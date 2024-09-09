@@ -84,7 +84,7 @@ const LoginForm = ({
                     </FormControl>
                 </Grid>
                 <Grid item xs={12}>
-                    <ButtonComponent type='submit' sendingRequest={loggingIn} buttonText={buttonText} />
+                    <ButtonComponent buttonColor='success' type='submit' sendingRequest={loggingIn} buttonText={buttonText} />
                 </Grid>
             </Grid>
         </Grid>

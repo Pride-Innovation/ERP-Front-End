@@ -11,7 +11,7 @@ import { schema } from './schema';
 import { ILogin } from './interface';
 import { useEffect, useState } from 'react';
 import LoginForm from './forms';
-import TypographyComponent from '../../components/headers/TypographyComponent';
+import { TypographyComponent } from '../../components/headers/TypographyComponent';
 
 const Login = () => {
     const [loggingIn, setLoggingIn] = useState<boolean>(false);
@@ -48,28 +48,32 @@ const Login = () => {
             <Grid item xs={12} md={6} spacing={6} p={4}
                 sx={(theme) => ({
                     bgcolor: theme.palette.background.paper,
+                    display: "flex",
+                    flexDirection: "column"
                 })}
             >
                 <Box>
-                    <TypographyComponent text='Assets Management Tool' fontSize={"18px"} fontWeight={600}/>
-                    <TypographyComponent text='Sign In to your account' fontSize={"17px"} fontWeight={500}/>
+                    <TypographyComponent sx={{ mb: 3, textAlign: "center" }} size={"22px"} font={600}>Assets Management Tool</TypographyComponent>
+                    <TypographyComponent sx={{ mb: 2, textAlign: "center" }} size='18px' font={500}>Sign In to your account</TypographyComponent>
                 </Box>
-                <form
-                    style={{ width: "100%" }}
-                    autoComplete="false"
-                    onSubmit={handleSubmit(onSubmit)}
-                >
-                    <LoginForm
-                        buttonText="Log In"
-                        register={register}
-                        formState={formState}
-                        control={control}
-                        showPassword={showPassword}
-                        loggingIn={loggingIn}
-                        handleClickShowPassword={handleClickShowPassword}
-                        handleMouseDownPassword={handleMouseDownPassword}
-                    />
-                </form>
+                <Box sx={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", flex: 1 }}>
+                    <form
+                        style={{ width: "100%"}}
+                        autoComplete="false"
+                        onSubmit={handleSubmit(onSubmit)}
+                    >
+                        <LoginForm
+                            buttonText="Log In"
+                            register={register}
+                            formState={formState}
+                            control={control}
+                            showPassword={showPassword}
+                            loggingIn={loggingIn}
+                            handleClickShowPassword={handleClickShowPassword}
+                            handleMouseDownPassword={handleMouseDownPassword}
+                        />
+                    </form>
+                </Box>
             </Grid>
         </Grid>
     )

@@ -1,16 +1,16 @@
-import { Typography } from '@mui/material'
-import { ITypographyComponent } from './interface'
+import {
+  styled,
+  Typography,
+} from '@mui/material';
 
-const TypographyComponent = ({ text, fontWeight, fontSize }: ITypographyComponent) => {
-  return (
-    <Typography
-      sx={(theme) => ({
-        color: theme.palette.grey[700],
-        fontWeight: fontWeight,
-        fontSize: fontSize
-      })}
-    >{text}</Typography>
-  )
+interface ITypographyComponent {
+  font: number;
+  size?: string;
 }
 
-export default TypographyComponent
+export const TypographyComponent = styled(Typography)<ITypographyComponent>(({ theme, font, size='16px' }) => ({
+  color: theme.palette.grey[800],
+  fontWeight: font,
+  fontSize: size,
+  lineHeight: '19.07px'
+}));
