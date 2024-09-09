@@ -11,6 +11,7 @@ import { schema } from './schema';
 import { ILogin } from './interface';
 import { useEffect, useState } from 'react';
 import LoginForm from './forms';
+import TypographyComponent from '../../components/headers/TypographyComponent';
 
 const Login = () => {
     const [loggingIn, setLoggingIn] = useState<boolean>(false);
@@ -49,6 +50,10 @@ const Login = () => {
                     bgcolor: theme.palette.background.paper,
                 })}
             >
+                <Box>
+                    <TypographyComponent text='Assets Management Tool' fontSize={"18px"} fontWeight={600}/>
+                    <TypographyComponent text='Sign In to your account' fontSize={"17px"} fontWeight={500}/>
+                </Box>
                 <form
                     style={{ width: "100%" }}
                     autoComplete="false"
