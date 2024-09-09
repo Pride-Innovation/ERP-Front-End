@@ -51,7 +51,7 @@ const LoginForm = ({
                             {...register("email")}
                             rules={{ required: true }}
                             render={({ field }) => (
-                                <InputComponent label='Email Address' field={field} error={formState.errors.email} id='email' />
+                                <InputComponent required label='Email Address' field={field} error={formState.errors.email} id='email' />
                             )}
                         />
                         {formState.errors.email && (
@@ -67,6 +67,7 @@ const LoginForm = ({
                             rules={{ required: true }}
                             render={({ field }) => (
                                 <InputComponent
+                                    required
                                     handleClick={handleClickShowPassword}
                                     handleMouseDown={handleMouseDownPassword}
                                     label='Password'

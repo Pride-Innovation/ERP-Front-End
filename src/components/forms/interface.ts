@@ -13,6 +13,7 @@ export interface IInputForm {
     type?: string;
     id: string;
     adornment?: boolean;
+    required?: boolean
     handleClick?: () => void;
     handleMouseDown?: (event: React.MouseEvent<HTMLButtonElement>) => void
 }
