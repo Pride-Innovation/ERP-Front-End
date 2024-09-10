@@ -12,19 +12,19 @@ import {
     UseFormRegister
 } from 'react-hook-form'
 import { InputComponent } from '../../../components/forms/Inputs'
-import { ILogin } from '../interface';
+import { IAuthentication } from '../interface';
 import ButtonComponent from '../../../components/forms/Button';
 import { LinkComponent } from '../../../components/headers/TypographyComponent';
 
 interface IAuthenticationForm {
-    formState: FormState<ILogin> & {
+    formState: FormState<IAuthentication> & {
         errors: {
             email?: FieldError;
             password?: FieldError;
         };
     };
-    control: Control<ILogin>;
-    register: UseFormRegister<ILogin>;
+    control: Control<IAuthentication>;
+    register: UseFormRegister<IAuthentication>;
     buttonText: string;
     showPassword: boolean;
     loggingIn: boolean;

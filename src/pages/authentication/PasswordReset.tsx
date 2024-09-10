@@ -7,8 +7,8 @@ import {
 } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import AuthenticationImage from "../../statics/images/logo.1b6cf8fbdaaee75f39fd.bmp";
-import { loginSchema } from './schema';
-import { ILogin } from './interface';
+import { authentiactionSchema } from './schema';
+import { IAuthentication } from './interface';
 import { useEffect, useState } from 'react';
 import AuthenticationForm from './forms';
 import { TypographyComponent } from '../../components/headers/TypographyComponent';
@@ -16,7 +16,7 @@ import { TypographyComponent } from '../../components/headers/TypographyComponen
 const PasswordReset = () => {
     const [loggingIn, setLoggingIn] = useState<boolean>(false);
     const [showPassword, setShowPassword] = useState<boolean>(false);
-    const defaultUser: ILogin = { email: "", password: "" };
+    const defaultUser: IAuthentication = { email: "", password: "reset-password" };
 
     const handleClickShowPassword = () => setShowPassword((show) => !show);
     const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => { event.preventDefault(); };
@@ -27,14 +27,14 @@ const PasswordReset = () => {
         formState,
         register,
         reset
-    } = useForm<ILogin>({
+    } = useForm<IAuthentication>({
         mode: 'onChange',
-        resolver: yupResolver(loginSchema)
+        resolver: yupResolver(authentiactionSchema)
     });
 
     useEffect(() => { reset({ ...defaultUser }) }, []);
 
-    const onSubmit = (formData: ILogin) => {
+    const onSubmit = (formData: IAuthentication) => {
 
         setLoggingIn(true);
         console.log(formData, "form data!!!!!")
@@ -53,7 +53,7 @@ const PasswordReset = () => {
                 })}
             >
                 <Box>
-                    <TypographyComponent sx={{ mb: 3 }} size={"22px"} weight={600}>Request Password Reset</TypographyComponent>
+                    <TypographyComponent sx={{ mb: 3 }} size={"20px"} weight={600}>Request Password Reset</TypographyComponent>
                     <TypographyComponent sx={{ mb: 2 }} size='16px' weight={500}>
                         Enter the email associated with your account to request for password reset
                     </TypographyComponent>
