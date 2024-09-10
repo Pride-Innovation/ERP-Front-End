@@ -53,7 +53,7 @@ const PasswordReset = () => {
                 })}
             >
                 <Box>
-                    <TypographyComponent sx={{ mb: 3 }} size={"20px"} weight={600}>Request Password Reset</TypographyComponent>
+                    <TypographyComponent sx={{ mb: 2 }} size={"20px"} weight={600}>Request Password Reset</TypographyComponent>
                     <TypographyComponent sx={{ mb: 2 }} size='16px' weight={500}>
                         Enter the email associated with your account to request for password reset
                     </TypographyComponent>

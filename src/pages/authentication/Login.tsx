@@ -13,11 +13,13 @@ import { useEffect, useState } from 'react';
 import { TypographyComponent } from '../../components/headers/TypographyComponent';
 import AuthenticationForm from './forms';
 import { ROUTES } from '../../core/routes/routes';
+import { useNavigate } from 'react-router';
 
 const Login = () => {
     const [loggingIn, setLoggingIn] = useState<boolean>(false);
     const [showPassword, setShowPassword] = useState<boolean>(false);
     const defaultUser: IAuthentication = { email: "", password: "" };
+    const navigate = useNavigate();
 
     const handleClickShowPassword = () => setShowPassword((show) => !show);
     const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => { event.preventDefault(); };
@@ -38,6 +40,7 @@ const Login = () => {
     const onSubmit = (formData: IAuthentication) => {
         setLoggingIn(true);
         console.log(formData, "form data!!!!!")
+        navigate(ROUTES.DASHBOARD);
     };
 
     return (
@@ -53,7 +56,7 @@ const Login = () => {
                 })}
             >
                 <Box>
-                    <TypographyComponent sx={{ mb: 3 }} size={"20px"} weight={600}>Assets Management Tool</TypographyComponent>
+                    <TypographyComponent sx={{ mb: 2 }} size={"20px"} weight={600}>Assets Management Tool</TypographyComponent>
                     <TypographyComponent sx={{ mb: 2 }} size='16px' weight={500}>Sign In to your account</TypographyComponent>
                 </Box>
                 <Box sx={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", flex: 1 }}>

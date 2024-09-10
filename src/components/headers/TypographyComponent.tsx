@@ -27,14 +27,13 @@ export const TypographyComponent = styled(Typography)<ITypographyComponent>(({
   color: color,
   fontWeight: weight,
   fontSize: size,
-  lineHeight: '19px'
 }));
 
 export const LinkComponent = ({
   weight,
   size = '16px',
   text,
-  href="#"
+  href = "#"
 }: ILinkComponent) => (
   <Link href={href} underline='hover' fontSize={size} sx={{ cursor: "pointer" }} fontWeight={weight}>{text}</Link>
 )
