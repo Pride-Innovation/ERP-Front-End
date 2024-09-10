@@ -1,6 +1,7 @@
+import { BrowserRouter as Router } from "react-router-dom";
 import { Grid } from "@mui/material";
-import Login from "./pages/authentication/Login";
-import ContainerComponent from "./components/Container";
+import ContainerComponent from "../components/Container";
+import AppRoutes from "../core/routes/AppRoutes";
 
 const App = () => {
   return (
@@ -10,7 +11,9 @@ const App = () => {
         xs={12}
         justifyContent="center"
       >
-        <Login />
+        <Router>
+          <AppRoutes />
+        </Router>
       </Grid>
     </ContainerComponent>
 

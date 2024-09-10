@@ -10,8 +10,8 @@ import AuthenticationImage from "../../statics/images/logo.1b6cf8fbdaaee75f39fd.
 import { loginSchema } from './schema';
 import { ILogin } from './interface';
 import { useEffect, useState } from 'react';
-import { TypographyComponent } from '../../components/headers/TypographyComponent';
 import AuthenticationForm from './forms';
+import { TypographyComponent } from '../../components/headers/TypographyComponent';
 
 const Login = () => {
     const [loggingIn, setLoggingIn] = useState<boolean>(false);
@@ -53,17 +53,19 @@ const Login = () => {
                 })}
             >
                 <Box>
-                    <TypographyComponent sx={{ mb: 3, textAlign: "center" }} size={"22px"} weight={600}>Assets Management Tool</TypographyComponent>
-                    <TypographyComponent sx={{ mb: 2, textAlign: "center" }} size='18px' weight={500}>Sign In to your account</TypographyComponent>
+                    <TypographyComponent sx={{ mb: 3, textAlign: "center" }} size={"22px"} weight={600}>Request Password Reset</TypographyComponent>
+                    <TypographyComponent sx={{ mb: 2, textAlign: "center" }} size='18px' weight={500}>
+                        Enter the email associated with your account to request for password reset
+                    </TypographyComponent>
                 </Box>
                 <Box sx={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", flex: 1 }}>
                     <form
-                        style={{ width: "100%"}}
+                        style={{ width: "100%" }}
                         autoComplete="false"
                         onSubmit={handleSubmit(onSubmit)}
                     >
                         <AuthenticationForm
-                            buttonText="Submit"
+                            buttonText=""
                             register={register}
                             formState={formState}
                             control={control}
@@ -71,7 +73,6 @@ const Login = () => {
                             loggingIn={loggingIn}
                             handleClickShowPassword={handleClickShowPassword}
                             handleMouseDownPassword={handleMouseDownPassword}
-                            linkText='Forgot Password?'
                         />
                     </form>
                 </Box>

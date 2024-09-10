@@ -14,7 +14,8 @@ interface ITypographyComponent {
 interface ILinkComponent {
   weight: number;
   size?: string;
-  text?: string
+  text?: string;
+  href: string
 }
 
 export const TypographyComponent = styled(Typography)<ITypographyComponent>(({
@@ -32,7 +33,8 @@ export const TypographyComponent = styled(Typography)<ITypographyComponent>(({
 export const LinkComponent = ({
   weight,
   size = '16px',
-  text
+  text,
+  href="#"
 }: ILinkComponent) => (
-  <Link underline='hover' fontSize={size} sx={{ cursor: "pointer" }} fontWeight={weight}>{text}</Link>
+  <Link href={href} underline='hover' fontSize={size} sx={{ cursor: "pointer" }} fontWeight={weight}>{text}</Link>
 )

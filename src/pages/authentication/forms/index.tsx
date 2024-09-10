@@ -16,7 +16,7 @@ import { ILogin } from '../interface';
 import ButtonComponent from '../../../components/forms/Button';
 import { LinkComponent } from '../../../components/headers/TypographyComponent';
 
-interface ILoginForm {
+interface IAuthenticationForm {
     formState: FormState<ILogin> & {
         errors: {
             email?: FieldError;
@@ -29,10 +29,11 @@ interface ILoginForm {
     showPassword: boolean;
     loggingIn: boolean;
     handleMouseDownPassword: (event: React.MouseEvent<HTMLButtonElement>) => void;
-    handleClickShowPassword: () => void
+    handleClickShowPassword: () => void;
+    linkText?: string
 }
 
-const LoginForm = ({
+const AuthenticationForm = ({
     formState,
     control,
     register,
@@ -40,8 +41,9 @@ const LoginForm = ({
     showPassword,
     loggingIn,
     handleClickShowPassword,
-    handleMouseDownPassword
-}: ILoginForm) => {
+    handleMouseDownPassword,
+    linkText
+}: IAuthenticationForm) => {
     return (
         <Grid item container xs={12}
         >
@@ -87,7 +89,7 @@ const LoginForm = ({
                 </Grid>
                 <Grid item xs={12}>
                     <Box sx={{ width: "100%", pb: '10px' }}>
-                        <LinkComponent size='17px' weight={400} text='Forgot Password?' />
+                        <LinkComponent href='#' size='17px' weight={400} text={linkText} />
                     </Box>
                     <ButtonComponent buttonColor='success' type='submit' sendingRequest={loggingIn} buttonText={buttonText} />
                 </Grid>
@@ -96,4 +98,4 @@ const LoginForm = ({
     )
 }
 
-export default LoginForm;
+export default AuthenticationForm;
