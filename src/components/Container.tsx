@@ -1,4 +1,4 @@
-import { styled } from "@mui/material";
+import { Grid, styled } from "@mui/material";
 import { ReactNode } from "react";
 import BackgroundImage from "../statics/images/cloud.560e38e799908a8a535a.jpg"
 
@@ -13,6 +13,10 @@ const MyComponent = styled('div')({
     backgroundPosition: "center",
 });
 
-export default function ContainerComponent({ children }: { children: ReactNode }) {
-    return <MyComponent>{children}</MyComponent>;
+export default function AuthenticationContainerComponent({ children }: { children: ReactNode }) {
+    return (<MyComponent>
+        <Grid container xs={12} justifyContent="center">
+            {children}
+        </Grid>
+    </MyComponent>)
 }

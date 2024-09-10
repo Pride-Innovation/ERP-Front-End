@@ -12,6 +12,8 @@ import { IAuthentication } from './interface';
 import { useEffect, useState } from 'react';
 import AuthenticationForm from './forms';
 import { TypographyComponent } from '../../components/headers/TypographyComponent';
+import { ROUTES } from '../../core/routes/routes';
+import AuthenticationContainerComponent from '../../components/Container';
 
 const PasswordReset = () => {
     const [loggingIn, setLoggingIn] = useState<boolean>(false);
@@ -41,45 +43,47 @@ const PasswordReset = () => {
     };
 
     return (
-        <Grid container xs={10} md={6} item>
-            <Grid item xs={12} md={6} >
-                <Box component="img" src={AuthenticationImage} alt='Login Image' height={500} width={"100%"} />
+        <AuthenticationContainerComponent>
+            <Grid container xs={10} md={6} item>
+                <Grid item xs={12} md={6} >
+                    <Box component="img" src={AuthenticationImage} alt='Login Image' height={500} width={"100%"} />
+                </Grid>
+                <Grid item xs={12} md={6} spacing={6} p={4}
+                    sx={(theme) => ({
+                        bgcolor: theme.palette.background.paper,
+                        display: "flex",
+                        flexDirection: "column"
+                    })}
+                >
+                    <Box>
+                        <TypographyComponent sx={{ mb: 2 }} size={"20px"} weight={600}>Request Password Reset</TypographyComponent>
+                        <TypographyComponent sx={{ mb: 2 }} size='16px' weight={500}>
+                            Enter the email associated with your account to request for password reset
+                        </TypographyComponent>
+                    </Box>
+                    <Box sx={{ width: "100%", mt: 3 }}>
+                        <form
+                            style={{ width: "100%" }}
+                            autoComplete="false"
+                            onSubmit={handleSubmit(onSubmit)}
+                        >
+                            <AuthenticationForm
+                                linkPath={ROUTES.LOGIN}
+                                buttonText="Submit"
+                                register={register}
+                                formState={formState}
+                                control={control}
+                                showPassword={showPassword}
+                                loggingIn={loggingIn}
+                                handleClickShowPassword={handleClickShowPassword}
+                                handleMouseDownPassword={handleMouseDownPassword}
+                                linkText='Back to Login'
+                            />
+                        </form>
+                    </Box>
+                </Grid>
             </Grid>
-            <Grid item xs={12} md={6} spacing={6} p={4}
-                sx={(theme) => ({
-                    bgcolor: theme.palette.background.paper,
-                    display: "flex",
-                    flexDirection: "column"
-                })}
-            >
-                <Box>
-                    <TypographyComponent sx={{ mb: 2 }} size={"20px"} weight={600}>Request Password Reset</TypographyComponent>
-                    <TypographyComponent sx={{ mb: 2 }} size='16px' weight={500}>
-                        Enter the email associated with your account to request for password reset
-                    </TypographyComponent>
-                </Box>
-                <Box sx={{ width: "100%", mt: 3 }}>
-                    <form
-                        style={{ width: "100%" }}
-                        autoComplete="false"
-                        onSubmit={handleSubmit(onSubmit)}
-                    >
-                        <AuthenticationForm
-                            linkPath='/'
-                            buttonText="Submit"
-                            register={register}
-                            formState={formState}
-                            control={control}
-                            showPassword={showPassword}
-                            loggingIn={loggingIn}
-                            handleClickShowPassword={handleClickShowPassword}
-                            handleMouseDownPassword={handleMouseDownPassword}
-                            linkText='Back To Login'
-                        />
-                    </form>
-                </Box>
-            </Grid>
-        </Grid>
+        </AuthenticationContainerComponent>
     )
 }
 

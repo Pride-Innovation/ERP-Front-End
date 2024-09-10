@@ -14,6 +14,7 @@ import { TypographyComponent } from '../../components/headers/TypographyComponen
 import AuthenticationForm from './forms';
 import { ROUTES } from '../../core/routes/routes';
 import { useNavigate } from 'react-router';
+import AuthenticationContainerComponent from '../../components/Container';
 
 const Login = () => {
     const [loggingIn, setLoggingIn] = useState<boolean>(false);
@@ -44,44 +45,46 @@ const Login = () => {
     };
 
     return (
-        <Grid container xs={10} md={6} item>
-            <Grid item xs={12} md={6} >
-                <Box component="img" src={AuthenticationImage} alt='Login Image' height={500} width={"100%"} />
+        <AuthenticationContainerComponent >
+            <Grid container xs={10} md={6} item>
+                <Grid item xs={12} md={6} >
+                    <Box component="img" src={AuthenticationImage} alt='Login Image' height={500} width={"100%"} />
+                </Grid>
+                <Grid item xs={12} md={6} spacing={6} p={4}
+                    sx={(theme) => ({
+                        bgcolor: theme.palette.background.paper,
+                        display: "flex",
+                        flexDirection: "column"
+                    })}
+                >
+                    <Box>
+                        <TypographyComponent sx={{ mb: 2 }} size={"20px"} weight={600}>Assets Management Tool</TypographyComponent>
+                        <TypographyComponent sx={{ mb: 2 }} size='16px' weight={500}>Sign In to your account</TypographyComponent>
+                    </Box>
+                    <Box sx={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", flex: 1 }}>
+                        <form
+                            style={{ width: "100%" }}
+                            autoComplete="false"
+                            onSubmit={handleSubmit(onSubmit)}
+                        >
+                            <AuthenticationForm
+                                linkPath={ROUTES.FORGOT_PASSWORD}
+                                buttonText="Submit"
+                                register={register}
+                                formState={formState}
+                                control={control}
+                                showPassword={showPassword}
+                                loggingIn={loggingIn}
+                                handleClickShowPassword={handleClickShowPassword}
+                                handleMouseDownPassword={handleMouseDownPassword}
+                                linkText='Forgot Password?'
+                                password
+                            />
+                        </form>
+                    </Box>
+                </Grid>
             </Grid>
-            <Grid item xs={12} md={6} spacing={6} p={4}
-                sx={(theme) => ({
-                    bgcolor: theme.palette.background.paper,
-                    display: "flex",
-                    flexDirection: "column"
-                })}
-            >
-                <Box>
-                    <TypographyComponent sx={{ mb: 2 }} size={"20px"} weight={600}>Assets Management Tool</TypographyComponent>
-                    <TypographyComponent sx={{ mb: 2 }} size='16px' weight={500}>Sign In to your account</TypographyComponent>
-                </Box>
-                <Box sx={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", flex: 1 }}>
-                    <form
-                        style={{ width: "100%" }}
-                        autoComplete="false"
-                        onSubmit={handleSubmit(onSubmit)}
-                    >
-                        <AuthenticationForm
-                            linkPath={ROUTES.FORGOT_PASSWORD}
-                            buttonText="Submit"
-                            register={register}
-                            formState={formState}
-                            control={control}
-                            showPassword={showPassword}
-                            loggingIn={loggingIn}
-                            handleClickShowPassword={handleClickShowPassword}
-                            handleMouseDownPassword={handleMouseDownPassword}
-                            linkText='Forgot Password?'
-                            password
-                        />
-                    </form>
-                </Box>
-            </Grid>
-        </Grid>
+        </AuthenticationContainerComponent>
     )
 }
 
