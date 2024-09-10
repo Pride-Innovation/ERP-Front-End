@@ -13,7 +13,7 @@ import { useEffect, useState } from 'react';
 import AuthenticationForm from './forms';
 import { TypographyComponent } from '../../components/headers/TypographyComponent';
 
-const Login = () => {
+const PasswordReset = () => {
     const [loggingIn, setLoggingIn] = useState<boolean>(false);
     const [showPassword, setShowPassword] = useState<boolean>(false);
     const defaultUser: ILogin = { email: "", password: "" };
@@ -53,19 +53,20 @@ const Login = () => {
                 })}
             >
                 <Box>
-                    <TypographyComponent sx={{ mb: 3, textAlign: "center" }} size={"22px"} weight={600}>Request Password Reset</TypographyComponent>
-                    <TypographyComponent sx={{ mb: 2, textAlign: "center" }} size='18px' weight={500}>
+                    <TypographyComponent sx={{ mb: 3 }} size={"22px"} weight={600}>Request Password Reset</TypographyComponent>
+                    <TypographyComponent sx={{ mb: 2 }} size='16px' weight={500}>
                         Enter the email associated with your account to request for password reset
                     </TypographyComponent>
                 </Box>
-                <Box sx={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", flex: 1 }}>
+                <Box sx={{ width: "100%", mt: 3 }}>
                     <form
                         style={{ width: "100%" }}
                         autoComplete="false"
                         onSubmit={handleSubmit(onSubmit)}
                     >
                         <AuthenticationForm
-                            buttonText=""
+                            linkPath='/'
+                            buttonText="Submit"
                             register={register}
                             formState={formState}
                             control={control}
@@ -73,6 +74,7 @@ const Login = () => {
                             loggingIn={loggingIn}
                             handleClickShowPassword={handleClickShowPassword}
                             handleMouseDownPassword={handleMouseDownPassword}
+                            linkText='Back To Login'
                         />
                     </form>
                 </Box>
@@ -81,4 +83,4 @@ const Login = () => {
     )
 }
 
-export default Login
+export default PasswordReset

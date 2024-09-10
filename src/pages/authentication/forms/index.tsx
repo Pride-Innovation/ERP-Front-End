@@ -31,6 +31,8 @@ interface IAuthenticationForm {
     handleMouseDownPassword: (event: React.MouseEvent<HTMLButtonElement>) => void;
     handleClickShowPassword: () => void;
     linkText?: string
+    linkPath: string
+    password?: boolean
 }
 
 const AuthenticationForm = ({
@@ -42,7 +44,9 @@ const AuthenticationForm = ({
     loggingIn,
     handleClickShowPassword,
     handleMouseDownPassword,
-    linkText
+    linkText,
+    linkPath,
+    password
 }: IAuthenticationForm) => {
     return (
         <Grid item container xs={12}
@@ -63,7 +67,7 @@ const AuthenticationForm = ({
                         )}
                     </FormControl>
                 </Grid>
-                <Grid item xs={12}>
+                {password && <Grid item xs={12}>
                     <FormControl fullWidth>
                         <Controller
                             control={control}
@@ -86,10 +90,10 @@ const AuthenticationForm = ({
                             <FormHelperText sx={{ color: 'error.main' }}>{formState.errors.password.message}</FormHelperText>
                         )}
                     </FormControl>
-                </Grid>
+                </Grid>}
                 <Grid item xs={12}>
                     <Box sx={{ width: "100%", pb: '10px' }}>
-                        <LinkComponent href='#' size='17px' weight={400} text={linkText} />
+                        <LinkComponent href={linkPath} size='17px' weight={400} text={linkText} />
                     </Box>
                     <ButtonComponent buttonColor='success' type='submit' sendingRequest={loggingIn} buttonText={buttonText} />
                 </Grid>

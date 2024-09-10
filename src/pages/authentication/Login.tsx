@@ -12,6 +12,7 @@ import { ILogin } from './interface';
 import { useEffect, useState } from 'react';
 import { TypographyComponent } from '../../components/headers/TypographyComponent';
 import AuthenticationForm from './forms';
+import { ROUTES } from '../../core/routes/routes';
 
 const Login = () => {
     const [loggingIn, setLoggingIn] = useState<boolean>(false);
@@ -53,16 +54,17 @@ const Login = () => {
                 })}
             >
                 <Box>
-                    <TypographyComponent sx={{ mb: 3, textAlign: "center" }} size={"22px"} weight={600}>Assets Management Tool</TypographyComponent>
-                    <TypographyComponent sx={{ mb: 2, textAlign: "center" }} size='18px' weight={500}>Sign In to your account</TypographyComponent>
+                    <TypographyComponent sx={{ mb: 3 }} size={"22px"} weight={600}>Assets Management Tool</TypographyComponent>
+                    <TypographyComponent sx={{ mb: 2 }} size='18px' weight={500}>Sign In to your account</TypographyComponent>
                 </Box>
                 <Box sx={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", flex: 1 }}>
                     <form
-                        style={{ width: "100%"}}
+                        style={{ width: "100%" }}
                         autoComplete="false"
                         onSubmit={handleSubmit(onSubmit)}
                     >
                         <AuthenticationForm
+                            linkPath={ROUTES.FORGOT_PASSWORD}
                             buttonText="Submit"
                             register={register}
                             formState={formState}
@@ -72,6 +74,7 @@ const Login = () => {
                             handleClickShowPassword={handleClickShowPassword}
                             handleMouseDownPassword={handleMouseDownPassword}
                             linkText='Forgot Password?'
+                            password
                         />
                     </form>
                 </Box>
