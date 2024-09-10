@@ -53,8 +53,8 @@ const Login = () => {
                 })}
             >
                 <Box>
-                    <TypographyComponent sx={{ mb: 3, textAlign: "center" }} size={"22px"} font={600}>Assets Management Tool</TypographyComponent>
-                    <TypographyComponent sx={{ mb: 2, textAlign: "center" }} size='18px' font={500}>Sign In to your account</TypographyComponent>
+                    <TypographyComponent sx={{ mb: 3, textAlign: "center" }} size={"22px"} weight={600}>Assets Management Tool</TypographyComponent>
+                    <TypographyComponent sx={{ mb: 2, textAlign: "center" }} size='18px' weight={500}>Sign In to your account</TypographyComponent>
                 </Box>
                 <Box sx={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", flex: 1 }}>
                     <form

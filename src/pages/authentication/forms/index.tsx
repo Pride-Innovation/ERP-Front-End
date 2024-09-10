@@ -1,4 +1,5 @@
 import {
+    Box,
     FormControl,
     FormHelperText,
     Grid
@@ -13,6 +14,7 @@ import {
 import { InputComponent } from '../../../components/forms/Inputs'
 import { ILogin } from '../interface';
 import ButtonComponent from '../../../components/forms/Button';
+import { LinkComponent } from '../../../components/headers/TypographyComponent';
 
 interface ILoginForm {
     formState: FormState<ILogin> & {
@@ -84,6 +86,9 @@ const LoginForm = ({
                     </FormControl>
                 </Grid>
                 <Grid item xs={12}>
+                    <Box sx={{ width: "100%", pb: '10px' }}>
+                        <LinkComponent size='17px' weight={400} text='Forgot Password?' />
+                    </Box>
                     <ButtonComponent buttonColor='success' type='submit' sendingRequest={loggingIn} buttonText={buttonText} />
                 </Grid>
             </Grid>

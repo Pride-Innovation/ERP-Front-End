@@ -1,16 +1,38 @@
 import {
+  Link,
   styled,
   Typography,
 } from '@mui/material';
 
 interface ITypographyComponent {
-  font: number;
+  weight: number;
   size?: string;
+  color?: string
 }
 
-export const TypographyComponent = styled(Typography)<ITypographyComponent>(({ theme, font, size='16px' }) => ({
-  color: theme.palette.grey[800],
-  fontWeight: font,
+
+interface ILinkComponent {
+  weight: number;
+  size?: string;
+  text?: string
+}
+
+export const TypographyComponent = styled(Typography)<ITypographyComponent>(({
+  theme,
+  weight,
+  size = '16px',
+  color = theme.palette.grey[800]
+}) => ({
+  color: color,
+  fontWeight: weight,
   fontSize: size,
-  lineHeight: '19.07px'
+  lineHeight: '19px'
 }));
+
+export const LinkComponent = ({
+  weight,
+  size = '16px',
+  text
+}: ILinkComponent) => (
+  <Link underline='hover' fontSize={size} sx={{ cursor: "pointer" }} fontWeight={weight}>{text}</Link>
+)
