@@ -14,14 +14,17 @@ import { sideBarItems } from './sideBarElements';
 import { Collapse } from '@mui/material';
 import { ExpandLess, ExpandMore } from '@mui/icons-material';
 import { ISideBarItem } from './interface';
+import { blue } from '@mui/material/colors';
 
 const drawerWidth = 250;
 
 export default function ApplicationDrawer() {
     const navigate = useNavigate();
     const [expandedItemId, setExpandedItemId] = useState<number | null>(null);
+    const [activeRoute, setActiveRoute] = useState<number | null>(null)
 
     const handleClick = (item: ISideBarItem) => {
+        setActiveRoute(item.id)
         if (item?.subroutes?.length > 0) {
             setExpandedItemId(expandedItemId === item.id ? null : item.id);
         } else {
@@ -57,16 +60,18 @@ export default function ApplicationDrawer() {
                         {
                             sideBarItems.map(item => (
                                 <React.Fragment key={item.id}>
-                                    <ListItemButton onClick={() => handleClick(item)}>
+                                    <ListItemButton sx={{
+                                        bgcolor: activeRoute === item.id ? blue[700] : ""
+                                    }} onClick={() => handleClick(item)}>
                                         <ListItemIcon>
                                             {item.icon}
                                         </ListItemIcon>
-                                        <ListItemText primary={item.name} />
+                                        <ListItemText sx={{ color: activeRoute === item.id ? "white" : "" }} primary={item.name} />
                                         {
                                             item.subroutes.length > 0 && (
                                                 expandedItemId === item.id
-                                                    ? <ExpandLess color='info' fontSize="small" />
-                                                    : <ExpandMore color='info' fontSize="small" />
+                                                    ? <ExpandLess sx={{ color: activeRoute === item.id ? "white" : blue[700] }} fontSize="small" />
+                                                    : <ExpandMore sx={{ color: activeRoute === item.id ? "white" : blue[700] }} fontSize="small" />
                                             )
                                         }
                                     </ListItemButton>
