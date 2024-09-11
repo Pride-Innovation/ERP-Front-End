@@ -12,7 +12,7 @@ import ListItemText from '@mui/material/ListItemText';
 import { Outlet, useNavigate } from 'react-router';
 import { sideBarItems } from './sideBarElements';
 import { Collapse } from '@mui/material';
-import { ExpandLess, ExpandMore, StarBorder } from '@mui/icons-material';
+import { ExpandLess, ExpandMore } from '@mui/icons-material';
 import { ISideBarItem } from './interface';
 
 const drawerWidth = 250;
@@ -65,8 +65,8 @@ export default function ApplicationDrawer() {
                                         {
                                             item.subroutes.length > 0 && (
                                                 expandedItemId === item.id
-                                                    ? <ExpandLess />
-                                                    : <ExpandMore />
+                                                    ? <ExpandLess color='info' fontSize="small" />
+                                                    : <ExpandMore color='info' fontSize="small" />
                                             )
                                         }
                                     </ListItemButton>
@@ -74,12 +74,16 @@ export default function ApplicationDrawer() {
                                         && expandedItemId === item.id
                                         && <Collapse in={expandedItemId === item.id} timeout="auto" unmountOnExit>
                                             <List component="div" disablePadding>
-                                                <ListItemButton sx={{ pl: 4 }}>
-                                                    <ListItemIcon>
-                                                        <StarBorder />
-                                                    </ListItemIcon>
-                                                    <ListItemText primary="Starred" />
-                                                </ListItemButton>
+                                                {
+                                                    item?.subroutes.map(subroute => (
+                                                        <ListItemButton key={subroute.id} onClick={() => navigate(subroute.route)} sx={{ pl: 4 }}>
+                                                            <ListItemIcon>
+                                                                {subroute.icon}
+                                                            </ListItemIcon>
+                                                            <ListItemText primary={subroute.name} />
+                                                        </ListItemButton>
+                                                    ))
+                                                }
                                             </List>
                                         </Collapse>}
                                 </React.Fragment>
