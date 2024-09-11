@@ -24,5 +24,19 @@ export const sideBarItems: Array<ISideBarItem> = [
         route: ROUTES.SETTINGS,
         icon: <SettingsIcon />,
         subroutes: []
-    }
+    },
+    {
+        id: 3,
+        name: "Profile",
+        route: ROUTES.PROFILE,
+        icon: <DashboardIcon />,
+        subroutes: [
+            {
+                id: 1,
+                name: "Dashboard",
+                route: ROUTES.ASSETS_MANAGEMENT,
+                icon: <DashboardIcon />,
+            }
+        ]
+    },
 ]

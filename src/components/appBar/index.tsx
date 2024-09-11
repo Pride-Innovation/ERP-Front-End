@@ -20,9 +20,13 @@ const drawerWidth = 250;
 export default function ApplicationDrawer() {
     const navigate = useNavigate();
     const [open, setOpen] = useState<boolean>(true);
+    const [routeID, setRouteID] = useState<number>(0);
 
     const handleClick = (item: ISideBarItem) => {
-        if (item?.subroutes?.length > 0) return setOpen(!open);
+        if (item?.subroutes?.length > 0) {
+            setRouteID(item.id);
+            return setOpen(!open);
+        }
         navigate(item.route);
     };
 
@@ -47,7 +51,7 @@ export default function ApplicationDrawer() {
                 <Toolbar />
                 <Box sx={{ overflow: 'auto' }}>
                     <List
-                        sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }}
+                        sx={{ width: '100%', maxWidth: drawerWidth, bgcolor: 'background.paper' }}
                         component="nav"
                         aria-labelledby="nested-list-subheader"
                     >
@@ -63,16 +67,18 @@ export default function ApplicationDrawer() {
                                             open === true && item.subroutes.length > 0 ? <ExpandLess />
                                                 : open === false && item.subroutes.length > 0 ? <ExpandMore /> : null}
                                     </ListItemButton>
-                                    {item?.subroutes?.length > 0 && <Collapse in={open} timeout="auto" unmountOnExit>
-                                        <List component="div" disablePadding>
-                                            <ListItemButton sx={{ pl: 4 }}>
-                                                <ListItemIcon>
-                                                    <StarBorder />
-                                                </ListItemIcon>
-                                                <ListItemText primary="Starred" />
-                                            </ListItemButton>
-                                        </List>
-                                    </Collapse>}
+                                    {item?.subroutes?.length > 0
+                                        && routeID === item.id
+                                        && <Collapse in={open} timeout="auto" unmountOnExit>
+                                            <List component="div" disablePadding>
+                                                <ListItemButton sx={{ pl: 4 }}>
+                                                    <ListItemIcon>
+                                                        <StarBorder />
+                                                    </ListItemIcon>
+                                                    <ListItemText primary="Starred" />
+                                                </ListItemButton>
+                                            </List>
+                                        </Collapse>}
                                 </React.Fragment>
                             ))
                         }
