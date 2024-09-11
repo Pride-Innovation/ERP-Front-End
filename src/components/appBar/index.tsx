@@ -61,12 +61,20 @@ export default function ApplicationDrawer() {
                             sideBarItems.map(item => (
                                 <React.Fragment key={item.id}>
                                     <ListItemButton sx={{
-                                        bgcolor: activeRoute === item.id ? blue[700] : ""
+                                        bgcolor: activeRoute === item.id ? blue[700] : "",
+                                        '&:hover': {
+                                            bgcolor: activeRoute === item.id ? 'primary.dark' : 'action.hover',
+                                        },
                                     }} onClick={() => handleClick(item)}>
                                         <ListItemIcon>
                                             {item.icon}
                                         </ListItemIcon>
-                                        <ListItemText sx={{ color: activeRoute === item.id ? "white" : "" }} primary={item.name} />
+                                        <ListItemText sx={{
+                                            color: activeRoute === item.id ? "white" : "",
+                                            '&:hover': {
+                                                color: 'primary.light',
+                                            },
+                                        }} primary={item.name} />
                                         {
                                             item.subroutes.length > 0 && (
                                                 expandedItemId === item.id
