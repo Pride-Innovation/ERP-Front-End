@@ -5,17 +5,27 @@ import CssBaseline from '@mui/material/CssBaseline';
 import Toolbar from '@mui/material/Toolbar';
 import List from '@mui/material/List';
 import Typography from '@mui/material/Typography';
-import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import { Outlet, useNavigate } from 'react-router';
-import { SideBarItems } from './sideBarElements';
+import { sideBarItems } from './sideBarElements';
+import { Collapse } from '@mui/material';
+import React, { useState } from 'react';
+import { ExpandLess, ExpandMore, StarBorder } from '@mui/icons-material';
+import { ISideBarItem } from './interface';
 
-const drawerWidth = 200;
+const drawerWidth = 250;
 
 export default function ApplicationDrawer() {
     const navigate = useNavigate();
+    const [open, setOpen] = useState<boolean>(true);
+
+    const handleClick = (item: ISideBarItem) => {
+        if (item?.subroutes?.length > 0) return setOpen(!open);
+        navigate(item.route);
+    };
+
     return (
         <Box sx={{ display: 'flex' }}>
             <CssBaseline />
@@ -36,17 +46,36 @@ export default function ApplicationDrawer() {
             >
                 <Toolbar />
                 <Box sx={{ overflow: 'auto' }}>
-                    <List>
-                        {SideBarItems.map((item) => (
-                            <ListItem key={item.id} disablePadding>
-                                <ListItemButton onClick={() => navigate(item.route)}>
-                                    <ListItemIcon>
-                                        {item.icon}
-                                    </ListItemIcon>
-                                    <ListItemText primary={item.name} />
-                                </ListItemButton>
-                            </ListItem>
-                        ))}
+                    <List
+                        sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }}
+                        component="nav"
+                        aria-labelledby="nested-list-subheader"
+                    >
+                        {
+                            sideBarItems.map(item => (
+                                <React.Fragment key={item.id}>
+                                    <ListItemButton onClick={() => handleClick(item)}>
+                                        <ListItemIcon>
+                                            {item.icon}
+                                        </ListItemIcon>
+                                        <ListItemText primary={item.name} />
+                                        {
+                                            open === true && item.subroutes.length > 0 ? <ExpandLess />
+                                                : open === false && item.subroutes.length > 0 ? <ExpandMore /> : null}
+                                    </ListItemButton>
+                                    {item?.subroutes?.length > 0 && <Collapse in={open} timeout="auto" unmountOnExit>
+                                        <List component="div" disablePadding>
+                                            <ListItemButton sx={{ pl: 4 }}>
+                                                <ListItemIcon>
+                                                    <StarBorder />
+                                                </ListItemIcon>
+                                                <ListItemText primary="Starred" />
+                                            </ListItemButton>
+                                        </List>
+                                    </Collapse>}
+                                </React.Fragment>
+                            ))
+                        }
                     </List>
                 </Box>
             </Drawer>

@@ -1,11 +1,11 @@
 const LOGIN: string = "/";
 const FORGOT_PASSWORD: string = "/forgot-password";
-const DASHBOARD: string = "/dashboard";
-const SETTINGS: string = `${DASHBOARD}/settings`;
+const ASSETS_MANAGEMENT: string = "/assets-mgt"
+const SETTINGS: string = `${ASSETS_MANAGEMENT}/settings`;
 
 export const ROUTES = {
     FORGOT_PASSWORD,
-    DASHBOARD,
     LOGIN,
-    SETTINGS
+    SETTINGS,
+    ASSETS_MANAGEMENT
 }

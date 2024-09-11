@@ -11,7 +11,7 @@ const AppRoutes = () => {
     <Routes>
       <Route path={ROUTES.LOGIN} element={<Login />} />
       <Route path={ROUTES.FORGOT_PASSWORD} element={<PasswordReset />} />
-      <Route path={ROUTES.DASHBOARD} element={<ApplicationDrawer />} >
+      <Route path={ROUTES.ASSETS_MANAGEMENT} element={<ApplicationDrawer />} >
         <Route index element={<Dashboard />} />
         <Route path={ROUTES.SETTINGS} element={<Settings />} />
       </Route>

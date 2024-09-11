@@ -41,7 +41,7 @@ const Login = () => {
     const onSubmit = (formData: IAuthentication) => {
         setLoggingIn(true);
         console.log(formData, "form data!!!!!")
-        navigate(ROUTES.DASHBOARD);
+        navigate(ROUTES.ASSETS_MANAGEMENT);
     };
 
     return (
