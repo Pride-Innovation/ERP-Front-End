@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
 import AppBar from '@mui/material/AppBar';
@@ -9,28 +9,27 @@ import Typography from '@mui/material/Typography';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import { Outlet, useNavigate } from 'react-router';
+import { Outlet, useLocation, useNavigate } from 'react-router';
 import { sideBarItems } from './sideBarElements';
 import { Collapse } from '@mui/material';
 import { ExpandLess, ExpandMore } from '@mui/icons-material';
-import { ISideBarItem } from './interface';
 import { blue } from '@mui/material/colors';
+import HandleRoutes from './HandleRoutes';
 
 const drawerWidth = 250;
 
 export default function ApplicationDrawer() {
     const navigate = useNavigate();
-    const [expandedItemId, setExpandedItemId] = useState<number | null>(null);
-    const [activeRoute, setActiveRoute] = useState<number | null>(null)
+    const { pathname } = useLocation();
 
-    const handleClick = (item: ISideBarItem) => {
-        setActiveRoute(item.id)
-        if (item?.subroutes?.length > 0) {
-            setExpandedItemId(expandedItemId === item.id ? null : item.id);
-        } else {
-            navigate(item.route);
-        }
-    };
+    const {
+        handleClick,
+        expandedItemId,
+        activeRoute,
+        handleRouteChange
+    } = HandleRoutes();
+
+    useEffect(() => { handleRouteChange(pathname) }, [pathname])
 
     return (
         <Box sx={{ display: 'flex' }}>
@@ -67,7 +66,9 @@ export default function ApplicationDrawer() {
                                         },
                                     }} onClick={() => handleClick(item)}>
                                         <ListItemIcon>
-                                            {item.icon}
+                                            {React.cloneElement(item.icon, {
+                                                style: { color: activeRoute === item.id ? "white" : "inherit" },
+                                            })}
                                         </ListItemIcon>
                                         <ListItemText sx={{
                                             color: activeRoute === item.id ? "white" : "",

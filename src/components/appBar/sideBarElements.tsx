@@ -42,7 +42,7 @@ export const sideBarItems: Array<ISideBarItem> = [
             {
                 id: 1,
                 name: "Dashboard",
-                route: ROUTES.ASSETS_MANAGEMENT,
+                route: ROUTES.PROFILE,
                 icon: <DashboardIcon />,
             }
         ]
