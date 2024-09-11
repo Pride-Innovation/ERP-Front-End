@@ -5,6 +5,7 @@ import PasswordReset from '../../pages/authentication/PasswordReset'
 import Dashboard from '../../pages/dashboard'
 import ApplicationDrawer from '../../components/appBar'
 import Settings from '../../pages/settings'
+import Profile from '../../pages/profile'
 
 const AppRoutes = () => {
   return (
@@ -14,6 +15,7 @@ const AppRoutes = () => {
       <Route path={ROUTES.ASSETS_MANAGEMENT} element={<ApplicationDrawer />} >
         <Route index element={<Dashboard />} />
         <Route path={ROUTES.SETTINGS} element={<Settings />} />
+        <Route path={ROUTES.PROFILE} element={<Profile />} />
       </Route>
     </Routes>
   )
