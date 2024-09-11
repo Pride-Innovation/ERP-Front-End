@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
 import AppBar from '@mui/material/AppBar';
@@ -11,7 +12,6 @@ import ListItemText from '@mui/material/ListItemText';
 import { Outlet, useNavigate } from 'react-router';
 import { sideBarItems } from './sideBarElements';
 import { Collapse } from '@mui/material';
-import React, { useState } from 'react';
 import { ExpandLess, ExpandMore, StarBorder } from '@mui/icons-material';
 import { ISideBarItem } from './interface';
 
@@ -19,15 +19,14 @@ const drawerWidth = 250;
 
 export default function ApplicationDrawer() {
     const navigate = useNavigate();
-    const [open, setOpen] = useState<boolean>(true);
-    const [routeID, setRouteID] = useState<number>(0);
+    const [expandedItemId, setExpandedItemId] = useState<number | null>(null);
 
     const handleClick = (item: ISideBarItem) => {
         if (item?.subroutes?.length > 0) {
-            setRouteID(item.id);
-            return setOpen(!open);
+            setExpandedItemId(expandedItemId === item.id ? null : item.id);
+        } else {
+            navigate(item.route);
         }
-        navigate(item.route);
     };
 
     return (
@@ -64,12 +63,16 @@ export default function ApplicationDrawer() {
                                         </ListItemIcon>
                                         <ListItemText primary={item.name} />
                                         {
-                                            open === true && item.subroutes.length > 0 ? <ExpandLess />
-                                                : open === false && item.subroutes.length > 0 ? <ExpandMore /> : null}
+                                            item.subroutes.length > 0 && (
+                                                expandedItemId === item.id
+                                                    ? <ExpandLess />
+                                                    : <ExpandMore />
+                                            )
+                                        }
                                     </ListItemButton>
                                     {item?.subroutes?.length > 0
-                                        && routeID === item.id
-                                        && <Collapse in={open} timeout="auto" unmountOnExit>
+                                        && expandedItemId === item.id
+                                        && <Collapse in={expandedItemId === item.id} timeout="auto" unmountOnExit>
                                             <List component="div" disablePadding>
                                                 <ListItemButton sx={{ pl: 4 }}>
                                                     <ListItemIcon>
