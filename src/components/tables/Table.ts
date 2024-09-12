@@ -9,7 +9,7 @@ import {
 export const DataGridStyled = styled(DataGrid)(({ theme }) => ({
     border: 'none',
     "& .MuiDataGrid-columnHeaders": {
-        fontSize: 15,
+        fontSize: 14,
         borderTop: "0.6px solid rgba(0,0,0,0.05) !important",
     },
     "& .MuiDataGrid-row": {

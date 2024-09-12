@@ -3,6 +3,7 @@ import { GridColDef } from '@mui/x-data-grid';
 import { Box, Button, Card } from '@mui/material';
 import { camelCaseToWords } from '../../utils/helpers';
 import { ITableComponent } from './interface';
+import { TypographyComponent } from '../headers/TypographyComponent';
 
 const TableComponent = ({
     columnHeaders,
@@ -21,7 +22,15 @@ const TableComponent = ({
                     (
                         ['string', 'number'].includes(typeof value)
                         || value instanceof (String || Number)))
-                    && label !== 'Action' && label !== 'Status' ? value :
+                    && label !== 'Action' && label !== 'Status' ? 
+                    (
+                        <TypographyComponent sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            height: "100%"
+                        }} weight={400} size='13.5px'>{value}</TypographyComponent>
+                    )
+                     :
                     (typeof value === 'string') && label === 'Action' ? (
                         <Button
                             sx={{ textTransform: "capitalize" }} >

@@ -3,13 +3,13 @@ import TableComponent from '../../components/tables/TableComponent'
 import { usersMock } from '../../mocks/users';
 
 const Users = () => {
-  const { id, unit, department, firstName, lastName, otherName, ...data } = usersMock[0];
+  const { id, reportsTo, firstName, lastName, otherName, ...data } = usersMock[0];
 
   const columnHeaders: Array<string> = Object.keys(
     { name: `${usersMock[0].firstName} ${usersMock[0].lastName} ${usersMock[0].otherName}`, ...data });
 
   const users = usersMock.map((user, index) => {
-    const { unit, department, firstName, lastName, otherName, ...data } = usersMock[index];
+    const { reportsTo, firstName, lastName, otherName, ...data } = usersMock[index];
     return (
       { name: `${user.firstName} ${user.lastName} ${user.otherName}`, ...data }
     )
