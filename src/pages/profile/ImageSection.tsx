@@ -1,4 +1,4 @@
-import { Box, Grid, IconButton, Stack } from '@mui/material'
+import { Box, Chip, Grid, IconButton, Stack } from '@mui/material'
 import MaleProfile from "../../statics/images/male.jpg";
 import FemaleProfile from "../../statics/images/female.webp";
 import { TypographyComponent } from '../../components/headers/TypographyComponent';
@@ -9,6 +9,7 @@ import React, { useContext, useEffect } from 'react';
 import { usersMock } from '../../mocks/users';
 import { UserContext } from '../../context/UserContext';
 import { camelCaseToWords } from '../../utils/helpers';
+import { availability } from '../../utils/constants';
 
 export const ImageSection = () => {
     const { user, setUser } = useContext(UserContext);
@@ -68,25 +69,34 @@ export const ProfileLine = () => {
     return (
         <Grid container xs={12} spacing={1}>
             {
-                Object.entries(data).map(([key, value]) => (
+                Object.entries({
+                    ...data,
+                    availability: data.availability ? availability.available : availability.on_leave
+                }).map(([key, value]) => (
                     <React.Fragment>
                         <Grid item xs={4} sx={{ fontWeight: 600, fontSize: "14px", borderBottom: `2px solid ${grey[100]}`, py: 0.5 }}>
                             {camelCaseToWords(key)}
                         </Grid>
                         <Grid item xs={8} sx={{ fontSize: "14px", borderBottom: `2px solid ${grey[100]}`, py: 0.5 }}>
-                            {value}
+                            {value === availability.available ? (
+                                <Chip size='small' label={availability.available} color="primary" variant="outlined" />
+                            ) : value === availability.on_leave ? (
+                                <Chip size='small' label={availability.on_leave} color="error" variant="outlined" />
+                            ) : value}
                         </Grid>
                     </React.Fragment>
                 ))
             }
-            
-            <Box sx={{ width: "100%", mt: 1 }}>
-                <ButtonComponent
-                    sendingRequest={false}
-                    buttonText='Update Profile'
-                    variant='outlined'
-                    buttonColor='info'
-                    type='button' />
+
+            <Box sx={{ width: "100%", mt: 1, display: "flex", justifyContent: "end" }}>
+                <Box>
+                    <ButtonComponent
+                        sendingRequest={false}
+                        buttonText='Update Profile'
+                        variant='contained'
+                        buttonColor='info'
+                        type='button' />
+                </Box>
             </Box>
         </Grid>
     )
