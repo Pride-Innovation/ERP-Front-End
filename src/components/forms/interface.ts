@@ -6,6 +6,7 @@ export interface IButton {
     buttonText: string;
     buttonColor: "primary" | "inherit" | "secondary" | "success" | "error" | "info" | "warning";
     type?: "button" | "submit" | "reset";
+    handleClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
 export interface IInputForm {
@@ -33,4 +34,8 @@ export interface IChip {
     variant?: "filled" | "outlined";
     size: "small" | "medium"
     color: "primary" | "secondary" | "error" | "info" | "success" | "warning"
+}
+
+export interface IPopover {
+    buttonText: string
 }

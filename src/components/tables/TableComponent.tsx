@@ -7,7 +7,7 @@ import { TypographyComponent } from '../headers/TypographyComponent';
 import ChipComponent from '../forms/Chip';
 import CheckIcon from '@mui/icons-material/Check';
 import DoNotDisturbAltIcon from '@mui/icons-material/DoNotDisturbAlt';
-import ButtonComponent from '../forms/Button';
+import PopoverComponent from '../forms/Popover';
 
 const TableComponent = ({
     columnHeaders,
@@ -37,12 +37,7 @@ const TableComponent = ({
                     </StyledBox>
                 ) : (column.isAction) ? (
                     <StyledBox >
-                        <ButtonComponent
-                            sendingRequest={false}
-                            buttonText={column.actionLabel as string}
-                            variant='outlined'
-                            buttonColor='info'
-                            type='button' />
+                        <PopoverComponent buttonText={column.actionLabel as string} />
                     </StyledBox>
                 ) : null
         }

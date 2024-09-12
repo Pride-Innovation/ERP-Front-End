@@ -6,12 +6,14 @@ const ButtonComponent = ({
   buttonText,
   type = 'button',
   buttonColor = "primary",
-  variant = 'contained'
+  variant = 'contained',
+  handleClick
 }: IButton) => {
   return (
     <Button
       color={buttonColor}
       type={type}
+      onClick={handleClick}
       variant={variant}
       sx={{ width: "100%", minHeight: "40px", textTransform: 'capitalize' }}
       startIcon={
