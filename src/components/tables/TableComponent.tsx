@@ -10,40 +10,39 @@ const TableComponent = ({
     rows
 }: ITableComponent) => {
 
-    const columns: GridColDef[] = (
-        [...columnHeaders]).map((label) => ({
-            field: label,
-            headerName: camelCaseToWords(label),
-            flex: 1,
-            minWidth: 100,
-            renderCell: (param) => {
-                const value = param.row[label];
-                return (
-                    (
-                        ['string', 'number'].includes(typeof value)
-                        || value instanceof (String || Number)))
-                    && label !== 'Action' && label !== 'Status' ? 
-                    (
-                        <TypographyComponent sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            height: "100%"
-                        }} weight={400} size='13.5px'>{value}</TypographyComponent>
-                    )
-                     :
-                    (typeof value === 'string') && label === 'Action' ? (
-                        <Button
-                            sx={{ textTransform: "capitalize" }} >
-                            {value}
-                        </Button>
-                    ) :
-                        (typeof value === 'string') && label === 'Status' ? (
-                            <Box sx={{ display: "flex", alignItems: "center" }}>
-                                bool
-                            </Box>
-                        ) : value
-            }
-        }));
+    const columns: GridColDef[] = columnHeaders.map((column) => ({
+        field: `${column.label}`,
+        headerName: camelCaseToWords(column.label),
+        flex: 1,
+        minWidth: 100,
+        renderCell: (param) => {
+            const value = param.row[column.label];
+            return (
+                (
+                    ['string', 'number'].includes(typeof value)
+                    || value instanceof (String || Number)))
+                && column.label !== 'Action' && column.label !== 'Status' ?
+                (
+                    <TypographyComponent sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        height: "100%"
+                    }} weight={400} size='13.5px'>{value}</TypographyComponent>
+                )
+                :
+                (typeof value === 'string') && column.label === 'Action' ? (
+                    <Button
+                        sx={{ textTransform: "capitalize" }} >
+                        {value}
+                    </Button>
+                ) :
+                    (typeof value === 'string') && column.label === 'Status' ? (
+                        <Box sx={{ display: "flex", alignItems: "center" }}>
+                            bool
+                        </Box>
+                    ) : value
+        }
+    }));
 
 
     return (
@@ -51,6 +50,7 @@ const TableComponent = ({
             <Box
             >
                 <DataGridStyled
+                    loading={rows.length === 0}
                     {...rows}
                     rows={rows}
                     columns={columns}
