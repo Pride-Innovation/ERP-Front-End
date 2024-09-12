@@ -7,6 +7,7 @@ import { TypographyComponent } from '../headers/TypographyComponent';
 import ChipComponent from '../forms/Chip';
 import CheckIcon from '@mui/icons-material/Check';
 import DoNotDisturbAltIcon from '@mui/icons-material/DoNotDisturbAlt';
+import ButtonComponent from '../forms/Button';
 
 const TableComponent = ({
     columnHeaders,
@@ -28,12 +29,20 @@ const TableComponent = ({
                     </StyledBox>
                 )
                 : (column.isBoolen) ? (
-                    <StyledBox
-                        sx={{ textTransform: "capitalize" }} >
+                    <StyledBox >
                         {value ?
                             <ChipComponent label='Available' icon={<CheckIcon fontSize='small' />} size='medium' color='success' /> :
                             <ChipComponent label='Leave' icon={<DoNotDisturbAltIcon fontSize='small' />} size='medium' color='error' />
                         }
+                    </StyledBox>
+                ) : (column.isAction) ? (
+                    <StyledBox >
+                        <ButtonComponent
+                            sendingRequest={false}
+                            buttonText={column.actionLabel as string}
+                            variant='outlined'
+                            buttonColor='info'
+                            type='button' />
                     </StyledBox>
                 ) : null
         }
@@ -41,9 +50,8 @@ const TableComponent = ({
 
 
     return (
-        <Card sx={{ pb: 2, width: "100%" }} >
-            <Box
-            >
+        <Card sx={{ width: "100%" }} >
+            <Box>
                 <DataGridStyled
                     loading={rows.length === 0}
                     {...rows}

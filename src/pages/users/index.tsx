@@ -16,13 +16,14 @@ const Users = () => {
     ...data
   } = usersMock[0];
 
-  const addName = {
+  const rowData = {
     name: `${usersMock[0].firstName} ${usersMock[0].lastName} ${usersMock[0].otherName}`,
-    ...data
+    ...data,
+    "action": "options"
   };
 
   useEffect(() => {
-    setColumnHeaders(getTableHeaders(addName))
+    setColumnHeaders(getTableHeaders(rowData))
   }, []);
 
   const users = usersMock.map((user, index) => {
@@ -33,7 +34,7 @@ const Users = () => {
       otherName,
       ...data
     } = usersMock[index];
-    
+
     return (
       {
         name: `${user.firstName} ${user.lastName} ${user.otherName}`,
