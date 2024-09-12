@@ -1,5 +1,6 @@
 
 import {
+    Box,
     styled,
 } from '@mui/material';
 import {
@@ -48,3 +49,8 @@ export const DataGridStyled = styled(DataGrid)(({ theme }) => ({
     },
 }));
 
+export const StyledBox = styled(Box)({
+    display: "flex",
+    alignItems: "center",
+    height: "100%"
+});

@@ -23,12 +23,22 @@ const Users = () => {
 
   useEffect(() => {
     setColumnHeaders(getTableHeaders(addName))
-  }, [])
+  }, []);
 
   const users = usersMock.map((user, index) => {
-    const { reportsTo, firstName, lastName, otherName, ...data } = usersMock[index];
+    const {
+      reportsTo,
+      firstName,
+      lastName,
+      otherName,
+      ...data
+    } = usersMock[index];
+    
     return (
-      { name: `${user.firstName} ${user.lastName} ${user.otherName}`, ...data }
+      {
+        name: `${user.firstName} ${user.lastName} ${user.otherName}`,
+        ...data
+      }
     )
   })
   return (

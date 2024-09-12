@@ -1,9 +1,12 @@
-import { DataGridStyled } from '../../components/tables/Table';
+import { DataGridStyled, StyledBox } from '../../components/tables/Table';
 import { GridColDef } from '@mui/x-data-grid';
-import { Box, Button, Card } from '@mui/material';
+import { Box, Card } from '@mui/material';
 import { camelCaseToWords } from '../../utils/helpers';
 import { ITableComponent } from './interface';
 import { TypographyComponent } from '../headers/TypographyComponent';
+import ChipComponent from '../forms/Chip';
+import CheckIcon from '@mui/icons-material/Check';
+import DoNotDisturbAltIcon from '@mui/icons-material/DoNotDisturbAlt';
 
 const TableComponent = ({
     columnHeaders,
@@ -17,30 +20,22 @@ const TableComponent = ({
         minWidth: 100,
         renderCell: (param) => {
             const value = param.row[column.label];
-            return (
+
+            return (column.isText || column.isNumber) ?
                 (
-                    ['string', 'number'].includes(typeof value)
-                    || value instanceof (String || Number)))
-                && column.label !== 'Action' && column.label !== 'Status' ?
-                (
-                    <TypographyComponent sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        height: "100%"
-                    }} weight={400} size='13.5px'>{value}</TypographyComponent>
+                    <StyledBox>
+                        <TypographyComponent weight={400} size='13.5px'>{value}</TypographyComponent>
+                    </StyledBox>
                 )
-                :
-                (typeof value === 'string') && column.label === 'Action' ? (
-                    <Button
+                : (column.isBoolen) ? (
+                    <StyledBox
                         sx={{ textTransform: "capitalize" }} >
-                        {value}
-                    </Button>
-                ) :
-                    (typeof value === 'string') && column.label === 'Status' ? (
-                        <Box sx={{ display: "flex", alignItems: "center" }}>
-                            bool
-                        </Box>
-                    ) : value
+                        {value ?
+                            <ChipComponent label='Available' icon={<CheckIcon fontSize='small' />} size='medium' color='success' /> :
+                            <ChipComponent label='Leave' icon={<DoNotDisturbAltIcon fontSize='small' />} size='medium' color='error' />
+                        }
+                    </StyledBox>
+                ) : null
         }
     }));
 

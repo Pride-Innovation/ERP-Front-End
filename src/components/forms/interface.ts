@@ -26,3 +26,11 @@ export interface IInputPropAdornment {
     optional?: boolean;
     position?: 'start' | 'end';
 }
+
+export interface IChip {
+    label: string;
+    icon: JSX.Element;
+    variant?: "filled" | "outlined";
+    size: "small" | "medium"
+    color: "primary" | "secondary" | "error" | "info" | "success" | "warning"
+}
