@@ -6,6 +6,7 @@ import Dashboard from '../../pages/dashboard'
 import ApplicationDrawer from '../../components/appBar'
 import Settings from '../../pages/settings'
 import Profile from '../../pages/profile'
+import Users from '../../pages/users'
 
 const AppRoutes = () => {
   return (
@@ -16,6 +17,7 @@ const AppRoutes = () => {
         <Route index element={<Dashboard />} />
         <Route path={ROUTES.SETTINGS} element={<Settings />} />
         <Route path={ROUTES.PROFILE} element={<Profile />} />
+        <Route path={ROUTES.USERS} element={<Users />} />
       </Route>
     </Routes>
   )

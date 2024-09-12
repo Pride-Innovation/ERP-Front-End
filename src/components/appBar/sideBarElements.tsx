@@ -4,6 +4,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import { ROUTES } from '../../core/routes/routes';
 import AutorenewIcon from '@mui/icons-material/Autorenew';
 import AutoStoriesIcon from '@mui/icons-material/AutoStories';
+import GroupIcon from '@mui/icons-material/Group';
 
 export const sideBarItems: Array<ISideBarItem> = [
     {
@@ -46,5 +47,12 @@ export const sideBarItems: Array<ISideBarItem> = [
                 icon: <DashboardIcon />,
             }
         ]
+    },
+    {
+        id: 4,
+        name: "Users",
+        route: ROUTES.USERS,
+        icon: <GroupIcon />,
+        subroutes: []
     },
 ]

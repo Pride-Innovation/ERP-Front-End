@@ -18,7 +18,7 @@ const HandleRoutes = () => {
         }
     };
 
-    
+
     const handleRouteChange = (route: string) => {
         if (route === ROUTES.ASSETS_MANAGEMENT) {
             handleClick(sideBarItems[0])
@@ -28,6 +28,9 @@ const HandleRoutes = () => {
         }
         if (route === ROUTES.PROFILE) {
             handleClick(sideBarItems[2])
+        }
+        if (route === ROUTES.USERS) {
+            handleClick(sideBarItems[3])
         }
     }
 
