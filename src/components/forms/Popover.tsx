@@ -1,10 +1,11 @@
 import Popover from '@mui/material/Popover';
-import Typography from '@mui/material/Typography';
 import React from 'react';
 import ButtonComponent from './Button';
 import { IPopover } from './interface';
+import { ListItemIcon, ListItemText, MenuItem } from '@mui/material';
+import InfoIcon from '@mui/icons-material/Info';
 
-const PopoverComponent = ({ buttonText }: IPopover) => {
+const PopoverComponent = ({ buttonText, options }: IPopover) => {
     const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null);
 
     const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -40,7 +41,12 @@ const PopoverComponent = ({ buttonText }: IPopover) => {
                     horizontal: 'left',
                 }}
             >
-                <Typography sx={{ p: 2 }}>The content of the Popover.</Typography>
+                {options.map(option => (<MenuItem value={option.value}>
+                    <ListItemIcon>
+                        <InfoIcon />
+                    </ListItemIcon>
+                    <ListItemText primary={option.label} />
+                </MenuItem>))}
             </Popover>
         </React.Fragment>
     )

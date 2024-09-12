@@ -37,7 +37,9 @@ const TableComponent = ({
                     </StyledBox>
                 ) : (column.isAction) ? (
                     <StyledBox >
-                        <PopoverComponent buttonText={column.actionLabel as string} />
+                        <PopoverComponent
+                            options={(column.actionData?.options) as Array<{ value: string, label: string }>}
+                            buttonText={column.actionData?.label as string} />
                     </StyledBox>
                 ) : null
         }

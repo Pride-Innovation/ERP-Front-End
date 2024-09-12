@@ -37,5 +37,6 @@ export interface IChip {
 }
 
 export interface IPopover {
-    buttonText: string
+    buttonText: string;
+    options: Array<{ value: string, label: string }>
 }

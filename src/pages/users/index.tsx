@@ -19,7 +19,10 @@ const Users = () => {
   const rowData = {
     name: `${usersMock[0].firstName} ${usersMock[0].lastName} ${usersMock[0].otherName}`,
     ...data,
-    "action": "options"
+    action: {
+      label: "options",
+      options: [{ value: "deactivate", label: "Deactivate" }, { value: "update", label: "Update" }]
+    },
   };
 
   useEffect(() => {

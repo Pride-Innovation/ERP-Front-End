@@ -9,10 +9,13 @@ export const getTableHeaders = (obj: Object): Array<ITableHeader> => {
         }) : (typeof value === 'boolean' && key !== "action") ? ({
             label: key,
             isBoolen: true
-        }) : (key === "action") ? ({
+        }) : (key === "action" && typeof value === 'object') ? ({
             label: key,
-            actionLabel: value,
-            isAction: true
+            isAction: true,
+            actionData: {
+                label: value?.label,
+                options: value?.options
+            }
         }) : null
 
     }) as Array<ITableHeader>;

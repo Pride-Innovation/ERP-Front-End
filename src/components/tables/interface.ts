@@ -1,5 +1,8 @@
 import { GridRowsProp } from "@mui/x-data-grid";
 
+export interface IOptions {
+    value: string, label: string
+}
 export interface ITableHeader {
     label: string;
     status?: boolean;
@@ -7,7 +10,10 @@ export interface ITableHeader {
     isBoolen?: boolean;
     isText?: boolean;
     isNumber?: boolean;
-    actionLabel?: string;
+    actionData?: {
+        label: string;
+        options: Array<IOptions>
+    };
 }
 
 export interface ITableComponent {
