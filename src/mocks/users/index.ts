@@ -1,4 +1,4 @@
-import { IUser } from "./interface";
+import { IUser } from "../../pages/users/interface";
 
 export const usersMock: IUser[] = [
     {

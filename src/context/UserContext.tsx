@@ -1,5 +1,5 @@
 import React, { createContext, Dispatch, SetStateAction, useState } from "react";
-import { IUser, IUsersTableData } from "../mocks/users/interface";
+import { IUser, IUsersTableData } from "../pages/users/interface";
 
 interface IUserContext {
     user: IUser;

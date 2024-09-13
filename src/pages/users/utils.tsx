@@ -5,7 +5,8 @@ import { ITableHeader } from '../../components/tables/interface';
 import InfoIcon from '@mui/icons-material/Info';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import { UserContext } from '../../context/UserContext';
-import { IUsersTableData } from '../../mocks/users/interface';
+import { IUsersTableData } from './interface';
+import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 
 const UserUtils = () => {
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
@@ -27,7 +28,8 @@ const UserUtils = () => {
             label: "options",
             options: [
                 { value: "deactivate", label: "Deactivate", icon: <InfoIcon fontSize='small' color='error' /> },
-                { value: "update", label: "Update", icon: <ModeEditIcon fontSize='small' color='info' /> }
+                { value: "update", label: "Update", icon: <ModeEditIcon fontSize='small' color='info' /> },
+                { value: "read", label: "View Details", icon: <RemoveRedEyeIcon fontSize='small' color='inherit' /> }
             ]
         },
     };
@@ -60,24 +62,7 @@ const UserUtils = () => {
     }, []);
 
 
-    const header = { plural: 'Users', singular: 'User' };
-
-    const handleCreation = () => {
-        console.log('Create user clicked');
-    };
-
-    const handleImport = () => {
-        console.log('Import users clicked');
-    };
-
-    return (
-        {
-            columnHeaders,
-            handleCreation,
-            handleImport,
-            header,
-        }
-    )
+    return ({ columnHeaders })
 }
 
 export default UserUtils
