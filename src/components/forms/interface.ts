@@ -1,4 +1,5 @@
 import { FieldError, FieldValues } from 'react-hook-form';
+import { IOptions } from '../tables/interface';
 
 export interface IButton {
     sendingRequest: boolean;
@@ -38,5 +39,5 @@ export interface IChip {
 
 export interface IPopover {
     buttonText: string;
-    options: Array<{ value: string, label: string }>
+    options: Array<IOptions>
 }

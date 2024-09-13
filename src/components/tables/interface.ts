@@ -1,7 +1,7 @@
 import { GridRowsProp } from "@mui/x-data-grid";
 
 export interface IOptions {
-    value: string, label: string
+    value: string, label: string, icon?: JSX.Element
 }
 export interface ITableHeader {
     label: string;

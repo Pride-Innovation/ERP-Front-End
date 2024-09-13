@@ -3,7 +3,7 @@ import React from 'react';
 import ButtonComponent from './Button';
 import { IPopover } from './interface';
 import { ListItemIcon, ListItemText, MenuItem } from '@mui/material';
-import InfoIcon from '@mui/icons-material/Info';
+import { IOptions } from '../tables/interface';
 
 const PopoverComponent = ({ buttonText, options }: IPopover) => {
     const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null);
@@ -41,10 +41,10 @@ const PopoverComponent = ({ buttonText, options }: IPopover) => {
                     horizontal: 'left',
                 }}
             >
-                {options.map(option => (<MenuItem value={option.value}>
-                    <ListItemIcon>
-                        <InfoIcon />
-                    </ListItemIcon>
+                {options.map((option: IOptions) => (<MenuItem value={option.value}>
+                    {option?.icon && <ListItemIcon>
+                        {option?.icon}
+                    </ListItemIcon>}
                     <ListItemText primary={option.label} />
                 </MenuItem>))}
             </Popover>

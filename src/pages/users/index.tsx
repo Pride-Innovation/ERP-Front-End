@@ -4,6 +4,8 @@ import { usersMock } from '../../mocks/users';
 import { useEffect, useState } from 'react';
 import { getTableHeaders } from '../../components/tables/getTableHeaders';
 import { ITableHeader } from '../../components/tables/interface';
+import InfoIcon from '@mui/icons-material/Info';
+import ModeEditIcon from '@mui/icons-material/ModeEdit';
 
 const Users = () => {
   const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
@@ -21,7 +23,10 @@ const Users = () => {
     ...data,
     action: {
       label: "options",
-      options: [{ value: "deactivate", label: "Deactivate" }, { value: "update", label: "Update" }]
+      options: [
+        { value: "deactivate", label: "Deactivate", icon: <InfoIcon fontSize='small' /> },
+        { value: "update", label: "Update", icon: <ModeEditIcon fontSize='small' /> }
+      ]
     },
   };
 
