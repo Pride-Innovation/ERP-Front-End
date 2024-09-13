@@ -1,4 +1,4 @@
-import { GridRowsProp } from "@mui/x-data-grid";
+import { GridRowsProp, GridToolbarProps } from "@mui/x-data-grid";
 
 export interface IOptions {
     value: string, label: string, icon?: JSX.Element
@@ -18,5 +18,23 @@ export interface ITableHeader {
 
 export interface ITableComponent {
     columnHeaders: Array<ITableHeader>;
-    rows: GridRowsProp
+    rows: GridRowsProp;
+    onCreationHandler: () => void;
+    onImportHandler?: () => void;
+    header: { plural: string; singular: string };
+}
+
+export interface ITableToolBar {
+    header: {
+        plural: string;
+        singular: string
+    },
+    onCreationHandler: () => void;
+    onImportHandler: () => void;
+}
+
+export interface CustomToolbarWrapperProps extends GridToolbarProps {
+    header: { plural: string; singular: string };
+    onCreationHandler: () => void;
+    onImportHandler: () => void;
 }

@@ -8,10 +8,14 @@ import ChipComponent from '../forms/Chip';
 import CheckIcon from '@mui/icons-material/Check';
 import DoNotDisturbAltIcon from '@mui/icons-material/DoNotDisturbAlt';
 import PopoverComponent from '../forms/Popover';
+import CustomToolbarWrapper from './TableToolBar';
 
 const TableComponent = ({
     columnHeaders,
-    rows
+    rows,
+    onCreationHandler,
+    onImportHandler,
+    header,
 }: ITableComponent) => {
 
     const columns: GridColDef[] = columnHeaders.map((column) => ({
@@ -45,7 +49,6 @@ const TableComponent = ({
         }
     }));
 
-
     return (
         <Card sx={{ width: "100%" }} >
             <Box>
@@ -54,6 +57,13 @@ const TableComponent = ({
                     {...rows}
                     rows={rows}
                     columns={columns}
+                    slots={{
+                        toolbar: () => (<CustomToolbarWrapper
+                            header={header}
+                            onCreationHandler={onCreationHandler}
+                            onImportHandler={() => onImportHandler?.()}
+                        />)
+                    }}
                     autoHeight
                     initialState={{
                         pagination: {
