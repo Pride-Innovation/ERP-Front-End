@@ -22,6 +22,7 @@ export interface ITableComponent {
     onCreationHandler: () => void;
     onImportHandler?: () => void;
     header: { plural: string; singular: string };
+    handleOptionClicked?: (option: number | string) => void
 }
 
 export interface ITableToolBar {

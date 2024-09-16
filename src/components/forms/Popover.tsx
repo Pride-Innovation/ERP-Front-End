@@ -5,7 +5,7 @@ import { IPopover } from './interface';
 import { ListItemIcon, ListItemText, MenuItem } from '@mui/material';
 import { IOptions } from '../tables/interface';
 
-const PopoverComponent = ({ buttonText, options }: IPopover) => {
+const PopoverComponent = ({ buttonText, options, handleOptionClicked }: IPopover) => {
     const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null);
 
     const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -41,12 +41,15 @@ const PopoverComponent = ({ buttonText, options }: IPopover) => {
                     horizontal: 'left',
                 }}
             >
-                {options.map((option: IOptions) => (<MenuItem value={option.value}>
-                    {option?.icon && <ListItemIcon>
-                        {option?.icon}
-                    </ListItemIcon>}
-                    <ListItemText primary={option.label} />
-                </MenuItem>))}
+                {options.map((option: IOptions) => (
+                    <MenuItem
+                        onClick={() => handleOptionClicked?.(option.value)}
+                        value={option.value}>
+                        {option?.icon && <ListItemIcon>
+                            {option?.icon}
+                        </ListItemIcon>}
+                        <ListItemText primary={option.label} />
+                    </MenuItem>))}
             </Popover>
         </React.Fragment>
     )

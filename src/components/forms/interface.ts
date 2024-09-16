@@ -40,4 +40,5 @@ export interface IChip {
 export interface IPopover {
     buttonText: string;
     options: Array<IOptions>
+    handleOptionClicked?: (option: number | string) => void;
 }

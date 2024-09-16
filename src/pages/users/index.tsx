@@ -27,6 +27,10 @@ const Users = () => {
     console.log('Import users clicked');
   };
 
+  const handleOptionClicked = (option: string | number) => {
+    console.log(option, "options informations!!")
+  }
+
   return (
     <Grid xs={12} container>
       {modalState === crudStates.create &&
@@ -34,13 +38,15 @@ const Users = () => {
           <CreateUser handleClose={handleClose} />
         </ModalComponent>
       }
-      {columnHeaders.length > 0 && <TableComponent
-        onCreationHandler={handleCreation}
-        onImportHandler={handleImport}
-        header={header}
-        rows={usersTableData}
-        columnHeaders={columnHeaders}
-      />}
+      {columnHeaders.length > 0 &&
+        <TableComponent
+          handleOptionClicked={handleOptionClicked}
+          onCreationHandler={handleCreation}
+          onImportHandler={handleImport}
+          header={header}
+          rows={usersTableData}
+          columnHeaders={columnHeaders}
+        />}
     </Grid>
   )
 }

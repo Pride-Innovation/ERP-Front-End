@@ -16,6 +16,7 @@ const TableComponent = ({
     onCreationHandler,
     onImportHandler,
     header,
+    handleOptionClicked
 }: ITableComponent) => {
 
     const columns: GridColDef[] = columnHeaders.map((column) => ({
@@ -42,6 +43,7 @@ const TableComponent = ({
                 ) : (column.isAction) ? (
                     <StyledBox >
                         <PopoverComponent
+                            handleOptionClicked={handleOptionClicked}
                             options={(column.actionData?.options) as Array<{ value: string, label: string }>}
                             buttonText={column.actionData?.label as string} />
                     </StyledBox>
