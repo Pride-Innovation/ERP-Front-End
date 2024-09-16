@@ -5,6 +5,7 @@ import { UserContext } from '../../context/UserContext';
 import { useContext, useState } from 'react';
 import { crudStates } from '../../utils/constants';
 import ModalComponent from '../../components/modal';
+import CreateUser from './CreateUser';
 
 const Users = () => {
   const { usersTableData } = useContext(UserContext);
@@ -28,9 +29,11 @@ const Users = () => {
 
   return (
     <Grid xs={12} container>
-      {modalState === crudStates.create && <ModalComponent open={open} handleClose={handleClose}>
-        <p>Create user</p>
-      </ModalComponent>}
+      {modalState === crudStates.create &&
+        <ModalComponent open={open} handleClose={handleClose} width="60%">
+          <CreateUser />
+        </ModalComponent>
+      }
       {columnHeaders.length > 0 && <TableComponent
         onCreationHandler={handleCreation}
         onImportHandler={handleImport}
