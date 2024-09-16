@@ -34,6 +34,7 @@ interface IUserForm {
     register: UseFormRegister<IUser>;
     buttonText: string;
     sendingRequest: boolean;
+    handleClose: () => void;
 }
 
 const UserForm = ({
@@ -42,10 +43,11 @@ const UserForm = ({
     register,
     buttonText,
     sendingRequest,
+    handleClose
 }: IUserForm) => {
     return (
-        <Grid item container spacing={3} xs={12}>
-            <Grid item container spacing={2} xs={12}>
+        <Grid item container xs={12}>
+            <Grid item container spacing={4} xs={12}>
                 <Grid item xs={12} md={6}>
                     <FormControl fullWidth>
                         <Controller
@@ -196,9 +198,9 @@ const UserForm = ({
                         )}
                     </FormControl>
                 </Grid>
-                <Grid item xs={12} sx={{ display: "flex", justifyContent: "end"}}>
-                    <Stack direction="row" spacing={3} sx={{ width: "30%"}}>
-                        <ButtonComponent buttonColor='error' type='button' sendingRequest={sendingRequest} buttonText="Close" />
+                <Grid item xs={12} sx={{ display: "flex", justifyContent: "end" }}>
+                    <Stack direction="row" spacing={3} sx={{ width: "30%" }}>
+                        <ButtonComponent handleClick={handleClose} buttonColor='error' type='button' sendingRequest={sendingRequest} buttonText="Close" />
                         <ButtonComponent buttonColor='success' type='submit' sendingRequest={sendingRequest} buttonText={buttonText} />
                     </Stack>
                 </Grid>

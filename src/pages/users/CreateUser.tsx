@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import UserForm from './UserForm';
-import { IUser } from './interface';
+import { ICreateUser, IUser } from './interface';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { userSchema } from './schema';
 import { Grid } from '@mui/material';
 
-const CreateUser = () => {
+const CreateUser = ({ handleClose }: ICreateUser) => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
 
     const defaultUser: IUser = {} as IUser;
@@ -40,6 +40,7 @@ const CreateUser = () => {
                     onSubmit={handleSubmit(onSubmit)}
                 >
                     <UserForm
+                        handleClose={handleClose}
                         buttonText="Submit"
                         formState={formState}
                         control={control}

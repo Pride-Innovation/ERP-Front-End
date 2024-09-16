@@ -1,6 +1,7 @@
 import Box from '@mui/material/Box';
 import Modal from '@mui/material/Modal';
 import { IModalComponent } from './interface';
+import { TypographyComponent } from '../headers/TypographyComponent';
 
 const style = {
     position: 'absolute' as 'absolute',
@@ -15,7 +16,8 @@ export default function ModalComponent({
     children,
     open,
     handleClose,
-    width = "40%"
+    width = "40%",
+    title
 }: IModalComponent) {
     return (
         <div>
@@ -26,6 +28,9 @@ export default function ModalComponent({
                 aria-describedby="modal-modal-description"
             >
                 <Box sx={{ ...style, width }}>
+                    <TypographyComponent sx={{ mb: 3}} size='20px' weight={600} >
+                        {title}
+                    </TypographyComponent>
                     {children}
                 </Box>
             </Modal>

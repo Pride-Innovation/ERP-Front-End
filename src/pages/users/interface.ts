@@ -17,3 +17,8 @@ export interface IUsersTableData {
 }
 
 export interface IUser extends IUsersExcludedTableData, IUsersTableData { }
+
+
+export interface ICreateUser {
+    handleClose: () => void;
+}
