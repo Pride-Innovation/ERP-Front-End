@@ -2,10 +2,13 @@ import { Grid } from '@mui/material'
 import TableComponent from '../../components/tables/TableComponent';
 import UserUtils from './utils';
 import { UserContext } from '../../context/UserContext';
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { crudStates } from '../../utils/constants';
 import ModalComponent from '../../components/modal';
 import CreateUser from './CreateUser';
+import { IUser } from './interface';
+import UpdateUsers from './UpdateUsers';
+import { usersMock } from '../../mocks/users';
 
 const Users = () => {
   const { usersTableData } = useContext(UserContext);
@@ -13,10 +16,12 @@ const Users = () => {
   const { columnHeaders } = UserUtils();
   const [modalState, setModalState] = useState<string>("");
   const [open, setOpen] = useState<boolean>(false);
+  const { setUser, setUsers, users } = useContext(UserContext);
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
+  useEffect(() => { setUsers(usersMock) }, [])
 
   const handleCreation = () => {
     setModalState(crudStates.create);
@@ -27,8 +32,11 @@ const Users = () => {
     console.log('Import users clicked');
   };
 
-  const handleOptionClicked = (option: string | number) => {
-    console.log(option, "options informations!!")
+  const handleOptionClicked = (option: string | number, moduleID?: string | number) => {
+    setModalState(option as string)
+    const user = users?.find(user => user.id === moduleID) as IUser;
+    setUser(user)
+    handleOpen();
   }
 
   return (
@@ -36,6 +44,11 @@ const Users = () => {
       {modalState === crudStates.create &&
         <ModalComponent title='Create User' open={open} handleClose={handleClose} width="60%">
           <CreateUser handleClose={handleClose} />
+        </ModalComponent>
+      }
+      {modalState === crudStates.update &&
+        <ModalComponent title='Update User' open={open} handleClose={handleClose} width="60%">
+          <UpdateUsers handleClose={handleClose} />
         </ModalComponent>
       }
       {columnHeaders.length > 0 &&

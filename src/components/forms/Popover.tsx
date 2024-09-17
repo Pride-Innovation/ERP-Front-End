@@ -5,7 +5,7 @@ import { IPopover } from './interface';
 import { ListItemIcon, ListItemText, MenuItem } from '@mui/material';
 import { IOptions } from '../tables/interface';
 
-const PopoverComponent = ({ buttonText, options, handleOptionClicked }: IPopover) => {
+const PopoverComponent = ({ buttonText, options, handleOptionClicked, moduleID }: IPopover) => {
     const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null);
 
     const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -43,7 +43,7 @@ const PopoverComponent = ({ buttonText, options, handleOptionClicked }: IPopover
             >
                 {options.map((option: IOptions) => (
                     <MenuItem
-                        onClick={() => handleOptionClicked?.(option.value)}
+                        onClick={() => handleOptionClicked?.(option.value, moduleID)}
                         value={option.value}>
                         {option?.icon && <ListItemIcon>
                             {option?.icon}

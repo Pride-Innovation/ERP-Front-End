@@ -26,7 +26,8 @@ const TableComponent = ({
         minWidth: 100,
         renderCell: (param) => {
             const value = param.row[column.label];
-
+            const id = param.row?.id
+            
             return (column.isText || column.isNumber) ?
                 (
                     <StyledBox>
@@ -43,6 +44,7 @@ const TableComponent = ({
                 ) : (column.isAction) ? (
                     <StyledBox >
                         <PopoverComponent
+                            moduleID={id}
                             handleOptionClicked={handleOptionClicked}
                             options={(column.actionData?.options) as Array<{ value: string, label: string }>}
                             buttonText={column.actionData?.label as string} />
