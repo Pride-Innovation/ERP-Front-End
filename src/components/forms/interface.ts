@@ -43,3 +43,12 @@ export interface IPopover {
     handleOptionClicked?: (option: number | string, moduleID?: string | number) => void;
     moduleID?: string | number
 }
+
+export interface ISelectComponent {
+    label: string
+    options: Array<IOptions>
+    required: boolean;
+    field: FieldValues;
+    error: FieldError | undefined;
+    id: string;
+}

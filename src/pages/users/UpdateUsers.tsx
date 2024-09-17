@@ -29,6 +29,7 @@ const UpdateUsers = ({ handleClose }: IUpdateUser) => {
     const onSubmit = (formData: IUser) => {
         setSendingRequest(true);
         console.log(formData, "form data!!!!!");
+        setSendingRequest(false)
     };
 
     return (

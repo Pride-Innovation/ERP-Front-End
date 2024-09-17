@@ -14,6 +14,7 @@ import {
 import { IUser } from './interface';
 import { InputComponent } from '../../components/forms/Inputs';
 import ButtonComponent from '../../components/forms/Button';
+import SelectComponent from '../../components/forms/Select';
 
 interface IUserForm {
     formState: FormState<IUser> & {
@@ -130,7 +131,12 @@ const UserForm = ({
                             {...register("gender")}
                             rules={{ required: true }}
                             render={({ field }) => (
-                                <InputComponent required label='Gender' field={field} error={formState.errors.gender} id='gender' />
+                                <SelectComponent
+                                    id='gender'
+                                    field={field}
+                                    error={formState.errors.gender}
+                                    required label='Gender'
+                                    options={[{ label: "Male", value: "Male" }, { label: "Female", value: "Female" }]} />
                             )}
                         />
                         {formState.errors.gender && (
@@ -200,7 +206,7 @@ const UserForm = ({
                 </Grid>
                 <Grid item xs={12} sx={{ display: "flex", justifyContent: "end" }}>
                     <Stack direction="row" spacing={3} sx={{ width: "30%" }}>
-                        <ButtonComponent handleClick={handleClose} buttonColor='error' type='button' sendingRequest={sendingRequest} buttonText="Close" />
+                        <ButtonComponent handleClick={handleClose} buttonColor='error' type='button' sendingRequest={false} buttonText="Close" />
                         <ButtonComponent buttonColor='success' type='submit' sendingRequest={sendingRequest} buttonText={buttonText} />
                     </Stack>
                 </Grid>
