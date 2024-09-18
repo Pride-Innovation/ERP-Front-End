@@ -1,5 +1,5 @@
 import { DataGridStyled, StyledBox } from '../../components/tables/Table';
-import { GridColDef } from '@mui/x-data-grid';
+import { GridColDef, GridRowsProp } from '@mui/x-data-grid';
 import { Box, Card } from '@mui/material';
 import { camelCaseToWords } from '../../utils/helpers';
 import { ITableComponent } from './interface';
@@ -9,6 +9,8 @@ import CheckIcon from '@mui/icons-material/Check';
 import DoNotDisturbAltIcon from '@mui/icons-material/DoNotDisturbAlt';
 import PopoverComponent from '../forms/Popover';
 import CustomToolbarWrapper from './TableToolBar';
+import CustomTextFilterOperator from './TableFilters';
+import { useEffect, useState } from 'react';
 
 const TableComponent = ({
     columnHeaders,
@@ -19,6 +21,12 @@ const TableComponent = ({
     handleOptionClicked
 }: ITableComponent) => {
 
+    const [filteredRows, setFilteredRows] = useState<GridRowsProp>(rows);
+
+    useEffect(() => setFilteredRows(rows), [])
+
+    const { handleTableFilter } = CustomTextFilterOperator({ rows: filteredRows, setFilteredRows, endPoint: "users" });
+
     const columns: GridColDef[] = columnHeaders.map((column) => ({
         field: `${column.label}`,
         headerName: camelCaseToWords(column.label),
@@ -27,7 +35,7 @@ const TableComponent = ({
         renderCell: (param) => {
             const value = param.row[column.label];
             const id = param.row?.id
-            
+
             return (column.isText || column.isNumber) ?
                 (
                     <StyledBox>
@@ -57,10 +65,11 @@ const TableComponent = ({
         <Card sx={{ width: "100%" }} >
             <Box>
                 <DataGridStyled
-                    loading={rows.length === 0}
-                    {...rows}
-                    rows={rows}
+                    loading={filteredRows.length === 0}
+                    {...filteredRows}
+                    rows={filteredRows}
                     columns={columns}
+                    onFilterModelChange={handleTableFilter}
                     slots={{
                         toolbar: () => (<CustomToolbarWrapper
                             header={header}

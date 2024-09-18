@@ -39,3 +39,14 @@ export interface CustomToolbarWrapperProps extends GridToolbarProps {
     onCreationHandler: () => void;
     onImportHandler: () => void;
 }
+
+export interface ITableFilter {
+    field: string;
+    value: string
+}
+
+export interface CustomTextFilterOperatorProps {
+    rows: GridRowsProp;
+    setFilteredRows: React.Dispatch<React.SetStateAction<GridRowsProp>>;
+    endPoint: string;
+}
