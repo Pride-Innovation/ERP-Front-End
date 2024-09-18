@@ -45,8 +45,13 @@ export interface ITableFilter {
     value: string
 }
 
-export interface CustomTextFilterOperatorProps {
+export interface ICustomTableFilterOperator {
     rows: GridRowsProp;
     setFilteredRows: React.Dispatch<React.SetStateAction<GridRowsProp>>;
+    endPoint: string;
+}
+
+export interface ICustomTablePagination {
+    rows: GridRowsProp;
     endPoint: string;
 }

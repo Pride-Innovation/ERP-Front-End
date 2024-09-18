@@ -11,6 +11,7 @@ import PopoverComponent from '../forms/Popover';
 import CustomToolbarWrapper from './TableToolBar';
 import CustomTextFilterOperator from './TableFilters';
 import { useEffect, useState } from 'react';
+import CustomTablePagination from './TablePagination';
 
 const TableComponent = ({
     columnHeaders,
@@ -20,12 +21,12 @@ const TableComponent = ({
     header,
     handleOptionClicked
 }: ITableComponent) => {
-
     const [filteredRows, setFilteredRows] = useState<GridRowsProp>(rows);
 
     useEffect(() => setFilteredRows(rows), [])
 
     const { handleTableFilter } = CustomTextFilterOperator({ rows: filteredRows, setFilteredRows, endPoint: "users" });
+    const { handleTablePagination } = CustomTablePagination({ rows: filteredRows, endPoint: "users" });
 
     const columns: GridColDef[] = columnHeaders.map((column) => ({
         field: `${column.label}`,
@@ -70,6 +71,8 @@ const TableComponent = ({
                     rows={filteredRows}
                     columns={columns}
                     onFilterModelChange={handleTableFilter}
+                    onPaginationModelChange={handleTablePagination}
+                    // rowCount={50}
                     slots={{
                         toolbar: () => (<CustomToolbarWrapper
                             header={header}

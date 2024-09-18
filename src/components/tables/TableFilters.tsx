@@ -1,8 +1,8 @@
 import { GridFilterModel, GridRowsProp } from "@mui/x-data-grid";
-import { CustomTextFilterOperatorProps } from "./interface";
+import { ICustomTableFilterOperator } from "./interface";
 
 
-const CustomTextFilterOperator = ({ rows, setFilteredRows, endPoint }: CustomTextFilterOperatorProps) => {
+const CustomTableFilterOperator = ({ rows, setFilteredRows, endPoint }: ICustomTableFilterOperator) => {
 
     const handleTableFilter = (model: GridFilterModel) => {
 
@@ -35,4 +35,4 @@ const CustomTextFilterOperator = ({ rows, setFilteredRows, endPoint }: CustomTex
     };
 };
 
-export default CustomTextFilterOperator;
+export default CustomTableFilterOperator;
