@@ -17,8 +17,12 @@ export interface IIChangePasswordForm {
     control: Control<IChangePassword>;
     register: UseFormRegister<IChangePassword>;
     buttonText: string;
-    showPassword: boolean;
+    showOldPassword: boolean;
+    showNewPassword: boolean;
+    showConfirmPassword: boolean;
     sendingRequest: boolean;
     handleMouseDownPassword: (event: React.MouseEvent<HTMLButtonElement>) => void;
-    handleClickShowPassword: () => void;
+    handleClickShowOldPassword: () => void;
+    handleClickShowNewPassword: () => void;
+    handleClickShowConfirmPassword: () => void;
 }

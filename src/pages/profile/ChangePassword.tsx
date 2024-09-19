@@ -8,10 +8,14 @@ import ChangePasswordForm from "./ChangePasswordForm";
 
 const ChangePassword = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
-    const [showPassword, setShowPassword] = useState<boolean>(false);
+    const [showOldPassword, setShowOldPassword] = useState<boolean>(false);
+    const [showNewPassword, setShowNewPassword] = useState<boolean>(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
     const defaultUser: IChangePassword = { oldPassword: "", newPassword: "", confirmPassword: "" };
 
-    const handleClickShowPassword = () => setShowPassword((show) => !show);
+    const handleClickShowOldPassword = () => setShowOldPassword((show) => !show);
+    const handleClickShowNewPassword = () => setShowNewPassword((show) => !show);
+    const handleClickShowConfirmPassword = () => setShowConfirmPassword((show) => !show);
     const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => { event.preventDefault(); };
 
     const {
@@ -31,6 +35,7 @@ const ChangePassword = () => {
         setSendingRequest(true);
         console.log(formData, "form data!!!!!")
     };
+    
     return (
         <Box sx={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", flex: 1 }}>
             <form
@@ -39,14 +44,18 @@ const ChangePassword = () => {
                 onSubmit={handleSubmit(onSubmit)}
             >
                 <ChangePasswordForm
-                    formState = {formState}
-                    control = {control}
-                    register = {register}
-                    buttonText = "Submit"
-                    showPassword = {showPassword}
-                    sendingRequest = {sendingRequest}
-                    handleClickShowPassword = {handleClickShowPassword}
-                    handleMouseDownPassword = {handleMouseDownPassword}
+                    formState={formState}
+                    control={control}
+                    register={register}
+                    buttonText="Submit"
+                    showOldPassword={showOldPassword}
+                    showNewPassword={showNewPassword}
+                    showConfirmPassword={showConfirmPassword}
+                    sendingRequest={sendingRequest}
+                    handleClickShowOldPassword={handleClickShowOldPassword}
+                    handleClickShowNewPassword={handleClickShowNewPassword}
+                    handleClickShowConfirmPassword={handleClickShowConfirmPassword}
+                    handleMouseDownPassword={handleMouseDownPassword}
                 />
             </form>
         </Box>

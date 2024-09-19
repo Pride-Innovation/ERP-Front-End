@@ -9,9 +9,13 @@ const ChangePasswordForm = ({
     control,
     register,
     buttonText,
-    showPassword,
+    showOldPassword,
+    showNewPassword,
+    showConfirmPassword,
     sendingRequest,
-    handleClickShowPassword,
+    handleClickShowOldPassword,
+    handleClickShowNewPassword,
+    handleClickShowConfirmPassword,
     handleMouseDownPassword,
 }: IIChangePasswordForm) => {
     return (
@@ -24,7 +28,17 @@ const ChangePasswordForm = ({
                             {...register("oldPassword")}
                             rules={{ required: true }}
                             render={({ field }) => (
-                                <InputComponent required label='Enter Old Password' field={field} error={formState.errors.oldPassword} id='oldPassword' />
+                                <InputComponent
+                                    required
+                                    handleClick={handleClickShowOldPassword}
+                                    handleMouseDown={handleMouseDownPassword}
+                                    label='Enter Old Password'
+                                    field={field}
+                                    error={formState.errors.oldPassword}
+                                    id='oldPassword'
+                                    type={showOldPassword ? 'text' : 'password'}
+                                    adornment
+                                />
                             )}
                         />
                         {formState.errors.oldPassword && (
@@ -41,13 +55,13 @@ const ChangePasswordForm = ({
                             render={({ field }) => (
                                 <InputComponent
                                     required
-                                    handleClick={handleClickShowPassword}
+                                    handleClick={handleClickShowNewPassword}
                                     handleMouseDown={handleMouseDownPassword}
                                     label='Enter New Password'
                                     field={field}
                                     error={formState.errors.newPassword}
                                     id='newPassword'
-                                    type={showPassword ? 'text' : 'password'}
+                                    type={showNewPassword ? 'text' : 'password'}
                                     adornment />
                             )}
                         />
@@ -65,13 +79,13 @@ const ChangePasswordForm = ({
                             render={({ field }) => (
                                 <InputComponent
                                     required
-                                    handleClick={handleClickShowPassword}
+                                    handleClick={handleClickShowConfirmPassword}
                                     handleMouseDown={handleMouseDownPassword}
                                     label='Confirm Password'
                                     field={field}
                                     error={formState.errors.confirmPassword}
                                     id='confirmPassword'
-                                    type={showPassword ? 'text' : 'password'}
+                                    type={showConfirmPassword ? 'text' : 'password'}
                                     adornment />
                             )}
                         />
