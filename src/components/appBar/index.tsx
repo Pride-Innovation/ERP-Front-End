@@ -19,9 +19,8 @@ import MaleLogo from '../../statics/images/male.jpg';
 // import FemaleLogo from '../../statics/images/female.webp';
 import { UserContext } from '../../context/UserContext';
 import PopoverComponent from '../forms/Popover';
-import InfoIcon from '@mui/icons-material/Info';
-import ModeEditIcon from '@mui/icons-material/ModeEdit';
-import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
+import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
+import LockOpenOutlinedIcon from '@mui/icons-material/LockOpenOutlined';
 
 const drawerWidth = 200;
 
@@ -66,9 +65,9 @@ export default function ApplicationDrawer() {
                         handleOptionClicked={() => console.log("Clicked")}
                         options={
                             [
-                                { value: "deactivate", label: "Deactivate", icon: <InfoIcon fontSize='small' color='error' /> },
-                                { value: "update", label: "Update", icon: <ModeEditIcon fontSize='small' color='info' /> },
-                                { value: "read", label: "View Details", icon: <RemoveRedEyeIcon fontSize='small' color='inherit' /> }
+                                { value: "settings", label: "Settings", header: true },
+                                { value: "profile", label: "Profile", icon: <PersonOutlineIcon fontSize='small' color='info' /> },
+                                { value: "password", label: "Change Password", icon: <LockOpenOutlinedIcon fontSize='small' color='info' /> }
                             ]
 
                         } />

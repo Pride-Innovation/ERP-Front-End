@@ -28,7 +28,7 @@ export default function ModalComponent({
                 aria-describedby="modal-modal-description"
             >
                 <Box sx={{ ...style, width }}>
-                    <TypographyComponent sx={{ mb: 3}} size='20px' weight={600} >
+                    <TypographyComponent sx={{ mb: 3 }} size='20px' weight={600} >
                         {title}
                     </TypographyComponent>
                     {children}

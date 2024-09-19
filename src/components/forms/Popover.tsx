@@ -3,13 +3,15 @@ import Popover from '@mui/material/Popover';
 import { IPopover } from './interface';
 import { ListItemIcon, ListItemText, MenuItem } from '@mui/material';
 import { IOptions } from '../tables/interface';
+import { blue, grey } from '@mui/material/colors';
+import { TypographyComponent } from '../headers/TypographyComponent';
 
 const PopoverComponent = ({
     setAnchorEl,
     anchorEl,
     options,
     handleOptionClicked,
-    moduleID
+    moduleID,
 }: IPopover) => {
 
     const handleClose = () => {
@@ -33,12 +35,22 @@ const PopoverComponent = ({
             >
                 {options.map((option: IOptions) => (
                     <MenuItem
+                        sx={{ bgcolor: `${option?.header ? grey[300] : ''}` }}
                         onClick={() => handleOptionClicked?.(option.value, moduleID)}
                         value={option.value}>
                         {option?.icon && <ListItemIcon>
                             {option?.icon}
                         </ListItemIcon>}
-                        <ListItemText primary={option.label} />
+                        <ListItemText
+                            primary={
+                                <TypographyComponent
+                                    size="16px"
+                                    sx={{ color: `${option?.header ? blue[700] : ''}` }}
+                                    weight={option?.header ? 500 : 400} >
+                                    {option.label}
+                                </TypographyComponent>
+                            }
+                        />
                     </MenuItem>))}
             </Popover>
         </React.Fragment>

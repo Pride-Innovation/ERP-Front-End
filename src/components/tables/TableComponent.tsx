@@ -30,7 +30,7 @@ const TableComponent = ({
     };
 
     useEffect(() => setFilteredRows(rows), [])
-    
+
     const { handleTableFilter } = CustomTextFilterOperator({ rows: filteredRows, setFilteredRows, endPoint: "users" });
     const { handleTablePagination } = CustomTablePagination({ rows: filteredRows, endPoint: "users" });
 
@@ -87,7 +87,13 @@ const TableComponent = ({
                     columns={columns}
                     onFilterModelChange={handleTableFilter}
                     onPaginationModelChange={handleTablePagination}
-                    // rowCount={50}
+                    /*
+                        ** TO DO **
+                        pass count value as a prop to this component. 
+                        This is to display to number of records when paginating.
+                        
+                        rowCount={50}
+                    */
                     slots={{
                         toolbar: () => (<CustomToolbarWrapper
                             header={header}

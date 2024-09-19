@@ -8,7 +8,14 @@ const CustomTableFilterOperator = ({ rows, setFilteredRows, endPoint }: ICustomT
 
         const { items } = model;
 
-        // const response = await make api calls(endPoint)
+        /*
+            ***** TO DO *****
+            
+            Call an API to return a list of data from the server (Table Data)
+            Update filtered rows state with the server response. 
+            const response = await make api calls(endPoint).
+        */
+
         console.log(endPoint, "endpoint!!")
 
         if (items.length > 0) {
