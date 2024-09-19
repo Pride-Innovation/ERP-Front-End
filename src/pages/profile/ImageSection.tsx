@@ -10,9 +10,20 @@ import { usersMock } from '../../mocks/users';
 import { UserContext } from '../../context/UserContext';
 import { camelCaseToWords } from '../../utils/helpers';
 import { availability } from '../../utils/constants';
+import AppBarUtills, { modalStates } from '../../components/appBar/utills';
+import ModalComponent from '../../components/modal';
+import ChangePassword from './ChangePassword';
 
 export const ImageSection = () => {
     const { user, setUser } = useContext(UserContext);
+
+    const {
+        handleClose,
+        modalState,
+        open,
+        handleOptionClicked,
+    } = AppBarUtills();
+
     useEffect(() => {
         setUser(() => {
             return usersMock[0]
@@ -28,6 +39,11 @@ export const ImageSection = () => {
                 justifyContent: "center"
             }}
             xs container>
+            {modalState === modalStates.password &&
+                <ModalComponent title='Change Password' open={open} handleClose={handleClose} width="40%">
+                    <ChangePassword handleClose={handleClose} />
+                </ModalComponent>
+            }
             <Box sx={{ position: "relative" }}>
                 <Box
                     component="img"
@@ -46,6 +62,7 @@ export const ImageSection = () => {
             </TypographyComponent>
             <Stack direction="column" spacing={1.5}>
                 <ButtonComponent
+                    handleClick={() => handleOptionClicked(modalStates.password)}
                     sendingRequest={false}
                     buttonText='Change Password'
                     variant='outlined'
@@ -79,7 +96,7 @@ export const ProfileLine = () => {
                         </Grid>
                         <Grid item xs={8} sx={{ fontSize: "14px", borderBottom: `2px solid ${grey[100]}`, py: 0.5 }}>
                             {value === availability.available ? (
-                                <Chip size='small' label={availability.available} color="primary" variant="outlined" />
+                                <Chip size='small' label={availability.available} color="success" />
                             ) : value === availability.on_leave ? (
                                 <Chip size='small' label={availability.on_leave} color="error" variant="outlined" />
                             ) : value}
