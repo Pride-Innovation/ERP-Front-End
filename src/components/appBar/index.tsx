@@ -24,6 +24,9 @@ import LockOpenOutlinedIcon from '@mui/icons-material/LockOpenOutlined';
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
 import { usersMock } from '../../mocks/users';
 import { TypographyComponent } from '../headers/TypographyComponent';
+import ModalComponent from '../modal';
+import AppBarUtills from './utills';
+import ChangePassword from '../../pages/profile/ChangePassword';
 
 const drawerWidth = 200;
 
@@ -32,13 +35,20 @@ export default function ApplicationDrawer() {
     const { pathname } = useLocation();
     const { user, setUser } = useContext(UserContext);
     const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
-    useEffect(() => { setUser(usersMock[0]) }, [])
+
+    const { handleClose, handleOpen, modalState, open, setModalState } = AppBarUtills();
+
+    useEffect(() => { setUser(usersMock[0]) }, []);
+
 
     const handleAnchorClick = (event: React.MouseEvent<HTMLButtonElement>) => {
         setAnchorEl(event.currentTarget);
     };
 
-    console.log(user, "information!!")
+    const handleOptionClicked = (option: string | number) => {
+        setModalState("password")
+        handleOpen();
+    }
 
     const {
         handleClick,
@@ -51,6 +61,11 @@ export default function ApplicationDrawer() {
 
     return (
         <Box sx={{ display: 'flex' }}>
+            {modalState === "password" &&
+                <ModalComponent title='Change Password' open={open} handleClose={handleClose} width="40%">
+                    <ChangePassword />
+                </ModalComponent>
+            }
             <CssBaseline />
             <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
                 <Toolbar>
@@ -71,7 +86,7 @@ export default function ApplicationDrawer() {
                         anchorEl={anchorEl}
                         setAnchorEl={setAnchorEl}
                         moduleID={user.id}
-                        handleOptionClicked={() => console.log("Clicked")}
+                        handleOptionClicked={handleOptionClicked}
                         options={
                             [
                                 { value: "settings", label: "Settings", header: true },

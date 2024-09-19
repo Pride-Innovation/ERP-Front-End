@@ -1,4 +1,4 @@
-import { FormControl, FormHelperText, Grid } from '@mui/material'
+import { FormControl, FormHelperText, Grid, Stack } from '@mui/material'
 import { Controller } from 'react-hook-form'
 import { IIChangePasswordForm } from './interface'
 import { InputComponent } from '../../components/forms/Inputs'
@@ -10,7 +10,7 @@ const ChangePasswordForm = ({
     register,
     buttonText,
     showPassword,
-    loggingIn,
+    sendingRequest,
     handleClickShowPassword,
     handleMouseDownPassword,
 }: IIChangePasswordForm) => {
@@ -57,11 +57,38 @@ const ChangePasswordForm = ({
                     </FormControl>
                 </Grid>
                 <Grid item xs={12}>
-                    <ButtonComponent buttonColor='success' type='submit' sendingRequest={loggingIn} buttonText={buttonText} />
+                    <FormControl fullWidth>
+                        <Controller
+                            control={control}
+                            {...register("confirmPassword")}
+                            rules={{ required: true }}
+                            render={({ field }) => (
+                                <InputComponent
+                                    required
+                                    handleClick={handleClickShowPassword}
+                                    handleMouseDown={handleMouseDownPassword}
+                                    label='Confirm Password'
+                                    field={field}
+                                    error={formState.errors.confirmPassword}
+                                    id='confirmPassword'
+                                    type={showPassword ? 'text' : 'password'}
+                                    adornment />
+                            )}
+                        />
+                        {formState.errors.confirmPassword && (
+                            <FormHelperText sx={{ color: 'error.main' }}>{formState.errors.confirmPassword.message}</FormHelperText>
+                        )}
+                    </FormControl>
+                </Grid>
+                <Grid item xs={12}>
+                    <Stack direction="row" spacing={3}>
+                        <ButtonComponent buttonColor='error' type='button' sendingRequest={false} buttonText="Cancel" />
+                        <ButtonComponent buttonColor='info' type='submit' sendingRequest={sendingRequest} buttonText={buttonText} />
+                    </Stack>
                 </Grid>
             </Grid>
         </Grid>
     )
 }
 
-export default ChangePasswordForm
+export default ChangePasswordForm;

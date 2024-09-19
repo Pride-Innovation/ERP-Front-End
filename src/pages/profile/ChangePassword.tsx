@@ -7,7 +7,7 @@ import { changePasswordSchema } from "./schema";
 import ChangePasswordForm from "./ChangePasswordForm";
 
 const ChangePassword = () => {
-    const [loggingIn, setLoggingIn] = useState<boolean>(false);
+    const [sendingRequest, setSendingRequest] = useState<boolean>(false);
     const [showPassword, setShowPassword] = useState<boolean>(false);
     const defaultUser: IChangePassword = { oldPassword: "", newPassword: "", confirmPassword: "" };
 
@@ -28,7 +28,7 @@ const ChangePassword = () => {
     useEffect(() => { reset({ ...defaultUser }) }, []);
 
     const onSubmit = (formData: IChangePassword) => {
-        setLoggingIn(true);
+        setSendingRequest(true);
         console.log(formData, "form data!!!!!")
     };
     return (
@@ -44,7 +44,7 @@ const ChangePassword = () => {
                     register = {register}
                     buttonText = "Submit"
                     showPassword = {showPassword}
-                    loggingIn = {loggingIn}
+                    sendingRequest = {sendingRequest}
                     handleClickShowPassword = {handleClickShowPassword}
                     handleMouseDownPassword = {handleMouseDownPassword}
                 />
