@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
 import AppBar from '@mui/material/AppBar';
@@ -11,12 +11,12 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import { Outlet, useLocation, useNavigate } from 'react-router';
 import { sideBarItems } from './sideBarElements';
-import { Avatar, Collapse } from '@mui/material';
+import { Avatar, Collapse, IconButton } from '@mui/material';
 import { ExpandLess, ExpandMore } from '@mui/icons-material';
 import { blue } from '@mui/material/colors';
 import HandleRoutes from './HandleRoutes';
 import MaleLogo from '../../statics/images/male.jpg';
-import FemaleLogo from '../../statics/images/female.webp';
+// import FemaleLogo from '../../statics/images/female.webp';
 import { UserContext } from '../../context/UserContext';
 import PopoverComponent from '../forms/Popover';
 import InfoIcon from '@mui/icons-material/Info';
@@ -29,6 +29,11 @@ export default function ApplicationDrawer() {
     const navigate = useNavigate();
     const { pathname } = useLocation();
     const { user } = useContext(UserContext);
+    const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
+
+    const handleAnchorClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+        setAnchorEl(event.currentTarget);
+    };
 
     console.log(user, "information!!")
 
@@ -49,10 +54,15 @@ export default function ApplicationDrawer() {
                     <Typography variant="h6" noWrap component="div">
                         Assets Management
                     </Typography>
-                    <Avatar src={MaleLogo} sx={{ height: 45, width: 45, ml: "auto", cursor: "pointer" }} />
+                    <IconButton
+                        onClick={(event: React.MouseEvent<HTMLButtonElement>) => handleAnchorClick?.(event)}
+                        sx={{ ml: "auto" }}>
+                        <Avatar src={MaleLogo} sx={{ height: 45, width: 45, cursor: "pointer" }} />
+                    </IconButton>
                     <PopoverComponent
+                        anchorEl={anchorEl}
+                        setAnchorEl={setAnchorEl}
                         moduleID={user.id}
-                        buttonText='Profile'
                         handleOptionClicked={() => console.log("Clicked")}
                         options={
                             [

@@ -1,5 +1,6 @@
 import { FieldError, FieldValues } from 'react-hook-form';
 import { IOptions } from '../tables/interface';
+import { Dispatch, SetStateAction } from 'react';
 
 export interface IButton {
     sendingRequest: boolean;
@@ -38,10 +39,12 @@ export interface IChip {
 }
 
 export interface IPopover {
-    buttonText: string;
+    // buttonText: string;
     options: Array<IOptions>
     handleOptionClicked?: (option: number | string, moduleID?: string | number) => void;
-    moduleID?: string | number
+    moduleID?: string | number;
+    setAnchorEl: Dispatch<SetStateAction<HTMLButtonElement | null>>
+    anchorEl: HTMLButtonElement | null
 }
 
 export interface ISelectComponent {

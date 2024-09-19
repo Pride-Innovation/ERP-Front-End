@@ -12,6 +12,7 @@ import CustomToolbarWrapper from './TableToolBar';
 import CustomTextFilterOperator from './TableFilters';
 import { useEffect, useState } from 'react';
 import CustomTablePagination from './TablePagination';
+import ButtonComponent from '../forms/Button';
 
 const TableComponent = ({
     columnHeaders,
@@ -22,9 +23,14 @@ const TableComponent = ({
     handleOptionClicked
 }: ITableComponent) => {
     const [filteredRows, setFilteredRows] = useState<GridRowsProp>(rows);
+    const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
+
+    const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+        setAnchorEl(event.currentTarget);
+    };
 
     useEffect(() => setFilteredRows(rows), [])
-
+    
     const { handleTableFilter } = CustomTextFilterOperator({ rows: filteredRows, setFilteredRows, endPoint: "users" });
     const { handleTablePagination } = CustomTablePagination({ rows: filteredRows, endPoint: "users" });
 
@@ -52,11 +58,20 @@ const TableComponent = ({
                     </StyledBox>
                 ) : (column.isAction) ? (
                     <StyledBox >
+                        <ButtonComponent
+                            handleClick={(event: React.MouseEvent<HTMLButtonElement>) => handleClick?.(event)}
+                            sendingRequest={false}
+                            buttonText={column.actionData?.label as string}
+                            variant='outlined'
+                            buttonColor='info'
+                            type='button' />
                         <PopoverComponent
                             moduleID={id}
                             handleOptionClicked={handleOptionClicked}
                             options={(column.actionData?.options) as Array<{ value: string, label: string }>}
-                            buttonText={column.actionData?.label as string} />
+                            anchorEl={anchorEl}
+                            setAnchorEl={setAnchorEl}
+                        />
                     </StyledBox>
                 ) : null
         }

@@ -1,16 +1,16 @@
-import Popover from '@mui/material/Popover';
 import React from 'react';
-import ButtonComponent from './Button';
+import Popover from '@mui/material/Popover';
 import { IPopover } from './interface';
 import { ListItemIcon, ListItemText, MenuItem } from '@mui/material';
 import { IOptions } from '../tables/interface';
 
-const PopoverComponent = ({ buttonText, options, handleOptionClicked, moduleID }: IPopover) => {
-    const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null);
-
-    const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-        setAnchorEl(event.currentTarget);
-    };
+const PopoverComponent = ({
+    setAnchorEl,
+    anchorEl,
+    options,
+    handleOptionClicked,
+    moduleID
+}: IPopover) => {
 
     const handleClose = () => {
         setAnchorEl(null);
@@ -21,16 +21,6 @@ const PopoverComponent = ({ buttonText, options, handleOptionClicked, moduleID }
 
     return (
         <React.Fragment>
-            <ButtonComponent
-                handleClick={(
-                    event: React.MouseEvent<HTMLButtonElement>
-                ) => handleClick?.(event)}
-                sendingRequest={false}
-                buttonText={buttonText}
-                variant='outlined'
-                buttonColor='info'
-                type='button' />
-
             <Popover
                 id={id}
                 open={open}
@@ -55,4 +45,4 @@ const PopoverComponent = ({ buttonText, options, handleOptionClicked, moduleID }
     )
 }
 
-export default PopoverComponent
+export default PopoverComponent;
