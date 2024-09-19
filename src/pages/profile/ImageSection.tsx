@@ -47,7 +47,7 @@ export const ImageSection = () => {
             <Stack direction="column" spacing={1.5}>
                 <ButtonComponent
                     sendingRequest={false}
-                    buttonText='Update Password'
+                    buttonText='Change Password'
                     variant='outlined'
                     buttonColor='info'
                     type='button' />

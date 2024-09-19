@@ -1,16 +1,10 @@
-import {
-    Box,
-    FormControl,
-    FormHelperText,
-    Grid
-} from '@mui/material'
-import { Controller } from 'react-hook-form';
-import { InputComponent } from '../../../components/forms/Inputs'
-import ButtonComponent from '../../../components/forms/Button';
-import { LinkComponent } from '../../../components/headers/TypographyComponent';
-import { IAuthenticationForm } from '../interface';
+import { FormControl, FormHelperText, Grid } from '@mui/material'
+import { Controller } from 'react-hook-form'
+import { IIChangePasswordForm } from './interface'
+import { InputComponent } from '../../components/forms/Inputs'
+import ButtonComponent from '../../components/forms/Button'
 
-const AuthenticationForm = ({
+const ChangePasswordForm = ({
     formState,
     control,
     register,
@@ -19,57 +13,50 @@ const AuthenticationForm = ({
     loggingIn,
     handleClickShowPassword,
     handleMouseDownPassword,
-    linkText,
-    linkPath,
-    password
-}: IAuthenticationForm) => {
+}: IIChangePasswordForm) => {
     return (
-        <Grid item container xs={12}
-        >
+        <Grid item container xs={12}>
             <Grid item container spacing={3} xs={12}>
                 <Grid item xs={12}>
                     <FormControl fullWidth>
                         <Controller
                             control={control}
-                            {...register("email")}
+                            {...register("oldPassword")}
                             rules={{ required: true }}
                             render={({ field }) => (
-                                <InputComponent required label='Email Address' field={field} error={formState.errors.email} id='email' />
+                                <InputComponent required label='Enter Old Password' field={field} error={formState.errors.oldPassword} id='oldPassword' />
                             )}
                         />
-                        {formState.errors.email && (
-                            <FormHelperText sx={{ color: 'error.main' }}>{formState.errors.email.message}</FormHelperText>
+                        {formState.errors.oldPassword && (
+                            <FormHelperText sx={{ color: 'error.main' }}>{formState.errors.oldPassword.message}</FormHelperText>
                         )}
                     </FormControl>
                 </Grid>
-                {password && <Grid item xs={12}>
+                <Grid item xs={12}>
                     <FormControl fullWidth>
                         <Controller
                             control={control}
-                            {...register("password")}
+                            {...register("newPassword")}
                             rules={{ required: true }}
                             render={({ field }) => (
                                 <InputComponent
                                     required
                                     handleClick={handleClickShowPassword}
                                     handleMouseDown={handleMouseDownPassword}
-                                    label='Password'
+                                    label='Enter New Password'
                                     field={field}
-                                    error={formState.errors.password}
-                                    id='password'
+                                    error={formState.errors.newPassword}
+                                    id='newPassword'
                                     type={showPassword ? 'text' : 'password'}
                                     adornment />
                             )}
                         />
-                        {formState.errors.password && (
-                            <FormHelperText sx={{ color: 'error.main' }}>{formState.errors.password.message}</FormHelperText>
+                        {formState.errors.newPassword && (
+                            <FormHelperText sx={{ color: 'error.main' }}>{formState.errors.newPassword.message}</FormHelperText>
                         )}
                     </FormControl>
-                </Grid>}
+                </Grid>
                 <Grid item xs={12}>
-                    <Box sx={{ width: "100%", pb: '10px' }}>
-                        <LinkComponent href={linkPath} size='17px' weight={400} text={linkText} />
-                    </Box>
                     <ButtonComponent buttonColor='success' type='submit' sendingRequest={loggingIn} buttonText={buttonText} />
                 </Grid>
             </Grid>
@@ -77,4 +64,4 @@ const AuthenticationForm = ({
     )
 }
 
-export default AuthenticationForm;
+export default ChangePasswordForm
