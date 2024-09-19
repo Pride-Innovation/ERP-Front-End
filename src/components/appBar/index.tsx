@@ -60,7 +60,7 @@ export default function ApplicationDrawer() {
         <Box sx={{ display: 'flex' }}>
             {modalState === modalStates.password &&
                 <ModalComponent title='Change Password' open={open} handleClose={handleClose} width="40%">
-                    <ChangePassword />
+                    <ChangePassword handleClose={handleClose} />
                 </ModalComponent>
             }
             <CssBaseline />

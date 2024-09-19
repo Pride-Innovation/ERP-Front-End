@@ -1,12 +1,12 @@
 import { Box } from "@mui/material"
 import { useEffect, useState } from "react";
-import { IChangePassword } from "./interface";
+import { IChangePassword, IChangePasswordComponent } from "./interface";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { changePasswordSchema } from "./schema";
 import ChangePasswordForm from "./ChangePasswordForm";
 
-const ChangePassword = () => {
+const ChangePassword = ({ handleClose }: IChangePasswordComponent) => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
     const [showOldPassword, setShowOldPassword] = useState<boolean>(false);
     const [showNewPassword, setShowNewPassword] = useState<boolean>(false);
@@ -35,7 +35,7 @@ const ChangePassword = () => {
         setSendingRequest(true);
         console.log(formData, "form data!!!!!")
     };
-    
+
     return (
         <Box sx={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", flex: 1 }}>
             <form
@@ -44,6 +44,7 @@ const ChangePassword = () => {
                 onSubmit={handleSubmit(onSubmit)}
             >
                 <ChangePasswordForm
+                    handleClose={handleClose}
                     formState={formState}
                     control={control}
                     register={register}

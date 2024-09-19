@@ -25,4 +25,9 @@ export interface IIChangePasswordForm {
     handleClickShowOldPassword: () => void;
     handleClickShowNewPassword: () => void;
     handleClickShowConfirmPassword: () => void;
+    handleClose: () => void
+}
+
+export interface IChangePasswordComponent {
+    handleClose: () => void;
 }

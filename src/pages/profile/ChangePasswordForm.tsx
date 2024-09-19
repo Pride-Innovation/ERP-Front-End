@@ -17,6 +17,7 @@ const ChangePasswordForm = ({
     handleClickShowNewPassword,
     handleClickShowConfirmPassword,
     handleMouseDownPassword,
+    handleClose
 }: IIChangePasswordForm) => {
     return (
         <Grid item container xs={12}>
@@ -96,7 +97,7 @@ const ChangePasswordForm = ({
                 </Grid>
                 <Grid item xs={12}>
                     <Stack direction="row" spacing={3}>
-                        <ButtonComponent buttonColor='error' type='button' sendingRequest={false} buttonText="Cancel" />
+                        <ButtonComponent handleClick={handleClose} buttonColor='error' type='button' sendingRequest={false} buttonText="Cancel" />
                         <ButtonComponent buttonColor='info' type='submit' sendingRequest={sendingRequest} buttonText={buttonText} />
                     </Stack>
                 </Grid>
