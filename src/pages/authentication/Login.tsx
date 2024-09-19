@@ -58,7 +58,7 @@ const Login = () => {
                     })}
                 >
                     <Box>
-                        <TypographyComponent sx={{ mb: 2 }} size={"20px"} weight={600}>Assets Management Tool</TypographyComponent>
+                        <TypographyComponent sx={{ mb: 2 }} size={"20px"} weight={600}>Pride Microfinance (ERP)</TypographyComponent>
                         <TypographyComponent sx={{ mb: 2 }} size='16px' weight={500}>Sign In to your account</TypographyComponent>
                     </Box>
                     <Box sx={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", flex: 1 }}>

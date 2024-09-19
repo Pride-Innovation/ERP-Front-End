@@ -1,6 +1,6 @@
 import { Box, Chip, Grid, IconButton, Stack } from '@mui/material'
 import MaleProfile from "../../statics/images/male.jpg";
-import FemaleProfile from "../../statics/images/female.webp";
+import FemaleProfile from "../../statics/images/Female.jpg";
 import { TypographyComponent } from '../../components/headers/TypographyComponent';
 import { blue, grey } from '@mui/material/colors';
 import ButtonComponent from '../../components/forms/Button';

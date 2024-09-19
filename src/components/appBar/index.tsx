@@ -11,24 +11,28 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import { Outlet, useLocation, useNavigate } from 'react-router';
 import { sideBarItems } from './sideBarElements';
-import { Avatar, Collapse, IconButton } from '@mui/material';
+import { Avatar, Collapse, IconButton, Stack } from '@mui/material';
 import { ExpandLess, ExpandMore } from '@mui/icons-material';
-import { blue } from '@mui/material/colors';
+import { blue, grey } from '@mui/material/colors';
 import HandleRoutes from './HandleRoutes';
 import MaleLogo from '../../statics/images/male.jpg';
-// import FemaleLogo from '../../statics/images/female.webp';
+import FemaleLogo from '../../statics/images/Female.jpg'
 import { UserContext } from '../../context/UserContext';
 import PopoverComponent from '../forms/Popover';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import LockOpenOutlinedIcon from '@mui/icons-material/LockOpenOutlined';
+import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
+import { usersMock } from '../../mocks/users';
+import { TypographyComponent } from '../headers/TypographyComponent';
 
 const drawerWidth = 200;
 
 export default function ApplicationDrawer() {
     const navigate = useNavigate();
     const { pathname } = useLocation();
-    const { user } = useContext(UserContext);
+    const { user, setUser } = useContext(UserContext);
     const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
+    useEffect(() => { setUser(usersMock[0]) }, [])
 
     const handleAnchorClick = (event: React.MouseEvent<HTMLButtonElement>) => {
         setAnchorEl(event.currentTarget);
@@ -51,13 +55,18 @@ export default function ApplicationDrawer() {
             <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
                 <Toolbar>
                     <Typography variant="h6" noWrap component="div">
-                        Assets Management
+                        Pride Microfinance (ERP)
                     </Typography>
-                    <IconButton
-                        onClick={(event: React.MouseEvent<HTMLButtonElement>) => handleAnchorClick?.(event)}
-                        sx={{ ml: "auto" }}>
-                        <Avatar src={MaleLogo} sx={{ height: 45, width: 45, cursor: "pointer" }} />
-                    </IconButton>
+                    {user &&
+                        <Stack direction="row" spacing={2} sx={{ ml: "auto", display: "flex", alignItems: "center" }}>
+                            <TypographyComponent size='17px' weight={400} sx={{ color: grey[100] }}>
+                                {user?.firstName} {user?.lastName}  ({user?.department})
+                            </TypographyComponent>
+                            <IconButton
+                                onClick={(event: React.MouseEvent<HTMLButtonElement>) => handleAnchorClick?.(event)}>
+                                <Avatar src={user?.gender === 'Male' ? MaleLogo : FemaleLogo} sx={{ height: 45, width: 45, cursor: "pointer" }} />
+                            </IconButton>
+                        </Stack>}
                     <PopoverComponent
                         anchorEl={anchorEl}
                         setAnchorEl={setAnchorEl}
@@ -67,7 +76,8 @@ export default function ApplicationDrawer() {
                             [
                                 { value: "settings", label: "Settings", header: true },
                                 { value: "profile", label: "Profile", icon: <PersonOutlineIcon fontSize='small' color='info' /> },
-                                { value: "password", label: "Change Password", icon: <LockOpenOutlinedIcon fontSize='small' color='info' /> }
+                                { value: "password", label: "Change Password", icon: <LockOpenOutlinedIcon fontSize='small' color='info' /> },
+                                { value: "logout", label: "Log Out", header: true, icon: <LogoutOutlinedIcon fontSize='small' color='info' /> }
                             ]
 
                         } />
