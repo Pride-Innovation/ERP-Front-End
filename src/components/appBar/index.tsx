@@ -19,13 +19,10 @@ import MaleLogo from '../../statics/images/male.jpg';
 import FemaleLogo from '../../statics/images/Female.jpg'
 import { UserContext } from '../../context/UserContext';
 import PopoverComponent from '../forms/Popover';
-import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
-import LockOpenOutlinedIcon from '@mui/icons-material/LockOpenOutlined';
-import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
 import { usersMock } from '../../mocks/users';
 import { TypographyComponent } from '../headers/TypographyComponent';
 import ModalComponent from '../modal';
-import AppBarUtills from './utills';
+import AppBarUtills, { modalStates } from './utills';
 import ChangePassword from '../../pages/profile/ChangePassword';
 
 const drawerWidth = 200;
@@ -36,19 +33,19 @@ export default function ApplicationDrawer() {
     const { user, setUser } = useContext(UserContext);
     const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
 
-    const { handleClose, handleOpen, modalState, open, setModalState } = AppBarUtills();
+    const {
+        handleClose,
+        modalState,
+        open,
+        handleOptionClicked,
+        options
+    } = AppBarUtills();
 
     useEffect(() => { setUser(usersMock[0]) }, []);
-
 
     const handleAnchorClick = (event: React.MouseEvent<HTMLButtonElement>) => {
         setAnchorEl(event.currentTarget);
     };
-
-    const handleOptionClicked = (option: string | number) => {
-        setModalState("password")
-        handleOpen();
-    }
 
     const {
         handleClick,
@@ -61,7 +58,7 @@ export default function ApplicationDrawer() {
 
     return (
         <Box sx={{ display: 'flex' }}>
-            {modalState === "password" &&
+            {modalState === modalStates.password &&
                 <ModalComponent title='Change Password' open={open} handleClose={handleClose} width="40%">
                     <ChangePassword />
                 </ModalComponent>
@@ -87,15 +84,7 @@ export default function ApplicationDrawer() {
                         setAnchorEl={setAnchorEl}
                         moduleID={user.id}
                         handleOptionClicked={handleOptionClicked}
-                        options={
-                            [
-                                { value: "settings", label: "Settings", header: true },
-                                { value: "profile", label: "Profile", icon: <PersonOutlineIcon fontSize='small' color='info' /> },
-                                { value: "password", label: "Change Password", icon: <LockOpenOutlinedIcon fontSize='small' color='info' /> },
-                                { value: "logout", label: "Log Out", header: true, icon: <LogoutOutlinedIcon fontSize='small' color='info' /> }
-                            ]
-
-                        } />
+                        options={options()} />
                 </Toolbar>
             </AppBar>
             <Drawer
