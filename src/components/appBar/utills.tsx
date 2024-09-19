@@ -10,6 +10,7 @@ export const modalStates = {
     profile: "profile",
     logout: "logout",
     settings: "settings",
+    leave: "leave",
 }
 
 
@@ -40,6 +41,10 @@ const AppBarUtills = () => {
         }
         if (modalStates.profile === option) {
             navigate(ROUTES.PROFILE)
+        }
+        if (modalStates.leave === option) {
+            setModalState(modalStates.leave)
+            handleOpen();
         }
     }
 

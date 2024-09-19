@@ -41,6 +41,13 @@ export default function ApplicationDrawer() {
         options
     } = AppBarUtills();
 
+    /*
+        ** TO DO **
+        - Get user from session storage.
+        - Create a helper method that fetches user from Session.
+        - Update user state with the data.
+    */
+
     useEffect(() => { setUser(usersMock[0]) }, []);
 
     const handleAnchorClick = (event: React.MouseEvent<HTMLButtonElement>) => {

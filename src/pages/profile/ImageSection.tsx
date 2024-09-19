@@ -13,6 +13,7 @@ import { availability } from '../../utils/constants';
 import AppBarUtills, { modalStates } from '../../components/appBar/utills';
 import ModalComponent from '../../components/modal';
 import ChangePassword from './ChangePassword';
+import LeaveComponent from './Leave';
 
 export const ImageSection = () => {
     const { user, setUser } = useContext(UserContext);
@@ -26,7 +27,7 @@ export const ImageSection = () => {
 
     useEffect(() => {
         setUser(() => {
-            return usersMock[0]
+            return usersMock[1]
         })
     }, []);
 
@@ -42,6 +43,11 @@ export const ImageSection = () => {
             {modalState === modalStates.password &&
                 <ModalComponent title='Change Password' open={open} handleClose={handleClose} width="40%">
                     <ChangePassword handleClose={handleClose} />
+                </ModalComponent>
+            }
+            {modalState === modalStates.leave &&
+                <ModalComponent title='Request for Leave' open={open} handleClose={handleClose} width="40%">
+                    <LeaveComponent />
                 </ModalComponent>
             }
             <Box sx={{ position: "relative" }}>
@@ -69,6 +75,7 @@ export const ImageSection = () => {
                     buttonColor='info'
                     type='button' />
                 <ButtonComponent
+                    handleClick={() => handleOptionClicked(modalStates.leave)}
                     sendingRequest={false}
                     buttonText='Update Availability'
                     variant='contained'
