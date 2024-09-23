@@ -24,6 +24,7 @@ const TableComponent = ({
 }: ITableComponent) => {
     const [filteredRows, setFilteredRows] = useState<GridRowsProp>(rows);
     const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
+    const [currentID, setCurrentId] = useState<string | number>("")
 
     const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
         setAnchorEl(event.currentTarget);
@@ -41,7 +42,6 @@ const TableComponent = ({
         minWidth: 100,
         renderCell: (param) => {
             const value = param.row[column.label];
-            const id = param.row?.id
 
             return (column.isText || column.isNumber) ?
                 (
@@ -59,14 +59,17 @@ const TableComponent = ({
                 ) : (column.isAction) ? (
                     <StyledBox >
                         <ButtonComponent
-                            handleClick={(event: React.MouseEvent<HTMLButtonElement>) => handleClick?.(event)}
+                            handleClick={(event: React.MouseEvent<HTMLButtonElement>) => {
+                                handleClick?.(event)
+                                setCurrentId(param.row?.id)
+                            }}
                             sendingRequest={false}
                             buttonText={column.actionData?.label as string}
                             variant='outlined'
                             buttonColor='info'
                             type='button' />
                         <PopoverComponent
-                            moduleID={id}
+                            moduleID={currentID}
                             handleOptionClicked={handleOptionClicked}
                             options={(column.actionData?.options) as Array<{ value: string, label: string }>}
                             anchorEl={anchorEl}

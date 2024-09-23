@@ -7,9 +7,23 @@ import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import { UserContext } from '../../context/UserContext';
 import { IUsersTableData } from './interface';
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
+import { crudStates } from '../../utils/constants';
 
 const UserUtils = () => {
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
+    const [modalState, setModalState] = useState<string>("");
+    const [open, setOpen] = useState<boolean>(false);
+
+
+    const handleOpen = () => setOpen(true);
+    const handleClose = () => setOpen(false);
+
+    const handleCreation = () => {
+        setModalState(crudStates.create);
+        handleOpen();
+    };
+
+
     const { setUsersTableData } = useContext(UserContext);
 
     const {
@@ -62,7 +76,15 @@ const UserUtils = () => {
     }, []);
 
 
-    return ({ columnHeaders })
+    return ({
+        columnHeaders,
+        handleCreation,
+        setModalState,
+        handleOpen,
+        modalState,
+        open,
+        handleClose
+    })
 }
 
 export default UserUtils

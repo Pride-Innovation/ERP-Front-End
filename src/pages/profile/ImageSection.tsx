@@ -9,12 +9,14 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 import { usersMock } from '../../mocks/users';
 import { UserContext } from '../../context/UserContext';
 import { camelCaseToWords } from '../../utils/helpers';
-import { availability } from '../../utils/constants';
+import { availability, crudStates } from '../../utils/constants';
 import AppBarUtills, { modalStates } from '../../components/appBar/utills';
 import ModalComponent from '../../components/modal';
 import ChangePassword from './ChangePassword';
 import LeaveComponent from './Leave';
 import InputFileUpload from '../../components/forms/FileUpload';
+import UpdateUsers from '../users/UpdateUsers';
+import UserUtils from '../users/utils';
 
 export const ImageSection = () => {
     const { user, setUser } = useContext(UserContext);
@@ -104,8 +106,15 @@ export const ImageSection = () => {
 export const ProfileLine = () => {
     const { user } = useContext(UserContext);
     const { id, ...data } = user
+    const { open, handleClose, modalState } = UserUtils();
+    
     return (
         <Grid container xs={12} spacing={1}>
+            {modalState === crudStates.update &&
+                <ModalComponent title='Update User' open={open} handleClose={handleClose} width="60%">
+                    <UpdateUsers handleClose={handleClose} />
+                </ModalComponent>
+            }
             {
                 Object.entries({
                     ...data,

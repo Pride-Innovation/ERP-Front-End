@@ -13,20 +13,18 @@ import { usersMock } from '../../mocks/users';
 const Users = () => {
   const { usersTableData } = useContext(UserContext);
   const header = { plural: 'Users', singular: 'User' };
-  const { columnHeaders } = UserUtils();
-  const [modalState, setModalState] = useState<string>("");
-  const [open, setOpen] = useState<boolean>(false);
+  const {
+    columnHeaders,
+    handleCreation,
+    setModalState,
+    handleOpen,
+    modalState,
+    open,
+    handleClose
+  } = UserUtils();
   const { setUser, setUsers, users } = useContext(UserContext);
 
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
-
   useEffect(() => { setUsers(usersMock) }, [])
-
-  const handleCreation = () => {
-    setModalState(crudStates.create);
-    handleOpen();
-  };
 
   const handleImport = () => {
     console.log('Import users clicked');
