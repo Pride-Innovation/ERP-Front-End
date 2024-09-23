@@ -59,7 +59,7 @@ const UserForm = ({
                                 <InputComponent type='input' required label='First name' field={field} error={formState.errors.firstName} id='firstName' />
                             )}
                         />
-                        {formState.errors.email && (
+                        {formState.errors.firstName && (
                             <FormHelperText sx={{ color: 'error.main' }}>{formState.errors.firstName?.message}</FormHelperText>
                         )}
                     </FormControl>
@@ -74,7 +74,7 @@ const UserForm = ({
                                 <InputComponent type='input' required label='Last name' field={field} error={formState.errors.lastName} id='lastName' />
                             )}
                         />
-                        {formState.errors.email && (
+                        {formState.errors.lastName && (
                             <FormHelperText sx={{ color: 'error.main' }}>{formState.errors.lastName?.message}</FormHelperText>
                         )}
                     </FormControl>
@@ -89,7 +89,7 @@ const UserForm = ({
                                 <InputComponent type='input' label='Other name' field={field} error={formState.errors.otherName} id='otherName' />
                             )}
                         />
-                        {formState.errors.email && (
+                        {formState.errors.otherName && (
                             <FormHelperText sx={{ color: 'error.main' }}>{formState.errors.otherName?.message}</FormHelperText>
                         )}
                     </FormControl>
@@ -104,7 +104,7 @@ const UserForm = ({
                                 <InputComponent type='input' required label='Staff Number' field={field} error={formState.errors.staffNumber} id='staffNumber' />
                             )}
                         />
-                        {formState.errors.email && (
+                        {formState.errors.staffNumber && (
                             <FormHelperText sx={{ color: 'error.main' }}>{formState.errors.staffNumber?.message}</FormHelperText>
                         )}
                     </FormControl>
