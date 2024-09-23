@@ -7,6 +7,7 @@ import ApplicationDrawer from '../../components/appBar'
 import Settings from '../../pages/settings'
 import Profile from '../../pages/profile'
 import Users from '../../pages/users'
+import AuditTrails from '../../pages/trails'
 
 const AppRoutes = () => {
   return (
@@ -18,6 +19,7 @@ const AppRoutes = () => {
         <Route path={ROUTES.SETTINGS} element={<Settings />} />
         <Route path={ROUTES.PROFILE} element={<Profile />} />
         <Route path={ROUTES.USERS} element={<Users />} />
+        <Route path={ROUTES.AUDIT_TRAILS} element={<AuditTrails />} />
       </Route>
     </Routes>
   )

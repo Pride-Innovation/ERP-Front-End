@@ -32,6 +32,9 @@ const HandleRoutes = () => {
         if (route === ROUTES.USERS) {
             handleClick(sideBarItems[3])
         }
+        if (route === ROUTES.AUDIT_TRAILS) {
+            handleClick(sideBarItems[4])
+        }
     }
 
     return (

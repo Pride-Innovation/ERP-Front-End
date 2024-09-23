@@ -5,6 +5,7 @@ const REFRESH_TOKEN: string = "/auth/refresh"
 const SETTINGS: string = `${ASSETS_MANAGEMENT}/settings`;
 const PROFILE: string = `${ASSETS_MANAGEMENT}/profile`;
 const USERS: string = `${ASSETS_MANAGEMENT}/users`;
+const AUDIT_TRAILS: string = `${ASSETS_MANAGEMENT}/trails`;
 
 export const ROUTES = {
     FORGOT_PASSWORD,
@@ -13,5 +14,6 @@ export const ROUTES = {
     ASSETS_MANAGEMENT,
     PROFILE,
     USERS,
-    REFRESH_TOKEN
+    REFRESH_TOKEN,
+    AUDIT_TRAILS
 }

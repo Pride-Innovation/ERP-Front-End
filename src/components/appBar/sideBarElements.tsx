@@ -5,6 +5,7 @@ import { ROUTES } from '../../core/routes/routes';
 import AutorenewIcon from '@mui/icons-material/Autorenew';
 import AutoStoriesIcon from '@mui/icons-material/AutoStories';
 import GroupIcon from '@mui/icons-material/Group';
+import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 
 export const sideBarItems: Array<ISideBarItem> = [
     {
@@ -53,6 +54,13 @@ export const sideBarItems: Array<ISideBarItem> = [
         name: "Users",
         route: ROUTES.USERS,
         icon: <GroupIcon />,
+        subroutes: []
+    },
+    {
+        id: 5,
+        name: "Audit Trails",
+        route: ROUTES.AUDIT_TRAILS,
+        icon: <ReceiptLongIcon />,
         subroutes: []
     },
 ]
