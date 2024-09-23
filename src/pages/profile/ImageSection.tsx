@@ -104,14 +104,20 @@ export const ImageSection = () => {
 
 
 export const ProfileLine = () => {
-    const { user } = useContext(UserContext);
+    const { user, setUser } = useContext(UserContext);
     const { id, ...data } = user
-    const { open, handleClose, modalState } = UserUtils();
-    
+    const { open, handleClose, modalState, setModalState, handleOpen } = UserUtils();
+
+    const handleProfileUpdate = () => {
+        setModalState(crudStates.update)
+        setUser(user)
+        handleOpen();
+    }
+
     return (
         <Grid container xs={12} spacing={1}>
             {modalState === crudStates.update &&
-                <ModalComponent title='Update User' open={open} handleClose={handleClose} width="60%">
+                <ModalComponent title='Update Personal Information' open={open} handleClose={handleClose} width="60%">
                     <UpdateUsers handleClose={handleClose} />
                 </ModalComponent>
             }
@@ -138,6 +144,7 @@ export const ProfileLine = () => {
             <Box sx={{ width: "100%", mt: 1, display: "flex", justifyContent: "end" }}>
                 <Box>
                     <ButtonComponent
+                        handleClick={handleProfileUpdate}
                         sendingRequest={false}
                         buttonText='Update Profile'
                         variant='contained'
