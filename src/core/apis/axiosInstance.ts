@@ -1,4 +1,5 @@
 import axios, { AxiosResponse, InternalAxiosRequestConfig } from "axios";
+import { ROUTES } from "../routes/routes";
 
 const status = (response: AxiosResponse): Promise<AxiosResponse> => {
     if (response.status >= 200 && response.status < 300) {
@@ -17,14 +18,13 @@ export const service = (() => {
         withCredentials: true
     });
 
-    // Add the JWT token to each request
     const onRequest = (config: InternalAxiosRequestConfig): InternalAxiosRequestConfig => {
         const token = sessionStorage.getItem('jwtToken');
 
         if (token) {
             config.headers['Authorization'] = `Bearer ${token}`;
         }
-        
+
         return config;
     }
 
@@ -43,15 +43,14 @@ export const service = (() => {
             originalRequest._retry = true;
 
             try {
-                // Assuming the refresh token is also stored in session storage
                 const refreshToken = sessionStorage.getItem('refreshToken');
-                const response = await api.post('/auth/refresh', { token: refreshToken }, { withCredentials: true });
 
-                // Store the new JWT token
-                const newToken = response.data.token; // Adjust according to your API response
+                const response = await api.post(ROUTES.REFRESH_TOKEN, { token: refreshToken }, { withCredentials: true });
+
+                const newToken = response.data.token;
+
                 sessionStorage.setItem('jwtToken', newToken);
 
-                // Update the original request with the new token
                 originalRequest.headers['Authorization'] = `Bearer ${newToken}`;
 
                 return api(originalRequest);

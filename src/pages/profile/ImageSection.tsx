@@ -5,7 +5,7 @@ import { TypographyComponent } from '../../components/headers/TypographyComponen
 import { blue, grey } from '@mui/material/colors';
 import ButtonComponent from '../../components/forms/Button';
 import EditIcon from '@mui/icons-material/Edit';
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { usersMock } from '../../mocks/users';
 import { UserContext } from '../../context/UserContext';
 import { camelCaseToWords } from '../../utils/helpers';
@@ -14,9 +14,22 @@ import AppBarUtills, { modalStates } from '../../components/appBar/utills';
 import ModalComponent from '../../components/modal';
 import ChangePassword from './ChangePassword';
 import LeaveComponent from './Leave';
+import InputFileUpload from '../../components/forms/FileUpload';
 
 export const ImageSection = () => {
     const { user, setUser } = useContext(UserContext);
+    const inputRef = useRef<HTMLInputElement>(null);
+    const [image, setImage] = useState<string>("")
+
+    const handleButtonClick = () => {
+        inputRef.current?.click();
+    };
+
+    const handleFileUpload = (files: FileList | null) => {
+        if (!files) return;
+        const file = files[0];
+        setImage(URL.createObjectURL(file));
+    }
 
     const {
         handleClose,
@@ -53,11 +66,12 @@ export const ImageSection = () => {
             <Box sx={{ position: "relative" }}>
                 <Box
                     component="img"
-                    sx={{ width: 130, height: 150 }}
-                    src={user.gender === "Male" ? MaleProfile : FemaleProfile}
+                    sx={{ width: 150, height: 150 }}
+                    src={image ? image : user.gender === "Male" ? MaleProfile : FemaleProfile}
                 />
-                <IconButton sx={{ position: "relative", bgcolor: blue[700] }}>
+                <IconButton onClick={handleButtonClick} sx={{ position: "relative", bgcolor: blue[700] }}>
                     <EditIcon fontSize='medium' sx={{ color: "white" }} />
+                    <InputFileUpload inputRef={inputRef} handleFileUpload={handleFileUpload} />
                 </IconButton>
             </Box>
             <TypographyComponent weight={600} size='18px' sx={{ mt: 2 }}>
