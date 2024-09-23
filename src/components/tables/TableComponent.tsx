@@ -20,7 +20,10 @@ const TableComponent = ({
     onCreationHandler,
     onImportHandler,
     header,
-    handleOptionClicked
+    handleOptionClicked,
+    importData = false,
+    createAction = false,
+    exportData = false
 }: ITableComponent) => {
     const [filteredRows, setFilteredRows] = useState<GridRowsProp>(rows);
     const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
@@ -98,9 +101,13 @@ const TableComponent = ({
                         rowCount={50}
                     */
                     slots={{
-                        toolbar: () => (<CustomToolbarWrapper
+                        toolbar: () => (
+                        <CustomToolbarWrapper
+                            createAction={createAction}
+                            exportData={exportData}
+                            importData={importData}
                             header={header}
-                            onCreationHandler={onCreationHandler}
+                            onCreationHandler={() => onCreationHandler?.()}
                             onImportHandler={() => onImportHandler?.()}
                         />)
                     }}

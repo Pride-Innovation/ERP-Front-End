@@ -7,14 +7,17 @@ import { CustomToolbarWrapperProps, ITableToolBar } from './interface'
 const TableToolBar = ({
     header,
     onCreationHandler,
-    onImportHandler
+    onImportHandler,
+    importData,
+    exportData,
+    createAction
 }: ITableToolBar) => {
     return (
         <GridToolbarContainer
             sx={{ width: '100%', display: 'flex', p: '20px' }}>
             <TypographyComponent size='17px' weight={600}>{header.plural}</TypographyComponent>
             <Stack direction="row" spacing={2} sx={{ ml: "auto" }}>
-                <Box>
+                {createAction && <Box>
                     <ButtonComponent
                         handleClick={() => onCreationHandler()}
                         sendingRequest={false}
@@ -22,8 +25,8 @@ const TableToolBar = ({
                         variant='contained'
                         buttonColor='info'
                         type='button' />
-                </Box>
-                <Box>
+                </Box>}
+                {importData && <Box>
                     <ButtonComponent
                         handleClick={() => onImportHandler()}
                         sendingRequest={false}
@@ -31,14 +34,17 @@ const TableToolBar = ({
                         variant='outlined'
                         buttonColor='info'
                         type='button' />
-                </Box>
-                <GridToolbarExport />
+                </Box>}
+                {exportData && <GridToolbarExport />}
             </Stack>
         </GridToolbarContainer>
     )
 }
 
 const CustomToolbarWrapper: React.FC<CustomToolbarWrapperProps> = ({
+    createAction,
+    importData,
+    exportData,
     header,
     onCreationHandler,
     onImportHandler,
@@ -46,6 +52,9 @@ const CustomToolbarWrapper: React.FC<CustomToolbarWrapperProps> = ({
 }) => {
     return (
         <TableToolBar
+            createAction={createAction}
+            importData={importData}
+            exportData={exportData}
             header={header}
             onCreationHandler={onCreationHandler}
             onImportHandler={onImportHandler}

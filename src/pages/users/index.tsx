@@ -2,7 +2,7 @@ import { Grid } from '@mui/material'
 import TableComponent from '../../components/tables/TableComponent';
 import UserUtils from './utils';
 import { UserContext } from '../../context/UserContext';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect } from 'react';
 import { crudStates } from '../../utils/constants';
 import ModalComponent from '../../components/modal';
 import CreateUser from './CreateUser';
@@ -51,6 +51,9 @@ const Users = () => {
       }
       {columnHeaders.length > 0 &&
         <TableComponent
+          createAction
+          importData
+          exportData
           handleOptionClicked={handleOptionClicked}
           onCreationHandler={handleCreation}
           onImportHandler={handleImport}

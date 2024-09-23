@@ -19,10 +19,13 @@ export interface ITableHeader {
 export interface ITableComponent {
     columnHeaders: Array<ITableHeader>;
     rows: GridRowsProp;
-    onCreationHandler: () => void;
+    onCreationHandler?: () => void;
     onImportHandler?: () => void;
     header: { plural: string; singular: string };
-    handleOptionClicked?: (option: number | string, moduleID?: string | number) => void
+    handleOptionClicked?: (option: number | string, moduleID?: string | number) => void;
+    createAction?: boolean;
+    importData?: boolean;
+    exportData?: boolean;
 }
 
 export interface ITableToolBar {
@@ -32,12 +35,18 @@ export interface ITableToolBar {
     },
     onCreationHandler: () => void;
     onImportHandler: () => void;
+    createAction: boolean;
+    importData: boolean;
+    exportData: boolean;
 }
 
 export interface CustomToolbarWrapperProps extends GridToolbarProps {
     header: { plural: string; singular: string };
     onCreationHandler: () => void;
     onImportHandler: () => void;
+    createAction: boolean;
+    importData: boolean;
+    exportData: boolean;
 }
 
 export interface ITableFilter {
