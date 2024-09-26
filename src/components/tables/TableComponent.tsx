@@ -23,7 +23,9 @@ const TableComponent = ({
     handleOptionClicked,
     importData = false,
     createAction = false,
-    exportData = false
+    exportData = false,
+    count = 10,
+    loading = false
 }: ITableComponent) => {
     const [filteredRows, setFilteredRows] = useState<GridRowsProp>(rows);
     const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
@@ -33,7 +35,7 @@ const TableComponent = ({
         setAnchorEl(event.currentTarget);
     };
 
-    useEffect(() => setFilteredRows(rows), [])
+    useEffect(() => setFilteredRows(rows), [rows]);
 
     const { handleTableFilter } = CustomTextFilterOperator({ rows: filteredRows, setFilteredRows, endPoint: "users" });
     const { handleTablePagination } = CustomTablePagination({ rows: filteredRows, endPoint: "users" });
@@ -87,7 +89,7 @@ const TableComponent = ({
         <Card sx={{ width: "100%" }} >
             <Box>
                 <DataGridStyled
-                    loading={filteredRows.length === 0}
+                    loading={loading}
                     {...filteredRows}
                     rows={filteredRows}
                     columns={columns}
@@ -100,22 +102,24 @@ const TableComponent = ({
                         
                         rowCount={50}
                     */
+                    rowCount={count}
+                    paginationMode='server'
                     slots={{
                         toolbar: () => (
-                        <CustomToolbarWrapper
-                            createAction={createAction}
-                            exportData={exportData}
-                            importData={importData}
-                            header={header}
-                            onCreationHandler={() => onCreationHandler?.()}
-                            onImportHandler={() => onImportHandler?.()}
-                        />)
+                            <CustomToolbarWrapper
+                                createAction={createAction}
+                                exportData={exportData}
+                                importData={importData}
+                                header={header}
+                                onCreationHandler={() => onCreationHandler?.()}
+                                onImportHandler={() => onImportHandler?.()}
+                            />)
                     }}
                     autoHeight
                     initialState={{
                         pagination: {
                             paginationModel: {
-                                pageSize: 5,
+                                pageSize: 10,
                             },
                         },
                     }}

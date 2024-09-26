@@ -26,6 +26,8 @@ export interface ITableComponent {
     createAction?: boolean;
     importData?: boolean;
     exportData?: boolean;
+    count?: number;
+    loading?: boolean;
 }
 
 export interface ITableToolBar {

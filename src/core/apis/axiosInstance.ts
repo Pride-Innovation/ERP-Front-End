@@ -10,7 +10,7 @@ const status = (response: AxiosResponse): Promise<AxiosResponse> => {
 
 export const service = (() => {
     const api = axios.create({
-        baseURL: 'http://localhost:8080/api',
+        baseURL: 'https://jsonplaceholder.typicode.com/',
         headers: {
             'Content-Type': 'application/json',
             Accept: 'application/json'

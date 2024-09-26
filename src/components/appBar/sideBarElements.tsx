@@ -63,4 +63,11 @@ export const sideBarItems: Array<ISideBarItem> = [
         icon: <ReceiptLongIcon />,
         subroutes: []
     },
+    {
+        id: 6,
+        name: "Test",
+        route: ROUTES.TEST,
+        icon: <ReceiptLongIcon />,
+        subroutes: []
+    },
 ]

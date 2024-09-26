@@ -8,6 +8,7 @@ import Settings from '../../pages/settings'
 import Profile from '../../pages/profile'
 import Users from '../../pages/users'
 import AuditTrails from '../../pages/trails'
+import TestComponent from '../../pages/test'
 
 const AppRoutes = () => {
   return (
@@ -20,6 +21,7 @@ const AppRoutes = () => {
         <Route path={ROUTES.PROFILE} element={<Profile />} />
         <Route path={ROUTES.USERS} element={<Users />} />
         <Route path={ROUTES.AUDIT_TRAILS} element={<AuditTrails />} />
+        <Route path={ROUTES.TEST} element={<TestComponent />} />
       </Route>
     </Routes>
   )

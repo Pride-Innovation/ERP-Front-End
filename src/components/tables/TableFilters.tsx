@@ -26,7 +26,6 @@ const CustomTableFilterOperator = ({ rows, setFilteredRows, endPoint }: ICustomT
                 const filteredRows = rows.filter(row =>
                     row[field]?.toString()?.toLowerCase().includes(value?.toLowerCase())
                 ) as GridRowsProp;
-
                 setFilteredRows(filteredRows);
 
             }
