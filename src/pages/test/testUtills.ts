@@ -4,6 +4,8 @@ import { ITableHeader } from "../../components/tables/interface";
 import { getTableHeaders } from "../../components/tables/getTableHeaders";
 
 const TestUtils = () => {
+    const endPoint = 'posts';
+    const header = { plural: 'Test Trails', singular: 'Test Trail' };
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
     const { id, ...data } = testListMock[0];
 
@@ -14,7 +16,7 @@ const TestUtils = () => {
     }, []);
 
     return (
-        { columnHeaders }
+        { columnHeaders, endPoint, header }
     )
 }
 

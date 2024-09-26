@@ -7,7 +7,7 @@ import ButtonComponent from '../../components/forms/Button';
 import EditIcon from '@mui/icons-material/Edit';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { usersMock } from '../../mocks/users';
-import { UserContext } from '../../context/UserContext';
+import { UserContext } from '../../context/user/UserContext';
 import { camelCaseToWords } from '../../utils/helpers';
 import { availability, crudStates } from '../../utils/constants';
 import AppBarUtills, { modalStates } from '../../components/appBar/utills';

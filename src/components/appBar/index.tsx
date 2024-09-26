@@ -17,7 +17,7 @@ import { blue, grey } from '@mui/material/colors';
 import HandleRoutes from './HandleRoutes';
 import MaleLogo from '../../statics/images/male.jpg';
 import FemaleLogo from '../../statics/images/Female.jpg'
-import { UserContext } from '../../context/UserContext';
+import { UserContext } from '../../context/user/UserContext';
 import PopoverComponent from '../forms/Popover';
 import { usersMock } from '../../mocks/users';
 import { TypographyComponent } from '../headers/TypographyComponent';

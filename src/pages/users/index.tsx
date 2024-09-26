@@ -1,7 +1,7 @@
 import { Grid } from '@mui/material'
 import TableComponent from '../../components/tables/TableComponent';
 import UserUtils from './utils';
-import { UserContext } from '../../context/UserContext';
+import { UserContext } from '../../context/user/UserContext';
 import { useContext, useEffect } from 'react';
 import { crudStates } from '../../utils/constants';
 import ModalComponent from '../../components/modal';

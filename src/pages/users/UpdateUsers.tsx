@@ -3,7 +3,7 @@ import { IUpdateUser, IUser } from './interface';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { userSchema } from './schema';
-import { UserContext } from '../../context/UserContext';
+import { UserContext } from '../../context/user/UserContext';
 import { Grid } from '@mui/material';
 import UserForm from './UserForm';
 

@@ -4,7 +4,7 @@ import { getTableHeaders } from '../../components/tables/getTableHeaders';
 import { ITableHeader } from '../../components/tables/interface';
 import InfoIcon from '@mui/icons-material/Info';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
-import { UserContext } from '../../context/UserContext';
+import { UserContext } from '../../context/user/UserContext';
 import { IUsersTableData } from './interface';
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import { crudStates } from '../../utils/constants';
