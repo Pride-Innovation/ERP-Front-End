@@ -25,7 +25,8 @@ const TableComponent = ({
     createAction = false,
     exportData = false,
     count = 10,
-    loading = false
+    loading = false,
+    endPoint = "users"
 }: ITableComponent) => {
     const [filteredRows, setFilteredRows] = useState<GridRowsProp>(rows);
     const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
@@ -37,8 +38,8 @@ const TableComponent = ({
 
     useEffect(() => setFilteredRows(rows), [rows]);
 
-    const { handleTableFilter } = CustomTextFilterOperator({ rows: filteredRows, setFilteredRows, endPoint: "users" });
-    const { handleTablePagination } = CustomTablePagination({ rows: filteredRows, endPoint: "users" });
+    const { handleTableFilter } = CustomTextFilterOperator({ rows: filteredRows, setFilteredRows, endPoint });
+    const { handleTablePagination } = CustomTablePagination({ endPoint });
 
     const columns: GridColDef[] = columnHeaders.map((column) => ({
         field: `${column.label}`,
@@ -95,13 +96,6 @@ const TableComponent = ({
                     columns={columns}
                     onFilterModelChange={handleTableFilter}
                     onPaginationModelChange={handleTablePagination}
-                    /*
-                        ** TO DO **
-                        pass count value as a prop to this component. 
-                        This is to display to number of records when paginating.
-                        
-                        rowCount={50}
-                    */
                     rowCount={count}
                     paginationMode='server'
                     slots={{
@@ -123,7 +117,7 @@ const TableComponent = ({
                             },
                         },
                     }}
-                    pageSizeOptions={[5, 10]}
+                    pageSizeOptions={[5, 10, 25, 50]}
                 />
             </Box>
         </Card>

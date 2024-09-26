@@ -28,6 +28,7 @@ export interface ITableComponent {
     exportData?: boolean;
     count?: number;
     loading?: boolean;
+    endPoint?: string;
 }
 
 export interface ITableToolBar {
@@ -63,6 +64,5 @@ export interface ICustomTableFilterOperator {
 }
 
 export interface ICustomTablePagination {
-    rows: GridRowsProp;
     endPoint: string;
 }
