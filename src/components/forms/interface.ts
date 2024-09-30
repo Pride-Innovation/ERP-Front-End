@@ -1,4 +1,4 @@
-import { FieldError, FieldValues } from 'react-hook-form';
+import { Control, FieldError, FieldValues, FormState, Path, UseFormRegister } from 'react-hook-form';
 import { IOptions } from '../tables/interface';
 import { Dispatch, SetStateAction } from 'react';
 
@@ -53,4 +53,16 @@ export interface ISelectComponent {
     field: FieldValues;
     error: FieldError | undefined;
     id: string;
+}
+
+export interface IUseFormInput<T extends FieldValues> {
+    register: UseFormRegister<any>;
+    control: Control<any>;
+    formState: FormState<T> & {
+        errors: any;
+    };
+    value: Path<T>;
+    label: string;
+    type?: string;
+    options?: IOptions[]
 }
