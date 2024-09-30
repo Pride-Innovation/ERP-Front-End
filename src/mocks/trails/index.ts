@@ -1,4 +1,3 @@
-import { IAssets } from "../../pages/assets/interface";
 import { IAuditTrail } from "../../pages/trails/interface";
 
 export const auditTrailsMock: IAuditTrail[] = [

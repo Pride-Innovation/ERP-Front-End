@@ -1,23 +1,23 @@
-export interface IAssets {
-    id: string | number;
+export interface IAsset {
+    id?: string | number;
     name: string;
     category: string;
     engravedNumber: string;
     model: string;
     serialNo: string;
-    ram?: string;
-    cpuSpeed?: string;
-    hardDiskSize?: string;
-    ipAddress?: string;
-    macAddress?: string;
-    interfaceType?: string;
-    location?: string;
-    status?: string;
-    purchaseCost?: string;
-    verificationDate?: string;
-    deploymentDate?: string;
-    costOfAsset?: string | number;
-    netValue?: string;
-    depreciationRate?: string;
-    assignedTo?: string
+    ram?: string | null;
+    cpuSpeed?: string | null;
+    hardDiskSize?: string | null;
+    ipAddress?: string | null;
+    macAddress?: string | null;
+    interfaceType?: string | null;
+    location?: string | null;
+    status?: string | null;
+    purchaseCost?: string | null;
+    verificationDate?: string | null;
+    deploymentDate?: string | null;
+    costOfAsset?: number | null;
+    netValue?: string | null;
+    depreciationRate?: string | null;
+    assignedTo?: string | null
 }
