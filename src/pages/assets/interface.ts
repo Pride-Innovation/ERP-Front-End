@@ -1,4 +1,11 @@
-import { Control, FieldError, FormState, UseFormRegister } from "react-hook-form";
+import {
+    Control,
+    FieldError,
+    FormState,
+    Path,
+    UseFormRegister
+} from "react-hook-form";
+import { IOptions } from "../../components/tables/interface";
 
 export interface IAsset {
     id?: string | number;
@@ -53,4 +60,11 @@ export interface IAssetForm {
     register: UseFormRegister<IAsset>;
     buttonText: string;
     sendingRequest: boolean;
+}
+
+export interface IFormData<T> {
+    value: Path<T>;
+    label: string;
+    type: "input" | "select";
+    options?: Array<IOptions>
 }

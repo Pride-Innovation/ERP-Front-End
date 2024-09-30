@@ -31,6 +31,16 @@ const AssetsManagement = () => {
         fetchResources()
     }, []);
 
+    const handleOptionClicked = (option: string | number, moduleID?: string | number) => {
+        console.log(option, "Option!!!")
+        console.log(moduleID, "module ID")
+        navigate(`${ROUTES.UPDATE_ASSET}/${moduleID}`)
+        // setModalState(option as string)
+        // const user = users?.find(user => user.id === moduleID) as IUser;
+        // setUser(user)
+        // handleOpen();
+    }
+
     return (
         <>
             {rows?.length > 0 && <Grid xs={12} container>
@@ -46,6 +56,7 @@ const AssetsManagement = () => {
                         rows={rows}
                         columnHeaders={columnHeaders}
                         onCreationHandler={() => navigate(ROUTES.CREATE_ASSET)}
+                        handleOptionClicked={handleOptionClicked}
                     />
                 }
             </Grid>}

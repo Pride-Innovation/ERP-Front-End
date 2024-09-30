@@ -5,7 +5,7 @@ import { assetsMock } from "../../mocks/assets";
 import InfoIcon from '@mui/icons-material/Info';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
-
+import { IAsset, IFormData } from "./interface";
 
 const AssetUtills = () => {
     const endPoint = 'posts';
@@ -46,8 +46,63 @@ const AssetUtills = () => {
         setColumnHeaders(getTableHeaders(rowData))
     }, []);
 
+
+    const formFields: Array<IFormData<IAsset>> = [
+        {
+            value: "name",
+            label: 'Asset Name',
+            type: "input"
+        },
+        {
+            value: "category",
+            label: 'category',
+            type: "input"
+        },
+        {
+            value: "engravedNumber",
+            label: 'Engraved number',
+            type: "input"
+        },
+        {
+            value: "model",
+            label: 'Model',
+            type: "input"
+        },
+        {
+            value: "serialNo",
+            label: 'Serial Number',
+            type: "input"
+        },
+        {
+            value: "status",
+            label: 'Status',
+            type: "select",
+            options: [
+                { label: "In Use", value: "use" },
+                { label: "In Store", value: "store" },
+                { label: "In Repair", value: "repair" },
+                { label: "Disposed/Decommisioned", value: "disposed" },
+            ]
+        },
+        {
+            value: "netValue",
+            label: 'Net Value',
+            type: "input"
+        },
+        {
+            value: "depreciationRate",
+            label: 'Depreciation Rate',
+            type: "input"
+        },
+        {
+            value: "assignedTo",
+            label: 'assignedTo',
+            type: "input"
+        },
+    ]
+
     return (
-        { columnHeaders, endPoint, header }
+        { columnHeaders, endPoint, header, formFields }
     )
 }
 

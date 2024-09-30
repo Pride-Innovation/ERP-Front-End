@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router';
 import { ROUTES } from '../../core/routes/routes';
 import { UseFormSelect, UseFormInput } from '../../components/forms';
 import { IAssetForm } from './interface';
+import AssetUtills from './utils';
 
 const AssetForm = ({
     formState,
@@ -16,46 +17,36 @@ const AssetForm = ({
     sendingRequest,
 }: IAssetForm) => {
     const navigate = useNavigate();
+    const { formFields } = AssetUtills();
+
     return (
         <Grid item container xs={12}>
             <Grid item container spacing={4} xs={12}>
-                <Grid item xs={12} md={4}>
-                    <UseFormInput register={register} control={control} formState={formState} value="name" label='Asset Name' />
-                </Grid>
-                <Grid item xs={12} md={4}>
-                    <UseFormInput register={register} control={control} formState={formState} value="category" label='Category' />
-                </Grid>
-                <Grid item xs={12} md={4}>
-                    <UseFormInput register={register} control={control} formState={formState} value="engravedNumber" label='Engraved Number' />
-                </Grid>
-                <Grid item xs={12} md={4}>
-                    <UseFormInput register={register} control={control} formState={formState} value="model" label='Model' />
-                </Grid>
-                <Grid item xs={12} md={4}>
-                    <UseFormInput register={register} control={control} formState={formState} value="serialNo" label='Serial Number' />
-                </Grid>
-                <Grid item xs={12} md={4}>
-                    <UseFormSelect options={
-                        [
-                            { label: "In Use", value: "use" },
-                            { label: "In Store", value: "store" },
-                            { label: "In Repair", value: "repair" },
-                            { label: "Disposed/Decommisioned", value: "disposed" },
-                        ]
-                    } register={register} control={control} formState={formState} value='status' label='Status' />
-                </Grid>
-                <Grid item xs={12} md={4}>
-                    <UseFormInput register={register} control={control} formState={formState} value="costOfAsset" label='Cost 0f Asset' />
-                </Grid>
-                <Grid item xs={12} md={4}>
-                    <UseFormInput register={register} control={control} formState={formState} value="netValue" label='Net value' />
-                </Grid>
-                <Grid item xs={12} md={4}>
-                    <UseFormInput register={register} control={control} formState={formState} value="depreciationRate" label='Depreciation Rate' />
-                </Grid>
-                <Grid item xs={12} md={4}>
-                    <UseFormInput register={register} control={control} formState={formState} value="assignedTo" label='Assigned To' />
-                </Grid>
+                {
+                    formFields.map(formField => {
+                        return formField.type === 'input' ? (
+                            <Grid item xs={12} md={4}>
+                                <UseFormInput
+                                    register={register}
+                                    control={control}
+                                    formState={formState}
+                                    value={formField.value}
+                                    label={formField.label}
+                                />
+                            </Grid>
+                        ) : formField.type === 'select' ? (
+                            <Grid item xs={12} md={4}>
+                                <UseFormSelect
+                                    options={formField.options}
+                                    register={register}
+                                    control={control}
+                                    formState={formState}
+                                    value={formField.value}
+                                    label={formField.label} />
+                            </Grid>
+                        ) : null
+                    })
+                }
                 <Grid item xs={12} sx={{ display: "flex", justifyContent: "end" }}>
                     <Stack direction="row" spacing={3} sx={{ width: "30%" }}>
                         <ButtonComponent handleClick={() => navigate(ROUTES.LIST_ASSETS)} buttonColor='error' type='button' sendingRequest={false} buttonText="Back" />

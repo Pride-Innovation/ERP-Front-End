@@ -5,10 +5,19 @@ import { assetSchema } from "./schema";
 import { useEffect, useState } from "react";
 import { Grid, Typography } from "@mui/material";
 import AssetForm from "./AssetForm";
+import { useParams } from "react-router";
+import { assetsMock } from "../../mocks/assets";
 
-const CreateAsset = () => {
+const UpdateAsset = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
-    const defaultUser: IAsset = {} as IAsset;
+    const { id } = useParams<{ id: string }>();
+    const [defaultAsset, setDefaultAsset] = useState<IAsset>(assetsMock[0]);
+
+    useEffect(() => {
+        setDefaultAsset(() => {
+            return assetsMock.find(asset => asset?.id === parseInt(id as string)) as IAsset
+        })
+    }, [id]);
 
     const {
         control,
@@ -22,18 +31,19 @@ const CreateAsset = () => {
     });
 
     useEffect(() => {
-        reset({ ...defaultUser });
-    }, [reset]);
+        reset({ ...defaultAsset });
+    }, [defaultAsset]);
 
     const onSubmit = (formData: IAsset) => {
         setSendingRequest(true);
         console.log(formData, "form data!!!!!");
+        setSendingRequest(false)
     };
 
     return (
         <Grid container xs={12}>
             <Grid item xs={12}>
-                <Typography sx={{ my: 4, fontWeight: 600 }}>Create an Asset</Typography>
+                <Typography sx={{ my: 4, fontWeight: 600 }}>Update an Asset</Typography>
                 <form
                     style={{ width: "100%" }}
                     autoComplete="off"
@@ -52,4 +62,4 @@ const CreateAsset = () => {
     )
 }
 
-export default CreateAsset
+export default UpdateAsset
