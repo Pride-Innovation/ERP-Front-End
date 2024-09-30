@@ -17,7 +17,7 @@ export const assetSchema = yup.object().shape({
     purchaseCost: yup.string().nullable().optional(),
     verificationDate: yup.string().nullable().optional(),
     deploymentDate: yup.string().nullable().optional(),
-    costOfAsset: yup.number().nullable().optional(),
+    costOfAsset: yup.number().nullable().optional().typeError("Must be a number"),
     netValue: yup.string().nullable().optional(),
     depreciationRate: yup.string().nullable().optional(),
     assignedTo: yup.string().nullable().optional(),

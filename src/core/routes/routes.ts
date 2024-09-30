@@ -8,6 +8,7 @@ const USERS: string = `${ASSETS_MANAGEMENT}/users`;
 const AUDIT_TRAILS: string = `${ASSETS_MANAGEMENT}/trails`;
 const TEST: string = `${ASSETS_MANAGEMENT}/test`;
 const LIST_ASSETS: string = `${ASSETS_MANAGEMENT}/assets-list`
+const CREATE_ASSET: string = `${ASSETS_MANAGEMENT}/create-asset`
 
 export const ROUTES = {
     FORGOT_PASSWORD,
@@ -19,5 +20,6 @@ export const ROUTES = {
     REFRESH_TOKEN,
     AUDIT_TRAILS,
     TEST,
-    LIST_ASSETS
+    LIST_ASSETS,
+    CREATE_ASSET
 }

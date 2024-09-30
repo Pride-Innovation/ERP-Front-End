@@ -10,6 +10,7 @@ import Users from '../../pages/users'
 import AuditTrails from '../../pages/trails'
 import TestComponent from '../../pages/test'
 import AssetsManagement from '../../pages/assets'
+import CreateAsset from '../../pages/assets/CreateAsset'
 
 const AppRoutes = () => {
   return (
@@ -24,6 +25,7 @@ const AppRoutes = () => {
         <Route path={ROUTES.AUDIT_TRAILS} element={<AuditTrails />} />
         <Route path={ROUTES.TEST} element={<TestComponent />} />
         <Route path={ROUTES.LIST_ASSETS} element={<AssetsManagement />} />
+        <Route path={ROUTES.CREATE_ASSET} element={<CreateAsset />} />
       </Route>
     </Routes>
   )

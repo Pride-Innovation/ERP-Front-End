@@ -6,11 +6,14 @@ import { Grid } from '@mui/material';
 import TableComponent from '../../components/tables/TableComponent';
 import AssetUtills from './utils';
 import { assetsMock } from '../../mocks/assets';
+import { useNavigate } from 'react-router';
+import { ROUTES } from '../../core/routes/routes';
 
 const AssetsManagement = () => {
     const [loading, setLoading] = useState<boolean>(false);
     const { setRows, rows } = useContext(RowContext);
     const { columnHeaders, endPoint, header } = AssetUtills();
+    const navigate = useNavigate();
 
     const fetchResources = async () => {
         setLoading(true)
@@ -42,6 +45,7 @@ const AssetsManagement = () => {
                         header={header}
                         rows={rows}
                         columnHeaders={columnHeaders}
+                        onCreationHandler={() => navigate(ROUTES.CREATE_ASSET)}
                     />
                 }
             </Grid>}

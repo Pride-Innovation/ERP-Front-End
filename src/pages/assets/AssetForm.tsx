@@ -60,7 +60,7 @@ const AssetForm = ({
     return (
         <Grid item container xs={12}>
             <Grid item container spacing={4} xs={12}>
-                <Grid item xs={12} md={6}>
+                <Grid item xs={12} md={4}>
                     <FormControl fullWidth>
                         <Controller
                             control={control}
@@ -75,7 +75,7 @@ const AssetForm = ({
                         )}
                     </FormControl>
                 </Grid>
-                <Grid item xs={12} md={6}>
+                <Grid item xs={12} md={4}>
                     <FormControl fullWidth>
                         <Controller
                             control={control}
@@ -90,7 +90,7 @@ const AssetForm = ({
                         )}
                     </FormControl>
                 </Grid>
-                <Grid item xs={12} md={6}>
+                <Grid item xs={12} md={4}>
                     <FormControl fullWidth>
                         <Controller
                             control={control}
@@ -105,7 +105,7 @@ const AssetForm = ({
                         )}
                     </FormControl>
                 </Grid>
-                <Grid item xs={12} md={6}>
+                <Grid item xs={12} md={4}>
                     <FormControl fullWidth>
                         <Controller
                             control={control}
@@ -120,7 +120,7 @@ const AssetForm = ({
                         )}
                     </FormControl>
                 </Grid>
-                <Grid item xs={12} md={6}>
+                <Grid item xs={12} md={4}>
                     <FormControl fullWidth>
                         <Controller
                             control={control}
@@ -135,7 +135,7 @@ const AssetForm = ({
                         )}
                     </FormControl>
                 </Grid>
-                <Grid item xs={12} md={6}>
+                <Grid item xs={12} md={4}>
                     <FormControl fullWidth>
                         <Controller
                             control={control}
@@ -160,7 +160,7 @@ const AssetForm = ({
                         )}
                     </FormControl>
                 </Grid>
-                <Grid item xs={12} md={6}>
+                <Grid item xs={12} md={4}>
                     <FormControl fullWidth>
                         <Controller
                             control={control}
@@ -175,7 +175,7 @@ const AssetForm = ({
                         )}
                     </FormControl>
                 </Grid>
-                <Grid item xs={12} md={6}>
+                <Grid item xs={12} md={4}>
                     <FormControl fullWidth>
                         <Controller
                             control={control}
@@ -190,7 +190,7 @@ const AssetForm = ({
                         )}
                     </FormControl>
                 </Grid>
-                <Grid item xs={12} md={6}>
+                <Grid item xs={12} md={4}>
                     <FormControl fullWidth>
                         <Controller
                             control={control}
@@ -205,7 +205,7 @@ const AssetForm = ({
                         )}
                     </FormControl>
                 </Grid>
-                <Grid item xs={12} md={6}>
+                <Grid item xs={12} md={4}>
                     <FormControl fullWidth>
                         <Controller
                             control={control}
@@ -222,7 +222,7 @@ const AssetForm = ({
                 </Grid>
                 <Grid item xs={12} sx={{ display: "flex", justifyContent: "end" }}>
                     <Stack direction="row" spacing={3} sx={{ width: "30%" }}>
-                        <ButtonComponent handleClick={() => navigate(ROUTES.LIST_ASSETS)} buttonColor='error' type='button' sendingRequest={false} buttonText="Close" />
+                        <ButtonComponent handleClick={() => navigate(ROUTES.LIST_ASSETS)} buttonColor='error' type='button' sendingRequest={false} buttonText="Back" />
                         <ButtonComponent buttonColor='success' type='submit' sendingRequest={sendingRequest} buttonText={buttonText} />
                     </Stack>
                 </Grid>
