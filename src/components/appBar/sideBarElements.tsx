@@ -65,6 +65,13 @@ export const sideBarItems: Array<ISideBarItem> = [
     },
     {
         id: 6,
+        name: "Assets Mgt",
+        route: ROUTES.LIST_ASSETS,
+        icon: <ReceiptLongIcon />,
+        subroutes: []
+    },
+    {
+        id: 7,
         name: "Test",
         route: ROUTES.TEST,
         icon: <ReceiptLongIcon />,

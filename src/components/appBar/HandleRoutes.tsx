@@ -35,6 +35,9 @@ const HandleRoutes = () => {
         if (route === ROUTES.AUDIT_TRAILS) {
             handleClick(sideBarItems[4])
         }
+        if (route === ROUTES.LIST_ASSETS) {
+            handleClick(sideBarItems[5])
+        }
     }
 
     return (

@@ -1,3 +1,4 @@
+import { IAssets } from "../../pages/assets/interface";
 import { IAuditTrail } from "../../pages/trails/interface";
 
 export const auditTrailsMock: IAuditTrail[] = [
@@ -38,3 +39,4 @@ export const testListMock: ITest[] = [
         "body": "consectetur animi nesciunt iure dolore\nenim quia ad\nveniam autem ut quam aut nobis\net est aut quod aut provident voluptas autem voluptas"
     },
 ]
+
