@@ -56,7 +56,19 @@ const AssetUtills = () => {
         {
             value: "category",
             label: 'category',
-            type: "input"
+            type: "select",
+            options: [
+                { label: "Desktop Computer", value: "desktopComputer" },
+                { label: "Laptop", value: "laptop" },
+                { label: "Scanner", value: "scanner" },
+                { label: "Printer", value: "printer" },
+                { label: "Monitor", value: "monitor" },
+                { label: "Accesories ( Mouse, Keyboard, etc )", value: "accesories" },
+                { label: "Components ( RAM, SSD/HDD, etc )", value: "component" },
+                { label: "Receipt Printer", value: "receiptPrinter" },
+                { label: "Consumables", value: "consumables" },
+                { label: "Office Equipment ( Desk, Chairs, etc)", value: "officeEquipment" },
+            ]
         },
         {
             value: "engravedNumber",

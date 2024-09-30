@@ -8,6 +8,7 @@ import AssetUtills from './utils';
 import { assetsMock } from '../../mocks/assets';
 import { useNavigate } from 'react-router';
 import { ROUTES } from '../../core/routes/routes';
+import { crudStates } from '../../utils/constants';
 
 const AssetsManagement = () => {
     const [loading, setLoading] = useState<boolean>(false);
@@ -32,13 +33,9 @@ const AssetsManagement = () => {
     }, []);
 
     const handleOptionClicked = (option: string | number, moduleID?: string | number) => {
-        console.log(option, "Option!!!")
-        console.log(moduleID, "module ID")
-        navigate(`${ROUTES.UPDATE_ASSET}/${moduleID}`)
-        // setModalState(option as string)
-        // const user = users?.find(user => user.id === moduleID) as IUser;
-        // setUser(user)
-        // handleOpen();
+        if (option === crudStates.update) {
+            navigate(`${ROUTES.UPDATE_ASSET}/${moduleID}`)
+        }
     }
 
     return (
