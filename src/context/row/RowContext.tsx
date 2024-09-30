@@ -1,5 +1,10 @@
 import { GridRowsProp } from '@mui/x-data-grid';
-import React, { createContext, Dispatch, SetStateAction, useState } from 'react'
+import React, {
+    createContext,
+    Dispatch,
+    SetStateAction,
+    useState
+} from 'react';
 
 interface IRowContext {
     rows: GridRowsProp;
