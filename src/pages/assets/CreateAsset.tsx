@@ -3,7 +3,7 @@ import { IAsset } from "./interface";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { assetSchema } from "./schema";
 import { useEffect, useState } from "react";
-import { Grid } from "@mui/material";
+import { Grid, Typography } from "@mui/material";
 import AssetForm from "./AssetForm";
 
 const CreateAsset = () => {
@@ -33,6 +33,7 @@ const CreateAsset = () => {
     return (
         <Grid container xs={12}>
             <Grid item xs={12}>
+                <Typography sx={{ my: 4, fontWeight: 600 }}>Creat an Asset</Typography>
                 <form
                     style={{ width: "100%" }}
                     autoComplete="off"

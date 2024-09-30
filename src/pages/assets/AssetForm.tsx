@@ -1,53 +1,12 @@
 import {
-    FormControl,
-    FormHelperText,
     Grid,
     Stack
 } from '@mui/material'
-import {
-    Control,
-    Controller,
-    FieldError,
-    FormState,
-    UseFormRegister
-} from 'react-hook-form'
-import { InputComponent } from '../../components/forms/Inputs';
 import ButtonComponent from '../../components/forms/Button';
-import SelectComponent from '../../components/forms/Select';
-import { IAsset } from './interface';
 import { useNavigate } from 'react-router';
 import { ROUTES } from '../../core/routes/routes';
-
-interface IAssetForm {
-    formState: FormState<IAsset> & {
-        errors: {
-            name?: FieldError;
-            category?: FieldError;
-            engravedNumber?: FieldError;
-            model?: FieldError;
-            serialNo?: FieldError;
-            ram?: FieldError;
-            cpuSpeed?: FieldError;
-            hardDiskSize?: FieldError;
-            ipAddress?: FieldError;
-            macAddress?: FieldError;
-            interfaceType?: FieldError;
-            location?: FieldError;
-            status?: FieldError;
-            purchaseCost?: FieldError;
-            verificationDate?: FieldError;
-            deploymentDate?: FieldError;
-            costOfAsset?: FieldError;
-            netValue?: FieldError;
-            depreciationRate?: FieldError;
-            assignedTo?: FieldError
-        };
-    };
-    control: Control<IAsset>;
-    register: UseFormRegister<IAsset>;
-    buttonText: string;
-    sendingRequest: boolean;
-}
+import { UseFormSelect, UseFormInput } from '../../components/forms';
+import { IAssetForm } from './interface';
 
 const AssetForm = ({
     formState,
@@ -61,164 +20,41 @@ const AssetForm = ({
         <Grid item container xs={12}>
             <Grid item container spacing={4} xs={12}>
                 <Grid item xs={12} md={4}>
-                    <FormControl fullWidth>
-                        <Controller
-                            control={control}
-                            {...register("name")}
-                            rules={{ required: true }}
-                            render={({ field }) => (
-                                <InputComponent type='input' required label='Asset Name' field={field} error={formState.errors.name} id='name' />
-                            )}
-                        />
-                        {formState.errors.name && (
-                            <FormHelperText sx={{ color: 'error.main' }}>{formState.errors.name?.message}</FormHelperText>
-                        )}
-                    </FormControl>
+                    <UseFormInput register={register} control={control} formState={formState} value="name" label='Asset Name' />
                 </Grid>
                 <Grid item xs={12} md={4}>
-                    <FormControl fullWidth>
-                        <Controller
-                            control={control}
-                            {...register("category")}
-                            rules={{ required: true }}
-                            render={({ field }) => (
-                                <InputComponent type='input' required label='category' field={field} error={formState.errors.category} id='category' />
-                            )}
-                        />
-                        {formState.errors.category && (
-                            <FormHelperText sx={{ color: 'error.main' }}>{formState.errors.category?.message}</FormHelperText>
-                        )}
-                    </FormControl>
+                    <UseFormInput register={register} control={control} formState={formState} value="category" label='Category' />
                 </Grid>
                 <Grid item xs={12} md={4}>
-                    <FormControl fullWidth>
-                        <Controller
-                            control={control}
-                            {...register("engravedNumber")}
-                            rules={{ required: false }}
-                            render={({ field }) => (
-                                <InputComponent type='input' label='Engraved Number' field={field} error={formState.errors.engravedNumber} id='engravedNumber' />
-                            )}
-                        />
-                        {formState.errors.engravedNumber && (
-                            <FormHelperText sx={{ color: 'error.main' }}>{formState.errors.engravedNumber?.message}</FormHelperText>
-                        )}
-                    </FormControl>
+                    <UseFormInput register={register} control={control} formState={formState} value="engravedNumber" label='Engraved Number' />
                 </Grid>
                 <Grid item xs={12} md={4}>
-                    <FormControl fullWidth>
-                        <Controller
-                            control={control}
-                            {...register("model")}
-                            rules={{ required: false }}
-                            render={({ field }) => (
-                                <InputComponent type='input' required label='Model' field={field} error={formState.errors.model} id='model' />
-                            )}
-                        />
-                        {formState.errors.model && (
-                            <FormHelperText sx={{ color: 'error.main' }}>{formState.errors.model?.message}</FormHelperText>
-                        )}
-                    </FormControl>
+                    <UseFormInput register={register} control={control} formState={formState} value="model" label='Model' />
                 </Grid>
                 <Grid item xs={12} md={4}>
-                    <FormControl fullWidth>
-                        <Controller
-                            control={control}
-                            {...register("serialNo")}
-                            rules={{ required: true }}
-                            render={({ field }) => (
-                                <InputComponent required label='Serial Number' field={field} error={formState.errors.serialNo} id='serialNo' />
-                            )}
-                        />
-                        {formState.errors.serialNo && (
-                            <FormHelperText sx={{ color: 'error.main' }}>{formState.errors.serialNo.message}</FormHelperText>
-                        )}
-                    </FormControl>
+                    <UseFormInput register={register} control={control} formState={formState} value="serialNo" label='Serial Number' />
                 </Grid>
                 <Grid item xs={12} md={4}>
-                    <FormControl fullWidth>
-                        <Controller
-                            control={control}
-                            {...register("status")}
-                            rules={{ required: true }}
-                            render={({ field }) => (
-                                <SelectComponent
-                                    id='status'
-                                    field={field}
-                                    error={formState.errors.status}
-                                    required label='Status'
-                                    options={[
-                                        { label: "use", value: "In Use" },
-                                        { label: "store", value: "In Store" },
-                                        { label: "repair", value: "In Repair" },
-                                        { label: "disposed", value: "Disposed/Decommisioned" },
-                                    ]} />
-                            )}
-                        />
-                        {formState.errors.status && (
-                            <FormHelperText sx={{ color: 'error.main' }}>{formState.errors.status.message}</FormHelperText>
-                        )}
-                    </FormControl>
+                    <UseFormSelect options={
+                        [
+                            { label: "In Use", value: "use" },
+                            { label: "In Store", value: "store" },
+                            { label: "In Repair", value: "repair" },
+                            { label: "Disposed/Decommisioned", value: "disposed" },
+                        ]
+                    } register={register} control={control} formState={formState} value='status' label='Status' />
                 </Grid>
                 <Grid item xs={12} md={4}>
-                    <FormControl fullWidth>
-                        <Controller
-                            control={control}
-                            {...register("costOfAsset")}
-                            rules={{ required: true }}
-                            render={({ field }) => (
-                                <InputComponent required label='Cost of Asset' field={field} error={formState.errors.costOfAsset} id='costOfAsset' />
-                            )}
-                        />
-                        {formState.errors.costOfAsset && (
-                            <FormHelperText sx={{ color: 'error.main' }}>{formState.errors.costOfAsset.message}</FormHelperText>
-                        )}
-                    </FormControl>
+                    <UseFormInput register={register} control={control} formState={formState} value="costOfAsset" label='Cost 0f Asset' />
                 </Grid>
                 <Grid item xs={12} md={4}>
-                    <FormControl fullWidth>
-                        <Controller
-                            control={control}
-                            {...register("netValue")}
-                            rules={{ required: true }}
-                            render={({ field }) => (
-                                <InputComponent required label='Net Value' field={field} error={formState.errors.netValue} id='netValue' />
-                            )}
-                        />
-                        {formState.errors.netValue && (
-                            <FormHelperText sx={{ color: 'error.main' }}>{formState.errors.netValue.message}</FormHelperText>
-                        )}
-                    </FormControl>
+                    <UseFormInput register={register} control={control} formState={formState} value="netValue" label='Net value' />
                 </Grid>
                 <Grid item xs={12} md={4}>
-                    <FormControl fullWidth>
-                        <Controller
-                            control={control}
-                            {...register("depreciationRate")}
-                            rules={{ required: true }}
-                            render={({ field }) => (
-                                <InputComponent required label='Depreciation rate' field={field} error={formState.errors.depreciationRate} id='depreciationRate' />
-                            )}
-                        />
-                        {formState.errors.depreciationRate && (
-                            <FormHelperText sx={{ color: 'error.main' }}>{formState.errors.depreciationRate.message}</FormHelperText>
-                        )}
-                    </FormControl>
+                    <UseFormInput register={register} control={control} formState={formState} value="depreciationRate" label='Depreciation Rate' />
                 </Grid>
                 <Grid item xs={12} md={4}>
-                    <FormControl fullWidth>
-                        <Controller
-                            control={control}
-                            {...register("assignedTo")}
-                            rules={{ required: true }}
-                            render={({ field }) => (
-                                <InputComponent required label='Assigned To' field={field} error={formState.errors.assignedTo} id='assignedTo' />
-                            )}
-                        />
-                        {formState.errors.assignedTo && (
-                            <FormHelperText sx={{ color: 'error.main' }}>{formState.errors.assignedTo.message}</FormHelperText>
-                        )}
-                    </FormControl>
+                    <UseFormInput register={register} control={control} formState={formState} value="assignedTo" label='Assigned To' />
                 </Grid>
                 <Grid item xs={12} sx={{ display: "flex", justifyContent: "end" }}>
                     <Stack direction="row" spacing={3} sx={{ width: "30%" }}>

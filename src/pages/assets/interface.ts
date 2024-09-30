@@ -1,3 +1,5 @@
+import { Control, FieldError, FormState, UseFormRegister } from "react-hook-form";
+
 export interface IAsset {
     id?: string | number;
     name: string;
@@ -20,4 +22,35 @@ export interface IAsset {
     netValue?: string | null;
     depreciationRate?: string | null;
     assignedTo?: string | null
+}
+
+export interface IAssetForm {
+    formState: FormState<IAsset> & {
+        errors: {
+            name?: FieldError;
+            category?: FieldError;
+            engravedNumber?: FieldError;
+            model?: FieldError;
+            serialNo?: FieldError;
+            ram?: FieldError;
+            cpuSpeed?: FieldError;
+            hardDiskSize?: FieldError;
+            ipAddress?: FieldError;
+            macAddress?: FieldError;
+            interfaceType?: FieldError;
+            location?: FieldError;
+            status?: FieldError;
+            purchaseCost?: FieldError;
+            verificationDate?: FieldError;
+            deploymentDate?: FieldError;
+            costOfAsset?: FieldError;
+            netValue?: FieldError;
+            depreciationRate?: FieldError;
+            assignedTo?: FieldError
+        };
+    };
+    control: Control<IAsset>;
+    register: UseFormRegister<IAsset>;
+    buttonText: string;
+    sendingRequest: boolean;
 }
