@@ -55,7 +55,7 @@ const AssetUtills = () => {
         },
         {
             value: "category",
-            label: 'category',
+            label: 'Category',
             type: "select",
             options: [
                 { label: "Desktop Computer", value: "desktopComputer" },
@@ -144,7 +144,7 @@ const AssetUtills = () => {
         {
             value: "location",
             label: 'Location',
-            type: "select",
+            type: "autocomplete",
             options: [
                 { label: "USB", value: "usb" },
                 { label: "LCD", value: "lcd" },
@@ -160,7 +160,7 @@ const AssetUtills = () => {
             value: "verificationDate",
             label: 'Verification Date',
             type: "date",
-        },
+        }
     ]
 
     return (

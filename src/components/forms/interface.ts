@@ -73,3 +73,10 @@ export interface IDatePickerComponent {
     error: FieldError | undefined;
     id?: string;
 }
+
+export interface IAutocompleteComponent {
+    label: string
+    options: Array<IOptions>
+    field: FieldValues;
+    error: FieldError | undefined;
+}
