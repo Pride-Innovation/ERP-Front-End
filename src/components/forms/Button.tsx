@@ -18,12 +18,12 @@ const ButtonComponent = ({
       sx={{ width: "100%", minHeight: "40px", textTransform: 'capitalize' }}
       startIcon={
         sendingRequest ? (
-          <CircularProgress />
+          <CircularProgress size="small" />
         ) : ('')
       }
       disabled={sendingRequest}
 
-    >{sendingRequest ? "Loading" : buttonText}</Button>
+    >{sendingRequest ? "Loading!!" : buttonText}</Button>
   )
 }
 

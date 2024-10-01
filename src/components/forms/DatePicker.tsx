@@ -7,10 +7,12 @@ const DatePickerComponent = ({ label, field, error }: IDatePickerComponent) => {
     return (
         <LocalizationProvider dateAdapter={AdapterDayjs}>
             <DatePicker
+                format='DD-MM-YYYY'
                 slotProps={{
                     textField: {
                         size: "small",
-                        error: Boolean(error)
+                        error: Boolean(error),
+                        required: true
                     }
                 }}
                 label={label}
