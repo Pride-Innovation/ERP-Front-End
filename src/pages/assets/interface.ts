@@ -65,6 +65,6 @@ export interface IAssetForm {
 export interface IFormData<T> {
     value: Path<T>;
     label: string;
-    type: "input" | "select";
+    type: "input" | "select" | "date";
     options?: Array<IOptions>
 }

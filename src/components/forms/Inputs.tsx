@@ -46,10 +46,10 @@ export const InputComponent = ({
     type = "text",
     handleClick,
     handleMouseDown,
-    required 
+    required
 }: IInputForm) => (
     <BootstrapInput
-        required ={required}
+        required={required}
         size='small'
         type={type}
         id={id}

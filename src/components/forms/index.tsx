@@ -5,6 +5,7 @@ import { InputComponent } from './Inputs';
 import SelectComponent from './Select';
 import { IOptions } from '../tables/interface';
 import { IUseFormInput } from './interface';
+import DatePickerComponent from './DatePicker';
 
 export const UseFormInput = <T extends FieldValues>({
     register,
@@ -65,6 +66,32 @@ export const UseFormSelect = <T extends FieldValues>({
                             required label={label}
                             options={options as IOptions[]}
                         />
+                    )}
+                />
+                {formState.errors[value] && (
+                    <FormHelperText sx={{ color: 'error.main' }}>{formState.errors[value].message}</FormHelperText>
+                )}
+            </FormControl>
+        </React.Fragment>
+    )
+}
+
+export const UseFormDatePicker = <T extends FieldValues>({
+    register,
+    control,
+    formState,
+    value,
+    label,
+}: IUseFormInput<T>) => {
+    return (
+        <React.Fragment>
+            <FormControl fullWidth>
+                <Controller
+                    control={control}
+                    {...register(value)}
+                    rules={{ required: true }}
+                    render={({ field }) => (
+                        <DatePickerComponent field={field} label={label} error={formState.errors[value]?.message} />
                     )}
                 />
                 {formState.errors[value] && (

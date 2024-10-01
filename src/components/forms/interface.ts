@@ -66,3 +66,10 @@ export interface IUseFormInput<T extends FieldValues> {
     type?: string;
     options?: IOptions[]
 }
+
+export interface IDatePickerComponent {
+    label: string
+    field: FieldValues;
+    error: FieldError | undefined;
+    id?: string;
+}

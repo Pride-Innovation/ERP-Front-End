@@ -108,8 +108,58 @@ const AssetUtills = () => {
         },
         {
             value: "assignedTo",
-            label: 'assignedTo',
+            label: 'Assigned To',
             type: "input"
+        },
+        {
+            value: "ram",
+            label: 'RAM',
+            type: "input"
+        },
+        {
+            value: "cpuSpeed",
+            label: 'CPU Speed',
+            type: "input"
+        },
+        {
+            value: "hardDiskSize",
+            label: 'Hard Disk Size',
+            type: "input"
+        },
+        {
+            value: "ipAddress",
+            label: 'IP Address',
+            type: "input"
+        },
+        {
+            value: "interfaceType",
+            label: 'Interface Type',
+            type: "select",
+            options: [
+                { label: "USB", value: "usb" },
+                { label: "LCD", value: "lcd" },
+                { label: "LED", value: "led" },
+            ]
+        },
+        {
+            value: "location",
+            label: 'Location',
+            type: "select",
+            options: [
+                { label: "USB", value: "usb" },
+                { label: "LCD", value: "lcd" },
+                { label: "LED", value: "led" },
+            ]
+        },
+        {
+            value: "purchaseCost",
+            label: 'Purchase Cost',
+            type: "input",
+        },
+        {
+            value: "verificationDate",
+            label: 'Verification Date',
+            type: "date",
         },
     ]
 

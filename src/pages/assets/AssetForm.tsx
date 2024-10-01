@@ -5,7 +5,7 @@ import {
 import ButtonComponent from '../../components/forms/Button';
 import { useNavigate } from 'react-router';
 import { ROUTES } from '../../core/routes/routes';
-import { UseFormSelect, UseFormInput } from '../../components/forms';
+import { UseFormSelect, UseFormInput, UseFormDatePicker } from '../../components/forms';
 import { IAssetForm } from './interface';
 import AssetUtills from './utils';
 
@@ -38,6 +38,15 @@ const AssetForm = ({
                             <Grid item xs={12} md={4}>
                                 <UseFormSelect
                                     options={formField.options}
+                                    register={register}
+                                    control={control}
+                                    formState={formState}
+                                    value={formField.value}
+                                    label={formField.label} />
+                            </Grid>
+                        ) : formField.type === 'date' ? (
+                            <Grid item xs={12} md={4}>
+                                <UseFormDatePicker
                                     register={register}
                                     control={control}
                                     formState={formState}
