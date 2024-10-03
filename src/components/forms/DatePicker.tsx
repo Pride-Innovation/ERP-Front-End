@@ -3,12 +3,18 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { IDatePickerComponent } from './interface';
 import { useEffect, useState } from 'react';
-import { Dayjs } from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 
 const DatePickerComponent = ({ label, field, error }: IDatePickerComponent) => {
-    const [parsedValue, setParsedValue] = useState<Dayjs>();
+    const [parsedValue, setParsedValue] = useState<Dayjs | null>(null);
 
-    useEffect(() => { setParsedValue(field?.value) }, [])
+    useEffect(() => {
+        if (field.value) {
+            setParsedValue(dayjs(field.value));
+        } else {
+            setParsedValue(null);
+        }
+    }, [field.value]);
 
     return (
         <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -22,14 +28,14 @@ const DatePickerComponent = ({ label, field, error }: IDatePickerComponent) => {
                     }
                 }}
                 label={label}
-                // {...field}
                 value={parsedValue}
                 onChange={(newValue) => {
-                    field.onChange(newValue);
+                    field.onChange(newValue ? newValue.format('YYYY-MM-DD') : null);
+                    setParsedValue(newValue);
                 }}
             />
         </LocalizationProvider>
     );
-}
+};
 
 export default DatePickerComponent;
