@@ -26,7 +26,8 @@ const TableComponent = ({
     exportData = false,
     count = 10,
     loading = false,
-    endPoint = "users"
+    endPoint = "users",
+    paginationMode = 'server'
 }: ITableComponent) => {
     const [filteredRows, setFilteredRows] = useState<GridRowsProp>(rows);
     const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
@@ -60,8 +61,8 @@ const TableComponent = ({
                 : (column.isBoolen) ? (
                     <StyledBox >
                         {value ?
-                            <ChipComponent label='Available' icon={<CheckIcon fontSize='small' />} size='medium' color='success' /> :
-                            <ChipComponent label='Leave' icon={<DoNotDisturbAltIcon fontSize='small' />} size='medium' color='error' />
+                            <ChipComponent variant='filled' label='Available' icon={<CheckIcon fontSize='small' />} size='medium' color='success' /> :
+                            <ChipComponent variant='filled' label='Leave' icon={<DoNotDisturbAltIcon fontSize='small' />} size='medium' color='error' />
                         }
                     </StyledBox>
                 ) : (column.isAction) ? (
@@ -99,7 +100,7 @@ const TableComponent = ({
                     onFilterModelChange={handleTableFilter}
                     onPaginationModelChange={handleTablePagination}
                     rowCount={count}
-                    paginationMode='server'
+                    paginationMode={paginationMode}
                     slots={{
                         toolbar: () => (
                             <CustomToolbarWrapper

@@ -57,6 +57,7 @@ const Request = () => {
             columnHeaders={columnHeaders}
             onCreationHandler={() => navigate(ROUTES.CREATE_REQUEST)}
             handleOptionClicked={handleOptionClicked}
+            paginationMode='client'
           />
         }
       </Grid>}

@@ -17,19 +17,23 @@ export const DataGridStyled = styled(DataGrid)(({ theme }) => ({
         maxHeight: 'none !important',
         "&:hover": {
             cursor: "pointer"
-        }
+        },
+        "&:nth-of-type(odd)": {
+            backgroundColor: theme.palette.action.hover,
+        },
     },
     "& .MuiDataGrid-columnHeaderTitle": {
         fontWeight: '600 !important',
-        color: theme.palette.grey[900]
+        color: theme.palette.grey[900],
     },
     '&>.MuiDataGrid-main': {
         '&>.MuiDataGrid-columnHeaders': {
-            borderBottom: `1px solid${theme.palette.grey[300]}`,
+            borderBottom: `none`,
             borderTop: `1px solid${theme.palette.grey[300]} !important`,
             borderRadius: '0px',
-        }, '& div div div div >.MuiDataGrid-cell': {
-            borderBottom: `1px solid${theme.palette.grey[100]}`,
+        },
+        '& div div div div >.MuiDataGrid-cell': {
+            borderBottom: `none`,
         },
     },
     '&.MuiDataGrid-root': {
@@ -48,6 +52,7 @@ export const DataGridStyled = styled(DataGrid)(({ theme }) => ({
         whiteSpace: 'normal',
     },
 }));
+
 
 export const StyledBox = styled(Box)({
     display: "flex",

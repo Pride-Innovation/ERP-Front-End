@@ -54,6 +54,7 @@ const AssetsManagement = () => {
                         columnHeaders={columnHeaders}
                         onCreationHandler={() => navigate(ROUTES.CREATE_ASSET)}
                         handleOptionClicked={handleOptionClicked}
+                        paginationMode='client'
                     />
                 }
             </Grid>}

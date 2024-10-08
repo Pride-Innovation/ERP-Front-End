@@ -10,6 +10,7 @@ export interface ITableHeader {
     isBoolen?: boolean;
     isText?: boolean;
     isNumber?: boolean;
+    isImage?: boolean;
     actionData?: {
         label: string;
         options: Array<IOptions>
@@ -29,6 +30,7 @@ export interface ITableComponent {
     count?: number;
     loading?: boolean;
     endPoint?: string;
+    paginationMode?: 'server' | 'client'
 }
 
 export interface ITableToolBar {
