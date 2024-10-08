@@ -1,14 +1,13 @@
-import { useForm } from "react-hook-form";
-import { IAsset } from "./interface";
-import { yupResolver } from "@hookform/resolvers/yup";
 import { useEffect, useState } from "react";
+import { IRequest } from "../interface";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { requestSchema } from "../../schema";
 import { Grid, Typography } from "@mui/material";
-import AssetForm from "./AssetForm";
-import { assetSchema } from "./subroutes/request/schema";
 
-const CreateAsset = () => {
+const CreateRequest = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
-    const defaultUser: IAsset = {} as IAsset;
+    const defaultRequest: IRequest = {} as IRequest;
 
     const {
         control,
@@ -16,40 +15,38 @@ const CreateAsset = () => {
         formState,
         register,
         reset
-    } = useForm<IAsset>({
+    } = useForm<IRequest>({
         mode: 'onChange',
-        resolver: yupResolver(assetSchema),
+        resolver: yupResolver(requestSchema),
     });
 
     useEffect(() => {
-        reset({ ...defaultUser });
+        reset({ ...defaultRequest });
     }, [reset]);
 
-    const onSubmit = (formData: IAsset) => {
+    const onSubmit = (formData: IRequest) => {
         setSendingRequest(true);
         console.log(formData, "form data!!!!!");
+        console.log(sendingRequest);
+        console.log(control)
+        console.log(handleSubmit)
+        console.log(formState)
+        console.log(register)
     };
-
     return (
         <Grid container xs={12}>
             <Grid item xs={12}>
-                <Typography sx={{ my: 4, fontWeight: 600 }}>Create an Asset</Typography>
+                <Typography sx={{ my: 4, fontWeight: 600 }}>Request an Asset</Typography>
                 <form
                     style={{ width: "100%" }}
                     autoComplete="off"
                     onSubmit={handleSubmit(onSubmit)}
                 >
-                    <AssetForm
-                        buttonText="Submit"
-                        formState={formState}
-                        control={control}
-                        sendingRequest={sendingRequest}
-                        register={register}
-                    />
+                    Request an Asset!!
                 </form>
             </Grid>
         </Grid>
     )
 }
 
-export default CreateAsset
+export default CreateRequest;

@@ -6,11 +6,14 @@ import { requestMock } from "../../../../mocks/request";
 import RequestUtills from "./utills";
 import TableComponent from "../../../../components/tables/TableComponent";
 import { Grid } from "@mui/material";
+import { useNavigate } from "react-router";
+import { ROUTES } from "../../../../core/routes/routes";
 
 const Request = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const { setRows, rows } = useContext(RowContext);
   const { columnHeaders, endPoint, header } = RequestUtills();
+  const navigate = useNavigate();
 
   const fetchResources = async () => {
     setLoading(true)
@@ -42,8 +45,7 @@ const Request = () => {
             header={header}
             rows={rows}
             columnHeaders={columnHeaders}
-          // onCreationHandler={() => navigate(ROUTES.CREATE_ASSET)}
-          // handleOptionClicked={handleOptionClicked}
+            onCreationHandler={() => navigate(ROUTES.CREATE_REQUEST)}
           />
         }
       </Grid>}

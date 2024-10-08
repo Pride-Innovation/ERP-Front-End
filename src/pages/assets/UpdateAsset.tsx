@@ -1,12 +1,12 @@
 import { useForm } from "react-hook-form";
 import { IAsset } from "./interface";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { assetSchema } from "./schema";
 import { useEffect, useState } from "react";
 import { Grid, Typography } from "@mui/material";
 import AssetForm from "./AssetForm";
 import { useParams } from "react-router";
 import { assetsMock } from "../../mocks/assets";
+import { assetSchema } from "./subroutes/request/schema";
 
 const UpdateAsset = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);

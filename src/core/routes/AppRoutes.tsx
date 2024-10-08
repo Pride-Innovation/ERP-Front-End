@@ -13,6 +13,7 @@ import AssetsManagement from '../../pages/assets'
 import CreateAsset from '../../pages/assets/CreateAsset'
 import UpdateAsset from '../../pages/assets/UpdateAsset'
 import Request from '../../pages/assets/subroutes/request'
+import CreateRequest from '../../pages/assets/subroutes/request/CreateRequest'
 
 const AppRoutes = () => {
   return (
@@ -30,6 +31,7 @@ const AppRoutes = () => {
         <Route path={ROUTES.CREATE_ASSET} element={<CreateAsset />} />
         <Route path={`${ROUTES.UPDATE_ASSET}/:id`} element={<UpdateAsset />} />
         <Route path={ROUTES.REQUEST} element={<Request />} />
+        <Route path={ROUTES.CREATE_REQUEST} element={<CreateRequest />} />
       </Route>
     </Routes>
   )

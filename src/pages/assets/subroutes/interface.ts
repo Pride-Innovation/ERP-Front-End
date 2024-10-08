@@ -5,7 +5,7 @@ export interface IAssetParticulars {
 }
 
 export interface IRequest {
-    id: string | number
+    id?: string | number;
     officerName: string;
     title: string;
     department: string;
@@ -13,6 +13,5 @@ export interface IRequest {
     quantity: number;
     destination: string;
     expectedReturnDate: string;
-    particulars: Array<IAssetParticulars>
+    particulars: Array<IAssetParticulars>;
 }
-
