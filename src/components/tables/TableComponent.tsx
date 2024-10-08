@@ -1,7 +1,7 @@
 import { DataGridStyled, StyledBox } from '../../components/tables/Table';
 import { GridColDef, GridRowsProp } from '@mui/x-data-grid';
 import { Box, Card } from '@mui/material';
-import { camelCaseToWords } from '../../utils/helpers';
+import { camelCaseToWords, isCamelCase } from '../../utils/helpers';
 import { ITableComponent } from './interface';
 import { TypographyComponent } from '../headers/TypographyComponent';
 import ChipComponent from '../forms/Chip';
@@ -52,7 +52,9 @@ const TableComponent = ({
             return (column.isText || column.isNumber) ?
                 (
                     <StyledBox>
-                        <TypographyComponent weight={400} size='13.5px'>{value}</TypographyComponent>
+                        <TypographyComponent weight={400} size='13.5px'>{
+                            (isCamelCase(value as string) && value) ?
+                                camelCaseToWords(value) : value}</TypographyComponent>
                     </StyledBox>
                 )
                 : (column.isBoolen) ? (

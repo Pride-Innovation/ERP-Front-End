@@ -17,3 +17,9 @@ export const convertStringToUpperCase = (str: string) => {
     const str2 = arr.join(" ");
     return str2;
 }
+
+
+export const isCamelCase = (str: string): boolean => {
+    const camelCaseRegex = /^[a-z]+([A-Z][a-z]*)*$/;
+    return camelCaseRegex.test(str);
+}
