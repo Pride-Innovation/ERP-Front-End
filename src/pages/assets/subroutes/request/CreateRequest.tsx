@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { requestSchema } from "../../schema";
 import { Grid, Typography } from "@mui/material";
+import RequestForm from "./RequestForm";
 
 const CreateRequest = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
@@ -27,11 +28,7 @@ const CreateRequest = () => {
     const onSubmit = (formData: IRequest) => {
         setSendingRequest(true);
         console.log(formData, "form data!!!!!");
-        console.log(sendingRequest);
-        console.log(control)
-        console.log(handleSubmit)
-        console.log(formState)
-        console.log(register)
+
     };
     return (
         <Grid container xs={12}>
@@ -42,7 +39,13 @@ const CreateRequest = () => {
                     autoComplete="off"
                     onSubmit={handleSubmit(onSubmit)}
                 >
-                    Request an Asset!!
+                    <RequestForm
+                        formState={formState}
+                        control={control}
+                        register={register}
+                        sendingRequest={sendingRequest}
+                        buttonText="Request Asset"
+                    />
                 </form>
             </Grid>
         </Grid>
