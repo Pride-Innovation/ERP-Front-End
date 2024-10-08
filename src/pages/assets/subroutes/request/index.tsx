@@ -8,6 +8,7 @@ import TableComponent from "../../../../components/tables/TableComponent";
 import { Grid } from "@mui/material";
 import { useNavigate } from "react-router";
 import { ROUTES } from "../../../../core/routes/routes";
+import { crudStates } from "../../../../utils/constants";
 
 const Request = () => {
   const [loading, setLoading] = useState<boolean>(false);
@@ -31,6 +32,15 @@ const Request = () => {
   useEffect(() => {
     fetchResources()
   }, []);
+
+
+  const handleOptionClicked = (option: string | number, moduleID?: string | number) => {
+    console.log(option, moduleID)
+    if (option === crudStates.update) {
+      navigate(`${ROUTES.UPDATE_REQUEST}/${moduleID}`)
+    }
+  }
+
   return (
     <>
       {rows?.length > 0 && <Grid xs={12} container>
@@ -46,6 +56,7 @@ const Request = () => {
             rows={rows}
             columnHeaders={columnHeaders}
             onCreationHandler={() => navigate(ROUTES.CREATE_REQUEST)}
+            handleOptionClicked={handleOptionClicked}
           />
         }
       </Grid>}

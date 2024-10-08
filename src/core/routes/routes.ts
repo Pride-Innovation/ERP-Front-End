@@ -12,6 +12,7 @@ const CREATE_ASSET: string = `${ASSETS_MANAGEMENT}/create-asset`
 const UPDATE_ASSET: string = `${ASSETS_MANAGEMENT}/update-asset`
 const REQUEST: string = `${ASSETS_MANAGEMENT}/request-asset`
 const CREATE_REQUEST: string = `${ASSETS_MANAGEMENT}/create-request`
+const UPDATE_REQUEST: string = `${ASSETS_MANAGEMENT}/update-request`
 
 
 export const ROUTES = {
@@ -28,5 +29,6 @@ export const ROUTES = {
     CREATE_ASSET,
     UPDATE_ASSET,
     REQUEST,
-    CREATE_REQUEST
+    CREATE_REQUEST,
+    UPDATE_REQUEST
 }

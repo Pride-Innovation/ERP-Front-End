@@ -14,6 +14,7 @@ import CreateAsset from '../../pages/assets/CreateAsset'
 import UpdateAsset from '../../pages/assets/UpdateAsset'
 import Request from '../../pages/assets/subroutes/request'
 import CreateRequest from '../../pages/assets/subroutes/request/CreateRequest'
+import UpdateRequest from '../../pages/assets/subroutes/request/UpdateRequest'
 
 const AppRoutes = () => {
   return (
@@ -32,6 +33,7 @@ const AppRoutes = () => {
         <Route path={`${ROUTES.UPDATE_ASSET}/:id`} element={<UpdateAsset />} />
         <Route path={ROUTES.REQUEST} element={<Request />} />
         <Route path={ROUTES.CREATE_REQUEST} element={<CreateRequest />} />
+        <Route path={`${ROUTES.UPDATE_REQUEST}/:id`} element={<UpdateRequest />} />
       </Route>
     </Routes>
   )
