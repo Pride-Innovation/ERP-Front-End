@@ -4,7 +4,7 @@ export const requestMock: IRequest[] = [
     {
         id: 1,
         officerName: "John Doe",
-        title: "Equipment Request",
+        title: "equipmentRequest",
         department: "Engineering",
         reason: "Project work",
         quantity: 2,
@@ -18,7 +18,7 @@ export const requestMock: IRequest[] = [
     {
         id: 2,
         officerName: "Jane Smith",
-        title: "Equipment Request",
+        title: "equipmentRequest",
         department: "HR",
         reason: "Training session",
         quantity: 1,
@@ -31,7 +31,7 @@ export const requestMock: IRequest[] = [
     {
         id: 3,
         officerName: "Michael Brown",
-        title: "Tool Request",
+        title: "toolRequest",
         department: "Maintenance",
         reason: "Repair work",
         quantity: 3,
@@ -46,7 +46,7 @@ export const requestMock: IRequest[] = [
     {
         id: 4,
         officerName: "Emily Davis",
-        title: "Equipment Request",
+        title: "equipmentRequest",
         department: "Marketing",
         reason: "Campaign setup",
         quantity: 2,
@@ -60,7 +60,7 @@ export const requestMock: IRequest[] = [
     {
         id: 5,
         officerName: "Chris Wilson",
-        title: "Equipment Request",
+        title: "equipmentRequest",
         department: "IT",
         reason: "System upgrade",
         quantity: 5,
@@ -77,7 +77,7 @@ export const requestMock: IRequest[] = [
     {
         id: 6,
         officerName: "Sarah Johnson",
-        title: "Equipment Request",
+        title: "equipmentRequest",
         department: "Finance",
         reason: "Audit preparation",
         quantity: 1,
@@ -90,7 +90,7 @@ export const requestMock: IRequest[] = [
     {
         id: 7,
         officerName: "David Martinez",
-        title: "Asset Request",
+        title: "assetRequest",
         department: "Operations",
         reason: "Logistics",
         quantity: 4,
@@ -106,7 +106,7 @@ export const requestMock: IRequest[] = [
     {
         id: 8,
         officerName: "Linda Thompson",
-        title: "Equipment Request",
+        title: "equipmentRequest",
         department: "Legal",
         reason: "Client meeting",
         quantity: 1,
@@ -119,7 +119,7 @@ export const requestMock: IRequest[] = [
     {
         id: 9,
         officerName: "Robert Garcia",
-        title: "Asset Request",
+        title: "assetRequest",
         department: "R&D",
         reason: "Research project",
         quantity: 3,
@@ -134,7 +134,7 @@ export const requestMock: IRequest[] = [
     {
         id: 10,
         officerName: "Jessica Lee",
-        title: "Equipment Request",
+        title: "equipmentRequest",
         department: "Customer Service",
         reason: "Customer support",
         quantity: 2,
