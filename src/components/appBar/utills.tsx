@@ -5,6 +5,7 @@ import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import LockOpenOutlinedIcon from '@mui/icons-material/LockOpenOutlined';
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
 import { crudStates } from "../../utils/constants";
+import TuneIcon from '@mui/icons-material/Tune';
 
 export const modalStates = {
     password: "password",
@@ -13,7 +14,6 @@ export const modalStates = {
     settings: "settings",
     leave: "leave",
     assets: "assets",
-    consumables: "consumables"
 }
 
 
@@ -28,8 +28,7 @@ const AppBarUtills = () => {
     const options = (action: string) =>
         action === crudStates.create ? (
             [
-                { value: modalStates.assets, label: "Assets", icon: <LockOpenOutlinedIcon fontSize='small' color='info' /> },
-                { value: modalStates.consumables, label: "Consumables", icon: <LogoutOutlinedIcon fontSize='small' color='info' /> }
+                { value: modalStates.assets, label: "Assets", icon: <TuneIcon fontSize='small' color='info' /> },
             ]
         ) :
             (
@@ -55,6 +54,9 @@ const AppBarUtills = () => {
         if (modalStates.leave === option) {
             setModalState(modalStates.leave)
             handleOpen();
+        }
+        if (modalStates.assets === option) {
+            navigate(ROUTES.CREATE_ASSET)
         }
     }
 

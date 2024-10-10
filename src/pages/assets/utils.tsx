@@ -49,11 +49,6 @@ const AssetUtills = () => {
 
     const formFields: Array<IFormData<IAsset>> = [
         {
-            value: "name",
-            label: 'Asset Name',
-            type: "input"
-        },
-        {
             value: "category",
             label: 'Category',
             type: "select",
@@ -69,6 +64,11 @@ const AssetUtills = () => {
                 { label: "Consumables", value: "consumables" },
                 { label: "Office Equipment ( Desk, Chairs, etc)", value: "officeEquipment" },
             ]
+        },
+        {
+            value: "name",
+            label: 'Asset Name',
+            type: "input"
         },
         {
             value: "engravedNumber",
