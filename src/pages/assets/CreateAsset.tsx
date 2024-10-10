@@ -8,6 +8,8 @@ import { assetSchema } from "./subroutes/request/schema";
 
 const CreateAsset = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
+    const [option, setOption] = useState<string | undefined>('');
+
     const defaultUser: IAsset = {} as IAsset;
 
     const {
@@ -29,8 +31,6 @@ const CreateAsset = () => {
         setSendingRequest(true);
         console.log(formData, "form data!!!!!");
     };
-
-    const [option, setOption] = useState<string | undefined>('');
 
     const handleChange = (event: SelectChangeEvent) => {
         setOption(event.target.value as string);

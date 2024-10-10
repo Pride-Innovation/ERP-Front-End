@@ -19,6 +19,7 @@ import { IAsset, IAssetForm, IFormData } from './interface';
 import AssetUtills from './utils';
 import { useEffect, useState } from 'react';
 import { IOptions } from '../../components/tables/interface';
+import { Controller } from 'react-hook-form';
 
 const AssetForm = ({
     formState,
@@ -31,17 +32,17 @@ const AssetForm = ({
 }: IAssetForm) => {
     const navigate = useNavigate();
     const { formFields, categories, computerFields } = AssetUtills();
+    const [stateFormFields, setStateFormFields] = useState<Array<IFormData<IAsset>>>(formFields.slice(1));
 
-    const [stateFormFields, setStateFormFields] = useState<Array<IFormData<IAsset>>>(formFields);
 
     useEffect(() => {
         if (option) {
             if ([categories.laptop, categories.desktopComputer].includes(option)) {
                 setStateFormFields(() => {
-                    return [...formFields, ...computerFields]
+                    return [...(formFields.slice(1)), ...computerFields]
                 })
             } else {
-                setStateFormFields([...formFields])
+                setStateFormFields([...(formFields.slice(1))])
             }
         }
     }, [option]);
@@ -52,20 +53,34 @@ const AssetForm = ({
                 <Grid item xs={12} md={4}>
                     <FormControl size='small' fullWidth>
                         <InputLabel id={"category"}>Select Category</InputLabel>
-                        <Select
-                            required={true}
-                            labelId={"category"}
-                            id={"category"}
-                            value={option}
-                            label="Select Category"
-                            onChange={handleChange}
-                        >
-                            {(formFields[0].options as Array<IOptions>).map((option) => (
-                                <MenuItem key={option.value} value={option.value}>
-                                    {option.label}
-                                </MenuItem>
-                            ))}
-                        </Select>
+                        <Controller
+                            control={control}
+                            {...register("category")}
+                            rules={{ required: true }}
+                            render={({ field: { onChange, onBlur } }) => (
+                                <Select
+                                    required={true}
+                                    labelId={"category"}
+                                    id={"category"}
+                                    value={option}
+                                    label="Select Category"
+                                    onBlur={onBlur}
+                                    onChange={
+                                        (e) => {
+                                            onChange(e);
+                                            handleChange?.(e)
+                                        }
+                                    }
+                                >
+                                    {(formFields[0].options as Array<IOptions>).map((option) => (
+                                        <MenuItem key={option.value} value={option.value}>
+                                            {option.label}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+
+                            )}
+                        />
                     </FormControl>
                 </Grid>
                 {
