@@ -2,7 +2,7 @@ import { useForm } from "react-hook-form";
 import { IAsset } from "./interface";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useEffect, useState } from "react";
-import { Grid, Typography } from "@mui/material";
+import { Grid, SelectChangeEvent, Typography } from "@mui/material";
 import AssetForm from "./AssetForm";
 import { useParams } from "react-router";
 import { assetsMock } from "../../mocks/assets";
@@ -12,6 +12,7 @@ const UpdateAsset = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
     const { id } = useParams<{ id: string }>();
     const [defaultAsset, setDefaultAsset] = useState<IAsset>(assetsMock[0]);
+    const [option, setOption] = useState<string | undefined>('');
 
     useEffect(() => {
         setDefaultAsset(() => {
@@ -32,12 +33,17 @@ const UpdateAsset = () => {
 
     useEffect(() => {
         reset({ ...defaultAsset });
+        setOption(defaultAsset.category)
     }, [defaultAsset]);
 
     const onSubmit = (formData: IAsset) => {
         setSendingRequest(true);
         console.log(formData, "form data!!!!!");
         setSendingRequest(false)
+    };
+
+    const handleChange = (event: SelectChangeEvent) => {
+        setOption(event.target.value as string);
     };
 
     return (
@@ -50,6 +56,8 @@ const UpdateAsset = () => {
                     onSubmit={handleSubmit(onSubmit)}
                 >
                     <AssetForm
+                        option={option}
+                        handleChange={handleChange}
                         buttonText="Submit"
                         formState={formState}
                         control={control}

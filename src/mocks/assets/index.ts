@@ -4,7 +4,7 @@ export const assetsMock: IAsset[] = [
     {
         id: 1,
         name: "Laptop A",
-        category: "Computers",
+        category: "laptop",
         engravedNumber: "ENG-001",
         model: "XPS 15",
         serialNo: "SN-123456",
@@ -50,7 +50,7 @@ export const assetsMock: IAsset[] = [
     {
         id: 3,
         name: "Monitor C",
-        category: "Monitors",
+        category: "monitor",
         engravedNumber: "ENG-003",
         model: "Dell UltraSharp",
         serialNo: "SN-345678",
