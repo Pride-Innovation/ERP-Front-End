@@ -11,7 +11,7 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import { Outlet, useLocation, useNavigate } from 'react-router';
 import { sideBarItems } from './sideBarElements';
-import { Avatar, Collapse, IconButton, Stack } from '@mui/material';
+import { Avatar, Badge, Collapse, IconButton, Stack } from '@mui/material';
 import { ExpandLess, ExpandMore } from '@mui/icons-material';
 import { blue, grey } from '@mui/material/colors';
 import HandleRoutes from './HandleRoutes';
@@ -24,6 +24,9 @@ import { TypographyComponent } from '../headers/TypographyComponent';
 import ModalComponent from '../modal';
 import AppBarUtills, { modalStates } from './utills';
 import ChangePassword from '../../pages/profile/ChangePassword';
+import MailIcon from '@mui/icons-material/Mail';
+import ButtonComponent from '../forms/Button';
+import { crudStates } from '../../utils/constants';
 
 const drawerWidth = 200;
 
@@ -32,6 +35,7 @@ export default function ApplicationDrawer() {
     const { pathname } = useLocation();
     const { user, setUser } = useContext(UserContext);
     const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
+    const [action, setAction] = useState<string>("");
 
     const {
         handleClose,
@@ -77,12 +81,29 @@ export default function ApplicationDrawer() {
                         Pride Microfinance (ERP)
                     </Typography>
                     {user &&
-                        <Stack direction="row" spacing={2} sx={{ ml: "auto", display: "flex", alignItems: "center" }}>
-                            <TypographyComponent size='17px' weight={400} sx={{ color: grey[100] }}>
-                                {user?.firstName} {user?.lastName}  ({user?.department})
+                        <Stack direction="row" spacing={4} sx={{ ml: "auto", display: "flex", alignItems: "center" }}>
+                            <Box>
+                                <ButtonComponent
+                                    handleClick={(event: React.MouseEvent<HTMLButtonElement>) => {
+                                        setAction(crudStates.create)
+                                        handleAnchorClick?.(event);
+                                    }}
+                                    sendingRequest={false}
+                                    buttonText="Create New"
+                                    buttonColor='info'
+                                    type='button' />
+                            </Box>
+                            <Badge badgeContent={4} color="warning">
+                                <MailIcon color="inherit" />
+                            </Badge>
+                            <TypographyComponent size='16px' weight={400} sx={{ color: grey[100] }}>
+                                {user?.firstName} {user?.lastName}
                             </TypographyComponent>
                             <IconButton
-                                onClick={(event: React.MouseEvent<HTMLButtonElement>) => handleAnchorClick?.(event)}>
+                                onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
+                                    setAction("")
+                                    handleAnchorClick?.(event)
+                                }}>
                                 <Avatar src={user?.gender === 'Male' ? MaleLogo : FemaleLogo} sx={{ height: 45, width: 45, cursor: "pointer" }} />
                             </IconButton>
                         </Stack>}
@@ -91,7 +112,7 @@ export default function ApplicationDrawer() {
                         setAnchorEl={setAnchorEl}
                         moduleID={user.id}
                         handleOptionClicked={handleOptionClicked}
-                        options={options()} />
+                        options={options(action)} />
                 </Toolbar>
             </AppBar>
             <Drawer

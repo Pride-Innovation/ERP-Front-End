@@ -4,6 +4,7 @@ import { ROUTES } from "../../core/routes/routes";
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import LockOpenOutlinedIcon from '@mui/icons-material/LockOpenOutlined';
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
+import { crudStates } from "../../utils/constants";
 
 export const modalStates = {
     password: "password",
@@ -11,6 +12,8 @@ export const modalStates = {
     logout: "logout",
     settings: "settings",
     leave: "leave",
+    assets: "assets",
+    consumables: "consumables"
 }
 
 
@@ -22,14 +25,21 @@ const AppBarUtills = () => {
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
 
-    const options = () => (
-        [
-            { value: modalStates.settings, label: "Settings", header: true },
-            { value: modalStates.profile, label: "Profile", icon: <PersonOutlineIcon fontSize='small' color='info' /> },
-            { value: modalStates.password, label: "Change Password", icon: <LockOpenOutlinedIcon fontSize='small' color='info' /> },
-            { value: modalStates.logout, label: "Log Out", header: true, icon: <LogoutOutlinedIcon fontSize='small' color='info' /> }
-        ]
-    )
+    const options = (action: string) =>
+        action === crudStates.create ? (
+            [
+                { value: modalStates.assets, label: "Assets", icon: <LockOpenOutlinedIcon fontSize='small' color='info' /> },
+                { value: modalStates.consumables, label: "Consumables", icon: <LogoutOutlinedIcon fontSize='small' color='info' /> }
+            ]
+        ) :
+            (
+                [
+                    { value: modalStates.settings, label: "Settings", header: true },
+                    { value: modalStates.profile, label: "Profile", icon: <PersonOutlineIcon fontSize='small' color='info' /> },
+                    { value: modalStates.password, label: "Change Password", icon: <LockOpenOutlinedIcon fontSize='small' color='info' /> },
+                    { value: modalStates.logout, label: "Log Out", header: true, icon: <LogoutOutlinedIcon fontSize='small' color='info' /> }
+                ]
+            )
 
     const handleOptionClicked = (option: string | number) => {
         if (modalStates.password === option) {

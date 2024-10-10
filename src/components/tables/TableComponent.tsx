@@ -98,7 +98,6 @@ const TableComponent = ({
         <Card sx={{ width: "100%" }} >
             <Box>
                 <DataGridStyled
-                    // getRowHeight={() => 'auto'}
                     loading={loading}
                     {...filteredRows}
                     rows={filteredRows}
