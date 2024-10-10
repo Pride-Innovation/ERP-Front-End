@@ -12,6 +12,19 @@ const AssetUtills = () => {
     const header = { plural: 'Assets', singular: 'Asset' };
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
 
+    const categories = {
+        desktopComputer: "desktopComputer",
+        laptop: "laptop",
+        scanner: "scanner",
+        printer: "printer",
+        monitor: "monitor",
+        accesories: "accesories",
+        component: "component",
+        receiptPrinter: "receiptPrinter",
+        consumables: "consumables",
+        officeEquipment: "officeEquipment",
+    }
+
     const {
         id,
         model,
@@ -47,22 +60,55 @@ const AssetUtills = () => {
     }, []);
 
 
+    const computerFields: Array<IFormData<IAsset>> = [
+        {
+            value: "ram",
+            label: 'RAM',
+            type: "input"
+        },
+        {
+            value: "cpuSpeed",
+            label: 'CPU Speed',
+            type: "input"
+        },
+        {
+            value: "hardDiskSize",
+            label: 'Hard Disk Size',
+            type: "input"
+        },
+        {
+            value: "ipAddress",
+            label: 'IP Address',
+            type: "input"
+        },
+        {
+            value: "interfaceType",
+            label: 'Interface Type',
+            type: "select",
+            options: [
+                { label: "USB", value: "usb" },
+                { label: "LCD", value: "lcd" },
+                { label: "LED", value: "led" },
+            ]
+        },
+    ]
+
     const formFields: Array<IFormData<IAsset>> = [
         {
             value: "category",
             label: 'Category',
             type: "select",
             options: [
-                { label: "Desktop Computer", value: "desktopComputer" },
-                { label: "Laptop", value: "laptop" },
-                { label: "Scanner", value: "scanner" },
-                { label: "Printer", value: "printer" },
-                { label: "Monitor", value: "monitor" },
-                { label: "Accesories ( Mouse, Keyboard, etc )", value: "accesories" },
-                { label: "Components ( RAM, SSD/HDD, etc )", value: "component" },
-                { label: "Receipt Printer", value: "receiptPrinter" },
-                { label: "Consumables", value: "consumables" },
-                { label: "Office Equipment ( Desk, Chairs, etc)", value: "officeEquipment" },
+                { label: "Desktop Computer", value: categories.desktopComputer },
+                { label: "Laptop", value: categories.laptop },
+                { label: "Scanner", value: categories.scanner },
+                { label: "Printer", value: categories.printer },
+                { label: "Monitor", value: categories.monitor },
+                { label: "Accesories ( Mouse, Keyboard, etc )", value: categories.accesories },
+                { label: "Components ( RAM, SSD/HDD, etc )", value: categories.component },
+                { label: "Receipt Printer", value: categories.receiptPrinter },
+                { label: "Consumables", value: categories.consumables },
+                { label: "Office Equipment ( Desk, Chairs, etc)", value: categories.officeEquipment },
             ]
         },
         {
@@ -112,36 +158,6 @@ const AssetUtills = () => {
             type: "input"
         },
         {
-            value: "ram",
-            label: 'RAM',
-            type: "input"
-        },
-        {
-            value: "cpuSpeed",
-            label: 'CPU Speed',
-            type: "input"
-        },
-        {
-            value: "hardDiskSize",
-            label: 'Hard Disk Size',
-            type: "input"
-        },
-        {
-            value: "ipAddress",
-            label: 'IP Address',
-            type: "input"
-        },
-        {
-            value: "interfaceType",
-            label: 'Interface Type',
-            type: "select",
-            options: [
-                { label: "USB", value: "usb" },
-                { label: "LCD", value: "lcd" },
-                { label: "LED", value: "led" },
-            ]
-        },
-        {
             value: "location",
             label: 'Location',
             type: "autocomplete",
@@ -164,7 +180,7 @@ const AssetUtills = () => {
     ]
 
     return (
-        { columnHeaders, endPoint, header, formFields }
+        { columnHeaders, endPoint, header, formFields, categories, computerFields  }
     )
 }
 

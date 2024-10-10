@@ -6,6 +6,7 @@ import {
     UseFormRegister
 } from "react-hook-form";
 import { IOptions } from "../../components/tables/interface";
+import { SelectChangeEvent } from "@mui/material";
 
 export interface IAsset {
     id?: string | number;
@@ -60,6 +61,8 @@ export interface IAssetForm {
     register: UseFormRegister<IAsset>;
     buttonText: string;
     sendingRequest: boolean;
+    option?: string | undefined;
+    handleChange?: (event: SelectChangeEvent) => void;
 }
 
 export interface IFormData<T> {

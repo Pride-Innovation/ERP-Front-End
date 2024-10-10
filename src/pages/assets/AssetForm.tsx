@@ -1,5 +1,9 @@
 import {
+    FormControl,
     Grid,
+    InputLabel,
+    MenuItem,
+    Select,
     Stack
 } from '@mui/material'
 import ButtonComponent from '../../components/forms/Button';
@@ -11,8 +15,10 @@ import {
     UseFormDatePicker,
     UseFormAutocompleteComponent
 } from '../../components/forms';
-import { IAssetForm } from './interface';
+import { IAsset, IAssetForm, IFormData } from './interface';
 import AssetUtills from './utils';
+import { useEffect, useState } from 'react';
+import { IOptions } from '../../components/tables/interface';
 
 const AssetForm = ({
     formState,
@@ -20,15 +26,50 @@ const AssetForm = ({
     register,
     buttonText,
     sendingRequest,
+    option,
+    handleChange
 }: IAssetForm) => {
     const navigate = useNavigate();
-    const { formFields } = AssetUtills();
+    const { formFields, categories, computerFields } = AssetUtills();
+
+    const [stateFormFields, setStateFormFields] = useState<Array<IFormData<IAsset>>>(formFields);
+
+    useEffect(() => {
+        if (option) {
+            if ([categories.laptop, categories.desktopComputer].includes(option)) {
+                setStateFormFields(() => {
+                    return [...formFields, ...computerFields]
+                })
+            } else {
+                setStateFormFields([...formFields])
+            }
+        }
+    }, [option]);
 
     return (
         <Grid item container xs={12}>
             <Grid item container spacing={4} xs={12}>
+                <Grid item xs={12} md={4}>
+                    <FormControl size='small' fullWidth>
+                        <InputLabel id={"category"}>Select Category</InputLabel>
+                        <Select
+                            required={true}
+                            labelId={"category"}
+                            id={"category"}
+                            value={option}
+                            label="Select Category"
+                            onChange={handleChange}
+                        >
+                            {(formFields[0].options as Array<IOptions>).map((option) => (
+                                <MenuItem key={option.value} value={option.value}>
+                                    {option.label}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+                </Grid>
                 {
-                    formFields.map(formField => {
+                    stateFormFields.map(formField => {
                         return formField.type === 'input' ? (
                             <Grid item xs={12} md={4}>
                                 <UseFormInput

@@ -2,7 +2,7 @@ import { useForm } from "react-hook-form";
 import { IAsset } from "./interface";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useEffect, useState } from "react";
-import { Grid, Typography } from "@mui/material";
+import { Grid, SelectChangeEvent, Typography } from "@mui/material";
 import AssetForm from "./AssetForm";
 import { assetSchema } from "./subroutes/request/schema";
 
@@ -30,6 +30,12 @@ const CreateAsset = () => {
         console.log(formData, "form data!!!!!");
     };
 
+    const [option, setOption] = useState<string | undefined>('');
+
+    const handleChange = (event: SelectChangeEvent) => {
+        setOption(event.target.value as string);
+    };
+
     return (
         <Grid container xs={12}>
             <Grid item xs={12}>
@@ -40,6 +46,8 @@ const CreateAsset = () => {
                     onSubmit={handleSubmit(onSubmit)}
                 >
                     <AssetForm
+                        option={option}
+                        handleChange={handleChange}
                         buttonText="Submit"
                         formState={formState}
                         control={control}
