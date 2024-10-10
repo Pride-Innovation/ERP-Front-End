@@ -1,7 +1,7 @@
 import { DataGridStyled, StyledBox } from '../../components/tables/Table';
 import { GridColDef, GridRowsProp } from '@mui/x-data-grid';
-import { Box, Card } from '@mui/material';
-import { camelCaseToWords, isCamelCase } from '../../utils/helpers';
+import { Avatar, Box, Card } from '@mui/material';
+import { camelCaseToWords, determineImage, isCamelCase } from '../../utils/helpers';
 import { ITableComponent } from './interface';
 import { TypographyComponent } from '../headers/TypographyComponent';
 import ChipComponent from '../forms/Chip';
@@ -50,42 +50,47 @@ const TableComponent = ({
         renderCell: (param) => {
             const value = param.row[column.label];
 
-            return (column.isText || column.isNumber) ?
-                (
-                    <StyledBox>
-                        <TypographyComponent weight={400} size='13.5px'>{
-                            (isCamelCase(value as string) && value) ?
-                                camelCaseToWords(value) : value}</TypographyComponent>
-                    </StyledBox>
-                )
-                : (column.isBoolen) ? (
-                    <StyledBox >
-                        {value ?
-                            <ChipComponent variant='filled' label='Available' icon={<CheckIcon fontSize='small' />} size='medium' color='success' /> :
-                            <ChipComponent variant='filled' label='Leave' icon={<DoNotDisturbAltIcon fontSize='small' />} size='medium' color='error' />
-                        }
-                    </StyledBox>
-                ) : (column.isAction) ? (
-                    <StyledBox >
-                        <ButtonComponent
-                            handleClick={(event: React.MouseEvent<HTMLButtonElement>) => {
-                                handleClick?.(event)
-                                setCurrentId(param.row?.id)
-                            }}
-                            sendingRequest={false}
-                            buttonText={column.actionData?.label as string}
-                            variant='outlined'
-                            buttonColor='info'
-                            type='button' />
-                        <PopoverComponent
-                            moduleID={currentID}
-                            handleOptionClicked={handleOptionClicked}
-                            options={(column.actionData?.options) as Array<{ value: string, label: string }>}
-                            anchorEl={anchorEl}
-                            setAnchorEl={setAnchorEl}
-                        />
-                    </StyledBox>
-                ) : null
+            return (column.isImage) ? (
+                <StyledBox sx={{ p: 0.5 }}>
+                    <Avatar src={determineImage(param.row)} alt='image' sx={{ height: 45, width: 45 }} />
+                </StyledBox>
+            )
+                : (column.isText || column.isNumber) ?
+                    (
+                        <StyledBox>
+                            <TypographyComponent weight={400} size='13.5px'>{
+                                (isCamelCase(value as string) && value) ?
+                                    camelCaseToWords(value) : value}</TypographyComponent>
+                        </StyledBox>
+                    )
+                    : (column.isBoolen) ? (
+                        <StyledBox >
+                            {value ?
+                                <ChipComponent variant='filled' label='Available' icon={<CheckIcon fontSize='small' />} size='medium' color='success' /> :
+                                <ChipComponent variant='filled' label='Leave' icon={<DoNotDisturbAltIcon fontSize='small' />} size='medium' color='error' />
+                            }
+                        </StyledBox>
+                    ) : (column.isAction) ? (
+                        <StyledBox >
+                            <ButtonComponent
+                                handleClick={(event: React.MouseEvent<HTMLButtonElement>) => {
+                                    handleClick?.(event)
+                                    setCurrentId(param.row?.id)
+                                }}
+                                sendingRequest={false}
+                                buttonText={column.actionData?.label as string}
+                                variant='outlined'
+                                buttonColor='info'
+                                type='button' />
+                            <PopoverComponent
+                                moduleID={currentID}
+                                handleOptionClicked={handleOptionClicked}
+                                options={(column.actionData?.options) as Array<{ value: string, label: string }>}
+                                anchorEl={anchorEl}
+                                setAnchorEl={setAnchorEl}
+                            />
+                        </StyledBox>
+                    ) : null
         }
     }));
 
@@ -93,6 +98,7 @@ const TableComponent = ({
         <Card sx={{ width: "100%" }} >
             <Box>
                 <DataGridStyled
+                    // getRowHeight={() => 'auto'}
                     loading={loading}
                     {...filteredRows}
                     rows={filteredRows}

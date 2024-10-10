@@ -4,6 +4,7 @@ export interface IUsersExcludedTableData {
     firstName: string;
     lastName: string;
     otherName?: string | null;
+    image?: string
 }
 
 export interface IUsersTableData {

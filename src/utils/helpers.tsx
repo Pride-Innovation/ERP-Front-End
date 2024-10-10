@@ -1,3 +1,7 @@
+import { GridRowModel } from "@mui/x-data-grid";
+import MaleAvatar from '../statics/images/male.jpg';
+import FemaleAvatar from '../statics/images/Female.jpg';
+
 export const camelCaseToWords = (camelCaseString: string) => {
     return camelCaseString
         .replace(/([a-z])([A-Z])/g, '$1 $2')
@@ -22,4 +26,18 @@ export const convertStringToUpperCase = (str: string) => {
 export const isCamelCase = (str: string): boolean => {
     const camelCaseRegex = /^[a-z]+([A-Z][a-z]*)*$/;
     return camelCaseRegex.test(str);
+}
+
+export const determineImage = (row: GridRowModel): string => {
+    if (Object.keys(row).includes("gender")) {
+        const gender = (row["gender"]).toLowerCase();
+        if (gender === "male") {
+            return MaleAvatar
+        }
+        if (gender === "female") {
+            return FemaleAvatar
+        }
+    }
+    
+    return "";
 }

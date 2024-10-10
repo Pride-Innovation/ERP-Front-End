@@ -13,6 +13,7 @@ export const usersMock: IUser[] = [
         department: 'Engineering',
         unit: 'Backend',
         gender: 'Male',
+        image: "image",
         availability: true
     },
     {
@@ -27,6 +28,7 @@ export const usersMock: IUser[] = [
         department: 'Product',
         unit: 'Management',
         gender: 'Female',
+        image: "image",
         availability: true
     },
     {
@@ -41,6 +43,7 @@ export const usersMock: IUser[] = [
         department: 'Design',
         unit: 'User Experience',
         gender: 'Male',
+        image: "image",
         availability: false
     },
     {
@@ -55,6 +58,7 @@ export const usersMock: IUser[] = [
         department: 'Marketing',
         unit: 'Digital Marketing',
         gender: 'Female',
+        image: "image",
         availability: true
     },
     {
@@ -69,6 +73,7 @@ export const usersMock: IUser[] = [
         department: 'Sales',
         unit: 'Field Sales',
         gender: 'Male',
+        image: "image",
         availability: true
     },
     {
@@ -83,6 +88,7 @@ export const usersMock: IUser[] = [
         department: 'Customer Service',
         unit: 'Support',
         gender: 'Female',
+        image: "image",
         availability: false
     },
     {
@@ -97,6 +103,7 @@ export const usersMock: IUser[] = [
         department: 'Human Resources',
         unit: 'Recruitment',
         gender: 'Male',
+        image: "image",
         availability: true
     },
     {
@@ -111,6 +118,7 @@ export const usersMock: IUser[] = [
         department: 'Finance',
         unit: 'Analysis',
         gender: 'Female',
+        image: "image",
         availability: true
     },
     {
@@ -125,6 +133,7 @@ export const usersMock: IUser[] = [
         department: 'IT',
         unit: 'Technical Support',
         gender: 'Male',
+        image: "image",
         availability: false
     },
     {
@@ -139,6 +148,7 @@ export const usersMock: IUser[] = [
         department: 'Business Operations',
         unit: 'Analysis',
         gender: 'Female',
+        image: "image",
         availability: true
     }
 ];

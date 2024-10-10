@@ -31,10 +31,13 @@ const UserUtils = () => {
         firstName,
         lastName,
         otherName,
+        email,
+        image,
         ...data
     } = usersMock[0];
 
     const rowData = {
+        image: usersMock[0].image,
         name: `${usersMock[0].firstName} ${usersMock[0].lastName} ${usersMock[0].otherName}`,
         ...data,
         action: {
