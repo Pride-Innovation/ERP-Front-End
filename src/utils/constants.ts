@@ -7,10 +7,12 @@ export const crudStates: {
     create: string;
     update: string;
     read: string;
-    delete: string
+    delete: string;
+    dispose: string;
 } = {
     create: "create",
     update: "update",
     read: "read",
-    delete: "delete"
+    delete: "delete",
+    dispose: "dispose"
 }

@@ -9,11 +9,12 @@ import { assetsMock } from '../../mocks/assets';
 import { useNavigate } from 'react-router';
 import { ROUTES } from '../../core/routes/routes';
 import { crudStates } from '../../utils/constants';
+import ModalComponent from '../../components/modal';
 
 const AssetsManagement = () => {
     const [loading, setLoading] = useState<boolean>(false);
     const { setRows, rows } = useContext(RowContext);
-    const { columnHeaders, endPoint, header } = AssetUtills();
+    const { columnHeaders, endPoint, header, open, handleClose, handleOpen } = AssetUtills();
     const navigate = useNavigate();
 
     const fetchResources = async () => {
@@ -36,10 +37,18 @@ const AssetsManagement = () => {
         if (option === crudStates.update) {
             navigate(`${ROUTES.UPDATE_ASSET}/${moduleID}`)
         }
+        if (option === crudStates.dispose) {
+            handleOpen()
+        }
     }
 
     return (
         <>
+            {
+                <ModalComponent width={"30%"} title='Dispose Asset' open={open} handleClose={handleClose}>
+                    <p>Text</p>
+                </ModalComponent>
+            }
             {rows?.length > 0 && <Grid xs={12} container>
                 {columnHeaders.length > 0 &&
                     <TableComponent

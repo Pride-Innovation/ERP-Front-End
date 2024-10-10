@@ -11,6 +11,10 @@ const AssetUtills = () => {
     const endPoint = 'posts';
     const header = { plural: 'Assets', singular: 'Asset' };
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
+    const [open, setOpen] = useState<boolean>(false);
+
+    const handleOpen = () => setOpen(true);
+    const handleClose = () => setOpen(false);
 
     const categories = {
         desktopComputer: "desktopComputer",
@@ -180,7 +184,17 @@ const AssetUtills = () => {
     ]
 
     return (
-        { columnHeaders, endPoint, header, formFields, categories, computerFields  }
+        { 
+            columnHeaders, 
+            endPoint, 
+            header, 
+            formFields, 
+            categories, 
+            computerFields,
+            open,
+            handleClose,
+            handleOpen
+        }
     )
 }
 
