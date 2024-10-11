@@ -1,190 +1,178 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import Box from '@mui/material/Box';
-import Drawer from '@mui/material/Drawer';
-import AppBar from '@mui/material/AppBar';
 import CssBaseline from '@mui/material/CssBaseline';
 import Toolbar from '@mui/material/Toolbar';
-import List from '@mui/material/List';
 import Typography from '@mui/material/Typography';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
 import { Outlet, useLocation, useNavigate } from 'react-router';
-import { sideBarItems } from './sideBarElements';
-import { Avatar, Badge, Collapse, IconButton, Stack } from '@mui/material';
-import { ExpandLess, ExpandMore } from '@mui/icons-material';
-import { blue, grey } from '@mui/material/colors';
+import { CSSObject, Divider, IconButton, styled, Theme } from '@mui/material';
 import HandleRoutes from './HandleRoutes';
-import MaleLogo from '../../statics/images/male.jpg';
-import FemaleLogo from '../../statics/images/Female.jpg'
-import { UserContext } from '../../context/user/UserContext';
-import PopoverComponent from '../forms/Popover';
-import { usersMock } from '../../mocks/users';
-import { TypographyComponent } from '../headers/TypographyComponent';
-import ModalComponent from '../modal';
-import AppBarUtills, { modalStates } from './utills';
-import ChangePassword from '../../pages/profile/ChangePassword';
-import MailIcon from '@mui/icons-material/Mail';
-import ButtonComponent from '../forms/Button';
-import { crudStates } from '../../utils/constants';
+import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar';
+import MuiDrawer from '@mui/material/Drawer';
+import MenuIcon from '@mui/icons-material/Menu';
+import Logo from "../../statics/images/logo.1b6cf8fbdaaee75f39fd.bmp";
+import SideBar from './SideBar';
+import NavBar from './NavBar';
 
-const drawerWidth = 200;
+const drawerWidth = 240;
 
-export default function ApplicationDrawer() {
+const openedMixin = (theme: Theme): CSSObject => ({
+    width: drawerWidth,
+    transition: theme.transitions.create('width', {
+        easing: theme.transitions.easing.sharp,
+        duration: theme.transitions.duration.enteringScreen,
+    }),
+    overflowX: 'hidden',
+});
+
+const closedMixin = (theme: Theme): CSSObject => ({
+    transition: theme.transitions.create('width', {
+        easing: theme.transitions.easing.sharp,
+        duration: theme.transitions.duration.leavingScreen,
+    }),
+    overflowX: 'hidden',
+    width: `calc(${theme.spacing(7)} + 1px)`,
+    [theme.breakpoints.up('sm')]: {
+        width: `calc(${theme.spacing(8)} + 1px)`,
+    },
+});
+
+
+const DrawerHeader = styled('div')(({ theme }) => ({
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    padding: theme.spacing(0, 1),
+    ...theme.mixins.toolbar,
+}));
+
+
+interface AppBarProps extends MuiAppBarProps {
+    open?: boolean;
+}
+
+
+const AppBar = styled(MuiAppBar, {
+    shouldForwardProp: (prop) => prop !== 'open',
+})<AppBarProps>(({ theme, open }) => ({
+    zIndex: theme.zIndex.drawer + 1,
+    transition: theme.transitions.create(['width', 'margin'], {
+        easing: theme.transitions.easing.sharp,
+        duration: theme.transitions.duration.leavingScreen,
+    }),
+    ...(open && {
+        marginLeft: drawerWidth,
+        width: `calc(100% - ${drawerWidth}px)`,
+        transition: theme.transitions.create(['width', 'margin'], {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.enteringScreen,
+        }),
+    }),
+}));
+
+
+const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' })(
+    ({ theme, open }) => ({
+        width: drawerWidth,
+        flexShrink: 0,
+        whiteSpace: 'nowrap',
+        boxSizing: 'border-box',
+        ...(open && {
+            ...openedMixin(theme),
+            '& .MuiDrawer-paper': openedMixin(theme),
+        }),
+        ...(!open && {
+            ...closedMixin(theme),
+            '& .MuiDrawer-paper': closedMixin(theme),
+        }),
+        border: 'none'
+    }),
+);
+
+interface Props { window?: () => Window; }
+
+export default function ApplicationDrawer({ window }: Props) {
     const navigate = useNavigate();
     const { pathname } = useLocation();
-    const { user, setUser } = useContext(UserContext);
-    const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
-    const [action, setAction] = useState<string>("");
+    const [mobileOpen, setMobileOpen] = React.useState(false);
+    const [drawerOpen, setDrawerOpen] = React.useState(false);
 
-    const {
-        handleClose,
-        modalState,
-        open,
-        handleOptionClicked,
-        options
-    } = AppBarUtills();
+    const handleDrawerToggle = () => { setMobileOpen(!mobileOpen) };
 
-    /*
-        ** TO DO **
-        - Get user from session storage.
-        - Create a helper method that fetches user from Session.
-        - Update user state with the data.
-    */
-
-    useEffect(() => { setUser(usersMock[0]) }, []);
-
-    const handleAnchorClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-        setAnchorEl(event.currentTarget);
-    };
-
-    const {
-        handleClick,
-        expandedItemId,
-        activeRoute,
-        handleRouteChange
-    } = HandleRoutes();
+    const handleDrawerOpen = () => { setDrawerOpen(true); };
+    const handleDrawerClose = () => { setDrawerOpen(false); };
+    const { handleRouteChange } = HandleRoutes();
 
     useEffect(() => { handleRouteChange(pathname) }, [pathname])
+    const container = window !== undefined ? () => window().document.body : undefined;
 
     return (
         <Box sx={{ display: 'flex' }}>
-            {modalState === modalStates.password &&
-                <ModalComponent title='Change Password' open={open} handleClose={handleClose} width="40%">
-                    <ChangePassword handleClose={handleClose} />
-                </ModalComponent>
-            }
             <CssBaseline />
-            <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
+            <AppBar position="fixed">
                 <Toolbar>
-                    <Typography variant="h6" noWrap component="div">
-                        Pride Microfinance (ERP)
+                    <IconButton
+                        color="primary"
+                        aria-label="open drawer"
+                        edge="start"
+                        onClick={handleDrawerToggle}
+                        sx={{ mr: 2, display: { sm: 'none' } }}
+                    >
+                        <MenuIcon />
+                    </IconButton>
+                    <Box
+                        src={Logo}
+                        sx={{ height: '40px', width: "50px", mr: '20px', display: { xs: 'none', md: 'block' } }}
+                        component='img'
+                    />
+                    <Typography sx={{
+                        display: { xs: 'none', md: 'block' },
+                        fontSize: '15px', fontWeight: 'bold'
+                    }} component="div">
+                        Pride Microfinance (MDI) - ERP
                     </Typography>
-                    {user &&
-                        <Stack direction="row" spacing={4} sx={{ ml: "auto", display: "flex", alignItems: "center" }}>
-                            <Box>
-                                <ButtonComponent
-                                    handleClick={(event: React.MouseEvent<HTMLButtonElement>) => {
-                                        setAction(crudStates.create)
-                                        handleAnchorClick?.(event);
-                                    }}
-                                    sendingRequest={false}
-                                    buttonText="Create New"
-                                    buttonColor='info'
-                                    type='button' />
-                            </Box>
-                            <Badge badgeContent={4} color="warning">
-                                <MailIcon color="inherit" />
-                            </Badge>
-                            <TypographyComponent size='16px' weight={400} sx={{ color: grey[100] }}>
-                                {user?.firstName} {user?.lastName}
-                            </TypographyComponent>
-                            <IconButton
-                                onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
-                                    setAction("")
-                                    handleAnchorClick?.(event)
-                                }}>
-                                <Avatar src={user?.gender === 'Male' ? MaleLogo : FemaleLogo} sx={{ height: 45, width: 45, cursor: "pointer" }} />
-                            </IconButton>
-                        </Stack>}
-                    <PopoverComponent
-                        anchorEl={anchorEl}
-                        setAnchorEl={setAnchorEl}
-                        moduleID={user.id}
-                        handleOptionClicked={handleOptionClicked}
-                        options={options(action)} />
+                    <NavBar />
                 </Toolbar>
             </AppBar>
-            <Drawer
-                variant="permanent"
+            <MuiDrawer
+                container={container}
+                variant="temporary"
+                open={mobileOpen}
+                onClose={handleDrawerToggle}
+                ModalProps={{ keepMounted: true }}
                 sx={{
-                    width: drawerWidth,
-                    flexShrink: 0,
-                    [`& .MuiDrawer-paper`]: { width: drawerWidth, boxSizing: 'border-box' },
+                    display: { xs: 'block', md: 'none' },
+                    '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
                 }}
             >
-                <Toolbar />
-                <Box sx={{ overflow: 'auto' }}>
-                    <List
-                        sx={{ width: '100%', maxWidth: drawerWidth, bgcolor: 'background.paper' }}
-                        component="nav"
-                        aria-labelledby="nested-list-subheader"
-                    >
-                        {
-                            sideBarItems.map(item => (
-                                <React.Fragment key={item.id}>
-                                    <ListItemButton sx={{
-                                        bgcolor: activeRoute === item.id ? blue[700] : "",
-                                        '&:hover': {
-                                            bgcolor: activeRoute === item.id ? 'primary.dark' : 'action.hover',
-                                        },
-                                    }} onClick={() => handleClick(item)}>
-                                        <ListItemIcon>
-                                            {React.cloneElement(item.icon, {
-                                                style: { color: activeRoute === item.id ? "white" : "inherit" },
-                                            })}
-                                        </ListItemIcon>
-                                        <ListItemText sx={{
-                                            color: activeRoute === item.id ? "white" : "",
-                                            '&:hover': {
-                                                color: 'primary.light',
-                                            },
-                                        }} primary={item.name} />
-                                        {
-                                            item.subroutes.length > 0 && (
-                                                expandedItemId === item.id
-                                                    ? <ExpandLess sx={{ color: activeRoute === item.id ? "white" : blue[700] }} fontSize="small" />
-                                                    : <ExpandMore sx={{ color: activeRoute === item.id ? "white" : blue[700] }} fontSize="small" />
-                                            )
-                                        }
-                                    </ListItemButton>
-                                    {item?.subroutes?.length > 0
-                                        && expandedItemId === item.id
-                                        && <Collapse in={expandedItemId === item.id} timeout="auto" unmountOnExit>
-                                            <List component="div" disablePadding>
-                                                {
-                                                    item?.subroutes.map(subroute => (
-                                                        <ListItemButton key={subroute.id} onClick={() => navigate(subroute.route)} sx={{ pl: 4 }}>
-                                                            <ListItemIcon>
-                                                                {subroute.icon}
-                                                            </ListItemIcon>
-                                                            <ListItemText primary={subroute.name} />
-                                                        </ListItemButton>
-                                                    ))
-                                                }
-                                            </List>
-                                        </Collapse>}
-                                </React.Fragment>
-                            ))
-                        }
-                    </List>
+                <DrawerHeader />
+                <Divider />
+                <Box p={1} sx={(theme) => ({ height: '100%', bgcolor: theme.palette.grey[50] })}>
+                    <SideBar />
+                </Box>
+            </MuiDrawer>
+            <Drawer
+                onMouseEnter={handleDrawerOpen}
+                onMouseLeave={handleDrawerClose}
+                variant="permanent"
+                open={drawerOpen}
+                sx={{
+                    display: { xs: 'none', sm: 'block' },
+                    '& .MuiDrawer-paper': { border: 'none' },
+                }}
+            >
+                <DrawerHeader />
+                <Divider />
+                <Box p={1} sx={(theme) => ({ height: '100%', bgcolor: theme.palette.grey[50] })}>
+                    <SideBar />
                 </Box>
             </Drawer>
             <Box
                 component="main"
-                sx={(theme) => ({ flexGrow: 1, p: 3, bgcolor: theme.palette.background.paper, height: '100vh' })}>
-                <Toolbar />
-                <Outlet />
+                sx={(theme) => ({ flexGrow: 1, height: '100vh', bgcolor: theme.palette.grey[50], overflowX: 'auto' })}>
+                <DrawerHeader />
+                <Box sx={{ p: 4 }}>
+                    <Outlet />
+                </Box>
             </Box>
         </Box>
     );

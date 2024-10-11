@@ -3,7 +3,7 @@ import { ImageSection, ProfileLine } from "./ImageSection";
 
 const Profile = () => {
     return (
-        <Grid p={4} container xs={12} spacing={3}>
+        <Grid container xs={12} spacing={3}>
             <Grid item xs={12} md={5}>
                 <Card sx={{ py: 3, width: "100%" }}>
                     <ImageSection />

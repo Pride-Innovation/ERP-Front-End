@@ -38,6 +38,9 @@ const HandleRoutes = () => {
         if (route === ROUTES.LIST_ASSETS) {
             handleClick(sideBarItems[5])
         }
+        if (route === ROUTES.REQUEST) {
+            handleClick(sideBarItems[6])
+        }
     }
 
     return (

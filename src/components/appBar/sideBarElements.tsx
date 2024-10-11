@@ -2,10 +2,11 @@ import { ISideBarItem } from './interface';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { ROUTES } from '../../core/routes/routes';
-import AutorenewIcon from '@mui/icons-material/Autorenew';
-import AutoStoriesIcon from '@mui/icons-material/AutoStories';
 import GroupIcon from '@mui/icons-material/Group';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
+import ViewListIcon from '@mui/icons-material/ViewList';
+import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
+import RecentActorsIcon from '@mui/icons-material/RecentActors';
 
 export const sideBarItems: Array<ISideBarItem> = [
     {
@@ -13,20 +14,7 @@ export const sideBarItems: Array<ISideBarItem> = [
         name: "Dashboard",
         route: ROUTES.ASSETS_MANAGEMENT,
         icon: <DashboardIcon />,
-        subroutes: [
-            {
-                id: 1,
-                name: "Page One",
-                route: ROUTES.ASSETS_MANAGEMENT,
-                icon: <AutorenewIcon />,
-            },
-            {
-                id: 1,
-                name: "Page Two",
-                route: ROUTES.ASSETS_MANAGEMENT,
-                icon: <AutoStoriesIcon />,
-            }
-        ]
+        subroutes: []
     },
     {
         id: 2,
@@ -39,15 +27,8 @@ export const sideBarItems: Array<ISideBarItem> = [
         id: 3,
         name: "Profile",
         route: ROUTES.PROFILE,
-        icon: <DashboardIcon />,
-        subroutes: [
-            {
-                id: 1,
-                name: "Dashboard",
-                route: ROUTES.PROFILE,
-                icon: <DashboardIcon />,
-            }
-        ]
+        icon: <ManageAccountsIcon />,
+        subroutes: []
     },
     {
         id: 4,
@@ -65,26 +46,20 @@ export const sideBarItems: Array<ISideBarItem> = [
     },
     {
         id: 6,
-        name: "Assets Mgt",
+        name: "Assets",
         route: ROUTES.LIST_ASSETS,
-        icon: <ReceiptLongIcon />,
-        subroutes: [
-            {
-                id: 1,
-                name: "List Assets",
-                route: ROUTES.LIST_ASSETS,
-                icon: <ReceiptLongIcon />,
-            },
-            {
-                id: 2,
-                name: "Requests",
-                route: ROUTES.REQUEST,
-                icon: <DashboardIcon />,
-            }
-        ]
+        icon: <ViewListIcon />,
+        subroutes: []
     },
     {
         id: 7,
+        name: "Requests",
+        route: ROUTES.REQUEST,
+        icon: <RecentActorsIcon />,
+        subroutes: []
+    },
+    {
+        id: 8,
         name: "Test",
         route: ROUTES.TEST,
         icon: <ReceiptLongIcon />,

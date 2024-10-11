@@ -3,7 +3,7 @@ import { IRequest } from "../interface";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { requestSchema } from "../../schema";
-import { Grid, Typography } from "@mui/material";
+import { Card, Grid, Typography } from "@mui/material";
 import RequestForm from "./RequestForm";
 
 const CreateRequest = () => {
@@ -28,27 +28,29 @@ const CreateRequest = () => {
     const onSubmit = (formData: IRequest) => {
         setSendingRequest(true);
         console.log(formData, "form data!!!!!");
-
     };
+    
     return (
-        <Grid container xs={12}>
-            <Grid item xs={12}>
-                <Typography sx={{ my: 4, fontWeight: 600 }}>Create a Request</Typography>
-                <form
-                    style={{ width: "100%" }}
-                    autoComplete="off"
-                    onSubmit={handleSubmit(onSubmit)}
-                >
-                    <RequestForm
-                        formState={formState}
-                        control={control}
-                        register={register}
-                        sendingRequest={sendingRequest}
-                        buttonText="Request Asset"
-                    />
-                </form>
+        <Card sx={{ p: 4 }}>
+            <Grid container xs={12}>
+                <Grid item xs={12}>
+                    <Typography sx={{ my: 4, fontWeight: 600 }}>Create a Request</Typography>
+                    <form
+                        style={{ width: "100%" }}
+                        autoComplete="off"
+                        onSubmit={handleSubmit(onSubmit)}
+                    >
+                        <RequestForm
+                            formState={formState}
+                            control={control}
+                            register={register}
+                            sendingRequest={sendingRequest}
+                            buttonText="Request Asset"
+                        />
+                    </form>
+                </Grid>
             </Grid>
-        </Grid>
+        </Card>
     )
 }
 
