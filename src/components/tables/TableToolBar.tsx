@@ -15,7 +15,7 @@ const TableToolBar = ({
     return (
         <GridToolbarContainer
             sx={{ width: '100%', display: 'flex', p: '20px' }}>
-            <TypographyComponent size='17px' weight={600}>{header.plural}</TypographyComponent>
+            <TypographyComponent size='17px' weight={600} sx={{ textTransform: "uppercase"}}>{header.plural}</TypographyComponent>
             <Stack direction="row" spacing={2} sx={{ ml: "auto" }}>
                 {createAction && <Box>
                     <ButtonComponent

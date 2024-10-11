@@ -55,7 +55,7 @@ const UpdateAsset = () => {
         <Card sx={{ p: 4 }}>
             <Grid container xs={12}>
                 <Grid item xs={12}>
-                    <Typography sx={{ my: 4, fontWeight: 600 }}>Update an Asset</Typography>
+                    <Typography sx={{ mb: 4, fontWeight: 600, textTransform: "uppercase" }}>Update Asset</Typography>
                     <form
                         style={{ width: "100%" }}
                         autoComplete="off"

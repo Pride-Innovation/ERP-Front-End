@@ -4,9 +4,9 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import { ROUTES } from '../../core/routes/routes';
 import GroupIcon from '@mui/icons-material/Group';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
-import ViewListIcon from '@mui/icons-material/ViewList';
 import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import RecentActorsIcon from '@mui/icons-material/RecentActors';
+import TuneIcon from '@mui/icons-material/Tune';
 
 export const sideBarItems: Array<ISideBarItem> = [
     {
@@ -48,7 +48,7 @@ export const sideBarItems: Array<ISideBarItem> = [
         id: 6,
         name: "Assets",
         route: ROUTES.LIST_ASSETS,
-        icon: <ViewListIcon />,
+        icon: <TuneIcon />,
         subroutes: []
     },
     {
