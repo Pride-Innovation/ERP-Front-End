@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router';
 import { ROUTES } from '../../core/routes/routes';
 import { crudStates } from '../../utils/constants';
 import ModalComponent from '../../components/modal';
+import Dispose from './Dispose';
 
 const AssetsManagement = () => {
     const [loading, setLoading] = useState<boolean>(false);
@@ -45,8 +46,12 @@ const AssetsManagement = () => {
     return (
         <>
             {
-                <ModalComponent width={"30%"} title='Dispose Asset' open={open} handleClose={handleClose}>
-                    <p>Text</p>
+                <ModalComponent width={"40%"} title='Dispose Asset' open={open} handleClose={handleClose}>
+                    <Dispose
+                        sendingRequest={loading}
+                        handleClose={handleClose}
+                        buttonText='Confirm'
+                    />
                 </ModalComponent>
             }
             {rows?.length > 0 && <Grid xs={12} container>

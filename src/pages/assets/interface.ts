@@ -71,3 +71,9 @@ export interface IFormData<T> {
     type: "input" | "select" | "date" | "autocomplete";
     options?: Array<IOptions>
 }
+
+export interface IDispose {
+    handleClose: () => void;
+    sendingRequest: boolean;
+    buttonText: string
+}
