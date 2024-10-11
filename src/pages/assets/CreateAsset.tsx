@@ -37,10 +37,10 @@ const CreateAsset = () => {
     };
 
     return (
-        <Card sx={{ p: 4}}>
+        <Card sx={{ p: 4 }}>
             <Grid container xs={12}>
                 <Grid item xs={12}>
-                    <Typography sx={{ mb: 4, fontWeight: 600, textTransform: "uppercase" }}>Create Asset</Typography>
+                    <Typography sx={{ mb: 4, fontWeight: 600, textTransform: "uppercase", fontSize: '17px' }}>Create Asset</Typography>
                     <form
                         style={{ width: "100%" }}
                         autoComplete="off"

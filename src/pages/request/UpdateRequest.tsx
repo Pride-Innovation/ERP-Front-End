@@ -44,7 +44,7 @@ const UpdateRequest = () => {
         <Card sx={{ p: 4 }}>
             <Grid container xs={12}>
                 <Grid item xs={12}>
-                    <Typography sx={{ mb: 4, fontWeight: 600, textTransform: "uppercase" }}>Update Request</Typography>
+                    <Typography sx={{ mb: 4, fontWeight: 600, textTransform: "uppercase", fontSize: '17px' }}>Update Request</Typography>
                     <form
                         style={{ width: "100%" }}
                         autoComplete="off"
