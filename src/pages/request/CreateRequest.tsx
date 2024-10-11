@@ -1,23 +1,14 @@
-import { useEffect, useState } from 'react'
-import { useParams } from 'react-router';
-import { IRequest } from '../interface';
-import { requestMock } from '../../../../mocks/request';
-import { useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
-import { requestSchema } from '../../schema';
-import { Card, Grid, Typography } from '@mui/material';
-import RequestForm from './RequestForm';
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { Card, Grid, Typography } from "@mui/material";
+import RequestForm from "./RequestForm";
+import { IRequest } from "./interface";
+import { requestSchema } from "./schema";
 
-const UpdateRequest = () => {
+const CreateRequest = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
-    const { id } = useParams<{ id: string }>();
-    const [defaultRequest, setDefaultRequest] = useState<IRequest>(requestMock[0]);
-
-    useEffect(() => {
-        setDefaultRequest(() => {
-            return requestMock.find(asset => asset?.id === parseInt(id as string)) as IRequest
-        })
-    }, [id]);
+    const defaultRequest: IRequest = {} as IRequest;
 
     const {
         control,
@@ -32,19 +23,18 @@ const UpdateRequest = () => {
 
     useEffect(() => {
         reset({ ...defaultRequest });
-    }, [defaultRequest]);
+    }, [reset]);
 
     const onSubmit = (formData: IRequest) => {
         setSendingRequest(true);
         console.log(formData, "form data!!!!!");
-        setSendingRequest(false)
     };
-
+    
     return (
         <Card sx={{ p: 4 }}>
             <Grid container xs={12}>
                 <Grid item xs={12}>
-                    <Typography sx={{ my: 4, fontWeight: 600 }}>Update Request</Typography>
+                    <Typography sx={{ my: 4, fontWeight: 600 }}>Create a Request</Typography>
                     <form
                         style={{ width: "100%" }}
                         autoComplete="off"
@@ -64,4 +54,4 @@ const UpdateRequest = () => {
     )
 }
 
-export default UpdateRequest
+export default CreateRequest;

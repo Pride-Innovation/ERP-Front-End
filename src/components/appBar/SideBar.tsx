@@ -29,7 +29,7 @@ const SideBar = () => {
 
     return (
 
-        <Card sx={{ overflow: 'auto' }}>
+        <Card sx={{ height: "100%" }}>
             <List
                 sx={{ width: '100%', bgcolor: 'background.paper' }}
                 component="nav"

@@ -1,18 +1,24 @@
 import * as yup from 'yup';
 
-export const requestSchema = yup.object().shape({
-    officerName: yup.string().required('Officer Name is required'),
-    title: yup.string().required('Title is required'),
-    department: yup.string().required('Department is required'),
-    reason: yup.string().required('Reason is required'),
-    quantity: yup.number().required('Quantity is required').positive().integer(),
-    destination: yup.string().required('Destination is required'),
-    expectedReturnDate: yup.string().required('Expected Return Date is required'),
-    particulars: yup.array().of(
-        yup.object().shape({
-            name: yup.string().required('Name is required'),
-            serialNumber: yup.string().required('Serial Number is required'),
-            engravedNumber: yup.string().required('Engraved Number is required')
-        })
-    ).required('Particulars are required'),
+export const assetSchema = yup.object().shape({
+    name: yup.string().required('Name is required'),
+    category: yup.string().required('Category is required'),
+    engravedNumber: yup.string().required('Engraved number is required'),
+    model: yup.string().required('Model is required'),
+    serialNo: yup.string().required('Serial Number Name is required'),
+    ram: yup.string().nullable().optional(),
+    cpuSpeed: yup.string().nullable().optional(),
+    hardDiskSize: yup.string().nullable().optional(),
+    ipAddress: yup.string().nullable().optional(),
+    macAddress: yup.string().nullable().optional(),
+    interfaceType: yup.string().nullable().optional(),
+    location: yup.string().nullable().optional(),
+    status: yup.string().nullable().optional(),
+    purchaseCost: yup.string().nullable().optional(),
+    verificationDate: yup.string().nullable().optional(),
+    deploymentDate: yup.string().nullable().optional(),
+    costOfAsset: yup.number().nullable().optional().typeError("Must be a number"),
+    netValue: yup.string().nullable().optional(),
+    depreciationRate: yup.string().nullable().optional(),
+    assignedTo: yup.string().nullable().optional(),
 });

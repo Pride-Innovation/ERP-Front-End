@@ -1,10 +1,15 @@
 import { Grid, Stack } from '@mui/material'
 import RequestUtills from './utills';
-import { UseFormAutocompleteComponent, UseFormDatePicker, UseFormInput, UseFormSelect } from '../../../../components/forms';
-import ButtonComponent from '../../../../components/forms/Button';
-import { IRequestForm } from '../interface';
 import { useNavigate } from 'react-router';
-import { ROUTES } from '../../../../core/routes/routes';
+import { IRequestForm } from './interface';
+import {
+    UseFormAutocompleteComponent,
+    UseFormDatePicker,
+    UseFormInput,
+    UseFormSelect
+} from '../../components/forms';
+import ButtonComponent from '../../components/forms/Button';
+import { ROUTES } from '../../core/routes/routes';
 
 const RequestForm = ({
     register,
@@ -67,8 +72,18 @@ const RequestForm = ({
                 }
                 <Grid item xs={12} sx={{ display: "flex", justifyContent: "end" }}>
                     <Stack direction="row" spacing={3} sx={{ width: "30%" }}>
-                        <ButtonComponent handleClick={() => navigate(ROUTES.REQUEST)} buttonColor='error' type='button' sendingRequest={false} buttonText="Back" />
-                        <ButtonComponent buttonColor='success' type='submit' sendingRequest={sendingRequest} buttonText={buttonText} />
+                        <ButtonComponent
+                            handleClick={() => navigate(ROUTES.REQUEST)}
+                            buttonColor='error'
+                            type='button'
+                            sendingRequest={false}
+                            buttonText="Back"
+                        />
+                        <ButtonComponent
+                            buttonColor='success'
+                            type='submit'
+                            sendingRequest={sendingRequest}
+                            buttonText={buttonText} />
                     </Stack>
                 </Grid>
             </Grid>

@@ -11,7 +11,7 @@ import {
 import AssetForm from "./AssetForm";
 import { useParams } from "react-router";
 import { assetsMock } from "../../mocks/assets";
-import { assetSchema } from "./subroutes/request/schema";
+import { assetSchema } from "./schema";
 
 const UpdateAsset = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);

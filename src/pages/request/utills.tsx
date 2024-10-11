@@ -1,12 +1,13 @@
-import React, { useEffect, useState } from 'react'
-import { ITableHeader } from '../../../../components/tables/interface';
-import { requestMock } from '../../../../mocks/request';
+import { useEffect, useState } from 'react'
 import InfoIcon from '@mui/icons-material/Info';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
-import { getTableHeaders } from '../../../../components/tables/getTableHeaders';
-import { IFormData } from '../../interface';
-import { IRequest } from '../interface';
+import { ITableHeader } from '../../components/tables/interface';
+import { requestMock } from '../../mocks/request';
+import { IFormData } from '../assets/interface';
+import { getTableHeaders } from '../../components/tables/getTableHeaders';
+import { IRequest } from './interface';
+
 
 const RequestUtills = () => {
     const endPoint = 'posts';

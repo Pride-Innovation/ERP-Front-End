@@ -2,9 +2,9 @@ import { useForm } from "react-hook-form";
 import { IAsset } from "./interface";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useEffect, useState } from "react";
-import { Card, Container, Grid, SelectChangeEvent, Typography } from "@mui/material";
+import { Card, Grid, SelectChangeEvent, Typography } from "@mui/material";
 import AssetForm from "./AssetForm";
-import { assetSchema } from "./subroutes/request/schema";
+import { assetSchema } from "./schema";
 
 const CreateAsset = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);

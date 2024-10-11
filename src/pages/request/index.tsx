@@ -1,14 +1,14 @@
 import { useContext, useEffect, useState } from "react";
-import RowContext from "../../../../context/row/RowContext";
-import { fetchRowsService } from "../../../../core/apis/globalService";
 import { GridRowsProp } from "@mui/x-data-grid";
-import { requestMock } from "../../../../mocks/request";
 import RequestUtills from "./utills";
-import TableComponent from "../../../../components/tables/TableComponent";
 import { Grid } from "@mui/material";
 import { useNavigate } from "react-router";
-import { ROUTES } from "../../../../core/routes/routes";
-import { crudStates } from "../../../../utils/constants";
+import RowContext from "../../context/row/RowContext";
+import { fetchRowsService } from "../../core/apis/globalService";
+import { requestMock } from "../../mocks/request";
+import { crudStates } from "../../utils/constants";
+import { ROUTES } from "../../core/routes/routes";
+import TableComponent from "../../components/tables/TableComponent";
 
 const Request = () => {
   const [loading, setLoading] = useState<boolean>(false);

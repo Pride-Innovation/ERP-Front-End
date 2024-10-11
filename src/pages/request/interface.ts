@@ -1,4 +1,9 @@
-import { Control, FieldError, FormState, UseFormRegister } from "react-hook-form";
+import {
+    Control,
+    FieldError,
+    FormState,
+    UseFormRegister
+} from "react-hook-form";
 
 export interface IAssetParticulars {
     name: string;

@@ -1,4 +1,4 @@
-import { IRequest } from "../../pages/assets/subroutes/interface";
+import { IRequest } from "../../pages/request/interface";
 
 export const requestMock: IRequest[] = [
     {

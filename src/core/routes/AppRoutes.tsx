@@ -12,9 +12,9 @@ import TestComponent from '../../pages/test'
 import AssetsManagement from '../../pages/assets'
 import CreateAsset from '../../pages/assets/CreateAsset'
 import UpdateAsset from '../../pages/assets/UpdateAsset'
-import Request from '../../pages/assets/subroutes/request'
-import CreateRequest from '../../pages/assets/subroutes/request/CreateRequest'
-import UpdateRequest from '../../pages/assets/subroutes/request/UpdateRequest'
+import Request from '../../pages/request'
+import CreateRequest from '../../pages/request/CreateRequest'
+import UpdateRequest from '../../pages/request/UpdateRequest'
 
 const AppRoutes = () => {
   return (
