@@ -6,20 +6,26 @@ import {
     ListItemIcon,
     ListItemText
 } from '@mui/material'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { sideBarItems } from './sideBarElements'
 import { blue } from '@mui/material/colors'
 import HandleRoutes from './HandleRoutes'
 import { ExpandLess, ExpandMore } from '@mui/icons-material'
-import { useNavigate } from 'react-router'
+import { useLocation, useNavigate } from 'react-router'
 
 const SideBar = () => {
     const navigate = useNavigate();
+    const { pathname } = useLocation();
     const {
         activeRoute,
         handleClick,
-        expandedItemId
+        expandedItemId,
+        handleRouteChange
     } = HandleRoutes();
+
+    useEffect(() => {
+        handleRouteChange(pathname)
+    }, [pathname]);
 
     return (
 

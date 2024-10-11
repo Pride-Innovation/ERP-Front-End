@@ -1,11 +1,10 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import Box from '@mui/material/Box';
 import CssBaseline from '@mui/material/CssBaseline';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
-import { Outlet, useLocation, useNavigate } from 'react-router';
+import { Outlet } from 'react-router';
 import { CSSObject, Divider, IconButton, styled, Theme } from '@mui/material';
-import HandleRoutes from './HandleRoutes';
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar';
 import MuiDrawer from '@mui/material/Drawer';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -91,8 +90,6 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
 interface Props { window?: () => Window; }
 
 export default function ApplicationDrawer({ window }: Props) {
-    const navigate = useNavigate();
-    const { pathname } = useLocation();
     const [mobileOpen, setMobileOpen] = React.useState(false);
     const [drawerOpen, setDrawerOpen] = React.useState(false);
 
@@ -100,9 +97,7 @@ export default function ApplicationDrawer({ window }: Props) {
 
     const handleDrawerOpen = () => { setDrawerOpen(true); };
     const handleDrawerClose = () => { setDrawerOpen(false); };
-    const { handleRouteChange } = HandleRoutes();
 
-    useEffect(() => { handleRouteChange(pathname) }, [pathname])
     const container = window !== undefined ? () => window().document.body : undefined;
 
     return (
