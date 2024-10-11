@@ -15,8 +15,18 @@ const Dispose = ({
                 </Grid>
                 <Grid item xs={12} sx={{ display: "flex", justifyContent: "end" }}>
                     <Stack direction="row" spacing={3} sx={{ width: "50%" }}>
-                        <ButtonComponent handleClick={handleClose} buttonColor='error' type='button' sendingRequest={false} buttonText="Close" />
-                        <ButtonComponent buttonColor='success' type='submit' sendingRequest={sendingRequest} buttonText={buttonText} />
+                        <ButtonComponent
+                            handleClick={handleClose}
+                            buttonColor='error'
+                            type='button'
+                            sendingRequest={false}
+                            buttonText="Close" />
+                        <ButtonComponent
+                            buttonColor='success'
+                            type='submit'
+                            sendingRequest={sendingRequest}
+                            buttonText={buttonText}
+                        />
                     </Stack>
                 </Grid>
             </Grid>
