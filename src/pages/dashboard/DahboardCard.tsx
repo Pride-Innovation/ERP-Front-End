@@ -1,43 +1,34 @@
 import { Box, Card, Typography } from "@mui/material";
 import { IDashboardCard } from "./interface";
 import { blue } from "@mui/material/colors";
+import DashBoardUtills from "./utills";
 
-const DashboardCard = ({
+const style = {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    bgcolor: 'linear-gradient(135deg, #e3f2fd 30%, #64b5f6 100%)',
+    transition: '0.3s',
+    flex: 1,
+    '&:hover': {
+        opacity: 0.9,
+    },
+    p: 2,
+}
+
+const DashboardCard: React.FC<IDashboardCard> = ({
     name,
     number,
     image,
     stockLevel,
     lastUpdated
-}: IDashboardCard) => {
-    let stockColor;
-    let stockStatus;
-
-    if (stockLevel === 'low') {
-        stockColor = 'red';
-        stockStatus = 'Required';
-    } else if (stockLevel === 'average') {
-        stockColor = 'orange';
-        stockStatus = 'Average Stock';
-    } else {
-        stockColor = 'green';
-        stockStatus = 'Plenty in Stock';
-    }
+}) => {
+    const { getStockDetails, StockIndicator } = DashBoardUtills()
+    const { color: stockColor, status: stockStatus } = getStockDetails(stockLevel);
 
     return (
         <Card
-            sx={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                borderRadius: "8px",
-                bgcolor: 'linear-gradient(135deg, #e3f2fd 30%, #64b5f6 100%)',
-                transition: '0.3s',
-                flex: 1,
-                '&:hover': {
-                    opacity: 0.9,
-                },
-                p: 2,
-            }}
+            sx={style}
         >
             <Box sx={{ display: 'flex', alignItems: 'center', flex: 1 }}>
                 <Box
@@ -64,22 +55,7 @@ const DashboardCard = ({
                     </Typography>
                 </Box>
             </Box>
-            <Box
-                sx={{
-                    bgcolor: '#ffffff',
-                    borderRadius: '50%',
-                    width: 40,
-                    height: 40,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    border: `2px solid ${stockColor}`,
-                }}
-            >
-                <Typography sx={{ fontSize: "20px" }} variant="caption" color={stockColor}>
-                    !
-                </Typography>
-            </Box>
+            <StockIndicator color={stockColor} />
         </Card>
     );
 };

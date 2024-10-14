@@ -5,3 +5,12 @@ export interface IDashboardCard {
     stockLevel: string;
     lastUpdated: string
 }
+
+export interface IStockIndicatorProps {
+    color: string;
+}
+
+export interface IStockDetails {
+    color: string;
+    status: string;
+}
