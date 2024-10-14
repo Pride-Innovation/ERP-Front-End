@@ -33,26 +33,26 @@ const RequestUtills = () => {
     };
 
     const formFields: Array<IFormData<IRequest>> = [
-        {
-            value: "officerName",
-            label: 'Officer Name',
-            type: "input"
-        },
-        {
-            value: "title",
-            label: 'Title',
-            type: "select",
-            options: [
-                { label: "Equipment Request", value: "equipmentRequest" },
-                { label: "Tool Request", value: "toolRequest" },
-                { label: "Asset Request", value: "assetRequest" },
-            ]
-        },
-        {
-            value: "department",
-            label: 'Department',
-            type: "input"
-        },
+        // {
+        //     value: "officerName",
+        //     label: 'Officer Name',
+        //     type: "input"
+        // },
+        // {
+        //     value: "title",
+        //     label: 'Title',
+        //     type: "select",
+        //     options: [
+        //         { label: "Equipment Request", value: "equipmentRequest" },
+        //         { label: "Tool Request", value: "toolRequest" },
+        //         { label: "Asset Request", value: "assetRequest" },
+        //     ]
+        // },
+        // {
+        //     value: "department",
+        //     label: 'Department',
+        //     type: "input"
+        // },
         {
             value: "reason",
             label: 'Reason',
