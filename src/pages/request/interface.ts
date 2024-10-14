@@ -18,6 +18,7 @@ export interface IRequest {
     department: string;
     reason: string;
     quantity: number;
+    status?: string;
     destination: string;
     expectedReturnDate: string;
     particulars: Array<IAssetParticulars>;

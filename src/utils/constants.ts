@@ -16,3 +16,13 @@ export const crudStates: {
     delete: "delete",
     dispose: "dispose"
 }
+
+export const requestStatus: {
+    pending: string;
+    approved: string;
+    rejected: string;
+} = {
+    pending: "pending",
+    approved: "approved",
+    rejected: "rejected"
+}

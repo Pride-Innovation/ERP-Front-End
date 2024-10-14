@@ -1,5 +1,9 @@
 import { Box, Typography } from "@mui/material";
 import { IStockDetails, IStockIndicatorProps } from "./interface";
+import { requestMock } from "../../mocks/request";
+import { useEffect, useState } from "react";
+import { ITableHeader } from "../../components/tables/interface";
+import { getTableHeaders } from "../../components/tables/getTableHeaders";
 
 const style = {
     bgcolor: '#ffffff',
@@ -12,6 +16,27 @@ const style = {
 }
 
 const DashBoardUtills = () => {
+    const endPoint = 'posts';
+    const header = { plural: 'Requests', singular: 'Request' };
+    const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
+
+    const {
+        id,
+        particulars,
+        title,
+        department,
+        reason,
+        ...data
+    } = requestMock[0];
+
+    const rowData = {
+
+        ...data,
+    };
+
+    useEffect(() => {
+        setColumnHeaders(getTableHeaders(rowData))
+    }, []);
 
     const getStockDetails = (stockLevel: string): IStockDetails => {
         switch (stockLevel) {
@@ -40,7 +65,10 @@ const DashBoardUtills = () => {
     return (
         {
             getStockDetails,
-            StockIndicator
+            StockIndicator,
+            endPoint,
+            header,
+            columnHeaders
         }
     )
 }
