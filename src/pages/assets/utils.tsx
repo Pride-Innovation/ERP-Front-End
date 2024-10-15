@@ -6,6 +6,7 @@ import InfoIcon from '@mui/icons-material/Info';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import { IAsset, IFormData } from "./interface";
+import { assetStatus } from "../../utils/constants";
 
 const AssetUtills = () => {
     const endPoint = 'posts';
@@ -140,10 +141,10 @@ const AssetUtills = () => {
             label: 'Status',
             type: "select",
             options: [
-                { label: "In Use", value: "use" },
-                { label: "In Store", value: "store" },
-                { label: "In Repair", value: "repair" },
-                { label: "Disposed/Decommisioned", value: "disposed" },
+                { label: "In Use", value: assetStatus.use },
+                { label: "In Store", value: assetStatus.store },
+                { label: "In Repair", value: assetStatus.repair },
+                { label: "Disposed/Decommisioned", value: assetStatus.repair },
             ]
         },
         {
@@ -184,12 +185,12 @@ const AssetUtills = () => {
     ]
 
     return (
-        { 
-            columnHeaders, 
-            endPoint, 
-            header, 
-            formFields, 
-            categories, 
+        {
+            columnHeaders,
+            endPoint,
+            header,
+            formFields,
+            categories,
             computerFields,
             open,
             handleClose,

@@ -27,7 +27,9 @@ const Dashboard = () => {
         mt={4}
         sx={{ width: "100%" }}
       >
-        <DashboardRequests />
+        <Card sx={{ flex: 3.3 }}>
+          <DashboardRequests />
+        </Card>
         <Card sx={{ flex: 2, p: 2.5 }}>
           Second
         </Card>

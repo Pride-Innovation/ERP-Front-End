@@ -13,6 +13,8 @@ import CustomTextFilterOperator from './TableFilters';
 import { useEffect, useState } from 'react';
 import CustomTablePagination from './TablePagination';
 import ButtonComponent from '../forms/Button';
+import TimeLineDot from '../timeLineDots';
+import { assetStatus, requestStatus } from '../../utils/constants';
 
 const TableComponent = ({
     columnHeaders,
@@ -62,35 +64,59 @@ const TableComponent = ({
                                 (isCamelCase(value as string) && value) ?
                                     camelCaseToWords(value) : value}</TypographyComponent>
                         </StyledBox>
-                    )
-                    : (column.isBoolen) ? (
-                        <StyledBox >
-                            {value ?
-                                <ChipComponent variant='filled' label='Available' icon={<CheckIcon fontSize='small' />} size='medium' color='success' /> :
-                                <ChipComponent variant='filled' label='Leave' icon={<DoNotDisturbAltIcon fontSize='small' />} size='medium' color='error' />
-                            }
-                        </StyledBox>
-                    ) : (column.isAction) ? (
-                        <StyledBox >
-                            <ButtonComponent
-                                handleClick={(event: React.MouseEvent<HTMLButtonElement>) => {
-                                    handleClick?.(event)
-                                    setCurrentId(param.row?.id)
-                                }}
-                                sendingRequest={false}
-                                buttonText={column.actionData?.label as string}
-                                variant='outlined'
-                                buttonColor='info'
-                                type='button' />
-                            <PopoverComponent
-                                moduleID={currentID}
-                                handleOptionClicked={handleOptionClicked}
-                                options={(column.actionData?.options) as Array<{ value: string, label: string }>}
-                                anchorEl={anchorEl}
-                                setAnchorEl={setAnchorEl}
-                            />
-                        </StyledBox>
-                    ) : null
+                    ) : (column.isStatus) ?
+                        (
+                            <StyledBox>
+                                <TypographyComponent
+                                    sx={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "space-between",
+                                        textTransform: "capitalize"
+                                    }}
+                                    weight={400} size='13.5px'>
+                                    <TimeLineDot color={
+                                        (value === requestStatus.approved ||
+                                            value === assetStatus.use
+                                        ) ? 'green' :
+                                            (value === requestStatus.pending ||
+                                                value === assetStatus.repair
+                                            ) ? 'orange' :
+                                                (value === requestStatus.rejected ||
+                                                    value === assetStatus.disposed
+                                                ) ? 'red' : "blue"
+                                    } />
+                                    {value}</TypographyComponent>
+                            </StyledBox>
+                        )
+                        : (column.isBoolen) ? (
+                            <StyledBox >
+                                {value ?
+                                    <ChipComponent variant='filled' label='Available' icon={<CheckIcon fontSize='small' />} size='medium' color='success' /> :
+                                    <ChipComponent variant='filled' label='Leave' icon={<DoNotDisturbAltIcon fontSize='small' />} size='medium' color='error' />
+                                }
+                            </StyledBox>
+                        ) : (column.isAction) ? (
+                            <StyledBox >
+                                <ButtonComponent
+                                    handleClick={(event: React.MouseEvent<HTMLButtonElement>) => {
+                                        handleClick?.(event)
+                                        setCurrentId(param.row?.id)
+                                    }}
+                                    sendingRequest={false}
+                                    buttonText={column.actionData?.label as string}
+                                    variant='outlined'
+                                    buttonColor='info'
+                                    type='button' />
+                                <PopoverComponent
+                                    moduleID={currentID}
+                                    handleOptionClicked={handleOptionClicked}
+                                    options={(column.actionData?.options) as Array<{ value: string, label: string }>}
+                                    anchorEl={anchorEl}
+                                    setAnchorEl={setAnchorEl}
+                                />
+                            </StyledBox>
+                        ) : null
         }
     }));
 

@@ -1,4 +1,5 @@
 import { IAsset } from "../../pages/assets/interface";
+import { assetStatus } from "../../utils/constants";
 
 export const assetsMock: IAsset[] = [
     {
@@ -15,7 +16,7 @@ export const assetsMock: IAsset[] = [
         macAddress: "00:1A:2B:3C:4D:5E",
         interfaceType: "USB-C",
         location: "Office A",
-        status: "store",
+        status: assetStatus.store,
         purchaseCost: "$1500",
         verificationDate: "2023-01-10",
         deploymentDate: "2023-01-15",
@@ -38,7 +39,7 @@ export const assetsMock: IAsset[] = [
         macAddress: "00:1A:2B:3C:4D:5F",
         interfaceType: "Ethernet",
         location: "Data Center",
-        status: "use",
+        status: assetStatus.repair,
         purchaseCost: "$5000",
         verificationDate: "2022-05-15",
         deploymentDate: "2022-06-01",
@@ -57,7 +58,7 @@ export const assetsMock: IAsset[] = [
         ipAddress: "192.168.1.30",
         macAddress: "00:1A:2B:3C:4D:60",
         location: "Office A",
-        status: "dispose",
+        status: assetStatus.disposed,
         purchaseCost: "$300",
         verificationDate: "2023-03-20",
         deploymentDate: "2023-03-25",
@@ -76,7 +77,7 @@ export const assetsMock: IAsset[] = [
         ipAddress: "192.168.1.40",
         macAddress: "00:1A:2B:3C:4D:61",
         location: "Office B",
-        status: "Active",
+        status: assetStatus.store,
         purchaseCost: "$1200",
         verificationDate: "2023-02-10",
         deploymentDate: "2023-02-15",
@@ -95,7 +96,7 @@ export const assetsMock: IAsset[] = [
         ipAddress: "192.168.1.50",
         macAddress: "00:1A:2B:3C:4D:62",
         location: "Office A",
-        status: "Active",
+        status: assetStatus.disposed,
         purchaseCost: "$400",
         verificationDate: "2023-04-15",
         deploymentDate: "2023-04-20",
@@ -116,7 +117,7 @@ export const assetsMock: IAsset[] = [
         ipAddress: "192.168.1.60",
         macAddress: "00:1A:2B:3C:4D:63",
         location: "Office C",
-        status: "Active",
+        status: assetStatus.store,
         purchaseCost: "$800",
         verificationDate: "2023-05-05",
         deploymentDate: "2023-05-10",

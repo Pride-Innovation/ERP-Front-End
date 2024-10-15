@@ -26,3 +26,15 @@ export const requestStatus: {
     approved: "approved",
     rejected: "rejected"
 }
+
+export const assetStatus: {
+    use: string;
+    store: string;
+    repair: string;
+    disposed: string
+} = {
+    use: "use",
+    store: "store",
+    repair: "repair",
+    disposed: "disposed"
+}

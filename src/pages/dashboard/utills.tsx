@@ -24,13 +24,12 @@ const DashBoardUtills = () => {
         id,
         particulars,
         title,
-        department,
         reason,
+        expectedReturnDate,
         ...data
     } = requestMock[0];
 
     const rowData = {
-
         ...data,
     };
 
