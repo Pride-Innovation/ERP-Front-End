@@ -1,27 +1,23 @@
-import { useForm } from "react-hook-form";
-import { IAsset } from "./interface";
-import { yupResolver } from "@hookform/resolvers/yup";
 import { useEffect, useState } from "react";
-import {
-    Card,
-    Grid,
-    SelectChangeEvent,
-    Typography
-} from "@mui/material";
-import AssetForm from "./AssetForm";
 import { useParams } from "react-router";
-import { assetsMock } from "../../mocks/assets";
-import { assetSchema } from "./schema";
+import { IITEquipment } from "./interface";
+import { assetsMock } from "../../../mocks/assets";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { ITEquipmentSchema } from "./schema";
+import { Card, Grid, SelectChangeEvent } from "@mui/material";
+import { FormHeader } from "../../../components/headers/TypographyComponent";
+import ITEquipmentForm from "./ITEquipmentForm";
 
-const UpdateAsset = () => {
+const UpdateITEquipment = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
     const { id } = useParams<{ id: string }>();
-    const [defaultAsset, setDefaultAsset] = useState<IAsset>(assetsMock[0]);
+    const [defaultAsset, setDefaultAsset] = useState<IITEquipment>(assetsMock[0]);
     const [option, setOption] = useState<string | undefined>('');
 
     useEffect(() => {
         setDefaultAsset(() => {
-            return assetsMock.find(asset => asset?.id === parseInt(id as string)) as IAsset
+            return assetsMock.find(asset => asset?.id === parseInt(id as string)) as IITEquipment
         })
     }, [id]);
 
@@ -31,9 +27,9 @@ const UpdateAsset = () => {
         formState,
         register,
         reset
-    } = useForm<IAsset>({
+    } = useForm<IITEquipment>({
         mode: 'onChange',
-        resolver: yupResolver(assetSchema),
+        resolver: yupResolver(ITEquipmentSchema),
     });
 
     useEffect(() => {
@@ -41,7 +37,7 @@ const UpdateAsset = () => {
         setOption(defaultAsset.category)
     }, [defaultAsset]);
 
-    const onSubmit = (formData: IAsset) => {
+    const onSubmit = (formData: IITEquipment) => {
         setSendingRequest(true);
         console.log(formData, "form data!!!!!");
         setSendingRequest(false)
@@ -55,13 +51,13 @@ const UpdateAsset = () => {
         <Card sx={{ p: 4 }}>
             <Grid container xs={12}>
                 <Grid item xs={12}>
-                    <Typography sx={{ mb: 4, fontWeight: 600, textTransform: "uppercase", fontSize: '17px' }}>Update Asset</Typography>
+                    <FormHeader header="Update Asset" />
                     <form
                         style={{ width: "100%" }}
                         autoComplete="off"
                         onSubmit={handleSubmit(onSubmit)}
                     >
-                        <AssetForm
+                        <ITEquipmentForm
                             option={option}
                             handleChange={handleChange}
                             buttonText="Submit"
@@ -77,4 +73,4 @@ const UpdateAsset = () => {
     )
 }
 
-export default UpdateAsset
+export default UpdateITEquipment

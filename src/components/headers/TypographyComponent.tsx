@@ -37,3 +37,7 @@ export const LinkComponent = ({
 }: ILinkComponent) => (
   <Link href={href} underline='hover' fontSize={size} sx={{ cursor: "pointer" }} fontWeight={weight}>{text}</Link>
 )
+
+export const FormHeader = ({ header }: { header: string }) => (
+  <Typography sx={{ mb: 4, fontWeight: 600, textTransform: "uppercase", fontSize: '17px' }}>{header}</Typography>
+)

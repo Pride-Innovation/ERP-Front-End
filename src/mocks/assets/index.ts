@@ -1,7 +1,7 @@
-import { IAsset } from "../../pages/assets/interface";
+import { IITEquipment } from "../../pages/assets/ITEquipment/interface";
 import { assetStatus } from "../../utils/constants";
 
-export const assetsMock: IAsset[] = [
+export const assetsMock: IITEquipment[] = [
     {
         id: 1,
         name: "Laptop A",

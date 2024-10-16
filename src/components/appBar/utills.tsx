@@ -56,7 +56,7 @@ const AppBarUtills = () => {
             handleOpen();
         }
         if (modalStates.assets === option) {
-            navigate(ROUTES.CREATE_ASSET)
+            navigate(ROUTES.CREATE_ITEQUIPMENT)
         }
     }
 

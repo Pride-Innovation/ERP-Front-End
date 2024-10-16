@@ -8,8 +8,8 @@ const USERS: string = `${ASSETS_MANAGEMENT}/users`;
 const AUDIT_TRAILS: string = `${ASSETS_MANAGEMENT}/trails`;
 const TEST: string = `${ASSETS_MANAGEMENT}/test`;
 const LIST_ASSETS: string = `${ASSETS_MANAGEMENT}/assets-list`
-const CREATE_ASSET: string = `${ASSETS_MANAGEMENT}/create-asset`
-const UPDATE_ASSET: string = `${ASSETS_MANAGEMENT}/update-asset`
+const CREATE_ITEQUIPMENT: string = `${ASSETS_MANAGEMENT}/create-it-equipment`
+const UPDATE_ITEQUIPMENT: string = `${ASSETS_MANAGEMENT}/update-it-equipment`
 const REQUEST: string = `${ASSETS_MANAGEMENT}/request-asset`
 const CREATE_REQUEST: string = `${ASSETS_MANAGEMENT}/create-request`
 const UPDATE_REQUEST: string = `${ASSETS_MANAGEMENT}/update-request`
@@ -26,8 +26,8 @@ export const ROUTES = {
     AUDIT_TRAILS,
     TEST,
     LIST_ASSETS,
-    CREATE_ASSET,
-    UPDATE_ASSET,
+    CREATE_ITEQUIPMENT,
+    UPDATE_ITEQUIPMENT,
     REQUEST,
     CREATE_REQUEST,
     UPDATE_REQUEST

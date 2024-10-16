@@ -1,3 +1,8 @@
+import { useNavigate } from "react-router";
+import ITEquipmentUtills from "./utills";
+import { useEffect, useState } from "react";
+import { IFormData } from "../interface";
+import { IITEquipment, IITEquipmentForm } from "./interface";
 import {
     FormControl,
     Grid,
@@ -5,23 +10,19 @@ import {
     MenuItem,
     Select,
     Stack
-} from '@mui/material'
-import ButtonComponent from '../../components/forms/Button';
-import { useNavigate } from 'react-router';
-import { ROUTES } from '../../core/routes/routes';
+} from "@mui/material";
+import { Controller } from "react-hook-form";
+import { IOptions } from "../../../components/tables/interface";
 import {
-    UseFormSelect,
-    UseFormInput,
+    UseFormAutocompleteComponent,
     UseFormDatePicker,
-    UseFormAutocompleteComponent
-} from '../../components/forms';
-import { IAsset, IAssetForm, IFormData } from './interface';
-import { useEffect, useState } from 'react';
-import { IOptions } from '../../components/tables/interface';
-import { Controller } from 'react-hook-form';
-import ITEquipmentUtills from './ITEquipment/utills';
+    UseFormInput,
+    UseFormSelect
+} from "../../../components/forms";
+import ButtonComponent from "../../../components/forms/Button";
+import { ROUTES } from "../../../core/routes/routes";
 
-const AssetForm = ({
+const ITEquipmentForm = ({
     formState,
     control,
     register,
@@ -29,10 +30,10 @@ const AssetForm = ({
     sendingRequest,
     option,
     handleChange
-}: IAssetForm) => {
+}: IITEquipmentForm) => {
     const navigate = useNavigate();
     const { formFields, categories, computerFields } = ITEquipmentUtills();
-    const [stateFormFields, setStateFormFields] = useState<Array<IFormData<IAsset>>>(formFields.slice(1));
+    const [stateFormFields, setStateFormFields] = useState<Array<IFormData<IITEquipment>>>(formFields.slice(1));
 
 
     useEffect(() => {
@@ -140,4 +141,4 @@ const AssetForm = ({
     )
 }
 
-export default AssetForm;
+export default ITEquipmentForm

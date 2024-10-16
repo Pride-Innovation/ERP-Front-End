@@ -1,16 +1,17 @@
-import { useForm } from "react-hook-form";
-import { IAsset } from "./interface";
-import { yupResolver } from "@hookform/resolvers/yup";
-import { useEffect, useState } from "react";
-import { Card, Grid, SelectChangeEvent, Typography } from "@mui/material";
-import AssetForm from "./AssetForm";
-import { assetSchema } from "./schema";
+import { useEffect, useState } from 'react'
+import { IITEquipment } from './interface';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { ITEquipmentSchema } from './schema';
+import { Card, Grid, SelectChangeEvent } from '@mui/material';
+import ITEquipmentForm from './ITEquipmentForm';
+import { FormHeader } from '../../../components/headers/TypographyComponent';
 
-const CreateAsset = () => {
+const CreateITEquipment = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
     const [option, setOption] = useState<string | undefined>('');
 
-    const defaultUser: IAsset = {} as IAsset;
+    const defaultUser: IITEquipment = {} as IITEquipment;
 
     const {
         control,
@@ -18,16 +19,16 @@ const CreateAsset = () => {
         formState,
         register,
         reset
-    } = useForm<IAsset>({
+    } = useForm<IITEquipment>({
         mode: 'onChange',
-        resolver: yupResolver(assetSchema),
+        resolver: yupResolver(ITEquipmentSchema),
     });
 
     useEffect(() => {
         reset({ ...defaultUser });
     }, [reset]);
 
-    const onSubmit = (formData: IAsset) => {
+    const onSubmit = (formData: IITEquipment) => {
         setSendingRequest(true);
         console.log(formData, "form data!!!!!");
     };
@@ -40,13 +41,13 @@ const CreateAsset = () => {
         <Card sx={{ p: 4 }}>
             <Grid container xs={12}>
                 <Grid item xs={12}>
-                    <Typography sx={{ mb: 4, fontWeight: 600, textTransform: "uppercase", fontSize: '17px' }}>Create Asset</Typography>
+                    <FormHeader header='Create Asset' />
                     <form
                         style={{ width: "100%" }}
                         autoComplete="off"
                         onSubmit={handleSubmit(onSubmit)}
                     >
-                        <AssetForm
+                        <ITEquipmentForm
                             option={option}
                             handleChange={handleChange}
                             buttonText="Submit"
@@ -62,4 +63,4 @@ const CreateAsset = () => {
     )
 }
 
-export default CreateAsset
+export default CreateITEquipment

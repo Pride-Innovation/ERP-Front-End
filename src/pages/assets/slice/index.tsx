@@ -1,11 +1,11 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { IAsset } from '../interface';
+import { IITEquipment } from '../ITEquipment/interface';
 
-interface IAssetState {
-    assets: IAsset[]
+interface IITEquipmentState {
+    assets: IITEquipment[]
 }
 
-const initialState: IAssetState = {
+const initialState: IITEquipmentState = {
     assets: []
 }
 

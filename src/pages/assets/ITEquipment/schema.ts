@@ -1,6 +1,6 @@
 import * as yup from 'yup';
 
-export const assetSchema = yup.object().shape({
+export const ITEquipmentSchema = yup.object().shape({
     name: yup.string().required('Name is required'),
     category: yup.string().required('Category is required'),
     engravedNumber: yup.string().required('Engraved number is required'),

@@ -50,7 +50,7 @@ const ITEquipment = () => {
 
     const handleOptionClicked = (option: string | number, moduleID?: string | number) => {
         if (option === crudStates.update) {
-            navigate(`${ROUTES.UPDATE_ASSET}/${moduleID}`)
+            navigate(`${ROUTES.UPDATE_ITEQUIPMENT}/${moduleID}`)
         }
         if (option === crudStates.dispose) {
             handleOpen()
@@ -81,7 +81,7 @@ const ITEquipment = () => {
                             header={header}
                             rows={rows}
                             columnHeaders={columnHeaders}
-                            onCreationHandler={() => navigate(ROUTES.CREATE_ASSET)}
+                            onCreationHandler={() => navigate(ROUTES.CREATE_ITEQUIPMENT)}
                             handleOptionClicked={handleOptionClicked}
                             paginationMode='client'
                         />
