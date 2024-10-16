@@ -1,18 +1,19 @@
 import { useEffect, useState } from "react";
-import { ITableHeader } from "../../components/tables/interface";
-import { getTableHeaders } from "../../components/tables/getTableHeaders";
-import { assetsMock } from "../../mocks/assets";
+import { assetsMock } from "../../../mocks/assets";
 import InfoIcon from '@mui/icons-material/Info';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
-import { IAsset, IFormData } from "./interface";
-import { assetStatus } from "../../utils/constants";
+import { ITableHeader } from "../../../components/tables/interface";
+import { getTableHeaders } from "../../../components/tables/getTableHeaders";
+import { IFormData } from "../interface";
+import { IITEquipment } from "./interface";
+import { assetStatus } from "../../../utils/constants";
 
-const AssetUtills = () => {
+const ITEquipmentUtills = () => {
     const endPoint = 'posts';
-    const header = { plural: 'Assets', singular: 'Asset' };
-    const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
+    const header = { plural: 'IT Equipments', singular: 'IT Equipment' };
     const [open, setOpen] = useState<boolean>(false);
+    const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
 
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
@@ -65,40 +66,7 @@ const AssetUtills = () => {
     }, []);
 
 
-    const computerFields: Array<IFormData<IAsset>> = [
-        {
-            value: "ram",
-            label: 'RAM',
-            type: "input"
-        },
-        {
-            value: "cpuSpeed",
-            label: 'CPU Speed',
-            type: "input"
-        },
-        {
-            value: "hardDiskSize",
-            label: 'Hard Disk Size',
-            type: "input"
-        },
-        {
-            value: "ipAddress",
-            label: 'IP Address',
-            type: "input"
-        },
-        {
-            value: "interfaceType",
-            label: 'Interface Type',
-            type: "select",
-            options: [
-                { label: "USB", value: "usb" },
-                { label: "LCD", value: "lcd" },
-                { label: "LED", value: "led" },
-            ]
-        },
-    ]
-
-    const formFields: Array<IFormData<IAsset>> = [
+    const formFields: Array<IFormData<IITEquipment>> = [
         {
             value: "category",
             label: 'Category',
@@ -184,19 +152,53 @@ const AssetUtills = () => {
         }
     ]
 
+    const computerFields: Array<IFormData<IITEquipment>> = [
+        {
+            value: "ram",
+            label: 'RAM',
+            type: "input"
+        },
+        {
+            value: "cpuSpeed",
+            label: 'CPU Speed',
+            type: "input"
+        },
+        {
+            value: "hardDiskSize",
+            label: 'Hard Disk Size',
+            type: "input"
+        },
+        {
+            value: "ipAddress",
+            label: 'IP Address',
+            type: "input"
+        },
+        {
+            value: "interfaceType",
+            label: 'Interface Type',
+            type: "select",
+            options: [
+                { label: "USB", value: "usb" },
+                { label: "LCD", value: "lcd" },
+                { label: "LED", value: "led" },
+            ]
+        },
+    ]
+
     return (
         {
-            columnHeaders,
+            open,
+            setOpen,
+            handleClose,
+            handleOpen,
             endPoint,
             header,
+            columnHeaders,
             formFields,
-            categories,
             computerFields,
-            open,
-            handleClose,
-            handleOpen
+            categories
         }
     )
 }
 
-export default AssetUtills
+export default ITEquipmentUtills

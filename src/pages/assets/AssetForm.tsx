@@ -16,10 +16,10 @@ import {
     UseFormAutocompleteComponent
 } from '../../components/forms';
 import { IAsset, IAssetForm, IFormData } from './interface';
-import AssetUtills from './utils';
 import { useEffect, useState } from 'react';
 import { IOptions } from '../../components/tables/interface';
 import { Controller } from 'react-hook-form';
+import ITEquipmentUtills from './ITEquipment/utills';
 
 const AssetForm = ({
     formState,
@@ -31,7 +31,7 @@ const AssetForm = ({
     handleChange
 }: IAssetForm) => {
     const navigate = useNavigate();
-    const { formFields, categories, computerFields } = AssetUtills();
+    const { formFields, categories, computerFields } = ITEquipmentUtills();
     const [stateFormFields, setStateFormFields] = useState<Array<IFormData<IAsset>>>(formFields.slice(1));
 
 
