@@ -1,6 +1,63 @@
+import { Grid } from "@mui/material"
+import React, { useContext, useEffect, useState } from "react"
+import TableComponent from "../../../components/tables/TableComponent"
+import { useNavigate } from "react-router";
+import FleetUtills from "./utills";
+import RowContext from "../../../context/row/RowContext";
+import { fetchRowsService } from "../../../core/apis/globalService";
+import { GridRowsProp } from "@mui/x-data-grid";
+import { fleetsMock } from "../../../mocks/assets/fleet";
+
 const Fleet = () => {
+    const [loading, setLoading] = useState<boolean>(false);
+    const navigate = useNavigate();
+    const { columnHeaders, header, endPoint, handleClose, handleOpen } = FleetUtills();
+    const { setRows, rows } = useContext(RowContext);
+
+    const fetchResources = async () => {
+        setLoading(true)
+        try {
+            const response = await fetchRowsService(
+                {
+                    page: 1,
+                    size: 10,
+                    endPoint
+                }
+            ) as unknown as GridRowsProp;
+
+            console.log(response, "response!!");
+            setRows([...fleetsMock]);
+
+        } catch (error) {
+            console.log(error)
+        }
+        setLoading(false)
+    }
+
+    useEffect(() => { fetchResources() }, []);
+
     return (
-        <div>Fleet</div>
+        <React.Fragment>
+            {rows?.length > 0 &&
+                <Grid xs={12} container>
+                    {columnHeaders.length > 0 &&
+                        <TableComponent
+                            endPoint={endPoint}
+                            loading={loading}
+                            count={100}
+                            exportData
+                            createAction
+                            importData
+                            header={header}
+                            rows={rows}
+                            columnHeaders={columnHeaders}
+                            // onCreationHandler={() => navigate(ROUTES.CREATE_ITEQUIPMENT)}
+                            // handleOptionClicked={handleOptionClicked}
+                            paginationMode='client'
+                        />
+                    }
+                </Grid>}
+        </React.Fragment>
     )
 }
 
