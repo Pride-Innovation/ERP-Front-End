@@ -16,6 +16,8 @@ import UpdateRequest from '../../pages/request/UpdateRequest'
 import UpdateITEquipment from '../../pages/assets/ITEquipment/UpdateITEquipment'
 import CreateITEquipment from '../../pages/assets/ITEquipment/CreateITEquipment'
 import ITEquipment from '../../pages/assets/ITEquipment'
+import Fleet from '../../pages/assets/fleet'
+import OfficeEquipment from '../../pages/assets/officeEquipment'
 
 const AppRoutes = () => {
   return (
@@ -31,6 +33,8 @@ const AppRoutes = () => {
         <Route path={ROUTES.TEST} element={<TestComponent />} />
         <Route path={ROUTES.LIST_ASSETS} element={<AssetsManagement />} >
           <Route index element={<ITEquipment />} />
+          <Route path={ROUTES.LIST_FLEET} element={<Fleet />} />
+          <Route path={ROUTES.LIST_OFFICE_EQUIPMENT} element={<OfficeEquipment />} />
           <Route path={ROUTES.CREATE_ITEQUIPMENT} element={<CreateITEquipment />} />
           <Route path={`${ROUTES.UPDATE_ITEQUIPMENT}/:id`} element={<UpdateITEquipment />} />
         </Route>

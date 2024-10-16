@@ -13,6 +13,8 @@ const UPDATE_ITEQUIPMENT: string = `${LIST_ASSETS}/update-it-equipment`
 const REQUEST: string = `${ASSETS_MANAGEMENT}/request-asset`
 const CREATE_REQUEST: string = `${ASSETS_MANAGEMENT}/create-request`
 const UPDATE_REQUEST: string = `${ASSETS_MANAGEMENT}/update-request`
+const LIST_OFFICE_EQUIPMENT: string = `${LIST_ASSETS}/office-equipment`
+const LIST_FLEET: string = `${LIST_ASSETS}/fleet`
 
 
 export const ROUTES = {
@@ -30,5 +32,7 @@ export const ROUTES = {
     UPDATE_ITEQUIPMENT,
     REQUEST,
     CREATE_REQUEST,
-    UPDATE_REQUEST
+    UPDATE_REQUEST,
+    LIST_OFFICE_EQUIPMENT,
+    LIST_FLEET
 }
