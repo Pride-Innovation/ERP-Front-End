@@ -1,51 +1,39 @@
 import { ITableHeader } from "./interface";
 
 export const getTableHeaders = (obj: Object): Array<ITableHeader> => {
-    return Object.entries(obj).map(([key, value]) => {
-        const valueType = typeof value;
 
-        if (['string', 'number'].includes(valueType) &&
-            !["action", "image", "assetStatus", "status"].includes(key)) {
-            return {
+    return Object.entries(obj).map(([key, value]) => {
+        
+        return ['string', 'number'].includes(typeof value)
+            && !(["action", "image", "assetStatus", "status"].includes(key))
+            ? ({
                 label: key,
                 isText: true,
-            };
-        }
+            }) : ['string'].includes(typeof value)
+                && !(["action", "assetStatus", "status"].includes(key))
+                && key === "image"
+                ? ({
+                    label: key,
+                    isImage: true,
+                }) : ['string'].includes(typeof value)
+                    && !(["image", "action"].includes(key))
+                    && ["status", "assetStatus"].includes(key)
+                    ? ({
+                        label: key,
+                        isStatus: true,
+                    })
+                    : (typeof value === 'boolean' && key !== "action") ? ({
+                        label: key,
+                        isBoolen: true
+                    })
+                        : (key === "action" && typeof value === 'object') ? ({
+                            label: key,
+                            isAction: true,
+                            actionData: {
+                                label: value?.label,
+                                options: value?.options
+                            }
+                        }) : null
 
-        if (valueType === 'string' && key === "image" &&
-            !["action", "assetStatus", "status"].includes(key)) {
-            return {
-                label: key,
-                isImage: true,
-            };
-        }
-
-        if (['string'].includes(valueType) &&
-            ["status", "assetStatus"].includes(key)) {
-            return {
-                label: key,
-                isStatus: true,
-            };
-        }
-
-        if (valueType === 'boolean' && key !== "action") {
-            return {
-                label: key,
-                isBoolean: true,
-            };
-        }
-
-        if (key === "action" && valueType === 'object') {
-            return {
-                label: key,
-                isAction: true,
-                actionData: {
-                    label: value?.label,
-                    options: value?.options,
-                },
-            };
-        }
-
-        return null;
-    }).filter(header => header !== null) as Array<ITableHeader>;
+    }) as Array<ITableHeader>;
 }
