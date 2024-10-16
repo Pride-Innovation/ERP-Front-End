@@ -14,7 +14,7 @@ import { useEffect, useState } from 'react';
 import CustomTablePagination from './TablePagination';
 import ButtonComponent from '../forms/Button';
 import TimeLineDot from '../timeLineDots';
-import { assetStatus, requestStatus } from '../../utils/constants';
+import TableUtills from './utills';
 
 const TableComponent = ({
     columnHeaders,
@@ -34,6 +34,7 @@ const TableComponent = ({
     const [filteredRows, setFilteredRows] = useState<GridRowsProp>(rows);
     const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
     const [currentID, setCurrentId] = useState<string | number>("")
+    const { determineTimeLineDotColor } = TableUtills();
 
     const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
         setAnchorEl(event.currentTarget);
@@ -75,17 +76,7 @@ const TableComponent = ({
                                         textTransform: "capitalize"
                                     }}
                                     weight={400} size='13.5px'>
-                                    <TimeLineDot color={
-                                        (value === requestStatus.approved ||
-                                            value === assetStatus.use
-                                        ) ? 'green' :
-                                            (value === requestStatus.pending ||
-                                                value === assetStatus.repair
-                                            ) ? 'orange' :
-                                                (value === requestStatus.rejected ||
-                                                    value === assetStatus.disposed
-                                                ) ? 'red' : "blue"
-                                    } />
+                                    <TimeLineDot color={determineTimeLineDotColor(value)} />
                                     {value}</TypographyComponent>
                             </StyledBox>
                         )
