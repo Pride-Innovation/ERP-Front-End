@@ -13,7 +13,7 @@ import { crudStates } from "../../../utils/constants";
 const Fleet = () => {
     const [loading, setLoading] = useState<boolean>(false);
     const navigate = useNavigate();
-    const { columnHeaders, header, endPoint, handleClose, handleOpen } = FleetUtills();
+    const { columnHeaders, header, endPoint, handleOpen } = FleetUtills();
     const { setRows, rows } = useContext(RowContext);
 
     const fetchResources = async () => {

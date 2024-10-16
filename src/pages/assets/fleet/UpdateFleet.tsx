@@ -7,12 +7,12 @@ import { FormHeader } from "../../../components/headers/TypographyComponent";
 import { IFleet } from "./interface";
 import { fleetsMock } from "../../../mocks/assets/fleet";
 import { fleetSchema } from "./schema";
+import FleetForm from "./FleetForm";
 
 const UpdateFleet = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
     const { id } = useParams<{ id: string }>();
     const [defaultAsset, setDefaultAsset] = useState<IFleet>(fleetsMock[0]);
-    const [option, setOption] = useState<string | undefined>('');
 
     useEffect(() => {
         setDefaultAsset(() => {
@@ -53,7 +53,13 @@ const UpdateFleet = () => {
                         autoComplete="off"
                         onSubmit={handleSubmit(onSubmit)}
                     >
-                        <p> Update Fleet</p>
+                        <FleetForm
+                            buttonText="Submit"
+                            formState={formState}
+                            control={control}
+                            sendingRequest={sendingRequest}
+                            register={register}
+                        />
                     </form>
                 </Grid>
             </Grid>

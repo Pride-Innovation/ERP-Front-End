@@ -1,3 +1,5 @@
+import { Control, FieldError, FormState, UseFormRegister } from "react-hook-form";
+
 export interface IFleet {
     id?: string | number;
     assetName: string;
@@ -29,4 +31,33 @@ export interface IExtraFleetFields {
     col3: string;
     col4: string;
     col5: string;
+}
+
+
+export interface IFleetForm {
+    formState: FormState<IFleet> & {
+        errors: {
+            name?: FieldError;
+            assetName?: FieldError;
+            hostname?: FieldError;
+            detailNetBookValue?: FieldError;
+            engravedNumber?: FieldError;
+            dateReceipt?: FieldError;
+            make?: FieldError;
+            assetCategory_id?: FieldError;
+            supplier?: FieldError;
+            unitOfMeasure?: FieldError;
+            purchaseCost?: FieldError;
+            costOfTheAsset?: FieldError;
+            netValueB?: FieldError;
+            registrationNumber?: FieldError;
+            desc?: FieldError;
+            image?: FieldError;
+            assetStatus?: FieldError;
+        };
+    };
+    control: Control<IFleet>;
+    register: UseFormRegister<IFleet>;
+    buttonText: string;
+    sendingRequest: boolean;
 }

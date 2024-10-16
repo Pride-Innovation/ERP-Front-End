@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { Card, Grid, SelectChangeEvent } from '@mui/material';
+import { Card, Grid } from '@mui/material';
 import { FormHeader } from '../../../components/headers/TypographyComponent';
 import { IFleet } from './interface';
 import { fleetSchema } from './schema';
+import FleetForm from './FleetForm';
 
 const CreateFleet = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
-    const [option, setOption] = useState<string | undefined>('');
 
     const defaultUser: IFleet = {} as IFleet;
 
@@ -32,10 +32,6 @@ const CreateFleet = () => {
         console.log(formData, "form data!!!!!");
     };
 
-    const handleChange = (event: SelectChangeEvent) => {
-        setOption(event.target.value as string);
-    };
-
     return (
         <Card sx={{ p: 4 }}>
             <Grid container xs={12}>
@@ -46,7 +42,13 @@ const CreateFleet = () => {
                         autoComplete="off"
                         onSubmit={handleSubmit(onSubmit)}
                     >
-                        <p>Fleet Form</p>
+                        <FleetForm
+                            buttonText="Submit"
+                            formState={formState}
+                            control={control}
+                            sendingRequest={sendingRequest}
+                            register={register}
+                        />
                     </form>
                 </Grid>
             </Grid>

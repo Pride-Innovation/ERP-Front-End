@@ -5,6 +5,8 @@ import InfoIcon from '@mui/icons-material/Info';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import { getTableHeaders } from "../../../components/tables/getTableHeaders";
+import { IFormData } from "../interface";
+import { IFleet } from "./interface";
 
 const FleetUtills = () => {
     const endPoint = 'posts';
@@ -46,6 +48,101 @@ const FleetUtills = () => {
         setColumnHeaders(getTableHeaders(rowData))
     }, []);
 
+
+    const formFields: Array<IFormData<IFleet>> = [
+        {
+            value: "assetName",
+            label: 'Asset Name',
+            type: "input"
+        },
+        {
+            value: "hostname",
+            label: 'Host Name',
+            type: "input"
+        },
+        {
+            value: "detailNetBookValue",
+            label: 'Detail Net Book Value',
+            type: "input"
+        },
+        {
+            value: "engravedNumber",
+            label: 'Engraved Number',
+            type: "input"
+        },
+        {
+            value: "dateReceipt",
+            label: 'Date Receipt',
+            type: "date"
+        },
+        {
+            value: "make",
+            label: 'Make',
+            type: "input"
+        },
+        {
+            value: "assetCategory_id",
+            label: 'Category',
+            type: "select",
+            options: [
+                { label: "Truck", value: "truck" },
+                { label: "Double Cabin", value: "doubleCabin" },
+                { label: "Motor Bike", value: "bike" }
+            ]
+        },
+        {
+            value: "supplier",
+            label: 'Supplier',
+            type: "input"
+        },
+        {
+            value: "unitOfMeasure",
+            label: 'Unit of Measure',
+            type: "input"
+        },
+        {
+            value: "purchaseCost",
+            label: 'Purchase Cost',
+            type: "input"
+        },
+        {
+            value: "purchaseCost",
+            label: 'Purchase Cost',
+            type: "input",
+        },
+        {
+            value: "costOfTheAsset",
+            label: 'Cost of Asset',
+            type: "input",
+        },
+        {
+            value: "netValueB",
+            label: 'Net Value B',
+            type: "input",
+        },
+        {
+            value: "registrationNumber",
+            label: 'Registration Number',
+            type: "input",
+        },
+        {
+            value: "desc",
+            label: 'Description',
+            type: "input",
+        },
+        {
+            value: "assetStatus",
+            label: 'Asset Status',
+            type: "select",
+            options: [
+                { label: "In Use", value: "use" },
+                { label: "In Store", value: "store"},
+                { label: "In Repair", value: "repair" },
+                { label: "Disposed/Decommisioned", value: "repair" },
+            ]
+        }
+    ]
+
     return (
         {
             endPoint,
@@ -53,7 +150,8 @@ const FleetUtills = () => {
             handleClose,
             handleOpen,
             columnHeaders,
-            header
+            header,
+            formFields
         }
     )
 }
