@@ -1,6 +1,7 @@
 import { GridRowModel } from "@mui/x-data-grid";
 import MaleAvatar from '../statics/images/male.jpg';
 import FemaleAvatar from '../statics/images/Female.jpg';
+import Placeholder from '../statics/images/Placeholder.png';
 
 export const camelCaseToWords = (camelCaseString: string) => {
     return camelCaseString
@@ -38,6 +39,6 @@ export const determineImage = (row: GridRowModel): string => {
             return FemaleAvatar
         }
     }
-    
-    return "";
+
+    return Placeholder;
 }
