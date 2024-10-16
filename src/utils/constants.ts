@@ -31,10 +31,12 @@ export const assetStatus: {
     use: string;
     store: string;
     repair: string;
-    disposed: string
+    disposed: string;
+    active: string;
 } = {
     use: "use",
     store: "store",
     repair: "repair",
-    disposed: "disposed"
+    disposed: "disposed",
+    active: 'active'
 }

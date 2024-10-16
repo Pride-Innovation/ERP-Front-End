@@ -5,6 +5,7 @@ const TableUtills = () => {
         switch (value) {
             case requestStatus.approved:
             case assetStatus.use:
+            case assetStatus.active:
                 return 'green';
             case requestStatus.pending:
             case assetStatus.repair:
