@@ -12,10 +12,10 @@ export interface IFleet {
     purchaseCost: string;
     costOfTheAsset: string;
     netValueB: string;
-    registrationNumber?: string;
-    desc?: string;
-    image?: string;
-    assetStatus?: string;
+    registrationNumber?: string | null;
+    desc?: string | null;
+    image?: string | null;
+    assetStatus?: string | null;
 }
 
 export interface IExtraFleetFields {

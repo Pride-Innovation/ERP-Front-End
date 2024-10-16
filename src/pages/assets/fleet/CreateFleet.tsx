@@ -1,17 +1,16 @@
 import { useEffect, useState } from 'react'
-import { IITEquipment } from './interface';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { ITEquipmentSchema } from './schema';
 import { Card, Grid, SelectChangeEvent } from '@mui/material';
-import ITEquipmentForm from './ITEquipmentForm';
 import { FormHeader } from '../../../components/headers/TypographyComponent';
+import { IFleet } from './interface';
+import { fleetSchema } from './schema';
 
-const CreateITEquipment = () => {
+const CreateFleet = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
     const [option, setOption] = useState<string | undefined>('');
 
-    const defaultUser: IITEquipment = {} as IITEquipment;
+    const defaultUser: IFleet = {} as IFleet;
 
     const {
         control,
@@ -19,16 +18,16 @@ const CreateITEquipment = () => {
         formState,
         register,
         reset
-    } = useForm<IITEquipment>({
+    } = useForm<IFleet>({
         mode: 'onChange',
-        resolver: yupResolver(ITEquipmentSchema),
+        resolver: yupResolver(fleetSchema),
     });
 
     useEffect(() => {
         reset({ ...defaultUser });
     }, [reset]);
 
-    const onSubmit = (formData: IITEquipment) => {
+    const onSubmit = (formData: IFleet) => {
         setSendingRequest(true);
         console.log(formData, "form data!!!!!");
     };
@@ -41,21 +40,13 @@ const CreateITEquipment = () => {
         <Card sx={{ p: 4 }}>
             <Grid container xs={12}>
                 <Grid item xs={12}>
-                    <FormHeader header='Create IT Equipment' />
+                    <FormHeader header='Create Fleet' />
                     <form
                         style={{ width: "100%" }}
                         autoComplete="off"
                         onSubmit={handleSubmit(onSubmit)}
                     >
-                        <ITEquipmentForm
-                            option={option}
-                            handleChange={handleChange}
-                            buttonText="Submit"
-                            formState={formState}
-                            control={control}
-                            sendingRequest={sendingRequest}
-                            register={register}
-                        />
+                        <p>Fleet Form</p>
                     </form>
                 </Grid>
             </Grid>
@@ -63,4 +54,4 @@ const CreateITEquipment = () => {
     )
 }
 
-export default CreateITEquipment
+export default CreateFleet

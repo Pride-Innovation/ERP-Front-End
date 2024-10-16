@@ -7,6 +7,8 @@ import RowContext from "../../../context/row/RowContext";
 import { fetchRowsService } from "../../../core/apis/globalService";
 import { GridRowsProp } from "@mui/x-data-grid";
 import { fleetsMock } from "../../../mocks/assets/fleet";
+import { ROUTES } from "../../../core/routes/routes";
+import { crudStates } from "../../../utils/constants";
 
 const Fleet = () => {
     const [loading, setLoading] = useState<boolean>(false);
@@ -36,6 +38,15 @@ const Fleet = () => {
 
     useEffect(() => { fetchResources() }, []);
 
+    const handleOptionClicked = (option: string | number, moduleID?: string | number) => {
+        if (option === crudStates.update) {
+            navigate(`${ROUTES.UPDATE_FLEET}/${moduleID}`)
+        }
+        if (option === crudStates.dispose) {
+            handleOpen()
+        }
+    }
+
     return (
         <React.Fragment>
             {rows?.length > 0 &&
@@ -51,8 +62,8 @@ const Fleet = () => {
                             header={header}
                             rows={rows}
                             columnHeaders={columnHeaders}
-                            // onCreationHandler={() => navigate(ROUTES.CREATE_ITEQUIPMENT)}
-                            // handleOptionClicked={handleOptionClicked}
+                            onCreationHandler={() => navigate(ROUTES.CREATE_FLEET)}
+                            handleOptionClicked={handleOptionClicked}
                             paginationMode='client'
                         />
                     }

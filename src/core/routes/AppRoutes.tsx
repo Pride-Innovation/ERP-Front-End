@@ -18,6 +18,8 @@ import CreateITEquipment from '../../pages/assets/ITEquipment/CreateITEquipment'
 import ITEquipment from '../../pages/assets/ITEquipment'
 import Fleet from '../../pages/assets/fleet'
 import OfficeEquipment from '../../pages/assets/officeEquipment'
+import CreateFleet from '../../pages/assets/fleet/CreateFleet'
+import UpdateFleet from '../../pages/assets/fleet/UpdateFleet'
 
 const AppRoutes = () => {
   return (
@@ -37,6 +39,8 @@ const AppRoutes = () => {
           <Route path={ROUTES.LIST_OFFICE_EQUIPMENT} element={<OfficeEquipment />} />
           <Route path={ROUTES.CREATE_ITEQUIPMENT} element={<CreateITEquipment />} />
           <Route path={`${ROUTES.UPDATE_ITEQUIPMENT}/:id`} element={<UpdateITEquipment />} />
+          <Route path={ROUTES.CREATE_FLEET} element={<CreateFleet />} />
+          <Route path={`${ROUTES.UPDATE_FLEET}/:id`} element={<UpdateFleet />} />
         </Route>
         <Route path={ROUTES.REQUEST} element={<Request />} />
         <Route path={ROUTES.CREATE_REQUEST} element={<CreateRequest />} />
