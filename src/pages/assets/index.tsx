@@ -1,10 +1,10 @@
-import ITEquipment from './ITEquipment';
+import { Outlet } from 'react-router';
 
 const AssetsManagement = () => {
 
     return (
         <>
-          <ITEquipment />
+        <Outlet/>
         </>
     )
 }

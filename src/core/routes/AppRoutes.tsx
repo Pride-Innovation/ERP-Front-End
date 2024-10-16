@@ -15,6 +15,7 @@ import CreateRequest from '../../pages/request/CreateRequest'
 import UpdateRequest from '../../pages/request/UpdateRequest'
 import UpdateITEquipment from '../../pages/assets/ITEquipment/UpdateITEquipment'
 import CreateITEquipment from '../../pages/assets/ITEquipment/CreateITEquipment'
+import ITEquipment from '../../pages/assets/ITEquipment'
 
 const AppRoutes = () => {
   return (
@@ -28,9 +29,11 @@ const AppRoutes = () => {
         <Route path={ROUTES.USERS} element={<Users />} />
         <Route path={ROUTES.AUDIT_TRAILS} element={<AuditTrails />} />
         <Route path={ROUTES.TEST} element={<TestComponent />} />
-        <Route path={ROUTES.LIST_ASSETS} element={<AssetsManagement />} />
-        <Route path={ROUTES.CREATE_ITEQUIPMENT} element={<CreateITEquipment />} />
-        <Route path={`${ROUTES.UPDATE_ITEQUIPMENT}/:id`} element={<UpdateITEquipment />} />
+        <Route path={ROUTES.LIST_ASSETS} element={<AssetsManagement />} >
+          <Route index element={<ITEquipment />} />
+          <Route path={ROUTES.CREATE_ITEQUIPMENT} element={<CreateITEquipment />} />
+          <Route path={`${ROUTES.UPDATE_ITEQUIPMENT}/:id`} element={<UpdateITEquipment />} />
+        </Route>
         <Route path={ROUTES.REQUEST} element={<Request />} />
         <Route path={ROUTES.CREATE_REQUEST} element={<CreateRequest />} />
         <Route path={`${ROUTES.UPDATE_REQUEST}/:id`} element={<UpdateRequest />} />
