@@ -17,6 +17,8 @@ const LIST_OFFICE_EQUIPMENT: string = `${LIST_ASSETS}/office-equipment`
 const LIST_FLEET: string = `${LIST_ASSETS}/fleet`
 const CREATE_FLEET: string = `${LIST_ASSETS}/create-fleet`
 const UPDATE_FLEET: string = `${LIST_ASSETS}/update-fleet`
+const CREATE_OFFICE_EQUIPMENT: string = `${LIST_ASSETS}/create-office-equipment`
+const UPDATE_OFFICE_EQUIPMENT: string = `${LIST_ASSETS}/update-office-equipment`
 
 
 export const ROUTES = {
@@ -38,5 +40,7 @@ export const ROUTES = {
     LIST_OFFICE_EQUIPMENT,
     LIST_FLEET,
     CREATE_FLEET,
-    UPDATE_FLEET
+    UPDATE_FLEET,
+    CREATE_OFFICE_EQUIPMENT,
+    UPDATE_OFFICE_EQUIPMENT
 }

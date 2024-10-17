@@ -12,6 +12,7 @@ import { Grid } from "@mui/material";
 import { officeEquipmentMock } from "../../../mocks/officeEquipment";
 import OfficeEquipmentUtills from "./utills";
 import TableComponent from "../../../components/tables/TableComponent";
+import { ROUTES } from "../../../core/routes/routes";
 
 const OfficeEquipment = () => {
     const [loading, setLoading] = useState<boolean>(false);
@@ -43,7 +44,7 @@ const OfficeEquipment = () => {
 
     const handleOptionClicked = (option: string | number, moduleID?: string | number) => {
         if (option === crudStates.update) {
-            // navigate(`${ROUTES.UPDATE_FLEET}/${moduleID}`)
+            navigate(`${ROUTES.UPDATE_OFFICE_EQUIPMENT}/${moduleID}`)
         }
         if (option === crudStates.dispose) {
             handleOpen()
@@ -65,7 +66,7 @@ const OfficeEquipment = () => {
                             header={header}
                             rows={rows}
                             columnHeaders={columnHeaders}
-                            // onCreationHandler={() => navigate(ROUTES.CREATE_FLEET)}
+                            onCreationHandler={() => navigate(ROUTES.CREATE_OFFICE_EQUIPMENT)}
                             handleOptionClicked={handleOptionClicked}
                             paginationMode='client'
                         />
