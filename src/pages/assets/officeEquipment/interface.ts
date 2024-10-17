@@ -1,5 +1,5 @@
 export interface IOfficeEquipment {
-    id: string | number;
+    id?: string | number;
     assetName: string;
     hostname: string;
     detailNetBookValue: string;
@@ -12,9 +12,9 @@ export interface IOfficeEquipment {
     purchaseCost: string;
     costOfTheAsset: string;
     netValueB: string;
-    assetStatus?: string;
-    desc?: string;
-    image?: string;
+    assetStatus?: string | null;
+    desc?: string | null;
+    image?: string | null;
 }
 
 export interface IOfficeEquipmentExtra {
