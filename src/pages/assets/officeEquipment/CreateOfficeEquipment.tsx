@@ -2,13 +2,13 @@ import { useEffect, useState } from "react";
 import { IOfficeEquipment } from "./interface";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Card, Grid, SelectChangeEvent } from "@mui/material";
+import { Card, Grid } from "@mui/material";
 import { FormHeader } from "../../../components/headers/TypographyComponent";
 import { officeEquipmentSchema } from "./schema";
+import OfficeEquipmentForm from "./OfficeEquipmentForm";
 
 const CreateOfficeEquipment = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
-    const [option, setOption] = useState<string | undefined>('');
 
     const defaultUser: IOfficeEquipment = {} as IOfficeEquipment;
 
@@ -32,9 +32,7 @@ const CreateOfficeEquipment = () => {
         console.log(formData, "form data!!!!!");
     };
 
-    const handleChange = (event: SelectChangeEvent) => {
-        setOption(event.target.value as string);
-    };
+
     return (
         <Card sx={{ p: 4 }}>
             <Grid container xs={12}>
@@ -45,7 +43,12 @@ const CreateOfficeEquipment = () => {
                         autoComplete="off"
                         onSubmit={handleSubmit(onSubmit)}
                     >
-                        Create Office Equipment!!!
+                        <OfficeEquipmentForm
+                            buttonText="Submit"
+                            formState={formState}
+                            control={control}
+                            sendingRequest={sendingRequest}
+                            register={register} />
                     </form>
                 </Grid>
             </Grid>

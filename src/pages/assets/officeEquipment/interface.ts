@@ -1,3 +1,5 @@
+import { Control, FieldError, FormState, UseFormRegister } from "react-hook-form";
+
 export interface IOfficeEquipment {
     id?: string | number;
     assetName: string;
@@ -28,4 +30,31 @@ export interface IOfficeEquipmentExtra {
     col3: string;
     col4: string;
     col5: string;
+}
+
+export interface IOfficeEquipmentForm {
+    formState: FormState<IOfficeEquipment> & {
+        errors: {
+            name?: FieldError;
+            assetName?: FieldError;
+            hostname?: FieldError;
+            detailNetBookValue?: FieldError;
+            engravedNumber?: FieldError;
+            dateReceipt?: FieldError;
+            make?: FieldError;
+            assetCategory_id?: FieldError;
+            supplier?: FieldError;
+            unitOfMeasure?: FieldError;
+            purchaseCost?: FieldError;
+            costOfTheAsset?: FieldError;
+            netValueB?: FieldError;
+            desc?: FieldError;
+            image?: FieldError;
+            assetStatus?: FieldError;
+        };
+    };
+    control: Control<IOfficeEquipment>;
+    register: UseFormRegister<IOfficeEquipment>;
+    buttonText: string;
+    sendingRequest: boolean;
 }

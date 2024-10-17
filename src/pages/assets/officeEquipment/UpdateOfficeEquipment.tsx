@@ -7,6 +7,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { officeEquipmentSchema } from './schema';
 import { Card, Grid } from '@mui/material';
 import { FormHeader } from '../../../components/headers/TypographyComponent';
+import OfficeEquipmentForm from './OfficeEquipmentForm';
 
 const UpdateOfficeEquipment = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
@@ -40,8 +41,6 @@ const UpdateOfficeEquipment = () => {
         setSendingRequest(false)
     };
 
-
-
     return (
         <Card sx={{ p: 4 }}>
             <Grid container xs={12}>
@@ -52,7 +51,12 @@ const UpdateOfficeEquipment = () => {
                         autoComplete="off"
                         onSubmit={handleSubmit(onSubmit)}
                     >
-                        Update Office Equipment
+                        <OfficeEquipmentForm
+                            buttonText="Submit"
+                            formState={formState}
+                            control={control}
+                            sendingRequest={sendingRequest}
+                            register={register} />
                     </form>
                 </Grid>
             </Grid>
