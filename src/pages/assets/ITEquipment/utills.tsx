@@ -11,7 +11,7 @@ import { assetStatus } from "../../../utils/constants";
 
 const ITEquipmentUtills = () => {
     const endPoint = 'posts';
-    const header = { plural: 'IT Equipments', singular: 'IT Equipment' };
+    const header = { plural: 'IT Equipment', singular: 'IT Equipment' };
     const [open, setOpen] = useState<boolean>(false);
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
 

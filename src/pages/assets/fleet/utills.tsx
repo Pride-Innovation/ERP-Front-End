@@ -10,7 +10,7 @@ import { IFleet } from "./interface";
 
 const FleetUtills = () => {
     const endPoint = 'posts';
-    const header = { plural: 'Fleets', singular: 'Fleet' };
+    const header = { plural: 'Fleet', singular: 'Fleet' };
     const [open, setOpen] = useState<boolean>(false);
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
 
