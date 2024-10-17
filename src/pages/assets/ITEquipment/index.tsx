@@ -8,9 +8,9 @@ import { useContext, useEffect, useState } from "react"
 import { fetchRowsService } from "../../../core/apis/globalService"
 import RowContext from "../../../context/row/RowContext"
 import { GridRowsProp } from "@mui/x-data-grid"
-import { assetsMock } from "../../../mocks/assets"
 import { crudStates } from "../../../utils/constants"
 import { ROUTES } from "../../../core/routes/routes"
+import { itEquipmentMock } from "../../../mocks/itEquipment"
 
 const ITEquipment = () => {
     const [loading, setLoading] = useState<boolean>(false);
@@ -39,7 +39,7 @@ const ITEquipment = () => {
 
             console.log(response, "response!!");
             
-            setRows([...assetsMock]);
+            setRows([...itEquipmentMock]);
         } catch (error) {
             console.log(error)
         }

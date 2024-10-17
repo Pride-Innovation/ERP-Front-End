@@ -5,7 +5,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { Card, Grid } from "@mui/material";
 import { FormHeader } from "../../../components/headers/TypographyComponent";
 import { IFleet } from "./interface";
-import { fleetsMock } from "../../../mocks/assets/fleet";
+import { fleetsMock } from "../../../mocks/fleet";
 import { fleetSchema } from "./schema";
 import FleetForm from "./FleetForm";
 

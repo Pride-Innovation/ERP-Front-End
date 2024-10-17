@@ -1,23 +1,23 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { IITEquipment } from "./interface";
-import { assetsMock } from "../../../mocks/assets";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { ITEquipmentSchema } from "./schema";
 import { Card, Grid, SelectChangeEvent } from "@mui/material";
 import { FormHeader } from "../../../components/headers/TypographyComponent";
 import ITEquipmentForm from "./ITEquipmentForm";
+import { itEquipmentMock } from "../../../mocks/itEquipment";
 
 const UpdateITEquipment = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
     const { id } = useParams<{ id: string }>();
-    const [defaultAsset, setDefaultAsset] = useState<IITEquipment>(assetsMock[0]);
+    const [defaultAsset, setDefaultAsset] = useState<IITEquipment>(itEquipmentMock[0]);
     const [option, setOption] = useState<string | undefined>('');
 
     useEffect(() => {
         setDefaultAsset(() => {
-            return assetsMock.find(asset => asset?.id === parseInt(id as string)) as IITEquipment
+            return itEquipmentMock.find(asset => asset?.id === parseInt(id as string)) as IITEquipment
         })
     }, [id]);
 
@@ -34,7 +34,7 @@ const UpdateITEquipment = () => {
 
     useEffect(() => {
         reset({ ...defaultAsset });
-        setOption(defaultAsset.category)
+        setOption(defaultAsset.category as string)
     }, [defaultAsset]);
 
     const onSubmit = (formData: IITEquipment) => {

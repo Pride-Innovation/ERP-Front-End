@@ -6,7 +6,7 @@ import FleetUtills from "./utills";
 import RowContext from "../../../context/row/RowContext";
 import { fetchRowsService } from "../../../core/apis/globalService";
 import { GridRowsProp } from "@mui/x-data-grid";
-import { fleetsMock } from "../../../mocks/assets/fleet";
+import { fleetsMock } from "../../../mocks/fleet";
 import { ROUTES } from "../../../core/routes/routes";
 import { crudStates } from "../../../utils/constants";
 

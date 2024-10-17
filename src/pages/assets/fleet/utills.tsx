@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { ITableHeader } from "../../../components/tables/interface";
-import { fleetsMock } from "../../../mocks/assets/fleet";
+import { fleetsMock } from "../../../mocks/fleet";
 import InfoIcon from '@mui/icons-material/Info';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';

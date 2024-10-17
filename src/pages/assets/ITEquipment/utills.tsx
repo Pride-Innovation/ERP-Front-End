@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { assetsMock } from "../../../mocks/assets";
 import InfoIcon from '@mui/icons-material/Info';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
@@ -8,6 +7,7 @@ import { getTableHeaders } from "../../../components/tables/getTableHeaders";
 import { IFormData } from "../interface";
 import { IITEquipment } from "./interface";
 import { assetStatus } from "../../../utils/constants";
+import { itEquipmentMock } from "../../../mocks/itEquipment";
 
 const ITEquipmentUtills = () => {
     const endPoint = 'posts';
@@ -34,21 +34,29 @@ const ITEquipmentUtills = () => {
     const {
         id,
         model,
-        serialNo,
         ram,
         cpuSpeed,
         hardDiskSize,
         ipAddress,
         macAddress,
+        image,
         interfaceType,
         purchaseCost,
-        costOfAsset,
-        netValue,
-        depreciationRate,
+        detailNetBookValue,
+        dateReceipt,
+        supplier,
+        unitOfMeasure,
+        assetDepreciationRate,
+        assetSubCategory_id,
+        desc,
+        netValueB,
+        costOfTheAsset,
+        hostname,
         ...data
-    } = assetsMock[0];
+    } = itEquipmentMock[0];
 
     const rowData = {
+        image: itEquipmentMock[0].image,
         ...data,
         action: {
             label: "options",
@@ -80,12 +88,10 @@ const ITEquipmentUtills = () => {
                 { label: "Accesories ( Mouse, Keyboard, etc )", value: categories.accesories },
                 { label: "Components ( RAM, SSD/HDD, etc )", value: categories.component },
                 { label: "Receipt Printer", value: categories.receiptPrinter },
-                { label: "Consumables", value: categories.consumables },
-                { label: "Office Equipment ( Desk, Chairs, etc)", value: categories.officeEquipment },
             ]
         },
         {
-            value: "name",
+            value: "assetName",
             label: 'Asset Name',
             type: "input"
         },
@@ -100,12 +106,12 @@ const ITEquipmentUtills = () => {
             type: "input"
         },
         {
-            value: "serialNo",
+            value: "serialNumber",
             label: 'Serial Number',
             type: "input"
         },
         {
-            value: "status",
+            value: "assetStatus",
             label: 'Status',
             type: "select",
             options: [
@@ -116,17 +122,17 @@ const ITEquipmentUtills = () => {
             ]
         },
         {
-            value: "netValue",
+            value: "netValueB",
             label: 'Net Value',
             type: "input"
         },
         {
-            value: "depreciationRate",
+            value: "assetDepreciationRate",
             label: 'Depreciation Rate',
             type: "input"
         },
         {
-            value: "assignedTo",
+            value: "user_id",
             label: 'Assigned To',
             type: "input"
         },
@@ -144,11 +150,6 @@ const ITEquipmentUtills = () => {
             value: "purchaseCost",
             label: 'Purchase Cost',
             type: "input",
-        },
-        {
-            value: "verificationDate",
-            label: 'Verification Date',
-            type: "date",
         }
     ]
 

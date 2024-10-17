@@ -3,51 +3,80 @@ import { Control, FieldError, FormState, UseFormRegister } from "react-hook-form
 
 export interface IITEquipment {
     id?: string | number;
-    name: string;
-    category: string;
+    assetName: string;
+    hostname: string;
+    detailNetBookValue: string;
     engravedNumber: string;
-    model: string;
-    serialNo: string;
+    dateReceipt: string;
+    make: string;
+    assetCategory_id: string;
+    supplier: string;
+    unitOfMeasure: string;
+    purchaseCost: string;
+    costOfTheAsset: string;
+    netValueB: string,
+    model?: string | null;
+    serialNumber?: string | null;
+    user_id?: string | null;
     ram?: string | null;
     cpuSpeed?: string | null;
     hardDiskSize?: string | null;
-    ipAddress?: string | null;
-    macAddress?: string | null;
-    interfaceType?: string | null;
     location?: string | null;
-    status?: string | null;
-    purchaseCost?: string | null;
-    verificationDate?: string | null;
-    deploymentDate?: string | null;
-    costOfAsset?: number | null;
-    netValue?: string | null;
-    depreciationRate?: string | null;
-    assignedTo?: string | null
+    macAddress?: string | null;
+    ipAddress?: string | null;
+    interfaceType?: string | null;
+    assetDepreciationRate?: string | null;
+    assetSubCategory_id?: string | null;
+    desc?: string | null;
+    image?: string | null;
+    assetStatus?: string | null;
+    category?: string | null
+}
+
+
+export interface IITEquipmentExtras {
+    status1: string;
+    status2: string;
+    status3: string;
+    status4: string;
+    status5: string;
+    col1: string;
+    col2: string;
+    col3: string;
+    col4: string;
+    col5: string;
 }
 
 export interface IITEquipmentForm {
     formState: FormState<IITEquipment> & {
         errors: {
-            name?: FieldError;
-            category?: FieldError;
-            engravedNumber?: FieldError;
-            model?: FieldError;
-            serialNo?: FieldError;
-            ram?: FieldError;
-            cpuSpeed?: FieldError;
-            hardDiskSize?: FieldError;
-            ipAddress?: FieldError;
-            macAddress?: FieldError;
-            interfaceType?: FieldError;
-            location?: FieldError;
-            status?: FieldError;
-            purchaseCost?: FieldError;
-            verificationDate?: FieldError;
-            deploymentDate?: FieldError;
-            costOfAsset?: FieldError;
-            netValue?: FieldError;
-            depreciationRate?: FieldError;
-            assignedTo?: FieldError
+            assetName?: FieldError
+            hostname?: FieldError
+            detailNetBookValue?: FieldError
+            engravedNumber?: FieldError
+            dateReceipt?: FieldError
+            make?: FieldError
+            assetCategory_id?: FieldError
+            supplier?: FieldError
+            unitOfMeasure?: FieldError
+            purchaseCost?: FieldError
+            costOfTheAsset?: FieldError
+            netValueB?: FieldError,
+            model?: FieldError
+            serialNumber?: FieldError
+            user_id?: FieldError
+            ram?: FieldError
+            cpuSpeed?: FieldError
+            hardDiskSize?: FieldError
+            location?: FieldError
+            macAddress?: FieldError
+            ipAddress?: FieldError
+            interfaceType?: FieldError
+            assetDepreciationRate?: FieldError
+            assetSubCategory_id?: FieldError
+            desc?: FieldError
+            image?: FieldError
+            assetStatus?: FieldError
         };
     };
     control: Control<IITEquipment>;
