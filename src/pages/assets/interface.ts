@@ -13,3 +13,7 @@ export interface IDispose {
     sendingRequest: boolean;
     buttonText: string
 }
+
+export interface INavigation {
+    id: number, text: string, path: string, icon: JSX.Element, otherRoutes: Array<string>
+}
