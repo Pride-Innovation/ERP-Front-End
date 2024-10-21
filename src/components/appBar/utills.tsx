@@ -5,8 +5,10 @@ import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import LockOpenOutlinedIcon from '@mui/icons-material/LockOpenOutlined';
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
 import { crudStates } from "../../utils/constants";
-import TuneIcon from '@mui/icons-material/Tune';
 import { UserContext } from "../../context/user/UserContext";
+import BalanceIcon from '@mui/icons-material/Balance';
+import SettingsBrightnessIcon from '@mui/icons-material/SettingsBrightness';
+import DirectionsCarFilledIcon from '@mui/icons-material/DirectionsCarFilled';
 
 export const modalStates = {
     password: "password",
@@ -32,9 +34,9 @@ const AppBarUtills = () => {
     const options = (action: string) =>
         action === crudStates.create ? (
             [
-                { value: modalStates.itEquipment, label: "IT Equipment", icon: <TuneIcon fontSize='small' color='info' /> },
-                { value: modalStates.officeEquipment, label: "Office Equipment", icon: <TuneIcon fontSize='small' color='info' /> },
-                { value: modalStates.fleet, label: "Fleet", icon: <TuneIcon fontSize='small' color='info' /> },
+                { value: modalStates.itEquipment, label: "IT Equipment", icon: <SettingsBrightnessIcon fontSize='small' color='info' /> },
+                { value: modalStates.officeEquipment, label: "Office Equipment", icon: <BalanceIcon fontSize='small' color='info' /> },
+                { value: modalStates.fleet, label: "Fleet", icon: <DirectionsCarFilledIcon fontSize='small' color='info' /> },
             ]
         ) :
             (
