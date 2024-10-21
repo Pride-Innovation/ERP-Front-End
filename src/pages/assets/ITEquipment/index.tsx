@@ -57,7 +57,7 @@ const ITEquipment = () => {
                 handleOpen();
                 break;
             case crudStates.read:
-                console.log(option, "read state!!");
+                navigate(`${ROUTES.VIEW_ITEQUIPMENT}/${moduleID}`);
                 break;
             default:
                 break;
