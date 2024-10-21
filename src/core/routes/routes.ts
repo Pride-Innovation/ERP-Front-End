@@ -7,18 +7,25 @@ const PROFILE: string = `${ASSETS_MANAGEMENT}/profile`;
 const USERS: string = `${ASSETS_MANAGEMENT}/users`;
 const AUDIT_TRAILS: string = `${ASSETS_MANAGEMENT}/trails`;
 const TEST: string = `${ASSETS_MANAGEMENT}/test`;
-const LIST_ASSETS: string = `${ASSETS_MANAGEMENT}/assets`
-const CREATE_ITEQUIPMENT: string = `${LIST_ASSETS}/create-it-equipment`
-const UPDATE_ITEQUIPMENT: string = `${LIST_ASSETS}/update-it-equipment`
 const REQUEST: string = `${ASSETS_MANAGEMENT}/request`
 const CREATE_REQUEST: string = `${ASSETS_MANAGEMENT}/request/create`
 const UPDATE_REQUEST: string = `${ASSETS_MANAGEMENT}/request/update`
-const LIST_OFFICE_EQUIPMENT: string = `${LIST_ASSETS}/office-equipment`
+
+/* IT Equipment Routes */
+const LIST_ASSETS: string = `${ASSETS_MANAGEMENT}/assets`
+const CREATE_ITEQUIPMENT: string = `${LIST_ASSETS}/it-equipment/create`
+const UPDATE_ITEQUIPMENT: string = `${LIST_ASSETS}/it-equipment/update`
+const VIEW_ITEQUIPMENT: string = `${LIST_ASSETS}/it-equipment`
+
+/* Fleet Routes */
 const LIST_FLEET: string = `${LIST_ASSETS}/fleet`
-const CREATE_FLEET: string = `${LIST_ASSETS}/create-fleet`
-const UPDATE_FLEET: string = `${LIST_ASSETS}/update-fleet`
-const CREATE_OFFICE_EQUIPMENT: string = `${LIST_ASSETS}/create-office-equipment`
-const UPDATE_OFFICE_EQUIPMENT: string = `${LIST_ASSETS}/update-office-equipment`
+const CREATE_FLEET: string = `${LIST_ASSETS}/fleet/create`
+const UPDATE_FLEET: string = `${LIST_ASSETS}/fleet/update`
+
+/* Office Equipment Routes */
+const LIST_OFFICE_EQUIPMENT: string = `${LIST_ASSETS}/office-equipment`
+const CREATE_OFFICE_EQUIPMENT: string = `${LIST_ASSETS}/office-equipment/create`
+const UPDATE_OFFICE_EQUIPMENT: string = `${LIST_ASSETS}/office-equipment/update`
 
 
 export const ROUTES = {
@@ -42,5 +49,6 @@ export const ROUTES = {
     CREATE_FLEET,
     UPDATE_FLEET,
     CREATE_OFFICE_EQUIPMENT,
-    UPDATE_OFFICE_EQUIPMENT
+    UPDATE_OFFICE_EQUIPMENT,
+    VIEW_ITEQUIPMENT
 }

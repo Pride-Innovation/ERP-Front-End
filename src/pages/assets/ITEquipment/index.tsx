@@ -38,7 +38,7 @@ const ITEquipment = () => {
             ) as unknown as GridRowsProp;
 
             console.log(response, "response!!");
-            
+
             setRows([...itEquipmentMock]);
         } catch (error) {
             console.log(error)
@@ -49,11 +49,18 @@ const ITEquipment = () => {
     useEffect(() => { fetchResources() }, []);
 
     const handleOptionClicked = (option: string | number, moduleID?: string | number) => {
-        if (option === crudStates.update) {
-            navigate(`${ROUTES.UPDATE_ITEQUIPMENT}/${moduleID}`)
-        }
-        if (option === crudStates.dispose) {
-            handleOpen()
+        switch (option) {
+            case crudStates.update:
+                navigate(`${ROUTES.UPDATE_ITEQUIPMENT}/${moduleID}`);
+                break;
+            case crudStates.dispose:
+                handleOpen();
+                break;
+            case crudStates.read:
+                console.log(option, "read state!!");
+                break;
+            default:
+                break;
         }
     }
 
@@ -91,4 +98,4 @@ const ITEquipment = () => {
     )
 }
 
-export default ITEquipment
+export default ITEquipment;
