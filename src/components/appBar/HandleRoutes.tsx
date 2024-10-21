@@ -41,6 +41,9 @@ const HandleRoutes = () => {
             handleClick(sideBarItems[3])
             handleActiveRoute(sideBarItems[3])
         }
+        if (route.indexOf(ROUTES.REQUEST) !== -1) {
+            handleActiveRoute(sideBarItems[3])
+        }
         if (route === ROUTES.SETTINGS) {
             handleClick(sideBarItems[4])
             handleActiveRoute(sideBarItems[4])
