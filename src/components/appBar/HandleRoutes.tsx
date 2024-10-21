@@ -10,7 +10,6 @@ const HandleRoutes = () => {
     const navigate = useNavigate()
 
     const handleClick = (item: ISideBarItem) => {
-        setActiveRoute(item.id)
         if (item?.subroutes?.length > 0) {
             setExpandedItemId(expandedItemId === item.id ? null : item.id);
         } else {
@@ -18,28 +17,41 @@ const HandleRoutes = () => {
         }
     };
 
+    const handleActiveRoute = (item: ISideBarItem) => {
+        setActiveRoute(item.id)
+    }
 
     const handleRouteChange = (route: string) => {
         if (route === ROUTES.ASSETS_MANAGEMENT) {
-            handleClick(sideBarItems[0])
+            handleClick(sideBarItems[0]);
+            handleActiveRoute(sideBarItems[0])
         }
         if (route === ROUTES.SETTINGS) {
             handleClick(sideBarItems[1])
+            handleActiveRoute(sideBarItems[1])
         }
         if (route === ROUTES.PROFILE) {
             handleClick(sideBarItems[2])
+            handleActiveRoute(sideBarItems[2])
         }
         if (route === ROUTES.USERS) {
             handleClick(sideBarItems[3])
+            handleActiveRoute(sideBarItems[3])
         }
         if (route === ROUTES.AUDIT_TRAILS) {
             handleClick(sideBarItems[4])
+            handleActiveRoute(sideBarItems[4])
         }
         if ([ROUTES.LIST_ASSETS].includes(route)) {
             handleClick(sideBarItems[5])
+            handleActiveRoute(sideBarItems[5])
+        }
+        if (route.indexOf(ROUTES.LIST_ASSETS) !== -1) {
+            handleActiveRoute(sideBarItems[5])
         }
         if (route === ROUTES.REQUEST) {
             handleClick(sideBarItems[6])
+            handleActiveRoute(sideBarItems[6])
         }
     }
 
