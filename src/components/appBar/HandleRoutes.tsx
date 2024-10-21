@@ -7,7 +7,7 @@ import { sideBarItems } from './sideBarElements';
 const HandleRoutes = () => {
     const [expandedItemId, setExpandedItemId] = useState<number | null>(null);
     const [activeRoute, setActiveRoute] = useState<number | null>(null)
-    const navigate = useNavigate()
+    const navigate = useNavigate();
 
     const handleClick = (item: ISideBarItem) => {
         if (item?.subroutes?.length > 0) {

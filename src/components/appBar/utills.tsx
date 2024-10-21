@@ -14,7 +14,9 @@ export const modalStates = {
     logout: "logout",
     settings: "settings",
     leave: "leave",
-    assets: "assets",
+    officeEquipment: "officeEquipment",
+    itEquipment: "itEquipment",
+    fleet: "fleet",
 }
 
 
@@ -30,7 +32,9 @@ const AppBarUtills = () => {
     const options = (action: string) =>
         action === crudStates.create ? (
             [
-                { value: modalStates.assets, label: "Assets", icon: <TuneIcon fontSize='small' color='info' /> },
+                { value: modalStates.itEquipment, label: "IT Equipment", icon: <TuneIcon fontSize='small' color='info' /> },
+                { value: modalStates.officeEquipment, label: "Office Equipment", icon: <TuneIcon fontSize='small' color='info' /> },
+                { value: modalStates.fleet, label: "Fleet", icon: <TuneIcon fontSize='small' color='info' /> },
             ]
         ) :
             (
@@ -43,25 +47,34 @@ const AppBarUtills = () => {
             )
 
     const handleOptionClicked = (option: string | number) => {
-        if (modalStates.password === option) {
-            setModalState(modalStates.password)
-            handleOpen();
+        switch (option) {
+            case modalStates.password:
+                setModalState(modalStates.password);
+                handleOpen();
+                break;
+            case modalStates.logout:
+                navigate(ROUTES.LOGIN);
+                break;
+            case modalStates.profile:
+                navigate(`${ROUTES.PROFILE}/${user.id}`);
+                break;
+            case modalStates.leave:
+                setModalState(modalStates.leave);
+                handleOpen();
+                break;
+            case modalStates.itEquipment:
+                navigate(ROUTES.CREATE_ITEQUIPMENT);
+                break;
+            case modalStates.officeEquipment:
+                navigate(ROUTES.CREATE_OFFICE_EQUIPMENT);
+                break;
+            case modalStates.fleet:
+                navigate(ROUTES.CREATE_FLEET);
+                break;
+            default:
+                break;
         }
-        if (modalStates.logout === option) {
-            navigate(ROUTES.LOGIN)
-        }
-        if (modalStates.profile === option) {
-            navigate(`${ROUTES.PROFILE}/${user.id}`)
-        }
-        if (modalStates.leave === option) {
-            setModalState(modalStates.leave)
-            handleOpen();
-        }
-        if (modalStates.assets === option) {
-            navigate(ROUTES.CREATE_ITEQUIPMENT)
-        }
-    }
-
+    };
 
     return ({
         handleClose,
