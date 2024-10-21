@@ -31,7 +31,7 @@ const AppRoutes = () => {
       <Route path={ROUTES.ASSETS_MANAGEMENT} element={<ApplicationDrawer />} >
         <Route index element={<Dashboard />} />
         <Route path={ROUTES.SETTINGS} element={<Settings />} />
-        <Route path={ROUTES.PROFILE} element={<Profile />} />
+        <Route path={`${ROUTES.PROFILE}/:id`} element={<Profile />} />
         <Route path={ROUTES.USERS} element={<Users />} />
         <Route path={ROUTES.AUDIT_TRAILS} element={<AuditTrails />} />
         <Route path={ROUTES.TEST} element={<TestComponent />} />

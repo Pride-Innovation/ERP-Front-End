@@ -9,8 +9,11 @@ import CreateUser from './CreateUser';
 import { IUser } from './interface';
 import UpdateUsers from './UpdateUsers';
 import { usersMock } from '../../mocks/users';
+import { useNavigate } from 'react-router';
+import { ROUTES } from '../../core/routes/routes';
 
 const Users = () => {
+  const navigate = useNavigate();
   const { usersTableData } = useContext(UserContext);
   const header = { plural: 'Users', singular: 'User' };
   const {
@@ -35,6 +38,10 @@ const Users = () => {
     const user = users?.find(user => user.id === moduleID) as IUser;
     setUser(user)
     handleOpen();
+
+    if (option === crudStates.read) {
+      navigate(`${ROUTES.PROFILE}/${user.id}`)
+    }
   }
 
   return (

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { useNavigate } from "react-router";
 import { ROUTES } from "../../core/routes/routes";
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
@@ -6,6 +6,7 @@ import LockOpenOutlinedIcon from '@mui/icons-material/LockOpenOutlined';
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
 import { crudStates } from "../../utils/constants";
 import TuneIcon from '@mui/icons-material/Tune';
+import { UserContext } from "../../context/user/UserContext";
 
 export const modalStates = {
     password: "password",
@@ -21,6 +22,7 @@ const AppBarUtills = () => {
     const [modalState, setModalState] = useState<string>("");
     const [open, setOpen] = useState<boolean>(false);
     const navigate = useNavigate();
+    const { user } = useContext(UserContext);
 
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
@@ -49,7 +51,7 @@ const AppBarUtills = () => {
             navigate(ROUTES.LOGIN)
         }
         if (modalStates.profile === option) {
-            navigate(ROUTES.PROFILE)
+            navigate(`${ROUTES.PROFILE}/${user.id}`)
         }
         if (modalStates.leave === option) {
             setModalState(modalStates.leave)
