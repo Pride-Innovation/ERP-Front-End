@@ -1,25 +1,25 @@
-import { useContext, useEffect, useState } from "react"
-import { Grid } from "@mui/material"
-import TableComponent from "../../../../components/tables/TableComponent"
-import assignmentHistoryMock from "../../../../mocks/assignmentHistory"
-import { fetchRowsService } from "../../../../core/apis/globalService"
-import { GridRowsProp } from "@mui/x-data-grid"
-import RowContext from "../../../../context/row/RowContext"
-import AssignmentHistoryUtills from "./AssignmentHistoryUtills"
-import { crudStates } from "../../../../utils/constants"
-import ModalComponent from "../../../../components/modal"
+import { useContext, useEffect, useState } from "react";
+import RowContext from "../../../../context/row/RowContext";
+import { fetchRowsService } from "../../../../core/apis/globalService";
+import { GridRowsProp } from "@mui/x-data-grid";
+import { repairHistoryMock } from "../../../../mocks/repairHistory";
+import { crudStates } from "../../../../utils/constants";
+import { Grid } from "@mui/material";
+import ModalComponent from "../../../../components/modal";
+import TableComponent from "../../../../components/tables/TableComponent";
+import RepairHistoryUtills from "./RepairHistoryUtills";
 
-const AssignmentHistory = ({ id }: { id: string | number }) => {
+const RepairHistory = ({ id }: { id: string | number }) => {
     const [loading, setLoading] = useState<boolean>(false);
     const { setRows, rows } = useContext(RowContext);
-    const { endPoint, columnHeaders, header, modalState, open, handleClose, handleCreation } = AssignmentHistoryUtills()
+    const { endPoint, columnHeaders, header, modalState, open, handleClose, handleCreation } = RepairHistoryUtills()
 
     const fetchResources = async () => {
         setLoading(true)
         try {
             const response = await fetchRowsService({ page: 1, size: 10, endPoint }) as unknown as GridRowsProp;
             console.log(response, "response!!")
-            setRows([...assignmentHistoryMock]);
+            setRows([...repairHistoryMock]);
         } catch (error) {
             console.log(error)
         }
@@ -28,13 +28,13 @@ const AssignmentHistory = ({ id }: { id: string | number }) => {
 
     useEffect(() => {
         fetchResources();
-    }, [id]);
+    }, []);
 
     return (
         <>
             {rows?.length > 0 && <Grid xs={12} container>
                 {modalState === crudStates.create &&
-                    <ModalComponent title='Create User' open={open} handleClose={handleClose} width="60%">
+                    <ModalComponent title='Create Repair History' open={open} handleClose={handleClose} width="60%">
                         <p>Modal Information!!</p>
                     </ModalComponent>
                 }
@@ -57,4 +57,4 @@ const AssignmentHistory = ({ id }: { id: string | number }) => {
     )
 }
 
-export default AssignmentHistory
+export default RepairHistory

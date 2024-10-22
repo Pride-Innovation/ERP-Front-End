@@ -31,3 +31,11 @@ export interface IAssignmentHistory {
     user: string;
     serialNumber: string;
 }
+
+export interface IRepairHistory {
+    id?: string | number;
+    repairDate: string;
+    repairedPart: string;
+    repairer: string;
+    serialNumber: string;
+}

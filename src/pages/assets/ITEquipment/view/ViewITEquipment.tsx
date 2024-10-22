@@ -16,8 +16,7 @@ import ButtonComponent from '../../../../components/forms/Button';
 import DetailSection from './DetailSection';
 import OtherDetails from './OtherDetails';
 import AssignmentHistory from './AssignmentHistory';
-
-
+import RepairHistory from './RepairHistory';
 
 const ITEquipmentDetails = () => {
     const equipment = itEquipmentMock[0];
@@ -69,7 +68,7 @@ const ITEquipmentDetails = () => {
                                     {
                                         label: "REPAIR TRAILS",
                                         position: 2,
-                                        content: <Typography variant="body1">Section Three</Typography>
+                                        content: <RepairHistory id={equipment.id} />
                                     },
                                 ]}
                             />
