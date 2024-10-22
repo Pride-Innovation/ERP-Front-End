@@ -6,11 +6,13 @@ import { fetchRowsService } from "../../../../core/apis/globalService"
 import { GridRowsProp } from "@mui/x-data-grid"
 import RowContext from "../../../../context/row/RowContext"
 import ITEquipmentViewUtills from "./utills"
+import { crudStates } from "../../../../utils/constants"
+import ModalComponent from "../../../../components/modal"
 
 const AssignmentHistory = ({ id }: { id: string | number }) => {
     const [loading, setLoading] = useState<boolean>(false);
     const { setRows, rows } = useContext(RowContext);
-    const { endPoint, columnHeaders, header } = ITEquipmentViewUtills()
+    const { endPoint, columnHeaders, header, modalState, open, handleClose, handleCreation } = ITEquipmentViewUtills()
 
     const fetchResources = async () => {
         setLoading(true)
@@ -31,6 +33,11 @@ const AssignmentHistory = ({ id }: { id: string | number }) => {
     return (
         <>
             {rows?.length > 0 && <Grid xs={12} container>
+                {modalState === crudStates.create &&
+                    <ModalComponent title='Create User' open={open} handleClose={handleClose} width="60%">
+                        <p>Modal Information!!</p>
+                    </ModalComponent>
+                }
                 {columnHeaders.length > 0 &&
                     <TableComponent
                         endPoint={endPoint}
@@ -42,6 +49,7 @@ const AssignmentHistory = ({ id }: { id: string | number }) => {
                         rows={rows}
                         columnHeaders={columnHeaders}
                         paginationMode='client'
+                        onCreationHandler={handleCreation}
                     />
                 }
             </Grid>}

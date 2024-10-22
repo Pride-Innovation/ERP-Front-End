@@ -2,11 +2,22 @@ import { useEffect, useState } from "react";
 import { ITableHeader } from "../../../../components/tables/interface";
 import assignmentHistoryMock from "../../../../mocks/assignmentHistory";
 import { getTableHeaders } from "../../../../components/tables/getTableHeaders";
+import { crudStates } from "../../../../utils/constants";
 
 const ITEquipmentViewUtills = () => {
     const endPoint = 'posts';
     const header = { plural: 'Assignment History', singular: 'Assignment' };
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
+    const [modalState, setModalState] = useState<string>("");
+    const [open, setOpen] = useState<boolean>(false);
+
+    const handleOpen = () => setOpen(true);
+    const handleClose = () => setOpen(false);
+
+    const handleCreation = () => {
+        setModalState(crudStates.create);
+        handleOpen();
+    };
 
     const {
         id,
@@ -32,7 +43,12 @@ const ITEquipmentViewUtills = () => {
     return ({
         endPoint,
         header,
-        columnHeaders
+        columnHeaders,
+        modalState,
+        setModalState,
+        open,
+        handleClose,
+        handleCreation
     }
     )
 }
