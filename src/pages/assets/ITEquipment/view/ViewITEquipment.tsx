@@ -15,6 +15,7 @@ import { grey } from '@mui/material/colors';
 import ButtonComponent from '../../../../components/forms/Button';
 import DetailSection from './DetailSection';
 import OtherDetails from './OtherDetails';
+import AssignmentHistory from './AssignmentHistory';
 
 
 
@@ -63,7 +64,7 @@ const ITEquipmentDetails = () => {
                                     {
                                         label: "ASSIGNMENT HISTORY",
                                         position: 1,
-                                        content: <Typography variant="body1">Section Two</Typography>
+                                        content: <AssignmentHistory id={equipment.id} />
                                     },
                                     {
                                         label: "REPAIR TRAILS",

@@ -21,3 +21,13 @@ export interface INavigation {
     icon: JSX.Element;
     otherRoutes: Array<string>;
 }
+
+export interface IAssignmentHistory {
+    id?: string | number;
+    startDate: string;
+    endDate: string;
+    statusBefore: string;
+    statusAfter: string;
+    user: string;
+    serialNumber: string;
+}
