@@ -11,7 +11,7 @@ const ITEquipmentRoutes = () => {
             <Route index element={<ITEquipment />} />
             <Route path={ROUTES.CREATE_ITEQUIPMENT} element={<CreateITEquipment />} />
             <Route path={`${ROUTES.UPDATE_ITEQUIPMENT}/:id`} element={<UpdateITEquipment />} />
-            <Route path={`${ROUTES.VIEW_ITEQUIPMENT}/:id`} element={<ITEquipmentDetails />} />
+            <Route path={`${ROUTES.LIST_ASSETS}/:id`} element={<ITEquipmentDetails />} />
         </Route>
     )
 }

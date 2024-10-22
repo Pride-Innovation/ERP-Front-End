@@ -57,7 +57,7 @@ const ITEquipment = () => {
                 handleOpen();
                 break;
             case crudStates.read:
-                navigate(`${ROUTES.VIEW_ITEQUIPMENT}/${moduleID}`);
+                navigate(`${ROUTES.LIST_ASSETS}/${moduleID}`);
                 break;
             default:
                 break;

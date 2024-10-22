@@ -51,6 +51,7 @@ const AssetsManagement = () => {
 
   const determineActivePath = (item: INavigation): boolean => {
     if (path === `${item.otherRoutes[1]}/${id}`) return true;
+    if (path === `${item.path}/${id}`) return true;
     return [item.path, ...item.otherRoutes].includes(path)
   }
 
