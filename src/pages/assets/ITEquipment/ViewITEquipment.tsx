@@ -1,38 +1,77 @@
-import React from 'react';
 import {
-    Container,
     Typography,
     Grid,
     Card,
     CardContent,
     CardMedia,
-    Button,
     Box,
     Divider,
+    IconButton,
+    Stack,
 } from '@mui/material';
 import { itEquipmentMock } from '../../../mocks/itEquipment';
 import PlaceHolder from "../../../statics/images/Placeholder.png";
 import TabComponent from '../../../components/tabs';
 import { IITEquipment } from './interface';
+import InfoIcon from '@mui/icons-material/Info';
+import HardwareIcon from '@mui/icons-material/Hardware';
+import SettingsEthernetIcon from '@mui/icons-material/SettingsEthernet';
+import MemoryIcon from '@mui/icons-material/Memory';
+import StorageIcon from '@mui/icons-material/Storage';
+import { grey } from '@mui/material/colors';
+import ContentPasteIcon from '@mui/icons-material/ContentPaste';
+import TableUtills from '../../../components/tables/utills';
+import TimeLineDot from '../../../components/timeLineDots';
+import ButtonComponent from '../../../components/forms/Button';
 
+const DetailSection = ({
+    text, label, icon
+}: { text: string; label: string; icon?: JSX.Element }) => {
+    const { determineTimeLineDotColor } = TableUtills();
+
+    return (
+        <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
+            {icon && <IconButton color='info' sx={{ mr: 1, bgcolor: '#FFF', borderRadius: "4px" }}>{icon}</IconButton>}
+            <Typography variant="body2" sx={{ bgcolor: "#FFF", p: 1.2, borderRadius: 1, width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <strong>{label}:</strong>
+                <span style={{ display: "flex", alignItems: "center" }}>
+                    {
+                        label === "Status" &&
+                        <TimeLineDot color={determineTimeLineDotColor(text.toLocaleLowerCase())} />
+
+                    }
+                    {text}
+                    {
+                        label === "Serial Number" &&
+                        <ContentPasteIcon fontSize='small' color='info' sx={{ ml: "5px" }} />
+                    }
+                    {
+                        label === "Purchase Cost" && <span style={{marginLeft: "5px"}}>UGX</span>
+                    }
+                </span>
+            </Typography>
+        </Box>
+    );
+}
 const OtherDetails = ({ equipment }: { equipment: IITEquipment }) => (
     <>
-        {equipment.ram && <Typography variant="body1"><strong>RAM:</strong> {equipment.ram}</Typography>}
-        {equipment.cpuSpeed && <Typography variant="body1"><strong>CPU Speed:</strong> {equipment.cpuSpeed}</Typography>}
-        {equipment.hardDiskSize && <Typography variant="body1"><strong>Hard Disk Size:</strong> {equipment.hardDiskSize}</Typography>}
-        {equipment.macAddress && <Typography variant="body1"><strong>MAC Address:</strong> {equipment.macAddress}</Typography>}
-        {equipment.ipAddress && <Typography variant="body1"><strong>IP Address:</strong> {equipment.ipAddress}</Typography>}
-        {equipment.assetDepreciationRate && <Typography variant="body1"><strong>Depreciation Rate:</strong> {equipment.assetDepreciationRate}</Typography>}
+        {equipment.ram && <DetailSection text={equipment.ram} label="RAM" icon={<MemoryIcon />} />}
+        {equipment.cpuSpeed && <DetailSection text={equipment.cpuSpeed} label="CPU Speed" icon={<HardwareIcon />} />}
+        {equipment.hardDiskSize && <DetailSection text={equipment.hardDiskSize} label="Hard Disk Size" icon={<StorageIcon />} />}
+        {equipment.macAddress && <DetailSection text={equipment.macAddress} label="MAC Address" icon={<SettingsEthernetIcon />} />}
+        {equipment.ipAddress && <DetailSection text={equipment.ipAddress} label="IP Address" icon={<SettingsEthernetIcon />} />}
+        {equipment.assetDepreciationRate && <DetailSection text={equipment.assetDepreciationRate} label="Depreciation Rate" icon={<InfoIcon />} />}
     </>
-)
+);
 
 const ITEquipmentDetails = () => {
     const equipment = itEquipmentMock[0];
+
     return (
-        <Card sx={{ p: 4 }} >
+        <Card sx={{ p: 4, boxShadow: 3 }}>
             <Grid container spacing={4}>
                 <Grid item xs={12} md={4}>
-                    <Card>
+                    <Card sx={{ boxShadow: 0, bgcolor: grey[100] }}>
                         <CardMedia
                             component="img"
                             height="250"
@@ -40,48 +79,64 @@ const ITEquipmentDetails = () => {
                             alt="Equipment Image"
                         />
                         <CardContent>
-                            <Typography variant="h5" gutterBottom>
+                            <Typography variant="h5" gutterBottom sx={{ color: "#1976d2" }}>
                                 {equipment.assetName}
                             </Typography>
                             <Divider />
-                            <Typography variant="body1" sx={{ mt: 2 }}><strong>Hostname:</strong> {equipment.hostname}</Typography>
-                            {equipment.model && <Typography variant="body1"><strong>Model:</strong> {equipment.model}</Typography>}
-                            {equipment.serialNumber && <Typography variant="body1"><strong>Serial Number:</strong> {equipment.serialNumber}</Typography>}
-                            <Typography variant="body1"><strong>Supplier:</strong> {equipment.supplier}</Typography>
-                            <Typography variant="body1"><strong>Purchase Cost:</strong> {equipment.purchaseCost}</Typography>
-                            <Typography variant="body1"><strong>Date of Receipt:</strong> {equipment.dateReceipt}</Typography>
-                            {equipment.location && <Typography variant="body1"><strong>Location:</strong> {equipment.location}</Typography>}
-                            {equipment.assetStatus && <Typography variant="body1"><strong>Status:</strong> {equipment.assetStatus}</Typography>}
-                            {equipment.desc && <Typography variant="body1"><strong>Description:</strong> {equipment.desc}</Typography>}
+                            <DetailSection label='Hostname' text={equipment.hostname} />
+                            {equipment.model && <DetailSection label="Model" text={equipment.model} />}
+                            {equipment.serialNumber && <DetailSection label="Serial Number" text={equipment.serialNumber} />}
+                            <DetailSection label="Supplier" text={equipment.supplier} />
+                            <DetailSection label="Purchase Cost" text={equipment.purchaseCost} />
+                            <DetailSection label="Date of Receipt" text={equipment.dateReceipt} />
+                            {equipment.location && <DetailSection label="Location" text={equipment.location} />}
+                            {equipment.assetStatus && <DetailSection label="Status" text={equipment.assetStatus} />}
+                            {equipment.desc && <DetailSection label="Description" text={equipment.desc} />}
                         </CardContent>
                     </Card>
                 </Grid>
 
                 <Grid item xs={12} md={8}>
-                    <Card>
+                    <Card sx={{ boxShadow: 0, bgcolor: grey[100] }}>
                         <CardContent>
                             <TabComponent
-                                headers={[{
-                                    label: "Step One",
-                                    position: 0,
-                                    content: <OtherDetails equipment={equipment} />
-                                }, {
-                                    label: "Step Two",
-                                    position: 1,
-                                    content: <p>Section Two</p>
-                                },]} />
+                                headers={[
+                                    {
+                                        label: "Step One",
+                                        position: 0,
+                                        content: <OtherDetails equipment={equipment} />
+                                    },
+                                    {
+                                        label: "Step Two",
+                                        position: 1,
+                                        content: <Typography variant="body1">Section Two</Typography>
+                                    },
+                                    {
+                                        label: "Step Three",
+                                        position: 2,
+                                        content: <Typography variant="body1">Section Three</Typography>
+                                    },
+                                ]}
+                            />
                         </CardContent>
                     </Card>
                 </Grid>
             </Grid>
-
-            <Box display="flex" justifyContent="flex-end" mt={4}>
-                <Button variant="contained" color="primary" onClick={() => {/* handle edit */ }} sx={{ mr: 2 }}>
-                    Edit
-                </Button>
-                <Button variant="contained" color="secondary" onClick={() => {/* handle delete */ }}>
-                    Delete
-                </Button>
+            <Box sx={{ width: "100%", display: "flex", justifyContent: "end"}}>
+                <Stack direction="row" spacing={3} sx={{ width: "30%", mt: 3 }}>
+                    <ButtonComponent
+                        handleClick={() => console.log("information!!")}
+                        buttonColor='error'
+                        type='button'
+                        sendingRequest={false}
+                        buttonText="Back"
+                    />
+                    <ButtonComponent
+                        buttonColor='info'
+                        type='submit'
+                        sendingRequest={false}
+                        buttonText="Update" />
+                </Stack>
             </Box>
         </Card>
     );
