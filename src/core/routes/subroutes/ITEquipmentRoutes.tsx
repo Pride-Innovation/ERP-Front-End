@@ -3,7 +3,7 @@ import { ROUTES } from '../routes'
 import CreateITEquipment from '../../../pages/assets/ITEquipment/CreateITEquipment'
 import UpdateITEquipment from '../../../pages/assets/ITEquipment/UpdateITEquipment'
 import ITEquipment from '../../../pages/assets/ITEquipment'
-import ViewITEquipment from '../../../pages/assets/ITEquipment/ViewITEquipment'
+import ViewITEquipment from '../../../pages/assets/ITEquipment/view/ViewITEquipment'
 
 const ITEquipmentRoutes = () => {
     return (

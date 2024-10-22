@@ -6,63 +6,17 @@ import {
     CardMedia,
     Box,
     Divider,
-    IconButton,
     Stack,
 } from '@mui/material';
-import { itEquipmentMock } from '../../../mocks/itEquipment';
-import PlaceHolder from "../../../statics/images/Placeholder.png";
-import TabComponent from '../../../components/tabs';
-import { IITEquipment } from './interface';
-import InfoIcon from '@mui/icons-material/Info';
-import HardwareIcon from '@mui/icons-material/Hardware';
-import SettingsEthernetIcon from '@mui/icons-material/SettingsEthernet';
-import MemoryIcon from '@mui/icons-material/Memory';
-import StorageIcon from '@mui/icons-material/Storage';
+import { itEquipmentMock } from '../../../../mocks/itEquipment';
+import PlaceHolder from "../../../../statics/images/Placeholder.png";
+import TabComponent from '../../../../components/tabs';
 import { grey } from '@mui/material/colors';
-import ContentPasteIcon from '@mui/icons-material/ContentPaste';
-import TableUtills from '../../../components/tables/utills';
-import TimeLineDot from '../../../components/timeLineDots';
-import ButtonComponent from '../../../components/forms/Button';
+import ButtonComponent from '../../../../components/forms/Button';
+import DetailSection from './DetailSection';
+import OtherDetails from './OtherDetails';
 
-const DetailSection = ({
-    text, label, icon
-}: { text: string; label: string; icon?: JSX.Element }) => {
-    const { determineTimeLineDotColor } = TableUtills();
 
-    return (
-        <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
-            {icon && <IconButton color='info' sx={{ mr: 1, bgcolor: '#FFF', borderRadius: "4px" }}>{icon}</IconButton>}
-            <Typography variant="body2" sx={{ bgcolor: "#FFF", p: 1.2, borderRadius: 1, width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <strong>{label}:</strong>
-                <span style={{ display: "flex", alignItems: "center" }}>
-                    {
-                        label === "Status" &&
-                        <TimeLineDot color={determineTimeLineDotColor(text.toLocaleLowerCase())} />
-
-                    }
-                    {text}
-                    {
-                        label === "Serial Number" &&
-                        <ContentPasteIcon fontSize='small' color='info' sx={{ ml: "5px" }} />
-                    }
-                    {
-                        label === "Purchase Cost" && <span style={{marginLeft: "5px"}}>UGX</span>
-                    }
-                </span>
-            </Typography>
-        </Box>
-    );
-}
-const OtherDetails = ({ equipment }: { equipment: IITEquipment }) => (
-    <>
-        {equipment.ram && <DetailSection text={equipment.ram} label="RAM" icon={<MemoryIcon />} />}
-        {equipment.cpuSpeed && <DetailSection text={equipment.cpuSpeed} label="CPU Speed" icon={<HardwareIcon />} />}
-        {equipment.hardDiskSize && <DetailSection text={equipment.hardDiskSize} label="Hard Disk Size" icon={<StorageIcon />} />}
-        {equipment.macAddress && <DetailSection text={equipment.macAddress} label="MAC Address" icon={<SettingsEthernetIcon />} />}
-        {equipment.ipAddress && <DetailSection text={equipment.ipAddress} label="IP Address" icon={<SettingsEthernetIcon />} />}
-        {equipment.assetDepreciationRate && <DetailSection text={equipment.assetDepreciationRate} label="Depreciation Rate" icon={<InfoIcon />} />}
-    </>
-);
 
 const ITEquipmentDetails = () => {
     const equipment = itEquipmentMock[0];
@@ -102,17 +56,17 @@ const ITEquipmentDetails = () => {
                             <TabComponent
                                 headers={[
                                     {
-                                        label: "Step One",
+                                        label: "Other Details",
                                         position: 0,
                                         content: <OtherDetails equipment={equipment} />
                                     },
                                     {
-                                        label: "Step Two",
+                                        label: "ASSIGNMENT HISTORY",
                                         position: 1,
                                         content: <Typography variant="body1">Section Two</Typography>
                                     },
                                     {
-                                        label: "Step Three",
+                                        label: "REPAIR TRAILS",
                                         position: 2,
                                         content: <Typography variant="body1">Section Three</Typography>
                                     },
