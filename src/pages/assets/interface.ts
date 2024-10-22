@@ -36,6 +36,6 @@ export interface IRepairHistory {
     id?: string | number;
     repairDate: string;
     repairedPart: string;
-    repairer: string;
+    technician: string;
     serialNumber: string;
 }
