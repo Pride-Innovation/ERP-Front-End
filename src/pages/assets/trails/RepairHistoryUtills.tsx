@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { ITableHeader } from "../../../../components/tables/interface";
-import { getTableHeaders } from "../../../../components/tables/getTableHeaders";
-import { crudStates } from "../../../../utils/constants";
-import { repairHistoryMock } from "../../../../mocks/repairHistory";
+import { ITableHeader } from "../../../components/tables/interface";
+import { getTableHeaders } from "../../../components/tables/getTableHeaders";
+import { crudStates } from "../../../utils/constants";
+import { repairHistoryMock } from "../../../mocks/repairHistory";
 
 const RepairHistoryUtills = () => {
     const endPoint = 'posts';

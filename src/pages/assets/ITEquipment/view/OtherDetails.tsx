@@ -1,5 +1,5 @@
 import { IITEquipment } from "../interface";
-import DetailSection from "./DetailSection";
+import DetailSection from "../../trails/DetailSection";
 import InfoIcon from '@mui/icons-material/Info';
 import HardwareIcon from '@mui/icons-material/Hardware';
 import SettingsEthernetIcon from '@mui/icons-material/SettingsEthernet';

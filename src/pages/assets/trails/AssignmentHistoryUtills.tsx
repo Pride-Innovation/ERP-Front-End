@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { ITableHeader } from "../../../../components/tables/interface";
-import assignmentHistoryMock from "../../../../mocks/assignmentHistory";
-import { getTableHeaders } from "../../../../components/tables/getTableHeaders";
-import { crudStates } from "../../../../utils/constants";
+import { ITableHeader } from "../../../components/tables/interface";
+import assignmentHistoryMock from "../../../mocks/assignmentHistory";
+import { getTableHeaders } from "../../../components/tables/getTableHeaders";
+import { crudStates } from "../../../utils/constants";
 
 const AssignmentHistoryUtills = () => {
     const endPoint = 'posts';

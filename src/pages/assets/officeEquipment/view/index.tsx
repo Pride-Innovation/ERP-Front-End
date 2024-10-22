@@ -1,26 +1,16 @@
-import {
-    Typography,
-    Grid,
-    Card,
-    CardContent,
-    CardMedia,
-    Box,
-    Divider,
-    Stack,
-} from '@mui/material';
-import { itEquipmentMock } from '../../../../mocks/itEquipment';
+import { Box, Card, CardContent, CardMedia, Divider, Grid, Stack, Typography } from "@mui/material";
 import PlaceHolder from "../../../../statics/images/Placeholder.png";
-import TabComponent from '../../../../components/tabs';
-import { grey } from '@mui/material/colors';
-import ButtonComponent from '../../../../components/forms/Button';
-import DetailSection from './DetailSection';
-import OtherDetails from './OtherDetails';
-import AssignmentHistory from './AssignmentHistory';
-import RepairHistory from './RepairHistory';
+import { grey } from "@mui/material/colors";
+import { officeEquipmentMock } from "../../../../mocks/officeEquipment";
+import TabComponent from "../../../../components/tabs";
+import DetailSection from "../../trails/DetailSection";
+import AssignmentHistory from "../../trails/AssignmentHistory";
+import RepairHistory from "../../trails/RepairHistory";
+import ButtonComponent from "../../../../components/forms/Button";
 
-const ITEquipmentDetails = () => {
-    const equipment = itEquipmentMock[0];
 
+const OfficeEquipment = () => {
+    const equipment = officeEquipmentMock[0];
     return (
         <Card sx={{ p: 4, boxShadow: 3 }}>
             <Grid container spacing={4}>
@@ -38,12 +28,9 @@ const ITEquipmentDetails = () => {
                             </Typography>
                             <Divider />
                             <DetailSection label='Hostname' text={equipment.hostname} />
-                            {equipment.model && <DetailSection label="Model" text={equipment.model} />}
-                            {equipment.serialNumber && <DetailSection label="Serial Number" text={equipment.serialNumber} />}
                             <DetailSection label="Supplier" text={equipment.supplier} />
                             <DetailSection label="Purchase Cost" text={equipment.purchaseCost} />
                             <DetailSection label="Date of Receipt" text={equipment.dateReceipt} />
-                            {equipment.location && <DetailSection label="Location" text={equipment.location} />}
                             {equipment.assetStatus && <DetailSection label="Status" text={equipment.assetStatus} />}
                             {equipment.desc && <DetailSection label="Description" text={equipment.desc} />}
                         </CardContent>
@@ -55,11 +42,6 @@ const ITEquipmentDetails = () => {
                         <CardContent>
                             <TabComponent
                                 headers={[
-                                    {
-                                        label: "Other Details",
-                                        position: 0,
-                                        content: <OtherDetails equipment={equipment} />
-                                    },
                                     {
                                         label: "ASSIGNMENT HISTORY",
                                         position: 1,
@@ -76,7 +58,7 @@ const ITEquipmentDetails = () => {
                     </Card>
                 </Grid>
             </Grid>
-            <Box sx={{ width: "100%", display: "flex", justifyContent: "end"}}>
+            <Box sx={{ width: "100%", display: "flex", justifyContent: "end" }}>
                 <Stack direction="row" spacing={3} sx={{ width: "30%", mt: 3 }}>
                     <ButtonComponent
                         handleClick={() => console.log("information!!")}
@@ -94,6 +76,6 @@ const ITEquipmentDetails = () => {
             </Box>
         </Card>
     );
-};
+}
 
-export default ITEquipmentDetails;
+export default OfficeEquipment;
