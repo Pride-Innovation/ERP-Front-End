@@ -1,4 +1,13 @@
-import { Box, Card, CardContent, CardMedia, Divider, Grid, Stack, Typography } from "@mui/material";
+import {
+    Box,
+    Card,
+    CardContent,
+    CardMedia,
+    Divider,
+    Grid,
+    Stack,
+    Typography
+} from "@mui/material";
 import PlaceHolder from "../../../../statics/images/Placeholder.png";
 import { grey } from "@mui/material/colors";
 import { officeEquipmentMock } from "../../../../mocks/officeEquipment";
@@ -9,7 +18,7 @@ import RepairHistory from "../../trails/RepairHistory";
 import ButtonComponent from "../../../../components/forms/Button";
 
 
-const OfficeEquipment = () => {
+const OfficeEquipmentDetails = () => {
     const equipment = officeEquipmentMock[0];
     return (
         <Card sx={{ p: 4, boxShadow: 3 }}>
@@ -44,12 +53,12 @@ const OfficeEquipment = () => {
                                 headers={[
                                     {
                                         label: "ASSIGNMENT HISTORY",
-                                        position: 1,
+                                        position: 0,
                                         content: <AssignmentHistory id={equipment.id} />
                                     },
                                     {
                                         label: "REPAIR TRAILS",
-                                        position: 2,
+                                        position: 1,
                                         content: <RepairHistory id={equipment.id} />
                                     },
                                 ]}
@@ -78,4 +87,4 @@ const OfficeEquipment = () => {
     );
 }
 
-export default OfficeEquipment;
+export default OfficeEquipmentDetails;

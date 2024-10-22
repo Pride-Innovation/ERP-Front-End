@@ -43,11 +43,19 @@ const OfficeEquipment = () => {
     useEffect(() => { fetchResources() }, []);
 
     const handleOptionClicked = (option: string | number, moduleID?: string | number) => {
-        if (option === crudStates.update) {
-            navigate(`${ROUTES.UPDATE_OFFICE_EQUIPMENT}/${moduleID}`)
-        }
-        if (option === crudStates.dispose) {
-            handleOpen()
+        console.log(option, "options!!")
+        switch (option) {
+            case crudStates.update:
+                navigate(`${ROUTES.UPDATE_OFFICE_EQUIPMENT}/${moduleID}`)
+                break;
+            case crudStates.dispose:
+                handleOpen()
+                break;
+            case crudStates.read:
+                navigate(`${ROUTES.LIST_OFFICE_EQUIPMENT}/${moduleID}`);
+                break;
+            default:
+                break;
         }
     }
 
