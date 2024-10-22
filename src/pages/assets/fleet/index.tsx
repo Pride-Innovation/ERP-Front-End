@@ -39,11 +39,18 @@ const Fleet = () => {
     useEffect(() => { fetchResources() }, []);
 
     const handleOptionClicked = (option: string | number, moduleID?: string | number) => {
-        if (option === crudStates.update) {
-            navigate(`${ROUTES.UPDATE_FLEET}/${moduleID}`)
-        }
-        if (option === crudStates.dispose) {
-            handleOpen()
+        switch (option) {
+            case crudStates.update:
+                navigate(`${ROUTES.UPDATE_FLEET}/${moduleID}`)
+                break;
+            case crudStates.dispose:
+                handleOpen();
+                break;
+            case crudStates.read:
+                navigate(`${ROUTES.LIST_FLEET}/${moduleID}`)
+                break;
+            default:
+                break;
         }
     }
 
