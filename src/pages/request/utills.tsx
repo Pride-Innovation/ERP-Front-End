@@ -7,6 +7,7 @@ import { requestMock } from '../../mocks/request';
 import { IFormData } from '../assets/interface';
 import { getTableHeaders } from '../../components/tables/getTableHeaders';
 import { IRequest } from './interface';
+import { crudStates } from '../../utils/constants';
 
 
 const RequestUtills = () => {
@@ -25,9 +26,9 @@ const RequestUtills = () => {
         action: {
             label: "options",
             options: [
-                { value: "dispose", label: "Dispose", icon: <InfoIcon fontSize='small' color='error' /> },
-                { value: "update", label: "Update", icon: <ModeEditIcon fontSize='small' color='info' /> },
-                { value: "read", label: "View Details", icon: <RemoveRedEyeIcon fontSize='small' color='inherit' /> }
+                { value: crudStates.delete, label: "Delete", icon: <InfoIcon fontSize='small' color='error' /> },
+                { value: crudStates.update, label: "Update", icon: <ModeEditIcon fontSize='small' color='info' /> },
+                { value: crudStates.read, label: "View Details", icon: <RemoveRedEyeIcon fontSize='small' color='inherit' /> }
             ]
         },
     };

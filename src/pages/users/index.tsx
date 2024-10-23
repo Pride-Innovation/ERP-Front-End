@@ -57,9 +57,8 @@ const Users = () => {
           <UpdateUsers handleClose={handleClose} />
         </ModalComponent>
       }
-
       {modalState === crudStates.deactivate &&
-        <ModalComponent title='Update User' open={open} handleClose={handleClose} width="40%">
+        <ModalComponent title='Deactivate User' open={open} handleClose={handleClose} width="40%">
           <Deactivate user={user} handleClose={handleClose} buttonText='Deactivate' sendingRequest={false} />
         </ModalComponent>
       }

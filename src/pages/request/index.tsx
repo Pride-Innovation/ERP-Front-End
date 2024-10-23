@@ -35,9 +35,12 @@ const Request = () => {
 
 
   const handleOptionClicked = (option: string | number, moduleID?: string | number) => {
-    console.log(option, moduleID)
-    if (option === crudStates.update) {
-      navigate(`${ROUTES.UPDATE_REQUEST}/${moduleID}`)
+    switch (option) {
+      case crudStates.update:
+        navigate(`${ROUTES.UPDATE_REQUEST}/${moduleID}`);
+        break;
+      default:
+        break;
     }
   }
 
