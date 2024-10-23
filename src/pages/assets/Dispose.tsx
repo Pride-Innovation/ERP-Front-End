@@ -1,7 +1,7 @@
 import { Grid, Stack, Typography } from "@mui/material";
 import ButtonComponent from "../../components/forms/Button";
 import { IDispose } from "./interface";
-import { Assignment as AssetIcon, VpnKey as SerialIcon } from '@mui/icons-material';
+import { Assignment as AssetIcon } from '@mui/icons-material';
 
 const Dispose = ({
     handleClose,
@@ -22,7 +22,6 @@ const Dispose = ({
                     </Typography>
                 </Stack>
                 <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 1 }}>
-                    <SerialIcon color="secondary" />
                     <Typography variant="subtitle1" color="textSecondary">
                         Engraved Number: {asset.engravedNumber}
                     </Typography>

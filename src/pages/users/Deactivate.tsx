@@ -18,7 +18,7 @@ const Deactivate = ({
                 <Stack direction="row" spacing={1} alignItems="center">
                     <AccountCircleOutlinedIcon color="primary" />
                     <Typography variant="h6" color="primary">
-                        John Doe
+                        {user.firstName + " " + user.lastName + " " + user.otherName}
                     </Typography>
                 </Stack>
                 <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 1 }}>
