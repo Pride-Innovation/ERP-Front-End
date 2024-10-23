@@ -186,6 +186,11 @@ const ITEquipmentUtills = () => {
         },
     ]
 
+    const determineCurrentAsset = (id: number, itemList: Array<IITEquipment>): IITEquipment => {
+        const item = itemList.find(item => item.id === id);
+        return item as IITEquipment;
+    }
+
     return (
         {
             open,
@@ -197,7 +202,8 @@ const ITEquipmentUtills = () => {
             columnHeaders,
             formFields,
             computerFields,
-            categories
+            categories,
+            determineCurrentAsset
         }
     )
 }

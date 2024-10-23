@@ -25,7 +25,8 @@ const ITEquipment = () => {
         handleOpen,
         endPoint,
         header,
-        columnHeaders
+        columnHeaders,
+        determineCurrentAsset
     } = ITEquipmentUtills();
 
     const fetchResources = async () => {
@@ -50,18 +51,13 @@ const ITEquipment = () => {
 
     useEffect(() => { fetchResources() }, []);
 
-    const determineCurrentAsset = (id: number) => {
-        const item = itEquipmentMock.find(item => item.id === id);
-        setCurrentAsset(item as IITEquipment)
-    }
-
     const handleOptionClicked = (option: string | number, moduleID?: string | number) => {
         switch (option) {
             case crudStates.update:
                 navigate(`${ROUTES.UPDATE_ITEQUIPMENT}/${moduleID}`);
                 break;
             case crudStates.dispose:
-                determineCurrentAsset(moduleID as number)
+                setCurrentAsset(determineCurrentAsset(moduleID as number, rows as IITEquipment[]))
                 handleOpen();
                 break;
             case crudStates.read:
