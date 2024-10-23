@@ -9,12 +9,14 @@ export const crudStates: {
     read: string;
     delete: string;
     dispose: string;
+    deactivate: string;
 } = {
     create: "create",
     update: "update",
     read: "read",
     delete: "delete",
-    dispose: "dispose"
+    dispose: "dispose",
+    deactivate: "deactivate"
 }
 
 export const requestStatus: {

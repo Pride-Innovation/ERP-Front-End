@@ -43,9 +43,9 @@ const UserUtils = () => {
         action: {
             label: "options",
             options: [
-                { value: "deactivate", label: "Deactivate", icon: <InfoIcon fontSize='small' color='error' /> },
-                { value: "update", label: "Update", icon: <ModeEditIcon fontSize='small' color='info' /> },
-                { value: "read", label: "View Details", icon: <RemoveRedEyeIcon fontSize='small' color='inherit' /> }
+                { value: crudStates.deactivate, label: "Deactivate", icon: <InfoIcon fontSize='small' color='error' /> },
+                { value: crudStates.update, label: "Update", icon: <ModeEditIcon fontSize='small' color='info' /> },
+                { value: crudStates.read, label: "View Details", icon: <RemoveRedEyeIcon fontSize='small' color='inherit' /> }
             ]
         },
     };

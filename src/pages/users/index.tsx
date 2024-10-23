@@ -11,6 +11,7 @@ import UpdateUsers from './UpdateUsers';
 import { usersMock } from '../../mocks/users';
 import { useNavigate } from 'react-router';
 import { ROUTES } from '../../core/routes/routes';
+import Deactivate from './Deactivate';
 
 const Users = () => {
   const navigate = useNavigate();
@@ -25,7 +26,7 @@ const Users = () => {
     open,
     handleClose
   } = UserUtils();
-  const { setUser, setUsers, users } = useContext(UserContext);
+  const { setUser, setUsers, users, user } = useContext(UserContext);
 
   useEffect(() => { setUsers(usersMock) }, [])
 
@@ -54,6 +55,12 @@ const Users = () => {
       {modalState === crudStates.update &&
         <ModalComponent title='Update User' open={open} handleClose={handleClose} width="60%">
           <UpdateUsers handleClose={handleClose} />
+        </ModalComponent>
+      }
+
+      {modalState === crudStates.deactivate &&
+        <ModalComponent title='Update User' open={open} handleClose={handleClose} width="40%">
+          <Deactivate user={user} handleClose={handleClose} buttonText='Deactivate' sendingRequest={false} />
         </ModalComponent>
       }
       {columnHeaders.length > 0 &&

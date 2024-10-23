@@ -27,3 +27,10 @@ export interface ICreateUser {
 export interface IUpdateUser {
     handleClose: () => void;
 }
+
+export interface IDeactivate {
+    handleClose: () => void;
+    sendingRequest: boolean;
+    buttonText: string;
+    user: IUser
+}
