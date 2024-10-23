@@ -43,7 +43,6 @@ const OfficeEquipment = () => {
     useEffect(() => { fetchResources() }, []);
 
     const handleOptionClicked = (option: string | number, moduleID?: string | number) => {
-        console.log(option, "options!!")
         switch (option) {
             case crudStates.update:
                 navigate(`${ROUTES.UPDATE_OFFICE_EQUIPMENT}/${moduleID}`)

@@ -1,5 +1,6 @@
 import { Path } from "react-hook-form";
 import { IOptions } from "../../components/tables/interface";
+import { IITEquipment } from "./ITEquipment/interface";
 
 export interface IFormData<T> {
     value: Path<T>;
@@ -12,6 +13,7 @@ export interface IDispose {
     handleClose: () => void;
     sendingRequest: boolean;
     buttonText: string;
+    asset: IITEquipment
 }
 
 export interface INavigation {

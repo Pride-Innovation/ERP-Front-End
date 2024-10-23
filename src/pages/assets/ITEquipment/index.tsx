@@ -11,9 +11,11 @@ import { GridRowsProp } from "@mui/x-data-grid"
 import { crudStates } from "../../../utils/constants"
 import { ROUTES } from "../../../core/routes/routes"
 import { itEquipmentMock } from "../../../mocks/itEquipment"
+import { IITEquipment } from "./interface"
 
 const ITEquipment = () => {
     const [loading, setLoading] = useState<boolean>(false);
+    const [currentAsset, setCurrentAsset] = useState<IITEquipment>({} as IITEquipment);
     const navigate = useNavigate();
     const { setRows, rows } = useContext(RowContext);
 
@@ -48,12 +50,18 @@ const ITEquipment = () => {
 
     useEffect(() => { fetchResources() }, []);
 
+    const determineCurrentAsset = (id: number) => {
+        const item = itEquipmentMock.find(item => item.id === id);
+        setCurrentAsset(item as IITEquipment)
+    }
+
     const handleOptionClicked = (option: string | number, moduleID?: string | number) => {
         switch (option) {
             case crudStates.update:
                 navigate(`${ROUTES.UPDATE_ITEQUIPMENT}/${moduleID}`);
                 break;
             case crudStates.dispose:
+                determineCurrentAsset(moduleID as number)
                 handleOpen();
                 break;
             case crudStates.read:
@@ -72,6 +80,7 @@ const ITEquipment = () => {
                         sendingRequest={loading}
                         handleClose={handleClose}
                         buttonText='Confirm'
+                        asset={currentAsset}
                     />
                 </ModalComponent>
             }
