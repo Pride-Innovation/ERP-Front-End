@@ -136,12 +136,17 @@ const FleetUtills = () => {
             type: "select",
             options: [
                 { label: "In Use", value: "use" },
-                { label: "In Store", value: "store"},
+                { label: "In Store", value: "store" },
                 { label: "In Repair", value: "repair" },
                 { label: "Disposed/Decommisioned", value: "repair" },
             ]
         }
     ]
+
+    const determineCurrentAsset = (id: number, itemList: Array<IFleet>): IFleet => {
+        const item = itemList.find(item => item.id === id);
+        return item as IFleet;
+    }
 
     return (
         {
@@ -151,7 +156,8 @@ const FleetUtills = () => {
             handleOpen,
             columnHeaders,
             header,
-            formFields
+            formFields,
+            determineCurrentAsset
         }
     )
 }

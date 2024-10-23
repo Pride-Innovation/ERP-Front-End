@@ -71,7 +71,7 @@ const ITEquipment = () => {
     return (
         <>
             {
-                <ModalComponent width={"40%"} title='Dispose Asset' open={open} handleClose={handleClose}>
+                <ModalComponent width={"40%"} title='Dispose IT Equipment' open={open} handleClose={handleClose}>
                     <Dispose
                         sendingRequest={loading}
                         handleClose={handleClose}

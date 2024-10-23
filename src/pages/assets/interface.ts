@@ -14,7 +14,7 @@ export interface IDispose {
     handleClose: () => void;
     sendingRequest: boolean;
     buttonText: string;
-    asset: IITEquipment | IOfficeEquipment
+    asset: IITEquipment | IOfficeEquipment;
 }
 
 export interface INavigation {

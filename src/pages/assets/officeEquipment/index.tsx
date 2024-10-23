@@ -66,7 +66,7 @@ const OfficeEquipment = () => {
     return (
         <React.Fragment>
             {
-                <ModalComponent width={"40%"} title='Dispose Asset' open={open} handleClose={handleClose}>
+                <ModalComponent width={"40%"} title='Dispose Office Equipment' open={open} handleClose={handleClose}>
                     <Dispose
                         sendingRequest={loading}
                         handleClose={handleClose}

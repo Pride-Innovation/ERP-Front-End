@@ -9,11 +9,15 @@ import { GridRowsProp } from "@mui/x-data-grid";
 import { fleetsMock } from "../../../mocks/fleet";
 import { ROUTES } from "../../../core/routes/routes";
 import { crudStates } from "../../../utils/constants";
+import { IFleet } from "./interface";
+import ModalComponent from "../../../components/modal";
+import Dispose from "../Dispose";
 
 const Fleet = () => {
     const [loading, setLoading] = useState<boolean>(false);
+    const [currentAsset, setCurrentAsset] = useState<IFleet>({} as IFleet);
     const navigate = useNavigate();
-    const { columnHeaders, header, endPoint, handleOpen } = FleetUtills();
+    const { columnHeaders, header, endPoint, handleOpen, determineCurrentAsset, open, handleClose } = FleetUtills();
     const { setRows, rows } = useContext(RowContext);
 
     const fetchResources = async () => {
@@ -44,6 +48,7 @@ const Fleet = () => {
                 navigate(`${ROUTES.UPDATE_FLEET}/${moduleID}`)
                 break;
             case crudStates.dispose:
+                setCurrentAsset(determineCurrentAsset(moduleID as number, rows as IFleet[]))
                 handleOpen();
                 break;
             case crudStates.read:
@@ -56,6 +61,16 @@ const Fleet = () => {
 
     return (
         <React.Fragment>
+            {
+                <ModalComponent width={"40%"} title='Dispose Fleet' open={open} handleClose={handleClose}>
+                    <Dispose
+                        sendingRequest={loading}
+                        handleClose={handleClose}
+                        buttonText='Confirm'
+                        asset={currentAsset}
+                    />
+                </ModalComponent>
+            }
             {rows?.length > 0 &&
                 <Grid xs={12} container>
                     {columnHeaders.length > 0 &&
