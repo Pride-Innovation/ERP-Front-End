@@ -13,11 +13,15 @@ import { officeEquipmentMock } from "../../../mocks/officeEquipment";
 import OfficeEquipmentUtills from "./utills";
 import TableComponent from "../../../components/tables/TableComponent";
 import { ROUTES } from "../../../core/routes/routes";
+import { IOfficeEquipment } from "./interface";
+import ModalComponent from "../../../components/modal";
+import Dispose from "../Dispose";
 
 const OfficeEquipment = () => {
     const [loading, setLoading] = useState<boolean>(false);
+    const [currentAsset, setCurrentAsset] = useState<IOfficeEquipment>({} as IOfficeEquipment);
     const navigate = useNavigate();
-    const { columnHeaders, header, endPoint, handleOpen } = OfficeEquipmentUtills();
+    const { columnHeaders, header, endPoint, handleOpen, determineCurrentAsset, handleClose, open } = OfficeEquipmentUtills();
     const { setRows, rows } = useContext(RowContext);
 
     const fetchResources = async () => {
@@ -48,6 +52,7 @@ const OfficeEquipment = () => {
                 navigate(`${ROUTES.UPDATE_OFFICE_EQUIPMENT}/${moduleID}`)
                 break;
             case crudStates.dispose:
+                setCurrentAsset(determineCurrentAsset(moduleID as number, rows as IOfficeEquipment[]))
                 handleOpen()
                 break;
             case crudStates.read:
@@ -60,6 +65,16 @@ const OfficeEquipment = () => {
 
     return (
         <React.Fragment>
+            {
+                <ModalComponent width={"40%"} title='Dispose Asset' open={open} handleClose={handleClose}>
+                    <Dispose
+                        sendingRequest={loading}
+                        handleClose={handleClose}
+                        buttonText='Confirm'
+                        asset={currentAsset}
+                    />
+                </ModalComponent>
+            }
             {rows?.length > 0 &&
                 <Grid xs={12} container>
                     {columnHeaders.length > 0 &&

@@ -24,7 +24,7 @@ const Dispose = ({
                 <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 1 }}>
                     <SerialIcon color="secondary" />
                     <Typography variant="subtitle1" color="textSecondary">
-                        Serial Number: {asset.serialNumber}
+                        Engraved Number: {asset.engravedNumber}
                     </Typography>
                 </Stack>
             </Grid>

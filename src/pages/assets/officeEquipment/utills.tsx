@@ -137,6 +137,11 @@ const OfficeEquipmentUtills = () => {
         }
     ]
 
+    const determineCurrentAsset = (id: number, itemList: Array<IOfficeEquipment>): IOfficeEquipment => {
+        const item = itemList.find(item => item.id === id);
+        return item as IOfficeEquipment;
+    }
+
     return (
         {
             endPoint,
@@ -145,7 +150,8 @@ const OfficeEquipmentUtills = () => {
             columnHeaders,
             handleOpen,
             handleClose,
-            formFields
+            formFields,
+            determineCurrentAsset
         }
     )
 }
