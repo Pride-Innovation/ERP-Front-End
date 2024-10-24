@@ -32,7 +32,7 @@ const DashBoardUtills = () => {
     } = requestMock[0];
 
     const rowData = {
-        name: `${requestMock[0].description}`,
+        name: `${requestMock[0].user?.firstName} ${requestMock[0].user?.lastName}`,
         department: requestMock[0].user?.department,
         ...data,
     };

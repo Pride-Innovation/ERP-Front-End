@@ -9,12 +9,14 @@ import { requestMock } from "../../mocks/request";
 import { crudStates } from "../../utils/constants";
 import { ROUTES } from "../../core/routes/routes";
 import TableComponent from "../../components/tables/TableComponent";
+import { RequestContext } from "../../context/request/RequestContext";
 
 const Request = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const { setRows, rows } = useContext(RowContext);
-  const { columnHeaders, endPoint, header } = RequestUtills();
+  const { columnHeaders, endPoint, header, handleRequest } = RequestUtills();
   const navigate = useNavigate();
+  const { requestTableData } = useContext(RequestContext);
 
   const fetchResources = async () => {
     setLoading(true)
@@ -29,9 +31,8 @@ const Request = () => {
     setLoading(false)
   }
 
-  useEffect(() => {
-    fetchResources()
-  }, []);
+  useEffect(() => { fetchResources() }, []);
+  useEffect(() => { if (rows.length > 0) { handleRequest(requestMock) } }, [rows])
 
 
   const handleOptionClicked = (option: string | number, moduleID?: string | number) => {
@@ -56,7 +57,7 @@ const Request = () => {
             createAction
             importData
             header={header}
-            rows={rows}
+            rows={requestTableData}
             columnHeaders={columnHeaders}
             onCreationHandler={() => navigate(ROUTES.CREATE_REQUEST)}
             handleOptionClicked={handleOptionClicked}
