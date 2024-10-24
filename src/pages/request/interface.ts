@@ -4,6 +4,7 @@ import {
     FormState,
     UseFormRegister
 } from "react-hook-form";
+import { IUser } from "../users/interface";
 
 export interface IAssetParticulars {
     name: string;
@@ -13,15 +14,22 @@ export interface IAssetParticulars {
 
 export interface IRequest {
     id?: string | number;
-    officerName: string;
-    title: string;
-    department: string;
+    user?: IUser
     reason: string;
     quantity: number;
-    status?: string;
-    destination: string;
-    expectedReturnDate: string;
-    particulars: Array<IAssetParticulars>;
+    status?: string | null;
+    description: string;
+    date: string;
+}
+
+export interface IRequestTableData {
+    department?: string;
+    name: string;
+    reason: string;
+    quantity: number;
+    status?: string | null;
+    description: string;
+    date: string;
 }
 
 
@@ -33,7 +41,7 @@ export interface IRequestForm {
             department?: FieldError;
             reason?: FieldError;
             quantity?: FieldError;
-            destination?: FieldError;
+            description?: FieldError;
             expectedReturnDate?: FieldError;
         };
     };

@@ -5,6 +5,7 @@ import App from './app/App';
 import { UserContextProvider } from './context/user/UserContext';
 import { TestContextProvider } from './context/test/TestContext';
 import { RowContextProvider } from './context/row/RowContext';
+import RequestContextProvider from './context/request/RequestContext';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -13,9 +14,11 @@ root.render(
   <React.StrictMode>
     <RowContextProvider>
       <UserContextProvider>
-        <TestContextProvider>
-          <App />
-        </TestContextProvider>
+        <RequestContextProvider>
+          <TestContextProvider>
+            <App />
+          </TestContextProvider>
+        </RequestContextProvider>
       </UserContextProvider>
     </RowContextProvider>
   </React.StrictMode>

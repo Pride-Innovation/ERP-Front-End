@@ -6,7 +6,7 @@ import { IOfficeEquipment } from "./officeEquipment/interface";
 export interface IFormData<T> {
     value: Path<T>;
     label: string;
-    type: "input" | "select" | "date" | "autocomplete";
+    type: "input" | "select" | "date" | "autocomplete" | "textarea";
     options?: Array<IOptions>;
 }
 

@@ -17,7 +17,8 @@ const RequestUtills = () => {
 
     const {
         id,
-        particulars,
+        user,
+        description,
         ...data
     } = requestMock[0];
 
@@ -45,20 +46,14 @@ const RequestUtills = () => {
             type: "input"
         },
         {
-            value: "destination",
-            label: 'Destination',
-            type: "select",
-            options: [
-                { label: "In Use", value: "use" },
-                { label: "In Store", value: "store" },
-                { label: "In Repair", value: "repair" },
-                { label: "Disposed/Decommisioned", value: "disposed" },
-            ]
+            value: "date",
+            label: 'Request Date',
+            type: "date"
         },
         {
-            value: "expectedReturnDate",
-            label: 'Expected Return Date',
-            type: "date"
+            value: "description",
+            label: 'Description',
+            type: "textarea"
         }
     ]
 

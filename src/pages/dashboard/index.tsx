@@ -1,5 +1,5 @@
-import { Card, Grid, Stack } from '@mui/material'
-import DahboardCard from './DahboardCard'
+import { Card, Grid, Stack } from '@mui/material';
+import DahboardCard from './DahboardCard';
 import Laptop from "../../statics/images/icons8-laptop-50.png";
 import Furniture from "../../statics/images/icons8-furniture-50.png";
 import Computer from "../../statics/images/icons8-computer-48.png";

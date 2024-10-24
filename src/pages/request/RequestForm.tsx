@@ -19,7 +19,7 @@ const RequestForm = ({
     buttonText
 }: IRequestForm) => {
     const { formFields } = RequestUtills();
-    const navigate = useNavigate()
+    const navigate = useNavigate();
 
     return (
         <Grid item container xs={12}>
@@ -27,7 +27,7 @@ const RequestForm = ({
                 {
                     formFields.map(formField => {
                         return formField.type === 'input' ? (
-                            <Grid item xs={12} md={4}>
+                            <Grid item xs={12} md={3}>
                                 <UseFormInput
                                     register={register}
                                     control={control}
@@ -36,8 +36,20 @@ const RequestForm = ({
                                     label={formField.label}
                                 />
                             </Grid>
+                        ) : formField.type === 'textarea' ? (
+                            <Grid item xs={12} md={6}>
+                                <UseFormInput
+                                    row={6}
+                                    multiline={true}
+                                    register={register}
+                                    control={control}
+                                    formState={formState}
+                                    value={formField.value}
+                                    label={formField.label}
+                                />
+                            </Grid>
                         ) : formField.type === 'select' ? (
-                            <Grid item xs={12} md={4}>
+                            <Grid item xs={12} md={3}>
                                 <UseFormSelect
                                     options={formField.options}
                                     register={register}
@@ -47,7 +59,7 @@ const RequestForm = ({
                                     label={formField.label} />
                             </Grid>
                         ) : formField.type === 'date' ? (
-                            <Grid item xs={12} md={4}>
+                            <Grid item xs={12} md={3}>
                                 <UseFormDatePicker
                                     register={register}
                                     control={control}
@@ -56,7 +68,7 @@ const RequestForm = ({
                                     label={formField.label} />
                             </Grid>
                         ) : formField.type === 'autocomplete' ? (
-                            <Grid item xs={12} md={4}>
+                            <Grid item xs={12} md={3}>
                                 <UseFormAutocompleteComponent
                                     register={register}
                                     control={control}

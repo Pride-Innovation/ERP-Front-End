@@ -15,12 +15,14 @@ export interface IInputForm {
     field: FieldValues;
     error: FieldError | undefined;
     label: string;
+    multiline?: boolean
     type?: string;
     id: string;
     adornment?: boolean;
     required?: boolean
     handleClick?: () => void;
-    handleMouseDown?: (event: React.MouseEvent<HTMLButtonElement>) => void
+    handleMouseDown?: (event: React.MouseEvent<HTMLButtonElement>) => void;
+    row?: number
 }
 
 export interface IInputPropAdornment {
@@ -64,7 +66,9 @@ export interface IUseFormInput<T extends FieldValues> {
     value: Path<T>;
     label: string;
     type?: string;
-    options?: IOptions[]
+    options?: IOptions[];
+    row?: number;
+    multiline?: boolean;
 }
 
 export interface IDatePickerComponent {

@@ -46,11 +46,15 @@ export const InputComponent = ({
     type = "text",
     handleClick,
     handleMouseDown,
-    required
+    multiline = false,
+    required,
+    row = 0
 }: IInputForm) => (
     <BootstrapInput
+        multiline={multiline}
         required={required}
         size='small'
+        rows={row}
         type={type}
         id={id}
         label={label}
