@@ -20,7 +20,7 @@ const TableComponent = ({
     columnHeaders,
     rows,
     onCreationHandler,
-    onImportHandler,
+    module,
     header,
     handleOptionClicked,
     importData = false,
@@ -131,7 +131,7 @@ const TableComponent = ({
                                 importData={importData}
                                 header={header}
                                 onCreationHandler={() => onCreationHandler?.()}
-                                onImportHandler={() => onImportHandler?.()}
+                                module={module as string}
                             />)
                     }}
                     autoHeight

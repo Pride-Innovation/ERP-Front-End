@@ -1,4 +1,8 @@
-import { useContext, useEffect, useState } from 'react'
+import {
+    useContext,
+    useEffect,
+    useState
+} from 'react';
 import InfoIcon from '@mui/icons-material/Info';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
@@ -6,12 +10,16 @@ import { ITableHeader } from '../../components/tables/interface';
 import { requestMock } from '../../mocks/request';
 import { IFormData } from '../assets/interface';
 import { getTableHeaders } from '../../components/tables/getTableHeaders';
-import { IRequest, IRequestTableData } from './interface';
+import {
+    IRequest,
+    IRequestTableData
+} from './interface';
 import { crudStates } from '../../utils/constants';
 import { RequestContext } from '../../context/request/RequestContext';
 
 const RequestUtills = () => {
     const endPoint = 'posts';
+    const module = "request";
     const header = { plural: 'Requests', singular: 'Request' };
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
     const { setRequestTableData } = useContext(RequestContext)
@@ -85,7 +93,7 @@ const RequestUtills = () => {
     }, []);
 
     return (
-        { endPoint, header, columnHeaders, formFields, handleRequest }
+        { endPoint, header, columnHeaders, formFields, handleRequest, module }
     )
 }
 

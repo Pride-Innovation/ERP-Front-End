@@ -84,3 +84,8 @@ export interface IAutocompleteComponent {
     field: FieldValues;
     error: FieldError | undefined;
 }
+
+export interface IFileUploadButton {
+    title: string;
+    module: string;
+}

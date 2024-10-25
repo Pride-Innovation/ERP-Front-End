@@ -30,10 +30,6 @@ const Users = () => {
 
   useEffect(() => { setUsers(usersMock) }, [])
 
-  const handleImport = () => {
-    console.log('Import users clicked');
-  };
-
   const handleOptionClicked = (option: string | number, moduleID?: string | number) => {
     setModalState(option as string)
     const user = users?.find(user => user.id === moduleID) as IUser;
@@ -69,7 +65,7 @@ const Users = () => {
           exportData
           handleOptionClicked={handleOptionClicked}
           onCreationHandler={handleCreation}
-          onImportHandler={handleImport}
+          module='user'
           header={header}
           rows={usersTableData}
           columnHeaders={columnHeaders}

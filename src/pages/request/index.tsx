@@ -10,19 +10,20 @@ import { crudStates } from "../../utils/constants";
 import { ROUTES } from "../../core/routes/routes";
 import TableComponent from "../../components/tables/TableComponent";
 import { RequestContext } from "../../context/request/RequestContext";
+import { FileContext } from "../../context/file/FileContext";
 
 const Request = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const { setRows, rows } = useContext(RowContext);
-  const { columnHeaders, endPoint, header, handleRequest } = RequestUtills();
+  const { columnHeaders, endPoint, header, handleRequest, module } = RequestUtills();
   const navigate = useNavigate();
   const { requestTableData } = useContext(RequestContext);
+  const { setImageData, imageData } = useContext(FileContext)
 
   const fetchResources = async () => {
     setLoading(true)
     try {
       const response = await fetchRowsService({ page: 1, size: 10, endPoint }) as unknown as GridRowsProp;
-
       console.log(response, "response!!")
       setRows([...requestMock]);
     } catch (error) {
@@ -31,9 +32,12 @@ const Request = () => {
     setLoading(false)
   }
 
-  useEffect(() => { fetchResources() }, []);
-  useEffect(() => { if (rows.length > 0) { handleRequest(requestMock) } }, [rows])
+  useEffect(() => {
+    fetchResources();
+    setImageData({ image: "", module: "" });
+  }, []);
 
+  useEffect(() => { if (rows.length > 0) { handleRequest(requestMock) } }, [rows])
 
   const handleOptionClicked = (option: string | number, moduleID?: string | number) => {
     switch (option) {
@@ -44,6 +48,12 @@ const Request = () => {
         break;
     }
   }
+
+  useEffect(() => {
+    if (imageData.module === module) {
+      console.log(imageData, "module data!!");
+    }
+  }, [imageData])
 
   return (
     <>
@@ -56,6 +66,7 @@ const Request = () => {
             exportData
             createAction
             importData
+            module={module}
             header={header}
             rows={requestTableData}
             columnHeaders={columnHeaders}

@@ -46,6 +46,7 @@ const AssignmentHistory = ({ id }: { id: string | number }) => {
                         exportData
                         createAction
                         header={header}
+                        module=""
                         rows={rows}
                         columnHeaders={columnHeaders}
                         paginationMode='client'
