@@ -9,9 +9,11 @@ import { assetStatus, requestStatus } from "../../utils/constants";
 import { MenuItem } from "@mui/material";
 import { exportPDF } from "../../utils/pdf";
 import { camelCaseToWords } from "../../utils/helpers";
+import { useContext } from "react";
+import { FileContext } from "../../context/file/FileContext";
 
 const TableUtills = () => {
-
+    const { fileName } = useContext(FileContext);
     const determineTimeLineDotColor = (value: string) => {
         switch (value) {
             case requestStatus.approved:
@@ -74,7 +76,7 @@ const TableUtills = () => {
         });
 
         const { columns, rows } = determineRowsandColumns(data);
-        return exportPDF(columns, rows);
+        return exportPDF(columns, rows, fileName);
     };
 
 

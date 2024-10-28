@@ -7,6 +7,8 @@ import { TypographyComponent } from '../headers/TypographyComponent';
 import { CustomToolbarWrapperProps, ITableToolBar } from './interface';
 import FileUploadButton from '../forms/FileUploadButton';
 import CustomGridToolbarExport from './CustomGridToolbarExport';
+import { useContext, useEffect } from 'react';
+import { FileContext } from '../../context/file/FileContext';
 
 const TableToolBar = ({
     header,
@@ -16,6 +18,9 @@ const TableToolBar = ({
     exportData,
     createAction
 }: ITableToolBar) => {
+    const { setFileName } = useContext(FileContext);
+    useEffect(() => { setFileName(module) }, [module]);
+    
     return (
         <GridToolbarContainer
             sx={{ width: '100%', display: 'flex', p: '20px' }}>

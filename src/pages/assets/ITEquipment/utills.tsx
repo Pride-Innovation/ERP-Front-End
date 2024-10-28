@@ -11,6 +11,7 @@ import { itEquipmentMock } from "../../../mocks/itEquipment";
 
 const ITEquipmentUtills = () => {
     const endPoint = 'posts';
+    const module = 'IT Equipment';
     const header = { plural: 'IT Equipment', singular: 'IT Equipment' };
     const [open, setOpen] = useState<boolean>(false);
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
@@ -203,7 +204,8 @@ const ITEquipmentUtills = () => {
             formFields,
             computerFields,
             categories,
-            determineCurrentAsset
+            determineCurrentAsset,
+            module
         }
     )
 }

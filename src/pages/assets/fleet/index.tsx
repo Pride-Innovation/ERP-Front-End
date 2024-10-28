@@ -17,7 +17,7 @@ const Fleet = () => {
     const [loading, setLoading] = useState<boolean>(false);
     const [currentAsset, setCurrentAsset] = useState<IFleet>({} as IFleet);
     const navigate = useNavigate();
-    const { columnHeaders, header, endPoint, handleOpen, determineCurrentAsset, open, handleClose } = FleetUtills();
+    const { columnHeaders, header, endPoint, handleOpen, determineCurrentAsset, open, handleClose, module } = FleetUtills();
     const { setRows, rows } = useContext(RowContext);
 
     const fetchResources = async () => {
@@ -80,6 +80,7 @@ const Fleet = () => {
                             count={100}
                             exportData
                             createAction
+                            module={module}
                             importData
                             header={header}
                             rows={rows}

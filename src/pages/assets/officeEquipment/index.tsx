@@ -21,7 +21,7 @@ const OfficeEquipment = () => {
     const [loading, setLoading] = useState<boolean>(false);
     const [currentAsset, setCurrentAsset] = useState<IOfficeEquipment>({} as IOfficeEquipment);
     const navigate = useNavigate();
-    const { columnHeaders, header, endPoint, handleOpen, determineCurrentAsset, handleClose, open } = OfficeEquipmentUtills();
+    const { columnHeaders, header, endPoint, handleOpen, determineCurrentAsset, handleClose, open, module } = OfficeEquipmentUtills();
     const { setRows, rows } = useContext(RowContext);
 
     const fetchResources = async () => {
@@ -86,6 +86,7 @@ const OfficeEquipment = () => {
                             createAction
                             importData
                             header={header}
+                            module={module}
                             rows={rows}
                             columnHeaders={columnHeaders}
                             onCreationHandler={() => navigate(ROUTES.CREATE_OFFICE_EQUIPMENT)}

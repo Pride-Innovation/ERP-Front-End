@@ -10,6 +10,7 @@ import { IFleet } from "./interface";
 
 const FleetUtills = () => {
     const endPoint = 'posts';
+    const module = "fleet";
     const header = { plural: 'Fleet', singular: 'Fleet' };
     const [open, setOpen] = useState<boolean>(false);
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
@@ -157,7 +158,8 @@ const FleetUtills = () => {
             columnHeaders,
             header,
             formFields,
-            determineCurrentAsset
+            determineCurrentAsset,
+            module
         }
     )
 }

@@ -26,6 +26,7 @@ const ITEquipment = () => {
         endPoint,
         header,
         columnHeaders,
+        module,
         determineCurrentAsset
     } = ITEquipmentUtills();
 
@@ -91,6 +92,7 @@ const ITEquipment = () => {
                             createAction
                             importData
                             header={header}
+                            module={module}
                             rows={rows}
                             columnHeaders={columnHeaders}
                             onCreationHandler={() => navigate(ROUTES.CREATE_ITEQUIPMENT)}

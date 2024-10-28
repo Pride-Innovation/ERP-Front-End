@@ -1,7 +1,7 @@
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 
-export const exportPDF = (columns, rows) => {
+export const exportPDF = (columns, rows, fileName) => {
     const doc = new jsPDF('l', 'pt');
 
     doc.autoTable({
@@ -9,5 +9,5 @@ export const exportPDF = (columns, rows) => {
         body: rows,
     });
 
-    doc.save('Assets.pdf');
+    doc.save(`${fileName}.pdf`);
 }

@@ -10,6 +10,7 @@ import { getTableHeaders } from "../../../components/tables/getTableHeaders";
 
 const OfficeEquipmentUtills = () => {
     const endPoint = 'posts';
+    const module = 'office equipment';
     const header = { plural: 'Office Equipment', singular: 'Office Equipment' };
     const [open, setOpen] = useState<boolean>(false);
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
@@ -151,7 +152,8 @@ const OfficeEquipmentUtills = () => {
             handleOpen,
             handleClose,
             formFields,
-            determineCurrentAsset
+            determineCurrentAsset,
+            module
         }
     )
 }
