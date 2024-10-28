@@ -6,6 +6,7 @@ import Placeholder from '../statics/images/Placeholder.png';
 export const camelCaseToWords = (camelCaseString: string) => {
     return camelCaseString
         .replace(/([a-z])([A-Z])/g, '$1 $2')
+        .replace(/_/g, ' ')
         .replace(/^./, (str) => str.toUpperCase());
 }
 
