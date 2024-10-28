@@ -18,7 +18,7 @@ const Request = () => {
   const { columnHeaders, endPoint, header, handleRequest, module } = RequestUtills();
   const navigate = useNavigate();
   const { requestTableData } = useContext(RequestContext);
-  const { setImageData, imageData } = useContext(FileContext)
+  const { setFileData, fileData } = useContext(FileContext)
 
   const fetchResources = async () => {
     setLoading(true)
@@ -34,7 +34,7 @@ const Request = () => {
 
   useEffect(() => {
     fetchResources();
-    setImageData({ image: "", module: "" });
+    setFileData({ file: "", module: "", jsonData: [] });
   }, []);
 
   useEffect(() => { if (rows.length > 0) { handleRequest(requestMock) } }, [rows])
@@ -50,10 +50,10 @@ const Request = () => {
   }
 
   useEffect(() => {
-    if (imageData.module === module) {
-      console.log(imageData, "module data!!");
+    if (fileData.module === module) {
+      console.log(fileData, "form data!!");
     }
-  }, [imageData])
+  }, [fileData])
 
   return (
     <>
