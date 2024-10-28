@@ -32,7 +32,6 @@ const FileUploadButton = ({ title, module }: IFileUploadButton) => {
 
             const worksheet = workbook.Sheets[workbook.SheetNames[0]];
             const json = XLSX.utils.sheet_to_json(worksheet);
-            console.log(json, "json format");
 
             setFileData({
                 file: URL.createObjectURL(file),
