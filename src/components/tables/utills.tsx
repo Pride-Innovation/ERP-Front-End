@@ -36,14 +36,18 @@ const TableUtills = () => {
             return { columns: [], rows: [] };
         }
 
-        const columns = Object.keys(data[0]).map(key => ({
-            title: key.charAt(0).toUpperCase() + key.slice(1),
-            dataKey: key,
-        }));
+        const columns = Object.keys(data[0])
+            .filter(key => key !== 'image' && key !== 'action')
+            .map(key => ({
+                title: key.charAt(0).toUpperCase() + key.slice(1),
+                dataKey: key,
+            }));
 
         const rows = data.map(item => {
             return Object.keys(item).reduce((acc, key) => {
-                acc[key] = item[key];
+                if (key !== 'image' && key !== 'action') {
+                    acc[key] = item[key];
+                }
                 return acc;
             }, {} as { [key: string]: string | number | object | boolean | Array<any> });
         });
