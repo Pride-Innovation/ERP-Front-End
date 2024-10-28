@@ -8,6 +8,28 @@ import Printer from "../../statics/images/icons8-printer-96.png";
 import DashboardRequests from './DashboardRequests';
 
 const Dashboard = () => {
+
+  /**
+   * 
+   * TO DO
+   * 
+   * The top section should show a report on the remaining stock for each catergory.
+   * 
+   * Below it on the Left we should show pending requests. For individuals, 
+   * It should show their pending requests. If they do not have pending requests, then
+   * we should display a list of assets assigned to them.
+   * 
+   * For admin, it should show all the requests for different branches.
+   * 
+   * On the right, we will have a pie chart showing percentage of each asset.
+   * 
+   * Below, we will have asset due for disposal.
+   * 
+   * The lastly, we will have a horizontal bar chart showing money stocks 
+   * for the different categories on monthly basis for the last one year.
+   * 
+   */
+
   return (
     <Grid container xs={12}>
       <Stack
