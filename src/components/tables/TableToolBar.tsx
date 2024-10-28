@@ -1,28 +1,12 @@
 import {
-    GridCsvExportMenuItem,
-    GridCsvExportOptions,
     GridToolbarContainer,
-    GridToolbarExportContainer
 } from '@mui/x-data-grid';
 import ButtonComponent from '../forms/Button';
-import { Box, ButtonProps, Stack } from '@mui/material';
+import { Box, Stack } from '@mui/material';
 import { TypographyComponent } from '../headers/TypographyComponent';
 import { CustomToolbarWrapperProps, ITableToolBar } from './interface';
 import FileUploadButton from '../forms/FileUploadButton';
-import TableUtills from './utills';
-
-const CustomGridToolbarExport = (props: ButtonProps) => {
-
-    const csvOptions: GridCsvExportOptions = {};
-    const { JsonExportMenuItem } = TableUtills();
-
-    return (
-        <GridToolbarExportContainer {...props}>
-            <GridCsvExportMenuItem options={csvOptions} />
-            <JsonExportMenuItem />
-        </GridToolbarExportContainer>
-    )
-}
+import CustomGridToolbarExport from './CustomGridToolbarExport';
 
 const TableToolBar = ({
     header,

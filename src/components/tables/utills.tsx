@@ -7,8 +7,10 @@ import {
 } from "@mui/x-data-grid";
 import { assetStatus, requestStatus } from "../../utils/constants";
 import { MenuItem } from "@mui/material";
+import { exportPDF } from "../../utils/pdf";
 
 const TableUtills = () => {
+
     const determineTimeLineDotColor = (value: string) => {
         switch (value) {
             case requestStatus.approved:
@@ -26,7 +28,34 @@ const TableUtills = () => {
         }
     };
 
-    const getJson = (apiRef: React.MutableRefObject<GridApi>) => {
+    const determineRowsandColumns = (data: Array<{
+        [key: string]: string | number | object | boolean |
+        Array<{ [key: string]: string | number | object }>;
+    }>) => {
+        if (data.length === 0) {
+            return { columns: [], rows: [] };
+        }
+
+        const columns = Object.keys(data[0]).map(key => ({
+            title: key.charAt(0).toUpperCase() + key.slice(1),
+            dataKey: key,
+        }));
+
+        const rows = data.map(item => {
+            return Object.keys(item).reduce((acc, key) => {
+                acc[key] = item[key];
+                return acc;
+            }, {} as { [key: string]: string | number | object | boolean | Array<any> });
+        });
+
+        return {
+            columns,
+            rows
+        };
+    };
+
+
+    const generatePDF = (apiRef: React.MutableRefObject<GridApi>) => {
         const filteredSortedRowIds = gridFilteredSortedRowIdsSelector(apiRef);
         const visibleColumnsField = gridVisibleColumnFieldsSelector(apiRef);
 
@@ -38,21 +67,8 @@ const TableUtills = () => {
             return row;
         });
 
-        return JSON.stringify(data, null, 2);
-    };
-
-
-    const exportBlob = (blob: Blob, filename: string) => {
-        const url = URL.createObjectURL(blob);
-
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = filename;
-        a.click();
-
-        setTimeout(() => {
-            URL.revokeObjectURL(url);
-        });
+        const { columns, rows } = determineRowsandColumns(data);
+        return exportPDF(columns, rows);
     };
 
 
@@ -64,16 +80,11 @@ const TableUtills = () => {
         return (
             <MenuItem
                 onClick={() => {
-                    const jsonString = getJson(apiRef);
-                    const blob = new Blob([jsonString], {
-                        type: 'text/json',
-                    });
-                    exportBlob(blob, 'DataGrid_demo.json');
-
+                    generatePDF(apiRef);
                     hideMenu?.();
                 }}
             >
-                Export PDF
+                Download as PDF
             </MenuItem>
         );
     }
