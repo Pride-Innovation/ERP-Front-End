@@ -8,6 +8,7 @@ import {
 import { assetStatus, requestStatus } from "../../utils/constants";
 import { MenuItem } from "@mui/material";
 import { exportPDF } from "../../utils/pdf";
+import { camelCaseToWords } from "../../utils/helpers";
 
 const TableUtills = () => {
 
@@ -38,10 +39,11 @@ const TableUtills = () => {
 
         const columns = Object.keys(data[0])
             .filter(key => key !== 'image' && key !== 'action')
-            .map(key => ({
-                title: key.charAt(0).toUpperCase() + key.slice(1),
-                dataKey: key,
-            }));
+            .map(key => (
+                {
+                    title: camelCaseToWords(key.charAt(0).toUpperCase() + key.slice(1)),
+                    dataKey: key,
+                }));
 
         const rows = data.map(item => {
             return Object.keys(item).reduce((acc, key) => {
