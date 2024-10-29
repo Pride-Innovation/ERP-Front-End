@@ -5,8 +5,17 @@ import Furniture from "../../statics/images/icons8-furniture-50.png";
 import Computer from "../../statics/images/icons8-computer-48.png";
 import Monitor from "../../statics/images/icons8-monitor-50.png";
 import DashboardRequests from './DashboardRequests';
+import DoughnutChart from '../../components/charts/DoughnutChart';
 
 const Dashboard = () => {
+  const headerText = '% of Assets';
+  const chartData = [40, 27, 34, 51];
+  const labels = [
+    "IT Equipment",
+    "Office Equipment",
+    "Fleet",
+    "Stationery"
+  ]
 
   /**
    * 
@@ -51,6 +60,15 @@ const Dashboard = () => {
       >
         <Card sx={{ boxShadow: 3 }}>
           <DashboardRequests />
+        </Card>
+        <Card sx={{ boxShadow: 3, p: 2 }}>
+          <DoughnutChart
+            headerText={headerText}
+            chartData={chartData}
+            labels={labels}
+            radius='65%'
+            title="ASSETS PERCENTAGE IN STOCK"
+            loading={false} />
         </Card>
       </Box>
     </Grid>
