@@ -67,7 +67,7 @@ const Dashboard = () => {
             chartData={chartData}
             labels={labels}
             radius='65%'
-            title="ASSETS PERCENTAGE IN STOCK"
+            title="ASSETS PERCENTAGE IN STORE"
             loading={false} />
         </Card>
       </Box>

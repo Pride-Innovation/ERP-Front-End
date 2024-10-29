@@ -11,10 +11,10 @@ import {
 } from 'chart.js';
 import { Doughnut } from 'react-chartjs-2';
 import { blue, green, orange } from '@mui/material/colors';
-import CircularProgress from '@mui/material/CircularProgress';
 import Spinner from '../Spinner';
 
 ChartJS.register(ArcElement, Tooltip, Legend, Title);
+const colors = [blue[900], green[900], orange[900], blue[300], blue[100]]
 
 export const data = {
     labels: [
@@ -28,20 +28,8 @@ export const data = {
         {
             label: '% of Assets',
             data: [6, 7, 4, 5, 8],
-            backgroundColor: [
-                blue[900],
-                green[900],
-                orange[900],
-                blue[300],
-                blue[100]
-            ],
-            borderColor: [
-                blue[900],
-                green[900],
-                orange[900],
-                blue[300],
-                blue[100]
-            ],
+            backgroundColor: [...colors],
+            borderColor: [...colors],
             borderWidth: 0,
             spacing: 5,
             radius: '75%',
@@ -57,8 +45,8 @@ export const options = {
     plugins: {
         title: {
             display: true,
-            text: 'VENDORS PERCENTAGE SALES PER DAY',
-            font: { size: 13 }
+            text: 'ASSETS IN STORE',
+            font: { size: 14 }
         },
         legend: {
             display: true,
