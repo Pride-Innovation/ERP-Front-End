@@ -19,7 +19,7 @@ const style = {
 
 const DashBoardUtills = () => {
     const endPoint = 'posts';
-    const header = { plural: 'Requests', singular: 'Request' };
+    const header = { plural: 'Latest Requests', singular: 'Request' };
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
     const { setRequestTableData } = useContext(RequestContext)
 
