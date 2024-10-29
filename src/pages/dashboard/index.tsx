@@ -6,6 +6,7 @@ import Computer from "../../statics/images/icons8-computer-48.png";
 import Monitor from "../../statics/images/icons8-monitor-50.png";
 import DashboardRequests from './DashboardRequests';
 import DoughnutChart from '../../components/charts/DoughnutChart';
+import DashboardBarChart from './DashboardBarChart';
 
 const Dashboard = () => {
   const headerText = '% of Assets';
@@ -70,6 +71,9 @@ const Dashboard = () => {
             title="ASSETS PERCENTAGE IN STORE"
             loading={false} />
         </Card>
+      </Box>
+      <Box sx={{ width: "100%" }}>
+        <DashboardBarChart />
       </Box>
     </Grid>
   )

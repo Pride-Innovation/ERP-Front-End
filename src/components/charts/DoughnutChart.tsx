@@ -12,6 +12,7 @@ import {
 import { Doughnut } from 'react-chartjs-2';
 import { blue, green, orange } from '@mui/material/colors';
 import Spinner from '../Spinner';
+import { IDoughnutChart } from './interface';
 
 ChartJS.register(ArcElement, Tooltip, Legend, Title);
 const colors = [blue[900], green[900], orange[900], blue[300], blue[100]]
@@ -54,23 +55,6 @@ export const options = {
         },
     },
 };
-
-interface IDoughnutChart {
-    loading: boolean;
-    title: string;
-    labels: Array<string>;
-    headerText: string;
-    chartData: Array<number>
-    spacing?: number;
-    cutout?: string;
-    backgroundColor?: Array<string>;
-    borderColor?: Array<string>
-    height?: number
-    keys?: boolean;
-    position?: 'top' | 'left' | 'right' | 'bottom' | 'center' | 'chartArea';
-    radius?: string
-    maintainAspectRatio?: boolean
-}
 
 export default function DoughnutChart({
     loading,
