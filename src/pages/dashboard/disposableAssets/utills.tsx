@@ -3,7 +3,7 @@ import { ITableHeader } from '../../../components/tables/interface';
 import { itEquipmentMock } from '../../../mocks/itEquipment';
 import { getTableHeaders } from '../../../components/tables/getTableHeaders';
 import InfoIcon from '@mui/icons-material/Info';
-import ModeEditIcon from '@mui/icons-material/ModeEdit';
+import DoNotDisturbAltIcon from '@mui/icons-material/DoNotDisturbAlt';
 
 const DisposalAssetsUtills = () => {
     const endPoint = 'posts';
@@ -43,7 +43,7 @@ const DisposalAssetsUtills = () => {
             label: "options",
             options: [
                 { value: "dispose", label: "Approve", icon: <InfoIcon fontSize='small' color='error' /> },
-                { value: "update", label: "Revert", icon: <ModeEditIcon fontSize='small' color='info' /> },
+                { value: "update", label: "Revert", icon: <DoNotDisturbAltIcon fontSize='small' color='info' /> },
             ]
         },
     };
