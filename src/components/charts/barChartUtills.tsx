@@ -15,11 +15,13 @@ const BarChartUtills = () => {
       const month = new Date(currentDate);
       month.setMonth(month.getMonth() - i);
 
+      const monthName = monthsOfYear[month.getMonth()];
+      const year = month.getFullYear();
+
       if (i === 0) {
-        lastEightMonths.push('This Month');
+        lastEightMonths.push(`This Month (${year})`);
       } else {
-        const monthName = monthsOfYear[month.getMonth()];
-        lastEightMonths.push(monthName);
+        lastEightMonths.push(`${monthName} ${year}`);
       }
     }
 
