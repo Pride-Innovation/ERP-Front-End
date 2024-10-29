@@ -15,7 +15,7 @@ import Spinner from '../Spinner';
 import { IDoughnutChart } from './interface';
 
 ChartJS.register(ArcElement, Tooltip, Legend, Title);
-const colors = [blue[900], green[900], orange[900], blue[300], blue[100]]
+const colors = [blue[900], green[900], orange[900], blue[100]]
 
 export const data = {
     labels: [

@@ -66,6 +66,7 @@ const Dashboard = () => {
           <DoughnutChart
             headerText={headerText}
             chartData={chartData}
+            cutout='20%'
             labels={labels}
             radius='65%'
             title="ASSETS PERCENTAGE IN STORE"
