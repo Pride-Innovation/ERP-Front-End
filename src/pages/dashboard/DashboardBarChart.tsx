@@ -6,11 +6,11 @@ import BarChart from "../../components/charts/BarChart";
 const DashboardBarChart = () => {
     const { barChartOptions, barChartData } = BarChartUtills();
 
-    const [agentBarChartOptions, setAgentBarChartOptions] = useState<ChartOptions<'bar'>>(barChartOptions);
-    const [agentBarChartData, setAgentBarChartData] = useState<ChartData<'bar'>>(barChartData);
+    const [assetBarChartOptions, setAssetBarChartOptions] = useState<ChartOptions<'bar'>>(barChartOptions);
+    const [assetBarChartData, setAssetBarChartData] = useState<ChartData<'bar'>>(barChartData);
 
-    const updateAgentBarChartInfo = () => {
-        setAgentBarChartOptions({
+    const updateAssetBarChartInfo = () => {
+        setAssetBarChartOptions({
             ...barChartOptions,
             plugins: {
                 ...barChartOptions.plugins,
@@ -22,16 +22,16 @@ const DashboardBarChart = () => {
             }
         });
 
-        setAgentBarChartData({ ...barChartData });
+        setAssetBarChartData({ ...barChartData });
     }
 
     useEffect(() => {
-        updateAgentBarChartInfo();
+        updateAssetBarChartInfo();
     }, []);
 
 
     return (
-        <BarChart data={agentBarChartData} options={agentBarChartOptions} />
+        <BarChart data={assetBarChartData} options={assetBarChartOptions} />
     )
 }
 
