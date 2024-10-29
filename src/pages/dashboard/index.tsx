@@ -8,6 +8,7 @@ import DashboardRequests from './DashboardRequests';
 import DoughnutChart from '../../components/charts/DoughnutChart';
 import DashboardBarChart from './DashboardBarChart';
 import PersonalAssets from './individualAssets';
+import DisposalAssets from './disposableAssets';
 
 const Dashboard = () => {
   const headerText = '% of Assets';
@@ -85,7 +86,7 @@ const Dashboard = () => {
           <PersonalAssets />
         </Card>
         <Card sx={{ boxShadow: 3 }}>
-          <PersonalAssets />
+          <DisposalAssets />
         </Card>
       </Box>
       <Box sx={{ width: "100%" }}>
