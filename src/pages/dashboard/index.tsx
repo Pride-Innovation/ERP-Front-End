@@ -7,7 +7,7 @@ import Vehicle from "../../statics/images/icons8-vehicle-60.png";
 import DashboardRequests from './DashboardRequests';
 import DoughnutChart from '../../components/charts/DoughnutChart';
 import DashboardBarChart from './DashboardBarChart';
-import PersonalRequest from './individualRequest';
+import PersonalAssets from './individualAssets';
 
 const Dashboard = () => {
   const headerText = '% of Assets';
@@ -82,10 +82,10 @@ const Dashboard = () => {
         mt={4}
       >
         <Card sx={{ boxShadow: 3 }}>
-          <PersonalRequest />
+          <PersonalAssets />
         </Card>
         <Card sx={{ boxShadow: 3 }}>
-          <PersonalRequest />
+          <PersonalAssets />
         </Card>
       </Box>
       <Box sx={{ width: "100%" }}>
