@@ -7,6 +7,7 @@ import Vehicle from "../../statics/images/icons8-vehicle-60.png";
 import DashboardRequests from './DashboardRequests';
 import DoughnutChart from '../../components/charts/DoughnutChart';
 import DashboardBarChart from './DashboardBarChart';
+import PersonalRequest from './individualRequest';
 
 const Dashboard = () => {
   const headerText = '% of Assets';
@@ -71,6 +72,20 @@ const Dashboard = () => {
             radius='65%'
             title="ASSETS PERCENTAGE IN STORE"
             loading={false} />
+        </Card>
+      </Box>
+      <Box
+        display="grid"
+        sx={{ width: "100%" }}
+        gridTemplateColumns="repeat(2, 1fr)"
+        gap={4}
+        mt={4}
+      >
+        <Card sx={{ boxShadow: 3 }}>
+          <PersonalRequest />
+        </Card>
+        <Card sx={{ boxShadow: 3 }}>
+          <PersonalRequest />
         </Card>
       </Box>
       <Box sx={{ width: "100%" }}>
