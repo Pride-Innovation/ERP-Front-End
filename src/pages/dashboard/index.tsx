@@ -45,7 +45,7 @@ const Dashboard = () => {
         display="grid"
         sx={{ width: "100%" }}
         gridTemplateColumns="repeat(4, 1fr)"
-        gap={2}
+        gap={4}
       >
         <DahboardCard name='IT Equipment' number={500} image={Laptop} stockLevel='low' lastUpdated='12-12-2024' />
         <DahboardCard name='Office Equipment' number={500} image={Furniture} stockLevel='normal' lastUpdated='12-12-2024' />
@@ -56,8 +56,8 @@ const Dashboard = () => {
         display="grid"
         sx={{ width: "100%" }}
         gridTemplateColumns="repeat(2, 1fr)"
-        gap={2}
-        mt={2}
+        gap={4}
+        mt={4}
       >
         <Card sx={{ boxShadow: 3 }}>
           <DashboardRequests />
@@ -74,7 +74,7 @@ const Dashboard = () => {
         </Card>
       </Box>
       <Box sx={{ width: "100%" }}>
-        <Card sx={{ boxShadow: 3, p: 2, mt: 2 }}>
+        <Card sx={{ boxShadow: 3, p: 2, mt: 4 }}>
           <DashboardBarChart />
         </Card>
       </Box>

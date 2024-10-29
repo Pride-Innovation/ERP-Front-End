@@ -10,51 +10,11 @@ import {
     Title
 } from 'chart.js';
 import { Doughnut } from 'react-chartjs-2';
-import { blue, green, orange } from '@mui/material/colors';
 import Spinner from '../Spinner';
 import { IDoughnutChart } from './interface';
+import DoughnutChartUtills from './doughnutChartUtills';
 
 ChartJS.register(ArcElement, Tooltip, Legend, Title);
-const colors = [blue[900], green[900], orange[900], blue[100]]
-
-export const data = {
-    labels: [
-        "Asset 1",
-        "Asset 2",
-        "Asset 3",
-        "Asset 4",
-        "Asset 5",
-    ],
-    datasets: [
-        {
-            label: '% of Assets',
-            data: [6, 7, 4, 5, 8],
-            backgroundColor: [...colors],
-            borderColor: [...colors],
-            borderWidth: 0,
-            spacing: 5,
-            radius: '75%',
-            cutout: '10%'
-        },
-    ],
-};
-
-export const options = {
-    responsive: true,
-    maintainAspectRatio: false,
-    aspectRatio: 1,
-    plugins: {
-        title: {
-            display: true,
-            text: 'ASSETS IN STORE',
-            font: { size: 14 }
-        },
-        legend: {
-            display: true,
-            position: 'top' as const,
-        },
-    },
-};
 
 export default function DoughnutChart({
     loading,
@@ -72,6 +32,7 @@ export default function DoughnutChart({
     maintainAspectRatio = false,
     position = "top"
 }: IDoughnutChart) {
+    const { data, options } = DoughnutChartUtills();
     const [formattedData, setFormattedData] = useState<{
         labels: Array<string>;
         datasets: Array<{

@@ -1,4 +1,4 @@
-import { blue, green, orange } from "@mui/material/colors";
+import { blue, green, orange, purple, yellow } from "@mui/material/colors";
 
 const BarChartUtills = () => {
 
@@ -49,42 +49,29 @@ const BarChartUtills = () => {
       {
         label: 'IT Equipment',
         data: [660, 700, 440, 550, 380, 620, 480, 310],
-        backgroundColor: blue[100],
+        backgroundColor: orange[500],
       },
       {
         label: 'Office Equipment',
         data: [520, 550, 380, 435, 220, 500, 340, 205],
-        backgroundColor: blue[900],
+        backgroundColor: blue[700],
       },
       {
         label: 'Fleet',
         data: [660, 700, 440, 550, 380, 620, 480, 310],
-        backgroundColor: orange[900],
+        backgroundColor: yellow[500],
       },
       {
         label: 'Stationery',
         data: [660, 700, 440, 550, 380, 620, 480, 310],
-        backgroundColor: green[900],
+        backgroundColor: purple[500],
       },
     ],
   };
 
-  const transactionHistoryChartData = {
-    labels,
-    datasets: [
-      {
-        label: 'IT Equipment',
-        data: [120000, 70000, 44000, 55000, 38000, 62000, 48000, 31000],
-        backgroundColor: blue[600],
-      }
-    ],
-  };
-
-
   return ({
     barChartOptions,
     barChartData,
-    transactionHistoryChartData,
   }
   )
 }
