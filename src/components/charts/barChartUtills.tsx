@@ -1,4 +1,4 @@
-import { blue, green, orange, purple, yellow } from "@mui/material/colors";
+import { blue, orange, purple, yellow } from "@mui/material/colors";
 
 const BarChartUtills = () => {
 

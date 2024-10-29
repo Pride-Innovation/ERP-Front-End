@@ -2,8 +2,8 @@ import { Box, Card, Grid } from '@mui/material';
 import DahboardCard from './DahboardCard';
 import Laptop from "../../statics/images/icons8-laptop-50.png";
 import Furniture from "../../statics/images/icons8-furniture-50.png";
-import Computer from "../../statics/images/icons8-computer-48.png";
-import Monitor from "../../statics/images/icons8-monitor-50.png";
+import Books from "../../statics/images/icons8-books-50.png";
+import Vehicle from "../../statics/images/icons8-vehicle-60.png";
 import DashboardRequests from './DashboardRequests';
 import DoughnutChart from '../../components/charts/DoughnutChart';
 import DashboardBarChart from './DashboardBarChart';
@@ -49,8 +49,8 @@ const Dashboard = () => {
       >
         <DahboardCard name='IT Equipment' number={500} image={Laptop} stockLevel='low' lastUpdated='12-12-2024' />
         <DahboardCard name='Office Equipment' number={500} image={Furniture} stockLevel='normal' lastUpdated='12-12-2024' />
-        <DahboardCard name='Fleet' number={500} image={Computer} stockLevel='average' lastUpdated='12-12-2024' />
-        <DahboardCard name='Stationery' number={500} image={Monitor} stockLevel='low' lastUpdated='12-12-2024' />
+        <DahboardCard name='Fleet' number={500} image={Vehicle} stockLevel='average' lastUpdated='12-12-2024' />
+        <DahboardCard name='Stationery' number={500} image={Books} stockLevel='low' lastUpdated='12-12-2024' />
       </Box>
       <Box
         display="grid"
