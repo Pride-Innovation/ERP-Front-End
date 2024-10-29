@@ -14,6 +14,7 @@ const style = {
         opacity: 0.9,
     },
     p: 2,
+    boxShadow: 3
 }
 
 const DashboardCard: React.FC<IDashboardCard> = ({
