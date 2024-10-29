@@ -22,10 +22,3 @@ export interface IBarChartProps {
     data: ChartData<'bar'>;
     options: ChartOptions<'bar'>
 };
-
-
-export interface IBarChartKeyTable {
-    id: number;
-    name: string;
-    [key: string]: number | string;
-  }

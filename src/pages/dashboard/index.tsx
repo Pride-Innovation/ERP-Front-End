@@ -73,7 +73,9 @@ const Dashboard = () => {
         </Card>
       </Box>
       <Box sx={{ width: "100%" }}>
-        <DashboardBarChart />
+        <Card sx={{ boxShadow: 3, p: 2, mt: 2 }}>
+          <DashboardBarChart />
+        </Card>
       </Box>
     </Grid>
   )
