@@ -1,6 +1,10 @@
+import Roles from "./roles"
+
 const Settings = () => {
     return (
-        <div>Settings</div>
+        <>
+            <Roles />
+        </>
     )
 }
 
