@@ -43,3 +43,28 @@ export const determineImage = (row: GridRowModel): string => {
 
     return Placeholder;
 }
+
+export const getLastSixMonths = (): string[] => {
+    const monthsOfYear = [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    const currentDate = new Date();
+    const lastSixMonths = [];
+
+    for (let i = 5; i >= 0; i--) {
+        const month = new Date(currentDate);
+        month.setMonth(month.getMonth() - i);
+
+        const monthName = monthsOfYear[month.getMonth()];
+        const year = month.getFullYear();
+
+        if (i === 0) {
+            lastSixMonths.push(`This Month (${year})`);
+        } else {
+            lastSixMonths.push(`${monthName} ${year}`);
+        }
+    }
+
+    return lastSixMonths;
+};

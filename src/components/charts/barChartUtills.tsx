@@ -1,35 +1,9 @@
-import { blue, orange, purple, yellow } from "@mui/material/colors";
+import { getLastSixMonths } from "../../utils/helpers";
+import { barGraphMock } from "../../mocks/dahboard";
 
 const BarChartUtills = () => {
 
-
-  const getLastEightMonths = (): string[] => {
-    const monthsOfYear = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
-    ];
-    const currentDate = new Date();
-    const lastEightMonths = [];
-
-    for (let i = 7; i >= 0; i--) {
-      const month = new Date(currentDate);
-      month.setMonth(month.getMonth() - i);
-
-      const monthName = monthsOfYear[month.getMonth()];
-      const year = month.getFullYear();
-
-      if (i === 0) {
-        lastEightMonths.push(`This Month (${year})`);
-      } else {
-        lastEightMonths.push(`${monthName} ${year}`);
-      }
-    }
-
-    return lastEightMonths;
-  };
-
-
-  const labels = getLastEightMonths();
+  const labels = getLastSixMonths();
 
   const barChartOptions = {
     responsive: true,
@@ -47,28 +21,7 @@ const BarChartUtills = () => {
 
   const barChartData = {
     labels,
-    datasets: [
-      {
-        label: 'IT Equipment',
-        data: [660, 700, 440, 550, 380, 620, 480, 310],
-        backgroundColor: orange[500],
-      },
-      {
-        label: 'Office Equipment',
-        data: [520, 550, 380, 435, 220, 500, 340, 205],
-        backgroundColor: blue[700],
-      },
-      {
-        label: 'Fleet',
-        data: [660, 700, 440, 550, 380, 620, 480, 310],
-        backgroundColor: yellow[500],
-      },
-      {
-        label: 'Stationery',
-        data: [660, 700, 440, 550, 380, 620, 480, 310],
-        backgroundColor: purple[500],
-      },
-    ],
+    datasets: barGraphMock,
   };
 
   return ({
