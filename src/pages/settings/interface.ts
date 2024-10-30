@@ -9,3 +9,10 @@ export interface IRole {
     name: string;
     permissions: Array<IPermission>;
 }
+
+
+export interface IModule {
+    id: number | string;
+    icon: JSX.Element;
+    name: string;
+}

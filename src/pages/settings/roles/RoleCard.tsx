@@ -6,7 +6,7 @@ import RoleUtills from './utills';
 import { permissionsMock, rolesMock } from '../../../mocks/settings';
 import { Box, Card, Grid, IconButton, Typography } from '@mui/material';
 import { grey } from '@mui/material/colors';
-import { IRole } from '../interface';
+import { IModule, IRole } from '../interface';
 import CheckboxComponent from '../../../components/forms/CheckBox';
 import TuneIcon from '@mui/icons-material/Tune';
 
@@ -18,9 +18,10 @@ const RoleRow = ({ role }: IRoleRow) => {
         <Box
             display="grid"
             sx={{ width: "100%", alignItems: "center" }}
-            gridTemplateColumns="4fr 1fr 1fr 1fr 1fr "
+            gridTemplateColumns="6fr 1fr 1fr 1fr 1fr "
             gap={4}
             px={3}
+            py={0.5}
         >
             <Typography variant="body2">{role.name}</Typography>
             <CheckboxComponent />
@@ -31,8 +32,11 @@ const RoleRow = ({ role }: IRoleRow) => {
     )
 }
 
+interface IRoleCard {
+    module: IModule
+}
 
-const RoleCard = () => {
+const RoleCard = ({ module }: IRoleCard) => {
     const [loading, setLoading] = useState<boolean>(false);
     const { setRows } = useContext(RowContext);
     const { endPoint, setPermissions } = RoleUtills();
@@ -60,49 +64,51 @@ const RoleCard = () => {
     useEffect(() => { fetchResources() }, []);
 
     console.log(loading, "loading!!");
-    
+
     return (
-        <Grid container xs={12}>
+        <Grid container xs={12} >
             <Box
                 display="grid"
-                sx={{ width: "100%", bgcolor: grey[50] }}
-                gridTemplateColumns="2fr 1fr"
+                sx={{ width: "100%" }}
+                gridTemplateColumns="1fr"
                 gap={4}
-                p={4}
             >
-                <Card sx={{ boxShadow: 0, border: `2px solid ${grey[200]}` }}>
+                <Card sx={{
+                    boxShadow: 0,
+                    border: `2px solid ${grey[200]}`,
+                }}>
                     <Box
                         display="grid"
                         sx={{ width: "100%", alignItems: "center" }}
-                        gridTemplateColumns="4fr 1fr 1fr 1fr 1fr "
+                        gridTemplateColumns="6fr 1fr 1fr 1fr 1fr "
                         gap={4}
                         px={3}
                         py={1.5}
                     >
-                        <Typography variant="body2">Action</Typography>
-                        <Typography variant='body1'>Create</Typography>
-                        <Typography variant='body1'>Read</Typography>
-                        <Typography variant='body1'>Update</Typography>
-                        <Typography variant='body1'>Delete</Typography>
+                        <Typography variant="body1">Action</Typography>
+                        <Typography variant='body2'>Create</Typography>
+                        <Typography variant='body2'>Read</Typography>
+                        <Typography variant='body2'>Update</Typography>
+                        <Typography variant='body2'>Delete</Typography>
                     </Box>
                     <Box sx={{
                         borderTop: `2px solid ${grey[200]}`,
                         borderBottom: `2px solid ${grey[100]}`,
                         px: 1.5,
+                        py: 0.5,
                         bgcolor: grey[50],
                         display: "flex",
                         alignItems: "center"
                     }} >
                         <IconButton>
-                            <TuneIcon fontSize='small' color='info' />
+                            {module.icon}
                         </IconButton>
-                        <Typography variant='body2' sx={{ fontWeight: 600 }}>Assets Management</Typography>
+                        <Typography variant='body2' sx={{ fontWeight: 600, ml: 2 }}>{module.name}</Typography>
                     </Box>
                     {
                         rolesMock.map(role => (<RoleRow role={role} />))
                     }
                 </Card >
-                <Card sx={{ boxShadow: 0 }}>1</Card>
             </Box>
         </Grid>
     )
