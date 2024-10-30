@@ -16,3 +16,11 @@ export interface IModule {
     icon: JSX.Element;
     name: string;
 }
+
+export interface IRoleRow {
+    role: IRole
+}
+
+export interface IRoleCard {
+    module: IModule
+}

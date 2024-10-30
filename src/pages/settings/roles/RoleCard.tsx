@@ -1,47 +1,19 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect } from 'react';
 import { fetchRowsService } from '../../../core/apis/globalService';
 import { GridRowsProp } from '@mui/x-data-grid';
 import RowContext from '../../../context/row/RowContext';
 import RoleUtills from './utills';
-import { permissionsMock, rolesMock } from '../../../mocks/settings';
+import { rolesMock } from '../../../mocks/settings';
 import { Box, Card, Grid, IconButton, Typography } from '@mui/material';
 import { grey } from '@mui/material/colors';
-import { IModule, IRole } from '../interface';
-import CheckboxComponent from '../../../components/forms/CheckBox';
-
-interface IRoleRow {
-    role: IRole
-}
-const RoleRow = ({ role }: IRoleRow) => {
-    return (
-        <Box
-            display="grid"
-            sx={{ width: "100%", alignItems: "center" }}
-            gridTemplateColumns="6fr 1fr 1fr 1fr 1fr "
-            gap={4}
-            px={3}
-            py={0.5}
-        >
-            <Typography variant="body2">{role.name}</Typography>
-            <CheckboxComponent />
-            <CheckboxComponent />
-            <CheckboxComponent />
-            <CheckboxComponent />
-        </Box>
-    )
-}
-
-interface IRoleCard {
-    module: IModule
-}
+import { IRoleCard } from '../interface';
+import RoleRow from './RoleRow';
 
 const RoleCard = ({ module }: IRoleCard) => {
-    const [loading, setLoading] = useState<boolean>(false);
     const { setRows } = useContext(RowContext);
-    const { endPoint, setPermissions } = RoleUtills();
+    const { endPoint, setRoles, roles } = RoleUtills();
 
     const fetchResources = async () => {
-        setLoading(true)
         try {
             const response = await fetchRowsService(
                 {
@@ -52,17 +24,14 @@ const RoleCard = ({ module }: IRoleCard) => {
             ) as unknown as GridRowsProp;
 
             setRows([...response]);
-            setPermissions([...permissionsMock]);
+            setRoles([...rolesMock]);
 
         } catch (error) {
             console.log(error)
         }
-        setLoading(false)
     }
 
     useEffect(() => { fetchResources() }, []);
-
-    console.log(loading, "loading!!");
 
     return (
         <Grid container xs={12} >
@@ -105,7 +74,7 @@ const RoleCard = ({ module }: IRoleCard) => {
                         <Typography variant='body2' sx={{ fontWeight: 600, ml: 2 }}>{module.name}</Typography>
                     </Box>
                     {
-                        rolesMock.map(role => (<RoleRow role={role} />))
+                        roles.map(role => (<RoleRow role={role} />))
                     }
                 </Card >
             </Box>

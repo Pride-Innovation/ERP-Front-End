@@ -1,6 +1,6 @@
 import { Control, FieldError, FieldValues, FormState, Path, UseFormRegister } from 'react-hook-form';
 import { IOptions } from '../tables/interface';
-import { Dispatch, SetStateAction } from 'react';
+import { ChangeEvent, Dispatch, SetStateAction } from 'react';
 
 export interface IButton {
     sendingRequest: boolean;
@@ -88,4 +88,9 @@ export interface IAutocompleteComponent {
 export interface IFileUploadButton {
     title: string;
     module: string;
+}
+
+export interface ICheckboxComponent {
+    checked: boolean;
+    // handleChangeEvent: (event: ChangeEvent<HTMLInputElement>, verb: string) => void
 }
