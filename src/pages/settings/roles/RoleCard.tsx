@@ -8,7 +8,6 @@ import { Box, Card, Grid, IconButton, Typography } from '@mui/material';
 import { grey } from '@mui/material/colors';
 import { IModule, IRole } from '../interface';
 import CheckboxComponent from '../../../components/forms/CheckBox';
-import TuneIcon from '@mui/icons-material/Tune';
 
 interface IRoleRow {
     role: IRole

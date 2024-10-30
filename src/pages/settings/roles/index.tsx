@@ -1,46 +1,41 @@
-import { Box, Card } from '@mui/material'
-import { FormHeader } from '../../../components/headers/TypographyComponent'
+import { Box, Card, Typography } from '@mui/material'
 import RoleCard from './RoleCard';
-import BalanceIcon from '@mui/icons-material/Balance';
-import SettingsBrightnessIcon from '@mui/icons-material/SettingsBrightness';
-import DirectionsCarFilledIcon from '@mui/icons-material/DirectionsCarFilled';
-import GroupIcon from '@mui/icons-material/Group';
 import { IModule } from '../interface';
+import ButtonComponent from '../../../components/forms/Button';
+import RoleUtills from './utills';
 
 
 const Roles = () => {
+    const { modulesList } = RoleUtills();
+    
     return (
         <Card sx={{ p: 4 }}>
-            <FormHeader header='Roles and Permissions' />
+            <Box sx={{
+                width: "100%",
+                display: "flex",
+                justifyContent: "space-between",
+                mb: 4,
+                alignItems: "center",
+            }}>
+                <Typography sx={{ fontWeight: 600, textTransform: "uppercase", fontSize: '17px' }}>Roles and Permissions</Typography>
+                <Box>
+                    <ButtonComponent
+                        handleClick={() => console.log("Clicked")}
+                        sendingRequest={false}
+                        buttonText="Creat New Role"
+                        variant='contained'
+                        buttonColor='info'
+                        type='button' />
+                </Box>
+            </Box>
             <Box
                 display="grid"
                 sx={{ width: "100%" }}
-                gridTemplateColumns="repeat(2 1fr)"
+                gridTemplateColumns="1fr 1fr"
                 gap={4}
             >
                 {
-                    [
-                        {
-                            id: 1,
-                            icon: <SettingsBrightnessIcon fontSize='small' color='info' />,
-                            name: "IT Equipment"
-                        },
-                        {
-                            id: 2,
-                            icon: <BalanceIcon fontSize='small' color='info' />,
-                            name: "Office Equipment"
-                        },
-                        {
-                            id: 3,
-                            icon: <DirectionsCarFilledIcon fontSize='small' color='info' />,
-                            name: "Fleet"
-                        },
-                        {
-                            id: 4,
-                            icon: <GroupIcon fontSize='small' color='info' />,
-                            name: "Users"
-                        }
-                    ].map((module: IModule) => {
+                    modulesList.map((module: IModule) => {
                         return (<RoleCard module={module} />)
                     })
                 }
