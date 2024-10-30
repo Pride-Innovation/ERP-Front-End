@@ -43,6 +43,7 @@ export const rolesMock: IRole[] = [
             { id: 10, name: "create_office_equipment" },
             { id: 11, name: "delete_office_equipment" },
             { id: 12, name: "read_office_equipment" },
+            { id: 7, name: "delete_it_equipment" },
             { id: 13, name: "update_fleet" },
         ]
     },
@@ -70,9 +71,9 @@ export const rolesMock: IRole[] = [
         id: 5,
         name: "Officer",
         permissions: [
-            { id: 1, name: "read_user" },
-            { id: 2, name: "create_user" },
-            { id: 3, name: "delete_user" },
+            { id: 1, name: "read_users" },
+            { id: 2, name: "create_users" },
+            { id: 3, name: "delete_users" },
         ]
     },
     {

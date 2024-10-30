@@ -45,16 +45,17 @@ const RoleUtills = () => {
         }
     ]
 
-    const filterPermissions = (verb: string, permissions: Array<IPermission>): Array<IPermission> => {
-        return permissions?.filter(perm => perm.name.indexOf(verb) !== -1);
+    const filterPermissions = (verb: string, permissions: Array<IPermission>, module: string): Array<IPermission> => {
+        return permissions?.filter(perm => perm.name.indexOf(verb) !== -1 && perm.name.indexOf(module) !== -1);
     }
 
 
-    const determineCrudStates = (permissions: Array<IPermission>) => {
-        const createList = filterPermissions(crudStates.create, permissions);
-        const readList = filterPermissions(crudStates.read, permissions);
-        const updateList = filterPermissions(crudStates.update, permissions);
-        const deleteList = filterPermissions(crudStates.delete, permissions);
+    const determineCrudStates = (permissions: Array<IPermission>, module: string) => {
+
+        const createList = filterPermissions(crudStates.create, permissions, module);
+        const readList = filterPermissions(crudStates.read, permissions, module);
+        const updateList = filterPermissions(crudStates.update, permissions, module);
+        const deleteList = filterPermissions(crudStates.delete, permissions, module);
 
         setMainCheckedState(() => {
             return {

@@ -4,10 +4,13 @@ import CheckboxComponent from "../../../components/forms/CheckBox"
 import RoleUtills from "./utills"
 import { useEffect } from "react"
 
-const RoleRow = ({ role }: IRoleRow) => {
+const RoleRow = ({ role, module }: IRoleRow) => {
     const { determineCrudStates, mainCheckedState } = RoleUtills();
 
-    useEffect(() => { determineCrudStates(role.permissions) }, []);
+    useEffect(() => {
+        const moduleName = module.name.toLocaleLowerCase().split(" ").join("_");
+        determineCrudStates(role.permissions, moduleName)
+    }, []);
 
     return (
         <Box

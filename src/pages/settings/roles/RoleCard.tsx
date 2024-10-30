@@ -74,7 +74,7 @@ const RoleCard = ({ module }: IRoleCard) => {
                         <Typography variant='body2' sx={{ fontWeight: 600, ml: 2 }}>{module.name}</Typography>
                     </Box>
                     {
-                        roles.map(role => (<RoleRow role={role} />))
+                        roles.map(role => (<RoleRow role={role} module={module}/>))
                     }
                 </Card >
             </Box>
