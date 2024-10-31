@@ -92,5 +92,6 @@ export interface IFileUploadButton {
 
 export interface ICheckboxComponent {
     checked: boolean;
+    name?: string ;
     handleChangeEvent: (event: ChangeEvent<HTMLInputElement>) => void
 }

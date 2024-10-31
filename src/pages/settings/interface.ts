@@ -22,10 +22,6 @@ export interface IRoleRow {
     module: IModule
 }
 
-export interface IRoleCard {
-    module: IModule
-}
-
 export interface IRoleDetails {
     role: IRole
 }

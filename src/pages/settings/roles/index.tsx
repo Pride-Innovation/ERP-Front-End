@@ -1,4 +1,4 @@
-import { Box, Card, Typography } from '@mui/material'
+import { Box, Typography } from '@mui/material'
 import ButtonComponent from '../../../components/forms/Button';
 import RoleDetails from './RoleDetails';
 import { rolesMock } from '../../../mocks/settings';

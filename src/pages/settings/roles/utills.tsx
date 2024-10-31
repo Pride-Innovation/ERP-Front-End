@@ -65,11 +65,11 @@ const RoleUtills = () => {
                 delete: deleteList?.length > 0 ? true : false,
             }
         })
-
     }
 
+
     return (
-        { endPoint, setRoles, modulesList, roles, determineCrudStates, mainCheckedState }
+        { endPoint, setRoles, modulesList, roles, determineCrudStates, mainCheckedState, filterPermissions }
     )
 }
 
