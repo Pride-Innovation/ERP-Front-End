@@ -23,5 +23,7 @@ export interface IRoleRow {
 }
 
 export interface IRoleDetails {
-    role: IRole
+    role: IRole;
+    deleteRole: (role: IRole) => void;
+    updateRole: (role: IRole) => void;
 }

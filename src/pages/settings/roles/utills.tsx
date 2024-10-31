@@ -20,7 +20,10 @@ const RoleUtills = () => {
         update: false,
         delete: false
     });
-
+    const [open, setOpen] = useState<boolean>(false);
+    const [modalState, setModalState] = useState<string>("");
+    const handleOpen = () => setOpen(true);
+    const handleClose = () => setOpen(false);
 
     const modulesList: IModule[] = [
         {
@@ -69,7 +72,20 @@ const RoleUtills = () => {
 
 
     return (
-        { endPoint, setRoles, modulesList, roles, determineCrudStates, mainCheckedState, filterPermissions }
+        {
+            endPoint,
+            setRoles,
+            modulesList,
+            roles,
+            determineCrudStates,
+            mainCheckedState,
+            filterPermissions,
+            handleClose,
+            handleOpen,
+            open,
+            modalState,
+            setModalState
+        }
     )
 }
 

@@ -3,8 +3,33 @@ import ButtonComponent from '../../../components/forms/Button';
 import RoleDetails from './RoleDetails';
 import { rolesMock } from '../../../mocks/settings';
 import { IRole } from '../interface';
+import ModalComponent from '../../../components/modal';
+import RoleUtills from './utills';
+import { crudStates } from '../../../utils/constants';
+import { useState } from 'react';
 
 const Roles = () => {
+    const { open, handleClose, handleOpen, modalState, setModalState } = RoleUtills();
+    const [currentRole, setCurrentRole] = useState<IRole>({} as IRole);
+
+    const createRole = () => {
+        setModalState(crudStates.create);
+        handleOpen()
+    }
+
+    const deleteRole = (role: IRole) => {
+        setCurrentRole(role)
+        setModalState(crudStates.delete);
+        handleOpen()
+    }
+
+    const updateRole = (role: IRole) => {
+        setCurrentRole(role)
+        setModalState(crudStates.update);
+        handleOpen()
+    }
+
+    console.log(currentRole, "current role!!!");
 
     return (
         <Box sx={{ py: 4 }}>
@@ -15,12 +40,27 @@ const Roles = () => {
                 mb: 4,
                 alignItems: "center",
             }}>
+                {
+                    crudStates.create === modalState && <ModalComponent width={"40%"} title='Create Role' open={open} handleClose={handleClose}>
+                        <p>Create new Role</p>
+                    </ModalComponent>
+                }
+                {
+                    crudStates.delete === modalState && <ModalComponent width={"40%"} title='Delete Role' open={open} handleClose={handleClose}>
+                        <p>Delete Role</p>
+                    </ModalComponent>
+                }
+                {
+                    crudStates.update === modalState && <ModalComponent width={"40%"} title='Update Role' open={open} handleClose={handleClose}>
+                        <p>Update Role</p>
+                    </ModalComponent>
+                }
                 <Typography sx={{ fontWeight: 600, textTransform: "none", fontSize: '17px' }}>Accounts Settings</Typography>
                 <Box>
                     <ButtonComponent
-                        handleClick={() => console.log("Clicked")}
+                        handleClick={createRole}
                         sendingRequest={false}
-                        buttonText="Creat New Role"
+                        buttonText="Create New Role"
                         variant='contained'
                         buttonColor='info'
                         type='button' />
@@ -35,7 +75,7 @@ const Roles = () => {
                 {
                     rolesMock.map((role: IRole) => {
                         return (
-                            <RoleDetails role={role} />
+                            <RoleDetails updateRole={updateRole} deleteRole={deleteRole} role={role} />
                         )
                     })
                 }

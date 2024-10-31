@@ -8,7 +8,7 @@ import RoleRow from "./RoleRow";
 import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
 import SettingsSuggestIcon from '@mui/icons-material/SettingsSuggest';
 
-const RoleDetails = ({ role }: IRoleDetails) => {
+const RoleDetails = ({ role, deleteRole, updateRole }: IRoleDetails) => {
     const { modulesList } = RoleUtills()
     return (
         <Grid container xs={12} >
@@ -40,12 +40,16 @@ const RoleDetails = ({ role }: IRoleDetails) => {
                             alignItems: "center",
                             height: "100%"
                         }} >
-                        <AccountCircleOutlinedIcon fontSize="large" color="info" sx={{ fontSize: "50px"}} />
+                        <AccountCircleOutlinedIcon fontSize="large" color="info" sx={{ fontSize: "50px" }} />
                         <Typography noWrap variant="body1" sx={{ fontWeight: 600, textAlign: "center" }}>
                             {role.name}
                         </Typography>
-                        <Button sx={{ textTransform: "none" }} startIcon={<EditOutlinedIcon />} variant="contained" color="info">Update</Button>
-                        <Button sx={{ textTransform: "none" }} startIcon={<DeleteOutlineOutlinedIcon />} variant="outlined" color="error">Delete</Button>
+                        <Button
+                            onClick={() => updateRole(role)}
+                            sx={{ textTransform: "none" }} startIcon={<EditOutlinedIcon />} variant="contained" color="info">Update</Button>
+                        <Button
+                            onClick={() => deleteRole(role)}
+                            sx={{ textTransform: "none" }} startIcon={<DeleteOutlineOutlinedIcon />} variant="outlined" color="error">Delete</Button>
 
                     </Stack>
 
@@ -78,7 +82,7 @@ const RoleDetails = ({ role }: IRoleDetails) => {
                         alignItems: "center"
                     }} >
                         <IconButton>
-                            <SettingsSuggestIcon fontSize="medium" color="info"/>
+                            <SettingsSuggestIcon fontSize="medium" color="info" />
                         </IconButton>
                         <Typography variant='body2' sx={{ fontWeight: 600 }}>
                             {role.name} Permissions
