@@ -2,7 +2,7 @@ import { Box, Typography } from "@mui/material"
 import { IRoleRow } from "../interface"
 import CheckboxComponent from "../../../components/forms/CheckBox"
 import RoleUtills from "./utills"
-import { useEffect } from "react"
+import { ChangeEvent, useEffect } from "react"
 
 const RoleRow = ({ role, module }: IRoleRow) => {
     const { determineCrudStates, mainCheckedState } = RoleUtills();
@@ -11,6 +11,10 @@ const RoleRow = ({ role, module }: IRoleRow) => {
         const moduleName = module.name.toLocaleLowerCase().split(" ").join("_");
         determineCrudStates(role.permissions, moduleName)
     }, []);
+
+    const handleChange = async (event: ChangeEvent<HTMLInputElement>) => {
+        console.log(event.target.value, "request information!!!")
+    }
 
     return (
         <Box
@@ -22,10 +26,10 @@ const RoleRow = ({ role, module }: IRoleRow) => {
             py={0.5}
         >
             <Typography variant="body2">{role.name}</Typography>
-            <CheckboxComponent checked={mainCheckedState.create} />
-            <CheckboxComponent checked={mainCheckedState.read} />
-            <CheckboxComponent checked={mainCheckedState.update} />
-            <CheckboxComponent checked={mainCheckedState.delete} />
+            <CheckboxComponent handleChangeEvent={handleChange} checked={mainCheckedState.create} />
+            <CheckboxComponent handleChangeEvent={handleChange} checked={mainCheckedState.read} />
+            <CheckboxComponent handleChangeEvent={handleChange} checked={mainCheckedState.update} />
+            <CheckboxComponent handleChangeEvent={handleChange} checked={mainCheckedState.delete} />
         </Box>
     )
 }

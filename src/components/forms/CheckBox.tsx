@@ -4,13 +4,12 @@ import { ICheckboxComponent } from './interface';
 
 const label = { inputProps: { 'aria-label': 'Checkbox demo' } };
 
-export default function CheckboxComponent({ checked }: ICheckboxComponent) {
-    const handleChange = async (event: ChangeEvent<HTMLInputElement>, verb: string) => { }
+export default function CheckboxComponent({ checked, handleChangeEvent }: ICheckboxComponent) {
     return (
         <div>
             <Checkbox
                 checked={checked}
-                onChange={(e) => handleChange}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => handleChangeEvent(e)}
                 {...label} />
         </div>
     );
