@@ -27,3 +27,10 @@ export interface IRoleDetails {
     deleteRole: (role: IRole) => void;
     updateRole: (role: IRole) => void;
 }
+
+export interface IDeleteRole {
+    handleClose: () => void;
+    sendingRequest: boolean;
+    buttonText: string;
+    role: IRole
+}

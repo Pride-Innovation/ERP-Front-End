@@ -7,6 +7,7 @@ import ModalComponent from '../../../components/modal';
 import RoleUtills from './utills';
 import { crudStates } from '../../../utils/constants';
 import { useState } from 'react';
+import DeleteRole from './DeleteRole';
 
 const Roles = () => {
     const { open, handleClose, handleOpen, modalState, setModalState } = RoleUtills();
@@ -29,8 +30,6 @@ const Roles = () => {
         handleOpen()
     }
 
-    console.log(currentRole, "current role!!!");
-
     return (
         <Box sx={{ py: 4 }}>
             <Box sx={{
@@ -47,7 +46,7 @@ const Roles = () => {
                 }
                 {
                     crudStates.delete === modalState && <ModalComponent width={"40%"} title='Delete Role' open={open} handleClose={handleClose}>
-                        <p>Delete Role</p>
+                        <DeleteRole role={currentRole} handleClose={handleClose} sendingRequest={false} buttonText='Delete' />
                     </ModalComponent>
                 }
                 {
