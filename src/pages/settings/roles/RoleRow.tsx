@@ -20,7 +20,7 @@ const RoleRow = ({ role, module }: IRoleRow) => {
         <Box
             display="grid"
             sx={{ width: "100%", alignItems: "center" }}
-            gridTemplateColumns="6fr 1fr 1fr 1fr 1fr "
+            gridTemplateColumns="6fr 1fr 1fr 1fr 1fr"
             gap={4}
             px={3}
             py={0.5}
@@ -33,4 +33,5 @@ const RoleRow = ({ role, module }: IRoleRow) => {
         </Box>
     )
 }
+
 export default RoleRow
