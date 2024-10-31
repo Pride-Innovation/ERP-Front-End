@@ -25,3 +25,7 @@ export interface IRoleRow {
 export interface IRoleCard {
     module: IModule
 }
+
+export interface IRoleDetails {
+    role: IRole
+}

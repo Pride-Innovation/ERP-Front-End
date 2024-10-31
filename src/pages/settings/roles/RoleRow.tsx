@@ -25,7 +25,7 @@ const RoleRow = ({ role, module }: IRoleRow) => {
             px={3}
             py={0.5}
         >
-            <Typography variant="body2">{role.name}</Typography>
+            <Typography variant="body2">{module.name}</Typography>
             <CheckboxComponent handleChangeEvent={handleChange} checked={mainCheckedState.create} />
             <CheckboxComponent handleChangeEvent={handleChange} checked={mainCheckedState.read} />
             <CheckboxComponent handleChangeEvent={handleChange} checked={mainCheckedState.update} />

@@ -1,10 +1,13 @@
-import Roles from "./roles"
+import { Box } from "@mui/material"
+import Roles from "./roles";
 
 const Settings = () => {
     return (
-        <>
-            <Roles />
-        </>
+        <Box sx={{ width: "100%", display: "flex", justifyContent: "center" }}>
+            <Box sx={{ width: "80%" }}>
+                <Roles />
+            </Box>
+        </Box>
     )
 }
 
