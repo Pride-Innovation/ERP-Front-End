@@ -43,7 +43,7 @@ const Roles = () => {
             }}>
                 {
                     crudStates.create === modalState && <ModalComponent width={"40%"} title='Create Role' open={open} handleClose={handleClose}>
-                        <CreateRole />
+                        <CreateRole handleClose={handleClose} sendingRequest={false} />
                     </ModalComponent>
                 }
                 {
@@ -53,7 +53,7 @@ const Roles = () => {
                 }
                 {
                     crudStates.update === modalState && <ModalComponent width={"40%"} title='Update Role' open={open} handleClose={handleClose}>
-                        <UpdateRole />
+                        <UpdateRole handleClose={handleClose} sendingRequest={false} role={currentRole} />
                     </ModalComponent>
                 }
                 <Typography sx={{ fontWeight: 600, textTransform: "none", fontSize: '17px' }}>Accounts Settings</Typography>

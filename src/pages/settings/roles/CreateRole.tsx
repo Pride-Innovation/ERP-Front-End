@@ -1,17 +1,14 @@
-import React, { useEffect, useState } from 'react'
-import { IRole } from '../interface';
+import { useEffect } from 'react'
+import { ICreateRole, IRole } from '../interface';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { roleSchema } from './schema';
 import { Grid } from '@mui/material';
 import RoleForm from './RoleForm';
-import RoleUtills from './utills';
 
-const CreateRole = () => {
-    const [sendingRequest, setSendingRequest] = useState<boolean>(false);
+const CreateRole = ({ handleClose, sendingRequest }: ICreateRole) => {
     const defaultUser: IRole = {} as IRole;
-    const { handleClose } = RoleUtills();
-    
+
     const {
         control,
         handleSubmit,
@@ -28,7 +25,6 @@ const CreateRole = () => {
     }, [reset]);
 
     const onSubmit = (formData: IRole) => {
-        setSendingRequest(true);
         console.log(formData, "form data!!!!!");
     };
 

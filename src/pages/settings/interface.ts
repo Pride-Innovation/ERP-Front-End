@@ -37,6 +37,17 @@ export interface IDeleteRole {
     role: IRole
 }
 
+export interface ICreateRole {
+    handleClose: () => void;
+    sendingRequest: boolean;
+}
+
+export interface IUpdateRole {
+    handleClose: () => void;
+    sendingRequest: boolean;
+    role: IRole
+}
+
 export interface IRoleForm {
     formState: FormState<IRole> & {
         errors: {

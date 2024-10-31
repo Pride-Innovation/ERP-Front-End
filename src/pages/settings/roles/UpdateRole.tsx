@@ -1,17 +1,12 @@
-import { useEffect, useState } from 'react'
-import { IRole } from '../interface';
+import { useEffect } from 'react'
+import { IRole, IUpdateRole } from '../interface';
 import { useForm } from 'react-hook-form';
 import { roleSchema } from './schema';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { rolesMock } from '../../../mocks/settings';
 import { Grid } from '@mui/material';
 import RoleForm from './RoleForm';
-import RoleUtills from './utills';
 
-const UpdateRole = () => {
-    const [sendingRequest, setSendingRequest] = useState<boolean>(false);
-    const role = rolesMock[0];
-    const { handleClose } = RoleUtills();
+const UpdateRole = ({ handleClose, sendingRequest, role }: IUpdateRole) => {
 
     const {
         control,
@@ -29,8 +24,7 @@ const UpdateRole = () => {
     }, [reset]);
 
     const onSubmit = (formData: IRole) => {
-        setSendingRequest(true);
-        setSendingRequest(false)
+        console.log(formData, "form data!!")
     };
 
     return (
