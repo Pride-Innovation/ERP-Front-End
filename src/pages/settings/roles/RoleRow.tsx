@@ -1,5 +1,5 @@
 import { Box, Typography } from "@mui/material";
-import { IModule, IRoleRow } from "../interface";
+import { IModule, IPermission, IRoleRow } from "../interface";
 import CheckboxComponent from "../../../components/forms/CheckBox";
 import RoleUtills from "./utills";
 import { ChangeEvent, useEffect } from "react";
@@ -12,7 +12,7 @@ const RoleRow = ({ role, module }: IRoleRow) => {
     const moduleNameFxn = (module: IModule) => module.name.toLocaleLowerCase().split(" ").join("_");
 
     useEffect(() => {
-        determineCrudStates(role.permissions, moduleNameFxn(module))
+        determineCrudStates(role?.permissions as Array<IPermission>, moduleNameFxn(module))
     }, []);
 
     const handleChange = async (event: ChangeEvent<HTMLInputElement>) => {

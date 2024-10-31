@@ -8,6 +8,7 @@ import RoleUtills from './utills';
 import { crudStates } from '../../../utils/constants';
 import { useState } from 'react';
 import DeleteRole from './DeleteRole';
+import CreateRole from './CreateRole';
 
 const Roles = () => {
     const { open, handleClose, handleOpen, modalState, setModalState } = RoleUtills();
@@ -30,6 +31,8 @@ const Roles = () => {
         handleOpen()
     }
 
+    console.log(open, "modal state!!!!");
+    
     return (
         <Box sx={{ py: 4 }}>
             <Box sx={{
@@ -41,7 +44,7 @@ const Roles = () => {
             }}>
                 {
                     crudStates.create === modalState && <ModalComponent width={"40%"} title='Create Role' open={open} handleClose={handleClose}>
-                        <p>Create new Role</p>
+                        <CreateRole />
                     </ModalComponent>
                 }
                 {

@@ -7,9 +7,9 @@ export interface IPermission {
 
 
 export interface IRole {
-    id: string | number;
+    id?: string | number;
     name: string;
-    permissions: Array<IPermission>;
+    permissions?: Array<IPermission>;
 }
 
 
