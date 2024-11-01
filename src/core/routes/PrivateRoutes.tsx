@@ -8,6 +8,6 @@ export const PrivateRoute = ({ permission }: { permission?: IPermission }) => {
     const { isAuthenticated, determinePermission } = RoutesUtills();
 
     return isAuthenticated() && permission && determinePermission(permission) ? <Outlet /> :
-        isAuthenticated() && permission && determinePermission(permission) ? <Navigate to={ROUTES.ERRORS} /> :
+        isAuthenticated() && permission && !determinePermission(permission) ? <Navigate to={ROUTES.ERRORS} /> :
             isAuthenticated() && !permission ? <Outlet /> : <Navigate to="/" />;
 }

@@ -18,6 +18,7 @@ import FleetRoutes from './subroutes/FleetRoutes'
 import OfficeEquipmentRoutes from './subroutes/OfficeEquipmentRoutes'
 import { PrivateRoute } from './PrivateRoutes'
 import RoutesUtills from './utills'
+import ErrorsPage from '../../pages/errors'
 
 const AppRoutes = () => {
   const { routePermission } = RoutesUtills();
@@ -27,6 +28,7 @@ const AppRoutes = () => {
       <Route path={ROUTES.LOGIN} element={<Login />} />
       <Route path={ROUTES.FORGOT_PASSWORD} element={<PasswordReset />} />
       <Route path={ROUTES.ASSETS_MANAGEMENT} element={<ApplicationDrawer />} >
+        <Route path={ROUTES.ERRORS} element={<ErrorsPage />} />
         <Route element={<PrivateRoute permission={routePermission(1)} />}>
           <Route index element={<Dashboard />} />
         </Route>
