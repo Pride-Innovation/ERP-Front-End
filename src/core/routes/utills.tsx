@@ -1,4 +1,4 @@
-import { jwtDecode } from "jwt-decode";
+// import { jwtDecode } from "jwt-decode";
 import { IPermission } from "../../pages/settings/interface";
 
 const RoutesUtills = () => {
@@ -18,13 +18,13 @@ const RoutesUtills = () => {
     const isAuthenticated = () => {
         const token = sessionStorage.getItem(accessToken);
         if (token) {
-            const { exp } = jwtDecode(token)
+            // const { exp } = jwtDecode(token)
 
-            const expirationTime = ((exp as number) * 1000) - 60000
+            // const expirationTime = ((exp as number) * 1000) - 60000
 
-            if (Date.now() >= expirationTime) {
-                return false
-            }
+            // if (Date.now() >= expirationTime) {
+            //     return false
+            // }
 
             return true
         };
