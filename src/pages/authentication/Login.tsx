@@ -15,13 +15,16 @@ import AuthenticationForm from './forms';
 import { ROUTES } from '../../core/routes/routes';
 import { useNavigate } from 'react-router';
 import AuthenticationContainerComponent from '../../components/Container';
+import MockAuthentication from '../../mocks/authentication';
+import AuthenticationUtils from './utills';
 
 const Login = () => {
     const [loggingIn, setLoggingIn] = useState<boolean>(false);
     const [showPassword, setShowPassword] = useState<boolean>(false);
     const defaultUser: IAuthentication = { email: "", password: "" };
     const navigate = useNavigate();
-
+    const { authenticateUser } = MockAuthentication()
+    const { handleSessionStorage } = AuthenticationUtils();
     const handleClickShowPassword = () => setShowPassword((show) => !show);
     const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => { event.preventDefault(); };
 
@@ -40,7 +43,8 @@ const Login = () => {
 
     const onSubmit = (formData: IAuthentication) => {
         setLoggingIn(true);
-        console.log(formData, "form data!!!!!")
+        const response = authenticateUser(formData.email);
+        handleSessionStorage(response.user, response.token)
         navigate(ROUTES.ASSETS_MANAGEMENT);
     };
 

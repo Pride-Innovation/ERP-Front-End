@@ -37,7 +37,8 @@ const RoutesUtills = () => {
         getCurrentUser,
         accessToken,
         isAuthenticated,
-        determinePermission
+        determinePermission,
+        currentUser
     })
 }
 
