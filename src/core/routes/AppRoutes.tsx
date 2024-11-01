@@ -16,27 +16,30 @@ import UpdateRequest from '../../pages/request/UpdateRequest'
 import ITEquipmentRoutes from './subroutes/ITEquipmentRoutes'
 import FleetRoutes from './subroutes/FleetRoutes'
 import OfficeEquipmentRoutes from './subroutes/OfficeEquipmentRoutes'
+import { PrivateRoute } from './PrivateRoutes'
 
 const AppRoutes = () => {
   return (
     <Routes>
       <Route path={ROUTES.LOGIN} element={<Login />} />
       <Route path={ROUTES.FORGOT_PASSWORD} element={<PasswordReset />} />
-      <Route path={ROUTES.ASSETS_MANAGEMENT} element={<ApplicationDrawer />} >
-        <Route index element={<Dashboard />} />
-        <Route path={ROUTES.SETTINGS} element={<Settings />} />
-        <Route path={`${ROUTES.PROFILE}/:id`} element={<Profile />} />
-        <Route path={ROUTES.USERS} element={<Users />} />
-        <Route path={ROUTES.AUDIT_TRAILS} element={<AuditTrails />} />
-        <Route path={ROUTES.TEST} element={<TestComponent />} />
-        <Route path={ROUTES.LIST_ASSETS} element={<AssetsManagement />} >
-          {ITEquipmentRoutes()}
-          {FleetRoutes()}
-          {OfficeEquipmentRoutes()}
+      <Route element={<PrivateRoute />}>
+        <Route path={ROUTES.ASSETS_MANAGEMENT} element={<ApplicationDrawer />} >
+          <Route index element={<Dashboard />} />
+          <Route path={ROUTES.SETTINGS} element={<Settings />} />
+          <Route path={`${ROUTES.PROFILE}/:id`} element={<Profile />} />
+          <Route path={ROUTES.USERS} element={<Users />} />
+          <Route path={ROUTES.AUDIT_TRAILS} element={<AuditTrails />} />
+          <Route path={ROUTES.TEST} element={<TestComponent />} />
+          <Route path={ROUTES.LIST_ASSETS} element={<AssetsManagement />} >
+            {ITEquipmentRoutes()}
+            {FleetRoutes()}
+            {OfficeEquipmentRoutes()}
+          </Route>
+          <Route path={ROUTES.REQUEST} element={<Request />} />
+          <Route path={ROUTES.CREATE_REQUEST} element={<CreateRequest />} />
+          <Route path={`${ROUTES.UPDATE_REQUEST}/:id`} element={<UpdateRequest />} />
         </Route>
-        <Route path={ROUTES.REQUEST} element={<Request />} />
-        <Route path={ROUTES.CREATE_REQUEST} element={<CreateRequest />} />
-        <Route path={`${ROUTES.UPDATE_REQUEST}/:id`} element={<UpdateRequest />} />
       </Route>
     </Routes>
   )
