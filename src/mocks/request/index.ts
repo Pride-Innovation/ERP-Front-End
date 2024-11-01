@@ -1,5 +1,6 @@
 import { IRequest } from "../../pages/request/interface";
 import { requestStatus } from "../../utils/constants";
+import { rolesMock } from "../settings";
 
 export const requestMock: IRequest[] = [
     {
@@ -17,6 +18,7 @@ export const requestMock: IRequest[] = [
             gender: "Male",
             staffNumber: "E12345",
             availability: true,
+            role: rolesMock[0]
         },
         reason: "Upgrade software",
         quantity: 1,
@@ -39,6 +41,7 @@ export const requestMock: IRequest[] = [
             gender: "Female",
             staffNumber: "P12346",
             availability: false,
+            role: rolesMock[1]
         },
         reason: "Request new equipment",
         quantity: 2,
@@ -61,6 +64,7 @@ export const requestMock: IRequest[] = [
             gender: "Female",
             staffNumber: "D12347",
             availability: true,
+            role: rolesMock[2]
         },
         reason: "Access to design software",
         quantity: 1,
@@ -83,6 +87,7 @@ export const requestMock: IRequest[] = [
             gender: "Male",
             staffNumber: "A12348",
             availability: true,
+            role: rolesMock[3]
         },
         reason: "Database access",
         quantity: 1,
@@ -105,6 +110,7 @@ export const requestMock: IRequest[] = [
             gender: "Female",
             staffNumber: "M12349",
             availability: false,
+            role: rolesMock[4]
         },
         reason: "Event materials",
         quantity: 3,
@@ -127,6 +133,7 @@ export const requestMock: IRequest[] = [
             gender: "Male",
             staffNumber: "H12350",
             availability: true,
+            role: rolesMock[5]
         },
         reason: "Employee training",
         quantity: 5,
@@ -149,6 +156,7 @@ export const requestMock: IRequest[] = [
             gender: "Female",
             staffNumber: "S12351",
             availability: false,
+            role: rolesMock[6]
         },
         reason: "New sales tools",
         quantity: 1,
@@ -171,6 +179,7 @@ export const requestMock: IRequest[] = [
             gender: "Male",
             staffNumber: "T12352",
             availability: true,
+            role: rolesMock[1]
         },
         reason: "Test environment setup",
         quantity: 1,
@@ -193,6 +202,7 @@ export const requestMock: IRequest[] = [
             gender: "Female",
             staffNumber: "P12353",
             availability: true,
+            role: rolesMock[2]
         },
         reason: "Project resources",
         quantity: 4,
@@ -215,6 +225,7 @@ export const requestMock: IRequest[] = [
             gender: "Male",
             staffNumber: "N12354",
             availability: true,
+            role: rolesMock[3]
         },
         reason: "Network equipment",
         quantity: 2,

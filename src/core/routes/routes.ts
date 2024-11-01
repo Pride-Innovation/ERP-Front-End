@@ -26,6 +26,8 @@ const LIST_OFFICE_EQUIPMENT: string = `${LIST_ASSETS}/office-equipment`
 const CREATE_OFFICE_EQUIPMENT: string = `${LIST_ASSETS}/office-equipment/create`
 const UPDATE_OFFICE_EQUIPMENT: string = `${LIST_ASSETS}/office-equipment/update`
 
+/* Errors Page */
+const ERRORS: string = `${ASSETS_MANAGEMENT}/restricted-access`
 
 export const ROUTES = {
     FORGOT_PASSWORD,
@@ -49,4 +51,5 @@ export const ROUTES = {
     UPDATE_FLEET,
     CREATE_OFFICE_EQUIPMENT,
     UPDATE_OFFICE_EQUIPMENT,
+    ERRORS
 }

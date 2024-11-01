@@ -1,10 +1,13 @@
+import { IRole } from "../settings/interface";
+
 export interface IUsersExcludedTableData {
     id?: string | number;
     reportsTo: string;
     firstName: string;
     lastName: string;
     otherName?: string | null;
-    image?: string
+    image?: string;
+    role: IRole
 }
 
 export interface IUsersTableData {

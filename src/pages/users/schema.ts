@@ -12,4 +12,10 @@ export const userSchema = yup.object().shape({
     gender: yup.string().required('Gender is required'),
     staffNumber: yup.string().required('Staff Number is required'),
     availability: yup.boolean().required('Availability is required'),
+    role: yup.object().shape({
+        name: yup.string().required('Role Name is required'),
+        permissions: yup.array().of(yup.object().shape({
+            name: yup.string().required('Permission Name is required')
+        })).optional(),
+    }).required('Role is required'),
 });

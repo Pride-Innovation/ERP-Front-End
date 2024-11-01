@@ -31,6 +31,7 @@ const UserUtils = () => {
         firstName,
         lastName,
         otherName,
+        role,
         email,
         image,
         ...data

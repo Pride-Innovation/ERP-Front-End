@@ -105,7 +105,7 @@ export const ImageSection = () => {
 
 export const ProfileLine = () => {
     const { user, setUser } = useContext(UserContext);
-    const { id, ...data } = user
+    const { id, role, ...data } = user
     const { open, handleClose, modalState, setModalState, handleOpen } = UserUtils();
 
     const handleProfileUpdate = () => {

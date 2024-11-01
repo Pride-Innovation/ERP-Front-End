@@ -1,4 +1,4 @@
-import { Box, Typography } from '@mui/material'
+import { Box, Typography } from '@mui/material';
 import ButtonComponent from '../../../components/forms/Button';
 import RoleDetails from './RoleDetails';
 import { rolesMock } from '../../../mocks/settings';
@@ -35,17 +35,17 @@ const Roles = () => {
     return (
         <>
             {
-                crudStates.create === modalState && <ModalComponent width={"40%"} title='Create Role' open={open} handleClose={handleClose}>
+                crudStates.create === modalState && <ModalComponent width={"35%"} title='Create Role' open={open} handleClose={handleClose}>
                     <CreateRole handleClose={handleClose} sendingRequest={false} />
                 </ModalComponent>
             }
             {
-                crudStates.delete === modalState && <ModalComponent width={"40%"} title='Delete Role' open={open} handleClose={handleClose}>
+                crudStates.delete === modalState && <ModalComponent width={"35%"} title='Delete Role' open={open} handleClose={handleClose}>
                     <DeleteRole role={currentRole} handleClose={handleClose} sendingRequest={false} buttonText='Delete' />
                 </ModalComponent>
             }
             {
-                crudStates.update === modalState && <ModalComponent width={"40%"} title='Update Role' open={open} handleClose={handleClose}>
+                crudStates.update === modalState && <ModalComponent width={"35%"} title='Update Role' open={open} handleClose={handleClose}>
                     <UpdateRole handleClose={handleClose} sendingRequest={false} role={currentRole} />
                 </ModalComponent>
             }

@@ -1,7 +1,7 @@
 import { Control, FieldError, FormState, UseFormRegister } from "react-hook-form";
 
 export interface IPermission {
-    id: number | string;
+    id?: number | string;
     name: string;
 }
 
