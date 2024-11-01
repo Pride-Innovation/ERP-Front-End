@@ -1,4 +1,3 @@
-// import { jwtDecode } from "jwt-decode";
 import { permissionsMock } from "../../mocks/settings";
 import { IPermission } from "../../pages/settings/interface";
 
@@ -22,14 +21,6 @@ const RoutesUtills = () => {
     const isAuthenticated = () => {
         const token = sessionStorage.getItem(accessToken);
         if (token) {
-            // const { exp } = jwtDecode(token)
-
-            // const expirationTime = ((exp as number) * 1000) - 60000
-
-            // if (Date.now() >= expirationTime) {
-            //     return false
-            // }
-
             return true
         };
         return false;

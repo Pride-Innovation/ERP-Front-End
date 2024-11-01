@@ -16,12 +16,16 @@ import SettingsBrightnessIcon from '@mui/icons-material/SettingsBrightness';
 import BalanceIcon from '@mui/icons-material/Balance';
 import DirectionsCarFilledIcon from '@mui/icons-material/DirectionsCarFilled';
 import { INavigation } from './interface';
+import RoutesUtills from '../../core/routes/utills';
+import { IPermission } from '../settings/interface';
 
 const AssetsManagement = () => {
   const [path, setPath] = useState<string>("");
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const { id } = useParams<{ id: string }>()
+  const { id } = useParams<{ id: string }>();
+  const { routePermission, determinePermission } = RoutesUtills();
+
 
   useEffect(() => { setPath(pathname) }, [pathname])
 
@@ -31,21 +35,24 @@ const AssetsManagement = () => {
       text: "IT Equipment",
       path: ROUTES.LIST_ASSETS,
       otherRoutes: [ROUTES.CREATE_ITEQUIPMENT, ROUTES.UPDATE_ITEQUIPMENT],
-      icon: <SettingsBrightnessIcon />
+      icon: <SettingsBrightnessIcon />,
+      permission: routePermission(8) as IPermission
     },
     {
       id: 2,
       text: "Office Equipment",
       path: ROUTES.LIST_OFFICE_EQUIPMENT,
       otherRoutes: [ROUTES.CREATE_OFFICE_EQUIPMENT, ROUTES.UPDATE_OFFICE_EQUIPMENT],
-      icon: <BalanceIcon />
+      icon: <BalanceIcon />,
+      permission: routePermission(12) as IPermission
     },
     {
       id: 3,
       text: "Fleet",
       path: ROUTES.LIST_FLEET,
       otherRoutes: [ROUTES.CREATE_FLEET, ROUTES.UPDATE_FLEET],
-      icon: <DirectionsCarFilledIcon />
+      icon: <DirectionsCarFilledIcon />,
+      permission: routePermission(16) as IPermission
     }
   ]
 
@@ -61,14 +68,16 @@ const AssetsManagement = () => {
         <Grid xs={12} container>
           <Stack direction="row" spacing={1}>
             {navigations.map(item => (
-              <Button
-                startIcon={item.icon}
-                onClick={() => navigate(item.path)}
-                key={item.id}
-                variant={determineActivePath(item) ? "contained" : "outlined"}
-              >
-                {item.text}
-              </Button>
+              <>
+                {determinePermission(item.permission) && <Button
+                  startIcon={item.icon}
+                  onClick={() => navigate(item.path)}
+                  key={item.id}
+                  variant={determineActivePath(item) ? "contained" : "outlined"}
+                >
+                  {item.text}
+                </Button>}
+              </>
             ))}
           </Stack>
         </Grid>

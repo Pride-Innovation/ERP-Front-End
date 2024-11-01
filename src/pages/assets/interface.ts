@@ -2,6 +2,7 @@ import { Path } from "react-hook-form";
 import { IOptions } from "../../components/tables/interface";
 import { IITEquipment } from "./ITEquipment/interface";
 import { IOfficeEquipment } from "./officeEquipment/interface";
+import { IPermission } from "../settings/interface";
 
 export interface IFormData<T> {
     value: Path<T>;
@@ -23,6 +24,7 @@ export interface INavigation {
     path: string;
     icon: JSX.Element;
     otherRoutes: Array<string>;
+    permission: IPermission
 }
 
 export interface IAssignmentHistory {
