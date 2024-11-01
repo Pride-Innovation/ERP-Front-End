@@ -17,20 +17,24 @@ import ITEquipmentRoutes from './subroutes/ITEquipmentRoutes'
 import FleetRoutes from './subroutes/FleetRoutes'
 import OfficeEquipmentRoutes from './subroutes/OfficeEquipmentRoutes'
 import { PrivateRoute } from './PrivateRoutes'
-import { permissionsMock } from '../../mocks/settings'
+import RoutesUtills from './utills'
 
 const AppRoutes = () => {
+  const { routePermission } = RoutesUtills();
+
   return (
     <Routes>
       <Route path={ROUTES.LOGIN} element={<Login />} />
       <Route path={ROUTES.FORGOT_PASSWORD} element={<PasswordReset />} />
       <Route path={ROUTES.ASSETS_MANAGEMENT} element={<ApplicationDrawer />} >
-        <Route element={<PrivateRoute permission={permissionsMock[0]} />}>
+        <Route element={<PrivateRoute permission={routePermission(1)} />}>
           <Route index element={<Dashboard />} />
         </Route>
         <Route path={ROUTES.SETTINGS} element={<Settings />} />
         <Route path={`${ROUTES.PROFILE}/:id`} element={<Profile />} />
-        <Route path={ROUTES.USERS} element={<Users />} />
+        <Route element={<PrivateRoute permission={routePermission(1)} />}>
+          <Route path={ROUTES.USERS} element={<Users />} />
+        </Route>
         <Route path={ROUTES.AUDIT_TRAILS} element={<AuditTrails />} />
         <Route path={ROUTES.TEST} element={<TestComponent />} />
         <Route path={ROUTES.LIST_ASSETS} element={<AssetsManagement />} >

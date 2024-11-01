@@ -1,4 +1,5 @@
 // import { jwtDecode } from "jwt-decode";
+import { permissionsMock } from "../../mocks/settings";
 import { IPermission } from "../../pages/settings/interface";
 
 const RoutesUtills = () => {
@@ -9,11 +10,14 @@ const RoutesUtills = () => {
         return JSON.parse(sessionStorage.getItem(currentUser) || '{}');
     }
 
-    const determinePermission = (permissions: IPermission[], permission: IPermission): boolean => {
-        const permissionDetails = permissions.find(perm => perm.id = permission.id);
+    const determinePermission = (permission: IPermission): boolean => {
+        const permissionDetails = getCurrentUser()?.role?.permissions.find(
+            (perm: IPermission) => perm.id === permission.id);
         if (permissionDetails) return true;
         return false;
     }
+
+    const routePermission = (id: number) => permissionsMock.find(perm => perm.id === id);
 
     const isAuthenticated = () => {
         const token = sessionStorage.getItem(accessToken);
@@ -28,8 +32,7 @@ const RoutesUtills = () => {
 
             return true
         };
-        // return false;
-        return true;
+        return false;
     }
 
 
@@ -39,6 +42,7 @@ const RoutesUtills = () => {
         isAuthenticated,
         determinePermission,
         currentUser,
+        routePermission
     })
 }
 
