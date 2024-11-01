@@ -27,26 +27,26 @@ const AppRoutes = () => {
     <Routes>
       <Route path={ROUTES.LOGIN} element={<Login />} />
       <Route path={ROUTES.FORGOT_PASSWORD} element={<PasswordReset />} />
-      <Route path={ROUTES.ASSETS_MANAGEMENT} element={<ApplicationDrawer />} >
-        <Route path={ROUTES.ERRORS} element={<ErrorsPage />} />
-        <Route element={<PrivateRoute permission={routePermission(1)} />}>
+      <Route element={<PrivateRoute />}>
+        <Route path={ROUTES.ASSETS_MANAGEMENT} element={<ApplicationDrawer />} >
           <Route index element={<Dashboard />} />
+          <Route path={ROUTES.SETTINGS} element={<Settings />} />
+          <Route path={`${ROUTES.PROFILE}/:id`} element={<Profile />} />
+          <Route element={<PrivateRoute permission={routePermission(1)} />}>
+            <Route path={ROUTES.USERS} element={<Users />} />
+          </Route>
+          <Route path={ROUTES.AUDIT_TRAILS} element={<AuditTrails />} />
+          <Route path={ROUTES.TEST} element={<TestComponent />} />
+          <Route path={ROUTES.LIST_ASSETS} element={<AssetsManagement />} >
+            {ITEquipmentRoutes()}
+            {FleetRoutes()}
+            {OfficeEquipmentRoutes()}
+          </Route>
+          <Route path={ROUTES.REQUEST} element={<Request />} />
+          <Route path={ROUTES.CREATE_REQUEST} element={<CreateRequest />} />
+          <Route path={`${ROUTES.UPDATE_REQUEST}/:id`} element={<UpdateRequest />} />
+          <Route path={ROUTES.ERRORS} element={<ErrorsPage />} />
         </Route>
-        <Route path={ROUTES.SETTINGS} element={<Settings />} />
-        <Route path={`${ROUTES.PROFILE}/:id`} element={<Profile />} />
-        <Route element={<PrivateRoute permission={routePermission(1)} />}>
-          <Route path={ROUTES.USERS} element={<Users />} />
-        </Route>
-        <Route path={ROUTES.AUDIT_TRAILS} element={<AuditTrails />} />
-        <Route path={ROUTES.TEST} element={<TestComponent />} />
-        <Route path={ROUTES.LIST_ASSETS} element={<AssetsManagement />} >
-          {ITEquipmentRoutes()}
-          {FleetRoutes()}
-          {OfficeEquipmentRoutes()}
-        </Route>
-        <Route path={ROUTES.REQUEST} element={<Request />} />
-        <Route path={ROUTES.CREATE_REQUEST} element={<CreateRequest />} />
-        <Route path={`${ROUTES.UPDATE_REQUEST}/:id`} element={<UpdateRequest />} />
       </Route>
     </Routes>
   )
