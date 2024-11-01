@@ -17,6 +17,7 @@ import { useNavigate } from 'react-router';
 import AuthenticationContainerComponent from '../../components/Container';
 import MockAuthentication from '../../mocks/authentication';
 import AuthenticationUtils from './utills';
+import { toast } from 'react-toastify';
 
 const Login = () => {
     const [loggingIn, setLoggingIn] = useState<boolean>(false);
@@ -45,6 +46,7 @@ const Login = () => {
         setLoggingIn(true);
         const response = authenticateUser(formData.email);
         handleSessionStorage(response.user, response.token)
+        toast.success(`Welcome ${response.user.firstName} !!`)
         navigate(ROUTES.ASSETS_MANAGEMENT);
     };
 

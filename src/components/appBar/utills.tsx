@@ -9,6 +9,7 @@ import { UserContext } from "../../context/user/UserContext";
 import BalanceIcon from '@mui/icons-material/Balance';
 import SettingsBrightnessIcon from '@mui/icons-material/SettingsBrightness';
 import DirectionsCarFilledIcon from '@mui/icons-material/DirectionsCarFilled';
+import AuthenticationUtils from "../../pages/authentication/utills";
 
 export const modalStates = {
     password: "password",
@@ -27,6 +28,7 @@ const AppBarUtills = () => {
     const [open, setOpen] = useState<boolean>(false);
     const navigate = useNavigate();
     const { user } = useContext(UserContext);
+    const { handleLogout } = AuthenticationUtils()
 
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
@@ -55,6 +57,7 @@ const AppBarUtills = () => {
                 handleOpen();
                 break;
             case modalStates.logout:
+                handleLogout();
                 navigate(ROUTES.LOGIN);
                 break;
             case modalStates.profile:
