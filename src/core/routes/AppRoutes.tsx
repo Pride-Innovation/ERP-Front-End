@@ -17,6 +17,7 @@ import ITEquipmentRoutes from './subroutes/ITEquipmentRoutes'
 import FleetRoutes from './subroutes/FleetRoutes'
 import OfficeEquipmentRoutes from './subroutes/OfficeEquipmentRoutes'
 import { PrivateRoute } from './PrivateRoutes'
+import { permissionsMock } from '../../mocks/settings'
 
 const AppRoutes = () => {
   return (
@@ -24,7 +25,7 @@ const AppRoutes = () => {
       <Route path={ROUTES.LOGIN} element={<Login />} />
       <Route path={ROUTES.FORGOT_PASSWORD} element={<PasswordReset />} />
       <Route path={ROUTES.ASSETS_MANAGEMENT} element={<ApplicationDrawer />} >
-        <Route element={<PrivateRoute />}>
+        <Route element={<PrivateRoute permission={permissionsMock[0]} />}>
           <Route index element={<Dashboard />} />
         </Route>
         <Route path={ROUTES.SETTINGS} element={<Settings />} />

@@ -44,10 +44,16 @@ const Login = () => {
 
     const onSubmit = (formData: IAuthentication) => {
         setLoggingIn(true);
-        const response = authenticateUser(formData.email);
-        handleSessionStorage(response.user, response.token)
-        toast.success(`Welcome ${response.user.firstName} !!`)
-        navigate(ROUTES.ASSETS_MANAGEMENT);
+        try {
+            const response = authenticateUser(formData.email);
+            handleSessionStorage(response.user, response.token)
+            toast.success(`Welcome ${response.user.firstName} !!`)
+            navigate(ROUTES.ASSETS_MANAGEMENT);
+        } catch (error) {
+            toast.error("Invalid user Credentials")
+            console.log(error, "Error Information!!")
+        }
+        setLoggingIn(false);
     };
 
     return (
