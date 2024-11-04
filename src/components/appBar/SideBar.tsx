@@ -1,6 +1,6 @@
 import {
     Card,
-    Collapse,
+    // Collapse,
     List,
     ListItemButton,
     ListItemIcon,
@@ -10,11 +10,10 @@ import React, { useEffect } from 'react'
 import { blue } from '@mui/material/colors'
 import HandleRoutes from './HandleRoutes'
 import { ExpandLess, ExpandMore } from '@mui/icons-material'
-import { useLocation, useNavigate } from 'react-router'
+import { useLocation } from 'react-router'
 import SideBarElements from './sideBarElements'
 
 const SideBar = () => {
-    const navigate = useNavigate();
     const { pathname } = useLocation();
     const { sideBarList } = SideBarElements();
 
@@ -63,7 +62,7 @@ const SideBar = () => {
                                     )
                                 }
                             </ListItemButton>
-                            {item?.subroutes?.length > 0
+                            {/* {item?.subroutes?.length > 0
                                 && expandedItemId === item.id
                                 && <Collapse in={expandedItemId === item.id} timeout="auto" unmountOnExit>
                                     <List component="div" disablePadding>
@@ -78,7 +77,7 @@ const SideBar = () => {
                                             ))
                                         }
                                     </List>
-                                </Collapse>}
+                                </Collapse>} */}
                         </React.Fragment>
                     ))
                 }
