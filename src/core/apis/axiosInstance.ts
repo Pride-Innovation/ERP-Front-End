@@ -1,70 +1,49 @@
-import axios, { AxiosResponse, InternalAxiosRequestConfig } from "axios";
-import { ROUTES } from "../routes/routes";
 
-const status = (response: AxiosResponse): Promise<AxiosResponse> => {
-    if (response.status >= 200 && response.status < 300) {
-        return Promise.resolve(response);
-    }
-    return Promise.reject(response);
+import axios, { AxiosResponse, AxiosError } from 'axios';
+
+interface ErrorResponse {
+    message?: string;
 }
 
-export const service = (() => {
-    const api = axios.create({
-        baseURL: 'https://jsonplaceholder.typicode.com/',
-        headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json'
-        },
-        withCredentials: true
-    });
+export const ErrorMessage = 'Something went wrong!';
+const unknownError = 'An unknown error occurred';
+const { BASE_URL } = process.env;
 
-    const onRequest = (config: InternalAxiosRequestConfig): InternalAxiosRequestConfig => {
-        const token = sessionStorage.getItem('jwtToken');
+const axiosInstance = axios.create({
+    baseURL: BASE_URL,
+    timeout: 60000,
+});
 
+axiosInstance.interceptors.request.use(
+    (config: any) => {
+        if (!config.headers) {
+            config.headers = {};
+        }
+
+        const token = localStorage.getItem('token');
         if (token) {
             config.headers['Authorization'] = `Bearer ${token}`;
-        }
+            config.headers['Accept'] = 'application/json';
 
+        }
         return config;
-    }
-
-    const onRequestError = (error: any): Promise<any> => {
+    },
+    (error: AxiosError) => {
         return Promise.reject(error);
     }
+);
 
-    const onResponse = (response: AxiosResponse): Promise<AxiosResponse> => {
-        return status(response);
+axiosInstance.interceptors.response.use(
+    (response: AxiosResponse) => {
+        return response;
+    },
+    (error: AxiosError) => {
+        const errorMessage =
+            (error.response?.data as ErrorResponse)?.message ||
+            error.message ||
+            unknownError;
+        return Promise.reject(new Error(errorMessage));
     }
+);
 
-    const onResponseError = async (error: any): Promise<any> => {
-        const originalRequest = error.config;
-
-        if (error.response && error.response.status === 401 && !originalRequest._retry) {
-            originalRequest._retry = true;
-
-            try {
-                const refreshToken = sessionStorage.getItem('refreshToken');
-
-                const response = await api.post(ROUTES.REFRESH_TOKEN, { token: refreshToken }, { withCredentials: true });
-
-                const newToken = response.data.token;
-
-                sessionStorage.setItem('jwtToken', newToken);
-
-                originalRequest.headers['Authorization'] = `Bearer ${newToken}`;
-
-                return api(originalRequest);
-
-            } catch (refreshError) {
-                console.error('Error during token refresh:', refreshError);
-                return Promise.reject(refreshError);
-            }
-        }
-        return Promise.reject(error);
-    }
-
-    api.interceptors.request.use(onRequest, onRequestError);
-    api.interceptors.response.use(onResponse, onResponseError);
-
-    return api;
-})();
+export default axiosInstance;
