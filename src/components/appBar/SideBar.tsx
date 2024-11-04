@@ -7,15 +7,17 @@ import {
     ListItemText
 } from '@mui/material'
 import React, { useEffect } from 'react'
-import { sideBarItems } from './sideBarElements'
 import { blue } from '@mui/material/colors'
 import HandleRoutes from './HandleRoutes'
 import { ExpandLess, ExpandMore } from '@mui/icons-material'
 import { useLocation, useNavigate } from 'react-router'
+import SideBarElements from './sideBarElements'
 
 const SideBar = () => {
     const navigate = useNavigate();
     const { pathname } = useLocation();
+    const { sideBarList } = SideBarElements();
+
     const {
         activeRoute,
         handleClick,
@@ -23,9 +25,7 @@ const SideBar = () => {
         handleRouteChange
     } = HandleRoutes();
 
-    useEffect(() => {
-        handleRouteChange(pathname)
-    }, [pathname]);
+    useEffect(() => { handleRouteChange(pathname) }, [pathname]);
 
     return (
 
@@ -36,7 +36,7 @@ const SideBar = () => {
                 aria-labelledby="nested-list-subheader"
             >
                 {
-                    sideBarItems.map(item => (
+                    sideBarList.map(item => (
                         <React.Fragment key={item.id}>
                             <ListItemButton sx={{
                                 bgcolor: activeRoute === item.id ? blue[700] : "",
