@@ -5,9 +5,7 @@ import { TypographyComponent } from '../../components/headers/TypographyComponen
 import { blue, grey } from '@mui/material/colors';
 import ButtonComponent from '../../components/forms/Button';
 import EditIcon from '@mui/icons-material/Edit';
-import React, { useContext, useEffect, useRef, useState } from 'react';
-import { usersMock } from '../../mocks/users';
-import { UserContext } from '../../context/user/UserContext';
+import React, { useContext, useRef, useState } from 'react';
 import { camelCaseToWords } from '../../utils/helpers';
 import { availability, crudStates } from '../../utils/constants';
 import AppBarUtills, { modalStates } from '../../components/appBar/utills';
@@ -17,11 +15,14 @@ import LeaveComponent from './Leave';
 import InputFileUpload from '../../components/forms/FileUpload';
 import UpdateUsers from '../users/UpdateUsers';
 import UserUtils from '../users/utils';
+import RoutesUtills from '../../core/routes/utills';
+import { IUser } from '../users/interface';
+import { UserContext } from '../../context/user/UserContext';
 
 export const ImageSection = () => {
-    const { user, setUser } = useContext(UserContext);
     const inputRef = useRef<HTMLInputElement>(null);
     const [image, setImage] = useState<string>("")
+    const { getCurrentUser } = RoutesUtills();
 
     const handleButtonClick = () => {
         inputRef.current?.click();
@@ -40,11 +41,6 @@ export const ImageSection = () => {
         handleOptionClicked,
     } = AppBarUtills();
 
-    useEffect(() => {
-        setUser(() => {
-            return usersMock[1]
-        })
-    }, []);
 
     return (
         <Grid
@@ -69,7 +65,7 @@ export const ImageSection = () => {
                 <Box
                     component="img"
                     sx={{ width: 150, height: 150 }}
-                    src={image ? image : user.gender === "Male" ? MaleProfile : FemaleProfile}
+                    src={image ? image : getCurrentUser().gender === "Male" ? MaleProfile : FemaleProfile}
                 />
                 <IconButton onClick={handleButtonClick} sx={{ position: "relative", bgcolor: blue[700] }}>
                     <EditIcon fontSize='medium' sx={{ color: "white" }} />
@@ -77,10 +73,10 @@ export const ImageSection = () => {
                 </IconButton>
             </Box>
             <TypographyComponent weight={600} size='18px' sx={{ mt: 2 }}>
-                {user.firstName + " " + user.lastName + " " + user.otherName}
+                {getCurrentUser().firstName + " " + getCurrentUser().lastName + " " + getCurrentUser().otherName}
             </TypographyComponent>
             <TypographyComponent weight={400} size='14px' sx={{ m: 0.5 }} color={grey[600]} >
-                {user.title}
+                {getCurrentUser().title}
             </TypographyComponent>
             <Stack direction="column" spacing={1.5}>
                 <ButtonComponent
@@ -104,13 +100,15 @@ export const ImageSection = () => {
 
 
 export const ProfileLine = () => {
-    const { user, setUser } = useContext(UserContext);
-    const { id, role, ...data } = user
+    const { getCurrentUser } = RoutesUtills();
+    const { setUser } = useContext(UserContext);
+
+    const { id, role, ...data } = getCurrentUser() as IUser;
     const { open, handleClose, modalState, setModalState, handleOpen } = UserUtils();
 
     const handleProfileUpdate = () => {
         setModalState(crudStates.update)
-        setUser(user)
+        setUser(getCurrentUser())
         handleOpen();
     }
 
