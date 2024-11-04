@@ -8,6 +8,7 @@ import RowContext from "../../../context/row/RowContext"
 import AssignmentHistoryUtills from "./AssignmentHistoryUtills"
 import { crudStates } from "../../../utils/constants"
 import ModalComponent from "../../../components/modal"
+import { ErrorMessage } from "../../../core/apis/axiosInstance"
 
 const AssignmentHistory = ({ id }: { id: string | number }) => {
     const [loading, setLoading] = useState<boolean>(false);
@@ -21,7 +22,8 @@ const AssignmentHistory = ({ id }: { id: string | number }) => {
             console.log(response, "response!!")
             setRows([...assignmentHistoryMock]);
         } catch (error) {
-            console.log(error)
+            const errorMessage = error instanceof Error ? error.message : ErrorMessage;
+            console.log(errorMessage)
         }
         setLoading(false)
     }

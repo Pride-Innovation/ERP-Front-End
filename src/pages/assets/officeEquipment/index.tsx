@@ -16,6 +16,7 @@ import { ROUTES } from "../../../core/routes/routes";
 import { IOfficeEquipment } from "./interface";
 import ModalComponent from "../../../components/modal";
 import Dispose from "../Dispose";
+import { ErrorMessage } from "../../../core/apis/axiosInstance";
 
 const OfficeEquipment = () => {
     const [loading, setLoading] = useState<boolean>(false);
@@ -39,7 +40,8 @@ const OfficeEquipment = () => {
             setRows([...officeEquipmentMock]);
 
         } catch (error) {
-            console.log(error)
+            const errorMessage = error instanceof Error ? error.message : ErrorMessage;
+            console.log(errorMessage)
         }
         setLoading(false)
     }

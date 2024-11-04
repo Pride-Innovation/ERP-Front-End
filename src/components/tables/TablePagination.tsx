@@ -3,18 +3,25 @@ import { ICustomTablePagination } from "./interface";
 import { useContext } from "react";
 import { fetchRowsService } from "../../core/apis/globalService";
 import RowContext from "../../context/row/RowContext";
+import { ErrorMessage } from "../../core/apis/axiosInstance";
 
 const CustomTablePagination = ({ endPoint }: ICustomTablePagination) => {
 
     const { setRows } = useContext(RowContext);
 
     const handleTablePagination = async (model: GridPaginationModel) => {
-        const response = await fetchRowsService({
-            page: (model.page + 1),
-            size: model.pageSize,
-            endPoint
-        }) as unknown as GridRowsProp;
-        setRows([...response]);
+        try {
+            const response = await fetchRowsService({
+                page: (model.page + 1),
+                size: model.pageSize,
+                endPoint
+            }) as unknown as GridRowsProp;
+            setRows([...response]);
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : ErrorMessage;
+            console.log(errorMessage)
+        }
+
     }
     return (
         { handleTablePagination }

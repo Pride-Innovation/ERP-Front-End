@@ -12,6 +12,7 @@ import { crudStates } from "../../../utils/constants"
 import { ROUTES } from "../../../core/routes/routes"
 import { itEquipmentMock } from "../../../mocks/itEquipment"
 import { IITEquipment } from "./interface"
+import { ErrorMessage } from "../../../core/apis/axiosInstance"
 
 const ITEquipment = () => {
     const [loading, setLoading] = useState<boolean>(false);
@@ -45,7 +46,8 @@ const ITEquipment = () => {
 
             setRows([...itEquipmentMock]);
         } catch (error) {
-            console.log(error)
+            const errorMessage = error instanceof Error ? error.message : ErrorMessage;
+            console.log(errorMessage)
         }
         setLoading(false)
     }

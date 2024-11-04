@@ -11,6 +11,7 @@ import { ROUTES } from "../../core/routes/routes";
 import TableComponent from "../../components/tables/TableComponent";
 import { RequestContext } from "../../context/request/RequestContext";
 import { FileContext } from "../../context/file/FileContext";
+import { ErrorMessage } from "../../core/apis/axiosInstance";
 
 const Request = () => {
   const [loading, setLoading] = useState<boolean>(false);
@@ -27,7 +28,8 @@ const Request = () => {
       console.log(response, "response!!")
       setRows([...requestMock]);
     } catch (error) {
-      console.log(error)
+      const errorMessage = error instanceof Error ? error.message : ErrorMessage;
+      console.log(errorMessage)
     }
     setLoading(false)
   }

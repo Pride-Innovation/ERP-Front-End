@@ -6,6 +6,7 @@ import { GridRowsProp } from "@mui/x-data-grid";
 import { requestMock } from "../../mocks/request";
 import RowContext from "../../context/row/RowContext";
 import { RequestContext } from "../../context/request/RequestContext";
+import { ErrorMessage } from "../../core/apis/axiosInstance";
 
 const DashboardRequests = () => {
     const [loading, setLoading] = useState<boolean>(false)
@@ -19,7 +20,8 @@ const DashboardRequests = () => {
             const response = await fetchRowsService({ page: 1, size: 10, endPoint }) as unknown as GridRowsProp;
             setRows([...response]);
         } catch (error) {
-            console.log(error)
+            const errorMessage = error instanceof Error ? error.message : ErrorMessage;
+            console.log(errorMessage)
         }
         setLoading(false)
     }

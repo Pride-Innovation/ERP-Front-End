@@ -12,6 +12,7 @@ import { crudStates } from "../../../utils/constants";
 import { IFleet } from "./interface";
 import ModalComponent from "../../../components/modal";
 import Dispose from "../Dispose";
+import { ErrorMessage } from "../../../core/apis/axiosInstance";
 
 const Fleet = () => {
     const [loading, setLoading] = useState<boolean>(false);
@@ -35,7 +36,8 @@ const Fleet = () => {
             setRows([...fleetsMock]);
 
         } catch (error) {
-            console.log(error)
+            const errorMessage = error instanceof Error ? error.message : ErrorMessage;
+            console.log(errorMessage)
         }
         setLoading(false)
     }

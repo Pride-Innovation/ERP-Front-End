@@ -5,6 +5,7 @@ import { GridRowsProp } from '@mui/x-data-grid';
 import TableComponent from '../../../components/tables/TableComponent';
 import IndividualRequestUtill from './utill';
 import { itEquipmentMock } from '../../../mocks/itEquipment';
+import { ErrorMessage } from '../../../core/apis/axiosInstance';
 
 const PersonalRequest = () => {
     const [loading, setLoading] = useState<boolean>(false)
@@ -26,7 +27,8 @@ const PersonalRequest = () => {
 
             setRows([...itEquipmentMock]);
         } catch (error) {
-            console.log(error)
+            const errorMessage = error instanceof Error ? error.message : ErrorMessage;
+            console.log(errorMessage)
         }
         setLoading(false)
     }

@@ -112,7 +112,7 @@ export const usersMock: IUser[] = [
         gender: 'Male',
         image: "image",
         availability: true,
-        role: rolesMock[6]
+        role: rolesMock[5]
     },
     {
         id: 8,

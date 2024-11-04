@@ -5,6 +5,7 @@ import { useContext, useEffect, useState } from "react";
 import { fetchRowsService } from "../../core/apis/globalService";
 import { GridRowsProp } from "@mui/x-data-grid";
 import RowContext from "../../context/row/RowContext";
+import { ErrorMessage } from "../../core/apis/axiosInstance";
 
 const TestComponent = () => {
     const [loading, setLoading] = useState<boolean>(false);
@@ -17,7 +18,8 @@ const TestComponent = () => {
             const response = await fetchRowsService({ page: 1, size: 10, endPoint }) as unknown as GridRowsProp;
             setRows([...response]);
         } catch (error) {
-            console.log(error)
+            const errorMessage = error instanceof Error ? error.message : ErrorMessage;
+            console.log(errorMessage)
         }
         setLoading(false)
     }

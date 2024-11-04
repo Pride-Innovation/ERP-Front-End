@@ -8,6 +8,7 @@ import { Grid } from "@mui/material";
 import ModalComponent from "../../../components/modal";
 import TableComponent from "../../../components/tables/TableComponent";
 import RepairHistoryUtills from "./RepairHistoryUtills";
+import { ErrorMessage } from "../../../core/apis/axiosInstance";
 
 const RepairHistory = ({ id }: { id: string | number }) => {
     const [loading, setLoading] = useState<boolean>(false);
@@ -21,7 +22,8 @@ const RepairHistory = ({ id }: { id: string | number }) => {
             console.log(response, "response!!")
             setRows([...repairHistoryMock]);
         } catch (error) {
-            console.log(error)
+            const errorMessage = error instanceof Error ? error.message : ErrorMessage;
+            console.log(errorMessage)
         }
         setLoading(false)
     }

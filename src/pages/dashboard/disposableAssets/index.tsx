@@ -5,6 +5,7 @@ import { fetchRowsService } from "../../../core/apis/globalService";
 import { GridRowsProp } from "@mui/x-data-grid";
 import { itEquipmentMock } from "../../../mocks/itEquipment";
 import TableComponent from "../../../components/tables/TableComponent";
+import { ErrorMessage } from "../../../core/apis/axiosInstance";
 
 const DisposalAssets = () => {
     const [loading, setLoading] = useState<boolean>(false)
@@ -26,7 +27,8 @@ const DisposalAssets = () => {
 
             setRows([...itEquipmentMock]);
         } catch (error) {
-            console.log(error)
+            const errorMessage = error instanceof Error ? error.message : ErrorMessage;
+            console.log(errorMessage)
         }
         setLoading(false)
     }

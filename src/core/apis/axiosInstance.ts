@@ -1,5 +1,6 @@
 
 import axios, { AxiosResponse, AxiosError } from 'axios';
+import RoutesUtills from '../routes/utills';
 
 interface ErrorResponse {
     message?: string;
@@ -7,10 +8,11 @@ interface ErrorResponse {
 
 export const ErrorMessage = 'Something went wrong!';
 const unknownError = 'An unknown error occurred';
-const { BASE_URL } = process.env;
+const { accessToken } = RoutesUtills();
+const { REACT_APP_BASE_URL } = process.env
 
 const axiosInstance = axios.create({
-    baseURL: BASE_URL,
+    baseURL: REACT_APP_BASE_URL,
     timeout: 60000,
 });
 
@@ -20,7 +22,9 @@ axiosInstance.interceptors.request.use(
             config.headers = {};
         }
 
-        const token = localStorage.getItem('token');
+        console.log(accessToken, "accessToken!!");
+
+        const token = sessionStorage.getItem('token');
         if (token) {
             config.headers['Authorization'] = `Bearer ${token}`;
             config.headers['Accept'] = 'application/json';
