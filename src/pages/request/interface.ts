@@ -50,3 +50,10 @@ export interface IRequestForm {
     buttonText: string;
     sendingRequest: boolean;
 }
+
+export interface IDeleteRequest {
+    handleClose: () => void;
+    sendingRequest: boolean;
+    buttonText: string;
+    request: IRequest
+}

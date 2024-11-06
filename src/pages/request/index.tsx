@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { GridRowsProp } from "@mui/x-data-grid";
 import RequestUtills from "./utills";
 import { Grid } from "@mui/material";
@@ -12,14 +12,29 @@ import TableComponent from "../../components/tables/TableComponent";
 import { RequestContext } from "../../context/request/RequestContext";
 import { FileContext } from "../../context/file/FileContext";
 import { ErrorMessage } from "../../core/apis/axiosInstance";
+import { IRequest } from "./interface";
+import ModalComponent from "../../components/modal";
+import DeleteRequest from "./DeleteRequest";
 
 const Request = () => {
   const [loading, setLoading] = useState<boolean>(false);
+  const [currentRequest, setCurrentRequest] = useState<IRequest>({} as IRequest);
   const { setRows, rows } = useContext(RowContext);
-  const { columnHeaders, endPoint, header, handleRequest, module } = RequestUtills();
   const navigate = useNavigate();
   const { requestTableData } = useContext(RequestContext);
   const { setFileData, fileData } = useContext(FileContext)
+
+  const {
+    columnHeaders,
+    endPoint,
+    header,
+    handleRequest,
+    module,
+    determineCurrentRequest,
+    handleClose,
+    handleOpen,
+    open
+  } = RequestUtills();
 
   const fetchResources = async () => {
     setLoading(true)
@@ -46,6 +61,10 @@ const Request = () => {
       case crudStates.update:
         navigate(`${ROUTES.UPDATE_REQUEST}/${moduleID}`);
         break;
+      case crudStates.delete:
+        setCurrentRequest(determineCurrentRequest(moduleID as number, rows as IRequest[]))
+        handleOpen();
+        break;
       default:
         break;
     }
@@ -58,7 +77,17 @@ const Request = () => {
   }, [fileData])
 
   return (
-    <>
+    <React.Fragment>
+      {
+        <ModalComponent width={"40%"} title='Dispose Fleet' open={open} handleClose={handleClose}>
+          <DeleteRequest
+            sendingRequest={loading}
+            handleClose={handleClose}
+            buttonText='Confirm'
+            request={currentRequest}
+          />
+        </ModalComponent>
+      }
       {rows?.length > 0 && <Grid xs={12} container>
         {columnHeaders.length > 0 &&
           <TableComponent
@@ -78,7 +107,7 @@ const Request = () => {
           />
         }
       </Grid>}
-    </>
+    </React.Fragment>
   )
 }
 

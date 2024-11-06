@@ -22,7 +22,11 @@ const RequestUtills = () => {
     const module = "request";
     const header = { plural: 'Requests', singular: 'Request' };
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
-    const { setRequestTableData } = useContext(RequestContext)
+    const { setRequestTableData } = useContext(RequestContext);
+    const [open, setOpen] = useState<boolean>(false);
+
+    const handleOpen = () => setOpen(true);
+    const handleClose = () => setOpen(false);
 
     const {
         id,
@@ -87,13 +91,29 @@ const RequestUtills = () => {
         setRequestTableData(data);
     }
 
+    const determineCurrentRequest = (id: number, itemList: Array<IRequest>): IRequest => {
+        const item = itemList.find(item => item.id === id);
+        return item as IRequest;
+    }
+
 
     useEffect(() => {
         setColumnHeaders(getTableHeaders(rowData))
     }, []);
 
     return (
-        { endPoint, header, columnHeaders, formFields, handleRequest, module }
+        {
+            endPoint,
+            header,
+            columnHeaders,
+            formFields,
+            handleRequest,
+            module,
+            determineCurrentRequest,
+            handleClose,
+            handleOpen,
+            open
+        }
     )
 }
 

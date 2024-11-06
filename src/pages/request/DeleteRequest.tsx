@@ -1,29 +1,24 @@
 import { Grid, Stack, Typography } from '@mui/material'
-import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
+import { IDeleteRequest } from './interface';
 import ButtonComponent from '../../components/forms/Button';
-import { IDeactivate } from './interface';
+import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined';
 
-const Deactivate = ({
-    user,
+const DeleteRequest = ({
+    request,
     handleClose,
     sendingRequest,
     buttonText
-}: IDeactivate) => {
+}: IDeleteRequest) => {
     return (
         <Grid item container spacing={4} xs={12}>
             <Grid item xs={12}>
                 <Typography variant="body1" sx={{ mb: 1 }}>
-                    Are you sure you want to deactivate this User?
+                    Are you sure you want to delete this request?
                 </Typography>
                 <Stack direction="row" spacing={1} alignItems="center">
-                    <AccountCircleOutlinedIcon color="primary" />
+                    <HelpOutlineOutlinedIcon color="primary" />
                     <Typography variant="h6" color="primary">
-                        {user.firstName + " " + user.lastName + " " + user.otherName}
-                    </Typography>
-                </Stack>
-                <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 1 }}>
-                    <Typography variant="subtitle1" color="textSecondary">
-                        Title: {user.title}
+                        {request.description}
                     </Typography>
                 </Stack>
             </Grid>
@@ -49,4 +44,4 @@ const Deactivate = ({
     )
 }
 
-export default Deactivate
+export default DeleteRequest;

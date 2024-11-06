@@ -8,10 +8,8 @@ import RecentActorsIcon from '@mui/icons-material/RecentActors';
 import TuneIcon from '@mui/icons-material/Tune';
 import RoutesUtills from '../../core/routes/utills';
 import { IPermission } from '../../pages/settings/interface';
-import { useEffect } from 'react';
 
 const SideBarElements = () => {
-
     const { getCurrentUser } = RoutesUtills();
     const userPermissions = getCurrentUser()?.role?.permissions as Array<IPermission>;
 
@@ -26,8 +24,6 @@ const SideBarElements = () => {
         return path;
     }
 
-    useEffect(() => {}, [getCurrentUser()]);
-    
     const sideBarList: Array<ISideBarItem> = [
         {
             id: 1,
