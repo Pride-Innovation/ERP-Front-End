@@ -84,14 +84,22 @@ const RequestDetails: React.FC<IRequestDetails> = ({ handleClose, data }) => {
             <Divider sx={{ marginTop: 3, marginBottom: 3 }} />
 
             <Box sx={{ display: "flex", justifyContent: "flex-end", width: "100%" }}>
-                <Stack direction="row" spacing={3} sx={{ width: "20%", mt: 2 }}>
+                <Stack direction="row" spacing={3} sx={{ width: status === "pending" ? "30%" : "20%", mt: 2 }}>
                     <ButtonComponent
                         handleClick={handleClose}
                         buttonColor="info"
                         type="button"
+                        variant="contained"
                         sendingRequest={false}
                         buttonText="Back"
                     />
+                    {status === "pending" && <ButtonComponent
+                        handleClick={handleClose}
+                        buttonColor="success"
+                        type="button"
+                        sendingRequest={false}
+                        buttonText="Approve"
+                    />}
                 </Stack>
             </Box>
         </Box>
