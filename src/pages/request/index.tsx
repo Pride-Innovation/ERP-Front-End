@@ -15,9 +15,11 @@ import { ErrorMessage } from "../../core/apis/axiosInstance";
 import { IRequest } from "./interface";
 import ModalComponent from "../../components/modal";
 import DeleteRequest from "./DeleteRequest";
+import RequestDetails from "./RequestDetails";
 
 const Request = () => {
   const [loading, setLoading] = useState<boolean>(false);
+  const [modalState, setModalState] = useState<string>("");
   const [currentRequest, setCurrentRequest] = useState<IRequest>({} as IRequest);
   const { setRows, rows } = useContext(RowContext);
   const navigate = useNavigate();
@@ -62,6 +64,12 @@ const Request = () => {
         navigate(`${ROUTES.UPDATE_REQUEST}/${moduleID}`);
         break;
       case crudStates.delete:
+        setModalState(crudStates.delete)
+        setCurrentRequest(determineCurrentRequest(moduleID as number, rows as IRequest[]))
+        handleOpen();
+        break;
+      case crudStates.read:
+        setModalState(crudStates.read)
         setCurrentRequest(determineCurrentRequest(moduleID as number, rows as IRequest[]))
         handleOpen();
         break;
@@ -78,14 +86,19 @@ const Request = () => {
 
   return (
     <React.Fragment>
-      {
-        <ModalComponent width={"40%"} title='Dispose Fleet' open={open} handleClose={handleClose}>
+      {crudStates.delete === modalState &&
+        <ModalComponent width={"40%"} title='Delete Request' open={open} handleClose={handleClose}>
           <DeleteRequest
             sendingRequest={loading}
             handleClose={handleClose}
             buttonText='Confirm'
             request={currentRequest}
           />
+        </ModalComponent>
+      }
+      {crudStates.read === modalState &&
+        <ModalComponent width={"60%"} title='Request Details' open={open} handleClose={handleClose}>
+          <RequestDetails open={open} handleClose={handleClose} data={currentRequest} />
         </ModalComponent>
       }
       {rows?.length > 0 && <Grid xs={12} container>

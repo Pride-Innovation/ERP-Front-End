@@ -57,3 +57,9 @@ export interface IDeleteRequest {
     buttonText: string;
     request: IRequest
 }
+
+export interface IRequestDetails {
+    open: boolean;
+    handleClose: () => void;
+    data: IRequest
+}
