@@ -1,127 +1,86 @@
-import React, { useContext, useEffect, useState } from "react";
-import { GridRowsProp } from "@mui/x-data-grid";
-import RequestUtills from "./utills";
-import { Grid } from "@mui/material";
-import { useNavigate } from "react-router";
-import RowContext from "../../context/row/RowContext";
-import { fetchRowsService } from "../../core/apis/globalService";
-import { requestMock } from "../../mocks/request";
-import { crudStates } from "../../utils/constants";
-import { ROUTES } from "../../core/routes/routes";
-import TableComponent from "../../components/tables/TableComponent";
-import { RequestContext } from "../../context/request/RequestContext";
-import { FileContext } from "../../context/file/FileContext";
-import { ErrorMessage } from "../../core/apis/axiosInstance";
-import { IRequest } from "./interface";
-import ModalComponent from "../../components/modal";
-import DeleteRequest from "./DeleteRequest";
-import RequestDetails from "./RequestDetails";
+import {
+  Button,
+  Card,
+  Grid,
+  Stack
+} from '@mui/material';
+import {
+  Outlet,
+  useLocation,
+  useNavigate,
+  useParams
+} from 'react-router';
+import { ROUTES } from '../../core/routes/routes';
+import { useEffect, useState } from 'react';
+import SettingsBrightnessIcon from '@mui/icons-material/SettingsBrightness';
+import BalanceIcon from '@mui/icons-material/Balance';
+import DirectionsCarFilledIcon from '@mui/icons-material/DirectionsCarFilled';
+import RoutesUtills from '../../core/routes/utills';
+import { IPermission } from '../settings/interface';
+import { INavigation } from './interface';
 
-const Request = () => {
-  const [loading, setLoading] = useState<boolean>(false);
-  const [modalState, setModalState] = useState<string>("");
-  const [currentRequest, setCurrentRequest] = useState<IRequest>({} as IRequest);
-  const { setRows, rows } = useContext(RowContext);
+const RequestsManagement = () => {
+  const [path, setPath] = useState<string>("");
+  const { pathname } = useLocation();
   const navigate = useNavigate();
-  const { requestTableData } = useContext(RequestContext);
-  const { setFileData, fileData } = useContext(FileContext)
+  const { id } = useParams<{ id: string }>();
+  const { routePermission, determinePermission } = RoutesUtills();
 
-  const {
-    columnHeaders,
-    endPoint,
-    header,
-    handleRequest,
-    module,
-    determineCurrentRequest,
-    handleClose,
-    handleOpen,
-    open
-  } = RequestUtills();
 
-  const fetchResources = async () => {
-    setLoading(true)
-    try {
-      const response = await fetchRowsService({ page: 1, size: 10, endPoint }) as unknown as GridRowsProp;
-      console.log(response, "response!!")
-      setRows([...requestMock]);
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : ErrorMessage;
-      console.log(errorMessage)
+  useEffect(() => { setPath(pathname) }, [pathname])
+
+  const navigations: Array<INavigation> = [
+    {
+      id: 1,
+      text: "All Requests",
+      path: ROUTES.REQUEST,
+      icon: <SettingsBrightnessIcon />,
+      permission: routePermission(8) as IPermission
+    },
+    {
+      id: 2,
+      text: "Pending Requests",
+      path: ROUTES.LIST_PENDING,
+      icon: <BalanceIcon />,
+      permission: routePermission(12) as IPermission
+    },
+    {
+      id: 3,
+      text: "Rejected Requests",
+      path: ROUTES.LIST_REJECTED,
+      icon: <DirectionsCarFilledIcon />,
+      permission: routePermission(16) as IPermission
     }
-    setLoading(false)
+  ]
+
+  const determineActivePath = (item: INavigation): boolean => {
+    if (path === `${item.path}/${id}`) return true;
+    return [item.path].includes(path);
   }
-
-  useEffect(() => {
-    fetchResources();
-    setFileData({ file: "", module: "", jsonData: [] });
-  }, []);
-
-  useEffect(() => { if (rows.length > 0) { handleRequest(requestMock) } }, [rows])
-
-  const handleOptionClicked = (option: string | number, moduleID?: string | number) => {
-    switch (option) {
-      case crudStates.update:
-        navigate(`${ROUTES.UPDATE_REQUEST}/${moduleID}`);
-        break;
-      case crudStates.delete:
-        setModalState(crudStates.delete)
-        setCurrentRequest(determineCurrentRequest(moduleID as number, rows as IRequest[]))
-        handleOpen();
-        break;
-      case crudStates.read:
-        setModalState(crudStates.read)
-        setCurrentRequest(determineCurrentRequest(moduleID as number, rows as IRequest[]))
-        handleOpen();
-        break;
-      default:
-        break;
-    }
-  }
-
-  useEffect(() => {
-    if (fileData.module === module) {
-      console.log(fileData, "form data!!");
-    }
-  }, [fileData])
 
   return (
-    <React.Fragment>
-      {crudStates.delete === modalState &&
-        <ModalComponent width={"40%"} title='Delete Request' open={open} handleClose={handleClose}>
-          <DeleteRequest
-            sendingRequest={loading}
-            handleClose={handleClose}
-            buttonText='Confirm'
-            request={currentRequest}
-          />
-        </ModalComponent>
-      }
-      {crudStates.read === modalState &&
-        <ModalComponent width={"60%"} title='Request Details' open={open} handleClose={handleClose}>
-          <RequestDetails open={open} handleClose={handleClose} data={currentRequest} />
-        </ModalComponent>
-      }
-      {rows?.length > 0 && <Grid xs={12} container>
-        {columnHeaders.length > 0 &&
-          <TableComponent
-            endPoint={endPoint}
-            loading={loading}
-            count={100}
-            exportData
-            createAction
-            importData
-            module={module}
-            header={header}
-            rows={requestTableData}
-            columnHeaders={columnHeaders}
-            onCreationHandler={() => navigate(ROUTES.CREATE_REQUEST)}
-            handleOptionClicked={handleOptionClicked}
-            paginationMode='client'
-          />
-        }
-      </Grid>}
-    </React.Fragment>
+    <>
+      <Card sx={{ p: 2, mb: 2 }}>
+        <Grid xs={12} container>
+          <Stack direction="row" spacing={1}>
+            {navigations.map(item => (
+              <>
+                {determinePermission(item.permission) && <Button
+                  startIcon={item.icon}
+                  onClick={() => navigate(item.path)}
+                  key={item.id}
+                  variant={determineActivePath(item) ? "contained" : "outlined"}
+                >
+                  {item.text}
+                </Button>}
+              </>
+            ))}
+          </Stack>
+        </Grid>
+      </Card>
+      <Outlet />
+    </>
   )
 }
 
-export default Request
+export default RequestsManagement

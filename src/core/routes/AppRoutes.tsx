@@ -10,7 +10,6 @@ import Users from '../../pages/users'
 import AuditTrails from '../../pages/trails'
 import TestComponent from '../../pages/test'
 import AssetsManagement from '../../pages/assets'
-import Request from '../../pages/request'
 import CreateRequest from '../../pages/request/CreateRequest'
 import UpdateRequest from '../../pages/request/UpdateRequest'
 import ITEquipmentRoutes from './subroutes/ITEquipmentRoutes'
@@ -19,6 +18,8 @@ import OfficeEquipmentRoutes from './subroutes/OfficeEquipmentRoutes'
 import { PrivateRoute } from './PrivateRoutes'
 import RoutesUtills from './utills'
 import ErrorsPage from '../../pages/errors'
+import RequestsManagement from '../../pages/request'
+import Request from '../../pages/request/allrequests'
 
 const AppRoutes = () => {
   const { routePermission } = RoutesUtills();
@@ -42,7 +43,9 @@ const AppRoutes = () => {
             {FleetRoutes()}
             {OfficeEquipmentRoutes()}
           </Route>
-          <Route path={ROUTES.REQUEST} element={<Request />} />
+          <Route path={ROUTES.REQUEST} element={<RequestsManagement />}>
+            <Route index element={<Request />} />
+          </Route>
           <Route path={ROUTES.CREATE_REQUEST} element={<CreateRequest />} />
           <Route path={`${ROUTES.UPDATE_REQUEST}/:id`} element={<UpdateRequest />} />
           <Route path={ROUTES.ERRORS} element={<ErrorsPage />} />

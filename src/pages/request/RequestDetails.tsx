@@ -34,7 +34,7 @@ const RequestDetails: React.FC<IRequestDetails> = ({ handleClose, data }) => {
                             </Typography>
                         )}
 
-                        <Typography variant="h6" fontWeight={600}>
+                        <Typography variant="body1" fontWeight={600}>
                             <strong>Requested By:</strong> {user?.firstName + " " + user?.lastName}
                         </Typography>
 

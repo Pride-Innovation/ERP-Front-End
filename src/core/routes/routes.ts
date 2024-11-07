@@ -7,9 +7,15 @@ const PROFILE: string = `${ASSETS_MANAGEMENT}/profile`;
 const USERS: string = `${ASSETS_MANAGEMENT}/users`;
 const AUDIT_TRAILS: string = `${ASSETS_MANAGEMENT}/trails`;
 const TEST: string = `${ASSETS_MANAGEMENT}/test`;
+
+/* Request Routes */
 const REQUEST: string = `${ASSETS_MANAGEMENT}/request`
 const CREATE_REQUEST: string = `${ASSETS_MANAGEMENT}/request/create`
 const UPDATE_REQUEST: string = `${ASSETS_MANAGEMENT}/request/update`
+
+/* Request Subroutes Routes */
+const LIST_PENDING: string = `${REQUEST}/pending`
+const LIST_REJECTED: string = `${REQUEST}/rejected`
 
 /* IT Equipment Routes */
 const LIST_ASSETS: string = `${ASSETS_MANAGEMENT}/assets`
@@ -51,5 +57,7 @@ export const ROUTES = {
     UPDATE_FLEET,
     CREATE_OFFICE_EQUIPMENT,
     UPDATE_OFFICE_EQUIPMENT,
-    ERRORS
+    ERRORS,
+    LIST_PENDING,
+    LIST_REJECTED
 }

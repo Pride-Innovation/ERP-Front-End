@@ -5,6 +5,7 @@ import {
     UseFormRegister
 } from "react-hook-form";
 import { IUser } from "../users/interface";
+import { IPermission } from "../settings/interface";
 
 export interface IAssetParticulars {
     name: string;
@@ -62,4 +63,12 @@ export interface IRequestDetails {
     open: boolean;
     handleClose: () => void;
     data: IRequest
+}
+
+export interface INavigation {
+    id: string | number;
+    text: string;
+    path: string;
+    icon: JSX.Element;
+    permission: IPermission
 }
