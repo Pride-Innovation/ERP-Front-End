@@ -12,9 +12,9 @@ import {
 } from 'react-router';
 import { ROUTES } from '../../core/routes/routes';
 import { useEffect, useState } from 'react';
-import SettingsBrightnessIcon from '@mui/icons-material/SettingsBrightness';
-import BalanceIcon from '@mui/icons-material/Balance';
-import DirectionsCarFilledIcon from '@mui/icons-material/DirectionsCarFilled';
+import CancelIcon from '@mui/icons-material/Cancel';
+import RestartAltIcon from '@mui/icons-material/RestartAlt';
+import ListIcon from '@mui/icons-material/List';
 import RoutesUtills from '../../core/routes/utills';
 import { IPermission } from '../settings/interface';
 import { INavigation } from './interface';
@@ -34,21 +34,21 @@ const RequestsManagement = () => {
       id: 1,
       text: "All Requests",
       path: ROUTES.REQUEST,
-      icon: <SettingsBrightnessIcon />,
+      icon: <ListIcon />,
       permission: routePermission(8) as IPermission
     },
     {
       id: 2,
       text: "Pending Requests",
       path: ROUTES.LIST_PENDING,
-      icon: <BalanceIcon />,
+      icon: <RestartAltIcon color='warning' />,
       permission: routePermission(12) as IPermission
     },
     {
       id: 3,
       text: "Rejected Requests",
       path: ROUTES.LIST_REJECTED,
-      icon: <DirectionsCarFilledIcon />,
+      icon: <CancelIcon color='error' />,
       permission: routePermission(16) as IPermission
     }
   ]
