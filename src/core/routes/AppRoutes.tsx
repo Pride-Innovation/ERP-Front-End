@@ -20,6 +20,7 @@ import RoutesUtills from './utills'
 import ErrorsPage from '../../pages/errors'
 import RequestsManagement from '../../pages/request'
 import Request from '../../pages/request/allrequests'
+import PendingRequest from '../../pages/request/pending'
 
 const AppRoutes = () => {
   const { routePermission } = RoutesUtills();
@@ -45,6 +46,7 @@ const AppRoutes = () => {
           </Route>
           <Route path={ROUTES.REQUEST} element={<RequestsManagement />}>
             <Route index element={<Request />} />
+            <Route path={ROUTES.LIST_PENDING} element={<PendingRequest />} />
           </Route>
           <Route path={ROUTES.CREATE_REQUEST} element={<CreateRequest />} />
           <Route path={`${ROUTES.UPDATE_REQUEST}/:id`} element={<UpdateRequest />} />

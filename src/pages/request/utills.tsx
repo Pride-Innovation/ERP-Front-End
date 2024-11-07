@@ -14,7 +14,7 @@ import {
     IRequest,
     IRequestTableData
 } from './interface';
-import { crudStates } from '../../utils/constants';
+import { crudStates, requestStatus } from '../../utils/constants';
 import { RequestContext } from '../../context/request/RequestContext';
 
 const RequestUtills = () => {
@@ -22,6 +22,7 @@ const RequestUtills = () => {
     const module = "request";
     const header = { plural: 'Requests', singular: 'Request' };
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
+    const [pendindRequests, setPendingRequests] = useState<Array<IRequest>>([] as IRequest[])
     const { setRequestTableData } = useContext(RequestContext);
     const [open, setOpen] = useState<boolean>(false);
 
@@ -96,6 +97,9 @@ const RequestUtills = () => {
         return item as IRequest;
     }
 
+    const filterPendingRecords = (items: Array<IRequest>) => {
+        setPendingRequests(items.filter(item => item.status === requestStatus.pending))
+    }
 
     useEffect(() => {
         setColumnHeaders(getTableHeaders(rowData))
@@ -112,7 +116,9 @@ const RequestUtills = () => {
             determineCurrentRequest,
             handleClose,
             handleOpen,
-            open
+            open,
+            filterPendingRecords,
+            pendindRequests
         }
     )
 }
