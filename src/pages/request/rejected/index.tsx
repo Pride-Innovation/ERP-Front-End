@@ -17,7 +17,7 @@ import ModalComponent from "../../../components/modal";
 import DeleteRequest from "../DeleteRequest";
 import RequestDetails from "../RequestDetails";
 
-const PendingRequest = () => {
+const RejectedRequest = () => {
     const [loading, setLoading] = useState<boolean>(false);
     const [modalState, setModalState] = useState<string>("");
     const [currentRequest, setCurrentRequest] = useState<IRequest>({} as IRequest);
@@ -35,8 +35,8 @@ const PendingRequest = () => {
         determineCurrentRequest,
         handleOpen,
         open,
-        filterPendingRecords,
-        pendingRequests,
+        filterRejectedRecords,
+        rejectedRequests,
         handleClose
     } = RequestUtills();
 
@@ -60,7 +60,7 @@ const PendingRequest = () => {
 
     useEffect(() => { if (rows.length > 0) { handleRequest(requestMock) } }, [rows])
 
-    useEffect(() => { filterPendingRecords(requestTableData as Array<IRequest>) }, [requestTableData]);
+    useEffect(() => { filterRejectedRecords(requestTableData as Array<IRequest>) }, [requestTableData]);
 
     const handleOptionClicked = (option: string | number, moduleID?: string | number) => {
         switch (option) {
@@ -113,8 +113,8 @@ const PendingRequest = () => {
                         count={100}
                         exportData
                         module={module}
-                        header={{ plural: "Pending Requests", singular: "Pending Requests" }}
-                        rows={pendingRequests}
+                        header={{ plural: "Rejected Requests", singular: "Rejected Requests" }}
+                        rows={rejectedRequests}
                         columnHeaders={columnHeaders}
                         handleOptionClicked={handleOptionClicked}
                         paginationMode='client'
@@ -125,4 +125,4 @@ const PendingRequest = () => {
     )
 }
 
-export default PendingRequest
+export default RejectedRequest

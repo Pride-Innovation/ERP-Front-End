@@ -21,6 +21,7 @@ import ErrorsPage from '../../pages/errors'
 import RequestsManagement from '../../pages/request'
 import Request from '../../pages/request/allrequests'
 import PendingRequest from '../../pages/request/pending'
+import RejectedRequest from '../../pages/request/rejected'
 
 const AppRoutes = () => {
   const { routePermission } = RoutesUtills();
@@ -47,6 +48,7 @@ const AppRoutes = () => {
           <Route path={ROUTES.REQUEST} element={<RequestsManagement />}>
             <Route index element={<Request />} />
             <Route path={ROUTES.LIST_PENDING} element={<PendingRequest />} />
+            <Route path={ROUTES.LIST_REJECTED} element={<RejectedRequest />} />
           </Route>
           <Route path={ROUTES.CREATE_REQUEST} element={<CreateRequest />} />
           <Route path={`${ROUTES.UPDATE_REQUEST}/:id`} element={<UpdateRequest />} />

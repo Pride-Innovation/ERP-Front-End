@@ -22,7 +22,8 @@ const RequestUtills = () => {
     const module = "request";
     const header = { plural: 'Requests', singular: 'Request' };
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
-    const [pendindRequests, setPendingRequests] = useState<Array<IRequest>>([] as IRequest[])
+    const [pendingRequests, setPendingRequests] = useState<Array<IRequest>>([] as IRequest[])
+    const [rejectedRequests, setRejectedRequests] = useState<Array<IRequest>>([] as IRequest[])
     const { setRequestTableData } = useContext(RequestContext);
     const [open, setOpen] = useState<boolean>(false);
 
@@ -101,6 +102,10 @@ const RequestUtills = () => {
         setPendingRequests(items.filter(item => item.status === requestStatus.pending))
     }
 
+
+    const filterRejectedRecords = (items: Array<IRequest>) => {
+        setRejectedRequests(items.filter(item => item.status === requestStatus.rejected))
+    }
     useEffect(() => {
         setColumnHeaders(getTableHeaders(rowData))
     }, []);
@@ -118,7 +123,9 @@ const RequestUtills = () => {
             handleOpen,
             open,
             filterPendingRecords,
-            pendindRequests
+            pendingRequests,
+            filterRejectedRecords,
+            rejectedRequests
         }
     )
 }
