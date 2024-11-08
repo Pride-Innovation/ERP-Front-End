@@ -99,7 +99,7 @@ const ITEquipment = () => {
                             columnHeaders={columnHeaders}
                             onCreationHandler={() => navigate(ROUTES.CREATE_ITEQUIPMENT)}
                             handleOptionClicked={handleOptionClicked}
-                            paginationMode='client'
+                            // paginationMode='client'
                         />
                     }
                 </Grid>}
