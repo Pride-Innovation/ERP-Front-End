@@ -249,7 +249,7 @@ export const transportRequest: ITransportRequest[] = [
         reason: "Business meeting",
         duration: "2 hours",
         priority: true,
-        status: "Approved",
+        status: requestStatus.approved,
         notes: "Need to be on time for a client presentation.",
         signature: null
     },
@@ -264,7 +264,7 @@ export const transportRequest: ITransportRequest[] = [
         reason: "Office visit",
         duration: "1 hour",
         priority: false,
-        status: "Pending",
+        status: requestStatus.pending,
         notes: "Meeting with a colleague at the office.",
         signature: "JaneSmithSignature"
     },
@@ -279,7 +279,7 @@ export const transportRequest: ITransportRequest[] = [
         reason: "Delivery",
         duration: "3 hours",
         priority: true,
-        status: "Approved",
+        status: requestStatus.approved,
         notes: "Package delivery for client X.",
         signature: null
     },
@@ -294,7 +294,7 @@ export const transportRequest: ITransportRequest[] = [
         reason: "Conference",
         duration: "4 hours",
         priority: true,
-        status: "Approved",
+        status: requestStatus.rejected,
         notes: "Conference on company policies.",
         signature: "EmilyDavisSignature"
     },
@@ -309,7 +309,7 @@ export const transportRequest: ITransportRequest[] = [
         reason: "Site inspection",
         duration: "2 hours",
         priority: false,
-        status: "Pending",
+        status: requestStatus.pending,
         notes: "Inspection of construction site for project Y.",
         signature: null
     },
@@ -324,7 +324,7 @@ export const transportRequest: ITransportRequest[] = [
         reason: "Client meeting",
         duration: "3 hours",
         priority: true,
-        status: "Approved",
+        status: requestStatus.pending,
         notes: "Important meeting with new client.",
         signature: "SarahWilsonSignature"
     },
@@ -339,7 +339,7 @@ export const transportRequest: ITransportRequest[] = [
         reason: "Team building event",
         duration: "5 hours",
         priority: false,
-        status: "Pending",
+        status: requestStatus.approved,
         notes: "Outdoor team-building event.",
         signature: null
     },
@@ -354,7 +354,7 @@ export const transportRequest: ITransportRequest[] = [
         reason: "Delivery",
         duration: "6 hours",
         priority: true,
-        status: "Approved",
+        status: requestStatus.rejected,
         notes: "Urgent delivery to client Z.",
         signature: null
     },
@@ -369,7 +369,7 @@ export const transportRequest: ITransportRequest[] = [
         reason: "Business trip",
         duration: "2 hours",
         priority: false,
-        status: "Pending",
+        status: requestStatus.rejected,
         notes: "Business trip to meet suppliers.",
         signature: "WilliamClarkSignature"
     },
@@ -384,7 +384,7 @@ export const transportRequest: ITransportRequest[] = [
         reason: "Conference",
         duration: "3 hours",
         priority: true,
-        status: "Approved",
+        status: requestStatus.approved,
         notes: "Conference on leadership development.",
         signature: null
     }

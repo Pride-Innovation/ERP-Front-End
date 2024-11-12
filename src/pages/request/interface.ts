@@ -88,3 +88,18 @@ export interface ITransportRequest {
     notes: string;
     signature?: string | null
 }
+
+export interface ITransportRequestTableData {
+    name: string;
+    requestDate?: string | null;
+    requestTime?: string | null;
+    timeVehicleRequired: string;
+    dateVehicleRequired: string;
+    destination: string;
+    reason: string;
+    duration: string;
+    priority: boolean;
+    status?: string | null;
+    notes: string;
+    signature?: string | null
+}

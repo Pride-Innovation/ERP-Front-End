@@ -6,7 +6,6 @@ import { IRequest } from "../../interface";
 import RowContext from "../../../../context/row/RowContext";
 import { RequestContext } from "../../../../context/request/RequestContext";
 import { FileContext } from "../../../../context/file/FileContext";
-import RequestUtills from "../../utills";
 import { fetchRowsService } from "../../../../core/apis/globalService";
 import { requestMock } from "../../../../mocks/request";
 import { ErrorMessage } from "../../../../core/apis/axiosInstance";
@@ -16,6 +15,7 @@ import ModalComponent from "../../../../components/modal";
 import DeleteRequest from "../DeleteRequest";
 import RequestDetails from "../RequestDetails";
 import TableComponent from "../../../../components/tables/TableComponent";
+import RequestUtills from "../utills";
 
 const RejectedRequest = () => {
     const [loading, setLoading] = useState<boolean>(false);

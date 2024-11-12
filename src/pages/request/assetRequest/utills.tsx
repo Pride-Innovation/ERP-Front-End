@@ -6,16 +6,13 @@ import {
 import InfoIcon from '@mui/icons-material/Info';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
-import { ITableHeader } from '../../components/tables/interface';
-import { requestMock } from '../../mocks/request';
-import { IFormData } from '../assets/interface';
-import { getTableHeaders } from '../../components/tables/getTableHeaders';
-import {
-    IRequest,
-    IRequestTableData
-} from './interface';
-import { crudStates, requestStatus } from '../../utils/constants';
-import { RequestContext } from '../../context/request/RequestContext';
+import { ITableHeader } from '../../../components/tables/interface';
+import { IRequest, IRequestTableData } from '../interface';
+import { RequestContext } from '../../../context/request/RequestContext';
+import { requestMock } from '../../../mocks/request';
+import { crudStates, requestStatus } from '../../../utils/constants';
+import { IFormData } from '../../assets/interface';
+import { getTableHeaders } from '../../../components/tables/getTableHeaders';
 
 const RequestUtills = () => {
     const endPoint = 'posts';

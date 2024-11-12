@@ -7,6 +7,7 @@ import { TestContextProvider } from './context/test/TestContext';
 import { RowContextProvider } from './context/row/RowContext';
 import RequestContextProvider from './context/request/RequestContext';
 import FileContextProvider from './context/file/FileContext';
+import TransportRequestContextProvider from './context/request/TransportRequestContext';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -16,11 +17,13 @@ root.render(
     <RowContextProvider>
       <UserContextProvider>
         <RequestContextProvider>
-          <FileContextProvider>
-            <TestContextProvider>
-              <App />
-            </TestContextProvider>
-          </FileContextProvider>
+          <TransportRequestContextProvider>
+            <FileContextProvider>
+              <TestContextProvider>
+                <App />
+              </TestContextProvider>
+            </FileContextProvider>
+          </TransportRequestContextProvider>
         </RequestContextProvider>
       </UserContextProvider>
     </RowContextProvider>
