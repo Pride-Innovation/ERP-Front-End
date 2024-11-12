@@ -49,6 +49,9 @@ const HandleRoutes = () => {
             handleClick(sideBarList[4])
             handleActiveRoute(sideBarList[4])
         }
+        if (route.indexOf(ROUTES.TRANSPORT_REQUEST) !== -1) {
+            handleActiveRoute(sideBarList[4])
+        }
         if (route === ROUTES.SETTINGS) {
             handleClick(sideBarList[5])
             handleActiveRoute(sideBarList[5])
