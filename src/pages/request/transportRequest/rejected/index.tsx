@@ -43,6 +43,7 @@ const TransportRejectedRequest = () => {
             console.log(response, "response!!")
             setRows([...transportRequest]);
         } catch (error) {
+            setRows([...transportRequest]);
             const errorMessage = error instanceof Error ? error.message : ErrorMessage;
             console.log(errorMessage)
         }
@@ -109,7 +110,7 @@ const TransportRejectedRequest = () => {
                         count={100}
                         exportData
                         module={module}
-                        header={{ plural: "Rejected Requests", singular: "Rejected Requests" }}
+                        header={{ plural: "Rejected Transport Requests", singular: "Rejected Requests" }}
                         rows={rejectedRequests}
                         columnHeaders={columnHeaders}
                         handleOptionClicked={handleOptionClicked}

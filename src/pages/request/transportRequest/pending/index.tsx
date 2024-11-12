@@ -43,6 +43,7 @@ const TransportPendingRequest = () => {
             console.log(response, "response!!")
             setRows([...transportRequest]);
         } catch (error) {
+            setRows([...transportRequest]);
             const errorMessage = error instanceof Error ? error.message : ErrorMessage;
             console.log(errorMessage)
         }
@@ -109,7 +110,7 @@ const TransportPendingRequest = () => {
                         count={100}
                         exportData
                         module={module}
-                        header={{ plural: "Pending Requests", singular: "Pending Requests" }}
+                        header={{ plural: "Pending Tranport Requests", singular: "Pending Requests" }}
                         rows={pendingRequests}
                         columnHeaders={columnHeaders}
                         handleOptionClicked={handleOptionClicked}

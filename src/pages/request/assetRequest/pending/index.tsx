@@ -46,6 +46,7 @@ const PendingRequest = () => {
             console.log(response, "response!!")
             setRows([...requestMock]);
         } catch (error) {
+            setRows([...requestMock]);
             const errorMessage = error instanceof Error ? error.message : ErrorMessage;
             console.log(errorMessage)
         }
