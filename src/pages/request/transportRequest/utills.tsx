@@ -30,7 +30,6 @@ const TransportRequestUtills = () => {
         notes,
         signature,
         priority,
-        dateVehicleRequired,
         ...data
     } = transportRequest[0];
 

@@ -78,8 +78,8 @@ export interface ITransportRequest {
     user?: IUser
     requestDate?: string | null;
     requestTime?: string | null;
-    timeVehicleRequired: string;
-    dateVehicleRequired: string;
+    timeRequired: string;
+    dateRequired: string;
     destination: string;
     reason: string;
     duration: string;
@@ -93,8 +93,8 @@ export interface ITransportRequestTableData {
     name: string;
     requestDate?: string | null;
     requestTime?: string | null;
-    timeVehicleRequired: string;
-    dateVehicleRequired: string;
+    timeRequired: string;
+    dateRequired: string;
     destination: string;
     reason: string;
     duration: string;
