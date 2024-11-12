@@ -36,6 +36,7 @@ const Fleet = () => {
             setRows([...fleetsMock]);
 
         } catch (error) {
+            setRows([...fleetsMock]);
             const errorMessage = error instanceof Error ? error.message : ErrorMessage;
             console.log(errorMessage)
         }

@@ -46,6 +46,7 @@ const ITEquipment = () => {
 
             setRows([...itEquipmentMock]);
         } catch (error) {
+            setRows([...itEquipmentMock]);
             const errorMessage = error instanceof Error ? error.message : ErrorMessage;
             console.log(errorMessage)
         }
@@ -99,7 +100,7 @@ const ITEquipment = () => {
                             columnHeaders={columnHeaders}
                             onCreationHandler={() => navigate(ROUTES.CREATE_ITEQUIPMENT)}
                             handleOptionClicked={handleOptionClicked}
-                            // paginationMode='client'
+                        // paginationMode='client'
                         />
                     }
                 </Grid>}

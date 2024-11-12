@@ -27,6 +27,7 @@ const PersonalRequest = () => {
 
             setRows([...itEquipmentMock]);
         } catch (error) {
+            setRows([...itEquipmentMock]);
             const errorMessage = error instanceof Error ? error.message : ErrorMessage;
             console.log(errorMessage)
         }

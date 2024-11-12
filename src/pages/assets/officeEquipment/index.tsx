@@ -40,6 +40,7 @@ const OfficeEquipment = () => {
             setRows([...officeEquipmentMock]);
 
         } catch (error) {
+            setRows([...officeEquipmentMock]);
             const errorMessage = error instanceof Error ? error.message : ErrorMessage;
             console.log(errorMessage)
         }
