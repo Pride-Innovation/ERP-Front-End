@@ -8,6 +8,7 @@ import RecentActorsIcon from '@mui/icons-material/RecentActors';
 import TuneIcon from '@mui/icons-material/Tune';
 import RoutesUtills from '../../core/routes/utills';
 import { IPermission } from '../../pages/settings/interface';
+import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
 
 const SideBarElements = () => {
     const { getCurrentUser } = RoutesUtills();
@@ -48,20 +49,27 @@ const SideBarElements = () => {
         },
         {
             id: 4,
-            name: "Requests",
+            name: "Asset Request",
             route: ROUTES.REQUEST,
             icon: <RecentActorsIcon />,
             subroutes: []
         },
         {
             id: 5,
+            name: "Transport Request",
+            route: ROUTES.TRANSPORT_REQUEST,
+            icon: <DirectionsCarIcon />,
+            subroutes: []
+        },
+        {
+            id: 6,
             name: "Settings",
             route: ROUTES.SETTINGS,
             icon: <SettingsIcon />,
             subroutes: []
         },
         {
-            id: 6,
+            id: 7,
             name: "Audit Trails",
             route: ROUTES.AUDIT_TRAILS,
             icon: <ReceiptLongIcon />,

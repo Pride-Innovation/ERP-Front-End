@@ -22,6 +22,10 @@ import RequestsManagement from '../../pages/request/assetRequest'
 import Request from '../../pages/request/assetRequest/allrequests'
 import PendingRequest from '../../pages/request/assetRequest/pending'
 import RejectedRequest from '../../pages/request/assetRequest/rejected'
+import TransportRequestsManagement from '../../pages/request/transportRequest'
+import TransportPendingRequest from '../../pages/request/transportRequest/pending'
+import TransportRejectedRequest from '../../pages/request/transportRequest/rejected'
+import TransportRequest from '../../pages/request/transportRequest/allRequests'
 
 const AppRoutes = () => {
   const { routePermission } = RoutesUtills();
@@ -49,6 +53,11 @@ const AppRoutes = () => {
             <Route index element={<Request />} />
             <Route path={ROUTES.LIST_PENDING} element={<PendingRequest />} />
             <Route path={ROUTES.LIST_REJECTED} element={<RejectedRequest />} />
+          </Route>
+          <Route path={ROUTES.TRANSPORT_REQUEST} element={<TransportRequestsManagement />}>
+            <Route index element={<TransportRequest />} />
+            <Route path={ROUTES.LIST_TRANSPORT_PENDING} element={<TransportPendingRequest />} />
+            <Route path={ROUTES.LIST_TRANSPORT_REJECTED} element={<TransportRejectedRequest />} />
           </Route>
           <Route path={ROUTES.CREATE_REQUEST} element={<CreateRequest />} />
           <Route path={`${ROUTES.UPDATE_REQUEST}/:id`} element={<UpdateRequest />} />

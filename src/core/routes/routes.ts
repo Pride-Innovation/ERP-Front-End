@@ -9,13 +9,22 @@ const AUDIT_TRAILS: string = `${ASSETS_MANAGEMENT}/trails`;
 const TEST: string = `${ASSETS_MANAGEMENT}/test`;
 
 /* Request Routes */
-const REQUEST: string = `${ASSETS_MANAGEMENT}/request`
-const CREATE_REQUEST: string = `${ASSETS_MANAGEMENT}/request/create`
-const UPDATE_REQUEST: string = `${ASSETS_MANAGEMENT}/request/update`
+const REQUEST: string = `${ASSETS_MANAGEMENT}/asset-request`
+const CREATE_REQUEST: string = `${ASSETS_MANAGEMENT}/asset-request/create`
+const UPDATE_REQUEST: string = `${ASSETS_MANAGEMENT}/asset-request/update`
+
+/* Transport Request Routes */
+const TRANSPORT_REQUEST: string = `${ASSETS_MANAGEMENT}/transport-request`
+const CREATE_TRANSPORT_REQUEST: string = `${ASSETS_MANAGEMENT}/transport-request/create`
+const UPDATE_TRANSPORT_REQUEST: string = `${ASSETS_MANAGEMENT}/transport-request/update`
 
 /* Request Subroutes Routes */
 const LIST_PENDING: string = `${REQUEST}/pending`
 const LIST_REJECTED: string = `${REQUEST}/rejected`
+
+/* Request Subroutes Routes */
+const LIST_TRANSPORT_PENDING: string = `${TRANSPORT_REQUEST}/pending`
+const LIST_TRANSPORT_REJECTED: string = `${TRANSPORT_REQUEST}/rejected`
 
 /* IT Equipment Routes */
 const LIST_ASSETS: string = `${ASSETS_MANAGEMENT}/assets`
@@ -59,5 +68,10 @@ export const ROUTES = {
     UPDATE_OFFICE_EQUIPMENT,
     ERRORS,
     LIST_PENDING,
-    LIST_REJECTED
+    LIST_REJECTED,
+    TRANSPORT_REQUEST,
+    CREATE_TRANSPORT_REQUEST,
+    UPDATE_TRANSPORT_REQUEST,
+    LIST_TRANSPORT_PENDING,
+    LIST_TRANSPORT_REJECTED
 }

@@ -34,6 +34,7 @@ export const rolesMock: IRole[] = [
             { id: 12, name: "read_office_equipment" },
             { id: 13, name: "update_fleet" },
             { id: 14, name: "create_fleet" },
+            { id: 16, name: "read_fleet" },
         ]
     },
     {
