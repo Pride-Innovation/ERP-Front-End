@@ -1,6 +1,6 @@
 import { Box, Card, Grid } from '@mui/material';
 import DahboardCard from './DahboardCard';
-import Laptop from "../../statics/images/icons8-laptop-50.png";
+import Laptop from "../../statics/images/laptop.png";
 import Furniture from "../../statics/images/icons8-furniture-50.png";
 import Books from "../../statics/images/icons8-books-50.png";
 import Vehicle from "../../statics/images/icons8-vehicle-60.png";
