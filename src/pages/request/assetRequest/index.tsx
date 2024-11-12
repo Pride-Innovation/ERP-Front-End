@@ -10,14 +10,14 @@ import {
   useNavigate,
   useParams
 } from 'react-router';
-import { ROUTES } from '../../core/routes/routes';
+import { ROUTES } from '../../../core/routes/routes';
 import { useEffect, useState } from 'react';
 import CancelIcon from '@mui/icons-material/Cancel';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import ListIcon from '@mui/icons-material/List';
-import RoutesUtills from '../../core/routes/utills';
-import { IPermission } from '../settings/interface';
-import { INavigation } from './interface';
+import RoutesUtills from '../../../core/routes/utills';
+import { IPermission } from '../../settings/interface';
+import { INavigation } from '../interface';
 
 const RequestsManagement = () => {
   const [path, setPath] = useState<string>("");

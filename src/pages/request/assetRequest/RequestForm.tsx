@@ -1,15 +1,16 @@
 import { Grid, Stack } from '@mui/material'
-import RequestUtills from './utills';
+import RequestUtills from '../utills';
 import { useNavigate } from 'react-router';
-import { IRequestForm } from './interface';
+import { IRequestForm } from '../interface';
 import {
     UseFormAutocompleteComponent,
     UseFormDatePicker,
     UseFormInput,
-    UseFormSelect
-} from '../../components/forms';
-import ButtonComponent from '../../components/forms/Button';
-import { ROUTES } from '../../core/routes/routes';
+    UseFormSelect,
+    UseFormTimePicker
+} from '../../../components/forms';
+import ButtonComponent from '../../../components/forms/Button';
+import { ROUTES } from '../../../core/routes/routes';
 
 const RequestForm = ({
     register,
@@ -61,6 +62,15 @@ const RequestForm = ({
                         ) : formField.type === 'date' ? (
                             <Grid item xs={12} md={3}>
                                 <UseFormDatePicker
+                                    register={register}
+                                    control={control}
+                                    formState={formState}
+                                    value={formField.value}
+                                    label={formField.label} />
+                            </Grid>
+                        ) : formField.type === 'time' ? (
+                            <Grid item xs={12} md={3}>
+                                <UseFormTimePicker
                                     register={register}
                                     control={control}
                                     formState={formState}

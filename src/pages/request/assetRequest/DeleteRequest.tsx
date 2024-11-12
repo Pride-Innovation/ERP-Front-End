@@ -1,7 +1,7 @@
 import { Grid, Stack, Typography } from '@mui/material'
-import { IDeleteRequest } from './interface';
-import ButtonComponent from '../../components/forms/Button';
 import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined';
+import { IDeleteRequest } from '../interface';
+import ButtonComponent from '../../../components/forms/Button';
 
 const DeleteRequest = ({
     request,

@@ -3,8 +3,8 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Card, Grid, Typography } from "@mui/material";
 import RequestForm from "./RequestForm";
-import { IRequest } from "./interface";
-import { requestSchema } from "./schema";
+import { IRequest } from "../interface";
+import { requestSchema } from "../schema";
 
 const CreateRequest = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);

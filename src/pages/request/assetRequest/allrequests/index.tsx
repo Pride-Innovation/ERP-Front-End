@@ -1,21 +1,21 @@
 import React, { useContext, useEffect, useState } from "react";
 import { GridRowsProp } from "@mui/x-data-grid";
-import { IRequest } from "../interface";
-import RowContext from "../../../context/row/RowContext";
 import { useNavigate } from "react-router";
-import { RequestContext } from "../../../context/request/RequestContext";
-import { FileContext } from "../../../context/file/FileContext";
-import RequestUtills from "../utills";
-import { fetchRowsService } from "../../../core/apis/globalService";
-import { requestMock } from "../../../mocks/request";
-import { ErrorMessage } from "../../../core/apis/axiosInstance";
-import { crudStates } from "../../../utils/constants";
-import { ROUTES } from "../../../core/routes/routes";
-import ModalComponent from "../../../components/modal";
+import { Grid } from "@mui/material";
+import { IRequest } from "../../interface";
+import RowContext from "../../../../context/row/RowContext";
+import { RequestContext } from "../../../../context/request/RequestContext";
+import { FileContext } from "../../../../context/file/FileContext";
+import RequestUtills from "../../utills";
+import { fetchRowsService } from "../../../../core/apis/globalService";
+import { requestMock } from "../../../../mocks/request";
+import { ErrorMessage } from "../../../../core/apis/axiosInstance";
+import { crudStates } from "../../../../utils/constants";
+import { ROUTES } from "../../../../core/routes/routes";
+import ModalComponent from "../../../../components/modal";
 import DeleteRequest from "../DeleteRequest";
 import RequestDetails from "../RequestDetails";
-import { Grid } from "@mui/material";
-import TableComponent from "../../../components/tables/TableComponent";
+import TableComponent from "../../../../components/tables/TableComponent";
 
 const Request = () => {
     const [loading, setLoading] = useState<boolean>(false);
@@ -45,6 +45,7 @@ const Request = () => {
             console.log(response, "response!!")
             setRows([...requestMock]);
         } catch (error) {
+            setRows([...requestMock]);
             const errorMessage = error instanceof Error ? error.message : ErrorMessage;
             console.log(errorMessage)
         }
@@ -57,6 +58,7 @@ const Request = () => {
     }, []);
 
     useEffect(() => { if (rows.length > 0) { handleRequest(requestMock) } }, [rows])
+    console.log("All requests")
 
     const handleOptionClicked = (option: string | number, moduleID?: string | number) => {
         switch (option) {

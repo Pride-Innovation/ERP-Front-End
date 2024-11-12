@@ -72,3 +72,19 @@ export interface INavigation {
     icon: JSX.Element;
     permission: IPermission
 }
+
+export interface ITransportRequest {
+    id?: string | number;
+    user?: IUser
+    requestDate?: string | null;
+    requestTime?: string | null;
+    timeVehicleRequired: string;
+    dateVehicleRequired: string;
+    destination: string;
+    reason: string;
+    duration: string;
+    priority: boolean;
+    status?: string | null;
+    notes: string;
+    signature?: string | null
+}

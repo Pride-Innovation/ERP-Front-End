@@ -7,7 +7,7 @@ import { IPermission } from "../settings/interface";
 export interface IFormData<T> {
     value: Path<T>;
     label: string;
-    type: "input" | "select" | "date" | "autocomplete" | "textarea";
+    type: "input" | "select" | "date" | "autocomplete" | "textarea" | "time";
     options?: Array<IOptions>;
 }
 

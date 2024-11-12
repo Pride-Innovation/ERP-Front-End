@@ -78,6 +78,13 @@ export interface IDatePickerComponent {
     id?: string;
 }
 
+export interface ITimePickerComponent {
+    label: string
+    field: FieldValues;
+    error: FieldError | undefined;
+    id?: string;
+}
+
 export interface IAutocompleteComponent {
     label: string
     options: Array<IOptions>

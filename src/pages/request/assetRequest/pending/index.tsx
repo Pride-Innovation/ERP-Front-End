@@ -1,21 +1,21 @@
 import React, { useContext, useEffect, useState } from "react";
 import { GridRowsProp } from "@mui/x-data-grid";
-import { IRequest } from "../interface";
-import RowContext from "../../../context/row/RowContext";
 import { useNavigate } from "react-router";
-import { RequestContext } from "../../../context/request/RequestContext";
-import { FileContext } from "../../../context/file/FileContext";
-import RequestUtills from "../utills";
-import { fetchRowsService } from "../../../core/apis/globalService";
-import { requestMock } from "../../../mocks/request";
-import { ErrorMessage } from "../../../core/apis/axiosInstance";
-import { crudStates } from "../../../utils/constants";
-import { ROUTES } from "../../../core/routes/routes";
 import { Grid } from "@mui/material";
-import TableComponent from "../../../components/tables/TableComponent";
-import ModalComponent from "../../../components/modal";
+import { IRequest } from "../../interface";
+import RowContext from "../../../../context/row/RowContext";
+import { RequestContext } from "../../../../context/request/RequestContext";
+import { FileContext } from "../../../../context/file/FileContext";
+import RequestUtills from "../../utills";
+import { fetchRowsService } from "../../../../core/apis/globalService";
+import { requestMock } from "../../../../mocks/request";
+import { ErrorMessage } from "../../../../core/apis/axiosInstance";
+import { crudStates } from "../../../../utils/constants";
+import { ROUTES } from "../../../../core/routes/routes";
+import ModalComponent from "../../../../components/modal";
 import DeleteRequest from "../DeleteRequest";
 import RequestDetails from "../RequestDetails";
+import TableComponent from "../../../../components/tables/TableComponent";
 
 const PendingRequest = () => {
     const [loading, setLoading] = useState<boolean>(false);
@@ -29,7 +29,6 @@ const PendingRequest = () => {
     const {
         columnHeaders,
         endPoint,
-        header,
         handleRequest,
         module,
         determineCurrentRequest,

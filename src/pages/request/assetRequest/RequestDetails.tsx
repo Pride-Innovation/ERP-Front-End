@@ -1,9 +1,9 @@
 import React from "react";
-import { IRequestDetails } from "./interface";
+import { IRequestDetails } from "../interface";
 import { Box, CardMedia, Divider, Grid, Stack, Typography, useTheme } from "@mui/material";
 import { CheckCircle, Error } from "@mui/icons-material";
-import ButtonComponent from "../../components/forms/Button";
-import PlaceHolder from "../../statics/images/Placeholder.png";
+import ButtonComponent from "../../../components/forms/Button";
+import PlaceHolder from "../../../statics/images/Placeholder.png";
 
 const RequestDetails: React.FC<IRequestDetails> = ({ handleClose, data }) => {
     const theme = useTheme();

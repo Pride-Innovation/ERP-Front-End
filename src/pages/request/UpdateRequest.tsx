@@ -3,7 +3,7 @@ import { useParams } from 'react-router';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Card, Grid, Typography } from '@mui/material';
-import RequestForm from './RequestForm';
+import RequestForm from './assetRequest/RequestForm';
 import { requestMock } from '../../mocks/request';
 import { IRequest } from './interface';
 import { requestSchema } from './schema';
