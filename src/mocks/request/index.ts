@@ -1,6 +1,7 @@
-import { IRequest } from "../../pages/request/interface";
+import { IRequest, ITransportRequest } from "../../pages/request/interface";
 import { requestStatus } from "../../utils/constants";
 import { rolesMock } from "../settings";
+import { usersMock } from "../users";
 
 export const requestMock: IRequest[] = [
     {
@@ -233,4 +234,158 @@ export const requestMock: IRequest[] = [
         description: "Requesting new network equipment for improved performance.",
         date: "2024-10-10",
     },
+];
+
+
+export const transportRequest: ITransportRequest[] = [
+    {
+        id: 1,
+        user: usersMock[0],
+        requestDate: "2024-11-01",
+        requestTime: "08:00",
+        timeVehicleRequired: "09:00",
+        dateVehicleRequired: "2024-11-01",
+        destination: "123 Main St, Cityville",
+        reason: "Business meeting",
+        duration: "2 hours",
+        priority: true,
+        status: "Approved",
+        notes: "Need to be on time for a client presentation.",
+        signature: null
+    },
+    {
+        id: 2,
+        user: usersMock[1],
+        requestDate: "2024-11-02",
+        requestTime: "10:00",
+        timeVehicleRequired: "11:00",
+        dateVehicleRequired: "2024-11-02",
+        destination: "456 Oak Ave, Townville",
+        reason: "Office visit",
+        duration: "1 hour",
+        priority: false,
+        status: "Pending",
+        notes: "Meeting with a colleague at the office.",
+        signature: "JaneSmithSignature"
+    },
+    {
+        id: 3,
+        user: usersMock[2],
+        requestDate: "2024-11-02",
+        requestTime: "12:30",
+        timeVehicleRequired: "13:00",
+        dateVehicleRequired: "2024-11-02",
+        destination: "789 Pine Blvd, Villagetown",
+        reason: "Delivery",
+        duration: "3 hours",
+        priority: true,
+        status: "Approved",
+        notes: "Package delivery for client X.",
+        signature: null
+    },
+    {
+        id: 4,
+        user: usersMock[3],
+        requestDate: "2024-11-03",
+        requestTime: "09:45",
+        timeVehicleRequired: "10:30",
+        dateVehicleRequired: "2024-11-03",
+        destination: "101 Maple Rd, Greenfield",
+        reason: "Conference",
+        duration: "4 hours",
+        priority: true,
+        status: "Approved",
+        notes: "Conference on company policies.",
+        signature: "EmilyDavisSignature"
+    },
+    {
+        id: 5,
+        user: usersMock[4],
+        requestDate: "2024-11-03",
+        requestTime: "14:00",
+        timeVehicleRequired: "15:00",
+        dateVehicleRequired: "2024-11-03",
+        destination: "202 Birch Ln, Oldtown",
+        reason: "Site inspection",
+        duration: "2 hours",
+        priority: false,
+        status: "Pending",
+        notes: "Inspection of construction site for project Y.",
+        signature: null
+    },
+    {
+        id: 6,
+        user: usersMock[5],
+        requestDate: "2024-11-04",
+        requestTime: "08:30",
+        timeVehicleRequired: "09:00",
+        dateVehicleRequired: "2024-11-04",
+        destination: "303 Cedar Dr, Uptown",
+        reason: "Client meeting",
+        duration: "3 hours",
+        priority: true,
+        status: "Approved",
+        notes: "Important meeting with new client.",
+        signature: "SarahWilsonSignature"
+    },
+    {
+        id: 7,
+        user: usersMock[6],
+        requestDate: "2024-11-05",
+        requestTime: "11:00",
+        timeVehicleRequired: "12:00",
+        dateVehicleRequired: "2024-11-05",
+        destination: "404 Redwood Ave, Lakeside",
+        reason: "Team building event",
+        duration: "5 hours",
+        priority: false,
+        status: "Pending",
+        notes: "Outdoor team-building event.",
+        signature: null
+    },
+    {
+        id: 8,
+        user: usersMock[7],
+        requestDate: "2024-11-06",
+        requestTime: "07:45",
+        timeVehicleRequired: "08:15",
+        dateVehicleRequired: "2024-11-06",
+        destination: "505 Aspen Way, Hilltown",
+        reason: "Delivery",
+        duration: "6 hours",
+        priority: true,
+        status: "Approved",
+        notes: "Urgent delivery to client Z.",
+        signature: null
+    },
+    {
+        id: 9,
+        user: usersMock[8],
+        requestDate: "2024-11-07",
+        requestTime: "13:00",
+        timeVehicleRequired: "13:30",
+        dateVehicleRequired: "2024-11-07",
+        destination: "606 Willow Rd, Seaside",
+        reason: "Business trip",
+        duration: "2 hours",
+        priority: false,
+        status: "Pending",
+        notes: "Business trip to meet suppliers.",
+        signature: "WilliamClarkSignature"
+    },
+    {
+        id: 10,
+        user: usersMock[9],
+        requestDate: "2024-11-08",
+        requestTime: "16:00",
+        timeVehicleRequired: "16:30",
+        dateVehicleRequired: "2024-11-08",
+        destination: "707 Fir St, Mountainview",
+        reason: "Conference",
+        duration: "3 hours",
+        priority: true,
+        status: "Approved",
+        notes: "Conference on leadership development.",
+        signature: null
+    }
 ];
