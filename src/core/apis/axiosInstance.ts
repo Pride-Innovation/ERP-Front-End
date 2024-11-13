@@ -12,7 +12,7 @@ const { accessToken } = RoutesUtills();
 const { REACT_APP_BASE_URL } = process.env
 
 const axiosInstance = axios.create({
-    baseURL: REACT_APP_BASE_URL,
+    baseURL: `${REACT_APP_BASE_URL}/api/`,
     timeout: 60000,
 });
 
