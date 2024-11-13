@@ -26,6 +26,8 @@ import TransportRequestsManagement from '../../pages/request/transportRequest'
 import TransportPendingRequest from '../../pages/request/transportRequest/pending'
 import TransportRejectedRequest from '../../pages/request/transportRequest/rejected'
 import TransportRequest from '../../pages/request/transportRequest/allRequests'
+import CreateTranportRequest from '../../pages/request/transportRequest/CreateTranportRequest'
+import UpdateTransportRequest from '../../pages/request/transportRequest/UpdateTransportRequest'
 
 const AppRoutes = () => {
   const { routePermission } = RoutesUtills();
@@ -61,6 +63,8 @@ const AppRoutes = () => {
           </Route>
           <Route path={ROUTES.CREATE_REQUEST} element={<CreateRequest />} />
           <Route path={`${ROUTES.UPDATE_REQUEST}/:id`} element={<UpdateRequest />} />
+          <Route path={ROUTES.CREATE_TRANSPORT_REQUEST} element={<CreateTranportRequest />} />
+          <Route path={`${ROUTES.UPDATE_TRANSPORT_REQUEST}/:id`} element={<UpdateTransportRequest />} />
           <Route path={ROUTES.ERRORS} element={<ErrorsPage />} />
         </Route>
       </Route>

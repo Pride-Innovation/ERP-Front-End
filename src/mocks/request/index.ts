@@ -248,7 +248,7 @@ export const transportRequest: ITransportRequest[] = [
         destination: "123 Main St, Cityville",
         reason: "Business meeting",
         duration: "2 hours",
-        priority: true,
+        priority: "high",
         status: requestStatus.approved,
         notes: "Need to be on time for a client presentation.",
         signature: null
@@ -263,7 +263,7 @@ export const transportRequest: ITransportRequest[] = [
         destination: "456 Oak Ave, Townville",
         reason: "Office visit",
         duration: "1 hour",
-        priority: false,
+        priority: "low",
         status: requestStatus.pending,
         notes: "Meeting with a colleague at the office.",
         signature: "JaneSmithSignature"
@@ -278,7 +278,7 @@ export const transportRequest: ITransportRequest[] = [
         destination: "789 Pine Blvd, Villagetown",
         reason: "Delivery",
         duration: "3 hours",
-        priority: true,
+        priority: "high",
         status: requestStatus.approved,
         notes: "Package delivery for client X.",
         signature: null
@@ -293,7 +293,7 @@ export const transportRequest: ITransportRequest[] = [
         destination: "101 Maple Rd, Greenfield",
         reason: "Conference",
         duration: "4 hours",
-        priority: true,
+        priority: "high",
         status: requestStatus.rejected,
         notes: "Conference on company policies.",
         signature: "EmilyDavisSignature"
@@ -308,7 +308,7 @@ export const transportRequest: ITransportRequest[] = [
         destination: "202 Birch Ln, Oldtown",
         reason: "Site inspection",
         duration: "2 hours",
-        priority: false,
+        priority: "low",
         status: requestStatus.pending,
         notes: "Inspection of construction site for project Y.",
         signature: null
@@ -323,7 +323,7 @@ export const transportRequest: ITransportRequest[] = [
         destination: "303 Cedar Dr, Uptown",
         reason: "Client meeting",
         duration: "3 hours",
-        priority: true,
+        priority: "high",
         status: requestStatus.pending,
         notes: "Important meeting with new client.",
         signature: "SarahWilsonSignature"
@@ -338,7 +338,7 @@ export const transportRequest: ITransportRequest[] = [
         destination: "404 Redwood Ave, Lakeside",
         reason: "Team building event",
         duration: "5 hours",
-        priority: false,
+        priority: "low",
         status: requestStatus.approved,
         notes: "Outdoor team-building event.",
         signature: null
@@ -353,7 +353,7 @@ export const transportRequest: ITransportRequest[] = [
         destination: "505 Aspen Way, Hilltown",
         reason: "Delivery",
         duration: "6 hours",
-        priority: true,
+        priority: "high",
         status: requestStatus.rejected,
         notes: "Urgent delivery to client Z.",
         signature: null
@@ -368,7 +368,7 @@ export const transportRequest: ITransportRequest[] = [
         destination: "606 Willow Rd, Seaside",
         reason: "Business trip",
         duration: "2 hours",
-        priority: false,
+        priority: "low",
         status: requestStatus.rejected,
         notes: "Business trip to meet suppliers.",
         signature: "WilliamClarkSignature"
@@ -383,7 +383,7 @@ export const transportRequest: ITransportRequest[] = [
         destination: "707 Fir St, Mountainview",
         reason: "Conference",
         duration: "3 hours",
-        priority: true,
+        priority: "high",
         status: requestStatus.approved,
         notes: "Conference on leadership development.",
         signature: null

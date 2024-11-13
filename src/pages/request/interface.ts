@@ -83,7 +83,7 @@ export interface ITransportRequest {
     destination: string;
     reason: string;
     duration: string;
-    priority: boolean;
+    priority: string;
     status?: string | null;
     notes: string;
     signature?: string | null
@@ -98,8 +98,31 @@ export interface ITransportRequestTableData {
     destination: string;
     reason: string;
     duration: string;
-    priority: boolean;
+    priority: string;
     status?: string | null;
     notes: string;
     signature?: string | null
+}
+
+
+export interface ITransportRequestForm {
+    formState: FormState<ITransportRequest> & {
+        errors: {
+            requestDate?: FieldError;
+            requestTime?: FieldError;
+            timeRequired?: FieldError;
+            dateRequired?: FieldError;
+            destination?: FieldError;
+            reason?: FieldError;
+            duration?: FieldError;
+            priority?: FieldError;
+            status?: FieldError;
+            notes?: FieldError;
+            signature?: FieldError
+        };
+    };
+    control: Control<ITransportRequest>;
+    register: UseFormRegister<ITransportRequest>;
+    buttonText: string;
+    sendingRequest: boolean;
 }

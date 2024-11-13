@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import { ITableHeader } from "../../../components/tables/interface";
-import { IRequest, ITransportRequest, ITransportRequestTableData } from "../interface";
+import { ITransportRequest, ITransportRequestTableData } from "../interface";
 import { transportRequest } from "../../../mocks/request";
 import { crudStates, requestStatus } from "../../../utils/constants";
 import InfoIcon from '@mui/icons-material/Info';
@@ -47,25 +47,54 @@ const TransportRequestUtills = () => {
         },
     };
 
-    const formFields: Array<IFormData<IRequest>> = [
+    const formFields: Array<IFormData<ITransportRequest>> = [
+        {
+            value: "requestDate",
+            label: 'Request Date',
+            type: "date"
+        },
+        {
+            value: "requestTime",
+            label: 'Request Time',
+            type: "time"
+        },
+        {
+            value: "dateRequired",
+            label: 'Date Required',
+            type: "date"
+        },
+        {
+            value: "timeRequired",
+            label: 'Time Required',
+            type: "time"
+        },
+        {
+            value: "destination",
+            label: 'Destination',
+            type: "input"
+        },
         {
             value: "reason",
             label: 'Reason',
             type: "input"
         },
         {
-            value: "quantity",
-            label: 'Quantity',
+            value: "duration",
+            label: 'Duration',
             type: "input"
         },
         {
-            value: "date",
-            label: 'Request Date',
-            type: "date"
+            value: "priority",
+            label: 'priority',
+            type: "select",
+            options: [
+                { label: "High", value: "high" },
+                { label: "Low", value: "low" },
+            ]
         },
         {
-            value: "description",
-            label: 'Description',
+            value: "notes",
+            label: "Notes",
             type: "textarea"
         }
     ]

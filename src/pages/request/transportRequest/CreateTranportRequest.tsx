@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
+import { ITransportRequest } from "../interface";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Card, Grid, Typography } from "@mui/material";
-import RequestForm from "./RequestForm";
-import { IRequest } from "../interface";
-import { requestSchema } from "./schema";
+import TransportRequestForm from "./TransportRequestForm";
+import { transportRequestSchema } from "./schema";
 
-const CreateRequest = () => {
+const CreateTranportRequest = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
-    const defaultRequest: IRequest = {} as IRequest;
+    const defaultRequest: ITransportRequest = {} as ITransportRequest;
 
     const {
         control,
@@ -16,16 +16,16 @@ const CreateRequest = () => {
         formState,
         register,
         reset
-    } = useForm<IRequest>({
+    } = useForm<ITransportRequest>({
         mode: 'onChange',
-        resolver: yupResolver(requestSchema),
+        resolver: yupResolver(transportRequestSchema),
     });
 
     useEffect(() => {
         reset({ ...defaultRequest });
     }, [reset]);
 
-    const onSubmit = (formData: IRequest) => {
+    const onSubmit = (formData: ITransportRequest) => {
         setSendingRequest(true);
         console.log(formData, "form data!!!!!");
     };
@@ -40,7 +40,7 @@ const CreateRequest = () => {
                         autoComplete="off"
                         onSubmit={handleSubmit(onSubmit)}
                     >
-                        <RequestForm
+                        <TransportRequestForm
                             formState={formState}
                             control={control}
                             register={register}
@@ -54,4 +54,4 @@ const CreateRequest = () => {
     )
 }
 
-export default CreateRequest;
+export default CreateTranportRequest;

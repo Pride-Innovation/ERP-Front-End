@@ -6,7 +6,7 @@ import { Card, Grid, Typography } from '@mui/material';
 import RequestForm from './RequestForm';
 import { requestMock } from '../../../mocks/request';
 import { IRequest } from '../interface';
-import { requestSchema } from '../schema';
+import { requestSchema } from './schema';
 
 const UpdateRequest = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
