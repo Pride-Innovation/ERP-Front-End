@@ -1,9 +1,9 @@
 import { Box, Card, Grid } from '@mui/material';
 import DahboardCard from './DahboardCard';
 import Laptop from "../../statics/images/computer-removebg-preview.png";
-import Furniture from "../../statics/images/icons8-furniture-50.png";
-import Books from "../../statics/images/icons8-books-50.png";
-import Vehicle from "../../statics/images/icons8-vehicle-60.png";
+import Furniture from "../../statics/images/office-removebg-preview.png";
+import Books from "../../statics/images/BookPile.png";
+import Vehicle from "../../statics/images/car-image-removebg-preview.png";
 import DashboardRequests from './DashboardRequests';
 import DoughnutChart from '../../components/charts/DoughnutChart';
 import DashboardBarChart from './DashboardBarChart';
