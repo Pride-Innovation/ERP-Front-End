@@ -3,6 +3,8 @@ export const availability = {
     on_leave: "on leave"
 }
 
+export const ErrorMessage = "Something went wrong, Please Try Again Later!!";
+
 export const crudStates: {
     create: string;
     update: string;

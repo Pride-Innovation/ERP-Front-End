@@ -2,6 +2,7 @@ import { IRole } from "../settings/interface";
 
 export interface IUsersExcludedTableData {
     id?: string | number;
+    name?: string;
     reportsTo: string;
     firstName: string;
     lastName: string;

@@ -1,4 +1,6 @@
 import { Control, FieldError, FormState, UseFormRegister } from "react-hook-form";
+import { IUser } from "../users/interface";
+import { IPermission, IRole } from "../settings/interface";
 
 export interface IAuthentication {
     email: string;
@@ -22,4 +24,19 @@ export interface IAuthenticationForm {
     linkText?: string
     linkPath: string
     password?: boolean
+}
+
+export interface ILoginResponse {
+    status: "success" | "failed",
+    data: { access_token: string } | null,
+    message?: string;
+}
+
+export interface IUserProfileResponse {
+    status: "success" | "failed",
+    data: {
+        user: IUser;
+        roles: Array<IRole>;
+        permissions: Array<IPermission>
+    } | null
 }
