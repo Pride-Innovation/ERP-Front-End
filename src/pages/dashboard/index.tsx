@@ -1,7 +1,7 @@
 import { Box, Card, Grid } from '@mui/material';
 import DahboardCard from './DahboardCard';
 import Laptop from "../../statics/images/computer-removebg-preview.png";
-import Furniture from "../../statics/images/office-removebg-preview.png";
+import Furniture from "../../statics/images/chair-office-removebg-preview.png";
 import Books from "../../statics/images/Archives-removebg-preview.png";
 import Vehicle from "../../statics/images/car-image-removebg-preview.png";
 import DashboardRequests from './DashboardRequests';
