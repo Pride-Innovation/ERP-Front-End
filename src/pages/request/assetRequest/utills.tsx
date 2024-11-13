@@ -71,7 +71,6 @@ const RequestUtills = () => {
         }
     ]
 
-
     const handleRequest = (list: Array<IRequest>) => {
         const data: Array<IRequestTableData> = list.map((request, index) => {
             const {

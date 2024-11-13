@@ -14,7 +14,8 @@ import TableComponent from "../../../../components/tables/TableComponent";
 import TransportRequestUtills from "../utills";
 import { TransportRequestContext } from "../../../../context/request/TransportRequestContext";
 import ModalComponent from "../../../../components/modal";
-import DeleteRequest from "../../assetRequest/DeleteRequest";
+import DeleteRequest from "../../DeleteRequest";
+import RequestDetails from "../../RequestDetails";
 
 const TransportRequest = () => {
     const [loading, setLoading] = useState<boolean>(false);
@@ -97,11 +98,11 @@ const TransportRequest = () => {
                     />
                 </ModalComponent>
             }
-            {/* {crudStates.read === modalState &&
-                <ModalComponent width={"60%"} title='Request Details' open={open} handleClose={handleClose}>
+            {crudStates.read === modalState &&
+                <ModalComponent width={"60%"} title='Transport Request Details' open={open} handleClose={handleClose}>
                     <RequestDetails open={open} handleClose={handleClose} data={currentRequest} />
                 </ModalComponent>
-            } */}
+            }
             {rows?.length > 0 && <Grid xs={12} container>
                 {columnHeaders.length > 0 &&
                     <TableComponent

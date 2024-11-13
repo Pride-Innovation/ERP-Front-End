@@ -62,7 +62,7 @@ export interface IDeleteRequest {
 export interface IRequestDetails {
     open: boolean;
     handleClose: () => void;
-    data: IRequest
+    data: IRequest | ITransportRequest
 }
 
 export interface INavigation {

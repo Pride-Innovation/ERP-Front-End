@@ -12,10 +12,10 @@ import { ErrorMessage } from "../../../../core/apis/axiosInstance";
 import { crudStates } from "../../../../utils/constants";
 import { ROUTES } from "../../../../core/routes/routes";
 import ModalComponent from "../../../../components/modal";
-import DeleteRequest from "../DeleteRequest";
-import RequestDetails from "../RequestDetails";
+import DeleteRequest from "../../DeleteRequest";
 import TableComponent from "../../../../components/tables/TableComponent";
 import RequestUtills from "../utills";
+import RequestDetails from "../../RequestDetails";
 
 const PendingRequest = () => {
     const [loading, setLoading] = useState<boolean>(false);

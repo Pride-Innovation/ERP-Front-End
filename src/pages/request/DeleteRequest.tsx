@@ -1,15 +1,10 @@
 import { Grid, Stack, Typography } from '@mui/material'
 import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined';
-import { IDeleteRequest, IRequest, ITransportRequest } from '../interface';
-import ButtonComponent from '../../../components/forms/Button';
+import { IDeleteRequest } from './interface';
+import ButtonComponent from '../../components/forms/Button';
+import GlobalRequestUtill from './utill';
 
-const isIRequest = (request: IRequest | ITransportRequest): request is IRequest => {
-    return (request as IRequest).description !== undefined;
-};
 
-const isITransportRequest = (request: IRequest | ITransportRequest): request is ITransportRequest => {
-    return (request as ITransportRequest).reason !== undefined;
-};
 
 const DeleteRequest = ({
     request,
@@ -17,7 +12,7 @@ const DeleteRequest = ({
     sendingRequest,
     buttonText
 }: IDeleteRequest) => {
-
+    const { isIRequest, isITransportRequest } = GlobalRequestUtill();
     return (
         <Grid item container spacing={4} xs={12}>
             <Grid item xs={12}>

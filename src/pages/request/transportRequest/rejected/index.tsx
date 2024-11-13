@@ -14,7 +14,8 @@ import { ITransportRequest } from "../../interface";
 import { TransportRequestContext } from "../../../../context/request/TransportRequestContext";
 import TransportRequestUtills from "../utills";
 import ModalComponent from "../../../../components/modal";
-import DeleteRequest from "../../assetRequest/DeleteRequest";
+import DeleteRequest from "../../DeleteRequest";
+import RequestDetails from "../../RequestDetails";
 
 const TransportRejectedRequest = () => {
     const [loading, setLoading] = useState<boolean>(false);
@@ -99,11 +100,11 @@ const TransportRejectedRequest = () => {
                     />
                 </ModalComponent>
             }
-            {/* {crudStates.read === modalState &&
-                <ModalComponent width={"60%"} title='Request Details' open={open} handleClose={handleClose}>
+            {crudStates.read === modalState &&
+                <ModalComponent width={"60%"} title='Transport Request Details' open={open} handleClose={handleClose}>
                     <RequestDetails open={open} handleClose={handleClose} data={currentRequest} />
                 </ModalComponent>
-            } */}
+            }
             {rows?.length > 0 && <Grid xs={12} container>
                 {columnHeaders.length > 0 &&
                     <TableComponent
