@@ -13,6 +13,8 @@ import { ROUTES } from "../../../../core/routes/routes";
 import TableComponent from "../../../../components/tables/TableComponent";
 import TransportRequestUtills from "../utills";
 import { TransportRequestContext } from "../../../../context/request/TransportRequestContext";
+import ModalComponent from "../../../../components/modal";
+import DeleteRequest from "../../assetRequest/DeleteRequest";
 
 const TransportRequest = () => {
     const [loading, setLoading] = useState<boolean>(false);
@@ -85,8 +87,8 @@ const TransportRequest = () => {
 
     return (
         <React.Fragment>
-            {/* {crudStates.delete === modalState &&
-                <ModalComponent width={"40%"} title='Delete Request' open={open} handleClose={handleClose}>
+            {crudStates.delete === modalState &&
+                <ModalComponent width={"40%"} title='Delete Transport Request' open={open} handleClose={handleClose}>
                     <DeleteRequest
                         sendingRequest={loading}
                         handleClose={handleClose}
@@ -95,7 +97,7 @@ const TransportRequest = () => {
                     />
                 </ModalComponent>
             }
-            {crudStates.read === modalState &&
+            {/* {crudStates.read === modalState &&
                 <ModalComponent width={"60%"} title='Request Details' open={open} handleClose={handleClose}>
                     <RequestDetails open={open} handleClose={handleClose} data={currentRequest} />
                 </ModalComponent>

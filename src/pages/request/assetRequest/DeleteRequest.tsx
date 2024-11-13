@@ -1,7 +1,15 @@
 import { Grid, Stack, Typography } from '@mui/material'
 import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined';
-import { IDeleteRequest } from '../interface';
+import { IDeleteRequest, IRequest, ITransportRequest } from '../interface';
 import ButtonComponent from '../../../components/forms/Button';
+
+const isIRequest = (request: IRequest | ITransportRequest): request is IRequest => {
+    return (request as IRequest).description !== undefined;
+};
+
+const isITransportRequest = (request: IRequest | ITransportRequest): request is ITransportRequest => {
+    return (request as ITransportRequest).reason !== undefined;
+};
 
 const DeleteRequest = ({
     request,
@@ -9,6 +17,7 @@ const DeleteRequest = ({
     sendingRequest,
     buttonText
 }: IDeleteRequest) => {
+
     return (
         <Grid item container spacing={4} xs={12}>
             <Grid item xs={12}>
@@ -18,7 +27,13 @@ const DeleteRequest = ({
                 <Stack direction="row" spacing={1} alignItems="center">
                     <HelpOutlineOutlinedIcon color="primary" />
                     <Typography variant="h6" color="primary">
-                        {request.description}
+                        {isIRequest(request) ? (
+                            request.description
+                        ) : isITransportRequest(request) ? (
+                            request.reason
+                        ) : (
+                            "No relevant information available"
+                        )}
                     </Typography>
                 </Stack>
             </Grid>

@@ -56,7 +56,7 @@ export interface IDeleteRequest {
     handleClose: () => void;
     sendingRequest: boolean;
     buttonText: string;
-    request: IRequest
+    request: IRequest | ITransportRequest
 }
 
 export interface IRequestDetails {
