@@ -16,7 +16,7 @@ import ITEquipmentRoutes from './subroutes/ITEquipmentRoutes'
 import FleetRoutes from './subroutes/FleetRoutes'
 import OfficeEquipmentRoutes from './subroutes/OfficeEquipmentRoutes'
 import { PrivateRoute } from './PrivateRoutes'
-import RoutesUtills from './utills'
+// import RoutesUtills from './utills'
 import ErrorsPage from '../../pages/errors'
 import RequestsManagement from '../../pages/request/assetRequest'
 import Request from '../../pages/request/assetRequest/allrequests'
@@ -30,7 +30,7 @@ import CreateTranportRequest from '../../pages/request/transportRequest/CreateTr
 import UpdateTransportRequest from '../../pages/request/transportRequest/UpdateTransportRequest'
 
 const AppRoutes = () => {
-  const { routePermission } = RoutesUtills();
+  // const { routePermission } = RoutesUtills();
 
   return (
     <Routes>
@@ -41,7 +41,9 @@ const AppRoutes = () => {
           <Route index element={<Dashboard />} />
           <Route path={ROUTES.SETTINGS} element={<Settings />} />
           <Route path={`${ROUTES.PROFILE}/:id`} element={<Profile />} />
-          <Route element={<PrivateRoute permission={routePermission(1)} />}>
+          <Route element={<PrivateRoute
+          // permission={routePermission(1)}
+          />}>
             <Route path={ROUTES.USERS} element={<Users />} />
           </Route>
           <Route path={ROUTES.AUDIT_TRAILS} element={<AuditTrails />} />
