@@ -6,18 +6,16 @@ import { useContext, useEffect } from 'react';
 import { crudStates } from '../../utils/constants';
 import ModalComponent from '../../components/modal';
 import CreateUser from './CreateUser';
-import { IUser } from './interface';
+import { IResponseData, IUser } from './interface';
 import UpdateUsers from './UpdateUsers';
-import { usersMock } from '../../mocks/users';
-import { useNavigate } from 'react-router';
-import { ROUTES } from '../../core/routes/routes';
 import Deactivate from './Deactivate';
-import { fetchUsersService } from './service';
+import { deleteUserService, fetchUsersService } from './service';
+import { toast } from 'react-toastify';
 
 const Users = () => {
-  const navigate = useNavigate();
   const { usersTableData } = useContext(UserContext);
   const header = { plural: 'Users', singular: 'User' };
+  const { user, users, setUsers } = useContext(UserContext);
   const {
     columnHeaders,
     handleCreation,
@@ -26,35 +24,45 @@ const Users = () => {
     modalState,
     open,
     handleClose,
-    handleUsers
+    handleUsers,
+    removeUserFromTable
   } = UserUtils();
-  const { setUser, setUsers, users, user } = useContext(UserContext);
 
   const fetchUsers = async () => {
-    setUsers(usersMock)
     try {
       const response = await fetchUsersService() as unknown as Array<IUser>;
-      handleUsers(response);
+      setUsers(response)
     } catch (error) {
       console.log(error, "response Error")
     }
   }
 
   useEffect(() => { fetchUsers() }, [])
+  useEffect(() => { if (users.length > 0) handleUsers(users) }, [users])
 
-  const handleOptionClicked = (option: string | number, moduleID?: string | number) => {
-    setModalState(option as string)
-    const user = users?.find(user => user.id === moduleID) as IUser;
-    setUser(user)
-    handleOpen();
-
+  const handleOptionClicked = async (option: string | number, moduleID?: string | number) => {
     switch (option) {
-      case crudStates.read:
-        navigate(`${ROUTES.PROFILE}/${user.id}`);
-        break
-      default:
+      case crudStates.deactivate:
+        const response = await deleteUserService(moduleID as string) as IResponseData;
+        if (response.status === "success") removeUserFromTable(moduleID as string)
+        toast.success(response?.data?.message);
         break;
+      default:
+        break
     }
+    console.log(option, moduleID, "Request!!");
+    // setModalState(option as string)
+    // const user = users?.find(user => user.id === moduleID) as IUser;
+    // setUser(user)
+    // handleOpen();
+
+    // switch (option) {
+    //   case crudStates.read:
+    //     navigate(`${ROUTES.PROFILE}/${user.id}`);
+    //     break
+    //   default:
+    //     break;
+    // }
 
   }
 

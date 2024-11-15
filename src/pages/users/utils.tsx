@@ -23,7 +23,7 @@ const UserUtils = () => {
     };
 
 
-    const { setUsersTableData } = useContext(UserContext);
+    const { setUsersTableData, users, setUsers } = useContext(UserContext);
 
     const {
         id,
@@ -51,6 +51,10 @@ const UserUtils = () => {
                 { value: crudStates.read, label: "View Details", icon: <RemoveRedEyeIcon fontSize='small' color='inherit' /> }
             ]
         },
+    };
+
+    const removeUserFromTable = (id: string | number) => {
+        setUsers(() => users.filter(user => user.id !== id))
     };
 
     const handleUsers = (users: Array<IUser>) => {
@@ -85,7 +89,8 @@ const UserUtils = () => {
         modalState,
         open,
         handleClose,
-        handleUsers
+        handleUsers,
+        removeUserFromTable
     })
 }
 

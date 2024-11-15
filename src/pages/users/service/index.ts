@@ -21,3 +21,12 @@ export const fetchUsersService = async () => {
     throw error
   }
 }
+
+export const deleteUserService = async (id: string | number) => {
+  try {
+    const response = await axiosInstance.get(`users/delete/${id}`);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+}
