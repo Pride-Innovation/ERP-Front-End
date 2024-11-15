@@ -5,7 +5,7 @@ import { ITableHeader } from '../../components/tables/interface';
 import InfoIcon from '@mui/icons-material/Info';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import { UserContext } from '../../context/user/UserContext';
-import { IUsersTableData } from './interface';
+import { IUser, IUsersTableData } from './interface';
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import { crudStates } from '../../utils/constants';
 
@@ -32,6 +32,7 @@ const UserUtils = () => {
         lastName,
         otherName,
         role,
+        name,
         email,
         image,
         ...data
@@ -39,7 +40,8 @@ const UserUtils = () => {
 
     const rowData = {
         image: usersMock[0].image,
-        name: `${usersMock[0].firstName} ${usersMock[0].lastName} ${usersMock[0].otherName}`,
+        name,
+        email,
         ...data,
         action: {
             label: "options",
@@ -51,21 +53,18 @@ const UserUtils = () => {
         },
     };
 
-    const handleUsers = () => {
-        const data: Array<IUsersTableData> = usersMock.map((user, index) => {
+    const handleUsers = (users: Array<IUser>) => {
+        const data: Array<IUsersTableData> = users.map((user, index) => {
             const {
                 reportsTo,
                 firstName,
                 lastName,
                 otherName,
                 ...data
-            } = usersMock[index];
+            } = users[index];
 
             return (
-                {
-                    name: `${user.firstName} ${user.lastName} ${user.otherName}`,
-                    ...data
-                }
+                { ...data }
             )
         })
 
@@ -75,7 +74,6 @@ const UserUtils = () => {
 
     useEffect(() => {
         setColumnHeaders(getTableHeaders(rowData))
-        handleUsers();
     }, []);
 
 
@@ -86,7 +84,8 @@ const UserUtils = () => {
         handleOpen,
         modalState,
         open,
-        handleClose
+        handleClose,
+        handleUsers
     })
 }
 

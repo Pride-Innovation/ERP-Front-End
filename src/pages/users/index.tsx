@@ -25,7 +25,8 @@ const Users = () => {
     handleOpen,
     modalState,
     open,
-    handleClose
+    handleClose,
+    handleUsers
   } = UserUtils();
   const { setUser, setUsers, users, user } = useContext(UserContext);
 
@@ -33,7 +34,7 @@ const Users = () => {
     setUsers(usersMock)
     try {
       const response = await fetchUsersService() as unknown as Array<IUser>;
-      console.log(response)
+      handleUsers(response);
     } catch (error) {
       console.log(error, "response Error")
     }

@@ -8,6 +8,7 @@ export const usersMock: IUser[] = [
         firstName: 'John',
         lastName: 'Doe',
         otherName: 'Michael',
+        name: "",
         email: 'john.doe@example.com',
         reportsTo: 'Jane Smith',
         title: 'Software Engineer',
