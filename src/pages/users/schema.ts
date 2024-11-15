@@ -1,7 +1,7 @@
 import * as yup from 'yup';
 
 export const userSchema = yup.object().shape({
-    reportsTo: yup.string().required('Reports To is required'),
+    // reportsTo: yup.string().required('Reports To is required'),
     firstName: yup.string().required('First Name is required'),
     lastName: yup.string().required('Last Name is required'),
     otherName: yup.string().nullable().optional(),
@@ -11,11 +11,11 @@ export const userSchema = yup.object().shape({
     unit: yup.string().required('Unit is required'),
     gender: yup.string().required('Gender is required'),
     staffNumber: yup.string().required('Staff Number is required'),
-    availability: yup.boolean().required('Availability is required'),
-    role: yup.object().shape({
-        name: yup.string().required('Role Name is required'),
-        permissions: yup.array().of(yup.object().shape({
-            name: yup.string().required('Permission Name is required')
-        })).optional(),
-    }).required('Role is required'),
+    // availability: yup.boolean().required('Availability is required'),
+    // role: yup.object().shape({
+    //     name: yup.string().required('Role Name is required'),
+    //     permissions: yup.array().of(yup.object().shape({
+    //         name: yup.string().required('Permission Name is required')
+    //     })).optional(),
+    // }).required('Role is required'),
 });

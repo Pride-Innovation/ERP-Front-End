@@ -3,12 +3,12 @@ import { IRole } from "../settings/interface";
 export interface IUsersExcludedTableData {
     id?: string | number;
     name?: string;
-    reportsTo: string;
+    reportsTo?: string;
     firstName: string;
     lastName: string;
     otherName?: string | null;
     image?: string;
-    role: IRole
+    role?: IRole
 }
 
 export interface IUsersTableData {
@@ -18,7 +18,7 @@ export interface IUsersTableData {
     unit: string;
     gender: string;
     staffNumber: string;
-    availability: boolean;
+    availability?: boolean;
 }
 
 export interface IUser extends IUsersExcludedTableData, IUsersTableData { }

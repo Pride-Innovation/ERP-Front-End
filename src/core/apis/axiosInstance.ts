@@ -22,9 +22,8 @@ axiosInstance.interceptors.request.use(
             config.headers = {};
         }
 
-        console.log(accessToken, "accessToken!!");
-
-        const token = sessionStorage.getItem('token');
+        const token = sessionStorage.getItem(accessToken);
+        
         if (token) {
             config.headers['Authorization'] = `Bearer ${token}`;
             config.headers['Accept'] = 'application/json';
