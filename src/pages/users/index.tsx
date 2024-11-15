@@ -12,6 +12,7 @@ import { usersMock } from '../../mocks/users';
 import { useNavigate } from 'react-router';
 import { ROUTES } from '../../core/routes/routes';
 import Deactivate from './Deactivate';
+import { fetchUsersService } from './service';
 
 const Users = () => {
   const navigate = useNavigate();
@@ -28,7 +29,17 @@ const Users = () => {
   } = UserUtils();
   const { setUser, setUsers, users, user } = useContext(UserContext);
 
-  useEffect(() => { setUsers(usersMock) }, [])
+  const fetchUsers = async () => {
+    setUsers(usersMock)
+    try {
+      const response = await fetchUsersService() as unknown as Array<IUser>;
+      console.log(response)
+    } catch (error) {
+      console.log(error, "response Error")
+    }
+  }
+
+  useEffect(() => { fetchUsers() }, [])
 
   const handleOptionClicked = (option: string | number, moduleID?: string | number) => {
     setModalState(option as string)
@@ -36,9 +47,14 @@ const Users = () => {
     setUser(user)
     handleOpen();
 
-    if (option === crudStates.read) {
-      navigate(`${ROUTES.PROFILE}/${user.id}`)
+    switch (option) {
+      case crudStates.read:
+        navigate(`${ROUTES.PROFILE}/${user.id}`);
+        break
+      default:
+        break;
     }
+
   }
 
   return (

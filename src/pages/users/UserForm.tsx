@@ -1,5 +1,4 @@
 import {
-    Button,
     FormControl,
     FormHelperText,
     Grid,
@@ -16,8 +15,7 @@ import { IUser } from './interface';
 import { InputComponent } from '../../components/forms/Inputs';
 import ButtonComponent from '../../components/forms/Button';
 import SelectComponent from '../../components/forms/Select';
-import InputFileUpload from '../../components/forms/FileUpload';
-import { useRef } from 'react';
+// import InputFileUpload from '../../components/forms/FileUpload';
 
 interface IUserForm {
     formState: FormState<IUser> & {
@@ -39,7 +37,7 @@ interface IUserForm {
     buttonText: string;
     sendingRequest: boolean;
     handleClose: () => void;
-    setImage?: (val: string) => void;
+    // setImage?: (val: string) => void;
 }
 
 const UserForm = ({
@@ -49,21 +47,21 @@ const UserForm = ({
     buttonText,
     sendingRequest,
     handleClose,
-    setImage
+    // setImage
 }: IUserForm) => {
-    const inputRef = useRef<HTMLInputElement>(null);
-    const handleButtonClick = () => {
-        inputRef.current?.click();
-    };
+    // const inputRef = useRef<HTMLInputElement>(null);
+    // const handleButtonClick = () => {
+    //     inputRef.current?.click();
+    // };
 
-    const handleFileUpload = (files: FileList | null) => {
-        if (!files || files.length === 0) return;
+    // const handleFileUpload = (files: FileList | null) => {
+    //     if (!files || files.length === 0) return;
 
-        const file = files[0];
-        const imageUrl = URL.createObjectURL(file);
+    //     const file = files[0];
+    //     const imageUrl = URL.createObjectURL(file);
 
-        setImage?.(imageUrl);
-    };
+    //     setImage?.(imageUrl);
+    // };
 
     return (
         <Grid item container xs={12}>
@@ -223,12 +221,12 @@ const UserForm = ({
                         )}
                     </FormControl>
                 </Grid>
-                <Grid item xs={12} md={6}>
+                {/* <Grid item xs={12} md={6}>
                     <Button variant='outlined' onClick={handleButtonClick} sx={{ width: "100%" }}>
                         Upload Image
                         <InputFileUpload inputRef={inputRef} handleFileUpload={handleFileUpload} />
                     </Button>
-                </Grid>
+                </Grid> */}
                 <Grid item xs={12} sx={{ display: "flex", justifyContent: "end" }}>
                     <Stack direction="row" spacing={3} sx={{ width: "30%" }}>
                         <ButtonComponent handleClick={handleClose} buttonColor='error' type='button' sendingRequest={false} buttonText="Close" />

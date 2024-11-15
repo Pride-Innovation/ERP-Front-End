@@ -15,14 +15,15 @@ import LeaveComponent from './Leave';
 import InputFileUpload from '../../components/forms/FileUpload';
 import UpdateUsers from '../users/UpdateUsers';
 import UserUtils from '../users/utils';
-import RoutesUtills from '../../core/routes/utills';
+// import RoutesUtills from '../../core/routes/utills';
 import { IUser } from '../users/interface';
 import { UserContext } from '../../context/user/UserContext';
+import { usersMock } from '../../mocks/users';
 
 export const ImageSection = () => {
     const inputRef = useRef<HTMLInputElement>(null);
     const [image, setImage] = useState<string>("")
-    const { getCurrentUser } = RoutesUtills();
+    // const { getCurrentUser } = RoutesUtills();
 
     const handleButtonClick = () => {
         inputRef.current?.click();
@@ -65,7 +66,7 @@ export const ImageSection = () => {
                 <Box
                     component="img"
                     sx={{ width: 150, height: 150 }}
-                    src={image ? image : getCurrentUser().gender === "Male" ? MaleProfile : FemaleProfile}
+                    src={image ? image : usersMock[0].gender === "Male" ? MaleProfile : FemaleProfile}
                 />
                 <IconButton onClick={handleButtonClick} sx={{ position: "relative", bgcolor: blue[700] }}>
                     <EditIcon fontSize='medium' sx={{ color: "white" }} />
@@ -73,10 +74,10 @@ export const ImageSection = () => {
                 </IconButton>
             </Box>
             <TypographyComponent weight={600} size='18px' sx={{ mt: 2 }}>
-                {getCurrentUser().firstName + " " + getCurrentUser().lastName + " " + getCurrentUser().otherName}
+                {usersMock[0].firstName + " " + usersMock[0].lastName + " " + usersMock[0].otherName}
             </TypographyComponent>
             <TypographyComponent weight={400} size='14px' sx={{ m: 0.5 }} color={grey[600]} >
-                {getCurrentUser().title}
+                {usersMock[0].title}
             </TypographyComponent>
             <Stack direction="column" spacing={1.5}>
                 <ButtonComponent
@@ -100,15 +101,15 @@ export const ImageSection = () => {
 
 
 export const ProfileLine = () => {
-    const { getCurrentUser } = RoutesUtills();
+    // const { getCurrentUser } = RoutesUtills();
     const { setUser } = useContext(UserContext);
 
-    const { id, role, ...data } = getCurrentUser() as IUser;
+    const { id, role, ...data } = usersMock[0] as IUser;
     const { open, handleClose, modalState, setModalState, handleOpen } = UserUtils();
 
     const handleProfileUpdate = () => {
         setModalState(crudStates.update)
-        setUser(getCurrentUser())
+        setUser(usersMock[0])
         handleOpen();
     }
 

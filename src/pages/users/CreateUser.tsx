@@ -1,15 +1,17 @@
 import { useEffect, useState } from 'react';
 import UserForm from './UserForm';
-import { ICreateUser, IUser } from './interface';
+import { ICreateUser, IResponseData, IUser } from './interface';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { userSchema } from './schema';
 import { Grid } from '@mui/material';
 import { createUSerService } from './service';
+import { toast } from 'react-toastify';
+import { ErrorMessage } from '../../utils/constants';
 
 const CreateUser = ({ handleClose }: ICreateUser) => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
-    const [image, setImage] = useState<string>("")
+    // const [image, setImage] = useState<string>("")
 
     const defaultUser: IUser = {} as IUser;
 
@@ -31,14 +33,13 @@ const CreateUser = ({ handleClose }: ICreateUser) => {
     const onSubmit = async (formData: IUser) => {
         setSendingRequest(true);
 
-        console.log(image, "Image file!!!");
-        
         const data = new FormData();
         data.append('email', formData.email);
         data.append('name', formData.firstName);
+
         data.append('password', "12345678");
-        data.append('password_confirmation', "12345678");
-        data.append('image', image);
+        data.append('password_confirmation', "");
+        // data.append('image', image);
 
         const roles = ["Super Admin", "Admin"];
 
@@ -47,12 +48,17 @@ const CreateUser = ({ handleClose }: ICreateUser) => {
         });
 
         try {
-            const response = await createUSerService(data);
-            console.log(response, "response data!!!");
+            const response = await createUSerService(data) as IResponseData;
+            if (response.status === "success") {
+                handleClose();
+                return toast.success(response?.data?.message)
+            }
+            return toast.error(ErrorMessage)
         } catch (error) {
             console.log(error)
+            toast.error(ErrorMessage)
         }
-        setSendingRequest(false)
+        setSendingRequest(false);
     };
 
     return (
@@ -64,7 +70,7 @@ const CreateUser = ({ handleClose }: ICreateUser) => {
                     onSubmit={handleSubmit(onSubmit)}
                 >
                     <UserForm
-                        setImage={setImage}
+                        // setImage={setImage}
                         handleClose={handleClose}
                         buttonText="Submit"
                         formState={formState}

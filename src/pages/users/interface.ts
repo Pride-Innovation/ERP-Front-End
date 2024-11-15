@@ -38,3 +38,11 @@ export interface IDeactivate {
     buttonText: string;
     user: IUser
 }
+
+export interface IResponseData {
+
+    status: "success" | "failed",
+    data: {
+        message: string;
+    }
+}
