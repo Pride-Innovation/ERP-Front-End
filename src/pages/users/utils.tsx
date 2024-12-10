@@ -92,6 +92,16 @@ const UserUtils = () => {
         return [firstName, lastName, otherNames];
     }
 
+    const filterCurrentUser = (users: Array<IUser>, userID: string | number): IUser => {
+        const user = users?.find(user => user.id === userID) as IUser;
+        return ({
+            ...user,
+            firstName: formatName(user?.name as string)[0],
+            lastName: formatName(user?.name as string)[1],
+            otherName: formatName(user?.name as string)[2]
+        })
+    }
+
     const userFields: Array<IFormData<IUser>> = [
         {
             value: "firstName",
@@ -183,7 +193,7 @@ const UserUtils = () => {
         handleUsers,
         removeUserFromTable,
         userFields,
-        formatName
+        filterCurrentUser
     })
 }
 

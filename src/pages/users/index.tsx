@@ -11,11 +11,14 @@ import UpdateUsers from './UpdateUsers';
 import Deactivate from './Deactivate';
 import { deleteUserService, fetchUsersService } from './service';
 import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router';
+import { ROUTES } from '../../core/routes/routes';
 
 const Users = () => {
   const { usersTableData } = useContext(UserContext);
   const header = { plural: 'Users', singular: 'User' };
   const { user, users, setUsers, setUser } = useContext(UserContext);
+  const navigate = useNavigate();
   const {
     columnHeaders,
     handleCreation,
@@ -25,7 +28,7 @@ const Users = () => {
     open,
     handleClose,
     handleUsers,
-    formatName,
+    filterCurrentUser,
     removeUserFromTable
   } = UserUtils();
 
@@ -50,14 +53,11 @@ const Users = () => {
         break;
       case crudStates.update:
         setModalState(option as string)
-        const user = users?.find(user => user.id === moduleID) as IUser;
-        setUser({
-          ...user,
-          firstName: formatName(user?.name as string)[0],
-          lastName: formatName(user?.name as string)[1],
-          otherName: formatName(user?.name as string)[2]
-        })
+        setUser(filterCurrentUser(users, moduleID as string))
         handleOpen();
+        break;
+      case crudStates.read:
+        navigate(`${ROUTES.PROFILE}/${moduleID}`)
         break;
       default:
         break
