@@ -24,7 +24,7 @@ export interface INavigation {
     path: string;
     icon: JSX.Element;
     otherRoutes: Array<string>;
-    permission: IPermission
+    permission?: IPermission
 }
 
 export interface IAssignmentHistory {

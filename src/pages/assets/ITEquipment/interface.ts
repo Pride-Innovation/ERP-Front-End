@@ -4,6 +4,7 @@ import { Control, FieldError, FormState, UseFormRegister } from "react-hook-form
 export interface IITEquipment {
     id?: string | number;
     assetName: string;
+    name?: string;
     hostname: string;
     detailNetBookValue: string;
     engravedNumber: string;

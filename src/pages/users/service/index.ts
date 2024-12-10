@@ -16,7 +16,7 @@ export const createUSerService = async (body: object) => {
 export const fetchUsersService = async () => {
   try {
     const response = await axiosInstance.get("users");
-    return response.data?.data["0"]?.data;
+    return response.data?.data;
   } catch (error) {
     throw error
   }

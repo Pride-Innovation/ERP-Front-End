@@ -11,7 +11,6 @@ import { ErrorMessage } from '../../utils/constants';
 
 const CreateUser = ({ handleClose }: ICreateUser) => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
-    // const [image, setImage] = useState<string>("")
 
     const defaultUser: IUser = {} as IUser;
 
@@ -35,13 +34,19 @@ const CreateUser = ({ handleClose }: ICreateUser) => {
 
         const data = new FormData();
         data.append('email', formData.email);
-        data.append('name', formData.firstName);
-
-        data.append('password', "12345678");
-        data.append('password_confirmation', "");
-        // data.append('image', image);
+        data.append('name', formData.firstName + " " + formData.lastName + " " + formData.otherName);
+        data.append('title', formData.title);
+        data.append('reportsTo', "1");
+        data.append('department_id', "1");
+        data.append('gender', formData.gender);
+        data.append('staffNumber', formData.staffNumber);
+        data.append('availability', formData.availability ? "present" : "absent");
 
         const roles = ["Super Admin", "Admin"];
+
+        data.append('password', "12345678");
+        data.append('password_confirmation', "12345678");
+
 
         roles.forEach((role, index) => {
             data.append(`roles[${index}]`, role);
@@ -70,7 +75,6 @@ const CreateUser = ({ handleClose }: ICreateUser) => {
                     onSubmit={handleSubmit(onSubmit)}
                 >
                     <UserForm
-                        // setImage={setImage}
                         handleClose={handleClose}
                         buttonText="Submit"
                         formState={formState}

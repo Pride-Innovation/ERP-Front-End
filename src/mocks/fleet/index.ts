@@ -4,6 +4,7 @@ export const fleetsMock: IFleet[] = [
     {
         id: 1,
         assetName: "Forklift",
+        name: "",
         hostname: "FLK-001",
         detailNetBookValue: "15000",
         engravedNumber: "ENG-001",

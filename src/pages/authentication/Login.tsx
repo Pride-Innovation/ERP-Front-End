@@ -62,8 +62,7 @@ const Login = () => {
             toast.success(`Welcome ${res.data?.user?.name} !!`)
             navigate(ROUTES.ASSETS_MANAGEMENT);
         } catch (error) {
-            toast.error("Invalid user Credentials")
-            console.log(error, "Error Information!!")
+            toast.error(ErrorMessage)
         }
         setLoggingIn(false);
     };

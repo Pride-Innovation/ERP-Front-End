@@ -36,7 +36,10 @@ const PopoverComponent = ({
                 {options.map((option: IOptions) => (
                     <MenuItem
                         sx={{ bgcolor: `${option?.header ? grey[300] : ''}` }}
-                        onClick={() => handleOptionClicked?.(option.value, moduleID)}
+                        onClick={() => {
+                            handleOptionClicked?.(option.value, moduleID);
+                            handleClose()
+                        }}
                         value={option.value}>
                         {option?.icon && <ListItemIcon>
                             {option?.icon}

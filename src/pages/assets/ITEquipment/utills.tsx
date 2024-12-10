@@ -53,6 +53,7 @@ const ITEquipmentUtills = () => {
         netValueB,
         costOfTheAsset,
         hostname,
+        assetName,
         ...data
     } = itEquipmentMock[0];
 

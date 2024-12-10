@@ -22,7 +22,8 @@ const SideBarElements = () => {
                         ROUTES.ERRORS
         ) : ROUTES.ERRORS;
 
-        return path;
+        // return path;
+        return ROUTES.LIST_ASSETS;
     }
 
     const sideBarList: Array<ISideBarItem> = [

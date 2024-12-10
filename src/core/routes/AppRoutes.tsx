@@ -48,11 +48,13 @@ const AppRoutes = () => {
           </Route>
           <Route path={ROUTES.AUDIT_TRAILS} element={<AuditTrails />} />
           <Route path={ROUTES.TEST} element={<TestComponent />} />
+
           <Route path={ROUTES.LIST_ASSETS} element={<AssetsManagement />} >
             {ITEquipmentRoutes()}
             {FleetRoutes()}
             {OfficeEquipmentRoutes()}
           </Route>
+          
           <Route path={ROUTES.REQUEST} element={<RequestsManagement />}>
             <Route index element={<Request />} />
             <Route path={ROUTES.LIST_PENDING} element={<PendingRequest />} />

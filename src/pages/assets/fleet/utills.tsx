@@ -27,13 +27,15 @@ const FleetUtills = () => {
         assetCategory_id,
         unitOfMeasure,
         supplier,
+        name,
         costOfTheAsset,
         netValueB,
         ...data
     } = fleetsMock[0];
 
     const rowData = {
-        image: fleetsMock[0].image,
+        image,
+        name,
         ...data,
         action: {
             label: "options",

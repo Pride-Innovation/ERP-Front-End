@@ -1,4 +1,4 @@
-import { Grid } from '@mui/material'
+import { Grid } from '@mui/material';
 import TableComponent from '../../components/tables/TableComponent';
 import UserUtils from './utils';
 import { UserContext } from '../../context/user/UserContext';
@@ -15,7 +15,7 @@ import { toast } from 'react-toastify';
 const Users = () => {
   const { usersTableData } = useContext(UserContext);
   const header = { plural: 'Users', singular: 'User' };
-  const { user, users, setUsers } = useContext(UserContext);
+  const { user, users, setUsers, setUser } = useContext(UserContext);
   const {
     columnHeaders,
     handleCreation,
@@ -25,6 +25,7 @@ const Users = () => {
     open,
     handleClose,
     handleUsers,
+    formatName,
     removeUserFromTable
   } = UserUtils();
 
@@ -38,7 +39,7 @@ const Users = () => {
   }
 
   useEffect(() => { fetchUsers() }, [])
-  useEffect(() => { if (users.length > 0) handleUsers(users) }, [users])
+  useEffect(() => { if (users?.length > 0) handleUsers(users) }, [users])
 
   const handleOptionClicked = async (option: string | number, moduleID?: string | number) => {
     switch (option) {
@@ -47,23 +48,20 @@ const Users = () => {
         if (response.status === "success") removeUserFromTable(moduleID as string)
         toast.success(response?.data?.message);
         break;
+      case crudStates.update:
+        setModalState(option as string)
+        const user = users?.find(user => user.id === moduleID) as IUser;
+        setUser({
+          ...user,
+          firstName: formatName(user?.name as string)[0],
+          lastName: formatName(user?.name as string)[1],
+          otherName: formatName(user?.name as string)[2]
+        })
+        handleOpen();
+        break;
       default:
         break
     }
-    console.log(option, moduleID, "Request!!");
-    // setModalState(option as string)
-    // const user = users?.find(user => user.id === moduleID) as IUser;
-    // setUser(user)
-    // handleOpen();
-
-    // switch (option) {
-    //   case crudStates.read:
-    //     navigate(`${ROUTES.PROFILE}/${user.id}`);
-    //     break
-    //   default:
-    //     break;
-    // }
-
   }
 
   return (

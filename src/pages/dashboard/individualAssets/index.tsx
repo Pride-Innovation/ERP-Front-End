@@ -7,7 +7,7 @@ import IndividualRequestUtill from './utill';
 import { itEquipmentMock } from '../../../mocks/itEquipment';
 import { ErrorMessage } from '../../../core/apis/axiosInstance';
 
-const PersonalRequest = () => {
+const PersonalAssets = () => {
     const [loading, setLoading] = useState<boolean>(false)
     const { endPoint, columnHeaders, header } = IndividualRequestUtill();
     const { setRows, rows } = useContext(RowContext);
@@ -49,4 +49,4 @@ const PersonalRequest = () => {
     )
 }
 
-export default PersonalRequest
+export default PersonalAssets

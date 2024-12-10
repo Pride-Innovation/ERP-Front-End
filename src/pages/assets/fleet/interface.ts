@@ -3,6 +3,7 @@ import { Control, FieldError, FormState, UseFormRegister } from "react-hook-form
 export interface IFleet {
     id?: string | number;
     assetName: string;
+    name?: string;
     hostname: string;
     detailNetBookValue: string;
     engravedNumber: string;

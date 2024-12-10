@@ -40,9 +40,11 @@ export const determineImage = (row: GridRowModel): string => {
             return FemaleAvatar
         }
     }
+    
 
     // return Placeholder;
-    return MaleAvatar;
+    console.log(row?.image, "image url")
+    return row?.image;
 }
 
 export const getLastSixMonths = (): string[] => {

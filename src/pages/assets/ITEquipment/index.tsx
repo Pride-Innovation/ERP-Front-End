@@ -5,14 +5,15 @@ import TableComponent from "../../../components/tables/TableComponent"
 import ITEquipmentUtills from "./utills"
 import { useNavigate } from "react-router"
 import { useContext, useEffect, useState } from "react"
-import { fetchRowsService } from "../../../core/apis/globalService"
+// import { fetchRowsService } from "../../../core/apis/globalService"
 import RowContext from "../../../context/row/RowContext"
-import { GridRowsProp } from "@mui/x-data-grid"
+// import { GridRowsProp } from "@mui/x-data-grid"
 import { crudStates } from "../../../utils/constants"
 import { ROUTES } from "../../../core/routes/routes"
-import { itEquipmentMock } from "../../../mocks/itEquipment"
+// import { itEquipmentMock } from "../../../mocks/itEquipment"
 import { IITEquipment } from "./interface"
 import { ErrorMessage } from "../../../core/apis/axiosInstance"
+import { fetchITEquipmentService } from "./service"
 
 const ITEquipment = () => {
     const [loading, setLoading] = useState<boolean>(false);
@@ -34,19 +35,18 @@ const ITEquipment = () => {
     const fetchResources = async () => {
         setLoading(true)
         try {
-            const response = await fetchRowsService(
-                {
-                    page: 1,
-                    size: 10,
-                    endPoint
-                }
-            ) as unknown as GridRowsProp;
-
-            console.log(response, "response!!");
-
-            setRows([...itEquipmentMock]);
+            // const response = await fetchRowsService(
+            //     {
+            //         page: 1,
+            //         size: 10,
+            //         endPoint
+            //     }
+            // ) as unknown as GridRowsProp;
+            const response = await fetchITEquipmentService();
+            console.log(response, "response data!!")
+            setRows([...response]);
         } catch (error) {
-            setRows([...itEquipmentMock]);
+            // setRows([...response]);
             const errorMessage = error instanceof Error ? error.message : ErrorMessage;
             console.log(errorMessage)
         }

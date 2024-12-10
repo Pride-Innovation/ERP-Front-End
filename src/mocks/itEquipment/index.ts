@@ -3,6 +3,7 @@ export const itEquipmentMock = [
         id: 1,
         assetName: "Lenovo ThinkPad",
         hostname: "thinkpad-01",
+        name: "",
         detailNetBookValue: "400.00",
         engravedNumber: "LT-001",
         dateReceipt: "2022-02-20",

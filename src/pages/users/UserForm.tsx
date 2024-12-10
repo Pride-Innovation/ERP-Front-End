@@ -1,21 +1,22 @@
 import {
-    FormControl,
-    FormHelperText,
     Grid,
     Stack
 } from '@mui/material'
 import {
     Control,
-    Controller,
     FieldError,
     FormState,
     UseFormRegister
 } from 'react-hook-form'
 import { IUser } from './interface';
-import { InputComponent } from '../../components/forms/Inputs';
 import ButtonComponent from '../../components/forms/Button';
-import SelectComponent from '../../components/forms/Select';
-// import InputFileUpload from '../../components/forms/FileUpload';
+import UserUtils from './utils';
+import {
+    UseFormAutocompleteComponent,
+    UseFormDatePicker,
+    UseFormInput,
+    UseFormSelect
+} from '../../components/forms';
 
 interface IUserForm {
     formState: FormState<IUser> & {
@@ -37,7 +38,6 @@ interface IUserForm {
     buttonText: string;
     sendingRequest: boolean;
     handleClose: () => void;
-    // setImage?: (val: string) => void;
 }
 
 const UserForm = ({
@@ -47,189 +47,60 @@ const UserForm = ({
     buttonText,
     sendingRequest,
     handleClose,
-    // setImage
 }: IUserForm) => {
-    // const inputRef = useRef<HTMLInputElement>(null);
-    // const handleButtonClick = () => {
-    //     inputRef.current?.click();
-    // };
-
-    // const handleFileUpload = (files: FileList | null) => {
-    //     if (!files || files.length === 0) return;
-
-    //     const file = files[0];
-    //     const imageUrl = URL.createObjectURL(file);
-
-    //     setImage?.(imageUrl);
-    // };
-
+    const { userFields } = UserUtils();
     return (
         <Grid item container xs={12}>
             <Grid item container spacing={4} xs={12}>
-                <Grid item xs={12} md={6}>
-                    <FormControl fullWidth>
-                        <Controller
-                            control={control}
-                            {...register("firstName")}
-                            rules={{ required: true }}
-                            render={({ field }) => (
-                                <InputComponent type='input' required label='First name' field={field} error={formState.errors.firstName} id='firstName' />
-                            )}
-                        />
-                        {formState.errors.firstName && (
-                            <FormHelperText sx={{ color: 'error.main' }}>{formState.errors.firstName?.message}</FormHelperText>
-                        )}
-                    </FormControl>
-                </Grid>
-                <Grid item xs={12} md={6}>
-                    <FormControl fullWidth>
-                        <Controller
-                            control={control}
-                            {...register("lastName")}
-                            rules={{ required: true }}
-                            render={({ field }) => (
-                                <InputComponent type='input' required label='Last name' field={field} error={formState.errors.lastName} id='lastName' />
-                            )}
-                        />
-                        {formState.errors.lastName && (
-                            <FormHelperText sx={{ color: 'error.main' }}>{formState.errors.lastName?.message}</FormHelperText>
-                        )}
-                    </FormControl>
-                </Grid>
-                <Grid item xs={12} md={6}>
-                    <FormControl fullWidth>
-                        <Controller
-                            control={control}
-                            {...register("otherName")}
-                            rules={{ required: false }}
-                            render={({ field }) => (
-                                <InputComponent type='input' label='Other name' field={field} error={formState.errors.otherName} id='otherName' />
-                            )}
-                        />
-                        {formState.errors.otherName && (
-                            <FormHelperText sx={{ color: 'error.main' }}>{formState.errors.otherName?.message}</FormHelperText>
-                        )}
-                    </FormControl>
-                </Grid>
-                <Grid item xs={12} md={6}>
-                    <FormControl fullWidth>
-                        <Controller
-                            control={control}
-                            {...register("staffNumber")}
-                            rules={{ required: false }}
-                            render={({ field }) => (
-                                <InputComponent type='input' required label='Staff Number' field={field} error={formState.errors.staffNumber} id='staffNumber' />
-                            )}
-                        />
-                        {formState.errors.staffNumber && (
-                            <FormHelperText sx={{ color: 'error.main' }}>{formState.errors.staffNumber?.message}</FormHelperText>
-                        )}
-                    </FormControl>
-                </Grid>
-                <Grid item xs={12} md={6}>
-                    <FormControl fullWidth>
-                        <Controller
-                            control={control}
-                            {...register("email")}
-                            rules={{ required: true }}
-                            render={({ field }) => (
-                                <InputComponent required label='Email Address' field={field} error={formState.errors.email} id='email' />
-                            )}
-                        />
-                        {formState.errors.email && (
-                            <FormHelperText sx={{ color: 'error.main' }}>{formState.errors.email.message}</FormHelperText>
-                        )}
-                    </FormControl>
-                </Grid>
-                <Grid item xs={12} md={6}>
-                    <FormControl fullWidth>
-                        <Controller
-                            control={control}
-                            {...register("gender")}
-                            rules={{ required: true }}
-                            render={({ field }) => (
-                                <SelectComponent
-                                    id='gender'
-                                    field={field}
-                                    error={formState.errors.gender}
-                                    required label='Gender'
-                                    options={[{ label: "Male", value: "Male" }, { label: "Female", value: "Female" }]} />
-                            )}
-                        />
-                        {formState.errors.gender && (
-                            <FormHelperText sx={{ color: 'error.main' }}>{formState.errors.gender.message}</FormHelperText>
-                        )}
-                    </FormControl>
-                </Grid>
-                <Grid item xs={12} md={6}>
-                    <FormControl fullWidth>
-                        <Controller
-                            control={control}
-                            {...register("department")}
-                            rules={{ required: true }}
-                            render={({ field }) => (
-                                <InputComponent required label='Department' field={field} error={formState.errors.department} id='department' />
-                            )}
-                        />
-                        {formState.errors.department && (
-                            <FormHelperText sx={{ color: 'error.main' }}>{formState.errors.department.message}</FormHelperText>
-                        )}
-                    </FormControl>
-                </Grid>
-                <Grid item xs={12} md={6}>
-                    <FormControl fullWidth>
-                        <Controller
-                            control={control}
-                            {...register("unit")}
-                            rules={{ required: true }}
-                            render={({ field }) => (
-                                <InputComponent required label='Unit' field={field} error={formState.errors.unit} id='unit' />
-                            )}
-                        />
-                        {formState.errors.unit && (
-                            <FormHelperText sx={{ color: 'error.main' }}>{formState.errors.unit.message}</FormHelperText>
-                        )}
-                    </FormControl>
-                </Grid>
-                <Grid item xs={12} md={6}>
-                    <FormControl fullWidth>
-                        <Controller
-                            control={control}
-                            {...register("title")}
-                            rules={{ required: true }}
-                            render={({ field }) => (
-                                <InputComponent required label='Title' field={field} error={formState.errors.title} id='title' />
-                            )}
-                        />
-                        {formState.errors.title && (
-                            <FormHelperText sx={{ color: 'error.main' }}>{formState.errors.title.message}</FormHelperText>
-                        )}
-                    </FormControl>
-                </Grid>
-                <Grid item xs={12} md={6}>
-                    <FormControl fullWidth>
-                        <Controller
-                            control={control}
-                            {...register("reportsTo")}
-                            rules={{ required: true }}
-                            render={({ field }) => (
-                                <InputComponent required label='Reports To' field={field} error={formState.errors.reportsTo} id='reportsTo' />
-                            )}
-                        />
-                        {formState.errors.reportsTo && (
-                            <FormHelperText sx={{ color: 'error.main' }}>{formState.errors.reportsTo.message}</FormHelperText>
-                        )}
-                    </FormControl>
-                </Grid>
-                {/* <Grid item xs={12} md={6}>
-                    <Button variant='outlined' onClick={handleButtonClick} sx={{ width: "100%" }}>
-                        Upload Image
-                        <InputFileUpload inputRef={inputRef} handleFileUpload={handleFileUpload} />
-                    </Button>
-                </Grid> */}
+                {
+                    userFields.map(formField => {
+                        return formField.type === 'input' ? (
+                            <Grid item xs={12} md={4}>
+                                <UseFormInput
+                                    register={register}
+                                    control={control}
+                                    formState={formState}
+                                    value={formField.value}
+                                    label={formField.label}
+                                />
+                            </Grid>
+                        ) : formField.type === 'select' ? (
+                            <Grid item xs={12} md={4}>
+                                <UseFormSelect
+                                    options={formField.options}
+                                    register={register}
+                                    control={control}
+                                    formState={formState}
+                                    value={formField.value}
+                                    label={formField.label} />
+                            </Grid>
+                        ) : formField.type === 'date' ? (
+                            <Grid item xs={12} md={4}>
+                                <UseFormDatePicker
+                                    register={register}
+                                    control={control}
+                                    formState={formState}
+                                    value={formField.value}
+                                    label={formField.label} />
+                            </Grid>
+                        ) : formField.type === 'autocomplete' ? (
+                            <Grid item xs={12} md={4}>
+                                <UseFormAutocompleteComponent
+                                    register={register}
+                                    control={control}
+                                    formState={formState}
+                                    value={formField.value}
+                                    label={formField.label}
+                                    options={formField.options}
+                                />
+                            </Grid>
+                        )
+                            : null
+                    })
+                }
                 <Grid item xs={12} sx={{ display: "flex", justifyContent: "end" }}>
                     <Stack direction="row" spacing={3} sx={{ width: "30%" }}>
-                        <ButtonComponent handleClick={handleClose} buttonColor='error' type='button' sendingRequest={false} buttonText="Close" />
+                        <ButtonComponent handleClick={() => handleClose?.()} buttonColor='error' type='button' sendingRequest={false} buttonText="Back" />
                         <ButtonComponent buttonColor='success' type='submit' sendingRequest={sendingRequest} buttonText={buttonText} />
                     </Stack>
                 </Grid>

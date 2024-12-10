@@ -1,18 +1,16 @@
-import { Grid } from "@mui/material"
-import React, { useContext, useEffect, useState } from "react"
-import TableComponent from "../../../components/tables/TableComponent"
+import { Grid } from "@mui/material";
+import React, { useContext, useEffect, useState } from "react";
+import TableComponent from "../../../components/tables/TableComponent";
 import { useNavigate } from "react-router";
 import FleetUtills from "./utills";
 import RowContext from "../../../context/row/RowContext";
-import { fetchRowsService } from "../../../core/apis/globalService";
-import { GridRowsProp } from "@mui/x-data-grid";
-import { fleetsMock } from "../../../mocks/fleet";
 import { ROUTES } from "../../../core/routes/routes";
 import { crudStates } from "../../../utils/constants";
 import { IFleet } from "./interface";
 import ModalComponent from "../../../components/modal";
 import Dispose from "../Dispose";
 import { ErrorMessage } from "../../../core/apis/axiosInstance";
+import { fetchFleetService } from "./service";
 
 const Fleet = () => {
     const [loading, setLoading] = useState<boolean>(false);
@@ -24,19 +22,11 @@ const Fleet = () => {
     const fetchResources = async () => {
         setLoading(true)
         try {
-            const response = await fetchRowsService(
-                {
-                    page: 1,
-                    size: 10,
-                    endPoint
-                }
-            ) as unknown as GridRowsProp;
-
-            console.log(response, "response!!");
-            setRows([...fleetsMock]);
+            const response = await fetchFleetService();
+            console.log(response, "response data!!")
+            setRows([...response]);
 
         } catch (error) {
-            setRows([...fleetsMock]);
             const errorMessage = error instanceof Error ? error.message : ErrorMessage;
             console.log(errorMessage)
         }

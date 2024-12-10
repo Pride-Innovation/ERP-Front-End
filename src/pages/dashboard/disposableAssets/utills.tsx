@@ -33,6 +33,7 @@ const DisposalAssetsUtills = () => {
         hostname,
         assetCategory_id,
         location,
+        make,
         ...data
     } = itEquipmentMock[0];
 
