@@ -9,6 +9,7 @@ import { IUser, IUsersTableData } from './interface';
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import { crudStates } from '../../utils/constants';
 import { IFormData } from '../assets/interface';
+import { fetchSingleUserService } from './service';
 
 const UserUtils = () => {
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
@@ -88,7 +89,7 @@ const UserUtils = () => {
         const nameParts = name.split(' ');
         const firstName = nameParts[0];
         const lastName = nameParts[1];
-        const otherNames = nameParts.slice(1, nameParts.length).join(" ");
+        const otherNames = nameParts.slice(2, nameParts.length).join(" ");
         return [firstName, lastName, otherNames];
     }
 
@@ -100,6 +101,16 @@ const UserUtils = () => {
             lastName: formatName(user?.name as string)[1],
             otherName: formatName(user?.name as string)[2]
         })
+    }
+
+    const getSingleUser = async (id: string | number): Promise<IUser> => {
+        const user = await fetchSingleUserService(id) as unknown as IUser;
+        return ({
+            ...user,
+            firstName: formatName(user?.name as string)[0],
+            lastName: formatName(user?.name as string)[1],
+            otherName: formatName(user?.name as string)[2]
+        });
     }
 
     const userFields: Array<IFormData<IUser>> = [
@@ -193,7 +204,8 @@ const UserUtils = () => {
         handleUsers,
         removeUserFromTable,
         userFields,
-        filterCurrentUser
+        filterCurrentUser,
+        getSingleUser
     })
 }
 
