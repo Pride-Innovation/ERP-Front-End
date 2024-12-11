@@ -47,9 +47,10 @@ const Users = () => {
   const handleOptionClicked = async (option: string | number, moduleID?: string | number) => {
     switch (option) {
       case crudStates.deactivate:
-        const response = await deleteUserService(moduleID as string) as IResponseData;
-        if (response.status === "success") removeUserFromTable(moduleID as string)
-        toast.success(response?.data?.message);
+
+        setModalState(option as string)
+        setUser(filterCurrentUser(users, moduleID as string))
+        handleOpen();
         break;
       case crudStates.update:
         setModalState(option as string)
@@ -62,6 +63,13 @@ const Users = () => {
       default:
         break
     }
+  }
+
+  const deactivateUser = async (id: string | number) => {
+    const response = await deleteUserService(id as string) as IResponseData;
+    if (response.status === "success") removeUserFromTable(id as string)
+    toast.success(response?.data?.message);
+    handleClose()
   }
 
   return (
@@ -78,7 +86,7 @@ const Users = () => {
       }
       {modalState === crudStates.deactivate &&
         <ModalComponent title='Deactivate User' open={open} handleClose={handleClose} width="40%">
-          <Deactivate user={user} handleClose={handleClose} buttonText='Deactivate' sendingRequest={false} />
+          <Deactivate handleDeactivate={deactivateUser} user={user} handleClose={handleClose} buttonText='Deactivate' sendingRequest={false} />
         </ModalComponent>
       }
       {columnHeaders.length > 0 &&

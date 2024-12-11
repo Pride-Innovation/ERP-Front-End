@@ -36,7 +36,8 @@ export interface IDeactivate {
     handleClose: () => void;
     sendingRequest: boolean;
     buttonText: string;
-    user: IUser
+    user: IUser;
+    handleDeactivate?: (id: string | number) => void
 }
 
 export interface IResponseData {

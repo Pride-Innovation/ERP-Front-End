@@ -7,7 +7,8 @@ const Deactivate = ({
     user,
     handleClose,
     sendingRequest,
-    buttonText
+    buttonText,
+    handleDeactivate
 }: IDeactivate) => {
     return (
         <Grid item container spacing={4} xs={12}>
@@ -18,7 +19,7 @@ const Deactivate = ({
                 <Stack direction="row" spacing={1} alignItems="center">
                     <AccountCircleOutlinedIcon color="primary" />
                     <Typography variant="h6" color="primary">
-                        {user.firstName + " " + user.lastName + " " + user.otherName}
+                        {user.name}
                     </Typography>
                 </Stack>
                 <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 1 }}>
@@ -38,6 +39,7 @@ const Deactivate = ({
                         buttonText="Close"
                     />
                     <ButtonComponent
+                        handleClick={() => handleDeactivate?.(user?.id as string)}
                         buttonColor='error'
                         type='submit'
                         sendingRequest={sendingRequest}
