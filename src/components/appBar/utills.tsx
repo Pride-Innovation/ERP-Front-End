@@ -1,15 +1,15 @@
-import { useContext, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router";
 import { ROUTES } from "../../core/routes/routes";
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import LockOpenOutlinedIcon from '@mui/icons-material/LockOpenOutlined';
 import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
 import { crudStates } from "../../utils/constants";
-import { UserContext } from "../../context/user/UserContext";
 import BalanceIcon from '@mui/icons-material/Balance';
 import SettingsBrightnessIcon from '@mui/icons-material/SettingsBrightness';
 import DirectionsCarFilledIcon from '@mui/icons-material/DirectionsCarFilled';
 import AuthenticationUtils from "../../pages/authentication/utills";
+import RoutesUtills from "../../core/routes/utills";
 
 export const modalStates = {
     password: "password",
@@ -27,8 +27,8 @@ const AppBarUtills = () => {
     const [modalState, setModalState] = useState<string>("");
     const [open, setOpen] = useState<boolean>(false);
     const navigate = useNavigate();
-    const { user } = useContext(UserContext);
     const { handleLogout } = AuthenticationUtils()
+    const { getCurrentUser } = RoutesUtills();
 
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
@@ -61,7 +61,7 @@ const AppBarUtills = () => {
                 navigate(ROUTES.LOGIN);
                 break;
             case modalStates.profile:
-                navigate(`${ROUTES.PROFILE}/${user.id}`);
+                navigate(`${ROUTES.PROFILE}/${getCurrentUser()?.id}`);
                 break;
             case modalStates.leave:
                 setModalState(modalStates.leave);

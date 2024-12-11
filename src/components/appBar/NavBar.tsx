@@ -63,14 +63,16 @@ const NavBar = () => {
                             <NotificationsNoneIcon color="inherit" />
                         </Badge>
                         <TypographyComponent size='16px' weight={400} sx={{ color: grey[100] }}>
-                            {getCurrentUser()?.firstName} {getCurrentUser()?.lastName}
+                            {getCurrentUser()?.name}
                         </TypographyComponent>
                         <IconButton
                             onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
                                 setAction("")
                                 handleAnchorClick?.(event)
                             }}>
-                            <Avatar src={getCurrentUser()?.gender === 'Male' ? MaleLogo : FemaleLogo} sx={{ height: 45, width: 45, cursor: "pointer" }} />
+                            <Avatar
+                                src={getCurrentUser()?.image || (getCurrentUser()?.gender === 'male' ? MaleLogo : FemaleLogo)}
+                                sx={{ height: 45, width: 45, cursor: "pointer" }} />
                         </IconButton>
                     </Stack>}
                 <PopoverComponent
