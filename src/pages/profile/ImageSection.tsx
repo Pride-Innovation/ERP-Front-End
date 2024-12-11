@@ -63,7 +63,7 @@ const ImageSection = () => {
                     src={image || (user.gender === 'male' ? MaleProfile : FemaleProfile)}
                 />
                 {getCurrentUser()?.id === parseInt(id as string, 10) && (
-                    <IconButton onClick={handleButtonClick} sx={{ position: "absolute", bgcolor: blue[700] }}>
+                    <IconButton onClick={handleButtonClick} sx={{ position: "relative", bgcolor: blue[700] }}>
                         <EditIcon fontSize='medium' sx={{ color: "white" }} />
                         <InputFileUpload inputRef={inputRef} handleFileUpload={handleFileUpload} />
                     </IconButton>
@@ -72,7 +72,7 @@ const ImageSection = () => {
             <TypographyComponent weight={600} size='18px' sx={{ mt: 2 }}>
                 {`${user.firstName} ${user.lastName} ${user.otherName}`}
             </TypographyComponent>
-            <TypographyComponent weight={400} size='14px' sx={{ m: 0.5 }} color={grey[600]}>
+            <TypographyComponent weight={400} size='14px' sx={{ m: 0.5 }} color={grey[600]} >
                 {user.title}
             </TypographyComponent>
             <Stack direction="column" spacing={1.5}>
@@ -152,14 +152,16 @@ const ProfileLine = () => {
                 ))}
             {getCurrentUser()?.id === parseInt(id as string, 10) && (
                 <Box sx={{ width: "100%", mt: 1, display: "flex", justifyContent: "end" }}>
-                    <ButtonComponent
-                        handleClick={handleProfileUpdate}
-                        sendingRequest={false}
-                        buttonText='Update Profile'
-                        variant='contained'
-                        buttonColor='info'
-                        type='button'
-                    />
+                    <Box>
+                        <ButtonComponent
+                            handleClick={handleProfileUpdate}
+                            sendingRequest={false}
+                            buttonText='Update Profile'
+                            variant='contained'
+                            buttonColor='info'
+                            type='button'
+                        />
+                    </Box>
                 </Box>
             )}
         </Grid>
