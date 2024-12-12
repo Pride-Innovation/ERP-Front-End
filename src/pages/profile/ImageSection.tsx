@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Box, Chip, Grid, IconButton, Stack } from '@mui/material';
 import { blue, grey } from '@mui/material/colors';
 import EditIcon from '@mui/icons-material/Edit';
@@ -11,19 +11,20 @@ import AppBarUtills, { modalStates } from '../../components/appBar/utills';
 import ModalComponent from '../../components/modal';
 import ChangePassword from './ChangePassword';
 import LeaveComponent from './Leave';
-import InputFileUpload from '../../components/forms/FileUpload';
 import UpdateUsers from '../users/UpdateUsers';
 import UserUtils from '../users/utils';
 import RoutesUtills from '../../core/routes/utills';
 import { UserContext } from '../../context/user/UserContext';
 import ButtonComponent from '../../components/forms/Button';
 import { TypographyComponent } from '../../components/headers/TypographyComponent';
+import UpdateProfileImage from './UpdateProfileImage';
 
 const ImageSection = () => {
-    const inputRef = useRef<HTMLInputElement>(null);
     const { setUser, user } = useContext(UserContext);
     const { id } = useParams<{ id: string | undefined }>();
     const { getSingleUser } = UserUtils();
+    const { handleClose, modalState, open, handleOptionClicked } = AppBarUtills();
+    const { getCurrentUser } = RoutesUtills();
     const [image, setImage] = useState<string>('');
 
     const getUserDetails = async () => {
@@ -33,16 +34,7 @@ const ImageSection = () => {
 
     useEffect(() => { getUserDetails() }, [id]);
 
-    const handleButtonClick = () => inputRef.current?.click();
-
-    const handleFileUpload = (files: FileList | null) => {
-        if (!files) return;
-        const file = files[0];
-        setImage(URL.createObjectURL(file));
-    };
-
-    const { getCurrentUser } = RoutesUtills();
-    const { handleClose, modalState, open, handleOptionClicked } = AppBarUtills();
+    const userImage = image || (user?.image && user?.image.length > 0 ? user?.image : (user?.gender === 'male' ? MaleProfile : FemaleProfile));
 
     return (
         <Grid container direction="column" alignItems="center" justifyContent="center">
@@ -56,21 +48,27 @@ const ImageSection = () => {
                     <LeaveComponent />
                 </ModalComponent>
             }
+            {modalState === modalStates.image &&
+                <ModalComponent title='Update Profile' open={open} handleClose={handleClose} width="40%">
+                    <UpdateProfileImage setImage={setImage} userImage={userImage} />
+                </ModalComponent>
+            }
             <Box sx={{ position: "relative" }}>
                 <Box
                     component="img"
                     sx={{ width: 150, height: 150 }}
-                    src={image || (user.gender === 'male' ? MaleProfile : FemaleProfile)}
+                    src={userImage}
                 />
                 {getCurrentUser()?.id === parseInt(id as string, 10) && (
-                    <IconButton onClick={handleButtonClick} sx={{ position: "relative", bgcolor: blue[700] }}>
+                    <IconButton
+                        onClick={() => handleOptionClicked(modalStates.image)}
+                        sx={{ position: "relative", bgcolor: blue[700] }}>
                         <EditIcon fontSize='medium' sx={{ color: "white" }} />
-                        <InputFileUpload inputRef={inputRef} handleFileUpload={handleFileUpload} />
                     </IconButton>
                 )}
             </Box>
             <TypographyComponent weight={600} size='18px' sx={{ mt: 2 }}>
-                {`${user.firstName} ${user.lastName} ${user.otherName}`}
+                {user?.name}
             </TypographyComponent>
             <TypographyComponent weight={400} size='14px' sx={{ m: 0.5 }} color={grey[600]} >
                 {user.title}

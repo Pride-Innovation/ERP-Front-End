@@ -20,6 +20,7 @@ export const modalStates = {
     officeEquipment: "officeEquipment",
     itEquipment: "itEquipment",
     fleet: "fleet",
+    image: "image"
 }
 
 
@@ -75,6 +76,10 @@ const AppBarUtills = () => {
                 break;
             case modalStates.fleet:
                 navigate(ROUTES.CREATE_FLEET);
+                break;
+            case modalStates.image:
+                setModalState(modalStates.image);
+                handleOpen();
                 break;
             default:
                 break;

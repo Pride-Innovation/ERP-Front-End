@@ -1,3 +1,4 @@
+import { Dispatch, SetStateAction } from "react";
 import { Control, FieldError, FormState, UseFormRegister } from "react-hook-form";
 
 export interface IChangePassword {
@@ -30,4 +31,9 @@ export interface IIChangePasswordForm {
 
 export interface IChangePasswordComponent {
     handleClose: () => void;
+}
+
+export interface IUpdateProfileImage {
+    setImage: Dispatch<SetStateAction<string>>
+    userImage: string;
 }
