@@ -31,7 +31,7 @@ const CreateUser = ({ handleClose }: ICreateUser) => {
 
     const onSubmit = async (formData: IUser) => {
         setSendingRequest(true);
-
+        console.log(formData, "Form Data!!")
         const data = new FormData();
         data.append('email', formData.email);
         data.append('name', formData.firstName + " " + formData.lastName + " " + formData.otherName);
@@ -52,6 +52,7 @@ const CreateUser = ({ handleClose }: ICreateUser) => {
             data.append(`roles[${index}]`, role);
         });
 
+        /*
         try {
             const response = await createUSerService(data) as IResponseData;
             if (response.status === "success") {
@@ -63,6 +64,7 @@ const CreateUser = ({ handleClose }: ICreateUser) => {
             console.log(error)
             toast.error(ErrorMessage)
         }
+            */
         setSendingRequest(false);
     };
 

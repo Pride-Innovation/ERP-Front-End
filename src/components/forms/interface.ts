@@ -69,6 +69,7 @@ export interface IUseFormInput<T extends FieldValues> {
     options?: IOptions[];
     row?: number;
     multiline?: boolean;
+    multiple?: boolean;
 }
 
 export interface IDatePickerComponent {
@@ -90,6 +91,7 @@ export interface IAutocompleteComponent {
     options: Array<IOptions>
     field: FieldValues;
     error: FieldError | undefined;
+    multiple?: boolean;
 }
 
 export interface IFileUploadButton {
@@ -99,6 +101,6 @@ export interface IFileUploadButton {
 
 export interface ICheckboxComponent {
     checked: boolean;
-    name?: string ;
+    name?: string;
     handleChangeEvent: (event: ChangeEvent<HTMLInputElement>) => void
 }

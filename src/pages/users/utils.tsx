@@ -130,15 +130,6 @@ const UserUtils = () => {
             type: "input"
         },
         {
-            value: "role",
-            label: 'Role',
-            type: "select",
-            options: [
-                { label: "Super Admin", value: "super_admin" },
-                { label: "Admin", value: "admin" },
-            ]
-        },
-        {
             value: "email",
             label: 'Email address',
             type: "input"
@@ -189,7 +180,20 @@ const UserUtils = () => {
         {
             value: "availability",
             label: 'Availability',
-            type: "input"
+            type: "select",
+            options: [
+                { label: "Present", value: "present" },
+                { label: "Absent", value: "absent" },
+            ]
+        },
+        {
+            value: "role",
+            label: 'Role',
+            type: "autocomplete",
+            options: [
+                { label: "Super Admin", value: "1" },
+                { label: "Admin", value: "2" },
+            ]
         },
     ]
 
