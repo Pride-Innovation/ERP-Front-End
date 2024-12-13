@@ -1,6 +1,6 @@
 import axiosInstance from "../../../core/apis/axiosInstance";
 
-export const createUSerService = async (body: object) => {
+const createUSerService = async (body: object) => {
   try {
     const response = await axiosInstance.post("users/create", body, {
       headers: {
@@ -13,7 +13,20 @@ export const createUSerService = async (body: object) => {
   }
 };
 
-export const fetchUsersService = async () => {
+const updateUSerService = async (body: object, id: string | number) => {
+  try {
+    const response = await axiosInstance.post(`users/update/${id}`, body, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      }
+    });
+    return response.data;
+  } catch (error) {
+    throw error
+  }
+};
+
+const fetchUsersService = async () => {
   try {
     const response = await axiosInstance.get("users");
     return response.data?.data;
@@ -22,7 +35,7 @@ export const fetchUsersService = async () => {
   }
 }
 
-export const deleteUserService = async (id: string | number) => {
+const deleteUserService = async (id: string | number) => {
   try {
     const response = await axiosInstance.get(`users/delete/${id}`);
     return response.data;
@@ -31,11 +44,19 @@ export const deleteUserService = async (id: string | number) => {
   }
 }
 
-export const fetchSingleUserService = async (id: string | number) => {
+const fetchSingleUserService = async (id: string | number) => {
   try {
     const response = await axiosInstance.get(`users/${id}`);
     return response.data?.data;
   } catch (error) {
     throw error
   }
+}
+
+export {
+  createUSerService,
+  fetchSingleUserService,
+  deleteUserService,
+  fetchUsersService,
+  updateUSerService
 }

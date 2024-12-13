@@ -16,7 +16,7 @@ export const usersMock: IUser[] = [
         unit: 'Backend',
         gender: 'Male',
         image: "image",
-        availability: true,
+        availability: "present",
         role: rolesMock[0]
     },
     {
@@ -32,7 +32,7 @@ export const usersMock: IUser[] = [
         unit: 'Management',
         gender: 'Female',
         image: "image",
-        availability: true,
+        availability: "present",
         role: rolesMock[1]
     },
     {
@@ -48,7 +48,7 @@ export const usersMock: IUser[] = [
         unit: 'User Experience',
         gender: 'Male',
         image: "image",
-        availability: false,
+        availability: "absent",
         role: rolesMock[2]
     },
     {
@@ -64,7 +64,7 @@ export const usersMock: IUser[] = [
         unit: 'Digital Marketing',
         gender: 'Female',
         image: "image",
-        availability: true,
+        availability: "present",
         role: rolesMock[3]
     },
     {
@@ -80,7 +80,7 @@ export const usersMock: IUser[] = [
         unit: 'Field Sales',
         gender: 'Male',
         image: "image",
-        availability: true,
+        availability: "present",
         role: rolesMock[4]
     },
     {
@@ -96,7 +96,7 @@ export const usersMock: IUser[] = [
         unit: 'Support',
         gender: 'Female',
         image: "image",
-        availability: false,
+        availability: "absent",
         role: rolesMock[5]
     },
     {
@@ -112,7 +112,7 @@ export const usersMock: IUser[] = [
         unit: 'Recruitment',
         gender: 'Male',
         image: "image",
-        availability: true,
+        availability: "present",
         role: rolesMock[5]
     },
     {
@@ -128,7 +128,7 @@ export const usersMock: IUser[] = [
         unit: 'Analysis',
         gender: 'Female',
         image: "image",
-        availability: true,
+        availability: "present",
         role: rolesMock[1]
     },
     {
@@ -144,7 +144,7 @@ export const usersMock: IUser[] = [
         unit: 'Technical Support',
         gender: 'Male',
         image: "image",
-        availability: false,
+        availability: "absent",
         role: rolesMock[1]
     },
     {
@@ -160,7 +160,7 @@ export const usersMock: IUser[] = [
         unit: 'Analysis',
         gender: 'Female',
         image: "image",
-        availability: true,
+        availability: "present",
         role: rolesMock[2]
     }
 ];

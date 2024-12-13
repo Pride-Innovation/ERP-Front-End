@@ -18,7 +18,7 @@ export const requestMock: IRequest[] = [
             unit: "Development",
             gender: "Male",
             staffNumber: "E12345",
-            availability: true,
+            availability: "present",
             role: rolesMock[0]
         },
         reason: "Upgrade software",
@@ -41,7 +41,7 @@ export const requestMock: IRequest[] = [
             unit: "Management",
             gender: "Female",
             staffNumber: "P12346",
-            availability: false,
+            availability: "absent",
             role: rolesMock[1]
         },
         reason: "Request new equipment",
@@ -64,7 +64,7 @@ export const requestMock: IRequest[] = [
             unit: "Creative",
             gender: "Female",
             staffNumber: "D12347",
-            availability: true,
+            availability: "present",
             role: rolesMock[2]
         },
         reason: "Access to design software",
@@ -87,7 +87,7 @@ export const requestMock: IRequest[] = [
             unit: "Data Science",
             gender: "Male",
             staffNumber: "A12348",
-            availability: true,
+            availability: "present",
             role: rolesMock[3]
         },
         reason: "Database access",
@@ -110,7 +110,7 @@ export const requestMock: IRequest[] = [
             unit: "Promotion",
             gender: "Female",
             staffNumber: "M12349",
-            availability: false,
+            availability: "absent",
             role: rolesMock[4]
         },
         reason: "Event materials",
@@ -133,7 +133,7 @@ export const requestMock: IRequest[] = [
             unit: "People Ops",
             gender: "Male",
             staffNumber: "H12350",
-            availability: true,
+            availability: "present",
             role: rolesMock[5]
         },
         reason: "Employee training",
@@ -156,7 +156,7 @@ export const requestMock: IRequest[] = [
             unit: "Sales Team",
             gender: "Female",
             staffNumber: "S12351",
-            availability: false,
+            availability: "absent",
             role: rolesMock[6]
         },
         reason: "New sales tools",
@@ -179,7 +179,7 @@ export const requestMock: IRequest[] = [
             unit: "Testing",
             gender: "Male",
             staffNumber: "T12352",
-            availability: true,
+            availability: "present",
             role: rolesMock[1]
         },
         reason: "Test environment setup",
@@ -202,7 +202,7 @@ export const requestMock: IRequest[] = [
             unit: "PMO",
             gender: "Female",
             staffNumber: "P12353",
-            availability: true,
+            availability: "present",
             role: rolesMock[2]
         },
         reason: "Project resources",
@@ -225,7 +225,7 @@ export const requestMock: IRequest[] = [
             unit: "Network Operations",
             gender: "Male",
             staffNumber: "N12354",
-            availability: true,
+            availability: "present",
             role: rolesMock[3]
         },
         reason: "Network equipment",

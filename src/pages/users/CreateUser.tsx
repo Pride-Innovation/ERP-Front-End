@@ -40,7 +40,7 @@ const CreateUser = ({ handleClose }: ICreateUser) => {
         data.append('department_id', "1");
         data.append('gender', formData.gender);
         data.append('staffNumber', formData.staffNumber);
-        data.append('availability', formData.availability ? "present" : "absent");
+        data.append('availability', (formData?.availability as string));
 
         const roles = formData?.role as unknown as Array<string>
 

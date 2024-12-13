@@ -18,7 +18,7 @@ export interface IUsersTableData {
     unit: string;
     gender: string;
     staffNumber: string;
-    availability?: boolean;
+    availability?: string;
 }
 
 export interface IUser extends IUsersExcludedTableData, IUsersTableData { }
