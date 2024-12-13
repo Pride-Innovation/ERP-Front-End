@@ -76,6 +76,10 @@ const UserUtils = () => {
         setUsers(() => users.filter(user => user.id !== id))
     };
 
+    const replaceUpdatedUser = (id: string | number, updatedUser: IUser) => {
+        setUsers(() => users.map(user => user?.id === id ? updatedUser : user))
+    }
+
     const handleUsers = (users: Array<IUser>) => {
         const data: Array<IUsersTableData> = users.map((user, index) => {
             const {
@@ -233,7 +237,8 @@ const UserUtils = () => {
         formatRoles,
         fetchRolesData,
         roles,
-        setRoleOptions
+        setRoleOptions,
+        replaceUpdatedUser
     })
 }
 

@@ -9,11 +9,12 @@ import UserForm from './UserForm';
 import { updateUSerService } from './service';
 import { toast } from 'react-toastify';
 import { ErrorMessage } from '../../utils/constants';
+import UserUtils from './utils';
 
 const UpdateUsers = ({ handleClose }: IUpdateUser) => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
     const { user } = useContext(UserContext);
-
+    const { replaceUpdatedUser } = UserUtils()
     const {
         control,
         handleSubmit,
@@ -32,8 +33,6 @@ const UpdateUsers = ({ handleClose }: IUpdateUser) => {
     const onSubmit = async (formData: IUser) => {
         setSendingRequest(true);
 
-        console.log(formData, "Form Data!!")
-
         const data = new FormData();
         data.append('email', formData.email);
         data.append('name', formData.firstName + " " + formData.lastName + " " + formData.otherName);
@@ -44,6 +43,9 @@ const UpdateUsers = ({ handleClose }: IUpdateUser) => {
         data.append('staffNumber', formData.staffNumber);
         data.append('availability', (formData?.availability as string));
 
+        data.append('password', "12345678");
+        data.append('password_confirmation', "12345678");
+
         const roles = formData?.role as unknown as Array<string>
         roles?.forEach((role, index) => {
             data.append(`roles[${index}]`, role);
@@ -53,6 +55,8 @@ const UpdateUsers = ({ handleClose }: IUpdateUser) => {
             const response = await updateUSerService(data, (user?.id as string)) as IResponseData;
             if (response.status === "success") {
                 handleClose();
+                const updatedUser: IUser = { ...(response["data"]?.[0] as IUser), id: user?.id }
+                replaceUpdatedUser((user?.id as string), updatedUser)
                 return toast.success(response?.data?.message)
             }
             return toast.error(ErrorMessage)

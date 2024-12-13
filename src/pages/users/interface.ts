@@ -44,6 +44,7 @@ export interface IResponseData {
 
     status: "success" | "failed",
     data: {
+        "0"?: IUser,
         message: string;
     }
 }
