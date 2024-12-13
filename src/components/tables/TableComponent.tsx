@@ -82,9 +82,9 @@ const TableComponent = ({
                         )
                         : (column.isBoolen) ? (
                             <StyledBox >
-                                {value ?
-                                    <ChipComponent variant='filled' label='Available' icon={<CheckIcon fontSize='small' />} size='medium' color='success' /> :
-                                    <ChipComponent variant='filled' label='Leave' icon={<DoNotDisturbAltIcon fontSize='small' />} size='medium' color='error' />
+                                {value === "present" ?
+                                    <ChipComponent variant='filled' label='Present' icon={<CheckIcon fontSize='small' />} size='medium' color='success' /> :
+                                    <ChipComponent variant='filled' label='Leave' icon={<DoNotDisturbAltIcon fontSize='small' />} size='medium' color='warning' />
                                 }
                             </StyledBox>
                         ) : (column.isAction) ? (
