@@ -1,7 +1,7 @@
 import { usersMock } from '../../mocks/users';
 import { useContext, useEffect, useState } from 'react';
 import { getTableHeaders } from '../../components/tables/getTableHeaders';
-import { ITableHeader } from '../../components/tables/interface';
+import { IOptions, ITableHeader } from '../../components/tables/interface';
 import InfoIcon from '@mui/icons-material/Info';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import { UserContext } from '../../context/user/UserContext';
@@ -10,11 +10,26 @@ import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import { crudStates } from '../../utils/constants';
 import { IFormData } from '../assets/interface';
 import { fetchSingleUserService } from './service';
+import { IRole } from '../settings/interface';
+import RoleUtills from '../settings/roles/utills';
 
 const UserUtils = () => {
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
+    const [roleOptions, setRoleOptions] = useState<IOptions[]>([] as Array<IOptions>);
     const [modalState, setModalState] = useState<string>("");
     const [open, setOpen] = useState<boolean>(false);
+    const [roles, setRoles] = useState<IRole[]>([] as Array<IRole>);
+    const { fetchAllRoles } = RoleUtills();
+
+    const fetchRolesData = async () => {
+        try {
+            const rolesData = await fetchAllRoles();
+            setRoles(rolesData);
+        } catch (error) {
+            console.error("Error fetching roles:", error);
+        }
+    };
+
 
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
@@ -113,6 +128,14 @@ const UserUtils = () => {
         });
     }
 
+    const formatRoles = (roles: Array<IRole>): Array<IOptions> => {
+        const roleOptions = roles.map(role => ({
+            value: role.name,
+            label: role.name
+        }))
+        return roleOptions;
+    }
+
     const userFields: Array<IFormData<IUser>> = [
         {
             value: "firstName",
@@ -190,10 +213,7 @@ const UserUtils = () => {
             value: "role",
             label: 'Role',
             type: "autocomplete",
-            options: [
-                { label: "Super Admin", value: "1" },
-                { label: "Admin", value: "2" },
-            ]
+            options: roleOptions
         },
     ]
 
@@ -209,7 +229,11 @@ const UserUtils = () => {
         removeUserFromTable,
         userFields,
         filterCurrentUser,
-        getSingleUser
+        getSingleUser,
+        formatRoles,
+        fetchRolesData,
+        roles,
+        setRoleOptions
     })
 }
 

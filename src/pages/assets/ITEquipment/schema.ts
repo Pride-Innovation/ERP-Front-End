@@ -19,7 +19,7 @@ export const ITEquipmentSchema = yup.object().shape({
     ram: yup.string().nullable().optional(),
     cpuSpeed: yup.string().nullable().optional(),
     hardDiskSize: yup.string().nullable().optional(),
-    // location: yup.string().nullable().optional(),
+    location: yup.string().nullable().optional(),
     macAddress: yup.string().nullable().optional(),
     ipAddress: yup.string().nullable().optional(),
     interfaceType: yup.string().nullable().optional(),

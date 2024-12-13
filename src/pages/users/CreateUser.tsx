@@ -42,17 +42,15 @@ const CreateUser = ({ handleClose }: ICreateUser) => {
         data.append('staffNumber', formData.staffNumber);
         data.append('availability', formData.availability ? "present" : "absent");
 
-        const roles = ["Super Admin", "Admin"];
+        const roles = formData?.role as unknown as Array<string>
 
         data.append('password', "12345678");
         data.append('password_confirmation', "12345678");
 
-
-        roles.forEach((role, index) => {
+        roles?.forEach((role, index) => {
             data.append(`roles[${index}]`, role);
         });
 
-        /*
         try {
             const response = await createUSerService(data) as IResponseData;
             if (response.status === "success") {
@@ -64,7 +62,6 @@ const CreateUser = ({ handleClose }: ICreateUser) => {
             console.log(error)
             toast.error(ErrorMessage)
         }
-            */
         setSendingRequest(false);
     };
 

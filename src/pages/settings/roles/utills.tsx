@@ -5,6 +5,7 @@ import SettingsBrightnessIcon from '@mui/icons-material/SettingsBrightness';
 import DirectionsCarFilledIcon from '@mui/icons-material/DirectionsCarFilled';
 import GroupIcon from '@mui/icons-material/Group';
 import { crudStates } from "../../../utils/constants";
+import { fetchAllRolesService } from "./service";
 
 const RoleUtills = () => {
     const endPoint = "posts";
@@ -70,6 +71,10 @@ const RoleUtills = () => {
         })
     }
 
+    const fetchAllRoles = async (): Promise<IRole[]> => {
+        const response = await fetchAllRolesService() as unknown as IRole[];
+        return response;
+    }
 
     return (
         {
@@ -84,7 +89,8 @@ const RoleUtills = () => {
             handleOpen,
             open,
             modalState,
-            setModalState
+            setModalState,
+            fetchAllRoles
         }
     )
 }

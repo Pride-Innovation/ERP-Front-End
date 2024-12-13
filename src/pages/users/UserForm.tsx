@@ -17,6 +17,7 @@ import {
     UseFormInput,
     UseFormSelect
 } from '../../components/forms';
+import { useEffect } from 'react';
 
 interface IUserForm {
     formState: FormState<IUser> & {
@@ -48,7 +49,11 @@ const UserForm = ({
     sendingRequest,
     handleClose,
 }: IUserForm) => {
-    const { userFields } = UserUtils();
+    const { userFields, formatRoles, fetchRolesData, roles, setRoleOptions } = UserUtils();
+
+    useEffect(() => { fetchRolesData(); }, []);
+    useEffect(() => { setRoleOptions(formatRoles(roles)) }, [roles])
+
     return (
         <Grid item container xs={12}>
             <Grid item container spacing={4} xs={12}>

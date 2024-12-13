@@ -138,16 +138,16 @@ const ITEquipmentUtills = () => {
             label: 'Assigned To',
             type: "input"
         },
-        {
-            value: "location",
-            label: 'Location',
-            type: "autocomplete",
-            options: [
-                { label: "USB", value: "usb" },
-                { label: "LCD", value: "lcd" },
-                { label: "LED", value: "led" },
-            ]
-        },
+        // {
+        //     value: "location",
+        //     label: 'Location',
+        //     type: "autocomplete",
+        //     options: [
+        //         { label: "USB", value: "usb" },
+        //         { label: "LCD", value: "lcd" },
+        //         { label: "LED", value: "led" },
+        //     ]
+        // },
         {
             value: "purchaseCost",
             label: 'Purchase Cost',

@@ -29,7 +29,7 @@ const AutocompleteComponent = ({
         } else {
             const newValueArray = multiple
                 ? (newValue as IOptions[]).map(option => option.value)
-                : (newValue as IOptions)?.value || null;
+                : (newValue as IOptions)?.value;
             setValue(newValue as Array<IOptions>);
             field.onChange(newValueArray);
         }
@@ -42,7 +42,7 @@ const AutocompleteComponent = ({
             disablePortal
             onChange={handleChange}
             options={options}
-            getOptionLabel={(option: IOptions) => option.label}
+            getOptionLabel={(option: IOptions) => option.label || ""}
             size='small'
             fullWidth
             renderInput={(params) => (
