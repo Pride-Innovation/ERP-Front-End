@@ -7,6 +7,7 @@ export const permissionsMock: IPermission[] = [
     { id: 4, name: "update_users" },
     { id: 5, name: "update_it_equipment" },
     { id: 6, name: "create_it_equipment" },
+    { id: 7, name: "delete_it_equipment" },
     { id: 8, name: "read_it_equipment" },
     { id: 9, name: "update_office_equipment" },
     { id: 10, name: "create_office_equipment" },
