@@ -3,6 +3,7 @@ import { Control, FieldError, FormState, UseFormRegister } from "react-hook-form
 export interface IPermission {
     id?: number | string;
     name: string;
+    guard_name?: string;
 }
 
 
@@ -10,6 +11,7 @@ export interface IRole {
     id?: string | number;
     name: string;
     permissions?: Array<IPermission>;
+    guard_name?: string;
 }
 
 

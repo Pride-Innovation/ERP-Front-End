@@ -6,15 +6,28 @@ import { IRole } from '../interface';
 import ModalComponent from '../../../components/modal';
 import RoleUtills from './utills';
 import { crudStates } from '../../../utils/constants';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import DeleteRole from './DeleteRole';
 import CreateRole from './CreateRole';
 import UpdateRole from './UpdateRole';
 
 const Roles = () => {
-    const { open, handleClose, handleOpen, modalState, setModalState } = RoleUtills();
+    const { open, handleClose, handleOpen, modalState, setModalState, fetchAllRoles } = RoleUtills();
     const [currentRole, setCurrentRole] = useState<IRole>({} as IRole);
+    const [roles, setRoles] = useState<IRole[]>([] as Array<IRole>)
 
+    useEffect(() => {
+        const fetchRoles = async () => {
+            try {
+                const rolesData = await fetchAllRoles();
+                setRoles(rolesData);
+            } catch (error) {
+                console.error("Error fetching roles:", error);
+            }
+        };
+
+        fetchRoles();
+    }, []);
     const createRole = () => {
         setModalState(crudStates.create);
         handleOpen()
@@ -32,6 +45,7 @@ const Roles = () => {
         handleOpen()
     }
 
+    console.log(roles, "roles list!!")
     return (
         <>
             {
@@ -75,7 +89,7 @@ const Roles = () => {
                     gap={4}
                 >
                     {
-                        rolesMock.map((role: IRole) => {
+                        roles.map((role: IRole) => {
                             return (
                                 <RoleDetails updateRole={updateRole} deleteRole={deleteRole} role={role} />
                             )

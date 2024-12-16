@@ -53,6 +53,11 @@ const RoleUtills = () => {
         return permissions?.filter(perm => perm.name.indexOf(verb) !== -1 && perm.name.indexOf(module) !== -1);
     }
 
+    const updatePermissionsOnClick = (currentPermissions: Array<IPermission>, newPermission: IPermission, val: boolean) => {
+        const newList = currentPermissions.filter(perm => perm.id !== newPermission.id);
+        return val ? [...newList, newPermission] : newList
+    }
+
 
     const determineCrudStates = (permissions: Array<IPermission>, module: string) => {
 
@@ -90,7 +95,8 @@ const RoleUtills = () => {
             open,
             modalState,
             setModalState,
-            fetchAllRoles
+            fetchAllRoles,
+            updatePermissionsOnClick
         }
     )
 }

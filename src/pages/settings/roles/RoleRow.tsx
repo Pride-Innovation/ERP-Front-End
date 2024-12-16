@@ -2,12 +2,13 @@ import { Box, Typography } from "@mui/material";
 import { IModule, IPermission, IRoleRow } from "../interface";
 import CheckboxComponent from "../../../components/forms/CheckBox";
 import RoleUtills from "./utills";
-import { ChangeEvent, useEffect } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { crudStates } from "../../../utils/constants";
 import { permissionsMock } from "../../../mocks/settings";
 
 const RoleRow = ({ role, module }: IRoleRow) => {
-    const { determineCrudStates, mainCheckedState, filterPermissions } = RoleUtills();
+    const { determineCrudStates, mainCheckedState, filterPermissions, updatePermissionsOnClick } = RoleUtills();
+    const [selectPermissions, setSelectedPermission] = useState<IPermission[]>([] as Array<IPermission>)
 
     const moduleNameFxn = (module: IModule) => module.name.toLocaleLowerCase().split(" ").join("_");
 
@@ -17,9 +18,13 @@ const RoleRow = ({ role, module }: IRoleRow) => {
 
     const handleChange = async (event: ChangeEvent<HTMLInputElement>) => {
         const verb = event.target.name;
+        const val = event.target.checked;
         const permission = filterPermissions(verb, permissionsMock, moduleNameFxn(module));
-        console.log(verb, role, module, permission, "request information!!!");
+        const result = updatePermissionsOnClick(selectPermissions, permission[0], val);
+        setSelectedPermission([...result])
     }
+
+    useEffect(() => { determineCrudStates(selectPermissions, moduleNameFxn(module)) }, [selectPermissions]);
 
     return (
         <Box
