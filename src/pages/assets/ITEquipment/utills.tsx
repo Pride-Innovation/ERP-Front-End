@@ -42,18 +42,19 @@ const ITEquipmentUtills = () => {
         macAddress,
         image,
         interfaceType,
-        purchaseCost,
         detailNetBookValue,
-        dateReceipt,
         supplier,
         unitOfMeasure,
         assetDepreciationRate,
         assetSubCategory_id,
+        assetCategory_id,
+        location,
         desc,
+        serialNumber,
         netValueB,
         costOfTheAsset,
         hostname,
-        assetName,
+        name,
         ...data
     } = itEquipmentMock[0];
 
@@ -138,16 +139,6 @@ const ITEquipmentUtills = () => {
             label: 'Assigned To',
             type: "input"
         },
-        // {
-        //     value: "location",
-        //     label: 'Location',
-        //     type: "autocomplete",
-        //     options: [
-        //         { label: "USB", value: "usb" },
-        //         { label: "LCD", value: "lcd" },
-        //         { label: "LED", value: "led" },
-        //     ]
-        // },
         {
             value: "purchaseCost",
             label: 'Purchase Cost',

@@ -1,7 +1,6 @@
 import { Box, Typography } from '@mui/material';
 import ButtonComponent from '../../../components/forms/Button';
 import RoleDetails from './RoleDetails';
-import { rolesMock } from '../../../mocks/settings';
 import { IRole } from '../interface';
 import ModalComponent from '../../../components/modal';
 import RoleUtills from './utills';
@@ -45,7 +44,6 @@ const Roles = () => {
         handleOpen()
     }
 
-    console.log(roles, "roles list!!")
     return (
         <>
             {

@@ -8,7 +8,8 @@ import { permissionsMock } from "../../../mocks/settings";
 
 const RoleRow = ({ role, module }: IRoleRow) => {
     const { determineCrudStates, mainCheckedState, filterPermissions, updatePermissionsOnClick } = RoleUtills();
-    const [selectPermissions, setSelectedPermission] = useState<IPermission[]>([] as Array<IPermission>)
+    const [selectedPermissions, setSelectedPermissions] = useState<IPermission[]>([] as Array<IPermission>);
+    const [selectedPermission, setSelectedPermission] = useState<{ name: string, value: boolean }>({} as { name: string, value: boolean })
 
     const moduleNameFxn = (module: IModule) => module.name.toLocaleLowerCase().split(" ").join("_");
 
@@ -20,11 +21,13 @@ const RoleRow = ({ role, module }: IRoleRow) => {
         const verb = event.target.name;
         const val = event.target.checked;
         const permission = filterPermissions(verb, permissionsMock, moduleNameFxn(module));
-        const result = updatePermissionsOnClick(selectPermissions, permission[0], val);
-        setSelectedPermission([...result])
+        const result = updatePermissionsOnClick(selectedPermissions, permission[0], val);
+        setSelectedPermissions([...result]);
+        setSelectedPermission({ name: verb, value: val })
     }
 
-    useEffect(() => { determineCrudStates(selectPermissions, moduleNameFxn(module)) }, [selectPermissions]);
+    useEffect(() => { determineCrudStates(selectedPermissions, moduleNameFxn(module)) }, [selectedPermissions]);
+    useEffect(() => { console.log(selectedPermission) }, [selectedPermission]);
 
     return (
         <Box
