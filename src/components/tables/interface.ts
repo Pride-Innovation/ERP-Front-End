@@ -12,6 +12,7 @@ export interface ITableHeader {
     isNumber?: boolean;
     isImage?: boolean;
     isStatus?: boolean;
+    isMoney?: boolean;
     actionData?: {
         label: string;
         options: Array<IOptions>

@@ -1,7 +1,7 @@
 import { DataGridStyled, StyledBox } from '../../components/tables/Table';
 import { GridColDef, GridRowsProp } from '@mui/x-data-grid';
 import { Avatar, Box, Card } from '@mui/material';
-import { camelCaseToWords, determineImage, isCamelCase } from '../../utils/helpers';
+import { camelCaseToWords, determineImage, formatToUGXMoney, isCamelCase } from '../../utils/helpers';
 import { ITableComponent } from './interface';
 import { TypographyComponent } from '../headers/TypographyComponent';
 import ChipComponent from '../forms/Chip';
@@ -65,49 +65,56 @@ const TableComponent = ({
                                 (isCamelCase(value as string) && value) ?
                                     camelCaseToWords(value) : value}</TypographyComponent>
                         </StyledBox>
-                    ) : (column.isStatus) ?
+                    ) : (column.isMoney) ?
                         (
                             <StyledBox>
                                 <TypographyComponent
-                                    sx={{
-                                        display: "flex",
-                                        alignItems: "center",
-                                        justifyContent: "space-between",
-                                        textTransform: "capitalize"
-                                    }}
                                     weight={400} size='13.5px'>
-                                    <TimeLineDot color={determineTimeLineDotColor(value)} />
-                                    {value}</TypographyComponent>
+                                    {formatToUGXMoney(value)}</TypographyComponent>
                             </StyledBox>
-                        )
-                        : (column.isBoolen) ? (
-                            <StyledBox >
-                                {value === "present" ?
-                                    <ChipComponent variant='filled' label='Present' icon={<CheckIcon fontSize='small' />} size='medium' color='success' /> :
-                                    <ChipComponent variant='filled' label='Leave' icon={<DoNotDisturbAltIcon fontSize='small' />} size='medium' color='warning' />
-                                }
-                            </StyledBox>
-                        ) : (column.isAction) ? (
-                            <StyledBox >
-                                <ButtonComponent
-                                    handleClick={(event: React.MouseEvent<HTMLButtonElement>) => {
-                                        handleClick?.(event)
-                                        setCurrentId(param.row?.id)
-                                    }}
-                                    sendingRequest={false}
-                                    buttonText={column.actionData?.label as string}
-                                    variant='outlined'
-                                    buttonColor='info'
-                                    type='button' />
-                                <PopoverComponent
-                                    moduleID={currentID}
-                                    handleOptionClicked={handleOptionClicked}
-                                    options={(column.actionData?.options) as Array<{ value: string, label: string }>}
-                                    anchorEl={anchorEl}
-                                    setAnchorEl={setAnchorEl}
-                                />
-                            </StyledBox>
-                        ) : null
+                        ) : (column.isStatus) ?
+                            (
+                                <StyledBox>
+                                    <TypographyComponent
+                                        sx={{
+                                            display: "flex",
+                                            alignItems: "center",
+                                            justifyContent: "space-between",
+                                            textTransform: "capitalize"
+                                        }}
+                                        weight={400} size='13.5px'>
+                                        <TimeLineDot color={determineTimeLineDotColor(value)} />
+                                        {value}</TypographyComponent>
+                                </StyledBox>
+                            )
+                            : (column.isBoolen) ? (
+                                <StyledBox >
+                                    {value === "present" ?
+                                        <ChipComponent variant='filled' label='Present' icon={<CheckIcon fontSize='small' />} size='medium' color='success' /> :
+                                        <ChipComponent variant='filled' label='Leave' icon={<DoNotDisturbAltIcon fontSize='small' />} size='medium' color='warning' />
+                                    }
+                                </StyledBox>
+                            ) : (column.isAction) ? (
+                                <StyledBox >
+                                    <ButtonComponent
+                                        handleClick={(event: React.MouseEvent<HTMLButtonElement>) => {
+                                            handleClick?.(event)
+                                            setCurrentId(param.row?.id)
+                                        }}
+                                        sendingRequest={false}
+                                        buttonText={column.actionData?.label as string}
+                                        variant='outlined'
+                                        buttonColor='info'
+                                        type='button' />
+                                    <PopoverComponent
+                                        moduleID={currentID}
+                                        handleOptionClicked={handleOptionClicked}
+                                        options={(column.actionData?.options) as Array<{ value: string, label: string }>}
+                                        anchorEl={anchorEl}
+                                        setAnchorEl={setAnchorEl}
+                                    />
+                                </StyledBox>
+                            ) : null
         }
     }));
 

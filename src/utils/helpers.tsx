@@ -40,7 +40,6 @@ export const determineImage = (row: GridRowModel): string => {
             return FemaleAvatar
         }
     }
-    
 
     // return Placeholder;
     console.log(row?.image, "image url")
@@ -71,3 +70,20 @@ export const getLastSixMonths = (): string[] => {
 
     return lastSixMonths;
 };
+
+export const formatToUGXMoney = (amount: string): string => {
+    const numAmount = parseFloat(amount);
+
+    if (isNaN(numAmount)) {
+        throw new Error('Invalid number');
+    }
+
+    const formatter = new Intl.NumberFormat('en-UG', {
+        style: 'currency',
+        currency: 'UGX',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+    });
+
+    return formatter.format(numAmount);
+}
