@@ -142,6 +142,50 @@ const ITEquipmentUtills = () => {
         {
             value: "purchaseCost",
             label: 'Purchase Cost',
+            type: "number",
+        },
+        {
+            value: "hostname",
+            label: 'Host Name',
+            type: "input",
+        },
+        {
+            value: "detailNetBookValue",
+            label: 'Detail Net Book Value',
+            type: "input",
+        },
+        {
+            value: "dateReceipt",
+            label: 'Receipt Date',
+            type: "date",
+        },
+        {
+            value: "assetCategory_id",
+            label: 'Asset Category',
+            type: "select",
+            options: [
+                { label: "Category One", value: "1" },
+                { label: "Category One", value: "2" },
+            ]
+        },
+        {
+            value: "unitOfMeasure",
+            label: 'Unit Of Measure',
+            type: "input",
+        },
+        {
+            value: "costOfTheAsset",
+            label: 'Cost Of The Asset',
+            type: "number",
+        },
+        {
+            value: "make",
+            label: 'Make',
+            type: "input",
+        },
+        {
+            value: "supplier",
+            label: 'Supplier',
             type: "input",
         }
     ]

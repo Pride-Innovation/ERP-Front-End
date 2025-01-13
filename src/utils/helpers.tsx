@@ -75,7 +75,8 @@ export const formatToUGXMoney = (amount: string): string => {
     const numAmount = parseFloat(amount);
 
     if (isNaN(numAmount)) {
-        throw new Error('Invalid number');
+        console.log(numAmount, "Not a number!!!")
+        // throw new Error('Invalid number');
     }
 
     const formatter = new Intl.NumberFormat('en-UG', {

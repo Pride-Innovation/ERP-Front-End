@@ -10,7 +10,7 @@ import { crudStates } from "../../../utils/constants"
 import { ROUTES } from "../../../core/routes/routes"
 import { IITEquipment } from "./interface"
 import { ErrorMessage } from "../../../core/apis/axiosInstance"
-import { fetchITEquipmentService } from "./service"
+import { deleteITEquipmentService, fetchITEquipmentService } from "./service"
 
 const ITEquipment = () => {
     const [loading, setLoading] = useState<boolean>(false);
@@ -43,7 +43,7 @@ const ITEquipment = () => {
 
     useEffect(() => { fetchResources() }, []);
 
-    const handleOptionClicked = (option: string | number, moduleID?: string | number) => {
+    const handleOptionClicked = async (option: string | number, moduleID?: string | number) => {
         switch (option) {
             case crudStates.update:
                 navigate(`${ROUTES.UPDATE_ITEQUIPMENT}/${moduleID}`);
@@ -55,6 +55,10 @@ const ITEquipment = () => {
             case crudStates.read:
                 navigate(`${ROUTES.LIST_ASSETS}/${moduleID}`);
                 break;
+            case crudStates.delete:
+                const response = await deleteITEquipmentService(moduleID as number);
+                console.log(response, "response information")
+                break;
             default:
                 break;
         }
@@ -65,6 +69,7 @@ const ITEquipment = () => {
             {
                 <ModalComponent width={"40%"} title='Dispose IT Equipment' open={open} handleClose={handleClose}>
                     <Dispose
+                        handleClickAction={handleOptionClicked}
                         sendingRequest={loading}
                         handleClose={handleClose}
                         buttonText='Confirm'

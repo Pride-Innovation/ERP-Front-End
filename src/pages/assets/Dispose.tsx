@@ -2,10 +2,12 @@ import { Grid, Stack, Typography } from "@mui/material";
 import ButtonComponent from "../../components/forms/Button";
 import { IDispose } from "./interface";
 import { Assignment as AssetIcon } from '@mui/icons-material';
+import { crudStates } from "../../utils/constants";
 
 const Dispose = ({
     handleClose,
     sendingRequest,
+    handleClickAction,
     buttonText,
     asset
 }: IDispose) => {
@@ -41,6 +43,7 @@ const Dispose = ({
                         buttonColor='error'
                         type='submit'
                         sendingRequest={sendingRequest}
+                        handleClick={() => handleClickAction?.(crudStates.delete, asset?.id as string)}
                         buttonText={buttonText}
                     />
                 </Stack>

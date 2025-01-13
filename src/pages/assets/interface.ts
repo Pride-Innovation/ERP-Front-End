@@ -7,12 +7,13 @@ import { IPermission } from "../settings/interface";
 export interface IFormData<T> {
     value: Path<T>;
     label: string;
-    type: "input" | "select" | "date" | "autocomplete" | "textarea" | "time";
+    type: "input" | "select" | "date" | "autocomplete" | "textarea" | "time" | "number";
     options?: Array<IOptions>;
 }
 
 export interface IDispose {
     handleClose: () => void;
+    handleClickAction?: (option: string | number, moduleID: string | number) => void;
     sendingRequest: boolean;
     buttonText: string;
     asset: IITEquipment | IOfficeEquipment;
