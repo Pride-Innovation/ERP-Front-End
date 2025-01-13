@@ -6,6 +6,7 @@ import { Card, Grid } from "@mui/material";
 import { FormHeader } from "../../../components/headers/TypographyComponent";
 import { officeEquipmentSchema } from "./schema";
 import OfficeEquipmentForm from "./OfficeEquipmentForm";
+import { createOfficeEquipmentService } from "./service";
 
 const CreateOfficeEquipment = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
@@ -27,9 +28,18 @@ const CreateOfficeEquipment = () => {
         reset({ ...defaultUser });
     }, [reset]);
 
-    const onSubmit = (formData: IOfficeEquipment) => {
+    const onSubmit = async (formData: IOfficeEquipment) => {
         setSendingRequest(true);
-        console.log(formData, "form data!!!!!");
+        const response = await createOfficeEquipmentService({
+            ...formData,
+            user_id: 1,
+            branch_id: 1,
+            assetStatus_id: 1,
+            unitOfMeasure_id: 1,
+            supplier_id: 1,
+            OfficeEquipmentAssetCategory_id: 1
+        }) as IOfficeEquipment;
+        console.log(response, "response data")
     };
 
 
