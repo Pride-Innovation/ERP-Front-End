@@ -38,38 +38,50 @@ const OfficeEquipmentForm = ({
                                     label={formField.label}
                                 />
                             </Grid>
-                        ) : formField.type === 'select' ? (
-                            <Grid item xs={12} md={4}>
-                                <UseFormSelect
-                                    options={formField.options}
-                                    register={register}
-                                    control={control}
-                                    formState={formState}
-                                    value={formField.value}
-                                    label={formField.label} />
-                            </Grid>
-                        ) : formField.type === 'date' ? (
-                            <Grid item xs={12} md={4}>
-                                <UseFormDatePicker
-                                    register={register}
-                                    control={control}
-                                    formState={formState}
-                                    value={formField.value}
-                                    label={formField.label} />
-                            </Grid>
-                        ) : formField.type === 'autocomplete' ? (
-                            <Grid item xs={12} md={4}>
-                                <UseFormAutocompleteComponent
-                                    register={register}
-                                    control={control}
-                                    formState={formState}
-                                    value={formField.value}
-                                    label={formField.label}
-                                    options={formField.options}
-                                />
-                            </Grid>
-                        )
-                            : null
+                        ) :
+                            formField.type === 'number' ? (
+                                <Grid item xs={12} md={4}>
+                                    <UseFormInput
+                                        type="number"
+                                        register={register}
+                                        control={control}
+                                        formState={formState}
+                                        value={formField.value}
+                                        label={formField.label}
+                                    />
+                                </Grid>
+                            ) : formField.type === 'select' ? (
+                                <Grid item xs={12} md={4}>
+                                    <UseFormSelect
+                                        options={formField.options}
+                                        register={register}
+                                        control={control}
+                                        formState={formState}
+                                        value={formField.value}
+                                        label={formField.label} />
+                                </Grid>
+                            ) : formField.type === 'date' ? (
+                                <Grid item xs={12} md={4}>
+                                    <UseFormDatePicker
+                                        register={register}
+                                        control={control}
+                                        formState={formState}
+                                        value={formField.value}
+                                        label={formField.label} />
+                                </Grid>
+                            ) : formField.type === 'autocomplete' ? (
+                                <Grid item xs={12} md={4}>
+                                    <UseFormAutocompleteComponent
+                                        register={register}
+                                        control={control}
+                                        formState={formState}
+                                        value={formField.value}
+                                        label={formField.label}
+                                        options={formField.options}
+                                    />
+                                </Grid>
+                            )
+                                : null
                     })
                 }
                 <Grid item xs={12} sx={{ display: "flex", justifyContent: "end" }}>

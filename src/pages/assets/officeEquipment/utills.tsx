@@ -103,17 +103,12 @@ const OfficeEquipmentUtills = () => {
         {
             value: "purchaseCost",
             label: 'Purchase Cost',
-            type: "input"
-        },
-        {
-            value: "purchaseCost",
-            label: 'Purchase Cost',
-            type: "input",
+            type: "number",
         },
         {
             value: "costOfTheAsset",
             label: 'Cost of Asset',
-            type: "input",
+            type: "number",
         },
         {
             value: "netValueB",
