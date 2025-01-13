@@ -2,7 +2,8 @@ import axiosInstance from "../../../../core/apis/axiosInstance"
 
 export const fetchFleetService = async () => {
     try {
-        const response = await axiosInstance.get("fleetAssets/");
+        const response = await axiosInstance.get("fleetAssets");
+        console.log(response, "response!!")
         return response.data?.data["0"]?.data
     } catch (error) {
         throw error;
