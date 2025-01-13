@@ -30,3 +30,64 @@ export const ITEquipmentSchema = yup.object().shape({
     assetStatus: yup.string().nullable().optional(),
     category: yup.string().nullable().optional(),
 });
+
+
+/*
+{
+    "category": "accesories",
+    "assetName": "Fletcher Mayo",
+    "engravedNumber": "776",
+    "model": "Non est eiusmod ips",
+    "serialNumber": "653",
+    "assetStatus": "repair",
+    "netValueB": "Ad tenetur praesenti",
+    "assetDepreciationRate": "Voluptas est qui fac",
+    "user_id": "poxov",
+    "purchaseCost": "36",
+    "hostname": "Ramona Underwood",
+    "detailNetBookValue": "Eveniet esse eligen",
+    "dateReceipt": "2025-01-14",
+    "assetCategory_id": "1",
+    "unitOfMeasure": "Placeat voluptatem",
+    "costOfTheAsset": "22",
+    "make": "Suscipit inventore q",
+    "supplier": "Neque amet eos nihi"
+}
+*/
+
+
+/*
+{
+    "id": 9,
+    "assetName": "Zoe Hester",
+    "hostname": "Olga Fischer",
+    "detailNetBookValue": "Sed sed sint hic qui",
+    "engravedNumber": "1",
+    "dateReceipt": "2025-01-14 00:00:00",
+    "make": "Aperiam nobis laboru",
+    "supplier_id": 1,
+    "unitOfMeasure_id": 1,
+    "purchaseCost": "75000",
+    "costOfTheAsset": "37000",
+    "netValueB": "Tempore ipsa aut a",
+    "model": "Proident accusamus",
+    "serialNumber": "884",
+    "user_id": 1,
+    "ram": "8GB",
+    "cpuSpeed": "2.7GH",
+    "hardDiskSize": "500GB",
+    "branch_id": 1,
+    "macAddress": "128H1234455",
+    "ipAddress": "143543ERTYY",
+    "interfaceType": "223",
+    "assetDepreciationRate": "Nihil qui autem ut q",
+    "assetSubCategory_id": null,
+    "desc": "Test Decription",
+    "image": {},
+    "ItAssetCategory_id": 1,
+    "assetStatus_id": 1,
+    "assetCategory_id": 1,
+    "supplier": 1,
+    "unitOfMeasure": 1
+}*/
+

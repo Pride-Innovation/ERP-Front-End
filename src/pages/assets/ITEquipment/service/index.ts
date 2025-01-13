@@ -30,9 +30,28 @@ const deleteITEquipmentService = async (id: string | number) => {
     }
 }
 
+const getITEquipmentByIDService = async (id: string | number) => {
+    try {
+        const response = await axiosInstance.get(`itAssets/${id}`);
+        return response.data?.data
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+const updateITEquipmentService = async (body: object, id: string | number) => {
+    try {
+        const response = await axiosInstance.post(`itAssets/update/${id}`, body);
+        return response?.data;
+    } catch (error) {
+        console.log(error)
+    }
+}
 
 export {
     fetchITEquipmentService,
     createITEquipmentService,
-    deleteITEquipmentService
+    deleteITEquipmentService,
+    getITEquipmentByIDService,
+    updateITEquipmentService
 }

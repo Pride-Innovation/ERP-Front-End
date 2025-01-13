@@ -30,6 +30,7 @@ const CreateITEquipment = () => {
     }, [reset]);
 
     const onSubmit = async (formData: IITEquipment) => {
+        console.log(formData, "formdata, request")
         setSendingRequest(true);
         const request = {
             ...formData,
@@ -52,8 +53,8 @@ const CreateITEquipment = () => {
             interfaceType: "223"
         }
 
-        const response = await createITEquipmentService(request) as IITEquipment;
-        console.log(response, "created IT Equipment!!!")
+        // const response = await createITEquipmentService(request) as IITEquipment;
+        // console.log(response, "created IT Equipment!!!")
     };
 
     const handleChange = (event: SelectChangeEvent) => {

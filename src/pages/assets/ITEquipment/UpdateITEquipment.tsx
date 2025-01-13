@@ -2,12 +2,13 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { IITEquipment } from "./interface";
 import { useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import { ITEquipmentSchema } from "./schema";
+// import { yupResolver } from "@hookform/resolvers/yup";
+// import { ITEquipmentSchema } from "./schema";
 import { Card, Grid, SelectChangeEvent } from "@mui/material";
 import { FormHeader } from "../../../components/headers/TypographyComponent";
 import ITEquipmentForm from "./ITEquipmentForm";
 import { itEquipmentMock } from "../../../mocks/itEquipment";
+import { getITEquipmentByIDService, updateITEquipmentService } from "./service";
 
 const UpdateITEquipment = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
@@ -15,11 +16,19 @@ const UpdateITEquipment = () => {
     const [defaultAsset, setDefaultAsset] = useState<IITEquipment>(itEquipmentMock[0]);
     const [option, setOption] = useState<string | undefined>('');
 
-    useEffect(() => {
-        setDefaultAsset(() => {
-            return itEquipmentMock.find(asset => asset?.id === parseInt(id as string)) as IITEquipment
-        })
-    }, [id]);
+    const findITEquipmentByID = async () => {
+        const response = await getITEquipmentByIDService(id as string);
+        setDefaultAsset({
+            ...response,
+            assetCategory_id: (response?.ItAssetCategory_id).toString(),
+            supplier: (response?.supplier_id).toString(),
+            unitOfMeasure: (response?.unitOfMeasure_id).toString(),
+            user_id: (response?.user_id).toString(),
+            assetSubCategory_id: null,
+        });
+    }
+
+    useEffect(() => { findITEquipmentByID(); }, [id]);
 
     const {
         control,
@@ -29,7 +38,7 @@ const UpdateITEquipment = () => {
         reset
     } = useForm<IITEquipment>({
         mode: 'onChange',
-        resolver: yupResolver(ITEquipmentSchema),
+        // resolver: yupResolver(ITEquipmentSchema),
     });
 
     useEffect(() => {
@@ -37,9 +46,11 @@ const UpdateITEquipment = () => {
         setOption(defaultAsset.category as string)
     }, [defaultAsset]);
 
-    const onSubmit = (formData: IITEquipment) => {
+    const onSubmit = async (formData: IITEquipment) => {
         setSendingRequest(true);
-        console.log(formData, "form data!!!!!");
+        const { assetSubCategory_id, ...data } = formData;
+        const response = await updateITEquipmentService(data, id as string);
+        console.log(response, "response information!!!")
         setSendingRequest(false)
     };
 
@@ -73,4 +84,4 @@ const UpdateITEquipment = () => {
     )
 }
 
-export default UpdateITEquipment
+export default UpdateITEquipment;
