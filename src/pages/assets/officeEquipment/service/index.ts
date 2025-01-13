@@ -18,12 +18,28 @@ const createOfficeEquipmentService = async (body: object) => {
     }
 }
 
-
 const deleteOfficeEquipmentService = async (id: string | number) => {
     try {
         const response = await axiosInstance.get(`officeEquipmentAssets/delete/${id}`);
-        console.log(response.data);
         return response.data;
+    } catch (error) {
+        throw error
+    }
+}
+
+const getOfficeEquipmentByIDService = async (id: string | number) => {
+    try {
+        const response = await axiosInstance.get(`officeEquipmentAssets/${id}`);
+        return response?.data?.data
+    } catch (error) {
+        throw error;
+    }
+}
+
+const updateOfficeEquipmentService = async (body: object, id: string | number) => {
+    try {
+        const response = await axiosInstance.post(`officeEquipmentAssets/update/${id}`, body);
+        return response?.data
     } catch (error) {
         throw error
     }
@@ -32,5 +48,7 @@ const deleteOfficeEquipmentService = async (id: string | number) => {
 export {
     fetchOfficeEquipmentService,
     createOfficeEquipmentService,
-    deleteOfficeEquipmentService
+    deleteOfficeEquipmentService,
+    getOfficeEquipmentByIDService,
+    updateOfficeEquipmentService
 }
