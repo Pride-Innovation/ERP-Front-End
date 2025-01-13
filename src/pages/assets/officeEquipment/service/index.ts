@@ -18,7 +18,19 @@ const createOfficeEquipmentService = async (body: object) => {
     }
 }
 
+
+const deleteOfficeEquipmentService = async (id: string | number) => {
+    try {
+        const response = await axiosInstance.get(`officeEquipmentAssets/delete/${id}`);
+        console.log(response.data);
+        return response.data;
+    } catch (error) {
+        throw error
+    }
+}
+
 export {
     fetchOfficeEquipmentService,
-    createOfficeEquipmentService
+    createOfficeEquipmentService,
+    deleteOfficeEquipmentService
 }

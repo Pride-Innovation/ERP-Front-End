@@ -14,7 +14,7 @@ import { IOfficeEquipment } from "./interface";
 import ModalComponent from "../../../components/modal";
 import Dispose from "../Dispose";
 import { ErrorMessage } from "../../../core/apis/axiosInstance";
-import { fetchOfficeEquipmentService } from "./service";
+import { deleteOfficeEquipmentService, fetchOfficeEquipmentService } from "./service";
 
 const OfficeEquipment = () => {
     const [loading, setLoading] = useState<boolean>(false);
@@ -38,7 +38,7 @@ const OfficeEquipment = () => {
 
     useEffect(() => { fetchResources() }, []);
 
-    const handleOptionClicked = (option: string | number, moduleID?: string | number) => {
+    const handleOptionClicked = async (option: string | number, moduleID?: string | number) => {
         switch (option) {
             case crudStates.update:
                 navigate(`${ROUTES.UPDATE_OFFICE_EQUIPMENT}/${moduleID}`)
@@ -50,6 +50,10 @@ const OfficeEquipment = () => {
             case crudStates.read:
                 navigate(`${ROUTES.LIST_OFFICE_EQUIPMENT}/${moduleID}`);
                 break;
+            case crudStates.delete:
+                const response = await deleteOfficeEquipmentService(moduleID as number);
+                console.log(response, "Item deleted successfully!!")
+                break;
             default:
                 break;
         }
@@ -60,6 +64,7 @@ const OfficeEquipment = () => {
             {
                 <ModalComponent width={"40%"} title='Dispose Office Equipment' open={open} handleClose={handleClose}>
                     <Dispose
+                        handleClickAction={handleOptionClicked}
                         sendingRequest={loading}
                         handleClose={handleClose}
                         buttonText='Confirm'
