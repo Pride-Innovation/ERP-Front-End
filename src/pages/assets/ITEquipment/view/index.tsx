@@ -8,7 +8,6 @@ import {
     Divider,
     Stack,
 } from '@mui/material';
-import { itEquipmentMock } from '../../../../mocks/itEquipment';
 import PlaceHolder from "../../../../statics/images/Placeholder.png";
 import TabComponent from '../../../../components/tabs';
 import { grey } from '@mui/material/colors';
@@ -17,9 +16,21 @@ import DetailSection from '../../trails/DetailSection';
 import OtherDetails from './OtherDetails';
 import AssignmentHistory from '../../trails/AssignmentHistory';
 import RepairHistory from '../../trails/RepairHistory';
+import { useEffect, useState } from 'react';
+import { getITEquipmentByIDService } from '../service';
+import { useParams } from 'react-router';
+import { IITEquipment } from '../interface';
 
 const ITEquipmentDetails = () => {
-    const equipment = itEquipmentMock[0];
+    const [equipment, setEquipment] = useState<IITEquipment>({} as IITEquipment)
+    const { id } = useParams<{ id: string }>();
+
+    const getITEquipment = async () => {
+        const response = await getITEquipmentByIDService(id as string) as IITEquipment;
+        setEquipment(response);
+    }
+
+    useEffect(() => { getITEquipment(); }, [])
 
     return (
         <Card sx={{ p: 4, boxShadow: 3 }}>
@@ -63,12 +74,12 @@ const ITEquipmentDetails = () => {
                                     {
                                         label: "ASSIGNMENT HISTORY",
                                         position: 1,
-                                        content: <AssignmentHistory id={equipment.id} />
+                                        content: <AssignmentHistory id={equipment?.id as string} />
                                     },
                                     {
                                         label: "REPAIR TRAILS",
                                         position: 2,
-                                        content: <RepairHistory id={equipment.id} />
+                                        content: <RepairHistory id={equipment?.id as string} />
                                     },
                                 ]}
                             />
