@@ -9,6 +9,8 @@ import { FormHeader } from "../../../components/headers/TypographyComponent";
 import ITEquipmentForm from "./ITEquipmentForm";
 import { itEquipmentMock } from "../../../mocks/itEquipment";
 import { getITEquipmentByIDService, updateITEquipmentService } from "./service";
+import { IResponseData } from "../../users/interface";
+import { toast } from "react-toastify";
 
 const UpdateITEquipment = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
@@ -25,6 +27,7 @@ const UpdateITEquipment = () => {
             unitOfMeasure: (response?.unitOfMeasure_id).toString(),
             user_id: (response?.user_id).toString(),
             assetSubCategory_id: null,
+            assetStatus: (response?.assetStatus_id).toString()
         });
     }
 
@@ -49,8 +52,17 @@ const UpdateITEquipment = () => {
     const onSubmit = async (formData: IITEquipment) => {
         setSendingRequest(true);
         const { assetSubCategory_id, ...data } = formData;
-        const response = await updateITEquipmentService(data, id as string);
-        console.log(response, "response information!!!")
+        const request = {
+            ...data,
+            branch_id: parseInt(formData.branch_id as string),
+            assetStatus_id: parseInt(formData.assetStatus as string),
+            ItAssetCategory_id: parseInt(formData.assetCategory_id),
+            unitOfMeasure_id: parseInt(formData.unitOfMeasure),
+            supplier_id: parseInt(formData.supplier),
+            user_id: parseInt(formData.user_id as string),
+        }
+        const response = await updateITEquipmentService(request, id as string) as IResponseData;
+        toast.success(response.data.message)
         setSendingRequest(false)
     };
 
