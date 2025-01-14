@@ -8,24 +8,28 @@ import { RowContextProvider } from './context/row/RowContext';
 import RequestContextProvider from './context/request/RequestContext';
 import FileContextProvider from './context/file/FileContext';
 import TransportRequestContextProvider from './context/request/TransportRequestContext';
+import { Provider } from 'react-redux';
+import { store } from './store';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 root.render(
   <React.StrictMode>
-    <RowContextProvider>
-      <UserContextProvider>
-        <RequestContextProvider>
-          <TransportRequestContextProvider>
-            <FileContextProvider>
-              <TestContextProvider>
-                <App />
-              </TestContextProvider>
-            </FileContextProvider>
-          </TransportRequestContextProvider>
-        </RequestContextProvider>
-      </UserContextProvider>
-    </RowContextProvider>
+    <Provider store={store}>
+      <RowContextProvider>
+        <UserContextProvider>
+          <RequestContextProvider>
+            <TransportRequestContextProvider>
+              <FileContextProvider>
+                <TestContextProvider>
+                  <App />
+                </TestContextProvider>
+              </FileContextProvider>
+            </TransportRequestContextProvider>
+          </RequestContextProvider>
+        </UserContextProvider>
+      </RowContextProvider>
+    </Provider>
   </React.StrictMode>
 );

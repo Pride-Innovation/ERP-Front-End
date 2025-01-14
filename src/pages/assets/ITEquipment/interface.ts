@@ -87,3 +87,42 @@ export interface IITEquipmentForm {
     option?: string | undefined;
     handleChange?: (event: SelectChangeEvent) => void;
 }
+
+export interface IBranch {
+    id: number
+    name: string
+    email: string
+    tel: string | null
+    desc: string | null
+    status: string,
+    user_id: number,
+    image: any
+}
+
+export interface IAsssetStatus {
+    id: number,
+    name: string,
+    status: string,
+    desc: string,
+    image: any,
+    user_id: number
+}
+
+export interface IAsssetCategory {
+    id: number,
+    name: string,
+    status: string,
+    desc: string,
+    image: any,
+    user_id: number
+}
+
+export interface IUnitOfMeasure {
+    id: number,
+    name: string,
+    status: string,
+    desc: string,
+    image: any,
+    user_id: number
+    symbol: string
+}

@@ -5,7 +5,7 @@ import {
 } from '@reduxjs/toolkit';
 import ITEquipmentReducer from "../pages/assets/slice/index"
 
-const store = configureStore({
+export const store = configureStore({
     reducer: {
         ITEquipmentStore: ITEquipmentReducer,
     },

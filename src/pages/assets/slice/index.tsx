@@ -1,26 +1,58 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { IITEquipment } from '../ITEquipment/interface';
+import {
+    IAsssetCategory,
+    IAsssetStatus,
+    IBranch,
+    IUnitOfMeasure
+} from '../ITEquipment/interface';
+import { IUser } from '../../users/interface';
 
 interface IITEquipmentState {
-    assets: IITEquipment[]
+    assetsStatuses: IAsssetStatus[];
+    users: IUser[];
+    branches: IBranch[];
+    assetCategories: IAsssetCategory[];
+    unitsOfMeasures: IUnitOfMeasure[];
 }
 
 const initialState: IITEquipmentState = {
-    assets: []
+    assetsStatuses: [],
+    users: [],
+    branches: [],
+    assetCategories: [],
+    unitsOfMeasures: [],
 }
 
 export const authSlice = createSlice({
     name: 'assets',
     initialState,
     reducers: {
-        laodAssets: (state, action) => {
-            state.assets = action.payload;
+        loadAssetStatuses: (state, action) => {
+            state.assetsStatuses = action.payload;
+        },
+        loadUsers: (state, action) => {
+            state.users = action.payload;
+        },
+        loadBranches: (state, action) => {
+            state.branches = action.payload;
+        },
+        loadAssetCategories: (state, action) => {
+            state.assetCategories = action.payload;
+        },
+        loadUnitOfMeasures: (state, action) => {
+            state.unitsOfMeasures = action.payload;
         },
     }
 })
 
 const { reducer, actions } = authSlice
 
-export const { laodAssets } = actions
+export const {
+    loadAssetStatuses,
+    loadUsers,
+    loadBranches,
+    loadAssetCategories,
+    loadUnitOfMeasures
+} = actions
 
 export default reducer;

@@ -48,10 +48,60 @@ const updateITEquipmentService = async (body: object, id: string | number) => {
     }
 }
 
+const listBranchesService = async () => {
+    try {
+        const response = await axiosInstance.get('branches');
+        return response.data?.data;
+    } catch (error) {
+        throw error;
+    }
+}
+
+const listUsersService = async () => {
+    try {
+        const response = await axiosInstance.get('users');
+        return response.data?.data;
+    } catch (error) {
+        throw error;
+    }
+}
+
+const listCategoriesService = async () => {
+    try {
+        const response = await axiosInstance.get('itAssetCategories');
+        return response.data?.data;
+    } catch (error) {
+        throw error;
+    }
+}
+
+const listUnitOfMeasuresService = async () => {
+    try {
+        const response = await axiosInstance.get('unitMeasures');
+        return response.data?.data;
+    } catch (error) {
+        throw error;
+    }
+}
+
+const listAssetStatusesService = async () => {
+    try {
+        const response = await axiosInstance.get('assetStatuses');
+        return response.data?.data;
+    } catch (error) {
+        throw error;
+    }
+}
+
 export {
     fetchITEquipmentService,
     createITEquipmentService,
     deleteITEquipmentService,
     getITEquipmentByIDService,
-    updateITEquipmentService
+    updateITEquipmentService,
+    listBranchesService,
+    listUsersService,
+    listCategoriesService,
+    listUnitOfMeasuresService,
+    listAssetStatusesService
 }

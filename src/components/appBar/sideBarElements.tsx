@@ -21,7 +21,7 @@ const SideBarElements = () => {
                     userPermissions.find(perm => perm.id === 16) ? ROUTES.LIST_FLEET :
                         ROUTES.ERRORS
         ) : ROUTES.ERRORS;
-
+        console.log(path, "path")
         // return path;
         return ROUTES.LIST_ASSETS;
     }

@@ -34,7 +34,7 @@ const ITEquipmentForm = ({
     const navigate = useNavigate();
     const { formFields, categories, computerFields } = ITEquipmentUtills();
     const [stateFormFields, setStateFormFields] = useState<Array<IFormData<IITEquipment>>>(formFields.slice(1));
-
+    console.log(formFields, "form fields!!")
 
     useEffect(() => {
         if (option) {

@@ -1,13 +1,28 @@
 import { useEffect, useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import InfoIcon from '@mui/icons-material/Info';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
-import { ITableHeader } from "../../../components/tables/interface";
+import { IOptions, ITableHeader } from "../../../components/tables/interface";
 import { getTableHeaders } from "../../../components/tables/getTableHeaders";
 import { IFormData } from "../interface";
 import { IITEquipment } from "./interface";
-import { assetStatus } from "../../../utils/constants";
 import { itEquipmentMock } from "../../../mocks/itEquipment";
+import {
+    listAssetStatusesService,
+    listBranchesService,
+    listCategoriesService,
+    listUnitOfMeasuresService,
+    listUsersService
+} from "./service";
+import { AppDispatch, RootState } from "../../../store";
+import {
+    loadAssetStatuses,
+    loadBranches,
+    loadAssetCategories,
+    loadUnitOfMeasures,
+    loadUsers
+} from "../slice";
 
 const ITEquipmentUtills = () => {
     const endPoint = 'posts';
@@ -15,6 +30,45 @@ const ITEquipmentUtills = () => {
     const header = { plural: 'IT Equipment', singular: 'IT Equipment' };
     const [open, setOpen] = useState<boolean>(false);
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
+    const dispatch = useDispatch<AppDispatch>();
+    const [optionsObject, setOptionsObject] = useState<{
+        assetsStatusesOptions: Array<IOptions>,
+        branchesOptions: Array<IOptions>,
+        assetCategoriesOptions: Array<IOptions>,
+        unitsOfMeasuresOptions: Array<IOptions>
+    }>({
+        assetsStatusesOptions: [],
+        branchesOptions: [],
+        assetCategoriesOptions: [],
+        unitsOfMeasuresOptions: []
+    })
+    const {
+        assetsStatuses,
+        users,
+        assetCategories,
+        unitsOfMeasures,
+        branches
+    } = useSelector((state: RootState) => state.ITEquipmentStore);
+
+    const updateReduxStore = async () => {
+        dispatch(loadBranches(await listBranchesService()));
+        dispatch(loadUsers(await listUsersService()));
+        dispatch(loadAssetCategories(await listCategoriesService()));
+        dispatch(loadUnitOfMeasures(await listUnitOfMeasuresService()));
+        dispatch(loadAssetStatuses(await listAssetStatusesService()));
+    }
+
+    useEffect(() => { updateReduxStore() }, []);
+
+    useEffect(() => {
+        setOptionsObject({
+            assetCategoriesOptions: assetCategories?.map(status => ({ label: status.name, value: status.id })) || [],
+            branchesOptions: branches?.map(status => ({ label: status.name, value: status.id })),
+            assetsStatusesOptions: assetsStatuses?.map(status => ({ label: status.name, value: status.id })) || [],
+            unitsOfMeasuresOptions: unitsOfMeasures?.map(status => ({ label: status.name, value: status.id })) || []
+        })
+
+    }, [assetsStatuses, users, assetCategories, unitsOfMeasures, branches])
 
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
@@ -117,12 +171,7 @@ const ITEquipmentUtills = () => {
             value: "assetStatus",
             label: 'Status',
             type: "select",
-            options: [
-                { label: "In Use", value: assetStatus.use },
-                { label: "In Store", value: assetStatus.store },
-                { label: "In Repair", value: assetStatus.repair },
-                { label: "Disposed/Decommisioned", value: assetStatus.repair },
-            ]
+            options: optionsObject.assetsStatusesOptions
         },
         {
             value: "netValueB",
@@ -163,10 +212,7 @@ const ITEquipmentUtills = () => {
             value: "assetCategory_id",
             label: 'Asset Category',
             type: "select",
-            options: [
-                { label: "Category One", value: "1" },
-                { label: "Category One", value: "2" },
-            ]
+            options: optionsObject.assetCategoriesOptions
         },
         {
             value: "unitOfMeasure",
