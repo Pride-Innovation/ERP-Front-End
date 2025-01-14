@@ -10,16 +10,27 @@ import {
 } from "@mui/material";
 import PlaceHolder from "../../../../statics/images/Placeholder.png";
 import { grey } from "@mui/material/colors";
-import { officeEquipmentMock } from "../../../../mocks/officeEquipment";
 import TabComponent from "../../../../components/tabs";
 import DetailSection from "../../trails/DetailSection";
 import AssignmentHistory from "../../trails/AssignmentHistory";
 import RepairHistory from "../../trails/RepairHistory";
 import ButtonComponent from "../../../../components/forms/Button";
+import { IOfficeEquipment } from "../interface";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router";
+import { getOfficeEquipmentByIDService } from "../service";
 
 
 const OfficeEquipmentDetails = () => {
-    const equipment = officeEquipmentMock[0];
+    const [equipment, setEquipment] = useState<IOfficeEquipment>({} as IOfficeEquipment)
+    const { id } = useParams<{ id: string }>();
+
+    const getITEquipment = async () => {
+        const response = await getOfficeEquipmentByIDService(id as string) as IOfficeEquipment;
+        setEquipment(response);
+    }
+
+    useEffect(() => { getITEquipment(); }, [])
     return (
         <Card sx={{ p: 4, boxShadow: 3 }}>
             <Grid container spacing={4}>
@@ -54,12 +65,12 @@ const OfficeEquipmentDetails = () => {
                                     {
                                         label: "ASSIGNMENT HISTORY",
                                         position: 0,
-                                        content: <AssignmentHistory id={equipment.id} />
+                                        content: <AssignmentHistory id={equipment?.id as string} />
                                     },
                                     {
                                         label: "REPAIR TRAILS",
                                         position: 1,
-                                        content: <RepairHistory id={equipment.id} />
+                                        content: <RepairHistory id={equipment?.id as string} />
                                     },
                                 ]}
                             />
