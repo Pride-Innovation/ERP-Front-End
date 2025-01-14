@@ -12,7 +12,6 @@ import { toast } from "react-toastify";
 
 const CreateOfficeEquipment = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
-
     const defaultUser: IOfficeEquipment = {} as IOfficeEquipment;
 
     const {

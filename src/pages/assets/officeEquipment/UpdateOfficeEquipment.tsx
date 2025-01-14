@@ -9,6 +9,8 @@ import { Card, Grid } from '@mui/material';
 import { FormHeader } from '../../../components/headers/TypographyComponent';
 import OfficeEquipmentForm from './OfficeEquipmentForm';
 import { getOfficeEquipmentByIDService, updateOfficeEquipmentService } from './service';
+import { IResponseData } from '../../users/interface';
+import { toast } from 'react-toastify';
 
 const UpdateOfficeEquipment = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
@@ -17,7 +19,14 @@ const UpdateOfficeEquipment = () => {
 
     const findOfficeEquipmentByID = async () => {
         const response = await getOfficeEquipmentByIDService(id as string);
-        setDefaultAsset(response)
+        setDefaultAsset({
+            ...response,
+            assetCategory_id: (response?.OfficeEquipmentAssetCategory_id).toString(),
+            supplier: (response?.supplier_id).toString(),
+            unitOfMeasure: (response?.unitOfMeasure_id).toString(),
+            user_id: (response?.user_id).toString(),
+            assetStatus: (response?.assetStatus_id).toString()
+        })
     }
 
     useEffect(() => { findOfficeEquipmentByID(); }, [id]);
@@ -40,9 +49,17 @@ const UpdateOfficeEquipment = () => {
 
     const onSubmit = async (formData: IOfficeEquipment) => {
         setSendingRequest(true);
-        console.log(formData, "form data!!!")
-        const response = await updateOfficeEquipmentService(formData, id as string);
-        console.log(response, "response!!!")
+        const request = {
+            ...formData,
+            branch_id: parseInt(formData.branch_id as string),
+            assetStatus_id: parseInt(formData.assetStatus as string),
+            OfficeEquipmentAssetCategory_id: parseInt(formData.assetCategory_id),
+            unitOfMeasure_id: parseInt(formData.unitOfMeasure),
+            supplier_id: parseInt(formData.supplier),
+            user_id: parseInt(formData.user_id as string),
+        }
+        const response = await updateOfficeEquipmentService(request, id as string) as IResponseData;
+        toast.success(response.data.message)
         setSendingRequest(false)
     };
 
