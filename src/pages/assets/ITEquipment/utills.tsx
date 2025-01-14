@@ -12,6 +12,7 @@ import {
     listAssetStatusesService,
     listBranchesService,
     listCategoriesService,
+    listSuppliersService,
     listUnitOfMeasuresService,
     listUsersService
 } from "./service";
@@ -21,7 +22,8 @@ import {
     loadBranches,
     loadAssetCategories,
     loadUnitOfMeasures,
-    loadUsers
+    loadUsers,
+    loadSuppliers
 } from "../slice";
 
 const ITEquipmentUtills = () => {
@@ -36,18 +38,23 @@ const ITEquipmentUtills = () => {
         branchesOptions: Array<IOptions>,
         assetCategoriesOptions: Array<IOptions>,
         unitsOfMeasuresOptions: Array<IOptions>
+        usersOptions: Array<IOptions>
+        suppliersOptions: Array<IOptions>
     }>({
         assetsStatusesOptions: [],
         branchesOptions: [],
         assetCategoriesOptions: [],
-        unitsOfMeasuresOptions: []
-    })
+        unitsOfMeasuresOptions: [],
+        usersOptions: [],
+        suppliersOptions: []
+    });
     const {
         assetsStatuses,
         users,
         assetCategories,
         unitsOfMeasures,
-        branches
+        branches,
+        suppliers
     } = useSelector((state: RootState) => state.ITEquipmentStore);
 
     const updateReduxStore = async () => {
@@ -56,19 +63,22 @@ const ITEquipmentUtills = () => {
         dispatch(loadAssetCategories(await listCategoriesService()));
         dispatch(loadUnitOfMeasures(await listUnitOfMeasuresService()));
         dispatch(loadAssetStatuses(await listAssetStatusesService()));
+        dispatch(loadSuppliers(await listSuppliersService()));
     }
 
     useEffect(() => { updateReduxStore() }, []);
 
     useEffect(() => {
         setOptionsObject({
-            assetCategoriesOptions: assetCategories?.map(status => ({ label: status.name, value: status.id })) || [],
-            branchesOptions: branches?.map(status => ({ label: status.name, value: status.id })),
+            assetCategoriesOptions: assetCategories?.map(category => ({ label: category.name, value: category.id })) || [],
+            branchesOptions: branches?.map(branch => ({ label: branch.name, value: branch.id })),
             assetsStatusesOptions: assetsStatuses?.map(status => ({ label: status.name, value: status.id })) || [],
-            unitsOfMeasuresOptions: unitsOfMeasures?.map(status => ({ label: status.name, value: status.id })) || []
+            unitsOfMeasuresOptions: unitsOfMeasures?.map(unit => ({ label: unit.name, value: unit.id })) || [],
+            usersOptions: users?.map(user => ({ label: user.name as string, value: user.id as number })) || [],
+            suppliersOptions: suppliers?.map(supplier => ({ label: supplier.name, value: supplier.id })) || [],
         })
 
-    }, [assetsStatuses, users, assetCategories, unitsOfMeasures, branches])
+    }, [assetsStatuses, users, assetCategories, unitsOfMeasures, branches, suppliers])
 
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
@@ -186,7 +196,8 @@ const ITEquipmentUtills = () => {
         {
             value: "user_id",
             label: 'Assigned To',
-            type: "input"
+            type: "select",
+            options: optionsObject.usersOptions
         },
         {
             value: "purchaseCost",
@@ -217,7 +228,8 @@ const ITEquipmentUtills = () => {
         {
             value: "unitOfMeasure",
             label: 'Unit Of Measure',
-            type: "input",
+            type: "select",
+            options: optionsObject.unitsOfMeasuresOptions
         },
         {
             value: "costOfTheAsset",
@@ -232,7 +244,8 @@ const ITEquipmentUtills = () => {
         {
             value: "supplier",
             label: 'Supplier',
-            type: "input",
+            type: "select",
+            options: optionsObject.suppliersOptions
         }
     ]
 
@@ -292,4 +305,4 @@ const ITEquipmentUtills = () => {
     )
 }
 
-export default ITEquipmentUtills
+export default ITEquipmentUtills;

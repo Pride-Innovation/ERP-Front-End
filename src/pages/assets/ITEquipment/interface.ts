@@ -126,3 +126,15 @@ export interface IUnitOfMeasure {
     user_id: number
     symbol: string
 }
+
+export interface ISupplier {
+    id: number,
+    name: string,
+    status: string,
+    desc: string,
+    image: any,
+    user_id: number
+    symbol: string
+    tel: string,
+    email: string,
+}

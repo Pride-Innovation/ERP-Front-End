@@ -34,7 +34,6 @@ const ITEquipmentForm = ({
     const navigate = useNavigate();
     const { formFields, categories, computerFields } = ITEquipmentUtills();
     const [stateFormFields, setStateFormFields] = useState<Array<IFormData<IITEquipment>>>(formFields.slice(1));
-    console.log(formFields, "form fields!!")
 
     useEffect(() => {
         if (option) {
@@ -43,10 +42,14 @@ const ITEquipmentForm = ({
                     return [...(formFields.slice(1)), ...computerFields]
                 })
             } else {
-                setStateFormFields([...(formFields.slice(1))])
+                return setStateFormFields([...(formFields.slice(1))])
             }
         }
     }, [option]);
+
+    useEffect(() => {
+        if (!option) { setStateFormFields(formFields.slice(1)) }
+    }, [formFields])
 
     return (
         <Grid item container xs={12}>

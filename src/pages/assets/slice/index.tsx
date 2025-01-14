@@ -3,6 +3,7 @@ import {
     IAsssetCategory,
     IAsssetStatus,
     IBranch,
+    ISupplier,
     IUnitOfMeasure
 } from '../ITEquipment/interface';
 import { IUser } from '../../users/interface';
@@ -13,6 +14,7 @@ interface IITEquipmentState {
     branches: IBranch[];
     assetCategories: IAsssetCategory[];
     unitsOfMeasures: IUnitOfMeasure[];
+    suppliers: ISupplier[];
 }
 
 const initialState: IITEquipmentState = {
@@ -21,6 +23,7 @@ const initialState: IITEquipmentState = {
     branches: [],
     assetCategories: [],
     unitsOfMeasures: [],
+    suppliers: []
 }
 
 export const authSlice = createSlice({
@@ -42,6 +45,9 @@ export const authSlice = createSlice({
         loadUnitOfMeasures: (state, action) => {
             state.unitsOfMeasures = action.payload;
         },
+        loadSuppliers: (state, action) => {
+            state.suppliers = action.payload;
+        },
     }
 })
 
@@ -52,7 +58,8 @@ export const {
     loadUsers,
     loadBranches,
     loadAssetCategories,
-    loadUnitOfMeasures
+    loadUnitOfMeasures,
+    loadSuppliers
 } = actions
 
 export default reducer;

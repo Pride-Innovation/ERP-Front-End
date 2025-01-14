@@ -32,13 +32,37 @@ const CreateITEquipment = () => {
     const onSubmit = async (formData: IITEquipment) => {
         console.log(formData, "formdata, request")
         setSendingRequest(true);
+        /**
+         * 
+         * 
+         * {
+    "category": "accesories",
+    "assetStatus": "4",
+    "assetDepreciationRate": "Nisi libero odio qui",
+    "user_id": "14",
+    "serialNumber": "382",
+    "model": "Enim est atque reic",
+    "netValueB": "Exercitation neque d",
+    "costOfTheAsset": "23",
+    "purchaseCost": "66",
+    "unitOfMeasure": "5",
+    "supplier": "Incidunt ipsa et n",
+    "assetCategory_id": "3",
+    "make": "Dolorum eveniet fac",
+    "dateReceipt": "2025-01-15",
+    "detailNetBookValue": "Quasi voluptate dolo",
+    "hostname": "Orli Ramirez",
+    "engravedNumber": "896",
+    "assetName": "Charde Workman"
+}
+         */
         const request = {
             ...formData,
             // assetSubCategory_id: 1,
             branch_id: 1,
-            assetStatus_id: 1,
-            ItAssetCategory_id: 1,
-            unitOfMeasure_id: 1,
+            assetStatus_id: (formData.assetStatus)?.toString(),
+            ItAssetCategory_id: (formData.assetCategory_id).toString(),
+            unitOfMeasure_id: (formData.unitOfMeasure).toString(),
             supplier_id: 1,
             engravedNumber: 1,
             user_id: 1,
