@@ -17,6 +17,8 @@ export interface IOfficeEquipment {
     assetStatus?: string | null;
     desc?: string | null;
     image?: string | null;
+    user_id?: string | null;
+    branch_id?: string | null;
 }
 
 export interface IOfficeEquipmentExtra {

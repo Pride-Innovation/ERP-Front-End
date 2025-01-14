@@ -7,6 +7,8 @@ import { FormHeader } from "../../../components/headers/TypographyComponent";
 import { officeEquipmentSchema } from "./schema";
 import OfficeEquipmentForm from "./OfficeEquipmentForm";
 import { createOfficeEquipmentService } from "./service";
+import { IResponseData } from "../../users/interface";
+import { toast } from "react-toastify";
 
 const CreateOfficeEquipment = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
@@ -30,16 +32,19 @@ const CreateOfficeEquipment = () => {
 
     const onSubmit = async (formData: IOfficeEquipment) => {
         setSendingRequest(true);
-        const response = await createOfficeEquipmentService({
+        const request = {
             ...formData,
-            user_id: 1,
-            branch_id: 1,
-            assetStatus_id: 1,
-            unitOfMeasure_id: 1,
-            supplier_id: 1,
-            OfficeEquipmentAssetCategory_id: 1
-        }) as IOfficeEquipment;
-        console.log(response, "response data")
+            branch_id: parseInt(formData.branch_id as string),
+            assetStatus_id: parseInt(formData.assetStatus as string),
+            OfficeEquipmentAssetCategory_id: parseInt(formData.assetCategory_id),
+            unitOfMeasure_id: parseInt(formData.unitOfMeasure),
+            supplier_id: parseInt(formData.supplier),
+            user_id: parseInt(formData.user_id as string),
+        }
+
+        const response = await createOfficeEquipmentService(request) as IResponseData;
+        toast.success(response.data.message)
+        setSendingRequest(false)
     };
 
 

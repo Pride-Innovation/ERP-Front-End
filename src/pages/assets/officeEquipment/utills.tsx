@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ITableHeader } from "../../../components/tables/interface";
+import { IOptions, ITableHeader } from "../../../components/tables/interface";
 import { IFormData } from "../interface";
 import { IOfficeEquipment } from "./interface";
 import { officeEquipmentMock } from "../../../mocks/officeEquipment";
@@ -7,16 +7,82 @@ import InfoIcon from '@mui/icons-material/Info';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import { getTableHeaders } from "../../../components/tables/getTableHeaders";
+import { useDispatch } from "react-redux";
+import {
+    loadAssetCategories,
+    loadAssetStatuses,
+    loadBranches,
+    loadSuppliers,
+    loadUnitOfMeasures,
+    loadUsers
+} from "../slice";
+import {
+    listAssetStatusesService,
+    listBranchesService,
+    listCategoriesService,
+    listSuppliersService,
+    listUnitOfMeasuresService,
+    listUsersService
+} from "../ITEquipment/service";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../store";
 
 const OfficeEquipmentUtills = () => {
     const endPoint = 'posts';
     const module = 'office equipment';
     const header = { plural: 'Office Equipment', singular: 'Office Equipment' };
+    const dispatch = useDispatch();
     const [open, setOpen] = useState<boolean>(false);
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
+    const [optionsObject, setOptionsObject] = useState<{
+        assetsStatusesOptions: Array<IOptions>,
+        branchesOptions: Array<IOptions>,
+        assetCategoriesOptions: Array<IOptions>,
+        unitsOfMeasuresOptions: Array<IOptions>
+        usersOptions: Array<IOptions>
+        suppliersOptions: Array<IOptions>
+    }>({
+        assetsStatusesOptions: [],
+        branchesOptions: [],
+        assetCategoriesOptions: [],
+        unitsOfMeasuresOptions: [],
+        usersOptions: [],
+        suppliersOptions: []
+    });
+    const {
+        assetsStatuses,
+        users,
+        assetCategories,
+        unitsOfMeasures,
+        branches,
+        suppliers
+    } = useSelector((state: RootState) => state.ITEquipmentStore);
 
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
+
+    const updateReduxStore = async () => {
+        dispatch(loadBranches(await listBranchesService()));
+        dispatch(loadUsers(await listUsersService()));
+        dispatch(loadAssetCategories(await listCategoriesService()));
+        dispatch(loadUnitOfMeasures(await listUnitOfMeasuresService()));
+        dispatch(loadAssetStatuses(await listAssetStatusesService()));
+        dispatch(loadSuppliers(await listSuppliersService()));
+    }
+
+    useEffect(() => { updateReduxStore() }, []);
+
+    useEffect(() => {
+        setOptionsObject({
+            assetCategoriesOptions: assetCategories?.map(category => ({ label: category.name, value: category.id })) || [],
+            branchesOptions: branches?.map(branch => ({ label: branch.name, value: branch.id })),
+            assetsStatusesOptions: assetsStatuses?.map(status => ({ label: status.name, value: status.id })) || [],
+            unitsOfMeasuresOptions: unitsOfMeasures?.map(unit => ({ label: unit.name, value: unit.id })) || [],
+            usersOptions: users?.map(user => ({ label: user.name as string, value: user.id as number })) || [],
+            suppliersOptions: suppliers?.map(supplier => ({ label: supplier.name, value: supplier.id })) || [],
+        })
+
+    }, [assetsStatuses, users, assetCategories, unitsOfMeasures, branches, suppliers])
 
     const {
         id,
@@ -84,21 +150,19 @@ const OfficeEquipmentUtills = () => {
             value: "assetCategory_id",
             label: 'Category',
             type: "select",
-            options: [
-                { label: "Truck", value: "truck" },
-                { label: "Double Cabin", value: "doubleCabin" },
-                { label: "Motor Bike", value: "bike" }
-            ]
+            options: optionsObject.assetCategoriesOptions
         },
         {
             value: "supplier",
             label: 'Supplier',
-            type: "input"
+            type: "select",
+            options: optionsObject.suppliersOptions
         },
         {
             value: "unitOfMeasure",
-            label: 'Unit of Measure',
-            type: "input"
+            label: 'Unit Of Measure',
+            type: "select",
+            options: optionsObject.unitsOfMeasuresOptions
         },
         {
             value: "purchaseCost",
@@ -122,15 +186,22 @@ const OfficeEquipmentUtills = () => {
         },
         {
             value: "assetStatus",
-            label: 'Asset Status',
+            label: 'Status',
             type: "select",
-            options: [
-                { label: "In Use", value: "use" },
-                { label: "In Store", value: "store" },
-                { label: "In Repair", value: "repair" },
-                { label: "Disposed/Decommisioned", value: "repair" },
-            ]
-        }
+            options: optionsObject.assetsStatusesOptions
+        },
+        {
+            value: "user_id",
+            label: 'Assigned To',
+            type: "select",
+            options: optionsObject.usersOptions
+        },
+        {
+            value: "branch_id",
+            label: 'Branch',
+            type: "select",
+            options: optionsObject.branchesOptions
+        },
     ]
 
     const determineCurrentAsset = (id: number, itemList: Array<IOfficeEquipment>): IOfficeEquipment => {
