@@ -19,6 +19,7 @@ export interface IITEquipment {
     model?: string | null;
     serialNumber?: string | null;
     user_id?: string | null;
+    branch_id?: string | null;
     ram?: string | null;
     cpuSpeed?: string | null;
     hardDiskSize?: string | null;

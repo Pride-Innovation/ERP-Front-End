@@ -7,6 +7,8 @@ import { Card, Grid, SelectChangeEvent } from '@mui/material';
 import ITEquipmentForm from './ITEquipmentForm';
 import { FormHeader } from '../../../components/headers/TypographyComponent';
 import { createITEquipmentService } from './service';
+import { IResponseData } from '../../users/interface';
+import { toast } from 'react-toastify';
 
 const CreateITEquipment = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
@@ -30,42 +32,15 @@ const CreateITEquipment = () => {
     }, [reset]);
 
     const onSubmit = async (formData: IITEquipment) => {
-        console.log(formData, "formdata, request")
         setSendingRequest(true);
-        /**
-         * 
-         * 
-         * {
-    "category": "accesories",
-    "assetStatus": "4",
-    "assetDepreciationRate": "Nisi libero odio qui",
-    "user_id": "14",
-    "serialNumber": "382",
-    "model": "Enim est atque reic",
-    "netValueB": "Exercitation neque d",
-    "costOfTheAsset": "23",
-    "purchaseCost": "66",
-    "unitOfMeasure": "5",
-    "supplier": "Incidunt ipsa et n",
-    "assetCategory_id": "3",
-    "make": "Dolorum eveniet fac",
-    "dateReceipt": "2025-01-15",
-    "detailNetBookValue": "Quasi voluptate dolo",
-    "hostname": "Orli Ramirez",
-    "engravedNumber": "896",
-    "assetName": "Charde Workman"
-}
-         */
         const request = {
             ...formData,
-            // assetSubCategory_id: 1,
-            branch_id: 1,
-            assetStatus_id: (formData.assetStatus)?.toString(),
-            ItAssetCategory_id: (formData.assetCategory_id).toString(),
-            unitOfMeasure_id: (formData.unitOfMeasure).toString(),
-            supplier_id: 1,
-            engravedNumber: 1,
-            user_id: 1,
+            branch_id: parseInt(formData.branch_id as string),
+            assetStatus_id: parseInt(formData.assetStatus as string),
+            ItAssetCategory_id: parseInt(formData.assetCategory_id),
+            unitOfMeasure_id: parseInt(formData.unitOfMeasure),
+            supplier_id: parseInt(formData.supplier),
+            user_id: parseInt(formData.user_id as string),
             desc: "Test Decription",
 
             /** Extra fields */
@@ -77,8 +52,9 @@ const CreateITEquipment = () => {
             interfaceType: "223"
         }
 
-        const response = await createITEquipmentService(request) as IITEquipment;
-        console.log(response, "created IT Equipment!!!")
+        const response = await createITEquipmentService(request) as IResponseData;
+        toast.success(response.data.message)
+        setSendingRequest(false)
     };
 
     const handleChange = (event: SelectChangeEvent) => {

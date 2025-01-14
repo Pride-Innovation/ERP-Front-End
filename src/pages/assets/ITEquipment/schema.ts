@@ -16,6 +16,7 @@ export const ITEquipmentSchema = yup.object().shape({
     model: yup.string().nullable().optional(),
     serialNumber: yup.string().nullable().optional(),
     user_id: yup.string().nullable().optional(),
+    branch_id: yup.string().nullable().optional(),
     ram: yup.string().nullable().optional(),
     cpuSpeed: yup.string().nullable().optional(),
     hardDiskSize: yup.string().nullable().optional(),

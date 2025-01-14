@@ -12,7 +12,7 @@ const fetchITEquipmentService = async () => {
 const createITEquipmentService = async (body: object) => {
     try {
         const response = await axiosInstance.post("itAssets/create", body);
-        return response.data?.data
+        return response.data
     } catch (error) {
         // throw error;
         console.log(error)

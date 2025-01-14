@@ -200,6 +200,12 @@ const ITEquipmentUtills = () => {
             options: optionsObject.usersOptions
         },
         {
+            value: "branch_id",
+            label: 'Branch',
+            type: "select",
+            options: optionsObject.branchesOptions
+        },
+        {
             value: "purchaseCost",
             label: 'Purchase Cost',
             type: "number",
