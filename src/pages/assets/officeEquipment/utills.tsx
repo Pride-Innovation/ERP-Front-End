@@ -56,7 +56,7 @@ const OfficeEquipmentUtills = () => {
         unitsOfMeasures,
         branches,
         suppliers
-    } = useSelector((state: RootState) => state.ITEquipmentStore);
+    } = useSelector((state: RootState) => state.EquipmentStore);
 
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);

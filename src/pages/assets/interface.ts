@@ -9,6 +9,7 @@ export interface IFormData<T> {
     label: string;
     type: "input" | "select" | "date" | "autocomplete" | "textarea" | "time" | "number";
     options?: Array<IOptions>;
+    required?: boolean;
 }
 
 export interface IDispose {

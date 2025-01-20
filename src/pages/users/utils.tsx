@@ -10,26 +10,38 @@ import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import { crudStates } from '../../utils/constants';
 import { IFormData } from '../assets/interface';
 import { fetchSingleUserService } from './service';
-import { IRole } from '../settings/interface';
-import RoleUtills from '../settings/roles/utills';
+import { useDispatch } from 'react-redux';
+import { AppDispatch, RootState } from '../../store';
+import { useSelector } from 'react-redux';
+import { loadRoles, loadUsers } from './slice';
+import { listUsersService } from '../assets/ITEquipment/service';
+import { fetchAllRolesService } from '../settings/roles/service';
 
 const UserUtils = () => {
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
-    const [roleOptions, setRoleOptions] = useState<IOptions[]>([] as Array<IOptions>);
     const [modalState, setModalState] = useState<string>("");
     const [open, setOpen] = useState<boolean>(false);
-    const [roles, setRoles] = useState<IRole[]>([] as Array<IRole>);
-    const { fetchAllRoles } = RoleUtills();
+    const dispatch = useDispatch<AppDispatch>();
+    const [optionsObject, setOptionsObject] = useState<{
+        usersOptions: Array<IOptions>;
+        rolesOptions: Array<IOptions>;
+    }>({ usersOptions: [], rolesOptions: [] });
+    const { usersList, rolesList } = useSelector((state: RootState) => state.UserStore);
+    const { setUsersTableData, users, setUsers } = useContext(UserContext);
 
-    const fetchRolesData = async () => {
-        try {
-            const rolesData = await fetchAllRoles();
-            setRoles(rolesData);
-        } catch (error) {
-            console.error("Error fetching roles:", error);
-        }
-    };
+    const updateReduxStore = async () => {
+        dispatch(loadUsers(await listUsersService()));
+        dispatch(loadRoles(await fetchAllRolesService()));
+    }
 
+    useEffect(() => { updateReduxStore() }, []);
+
+    useEffect(() => {
+        setOptionsObject({
+            usersOptions: usersList?.map(user => ({ label: user.name as string, value: user.id as number })) || [],
+            rolesOptions: rolesList?.map(role => ({ label: role.name, value: role.id as string })) || [],
+        })
+    }, [usersList, rolesList])
 
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
@@ -38,9 +50,6 @@ const UserUtils = () => {
         setModalState(crudStates.create);
         handleOpen();
     };
-
-
-    const { setUsersTableData, users, setUsers } = useContext(UserContext);
 
     const {
         id,
@@ -132,14 +141,6 @@ const UserUtils = () => {
         });
     }
 
-    const formatRoles = (roles: Array<IRole>): Array<IOptions> => {
-        const roleOptions = roles.map(role => ({
-            value: role.name,
-            label: role.name
-        }))
-        return roleOptions;
-    }
-
     const userFields: Array<IFormData<IUser>> = [
         {
             value: "firstName",
@@ -154,7 +155,8 @@ const UserUtils = () => {
         {
             value: "otherName",
             label: 'Other Name',
-            type: "input"
+            type: "input",
+            required: false
         },
         {
             value: "email",
@@ -169,16 +171,17 @@ const UserUtils = () => {
         {
             value: "reportsTo",
             label: 'Reports To',
-            type: "input"
+            type: "select",
+            options: optionsObject.usersOptions
         },
         {
             value: "department",
             label: 'Department',
             type: "select",
             options: [
-                { label: "Business Technology", value: "1" },
-                { label: "Legal Department", value: "2" },
-                { label: "Credit Department", value: "3" },
+                { label: "Business Technology", value: 1 },
+                { label: "Legal Department", value: 2 },
+                { label: "Credit Department", value: 3 },
             ]
         },
         {
@@ -186,8 +189,8 @@ const UserUtils = () => {
             label: 'Unit',
             type: "select",
             options: [
-                { label: "Innovation", value: "1" },
-                { label: "Security", value: "2" },
+                { label: "Innovation", value: 1 },
+                { label: "Security", value: 2 },
             ]
         },
         {
@@ -217,7 +220,7 @@ const UserUtils = () => {
             value: "role",
             label: 'Role',
             type: "autocomplete",
-            options: roleOptions
+            options: optionsObject.rolesOptions
         },
     ]
 
@@ -234,10 +237,6 @@ const UserUtils = () => {
         userFields,
         filterCurrentUser,
         getSingleUser,
-        formatRoles,
-        fetchRolesData,
-        roles,
-        setRoleOptions,
         replaceUpdatedUser
     })
 }

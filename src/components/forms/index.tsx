@@ -17,7 +17,8 @@ export const UseFormInput = <T extends FieldValues>({
     label,
     type = "input",
     row = 0,
-    multiline = false
+    multiline = false,
+    required = true
 }: IUseFormInput<T>) => {
     return (
         <React.Fragment>
@@ -31,7 +32,7 @@ export const UseFormInput = <T extends FieldValues>({
                             row={row}
                             multiline={multiline}
                             type={type}
-                            required
+                            required={required}
                             label={label}
                             field={field}
                             error={formState.errors[value]?.message}

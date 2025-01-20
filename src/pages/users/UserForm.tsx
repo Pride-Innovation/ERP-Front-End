@@ -2,13 +2,7 @@ import {
     Grid,
     Stack
 } from '@mui/material'
-import {
-    Control,
-    FieldError,
-    FormState,
-    UseFormRegister
-} from 'react-hook-form'
-import { IUser } from './interface';
+
 import ButtonComponent from '../../components/forms/Button';
 import UserUtils from './utils';
 import {
@@ -17,29 +11,7 @@ import {
     UseFormInput,
     UseFormSelect
 } from '../../components/forms';
-import { useEffect } from 'react';
-
-interface IUserForm {
-    formState: FormState<IUser> & {
-        errors: {
-            email?: FieldError;
-            reportsTo?: FieldError;
-            firstName?: FieldError;
-            lastName?: FieldError;
-            otherName?: FieldError;
-            title?: FieldError;
-            department?: FieldError;
-            unit?: FieldError;
-            gender?: FieldError;
-            staffNumber?: FieldError;
-        };
-    };
-    control: Control<IUser>;
-    register: UseFormRegister<IUser>;
-    buttonText: string;
-    sendingRequest: boolean;
-    handleClose: () => void;
-}
+import { IUserForm } from './interface';
 
 const UserForm = ({
     formState,
@@ -49,9 +21,7 @@ const UserForm = ({
     sendingRequest,
     handleClose,
 }: IUserForm) => {
-    const { userFields, formatRoles, fetchRolesData, roles, setRoleOptions } = UserUtils();
-    useEffect(() => { fetchRolesData(); }, []);
-    useEffect(() => { setRoleOptions(formatRoles(roles)) }, [roles])
+    const { userFields } = UserUtils();
     return (
         <Grid item container xs={12}>
             <Grid item container spacing={4} xs={12}>
@@ -60,6 +30,7 @@ const UserForm = ({
                         return formField.type === 'input' ? (
                             <Grid item xs={12} md={4}>
                                 <UseFormInput
+                                    required={formField.required}
                                     register={register}
                                     control={control}
                                     formState={formState}

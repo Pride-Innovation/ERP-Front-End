@@ -31,12 +31,14 @@ const CreateUser = ({ handleClose }: ICreateUser) => {
 
     const onSubmit = async (formData: IUser) => {
         setSendingRequest(true);
+
         console.log(formData, "Form Data!!")
+
         const data = new FormData();
         data.append('email', formData.email);
         data.append('name', formData.firstName + " " + formData.lastName + " " + formData.otherName);
         data.append('title', formData.title);
-        data.append('reportsTo', "1");
+        data.append('reportsTo', formData.reportsTo as string);
         data.append('department_id', "1");
         data.append('gender', formData.gender);
         data.append('staffNumber', formData.staffNumber);

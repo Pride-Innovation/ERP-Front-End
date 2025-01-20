@@ -53,10 +53,20 @@ const fetchSingleUserService = async (id: string | number) => {
   }
 }
 
+const fetchRolesService = async () => {
+  try {
+    const response = await axiosInstance.get("roles");
+    return response.data?.data;
+  } catch (error) {
+    throw error
+  }
+}
+
 export {
   createUSerService,
   fetchSingleUserService,
   deleteUserService,
   fetchUsersService,
-  updateUSerService
+  updateUSerService,
+  fetchRolesService
 }

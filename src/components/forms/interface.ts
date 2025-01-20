@@ -70,6 +70,7 @@ export interface IUseFormInput<T extends FieldValues> {
     row?: number;
     multiline?: boolean;
     multiple?: boolean;
+    required?: boolean;
 }
 
 export interface IDatePickerComponent {

@@ -3,11 +3,13 @@ import {
     ThunkAction,
     Action
 } from '@reduxjs/toolkit';
-import ITEquipmentReducer from "../pages/assets/slice/index"
+import EquipmentReducer from "../pages/assets/slice/index"
+import UserReducer from "../pages/users/slice/index"
 
 export const store = configureStore({
     reducer: {
-        ITEquipmentStore: ITEquipmentReducer,
+        EquipmentStore: EquipmentReducer,
+        UserStore: UserReducer
     },
 });
 

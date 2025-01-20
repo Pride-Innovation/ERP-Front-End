@@ -55,7 +55,7 @@ const ITEquipmentUtills = () => {
         unitsOfMeasures,
         branches,
         suppliers
-    } = useSelector((state: RootState) => state.ITEquipmentStore);
+    } = useSelector((state: RootState) => state.EquipmentStore);
 
     const updateReduxStore = async () => {
         dispatch(loadBranches(await listBranchesService()));
