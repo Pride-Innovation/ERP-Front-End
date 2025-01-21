@@ -23,7 +23,6 @@ const Fleet = () => {
         setLoading(true)
         try {
             const response = await fetchFleetService();
-            console.log(response, "response data!!")
             setRows([...response]);
 
         } catch (error) {

@@ -17,4 +17,6 @@ export const fleetSchema = yup.object().shape({
     desc: yup.string().nullable().optional(),
     image: yup.string().nullable().optional(),
     assetStatus: yup.string().nullable().optional(),
+    user_id: yup.string().nullable().optional(),
+    branch_id: yup.string().nullable().optional()
 });

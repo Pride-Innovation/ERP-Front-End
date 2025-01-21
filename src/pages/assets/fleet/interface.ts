@@ -19,6 +19,8 @@ export interface IFleet {
     desc?: string | null;
     image?: string | null;
     assetStatus?: string | null;
+    user_id?: string | null;
+    branch_id?: string | null;
 }
 
 export interface IExtraFleetFields {
