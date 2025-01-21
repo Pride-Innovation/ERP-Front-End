@@ -8,17 +8,26 @@ import { IFleet } from "./interface";
 import { fleetsMock } from "../../../mocks/fleet";
 import { fleetSchema } from "./schema";
 import FleetForm from "./FleetForm";
+import { getFleetEquipmentByIDService } from "./service";
 
 const UpdateFleet = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
     const { id } = useParams<{ id: string }>();
     const [defaultAsset, setDefaultAsset] = useState<IFleet>(fleetsMock[0]);
 
-    useEffect(() => {
-        setDefaultAsset(() => {
-            return fleetsMock.find(asset => asset?.id === parseInt(id as string)) as IFleet
+    const findFleetEquipmentByID = async () => {
+        const response = await getFleetEquipmentByIDService(id as string);
+        setDefaultAsset({
+            ...response,
+            assetCategory_id: (response?.FleetAssetCategory_id).toString(),
+            supplier: (response?.supplier_id).toString(),
+            unitOfMeasure: (response?.unitOfMeasure_id).toString(),
+            user_id: (response?.user_id).toString(),
+            assetStatus: (response?.assetStatus_id).toString()
         })
-    }, [id]);
+    }
+
+    useEffect(() => { findFleetEquipmentByID() }, [id]);
 
     const {
         control,

@@ -17,3 +17,12 @@ export const createFleetService = async (body: Object) => {
         throw error;
     }
 }
+
+export const getFleetEquipmentByIDService = async (id: string | number) => {
+    try {
+        const response = await axiosInstance.get(`fleetAssets/${id}`);
+        return response?.data?.data
+    } catch (error) {
+        throw error;
+    }
+}
