@@ -13,10 +13,9 @@ export const fleetSchema = yup.object().shape({
     costOfTheAsset: yup.string().required('Cost of Asset is required'),
     assetCategory_id: yup.string().required('Cost of Asset is required'),
     netValueB: yup.string().required('Net Value is required'),
-    registrationNumber: yup.string().nullable().optional(),
     desc: yup.string().nullable().optional(),
     image: yup.string().nullable().optional(),
     assetStatus: yup.string().nullable().optional(),
     user_id: yup.string().nullable().optional(),
-    branch_id: yup.string().nullable().optional()
+    branch_id: yup.string().nullable().optional(),
 });

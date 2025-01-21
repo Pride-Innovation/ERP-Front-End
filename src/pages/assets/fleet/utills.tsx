@@ -7,6 +7,8 @@ import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import { getTableHeaders } from "../../../components/tables/getTableHeaders";
 import { IFormData } from "../interface";
 import { IFleet } from "./interface";
+import { RootState } from "../../../store";
+import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
 import {
     loadAssetCategories,
@@ -24,16 +26,13 @@ import {
     listUnitOfMeasuresService,
     listUsersService
 } from "../ITEquipment/service";
-import { useSelector } from "react-redux";
-import { RootState } from "../../../store";
 
 const FleetUtills = () => {
     const endPoint = 'posts';
     const module = "fleet";
     const header = { plural: 'Fleet', singular: 'Fleet' };
     const [open, setOpen] = useState<boolean>(false);
-    const dispatch = useDispatch();
-
+    const dispatch = useDispatch()
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
     const [optionsObject, setOptionsObject] = useState<{
         assetsStatusesOptions: Array<IOptions>,
@@ -50,7 +49,8 @@ const FleetUtills = () => {
         usersOptions: [],
         suppliersOptions: []
     });
-
+    const handleOpen = () => setOpen(true);
+    const handleClose = () => setOpen(false);
     const {
         assetsStatuses,
         users,
@@ -59,9 +59,6 @@ const FleetUtills = () => {
         branches,
         suppliers
     } = useSelector((state: RootState) => state.EquipmentStore);
-    
-    const handleOpen = () => setOpen(true);
-    const handleClose = () => setOpen(false);
 
     const updateReduxStore = async () => {
         dispatch(loadBranches(await listBranchesService()));
@@ -85,7 +82,6 @@ const FleetUtills = () => {
         })
 
     }, [assetsStatuses, users, assetCategories, unitsOfMeasures, branches, suppliers])
-
     const {
         id,
         hostname,
@@ -165,19 +161,19 @@ const FleetUtills = () => {
         },
         {
             value: "unitOfMeasure",
-            label: 'Unit Of Measure',
+            label: 'Unit of Measure',
             type: "select",
             options: optionsObject.unitsOfMeasuresOptions
         },
         {
             value: "purchaseCost",
             label: 'Purchase Cost',
-            type: "number",
+            type: "input"
         },
         {
             value: "costOfTheAsset",
             label: 'Cost of Asset',
-            type: "number",
+            type: "input",
         },
         {
             value: "netValueB",
