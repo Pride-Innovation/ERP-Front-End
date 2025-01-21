@@ -15,7 +15,8 @@ export interface IFleet {
     purchaseCost: string;
     costOfTheAsset: string;
     netValueB: string;
-    // registrationNumber?: string | null;
+    registrationNumber?: string | null;
+    model?: string | null;
     desc?: string | null;
     image?: string | null;
     assetStatus?: string | null;
@@ -53,7 +54,7 @@ export interface IFleetForm {
             purchaseCost?: FieldError;
             costOfTheAsset?: FieldError;
             netValueB?: FieldError;
-            // registrationNumber?: FieldError;
+            registrationNumber?: FieldError;
             desc?: FieldError;
             image?: FieldError;
             assetStatus?: FieldError;

@@ -186,6 +186,16 @@ const FleetUtills = () => {
             type: "input",
         },
         {
+            value: "registrationNumber",
+            label: 'Registration Number',
+            type: "input",
+        },
+        {
+            value: "model",
+            label: 'Model',
+            type: "input",
+        },
+        {
             value: "assetStatus",
             label: 'Status',
             type: "select",
