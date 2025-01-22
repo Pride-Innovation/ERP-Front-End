@@ -1,26 +1,38 @@
 import {
   Box,
-  Button,
-  Card,
-  Stack,
   TextField,
-  Typography
 } from "@mui/material"
 import BranchUtills from "./utills"
 import ButtonComponent from "../../../components/forms/Button";
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
-import { ChangeEvent } from "react";
+import { ChangeEvent, useState } from "react";
 import { crudStates } from "../../../utils/constants";
 import ModalComponent from "../../../components/modal";
 import CreateBranch from "./CreateBranch";
 import ViewBranch from "./ViewBranch";
+import UpdateBranch from "./UpdateBranch";
+import { IBranch } from "../../assets/ITEquipment/interface";
+import DeleteBranch from "./DeleteBranch";
 
 const Branches = () => {
+  const [currentBranch, setCurrentBranch] = useState<IBranch>({} as IBranch);
   const { branches, filterByName, modalState, open, handleClose, handleOpen, setModalState } = BranchUtills()
 
 
-  const createBranchFxn = () => {
+  const createBranch = () => {
     setModalState(crudStates.create);
+    handleOpen()
+  }
+
+  const updateBranch = (branch: IBranch) => {
+    setCurrentBranch(branch)
+    setModalState(crudStates.update);
+    handleOpen()
+  }
+
+  const deleteBranch = (branch: IBranch) => {
+    setCurrentBranch(branch)
+    setModalState(crudStates.delete);
     handleOpen()
   }
 
@@ -29,6 +41,16 @@ const Branches = () => {
       {
         crudStates.create === modalState && <ModalComponent width={"50%"} title='Create Branch' open={open} handleClose={handleClose}>
           <CreateBranch handleClose={handleClose} sendingRequest={false} />
+        </ModalComponent>
+      }
+      {
+        crudStates.delete === modalState && <ModalComponent width={"35%"} title='Delete Branch' open={open} handleClose={handleClose}>
+          <DeleteBranch branch={currentBranch} handleClose={handleClose} sendingRequest={false} buttonText='Delete' />
+        </ModalComponent>
+      }
+      {
+        crudStates.update === modalState && <ModalComponent width={"50%"} title='Update Branch' open={open} handleClose={handleClose}>
+          <UpdateBranch handleClose={handleClose} sendingRequest={false} branch={currentBranch} />
         </ModalComponent>
       }
       <Box sx={{ width: "80%" }}>
@@ -53,7 +75,7 @@ const Branches = () => {
           </Box>
           <Box>
             <ButtonComponent
-              handleClick={createBranchFxn}
+              handleClick={createBranch}
               sendingRequest={false}
               buttonText="Create New Branch"
               variant='contained'
@@ -71,7 +93,7 @@ const Branches = () => {
           }}>
           {
             branches.map(branch => (
-                <ViewBranch branch={branch} />
+              <ViewBranch branch={branch} deleteBranch={deleteBranch} updateBranch={updateBranch} />
             ))
           }
         </Box>

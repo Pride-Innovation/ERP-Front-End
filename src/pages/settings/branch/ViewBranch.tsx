@@ -3,10 +3,9 @@ import { grey } from '@mui/material/colors'
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
 import CameraOutdoorOutlinedIcon from '@mui/icons-material/CameraOutdoorOutlined';
-import React from 'react';
-import { IBranch } from '../../assets/ITEquipment/interface';
+import { IBranchDetails } from './interface';
 
-const ViewBranch: React.FC<{ branch: IBranch }> = ({ branch }) => {
+const ViewBranch = ({ branch, deleteBranch, updateBranch }: IBranchDetails) => {
     return (
         <Card sx={{
             boxShadow: 0,
@@ -42,10 +41,10 @@ const ViewBranch: React.FC<{ branch: IBranch }> = ({ branch }) => {
                     +256777338787
                 </Typography>
                 <Button
-                    onClick={() => console.log(branch.id)}
+                    onClick={() => updateBranch(branch)}
                     sx={{ textTransform: "none" }} startIcon={<EditOutlinedIcon />} variant="contained" color="info">Update</Button>
                 <Button
-                    onClick={() => console.log(branch.id)}
+                    onClick={() => deleteBranch(branch)}
                     sx={{ textTransform: "none" }} startIcon={<DeleteOutlineOutlinedIcon />} variant="outlined" color="error">Delete</Button>
             </Stack>
         </Card >

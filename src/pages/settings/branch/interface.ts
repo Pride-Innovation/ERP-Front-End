@@ -22,3 +22,22 @@ export interface ICreateBranch {
     handleClose: () => void;
     sendingRequest: boolean;
 }
+
+export interface IUpdateBranch {
+    handleClose: () => void;
+    sendingRequest: boolean;
+    branch: IBranch
+}
+
+export interface IBranchDetails {
+    branch: IBranch;
+    deleteBranch: (role: IBranch) => void;
+    updateBranch: (role: IBranch) => void;
+}
+
+export interface IDeleteBranch {
+    handleClose: () => void;
+    sendingRequest: boolean;
+    buttonText: string;
+    branch: IBranch
+}
