@@ -8,7 +8,9 @@ import { IFleet } from "./interface";
 import { fleetsMock } from "../../../mocks/fleet";
 import { fleetSchema } from "./schema";
 import FleetForm from "./FleetForm";
-import { getFleetEquipmentByIDService } from "./service";
+import { getFleetEquipmentByIDService, updateFleetEquipmentService } from "./service";
+import { IResponseData } from "../../users/interface";
+import { toast } from "react-toastify";
 
 const UpdateFleet = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
@@ -19,7 +21,7 @@ const UpdateFleet = () => {
         const response = await getFleetEquipmentByIDService(id as string);
         setDefaultAsset({
             ...response,
-            assetCategory_id: (response?.FleetAssetCategory_id).toString(),
+            // assetCategory_id: (response?.FleetAssetCategory_id).toString(),
             supplier: (response?.supplier_id).toString(),
             unitOfMeasure: (response?.unitOfMeasure_id).toString(),
             user_id: (response?.user_id).toString(),
@@ -44,13 +46,22 @@ const UpdateFleet = () => {
         reset({ ...defaultAsset });
     }, [defaultAsset]);
 
-    const onSubmit = (formData: IFleet) => {
+    const onSubmit = async (formData: IFleet) => {
         setSendingRequest(true);
-        console.log(formData, "form data!!!!!");
+        const request = {
+            ...formData,
+            branch_id: parseInt(formData.branch_id as string),
+            assetStatus_id: parseInt(formData.assetStatus as string),
+            FleetAssetCategory_id: parseInt(formData.assetCategory_id),
+            unitOfMeasure_id: parseInt(formData.unitOfMeasure),
+            supplier_id: parseInt(formData.supplier),
+            user_id: parseInt(formData.user_id as string),
+        }
+
+        const response = await updateFleetEquipmentService(request, id as string) as IResponseData;
+        toast.success(response.data.message)
         setSendingRequest(false)
     };
-
-
 
     return (
         <Card sx={{ p: 4 }}>

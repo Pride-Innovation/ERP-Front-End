@@ -26,3 +26,12 @@ export const getFleetEquipmentByIDService = async (id: string | number) => {
         throw error;
     }
 }
+
+export const updateFleetEquipmentService = async (body: object, id: string | number) => {
+    try {
+        const response = await axiosInstance.post(`fleetAssets/update/${id}`, body);
+        return response?.data
+    } catch (error) {
+        throw error
+    }
+}
