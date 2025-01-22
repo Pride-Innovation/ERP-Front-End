@@ -1,4 +1,11 @@
-import { Box, Button, Card, Stack, TextField, Typography } from "@mui/material"
+import {
+  Box,
+  Button,
+  Card,
+  Stack,
+  TextField,
+  Typography
+} from "@mui/material"
 import BranchUtills from "./utills"
 import { grey } from "@mui/material/colors"
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
@@ -12,12 +19,18 @@ import ModalComponent from "../../../components/modal";
 import CreateBranch from "./CreateBranch";
 
 const Branches = () => {
-  const { branches, filterByName, modalState, open, handleClose } = BranchUtills()
+  const { branches, filterByName, modalState, open, handleClose, handleOpen, setModalState } = BranchUtills()
+
+
+  const createBranchFxn = () => {
+    setModalState(crudStates.create);
+    handleOpen()
+  }
 
   return (
     <>
       {
-        crudStates.create === modalState && <ModalComponent width={"35%"} title='Create Role' open={open} handleClose={handleClose}>
+        crudStates.create === modalState && <ModalComponent width={"50%"} title='Create Branch' open={open} handleClose={handleClose}>
           <CreateBranch handleClose={handleClose} sendingRequest={false} />
         </ModalComponent>
       }
@@ -43,7 +56,7 @@ const Branches = () => {
           </Box>
           <Box>
             <ButtonComponent
-              handleClick={() => console.log("create branch")}
+              handleClick={createBranchFxn}
               sendingRequest={false}
               buttonText="Create New Branch"
               variant='contained'

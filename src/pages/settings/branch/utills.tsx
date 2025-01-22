@@ -31,13 +31,28 @@ const BranchUtills = () => {
         },
         {
             value: "email",
-            label: 'Branch Name',
+            label: 'Branch Email',
             type: "input"
         },
         {
             value: "tel",
-            label: 'Telephone Number',
+            label: 'Branch Telephone',
             type: "input"
+        },
+        {
+            value: "status",
+            label: 'Branch Status',
+            type: "select",
+            options: [
+                {
+                    label: "Full Branch",
+                    value: 1
+                },
+                {
+                    label: "Minor Branch",
+                    value: 2
+                }
+            ]
         },
         {
             value: "desc",

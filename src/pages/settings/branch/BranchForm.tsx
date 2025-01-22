@@ -24,7 +24,7 @@ const BranchForm = ({
                 {
                     formFields.map(formField => {
                         return formField.type === 'input' ? (
-                            <Grid item xs={12} md={4}>
+                            <Grid item xs={12} md={6}>
                                 <UseFormInput
                                     register={register}
                                     control={control}
@@ -34,10 +34,11 @@ const BranchForm = ({
                                 />
                             </Grid>
                         ) :
-                            formField.type === 'number' ? (
-                                <Grid item xs={12} md={4}>
+                            formField.type === 'textarea' ? (
+                                <Grid item xs={12} md={12}>
                                     <UseFormInput
-                                        type="number"
+                                        row={4}
+                                        multiline={true}
                                         register={register}
                                         control={control}
                                         formState={formState}
@@ -45,38 +46,50 @@ const BranchForm = ({
                                         label={formField.label}
                                     />
                                 </Grid>
-                            ) : formField.type === 'select' ? (
-                                <Grid item xs={12} md={4}>
-                                    <UseFormSelect
-                                        options={formField.options}
-                                        register={register}
-                                        control={control}
-                                        formState={formState}
-                                        value={formField.value}
-                                        label={formField.label} />
-                                </Grid>
-                            ) : formField.type === 'date' ? (
-                                <Grid item xs={12} md={4}>
-                                    <UseFormDatePicker
-                                        register={register}
-                                        control={control}
-                                        formState={formState}
-                                        value={formField.value}
-                                        label={formField.label} />
-                                </Grid>
-                            ) : formField.type === 'autocomplete' ? (
-                                <Grid item xs={12} md={4}>
-                                    <UseFormAutocompleteComponent
-                                        register={register}
-                                        control={control}
-                                        formState={formState}
-                                        value={formField.value}
-                                        label={formField.label}
-                                        options={formField.options}
-                                    />
-                                </Grid>
-                            )
-                                : null
+                            ) :
+                                formField.type === 'number' ? (
+                                    <Grid item xs={12} md={6}>
+                                        <UseFormInput
+                                            type="number"
+                                            register={register}
+                                            control={control}
+                                            formState={formState}
+                                            value={formField.value}
+                                            label={formField.label}
+                                        />
+                                    </Grid>
+                                ) : formField.type === 'select' ? (
+                                    <Grid item xs={12} md={6}>
+                                        <UseFormSelect
+                                            options={formField.options}
+                                            register={register}
+                                            control={control}
+                                            formState={formState}
+                                            value={formField.value}
+                                            label={formField.label} />
+                                    </Grid>
+                                ) : formField.type === 'date' ? (
+                                    <Grid item xs={12} md={6}>
+                                        <UseFormDatePicker
+                                            register={register}
+                                            control={control}
+                                            formState={formState}
+                                            value={formField.value}
+                                            label={formField.label} />
+                                    </Grid>
+                                ) : formField.type === 'autocomplete' ? (
+                                    <Grid item xs={12} md={6}>
+                                        <UseFormAutocompleteComponent
+                                            register={register}
+                                            control={control}
+                                            formState={formState}
+                                            value={formField.value}
+                                            label={formField.label}
+                                            options={formField.options}
+                                        />
+                                    </Grid>
+                                )
+                                    : null
                     })
                 }
                 <Grid item xs={12} sx={{ display: "flex", justifyContent: "end" }}>
