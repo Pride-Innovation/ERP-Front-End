@@ -1,0 +1,24 @@
+import { Control, FieldError, FormState, UseFormRegister } from "react-hook-form";
+import { IBranch } from "../../assets/ITEquipment/interface";
+
+export interface IBranchForm {
+    formState: FormState<IBranch> & {
+        errors: {
+            name?: FieldError;
+            email?: FieldError;
+            tel?: FieldError;
+            desc?: FieldError;
+            status?: FieldError;
+        };
+    };
+    control: Control<IBranch>;
+    register: UseFormRegister<IBranch>;
+    buttonText: string;
+    sendingRequest: boolean;
+    handleClose: () => void
+}
+
+export interface ICreateBranch {
+    handleClose: () => void;
+    sendingRequest: boolean;
+}
