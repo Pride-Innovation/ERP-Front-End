@@ -41,6 +41,10 @@ const LIST_OFFICE_EQUIPMENT: string = `${LIST_ASSETS}/office-equipment`
 const CREATE_OFFICE_EQUIPMENT: string = `${LIST_ASSETS}/office-equipment/create`
 const UPDATE_OFFICE_EQUIPMENT: string = `${LIST_ASSETS}/office-equipment/update`
 
+/* Settings Routes */
+const BRANCHES: string = `${ASSETS_MANAGEMENT}/settings/branches`;
+const UNITS: string = `${ASSETS_MANAGEMENT}/settings/units`;
+
 /* Errors Page */
 const ERRORS: string = `${ASSETS_MANAGEMENT}/restricted-access`
 
@@ -73,5 +77,7 @@ export const ROUTES = {
     CREATE_TRANSPORT_REQUEST,
     UPDATE_TRANSPORT_REQUEST,
     LIST_TRANSPORT_PENDING,
-    LIST_TRANSPORT_REJECTED
+    LIST_TRANSPORT_REJECTED,
+    BRANCHES,
+    UNITS
 }

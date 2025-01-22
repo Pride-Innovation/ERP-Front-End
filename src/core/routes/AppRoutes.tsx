@@ -28,6 +28,7 @@ import TransportRejectedRequest from '../../pages/request/transportRequest/rejec
 import TransportRequest from '../../pages/request/transportRequest/allRequests'
 import CreateTranportRequest from '../../pages/request/transportRequest/CreateTranportRequest'
 import UpdateTransportRequest from '../../pages/request/transportRequest/UpdateTransportRequest'
+import SettingsSubRoutes from './subroutes/SettingsSub'
 
 const AppRoutes = () => {
   // const { routePermission } = RoutesUtills();
@@ -39,7 +40,9 @@ const AppRoutes = () => {
       <Route element={<PrivateRoute />}>
         <Route path={ROUTES.ASSETS_MANAGEMENT} element={<ApplicationDrawer />} >
           <Route index element={<Dashboard />} />
-          <Route path={ROUTES.SETTINGS} element={<Settings />} />
+          <Route path={ROUTES.SETTINGS} element={<Settings />} >
+            {SettingsSubRoutes()}
+          </Route>
           <Route path={`${ROUTES.PROFILE}/:id`} element={<Profile />} />
           <Route element={<PrivateRoute
           // permission={routePermission(1)}
@@ -54,7 +57,7 @@ const AppRoutes = () => {
             {FleetRoutes()}
             {OfficeEquipmentRoutes()}
           </Route>
-          
+
           <Route path={ROUTES.REQUEST} element={<RequestsManagement />}>
             <Route index element={<Request />} />
             <Route path={ROUTES.LIST_PENDING} element={<PendingRequest />} />

@@ -62,3 +62,10 @@ export interface IRoleForm {
     sendingRequest: boolean;
     handleClose: () => void;
 }
+
+export interface ISettingsNavigation {
+    id: number;
+    text: string;
+    path: string;
+    icon: JSX.Element;
+}

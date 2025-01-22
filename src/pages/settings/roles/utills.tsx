@@ -1,11 +1,15 @@
 import { useState } from "react";
-import { IModule, IPermission, IRole } from "../interface";
+import { IModule, IPermission, IRole, ISettingsNavigation } from "../interface";
 import BalanceIcon from '@mui/icons-material/Balance';
 import SettingsBrightnessIcon from '@mui/icons-material/SettingsBrightness';
 import DirectionsCarFilledIcon from '@mui/icons-material/DirectionsCarFilled';
 import GroupIcon from '@mui/icons-material/Group';
 import { crudStates } from "../../../utils/constants";
 import { fetchAllRolesService } from "./service";
+import { ROUTES } from "../../../core/routes/routes";
+import VpnKeyOutlinedIcon from '@mui/icons-material/VpnKeyOutlined';
+import CameraOutdoorOutlinedIcon from '@mui/icons-material/CameraOutdoorOutlined';
+import BedroomBabyOutlinedIcon from '@mui/icons-material/BedroomBabyOutlined';
 
 const RoleUtills = () => {
     const endPoint = "posts";
@@ -25,7 +29,6 @@ const RoleUtills = () => {
     const [modalState, setModalState] = useState<string>("");
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
-
     const modulesList: IModule[] = [
         {
             id: 1,
@@ -81,6 +84,27 @@ const RoleUtills = () => {
         return response;
     }
 
+    const navigations: Array<ISettingsNavigation> = [
+        {
+            id: 1,
+            text: "Roles and Permissions",
+            path: ROUTES.SETTINGS,
+            icon: <VpnKeyOutlinedIcon fontSize="small" />
+        },
+        {
+            id: 2,
+            text: "Branches",
+            path: ROUTES.BRANCHES,
+            icon: <CameraOutdoorOutlinedIcon />
+        },
+        {
+            id: 3,
+            text: "Units",
+            path: ROUTES.UNITS,
+            icon: <BedroomBabyOutlinedIcon />
+        }
+    ]
+
     return (
         {
             endPoint,
@@ -96,7 +120,8 @@ const RoleUtills = () => {
             modalState,
             setModalState,
             fetchAllRoles,
-            updatePermissionsOnClick
+            updatePermissionsOnClick,
+            navigations
         }
     )
 }

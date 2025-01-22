@@ -4,7 +4,7 @@ import Roles from "./roles";
 const Settings = () => {
     return (
         <Box sx={{ width: "100%", display: "flex", justifyContent: "center" }}>
-            <Box sx={{ width: "80%" }}>
+            <Box sx={{ width: "90%" }}>
                 <Roles />
             </Box>
         </Box>
