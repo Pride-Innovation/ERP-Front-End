@@ -1,19 +1,51 @@
-import { Box, Button, Card, Stack, Typography } from "@mui/material"
+import { Box, Button, Card, Stack, TextField, Typography } from "@mui/material"
 import BranchUtills from "./utills"
 import { grey } from "@mui/material/colors"
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
 import CameraOutdoorOutlinedIcon from '@mui/icons-material/CameraOutdoorOutlined';
+import ButtonComponent from "../../../components/forms/Button";
+import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
+import { ChangeEvent } from "react";
 
 const Branches = () => {
-  const { branches } = BranchUtills()
+  const { branches, filterByName } = BranchUtills()
 
   return (
     <Box sx={{ width: "80%" }}>
+      <Box sx={{
+        width: "100%",
+        display: "flex",
+        justifyContent: "flex-end",
+        mb: 4,
+        alignItems: "center",
+      }}>
+        <Box sx={{ mr: "10px" }}>
+          <TextField
+            onChange={(e: ChangeEvent<HTMLInputElement>) => filterByName(e.target.value)}
+            size="small"
+            placeholder="Filter by branch name"
+            InputProps={
+              {
+                startAdornment: (<SearchOutlinedIcon fontSize="small" sx={{ mr: "10px" }} />)
+              }
+            }
+          />
+        </Box>
+        <Box>
+          <ButtonComponent
+            handleClick={() => console.log("create branch")}
+            sendingRequest={false}
+            buttonText="Create New Branch"
+            variant='contained'
+            buttonColor='info'
+            type='button' />
+        </Box>
+      </Box>
       <Box
         display="grid"
-        gridTemplateColumns="repeat(4, 1fr)"
-        gap={2}
+        gridTemplateColumns="repeat(3, 1fr)"
+        gap={3}
         sx={{
           width: "100%",
           alignItems: "center",
@@ -60,7 +92,6 @@ const Branches = () => {
                   onClick={() => console.log(branch.id)}
                   sx={{ textTransform: "none" }} startIcon={<DeleteOutlineOutlinedIcon />} variant="outlined" color="error">Delete</Button>
               </Stack>
-
             </Card >
           ))
         }
