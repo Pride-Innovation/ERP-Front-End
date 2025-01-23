@@ -52,8 +52,11 @@ const HandleRoutes = () => {
         if (route.indexOf(ROUTES.TRANSPORT_REQUEST) !== -1) {
             handleActiveRoute(sideBarList[4])
         }
-        if (route === ROUTES.SETTINGS) {
+        if ([ROUTES.SETTINGS].includes(route)) {
             handleClick(sideBarList[5])
+            handleActiveRoute(sideBarList[5])
+        }
+        if (route.indexOf(ROUTES.SETTINGS) !== -1) {
             handleActiveRoute(sideBarList[5])
         }
         if (route === ROUTES.AUDIT_TRAILS) {
