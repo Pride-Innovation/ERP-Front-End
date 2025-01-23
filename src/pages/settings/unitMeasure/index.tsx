@@ -1,7 +1,33 @@
 import { Box } from "@mui/material";
 import ButtonComponent from "../../../components/forms/Button";
+import UnitMeasureUtills from "./Utills";
+import UnitMeasureDetails from "./UnitMeasureDetails";
+import { IUnitOfMeasure } from "../../assets/ITEquipment/interface";
+import { useState } from "react";
+import { crudStates } from "../../../utils/constants";
 
 const UnitMeasures = () => {
+    const { unitsOfMeasure, setModalState, handleClose, handleOpen } = UnitMeasureUtills();
+    const [currentUnitOfMeasure, setCurrentUnitOfMeasure] = useState<IUnitOfMeasure>({} as IUnitOfMeasure);
+
+
+    const createUnitOfMeasure = () => {
+        setModalState(crudStates.create);
+        handleOpen()
+    }
+
+    const updateUnitOfMeasure = (unitOfMeasure: IUnitOfMeasure) => {
+        setCurrentUnitOfMeasure(unitOfMeasure)
+        setModalState(crudStates.update);
+        handleOpen()
+    }
+
+    const deleteUnitOfMeasure = (unitOfMeasure: IUnitOfMeasure) => {
+        setCurrentUnitOfMeasure(unitOfMeasure)
+        setModalState(crudStates.delete);
+        handleOpen()
+    }
+
     return (
         <Box sx={{ width: "100%" }}>
             <Box sx={{
@@ -11,18 +37,6 @@ const UnitMeasures = () => {
                 mb: 4,
                 alignItems: "center",
             }}>
-                {/* <Box sx={{ mr: "10px" }}>
-                    <TextField
-                        onChange={(e: ChangeEvent<HTMLInputElement>) => filterByName(e.target.value)}
-                        size="small"
-                        placeholder="Filter by branch name"
-                        InputProps={
-                            {
-                                startAdornment: (<SearchOutlinedIcon color="info" fontSize="small" sx={{ mr: "10px" }} />)
-                            }
-                        }
-                    />
-                </Box> */}
                 <Box>
                     <ButtonComponent
                         handleClick={() => console.log("create unit of measure!!")}
@@ -35,17 +49,21 @@ const UnitMeasures = () => {
             </Box>
             <Box
                 display="grid"
-                gridTemplateColumns="repeat(3, 1fr)"
+                gridTemplateColumns="repeat(4, 1fr)"
                 gap={3}
                 sx={{
                     width: "100%",
                     alignItems: "center",
                 }}>
-                {/* {
-                    branches.map(branch => (
-                        <ViewBranch branch={branch} deleteBranch={deleteBranch} updateBranch={updateBranch} />
+                {
+                    unitsOfMeasure.map(measure => (
+                        <UnitMeasureDetails
+                            unitOfMeasure={measure}
+                            deleteUnitOfMeasure={deleteUnitOfMeasure}
+                            updateUnitOfMeasure={updateUnitOfMeasure}
+                        />
                     ))
-                } */}
+                }
             </Box>
         </Box>
     )
