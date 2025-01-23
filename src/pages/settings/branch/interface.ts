@@ -15,7 +15,8 @@ export interface IBranchForm {
     register: UseFormRegister<IBranch>;
     buttonText: string;
     sendingRequest: boolean;
-    handleClose: () => void
+    handleClose: () => void;
+    update?: boolean;
 }
 
 export interface ICreateBranch {

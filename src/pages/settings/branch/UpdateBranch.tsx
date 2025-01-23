@@ -34,6 +34,7 @@ const UpdateBranch = ({ handleClose, sendingRequest, branch }: IUpdateBranch) =>
                     onSubmit={handleSubmit(onSubmit)}
                 >
                     <BranchForm
+                        update
                         handleClose={handleClose}
                         buttonText="Submit"
                         formState={formState}

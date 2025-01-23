@@ -1,4 +1,4 @@
-import { Grid, Stack } from "@mui/material"
+import { Box, Grid, Stack } from "@mui/material"
 import BranchUtills from "./utills"
 import {
     UseFormAutocompleteComponent,
@@ -15,7 +15,8 @@ const BranchForm = ({
     formState,
     buttonText,
     sendingRequest,
-    handleClose
+    handleClose,
+    update = false
 }: IBranchForm) => {
     const { formFields } = BranchUtills();
     return (
@@ -92,7 +93,17 @@ const BranchForm = ({
                                     : null
                     })
                 }
-                <Grid item xs={12} sx={{ display: "flex", justifyContent: "end" }}>
+                <Grid item xs={12} sx={{ display: "flex", justifyContent: "space-between" }}>
+                    <Box>
+                        {update &&
+                            <ButtonComponent
+                                variant="outlined"
+                                handleClick={handleClose}
+                                buttonColor='info'
+                                type='button'
+                                sendingRequest={false}
+                                buttonText="Update Permissions" />}
+                    </Box>
                     <Stack direction="row" spacing={3} sx={{ width: "30%" }}>
                         <ButtonComponent handleClick={handleClose} buttonColor='error' type='button' sendingRequest={false} buttonText="Cancel" />
                         <ButtonComponent buttonColor='success' type='submit' sendingRequest={sendingRequest} buttonText={buttonText} />
