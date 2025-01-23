@@ -21,7 +21,7 @@ const Settings = () => {
         <Box sx={{ width: "100%", display: "flex", justifyContent: "center" }}>
             <Box sx={{ width: "90%", display: "flex" }} py={4}>
                 <Box sx={{ width: "20%", mr: 3 }}>
-                    <Typography sx={{ fontWeight: 600, textTransform: "none", fontSize: '17px' }}>Accounts Settings</Typography>
+                    <Typography sx={{ fontWeight: 600, textTransform: "uppercase", fontSize: '17px' }}>System Settings</Typography>
                     <Box sx={{ mt: 6 }}>
                         <Stack direction="column" spacing={1}>
                             {navigations.map(item => (

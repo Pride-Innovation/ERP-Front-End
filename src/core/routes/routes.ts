@@ -45,6 +45,7 @@ const UPDATE_OFFICE_EQUIPMENT: string = `${LIST_ASSETS}/office-equipment/update`
 const BRANCHES: string = `${ASSETS_MANAGEMENT}/settings/branches`;
 const UNITS: string = `${ASSETS_MANAGEMENT}/settings/units`;
 const UNITS_MEASURE: string = `${ASSETS_MANAGEMENT}/settings/units-of-measure`;
+const SUPPLIERS: string = `${ASSETS_MANAGEMENT}/settings/suppliers`;
 
 /* Errors Page */
 const ERRORS: string = `${ASSETS_MANAGEMENT}/restricted-access`
@@ -81,5 +82,6 @@ export const ROUTES = {
     LIST_TRANSPORT_REJECTED,
     BRANCHES,
     UNITS,
-    UNITS_MEASURE
+    UNITS_MEASURE,
+    SUPPLIERS
 }

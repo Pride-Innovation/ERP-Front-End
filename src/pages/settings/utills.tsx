@@ -5,6 +5,7 @@ import BedroomBabyOutlinedIcon from '@mui/icons-material/BedroomBabyOutlined';
 import ScaleIcon from '@mui/icons-material/Scale';
 import { ISettingsNavigation } from './interface';
 import { ROUTES } from '../../core/routes/routes';
+import ListAltIcon from '@mui/icons-material/ListAlt';
 
 const SettingsUtills = () => {
 
@@ -32,6 +33,12 @@ const SettingsUtills = () => {
             text: "Units of Measure",
             path: ROUTES.UNITS_MEASURE,
             icon: <ScaleIcon />
+        },
+        {
+            id: 5,
+            text: "Suppliers",
+            path: ROUTES.SUPPLIERS,
+            icon: <ListAltIcon />
         }
     ]
 
