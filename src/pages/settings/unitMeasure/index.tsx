@@ -8,6 +8,7 @@ import { crudStates } from "../../../utils/constants";
 import ModalComponent from "../../../components/modal";
 import CreateUnitOfMeasure from "./CreateUnitOfMeasure";
 import UpdateUnitOfMeasure from "./UpdateUnitOfMeasure";
+import DeleteUnitOfMeasure from "./DeleteUnitOfMeasure";
 
 const UnitMeasures = () => {
     const { unitsOfMeasure, setModalState, handleClose, handleOpen, modalState, open } = UnitMeasureUtills();
@@ -40,8 +41,7 @@ const UnitMeasures = () => {
             }
             {
                 crudStates.delete === modalState && <ModalComponent width={"35%"} title='Delete Unit of Measure' open={open} handleClose={handleClose}>
-                    {/* <DeleteBranch branch={currentBranch} handleClose={handleClose} sendingRequest={false} buttonText='Delete' /> */}
-                    <p>Delete Measure</p>
+                    <DeleteUnitOfMeasure unitOfMeasure={currentUnitOfMeasure} handleClose={handleClose} sendingRequest={false} buttonText='Delete' />
                 </ModalComponent>
             }
             {
