@@ -138,4 +138,5 @@ export interface ISupplier {
     symbol: string
     tel: string,
     email: string,
+    // Nice to have a supplier product type!!!
 }

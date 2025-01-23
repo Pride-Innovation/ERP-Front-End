@@ -42,7 +42,6 @@ const Suppliers = () => {
             {
                 crudStates.delete === modalState && <ModalComponent width={"35%"} title='Delete Supplier' open={open} handleClose={handleClose}>
                     <DeleteSupplier supplier={currentSupplier} handleClose={handleClose} sendingRequest={false} buttonText='Delete' />
-                    <p>Delete supplier</p>
                 </ModalComponent>
             }
             {
