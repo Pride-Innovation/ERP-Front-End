@@ -1,7 +1,7 @@
-import { Box, Button, Stack, Typography } from '@mui/material';
+import { Box } from '@mui/material';
 import ButtonComponent from '../../../components/forms/Button';
 import RoleDetails from './RoleDetails';
-import { IRole, ISettingsNavigation } from '../interface';
+import { IRole } from '../interface';
 import ModalComponent from '../../../components/modal';
 import RoleUtills from './utills';
 import { crudStates } from '../../../utils/constants';
@@ -9,19 +9,12 @@ import { useEffect, useState } from 'react';
 import DeleteRole from './DeleteRole';
 import CreateRole from './CreateRole';
 import UpdateRole from './UpdateRole';
-import { useLocation, useNavigate } from 'react-router';
-import { ROUTES } from '../../../core/routes/routes';
-import Branches from '../branch';
-import Units from '../unit';
+
 
 const Roles = () => {
-    const { open, handleClose, handleOpen, modalState, setModalState, fetchAllRoles, navigations } = RoleUtills();
+    const { open, handleClose, handleOpen, modalState, setModalState, fetchAllRoles } = RoleUtills();
     const [currentRole, setCurrentRole] = useState<IRole>({} as IRole);
     const [roles, setRoles] = useState<IRole[]>([] as Array<IRole>)
-    const [path, setPath] = useState<string>("");
-    const { pathname } = useLocation();
-    const navigate = useNavigate();
-    useEffect(() => { setPath(pathname) }, [pathname])
 
     useEffect(() => {
         const fetchRoles = async () => {
@@ -52,10 +45,6 @@ const Roles = () => {
         handleOpen()
     }
 
-    const determineActivePath = (item: ISettingsNavigation): boolean => {
-        if (path === `${item.path}`) return true;
-        return false;
-    }
 
     return (
         <>
@@ -74,74 +63,39 @@ const Roles = () => {
                     <UpdateRole handleClose={handleClose} sendingRequest={false} role={currentRole} />
                 </ModalComponent>
             }
-            <Box sx={{ py: 4, display: "flex" }}>
-                <Box sx={{ width: "20%", mr: 3 }}>
-                    <Typography sx={{ fontWeight: 600, textTransform: "none", fontSize: '17px' }}>Accounts Settings</Typography>
-                    <Box sx={{ mt: 6 }}>
-                        <Stack direction="column" spacing={1}>
-                            {navigations.map(item => (
-                                <>
-                                    <Button
-                                        startIcon={item.icon}
-                                        onClick={() => navigate(item.path)}
-                                        key={item.id}
-                                        sx={{ textTransform: "capitalize", display: "flex", justifyContent: "flex-start"}}
-                                        variant={determineActivePath(item) ? "contained" : "text"}
-                                    >
-                                        {item.text}
-                                    </Button>
-                                </>
-                            ))}
-                        </Stack>
+
+            <Box sx={{ width: "100%" }}>
+                <Box sx={{
+                    width: "100%",
+                    display: "flex",
+                    justifyContent: "flex-end",
+                    mb: 4,
+                    alignItems: "center",
+                }}>
+                    <Box>
+                        <ButtonComponent
+                            handleClick={createRole}
+                            sendingRequest={false}
+                            buttonText="Create New Role"
+                            variant='contained'
+                            buttonColor='info'
+                            type='button' />
                     </Box>
                 </Box>
-                {
-                    path === ROUTES.SETTINGS && (
-                        <Box sx={{ width: "80%" }}>
-                            <Box sx={{
-                                width: "100%",
-                                display: "flex",
-                                justifyContent: "flex-end",
-                                mb: 4,
-                                alignItems: "center",
-                            }}>
-                                <Box>
-                                    <ButtonComponent
-                                        handleClick={createRole}
-                                        sendingRequest={false}
-                                        buttonText="Create New Role"
-                                        variant='contained'
-                                        buttonColor='info'
-                                        type='button' />
-                                </Box>
-                            </Box>
-                            <Box
-                                display="grid"
-                                sx={{ width: "100%" }}
-                                gridTemplateColumns="1fr"
-                                gap={4}
-                            >
-                                {
-                                    roles.map((role: IRole) => {
-                                        return (
-                                            <RoleDetails updateRole={updateRole} deleteRole={deleteRole} role={role} />
-                                        )
-                                    })
-                                }
-                            </Box>
-                        </Box>
-                    )
-                }
-                {
-                    path === ROUTES.BRANCHES && (
-                        <Branches />
-                    )
-                }
-                {
-                    path === ROUTES.UNITS && (
-                        <Units />
-                    )
-                }
+                <Box
+                    display="grid"
+                    sx={{ width: "100%" }}
+                    gridTemplateColumns="1fr"
+                    gap={4}
+                >
+                    {
+                        roles.map((role: IRole) => {
+                            return (
+                                <RoleDetails updateRole={updateRole} deleteRole={deleteRole} role={role} />
+                            )
+                        })
+                    }
+                </Box>
             </Box>
         </>
     )

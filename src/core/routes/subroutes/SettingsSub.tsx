@@ -1,16 +1,18 @@
 import { Route } from "react-router"
-import Settings from "../../../pages/settings"
 import { ROUTES } from "../routes"
 import Branches from "../../../pages/settings/branch"
 import Units from "../../../pages/settings/unit"
+import UnitMeasures from "../../../pages/settings/unitMeasure"
+import Roles from "../../../pages/settings/roles"
 
 const SettingsSubRoutes = () => {
 
     return (
         <Route>
-            <Route index element={<Settings />} />
+            <Route index element={<Roles />} />
             <Route path={ROUTES.BRANCHES} element={<Branches />} />
             <Route path={ROUTES.UNITS} element={<Units />} />
+            <Route path={ROUTES.UNITS_MEASURE} element={<UnitMeasures />} />
         </Route>
     )
 }
