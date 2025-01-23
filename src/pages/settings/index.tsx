@@ -19,7 +19,7 @@ const Settings = () => {
 
     return (
         <Box sx={{ width: "100%", display: "flex", justifyContent: "center" }}>
-            <Box sx={{ width: "90%", display: "flex" }}>
+            <Box sx={{ width: "90%", display: "flex" }} py={4}>
                 <Box sx={{ width: "20%", mr: 3 }}>
                     <Typography sx={{ fontWeight: 600, textTransform: "none", fontSize: '17px' }}>Accounts Settings</Typography>
                     <Box sx={{ mt: 6 }}>
@@ -40,7 +40,9 @@ const Settings = () => {
                         </Stack>
                     </Box>
                 </Box>
-                <Outlet />
+                <Box sx={{ width: "80%"}}>
+                    <Outlet />
+                </Box>
             </Box>
         </Box>
     )

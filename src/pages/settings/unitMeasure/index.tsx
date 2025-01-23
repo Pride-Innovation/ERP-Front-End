@@ -3,7 +3,7 @@ import ButtonComponent from "../../../components/forms/Button";
 
 const UnitMeasures = () => {
     return (
-        <Box sx={{ width: "80%" }}>
+        <Box sx={{ width: "100%" }}>
             <Box sx={{
                 width: "100%",
                 display: "flex",

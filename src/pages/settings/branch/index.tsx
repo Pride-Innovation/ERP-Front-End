@@ -53,7 +53,7 @@ const Branches = () => {
           <UpdateBranch handleClose={handleClose} sendingRequest={false} branch={currentBranch} />
         </ModalComponent>
       }
-      <Box sx={{ width: "80%" }}>
+      <Box sx={{ width: "100%" }}>
         <Box sx={{
           width: "100%",
           display: "flex",
