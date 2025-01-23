@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import { IUnitOfMeasure } from '../../assets/ITEquipment/interface';
 import { useForm } from 'react-hook-form';
 import { Grid } from '@mui/material';
@@ -6,7 +6,7 @@ import UnitOfMeasureForm from './UnitOfMeasureForm';
 import { ICreateUnitOfMeasure } from './interface';
 
 const CreateUnitOfMeasure = ({ handleClose, sendingRequest }: ICreateUnitOfMeasure) => {
-    const defaultBranch: IUnitOfMeasure = {} as IUnitOfMeasure;
+    const defaultUnitOfMeasure: IUnitOfMeasure = {} as IUnitOfMeasure;
 
     const {
         control,
@@ -20,13 +20,13 @@ const CreateUnitOfMeasure = ({ handleClose, sendingRequest }: ICreateUnitOfMeasu
     });
 
     useEffect(() => {
-        reset({ ...defaultBranch });
+        reset({ ...defaultUnitOfMeasure });
     }, [reset]);
 
     const onSubmit = (formData: IUnitOfMeasure) => {
         console.log(formData, "form data!!!!!");
     };
-    
+
     return (
         <Grid container xs={12}>
             <Grid item xs={12}>
