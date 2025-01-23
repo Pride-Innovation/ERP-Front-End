@@ -21,6 +21,11 @@ const DeleteUnitOfMeasure = ({
                         {unitOfMeasure.name}
                     </Typography>
                 </Stack>
+                <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 1 }}>
+                    <Typography variant="subtitle1" color="textSecondary">
+                        Symbol: {unitOfMeasure.symbol}
+                    </Typography>
+                </Stack>
             </Grid>
             <Grid item xs={12} sx={{ display: "flex", justifyContent: "end" }}>
                 <Stack direction="row" spacing={3} sx={{ width: "50%" }}>
