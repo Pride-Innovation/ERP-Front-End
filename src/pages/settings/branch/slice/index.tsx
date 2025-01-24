@@ -17,13 +17,17 @@ export const authSlice = createSlice({
         loadBranches: (state, action) => {
             state.branches = action.payload;
         },
+        addBranch: (state, action) => {
+            state.branches = [action.payload, ...state.branches]
+        }
     }
 })
 
 const { reducer, actions } = authSlice
 
 export const {
-    loadBranches
+    loadBranches,
+    addBranch
 } = actions
 
 export default reducer;

@@ -5,7 +5,7 @@ import { IFormData } from "../../assets/interface";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../store";
-import { loadBranches } from "./slice";
+import { addBranch, loadBranches } from "./slice";
 
 const BranchUtills = () => {
     const [branchList, setBranchList] = useState<IBranch[]>([] as Array<IBranch>);
@@ -23,6 +23,10 @@ const BranchUtills = () => {
     const filterByName = (text: string) => {
         const filteredBranches = branches.filter(branch => branch.name.toLowerCase().indexOf(text.toLowerCase()) !== -1);
         setBranchList(filteredBranches);
+    }
+
+    const addBranchToStore = (branch: IBranch) => {
+        dispatch(addBranch(branch))
     }
 
     useEffect(() => { fetchAllBranches() }, []);
@@ -68,14 +72,15 @@ const BranchUtills = () => {
 
     return (
         {
-            branchList,
+            branches,
             filterByName,
             formFields,
             modalState,
             setModalState,
             open,
             handleClose,
-            handleOpen
+            handleOpen,
+            addBranchToStore
         }
     )
 }

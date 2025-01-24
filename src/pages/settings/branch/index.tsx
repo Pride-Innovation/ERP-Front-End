@@ -18,7 +18,7 @@ const Branches = () => {
   const [currentBranch, setCurrentBranch] = useState<IBranch>({} as IBranch);
   const [sendingRequest, setSendingRequest] = useState<boolean>(false)
 
-  const { branchList, filterByName, modalState, open, handleClose, handleOpen, setModalState } = BranchUtills()
+  const { branches, filterByName, modalState, open, handleClose, handleOpen, setModalState } = BranchUtills()
 
 
   const createBranch = () => {
@@ -94,7 +94,7 @@ const Branches = () => {
             alignItems: "center",
           }}>
           {
-            branchList.map(branch => (
+            branches.map(branch => (
               <ViewBranch branch={branch} deleteBranch={deleteBranch} updateBranch={updateBranch} />
             ))
           }

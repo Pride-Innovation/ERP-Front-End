@@ -9,6 +9,7 @@ import { branchSchema } from "./schema";
 import { createBranchService } from "./service";
 import { IResponseData } from "../../users/interface";
 import { toast } from "react-toastify";
+import BranchUtills from "./utills";
 
 const CreateBranch = ({
     handleClose,
@@ -16,7 +17,7 @@ const CreateBranch = ({
     setSendingRequest
 }: ICreateBranch) => {
     const defaultBranch: IBranch = {} as IBranch;
-
+    const { addBranchToStore } = BranchUtills();
     const {
         control,
         handleSubmit,
@@ -40,6 +41,7 @@ const CreateBranch = ({
         }
         const response = await createBranchService(request) as IResponseData;
         if (response.status === 'success') {
+            addBranchToStore(response.data[0] as IBranch)
             toast.success(response.data.message)
             setSendingRequest(false);
             handleClose()
