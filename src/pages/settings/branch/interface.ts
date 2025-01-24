@@ -29,6 +29,7 @@ export interface ICreateBranch {
 export interface IUpdateBranch {
     handleClose: () => void;
     sendingRequest: boolean;
+    setSendingRequest: Dispatch<SetStateAction<boolean>>
     branch: IBranch
 }
 

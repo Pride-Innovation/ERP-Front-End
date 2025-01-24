@@ -4,8 +4,15 @@ import { useEffect } from "react";
 import { IUpdateBranch } from "./interface";
 import { Grid } from "@mui/material";
 import BranchForm from "./BranchForm";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { branchSchema } from "./schema";
+import { updateBranchService } from "./service";
+import { IResponseData } from "../../users/interface";
+import { toast } from "react-toastify";
+import BranchUtills from "./utills";
 
-const UpdateBranch = ({ handleClose, sendingRequest, branch }: IUpdateBranch) => {
+const UpdateBranch = ({ handleClose, sendingRequest, branch, setSendingRequest }: IUpdateBranch) => {
+    const { updateBranchInStore } = BranchUtills()
     const {
         control,
         handleSubmit,
@@ -14,15 +21,29 @@ const UpdateBranch = ({ handleClose, sendingRequest, branch }: IUpdateBranch) =>
         reset
     } = useForm<IBranch>({
         mode: 'onChange',
-        // resolver: yupResolver(roleSchema),
+        resolver: yupResolver(branchSchema),
     });
 
     useEffect(() => {
         reset({ ...branch });
     }, [reset]);
 
-    const onSubmit = (formData: IBranch) => {
-        console.log(formData, "form data!!")
+    const onSubmit = async (formData: IBranch) => {
+        setSendingRequest(true);
+        const request = {
+            ...formData,
+            user_id: 1
+        }
+
+        const response = await updateBranchService(request, formData?.id as string) as IResponseData;
+        if (response.status === 'success') {
+            updateBranchInStore(response.data[0] as IBranch)
+            toast.success(response.data.message)
+            setSendingRequest(false);
+            handleClose()
+        }
+        setSendingRequest(true);
+
     };
 
     return (

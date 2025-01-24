@@ -37,8 +37,7 @@ const ViewBranch = ({ branch, deleteBranch, updateBranch }: IBranchDetails) => {
                     {branch.email}
                 </Typography>
                 <Typography variant="body2" sx={{ fontWeight: 400, textAlign: "center" }}>
-                    {/* {branch.tel} */}
-                    +256777338787
+                    {branch.tel}
                 </Typography>
                 <Button
                     onClick={() => updateBranch(branch)}

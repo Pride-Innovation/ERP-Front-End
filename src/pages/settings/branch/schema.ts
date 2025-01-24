@@ -6,6 +6,5 @@ export const branchSchema = yup.object().shape({
     tel: yup.string().nullable().optional(),
     desc: yup.string().nullable().optional(),
     status: yup.string().nullable().optional(),
-    user_id: yup.number().nullable().optional(),
     image: yup.mixed().nullable().optional(),
 });

@@ -11,8 +11,8 @@ const createBranchService = async (body: Object) => {
 
 const updateBranchService = async (body: Object, id: string | number) => {
     try {
-        const response = await axiosInstance.post(`branch/${id}`, body)
-        console.log(response?.data)
+        const response = await axiosInstance.post(`branches/update/${id}`, body)
+        return response?.data
     } catch (error) {
         throw error
     }

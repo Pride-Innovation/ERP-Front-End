@@ -22,6 +22,9 @@ export const authSlice = createSlice({
         },
         removeBranch: (state, action) => {
             state.branches = state.branches.filter(branch => branch?.id !== action.payload?.id)
+        },
+        updateBranch: (state, action) => {
+            state.branches = state.branches.map(branch => branch?.id === action?.payload?.id ? action?.payload : branch)
         }
     }
 })
@@ -31,7 +34,8 @@ const { reducer, actions } = authSlice
 export const {
     loadBranches,
     addBranch,
-    removeBranch
+    removeBranch,
+    updateBranch
 } = actions
 
 export default reducer;

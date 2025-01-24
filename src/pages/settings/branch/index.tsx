@@ -47,12 +47,22 @@ const Branches = () => {
       }
       {
         crudStates.delete === modalState && <ModalComponent width={"35%"} title='Delete Branch' open={open} handleClose={handleClose}>
-          <DeleteBranch branch={currentBranch} handleClose={handleClose} setSendingRequest={setSendingRequest} sendingRequest={sendingRequest} buttonText='Delete' />
+          <DeleteBranch
+            branch={currentBranch}
+            handleClose={handleClose}
+            setSendingRequest={setSendingRequest}
+            sendingRequest={sendingRequest}
+            buttonText='Delete' />
         </ModalComponent>
       }
       {
         crudStates.update === modalState && <ModalComponent width={"50%"} title='Update Branch' open={open} handleClose={handleClose}>
-          <UpdateBranch handleClose={handleClose} sendingRequest={false} branch={currentBranch} />
+          <UpdateBranch
+            handleClose={handleClose}
+            setSendingRequest={setSendingRequest}
+            sendingRequest={sendingRequest}
+            branch={currentBranch}
+          />
         </ModalComponent>
       }
       <Box sx={{ width: "100%" }}>
