@@ -2,13 +2,29 @@ import { Grid, Stack, Typography } from '@mui/material'
 import ScaleIcon from '@mui/icons-material/Scale';
 import ButtonComponent from '../../../components/forms/Button';
 import { IDeleteUnitOfMeasure } from './interface';
+import UnitMeasureUtills from './Utills';
+import { toast } from 'react-toastify';
+import { deleteUnitMeasureService } from './service';
 
 const DeleteUnitOfMeasure = ({
     unitOfMeasure,
     sendingRequest,
     buttonText,
-    handleClose
+    handleClose,
+    setSendingRequest
 }: IDeleteUnitOfMeasure) => {
+    const { removeUnitOfMeasureToStore } = UnitMeasureUtills();
+
+    const deleteBranch = async () => {
+        setSendingRequest(true)
+        const response = await deleteUnitMeasureService(unitOfMeasure?.id as string);
+        setSendingRequest(false)
+        if (response?.status === "success") {
+            removeUnitOfMeasureToStore(unitOfMeasure)
+            handleClose();
+            toast.success(response?.data?.message)
+        }
+    }
     return (
         <Grid item container spacing={4} xs={12}>
             <Grid item xs={12}>
@@ -38,6 +54,7 @@ const DeleteUnitOfMeasure = ({
                         buttonText="Close"
                     />
                     <ButtonComponent
+                        handleClick={deleteBranch}
                         buttonColor='error'
                         type='submit'
                         sendingRequest={sendingRequest}

@@ -18,7 +18,17 @@ const updateUnitMeasureService = async (body: Object, id: string | number) => {
     }
 }
 
+const deleteUnitMeasureService = async (id: string | number) => {
+    try {
+        const response = await axiosInstance.get(`unitMeasures/delete/${id}`)
+        return response?.data
+    } catch (error) {
+        throw error
+    }
+}
+
 export {
     createUnitMeasureService,
-    updateUnitMeasureService
+    updateUnitMeasureService,
+    deleteUnitMeasureService
 }

@@ -49,6 +49,7 @@ export interface IUnitOfMeasureDetails {
 export interface IDeleteUnitOfMeasure {
     handleClose: () => void;
     sendingRequest: boolean;
+    setSendingRequest: Dispatch<SetStateAction<boolean>>;
     buttonText: string;
     unitOfMeasure: IUnitOfMeasure
 }
