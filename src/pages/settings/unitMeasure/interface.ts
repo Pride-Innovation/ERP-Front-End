@@ -36,7 +36,8 @@ export interface ICreateUnitOfMeasure {
 export interface IUpdateUnitOfMeasure {
     handleClose: () => void;
     sendingRequest: boolean;
-    unitOfMeasure: IUnitOfMeasure
+    setSendingRequest: Dispatch<SetStateAction<boolean>>;
+    unitOfMeasure: IUnitOfMeasure;
 }
 
 export interface IUnitOfMeasureDetails {

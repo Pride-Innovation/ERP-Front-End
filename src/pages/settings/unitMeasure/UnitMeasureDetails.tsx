@@ -35,7 +35,7 @@ const UnitMeasureDetails = ({
                     height: "100%"
                 }} >
                 <Typography variant="caption" sx={{ fontWeight: 400, textAlign: "center" }}>
-                    {unitOfMeasure.symbol}
+                    Symbol: <b> {unitOfMeasure.symbol}</b>
                 </Typography>
                 <Button
                     onClick={() => updateUnitOfMeasure(unitOfMeasure)}

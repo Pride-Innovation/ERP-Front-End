@@ -6,7 +6,7 @@ import { ICreateUnitOfMeasure, IUnitOfMeasure } from './interface';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { unitMeasureSchema } from './schema';
 import { IResponseData } from '../../users/interface';
-import { createUnitMeasureService } from './branch';
+import { createUnitMeasureService } from './service';
 import UnitMeasureUtills from './Utills';
 import { toast } from 'react-toastify';
 

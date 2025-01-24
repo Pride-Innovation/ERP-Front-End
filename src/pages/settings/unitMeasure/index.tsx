@@ -41,12 +41,12 @@ const UnitMeasures = () => {
             }
             {
                 crudStates.delete === modalState && <ModalComponent width={"35%"} title='Delete Unit of Measure' open={open} handleClose={handleClose}>
-                    <DeleteUnitOfMeasure unitOfMeasure={currentUnitOfMeasure} handleClose={handleClose} sendingRequest={false} buttonText='Delete' />
+                    <DeleteUnitOfMeasure unitOfMeasure={currentUnitOfMeasure} handleClose={handleClose} sendingRequest={sendingRequest} buttonText='Delete' />
                 </ModalComponent>
             }
             {
                 crudStates.update === modalState && <ModalComponent width={"50%"} title='Update Unit of Measure' open={open} handleClose={handleClose}>
-                    <UpdateUnitOfMeasure handleClose={handleClose} sendingRequest={false} unitOfMeasure={currentUnitOfMeasure} />
+                    <UpdateUnitOfMeasure handleClose={handleClose} sendingRequest={sendingRequest} setSendingRequest={setSendingRequest} unitOfMeasure={currentUnitOfMeasure} />
                 </ModalComponent>
             }
             <Box sx={{ width: "100%" }}>
