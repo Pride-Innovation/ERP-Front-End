@@ -7,7 +7,7 @@ import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import { getTableHeaders } from "../../../components/tables/getTableHeaders";
 import { IFormData } from "../interface";
 import { IFleet } from "./interface";
-import { RootState } from "../../../store";
+import { AppDispatch, RootState } from "../../../store";
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
 import {
@@ -32,7 +32,7 @@ const FleetUtills = () => {
     const module = "fleet";
     const header = { plural: 'Fleet', singular: 'Fleet' };
     const [open, setOpen] = useState<boolean>(false);
-    const dispatch = useDispatch()
+    const dispatch = useDispatch<AppDispatch>()
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
     const [optionsObject, setOptionsObject] = useState<{
         assetsStatusesOptions: Array<IOptions>,

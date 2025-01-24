@@ -5,14 +5,14 @@ import { IUnitOfMeasure } from "./interface"
 import { useDispatch } from "react-redux"
 import { addUnitOfMeasure, loadUnitOfMeasures, removeUnitOfMeasure, updateUnitOfMeasure } from "./slice"
 import { useSelector } from "react-redux"
-import { RootState } from "../../../store"
+import { AppDispatch, RootState } from "../../../store"
 
 const UnitMeasureUtills = () => {
     const [modalState, setModalState] = useState<string>("");
     const [open, setOpen] = useState<boolean>(false);
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
-    const dispatch = useDispatch()
+    const dispatch = useDispatch<AppDispatch>()
     const { unitsOfMeasure } = useSelector((state: RootState) => state.UnitsOfMeasureStore);
 
     const fetchAllUnitsOfMeasure = async () => {

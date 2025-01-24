@@ -2,18 +2,22 @@ import { useEffect, useState } from "react"
 import { listSuppliersService } from "../../assets/ITEquipment/service";
 import { IFormData } from "../../assets/interface";
 import { ISupplier } from "./interface";
+import { useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../../../store";
+import { useDispatch } from "react-redux";
+import { loadSuppliers } from "./slice";
 
 const SupplierUtills = () => {
-    const [suppliers, setSuppliers] = useState<ISupplier[]>([] as Array<ISupplier>);
     const [modalState, setModalState] = useState<string>("");
     const [open, setOpen] = useState<boolean>(false);
-
+    const { suppliers } = useSelector((state: RootState) => state.SuppliersStore);
+    const dispatch = useDispatch<AppDispatch>()
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
 
     const fetchAllSuppliers = async () => {
         const response = await listSuppliersService() as Array<ISupplier>;
-        setSuppliers(response)
+        dispatch(loadSuppliers(response))
     }
 
     useEffect(() => { fetchAllSuppliers() }, []);

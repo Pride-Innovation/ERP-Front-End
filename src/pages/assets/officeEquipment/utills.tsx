@@ -21,7 +21,7 @@ import {
     listUsersService
 } from "../ITEquipment/service";
 import { useSelector } from "react-redux";
-import { RootState } from "../../../store";
+import { AppDispatch, RootState } from "../../../store";
 import { loadBranches } from "../../settings/branch/slice";
 import { listBranchesService } from "../../settings/branch/service";
 import { loadUnitOfMeasures } from "../../settings/unitMeasure/slice";
@@ -31,7 +31,7 @@ const OfficeEquipmentUtills = () => {
     const endPoint = 'posts';
     const module = 'office equipment';
     const header = { plural: 'Office Equipment', singular: 'Office Equipment' };
-    const dispatch = useDispatch();
+    const dispatch = useDispatch<AppDispatch>();
     const [open, setOpen] = useState<boolean>(false);
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
     const [optionsObject, setOptionsObject] = useState<{
