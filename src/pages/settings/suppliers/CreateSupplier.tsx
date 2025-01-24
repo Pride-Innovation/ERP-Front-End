@@ -1,9 +1,8 @@
 import { useForm } from "react-hook-form";
-import { ISupplier } from "../../assets/ITEquipment/interface";
 import { useEffect } from "react";
 import { Grid } from "@mui/material";
 import SupplierForm from "./SupplierForm";
-import { ICreateSupplier } from "./interface";
+import { ICreateSupplier, ISupplier } from "./interface";
 
 const CreateSupplier = ({ handleClose, sendingRequest }: ICreateSupplier) => {
   const defaultSupplier: ISupplier = {} as ISupplier;

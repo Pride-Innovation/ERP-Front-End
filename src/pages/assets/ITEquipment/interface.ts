@@ -106,17 +106,3 @@ export interface IAsssetCategory {
     image: any,
     user_id: number
 }
-
-
-export interface ISupplier {
-    id: number,
-    name: string,
-    status: string,
-    desc: string,
-    image: any,
-    user_id: number
-    symbol: string
-    tel: string,
-    email: string,
-    // Nice to have a supplier product type!!!
-}

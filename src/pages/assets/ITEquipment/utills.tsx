@@ -20,11 +20,11 @@ import {
     loadAssetStatuses,
     loadAssetCategories,
     loadUsers,
-    loadSuppliers
 } from "../slice";
 import { loadBranches } from "../../settings/branch/slice";
 import { listBranchesService } from "../../settings/branch/service";
 import { loadUnitOfMeasures } from "../../settings/unitMeasure/slice";
+import { loadSuppliers } from "../../settings/suppliers/slice";
 
 const ITEquipmentUtills = () => {
     const endPoint = 'posts';
@@ -52,8 +52,8 @@ const ITEquipmentUtills = () => {
         assetsStatuses,
         users,
         assetCategories,
-        suppliers
     } = useSelector((state: RootState) => state.EquipmentStore);
+    const { suppliers } = useSelector((state: RootState) => state.SuppliersStore);
     const { unitsOfMeasure } = useSelector((state: RootState) => state.UnitsOfMeasureStore);
     const { branches } = useSelector((state: RootState) => state.BranchStore);
 

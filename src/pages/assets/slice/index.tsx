@@ -2,7 +2,6 @@ import { createSlice } from '@reduxjs/toolkit';
 import {
     IAsssetCategory,
     IAsssetStatus,
-    ISupplier
 } from '../ITEquipment/interface';
 import { IUser } from '../../users/interface';
 
@@ -10,14 +9,12 @@ interface IITEquipmentState {
     assetsStatuses: IAsssetStatus[];
     users: IUser[];
     assetCategories: IAsssetCategory[];
-    suppliers: ISupplier[];
 }
 
 const initialState: IITEquipmentState = {
     assetsStatuses: [],
     users: [],
     assetCategories: [],
-    suppliers: []
 }
 
 export const authSlice = createSlice({
@@ -33,9 +30,6 @@ export const authSlice = createSlice({
         loadAssetCategories: (state, action) => {
             state.assetCategories = action.payload;
         },
-        loadSuppliers: (state, action) => {
-            state.suppliers = action.payload;
-        },
     }
 })
 
@@ -45,7 +39,6 @@ export const {
     loadAssetStatuses,
     loadUsers,
     loadAssetCategories,
-    loadSuppliers
 } = actions
 
 export default reducer;

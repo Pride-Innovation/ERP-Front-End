@@ -4,7 +4,19 @@ import {
     FormState,
     UseFormRegister
 } from "react-hook-form";
-import { ISupplier } from "../../assets/ITEquipment/interface";
+
+export interface ISupplier {
+    id: number,
+    name: string,
+    status: string,
+    desc: string,
+    image: any,
+    user_id: number
+    symbol: string
+    tel: string,
+    email: string,
+    // Nice to have a supplier product type!!!
+}
 
 interface ISupplierDetails {
     supplier: ISupplier;

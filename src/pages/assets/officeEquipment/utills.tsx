@@ -11,7 +11,6 @@ import { useDispatch } from "react-redux";
 import {
     loadAssetCategories,
     loadAssetStatuses,
-    loadSuppliers,
     loadUsers
 } from "../slice";
 import {
@@ -26,6 +25,7 @@ import { RootState } from "../../../store";
 import { loadBranches } from "../../settings/branch/slice";
 import { listBranchesService } from "../../settings/branch/service";
 import { loadUnitOfMeasures } from "../../settings/unitMeasure/slice";
+import { loadSuppliers } from "../../settings/suppliers/slice";
 
 const OfficeEquipmentUtills = () => {
     const endPoint = 'posts';
@@ -53,8 +53,8 @@ const OfficeEquipmentUtills = () => {
         assetsStatuses,
         users,
         assetCategories,
-        suppliers
     } = useSelector((state: RootState) => state.EquipmentStore);
+    const { suppliers } = useSelector((state: RootState) => state.SuppliersStore);
     const { unitsOfMeasure } = useSelector((state: RootState) => state.UnitsOfMeasureStore);
     const { branches } = useSelector((state: RootState) => state.BranchStore);
 

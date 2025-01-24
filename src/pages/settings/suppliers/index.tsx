@@ -4,12 +4,12 @@ import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import ButtonComponent from "../../../components/forms/Button";
 import SupplierUtills from "./Utills";
 import SupplierDetails from "./SupplierDetails";
-import { ISupplier } from "../../assets/ITEquipment/interface";
 import { crudStates } from "../../../utils/constants";
 import ModalComponent from "../../../components/modal";
 import CreateSupplier from "./CreateSupplier";
 import UpdateSupplier from "./UpdateSupplier";
 import DeleteSupplier from "./DeleteSupplier";
+import { ISupplier } from "./interface";
 
 const Suppliers = () => {
     const [currentSupplier, setCurrentSupplier] = useState<ISupplier>({} as ISupplier);

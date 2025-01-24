@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
-import { ISupplier } from "../../assets/ITEquipment/interface"
 import { listSuppliersService } from "../../assets/ITEquipment/service";
 import { IFormData } from "../../assets/interface";
+import { ISupplier } from "./interface";
 
 const SupplierUtills = () => {
     const [suppliers, setSuppliers] = useState<ISupplier[]>([] as Array<ISupplier>);

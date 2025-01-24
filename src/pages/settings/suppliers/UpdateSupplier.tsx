@@ -1,7 +1,6 @@
 import { useForm } from "react-hook-form";
-import { ISupplier } from "../../assets/ITEquipment/interface";
 import { useEffect } from "react";
-import { IUpdateSupplier } from "./interface";
+import { ISupplier, IUpdateSupplier } from "./interface";
 import { Grid } from "@mui/material";
 import SupplierForm from "./SupplierForm";
 
