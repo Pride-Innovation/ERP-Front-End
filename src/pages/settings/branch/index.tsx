@@ -47,7 +47,7 @@ const Branches = () => {
       }
       {
         crudStates.delete === modalState && <ModalComponent width={"35%"} title='Delete Branch' open={open} handleClose={handleClose}>
-          <DeleteBranch branch={currentBranch} handleClose={handleClose} sendingRequest={false} buttonText='Delete' />
+          <DeleteBranch branch={currentBranch} handleClose={handleClose} setSendingRequest={setSendingRequest} sendingRequest={sendingRequest} buttonText='Delete' />
         </ModalComponent>
       }
       {

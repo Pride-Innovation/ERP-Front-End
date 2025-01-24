@@ -41,6 +41,7 @@ export interface IBranchDetails {
 export interface IDeleteBranch {
     handleClose: () => void;
     sendingRequest: boolean;
+    setSendingRequest: Dispatch<SetStateAction<boolean>>
     buttonText: string;
     branch: IBranch
 }
