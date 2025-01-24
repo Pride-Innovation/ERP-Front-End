@@ -13,7 +13,7 @@ import { IUnitOfMeasure } from "./interface";
 const UnitMeasures = () => {
     const { unitsOfMeasure, setModalState, handleClose, handleOpen, modalState, open } = UnitMeasureUtills();
     const [currentUnitOfMeasure, setCurrentUnitOfMeasure] = useState<IUnitOfMeasure>({} as IUnitOfMeasure);
-
+    const [sendingRequest, setSendingRequest] = useState<boolean>(false)
 
     const createUnitOfMeasure = () => {
         setModalState(crudStates.create);
@@ -36,7 +36,7 @@ const UnitMeasures = () => {
         <>
             {
                 crudStates.create === modalState && <ModalComponent width={"50%"} title='Create Unit of Measure' open={open} handleClose={handleClose}>
-                    <CreateUnitOfMeasure handleClose={handleClose} sendingRequest={false} />
+                    <CreateUnitOfMeasure handleClose={handleClose} sendingRequest={sendingRequest} setSendingRequest={setSendingRequest} />
                 </ModalComponent>
             }
             {

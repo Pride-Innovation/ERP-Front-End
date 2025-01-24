@@ -2,21 +2,37 @@ import { useEffect, useState } from "react"
 import { listUnitOfMeasuresService } from "../../assets/ITEquipment/service"
 import { IFormData } from "../../assets/interface"
 import { IUnitOfMeasure } from "./interface"
+import { useDispatch } from "react-redux"
+import { addUnitOfMeasure, loadUnitOfMeasures, removeUnitOfMeasure, updateUnitOfMeasure } from "./slice"
+import { useSelector } from "react-redux"
+import { RootState } from "../../../store"
 
 const UnitMeasureUtills = () => {
-    const [unitsOfMeasure, setunitsOfMeasure] = useState<IUnitOfMeasure[]>([] as Array<IUnitOfMeasure>)
     const [modalState, setModalState] = useState<string>("");
     const [open, setOpen] = useState<boolean>(false);
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
-
+    const dispatch = useDispatch()
+    const { unitsOfMeasure } = useSelector((state: RootState) => state.UnitsOfMeasureStore);
 
     const fetchAllUnitsOfMeasure = async () => {
         const response = await listUnitOfMeasuresService() as Array<IUnitOfMeasure>;
-        setunitsOfMeasure(response)
+        dispatch(loadUnitOfMeasures(response))
     }
 
     useEffect(() => { fetchAllUnitsOfMeasure() }, []);
+
+    const addUnitOfMeasureToStore = (unitOfMeasure: IUnitOfMeasure) => {
+        dispatch(addUnitOfMeasure(unitOfMeasure))
+    }
+
+    const removeUnitOfMeasureToStore = (unitOfMeasure: IUnitOfMeasure) => {
+        dispatch(removeUnitOfMeasure(unitOfMeasure))
+    }
+
+    const updateUnitOfMeasureInStore = (unitOfMeasure: IUnitOfMeasure) => {
+        dispatch(updateUnitOfMeasure(unitOfMeasure))
+    }
 
 
     const formFields: Array<IFormData<IUnitOfMeasure>> = [
@@ -58,7 +74,10 @@ const UnitMeasureUtills = () => {
         setModalState,
         open,
         modalState,
-        formFields
+        formFields,
+        addUnitOfMeasureToStore,
+        removeUnitOfMeasureToStore,
+        updateUnitOfMeasureInStore
     })
 }
 

@@ -4,7 +4,7 @@ import ButtonComponent from '../../../components/forms/Button';
 import { IDeleteBranch } from './interface';
 import { deleteBranchService } from './service';
 import { toast } from 'react-toastify';
-import BranchUtills from './utills';
+import BranchUtills from './Utills';
 
 const DeleteBranch = ({
     branch,

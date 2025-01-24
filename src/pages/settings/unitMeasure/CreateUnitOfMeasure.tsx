@@ -3,9 +3,16 @@ import { useForm } from 'react-hook-form';
 import { Grid } from '@mui/material';
 import UnitOfMeasureForm from './UnitOfMeasureForm';
 import { ICreateUnitOfMeasure, IUnitOfMeasure } from './interface';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { unitMeasureSchema } from './schema';
+import { IResponseData } from '../../users/interface';
+import { createUnitMeasureService } from './branch';
+import UnitMeasureUtills from './Utills';
+import { toast } from 'react-toastify';
 
-const CreateUnitOfMeasure = ({ handleClose, sendingRequest }: ICreateUnitOfMeasure) => {
+const CreateUnitOfMeasure = ({ handleClose, sendingRequest, setSendingRequest }: ICreateUnitOfMeasure) => {
     const defaultUnitOfMeasure: IUnitOfMeasure = {} as IUnitOfMeasure;
+    const { addUnitOfMeasureToStore } = UnitMeasureUtills()
 
     const {
         control,
@@ -15,15 +22,26 @@ const CreateUnitOfMeasure = ({ handleClose, sendingRequest }: ICreateUnitOfMeasu
         reset
     } = useForm<IUnitOfMeasure>({
         mode: 'onChange',
-        // resolver: yupResolver(roleSchema),
+        resolver: yupResolver(unitMeasureSchema),
     });
 
     useEffect(() => {
         reset({ ...defaultUnitOfMeasure });
     }, [reset]);
 
-    const onSubmit = (formData: IUnitOfMeasure) => {
-        console.log(formData, "form data!!!!!");
+    const onSubmit = async (formData: IUnitOfMeasure) => {
+        setSendingRequest(true);
+        const request = {
+            ...formData,
+            user_id: 1
+        }
+        const response = await createUnitMeasureService(request) as IResponseData;
+        if (response.status === 'success') {
+            addUnitOfMeasureToStore(response.data["0"] as unknown as IUnitOfMeasure)
+            toast.success(response.data.message)
+            setSendingRequest(false);
+            handleClose()
+        }
     };
 
     return (

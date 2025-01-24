@@ -14,7 +14,6 @@ import {
     loadAssetCategories,
     loadAssetStatuses,
     loadSuppliers,
-    loadUnitOfMeasures,
     loadUsers
 } from "../slice";
 import {
@@ -26,6 +25,7 @@ import {
 } from "../ITEquipment/service";
 import { loadBranches } from "../../settings/branch/slice";
 import { listBranchesService } from "../../settings/branch/service";
+import { loadUnitOfMeasures } from "../../settings/unitMeasure/slice";
 
 const FleetUtills = () => {
     const endPoint = 'posts';
@@ -55,9 +55,10 @@ const FleetUtills = () => {
         assetsStatuses,
         users,
         assetCategories,
-        unitsOfMeasures,
         suppliers
     } = useSelector((state: RootState) => state.EquipmentStore);
+
+    const { unitsOfMeasure } = useSelector((state: RootState) => state.UnitsOfMeasureStore);
     const { branches } = useSelector((state: RootState) => state.BranchStore);
 
     const updateReduxStore = async () => {
@@ -76,12 +77,12 @@ const FleetUtills = () => {
             assetCategoriesOptions: assetCategories?.map(category => ({ label: category.name, value: category.id })) || [],
             branchesOptions: branches?.map(branch => ({ label: branch.name, value: branch?.id as number })),
             assetsStatusesOptions: assetsStatuses?.map(status => ({ label: status.name, value: status.id })) || [],
-            unitsOfMeasuresOptions: unitsOfMeasures?.map(unit => ({ label: unit.name, value: unit.id })) || [],
+            unitsOfMeasuresOptions: unitsOfMeasure?.map(unit => ({ label: unit.name, value: unit?.id as number })) || [],
             usersOptions: users?.map(user => ({ label: user.name as string, value: user.id as number })) || [],
             suppliersOptions: suppliers?.map(supplier => ({ label: supplier.name, value: supplier.id })) || [],
         })
 
-    }, [assetsStatuses, users, assetCategories, unitsOfMeasures, branches, suppliers])
+    }, [assetsStatuses, users, assetCategories, unitsOfMeasure, branches, suppliers])
     const {
         id,
         hostname,

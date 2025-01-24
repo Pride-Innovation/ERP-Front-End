@@ -6,12 +6,14 @@ import {
 import EquipmentReducer from "../pages/assets/slice/index"
 import UserReducer from "../pages/users/slice/index"
 import BranchReducer from "../pages/settings/branch/slice"
+import UnitsOfMeasureReducer from "../pages/settings/unitMeasure/slice"
 
 export const store = configureStore({
     reducer: {
         EquipmentStore: EquipmentReducer,
         UserStore: UserReducer,
         BranchStore: BranchReducer,
+        UnitsOfMeasureStore: UnitsOfMeasureReducer,
     },
 });
 

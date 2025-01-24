@@ -8,7 +8,7 @@ import { branchSchema } from "./schema";
 import { updateBranchService } from "./service";
 import { IResponseData } from "../../users/interface";
 import { toast } from "react-toastify";
-import BranchUtills from "./utills";
+import BranchUtills from "./Utills";
 
 const UpdateBranch = ({ handleClose, sendingRequest, branch, setSendingRequest }: IUpdateBranch) => {
     const { updateBranchInStore } = BranchUtills()
