@@ -90,14 +90,14 @@ export interface IITEquipmentForm {
 }
 
 export interface IBranch {
-    id: number
+    id?: string | number;
     name: string
     email: string
-    tel: string | null
-    desc: string | null
-    status: string,
-    user_id: number,
-    image: any
+    tel?: string | null
+    desc?: string | null
+    status?: string | null,
+    user_id?: number | null,
+    image?: any | null
 }
 
 export interface IAsssetStatus {

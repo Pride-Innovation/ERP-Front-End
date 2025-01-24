@@ -4,6 +4,8 @@ import { IBranch } from "../../assets/ITEquipment/interface";
 import { useEffect } from "react";
 import BranchForm from "./BranchForm";
 import { ICreateBranch } from "./interface";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { branchSchema } from "./schema";
 
 const CreateBranch = ({ handleClose, sendingRequest }: ICreateBranch) => {
     const defaultBranch: IBranch = {} as IBranch;
@@ -16,7 +18,7 @@ const CreateBranch = ({ handleClose, sendingRequest }: ICreateBranch) => {
         reset
     } = useForm<IBranch>({
         mode: 'onChange',
-        // resolver: yupResolver(roleSchema),
+        resolver: yupResolver(branchSchema),
     });
 
     useEffect(() => {

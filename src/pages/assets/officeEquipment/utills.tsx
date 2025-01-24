@@ -75,7 +75,7 @@ const OfficeEquipmentUtills = () => {
     useEffect(() => {
         setOptionsObject({
             assetCategoriesOptions: assetCategories?.map(category => ({ label: category.name, value: category.id })) || [],
-            branchesOptions: branches?.map(branch => ({ label: branch.name, value: branch.id })),
+            branchesOptions: branches?.map(branch => ({ label: branch.name, value: branch.id as number })),
             assetsStatusesOptions: assetsStatuses?.map(status => ({ label: status.name, value: status.id })) || [],
             unitsOfMeasuresOptions: unitsOfMeasures?.map(unit => ({ label: unit.name, value: unit.id })) || [],
             usersOptions: users?.map(user => ({ label: user.name as string, value: user.id as number })) || [],
