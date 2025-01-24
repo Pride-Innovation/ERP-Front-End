@@ -1,5 +1,6 @@
 import { Control, FieldError, FormState, UseFormRegister } from "react-hook-form";
 import { IBranch } from "../../assets/ITEquipment/interface";
+import { Dispatch, SetStateAction } from "react";
 
 export interface IBranchForm {
     formState: FormState<IBranch> & {
@@ -22,6 +23,7 @@ export interface IBranchForm {
 export interface ICreateBranch {
     handleClose: () => void;
     sendingRequest: boolean;
+    setSendingRequest: Dispatch<SetStateAction<boolean>>
 }
 
 export interface IUpdateBranch {

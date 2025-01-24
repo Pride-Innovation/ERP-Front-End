@@ -49,7 +49,7 @@ const BranchUtills = () => {
                     value: 1
                 },
                 {
-                    label: "Minor Branch",
+                    label: "Echo Branch",
                     value: 2
                 }
             ]

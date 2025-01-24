@@ -16,6 +16,8 @@ import DeleteBranch from "./DeleteBranch";
 
 const Branches = () => {
   const [currentBranch, setCurrentBranch] = useState<IBranch>({} as IBranch);
+  const [sendingRequest, setSendingRequest] = useState<boolean>(false)
+
   const { branches, filterByName, modalState, open, handleClose, handleOpen, setModalState } = BranchUtills()
 
 
@@ -40,7 +42,7 @@ const Branches = () => {
     <>
       {
         crudStates.create === modalState && <ModalComponent width={"50%"} title='Create Branch' open={open} handleClose={handleClose}>
-          <CreateBranch handleClose={handleClose} sendingRequest={false} />
+          <CreateBranch handleClose={handleClose} sendingRequest={sendingRequest} setSendingRequest={setSendingRequest} />
         </ModalComponent>
       }
       {
