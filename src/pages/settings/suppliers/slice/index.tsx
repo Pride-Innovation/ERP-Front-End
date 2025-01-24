@@ -17,13 +17,25 @@ export const authSlice = createSlice({
         loadSuppliers: (state, action) => {
             state.suppliers = action.payload;
         },
+        addSupplier: (state, action) => {
+            state.suppliers = [action.payload, ...state.suppliers]
+        },
+        removeSupplier: (state, action) => {
+            state.suppliers = state.suppliers.filter(supplier => supplier?.id !== action.payload?.id)
+        },
+        updateSupplier: (state, action) => {
+            state.suppliers = state.suppliers.map(supplier => supplier?.id === action?.payload?.id ? action?.payload : supplier)
+        }
     }
 })
 
 const { reducer, actions } = authSlice
 
 export const {
-    loadSuppliers
+    loadSuppliers,
+    addSupplier,
+    removeSupplier,
+    updateSupplier
 } = actions
 
 export default reducer;

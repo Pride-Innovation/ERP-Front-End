@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react"
-import { listSuppliersService } from "../../assets/ITEquipment/service";
 import { IFormData } from "../../assets/interface";
 import { ISupplier } from "./interface";
 import { useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../../store";
 import { useDispatch } from "react-redux";
-import { loadSuppliers } from "./slice";
+import { addSupplier, loadSuppliers, removeSupplier, updateSupplier } from "./slice";
+import { listSuppliersService } from "./service";
 
 const SupplierUtills = () => {
     const [modalState, setModalState] = useState<string>("");
@@ -21,6 +21,18 @@ const SupplierUtills = () => {
     }
 
     useEffect(() => { fetchAllSuppliers() }, []);
+
+    const addSupplierToStore = (supplier: ISupplier) => {
+        dispatch(addSupplier(supplier))
+    }
+
+    const removeSupplierToStore = (supplier: ISupplier) => {
+        dispatch(removeSupplier(supplier))
+    }
+
+    const updateSupplierInStore = (supplier: ISupplier) => {
+        dispatch(updateSupplier(supplier))
+    }
 
     const formFields: Array<IFormData<ISupplier>> = [
         {
@@ -66,7 +78,10 @@ const SupplierUtills = () => {
         modalState,
         setModalState,
         open,
-        formFields
+        formFields,
+        addSupplierToStore,
+        removeSupplierToStore,
+        updateSupplierInStore
     }
     )
 }

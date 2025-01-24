@@ -14,7 +14,7 @@ import { ISupplier } from "./interface";
 const Suppliers = () => {
     const [currentSupplier, setCurrentSupplier] = useState<ISupplier>({} as ISupplier);
     const { suppliers, setModalState, handleOpen, modalState, open, handleClose } = SupplierUtills()
-
+    const [sendingRequest, setSendingRequest] = useState<boolean>(false)
     const createSupplier = () => {
         setModalState(crudStates.create);
         handleOpen()
@@ -36,7 +36,7 @@ const Suppliers = () => {
         <>
             {
                 crudStates.create === modalState && <ModalComponent width={"50%"} title='Create Supplier' open={open} handleClose={handleClose}>
-                    <CreateSupplier handleClose={handleClose} sendingRequest={false} />
+                    <CreateSupplier handleClose={handleClose} sendingRequest={sendingRequest} setSendingRequest={setSendingRequest} />
                 </ModalComponent>
             }
             {

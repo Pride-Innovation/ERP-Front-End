@@ -3,10 +3,16 @@ import { useEffect } from "react";
 import { Grid } from "@mui/material";
 import SupplierForm from "./SupplierForm";
 import { ICreateSupplier, ISupplier } from "./interface";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { supplierSchema } from "./schema";
+import { IResponseData } from "../../users/interface";
+import { createSupplierService } from "./service";
+import SupplierUtills from "./Utills";
+import { toast } from "react-toastify";
 
-const CreateSupplier = ({ handleClose, sendingRequest }: ICreateSupplier) => {
+const CreateSupplier = ({ handleClose, sendingRequest, setSendingRequest }: ICreateSupplier) => {
   const defaultSupplier: ISupplier = {} as ISupplier;
-
+  const { addSupplierToStore } = SupplierUtills()
   const {
     control,
     handleSubmit,
@@ -15,15 +21,26 @@ const CreateSupplier = ({ handleClose, sendingRequest }: ICreateSupplier) => {
     reset
   } = useForm<ISupplier>({
     mode: 'onChange',
-    // resolver: yupResolver(roleSchema),
+    resolver: yupResolver(supplierSchema),
   });
 
   useEffect(() => {
     reset({ ...defaultSupplier });
   }, [reset]);
 
-  const onSubmit = (formData: ISupplier) => {
-    console.log(formData, "form data!!!!!");
+  const onSubmit = async (formData: ISupplier) => {
+    setSendingRequest(true)
+    const request = {
+      ...formData,
+      user_id: 1
+    }
+    const response = await createSupplierService(request) as IResponseData;
+    if (response.status === 'success') {
+      addSupplierToStore(response.data[0] as unknown as ISupplier)
+      toast.success(response.data.message)
+      setSendingRequest(false);
+      handleClose()
+    }
   };
 
   return (

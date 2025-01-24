@@ -1,3 +1,4 @@
+import { Dispatch, SetStateAction } from "react";
 import {
     Control,
     FieldError,
@@ -6,13 +7,13 @@ import {
 } from "react-hook-form";
 
 export interface ISupplier {
-    id: number,
+    id?: string | number,
     name: string,
-    status: string,
-    desc: string,
-    image: any,
-    user_id: number
-    symbol: string
+    status?: string | null,
+    desc?: string | null,
+    image?: any | null,
+    user_id?: number | null
+    symbol?: string | null
     tel: string,
     email: string,
     // Nice to have a supplier product type!!!
@@ -27,6 +28,7 @@ interface ISupplierDetails {
 interface ICreateSupplier {
     handleClose: () => void;
     sendingRequest: boolean;
+    setSendingRequest: Dispatch<SetStateAction<boolean>>;
 }
 
 interface IUpdateSupplier {

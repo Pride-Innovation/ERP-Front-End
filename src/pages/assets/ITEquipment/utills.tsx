@@ -11,7 +11,6 @@ import { itEquipmentMock } from "../../../mocks/itEquipment";
 import {
     listAssetStatusesService,
     listCategoriesService,
-    listSuppliersService,
     listUnitOfMeasuresService,
     listUsersService
 } from "./service";
@@ -25,6 +24,7 @@ import { loadBranches } from "../../settings/branch/slice";
 import { listBranchesService } from "../../settings/branch/service";
 import { loadUnitOfMeasures } from "../../settings/unitMeasure/slice";
 import { loadSuppliers } from "../../settings/suppliers/slice";
+import { listSuppliersService } from "../../settings/suppliers/service";
 
 const ITEquipmentUtills = () => {
     const endPoint = 'posts';
@@ -75,7 +75,7 @@ const ITEquipmentUtills = () => {
             assetsStatusesOptions: assetsStatuses?.map(status => ({ label: status.name, value: status.id })) || [],
             unitsOfMeasuresOptions: unitsOfMeasure?.map(unit => ({ label: unit.name, value: unit?.id as number })) || [],
             usersOptions: users?.map(user => ({ label: user.name as string, value: user.id as number })) || [],
-            suppliersOptions: suppliers?.map(supplier => ({ label: supplier.name, value: supplier.id })) || [],
+            suppliersOptions: suppliers?.map(supplier => ({ label: supplier.name, value: supplier?.id as number })) || [],
         })
 
     }, [assetsStatuses, users, assetCategories, unitsOfMeasure, branches, suppliers])
