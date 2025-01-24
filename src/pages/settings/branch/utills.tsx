@@ -2,21 +2,27 @@ import { useEffect, useState } from "react"
 import { IBranch } from "../../assets/ITEquipment/interface"
 import { listBranchesService } from "../../assets/ITEquipment/service";
 import { IFormData } from "../../assets/interface";
+import { useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../store";
+import { loadBranches } from "./slice";
 
 const BranchUtills = () => {
-    const [branches, setBranches] = useState<IBranch[]>([] as Array<IBranch>);
     const [branchList, setBranchList] = useState<IBranch[]>([] as Array<IBranch>);
     const [modalState, setModalState] = useState<string>("");
     const [open, setOpen] = useState<boolean>(false);
+    const dispatch = useDispatch();
+
+    const { branches } = useSelector((state: RootState) => state.BranchStore);
 
     const fetchAllBranches = async () => {
         const response = await listBranchesService() as Array<IBranch>;
-        setBranches(response);
+        dispatch(loadBranches(response))
         setBranchList(response);
     }
     const filterByName = (text: string) => {
-        const filteredBranches = branchList.filter(branch => branch.name.toLowerCase().indexOf(text.toLowerCase()) !== -1);
-        setBranches(filteredBranches);
+        const filteredBranches = branches.filter(branch => branch.name.toLowerCase().indexOf(text.toLowerCase()) !== -1);
+        setBranchList(filteredBranches);
     }
 
     useEffect(() => { fetchAllBranches() }, []);
@@ -62,7 +68,7 @@ const BranchUtills = () => {
 
     return (
         {
-            branches,
+            branchList,
             filterByName,
             formFields,
             modalState,

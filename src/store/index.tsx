@@ -5,11 +5,13 @@ import {
 } from '@reduxjs/toolkit';
 import EquipmentReducer from "../pages/assets/slice/index"
 import UserReducer from "../pages/users/slice/index"
+import BranchReducer from "../pages/settings/branch/slice"
 
 export const store = configureStore({
     reducer: {
         EquipmentStore: EquipmentReducer,
-        UserStore: UserReducer
+        UserStore: UserReducer,
+        BranchStore: BranchReducer,
     },
 });
 

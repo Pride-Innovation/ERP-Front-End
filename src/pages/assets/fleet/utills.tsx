@@ -13,7 +13,6 @@ import { useDispatch } from "react-redux";
 import {
     loadAssetCategories,
     loadAssetStatuses,
-    loadBranches,
     loadSuppliers,
     loadUnitOfMeasures,
     loadUsers
@@ -26,6 +25,7 @@ import {
     listUnitOfMeasuresService,
     listUsersService
 } from "../ITEquipment/service";
+import { loadBranches } from "../../settings/branch/slice";
 
 const FleetUtills = () => {
     const endPoint = 'posts';
@@ -56,9 +56,9 @@ const FleetUtills = () => {
         users,
         assetCategories,
         unitsOfMeasures,
-        branches,
         suppliers
     } = useSelector((state: RootState) => state.EquipmentStore);
+    const { branches } = useSelector((state: RootState) => state.BranchStore);
 
     const updateReduxStore = async () => {
         dispatch(loadBranches(await listBranchesService()));

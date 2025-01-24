@@ -19,12 +19,12 @@ import {
 import { AppDispatch, RootState } from "../../../store";
 import {
     loadAssetStatuses,
-    loadBranches,
     loadAssetCategories,
     loadUnitOfMeasures,
     loadUsers,
     loadSuppliers
 } from "../slice";
+import { loadBranches } from "../../settings/branch/slice";
 
 const ITEquipmentUtills = () => {
     const endPoint = 'posts';
@@ -53,9 +53,9 @@ const ITEquipmentUtills = () => {
         users,
         assetCategories,
         unitsOfMeasures,
-        branches,
         suppliers
     } = useSelector((state: RootState) => state.EquipmentStore);
+    const { branches } = useSelector((state: RootState) => state.BranchStore);
 
     const updateReduxStore = async () => {
         dispatch(loadBranches(await listBranchesService()));
