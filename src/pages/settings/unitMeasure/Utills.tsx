@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
-import { IUnitOfMeasure } from "../../assets/ITEquipment/interface"
 import { listUnitOfMeasuresService } from "../../assets/ITEquipment/service"
 import { IFormData } from "../../assets/interface"
+import { IUnitOfMeasure } from "./interface"
 
 const UnitMeasureUtills = () => {
     const [unitsOfMeasure, setunitsOfMeasure] = useState<IUnitOfMeasure[]>([] as Array<IUnitOfMeasure>)

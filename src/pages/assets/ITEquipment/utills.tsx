@@ -10,7 +10,6 @@ import { IITEquipment } from "./interface";
 import { itEquipmentMock } from "../../../mocks/itEquipment";
 import {
     listAssetStatusesService,
-    listBranchesService,
     listCategoriesService,
     listSuppliersService,
     listUnitOfMeasuresService,
@@ -25,6 +24,7 @@ import {
     loadSuppliers
 } from "../slice";
 import { loadBranches } from "../../settings/branch/slice";
+import { listBranchesService } from "../../settings/branch/service";
 
 const ITEquipmentUtills = () => {
     const endPoint = 'posts';

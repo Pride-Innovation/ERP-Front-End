@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react"
-import { IBranch } from "../../assets/ITEquipment/interface"
-import { listBranchesService } from "../../assets/ITEquipment/service";
 import { IFormData } from "../../assets/interface";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../store";
 import { addBranch, loadBranches, removeBranch, updateBranch } from "./slice";
+import { IBranch } from "./interface";
+import { listBranchesService } from "./service";
 
 const BranchUtills = () => {
     const [branchList, setBranchList] = useState<IBranch[]>([] as Array<IBranch>);

@@ -1,7 +1,6 @@
 import { useForm } from "react-hook-form";
-import { IBranch } from "../../assets/ITEquipment/interface";
 import { useEffect } from "react";
-import { IUpdateBranch } from "./interface";
+import { IBranch, IUpdateBranch } from "./interface";
 import { Grid } from "@mui/material";
 import BranchForm from "./BranchForm";
 import { yupResolver } from "@hookform/resolvers/yup";

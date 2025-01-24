@@ -1,6 +1,17 @@
 import { Control, FieldError, FormState, UseFormRegister } from "react-hook-form";
-import { IBranch } from "../../assets/ITEquipment/interface";
 import { Dispatch, SetStateAction } from "react";
+
+export interface IBranch {
+    id?: string | number;
+    name: string
+    email: string
+    tel?: string | null
+    desc?: string | null
+    status?: string | null,
+    user_id?: number | null,
+    image?: any | null
+}
+
 
 export interface IBranchForm {
     formState: FormState<IBranch> & {

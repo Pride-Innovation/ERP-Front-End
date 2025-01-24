@@ -1,6 +1,14 @@
 import { Control, FieldError, FormState, UseFormRegister } from "react-hook-form";
-import { IUnitOfMeasure } from "../../assets/ITEquipment/interface";
 
+export interface IUnitOfMeasure {
+    id: number,
+    name: string,
+    status: string,
+    desc: string,
+    image: any,
+    user_id: number
+    symbol: string
+}
 
 export interface IUnitOfMeasureForm {
     formState: FormState<IUnitOfMeasure> & {

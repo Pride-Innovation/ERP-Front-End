@@ -1,9 +1,8 @@
 import { useEffect } from 'react'
-import { IUnitOfMeasure } from '../../assets/ITEquipment/interface';
 import { useForm } from 'react-hook-form';
 import { Grid } from '@mui/material';
 import UnitOfMeasureForm from './UnitOfMeasureForm';
-import { ICreateUnitOfMeasure } from './interface';
+import { ICreateUnitOfMeasure, IUnitOfMeasure } from './interface';
 
 const CreateUnitOfMeasure = ({ handleClose, sendingRequest }: ICreateUnitOfMeasure) => {
     const defaultUnitOfMeasure: IUnitOfMeasure = {} as IUnitOfMeasure;

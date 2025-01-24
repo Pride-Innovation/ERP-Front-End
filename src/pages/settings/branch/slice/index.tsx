@@ -1,6 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { IBranch } from '../../../assets/ITEquipment/interface';
-
+import { IBranch } from '../interface';
 
 interface IBranchState {
     branches: IBranch[];

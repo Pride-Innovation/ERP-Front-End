@@ -48,15 +48,6 @@ const updateITEquipmentService = async (body: object, id: string | number) => {
     }
 }
 
-const listBranchesService = async () => {
-    try {
-        const response = await axiosInstance.get('branches');
-        return response.data?.data;
-    } catch (error) {
-        throw error;
-    }
-}
-
 const listUsersService = async () => {
     try {
         const response = await axiosInstance.get('users');
@@ -108,7 +99,6 @@ export {
     deleteITEquipmentService,
     getITEquipmentByIDService,
     updateITEquipmentService,
-    listBranchesService,
     listUsersService,
     listCategoriesService,
     listUnitOfMeasuresService,

@@ -19,13 +19,13 @@ import {
 } from "../slice";
 import {
     listAssetStatusesService,
-    listBranchesService,
     listCategoriesService,
     listSuppliersService,
     listUnitOfMeasuresService,
     listUsersService
 } from "../ITEquipment/service";
 import { loadBranches } from "../../settings/branch/slice";
+import { listBranchesService } from "../../settings/branch/service";
 
 const FleetUtills = () => {
     const endPoint = 'posts';

@@ -89,17 +89,6 @@ export interface IITEquipmentForm {
     handleChange?: (event: SelectChangeEvent) => void;
 }
 
-export interface IBranch {
-    id?: string | number;
-    name: string
-    email: string
-    tel?: string | null
-    desc?: string | null
-    status?: string | null,
-    user_id?: number | null,
-    image?: any | null
-}
-
 export interface IAsssetStatus {
     id: number,
     name: string,
@@ -118,15 +107,6 @@ export interface IAsssetCategory {
     user_id: number
 }
 
-export interface IUnitOfMeasure {
-    id: number,
-    name: string,
-    status: string,
-    desc: string,
-    image: any,
-    user_id: number
-    symbol: string
-}
 
 export interface ISupplier {
     id: number,

@@ -1,6 +1,5 @@
 import { useForm } from 'react-hook-form';
-import { IUnitOfMeasure } from '../../assets/ITEquipment/interface';
-import { IUpdateUnitOfMeasure } from './interface';
+import { IUnitOfMeasure, IUpdateUnitOfMeasure } from './interface';
 import { useEffect } from 'react';
 import { Grid } from '@mui/material';
 import UnitOfMeasureForm from './UnitOfMeasureForm';

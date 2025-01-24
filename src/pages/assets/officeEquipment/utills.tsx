@@ -17,7 +17,6 @@ import {
 } from "../slice";
 import {
     listAssetStatusesService,
-    listBranchesService,
     listCategoriesService,
     listSuppliersService,
     listUnitOfMeasuresService,
@@ -26,6 +25,7 @@ import {
 import { useSelector } from "react-redux";
 import { RootState } from "../../../store";
 import { loadBranches } from "../../settings/branch/slice";
+import { listBranchesService } from "../../settings/branch/service";
 
 const OfficeEquipmentUtills = () => {
     const endPoint = 'posts';

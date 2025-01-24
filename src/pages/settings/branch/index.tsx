@@ -11,8 +11,8 @@ import ModalComponent from "../../../components/modal";
 import CreateBranch from "./CreateBranch";
 import ViewBranch from "./ViewBranch";
 import UpdateBranch from "./UpdateBranch";
-import { IBranch } from "../../assets/ITEquipment/interface";
 import DeleteBranch from "./DeleteBranch";
+import { IBranch } from "./interface";
 
 const Branches = () => {
   const [currentBranch, setCurrentBranch] = useState<IBranch>({} as IBranch);

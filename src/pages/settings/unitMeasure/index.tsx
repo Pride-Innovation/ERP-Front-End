@@ -2,13 +2,13 @@ import { Box } from "@mui/material";
 import ButtonComponent from "../../../components/forms/Button";
 import UnitMeasureUtills from "./Utills";
 import UnitMeasureDetails from "./UnitMeasureDetails";
-import { IUnitOfMeasure } from "../../assets/ITEquipment/interface";
 import { useState } from "react";
 import { crudStates } from "../../../utils/constants";
 import ModalComponent from "../../../components/modal";
 import CreateUnitOfMeasure from "./CreateUnitOfMeasure";
 import UpdateUnitOfMeasure from "./UpdateUnitOfMeasure";
 import DeleteUnitOfMeasure from "./DeleteUnitOfMeasure";
+import { IUnitOfMeasure } from "./interface";
 
 const UnitMeasures = () => {
     const { unitsOfMeasure, setModalState, handleClose, handleOpen, modalState, open } = UnitMeasureUtills();

@@ -2,10 +2,10 @@ import { createSlice } from '@reduxjs/toolkit';
 import {
     IAsssetCategory,
     IAsssetStatus,
-    ISupplier,
-    IUnitOfMeasure
+    ISupplier
 } from '../ITEquipment/interface';
 import { IUser } from '../../users/interface';
+import { IUnitOfMeasure } from '../../settings/unitMeasure/interface';
 
 interface IITEquipmentState {
     assetsStatuses: IAsssetStatus[];
