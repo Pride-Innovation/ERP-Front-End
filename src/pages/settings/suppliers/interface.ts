@@ -41,6 +41,7 @@ interface IUpdateSupplier {
 interface IDeleteSupplier {
     handleClose: () => void;
     sendingRequest: boolean;
+    setSendingRequest: Dispatch<SetStateAction<boolean>>;
     buttonText: string;
     supplier: ISupplier
 }

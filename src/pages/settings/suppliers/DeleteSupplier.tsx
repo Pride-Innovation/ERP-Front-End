@@ -2,13 +2,29 @@ import { IDeleteSupplier } from './interface'
 import { Grid, Stack, Typography } from '@mui/material'
 import ProductionQuantityLimitsIcon from '@mui/icons-material/ProductionQuantityLimits';
 import ButtonComponent from '../../../components/forms/Button';
+import SupplierUtills from './Utills';
+import { toast } from 'react-toastify';
+import { deleteSupplierService } from './service';
 
 const DeleteSupplier = ({
     sendingRequest,
     supplier,
     handleClose,
-    buttonText
+    buttonText,
+    setSendingRequest
 }: IDeleteSupplier) => {
+    const { removeSupplierToStore } = SupplierUtills();
+
+    const deleteSupplier = async () => {
+        setSendingRequest(true)
+        const response = await deleteSupplierService(supplier?.id as string);
+        setSendingRequest(false)
+        if (response?.status === "success") {
+            removeSupplierToStore(supplier)
+            handleClose();
+            toast.success(response?.data?.message)
+        }
+    }
     return (
         <Grid item container spacing={4} xs={12}>
             <Grid item xs={12}>
@@ -33,6 +49,7 @@ const DeleteSupplier = ({
                         buttonText="Close"
                     />
                     <ButtonComponent
+                        handleClick={deleteSupplier}
                         buttonColor='error'
                         type='submit'
                         sendingRequest={sendingRequest}
