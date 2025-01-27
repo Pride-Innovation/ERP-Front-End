@@ -36,17 +36,29 @@ const Suppliers = () => {
         <>
             {
                 crudStates.create === modalState && <ModalComponent width={"50%"} title='Create Supplier' open={open} handleClose={handleClose}>
-                    <CreateSupplier handleClose={handleClose} sendingRequest={sendingRequest} setSendingRequest={setSendingRequest} />
+                    <CreateSupplier
+                        handleClose={handleClose}
+                        sendingRequest={sendingRequest}
+                        setSendingRequest={setSendingRequest} />
                 </ModalComponent>
             }
             {
                 crudStates.delete === modalState && <ModalComponent width={"35%"} title='Delete Supplier' open={open} handleClose={handleClose}>
-                    <DeleteSupplier setSendingRequest={setSendingRequest} supplier={currentSupplier} handleClose={handleClose} sendingRequest={sendingRequest} buttonText='Delete' />
+                    <DeleteSupplier
+                        setSendingRequest={setSendingRequest}
+                        supplier={currentSupplier}
+                        handleClose={handleClose}
+                        sendingRequest={sendingRequest}
+                        buttonText='Delete' />
                 </ModalComponent>
             }
             {
                 crudStates.update === modalState && <ModalComponent width={"50%"} title='Update Supplier' open={open} handleClose={handleClose}>
-                    <UpdateSupplier handleClose={handleClose} sendingRequest={sendingRequest} supplier={currentSupplier} setSendingRequest={setSendingRequest} />
+                    <UpdateSupplier
+                        handleClose={handleClose}
+                        sendingRequest={sendingRequest}
+                        supplier={currentSupplier}
+                        setSendingRequest={setSendingRequest} />
                 </ModalComponent>
             }
             <Box sx={{ width: "100%" }}>
