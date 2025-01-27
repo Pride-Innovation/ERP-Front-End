@@ -46,7 +46,7 @@ const Suppliers = () => {
             }
             {
                 crudStates.update === modalState && <ModalComponent width={"50%"} title='Update Supplier' open={open} handleClose={handleClose}>
-                    <UpdateSupplier handleClose={handleClose} sendingRequest={false} supplier={currentSupplier} />
+                    <UpdateSupplier handleClose={handleClose} sendingRequest={sendingRequest} supplier={currentSupplier} setSendingRequest={setSendingRequest} />
                 </ModalComponent>
             }
             <Box sx={{ width: "100%" }}>

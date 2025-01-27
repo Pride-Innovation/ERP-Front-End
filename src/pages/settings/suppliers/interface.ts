@@ -7,15 +7,15 @@ import {
 } from "react-hook-form";
 
 export interface ISupplier {
-    id?: string | number,
-    name: string,
-    status?: string | null,
-    desc?: string | null,
-    image?: any | null,
-    user_id?: number | null
-    symbol?: string | null
-    tel: string,
-    email: string,
+    id?: string | number;
+    name: string;
+    status?: string | null;
+    desc?: string | null;
+    image?: any | null;
+    user_id?: number | null;
+    symbol?: string | null;
+    tel: string;
+    email: string;
     // Nice to have a supplier product type!!!
 }
 
@@ -34,6 +34,7 @@ interface ICreateSupplier {
 interface IUpdateSupplier {
     handleClose: () => void;
     sendingRequest: boolean;
+    setSendingRequest: Dispatch<SetStateAction<boolean>>;
     supplier: ISupplier
 }
 
