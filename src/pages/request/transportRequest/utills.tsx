@@ -136,7 +136,8 @@ const TransportRequestUtills = () => {
     ]
 
     const determineStatusColor = (id: string) => {
-        return (statuses.find(status => status.id === parseInt(id, 10)))?.name === "pending" ? "pending" : "rejected"
+        return (statuses.find(status => status.id === parseInt(id, 10)))?.name
+            === requestStatus.pending ? requestStatus.pending : requestStatus.rejected
     }
 
     const handleRequest = (list: Array<ITransportRequest>) => {
