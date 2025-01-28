@@ -14,6 +14,9 @@ import { addNewTransportRequest, loadAllTransportRequest } from "./slice";
 import { useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../../store";
 import moment from "moment";
+import { listAssetStatusesService } from "../../settings/statuses/service";
+import { loadStatuses } from "../../settings/statuses/slice";
+import { IStatus } from "../../settings/statuses/interface";
 
 const TransportRequestUtills = () => {
     const endPoint = 'fleetRequisitions';
@@ -23,12 +26,20 @@ const TransportRequestUtills = () => {
     const [pendingRequests, setPendingRequests] = useState<Array<ITransportRequest>>([] as ITransportRequest[])
     const [rejectedRequests, setRejectedRequests] = useState<Array<ITransportRequest>>([] as ITransportRequest[])
     const { setTransportRequestTableData } = useContext(TransportRequestContext);
+    const { statuses } = useSelector((state: RootState) => state.StatusesStore)
     const [open, setOpen] = useState<boolean>(false);
     const dispatch = useDispatch<AppDispatch>();
     const { allTranportRequests } = useSelector((state: RootState) => state.TransportRequestStore)
 
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
+
+    const fetchAllStatuses = async () => {
+        const response = await listAssetStatusesService() as Array<IStatus>;
+        dispatch(loadStatuses(response))
+    }
+
+    useEffect(() => { fetchAllStatuses() }, []);
 
     const addAllTransportRequestsInStore = (transportRequests: Array<ITransportRequest>) => {
         dispatch(loadAllTransportRequest(transportRequests))
@@ -124,6 +135,9 @@ const TransportRequestUtills = () => {
         }
     ]
 
+    const determineStatusColor = (id: string) => {
+        return (statuses.find(status => status.id === parseInt(id, 10)))?.name === "pending" ? "pending" : "rejected"
+    }
 
     const handleRequest = (list: Array<ITransportRequest>) => {
         const data: Array<ITransportRequestTableData> = list.map((request, index) => {
@@ -140,6 +154,7 @@ const TransportRequestUtills = () => {
                     dateVehicleRequired: moment(request.timeVehicleIsRequired).format('LL'),
                     ...fielsdata,
                     duration: `${request.duration} hrs`,
+                    status: determineStatusColor(request.status as string)
                 }
             )
         })
@@ -181,7 +196,7 @@ const TransportRequestUtills = () => {
             rejectedRequests,
             addAllTransportRequestsInStore,
             addNewTransportRequestToStore,
-            allTranportRequests
+            allTranportRequests,
         }
     )
 }
