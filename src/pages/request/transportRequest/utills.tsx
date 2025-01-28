@@ -124,7 +124,6 @@ const TransportRequestUtills = () => {
 
 
     const handleRequest = (list: Array<ITransportRequest>) => {
-        console.log(list, "list data!!!")
         const data: Array<ITransportRequestTableData> = list.map((request, index) => {
             const {
                 ...fielsdata
