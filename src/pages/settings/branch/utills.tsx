@@ -90,7 +90,8 @@ const BranchUtills = () => {
             handleOpen,
             addBranchToStore,
             removeBranchToStore,
-            updateBranchInStore
+            updateBranchInStore,
+            branchList
         }
     )
 }

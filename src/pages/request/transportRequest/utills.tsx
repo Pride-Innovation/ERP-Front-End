@@ -9,9 +9,14 @@ import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import { IFormData } from "../../assets/interface";
 import { TransportRequestContext } from "../../../context/request/TransportRequestContext";
 import { getTableHeaders } from "../../../components/tables/getTableHeaders";
+import { useDispatch } from "react-redux";
+import { addNewTransportRequest, loadAllTransportRequest } from "./slice";
+import { useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../../../store";
+import moment from "moment"
 
 const TransportRequestUtills = () => {
-    const endPoint = 'posts';
+    const endPoint = 'fleetRequisitions';
     const module = "request";
     const header = { plural: 'Transport Requests', singular: 'Request' };
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
@@ -19,9 +24,19 @@ const TransportRequestUtills = () => {
     const [rejectedRequests, setRejectedRequests] = useState<Array<ITransportRequest>>([] as ITransportRequest[])
     const { setTransportRequestTableData } = useContext(TransportRequestContext);
     const [open, setOpen] = useState<boolean>(false);
+    const dispatch = useDispatch<AppDispatch>();
+    const { allTranportRequests } = useSelector((state: RootState) => state.TransportRequestStore)
 
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
+
+    const addAllTransportRequestsInStore = (transportRequests: Array<ITransportRequest>) => {
+        dispatch(loadAllTransportRequest(transportRequests))
+    }
+
+    const addNewTransportRequestToStore = (transportRequest: ITransportRequest) => {
+        dispatch(addNewTransportRequest(transportRequest))
+    }
 
     const {
         id,
@@ -30,12 +45,20 @@ const TransportRequestUtills = () => {
         notes,
         signature,
         priority,
+        requestDate,
+        requestTime,
+        timeRequired,
+        timeVehicleIsRequired,
+        dateVehicleIsRequired,
         ...data
     } = transportRequest[0];
 
     const rowData = {
-        name: `${transportRequest[0].user?.firstName} ${transportRequest[0].user?.lastName} ${transportRequest[0].user?.otherName}`,
-        department: transportRequest[0]?.user?.department,
+        name: "",
+        dateRequested: "",
+        timeRequested: "",
+        timeVehicleRequired: "",
+        dateVehicleRequired: "",
         ...data,
         action: {
             label: "options",
@@ -59,7 +82,7 @@ const TransportRequestUtills = () => {
             type: "time"
         },
         {
-            value: "dateRequired",
+            value: "dateVehicleIsRequired",
             label: 'Date Required',
             type: "date"
         },
@@ -101,16 +124,19 @@ const TransportRequestUtills = () => {
 
 
     const handleRequest = (list: Array<ITransportRequest>) => {
+        console.log(list, "list data!!!")
         const data: Array<ITransportRequestTableData> = list.map((request, index) => {
             const {
-                user,
                 ...fielsdata
             } = list[index];
 
             return (
                 {
-                    name: `${request.user?.firstName} ${request.user?.lastName}`,
-                    department: request.user?.department,
+                    name: `${request.requester?.name}`,
+                    dateRequested: moment(request.requestDate).format('LL'),
+                    timeRequested: moment(request.requestDate).format('LT'),
+                    timeVehicleRequired: moment(request.timeVehicleIsRequired).format('LT'),
+                    dateVehicleRequired: moment(request.timeVehicleIsRequired).format('LL'),
                     ...fielsdata
                 }
             )
@@ -150,7 +176,10 @@ const TransportRequestUtills = () => {
             filterPendingRecords,
             pendingRequests,
             filterRejectedRecords,
-            rejectedRequests
+            rejectedRequests,
+            addAllTransportRequestsInStore,
+            addNewTransportRequestToStore,
+            allTranportRequests
         }
     )
 }

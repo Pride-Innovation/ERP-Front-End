@@ -1,12 +1,8 @@
 import React, { useContext, useEffect, useState } from "react";
-import { GridRowsProp } from "@mui/x-data-grid";
 import { useNavigate } from "react-router";
 import { Grid } from "@mui/material";
 import { ITransportRequest } from "../../interface";
-import RowContext from "../../../../context/row/RowContext";
 import { FileContext } from "../../../../context/file/FileContext";
-import { fetchRowsService } from "../../../../core/apis/globalService";
-import { transportRequest } from "../../../../mocks/request";
 import { ErrorMessage } from "../../../../core/apis/axiosInstance";
 import { crudStates } from "../../../../utils/constants";
 import { ROUTES } from "../../../../core/routes/routes";
@@ -16,12 +12,13 @@ import { TransportRequestContext } from "../../../../context/request/TransportRe
 import ModalComponent from "../../../../components/modal";
 import DeleteRequest from "../../DeleteRequest";
 import RequestDetails from "../../RequestDetails";
+import { fetchRowsService } from "../../../../core/apis/globalService";
+
 
 const TransportRequest = () => {
     const [loading, setLoading] = useState<boolean>(false);
     const [modalState, setModalState] = useState<string>("");
     const [currentRequest, setCurrentRequest] = useState<ITransportRequest>({} as ITransportRequest);
-    const { setRows, rows } = useContext(RowContext);
     const navigate = useNavigate();
     const { transportRequestTableData } = useContext(TransportRequestContext);
     const { setFileData, fileData } = useContext(FileContext)
@@ -35,17 +32,22 @@ const TransportRequest = () => {
         determineCurrentRequest,
         handleClose,
         handleOpen,
-        open
+        open,
+        addAllTransportRequestsInStore,
+        allTranportRequests
     } = TransportRequestUtills();
 
     const fetchResources = async () => {
-        setLoading(true)
+        setLoading(true);
         try {
-            const response = await fetchRowsService({ page: 1, size: 10, endPoint }) as unknown as GridRowsProp;
-            console.log(response, "response!!")
-            setRows([...transportRequest]);
+            const response = await fetchRowsService({
+                page: 1,
+                // size: 10, 
+                endPoint
+            });
+            const data = response?.data as ITransportRequest[]
+            addAllTransportRequestsInStore(data)
         } catch (error) {
-            setRows([...transportRequest]);
             const errorMessage = error instanceof Error ? error.message : ErrorMessage;
             console.log(errorMessage)
         }
@@ -57,8 +59,7 @@ const TransportRequest = () => {
         setFileData({ file: "", module: "", jsonData: [] });
     }, []);
 
-    useEffect(() => { if (rows.length > 0) { handleRequest(transportRequest) } }, [rows])
-    console.log("All requests")
+    useEffect(() => { if (allTranportRequests.length > 0) { handleRequest(allTranportRequests) } }, [allTranportRequests])
 
     const handleOptionClicked = (option: string | number, moduleID?: string | number) => {
         switch (option) {
@@ -67,12 +68,12 @@ const TransportRequest = () => {
                 break;
             case crudStates.delete:
                 setModalState(crudStates.delete)
-                setCurrentRequest(determineCurrentRequest(moduleID as number, rows as ITransportRequest[]))
+                setCurrentRequest(determineCurrentRequest(moduleID as number, allTranportRequests as ITransportRequest[]))
                 handleOpen();
                 break;
             case crudStates.read:
                 setModalState(crudStates.read)
-                setCurrentRequest(determineCurrentRequest(moduleID as number, rows as ITransportRequest[]))
+                setCurrentRequest(determineCurrentRequest(moduleID as number, allTranportRequests as ITransportRequest[]))
                 handleOpen();
                 break;
             default:
@@ -103,7 +104,7 @@ const TransportRequest = () => {
                     <RequestDetails open={open} handleClose={handleClose} data={currentRequest} />
                 </ModalComponent>
             }
-            {rows?.length > 0 && <Grid xs={12} container>
+            {allTranportRequests?.length > 0 && <Grid xs={12} container>
                 {columnHeaders.length > 0 &&
                     <TableComponent
                         endPoint={endPoint}

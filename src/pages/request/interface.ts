@@ -75,11 +75,13 @@ export interface INavigation {
 
 export interface ITransportRequest {
     id?: string | number;
-    user?: IUser
+    user?: IUser,
+    requester?: IUser,
     requestDate?: string | null;
     requestTime?: string | null;
     timeRequired: string;
-    dateRequired: string;
+    dateVehicleIsRequired: string;
+    timeVehicleIsRequired: string;
     destination: string;
     reason: string;
     duration: string;
@@ -94,7 +96,8 @@ export interface ITransportRequestTableData {
     requestDate?: string | null;
     requestTime?: string | null;
     timeRequired: string;
-    dateRequired: string;
+    dateVehicleIsRequired: string;
+    timeVehicleIsRequired: string;
     destination: string;
     reason: string;
     duration: string;

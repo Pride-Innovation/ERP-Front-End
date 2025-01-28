@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { Box, CardMedia, Divider, Grid, Stack, Typography, useTheme } from "@mui/material";
+import {
+    Box,
+    CardMedia,
+    Divider,
+    Grid,
+    Stack,
+    Typography,
+    useTheme
+} from "@mui/material";
 import { CheckCircle, Error } from "@mui/icons-material";
 import PlaceHolder from "../../statics/images/Placeholder.png";
 import ButtonComponent from "../../components/forms/Button";
