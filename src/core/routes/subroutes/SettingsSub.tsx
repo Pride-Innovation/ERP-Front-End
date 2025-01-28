@@ -5,6 +5,7 @@ import Units from "../../../pages/settings/unit"
 import UnitMeasures from "../../../pages/settings/unitMeasure"
 import Roles from "../../../pages/settings/roles"
 import Suppliers from "../../../pages/settings/suppliers"
+import Statuses from "../../../pages/settings/statuses"
 
 const SettingsSubRoutes = () => {
 
@@ -15,6 +16,7 @@ const SettingsSubRoutes = () => {
             <Route path={ROUTES.UNITS} element={<Units />} />
             <Route path={ROUTES.UNITS_MEASURE} element={<UnitMeasures />} />
             <Route path={ROUTES.SUPPLIERS} element={<Suppliers />} />
+            <Route path={ROUTES.STATUSES} element={<Statuses />} />
         </Route>
     )
 }

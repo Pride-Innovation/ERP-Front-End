@@ -13,7 +13,7 @@ import { useDispatch } from "react-redux";
 import { addNewTransportRequest, loadAllTransportRequest } from "./slice";
 import { useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../../store";
-import moment from "moment"
+import moment from "moment";
 
 const TransportRequestUtills = () => {
     const endPoint = 'fleetRequisitions';
@@ -46,6 +46,7 @@ const TransportRequestUtills = () => {
         signature,
         priority,
         requestDate,
+        duration,
         requestTime,
         timeRequired,
         timeVehicleIsRequired,
@@ -59,6 +60,7 @@ const TransportRequestUtills = () => {
         timeRequested: "",
         timeVehicleRequired: "",
         dateVehicleRequired: "",
+        duration: `${transportRequest[0].duration} hrs`,
         ...data,
         action: {
             label: "options",
@@ -136,7 +138,8 @@ const TransportRequestUtills = () => {
                     timeRequested: moment(request.requestDate).format('LT'),
                     timeVehicleRequired: moment(request.timeVehicleIsRequired).format('LT'),
                     dateVehicleRequired: moment(request.timeVehicleIsRequired).format('LL'),
-                    ...fielsdata
+                    ...fielsdata,
+                    duration: `${request.duration} hrs`,
                 }
             )
         })
@@ -183,4 +186,4 @@ const TransportRequestUtills = () => {
     )
 }
 
-export default TransportRequestUtills
+export default TransportRequestUtills;

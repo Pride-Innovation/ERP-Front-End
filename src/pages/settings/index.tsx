@@ -40,7 +40,7 @@ const Settings = () => {
                         </Stack>
                     </Box>
                 </Box>
-                <Box sx={{ width: "80%"}}>
+                <Box sx={{ width: "80%" }}>
                     <Outlet />
                 </Box>
             </Box>

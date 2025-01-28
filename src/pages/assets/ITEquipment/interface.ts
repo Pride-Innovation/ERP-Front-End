@@ -89,15 +89,6 @@ export interface IITEquipmentForm {
     handleChange?: (event: SelectChangeEvent) => void;
 }
 
-export interface IAsssetStatus {
-    id: number,
-    name: string,
-    status: string,
-    desc: string,
-    image: any,
-    user_id: number
-}
-
 export interface IAsssetCategory {
     id: number,
     name: string,

@@ -46,6 +46,7 @@ const BRANCHES: string = `${ASSETS_MANAGEMENT}/settings/branches`;
 const UNITS: string = `${ASSETS_MANAGEMENT}/settings/units`;
 const UNITS_MEASURE: string = `${ASSETS_MANAGEMENT}/settings/units-of-measure`;
 const SUPPLIERS: string = `${ASSETS_MANAGEMENT}/settings/suppliers`;
+const STATUSES: string = `${ASSETS_MANAGEMENT}/settings/statuses`;
 
 /* Errors Page */
 const ERRORS: string = `${ASSETS_MANAGEMENT}/restricted-access`
@@ -83,5 +84,6 @@ export const ROUTES = {
     BRANCHES,
     UNITS,
     UNITS_MEASURE,
-    SUPPLIERS
+    SUPPLIERS,
+    STATUSES
 }

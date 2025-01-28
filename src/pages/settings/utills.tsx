@@ -6,6 +6,7 @@ import ScaleIcon from '@mui/icons-material/Scale';
 import { ISettingsNavigation } from './interface';
 import { ROUTES } from '../../core/routes/routes';
 import ListAltIcon from '@mui/icons-material/ListAlt';
+import DownloadingIcon from '@mui/icons-material/Downloading';
 
 const SettingsUtills = () => {
 
@@ -39,6 +40,12 @@ const SettingsUtills = () => {
             text: "Suppliers",
             path: ROUTES.SUPPLIERS,
             icon: <ListAltIcon />
+        },
+        {
+            id: 6,
+            text: "Statuses",
+            path: ROUTES.STATUSES,
+            icon: <DownloadingIcon />
         }
     ]
 

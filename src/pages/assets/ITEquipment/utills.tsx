@@ -9,14 +9,12 @@ import { IFormData } from "../interface";
 import { IITEquipment } from "./interface";
 import { itEquipmentMock } from "../../../mocks/itEquipment";
 import {
-    listAssetStatusesService,
     listCategoriesService,
     listUnitOfMeasuresService,
     listUsersService
 } from "./service";
 import { AppDispatch, RootState } from "../../../store";
 import {
-    loadAssetStatuses,
     loadAssetCategories,
     loadUsers,
 } from "../slice";
@@ -25,6 +23,8 @@ import { listBranchesService } from "../../settings/branch/service";
 import { loadUnitOfMeasures } from "../../settings/unitMeasure/slice";
 import { loadSuppliers } from "../../settings/suppliers/slice";
 import { listSuppliersService } from "../../settings/suppliers/service";
+import { loadStatuses } from "../../settings/statuses/slice";
+import { listAssetStatusesService } from "../../settings/statuses/service";
 
 const ITEquipmentUtills = () => {
     const endPoint = 'posts';
@@ -49,10 +49,10 @@ const ITEquipmentUtills = () => {
         suppliersOptions: []
     });
     const {
-        assetsStatuses,
         users,
         assetCategories,
     } = useSelector((state: RootState) => state.EquipmentStore);
+    const { statuses } = useSelector((state: RootState) => state.StatusesStore);
     const { suppliers } = useSelector((state: RootState) => state.SuppliersStore);
     const { unitsOfMeasure } = useSelector((state: RootState) => state.UnitsOfMeasureStore);
     const { branches } = useSelector((state: RootState) => state.BranchStore);
@@ -62,7 +62,7 @@ const ITEquipmentUtills = () => {
         dispatch(loadUsers(await listUsersService()));
         dispatch(loadAssetCategories(await listCategoriesService()));
         dispatch(loadUnitOfMeasures(await listUnitOfMeasuresService()));
-        dispatch(loadAssetStatuses(await listAssetStatusesService()));
+        dispatch(loadStatuses(await listAssetStatusesService()));
         dispatch(loadSuppliers(await listSuppliersService()));
     }
 
@@ -72,13 +72,13 @@ const ITEquipmentUtills = () => {
         setOptionsObject({
             assetCategoriesOptions: assetCategories?.map(category => ({ label: category.name, value: category.id })) || [],
             branchesOptions: branches?.map(branch => ({ label: branch.name, value: branch?.id as number })),
-            assetsStatusesOptions: assetsStatuses?.map(status => ({ label: status.name, value: status.id })) || [],
+            assetsStatusesOptions: statuses?.map(status => ({ label: status.name, value: status.id as number })) || [],
             unitsOfMeasuresOptions: unitsOfMeasure?.map(unit => ({ label: unit.name, value: unit?.id as number })) || [],
             usersOptions: users?.map(user => ({ label: user.name as string, value: user.id as number })) || [],
             suppliersOptions: suppliers?.map(supplier => ({ label: supplier.name, value: supplier?.id as number })) || [],
         })
 
-    }, [assetsStatuses, users, assetCategories, unitsOfMeasure, branches, suppliers])
+    }, [statuses, users, assetCategories, unitsOfMeasure, branches, suppliers])
 
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);

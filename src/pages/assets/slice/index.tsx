@@ -1,18 +1,18 @@
 import { createSlice } from '@reduxjs/toolkit';
 import {
     IAsssetCategory,
-    IAsssetStatus,
+    // IAsssetStatus,
 } from '../ITEquipment/interface';
 import { IUser } from '../../users/interface';
 
 interface IITEquipmentState {
-    assetsStatuses: IAsssetStatus[];
+    // assetsStatuses: IAsssetStatus[];
     users: IUser[];
     assetCategories: IAsssetCategory[];
 }
 
 const initialState: IITEquipmentState = {
-    assetsStatuses: [],
+    // assetsStatuses: [],
     users: [],
     assetCategories: [],
 }
@@ -21,9 +21,9 @@ export const authSlice = createSlice({
     name: 'assets',
     initialState,
     reducers: {
-        loadAssetStatuses: (state, action) => {
-            state.assetsStatuses = action.payload;
-        },
+        // loadAssetStatuses: (state, action) => {
+        //     state.assetsStatuses = action.payload;
+        // },
         loadUsers: (state, action) => {
             state.users = action.payload;
         },
@@ -36,7 +36,7 @@ export const authSlice = createSlice({
 const { reducer, actions } = authSlice
 
 export const {
-    loadAssetStatuses,
+    // loadAssetStatuses,
     loadUsers,
     loadAssetCategories,
 } = actions
