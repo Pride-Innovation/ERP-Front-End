@@ -17,13 +17,21 @@ export const statusSlice = createSlice({
         loadStatuses: (state, action) => {
             state.statuses = action.payload;
         },
+        addStatus: (state, action) => {
+            state.statuses = [action.payload, ...state.statuses];
+        },
+        updateStatus: (state, action) => {
+            state.statuses = state.statuses.map(status => status.id === action.payload?.id ? action.payload : status)
+        },
     }
 })
 
 const { reducer, actions } = statusSlice
 
 export const {
-    loadStatuses
+    loadStatuses,
+    addStatus,
+    updateStatus
 } = actions;
 
 export default reducer;

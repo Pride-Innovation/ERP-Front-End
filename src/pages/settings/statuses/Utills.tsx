@@ -3,8 +3,9 @@ import { useDispatch } from "react-redux";
 import { AppDispatch, RootState } from "../../../store";
 import { IStatus } from "./interface";
 import { listAssetStatusesService } from "./service";
-import { loadStatuses } from "./slice";
+import { addStatus, loadStatuses, updateStatus } from "./slice";
 import { useSelector } from "react-redux";
+import { IFormData } from "../../assets/interface";
 
 const StatusUtills = () => {
     const [modalState, setModalState] = useState<string>("");
@@ -20,6 +21,26 @@ const StatusUtills = () => {
 
     useEffect(() => { fetchAllStatuses() }, []);
 
+    const addStatusToStore = (status: IStatus) => {
+        dispatch(addStatus(status))
+    }
+
+    const updateStatusInStore = (status: IStatus) => {
+        dispatch(updateStatus(status))
+    }
+
+    const formFields: Array<IFormData<IStatus>> = [
+        {
+            value: "name",
+            label: 'Status Name',
+            type: "input"
+        },
+        {
+            value: "desc",
+            label: 'Description',
+            type: "textarea"
+        }]
+
     return (
         {
             modalState,
@@ -28,7 +49,10 @@ const StatusUtills = () => {
             handleOpen,
             open,
             setOpen,
-            statuses
+            statuses,
+            formFields,
+            addStatusToStore,
+            updateStatusInStore
         }
     )
 }

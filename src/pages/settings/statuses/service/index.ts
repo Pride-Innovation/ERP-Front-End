@@ -9,6 +9,26 @@ const listAssetStatusesService = async () => {
     }
 }
 
+const createStatusService = async (body: Object) => {
+    try {
+        const response = await axiosInstance.post('assetStatuses/create', body);
+        return response?.data
+    } catch (error) {
+        throw error
+    }
+}
+
+const updateStatusService = async (body: Object, id: string | number) => {
+    try {
+        const response = await axiosInstance.post(`assetStatuses/update/${id}`, body)
+        return response?.data
+    } catch (error) {
+        throw error
+    }
+}
+
 export {
     listAssetStatusesService,
+    createStatusService,
+    updateStatusService
 }
