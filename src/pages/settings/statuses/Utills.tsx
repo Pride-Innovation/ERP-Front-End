@@ -3,7 +3,7 @@ import { useDispatch } from "react-redux";
 import { AppDispatch, RootState } from "../../../store";
 import { IStatus } from "./interface";
 import { listAssetStatusesService } from "./service";
-import { addStatus, loadStatuses, updateStatus } from "./slice";
+import { addStatus, loadStatuses, removeStatus, updateStatus } from "./slice";
 import { useSelector } from "react-redux";
 import { IFormData } from "../../assets/interface";
 
@@ -29,6 +29,10 @@ const StatusUtills = () => {
         dispatch(updateStatus(status))
     }
 
+    const removeStatusFromStore = (status: IStatus) => {
+        dispatch(removeStatus(status))
+    }
+
     const formFields: Array<IFormData<IStatus>> = [
         {
             value: "name",
@@ -52,7 +56,8 @@ const StatusUtills = () => {
             statuses,
             formFields,
             addStatusToStore,
-            updateStatusInStore
+            updateStatusInStore,
+            removeStatusFromStore
         }
     )
 }

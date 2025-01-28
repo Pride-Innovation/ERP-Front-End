@@ -8,6 +8,7 @@ import StatusDetails from "./StatusDetails";
 import CreateStatus from "./CreateStatus";
 import ModalComponent from "../../../components/modal";
 import UpdateStatus from "./UpdateStatus";
+import DeleteStatus from "./DeleteStatus";
 
 const Statuses = () => {
     const [currentStatus, setCurrentStatus] = useState<IStatus>({} as IStatus);
@@ -37,17 +38,17 @@ const Statuses = () => {
                     <CreateStatus handleClose={handleClose} sendingRequest={sendingRequest} setSendingRequest={setSendingRequest} />
                 </ModalComponent>
             }
-            {/* {
-                crudStates.delete === modalState && <ModalComponent width={"35%"} title='Delete Unit of Measure' open={open} handleClose={handleClose}>
-                    <DeleteUnitOfMeasure
-                        unitOfMeasure={currentUnitOfMeasure}
+            {
+                crudStates.delete === modalState && <ModalComponent width={"35%"} title='Delete Status' open={open} handleClose={handleClose}>
+                    <DeleteStatus
+                        status={currentStatus}
                         handleClose={handleClose}
                         sendingRequest={sendingRequest}
                         setSendingRequest={setSendingRequest}
                         buttonText='Delete'
                     />
                 </ModalComponent>
-            } */}
+            }
             {
                 crudStates.update === modalState && <ModalComponent width={"35%"} title='Update Status' open={open} handleClose={handleClose}>
                     <UpdateStatus

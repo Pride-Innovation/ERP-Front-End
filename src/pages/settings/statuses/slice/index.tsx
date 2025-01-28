@@ -21,7 +21,10 @@ export const statusSlice = createSlice({
             state.statuses = [action.payload, ...state.statuses];
         },
         updateStatus: (state, action) => {
-            state.statuses = state.statuses.map(status => status.id === action.payload?.id ? action.payload : status)
+            state.statuses = state.statuses.map(status => status.id === action.payload?.id ? action.payload : status);
+        },
+        removeStatus: (state, action) => {
+            state.statuses = state.statuses.filter(status => status?.id !== action.payload?.id);
         },
     }
 })
@@ -31,7 +34,8 @@ const { reducer, actions } = statusSlice
 export const {
     loadStatuses,
     addStatus,
-    updateStatus
+    updateStatus,
+    removeStatus
 } = actions;
 
 export default reducer;

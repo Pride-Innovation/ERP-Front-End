@@ -43,3 +43,12 @@ export interface IUpdateStatus {
     setSendingRequest: Dispatch<SetStateAction<boolean>>;
     status: IStatus;
 }
+
+
+export interface IDeleteStatus {
+    handleClose: () => void;
+    sendingRequest: boolean;
+    setSendingRequest: Dispatch<SetStateAction<boolean>>;
+    buttonText: string;
+    status: IStatus
+}

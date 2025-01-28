@@ -27,8 +27,18 @@ const updateStatusService = async (body: Object, id: string | number) => {
     }
 }
 
+const deleteStatusService = async (id: string | number) => {
+    try {
+        const response = await axiosInstance.get(`assetStatuses/delete/${id}`)
+        return response?.data
+    } catch (error) {
+        throw error
+    }
+}
+
 export {
     listAssetStatusesService,
     createStatusService,
-    updateStatusService
+    updateStatusService,
+    deleteStatusService
 }
