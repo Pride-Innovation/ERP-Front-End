@@ -59,7 +59,7 @@ const StatusForm = ({
                                         />
                                     </Grid>
                                 ) : formField.type === 'select' ? (
-                                    <Grid item xs={12} md={6}>
+                                    <Grid item xs={12} md={12}>
                                         <UseFormSelect
                                             options={formField.options}
                                             register={register}

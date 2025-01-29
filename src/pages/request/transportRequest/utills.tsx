@@ -51,26 +51,28 @@ const TransportRequestUtills = () => {
 
     const {
         id,
-        user,
-        reason,
-        notes,
+        requester,
         signature,
         priority,
-        requestDate,
         duration,
-        requestTime,
-        timeRequired,
+        requestDate,
         timeVehicleIsRequired,
         dateVehicleIsRequired,
+        timeOfSubmissionOfRequest,
+        Narration,
+        purpose,
+        desc,
+        position,
+        fromPosition,
         ...data
     } = transportRequest[0];
 
     const rowData = {
         name: "",
-        dateRequested: "",
-        timeRequested: "",
-        timeVehicleRequired: "",
-        dateVehicleRequired: "",
+        requestDate: transportRequest[0]?.requestDate,
+        timeOfSubmissionOfRequest: transportRequest[0]?.timeOfSubmissionOfRequest,
+        dateVehicleIsRequired: transportRequest[0]?.dateVehicleIsRequired,
+        timeVehicleIsRequired: transportRequest[0]?.timeVehicleIsRequired,
         duration: `${transportRequest[0].duration} hrs`,
         ...data,
         action: {
@@ -85,12 +87,7 @@ const TransportRequestUtills = () => {
 
     const formFields: Array<IFormData<ITransportRequest>> = [
         {
-            value: "requestDate",
-            label: 'Request Date',
-            type: "date"
-        },
-        {
-            value: "requestTime",
+            value: "timeVehicleIsRequired",
             label: 'Request Time',
             type: "time"
         },
@@ -100,18 +97,13 @@ const TransportRequestUtills = () => {
             type: "date"
         },
         {
-            value: "timeRequired",
-            label: 'Time Required',
-            type: "time"
-        },
-        {
             value: "destination",
             label: 'Destination',
             type: "input"
         },
         {
-            value: "reason",
-            label: 'Reason',
+            value: "purpose",
+            label: 'Purpose',
             type: "input"
         },
         {
@@ -129,36 +121,68 @@ const TransportRequestUtills = () => {
             ]
         },
         {
-            value: "notes",
-            label: "Notes",
+            value: "timeOfSubmissionOfRequest",
+            label: 'Time Required',
+            type: "time"
+        },
+        {
+            value: "status",
+            label: 'Status',
+            type: "select",
+            options: [
+                { label: "High", value: "high" },
+                { label: "Low", value: "low" },
+            ]
+        },
+        {
+            value: "position",
+            label: "position",
+            type: "input"
+        },
+        {
+            value: "fromPosition",
+            label: "From Position",
+            type: "input"
+        },
+        {
+            value: "Narration",
+            label: "Narration",
+            type: "input"
+        },
+        {
+            value: "desc",
+            label: "Description",
             type: "textarea"
-        }
-    ]
+        },
+    ];
 
     const determineStatusColor = (id: string) => {
-        return (statuses.find(status => status.id === parseInt(id, 10)))?.name
-            === requestStatus.pending ? requestStatus.pending : requestStatus.rejected
+        console.log(statuses, "statuses!!")
+        const status = statuses.find(status => status.id === parseInt(id, 10));
+        console.log(status, id, "status!!")
+        // return (statuses.find(status => status.id === parseInt(id, 10)))?.name
+        //     === requestStatus.pending ? requestStatus.pending : requestStatus.rejected
+        return requestStatus.rejected;
     }
 
     const handleRequest = (list: Array<ITransportRequest>) => {
+
         const data: Array<ITransportRequestTableData> = list.map((request, index) => {
-            const {
-                ...fielsdata
-            } = list[index];
+            const { requester, signature, ...fielsdata } = list[index];
 
             return (
                 {
                     name: `${request.requester?.name}`,
-                    dateRequested: moment(request.requestDate).format('LL'),
-                    timeRequested: moment(request.requestDate).format('LT'),
-                    timeVehicleRequired: moment(request.timeVehicleIsRequired).format('LT'),
-                    dateVehicleRequired: moment(request.timeVehicleIsRequired).format('LL'),
                     ...fielsdata,
                     duration: `${request.duration} hrs`,
+                    requestDate: moment(request.requestDate).format('LL'),
+                    timeOfSubmissionOfRequest: moment(request.timeOfSubmissionOfRequest).format('LT'),
+                    dateVehicleIsRequired: moment(request.dateVehicleIsRequired).format('LL'),
+                    timeVehicleIsRequired: moment(request.timeVehicleIsRequired).format('LL'),
                     status: determineStatusColor(request.status as string)
                 }
             )
-        })
+        });
         setTransportRequestTableData(data);
     }
 

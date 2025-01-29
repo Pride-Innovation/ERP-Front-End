@@ -1,14 +1,19 @@
 import * as yup from 'yup';
 
 export const transportRequestSchema = yup.object().shape({
-    requestDate: yup.string().nullable().optional(),
-    requestTime: yup.string().nullable().optional(),
-    timeRequired: yup.string().required('Time Required is required'),
-    dateVehicleIsRequired: yup.string().required('Date Required is required'),
+    requestDate: yup.string().optional().nullable(),
+    requesterID: yup.number().optional().nullable(),
     timeVehicleIsRequired: yup.string().required('Date Required is required'),
+    dateVehicleIsRequired: yup.string().required('Date Required is required'),
     destination: yup.string().required('Destination is required'),
-    reason: yup.string().required('Reason is required'),
+    purpose: yup.string().required('Purpose is required'),
     duration: yup.string().required('Duration is required'),
     priority: yup.string().required('Priority is required'),
-    notes: yup.string().required('Notes is required')
+    timeOfSubmissionOfRequest: yup.string().required('Notes is required'),
+    desc: yup.string().optional().nullable(),
+    signature: yup.mixed().optional().nullable(),
+    status: yup.string().optional().nullable(),
+    position: yup.string().optional().nullable(),
+    fromPosition: yup.string().optional().nullable(),
+    Narration: yup.string().optional().nullable(),
 });

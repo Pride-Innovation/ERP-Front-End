@@ -46,18 +46,18 @@ const RequestDetails: React.FC<IRequestDetails> = ({ handleClose, data }) => {
 
                 <Grid item xs={12} sm={6}>
                     <Stack spacing={2} sx={{ padding: 1 }}>
-                        {details.user?.department && (
+                        {details.requester?.department && (
                             <Typography variant="body1" fontWeight={500}>
-                                <strong>Department:</strong> {details.user.department}
+                                <strong>Department:</strong> {details.requester.department}
                             </Typography>
                         )}
 
                         <Typography variant="body1" fontWeight={600}>
-                            <strong>Requested By:</strong> {details.user?.firstName + " " + details.user?.lastName}
+                            <strong>Requested By:</strong> {details.requester?.firstName + " " + details.requester?.lastName}
                         </Typography>
 
                         <Typography variant="body1" fontWeight={500}>
-                            <strong>Reason:</strong> {details?.reason}
+                            <strong>Reason:</strong> Test Reason
                         </Typography>
 
                         {isIRequest(details) && (

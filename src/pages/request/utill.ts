@@ -6,7 +6,7 @@ const GlobalRequestUtill = () => {
     };
 
     const isITransportRequest = (request: IRequest | ITransportRequest): request is ITransportRequest => {
-        return (request as ITransportRequest).timeRequired !== undefined;
+        return (request as ITransportRequest).timeVehicleIsRequired !== undefined;
     };
 
     return ({ isIRequest, isITransportRequest })

@@ -21,6 +21,7 @@ export interface IRequest {
     status?: string | null;
     description: string;
     date: string;
+    requester?: IUser
 }
 
 export interface IRequestTableData {
@@ -75,53 +76,60 @@ export interface INavigation {
 
 export interface ITransportRequest {
     id?: string | number;
-    user?: IUser,
-    requester?: IUser,
     requestDate?: string | null;
-    requestTime?: string | null;
-    timeRequired: string;
-    dateVehicleIsRequired: string;
+    requesterID?: number | null,
     timeVehicleIsRequired: string;
+    dateVehicleIsRequired: string;
     destination: string;
-    reason: string;
+    purpose: string;
     duration: string;
     priority: string;
+    timeOfSubmissionOfRequest: string
+    desc?: string | null;
+    signature?: any | null,
     status?: string | null;
-    notes: string;
-    signature?: string | null
+    position?: string | null;
+    fromPosition?: string | null
+    Narration?: string | null,
+    requester?: IUser
 }
 
 export interface ITransportRequestTableData {
     name: string;
     requestDate?: string | null;
-    requestTime?: string | null;
-    timeRequired: string;
-    dateVehicleIsRequired: string;
+    requesterID?: number | null,
     timeVehicleIsRequired: string;
+    dateVehicleIsRequired: string;
     destination: string;
-    reason: string;
+    purpose: string;
     duration: string;
     priority: string;
+    timeOfSubmissionOfRequest: string
+    desc?: string | null;
+    signature?: any | null,
     status?: string | null;
-    notes: string;
-    signature?: string | null
+    position?: string | null;
+    fromPosition?: string | null
+    Narration?: string | null,
+    requester?: IUser
 }
 
 
 export interface ITransportRequestForm {
     formState: FormState<ITransportRequest> & {
         errors: {
-            requestDate?: FieldError;
-            requestTime?: FieldError;
-            timeRequired?: FieldError;
-            dateRequired?: FieldError;
+            timeVehicleIsRequired?: FieldError;
+            dateVehicleIsRequired?: FieldError;
             destination?: FieldError;
-            reason?: FieldError;
+            purpose?: FieldError;
             duration?: FieldError;
             priority?: FieldError;
+            timeOfSubmissionOfRequest?: FieldError;
+            desc?: FieldError;
             status?: FieldError;
-            notes?: FieldError;
-            signature?: FieldError
+            position?: FieldError;
+            fromPosition?: FieldError
+            Narration?: FieldError;
         };
     };
     control: Control<ITransportRequest>;

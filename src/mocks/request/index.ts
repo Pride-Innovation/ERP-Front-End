@@ -33,18 +33,20 @@ export const requestMock: IRequest[] = [
 export const transportRequest: ITransportRequest[] = [
     {
         id: 1,
-        user: usersMock[0],
+        requester: usersMock[0],
         requestDate: "2024-11-01",
-        requestTime: "08:00",
-        timeRequired: "09:00",
+        timeOfSubmissionOfRequest: "08:00",
+        timeVehicleIsRequired: "09:00",
         dateVehicleIsRequired: "2024-11-01",
-        timeVehicleIsRequired: "2024-11-01",
         destination: "123 Main St, Cityville",
-        reason: "Business meeting",
+        purpose: "Business meeting",
         duration: "2 hours",
         priority: "high",
         status: requestStatus.approved,
-        notes: "Need to be on time for a client presentation.",
-        signature: null
+        signature: null,
+        desc: "Need to be on time for a client presentation.",
+        position: "test",
+        fromPosition: "mbale",
+        Narration: null,
     }
 ];

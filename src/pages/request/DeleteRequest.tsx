@@ -5,7 +5,6 @@ import ButtonComponent from '../../components/forms/Button';
 import GlobalRequestUtill from './utill';
 
 
-
 const DeleteRequest = ({
     request,
     handleClose,
@@ -25,7 +24,7 @@ const DeleteRequest = ({
                         {isIRequest(request) ? (
                             request.description
                         ) : isITransportRequest(request) ? (
-                            request.reason
+                            request.purpose
                         ) : (
                             "No relevant information available"
                         )}

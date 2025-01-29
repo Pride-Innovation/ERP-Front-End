@@ -6,6 +6,7 @@ import { listAssetStatusesService } from "./service";
 import { addStatus, loadStatuses, removeStatus, updateStatus } from "./slice";
 import { useSelector } from "react-redux";
 import { IFormData } from "../../assets/interface";
+import { requestStatus } from "../../../utils/constants";
 
 const StatusUtills = () => {
     const [modalState, setModalState] = useState<string>("");
@@ -38,6 +39,16 @@ const StatusUtills = () => {
             value: "name",
             label: 'Status Name',
             type: "input"
+        },
+        {
+            value: "status",
+            label: "Status Color",
+            type: "select",
+            options: [
+                { label: "Red Color", value: requestStatus.rejected },
+                { label: "Green Color", value: requestStatus.approved },
+                { label: "Orange Color", value: requestStatus.pending },
+            ]
         },
         {
             value: "desc",
