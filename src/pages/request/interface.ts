@@ -91,7 +91,9 @@ export interface ITransportRequest {
     position?: string | null;
     fromPosition?: string | null
     Narration?: string | null,
-    requester?: IUser
+    requester?: IUser,
+    approvedAt?: string | null,
+    approvedBy?: string | number
 }
 
 export interface ITransportRequestTableData {
