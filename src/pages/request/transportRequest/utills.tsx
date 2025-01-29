@@ -133,11 +133,6 @@ const TransportRequestUtills = () => {
                 { label: "Low", value: "low" },
             ]
         },
-        // {
-        //     value: "timeOfSubmissionOfRequest",
-        //     label: 'Time of Submission of Request',
-        //     type: "time"
-        // },
         {
             value: "status",
             label: 'Status',
@@ -167,12 +162,10 @@ const TransportRequestUtills = () => {
     ];
 
     const determineStatusColor = (id: string) => {
-        console.log(statuses, "statuses!!")
-        const status = statuses.find(status => status.id === parseInt(id, 10));
-        console.log(status, id, "status!!")
-        // return (statuses.find(status => status.id === parseInt(id, 10)))?.name
-        //     === requestStatus.pending ? requestStatus.pending : requestStatus.rejected
-        return requestStatus.rejected;
+        const statusColor = (statuses.find(status => status.id === parseInt(id, 10)))?.status
+        return statusColor === requestStatus.approved ? requestStatus.approved
+            : statusColor === requestStatus.pending ? requestStatus.pending
+                : requestStatus.rejected
     }
 
     const handleRequest = (list: Array<ITransportRequest>) => {
