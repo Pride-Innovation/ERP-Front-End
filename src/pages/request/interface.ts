@@ -84,7 +84,7 @@ export interface ITransportRequest {
     purpose: string;
     duration: string;
     priority: string;
-    timeOfSubmissionOfRequest: string
+    timeOfSubmissionOfRequest?: string | null;
     desc?: string | null;
     signature?: any | null,
     status?: string | null;

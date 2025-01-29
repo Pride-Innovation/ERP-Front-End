@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from "react";
-import { ITableHeader } from "../../../components/tables/interface";
+import { IOptions, ITableHeader } from "../../../components/tables/interface";
 import { ITransportRequest, ITransportRequestTableData } from "../interface";
 import { transportRequest } from "../../../mocks/request";
 import { crudStates, requestStatus } from "../../../utils/constants";
@@ -28,6 +28,12 @@ const TransportRequestUtills = () => {
     const { setTransportRequestTableData } = useContext(TransportRequestContext);
     const { statuses } = useSelector((state: RootState) => state.StatusesStore)
     const [open, setOpen] = useState<boolean>(false);
+    const [optionsObject, setOptionsObject] = useState<{
+        statusesOptions: Array<IOptions>,
+    }>({
+        statusesOptions: []
+    });
+
     const dispatch = useDispatch<AppDispatch>();
     const { allTranportRequests } = useSelector((state: RootState) => state.TransportRequestStore)
 
@@ -48,6 +54,13 @@ const TransportRequestUtills = () => {
     const addNewTransportRequestToStore = (transportRequest: ITransportRequest) => {
         dispatch(addNewTransportRequest(transportRequest))
     }
+
+    useEffect(() => {
+        setOptionsObject({
+            statusesOptions: statuses?.map(status => ({ label: status.name, value: status.id as number })) || [],
+        })
+
+    }, [statuses])
 
     const {
         id,
@@ -88,7 +101,7 @@ const TransportRequestUtills = () => {
     const formFields: Array<IFormData<ITransportRequest>> = [
         {
             value: "timeVehicleIsRequired",
-            label: 'Request Time',
+            label: 'Time Vehicle is Required',
             type: "time"
         },
         {
@@ -108,8 +121,8 @@ const TransportRequestUtills = () => {
         },
         {
             value: "duration",
-            label: 'Duration',
-            type: "input"
+            label: 'Duration (Hours)',
+            type: "number"
         },
         {
             value: "priority",
@@ -120,19 +133,16 @@ const TransportRequestUtills = () => {
                 { label: "Low", value: "low" },
             ]
         },
-        {
-            value: "timeOfSubmissionOfRequest",
-            label: 'Time Required',
-            type: "time"
-        },
+        // {
+        //     value: "timeOfSubmissionOfRequest",
+        //     label: 'Time of Submission of Request',
+        //     type: "time"
+        // },
         {
             value: "status",
             label: 'Status',
             type: "select",
-            options: [
-                { label: "High", value: "high" },
-                { label: "Low", value: "low" },
-            ]
+            options: optionsObject.statusesOptions
         },
         {
             value: "position",

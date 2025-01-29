@@ -9,7 +9,7 @@ export const transportRequestSchema = yup.object().shape({
     purpose: yup.string().required('Purpose is required'),
     duration: yup.string().required('Duration is required'),
     priority: yup.string().required('Priority is required'),
-    timeOfSubmissionOfRequest: yup.string().required('Notes is required'),
+    // timeOfSubmissionOfRequest: yup.string().required('Notes is required'),
     desc: yup.string().optional().nullable(),
     signature: yup.mixed().optional().nullable(),
     status: yup.string().optional().nullable(),

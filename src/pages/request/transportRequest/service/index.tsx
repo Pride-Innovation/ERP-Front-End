@@ -9,6 +9,16 @@ const fetchAllTransportRequestService = async () => {
     }
 }
 
+const createTranportRequestService = async (body: Object) => {
+    try {
+        const response = await axiosInstance.post("fleetRequisitions/create", body);
+        return response?.data?.data
+    } catch (error) {
+        throw (error)
+    }
+}
+
 export {
-    fetchAllTransportRequestService
+    fetchAllTransportRequestService,
+    createTranportRequestService
 }

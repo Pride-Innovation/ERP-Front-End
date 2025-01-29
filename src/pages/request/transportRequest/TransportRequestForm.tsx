@@ -37,6 +37,16 @@ const TransportRequestForm = ({
                                     label={formField.label}
                                 />
                             </Grid>
+                        ) : formField.type === "number" ? (
+                            <Grid item xs={12} md={3}>
+                                <UseFormInput
+                                    register={register}
+                                    control={control}
+                                    formState={formState}
+                                    value={formField.value}
+                                    label={formField.label}
+                                />
+                            </Grid>
                         ) : formField.type === 'textarea' ? (
                             <Grid item xs={12} md={6}>
                                 <UseFormInput
@@ -99,7 +109,7 @@ const TransportRequestForm = ({
                             buttonColor='error'
                             type='button'
                             sendingRequest={false}
-                            buttonText="Back"
+                            buttonText="Cancel"
                         />
                         <ButtonComponent
                             buttonColor='success'

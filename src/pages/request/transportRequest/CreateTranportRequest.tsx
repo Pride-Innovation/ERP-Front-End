@@ -5,6 +5,10 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { Card, Grid, Typography } from "@mui/material";
 import TransportRequestForm from "./TransportRequestForm";
 import { transportRequestSchema } from "./schema";
+import { createTranportRequestService } from "./service";
+import moment from "moment";
+import { IResponseData } from "../../users/interface";
+import { toast } from "react-toastify";
 
 const CreateTranportRequest = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
@@ -25,9 +29,22 @@ const CreateTranportRequest = () => {
         reset({ ...defaultRequest });
     }, [reset]);
 
-    const onSubmit = (formData: ITransportRequest) => {
+    const onSubmit = async (formData: ITransportRequest) => {
+
+        const date = new Date().toUTCString();
+
         setSendingRequest(true);
-        console.log(formData, "form data!!!!!");
+        const request = {
+            ...formData,
+            requester_id: 1,
+            requestDate: moment(date).format('YYYY-MM-DD HH:mm:ss'),
+            timeOfSubmissionOfRequest: moment(date).format('YYYY-MM-DD HH:mm:ss'),
+            timeVehicleIsRequired: moment(formData.timeVehicleIsRequired).format('YYYY-MM-DD HH:mm:ss')
+        }
+
+        const response = await createTranportRequestService(request) as IResponseData;
+        toast.success(response.data.message)
+        setSendingRequest(false)
     };
 
     return (
@@ -45,7 +62,7 @@ const CreateTranportRequest = () => {
                             control={control}
                             register={register}
                             sendingRequest={sendingRequest}
-                            buttonText="Request Asset"
+                            buttonText="Submit"
                         />
                     </form>
                 </Grid>
