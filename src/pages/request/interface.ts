@@ -65,6 +65,8 @@ export interface IDeleteRequest {
 
 export interface IRequestDetails {
     open: boolean;
+    sendingRequest: boolean;
+    setSendingRequest: Dispatch<SetStateAction<boolean>>;
     handleClose: () => void;
     data: IRequest | ITransportRequest
 }

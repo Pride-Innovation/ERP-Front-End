@@ -46,10 +46,21 @@ const deleteTranportRequestService = async (id: string | number) => {
     }
 }
 
+
+const forwardTranportRequestForApprovalService = async (id: string | number) => {
+    try {
+        const response = await axiosInstance.post(`fleetRequisitions/forwardForApproval/${id}`);
+        return response?.data
+    } catch (error) {
+        throw (error)
+    }
+}
+
 export {
     fetchAllTransportRequestService,
     createTranportRequestService,
     findTranportRequestByIDService,
     updateTranportRequestService,
-    deleteTranportRequestService
+    deleteTranportRequestService,
+    forwardTranportRequestForApprovalService
 }

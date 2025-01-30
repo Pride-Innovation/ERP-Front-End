@@ -13,8 +13,9 @@ import PlaceHolder from "../../statics/images/Placeholder.png";
 import ButtonComponent from "../../components/forms/Button";
 import { IRequest, IRequestDetails, ITransportRequest } from "./interface";
 import GlobalRequestUtill from "./utill";
+import { forwardTranportRequestForApprovalService } from "./transportRequest/service";
 
-const RequestDetails: React.FC<IRequestDetails> = ({ handleClose, data }) => {
+const RequestDetails: React.FC<IRequestDetails> = ({ handleClose, data, sendingRequest, setSendingRequest }) => {
     const [details, setDetails] = useState<IRequest | ITransportRequest>(data);
     const theme = useTheme();
     const { isIRequest, isITransportRequest } = GlobalRequestUtill();
@@ -27,7 +28,12 @@ const RequestDetails: React.FC<IRequestDetails> = ({ handleClose, data }) => {
         }
     }, [data]);
 
-    console.log(details, "Details!!")
+    const forwardForApproval = async () => {
+        setSendingRequest(true)
+        const response = await forwardTranportRequestForApprovalService(details?.id as string);
+        console.log(response, "response data!!!")
+        setSendingRequest(false)
+    }
 
     return (
         <Box sx={{ width: "100%" }}>
@@ -129,21 +135,21 @@ const RequestDetails: React.FC<IRequestDetails> = ({ handleClose, data }) => {
                 <Stack direction="row" spacing={3} sx={{ width: details.status === "pending" ? "30%" : "20%", mt: 2 }}>
                     <ButtonComponent
                         handleClick={handleClose}
-                        buttonColor="info"
+                        buttonColor="error"
                         type="button"
-                        variant="contained"
+                        variant="outlined"
                         sendingRequest={false}
                         buttonText="Back"
                     />
-                    {details.status === "pending" && (
-                        <ButtonComponent
-                            handleClick={handleClose}
-                            buttonColor="success"
-                            type="button"
-                            sendingRequest={false}
-                            buttonText="Approve"
-                        />
-                    )}
+                    {/* {details.status === "pending" && ( */}
+                    <ButtonComponent
+                        handleClick={forwardForApproval}
+                        buttonColor="info"
+                        type="button"
+                        sendingRequest={sendingRequest}
+                        buttonText="Forward"
+                    />
+                    {/* )} */}
                 </Stack>
             </Box>
         </Box>

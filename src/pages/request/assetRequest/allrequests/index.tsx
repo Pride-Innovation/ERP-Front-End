@@ -101,7 +101,7 @@ const Request = () => {
             }
             {crudStates.read === modalState &&
                 <ModalComponent width={"60%"} title='Request Details' open={open} handleClose={handleClose}>
-                    <RequestDetails open={open} handleClose={handleClose} data={currentRequest} />
+                    <RequestDetails sendingRequest={loading} setSendingRequest={setLoading} open={open} handleClose={handleClose} data={currentRequest} />
                 </ModalComponent>
             }
             {rows?.length > 0 && <Grid xs={12} container>
