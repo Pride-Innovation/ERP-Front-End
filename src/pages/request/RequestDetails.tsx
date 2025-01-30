@@ -27,6 +27,8 @@ const RequestDetails: React.FC<IRequestDetails> = ({ handleClose, data }) => {
         }
     }, [data]);
 
+    console.log(details, "Details!!")
+
     return (
         <Box sx={{ width: "100%" }}>
             <Grid container spacing={3}>
@@ -53,11 +55,11 @@ const RequestDetails: React.FC<IRequestDetails> = ({ handleClose, data }) => {
                         )}
 
                         <Typography variant="body1" fontWeight={600}>
-                            <strong>Requested By:</strong> {details.requester?.firstName + " " + details.requester?.lastName}
+                            <strong>Requested By:</strong> {details.requester?.name}
                         </Typography>
 
                         <Typography variant="body1" fontWeight={500}>
-                            <strong>Reason:</strong> Test Reason
+                            <strong>Purpose:</strong> {details.purpose}
                         </Typography>
 
                         {isIRequest(details) && (
@@ -115,7 +117,7 @@ const RequestDetails: React.FC<IRequestDetails> = ({ handleClose, data }) => {
                 <Grid item xs={12}>
                     {isIRequest(details) && (
                         <Typography variant="body1" fontWeight={500}>
-                            <strong>Description:</strong> {details?.description}
+                            <strong>Description:</strong> {details?.desc}
                         </Typography>
                     )}
                 </Grid>

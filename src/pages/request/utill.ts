@@ -2,7 +2,7 @@ import { IRequest, ITransportRequest } from './interface';
 
 const GlobalRequestUtill = () => {
     const isIRequest = (request: IRequest | ITransportRequest): request is IRequest => {
-        return (request as IRequest).description !== undefined;
+        return (request as IRequest).reason !== undefined;
     };
 
     const isITransportRequest = (request: IRequest | ITransportRequest): request is ITransportRequest => {

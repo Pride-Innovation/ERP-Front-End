@@ -24,7 +24,7 @@ export const requestMock: IRequest[] = [
         reason: "Upgrade software",
         quantity: 1,
         status: requestStatus.pending,
-        description: "Requesting to upgrade the software on the development machine.",
+        desc: "Requesting to upgrade the software on the development machine.",
         date: "2024-10-01",
     }
 ];

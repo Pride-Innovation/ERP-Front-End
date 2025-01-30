@@ -30,7 +30,7 @@ const RequestUtills = () => {
     const {
         id,
         user,
-        description,
+        desc,
         ...data
     } = requestMock[0];
 
@@ -65,7 +65,7 @@ const RequestUtills = () => {
             type: "date"
         },
         {
-            value: "description",
+            value: "desc",
             label: 'Description',
             type: "textarea"
         }

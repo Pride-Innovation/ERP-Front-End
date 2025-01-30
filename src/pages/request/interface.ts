@@ -17,9 +17,10 @@ export interface IRequest {
     id?: string | number;
     user?: IUser
     reason: string;
+    purpose?: string;
     quantity: number;
     status?: string | null;
-    description: string;
+    desc: string;
     date: string;
     requester?: IUser
 }
@@ -30,7 +31,7 @@ export interface IRequestTableData {
     reason: string;
     quantity: number;
     status?: string | null;
-    description: string;
+    desc: string;
     date: string;
 }
 

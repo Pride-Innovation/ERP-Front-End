@@ -22,7 +22,7 @@ const DeleteRequest = ({
                     <HelpOutlineOutlinedIcon color="primary" />
                     <Typography variant="h6" color="primary">
                         {isIRequest(request) ? (
-                            request.description
+                            request.reason
                         ) : isITransportRequest(request) ? (
                             request.purpose
                         ) : (
