@@ -6,11 +6,17 @@ import { usersMock } from "../users";
 export const requestMock: IRequest[] = [
     {
         id: 1,
-        user: {
+        name: "Software Upgrade Request",
+        requesterID: 12345,
+        quantity: 1,
+        priority: "High",
+        status: "pending",
+        desc: "Requesting to upgrade the software on the development machine.",
+        requester: {
             reportsTo: "Jane Smith",
             firstName: "John",
             lastName: "Doe",
-            otherName: null,
+            otherName: "PAtson",
             image: "https://example.com/images/john.jpg",
             email: "john.doe@example.com",
             title: "Software Engineer",
@@ -21,11 +27,10 @@ export const requestMock: IRequest[] = [
             availability: "present",
             role: rolesMock[0]
         },
-        reason: "Upgrade software",
-        quantity: 1,
-        status: requestStatus.pending,
-        desc: "Requesting to upgrade the software on the development machine.",
-        date: "2024-10-01",
+        timeOfSubmissionOfRequest: new Date().toISOString(),
+        position: "Software Engineer",
+        fromPosition: "Junior Software Engineer",
+        Narration: "test",
     }
 ];
 

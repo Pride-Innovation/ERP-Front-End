@@ -6,16 +6,23 @@ import {
 import InfoIcon from '@mui/icons-material/Info';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
-import { ITableHeader } from '../../../components/tables/interface';
+import { IOptions, ITableHeader } from '../../../components/tables/interface';
 import { IRequest, IRequestTableData } from '../interface';
 import { RequestContext } from '../../../context/request/RequestContext';
 import { requestMock } from '../../../mocks/request';
 import { crudStates, requestStatus } from '../../../utils/constants';
 import { IFormData } from '../../assets/interface';
 import { getTableHeaders } from '../../../components/tables/getTableHeaders';
+import { useDispatch } from 'react-redux';
+import { AppDispatch, RootState } from '../../../store';
+import { loadAllRequests } from './slice';
+import { useSelector } from 'react-redux';
+import { listAssetStatusesService } from '../../settings/statuses/service';
+import { IStatus } from '../../settings/statuses/interface';
+import { loadStatuses } from '../../settings/statuses/slice';
 
 const RequestUtills = () => {
-    const endPoint = 'posts';
+    const endPoint = 'assetRequisitions';
     const module = "request";
     const header = { plural: 'Requests', singular: 'Request' };
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
@@ -23,20 +30,43 @@ const RequestUtills = () => {
     const [rejectedRequests, setRejectedRequests] = useState<Array<IRequest>>([] as IRequest[])
     const { setRequestTableData } = useContext(RequestContext);
     const [open, setOpen] = useState<boolean>(false);
+    const { statuses } = useSelector((state: RootState) => state.StatusesStore)
+    const [optionsObject, setOptionsObject] = useState<{ statusesOptions: Array<IOptions> }>({ statusesOptions: [] });
+    const dispatch = useDispatch<AppDispatch>();
+    const { assetsRequests } = useSelector((state: RootState) => state.AssetsRequestsStore)
+
+    useEffect(() => {
+        setOptionsObject({
+            statusesOptions: statuses?.map(status => ({ label: status.name, value: status.id as number })) || [],
+        })
+
+    }, [statuses])
 
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
 
+    const addAllRequestsInStore = (transportRequests: Array<IRequest>) => {
+        dispatch(loadAllRequests(transportRequests))
+    }
+
+    const fetchAllStatuses = async () => {
+        const response = await listAssetStatusesService() as Array<IStatus>;
+        dispatch(loadStatuses(response))
+    }
+
+    useEffect(() => { fetchAllStatuses() }, []);
+
     const {
         id,
-        user,
+        requester,
+        name,
         desc,
         ...data
     } = requestMock[0];
 
     const rowData = {
-        name: `${requestMock[0].user?.firstName} ${requestMock[0].user?.lastName} ${requestMock[0].user?.otherName}`,
-        department: requestMock[0]?.user?.department,
+        name: `${requestMock[0].requester?.firstName} ${requestMock[0].requester?.lastName} ${requestMock[0].requester?.otherName}`,
+        department: requestMock[0]?.requester?.department,
         ...data,
         action: {
             label: "options",
@@ -48,40 +78,58 @@ const RequestUtills = () => {
         },
     };
 
+
+
     const formFields: Array<IFormData<IRequest>> = [
         {
-            value: "reason",
-            label: 'Reason',
+            value: "priority",
+            label: 'priority',
+            type: "select",
+            options: [
+                { label: "High", value: "high" },
+                { label: "Low", value: "low" },
+            ]
+        },
+        {
+            value: "status",
+            label: 'Status',
+            type: "select",
+            options: optionsObject.statusesOptions
+        },
+        {
+            value: "position",
+            label: "position",
             type: "input"
         },
         {
-            value: "quantity",
-            label: 'Quantity',
+            value: "fromPosition",
+            label: "From Position",
             type: "input"
         },
         {
-            value: "date",
-            label: 'Request Date',
-            type: "date"
+            value: "Narration",
+            label: "Narration",
+            type: "input"
         },
         {
             value: "desc",
-            label: 'Description',
+            label: "Description",
             type: "textarea"
-        }
-    ]
+        },
+    ];
 
     const handleRequest = (list: Array<IRequest>) => {
         const data: Array<IRequestTableData> = list.map((request, index) => {
             const {
-                user,
+                name,
+                requester,
                 ...fielsdata
             } = list[index];
 
             return (
                 {
-                    name: `${request.user?.firstName} ${request.user?.lastName}`,
-                    department: request.user?.department,
+                    name: `${request.requester?.firstName} ${request.requester?.lastName}`,
+                    department: request.requester?.department,
                     ...fielsdata
                 }
             )
@@ -121,7 +169,9 @@ const RequestUtills = () => {
             filterPendingRecords,
             pendingRequests,
             filterRejectedRecords,
-            rejectedRequests
+            rejectedRequests,
+            addAllRequestsInStore,
+            assetsRequests
         }
     )
 }

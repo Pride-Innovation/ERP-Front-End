@@ -10,6 +10,7 @@ import UnitsOfMeasureReducer from "../pages/settings/unitMeasure/slice"
 import SuppliersReducer from "../pages/settings/suppliers/slice"
 import TransportRequestReducer from "../pages/request/transportRequest/slice"
 import StatusesReducer from "../pages/settings/statuses/slice"
+import AssetsRequestsReducer from "../pages/request/assetRequest/slice"
 
 export const store = configureStore({
     reducer: {
@@ -19,7 +20,8 @@ export const store = configureStore({
         UnitsOfMeasureStore: UnitsOfMeasureReducer,
         SuppliersStore: SuppliersReducer,
         TransportRequestStore: TransportRequestReducer,
-        StatusesStore: StatusesReducer
+        StatusesStore: StatusesReducer,
+        AssetsRequestsStore: AssetsRequestsReducer
     },
 });
 

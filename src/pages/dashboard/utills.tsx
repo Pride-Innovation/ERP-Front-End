@@ -25,29 +25,30 @@ const DashBoardUtills = () => {
 
     const {
         id,
-        reason,
-        user,
+        requester,
+        name,
         desc,
         ...data
     } = requestMock[0];
 
     const rowData = {
-        name: `${requestMock[0].user?.firstName} ${requestMock[0].user?.lastName}`,
-        department: requestMock[0].user?.department,
+        name: `${requestMock[0].requester?.firstName} ${requestMock[0].requester?.lastName}`,
+        department: requestMock[0].requester?.department,
         ...data,
     };
 
     const handleRequest = (list: Array<IRequest>) => {
         const data: Array<IRequestTableData> = list.map((request, index) => {
             const {
-                user,
+                requester,
+                name,
                 ...fielsdata
             } = list[index];
 
             return (
                 {
-                    name: `${request.user?.firstName} ${request.user?.lastName}`,
-                    department: request.user?.department,
+                    name: `${request.requester?.firstName} ${request.requester?.lastName}`,
+                    department: request.requester?.department,
                     ...fielsdata
                 }
             )

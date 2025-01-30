@@ -1,13 +1,10 @@
 import React, { useContext, useEffect, useState } from "react";
-import { GridRowsProp } from "@mui/x-data-grid";
 import { useNavigate } from "react-router";
 import { Grid } from "@mui/material";
 import { IRequest } from "../../interface";
-import RowContext from "../../../../context/row/RowContext";
 import { RequestContext } from "../../../../context/request/RequestContext";
 import { FileContext } from "../../../../context/file/FileContext";
 import { fetchRowsService } from "../../../../core/apis/globalService";
-import { requestMock } from "../../../../mocks/request";
 import { ErrorMessage } from "../../../../core/apis/axiosInstance";
 import { crudStates } from "../../../../utils/constants";
 import { ROUTES } from "../../../../core/routes/routes";
@@ -21,7 +18,6 @@ const Request = () => {
     const [loading, setLoading] = useState<boolean>(false);
     const [modalState, setModalState] = useState<string>("");
     const [currentRequest, setCurrentRequest] = useState<IRequest>({} as IRequest);
-    const { setRows, rows } = useContext(RowContext);
     const navigate = useNavigate();
     const { requestTableData } = useContext(RequestContext);
     const { setFileData, fileData } = useContext(FileContext)
@@ -35,17 +31,18 @@ const Request = () => {
         determineCurrentRequest,
         handleClose,
         handleOpen,
-        open
+        open,
+        assetsRequests,
+        addAllRequestsInStore
     } = RequestUtills();
 
     const fetchResources = async () => {
         setLoading(true)
         try {
-            const response = await fetchRowsService({ page: 1, size: 10, endPoint }) as unknown as GridRowsProp;
-            console.log(response, "response!!")
-            setRows([...requestMock]);
+            const response = await fetchRowsService({ page: 1, size: 10, endPoint });
+            const data = response?.data as IRequest[]
+            addAllRequestsInStore(data)
         } catch (error) {
-            setRows([...requestMock]);
             const errorMessage = error instanceof Error ? error.message : ErrorMessage;
             console.log(errorMessage)
         }
@@ -57,8 +54,7 @@ const Request = () => {
         setFileData({ file: "", module: "", jsonData: [] });
     }, []);
 
-    useEffect(() => { if (rows.length > 0) { handleRequest(requestMock) } }, [rows])
-    console.log("All requests")
+    useEffect(() => { if (assetsRequests.length > 0) { handleRequest(assetsRequests) } }, [assetsRequests])
 
     const handleOptionClicked = (option: string | number, moduleID?: string | number) => {
         switch (option) {
@@ -67,12 +63,12 @@ const Request = () => {
                 break;
             case crudStates.delete:
                 setModalState(crudStates.delete)
-                setCurrentRequest(determineCurrentRequest(moduleID as number, rows as IRequest[]))
+                setCurrentRequest(determineCurrentRequest(moduleID as number, assetsRequests as IRequest[]))
                 handleOpen();
                 break;
             case crudStates.read:
                 setModalState(crudStates.read)
-                setCurrentRequest(determineCurrentRequest(moduleID as number, rows as IRequest[]))
+                setCurrentRequest(determineCurrentRequest(moduleID as number, assetsRequests as IRequest[]))
                 handleOpen();
                 break;
             default:
@@ -84,7 +80,7 @@ const Request = () => {
         if (fileData.module === module) {
             console.log(fileData, "form data!!");
         }
-    }, [fileData])
+    }, [fileData]);
 
     return (
         <React.Fragment>
@@ -104,7 +100,7 @@ const Request = () => {
                     <RequestDetails sendingRequest={loading} setSendingRequest={setLoading} open={open} handleClose={handleClose} data={currentRequest} />
                 </ModalComponent>
             }
-            {rows?.length > 0 && <Grid xs={12} container>
+            {assetsRequests?.length > 0 && <Grid xs={12} container>
                 {columnHeaders.length > 0 &&
                     <TableComponent
                         endPoint={endPoint}

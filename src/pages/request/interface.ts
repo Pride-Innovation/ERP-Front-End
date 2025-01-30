@@ -16,24 +16,37 @@ export interface IAssetParticulars {
 
 export interface IRequest {
     id?: string | number;
-    user?: IUser
-    reason: string;
-    purpose?: string;
-    quantity: number;
+    name: string;
+    requestDate?: string | null;
+    requesterID?: number | null,
+    quantity?: number | null,
+    priority: string;
+    timeOfSubmissionOfRequest?: string | null;
+    desc?: string | null;
+    signature?: any | null,
     status?: string | null;
-    desc: string;
-    date: string;
-    requester?: IUser
+    position?: string | null;
+    fromPosition?: string | null
+    Narration?: string | null,
+    requester?: IUser,
+    // approvedAt?: string | null,
+    // approvedBy?: string | number
 }
 
 export interface IRequestTableData {
-    department?: string;
     name: string;
-    reason: string;
-    quantity: number;
+    requestDate?: string | null;
+    requesterID?: number | null,
+    quantity?: number | null,
+    priority: string;
+    timeOfSubmissionOfRequest?: string | null;
+    desc?: string | null;
+    signature?: any | null,
     status?: string | null;
-    desc: string;
-    date: string;
+    position?: string | null;
+    fromPosition?: string | null
+    Narration?: string | null,
+    requester?: IUser
 }
 
 

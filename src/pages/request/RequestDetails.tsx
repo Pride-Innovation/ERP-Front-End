@@ -65,7 +65,7 @@ const RequestDetails: React.FC<IRequestDetails> = ({ handleClose, data, sendingR
                         </Typography>
 
                         <Typography variant="body1" fontWeight={500}>
-                            <strong>Purpose:</strong> {details.purpose}
+                            <strong>Purpose:</strong> {details.Narration}
                         </Typography>
 
                         {isIRequest(details) && (
@@ -75,7 +75,7 @@ const RequestDetails: React.FC<IRequestDetails> = ({ handleClose, data, sendingR
                                 </Typography>
 
                                 <Typography variant="body1" fontWeight={500}>
-                                    <strong>Date:</strong> {details?.date}
+                                    <strong>Date:</strong> {details?.position}
                                 </Typography>
                             </>
                         )}
