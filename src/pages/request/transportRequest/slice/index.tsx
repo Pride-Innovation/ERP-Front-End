@@ -19,7 +19,7 @@ export const transportRequestSlice = createSlice({
             state.allTranportRequests = [action.payload, state.allTranportRequests]
         },
         removeTransportRequest: (state, action) => {
-            state.allTranportRequests = [action.payload, state.allTranportRequests]
+            state.allTranportRequests = state.allTranportRequests.filter(request => request?.id !== action?.payload?.id)
         }
     }
 });
