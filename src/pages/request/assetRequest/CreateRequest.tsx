@@ -5,6 +5,10 @@ import { Card, Grid, Typography } from "@mui/material";
 import RequestForm from "./RequestForm";
 import { IRequest } from "../interface";
 import { requestSchema } from "./schema";
+import moment from "moment";
+import { createAssetRequestService } from "./service";
+import { IResponseData } from "../../users/interface";
+import { toast } from "react-toastify";
 
 const CreateRequest = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
@@ -25,9 +29,19 @@ const CreateRequest = () => {
         reset({ ...defaultRequest });
     }, [reset]);
 
-    const onSubmit = (formData: IRequest) => {
+    const onSubmit = async (formData: IRequest) => {
+        const date = new Date().toUTCString();
+
         setSendingRequest(true);
-        console.log(formData, "form data!!!!!");
+        const request = {
+            ...formData,
+            requester_id: 1,
+            requestDate: moment(date).format('YYYY-MM-DD HH:mm:ss'),
+            timeOfSubmissionOfRequest: moment(date).format('YYYY-MM-DD HH:mm:ss'),
+        }
+        const response = await createAssetRequestService(request) as IResponseData;
+        toast.success(response.data.message)
+        setSendingRequest(false)
     };
 
     return (
@@ -45,7 +59,7 @@ const CreateRequest = () => {
                             control={control}
                             register={register}
                             sendingRequest={sendingRequest}
-                            buttonText="Request Asset"
+                            buttonText="Submit"
                         />
                     </form>
                 </Grid>

@@ -91,6 +91,11 @@ const RequestUtills = () => {
 
     const formFields: Array<IFormData<IRequest>> = [
         {
+            value: "name",
+            label: "Name",
+            type: "input"
+        },
+        {
             value: "priority",
             label: 'priority',
             type: "select",
@@ -108,6 +113,11 @@ const RequestUtills = () => {
         {
             value: "position",
             label: "position",
+            type: "input"
+        },
+        {
+            value: "quantity",
+            label: "Quantity",
             type: "input"
         },
         {
