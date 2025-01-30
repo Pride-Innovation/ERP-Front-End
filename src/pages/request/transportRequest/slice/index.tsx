@@ -17,6 +17,9 @@ export const transportRequestSlice = createSlice({
         },
         addNewTransportRequest: (state, action) => {
             state.allTranportRequests = [action.payload, state.allTranportRequests]
+        },
+        removeTransportRequest: (state, action) => {
+            state.allTranportRequests = [action.payload, state.allTranportRequests]
         }
     }
 });
@@ -25,7 +28,8 @@ const { reducer, actions } = transportRequestSlice;
 
 export const {
     loadAllTransportRequest,
-    addNewTransportRequest
+    addNewTransportRequest,
+    removeTransportRequest
 } = actions;
 
 export default reducer;

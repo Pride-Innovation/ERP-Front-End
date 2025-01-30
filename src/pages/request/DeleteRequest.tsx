@@ -3,15 +3,33 @@ import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined';
 import { IDeleteRequest } from './interface';
 import ButtonComponent from '../../components/forms/Button';
 import GlobalRequestUtill from './utill';
+import { deleteTranportRequestService } from './transportRequest/service';
+import { toast } from 'react-toastify';
+import TransportRequestUtills from './transportRequest/utills';
 
 
 const DeleteRequest = ({
     request,
     handleClose,
     sendingRequest,
+    setSendingRequest,
     buttonText
 }: IDeleteRequest) => {
     const { isIRequest, isITransportRequest } = GlobalRequestUtill();
+    const { removeTransportRequestFromStore } = TransportRequestUtills()
+
+    const deleteTranportRequest = async () => {
+        const response = await deleteTranportRequestService(request?.id as string);
+        setSendingRequest(true)
+        if (response?.status === "success") {
+            isITransportRequest(request) ? removeTransportRequestFromStore(request) : console.log(request)
+            handleClose();
+            toast.success(response?.data?.message)
+        }
+        setSendingRequest(false)
+
+    }
+
     return (
         <Grid item container spacing={4} xs={12}>
             <Grid item xs={12}>
@@ -42,6 +60,7 @@ const DeleteRequest = ({
                         buttonText="Close"
                     />
                     <ButtonComponent
+                        handleClick={deleteTranportRequest}
                         buttonColor='error'
                         type='submit'
                         sendingRequest={sendingRequest}

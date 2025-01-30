@@ -93,6 +93,7 @@ const PendingRequest = () => {
             {crudStates.delete === modalState &&
                 <ModalComponent width={"40%"} title='Delete Request' open={open} handleClose={handleClose}>
                     <DeleteRequest
+                        setSendingRequest={setLoading}
                         sendingRequest={loading}
                         handleClose={handleClose}
                         buttonText='Confirm'

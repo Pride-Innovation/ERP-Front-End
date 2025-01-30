@@ -10,7 +10,7 @@ import { IFormData } from "../../assets/interface";
 import { TransportRequestContext } from "../../../context/request/TransportRequestContext";
 import { getTableHeaders } from "../../../components/tables/getTableHeaders";
 import { useDispatch } from "react-redux";
-import { addNewTransportRequest, loadAllTransportRequest } from "./slice";
+import { addNewTransportRequest, loadAllTransportRequest, removeTransportRequest } from "./slice";
 import { useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../../store";
 import moment from "moment";
@@ -53,6 +53,10 @@ const TransportRequestUtills = () => {
 
     const addNewTransportRequestToStore = (transportRequest: ITransportRequest) => {
         dispatch(addNewTransportRequest(transportRequest))
+    }
+
+    const removeTransportRequestFromStore = (request: ITransportRequest) => {
+        dispatch(removeTransportRequest(request))
     }
 
     useEffect(() => {
@@ -225,6 +229,7 @@ const TransportRequestUtills = () => {
             addAllTransportRequestsInStore,
             addNewTransportRequestToStore,
             allTranportRequests,
+            removeTransportRequestFromStore
         }
     )
 }

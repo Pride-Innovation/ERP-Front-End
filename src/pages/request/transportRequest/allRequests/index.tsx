@@ -92,6 +92,7 @@ const TransportRequest = () => {
             {crudStates.delete === modalState &&
                 <ModalComponent width={"40%"} title='Delete Transport Request' open={open} handleClose={handleClose}>
                     <DeleteRequest
+                        setSendingRequest={setLoading}
                         sendingRequest={loading}
                         handleClose={handleClose}
                         buttonText='Confirm'

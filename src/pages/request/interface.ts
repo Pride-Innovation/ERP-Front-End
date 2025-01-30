@@ -6,6 +6,7 @@ import {
 } from "react-hook-form";
 import { IUser } from "../users/interface";
 import { IPermission } from "../settings/interface";
+import { Dispatch, SetStateAction } from "react";
 
 export interface IAssetParticulars {
     name: string;
@@ -57,6 +58,7 @@ export interface IRequestForm {
 export interface IDeleteRequest {
     handleClose: () => void;
     sendingRequest: boolean;
+    setSendingRequest: Dispatch<SetStateAction<boolean>>;
     buttonText: string;
     request: IRequest | ITransportRequest
 }

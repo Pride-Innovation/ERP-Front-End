@@ -94,6 +94,7 @@ const TransportRejectedRequest = () => {
                 <ModalComponent width={"40%"} title='Delete Transport Request' open={open} handleClose={handleClose}>
                     <DeleteRequest
                         sendingRequest={loading}
+                        setSendingRequest={setLoading}
                         handleClose={handleClose}
                         buttonText='Confirm'
                         request={currentRequest}
