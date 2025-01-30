@@ -63,7 +63,7 @@ const UpdateTransportRequest = () => {
                             control={control}
                             register={register}
                             sendingRequest={sendingRequest}
-                            buttonText="Request Asset"
+                            buttonText="Submit"
                         />
                     </form>
                 </Grid>

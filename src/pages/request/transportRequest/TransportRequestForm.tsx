@@ -9,7 +9,6 @@ import {
     UseFormTimePicker
 } from '../../../components/forms';
 import ButtonComponent from '../../../components/forms/Button';
-import { ROUTES } from '../../../core/routes/routes';
 import { ITransportRequestForm } from '../interface';
 
 const TransportRequestForm = ({
@@ -105,7 +104,7 @@ const TransportRequestForm = ({
                 <Grid item xs={12} sx={{ display: "flex", justifyContent: "end" }}>
                     <Stack direction="row" spacing={3} sx={{ width: "30%" }}>
                         <ButtonComponent
-                            handleClick={() => navigate(ROUTES.TRANSPORT_REQUEST)}
+                            handleClick={() => navigate(-1)}
                             buttonColor='error'
                             type='button'
                             sendingRequest={false}
