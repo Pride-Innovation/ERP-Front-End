@@ -7,6 +7,9 @@ import RequestForm from './RequestForm';
 import { requestMock } from '../../../mocks/request';
 import { IRequest } from '../interface';
 import { requestSchema } from './schema';
+import { updateAssetRequestService } from './service';
+import { IResponseData } from '../../users/interface';
+import { toast } from 'react-toastify';
 
 const UpdateRequest = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
@@ -34,9 +37,13 @@ const UpdateRequest = () => {
         reset({ ...defaultRequest });
     }, [defaultRequest]);
 
-    const onSubmit = (formData: IRequest) => {
+    const onSubmit = async (formData: IRequest) => {
         setSendingRequest(true);
-        console.log(formData, "form data!!!!!");
+        const { id, requester, ...data } = formData
+        const request = { requester_id: formData?.requester?.id, ...data }
+
+        const response = await updateAssetRequestService({ ...request, }, id as string) as IResponseData;
+        toast.success(response.data.message);
         setSendingRequest(false)
     };
 
