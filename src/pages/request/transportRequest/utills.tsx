@@ -173,7 +173,6 @@ const TransportRequestUtills = () => {
     }
 
     const handleRequest = (list: Array<ITransportRequest>) => {
-
         const data: Array<ITransportRequestTableData> = list.map((request, index) => {
             const { requester, signature, ...fielsdata } = list[index];
 
