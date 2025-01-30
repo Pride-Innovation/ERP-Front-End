@@ -59,14 +59,15 @@ const RequestUtills = () => {
     const {
         id,
         requester,
+        requesterID,
+        Narration,
         name,
         desc,
         ...data
     } = requestMock[0];
 
     const rowData = {
-        name: `${requestMock[0].requester?.firstName} ${requestMock[0].requester?.lastName} ${requestMock[0].requester?.otherName}`,
-        department: requestMock[0]?.requester?.department,
+        name: `${requestMock[0].requester?.name}`,
         ...data,
         action: {
             label: "options",
@@ -128,8 +129,7 @@ const RequestUtills = () => {
 
             return (
                 {
-                    name: `${request.requester?.firstName} ${request.requester?.lastName}`,
-                    department: request.requester?.department,
+                    name: `${request.requester?.name}`,
                     ...fielsdata
                 }
             )
