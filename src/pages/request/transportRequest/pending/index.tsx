@@ -62,7 +62,7 @@ const TransportPendingRequest = () => {
     const handleOptionClicked = (option: string | number, moduleID?: string | number) => {
         switch (option) {
             case crudStates.update:
-                navigate(`${ROUTES.UPDATE_REQUEST}/${moduleID}`);
+                navigate(`${ROUTES.UPDATE_TRANSPORT_REQUEST}/${moduleID}`);
                 break;
             case crudStates.delete:
                 setModalState(crudStates.delete)
