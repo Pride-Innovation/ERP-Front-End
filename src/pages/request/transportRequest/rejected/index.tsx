@@ -1,11 +1,8 @@
 import React, { useContext, useEffect, useState } from "react";
-import { GridRowsProp } from "@mui/x-data-grid";
 import { useNavigate } from "react-router";
 import { Grid } from "@mui/material";
-import RowContext from "../../../../context/row/RowContext";
 import { FileContext } from "../../../../context/file/FileContext";
 import { fetchRowsService } from "../../../../core/apis/globalService";
-import { transportRequest } from "../../../../mocks/request";
 import { ErrorMessage } from "../../../../core/apis/axiosInstance";
 import { crudStates } from "../../../../utils/constants";
 import { ROUTES } from "../../../../core/routes/routes";
@@ -21,7 +18,6 @@ const TransportRejectedRequest = () => {
     const [loading, setLoading] = useState<boolean>(false);
     const [modalState, setModalState] = useState<string>("");
     const [currentRequest, setCurrentRequest] = useState<ITransportRequest>({} as ITransportRequest);
-    const { setRows, rows } = useContext(RowContext);
     const navigate = useNavigate();
     const { transportRequestTableData } = useContext(TransportRequestContext);
     const { setFileData, fileData } = useContext(FileContext)
@@ -36,17 +32,18 @@ const TransportRejectedRequest = () => {
         open,
         filterRejectedRecords,
         rejectedRequests,
-        handleClose
+        handleClose,
+        addAllTransportRequestsInStore,
+        allTranportRequests
     } = TransportRequestUtills();
 
     const fetchResources = async () => {
         setLoading(true)
         try {
-            const response = await fetchRowsService({ page: 1, size: 10, endPoint }) as unknown as GridRowsProp;
-            console.log(response, "response!!")
-            setRows([...transportRequest]);
+            const response = await fetchRowsService({ page: 1, size: 10, endPoint });
+            const data = response?.data as ITransportRequest[]
+            addAllTransportRequestsInStore(data)
         } catch (error) {
-            setRows([...transportRequest]);
             const errorMessage = error instanceof Error ? error.message : ErrorMessage;
             console.log(errorMessage)
         }
@@ -58,7 +55,7 @@ const TransportRejectedRequest = () => {
         setFileData({ file: "", module: "", jsonData: [] });
     }, []);
 
-    useEffect(() => { if (rows.length > 0) { handleRequest(transportRequest) } }, [rows])
+    useEffect(() => { if (allTranportRequests.length > 0) { handleRequest(allTranportRequests) } }, [allTranportRequests])
 
     useEffect(() => { filterRejectedRecords(transportRequestTableData as Array<ITransportRequest>) }, [transportRequestTableData]);
 
@@ -69,12 +66,12 @@ const TransportRejectedRequest = () => {
                 break;
             case crudStates.delete:
                 setModalState(crudStates.delete)
-                setCurrentRequest(determineCurrentRequest(moduleID as number, rows as ITransportRequest[]))
+                setCurrentRequest(determineCurrentRequest(moduleID as number, allTranportRequests as ITransportRequest[]))
                 handleOpen();
                 break;
             case crudStates.read:
                 setModalState(crudStates.read)
-                setCurrentRequest(determineCurrentRequest(moduleID as number, rows as ITransportRequest[]))
+                setCurrentRequest(determineCurrentRequest(moduleID as number, allTranportRequests as ITransportRequest[]))
                 handleOpen();
                 break;
             default:
@@ -106,7 +103,7 @@ const TransportRejectedRequest = () => {
                     <RequestDetails sendingRequest={loading} setSendingRequest={setLoading} open={open} handleClose={handleClose} data={currentRequest} />
                 </ModalComponent>
             }
-            {rows?.length > 0 && <Grid xs={12} container>
+            {allTranportRequests?.length > 0 && <Grid xs={12} container>
                 {columnHeaders.length > 0 &&
                     <TableComponent
                         endPoint={endPoint}
