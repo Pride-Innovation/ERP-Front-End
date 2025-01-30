@@ -20,6 +20,7 @@ import { useSelector } from 'react-redux';
 import { listAssetStatusesService } from '../../settings/statuses/service';
 import { IStatus } from '../../settings/statuses/interface';
 import { loadStatuses } from '../../settings/statuses/slice';
+import moment from 'moment';
 
 const RequestUtills = () => {
     const endPoint = 'assetRequisitions';
@@ -60,6 +61,8 @@ const RequestUtills = () => {
         id,
         requester,
         requesterID,
+        requestDate,
+        timeOfSubmissionOfRequest,
         Narration,
         name,
         desc,
@@ -68,7 +71,12 @@ const RequestUtills = () => {
 
     const rowData = {
         name: `${requestMock[0].requester?.name}`,
+        requestDate: requestMock[0]?.requestDate,
+        timeOfSubmissionOfRequest: requestMock[0]?.timeOfSubmissionOfRequest,
+        fromPosition: requestMock[0].fromPosition,
+        position: requestMock[0].position,
         ...data,
+        status: requestMock[0]?.status,
         action: {
             label: "options",
             options: [
@@ -130,7 +138,12 @@ const RequestUtills = () => {
             return (
                 {
                     name: `${request.requester?.name}`,
-                    ...fielsdata
+                    ...fielsdata,
+                    requestDate: moment(request.requestDate).format('LL'),
+                    timeOfSubmissionOfRequest: moment(request.timeOfSubmissionOfRequest).format('LT'),
+                    fromPosition: request.fromPosition,
+                    position: request.position,
+                    status: request.status
                 }
             )
         })

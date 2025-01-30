@@ -8,6 +8,7 @@ export const requestMock: IRequest[] = [
         id: 1,
         name: "Software Upgrade Request",
         requesterID: 12345,
+        requestDate: "2024-11-01",
         quantity: 1,
         priority: "High",
         status: "pending",
