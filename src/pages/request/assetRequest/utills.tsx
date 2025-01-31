@@ -164,7 +164,8 @@ const RequestUtills = () => {
                     timeOfSubmissionOfRequest: moment(request.timeOfSubmissionOfRequest).format('LT'),
                     fromPosition: request.fromPosition,
                     position: request.position,
-                    status: determineStatusColor(request.status as string)
+                    status: request.status 
+                    // status: determineStatusColor(request.status as string)
                 }
             )
         })
