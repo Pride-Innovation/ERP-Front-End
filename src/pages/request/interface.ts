@@ -66,6 +66,8 @@ export interface IRequestForm {
     register: UseFormRegister<IRequest>;
     buttonText: string;
     sendingRequest: boolean;
+    setImage: Dispatch<SetStateAction<string>>
+    image: string;
 }
 
 export interface IDeleteRequest {

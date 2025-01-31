@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Card, Grid, Typography } from "@mui/material";
+import { Box, Card, Divider, Grid, Typography } from "@mui/material";
 import RequestForm from "./RequestForm";
 import { IRequest } from "../interface";
 import { requestSchema } from "./schema";
@@ -12,6 +12,7 @@ import { toast } from "react-toastify";
 
 const CreateRequest = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
+    const [image, setImage] = useState<string>("")
     const defaultRequest: IRequest = {} as IRequest;
 
     const {
@@ -45,23 +46,28 @@ const CreateRequest = () => {
     };
 
     return (
-        <Card sx={{ p: 4 }}>
+        <Card sx={{ py: 4 }}>
             <Grid container xs={12}>
                 <Grid item xs={12}>
-                    <Typography sx={{ mb: 4, fontWeight: 600, textTransform: "uppercase", fontSize: '17px' }}>Create a Request</Typography>
-                    <form
-                        style={{ width: "100%" }}
-                        autoComplete="off"
-                        onSubmit={handleSubmit(onSubmit)}
-                    >
-                        <RequestForm
-                            formState={formState}
-                            control={control}
-                            register={register}
-                            sendingRequest={sendingRequest}
-                            buttonText="Submit"
-                        />
-                    </form>
+                    <Typography sx={{ mb: 4, px: 4, fontWeight: 600, textTransform: "uppercase", fontSize: '17px' }}>Create a Request</Typography>
+                    <Divider sx={{ mb: 4 }} />
+                    <Box sx={{ px: 4 }}>
+                        <form
+                            style={{ width: "100%" }}
+                            autoComplete="off"
+                            onSubmit={handleSubmit(onSubmit)}
+                        >
+                            <RequestForm
+                                setImage={setImage}
+                                image={image}
+                                formState={formState}
+                                control={control}
+                                register={register}
+                                sendingRequest={sendingRequest}
+                                buttonText="Submit"
+                            />
+                        </form>
+                    </Box>
                 </Grid>
             </Grid>
         </Card>
