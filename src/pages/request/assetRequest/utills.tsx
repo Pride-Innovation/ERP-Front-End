@@ -15,7 +15,7 @@ import { IFormData } from '../../assets/interface';
 import { getTableHeaders } from '../../../components/tables/getTableHeaders';
 import { useDispatch } from 'react-redux';
 import { AppDispatch, RootState } from '../../../store';
-import { loadAllRequests } from './slice';
+import { loadAllRequests, removeAssetRequest } from './slice';
 import { useSelector } from 'react-redux';
 import { listAssetStatusesService } from '../../settings/statuses/service';
 import { IStatus } from '../../settings/statuses/interface';
@@ -56,6 +56,10 @@ const RequestUtills = () => {
     }
 
     useEffect(() => { fetchAllStatuses() }, []);
+
+      const removeAssetRequestFromStore = (request: IRequest) => {
+            dispatch(removeAssetRequest(request))
+        }
 
     const {
         id,
@@ -194,7 +198,8 @@ const RequestUtills = () => {
             filterRejectedRecords,
             rejectedRequests,
             addAllRequestsInStore,
-            assetsRequests
+            assetsRequests,
+            removeAssetRequestFromStore
         }
     )
 }

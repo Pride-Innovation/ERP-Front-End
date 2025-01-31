@@ -6,6 +6,8 @@ import GlobalRequestUtill from './utill';
 import { deleteTranportRequestService } from './transportRequest/service';
 import { toast } from 'react-toastify';
 import TransportRequestUtills from './transportRequest/utills';
+import { deleteAssetRequestService } from './assetRequest/service';
+import RequestUtills from './assetRequest/utills';
 
 
 const DeleteRequest = ({
@@ -17,12 +19,16 @@ const DeleteRequest = ({
 }: IDeleteRequest) => {
     const { isIRequest, isITransportRequest } = GlobalRequestUtill();
     const { removeTransportRequestFromStore } = TransportRequestUtills()
-
+    const { removeAssetRequestFromStore } = RequestUtills()
     const deleteTranportRequest = async () => {
-        const response = await deleteTranportRequestService(request?.id as string);
         setSendingRequest(true)
+        const response =
+            isITransportRequest(request) ? await deleteTranportRequestService(request?.id as string) :
+                await deleteAssetRequestService(request?.id as string)
+
         if (response?.status === "success") {
-            isITransportRequest(request) ? removeTransportRequestFromStore(request) : console.log(request)
+            isITransportRequest(request) ? removeTransportRequestFromStore(request) :
+                removeAssetRequestFromStore(request)
             handleClose();
             toast.success(response?.data?.message)
         }
@@ -40,7 +46,7 @@ const DeleteRequest = ({
                     <HelpOutlineOutlinedIcon color="primary" />
                     <Typography variant="h6" color="primary">
                         {isIRequest(request) ? (
-                            request.quantity
+                            request.desc
                         ) : isITransportRequest(request) ? (
                             request.purpose
                         ) : (

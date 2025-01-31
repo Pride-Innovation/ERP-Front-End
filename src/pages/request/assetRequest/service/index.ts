@@ -20,7 +20,17 @@ const updateAssetRequestService = async (body: Object, id: string | number) => {
     }
 }
 
+const deleteAssetRequestService = async (id: string | number) => {
+    try {
+        const response = await axiosInstance.get(`assetRequisitions/delete/${id}`);
+        return response?.data
+    } catch (error) {
+        throw (error)
+    }
+}
+
 export {
     createAssetRequestService,
-    updateAssetRequestService
+    updateAssetRequestService,
+    deleteAssetRequestService
 }
