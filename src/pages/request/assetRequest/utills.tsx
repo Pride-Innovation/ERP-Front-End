@@ -57,9 +57,9 @@ const RequestUtills = () => {
 
     useEffect(() => { fetchAllStatuses() }, []);
 
-      const removeAssetRequestFromStore = (request: IRequest) => {
-            dispatch(removeAssetRequest(request))
-        }
+    const removeAssetRequestFromStore = (request: IRequest) => {
+        dispatch(removeAssetRequest(request))
+    }
 
     const {
         id,
@@ -141,6 +141,13 @@ const RequestUtills = () => {
         },
     ];
 
+    const determineStatusColor = (id: string) => {
+        const statusColor = (statuses.find(status => status.id === parseInt(id, 10)))?.status
+        return statusColor === requestStatus.approved ? requestStatus.approved
+            : statusColor === requestStatus.pending ? requestStatus.pending
+                : requestStatus.rejected
+    }
+
     const handleRequest = (list: Array<IRequest>) => {
         const data: Array<IRequestTableData> = list.map((request, index) => {
             const {
@@ -157,7 +164,7 @@ const RequestUtills = () => {
                     timeOfSubmissionOfRequest: moment(request.timeOfSubmissionOfRequest).format('LT'),
                     fromPosition: request.fromPosition,
                     position: request.position,
-                    status: request.status
+                    status: determineStatusColor(request.status as string)
                 }
             )
         })

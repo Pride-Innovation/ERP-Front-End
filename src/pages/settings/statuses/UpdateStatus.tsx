@@ -42,8 +42,9 @@ const UpdateStatus = ({ status, handleClose, sendingRequest, setSendingRequest }
             setSendingRequest(false);
             handleClose()
         }
-        setSendingRequest(true);
+        setSendingRequest(false);
     };
+    
     return (
         <Grid container xs={12}>
             <Grid item xs={12}>

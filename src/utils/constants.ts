@@ -25,10 +25,12 @@ export const requestStatus: {
     pending: string;
     approved: string;
     rejected: string;
+    normal: string;
 } = {
     pending: "pending",
     approved: "approved",
-    rejected: "rejected"
+    rejected: "rejected",
+    normal: "normal"
 }
 
 export const assetStatus: {

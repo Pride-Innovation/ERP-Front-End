@@ -48,6 +48,7 @@ const StatusUtills = () => {
                 { label: "Red Color", value: requestStatus.rejected },
                 { label: "Green Color", value: requestStatus.approved },
                 { label: "Orange Color", value: requestStatus.pending },
+                { label: "Blue Color", value: requestStatus.normal },
             ]
         },
         {

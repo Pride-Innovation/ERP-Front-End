@@ -41,6 +41,7 @@ const CreateStatus = ({ sendingRequest, setSendingRequest, handleClose }: ICreat
             setSendingRequest(false);
             handleClose()
         }
+        setSendingRequest(false);
     };
 
     return (
