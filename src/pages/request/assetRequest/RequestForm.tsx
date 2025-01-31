@@ -31,7 +31,8 @@ const RequestForm = ({
     formState,
     sendingRequest,
     buttonText,
-    setImage
+    setImage,
+    image
 }: IRequestForm) => {
     const { formFields } = RequestUtills();
     const navigate = useNavigate();
@@ -58,7 +59,7 @@ const RequestForm = ({
                     <CardMedia
                         component="img"
                         height="250"
-                        image={PlaceHolder}
+                        image={image ? image : PlaceHolder}
                         alt="Equipment Image"
                     />
                     <Box sx={{ my: 2, px: 2 }}>

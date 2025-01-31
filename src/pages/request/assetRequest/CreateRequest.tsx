@@ -12,7 +12,7 @@ import { toast } from "react-toastify";
 
 const CreateRequest = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
-    const [image, setImage] = useState<string>("")
+    const [signature, setSignature] = useState<string>("")
     const defaultRequest: IRequest = {} as IRequest;
 
     const {
@@ -58,8 +58,8 @@ const CreateRequest = () => {
                             onSubmit={handleSubmit(onSubmit)}
                         >
                             <RequestForm
-                                setImage={setImage}
-                                image={image}
+                                setImage={setSignature}
+                                image={signature}
                                 formState={formState}
                                 control={control}
                                 register={register}
