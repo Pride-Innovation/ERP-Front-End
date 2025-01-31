@@ -11,9 +11,7 @@ const createAssetRequestService = async (object: Object) => {
 
 const updateAssetRequestService = async (body: Object, id: string | number) => {
     try {
-        const response = await axiosInstance.post(`assetRequisitions/update/${id}`, body, {
-            headers: { 'Content-Type': 'multipart/form-data' }
-        });
+        const response = await axiosInstance.post(`assetRequisitions/update/${id}`, body);
         return response?.data
     } catch (error) {
         throw (error)
@@ -29,8 +27,19 @@ const deleteAssetRequestService = async (id: string | number) => {
     }
 }
 
+
+const findAssetRequestByIDService = async (id: string | number) => {
+    try {
+        const response = await axiosInstance.get(`assetRequisitions/${id}`);
+        return response?.data
+    } catch (error) {
+        throw (error)
+    }
+}
+
 export {
     createAssetRequestService,
     updateAssetRequestService,
-    deleteAssetRequestService
+    deleteAssetRequestService,
+    findAssetRequestByIDService
 }

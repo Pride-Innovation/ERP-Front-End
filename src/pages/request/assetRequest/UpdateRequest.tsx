@@ -7,7 +7,7 @@ import RequestForm from './RequestForm';
 import { requestMock } from '../../../mocks/request';
 import { IRequest } from '../interface';
 import { requestSchema } from './schema';
-import { updateAssetRequestService } from './service';
+import { findAssetRequestByIDService, updateAssetRequestService } from './service';
 import { IResponseData } from '../../users/interface';
 import { toast } from 'react-toastify';
 
@@ -17,11 +17,12 @@ const UpdateRequest = () => {
     const { id } = useParams<{ id: string }>();
     const [defaultRequest, setDefaultRequest] = useState<IRequest>(requestMock[0]);
 
-    useEffect(() => {
-        setDefaultRequest(() => {
-            return requestMock.find(asset => asset?.id === parseInt(id as string)) as IRequest
-        })
-    }, [id]);
+    const findAssetRequestById = async () => {
+        const response = await findAssetRequestByIDService(id as string);
+        setDefaultRequest(response?.data)
+    }
+
+    useEffect(() => { findAssetRequestById() }, [id]);
 
     const {
         control,
@@ -40,21 +41,11 @@ const UpdateRequest = () => {
 
     const onSubmit = async (formData: IRequest) => {
         setSendingRequest(true);
-        const request = new FormData();
-
-        request.append("Narration", formData.Narration as string);
-        request.append("desc", formData.desc as string);
-        request.append("fromPosition", formData.fromPosition as string)
-        request.append("name", formData.name as string)
-        request.append("position", formData.position as string)
-        request.append("priority", formData.priority as string)
-        request.append("quantity", (formData.quantity as number).toString())
-        request.append("requestDate", formData.requestDate as string)
-        request.append("requester_id", (formData.requester?.id as number).toString())
-        request.append("status", formData.status as string)
-        request.append("timeOfSubmissionOfRequest", formData.timeOfSubmissionOfRequest as string)
-        request.append("signature", signature)
-
+        const { requester, requesterID, ...data } = formData;
+        const request = {
+            ...data,
+            requester_id: formData?.requester?.id,
+        }
         const response = await updateAssetRequestService({
             ...request,
             signature: signature
