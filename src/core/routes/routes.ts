@@ -7,6 +7,7 @@ const PROFILE: string = `${ASSETS_MANAGEMENT}/profile`;
 const USERS: string = `${ASSETS_MANAGEMENT}/users`;
 const AUDIT_TRAILS: string = `${ASSETS_MANAGEMENT}/trails`;
 const TEST: string = `${ASSETS_MANAGEMENT}/test`;
+const INVENTORY: string = `${ASSETS_MANAGEMENT}/inventory`;
 
 /* Request Routes */
 const REQUEST: string = `${ASSETS_MANAGEMENT}/asset-request`
@@ -85,5 +86,6 @@ export const ROUTES = {
     UNITS,
     UNITS_MEASURE,
     SUPPLIERS,
-    STATUSES
+    STATUSES,
+    INVENTORY
 }

@@ -52,16 +52,23 @@ const HandleRoutes = () => {
         if (route.indexOf(ROUTES.TRANSPORT_REQUEST) !== -1) {
             handleActiveRoute(sideBarList[4])
         }
-        if ([ROUTES.SETTINGS].includes(route)) {
+        if ([ROUTES.INVENTORY].includes(route)) {
             handleClick(sideBarList[5])
             handleActiveRoute(sideBarList[5])
         }
-        if (route.indexOf(ROUTES.SETTINGS) !== -1) {
+        if (route.indexOf(ROUTES.INVENTORY) !== -1) {
             handleActiveRoute(sideBarList[5])
         }
-        if (route === ROUTES.AUDIT_TRAILS) {
+        if ([ROUTES.SETTINGS].includes(route)) {
             handleClick(sideBarList[6])
             handleActiveRoute(sideBarList[6])
+        }
+        if (route.indexOf(ROUTES.SETTINGS) !== -1) {
+            handleActiveRoute(sideBarList[6])
+        }
+        if (route === ROUTES.AUDIT_TRAILS) {
+            handleClick(sideBarList[7])
+            handleActiveRoute(sideBarList[7])
         }
     }
 

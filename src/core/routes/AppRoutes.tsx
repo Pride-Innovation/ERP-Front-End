@@ -29,6 +29,8 @@ import TransportRequest from '../../pages/request/transportRequest/allRequests'
 import CreateTranportRequest from '../../pages/request/transportRequest/CreateTranportRequest'
 import UpdateTransportRequest from '../../pages/request/transportRequest/UpdateTransportRequest'
 import SettingsSubRoutes from './subroutes/SettingsSub'
+import InventoryRoutes from './subroutes/InventoryRoutes'
+import Inventory from '../../pages/inventory'
 
 const AppRoutes = () => {
   // const { routePermission } = RoutesUtills();
@@ -42,6 +44,9 @@ const AppRoutes = () => {
           <Route index element={<Dashboard />} />
           <Route path={ROUTES.SETTINGS} element={<Settings />} >
             {SettingsSubRoutes()}
+          </Route>
+          <Route path={ROUTES.INVENTORY} element={<Inventory />} >
+            {InventoryRoutes()}
           </Route>
           <Route path={`${ROUTES.PROFILE}/:id`} element={<Profile />} />
           <Route element={<PrivateRoute

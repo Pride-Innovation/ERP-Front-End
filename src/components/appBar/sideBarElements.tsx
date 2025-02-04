@@ -9,6 +9,7 @@ import TuneIcon from '@mui/icons-material/Tune';
 import RoutesUtills from '../../core/routes/utills';
 import { IPermission } from '../../pages/settings/interface';
 import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
+import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 
 const SideBarElements = () => {
     const { getCurrentUser } = RoutesUtills();
@@ -64,13 +65,20 @@ const SideBarElements = () => {
         },
         {
             id: 6,
+            name: "Inventory",
+            route: ROUTES.INVENTORY,
+            icon: <Inventory2OutlinedIcon />,
+            subroutes: []
+        },
+        {
+            id: 7,
             name: "Settings",
             route: ROUTES.SETTINGS,
             icon: <SettingsIcon />,
             subroutes: []
         },
         {
-            id: 7,
+            id: 8,
             name: "Audit Trails",
             route: ROUTES.AUDIT_TRAILS,
             icon: <ReceiptLongIcon />,
