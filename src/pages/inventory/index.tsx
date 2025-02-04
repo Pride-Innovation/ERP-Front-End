@@ -8,9 +8,12 @@ import { inventoryMock } from "../../mocks/inventory";
 import CreateInventory from "./CreateInventory";
 import UpdateInventory from "./UpdateInventory";
 import DeleteInventory from "./DeleteInventory";
+import { useNavigate } from "react-router";
+import { ROUTES } from "../../core/routes/routes";
 
 const Inventory = () => {
-    const [sendingRequest, setSendingRequest] = useState<boolean>(false)
+    const [sendingRequest, setSendingRequest] = useState<boolean>(false);
+    const navigate = useNavigate()
     const {
         columnHeaders,
         setModalState,
@@ -49,6 +52,7 @@ const Inventory = () => {
                 handleOpen();
                 break;
             case crudStates.read:
+                navigate(`${ROUTES.INVENTORY}/${moduleID}`)
                 break;
             default:
                 break
@@ -69,7 +73,11 @@ const Inventory = () => {
             }
             {modalState === crudStates.deactivate &&
                 <ModalComponent title='Deactivate Inventory' open={open} handleClose={handleClose} width="40%">
-                    <DeleteInventory setSendingRequest={setSendingRequest} handleClose={handleClose} buttonText='Deactivate' sendingRequest={false} />
+                    <DeleteInventory
+                        setSendingRequest={setSendingRequest}
+                        handleClose={handleClose}
+                        buttonText='Confirm'
+                        sendingRequest={sendingRequest} />
                 </ModalComponent>
             }
             {columnHeaders.length > 0 &&
