@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { AppDispatch, RootState } from "../../store";
 import { IOptions, ITableHeader } from "../../components/tables/interface";
@@ -16,6 +16,7 @@ import { loadUnitOfMeasures } from "../settings/unitMeasure/slice";
 import { listUnitOfMeasuresService } from "../assets/ITEquipment/service";
 import { loadSuppliers } from "../settings/suppliers/slice";
 import { listSuppliersService } from "../settings/suppliers/service";
+import { InventoryContext } from "../../context/inventory";
 
 
 const InventoryUtills = () => {
@@ -24,6 +25,7 @@ const InventoryUtills = () => {
     const [modalState, setModalState] = useState<string>("");
     const [open, setOpen] = useState<boolean>(false);
     const dispatch = useDispatch<AppDispatch>();
+    const { setCurrentInventory } = useContext(InventoryContext);
     const { unitsOfMeasure } = useSelector((state: RootState) => state.UnitsOfMeasureStore);
     const { inventoryList } = useSelector((state: RootState) => state.InventoryStore);
     const { suppliers } = useSelector((state: RootState) => state.SuppliersStore);
@@ -49,6 +51,12 @@ const InventoryUtills = () => {
     }
 
     useEffect(() => { updateReduxStore() }, []);
+
+    const findCurrentInventory = (id: string | number) => {
+        setCurrentInventory(() => {
+            return inventoryList.find(inventory => inventory?.id === id) as IInventory
+        })
+    }
 
     useEffect(() => {
         setOptionsObject({
@@ -164,7 +172,8 @@ const InventoryUtills = () => {
         header,
         loadAllInventoryInStore,
         handleCreation,
-        formFields
+        formFields,
+        findCurrentInventory
     })
 }
 

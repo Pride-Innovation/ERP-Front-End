@@ -6,6 +6,7 @@ import { crudStates } from "../../utils/constants";
 import ModalComponent from "../../components/modal";
 import { inventoryMock } from "../../mocks/inventory";
 import CreateInventory from "./CreateInventory";
+import UpdateInventory from "./UpdateInventory";
 
 const Inventory = () => {
     const {
@@ -18,13 +19,13 @@ const Inventory = () => {
         handleClose,
         open,
         loadAllInventoryInStore,
-        handleCreation
+        handleCreation,
+        findCurrentInventory
     } = InventoryUtills()
 
     const fetchInventory = async () => {
         try {
             // const response = await fetchUsersService() as unknown as Array<IUser>;
-            // setUsers(response)
             loadAllInventoryInStore(inventoryMock)
         } catch (error) {
             console.log(error, "response Error")
@@ -36,11 +37,11 @@ const Inventory = () => {
     const handleOptionClicked = async (option: string | number, moduleID?: string | number) => {
         switch (option) {
             case crudStates.deactivate:
-
                 setModalState(option as string)
                 handleOpen();
                 break;
             case crudStates.update:
+                findCurrentInventory(moduleID as number)
                 setModalState(option as string)
                 handleOpen();
                 break;
@@ -59,9 +60,8 @@ const Inventory = () => {
                 </ModalComponent>
             }
             {modalState === crudStates.update &&
-                <ModalComponent title='Update Inventory' open={open} handleClose={handleClose} width="60%">
-                    {/* <UpdateUsers handleClose={handleClose} /> */}
-                    <p>Update Inventory</p>
+                <ModalComponent title='Update Inventory' open={open} handleClose={handleClose} width="70%">
+                    <UpdateInventory handleClose={handleClose} />
                 </ModalComponent>
             }
             {modalState === crudStates.deactivate &&

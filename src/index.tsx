@@ -10,6 +10,7 @@ import FileContextProvider from './context/file/FileContext';
 import TransportRequestContextProvider from './context/request/TransportRequestContext';
 import { Provider } from 'react-redux';
 import { store } from './store';
+import { InventoryContextProvider } from './context/inventory';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -17,19 +18,21 @@ const root = ReactDOM.createRoot(
 root.render(
   <React.StrictMode>
     <Provider store={store}>
-      <RowContextProvider>
-        <UserContextProvider>
-          <RequestContextProvider>
-            <TransportRequestContextProvider>
-              <FileContextProvider>
-                <TestContextProvider>
-                  <App />
-                </TestContextProvider>
-              </FileContextProvider>
-            </TransportRequestContextProvider>
-          </RequestContextProvider>
-        </UserContextProvider>
-      </RowContextProvider>
+      <InventoryContextProvider>
+        <RowContextProvider>
+          <UserContextProvider>
+            <RequestContextProvider>
+              <TransportRequestContextProvider>
+                <FileContextProvider>
+                  <TestContextProvider>
+                    <App />
+                  </TestContextProvider>
+                </FileContextProvider>
+              </TransportRequestContextProvider>
+            </RequestContextProvider>
+          </UserContextProvider>
+        </RowContextProvider>
+      </InventoryContextProvider>
     </Provider>
   </React.StrictMode>
 );

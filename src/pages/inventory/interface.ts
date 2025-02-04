@@ -19,6 +19,10 @@ interface ICreateInventory {
     handleClose: () => void;
 }
 
+interface IUpdateInventory {
+    handleClose: () => void;
+}
+
 interface IInventoryForm {
     formState: FormState<IInventory> & {
         errors: {
@@ -45,5 +49,6 @@ interface IInventoryForm {
 export type {
     IInventory,
     ICreateInventory,
-    IInventoryForm
+    IInventoryForm,
+    IUpdateInventory
 }
