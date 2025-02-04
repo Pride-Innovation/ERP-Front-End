@@ -1,5 +1,4 @@
 import { useParams } from "react-router"
-import InventoryUtills from "../Utills";
 import { useContext, useEffect } from "react";
 import { InventoryContext } from "../../../context/inventory";
 import {
@@ -19,18 +18,19 @@ import ButtonComponent from "../../../components/forms/Button";
 import AssignmentHistory from "../../assets/trails/AssignmentHistory";
 import OtherDetails from "./OtherDetails";
 import PlaceHolder from "../../../statics/images/Placeholder.png"
-
+import { inventoryMock } from "../../../mocks/inventory";
+import { IInventory } from "../interface";
 
 const InventoryDetails = () => {
-    const { findCurrentInventory } = InventoryUtills();
-    const { currentInventory } = useContext(InventoryContext);
+    const { currentInventory, setCurrentInventory } = useContext(InventoryContext);
     const { id } = useParams<{ id: string }>();
 
     useEffect(() => {
-        findCurrentInventory(parseInt(id as string))
+        setCurrentInventory(() => {
+            return inventoryMock.find(inventory => inventory?.id === parseInt(id as string)) as IInventory
+        })
     }, []);
 
-    console.log(currentInventory, "currentInventory!!")
     return (
         <Card sx={{ p: 4, boxShadow: 3 }}>
             <Grid container spacing={4}>
