@@ -5,6 +5,7 @@ import InventoryUtills from "./Utills";
 import { crudStates } from "../../utils/constants";
 import ModalComponent from "../../components/modal";
 import { inventoryMock } from "../../mocks/inventory";
+import CreateInventory from "./CreateInventory";
 
 const Inventory = () => {
     const {
@@ -16,7 +17,8 @@ const Inventory = () => {
         modalState,
         handleClose,
         open,
-        loadAllInventoryInStore
+        loadAllInventoryInStore,
+        handleCreation
     } = InventoryUtills()
 
     const fetchInventory = async () => {
@@ -52,9 +54,8 @@ const Inventory = () => {
     return (
         <Grid xs={12} container>
             {modalState === crudStates.create &&
-                <ModalComponent title='Create Inventory' open={open} handleClose={handleClose} width="60%">
-                    {/* <CreateUser handleClose={handleClose} /> */}
-                    <p>Create Inventory</p>
+                <ModalComponent title='Create Inventory' open={open} handleClose={handleClose} width="70%">
+                    <CreateInventory handleClose={handleClose} />
                 </ModalComponent>
             }
             {modalState === crudStates.update &&
@@ -75,7 +76,7 @@ const Inventory = () => {
                     importData
                     exportData
                     handleOptionClicked={handleOptionClicked}
-                    onCreationHandler={() => console.log("Creation")}
+                    onCreationHandler={handleCreation}
                     module='user'
                     header={header}
                     rows={inventoryList}
