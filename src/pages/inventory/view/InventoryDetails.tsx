@@ -49,12 +49,7 @@ const InventoryDetails = () => {
                             <Divider />
                             <DetailSection label='Cost Price' text={currentInventory?.costPrice} />
                             {currentInventory?.purchasePrice && <DetailSection label="Purchase Price" text={currentInventory?.purchasePrice} />}
-                            {/* {currentInventory?.quantityInStock && <DetailSection label="Quantity In Stock" text={(currentInventory?.quantityInStock).toString()} />} */}
-                            {/* <DetailSection label="Unit of Measure" text={currentInventory?.unitOfMeasure} /> */}
-                            {/* <DetailSection label="Expiration Date" text={currentInventory?.expirationDate} /> */}
                             {currentInventory?.location && <DetailSection label="Location" text={currentInventory?.location} />}
-                            {/* {currentInventory?.supplier && <DetailSection label="Supplier" text={currentInventory?.supplier} />} */}
-                            {/* {currentInventory?.reorderLevel && <DetailSection label="Reorder Level" text={currentInventory?.reorderLevel} />} */}
                             {currentInventory?.description && <DetailSection label="Description" text={currentInventory?.description} />}
                         </CardContent>
                     </Card>
