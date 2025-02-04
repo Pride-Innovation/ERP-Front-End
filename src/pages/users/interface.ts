@@ -1,4 +1,9 @@
-import { Control, FieldError, FormState, UseFormRegister } from "react-hook-form";
+import {
+    Control,
+    FieldError,
+    FormState,
+    UseFormRegister
+} from "react-hook-form";
 import { IRole } from "../settings/interface";
 
 export interface IUsersExcludedTableData {

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Grid } from "@mui/material"
 import TableComponent from "../../components/tables/TableComponent";
 import InventoryUtills from "./Utills";
@@ -7,8 +7,10 @@ import ModalComponent from "../../components/modal";
 import { inventoryMock } from "../../mocks/inventory";
 import CreateInventory from "./CreateInventory";
 import UpdateInventory from "./UpdateInventory";
+import DeleteInventory from "./DeleteInventory";
 
 const Inventory = () => {
+    const [sendingRequest, setSendingRequest] = useState<boolean>(false)
     const {
         columnHeaders,
         setModalState,
@@ -37,6 +39,7 @@ const Inventory = () => {
     const handleOptionClicked = async (option: string | number, moduleID?: string | number) => {
         switch (option) {
             case crudStates.deactivate:
+                findCurrentInventory(moduleID as number)
                 setModalState(option as string)
                 handleOpen();
                 break;
@@ -65,9 +68,8 @@ const Inventory = () => {
                 </ModalComponent>
             }
             {modalState === crudStates.deactivate &&
-                <ModalComponent title='Deactivate User' open={open} handleClose={handleClose} width="40%">
-                    {/* <Deactivate handleDeactivate={deactivateUser} user={user} handleClose={handleClose} buttonText='Deactivate' sendingRequest={false} /> */}
-                    <p>Update Inventory</p>
+                <ModalComponent title='Deactivate Inventory' open={open} handleClose={handleClose} width="40%">
+                    <DeleteInventory setSendingRequest={setSendingRequest} handleClose={handleClose} buttonText='Deactivate' sendingRequest={false} />
                 </ModalComponent>
             }
             {columnHeaders.length > 0 &&

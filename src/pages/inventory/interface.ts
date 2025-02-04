@@ -1,3 +1,4 @@
+import { Dispatch, SetStateAction } from "react";
 import { Control, FieldError, FormState, UseFormRegister } from "react-hook-form";
 
 interface IInventory {
@@ -21,6 +22,13 @@ interface ICreateInventory {
 
 interface IUpdateInventory {
     handleClose: () => void;
+}
+
+interface IDeleteInventory {
+    handleClose: () => void;
+    sendingRequest: boolean;
+    setSendingRequest: Dispatch<SetStateAction<boolean>>;
+    buttonText: string;
 }
 
 interface IInventoryForm {
@@ -50,5 +58,6 @@ export type {
     IInventory,
     ICreateInventory,
     IInventoryForm,
-    IUpdateInventory
+    IUpdateInventory,
+    IDeleteInventory
 }
