@@ -41,10 +41,10 @@ interface IInventoryForm {
             category?: FieldError;
             reorderLevel?: FieldError;
             costPrice?: FieldError;
-            purchasePrice?: FieldError
-            supplier?: FieldError
-            description?: FieldError
-            expirationDate?: FieldError
+            purchasePrice?: FieldError;
+            supplier?: FieldError;
+            description?: FieldError;
+            expirationDate?: FieldError;
         };
     };
     control: Control<IInventory>;

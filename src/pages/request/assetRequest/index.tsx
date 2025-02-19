@@ -24,7 +24,9 @@ const RequestsManagement = () => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const { routePermission, determinePermission } = RoutesUtills();
+  const { routePermission,
+    // determinePermission
+  } = RoutesUtills();
 
 
   useEffect(() => { setPath(pathname) }, [pathname])
@@ -65,14 +67,16 @@ const RequestsManagement = () => {
           <Stack direction="row" spacing={1}>
             {navigations.map(item => (
               <>
-                {determinePermission(item.permission) && <Button
+                {/* {determinePermission(item.permission) && */}
+                <Button
                   startIcon={item.icon}
                   onClick={() => navigate(item.path)}
                   key={item.id}
                   variant={determineActivePath(item) ? "contained" : "outlined"}
                 >
                   {item.text}
-                </Button>}
+                </Button>
+                {/* } */}
               </>
             ))}
           </Stack>

@@ -15,7 +15,7 @@ const DeleteUnitOfMeasure = ({
 }: IDeleteUnitOfMeasure) => {
     const { removeUnitOfMeasureToStore } = UnitMeasureUtills();
 
-    const deleteBranch = async () => {
+    const deleteUnitOfMeasure = async () => {
         setSendingRequest(true)
         const response = await deleteUnitMeasureService(unitOfMeasure?.id as string);
         setSendingRequest(false)
@@ -54,7 +54,7 @@ const DeleteUnitOfMeasure = ({
                         buttonText="Close"
                     />
                     <ButtonComponent
-                        handleClick={deleteBranch}
+                        handleClick={deleteUnitOfMeasure}
                         buttonColor='error'
                         type='submit'
                         sendingRequest={sendingRequest}

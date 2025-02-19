@@ -5,7 +5,8 @@ const listSuppliersService = async () => {
         const response = await axiosInstance.get('suppliers');
         return response.data?.data;
     } catch (error) {
-        throw error;
+        // throw error;
+        console.log(error)
     }
 }
 

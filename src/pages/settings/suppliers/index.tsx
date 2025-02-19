@@ -32,6 +32,7 @@ const Suppliers = () => {
         handleOpen()
     }
 
+    console.log(suppliers, "Suppliers!!")
     return (
         <>
             {
@@ -99,14 +100,14 @@ const Suppliers = () => {
                         width: "100%",
                         alignItems: "center",
                     }}>
-                    {
+                    {/* {
                         suppliers.map(supplier => (
                             <SupplierDetails
                                 supplier={supplier}
                                 deleteSupplier={deleteSupplier}
                                 updateSupplier={updateSupplier} />
                         ))
-                    }
+                    } */}
                 </Box>
             </Box>
         </>
