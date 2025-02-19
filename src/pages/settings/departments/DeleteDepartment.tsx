@@ -1,0 +1,71 @@
+import { toast } from "react-toastify";
+import { IDeleteDepartment } from "./interface";
+import DepartmentUtills from "./utills";
+import { Grid, Stack, Typography } from "@mui/material";
+import ButtonComponent from "../../../components/forms/Button";
+import { deleteDepartmentService } from "./service";
+import { IUser } from "../../users/interface";
+import ApartmentIcon from '@mui/icons-material/Apartment';
+
+
+const DeleteDepartment = ({
+    sendingRequest,
+    setSendingRequest,
+    handleClose,
+    department,
+    buttonText
+}: IDeleteDepartment) => {
+    const { removeDepartmentFromStore } = DepartmentUtills();
+
+    const deleteUnitOfMeasure = async () => {
+        setSendingRequest(true)
+        const response = await deleteDepartmentService(department?.id as string);
+        setSendingRequest(false)
+        if (response?.status === "success") {
+            removeDepartmentFromStore(department)
+            handleClose();
+            toast.success(response?.data?.message)
+        }
+    }
+    return (
+        <Grid item container spacing={4} xs={12}>
+            <Grid item xs={12}>
+                <Typography variant="body1" sx={{ mb: 1 }}>
+                    Are you sure you want to delete this Department?
+                </Typography>
+                <Stack direction="row" spacing={1} alignItems="center">
+                    <ApartmentIcon color="primary" />
+                    <Typography variant="h6" color="primary">
+                        {department.name}
+                    </Typography>
+                </Stack>
+                {(department.head as IUser)?.name && <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 1 }}>
+                    <Typography variant="subtitle1" color="textSecondary">
+                        Head of Department: {(department.head as IUser)?.name}
+                    </Typography>
+                </Stack>}
+            </Grid>
+            <Grid item xs={12} sx={{ display: "flex", justifyContent: "end" }}>
+                <Stack direction="row" spacing={3} sx={{ width: "50%" }}>
+                    <ButtonComponent
+                        handleClick={handleClose}
+                        buttonColor='info'
+                        type='button'
+                        variant="outlined"
+                        sendingRequest={false}
+                        buttonText="Close"
+                    />
+                    <ButtonComponent
+                        handleClick={deleteUnitOfMeasure}
+                        buttonColor='error'
+                        type='submit'
+                        sendingRequest={sendingRequest}
+                        buttonText={buttonText}
+                    />
+                </Stack>
+            </Grid>
+        </Grid>
+    )
+}
+
+export default DeleteDepartment

@@ -27,8 +27,18 @@ const updateDepartmentService = async (body: Object, id: string | number) => {
     }
 }
 
+const deleteDepartmentService = async (id: string | number) => {
+    try {
+        const response = await axiosInstance.get(`departments/delete/${id}`);
+        return response.data
+    } catch (error) {
+        throw error;
+    }
+}
+
 export {
     listDepartmentsService,
     updateDepartmentService,
-    createDepartmentService
+    createDepartmentService,
+    deleteDepartmentService
 }

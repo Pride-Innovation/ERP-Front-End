@@ -50,6 +50,14 @@ interface IUpdateDepartment {
     department: IDepartment
 }
 
+export interface IDeleteDepartment {
+    handleClose: () => void;
+    sendingRequest: boolean;
+    setSendingRequest: Dispatch<SetStateAction<boolean>>;
+    buttonText: string;
+    department: IDepartment
+}
+
 export type {
     IDepartment,
     IDepartmentDetails,

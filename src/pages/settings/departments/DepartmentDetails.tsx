@@ -1,10 +1,10 @@
 import { Box, Button, Card, Stack, Typography } from "@mui/material"
 import { grey } from "@mui/material/colors"
-import ScaleIcon from '@mui/icons-material/Scale';
 import { IDepartmentDetails } from "./interface";
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
 import { IUser } from "../../users/interface";
+import ApartmentIcon from '@mui/icons-material/Apartment';
 
 const DepartmentDetails = ({
     deleteDepartment,
@@ -22,7 +22,7 @@ const DepartmentDetails = ({
                 py={1.5}
             >
                 <Typography noWrap variant="body2" sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-                    <ScaleIcon fontSize="small" color="info" sx={{ mr: "4px", fontSize: "16px" }} />
+                    <ApartmentIcon fontSize="small" color="info" sx={{ mr: "4px", fontSize: "16px" }} />
                     {department.name}
                 </Typography>
             </Box>

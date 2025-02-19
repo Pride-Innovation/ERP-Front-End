@@ -8,6 +8,7 @@ import DepartmentDetails from './DepartmentDetails';
 import ModalComponent from '../../../components/modal';
 import CreateDepartment from './CreateDepartment';
 import UpdateDepartment from './UpdateDepartment';
+import DeleteDepartment from './DeleteDepartment';
 
 const Departments = () => {
     const { departments, setModalState, handleClose, handleOpen, modalState, open } = DepartmentUtills();
@@ -31,7 +32,6 @@ const Departments = () => {
         handleOpen()
     }
 
-    console.log(departments, "departments!!!")
     return (
         <>
             {
@@ -39,7 +39,7 @@ const Departments = () => {
                     <CreateDepartment handleClose={handleClose} sendingRequest={sendingRequest} setSendingRequest={setSendingRequest} />
                 </ModalComponent>
             }
-            {/* {
+            {
                 crudStates.delete === modalState && <ModalComponent width={"35%"} title='Delete Department' open={open} handleClose={handleClose}>
                     <DeleteDepartment
                         department={currentDepartment}
@@ -49,7 +49,7 @@ const Departments = () => {
                         buttonText='Delete'
                     />
                 </ModalComponent>
-            } */}
+            }
             {
                 crudStates.update === modalState && <ModalComponent width={"50%"} title='Update Department' open={open} handleClose={handleClose}>
                     <UpdateDepartment
