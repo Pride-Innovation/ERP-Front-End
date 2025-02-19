@@ -7,6 +7,7 @@ import { ISettingsNavigation } from './interface';
 import { ROUTES } from '../../core/routes/routes';
 import ListAltIcon from '@mui/icons-material/ListAlt';
 import DownloadingIcon from '@mui/icons-material/Downloading';
+import ApartmentIcon from '@mui/icons-material/Apartment';
 
 const SettingsUtills = () => {
 
@@ -46,6 +47,12 @@ const SettingsUtills = () => {
             text: "Statuses",
             path: ROUTES.STATUSES,
             icon: <DownloadingIcon />
+        },
+        {
+            id: 6,
+            text: "Departments",
+            path: ROUTES.DEPARTMENT,
+            icon: <ApartmentIcon />
         }
     ]
 

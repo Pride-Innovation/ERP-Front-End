@@ -1,17 +1,7 @@
 import { Control, FieldError, FormState, UseFormRegister } from "react-hook-form";
 import { IUser } from "../../users/interface"
 import { Dispatch, SetStateAction } from "react";
-
-interface IDepartment {
-    id: string | number;
-    name: string;
-    status: 1;
-    desc: string;
-    image: string;
-    head: string | null;
-    created_at: string;
-    updated_at: string;
-}
+import { IDepartment } from "../departments/interface";
 
 interface IUnit {
     id?: number | string;

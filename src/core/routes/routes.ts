@@ -48,6 +48,7 @@ const UNITS: string = `${ASSETS_MANAGEMENT}/settings/units`;
 const UNITS_MEASURE: string = `${ASSETS_MANAGEMENT}/settings/units-of-measure`;
 const SUPPLIERS: string = `${ASSETS_MANAGEMENT}/settings/suppliers`;
 const STATUSES: string = `${ASSETS_MANAGEMENT}/settings/statuses`;
+const DEPARTMENT: string = `${ASSETS_MANAGEMENT}/settings/departments`;
 
 /* Errors Page */
 const ERRORS: string = `${ASSETS_MANAGEMENT}/restricted-access`
@@ -87,5 +88,6 @@ export const ROUTES = {
     UNITS_MEASURE,
     SUPPLIERS,
     STATUSES,
-    INVENTORY
+    INVENTORY,
+    DEPARTMENT
 }

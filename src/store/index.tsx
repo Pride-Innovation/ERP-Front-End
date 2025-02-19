@@ -13,6 +13,7 @@ import StatusesReducer from "../pages/settings/statuses/slice"
 import AssetsRequestsReducer from "../pages/request/assetRequest/slice"
 import InventoryReducer from "../pages/inventory/slice"
 import UnitReducer from "../pages/settings/unit/slice"
+import DepartmentReducer from "../pages/settings/departments/slice"
 
 export const store = configureStore({
     reducer: {
@@ -25,7 +26,8 @@ export const store = configureStore({
         StatusesStore: StatusesReducer,
         AssetsRequestsStore: AssetsRequestsReducer,
         InventoryStore: InventoryReducer,
-        UnitStore: UnitReducer
+        UnitStore: UnitReducer,
+        DepartmentStore: DepartmentReducer,
     },
 });
 
