@@ -15,6 +15,7 @@ const Suppliers = () => {
     const [currentSupplier, setCurrentSupplier] = useState<ISupplier>({} as ISupplier);
     const { suppliers, setModalState, handleOpen, modalState, open, handleClose } = SupplierUtills()
     const [sendingRequest, setSendingRequest] = useState<boolean>(false)
+
     const createSupplier = () => {
         setModalState(crudStates.create);
         handleOpen()
@@ -32,7 +33,6 @@ const Suppliers = () => {
         handleOpen()
     }
 
-    console.log(suppliers, "Suppliers!!")
     return (
         <>
             {

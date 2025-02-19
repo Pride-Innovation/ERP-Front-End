@@ -38,7 +38,7 @@ const DepartmentUtills = () => {
     const formFields: Array<IFormData<IDepartment>> = [
         {
             value: "name",
-            label: 'Unit Name',
+            label: 'Department Name',
             type: "input"
         },
         {

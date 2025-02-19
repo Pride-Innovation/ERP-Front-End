@@ -5,7 +5,6 @@ import { IDepartmentDetails } from "./interface";
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
 import { IUser } from "../../users/interface";
-import { useEffect, useState } from "react";
 
 const DepartmentDetails = ({
     deleteDepartment,

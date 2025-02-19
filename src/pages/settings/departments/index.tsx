@@ -5,6 +5,9 @@ import { Box } from '@mui/material';
 import ButtonComponent from '../../../components/forms/Button';
 import DepartmentUtills from './utills';
 import DepartmentDetails from './DepartmentDetails';
+import ModalComponent from '../../../components/modal';
+import CreateDepartment from './CreateDepartment';
+import UpdateDepartment from './UpdateDepartment';
 
 const Departments = () => {
     const { departments, setModalState, handleClose, handleOpen, modalState, open } = DepartmentUtills();
@@ -31,32 +34,32 @@ const Departments = () => {
     console.log(departments, "departments!!!")
     return (
         <>
+            {
+                crudStates.create === modalState && <ModalComponent width={"50%"} title='Create Department' open={open} handleClose={handleClose}>
+                    <CreateDepartment handleClose={handleClose} sendingRequest={sendingRequest} setSendingRequest={setSendingRequest} />
+                </ModalComponent>
+            }
             {/* {
-          crudStates.create === modalState && <ModalComponent width={"50%"} title='Create Department' open={open} handleClose={handleClose}>
-            <CreateDepartment handleClose={handleClose} sendingRequest={sendingRequest} setSendingRequest={setSendingRequest} />
-          </ModalComponent>
-        }
-        {
-          crudStates.delete === modalState && <ModalComponent width={"35%"} title='Delete Department' open={open} handleClose={handleClose}>
-            <DeleteDepartment
-              department={currentDepartment}
-              handleClose={handleClose}
-              sendingRequest={sendingRequest}
-              setSendingRequest={setSendingRequest}
-              buttonText='Delete'
-            />
-          </ModalComponent>
-        }
-        {
-          crudStates.update === modalState && <ModalComponent width={"50%"} title='Update Department' open={open} handleClose={handleClose}>
-            <UpdateDepartment
-              handleClose={handleClose}
-              sendingRequest={sendingRequest}
-              setSendingRequest={setSendingRequest}
-              department={currentDepartment}
-            />
-          </ModalComponent>
-        } */}
+                crudStates.delete === modalState && <ModalComponent width={"35%"} title='Delete Department' open={open} handleClose={handleClose}>
+                    <DeleteDepartment
+                        department={currentDepartment}
+                        handleClose={handleClose}
+                        sendingRequest={sendingRequest}
+                        setSendingRequest={setSendingRequest}
+                        buttonText='Delete'
+                    />
+                </ModalComponent>
+            } */}
+            {
+                crudStates.update === modalState && <ModalComponent width={"50%"} title='Update Department' open={open} handleClose={handleClose}>
+                    <UpdateDepartment
+                        handleClose={handleClose}
+                        sendingRequest={sendingRequest}
+                        setSendingRequest={setSendingRequest}
+                        department={currentDepartment}
+                    />
+                </ModalComponent>
+            }
             <Box sx={{ width: "100%" }}>
                 <Box sx={{
                     width: "100%",

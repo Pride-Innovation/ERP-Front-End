@@ -9,6 +9,26 @@ const listDepartmentsService = async () => {
     }
 }
 
+const createDepartmentService = async (body: Object) => {
+    try {
+        const response = await axiosInstance.post('departments/create', body);
+        return response.data
+    } catch (error) {
+        throw error;
+    }
+}
+
+const updateDepartmentService = async (body: Object, id: string | number) => {
+    try {
+        const response = await axiosInstance.post(`departments/update/${id}`, body);
+        return response.data
+    } catch (error) {
+        throw error;
+    }
+}
+
 export {
-    listDepartmentsService
+    listDepartmentsService,
+    updateDepartmentService,
+    createDepartmentService
 }

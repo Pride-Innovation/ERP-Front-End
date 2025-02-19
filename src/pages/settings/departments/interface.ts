@@ -1,16 +1,16 @@
+import { Control, FieldError, FormState, UseFormRegister } from "react-hook-form";
 import { IUser } from "../../users/interface";
 import { IUnit } from "../unit/interface";
+import { Dispatch, SetStateAction } from "react";
 
 interface IDepartment {
-    id: string | number;
+    id?: string | number;
     name: string;
-    status: 1;
-    desc: string;
-    image: string;
-    head: string | number | IUser |null ;
-    created_at: string;
-    updated_at: string;
-    units?: Array<IUnit>
+    status?: number | null;
+    desc?: string | null;
+    image?: any | null;
+    head?: string | number | IUser | null;
+    units?: Array<IUnit> | null
 }
 
 interface IDepartmentDetails {
@@ -19,7 +19,41 @@ interface IDepartmentDetails {
     updateDepartment: (role: IDepartment) => void;
 }
 
+
+interface IDepartmentForm {
+    formState: FormState<IDepartment> & {
+        errors: {
+            name?: FieldError;
+            email?: FieldError;
+            tel?: FieldError;
+            desc?: FieldError;
+            status?: FieldError;
+        };
+    };
+    control: Control<IDepartment>;
+    register: UseFormRegister<IDepartment>;
+    buttonText: string;
+    sendingRequest: boolean;
+    handleClose: () => void;
+}
+
+interface ICreateDepartment {
+    handleClose: () => void;
+    sendingRequest: boolean;
+    setSendingRequest: Dispatch<SetStateAction<boolean>>;
+}
+
+interface IUpdateDepartment {
+    handleClose: () => void;
+    sendingRequest: boolean;
+    setSendingRequest: Dispatch<SetStateAction<boolean>>;
+    department: IDepartment
+}
+
 export type {
     IDepartment,
-    IDepartmentDetails
+    IDepartmentDetails,
+    IDepartmentForm,
+    ICreateDepartment,
+    IUpdateDepartment
 }
