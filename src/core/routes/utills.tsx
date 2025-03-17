@@ -4,6 +4,7 @@ import { IPermission } from "../../pages/settings/interface";
 const RoutesUtills = () => {
     const accessToken: string = 'access-token';
     const currentUser: string = 'current-user';
+    const refreshToken: string = 'refreshToken';
 
     const getCurrentUser = () => {
         return JSON.parse(sessionStorage.getItem(currentUser) || '{}');
@@ -33,7 +34,8 @@ const RoutesUtills = () => {
         isAuthenticated,
         determinePermission,
         currentUser,
-        routePermission
+        routePermission,
+        refreshToken
     })
 }
 

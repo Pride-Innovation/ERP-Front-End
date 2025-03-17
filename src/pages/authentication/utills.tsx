@@ -3,11 +3,12 @@ import { IUser } from "../users/interface"
 import { jwtDecode } from "jwt-decode";
 
 const AuthenticationUtils = () => {
-    const { currentUser, accessToken } = RoutesUtills();
+    const { currentUser, accessToken, refreshToken } = RoutesUtills();
 
-    const handleSessionStorage = (user: IUser, token: string) => {
+    const handleSessionStorage = (user: IUser, token: string, refresh: string) => {
         sessionStorage.setItem(accessToken, token);
         sessionStorage.setItem(currentUser, JSON.stringify(user))
+        sessionStorage.setItem(refreshToken, refresh)
     }
 
     const handleLogout = () => {

@@ -26,10 +26,9 @@ export interface IAuthenticationForm {
     password?: boolean
 }
 
-export interface ILoginResponse {
-    status: "success" | "failed",
-    data: { access_token: string } | null,
-    message?: string;
+export interface ILoginResponse extends IUser {
+    accessToken: string;
+    refreshToken: string;
 }
 
 export interface IUserProfileResponse {

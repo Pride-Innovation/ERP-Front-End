@@ -8,7 +8,7 @@ import {
 import { yupResolver } from '@hookform/resolvers/yup';
 import AuthenticationImage from "../../statics/images/logo.1b6cf8fbdaaee75f39fd.bmp";
 import { authentiactionSchema } from './schema';
-import { IAuthentication, ILoginResponse, IUserProfileResponse } from './interface';
+import { IAuthentication, ILoginResponse } from './interface';
 import { useEffect, useState } from 'react';
 import { TypographyComponent } from '../../components/headers/TypographyComponent';
 import AuthenticationForm from './forms';
@@ -17,8 +17,7 @@ import { useNavigate } from 'react-router';
 import AuthenticationContainerComponent from '../../components/Container';
 import AuthenticationUtils from './utills';
 import { toast } from 'react-toastify';
-import { loginService, userProfileService } from './service';
-import { IUser } from '../users/interface';
+import { loginService } from './service';
 import { ErrorMessage } from '../../utils/constants';
 
 const Login = () => {
@@ -30,7 +29,6 @@ const Login = () => {
     const handleClickShowPassword = () => setShowPassword((show) => !show);
     const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => { event.preventDefault(); };
 
-    const { REACT_APP_CLIENT_ID, REACT_APP_CLIENT_SECRET } = process.env
     const {
         control,
         handleSubmit,
@@ -47,20 +45,19 @@ const Login = () => {
     const onSubmit = async (formData: IAuthentication) => {
         setLoggingIn(true);
         try {
-            const request = {
-                email: formData.email,
-                password: formData.password,
-                client_id: REACT_APP_CLIENT_ID,
-                client_secret: REACT_APP_CLIENT_SECRET
+            const response = await loginService(formData) as unknown as ILoginResponse;
+            const { accessToken, refreshToken, ...data } = response;
+
+            if (response.accessToken) {
+                handleSessionStorage(
+                    data,
+                    response.accessToken,
+                    response.refreshToken
+                )
+                toast.success(`Welcome ${response.firstName} !!`)
+                navigate(ROUTES.ASSETS_MANAGEMENT);
             }
 
-            const response = await loginService(request) as unknown as ILoginResponse;
-            if (response.status === 'failed') return toast.error(response?.message);
-            const res = await userProfileService(response.data?.access_token as string) as unknown as IUserProfileResponse;
-            if (res.status === "failed") return ErrorMessage;
-            handleSessionStorage(res.data?.user as IUser, response.data?.access_token as string)
-            toast.success(`Welcome ${res.data?.user?.name} !!`)
-            navigate(ROUTES.ASSETS_MANAGEMENT);
         } catch (error) {
             toast.error(ErrorMessage)
         }

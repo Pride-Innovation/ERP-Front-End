@@ -3,7 +3,8 @@ import { IUnitDetails } from './interface'
 import { grey } from '@mui/material/colors'
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
-import ScaleIcon from '@mui/icons-material/Scale';
+// import ScaleIcon from '@mui/icons-material/Scale';
+import BedroomBabyOutlinedIcon from '@mui/icons-material/BedroomBabyOutlined';
 
 
 const UnitDetails = ({
@@ -22,7 +23,7 @@ const UnitDetails = ({
                 py={1.5}
             >
                 <Typography noWrap variant="body2" sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-                    <ScaleIcon fontSize="small" color="info" sx={{ mr: "4px", fontSize: "16px" }} />
+                    <BedroomBabyOutlinedIcon fontSize="small" color="info" sx={{ mr: "4px", fontSize: "16px" }} />
                     {unit.name}
                 </Typography>
             </Box>

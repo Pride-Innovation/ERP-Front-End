@@ -1,5 +1,5 @@
-import { Box, Button, Card, Stack, Typography } from "@mui/material"
-import { grey } from "@mui/material/colors"
+import { Box, Button, Card, Stack, Typography } from "@mui/material";
+import { grey } from "@mui/material/colors";
 import { IDepartmentDetails } from "./interface";
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
