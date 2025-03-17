@@ -13,6 +13,7 @@ import DeleteRequest from "../../DeleteRequest";
 import TableComponent from "../../../../components/tables/TableComponent";
 import RequestUtills from "../utills";
 import RequestDetails from "../../RequestDetails";
+import { requestMock } from "../../../../mocks/request";
 
 const Request = () => {
     const [loading, setLoading] = useState<boolean>(false);
@@ -39,9 +40,10 @@ const Request = () => {
     const fetchResources = async () => {
         setLoading(true)
         try {
-            const response = await fetchRowsService({ page: 1, size: 10, endPoint });
-            const data = response?.data as IRequest[]
-            addAllRequestsInStore(data)
+            // const response = await fetchRowsService({ page: 1, size: 10, endPoint });
+            // const data = response?.data as IRequest[]
+            // addAllRequestsInStore(data)
+            addAllRequestsInStore(requestMock)
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : ErrorMessage;
             console.log(errorMessage)

@@ -18,7 +18,7 @@ import { AppDispatch, RootState } from '../../../store';
 import { loadAllRequests, removeAssetRequest } from './slice';
 import { useSelector } from 'react-redux';
 import { listAssetStatusesService } from '../../settings/statuses/service';
-import { IStatus } from '../../settings/statuses/interface';
+import { IStatusFetchResponse } from '../../settings/statuses/interface';
 import { loadStatuses } from '../../settings/statuses/slice';
 import moment from 'moment';
 
@@ -51,8 +51,8 @@ const RequestUtills = () => {
     }
 
     const fetchAllStatuses = async () => {
-        const response = await listAssetStatusesService() as Array<IStatus>;
-        dispatch(loadStatuses(response))
+        const response = await listAssetStatusesService() as IStatusFetchResponse;
+        dispatch(loadStatuses(response.content))
     }
 
     useEffect(() => { fetchAllStatuses() }, []);
@@ -164,7 +164,7 @@ const RequestUtills = () => {
                     timeOfSubmissionOfRequest: moment(request.timeOfSubmissionOfRequest).format('LT'),
                     fromPosition: request.fromPosition,
                     position: request.position,
-                    status: request.status 
+                    status: request.status
                     // status: determineStatusColor(request.status as string)
                 }
             )

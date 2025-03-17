@@ -2,8 +2,8 @@ import axiosInstance from "../../../../core/apis/axiosInstance";
 
 const listAssetStatusesService = async () => {
     try {
-        const response = await axiosInstance.get('assetStatuses');
-        return response.data?.data;
+        const response = await axiosInstance.get('/statuses');
+        return response.data;
     } catch (error) {
         throw error;
     }
