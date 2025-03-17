@@ -27,7 +27,7 @@ const DashBoardUtills = () => {
         id,
         requester,
         name,
-        desc,
+        description,
         ...data
     } = requestMock[0];
 

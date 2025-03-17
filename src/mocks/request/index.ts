@@ -7,12 +7,11 @@ export const requestMock: IRequest[] = [
     {
         id: 1,
         name: "Software Upgrade Request",
-        requesterID: 12345,
-        requestDate: "2024-11-01",
+        createDate: "2024-11-01",
         quantity: 1,
         priority: "High",
-        status: "pending",
-        desc: "Requesting to upgrade the software on the development machine.",
+        // status: "pending",
+        description: "Requesting to upgrade the software on the development machine.",
         requester: {
             reportsTo: "Jane Smith",
             firstName: "John",
@@ -29,9 +28,6 @@ export const requestMock: IRequest[] = [
             role: rolesMock[0]
         },
         timeOfSubmissionOfRequest: new Date().toISOString(),
-        position: "Software Engineer",
-        fromPosition: "Junior Software Engineer",
-        Narration: "test",
     }
 ];
 

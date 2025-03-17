@@ -18,7 +18,7 @@ const createStatusService = async (body: Object) => {
     }
 }
 
-const updateStatusService = async (body: Object, id: string | number) => {
+const updateStatusService = async (body: Object, id: number) => {
     try {
         const response = await axiosInstance.post(`assetStatuses/update/${id}`, body)
         return response?.data
@@ -27,7 +27,7 @@ const updateStatusService = async (body: Object, id: string | number) => {
     }
 }
 
-const deleteStatusService = async (id: string | number) => {
+const deleteStatusService = async (id: number) => {
     try {
         const response = await axiosInstance.get(`assetStatuses/delete/${id}`)
         return response?.data

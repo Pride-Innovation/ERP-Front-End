@@ -10,7 +10,7 @@ export const requestSchema = yup.object().shape({
     timeOfSubmissionOfRequest: yup.string().optional().nullable(),
     desc: yup.string().optional().nullable(),
     signature: yup.mixed().optional().nullable(),
-    status: yup.string().nullable().optional(),
+    // status: yup.mixed().nullable().optional(),
     position: yup.string().optional().nullable(),
     fromPosition: yup.string().optional().nullable(),
     Narration: yup.string().optional().nullable(),

@@ -65,7 +65,7 @@ const RequestDetails: React.FC<IRequestDetails> = ({ handleClose, data, sendingR
                         </Typography>
 
                         <Typography variant="body1" fontWeight={500}>
-                            <strong>Purpose:</strong> {details.Narration}
+                            <strong>Purpose:</strong> {details.priority}
                         </Typography>
 
                         {isIRequest(details) && (
@@ -75,7 +75,7 @@ const RequestDetails: React.FC<IRequestDetails> = ({ handleClose, data, sendingR
                                 </Typography>
 
                                 <Typography variant="body1" fontWeight={500}>
-                                    <strong>Date:</strong> {details?.position}
+                                    <strong>Date:</strong> {details?.description}
                                 </Typography>
                             </>
                         )}
@@ -123,7 +123,7 @@ const RequestDetails: React.FC<IRequestDetails> = ({ handleClose, data, sendingR
                 <Grid item xs={12}>
                     {isIRequest(details) && (
                         <Typography variant="body1" fontWeight={500}>
-                            <strong>Description:</strong> {details?.desc}
+                            <strong>Description:</strong> {details?.description}
                         </Typography>
                     )}
                 </Grid>

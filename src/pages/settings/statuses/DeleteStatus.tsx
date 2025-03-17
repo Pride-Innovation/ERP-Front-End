@@ -16,7 +16,7 @@ const DeleteStatus = ({
     const { removeStatusFromStore } = StatusUtills()
     const deleteBranch = async () => {
         setSendingRequest(true)
-        const response = await deleteStatusService(status?.id as string);
+        const response = await deleteStatusService(status?.id as number);
         setSendingRequest(false)
         if (response?.status === "success") {
             removeStatusFromStore(status)

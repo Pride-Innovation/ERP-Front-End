@@ -41,7 +41,7 @@ const UpdateRequest = () => {
 
     const onSubmit = async (formData: IRequest) => {
         setSendingRequest(true);
-        const { requester, requesterID, ...data } = formData;
+        const { requester, ...data } = formData;
         const request = {
             ...data,
             requester_id: formData?.requester?.id,

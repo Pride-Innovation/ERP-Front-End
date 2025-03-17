@@ -35,7 +35,7 @@ const UpdateStatus = ({ status, handleClose, sendingRequest, setSendingRequest }
             user_id: 1
         }
 
-        const response = await updateStatusService(request, formData?.id as string) as IResponseData;
+        const response = await updateStatusService(request, formData?.id as number) as IResponseData;
         if (response.status === 'success') {
             updateStatusInStore(response.data[0] as unknown as IStatus)
             toast.success(response.data.message)

@@ -54,7 +54,7 @@ const RequestForm = ({
 
     return (
         <Grid item container xs={12} spacing={3}>
-            <Grid item container md={3}>
+            <Grid item container md={4}>
                 <Card sx={{ boxShadow: 0, bgcolor: grey[100] }}>
                     <CardMedia
                         component="img"
@@ -76,11 +76,11 @@ const RequestForm = ({
 
                 </Card>
             </Grid>
-            <Grid item container spacing={4} md={9} xs={12}>
+            <Grid item container spacing={4} md={8} xs={12}>
                 {
                     formFields.map(formField => {
                         return formField.type === 'input' ? (
-                            <Grid item xs={12} md={3}>
+                            <Grid item xs={12} md={4}>
                                 <UseFormInput
                                     register={register}
                                     control={control}
@@ -90,7 +90,7 @@ const RequestForm = ({
                                 />
                             </Grid>
                         ) : formField.type === 'textarea' ? (
-                            <Grid item xs={12} md={9}>
+                            <Grid item xs={12} md={12}>
                                 <UseFormInput
                                     row={6}
                                     multiline={true}
@@ -102,7 +102,7 @@ const RequestForm = ({
                                 />
                             </Grid>
                         ) : formField.type === 'select' ? (
-                            <Grid item xs={12} md={3}>
+                            <Grid item xs={12} md={4}>
                                 <UseFormSelect
                                     options={formField.options}
                                     register={register}
@@ -112,7 +112,7 @@ const RequestForm = ({
                                     label={formField.label} />
                             </Grid>
                         ) : formField.type === 'date' ? (
-                            <Grid item xs={12} md={3}>
+                            <Grid item xs={12} md={4}>
                                 <UseFormDatePicker
                                     register={register}
                                     control={control}
@@ -121,7 +121,7 @@ const RequestForm = ({
                                     label={formField.label} />
                             </Grid>
                         ) : formField.type === 'time' ? (
-                            <Grid item xs={12} md={3}>
+                            <Grid item xs={12} md={4}>
                                 <UseFormTimePicker
                                     register={register}
                                     control={control}
@@ -130,7 +130,7 @@ const RequestForm = ({
                                     label={formField.label} />
                             </Grid>
                         ) : formField.type === 'autocomplete' ? (
-                            <Grid item xs={12} md={3}>
+                            <Grid item xs={12} md={4}>
                                 <UseFormAutocompleteComponent
                                     register={register}
                                     control={control}

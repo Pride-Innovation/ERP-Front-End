@@ -3,7 +3,7 @@ import { Control, FieldError, FormState, UseFormRegister } from "react-hook-form
 import { IFetchDataRequest } from "../../../core/apis/interface";
 
 export interface IStatus {
-    id?: string | number;
+    id?: number;
     name: string;
     desc?: string | null;
     status?: string | null;

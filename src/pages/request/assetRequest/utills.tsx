@@ -64,23 +64,19 @@ const RequestUtills = () => {
     const {
         id,
         requester,
-        requesterID,
-        requestDate,
         timeOfSubmissionOfRequest,
-        Narration,
         name,
-        desc,
+        description,
+        status,
         ...data
     } = requestMock[0];
 
     const rowData = {
         name: `${requestMock[0].requester?.name}`,
-        requestDate: requestMock[0]?.requestDate,
+        requestDate: requestMock[0]?.createDate,
         timeOfSubmissionOfRequest: requestMock[0]?.timeOfSubmissionOfRequest,
-        fromPosition: requestMock[0].fromPosition,
-        position: requestMock[0].position,
         ...data,
-        status: requestMock[0]?.status,
+        // status: requestMock[0]?.status,
         action: {
             label: "options",
             options: [
@@ -114,28 +110,14 @@ const RequestUtills = () => {
             type: "select",
             options: optionsObject.statusesOptions
         },
-        {
-            value: "position",
-            label: "position",
-            type: "input"
-        },
+
         {
             value: "quantity",
             label: "Quantity",
             type: "input"
         },
         {
-            value: "fromPosition",
-            label: "From Position",
-            type: "input"
-        },
-        {
-            value: "Narration",
-            label: "Narration",
-            type: "input"
-        },
-        {
-            value: "desc",
+            value: "description",
             label: "Description",
             type: "textarea"
         },
@@ -160,10 +142,10 @@ const RequestUtills = () => {
                 {
                     name: `${request.requester?.name}`,
                     ...fielsdata,
-                    requestDate: moment(request.requestDate).format('LL'),
+                    requestDate: moment(request.createDate).format('LL'),
                     timeOfSubmissionOfRequest: moment(request.timeOfSubmissionOfRequest).format('LT'),
-                    fromPosition: request.fromPosition,
-                    position: request.position,
+                    // fromPosition: request.fromPosition,
+                    // position: request.position,
                     status: request.status
                     // status: determineStatusColor(request.status as string)
                 }
@@ -178,12 +160,12 @@ const RequestUtills = () => {
     }
 
     const filterPendingRecords = (items: Array<IRequest>) => {
-        setPendingRequests(items.filter(item => item.status === requestStatus.pending))
+        setPendingRequests(items.filter(item => item.status?.name === requestStatus.pending))
     }
 
 
     const filterRejectedRecords = (items: Array<IRequest>) => {
-        setRejectedRequests(items.filter(item => item.status === requestStatus.rejected))
+        setRejectedRequests(items.filter(item => item.status?.name === requestStatus.rejected))
     }
     useEffect(() => {
         setColumnHeaders(getTableHeaders(rowData))

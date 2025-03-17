@@ -7,6 +7,7 @@ import {
 import { IUser } from "../users/interface";
 import { IPermission } from "../settings/interface";
 import { Dispatch, SetStateAction } from "react";
+import { IStatus } from "../settings/statuses/interface";
 
 export interface IAssetParticulars {
     name: string;
@@ -17,20 +18,17 @@ export interface IAssetParticulars {
 export interface IRequest {
     id?: string | number;
     name: string;
-    requestDate?: string | null;
-    requesterID?: number | null,
     quantity?: number | null,
     priority: string;
     timeOfSubmissionOfRequest?: string | null;
-    desc?: string | null;
-    signature?: any | null,
-    status?: string | null;
-    position?: string | null;
-    fromPosition?: string | null
-    Narration?: string | null,
-    requester?: IUser,
-    // approvedAt?: string | null,
-    // approvedBy?: string | number
+    description?: string | null;
+    signaturePath?: any | null,
+    status?: IStatus | null;
+    createDate?: string,
+    lastModified?: string,
+    createdBy?: number,
+    lastModifiedBy?: number,
+    requester?: IUser
 }
 
 export interface IRequestTableData {
@@ -42,7 +40,7 @@ export interface IRequestTableData {
     timeOfSubmissionOfRequest?: string | null;
     desc?: string | null;
     signature?: any | null,
-    status?: string | null;
+    status?: IStatus | null;
     position?: string | null;
     fromPosition?: string | null
     Narration?: string | null,

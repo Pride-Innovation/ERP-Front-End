@@ -31,16 +31,8 @@ const CreateRequest = () => {
     }, [reset]);
 
     const onSubmit = async (formData: IRequest) => {
-        const date = new Date().toUTCString();
-
         setSendingRequest(true);
-        const request = {
-            ...formData,
-            requester_id: 1,
-            requestDate: moment(date).format('YYYY-MM-DD HH:mm:ss'),
-            timeOfSubmissionOfRequest: moment(date).format('YYYY-MM-DD HH:mm:ss'),
-        }
-        const response = await createAssetRequestService(request) as IResponseData;
+        const response = await createAssetRequestService(formData) as IResponseData;
         toast.success(response.data.message)
         setSendingRequest(false)
     };
