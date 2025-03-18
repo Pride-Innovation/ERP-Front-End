@@ -39,7 +39,9 @@ const updateTranportRequestService = async (body: Object, id: string | number) =
 
 const deleteTranportRequestService = async (id: string | number) => {
     try {
-        const response = await axiosInstance.get(`fleetRequisitions/delete/${id}`);
+        console.log(id, "id")
+        const response = await axiosInstance.delete(`/requests/${id}`);
+        console.log(response, "response!!")
         return response?.data
     } catch (error) {
         throw (error)

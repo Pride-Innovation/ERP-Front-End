@@ -46,6 +46,18 @@ const DeleteRequest = ({
                     <HelpOutlineOutlinedIcon color="primary" />
                     <Typography variant="h6" color="primary">
                         {isIRequest(request) ? (
+                            request?.name
+                        ) : isITransportRequest(request) ? (
+                            request.purpose
+                        ) : (
+                            "No relevant information available"
+                        )}
+                    </Typography>
+                </Stack>
+                <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 1 }}>
+                    <Typography variant="subtitle1" color="textSecondary">
+                        <b>Request Description: </b>
+                        {isIRequest(request) ? (
                             request?.description
                         ) : isITransportRequest(request) ? (
                             request.purpose

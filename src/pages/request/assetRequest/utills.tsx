@@ -37,9 +37,11 @@ const RequestUtills = () => {
     const { assetsRequests } = useSelector((state: RootState) => state.AssetsRequestsStore)
 
     useEffect(() => {
-        setOptionsObject({
-            statusesOptions: statuses?.map(status => ({ label: status.name, value: status.id as number })) || [],
-        })
+        if (statuses.length > 0) {
+            setOptionsObject({
+                statusesOptions: statuses?.map(status => ({ label: status.name, value: status.id as number })) || [],
+            })
+        }
 
     }, [statuses])
 

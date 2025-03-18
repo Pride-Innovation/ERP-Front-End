@@ -7,7 +7,6 @@ const createAssetRequestService = async (object: Object) => {
                 'Content-Type': 'multipart/form-data',
             }
         });
-        console.log(response?.data, "Response data!!")
         return response?.data
     } catch (error) {
         console.log(error)
@@ -16,7 +15,11 @@ const createAssetRequestService = async (object: Object) => {
 
 const updateAssetRequestService = async (body: Object, id: string | number) => {
     try {
-        const response = await axiosInstance.post(`assetRequisitions/update/${id}`, body);
+        const response = await axiosInstance.put(`/requests/${id}`, body, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            }
+        });
         return response?.data
     } catch (error) {
         throw (error)
@@ -25,7 +28,7 @@ const updateAssetRequestService = async (body: Object, id: string | number) => {
 
 const deleteAssetRequestService = async (id: string | number) => {
     try {
-        const response = await axiosInstance.get(`assetRequisitions/delete/${id}`);
+        const response = await axiosInstance.delete(`/requests/${id}`);
         return response?.data
     } catch (error) {
         throw (error)
@@ -35,10 +38,10 @@ const deleteAssetRequestService = async (id: string | number) => {
 
 const findAssetRequestByIDService = async (id: string | number) => {
     try {
-        const response = await axiosInstance.get(`assetRequisitions/${id}`);
+        const response = await axiosInstance.get(`/requests/${id}`);
         return response?.data
     } catch (error) {
-        throw (error)
+        console.log(error)
     }
 }
 

@@ -19,7 +19,7 @@ const UpdateRequest = () => {
 
     const findAssetRequestById = async () => {
         const response = await findAssetRequestByIDService(id as string);
-        setDefaultRequest(response?.data)
+        setDefaultRequest({ ...response, status: response?.status?.id })
     }
 
     useEffect(() => { findAssetRequestById() }, [id]);
@@ -41,16 +41,19 @@ const UpdateRequest = () => {
 
     const onSubmit = async (formData: IRequest) => {
         setSendingRequest(true);
-        const { requester, ...data } = formData;
-        const request = {
-            ...data,
-            requester_id: formData?.requester?.id,
-        }
-        const response = await updateAssetRequestService({
-            ...request,
-            signature: signature
-        }, id as string) as IResponseData;
-        toast.success(response.data.message);
+
+        const request = new FormData();
+        request.append("priority", formData.priority)
+        request.append("quantity", (formData.quantity as number).toString())
+        request.append("name", formData.name)
+        request.append("status", formData.status as unknown as string)
+        request.append("description", formData.description as string)
+        // request.append("file", "file")
+
+        const response = await updateAssetRequestService(request, id as string) as IResponseData;
+        console.log(response, "request updated!!")
+
+        // toast.success(response.data.message);
         setSendingRequest(false)
     };
 

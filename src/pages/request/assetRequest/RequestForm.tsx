@@ -145,7 +145,7 @@ const RequestForm = ({
                     })
                 }
                 <Grid item xs={12} sx={{ display: "flex", justifyContent: "end" }}>
-                    <Stack direction="row" spacing={3} sx={{ width: "30%" }}>
+                    <Stack direction="row" spacing={3} sx={{ width: "40%" }}>
                         <ButtonComponent
                             handleClick={() => navigate(ROUTES.REQUEST)}
                             buttonColor='error'
