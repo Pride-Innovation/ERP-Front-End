@@ -71,6 +71,8 @@ export interface IRequestForm {
     sendingRequest: boolean;
     setImage: Dispatch<SetStateAction<string>>
     image: string;
+    setFile?: Dispatch<SetStateAction<File | null>>
+    file?: File | null;
 }
 
 export interface IDeleteRequest {

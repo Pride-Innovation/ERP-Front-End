@@ -32,6 +32,7 @@ const RequestForm = ({
     sendingRequest,
     buttonText,
     setImage,
+    setFile,
     image
 }: IRequestForm) => {
     const { formFields } = RequestUtills();
@@ -48,7 +49,8 @@ const RequestForm = ({
 
     const handleFileUpload = (files: FileList | null) => {
         if (!files) return;
-        const file = files[0];
+        const file = files[0] as File;
+        setFile?.(file)
         setImage(URL.createObjectURL(file));
     };
 

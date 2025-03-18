@@ -13,6 +13,7 @@ import RoutesUtills from "../../../core/routes/utills";
 const CreateRequest = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
     const [signature, setSignature] = useState<string>("")
+    const [file, setFile] = useState<File | null>( null)
     const defaultRequest: IRequest = {} as IRequest;
     const { getCurrentUser } = RoutesUtills();
 
@@ -34,6 +35,9 @@ const CreateRequest = () => {
 
     const onSubmit = async (formData: IRequest) => {
         setSendingRequest(true);
+
+        console.log(file)
+
         const currentUserID = getCurrentUser()?.id
         const request = new FormData();
         request.append("priority", formData.priority)
@@ -41,7 +45,7 @@ const CreateRequest = () => {
         request.append("name", formData.name)
         request.append("status", formData.status as unknown as string)
         request.append("description", formData.description as string)
-        request.append("file", "file")
+        request.append("file", file as unknown as string)
         request.append("requesterId", currentUserID)
 
         const response = await createAssetRequestService(request) as IResponseData;
@@ -62,6 +66,8 @@ const CreateRequest = () => {
                             onSubmit={handleSubmit(onSubmit)}
                         >
                             <RequestForm
+                                setFile={setFile}
+                                file={file}
                                 setImage={setSignature}
                                 image={signature}
                                 formState={formState}
