@@ -41,8 +41,8 @@ const TransportRequest = () => {
         setLoading(true);
         try {
             const response = await fetchRowsService({
-                page: 1,
-                // size: 10, 
+                pageNumber: 1,
+                pageSize: 10, 
                 endPoint
             });
             const data = response?.data as ITransportRequest[]

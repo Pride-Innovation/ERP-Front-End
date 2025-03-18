@@ -12,8 +12,8 @@ const CustomTablePagination = ({ endPoint }: ICustomTablePagination) => {
     const handleTablePagination = async (model: GridPaginationModel) => {
         try {
             const response = await fetchRowsService({
-                page: (model.page + 1),
-                size: model.pageSize,
+                pageNumber: (model.page + 1),
+                pageSize: model.pageSize,
                 endPoint
             }) as unknown as GridRowsProp;
             setRows([...response]);

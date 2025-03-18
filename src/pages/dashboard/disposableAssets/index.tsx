@@ -17,8 +17,8 @@ const DisposalAssets = () => {
         try {
             const response = await fetchRowsService(
                 {
-                    page: 1,
-                    size: 10,
+                    pageNumber: 1,
+                    pageSize: 10,
                     endPoint
                 }
             ) as unknown as GridRowsProp;

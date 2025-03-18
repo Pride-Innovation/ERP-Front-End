@@ -5,15 +5,17 @@ import { Box, Card, Divider, Grid, Typography } from "@mui/material";
 import RequestForm from "./RequestForm";
 import { IRequest } from "../interface";
 import { requestSchema } from "./schema";
-import moment from "moment";
 import { createAssetRequestService } from "./service";
 import { IResponseData } from "../../users/interface";
 import { toast } from "react-toastify";
+import RoutesUtills from "../../../core/routes/utills";
 
 const CreateRequest = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
     const [signature, setSignature] = useState<string>("")
     const defaultRequest: IRequest = {} as IRequest;
+    const { getCurrentUser } = RoutesUtills();
+
 
     const {
         control,
@@ -32,8 +34,18 @@ const CreateRequest = () => {
 
     const onSubmit = async (formData: IRequest) => {
         setSendingRequest(true);
-        const response = await createAssetRequestService(formData) as IResponseData;
-        toast.success(response.data.message)
+        const currentUserID = getCurrentUser()?.id
+        const request = new FormData();
+        request.append("priority", formData.priority)
+        request.append("quantity", (formData.quantity as number).toString())
+        request.append("name", formData.name)
+        request.append("status", formData.status as unknown as string)
+        request.append("description", formData.description as string)
+        request.append("file", "file")
+        request.append("requesterId", currentUserID)
+
+        const response = await createAssetRequestService(request) as IResponseData;
+        // toast.success(response.data.message)
         setSendingRequest(false)
     };
 

@@ -49,7 +49,8 @@ const DashBoardUtills = () => {
                 {
                     name: `${request.requester?.firstName} ${request.requester?.lastName}`,
                     department: request.requester?.department,
-                    ...fielsdata
+                    ...fielsdata,
+                    status: request.status?.status
                 }
             )
         })

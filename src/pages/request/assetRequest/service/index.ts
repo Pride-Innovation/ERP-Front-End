@@ -2,11 +2,15 @@ import axiosInstance from "../../../../core/apis/axiosInstance"
 
 const createAssetRequestService = async (object: Object) => {
     try {
-        const response = await axiosInstance.post("/requests", object);
-        console.log(response.data, "response data!!")
+        const response = await axiosInstance.post("/requests", object, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            }
+        });
+        console.log(response?.data, "Response data!!")
         return response?.data
     } catch (error) {
-        throw (error)
+        console.log(error)
     }
 }
 

@@ -47,7 +47,6 @@ const Login = () => {
         try {
             const response = await loginService(formData) as unknown as ILoginResponse;
             const { accessToken, refreshToken, ...data } = response;
-
             if (response.accessToken) {
                 handleSessionStorage(
                     data,

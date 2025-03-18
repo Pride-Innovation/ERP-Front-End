@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { Grid } from "@mui/material";
-import { IRequest } from "../../interface";
+import { IRequest, IRequestResponse } from "../../interface";
 import { RequestContext } from "../../../../context/request/RequestContext";
 import { FileContext } from "../../../../context/file/FileContext";
 import { fetchRowsService } from "../../../../core/apis/globalService";
@@ -13,7 +13,6 @@ import DeleteRequest from "../../DeleteRequest";
 import TableComponent from "../../../../components/tables/TableComponent";
 import RequestUtills from "../utills";
 import RequestDetails from "../../RequestDetails";
-import { requestMock } from "../../../../mocks/request";
 
 const Request = () => {
     const [loading, setLoading] = useState<boolean>(false);
@@ -40,10 +39,9 @@ const Request = () => {
     const fetchResources = async () => {
         setLoading(true)
         try {
-            // const response = await fetchRowsService({ page: 1, size: 10, endPoint });
-            // const data = response?.data as IRequest[]
-            // addAllRequestsInStore(data)
-            addAllRequestsInStore(requestMock)
+            const response = await fetchRowsService({ pageNumber: 0, pageSize: 10, endPoint }) as IRequestResponse;
+            addAllRequestsInStore(response.content);
+
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : ErrorMessage;
             console.log(errorMessage)

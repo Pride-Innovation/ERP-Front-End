@@ -1,6 +1,6 @@
 export interface IFetchRowsService {
-    page?: number;
-    size?: number;
+    pageNumber?: number;
+    pageSize?: number;
     endPoint: string;
 }
 

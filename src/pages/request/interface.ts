@@ -8,6 +8,7 @@ import { IUser } from "../users/interface";
 import { IPermission } from "../settings/interface";
 import { Dispatch, SetStateAction } from "react";
 import { IStatus } from "../settings/statuses/interface";
+import { IFetchDataRequest } from "../../core/apis/interface";
 
 export interface IAssetParticulars {
     name: string;
@@ -31,6 +32,10 @@ export interface IRequest {
     requester?: IUser
 }
 
+export interface IRequestResponse extends IFetchDataRequest {
+    content: Array<IRequest>
+}
+
 export interface IRequestTableData {
     name: string;
     requestDate?: string | null;
@@ -40,7 +45,7 @@ export interface IRequestTableData {
     timeOfSubmissionOfRequest?: string | null;
     desc?: string | null;
     signature?: any | null,
-    status?: IStatus | null;
+    status?: string | null;
     position?: string | null;
     fromPosition?: string | null
     Narration?: string | null,

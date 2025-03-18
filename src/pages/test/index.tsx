@@ -15,7 +15,7 @@ const TestComponent = () => {
     const fetchResources = async () => {
         setLoading(true)
         try {
-            const response = await fetchRowsService({ page: 1, size: 10, endPoint }) as unknown as GridRowsProp;
+            const response = await fetchRowsService({ pageNumber: 1, pageSize: 10, endPoint }) as unknown as GridRowsProp;
             setRows([...response]);
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : ErrorMessage;

@@ -28,6 +28,12 @@ export const requestMock: IRequest[] = [
             role: rolesMock[0]
         },
         timeOfSubmissionOfRequest: new Date().toISOString(),
+        status: {
+            id: 1,
+            name: "Pending",
+            desc: "pending Approval",
+            status: "pending"
+        }
     }
 ];
 

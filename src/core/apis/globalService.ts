@@ -2,12 +2,11 @@ import axiosInstance from "./axiosInstance";
 import { IFetchRowsService } from "./interface"
 
 export const fetchRowsService = async ({
-    page,
-    // size, 
+    pageNumber,
+    pageSize, 
     endPoint }: IFetchRowsService) => {
     try {
-        // const response = await axiosInstance.get(`${endPoint}?page=${page}&_limit=${size}`);
-        const response = await axiosInstance.get(`${endPoint}?page=${page}`);
+        const response = await axiosInstance.get(`${endPoint}?pageNumber=${pageNumber}&pageSize=${pageSize}`);
         return response.data;
     } catch (error) {
         throw (error);

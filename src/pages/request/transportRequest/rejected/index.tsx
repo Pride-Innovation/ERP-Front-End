@@ -40,7 +40,7 @@ const TransportRejectedRequest = () => {
     const fetchResources = async () => {
         setLoading(true)
         try {
-            const response = await fetchRowsService({ page: 1, size: 10, endPoint });
+            const response = await fetchRowsService({ pageNumber: 1, pageSize: 10, endPoint });
             const data = response?.data as ITransportRequest[]
             addAllTransportRequestsInStore(data)
         } catch (error) {

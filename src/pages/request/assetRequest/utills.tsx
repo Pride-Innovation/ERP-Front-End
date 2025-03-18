@@ -23,7 +23,7 @@ import { loadStatuses } from '../../settings/statuses/slice';
 import moment from 'moment';
 
 const RequestUtills = () => {
-    const endPoint = 'assetRequisitions';
+    const endPoint = 'requests';
     const module = "request";
     const header = { plural: 'Requests', singular: 'Request' };
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
@@ -46,8 +46,9 @@ const RequestUtills = () => {
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
 
-    const addAllRequestsInStore = (transportRequests: Array<IRequest>) => {
-        dispatch(loadAllRequests(transportRequests))
+    const addAllRequestsInStore = (assetRequests: Array<IRequest>) => {
+        console.log(assetRequests, "Requests!!")
+        dispatch(loadAllRequests(assetRequests))
     }
 
     const fetchAllStatuses = async () => {
@@ -72,11 +73,11 @@ const RequestUtills = () => {
     } = requestMock[0];
 
     const rowData = {
-        name: `${requestMock[0].requester?.name}`,
+        name: requestMock[0]?.name,
         requestDate: requestMock[0]?.createDate,
         timeOfSubmissionOfRequest: requestMock[0]?.timeOfSubmissionOfRequest,
         ...data,
-        // status: requestMock[0]?.status,
+        status: requestMock[0]?.status?.status,
         action: {
             label: "options",
             options: [
@@ -123,8 +124,8 @@ const RequestUtills = () => {
         },
     ];
 
-    const determineStatusColor = (id: string) => {
-        const statusColor = (statuses.find(status => status.id === parseInt(id, 10)))?.status
+    const determineStatusColor = (id: number): string => {
+        const statusColor = (statuses.find(status => status.id === id))?.status
         return statusColor === requestStatus.approved ? requestStatus.approved
             : statusColor === requestStatus.pending ? requestStatus.pending
                 : requestStatus.rejected
@@ -133,21 +134,16 @@ const RequestUtills = () => {
     const handleRequest = (list: Array<IRequest>) => {
         const data: Array<IRequestTableData> = list.map((request, index) => {
             const {
-                name,
                 requester,
                 ...fielsdata
             } = list[index];
 
             return (
                 {
-                    name: `${request.requester?.name}`,
                     ...fielsdata,
                     requestDate: moment(request.createDate).format('LL'),
-                    timeOfSubmissionOfRequest: moment(request.timeOfSubmissionOfRequest).format('LT'),
-                    // fromPosition: request.fromPosition,
-                    // position: request.position,
-                    status: request.status
-                    // status: determineStatusColor(request.status as string)
+                    timeOfSubmissionOfRequest: moment(request.createDate).format('LT'),
+                    status: determineStatusColor(request.status?.id as number)
                 }
             )
         })
