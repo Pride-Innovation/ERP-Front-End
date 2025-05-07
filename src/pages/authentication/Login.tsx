@@ -1,10 +1,10 @@
 import {
     Box,
     Grid,
+    useTheme,
+    useMediaQuery,
 } from '@mui/material';
-import {
-    useForm
-} from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import AuthenticationImage from "../../statics/images/logo.png";
 import { authentiactionSchema } from './schema';
@@ -20,13 +20,18 @@ import { toast } from 'react-toastify';
 import { loginService } from './service';
 
 const Login = () => {
-    const [loggingIn, setLoggingIn] = useState<boolean>(false);
-    const [showPassword, setShowPassword] = useState<boolean>(false);
+    const [loggingIn, setLoggingIn] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
     const defaultUser: IAuthentication = { email: "", password: "" };
     const navigate = useNavigate();
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const { handleSessionStorage } = AuthenticationUtils();
+
     const handleClickShowPassword = () => setShowPassword((show) => !show);
-    const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => { event.preventDefault(); };
+    const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
+        event.preventDefault();
+    };
 
     const {
         control,
@@ -39,50 +44,93 @@ const Login = () => {
         resolver: yupResolver(authentiactionSchema)
     });
 
-    useEffect(() => { reset({ ...defaultUser }) }, []);
+    useEffect(() => {
+        reset({ ...defaultUser });
+    }, []);
 
     const onSubmit = async (formData: IAuthentication) => {
         setLoggingIn(true);
         try {
             const response = await loginService(formData) as unknown as ILoginResponse;
             if (response?.status === 200) {
-                const { accessToken, refreshToken } = response.data
-                handleSessionStorage(response.data, accessToken, refreshToken)
-                toast.success(`Welcome ${response.data.firstName} !!`)
-                // navigate(ROUTES.ASSETS_MANAGEMENT);
+                const { accessToken, refreshToken } = response.data;
+                handleSessionStorage(response.data, accessToken, refreshToken);
+                toast.success(`Welcome ${response.data.firstName} !!`);
+                navigate(ROUTES.ASSETS_MANAGEMENT);
             }
         } catch (error) {
-            console.log(error)
+            console.log(error);
+            toast.error("Login failed. Please check your credentials.");
+        } finally {
+            setLoggingIn(false);
         }
-        setLoggingIn(false);
     };
 
     return (
-        <AuthenticationContainerComponent >
-            <Grid container xs={10} md={6} item>
-                <Grid item xs={12} md={6} >
-                    <Box component="img" src={AuthenticationImage} alt='Login Image' height={500} width={"100%"} />
-                </Grid>
-                <Grid item xs={12} md={6} spacing={6} p={4}
-                    sx={(theme) => ({
-                        bgcolor: theme.palette.background.paper,
-                        display: "flex",
-                        flexDirection: "column"
-                    })}
+        <AuthenticationContainerComponent>
+            <Grid
+                container
+                spacing={0}
+                sx={{
+                    width: '100%',
+                    backgroundColor: '#ffffff',
+                    boxShadow: '0px 4px 15px rgba(0, 0, 0, 0.05)',
+                    borderRadius: 2,
+                    overflow: 'hidden',
+                }}
+            >
+                {!isMobile && (
+                    <Grid item xs={12} md={6}>
+                        <Box
+                            component="img"
+                            src={AuthenticationImage}
+                            alt="Login"
+                            sx={{
+                                height: '100%',
+                                width: '100%',
+                                objectFit: 'cover',
+                                backgroundColor: '#f4f4f4',
+                            }}
+                        />
+                    </Grid>
+                )}
+                <Grid
+                    item
+                    xs={12}
+                    md={6}
+                    sx={{
+                        p: { xs: 4, sm: 6 },
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'center',
+                        bgcolor: '#fff',
+                    }}
                 >
-                    <Box>
-                        <TypographyComponent sx={{ mb: 2 }} size={"20px"} weight={600}>Pride Microfinance (ERP)</TypographyComponent>
-                        <TypographyComponent sx={{ mb: 2 }} size='16px' weight={500}>Sign In to your account</TypographyComponent>
+                    <Box mb={4}>
+                        <TypographyComponent
+                            size="24px"
+                            weight={700}
+                            sx={{ color: '#BC892C', mb: 1 }}
+                        >
+                            Pride Microfinance (ERP)
+                        </TypographyComponent>
+                        <TypographyComponent
+                            size="16px"
+                            weight={500}
+                            sx={{ color: '#000' }}
+                        >
+                            Sign In to your account
+                        </TypographyComponent>
                     </Box>
-                    <Box sx={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", flex: 1 }}>
+                    <Box>
                         <form
-                            style={{ width: "100%" }}
-                            autoComplete="false"
+                            style={{ width: '100%' }}
+                            autoComplete="off"
                             onSubmit={handleSubmit(onSubmit)}
                         >
                             <AuthenticationForm
                                 linkPath={ROUTES.FORGOT_PASSWORD}
-                                buttonText="Submit"
+                                buttonText="Login"
                                 register={register}
                                 formState={formState}
                                 control={control}
@@ -98,7 +146,7 @@ const Login = () => {
                 </Grid>
             </Grid>
         </AuthenticationContainerComponent>
-    )
-}
+    );
+};
 
 export default Login;

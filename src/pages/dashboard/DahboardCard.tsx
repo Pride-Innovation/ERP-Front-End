@@ -1,21 +1,6 @@
-import { Box, Card, Typography } from "@mui/material";
+import { Box, Card, Typography, useTheme } from "@mui/material";
 import { IDashboardCard } from "./interface";
-import { blue } from "@mui/material/colors";
 import DashBoardUtills from "./utills";
-
-const style = {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    bgcolor: 'linear-gradient(135deg, #e3f2fd 30%, #64b5f6 100%)',
-    transition: '0.3s',
-    flex: 1,
-    '&:hover': {
-        opacity: 0.9,
-    },
-    p: 2,
-    boxShadow: 3
-}
 
 const DashboardCard: React.FC<IDashboardCard> = ({
     name,
@@ -24,38 +9,62 @@ const DashboardCard: React.FC<IDashboardCard> = ({
     stockLevel,
     lastUpdated
 }) => {
-    const { getStockDetails, StockIndicator } = DashBoardUtills()
+    const theme = useTheme();
+    const { getStockDetails, StockIndicator } = DashBoardUtills();
     const { color: stockColor, status: stockStatus } = getStockDetails(stockLevel);
 
     return (
         <Card
-            sx={style}
+            elevation={3}
+            sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                p: 3,
+                background: 'linear-gradient(135deg, #FFFDF7, #F4F1EC)',
+                borderRadius: 3,
+                height: '100%',
+                transition: 'transform 0.2s ease-in-out',
+                '&:hover': {
+                    transform: 'scale(1.015)',
+                },
+            }}
         >
+            {/* Left side with image and info */}
             <Box sx={{ display: 'flex', alignItems: 'center', flex: 1 }}>
                 <Box
                     component="img"
                     src={image}
                     alt={`${name} Icon`}
-                    sx={{ width: 50, height: 50, mr: 2, borderRadius: "8px", bgcolor: blue[100], p: 1 }}
+                    sx={{
+                        width: 56,
+                        height: 56,
+                        p: 1,
+                        borderRadius: 2,
+                        backgroundColor: '#08796C10',
+                        mr: 2,
+                    }}
                 />
                 <Box>
-                    <Typography variant="h6" sx={{ fontWeight: 'bold', color: blue[900] }}>
+                    <Typography variant="h6" sx={{ fontWeight: 700, color: '#08796C' }}>
                         {name}
                     </Typography>
-                    <Typography variant="subtitle2" color="text.secondary" sx={{ fontWeight: 600 }}>
-                        {number}
+                    <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#333' }}>
+                        Total: {number}
                     </Typography>
-                    <Typography variant="caption" color="text.secondary">
+                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                         Last updated: {lastUpdated}
                     </Typography>
                     <Typography
                         variant="body2"
-                        sx={{ color: stockColor, fontWeight: 'bold', mt: 0.5 }}
+                        sx={{ mt: 0.5, color: stockColor, fontWeight: 600 }}
                     >
                         {stockStatus}
                     </Typography>
                 </Box>
             </Box>
+
+            {/* Right side stock indicator */}
             <StockIndicator color={stockColor} />
         </Card>
     );

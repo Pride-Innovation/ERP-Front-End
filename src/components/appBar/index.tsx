@@ -8,7 +8,7 @@ import { CSSObject, Divider, IconButton, styled, Theme } from '@mui/material';
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar';
 import MuiDrawer from '@mui/material/Drawer';
 import MenuIcon from '@mui/icons-material/Menu';
-import Logo from "../../statics/images/logo.png";
+import Logo from "../../statics/images/whitelogo.png";
 import SideBar from './SideBar';
 import NavBar from './NavBar';
 
@@ -35,7 +35,6 @@ const closedMixin = (theme: Theme): CSSObject => ({
     },
 });
 
-
 const DrawerHeader = styled('div')(({ theme }) => ({
     display: 'flex',
     alignItems: 'center',
@@ -44,11 +43,9 @@ const DrawerHeader = styled('div')(({ theme }) => ({
     ...theme.mixins.toolbar,
 }));
 
-
 interface AppBarProps extends MuiAppBarProps {
     open?: boolean;
 }
-
 
 const AppBar = styled(MuiAppBar, {
     shouldForwardProp: (prop) => prop !== 'open',
@@ -68,7 +65,6 @@ const AppBar = styled(MuiAppBar, {
     }),
 }));
 
-
 const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' })(
     ({ theme, open }) => ({
         width: drawerWidth,
@@ -83,7 +79,7 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
             ...closedMixin(theme),
             '& .MuiDrawer-paper': closedMixin(theme),
         }),
-        border: 'none'
+        border: 'none',
     }),
 );
 
@@ -103,7 +99,7 @@ export default function ApplicationDrawer({ window }: Props) {
     return (
         <Box sx={{ display: 'flex' }}>
             <CssBaseline />
-            <AppBar position="fixed">
+            <AppBar position="fixed" open={drawerOpen} sx={{ backgroundColor: '#08796C', borderBottom: '1px solid #e0e0e0' }}>
                 <Toolbar>
                     <IconButton
                         color="primary"
@@ -116,14 +112,19 @@ export default function ApplicationDrawer({ window }: Props) {
                     </IconButton>
                     <Box
                         src={Logo}
-                        sx={{ height: '40px', width: "50px", mr: '20px', display: { xs: 'none', md: 'block' } }}
+                        sx={{ height: '40px', width: "45px", mr: '20px', display: { xs: 'none', md: 'block' }, borderRadius: "4px" }}
                         component='img'
                     />
-                    <Typography sx={{
-                        display: { xs: 'none', md: 'block' },
-                        fontSize: '15px', fontWeight: 'bold'
-                    }} component="div">
-                        Pride Microfinance (MDI) - ERP
+                    <Typography
+                        sx={{
+                            display: { xs: 'none', md: 'block' },
+                            fontSize: '16px',
+                            fontWeight: 700,
+                            color: 'white',
+                            letterSpacing: 0.5,
+                        }}
+                    >
+                        Pride Bank (PBL) - ERP
                     </Typography>
                     <NavBar />
                 </Toolbar>
@@ -136,7 +137,7 @@ export default function ApplicationDrawer({ window }: Props) {
                 ModalProps={{ keepMounted: true }}
                 sx={{
                     display: { xs: 'block', md: 'none' },
-                    '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
+                    '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth, bgcolor: '#08796C', color: 'white' },
                 }}
             >
                 <DrawerHeader />
@@ -152,12 +153,12 @@ export default function ApplicationDrawer({ window }: Props) {
                 open={drawerOpen}
                 sx={{
                     display: { xs: 'none', sm: 'block' },
-                    '& .MuiDrawer-paper': { border: 'none' },
+                    '& .MuiDrawer-paper': { border: 'none', bgcolor: '#08796C', color: 'white' },
                 }}
             >
                 <DrawerHeader />
                 <Divider />
-                <Box p={1} sx={(theme) => ({ height: '100%', bgcolor: theme.palette.grey[50] })}>
+                <Box p={1} sx={(theme) => ({ height: '100%', bgcolor: theme.palette.grey[50]})}>
                     <SideBar />
                 </Box>
             </Drawer>

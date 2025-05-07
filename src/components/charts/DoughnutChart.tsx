@@ -1,7 +1,4 @@
-import {
-    useEffect,
-    useState
-} from 'react';
+import { useMemo } from 'react';
 import {
     Chart as ChartJS,
     ArcElement,
@@ -23,79 +20,56 @@ export default function DoughnutChart({
     headerText,
     chartData,
     spacing = 2,
-    cutout = "5%",
+    cutout = '5%',
     backgroundColor,
     borderColor,
     height = 500,
     keys = true,
     radius = '75%',
     maintainAspectRatio = false,
-    position = "top"
+    position = 'top'
 }: IDoughnutChart) {
-    const { data, options } = DoughnutChartUtills();
-    const [formattedData, setFormattedData] = useState<{
-        labels: Array<string>;
-        datasets: Array<{
-            label: string,
-            data: Array<number>,
-            backgroundColor: Array<string>,
-            borderColor: Array<string>,
-            borderWidth: number,
-            spacing: number,
-            cutout: string,
-            radius: string
-        }>
-    }>(data)
-    const [formatedOptions, setFormattedOptions] = useState<{
-        responsive: boolean,
-        maintainAspectRatio: boolean,
+    const { data: baseData, options: baseOptions } = DoughnutChartUtills();
+
+    const formattedData = useMemo(() => ({
+        labels,
+        datasets: [
+            {
+                ...baseData.datasets[0],
+                label: headerText,
+                data: chartData,
+                spacing,
+                cutout,
+                radius,
+                backgroundColor: backgroundColor || [
+                    '#08796C', // IT Equipment
+                    '#BC892C', // Office Equipment
+                    '#000000', // Fleet
+                    '#ACD1D1'  // Stationery
+                ],
+                borderColor: borderColor || ['#ffffff'],
+            }
+        ]
+    }), [labels, chartData, backgroundColor, borderColor, spacing, cutout, radius, headerText]);
+
+    const formattedOptions = useMemo(() => ({
+        ...baseOptions,
+        maintainAspectRatio,
         plugins: {
             title: {
-                display: boolean,
-                text: string,
-                font: { size: number }
+                ...baseOptions.plugins.title,
+                display: !!title,
+                text: title,
+                font: { size: 16 }
             },
             legend: {
-                display: boolean,
-                position: any
-            },
-        },
-    }>(options)
-
-    useEffect(() => {
-        setFormattedData({
-            ...data,
-            labels: labels,
-            datasets: [
-                {
-                    ...data.datasets[0],
-                    borderColor: borderColor ? borderColor : data.datasets[0].borderColor,
-                    backgroundColor: backgroundColor ? backgroundColor : data.datasets[0].backgroundColor,
-                    label: headerText,
-                    data: chartData,
-                    spacing: spacing,
-                    cutout: cutout,
-                    radius,
-                }
-            ],
-
-        });
-        setFormattedOptions({
-            ...options,
-            maintainAspectRatio,
-            plugins: {
-                title: {
-                    ...options.plugins.title,
-                    text: title
-                },
-                legend: {
-                    display: keys,
-                    position
-                },
+                display: keys,
+                position
             }
-        })
-    }, [])
+        }
+    }), [baseOptions, maintainAspectRatio, title, keys, position]);
 
-    return loading ? <Spinner /> :
-        <Doughnut height={height} options={formatedOptions} data={formattedData} />;
+    return loading ? <Spinner /> : (
+        <Doughnut height={height} options={formattedOptions} data={formattedData} />
+    );
 }

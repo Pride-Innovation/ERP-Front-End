@@ -2,12 +2,13 @@ import {
   Link,
   styled,
   Typography,
+  TypographyProps,
 } from '@mui/material';
 
 interface ITypographyComponent {
-  weight: number;
+  weight?: number;
   size?: string;
-  color?: string
+  color?: string;
 }
 
 
@@ -18,16 +19,24 @@ interface ILinkComponent {
   href: string
 }
 
-export const TypographyComponent = styled(Typography)<ITypographyComponent>(({
-  theme,
-  weight,
-  size = '16px',
-  color = theme.palette.grey[800]
-}) => ({
-  color: color,
+
+const StyledTypography = styled(Typography, {
+  shouldForwardProp: (prop) => prop !== 'weight' && prop !== 'size' && prop !== 'color'
+})<ITypographyComponent>(({ theme, weight = 400, size = '16px', color }) => ({
   fontWeight: weight,
   fontSize: size,
+  color: color || theme.palette.text.primary,
 }));
+
+
+export const TypographyComponent = ({
+  weight,
+  size,
+  color,
+  ...rest
+}: ITypographyComponent & TypographyProps) => {
+  return <StyledTypography weight={weight} size={size} color={color} {...rest} />;
+};
 
 export const LinkComponent = ({
   weight,

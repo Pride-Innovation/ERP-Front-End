@@ -58,7 +58,7 @@ const SideBarElements = () => {
         },
         {
             id: 5,
-            name: "Transport Request",
+            name: "Transport",
             route: ROUTES.TRANSPORT_REQUEST,
             icon: <DirectionsCarIcon />,
             subroutes: []

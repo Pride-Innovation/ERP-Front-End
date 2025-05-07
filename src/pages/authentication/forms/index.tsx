@@ -2,10 +2,10 @@ import {
     Box,
     FormControl,
     FormHelperText,
-    Grid
-} from '@mui/material'
+    Grid,
+} from '@mui/material';
 import { Controller } from 'react-hook-form';
-import { InputComponent } from '../../../components/forms/Inputs'
+import { InputComponent } from '../../../components/forms/Inputs';
 import ButtonComponent from '../../../components/forms/Button';
 import { LinkComponent } from '../../../components/headers/TypographyComponent';
 import { IAuthenticationForm } from '../interface';
@@ -13,7 +13,6 @@ import { IAuthenticationForm } from '../interface';
 const AuthenticationForm = ({
     formState,
     control,
-    register,
     buttonText,
     showPassword,
     loggingIn,
@@ -21,60 +20,89 @@ const AuthenticationForm = ({
     handleMouseDownPassword,
     linkText,
     linkPath,
-    password
+    password,
 }: IAuthenticationForm) => {
     return (
-        <Grid item container xs={12}
-        >
-            <Grid item container spacing={3} xs={12}>
+        <Grid container spacing={4}>
+            <Grid item xs={12}>
+                <FormControl fullWidth>
+                    <Controller
+                        name="email"
+                        control={control}
+                        render={({ field }) => (
+                            <InputComponent
+                                required
+                                label="Email Address"
+                                field={field}
+                                error={formState.errors.email}
+                                id="email"
+                                type="email"
+                            />
+                        )}
+                    />
+                    {formState.errors.email && (
+                        <FormHelperText error>
+                            {formState.errors.email.message}
+                        </FormHelperText>
+                    )}
+                </FormControl>
+            </Grid>
+
+            {password && (
                 <Grid item xs={12}>
                     <FormControl fullWidth>
                         <Controller
+                            name="password"
                             control={control}
-                            {...register("email")}
-                            rules={{ required: true }}
-                            render={({ field }) => (
-                                <InputComponent required label='Email Address' field={field} error={formState.errors.email} id='email' />
-                            )}
-                        />
-                        {formState.errors.email && (
-                            <FormHelperText sx={{ color: 'error.main' }}>{formState.errors.email.message}</FormHelperText>
-                        )}
-                    </FormControl>
-                </Grid>
-                {password && <Grid item xs={12}>
-                    <FormControl fullWidth>
-                        <Controller
-                            control={control}
-                            {...register("password")}
-                            rules={{ required: true }}
                             render={({ field }) => (
                                 <InputComponent
                                     required
-                                    handleClick={handleClickShowPassword}
-                                    handleMouseDown={handleMouseDownPassword}
-                                    label='Password'
+                                    label="Password"
                                     field={field}
                                     error={formState.errors.password}
-                                    id='password'
+                                    id="password"
                                     type={showPassword ? 'text' : 'password'}
-                                    adornment />
+                                    handleClick={handleClickShowPassword}
+                                    handleMouseDown={handleMouseDownPassword}
+                                    adornment
+                                />
                             )}
                         />
                         {formState.errors.password && (
-                            <FormHelperText sx={{ color: 'error.main' }}>{formState.errors.password.message}</FormHelperText>
+                            <FormHelperText error>
+                                {formState.errors.password.message}
+                            </FormHelperText>
                         )}
                     </FormControl>
-                </Grid>}
-                <Grid item xs={12}>
-                    <Box sx={{ width: "100%", pb: '10px' }}>
-                        <LinkComponent href={linkPath} size='17px' weight={400} text={linkText} />
-                    </Box>
-                    <ButtonComponent buttonColor='success' type='submit' sendingRequest={loggingIn} buttonText={buttonText} />
                 </Grid>
+            )}
+
+            <Grid item xs={12}>
+                <Box
+                    sx={{
+                        width: '100%',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        pb: 2,
+                    }}
+                >
+                    <LinkComponent
+                        href={linkPath}
+                        size="15px"
+                        weight={400}
+                        text={linkText}
+                    />
+                </Box>
+                <ButtonComponent
+                    type="submit"
+                    sendingRequest={loggingIn}
+                    buttonText={buttonText}
+                    buttonColor="success"
+                />
             </Grid>
         </Grid>
-    )
-}
+    );
+};
 
 export default AuthenticationForm;
