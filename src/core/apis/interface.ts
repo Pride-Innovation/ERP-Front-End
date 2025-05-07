@@ -31,3 +31,35 @@ export interface IFetchDataRequest {
     numberOfElements: number,
     empty: boolean
 }
+
+export interface IAxiosResponse {
+    status: number,
+    statusText: string,
+    headers: {
+        "cache-control": string,
+        "content-type": string,
+        expires: string,
+    },
+    config: {
+        transitional: {
+            silentJSONParsing: boolean,
+            forcedJSONParsing: boolean,
+            clarifyTimeoutError: boolean
+        },
+
+        timeout: number,
+        xsrfCookieName: string,
+        // xsrfCookieName: "XSRF-TOKEN",
+        xsrfHeaderName: string,
+        // "xsrfHeaderName": "X-XSRF-TOKEN",
+        maxContentLength: number,
+        maxBodyLength: number,
+        headers: {
+            Accept: string,
+            "Content-Type": string
+        },
+        baseURL: string,
+        method: string,
+        url: string,
+    },
+}

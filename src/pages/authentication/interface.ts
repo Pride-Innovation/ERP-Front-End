@@ -1,6 +1,7 @@
 import { Control, FieldError, FormState, UseFormRegister } from "react-hook-form";
 import { IUser } from "../users/interface";
 import { IPermission, IRole } from "../settings/interface";
+import { IAxiosResponse } from "../../core/apis/interface";
 
 export interface IAuthentication {
     email: string;
@@ -26,9 +27,13 @@ export interface IAuthenticationForm {
     password?: boolean
 }
 
-export interface ILoginResponse extends IUser {
+interface ILoginUserDetailsResponse extends IUser {
     accessToken: string;
     refreshToken: string;
+}
+
+export interface ILoginResponse extends IAxiosResponse {
+    data: ILoginUserDetailsResponse
 }
 
 export interface IUserProfileResponse {

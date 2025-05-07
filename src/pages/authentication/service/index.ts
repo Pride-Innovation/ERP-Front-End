@@ -4,9 +4,9 @@ export const loginService = async (body: object) => {
 
     try {
         const response = await axiosInstance.post('auth/login', body)
-        return response.data
+        return response
     } catch (error) {
-        throw error
+        return error
     }
 }
 

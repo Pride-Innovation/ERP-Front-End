@@ -6,7 +6,7 @@ import {
     useForm
 } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import AuthenticationImage from "../../statics/images/logo.1b6cf8fbdaaee75f39fd.bmp";
+import AuthenticationImage from "../../statics/images/logo.png";
 import { authentiactionSchema } from './schema';
 import { IAuthentication, ILoginResponse } from './interface';
 import { useEffect, useState } from 'react';
@@ -18,7 +18,6 @@ import AuthenticationContainerComponent from '../../components/Container';
 import AuthenticationUtils from './utills';
 import { toast } from 'react-toastify';
 import { loginService } from './service';
-import { ErrorMessage } from '../../utils/constants';
 
 const Login = () => {
     const [loggingIn, setLoggingIn] = useState<boolean>(false);
@@ -46,19 +45,14 @@ const Login = () => {
         setLoggingIn(true);
         try {
             const response = await loginService(formData) as unknown as ILoginResponse;
-            const { accessToken, refreshToken, ...data } = response;
-            if (response.accessToken) {
-                handleSessionStorage(
-                    data,
-                    response.accessToken,
-                    response.refreshToken
-                )
-                toast.success(`Welcome ${response.firstName} !!`)
-                navigate(ROUTES.ASSETS_MANAGEMENT);
+            if (response?.status === 200) {
+                const { accessToken, refreshToken } = response.data
+                handleSessionStorage(response.data, accessToken, refreshToken)
+                toast.success(`Welcome ${response.data.firstName} !!`)
+                // navigate(ROUTES.ASSETS_MANAGEMENT);
             }
-
         } catch (error) {
-            toast.error(ErrorMessage)
+            console.log(error)
         }
         setLoggingIn(false);
     };

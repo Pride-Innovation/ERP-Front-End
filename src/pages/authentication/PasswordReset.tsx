@@ -6,7 +6,7 @@ import {
     useForm
 } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import AuthenticationImage from "../../statics/images/logo.1b6cf8fbdaaee75f39fd.bmp";
+import AuthenticationImage from "../../statics/images/logo.png";
 import { authentiactionSchema } from './schema';
 import { IAuthentication } from './interface';
 import { useEffect, useState } from 'react';

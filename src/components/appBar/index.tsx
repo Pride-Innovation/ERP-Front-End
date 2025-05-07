@@ -8,7 +8,7 @@ import { CSSObject, Divider, IconButton, styled, Theme } from '@mui/material';
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar';
 import MuiDrawer from '@mui/material/Drawer';
 import MenuIcon from '@mui/icons-material/Menu';
-import Logo from "../../statics/images/logo.1b6cf8fbdaaee75f39fd.bmp";
+import Logo from "../../statics/images/logo.png";
 import SideBar from './SideBar';
 import NavBar from './NavBar';
 

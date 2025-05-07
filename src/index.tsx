@@ -11,28 +11,33 @@ import TransportRequestContextProvider from './context/request/TransportRequestC
 import { Provider } from 'react-redux';
 import { store } from './store';
 import { InventoryContextProvider } from './context/inventory';
+import { ThemeProvider, CssBaseline } from '@mui/material';
+import customThemes from './utils/customThemes';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 root.render(
   <React.StrictMode>
-    <Provider store={store}>
-      <InventoryContextProvider>
-        <RowContextProvider>
-          <UserContextProvider>
-            <RequestContextProvider>
-              <TransportRequestContextProvider>
-                <FileContextProvider>
-                  <TestContextProvider>
-                    <App />
-                  </TestContextProvider>
-                </FileContextProvider>
-              </TransportRequestContextProvider>
-            </RequestContextProvider>
-          </UserContextProvider>
-        </RowContextProvider>
-      </InventoryContextProvider>
-    </Provider>
+    <ThemeProvider theme={customThemes} >
+      <CssBaseline />
+      <Provider store={store}>
+        <InventoryContextProvider>
+          <RowContextProvider>
+            <UserContextProvider>
+              <RequestContextProvider>
+                <TransportRequestContextProvider>
+                  <FileContextProvider>
+                    <TestContextProvider>
+                      <App />
+                    </TestContextProvider>
+                  </FileContextProvider>
+                </TransportRequestContextProvider>
+              </RequestContextProvider>
+            </UserContextProvider>
+          </RowContextProvider>
+        </InventoryContextProvider>
+      </Provider>
+    </ThemeProvider>
   </React.StrictMode>
 );
