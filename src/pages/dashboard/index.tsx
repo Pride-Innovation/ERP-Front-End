@@ -1,3 +1,10 @@
+/*
+13.9 Pride's Standard Copyright Notice:
+Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
+and distribute this software and its documentation for any purpose is prohibited unless authorized in writing by the
+Managing Director
+*/
+
 import { Box, Card, Container, Grid, useTheme } from '@mui/material';
 import DahboardCard from './DahboardCard';
 import Laptop from "../../statics/images/computer-removebg-preview.png";
@@ -39,13 +46,13 @@ const Dashboard = () => {
       </Grid>
 
       <Grid container spacing={4} mt={1}>
-        <Grid item xs={12} md={6}>
-          <Card sx={{ boxShadow: 3, p: 2 }}>
-            {/* <DashboardRequests /> */}
+        <Grid item xs={12} md={7}>
+          <Card sx={{ boxShadow: 3 }}>
+            <DashboardRequests />
           </Card>
         </Grid>
-        <Grid item xs={12} md={6}>
-          <Card sx={{ boxShadow: 3, p: 2 }}>
+        <Grid item xs={12} md={5}>
+          <Card sx={{ boxShadow: 3 }}>
             <DoughnutChart
               headerText={headerText}
               chartData={chartData}

@@ -28,12 +28,14 @@ const DashBoardUtills = () => {
         requester,
         name,
         description,
+        status,
         ...data
     } = requestMock[0];
 
     const rowData = {
         name: `${requestMock[0].requester?.firstName} ${requestMock[0].requester?.lastName}`,
         department: requestMock[0].requester?.department,
+        status: requestMock[0].status?.name,
         ...data,
     };
 

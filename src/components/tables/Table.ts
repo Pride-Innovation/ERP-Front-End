@@ -8,48 +8,38 @@ import {
 } from '@mui/x-data-grid';
 
 export const DataGridStyled = styled(DataGrid)(({ theme }) => ({
-    border: 'none',
-    "& .MuiDataGrid-columnHeaders": {
-        fontSize: 14,
-        borderTop: "0.6px solid rgba(0,0,0,0.05) !important",
+    '& .MuiDataGrid-columnHeaderTitle': {
+        // fontWeight: 'bold',
+        textTransform: 'capitalize',
     },
-    "& .MuiDataGrid-row": {
-        maxHeight: 'none !important',
-        "&:hover": {
-            cursor: "pointer"
-        },
-        "&:nth-of-type(odd)": {
-            backgroundColor: theme.palette.action.hover,
-        },
+    // Remove focus outline on cells
+    '& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within': {
+        outline: 'none',
     },
-    "& .MuiDataGrid-columnHeaderTitle": {
-        fontWeight: '600 !important',
-        color: theme.palette.grey[900],
+    // Remove focus outline on column headers
+    '& .MuiDataGrid-columnHeader:focus, & .MuiDataGrid-columnHeader:focus-within': {
+        outline: 'none',
     },
-    '&>.MuiDataGrid-main': {
-        '&>.MuiDataGrid-columnHeaders': {
-            borderBottom: `none`,
-            borderTop: `1px solid${theme.palette.grey[300]} !important`,
-            borderRadius: '0px',
-        },
-        '& div div div div >.MuiDataGrid-cell': {
-            borderBottom: `none`,
-        },
-    },
-    '&.MuiDataGrid-root': {
-        border: 'none',
-    },
-    "&.MuiDataGrid-root .MuiDataGrid-cell:focus-within": {
-        outline: "none !important",
-    },
-    '& .MuiDataGrid-columnHeader:focus-within, & .MuiDataGrid-columnHeader:focus': {
-        outline: 'none !important',
+    // Optional: Remove row hover/selected styling
+    '& .MuiDataGrid-row.Mui-selected': {
+        backgroundColor: 'inherit',
     },
 
+    border: 'none',
+    borderRadius: 2,
+    '& .MuiDataGrid-columnHeaders': {
+        backgroundColor: '#BC892C',
+        color: 'teal',
+        fontWeight: 'bold',
+    },
+    '& .MuiDataGrid-row:hover': {
+        backgroundColor: '#F1F1F1',
+    },
     '& .MuiDataGrid-cell': {
-        lineHeight: 'unset !important',
-        maxHeight: 'none !important',
-        whiteSpace: 'normal',
+        fontSize: 14,
+    },
+    '& .MuiDataGrid-footerContainer': {
+        borderTop: '1px solid #E0E0E0',
     },
 }));
 
