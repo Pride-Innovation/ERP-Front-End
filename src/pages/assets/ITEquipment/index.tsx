@@ -1,3 +1,10 @@
+/*
+13.9 Pride's Standard Copyright Notice:
+Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
+and distribute this software and its documentation for any purpose is prohibited unless authorized in writing by the
+Managing Director
+*/
+
 import { Grid } from "@mui/material"
 import ModalComponent from "../../../components/modal"
 import Dispose from "../Dispose"
@@ -79,23 +86,22 @@ const ITEquipment = () => {
             }
             {rows?.length > 0 &&
                 <Grid xs={12} container>
-                    {columnHeaders.length > 0 &&
-                        <TableComponent
-                            endPoint={endPoint}
-                            loading={loading}
-                            count={100}
-                            exportData
-                            createAction
-                            importData
-                            header={header}
-                            module={module}
-                            rows={rows}
-                            columnHeaders={columnHeaders}
-                            onCreationHandler={() => navigate(ROUTES.CREATE_ITEQUIPMENT)}
-                            handleOptionClicked={handleOptionClicked}
-                        />
-                    }
-                </Grid>}
+                    <TableComponent
+                        endPoint={endPoint}
+                        loading={loading}
+                        count={100}
+                        exportData
+                        createAction
+                        importData
+                        header={header}
+                        module={module}
+                        rows={rows}
+                        columnHeaders={columnHeaders}
+                        onCreationHandler={() => navigate(ROUTES.CREATE_ITEQUIPMENT)}
+                        handleOptionClicked={handleOptionClicked}
+                    />
+                </Grid>
+            }
         </>
     )
 }

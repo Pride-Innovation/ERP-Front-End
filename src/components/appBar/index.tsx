@@ -131,7 +131,7 @@ export default function ApplicationDrawer({ window }: Props) {
                             letterSpacing: 0.5,
                         }}
                     >
-                        Pride Bank (PBL) - ERP
+                        Asset Management System
                     </Typography>
                     <NavBar />
                 </Toolbar>

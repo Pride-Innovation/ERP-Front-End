@@ -131,7 +131,7 @@ const TableComponent = ({
                 <DataGridStyled
                     loading={loading}
                     {...filteredRows}
-                    rows={filteredRows}
+                    rows={filteredRows || []}
                     columns={columns}
                     onFilterModelChange={handleTableFilter}
                     onPaginationModelChange={handleTablePagination}

@@ -54,7 +54,7 @@ const Request = () => {
         setFileData({ file: "", module: "", jsonData: [] });
     }, []);
 
-    useEffect(() => { if (assetsRequests.length > 0) { handleRequest(assetsRequests) } }, [assetsRequests])
+    useEffect(() => { if (assetsRequests?.length > 0) { handleRequest(assetsRequests) } }, [assetsRequests])
 
     const handleOptionClicked = (option: string | number, moduleID?: string | number) => {
         switch (option) {
@@ -100,7 +100,7 @@ const Request = () => {
                     <RequestDetails sendingRequest={loading} setSendingRequest={setLoading} open={open} handleClose={handleClose} data={currentRequest} />
                 </ModalComponent>
             }
-            {assetsRequests?.length > 0 && <Grid xs={12} container>
+            <Grid xs={12} container>
                 {columnHeaders.length > 0 &&
                     <TableComponent
                         endPoint={endPoint}
@@ -116,9 +116,10 @@ const Request = () => {
                         onCreationHandler={() => navigate(ROUTES.CREATE_REQUEST)}
                         handleOptionClicked={handleOptionClicked}
                         paginationMode='client'
+                    // paginationMode='server'
                     />
                 }
-            </Grid>}
+            </Grid>
         </React.Fragment>
     )
 }

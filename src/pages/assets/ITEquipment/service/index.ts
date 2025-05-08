@@ -5,7 +5,7 @@ const fetchITEquipmentService = async () => {
         const response = await axiosInstance.get("itAssets");
         return response.data?.data
     } catch (error) {
-        throw error;
+        return error;
     }
 }
 
@@ -14,8 +14,7 @@ const createITEquipmentService = async (body: object) => {
         const response = await axiosInstance.post("itAssets/create", body);
         return response.data
     } catch (error) {
-        // throw error;
-        console.log(error)
+        return error;
     }
 }
 
@@ -25,8 +24,7 @@ const deleteITEquipmentService = async (id: string | number) => {
         const response = await axiosInstance.get(`itAssets/delete/${id}`);
         return response.data?.data
     } catch (error) {
-        // throw error;
-        console.log(error)
+        return error;
     }
 }
 
@@ -35,7 +33,7 @@ const getITEquipmentByIDService = async (id: string | number) => {
         const response = await axiosInstance.get(`itAssets/${id}`);
         return response.data?.data
     } catch (error) {
-        console.log(error)
+        return error;
     }
 }
 
@@ -44,7 +42,7 @@ const updateITEquipmentService = async (body: object, id: string | number) => {
         const response = await axiosInstance.post(`itAssets/update/${id}`, body);
         return response?.data;
     } catch (error) {
-        console.log(error)
+        return error;
     }
 }
 
@@ -53,7 +51,7 @@ const listUsersService = async () => {
         const response = await axiosInstance.get('users');
         return response.data?.data;
     } catch (error) {
-        throw error;
+        return error;
     }
 }
 
@@ -62,7 +60,7 @@ const listCategoriesService = async () => {
         const response = await axiosInstance.get('itAssetCategories');
         return response.data?.data;
     } catch (error) {
-        throw error;
+        return error;
     }
 }
 
@@ -71,7 +69,7 @@ const listUnitOfMeasuresService = async () => {
         const response = await axiosInstance.get('unitMeasures');
         return response.data?.data;
     } catch (error) {
-        throw error;
+        return error;
     }
 }
 

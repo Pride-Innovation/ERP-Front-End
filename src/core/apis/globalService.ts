@@ -9,6 +9,6 @@ export const fetchRowsService = async ({
         const response = await axiosInstance.get(`${endPoint}?pageNumber=${pageNumber}&pageSize=${pageSize}`);
         return response.data;
     } catch (error) {
-        throw (error);
+        return (error);
     }
 }

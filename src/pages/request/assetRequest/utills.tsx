@@ -37,7 +37,7 @@ const RequestUtills = () => {
     const { assetsRequests } = useSelector((state: RootState) => state.AssetsRequestsStore)
 
     useEffect(() => {
-        if (statuses.length > 0) {
+        if (statuses?.length > 0) {
             setOptionsObject({
                 statusesOptions: statuses?.map(status => ({ label: status.name, value: status.id as number })) || [],
             })
@@ -49,7 +49,6 @@ const RequestUtills = () => {
     const handleClose = () => setOpen(false);
 
     const addAllRequestsInStore = (assetRequests: Array<IRequest>) => {
-        console.log(assetRequests, "Requests!!")
         dispatch(loadAllRequests(assetRequests))
     }
 
