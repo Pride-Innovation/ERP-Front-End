@@ -20,11 +20,11 @@ const TableToolBar = ({
 }: ITableToolBar) => {
     const { setFileName } = useContext(FileContext);
     useEffect(() => { setFileName(module) }, [module]);
-    
+
     return (
         <GridToolbarContainer
             sx={{ width: '100%', display: 'flex', p: '20px' }}>
-            <TypographyComponent size='17px' weight={600} sx={{ textTransform: "uppercase" }}>{header.plural}</TypographyComponent>
+            <TypographyComponent size='17px' color="#BC892C" weight={600} sx={{ textTransform: "uppercase" }}>{header.plural}</TypographyComponent>
             <Stack direction="row" spacing={2} sx={{ ml: "auto" }}>
                 {createAction && <Box>
                     <ButtonComponent
@@ -32,7 +32,7 @@ const TableToolBar = ({
                         sendingRequest={false}
                         buttonText={`Create ${header.singular} `}
                         variant='contained'
-                        buttonColor='info'
+                        buttonColor='success'
                         type='button' />
                 </Box>}
                 {importData && <Box>

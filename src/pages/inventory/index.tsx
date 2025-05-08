@@ -1,5 +1,12 @@
+/*
+13.9 Pride's Standard Copyright Notice:
+Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
+and distribute this software and its documentation for any purpose is prohibited unless authorized in writing by the
+Managing Director
+*/
+
 import { useEffect, useState } from "react";
-import { Grid } from "@mui/material"
+import { Card, Grid } from "@mui/material"
 import TableComponent from "../../components/tables/TableComponent";
 import InventoryUtills from "./Utills";
 import { crudStates } from "../../utils/constants";
@@ -81,17 +88,21 @@ const Inventory = () => {
                 </ModalComponent>
             }
             {columnHeaders.length > 0 &&
-                <TableComponent
-                    createAction
-                    importData
-                    exportData
-                    handleOptionClicked={handleOptionClicked}
-                    onCreationHandler={handleCreation}
-                    module='user'
-                    header={header}
-                    rows={inventoryList}
-                    columnHeaders={columnHeaders}
-                />}
+                <Card sx={{ width: "100%" }}>
+                    <TableComponent
+                        createAction
+                        importData
+                        exportData
+                        handleOptionClicked={handleOptionClicked}
+                        onCreationHandler={handleCreation}
+                        module='user'
+                        header={header}
+                        rows={inventoryList}
+                        columnHeaders={columnHeaders}
+                    />
+                </Card>
+            }
+
         </Grid>
     )
 }

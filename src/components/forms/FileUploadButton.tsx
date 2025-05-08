@@ -51,8 +51,9 @@ const FileUploadButton = ({ title, module }: IFileUploadButton) => {
             component="label"
             role={undefined}
             variant="outlined"
+            color="secondary"
             tabIndex={-1}
-            startIcon={<CloudUploadIcon fontSize="large" />}
+            startIcon={<CloudUploadIcon fontSize="large" sx={{ color: "#BC892C" }} />}
         >
             Import {title}
             <InputFileUpload inputRef={inputRef} handleFileUpload={handleFileUpload} />

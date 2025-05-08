@@ -10,11 +10,11 @@ import { createTheme } from '@mui/material/styles';
 const customThemes = createTheme({
     palette: {
         primary: {
-            main: '#08796C', // Your brand green
+            main: '#08796C',
             contrastText: '#ffffff',
         },
         secondary: {
-            main: '#004D40',
+            main: '#BC892C',
         },
         error: {
             main: '#D32F2F',
@@ -23,7 +23,7 @@ const customThemes = createTheme({
             main: '#FFA000',
         },
         info: {
-            main: '#0288D1',
+            main: '#004D40',
         },
         success: {
             main: '#08796C',
