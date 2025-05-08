@@ -1,3 +1,10 @@
+/*
+13.9 Pride's Standard Copyright Notice:
+Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
+and distribute this software and its documentation for any purpose is prohibited unless authorized in writing by the
+Managing Director
+*/
+
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { ROUTES } from "../../core/routes/routes";
@@ -37,17 +44,17 @@ const AppBarUtills = () => {
     const options = (action: string) =>
         action === crudStates.create ? (
             [
-                { value: modalStates.itEquipment, label: "IT Equipment", icon: <SettingsBrightnessIcon fontSize='small' color='info' /> },
-                { value: modalStates.officeEquipment, label: "Office Equipment", icon: <BalanceIcon fontSize='small' color='info' /> },
-                { value: modalStates.fleet, label: "Fleet", icon: <DirectionsCarFilledIcon fontSize='small' color='info' /> },
+                { value: modalStates.itEquipment, label: "IT Equipment", icon: <SettingsBrightnessIcon fontSize='small' color='success' /> },
+                { value: modalStates.officeEquipment, label: "Office Equipment", icon: <BalanceIcon fontSize='small' color='success' /> },
+                { value: modalStates.fleet, label: "Fleet", icon: <DirectionsCarFilledIcon fontSize='small' color='success' /> },
             ]
         ) :
             (
                 [
                     { value: modalStates.settings, label: "Settings", header: true },
-                    { value: modalStates.profile, label: "Profile", icon: <PersonOutlineIcon fontSize='small' color='info' /> },
-                    { value: modalStates.password, label: "Change Password", icon: <LockOpenOutlinedIcon fontSize='small' color='info' /> },
-                    { value: modalStates.logout, label: "Log Out", header: true, icon: <LogoutOutlinedIcon fontSize='small' color='info' /> }
+                    { value: modalStates.profile, label: "Profile", icon: <PersonOutlineIcon fontSize='small' color='success' /> },
+                    { value: modalStates.password, label: "Change Password", icon: <LockOpenOutlinedIcon fontSize='small' color='success' /> },
+                    { value: modalStates.logout, label: "Log Out", header: true, icon: <LogoutOutlinedIcon fontSize='small' color='error' /> }
                 ]
             )
 

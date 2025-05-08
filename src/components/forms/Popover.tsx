@@ -1,9 +1,16 @@
+/*
+13.9 Pride's Standard Copyright Notice:
+Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
+and distribute this software and its documentation for any purpose is prohibited unless authorized in writing by the
+Managing Director
+*/
+
 import React from 'react';
 import Popover from '@mui/material/Popover';
 import { IPopover } from './interface';
 import { ListItemIcon, ListItemText, MenuItem } from '@mui/material';
 import { IOptions } from '../tables/interface';
-import { blue, grey } from '@mui/material/colors';
+import { teal } from '@mui/material/colors';
 import { TypographyComponent } from '../headers/TypographyComponent';
 
 const PopoverComponent = ({
@@ -35,7 +42,7 @@ const PopoverComponent = ({
             >
                 {options.map((option: IOptions) => (
                     <MenuItem
-                        sx={{ bgcolor: `${option?.header ? grey[300] : ''}` }}
+                        sx={{ bgcolor: `${option?.header ? teal[50] : ''}` }}
                         onClick={() => {
                             handleOptionClicked?.(option.value, moduleID);
                             handleClose()
@@ -48,7 +55,7 @@ const PopoverComponent = ({
                             primary={
                                 <TypographyComponent
                                     size="16px"
-                                    sx={{ color: `${option?.header ? blue[700] : ''}` }}
+                                    sx={{ color: `${option?.header ? teal[700] : ''}` }}
                                     weight={option?.header ? 500 : 400} >
                                     {option.label}
                                 </TypographyComponent>
