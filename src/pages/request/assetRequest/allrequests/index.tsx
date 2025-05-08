@@ -1,3 +1,10 @@
+/*
+13.9 Pride's Standard Copyright Notice:
+Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
+and distribute this software and its documentation for any purpose is prohibited unless authorized in writing by the
+Managing Director
+*/
+
 import React, { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { Grid } from "@mui/material";
@@ -40,7 +47,8 @@ const Request = () => {
         setLoading(true)
         try {
             const response = await fetchRowsService({ pageNumber: 0, pageSize: 10, endPoint }) as IRequestResponse;
-            addAllRequestsInStore(response.content);
+            console.log(response, "Response!!")
+            // addAllRequestsInStore(response.content);
 
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : ErrorMessage;

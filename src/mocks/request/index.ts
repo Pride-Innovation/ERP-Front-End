@@ -1,3 +1,10 @@
+/*
+13.9 Pride's Standard Copyright Notice:
+Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
+and distribute this software and its documentation for any purpose is prohibited unless authorized in writing by the
+Managing Director
+*/
+
 import { IRequest, ITransportRequest } from "../../pages/request/interface";
 import { requestStatus } from "../../utils/constants";
 import { rolesMock } from "../settings";
@@ -10,7 +17,6 @@ export const requestMock: IRequest[] = [
         createDate: "2024-11-01",
         quantity: 1,
         priority: "High",
-        // status: "pending",
         description: "Requesting to upgrade the software on the development machine.",
         requester: {
             reportsTo: "Jane Smith",

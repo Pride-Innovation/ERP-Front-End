@@ -119,7 +119,7 @@ const Login = () => {
                             weight={700}
                             sx={{ color: '#BC892C', mb: 1 }}
                         >
-                            Pride Microfinance (ERP)
+                            Assets Management
                         </TypographyComponent>
                         <TypographyComponent
                             size="16px"
