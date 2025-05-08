@@ -1,4 +1,4 @@
-import { Grid } from "@mui/material"
+import { Box, Grid, Paper } from "@mui/material"
 import { ICreateInventory, IInventory } from "./interface"
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -32,24 +32,18 @@ const CreateInventory = ({ handleClose }: ICreateInventory) => {
         setSendingRequest(false);
     }
     return (
-        <Grid container xs={12}>
-            <Grid item xs={12}>
-                <form
-                    style={{ width: "100%" }}
-                    autoComplete="off"
-                    onSubmit={handleSubmit(onSubmit)}
-                >
-                    <InventoryForm
-                        handleClose={handleClose}
-                        buttonText="Submit"
-                        formState={formState}
-                        control={control}
-                        sendingRequest={sendingRequest}
-                        register={register}
-                    />
-                </form>
-            </Grid>
-        </Grid>
+        <Box component="form" noValidate autoComplete="off" onSubmit={handleSubmit(onSubmit)} sx={{ px: 2, py: 1 }}>
+            <Paper elevation={0} sx={{ p: 2 }}>
+                <InventoryForm
+                    handleClose={handleClose}
+                    buttonText="Submit"
+                    formState={formState}
+                    control={control}
+                    sendingRequest={sendingRequest}
+                    register={register}
+                />
+            </Paper>
+        </Box >
     )
 }
 

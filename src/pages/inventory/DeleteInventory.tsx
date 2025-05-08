@@ -1,61 +1,64 @@
-import { Grid, Stack, Typography } from '@mui/material'
+import { Grid, Stack, Typography, Divider, useTheme } from '@mui/material';
 import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
 import { IDeleteInventory } from './interface';
 import ButtonComponent from '../../components/forms/Button';
 import { useContext } from 'react';
 import { InventoryContext } from '../../context/inventory';
 
-
 const DeleteInventory = ({
     handleClose,
     sendingRequest,
     buttonText
 }: IDeleteInventory) => {
-    const { currentInventory } = useContext(InventoryContext)
+    const { currentInventory } = useContext(InventoryContext);
+    const theme = useTheme();
 
     const handleDeactivate = (id: string | number) => {
-        console.log(id, "id information!!")
-    }
+        console.log(id, "id information!!");
+    };
 
     return (
-        <Grid item container spacing={4} xs={12}>
+        <Grid container spacing={3}>
             <Grid item xs={12}>
-                <Typography variant="body1" sx={{ mb: 1 }}>
-                    Are you sure you want to deactivate this Item?
+                <Typography variant="body1" sx={{ mb: 2, color: theme.palette.text.primary }}>
+                    Are you sure you want to deactivate this item?
                 </Typography>
-                <Stack direction="row" spacing={1} alignItems="center">
+
+                <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
                     <AccountCircleOutlinedIcon color="primary" />
-                    <Typography variant="h6" color="primary">
-                        {currentInventory.name}
+                    <Typography variant="subtitle1" color="primary" sx={{ fontWeight: 600 }}>
+                        {currentInventory?.name}
                     </Typography>
                 </Stack>
-                <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 1 }}>
-                    <Typography variant="subtitle1" color="textSecondary">
-                        Unit of Measure: <b> {(currentInventory.unitOfMeasure).toUpperCase()}</b>
-                    </Typography>
-                </Stack>
+
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                    Unit of Measure: <b>{currentInventory?.unitOfMeasure?.toUpperCase()}</b>
+                </Typography>
+
+                <Divider sx={{ my: 2 }} />
             </Grid>
-            <Grid item xs={12} sx={{ display: "flex", justifyContent: "end" }}>
-                <Stack direction="row" spacing={3} sx={{ width: "50%" }}>
+
+            <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ width: { xs: '100%', sm: 'auto' } }}>
                     <ButtonComponent
                         handleClick={handleClose}
-                        buttonColor='info'
-                        type='button'
+                        buttonColor="info"
+                        type="button"
                         variant="outlined"
                         sendingRequest={false}
-                        buttonText="Close"
+                        buttonText="Cancel"
                     />
                     <ButtonComponent
                         handleClick={() => handleDeactivate(currentInventory?.id as string)}
-                        buttonColor='error'
-                        type='submit'
+                        buttonColor="error"
+                        type="submit"
                         sendingRequest={sendingRequest}
                         buttonText={buttonText}
                     />
                 </Stack>
             </Grid>
         </Grid>
-    )
-}
+    );
+};
 
-export default DeleteInventory
+export default DeleteInventory;

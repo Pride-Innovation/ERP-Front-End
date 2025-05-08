@@ -1,8 +1,14 @@
-import { Grid, Stack } from "@mui/material"
-import InventoryUtills from "./Utills"
-import { UseFormAutocompleteComponent, UseFormDatePicker, UseFormInput, UseFormSelect, UseFormTimePicker } from "../../components/forms"
-import { IInventoryForm } from "./interface"
-import ButtonComponent from "../../components/forms/Button"
+import { Grid, Stack, useTheme } from "@mui/material";
+import InventoryUtills from "./Utills";
+import {
+    UseFormAutocompleteComponent,
+    UseFormDatePicker,
+    UseFormInput,
+    UseFormSelect,
+    UseFormTimePicker
+} from "../../components/forms";
+import { IInventoryForm } from "./interface";
+import ButtonComponent from "../../components/forms/Button";
 
 const InventoryForm = ({
     register,
@@ -12,99 +18,61 @@ const InventoryForm = ({
     sendingRequest,
     buttonText
 }: IInventoryForm) => {
-    const { formFields } = InventoryUtills()
-    return (
-        <Grid item container xs={12}>
-            <Grid item container spacing={4} xs={12}>
-                {
-                    formFields.map(formField => {
-                        return formField.type === 'input' ? (
-                            <Grid item xs={12} md={3}>
-                                <UseFormInput
-                                    register={register}
-                                    control={control}
-                                    formState={formState}
-                                    value={formField.value}
-                                    label={formField.label}
-                                />
-                            </Grid>
-                        ) :
+    const { formFields } = InventoryUtills();
+    const theme = useTheme();
 
-                            formField.type === 'number' ? (
-                                <Grid item xs={12} md={3}>
-                                    <UseFormInput
-                                        register={register}
-                                        control={control}
-                                        formState={formState}
-                                        value={formField.value}
-                                        label={formField.label}
-                                    />
-                                </Grid>
-                            ) :
-                                formField.type === 'textarea' ? (
-                                    <Grid item xs={12} md={9}>
-                                        <UseFormInput
-                                            row={6}
-                                            multiline={true}
-                                            register={register}
-                                            control={control}
-                                            formState={formState}
-                                            value={formField.value}
-                                            label={formField.label}
-                                        />
-                                    </Grid>
-                                ) : formField.type === 'select' ? (
-                                    <Grid item xs={12} md={3}>
-                                        <UseFormSelect
-                                            options={formField.options}
-                                            register={register}
-                                            control={control}
-                                            formState={formState}
-                                            value={formField.value}
-                                            label={formField.label} />
-                                    </Grid>
-                                ) : formField.type === 'date' ? (
-                                    <Grid item xs={12} md={3}>
-                                        <UseFormDatePicker
-                                            register={register}
-                                            control={control}
-                                            formState={formState}
-                                            value={formField.value}
-                                            label={formField.label} />
-                                    </Grid>
-                                ) : formField.type === 'time' ? (
-                                    <Grid item xs={12} md={3}>
-                                        <UseFormTimePicker
-                                            register={register}
-                                            control={control}
-                                            formState={formState}
-                                            value={formField.value}
-                                            label={formField.label} />
-                                    </Grid>
-                                ) : formField.type === 'autocomplete' ? (
-                                    <Grid item xs={12} md={3}>
-                                        <UseFormAutocompleteComponent
-                                            register={register}
-                                            control={control}
-                                            formState={formState}
-                                            value={formField.value}
-                                            label={formField.label}
-                                            options={formField.options}
-                                        />
-                                    </Grid>
-                                )
-                                    : null
-                    })
-                }
-                <Grid item xs={12} sx={{ display: "flex", justifyContent: "end" }}>
-                    <Stack direction="row" spacing={3} sx={{ width: "30%" }}>
-                        <ButtonComponent handleClick={() => handleClose()} buttonColor='error' type='button' sendingRequest={false} buttonText="Cancel" />
-                        <ButtonComponent buttonColor='success' type='submit' sendingRequest={sendingRequest} buttonText={buttonText} />
-                    </Stack>
-                </Grid>
+    return (
+        <Grid container spacing={3}>
+            {formFields.map((field, idx) => {
+                const commonProps = {
+                    register,
+                    control,
+                    formState,
+                    value: field.value,
+                    label: field.label
+                };
+
+                const gridSize = field.type === "textarea" ? 12 : 12;
+
+                return (
+                    <Grid item xs={12} md={field.type === "textarea" ? 12 : 4} key={idx}>
+                        {field.type === "input" || field.type === "number" ? (
+                            <UseFormInput {...commonProps} type={field.type === "number" ? "number" : "text"} />
+                        ) : field.type === "textarea" ? (
+                            <UseFormInput {...commonProps} multiline row={5} />
+                        ) : field.type === "select" ? (
+                            <UseFormSelect {...commonProps} options={field.options} />
+                        ) : field.type === "date" ? (
+                            <UseFormDatePicker {...commonProps} />
+                        ) : field.type === "time" ? (
+                            <UseFormTimePicker {...commonProps} />
+                        ) : field.type === "autocomplete" ? (
+                            <UseFormAutocompleteComponent {...commonProps} options={field.options} />
+                        ) : null}
+                    </Grid>
+                );
+            })}
+
+            <Grid item xs={12} sx={{ mt: 2 }}>
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent="flex-end">
+                    <ButtonComponent
+                        handleClick={handleClose}
+                        buttonColor="error"
+                        type="button"
+                        variant="outlined"
+                        sendingRequest={false}
+                        buttonText="Cancel"
+                    />
+                    <ButtonComponent
+                        buttonColor="success"
+                        type="submit"
+                        sendingRequest={sendingRequest}
+                        buttonText={buttonText}
+                    />
+                </Stack>
             </Grid>
         </Grid>
-    )
-}
+    );
+};
 
-export default InventoryForm
+export default InventoryForm;
