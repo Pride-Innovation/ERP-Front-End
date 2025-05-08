@@ -1,4 +1,11 @@
-import { Box, Grid, Paper } from "@mui/material"
+/*
+13.9 Pride's Standard Copyright Notice:
+Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
+and distribute this software and its documentation for any purpose is prohibited unless authorized in writing by the
+Managing Director
+*/
+
+import { Box, Paper } from "@mui/material"
 import { ICreateInventory, IInventory } from "./interface"
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
