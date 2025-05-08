@@ -5,7 +5,7 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { Box, Card, Container, Grid, useTheme } from '@mui/material';
+import { Box, Card, Container, Grid } from '@mui/material';
 import DahboardCard from './DahboardCard';
 import Laptop from "../../statics/images/computer-removebg-preview.png";
 import Furniture from "../../statics/images/chair-office-removebg-preview.png";
@@ -18,7 +18,6 @@ import PersonalAssets from './individualAssets';
 import DisposalAssets from './disposableAssets';
 
 const Dashboard = () => {
-  const theme = useTheme();
 
   const headerText = '% of Assets';
   const chartData = [40, 27, 34, 51];
@@ -65,8 +64,6 @@ const Dashboard = () => {
           </Card>
         </Grid>
       </Grid>
-
-      {/* Assets Sections */}
       <Grid container spacing={4} mt={1}>
         <Grid item xs={12} md={6}>
           <Card sx={{ boxShadow: 3, p: 2 }}>
@@ -84,7 +81,7 @@ const Dashboard = () => {
       <Grid container spacing={4} mt={1}>
         <Grid item xs={12}>
           <Card sx={{ boxShadow: 3, p: 2 }}>
-            {/* <DashboardBarChart /> */}
+            <DashboardBarChart />
           </Card>
         </Grid>
       </Grid>
