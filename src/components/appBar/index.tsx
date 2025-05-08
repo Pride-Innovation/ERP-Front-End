@@ -1,3 +1,10 @@
+/*
+13.9 Pride's Standard Copyright Notice:
+Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
+and distribute this software and its documentation for any purpose is prohibited unless authorized in writing by the
+Managing Director
+*/
+
 import React from 'react';
 import Box from '@mui/material/Box';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -29,9 +36,9 @@ const closedMixin = (theme: Theme): CSSObject => ({
         duration: theme.transitions.duration.leavingScreen,
     }),
     overflowX: 'hidden',
-    width: `calc(${theme.spacing(7)} + 1px)`,
+    width: `calc(${theme.spacing(7)} + 10px)`,
     [theme.breakpoints.up('sm')]: {
-        width: `calc(${theme.spacing(8)} + 1px)`,
+        width: `calc(${theme.spacing(8)} + 10px)`,
     },
 });
 
@@ -143,7 +150,7 @@ export default function ApplicationDrawer({ window }: Props) {
                 <DrawerHeader />
                 <Divider />
                 <Box p={1} sx={(theme) => ({ height: '100%', bgcolor: theme.palette.grey[50] })}>
-                    <SideBar />
+                    <SideBar drawerOpen={true} />
                 </Box>
             </MuiDrawer>
             <Drawer
@@ -158,8 +165,8 @@ export default function ApplicationDrawer({ window }: Props) {
             >
                 <DrawerHeader />
                 <Divider />
-                <Box p={1} sx={(theme) => ({ height: '100%', bgcolor: theme.palette.grey[50]})}>
-                    <SideBar />
+                <Box p={1} sx={(theme) => ({ height: '100%', bgcolor: theme.palette.grey[50] })}>
+                    <SideBar drawerOpen={drawerOpen} />
                 </Box>
             </Drawer>
             <Box
