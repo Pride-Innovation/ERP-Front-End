@@ -111,7 +111,7 @@ const TableComponent = ({
                                         sendingRequest={false}
                                         buttonText={column.actionData?.label as string}
                                         variant='outlined'
-                                        buttonColor='info'
+                                        buttonColor='success'
                                         type='button' />
                                     <PopoverComponent
                                         moduleID={currentID}

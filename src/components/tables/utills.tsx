@@ -6,7 +6,7 @@ import {
     useGridApiContext
 } from "@mui/x-data-grid";
 import { assetStatus, requestStatus } from "../../utils/constants";
-import { MenuItem } from "@mui/material";
+import { MenuItem, useTheme } from "@mui/material";
 import { exportPDF } from "../../utils/pdf";
 import { camelCaseToWords } from "../../utils/helpers";
 import { useContext } from "react";
@@ -82,11 +82,15 @@ const TableUtills = () => {
 
     const JsonExportMenuItem = (props: GridExportMenuItemProps<{}>) => {
         const apiRef = useGridApiContext();
+        const theme = useTheme();
 
         const { hideMenu } = props;
 
         return (
             <MenuItem
+                sx={{
+                    color: theme.palette.secondary.main,
+                }}
                 onClick={() => {
                     generatePDF(apiRef);
                     hideMenu?.();
