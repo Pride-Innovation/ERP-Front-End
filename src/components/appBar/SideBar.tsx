@@ -57,7 +57,7 @@ const SideBar = ({ drawerOpen }: SideBarProps) => {
                                     bgcolor: activeRoute === item.id ? '#06675A' : 'rgba(8, 121, 108, 0.08)',
                                     color: activeRoute === item.id ? 'white' : '#08796C',
                                 },
-                                transition: 'all 0.3s ease',
+                                transition: 'all 0.3s ease', // Smooth transition
                             }}
                             onClick={() => handleClick(item)}
                         >
@@ -77,12 +77,12 @@ const SideBar = ({ drawerOpen }: SideBarProps) => {
                                 primary={item.name}
                                 sx={{
                                     opacity: drawerOpen ? 1 : 0,
+                                    transition: 'opacity 0.3s ease-in-out, margin 0.3s ease-in-out, max-width 0.3s ease-in-out',
                                     whiteSpace: 'nowrap',
                                     ml: drawerOpen ? 1 : 0,
-                                    transition: 'opacity 0.3s ease, margin 0.3s ease',
                                     overflow: 'hidden',
                                     maxWidth: drawerOpen ? 200 : 0,
-                                }}
+                                  }}
                             />
 
                             {item.subroutes.length > 0 && drawerOpen && (
