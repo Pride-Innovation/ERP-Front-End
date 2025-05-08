@@ -95,7 +95,7 @@ const RequestUtills = () => {
     const formFields: Array<IFormData<IRequest>> = [
         {
             value: "name",
-            label: "Name",
+            label: "Title",
             type: "input"
         },
         {
@@ -106,18 +106,6 @@ const RequestUtills = () => {
                 { label: "High", value: "high" },
                 { label: "Low", value: "low" },
             ]
-        },
-        {
-            value: "status",
-            label: 'Status',
-            type: "select",
-            options: optionsObject.statusesOptions
-        },
-
-        {
-            value: "quantity",
-            label: "Quantity",
-            type: "input"
         },
         {
             value: "description",

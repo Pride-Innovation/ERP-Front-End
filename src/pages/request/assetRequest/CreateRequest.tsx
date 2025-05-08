@@ -1,7 +1,13 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Box, Card, Divider, Grid, Typography } from "@mui/material";
+import {
+    Box,
+    Divider,
+    Grid,
+    Typography,
+    Paper
+} from "@mui/material";
 import RequestForm from "./RequestForm";
 import { IRequest } from "../interface";
 import { requestSchema } from "./schema";
@@ -11,12 +17,10 @@ import { toast } from "react-toastify";
 import RoutesUtills from "../../../core/routes/utills";
 
 const CreateRequest = () => {
-    const [sendingRequest, setSendingRequest] = useState<boolean>(false);
-    const [signature, setSignature] = useState<string>("")
-    const [file, setFile] = useState<File | null>( null)
-    const defaultRequest: IRequest = {} as IRequest;
+    const [sendingRequest, setSendingRequest] = useState(false);
+    const [signature, setSignature] = useState("");
+    const [file, setFile] = useState<File | null>(null);
     const { getCurrentUser } = RoutesUtills();
-
 
     const {
         control,
@@ -30,58 +34,60 @@ const CreateRequest = () => {
     });
 
     useEffect(() => {
-        reset({ ...defaultRequest });
+        reset({} as IRequest);
     }, [reset]);
 
     const onSubmit = async (formData: IRequest) => {
         setSendingRequest(true);
 
-        console.log(file)
+        const currentUserID = getCurrentUser()?.id;
+        const formPayload = new FormData();
 
-        const currentUserID = getCurrentUser()?.id
-        const request = new FormData();
-        request.append("priority", formData.priority)
-        request.append("quantity", (formData.quantity as number).toString())
-        request.append("name", formData.name)
-        request.append("status", formData.status as unknown as string)
-        request.append("description", formData.description as string)
-        request.append("file", file as unknown as string)
-        request.append("requesterId", currentUserID)
+        formPayload.append("priority", formData.priority);
+        formPayload.append("quantity", String(formData.quantity));
+        formPayload.append("name", formData.name);
+        formPayload.append("status", String(formData.status));
+        if (file) formPayload.append("file", file);
+        formPayload.append("requesterId", currentUserID);
 
-        const response = await createAssetRequestService(request) as IResponseData;
-        // toast.success(response.data.message)
-        setSendingRequest(false)
+        const response = await createAssetRequestService(formPayload) as IResponseData;
+        toast.success(response?.data?.message || "Request submitted");
+        setSendingRequest(false);
     };
 
     return (
-        <Card sx={{ py: 4 }}>
-            <Grid container xs={12}>
-                <Grid item xs={12}>
-                    <Typography sx={{ mb: 4, px: 4, fontWeight: 600, textTransform: "uppercase", fontSize: '17px' }}>Create a Request</Typography>
-                    <Divider sx={{ mb: 4 }} />
-                    <Box sx={{ px: 4 }}>
-                        <form
-                            style={{ width: "100%" }}
-                            autoComplete="off"
-                            onSubmit={handleSubmit(onSubmit)}
-                        >
-                            <RequestForm
-                                setFile={setFile}
-                                file={file}
-                                setImage={setSignature}
-                                image={signature}
-                                formState={formState}
-                                control={control}
-                                register={register}
-                                sendingRequest={sendingRequest}
-                                buttonText="Submit"
-                            />
-                        </form>
-                    </Box>
+        <Paper elevation={3} sx={{ p: 4, borderRadius: 3, boxShadow: 3, maxWidth: "1200px", mx: "auto" }}>
+            <Typography
+                sx={{
+                    fontWeight: 600,
+                    textTransform: "uppercase",
+                    color: "#BC892C",
+                    mb: 3
+                }}
+            >
+                Create a Request
+            </Typography>
+            <Divider sx={{ mb: 4 }} />
+            <Box component="form" autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
+                <Grid container spacing={4}>
+                    <Grid item xs={12}>
+                        <RequestForm
+                            setFile={setFile}
+                            file={file}
+                            setImage={setSignature}
+                            image={signature}
+                            formState={formState}
+                            control={control}
+                            register={register}
+                            sendingRequest={sendingRequest}
+                            buttonText="Submit"
+                        />
+                    </Grid>
+
                 </Grid>
-            </Grid>
-        </Card>
-    )
-}
+            </Box>
+        </Paper>
+    );
+};
 
 export default CreateRequest;
