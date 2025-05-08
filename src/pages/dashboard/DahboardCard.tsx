@@ -5,7 +5,7 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { Box, Card, Typography, useTheme } from "@mui/material";
+import { Box, Card, Typography } from "@mui/material";
 import { IDashboardCard } from "./interface";
 import DashBoardUtills from "./utills";
 
@@ -16,7 +16,6 @@ const DashboardCard: React.FC<IDashboardCard> = ({
     stockLevel,
     lastUpdated
 }) => {
-    const theme = useTheme();
     const { getStockDetails, StockIndicator } = DashBoardUtills();
     const { color: stockColor, status: stockStatus } = getStockDetails(stockLevel);
 
@@ -37,7 +36,6 @@ const DashboardCard: React.FC<IDashboardCard> = ({
                 },
             }}
         >
-            {/* Left side with image and info */}
             <Box sx={{ display: 'flex', alignItems: 'center', flex: 1 }}>
                 <Box
                     component="img"
@@ -71,7 +69,6 @@ const DashboardCard: React.FC<IDashboardCard> = ({
                 </Box>
             </Box>
 
-            {/* Right side stock indicator */}
             <StockIndicator color={stockColor} />
         </Card>
     );

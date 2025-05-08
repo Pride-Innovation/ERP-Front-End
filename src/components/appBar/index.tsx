@@ -171,7 +171,7 @@ export default function ApplicationDrawer({ window }: Props) {
             </Drawer>
             <Box
                 component="main"
-                sx={(theme) => ({ flexGrow: 1, height: '100vh', bgcolor: theme.palette.grey[50], overflowX: 'auto' })}>
+                sx={() => ({ flexGrow: 1, height: '100vh', bgcolor: "#DFF2FE", overflowX: 'auto' })}>
                 <DrawerHeader />
                 <Box sx={{ px: 3, my: 2 }}>
                     <Outlet />

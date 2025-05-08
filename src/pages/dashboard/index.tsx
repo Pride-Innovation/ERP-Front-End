@@ -5,7 +5,7 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { Box, Card, Container, Grid } from '@mui/material';
+import { Box, Card, Container, Grid, Typography } from '@mui/material';
 import DahboardCard from './DahboardCard';
 import Laptop from "../../statics/images/computer-removebg-preview.png";
 import Furniture from "../../statics/images/chair-office-removebg-preview.png";
@@ -18,73 +18,89 @@ import PersonalAssets from './individualAssets';
 import DisposalAssets from './disposableAssets';
 
 const Dashboard = () => {
-
   const headerText = '% of Assets';
   const chartData = [40, 27, 34, 51];
   const labels = ["IT Equipment", "Office Equipment", "Fleet", "Stationery"];
 
   return (
     <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
-      <Grid container spacing={4}>
-        {[
-          { name: 'IT Equipment', image: Laptop, stockLevel: 'low' },
-          { name: 'Office Equipment', image: Furniture, stockLevel: 'normal' },
-          { name: 'Fleet', image: Vehicle, stockLevel: 'average' },
-          { name: 'Stationery', image: Books, stockLevel: 'low' },
-        ].map((item, index) => (
-          <Grid item xs={12} sm={6} md={3} key={index}>
-            <DahboardCard
-              name={item.name}
-              number={500}
-              image={item.image}
-              stockLevel={item.stockLevel}
-              lastUpdated='12-12-2024'
-            />
+
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h6" fontWeight={700} color="#08796C" sx={{ mb: 2 }}>
+          Assets Overview
+        </Typography>
+        <Grid container spacing={3}>
+          {[
+            { name: 'IT Equipment', image: Laptop, stockLevel: 'low' },
+            { name: 'Office Equipment', image: Furniture, stockLevel: 'normal' },
+            { name: 'Fleet', image: Vehicle, stockLevel: 'average' },
+            { name: 'Stationery', image: Books, stockLevel: 'low' },
+          ].map((item, index) => (
+            <Grid item xs={12} sm={6} md={3} key={index}>
+              <DahboardCard
+                name={item.name}
+                number={500}
+                image={item.image}
+                stockLevel={item.stockLevel}
+                lastUpdated='12-12-2024'
+              />
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
+
+      <Box sx={{ mt: 6, mb: 4 }}>
+        <Typography variant="h6" fontWeight={700} color="#08796C" sx={{ mb: 2 }}>
+          Requests & Asset Distribution
+        </Typography>
+        <Grid container spacing={3}>
+          <Grid item xs={12} md={5}>
+            <Card sx={{ boxShadow: 2, borderRadius: 3, p: 3, backgroundColor: '#F5F9F8' }}>
+              <DoughnutChart
+                headerText={headerText}
+                chartData={chartData}
+                cutout="25%"
+                labels={labels}
+                radius="70%"
+                title="ASSETS PERCENTAGE IN STORE"
+                loading={false}
+              />
+            </Card>
           </Grid>
-        ))}
-      </Grid>
+          <Grid item xs={12} md={7}>
+            <Card sx={{ boxShadow: 2, borderRadius: 3, p: 3, backgroundColor: '#F5F9F8' }}>
+              <DashboardRequests />
+            </Card>
+          </Grid>
+        </Grid>
+      </Box>
 
-      <Grid container spacing={4} mt={1}>
-        <Grid item xs={12} md={7}>
-          <Card sx={{ boxShadow: 3 }}>
-            <DashboardRequests />
-          </Card>
+      <Box sx={{ mt: 6, mb: 4 }}>
+        <Typography variant="h6" fontWeight={700} color="#08796C" sx={{ mb: 2 }}>
+          Ownership & Disposal Insights
+        </Typography>
+        <Grid container spacing={3}>
+          <Grid item xs={12} md={6}>
+            <Card sx={{ boxShadow: 2, borderRadius: 3, p: 3, backgroundColor: '#F5F9F8' }}>
+              <PersonalAssets />
+            </Card>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <Card sx={{ boxShadow: 2, borderRadius: 3, p: 3, backgroundColor: '#F5F9F8' }}>
+              <DisposalAssets />
+            </Card>
+          </Grid>
         </Grid>
-        <Grid item xs={12} md={5}>
-          <Card sx={{ boxShadow: 3 }}>
-            <DoughnutChart
-              headerText={headerText}
-              chartData={chartData}
-              cutout="20%"
-              labels={labels}
-              radius="65%"
-              title="ASSETS PERCENTAGE IN STORE"
-              loading={false}
-            />
-          </Card>
-        </Grid>
-      </Grid>
-      <Grid container spacing={4} mt={1}>
-        <Grid item xs={12} md={6}>
-          <Card sx={{ boxShadow: 3, p: 2 }}>
-            <PersonalAssets />
-          </Card>
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <Card sx={{ boxShadow: 3, p: 2 }}>
-            {/* <DisposalAssets /> */}
-          </Card>
-        </Grid>
-      </Grid>
+      </Box>
 
-      {/* Bar Chart */}
-      <Grid container spacing={4} mt={1}>
-        <Grid item xs={12}>
-          <Card sx={{ boxShadow: 3, p: 2 }}>
-            <DashboardBarChart />
-          </Card>
-        </Grid>
-      </Grid>
+      <Box sx={{ mt: 6 }}>
+        <Typography variant="h6" fontWeight={700} color="#08796C" sx={{ mb: 2 }}>
+          Trends & Performance
+        </Typography>
+        <Card sx={{ boxShadow: 2, borderRadius: 3, p: 3, backgroundColor: '#F5F9F8' }}>
+          <DashboardBarChart />
+        </Card>
+      </Box>
     </Container>
   );
 };

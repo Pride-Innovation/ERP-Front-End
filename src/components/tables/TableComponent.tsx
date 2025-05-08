@@ -126,7 +126,7 @@ const TableComponent = ({
     }));
 
     return (
-        <Card sx={{ width: "100%" }} >
+        <Card sx={{ width: "100%", boxShadow: "none" }} >
             <Box>
                 <DataGridStyled
                     loading={loading}
