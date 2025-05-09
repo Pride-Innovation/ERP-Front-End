@@ -59,7 +59,7 @@ const StatusUtills = () => {
             ]
         },
         {
-            value: "desc",
+            value: "description",
             label: 'Description',
             type: "textarea"
         }]

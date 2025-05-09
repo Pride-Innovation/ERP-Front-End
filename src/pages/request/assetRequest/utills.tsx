@@ -56,6 +56,7 @@ const RequestUtills = () => {
     const handleClose = () => setOpen(false);
 
     const addAllRequestsInStore = (assetRequests: Array<IRequest>) => {
+        console.log(assetRequests, "Requests Information!!")
         dispatch(loadAllRequests(assetRequests))
     }
 

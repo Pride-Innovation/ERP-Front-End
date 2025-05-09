@@ -78,10 +78,6 @@ const RequestDetails: React.FC<IRequestDetails> = ({ handleClose, data, sendingR
                         {isIRequest(details) && (
                             <>
                                 <Typography variant="body1" fontWeight={500}>
-                                    <strong>Quantity:</strong> {details?.quantity}
-                                </Typography>
-
-                                <Typography variant="body1" fontWeight={500}>
                                     <strong>Date:</strong> {details?.description}
                                 </Typography>
                             </>

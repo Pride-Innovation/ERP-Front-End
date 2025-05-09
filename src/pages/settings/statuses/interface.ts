@@ -12,7 +12,7 @@ import { IFetchDataRequest } from "../../../core/apis/interface";
 export interface IStatus {
     id?: number;
     name: string;
-    desc?: string | null;
+    description?: string | null;
     status?: string | null;
 }
 

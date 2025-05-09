@@ -51,7 +51,7 @@ const UpdateRequest = () => {
 
         const request = new FormData();
         request.append("priority", formData.priority)
-        request.append("quantity", (formData.quantity as number).toString())
+        // request.append("quantity", (formData.quantity as number).toString())
         request.append("name", formData.name)
         request.append("status", formData.status as unknown as string)
         request.append("description", formData.description as string)

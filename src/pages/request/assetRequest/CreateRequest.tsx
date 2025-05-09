@@ -47,15 +47,11 @@ const CreateRequest = () => {
     const onSubmit = async (formData: IRequest) => {
         setSendingRequest(true);
 
-        const currentUserID = getCurrentUser()?.id;
         const formPayload = new FormData();
-
         formPayload.append("priority", formData.priority);
-        formPayload.append("quantity", String(formData.quantity));
         formPayload.append("name", formData.name);
         formPayload.append("status", String(formData.status));
         if (file) formPayload.append("file", file);
-        formPayload.append("requesterId", currentUserID);
 
         const response = await createAssetRequestService(formPayload) as IResponseData;
         toast.success(response?.data?.message || "Request submitted");

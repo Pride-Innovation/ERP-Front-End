@@ -15,7 +15,7 @@ import { IUser } from "../users/interface";
 import { IPermission } from "../settings/interface";
 import { Dispatch, SetStateAction } from "react";
 import { IStatus } from "../settings/statuses/interface";
-import { IFetchDataRequest } from "../../core/apis/interface";
+import { IAxiosResponse, IFetchDataRequest } from "../../core/apis/interface";
 
 export interface IAssetParticulars {
     name: string;
@@ -23,20 +23,39 @@ export interface IAssetParticulars {
     engravedNumber: string;
 }
 
+export interface IAssetType {
+    id: number | string,
+    name: string,
+    description: string,
+}
+
+export interface ICommodity {
+    id: number | string,
+    name: string,
+    groupName: string,
+    assetType: IAssetType | null
+}
+
 export interface IRequest {
-    id?: string | number;
-    name: string;
-    quantity?: number | null,
-    priority: string;
-    timeOfSubmissionOfRequest?: string | null;
-    description?: string | null;
+    id?: string | number,
+    name: string,
+    priority: string,
+    description?: string | null,
     signaturePath?: any | null,
-    status?: IStatus | null;
-    createDate?: string,
-    lastModified?: string,
-    createdBy?: number,
-    lastModifiedBy?: number,
-    requester?: IUser
+    status?: IStatus | null
+    timeOfSubmissionOfRequest?: string | null,
+    createDate?: string | null,
+    lastModified?: string | null,
+    createdBy?: IUser | null,
+    lastModifiedBy?: IUser | null,
+    requester?: IUser | null
+    // requestReports: [],
+    currentApprover?: IUser | null,
+    commodities?: Array<{
+        commodity: ICommodity,
+        quantity: number
+    }> | null,
+    emailMessage?: string | null
 }
 
 export interface IRequestResponse extends IFetchDataRequest {
@@ -170,4 +189,8 @@ export interface ITransportRequestForm {
     register: UseFormRegister<ITransportRequest>;
     buttonText: string;
     sendingRequest: boolean;
+}
+
+export interface IRequestAxiosResponse extends IAxiosResponse {
+    data: IRequestResponse
 }

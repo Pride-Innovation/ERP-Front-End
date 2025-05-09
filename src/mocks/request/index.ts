@@ -7,39 +7,28 @@ Managing Director
 
 import { IRequest, ITransportRequest } from "../../pages/request/interface";
 import { requestStatus } from "../../utils/constants";
-import { rolesMock } from "../settings";
+import { requestCommoditiesMocks } from "../commodity";
+import { statusMocks } from "../status";
 import { usersMock } from "../users";
 
 export const requestMock: IRequest[] = [
     {
-        id: 1,
-        name: "Software Upgrade Request",
-        createDate: "2024-11-01",
-        quantity: 1,
+        id: 25,
+        name: "Request for Office Supplies",
         priority: "High",
-        description: "Requesting to upgrade the software on the development machine.",
-        requester: {
-            reportsTo: "Jane Smith",
-            firstName: "John",
-            lastName: "Doe",
-            otherName: "PAtson",
-            image: "https://example.com/images/john.jpg",
-            email: "john.doe@example.com",
-            title: "Software Engineer",
-            department: "Engineering",
-            unit: "Development",
-            gender: "Male",
-            staffNumber: "E12345",
-            availability: "present",
-            role: rolesMock[0]
-        },
-        timeOfSubmissionOfRequest: new Date().toISOString(),
-        status: {
-            id: 1,
-            name: "Pending",
-            desc: "pending Approval",
-            status: "pending"
-        }
+        description: "Request for office supplies",
+        signaturePath: "C:\\Users\\sodong\\Projects\\erp\\human-resource\\statics/e0b84f16-4fed-4a83-b833-1a9608d5dd94_Airtel Mobile Money.png",
+        status: statusMocks[0],
+        timeOfSubmissionOfRequest: "2025-05-07T12:21:29.278878",
+        createDate: "2025-05-07T12:21:29.278878",
+        lastModified: "2025-05-07T12:21:29.278878",
+        createdBy: usersMock[0],
+        lastModifiedBy: usersMock[0],
+        requester: usersMock[0],
+        // "requestReports": [],
+        currentApprover: usersMock[0],
+        commodities: requestCommoditiesMocks,
+        emailMessage: "Email sent Successfully"
     }
 ];
 

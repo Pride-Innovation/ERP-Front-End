@@ -8,11 +8,10 @@ Managing Director
 import React, { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { Grid } from "@mui/material";
-import { IRequest, IRequestResponse } from "../../interface";
+import { IRequest, IRequestAxiosResponse } from "../../interface";
 import { RequestContext } from "../../../../context/request/RequestContext";
 import { FileContext } from "../../../../context/file/FileContext";
 import { fetchRowsService } from "../../../../core/apis/globalService";
-import { ErrorMessage } from "../../../../core/apis/axiosInstance";
 import { crudStates } from "../../../../utils/constants";
 import { ROUTES } from "../../../../core/routes/routes";
 import ModalComponent from "../../../../components/modal";
@@ -46,13 +45,13 @@ const Request = () => {
     const fetchResources = async () => {
         setLoading(true)
         try {
-            const response = await fetchRowsService({ pageNumber: 0, pageSize: 10, endPoint }) as IRequestResponse;
-            console.log(response, "Response!!")
-            // addAllRequestsInStore(response.content);
+            const response = await fetchRowsService({ pageNumber: 0, pageSize: 10, endPoint }) as IRequestAxiosResponse;
+            if (response.status === 200) {
+                addAllRequestsInStore(response.data.content);
+            }
 
         } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : ErrorMessage;
-            console.log(errorMessage)
+            console.log(error)
         }
         setLoading(false)
     }

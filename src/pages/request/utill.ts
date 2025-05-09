@@ -9,7 +9,7 @@ import { IRequest, ITransportRequest } from './interface';
 
 const GlobalRequestUtill = () => {
     const isIRequest = (request: IRequest | ITransportRequest): request is IRequest => {
-        return (request as IRequest).quantity !== undefined;
+        return (request as IRequest).commodities !== undefined;
     };
 
     const isITransportRequest = (request: IRequest | ITransportRequest): request is ITransportRequest => {
