@@ -1,7 +1,13 @@
+/*
+13.9 Pride's Standard Copyright Notice:
+Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
+and distribute this software and its documentation for any purpose is prohibited unless authorized in writing by the
+Managing Director
+*/
+
 import { GridRowModel } from "@mui/x-data-grid";
 import MaleAvatar from '../statics/images/male.jpg';
 import FemaleAvatar from '../statics/images/Female.jpg';
-// import Placeholder from '../statics/images/Placeholder.png';
 
 export const camelCaseToWords = (camelCaseString: string) => {
     return camelCaseString
@@ -41,7 +47,6 @@ export const determineImage = (row: GridRowModel): string => {
         }
     }
 
-    // return Placeholder;
     console.log(row?.image, "image url")
     return row?.image;
 }
@@ -76,7 +81,6 @@ export const formatToUGXMoney = (amount: string): string => {
 
     if (isNaN(numAmount)) {
         console.log(numAmount, "Not a number!!!")
-        // throw new Error('Invalid number');
     }
 
     const formatter = new Intl.NumberFormat('en-UG', {
