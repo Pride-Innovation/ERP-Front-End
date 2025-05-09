@@ -25,7 +25,7 @@ import { AppDispatch, RootState } from '../../../store';
 import { loadAllRequests, removeAssetRequest } from './slice';
 import { useSelector } from 'react-redux';
 import { listAssetStatusesService } from '../../settings/statuses/service';
-import { IStatusFetchResponse } from '../../settings/statuses/interface';
+import { IStatus, IStatusFetchResponse } from '../../settings/statuses/interface';
 import { loadStatuses } from '../../settings/statuses/slice';
 import moment from 'moment';
 
@@ -56,7 +56,6 @@ const RequestUtills = () => {
     const handleClose = () => setOpen(false);
 
     const addAllRequestsInStore = (assetRequests: Array<IRequest>) => {
-        console.log(assetRequests, "Requests Information!!")
         dispatch(loadAllRequests(assetRequests))
     }
 
@@ -78,7 +77,14 @@ const RequestUtills = () => {
         name,
         description,
         createDate,
+        lastModified,
+        createdBy,
+        lastModifiedBy,
+        commodities,
+        emailMessage,
+        currentApprover,
         status,
+        signaturePath,
         ...data
     } = requestMock[0];
 
@@ -88,6 +94,8 @@ const RequestUtills = () => {
         timeOfSubmissionOfRequest: requestMock[0]?.timeOfSubmissionOfRequest,
         ...data,
         status: requestMock[0]?.status?.status,
+        requestedBy: `${requestMock[0].requester?.firstName} ${requestMock[0].requester?.lastName}`,
+        toBeApprovedBy: `${requestMock[0].currentApprover?.firstName} ${requestMock[0].currentApprover?.lastName}`,
         action: {
             label: "options",
             options: [
@@ -122,8 +130,8 @@ const RequestUtills = () => {
         },
     ];
 
-    const determineStatusColor = (id: number): string => {
-        const statusColor = (statuses.find(status => status.id === id))?.status
+    const determineStatusColor = (stat: IStatus): string => {
+        const statusColor = (statuses.find(status => status.id === stat.id))?.status
         return statusColor === requestStatus.approved ? requestStatus.approved
             : statusColor === requestStatus.pending ? requestStatus.pending
                 : requestStatus.rejected
@@ -141,7 +149,9 @@ const RequestUtills = () => {
                     ...fielsdata,
                     requestDate: moment(request.createDate).format('LL'),
                     timeOfSubmissionOfRequest: moment(request.createDate).format('LT'),
-                    status: determineStatusColor(request.status?.id as number)
+                    status: determineStatusColor(request.status as IStatus),
+                    requestedBy: `${request.requester?.firstName} ${request.requester?.lastName}`,
+                    toBeApprovedBy: `${request.currentApprover?.firstName} ${request.currentApprover?.lastName}`,
                 }
             )
         })

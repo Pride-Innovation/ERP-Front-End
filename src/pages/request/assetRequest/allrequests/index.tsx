@@ -88,7 +88,7 @@ const Request = () => {
             console.log(fileData, "form data!!");
         }
     }, [fileData]);
-
+    console.log(columnHeaders, "column headers")
     return (
         <React.Fragment>
             {crudStates.delete === modalState &&
