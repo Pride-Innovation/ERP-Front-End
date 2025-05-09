@@ -22,6 +22,7 @@ import RequestDetails from "../../RequestDetails";
 
 const Request = () => {
     const [loading, setLoading] = useState<boolean>(false);
+    const [count, setCount] = useState<number>(0)
     const [modalState, setModalState] = useState<string>("");
     const [currentRequest, setCurrentRequest] = useState<IRequest>({} as IRequest);
     const navigate = useNavigate();
@@ -48,6 +49,7 @@ const Request = () => {
             const response = await fetchRowsService({ pageNumber: 0, pageSize: 10, endPoint }) as IRequestAxiosResponse;
             if (response.status === 200) {
                 addAllRequestsInStore(response.data.content);
+                setCount(response.data.totalElements)
             }
 
         } catch (error) {
@@ -88,7 +90,7 @@ const Request = () => {
             console.log(fileData, "form data!!");
         }
     }, [fileData]);
-    console.log(columnHeaders, "column headers")
+
     return (
         <React.Fragment>
             {crudStates.delete === modalState &&
@@ -112,7 +114,7 @@ const Request = () => {
                     <TableComponent
                         endPoint={endPoint}
                         loading={loading}
-                        count={100}
+                        count={count}
                         exportData
                         createAction
                         importData
@@ -122,8 +124,7 @@ const Request = () => {
                         columnHeaders={columnHeaders}
                         onCreationHandler={() => navigate(ROUTES.CREATE_REQUEST)}
                         handleOptionClicked={handleOptionClicked}
-                        paginationMode='client'
-                    // paginationMode='server'
+                        paginationMode='server'
                     />
                 }
             </Grid>

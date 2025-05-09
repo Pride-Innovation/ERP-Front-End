@@ -7,13 +7,14 @@ Managing Director
 
 import { DataGridStyled, StyledBox } from '../../components/tables/Table';
 import { GridColDef, GridRowsProp } from '@mui/x-data-grid';
-import { Avatar, Box, Card } from '@mui/material';
+import { Avatar, Box, Card, useTheme } from '@mui/material';
 import { camelCaseToWords, determineImage, formatToUGXMoney, isCamelCase } from '../../utils/helpers';
 import { ITableComponent } from './interface';
 import { TypographyComponent } from '../headers/TypographyComponent';
 import ChipComponent from '../forms/Chip';
 import CheckIcon from '@mui/icons-material/Check';
 import DoNotDisturbAltIcon from '@mui/icons-material/DoNotDisturbAlt';
+import AccessAlarmsIcon from '@mui/icons-material/AccessAlarms';
 import PopoverComponent from '../forms/Popover';
 import CustomToolbarWrapper from './TableToolBar';
 import CustomTextFilterOperator from './TableFilters';
@@ -42,6 +43,7 @@ const TableComponent = ({
     const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
     const [currentID, setCurrentId] = useState<string | number>("")
     const { determineTimeLineDotColor } = TableUtills();
+    const theme = useTheme()
 
     const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
         setAnchorEl(event.currentTarget);
@@ -101,27 +103,38 @@ const TableComponent = ({
                                         <ChipComponent variant='filled' label='Leave' icon={<DoNotDisturbAltIcon fontSize='small' />} size='medium' color='warning' />
                                     }
                                 </StyledBox>
-                            ) : (column.isAction) ? (
-                                <StyledBox >
-                                    <ButtonComponent
-                                        handleClick={(event: React.MouseEvent<HTMLButtonElement>) => {
-                                            handleClick?.(event)
-                                            setCurrentId(param.row?.id)
-                                        }}
-                                        sendingRequest={false}
-                                        buttonText={column.actionData?.label as string}
-                                        variant='outlined'
-                                        buttonColor='success'
-                                        type='button' />
-                                    <PopoverComponent
-                                        moduleID={currentID}
-                                        handleOptionClicked={handleOptionClicked}
-                                        options={(column.actionData?.options) as Array<{ value: string, label: string }>}
-                                        anchorEl={anchorEl}
-                                        setAnchorEl={setAnchorEl}
-                                    />
-                                </StyledBox>
-                            ) : null
+                            )
+                                : (column.isPriority) ? (
+                                    <StyledBox >
+                                        {value === "high" ?
+                                            <ChipComponent variant='filled' label='High' icon={<AccessAlarmsIcon fontSize='small' />} size='medium' color='error' /> :
+                                            value === "medium" ?
+                                                <ChipComponent variant='filled' label='Medium' icon={<DoNotDisturbAltIcon fontSize='small' />} size='medium' color='secondary' /> :
+                                                <ChipComponent variant='filled' label='Low' icon={<CheckIcon fontSize='small' sx={{ color: theme.palette.background.paper }} />} size='medium' color='success' />
+                                        }
+                                    </StyledBox>
+                                )
+                                    : (column.isAction) ? (
+                                        <StyledBox >
+                                            <ButtonComponent
+                                                handleClick={(event: React.MouseEvent<HTMLButtonElement>) => {
+                                                    handleClick?.(event)
+                                                    setCurrentId(param.row?.id)
+                                                }}
+                                                sendingRequest={false}
+                                                buttonText={column.actionData?.label as string}
+                                                variant='outlined'
+                                                buttonColor='success'
+                                                type='button' />
+                                            <PopoverComponent
+                                                moduleID={currentID}
+                                                handleOptionClicked={handleOptionClicked}
+                                                options={(column.actionData?.options) as Array<{ value: string, label: string }>}
+                                                anchorEl={anchorEl}
+                                                setAnchorEl={setAnchorEl}
+                                            />
+                                        </StyledBox>
+                                    ) : null
         }
     }));
 

@@ -19,6 +19,7 @@ export interface ITableHeader {
     isNumber?: boolean;
     isImage?: boolean;
     isStatus?: boolean;
+    isPriority?: boolean;
     isMoney?: boolean;
     actionData?: {
         label: string;
