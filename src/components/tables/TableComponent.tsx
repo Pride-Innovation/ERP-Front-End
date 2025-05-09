@@ -13,6 +13,7 @@ import { ITableComponent } from './interface';
 import { TypographyComponent } from '../headers/TypographyComponent';
 import ChipComponent from '../forms/Chip';
 import CheckIcon from '@mui/icons-material/Check';
+import SpeedIcon from '@mui/icons-material/Speed';
 import DoNotDisturbAltIcon from '@mui/icons-material/DoNotDisturbAlt';
 import AccessAlarmsIcon from '@mui/icons-material/AccessAlarms';
 import PopoverComponent from '../forms/Popover';
@@ -110,7 +111,7 @@ const TableComponent = ({
                                             <ChipComponent variant='filled' label='High' icon={<AccessAlarmsIcon fontSize='small' />} size='medium' color='error' /> :
                                             value === "medium" ?
                                                 <ChipComponent variant='filled' label='Medium' icon={<DoNotDisturbAltIcon fontSize='small' />} size='medium' color='secondary' /> :
-                                                <ChipComponent variant='filled' label='Low' icon={<CheckIcon fontSize='small' sx={{ color: theme.palette.background.paper }} />} size='medium' color='success' />
+                                                <ChipComponent variant='filled' label='Low' icon={<SpeedIcon fontSize='small' sx={{ color: theme.palette.background.paper }} />} size='medium' color='success' />
                                         }
                                     </StyledBox>
                                 )
