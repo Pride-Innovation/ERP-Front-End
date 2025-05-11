@@ -5,10 +5,10 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { Box, Button, Stack, Typography } from "@mui/material"
+import { Box, Button, Card, Divider, Stack, Typography, useTheme } from "@mui/material";
 import { Outlet, useLocation, useNavigate } from "react-router";
-import { ISettingsNavigation } from "./interface";
 import { useEffect, useState } from "react";
+import { ISettingsNavigation } from "./interface";
 import SettingsUtills from "./utills";
 
 const Settings = () => {
@@ -16,43 +16,89 @@ const Settings = () => {
     const { pathname } = useLocation();
     const { navigations } = SettingsUtills();
     const navigate = useNavigate();
+    const theme = useTheme();
 
-    useEffect(() => { setPath(pathname) }, [pathname])
+    useEffect(() => {
+        setPath(pathname);
+    }, [pathname]);
 
-    const determineActivePath = (item: ISettingsNavigation): boolean => {
-        if (path === `${item.path}`) return true;
-        return false;
-    }
+    const isActive = (item: ISettingsNavigation): boolean => path === item.path;
 
     return (
-        <Box sx={{ width: "100%", display: "flex", justifyContent: "center" }}>
-            <Box sx={{ width: "90%", display: "flex" }} py={4}>
-                <Box sx={{ width: "20%", mr: 3 }}>
-                    <Typography sx={{ fontWeight: 600, textTransform: "uppercase", fontSize: '17px' }}>System Settings</Typography>
-                    <Box sx={{ mt: 6 }}>
-                        <Stack direction="column" spacing={1}>
-                            {navigations.map(item => (
-                                <>
-                                    <Button
-                                        startIcon={item.icon}
-                                        onClick={() => navigate(item.path)}
-                                        key={item.id}
-                                        sx={{ textTransform: "capitalize", display: "flex", justifyContent: "flex-start" }}
-                                        variant={determineActivePath(item) ? "contained" : "text"}
-                                    >
-                                        {item.text}
-                                    </Button>
-                                </>
-                            ))}
-                        </Stack>
-                    </Box>
-                </Box>
-                <Box sx={{ width: "80%" }}>
+        <Box sx={{ width: "100%", display: "flex", justifyContent: "center", minHeight: "85vh", bgcolor: theme.palette.background.default, py: 4 }}>
+            <Box sx={{ width: "90%", display: "flex", gap: 3, flexDirection: { xs: "column", md: "row" } }}>
+
+                {/* Sidebar Card */}
+                <Card
+                    elevation={1}
+                    sx={{
+                        width: { xs: "100%", md: "280px" },
+                        p: 3,
+                        borderRadius: 2,
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 3,
+                        bgcolor: theme.palette.background.paper,
+                    }}
+                >
+                    <Typography
+                        variant="h6"
+                        color="secondary"
+                        sx={{ fontWeight: 700, textTransform: "uppercase", fontSize: "16px" }}
+                    >
+                        System Settings
+                    </Typography>
+
+                    <Divider />
+
+                    <Stack spacing={1}>
+                        {navigations.map((item) => (
+                            <Button
+                                key={item.id}
+                                startIcon={item.icon}
+                                onClick={() => navigate(item.path)}
+                                variant={isActive(item) ? "contained" : "text"}
+                                sx={{
+                                    justifyContent: "flex-start",
+                                    textTransform: "capitalize",
+                                    borderRadius: 2,
+                                    fontWeight: isActive(item) ? 600 : 500,
+                                    color: isActive(item)
+                                        ? theme.palette.common.white
+                                        : theme.palette.text.primary,
+                                    bgcolor: isActive(item)
+                                        ? theme.palette.primary.main
+                                        : "transparent",
+                                    "&:hover": {
+                                        bgcolor: isActive(item)
+                                            ? theme.palette.primary.dark
+                                            : theme.palette.action.hover,
+                                    },
+                                }}
+                            >
+                                {item.text}
+                            </Button>
+                        ))}
+                    </Stack>
+                </Card>
+
+                {/* Content Card */}
+                <Card
+                    elevation={1}
+                    sx={{
+                        flexGrow: 1,
+                        borderRadius: 2,
+                        p: 3,
+                        bgcolor: theme.palette.background.paper,
+                        minHeight: "70vh",
+                        overflow: "auto",
+                    }}
+                >
                     <Outlet />
-                </Box>
+                </Card>
             </Box>
         </Box>
-    )
-}
+    );
+};
 
-export default Settings
+export default Settings;

@@ -9,7 +9,6 @@ import {
   Box,
   TextField,
 } from "@mui/material"
-import BranchUtills from "./Utills"
 import ButtonComponent from "../../../components/forms/Button";
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import { ChangeEvent, useState } from "react";
@@ -20,6 +19,7 @@ import ViewBranch from "./ViewBranch";
 import UpdateBranch from "./UpdateBranch";
 import DeleteBranch from "./DeleteBranch";
 import { IBranch } from "./interface";
+import BranchUtills from "./utills";
 
 const Branches = () => {
   const [currentBranch, setCurrentBranch] = useState<IBranch>({} as IBranch);
@@ -111,7 +111,7 @@ const Branches = () => {
             alignItems: "center",
           }}>
           {
-            branches.map(branch => (
+            branches?.map(branch => (
               <ViewBranch branch={branch} deleteBranch={deleteBranch} updateBranch={updateBranch} />
             ))
           }

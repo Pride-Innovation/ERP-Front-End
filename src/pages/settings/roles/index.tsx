@@ -23,18 +23,19 @@ const Roles = () => {
     const [currentRole, setCurrentRole] = useState<IRole>({} as IRole);
     const [roles, setRoles] = useState<IRole[]>([] as Array<IRole>)
 
-    useEffect(() => {
-        const fetchRoles = async () => {
-            try {
-                const rolesData = await fetchAllRoles();
-                setRoles(rolesData);
-            } catch (error) {
-                console.error("Error fetching roles:", error);
-            }
-        };
+    const fetchRoles = async () => {
+        try {
+            const rolesData = await fetchAllRoles();
+            setRoles(rolesData);
+        } catch (error) {
+            console.error("Error fetching roles:", error);
+        }
+    };
 
+    useEffect(() => {
         fetchRoles();
     }, []);
+    
     const createRole = () => {
         setModalState(crudStates.create);
         handleOpen()
@@ -96,7 +97,7 @@ const Roles = () => {
                     gap={4}
                 >
                     {
-                        roles.map((role: IRole) => {
+                        roles?.map((role: IRole) => {
                             return (
                                 <RoleDetails updateRole={updateRole} deleteRole={deleteRole} role={role} />
                             )

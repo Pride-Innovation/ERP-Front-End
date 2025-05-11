@@ -15,7 +15,7 @@ import { branchSchema } from "./schema";
 import { createBranchService } from "./service";
 import { IResponseData } from "../../users/interface";
 import { toast } from "react-toastify";
-import BranchUtills from "./Utills";
+import BranchUtills from "./utills";
 
 const CreateBranch = ({
     handleClose,
