@@ -58,12 +58,12 @@ const RoleUtills = () => {
         {
             id: 4,
             icon: <GroupIcon fontSize='large' color='info' />,
-            name: "Users"
+            name: "User"
         }
     ]
 
     const filterPermissions = (verb: string, permissions: Array<IPermission>, module: string): Array<IPermission> => {
-        return permissions?.filter(perm => perm.name.indexOf(verb) !== -1 && perm.name.indexOf(module) !== -1);
+        return permissions?.filter(perm => perm.name.indexOf(verb.toUpperCase()) !== -1 && perm.name.indexOf(module.toUpperCase()) !== -1);
     }
 
     const updatePermissionsOnClick = (currentPermissions: Array<IPermission>, newPermission: IPermission, val: boolean) => {

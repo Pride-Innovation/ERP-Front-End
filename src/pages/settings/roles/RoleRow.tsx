@@ -27,7 +27,9 @@ const RoleRow = ({ role, module }: IRoleRow) => {
     }, [])
 
     useEffect(() => {
-        determineCrudStates(updatedPermissions, moduleNameFxn(module))
+        if (updatedPermissions.length > 0) {
+            determineCrudStates(updatedPermissions, moduleNameFxn(module))
+        }
     }, [updatedPermissions]);
 
     const handleChange = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -41,8 +43,8 @@ const RoleRow = ({ role, module }: IRoleRow) => {
             response = await removePermissionFromRoleService(role?.id as number, permission[0].id as number) as IRoleAxiosResponse;
         }
 
-        if (response?.status === 200) {
-            toast.success(`Role ${response.data.name} has been created successfully`)
+        if (response?.status === 201) {
+            toast.success(`Role ${response.data.name} permissions have been updated successfully`)
         }
 
         const result = updatePermissionsOnClick(updatedPermissions as Array<IPermission>, permission[0], val);
