@@ -5,7 +5,7 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { Box, Button, Card, Divider, Stack, Typography, useTheme } from "@mui/material";
+import { Box, Button, Divider, Stack, Typography, useTheme, Paper } from "@mui/material";
 import { Outlet, useLocation, useNavigate } from "react-router";
 import { useEffect, useState } from "react";
 import { ISettingsNavigation } from "./interface";
@@ -25,31 +25,42 @@ const Settings = () => {
     const isActive = (item: ISettingsNavigation): boolean => path === item.path;
 
     return (
-        <Box sx={{ width: "100%", display: "flex", justifyContent: "center", minHeight: "85vh", bgcolor: theme.palette.background.default, py: 4 }}>
-            <Box sx={{ width: "90%", display: "flex", gap: 3, flexDirection: { xs: "column", md: "row" } }}>
-
-                {/* Sidebar Card */}
-                <Card
-                    elevation={1}
+        <Box sx={{
+            width: "100%", display: "flex", justifyContent: "center",
+        }}>
+            <Paper
+                elevation={3}
+                sx={{
+                    width: "100%",
+                    minHeight: "85vh",
+                    display: "flex",
+                    flexDirection: { xs: "column", md: "row" },
+                    borderRadius: 3,
+                    overflow: "hidden",
+                }}
+            >
+                <Box
                     sx={{
-                        width: { xs: "100%", md: "280px" },
+                        width: { xs: "100%", md: "250px" },
+                        bgcolor: theme.palette.grey[100],
+                        borderRight: { md: `1px solid ${theme.palette.divider}` },
                         p: 3,
-                        borderRadius: 2,
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: 3,
-                        bgcolor: theme.palette.background.paper,
                     }}
                 >
                     <Typography
-                        variant="h6"
-                        color="secondary"
-                        sx={{ fontWeight: 700, textTransform: "uppercase", fontSize: "16px" }}
+                        variant="subtitle1"
+                        color="text.secondary"
+                        sx={{
+                            fontWeight: 700,
+                            textTransform: "uppercase",
+                            mb: 2,
+                            color: theme.palette.secondary.main
+                        }}
                     >
                         System Settings
                     </Typography>
 
-                    <Divider />
+                    <Divider sx={{ mb: 2 }} />
 
                     <Stack spacing={1}>
                         {navigations.map((item) => (
@@ -58,6 +69,7 @@ const Settings = () => {
                                 startIcon={item.icon}
                                 onClick={() => navigate(item.path)}
                                 variant={isActive(item) ? "contained" : "text"}
+                                fullWidth
                                 sx={{
                                     justifyContent: "flex-start",
                                     textTransform: "capitalize",
@@ -80,23 +92,17 @@ const Settings = () => {
                             </Button>
                         ))}
                     </Stack>
-                </Card>
-
-                {/* Content Card */}
-                <Card
-                    elevation={1}
+                </Box>
+                <Box
                     sx={{
-                        flexGrow: 1,
-                        borderRadius: 2,
-                        p: 3,
+                        flex: 1,
+                        p: 4,
                         bgcolor: theme.palette.background.paper,
-                        minHeight: "70vh",
-                        overflow: "auto",
                     }}
                 >
                     <Outlet />
-                </Card>
-            </Box>
+                </Box>
+            </Paper>
         </Box>
     );
 };
