@@ -14,12 +14,16 @@ import { crudStates } from "../../../utils/constants";
 import { permissionsMock } from "../../../mocks/settings";
 import { toast } from "react-toastify";
 import { assignPermissionToRoleService, removePermissionFromRoleService } from "./service";
+import { AppDispatch } from "../../../store";
+import { useDispatch } from "react-redux";
+import { updateRole } from "./slice";
 
 const RoleRow = ({ role, module }: IRoleRow) => {
     const { determineCrudStates, mainCheckedState, filterPermissions, updatePermissionsOnClick } = RoleUtills();
     const [selectedPermissions, setSelectedPermissions] = useState<IPermission[]>([] as Array<IPermission>);
     const [updatedPermissions, setUpdatedPermissions] = useState<IPermission[]>([] as Array<IPermission>)
     const moduleNameFxn = (module: IModule) => module.name.toLocaleLowerCase().split(" ").join("_");
+    const dispatch = useDispatch<AppDispatch>();
 
     useEffect(() => {
         if (((role.permissions as Array<IPermission>)?.length) > 0)
@@ -48,6 +52,7 @@ const RoleRow = ({ role, module }: IRoleRow) => {
                 `Permission ${(permission[0].name).split("_").join(" ").toLowerCase()} 
                 has been ${(val ? "Added To" : "Removed From")} ${response.data.name}`
             )
+            dispatch(updateRole(response.data))
         }
 
         const result = updatePermissionsOnClick(updatedPermissions as Array<IPermission>, permission[0], val);

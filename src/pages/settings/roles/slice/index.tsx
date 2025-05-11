@@ -25,10 +25,13 @@ export const rolesSlice = createSlice({
         },
         removeRoles: (state, action) => {
             state.roles = state.roles.filter(role => role?.id !== action?.payload?.id)
+        },
+        updateRole: (state, action) => {
+            state.roles = state.roles.map(role => role?.id === action?.payload?.id ? action.payload : role)
         }
     }
 });
 
 const { actions, reducer } = rolesSlice;
-export const { loadAllRoles, removeRoles } = actions;
+export const { loadAllRoles, removeRoles, updateRole } = actions;
 export default reducer;
