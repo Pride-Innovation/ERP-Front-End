@@ -6,15 +6,21 @@ Managing Director
 */
 
 import { useEffect } from 'react'
-import { ICreateRole, IRole } from '../interface';
+import { ICreateRole, IRole, IRoleAxiosResponse } from '../interface';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { roleSchema } from './schema';
 import { Grid } from '@mui/material';
 import RoleForm from './RoleForm';
+import { createRoleService } from './service';
+import { toast } from 'react-toastify';
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from '../../../store';
+import { addRole } from './slice';
 
 const CreateRole = ({ handleClose, sendingRequest }: ICreateRole) => {
     const defaultUser: IRole = {} as IRole;
+    const dispatch = useDispatch<AppDispatch>();
 
     const {
         control,
@@ -31,8 +37,16 @@ const CreateRole = ({ handleClose, sendingRequest }: ICreateRole) => {
         reset({ ...defaultUser });
     }, [reset]);
 
-    const onSubmit = (formData: IRole) => {
-        console.log(formData, "form data!!!!!");
+    const onSubmit = async (formData: IRole) => {
+        try {
+            const response = await createRoleService(formData) as IRoleAxiosResponse;
+            if (response.status === 200) {
+                toast.success(`Role ${response.data.name} has been created successfully`);
+                dispatch(addRole(response.data))
+            }
+        } catch (error) {
+            console.log(error)
+        }
     };
 
     return (

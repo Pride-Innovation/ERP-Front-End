@@ -25,4 +25,13 @@ const removePermissionFromRoleService = async (roleId: string | number, permissi
     }
 }
 
-export { assignPermissionToRoleService, removePermissionFromRoleService }
+const createRoleService = async (body: Object) => {
+    try {
+        const response = await axiosInstance.post('roles', body);
+        return response
+    } catch (error) {
+        return error
+    }
+}
+
+export { assignPermissionToRoleService, removePermissionFromRoleService, createRoleService }
