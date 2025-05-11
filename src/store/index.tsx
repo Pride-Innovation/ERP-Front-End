@@ -21,6 +21,7 @@ import AssetsRequestsReducer from "../pages/request/assetRequest/slice"
 import InventoryReducer from "../pages/inventory/slice"
 import UnitReducer from "../pages/settings/unit/slice"
 import DepartmentReducer from "../pages/settings/departments/slice"
+import RoleReducer from "../pages/settings/roles/slice"
 
 export const store = configureStore({
     reducer: {
@@ -35,6 +36,7 @@ export const store = configureStore({
         InventoryStore: InventoryReducer,
         UnitStore: UnitReducer,
         DepartmentStore: DepartmentReducer,
+        RoleStore: RoleReducer,
     },
 });
 

@@ -12,11 +12,14 @@ import SettingsBrightnessIcon from '@mui/icons-material/SettingsBrightness';
 import DirectionsCarFilledIcon from '@mui/icons-material/DirectionsCarFilled';
 import GroupIcon from '@mui/icons-material/Group';
 import { crudStates } from "../../../utils/constants";
-import { fetchAllRolesService } from "./service";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "../../../store";
+import { loadAllRoles } from "./slice";
 
 const RoleUtills = () => {
-    const endPoint = "posts";
+    const endPoint = "roles";
     const [roles, setRoles] = useState<Array<IRole>>([] as Array<IRole>);
+    const dispatch = useDispatch<AppDispatch>();
     const [mainCheckedState, setMainCheckedState] = useState<{
         create: boolean,
         read: boolean,
@@ -82,12 +85,9 @@ const RoleUtills = () => {
         })
     }
 
-    const fetchAllRoles = async (): Promise<IRole[]> => {
-        const response = await fetchAllRolesService() as unknown as IRole[];
-        return response;
+    const addAllRolesInStore = (roles: Array<IRole>) => {
+        dispatch(loadAllRoles(roles))
     }
-
-
 
     return (
         {
@@ -103,8 +103,8 @@ const RoleUtills = () => {
             open,
             modalState,
             setModalState,
-            fetchAllRoles,
-            updatePermissionsOnClick
+            updatePermissionsOnClick,
+            addAllRolesInStore
         }
     )
 }

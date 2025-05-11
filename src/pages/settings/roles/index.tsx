@@ -8,7 +8,7 @@ Managing Director
 import { Box } from '@mui/material';
 import ButtonComponent from '../../../components/forms/Button';
 import RoleDetails from './RoleDetails';
-import { IRole } from '../interface';
+import { IRole, IRolesAxiosResponse } from '../interface';
 import ModalComponent from '../../../components/modal';
 import RoleUtills from './utills';
 import { crudStates } from '../../../utils/constants';
@@ -16,26 +16,39 @@ import { useEffect, useState } from 'react';
 import DeleteRole from './DeleteRole';
 import CreateRole from './CreateRole';
 import UpdateRole from './UpdateRole';
+import { fetchRowsService } from '../../../core/apis/globalService';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../store';
 
 
 const Roles = () => {
-    const { open, handleClose, handleOpen, modalState, setModalState, fetchAllRoles } = RoleUtills();
-    const [currentRole, setCurrentRole] = useState<IRole>({} as IRole);
-    const [roles, setRoles] = useState<IRole[]>([] as Array<IRole>)
 
-    const fetchRoles = async () => {
+    const { open, handleClose, handleOpen, modalState, setModalState, endPoint, addAllRolesInStore } = RoleUtills();
+    const [currentRole, setCurrentRole] = useState<IRole>({} as IRole);
+    const [loading, setLoading] = useState<boolean>(false);
+    const [count, setCount] = useState<number>(0);
+    const { roles } = useSelector((state: RootState) => state.RoleStore);
+
+
+    const fetchResources = async () => {
+        setLoading(true)
         try {
-            const rolesData = await fetchAllRoles();
-            setRoles(rolesData);
+            const response = await fetchRowsService({ pageNumber: 0, pageSize: 10, endPoint }) as IRolesAxiosResponse;
+            if (response.status === 200) {
+                addAllRolesInStore(response.data.content);
+                setCount(response.data.totalElements)
+            }
+
         } catch (error) {
-            console.error("Error fetching roles:", error);
+            console.log(error)
         }
-    };
+        setLoading(false)
+    }
 
     useEffect(() => {
-        fetchRoles();
+        fetchResources();
     }, []);
-    
+
     const createRole = () => {
         setModalState(crudStates.create);
         handleOpen()

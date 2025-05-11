@@ -6,6 +6,7 @@ Managing Director
 */
 
 import { Control, FieldError, FormState, UseFormRegister } from "react-hook-form";
+import { IAxiosResponse, IFetchDataRequest } from "../../core/apis/interface";
 
 export interface IPermission {
     id?: number | string;
@@ -18,7 +19,6 @@ export interface IRole {
     id?: string | number;
     name: string;
     permissions?: Array<IPermission>;
-    guard_name?: string;
 }
 
 
@@ -75,4 +75,12 @@ export interface ISettingsNavigation {
     text: string;
     path: string;
     icon: JSX.Element;
+}
+
+export interface IRoleResponse extends IFetchDataRequest {
+    content: Array<IRole>
+}
+
+export interface IRolesAxiosResponse extends IAxiosResponse {
+    data: IRoleResponse
 }
