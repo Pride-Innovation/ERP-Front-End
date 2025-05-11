@@ -7,13 +7,22 @@ Managing Director
 
 import axiosInstance from "../../../../core/apis/axiosInstance"
 
-const fetchAllRolesService = async () => {
+const assignPermissionToRoleService = async (roleId: string | number, permissionId: string | number) => {
     try {
-        const response = await axiosInstance.get("roles");
-        return response?.data?.data
+        const response = await axiosInstance.put(`/roles/${roleId}/add-permissions/${permissionId}`);
+        return response
     } catch (error) {
-        console.log(error)
+        return error;
     }
 }
 
-export { fetchAllRolesService }
+const removePermissionFromRoleService = async (roleId: string | number, permissionId: string | number) => {
+    try {
+        const response = await axiosInstance.put(`/roles/${roleId}/remove-permissions/${permissionId}`);
+        return response
+    } catch (error) {
+        return error;
+    }
+}
+
+export { assignPermissionToRoleService, removePermissionFromRoleService }

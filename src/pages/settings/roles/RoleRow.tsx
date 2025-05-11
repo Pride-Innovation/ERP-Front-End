@@ -6,35 +6,56 @@ Managing Director
 */
 
 import { Box, Typography } from "@mui/material";
-import { IModule, IPermission, IRoleRow } from "../interface";
+import { IModule, IPermission, IRoleAxiosResponse, IRoleRow } from "../interface";
 import CheckboxComponent from "../../../components/forms/CheckBox";
 import RoleUtills from "./utills";
 import { ChangeEvent, useEffect, useState } from "react";
 import { crudStates } from "../../../utils/constants";
 import { permissionsMock } from "../../../mocks/settings";
+import { toast } from "react-toastify";
+import { assignPermissionToRoleService, removePermissionFromRoleService } from "./service";
 
 const RoleRow = ({ role, module }: IRoleRow) => {
     const { determineCrudStates, mainCheckedState, filterPermissions, updatePermissionsOnClick } = RoleUtills();
     const [selectedPermissions, setSelectedPermissions] = useState<IPermission[]>([] as Array<IPermission>);
-    const [selectedPermission, setSelectedPermission] = useState<{ name: string, value: boolean }>({} as { name: string, value: boolean })
-
+    const [updatedPermissions, setUpdatedPermissions] = useState<IPermission[]>([] as Array<IPermission>)
     const moduleNameFxn = (module: IModule) => module.name.toLocaleLowerCase().split(" ").join("_");
 
     useEffect(() => {
-        determineCrudStates(role?.permissions as Array<IPermission>, moduleNameFxn(module))
-    }, []);
+        if (((role.permissions as Array<IPermission>)?.length) > 0)
+            setUpdatedPermissions(role.permissions as Array<IPermission>)
+    }, [])
+
+    useEffect(() => {
+        determineCrudStates(updatedPermissions, moduleNameFxn(module))
+    }, [updatedPermissions]);
 
     const handleChange = async (event: ChangeEvent<HTMLInputElement>) => {
         const verb = event.target.name;
         const val = event.target.checked;
         const permission = filterPermissions(verb, permissionsMock, moduleNameFxn(module));
-        const result = updatePermissionsOnClick(selectedPermissions, permission[0], val);
+        let response = {} as IRoleAxiosResponse;
+        if (val) {
+            response = await assignPermissionToRoleService(role?.id as number, permission[0].id as number) as IRoleAxiosResponse;
+        } else {
+            response = await removePermissionFromRoleService(role?.id as number, permission[0].id as number) as IRoleAxiosResponse;
+        }
+
+        if (response?.status === 200) {
+            toast.success(`Role ${response.data.name} has been created successfully`)
+        }
+
+        const result = updatePermissionsOnClick(updatedPermissions as Array<IPermission>, permission[0], val);
+
         setSelectedPermissions([...result]);
-        setSelectedPermission({ name: verb, value: val })
+        setUpdatedPermissions([...result])
     }
 
-    useEffect(() => { determineCrudStates(selectedPermissions, moduleNameFxn(module)) }, [selectedPermissions]);
-    useEffect(() => { console.log(selectedPermission) }, [selectedPermission]);
+    useEffect(() => {
+        if (selectedPermissions.length > 0) {
+            determineCrudStates(selectedPermissions, moduleNameFxn(module))
+        }
+    }, [selectedPermissions]);
 
     return (
         <Box

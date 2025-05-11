@@ -84,3 +84,7 @@ export interface IRoleResponse extends IFetchDataRequest {
 export interface IRolesAxiosResponse extends IAxiosResponse {
     data: IRoleResponse
 }
+
+export interface IRoleAxiosResponse extends IAxiosResponse {
+    data: IRole
+}

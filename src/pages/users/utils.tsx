@@ -22,7 +22,7 @@ import { AppDispatch, RootState } from '../../store';
 import { useSelector } from 'react-redux';
 import { loadRoles, loadUsers } from './slice';
 import { listUsersService } from '../assets/ITEquipment/service';
-import { fetchAllRolesService } from '../settings/roles/service';
+// import { fetchAllRolesService } from '../settings/roles/service';
 
 const UserUtils = () => {
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
@@ -38,7 +38,7 @@ const UserUtils = () => {
 
     const updateReduxStore = async () => {
         dispatch(loadUsers(await listUsersService()));
-        dispatch(loadRoles(await fetchAllRolesService()));
+        // dispatch(loadRoles(await fetchAllRolesService()));
     }
 
     useEffect(() => { updateReduxStore() }, []);

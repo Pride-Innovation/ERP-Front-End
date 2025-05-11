@@ -6,7 +6,7 @@ Managing Director
 */
 
 import { useState } from "react";
-import { IModule, IPermission, IRole } from "../interface";
+import { IModule, IPermission, IRole, IRolesAxiosResponse } from "../interface";
 import BalanceIcon from '@mui/icons-material/Balance';
 import SettingsBrightnessIcon from '@mui/icons-material/SettingsBrightness';
 import DirectionsCarFilledIcon from '@mui/icons-material/DirectionsCarFilled';
@@ -15,6 +15,7 @@ import { crudStates } from "../../../utils/constants";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../../../store";
 import { loadAllRoles } from "./slice";
+import { fetchRowsService } from "../../../core/apis/globalService";
 
 const RoleUtills = () => {
     const endPoint = "roles";
@@ -35,6 +36,9 @@ const RoleUtills = () => {
     const [modalState, setModalState] = useState<string>("");
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
+    const [count, setCount] = useState<number>(0);
+    const [loading, setLoading] = useState<boolean>(false);
+
     const modulesList: IModule[] = [
         {
             id: 1,
@@ -85,6 +89,20 @@ const RoleUtills = () => {
         })
     }
 
+    const fetchAllRoles = async () => {
+        setLoading(true)
+        try {
+            const response = await fetchRowsService({ pageNumber: 0, pageSize: 10, endPoint }) as IRolesAxiosResponse;
+            if (response.status === 200) {
+                addAllRolesInStore(response.data.content);
+                setCount(response.data.totalElements)
+            }
+        } catch (error) {
+            console.log(error)
+        }
+        setLoading(false)
+    }
+
     const addAllRolesInStore = (roles: Array<IRole>) => {
         dispatch(loadAllRoles(roles))
     }
@@ -104,7 +122,9 @@ const RoleUtills = () => {
             modalState,
             setModalState,
             updatePermissionsOnClick,
-            addAllRolesInStore
+            loading,
+            count,
+            fetchAllRoles
         }
     )
 }
