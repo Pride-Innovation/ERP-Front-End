@@ -44,7 +44,10 @@ const RoleRow = ({ role, module }: IRoleRow) => {
         }
 
         if (response?.status === 201) {
-            toast.success(`Role ${response.data.name} permissions have been updated successfully`)
+            toast.success(
+                `Permission ${(permission[0].name).split("_").join(" ").toLowerCase()} 
+                has been ${(val ? "Added To" : "Removed From")} ${response.data.name}`
+            )
         }
 
         const result = updatePermissionsOnClick(updatedPermissions as Array<IPermission>, permission[0], val);
