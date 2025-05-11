@@ -25,85 +25,82 @@ const Settings = () => {
     const isActive = (item: ISettingsNavigation): boolean => path === item.path;
 
     return (
-        <Box sx={{
-            width: "100%", display: "flex", justifyContent: "center",
-        }}>
-            <Paper
-                elevation={3}
+        <Paper
+            elevation={3}
+            sx={{
+                width: "100%",
+                minHeight: "85vh",
+                display: "flex",
+                flexDirection: { xs: "column", md: "row" },
+                borderRadius: 3,
+                overflow: "hidden",
+                boxShadow: "none"
+            }}
+        >
+            <Box
                 sx={{
-                    width: "100%",
-                    minHeight: "85vh",
-                    display: "flex",
-                    flexDirection: { xs: "column", md: "row" },
-                    borderRadius: 3,
-                    overflow: "hidden",
+                    width: { xs: "100%", md: "250px" },
+                    bgcolor: theme.palette.grey[100],
+                    borderRight: { md: `1px solid ${theme.palette.divider}` },
+                    p: 3,
                 }}
             >
-                <Box
+                <Typography
+                    variant="subtitle1"
+                    color="text.secondary"
                     sx={{
-                        width: { xs: "100%", md: "250px" },
-                        bgcolor: theme.palette.grey[100],
-                        borderRight: { md: `1px solid ${theme.palette.divider}` },
-                        p: 3,
+                        fontWeight: 700,
+                        textTransform: "uppercase",
+                        mb: 2,
+                        color: theme.palette.secondary.main
                     }}
                 >
-                    <Typography
-                        variant="subtitle1"
-                        color="text.secondary"
-                        sx={{
-                            fontWeight: 700,
-                            textTransform: "uppercase",
-                            mb: 2,
-                            color: theme.palette.secondary.main
-                        }}
-                    >
-                        System Settings
-                    </Typography>
+                    System Settings
+                </Typography>
 
-                    <Divider sx={{ mb: 2 }} />
+                <Divider sx={{ mb: 2 }} />
 
-                    <Stack spacing={1}>
-                        {navigations.map((item) => (
-                            <Button
-                                key={item.id}
-                                startIcon={item.icon}
-                                onClick={() => navigate(item.path)}
-                                variant={isActive(item) ? "contained" : "text"}
-                                fullWidth
-                                sx={{
-                                    justifyContent: "flex-start",
-                                    textTransform: "capitalize",
-                                    borderRadius: 2,
-                                    fontWeight: isActive(item) ? 600 : 500,
-                                    color: isActive(item)
-                                        ? theme.palette.common.white
-                                        : theme.palette.text.primary,
+                <Stack spacing={1}>
+                    {navigations.map((item) => (
+                        <Button
+                            key={item.id}
+                            startIcon={item.icon}
+                            onClick={() => navigate(item.path)}
+                            variant={isActive(item) ? "contained" : "text"}
+                            fullWidth
+                            sx={{
+                                justifyContent: "flex-start",
+                                textTransform: "capitalize",
+                                borderRadius: 2,
+                                fontWeight: isActive(item) ? 600 : 500,
+                                color: isActive(item)
+                                    ? theme.palette.common.white
+                                    : theme.palette.text.primary,
+                                bgcolor: isActive(item)
+                                    ? theme.palette.primary.main
+                                    : "transparent",
+                                "&:hover": {
                                     bgcolor: isActive(item)
-                                        ? theme.palette.primary.main
-                                        : "transparent",
-                                    "&:hover": {
-                                        bgcolor: isActive(item)
-                                            ? theme.palette.primary.dark
-                                            : theme.palette.action.hover,
-                                    },
-                                }}
-                            >
-                                {item.text}
-                            </Button>
-                        ))}
-                    </Stack>
-                </Box>
-                <Box
-                    sx={{
-                        flex: 1,
-                        p: 4,
-                        bgcolor: theme.palette.background.paper,
-                    }}
-                >
-                    <Outlet />
-                </Box>
-            </Paper>
-        </Box>
+                                        ? theme.palette.primary.dark
+                                        : theme.palette.action.hover,
+                                },
+                            }}
+                        >
+                            {item.text}
+                        </Button>
+                    ))}
+                </Stack>
+            </Box>
+            <Box
+                sx={{
+                    flex: 1,
+                    p: 4,
+                    bgcolor: theme.palette.background.paper,
+                }}
+            >
+                <Outlet />
+            </Box>
+        </Paper>
     );
 };
 
