@@ -7,8 +7,13 @@ Managing Director
 
 import { Grid, Stack, Typography } from '@mui/material'
 import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
-import { IDeleteRole } from '../interface';
+import { IDeleteRole, IRoleAxiosResponse } from '../interface';
 import ButtonComponent from '../../../components/forms/Button';
+import { deleteRoleService } from './service';
+import { toast } from 'react-toastify';
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from '../../../store';
+import { removeRoles } from './slice';
 
 const DeleteRole = ({
     role,
@@ -16,6 +21,21 @@ const DeleteRole = ({
     sendingRequest,
     buttonText
 }: IDeleteRole) => {
+    const dispatch = useDispatch<AppDispatch>();
+
+    const deleteRole = async () => {
+        try {
+            const response = await deleteRoleService(role?.id as number) as IRoleAxiosResponse;
+            if (response.status === 204) {
+                toast.success("Role has been deleted Successfully");
+                dispatch(removeRoles(role));
+            }
+        } catch (error) {
+            console.log(error);
+        }
+        handleClose();
+    };
+
     return (
         <Grid item container spacing={4} xs={12}>
             <Grid item xs={12}>
@@ -42,6 +62,7 @@ const DeleteRole = ({
                     <ButtonComponent
                         buttonColor='error'
                         type='submit'
+                        handleClick={deleteRole}
                         sendingRequest={sendingRequest}
                         buttonText={buttonText}
                     />

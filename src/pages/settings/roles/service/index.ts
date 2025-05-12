@@ -43,9 +43,19 @@ const updateRoleService = async (body: Object, id: string | number) => {
     }
 }
 
+const deleteRoleService = async (id: string | number) => {
+    try {
+        const response = await axiosInstance.delete(`roles/${id}`);
+        return response
+    } catch (error) {
+        return error
+    }
+}
+
 export {
     assignPermissionToRoleService,
     removePermissionFromRoleService,
     createRoleService,
-    updateRoleService
+    updateRoleService,
+    deleteRoleService
 }

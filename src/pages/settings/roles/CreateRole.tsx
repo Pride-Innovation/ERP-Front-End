@@ -40,13 +40,14 @@ const CreateRole = ({ handleClose, sendingRequest }: ICreateRole) => {
     const onSubmit = async (formData: IRole) => {
         try {
             const response = await createRoleService(formData) as IRoleAxiosResponse;
-            if (response.status === 200) {
+            if (response.status === 201) {
                 toast.success(`Role ${response.data.name} has been created successfully`);
                 dispatch(addRole(response.data))
             }
         } catch (error) {
             console.log(error)
         }
+        handleClose();
     };
 
     return (

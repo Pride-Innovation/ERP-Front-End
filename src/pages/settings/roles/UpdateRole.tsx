@@ -39,7 +39,7 @@ const UpdateRole = ({ handleClose, sendingRequest, role }: IUpdateRole) => {
         try {
             const response = await updateRoleService(formData, (role.id as number)) as IRoleAxiosResponse
             if (response.status === 201) {
-                toast.success(`Role ${response.data.name} has been updated successfully`);
+                toast.success(`Role has been updated successfully`);
                 dispatch(updateRole(response.data))
             }
 
