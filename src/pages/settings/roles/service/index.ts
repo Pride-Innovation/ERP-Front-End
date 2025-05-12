@@ -34,4 +34,18 @@ const createRoleService = async (body: Object) => {
     }
 }
 
-export { assignPermissionToRoleService, removePermissionFromRoleService, createRoleService }
+const updateRoleService = async (body: Object, id: string | number) => {
+    try {
+        const response = await axiosInstance.put(`roles/${id}`, body);
+        return response
+    } catch (error) {
+        return error
+    }
+}
+
+export {
+    assignPermissionToRoleService,
+    removePermissionFromRoleService,
+    createRoleService,
+    updateRoleService
+}

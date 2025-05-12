@@ -6,15 +6,20 @@ Managing Director
 */
 
 import { useEffect } from 'react'
-import { IRole, IUpdateRole } from '../interface';
+import { IRole, IRoleAxiosResponse, IUpdateRole } from '../interface';
 import { useForm } from 'react-hook-form';
 import { roleSchema } from './schema';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Grid } from '@mui/material';
 import RoleForm from './RoleForm';
+import { updateRoleService } from './service';
+import { toast } from 'react-toastify';
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from '../../../store';
+import { updateRole } from './slice';
 
 const UpdateRole = ({ handleClose, sendingRequest, role }: IUpdateRole) => {
-
+    const dispatch = useDispatch<AppDispatch>();
     const {
         control,
         handleSubmit,
@@ -30,8 +35,18 @@ const UpdateRole = ({ handleClose, sendingRequest, role }: IUpdateRole) => {
         reset({ ...role });
     }, [reset]);
 
-    const onSubmit = (formData: IRole) => {
-        console.log(formData, "form data!!")
+    const onSubmit = async (formData: IRole) => {
+        try {
+            const response = await updateRoleService(formData, (role.id as number)) as IRoleAxiosResponse
+            if (response.status === 201) {
+                toast.success(`Role ${response.data.name} has been updated successfully`);
+                dispatch(updateRole(response.data))
+            }
+
+        } catch (error) {
+            console.log(error)
+        }
+        handleClose()
     };
 
     return (
