@@ -12,6 +12,7 @@ import {
     UseFormRegister
 } from "react-hook-form";
 import { IRole } from "../settings/interface";
+import { IAxiosResponse, IFetchDataRequest } from "../../core/apis/interface";
 
 export interface IUsersExcludedTableData {
     id?: string | number;
@@ -82,4 +83,17 @@ export interface IUserForm {
     buttonText: string;
     sendingRequest: boolean;
     handleClose: () => void;
+}
+
+
+export interface IUserResponse extends IFetchDataRequest {
+    content: Array<IUser>
+}
+
+export interface IBranchesAxiosResponse extends IAxiosResponse {
+    data: IUserResponse
+}
+
+export interface IBranchAxiosResponse extends IAxiosResponse {
+    data: IUser
 }

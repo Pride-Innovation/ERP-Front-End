@@ -8,16 +8,27 @@ Managing Director
 import { useEffect, useState } from "react"
 import { IFormData } from "../../assets/interface";
 import { useDispatch } from "react-redux";
-import { AppDispatch } from "../../../store";
+import { AppDispatch, RootState } from "../../../store";
 import { addBranch, loadBranches, removeBranch, updateBranch } from "./slice";
 import { IBranch, IBranchesAxiosResponse } from "./interface";
 import { listBranchesService } from "./service";
+import UserUtils from "../../users/utils";
+import { useSelector } from "react-redux";
+import { IOptions } from "../../../components/tables/interface";
 
 const BranchUtills = () => {
     const [modalState, setModalState] = useState<string>("");
     const [open, setOpen] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false);
     const dispatch = useDispatch<AppDispatch>();
+    const [optionsObject, setOptionsObject] = useState<{
+        usersOptions: Array<IOptions>,
+    }>({
+        usersOptions: [],
+    });
+    const { users } = useSelector((state: RootState) => state.UserStore);
+
+    const { fetchAllUsers } = UserUtils()
 
     const fetchAllBranches = async () => {
         setLoading(true)
@@ -31,6 +42,14 @@ const BranchUtills = () => {
         }
         setLoading(false)
     }
+
+    useEffect(() => {
+        setOptionsObject({
+            usersOptions: users?.map(user => ({ label: `${user.firstName} ${user.lastName}`, value: user.id as number })) || [],
+        });
+
+    }, [users])
+
     const filterByName = (text: string) => {
         /**
          * TO DO
@@ -73,8 +92,8 @@ const BranchUtills = () => {
         {
             value: "branchManager",
             label: "Branch Manager",
-            type: "select",
-            options: []
+            type: "autocomplete",
+            options: optionsObject.usersOptions
         },
         {
             value: "branchOperationsManager",
@@ -121,7 +140,9 @@ const BranchUtills = () => {
             removeBranchToStore,
             updateBranchInStore,
             loading,
-            fetchAllBranches
+            fetchAllBranches,
+            users,
+            fetchAllUsers
         }
     )
 }

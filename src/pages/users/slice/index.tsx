@@ -10,12 +10,12 @@ import { IUser } from '../../users/interface';
 import { IRole } from '../../settings/interface';
 
 interface IITEquipmentState {
-    usersList: IUser[];
+    users: IUser[];
     rolesList: IRole[];
 }
 
 const initialState: IITEquipmentState = {
-    usersList: [],
+    users: [],
     rolesList: []
 }
 
@@ -24,7 +24,7 @@ export const authSlice = createSlice({
     initialState,
     reducers: {
         loadUsers: (state, action) => {
-            state.usersList = action.payload;
+            state.users = action.payload;
         },
         loadRoles: (state, action) => {
             state.rolesList = action.payload;

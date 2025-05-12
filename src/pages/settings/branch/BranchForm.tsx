@@ -18,7 +18,7 @@ const BranchForm = ({
     handleClose,
     update = false,
 }: IBranchForm) => {
-    const { formFields } = BranchUtills();
+    const { formFields, fetchAllUsers } = BranchUtills();
 
     return (
         <Box sx={{ width: "100%" }}>
@@ -44,7 +44,7 @@ const BranchForm = ({
                             )}
                             {field.type === "date" && <UseFormDatePicker {...commonProps} />}
                             {field.type === "autocomplete" && (
-                                <UseFormAutocompleteComponent {...commonProps} options={field.options} />
+                                <UseFormAutocompleteComponent fetchOptions={fetchAllUsers} {...commonProps} options={field.options} />
                             )}
                         </Grid>
                     );

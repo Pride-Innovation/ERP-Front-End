@@ -12,7 +12,7 @@ import { IOptions, ITableHeader } from '../../components/tables/interface';
 import InfoIcon from '@mui/icons-material/Info';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import { UserContext } from '../../context/user/UserContext';
-import { IUser, IUsersTableData } from './interface';
+import { IBranchesAxiosResponse, IUser, IUsersTableData } from './interface';
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import { crudStates } from '../../utils/constants';
 import { IFormData } from '../assets/interface';
@@ -22,9 +22,11 @@ import { AppDispatch, RootState } from '../../store';
 import { useSelector } from 'react-redux';
 import { loadRoles, loadUsers } from './slice';
 import { listUsersService } from '../assets/ITEquipment/service';
+import { fetchRowsService } from '../../core/apis/globalService';
 // import { fetchAllRolesService } from '../settings/roles/service';
 
 const UserUtils = () => {
+    const endPoint: string = "users";
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
     const [modalState, setModalState] = useState<string>("");
     const [open, setOpen] = useState<boolean>(false);
@@ -33,22 +35,36 @@ const UserUtils = () => {
         usersOptions: Array<IOptions>;
         rolesOptions: Array<IOptions>;
     }>({ usersOptions: [], rolesOptions: [] });
-    const { usersList, rolesList } = useSelector((state: RootState) => state.UserStore);
-    const { setUsersTableData, users, setUsers } = useContext(UserContext);
+    const { users, rolesList } = useSelector((state: RootState) => state.UserStore);
+    const { setUsersTableData, 
+        // users, 
+        setUsers } = useContext(UserContext);
 
     const updateReduxStore = async () => {
         dispatch(loadUsers(await listUsersService()));
         // dispatch(loadRoles(await fetchAllRolesService()));
     }
 
+    const fetchAllUsers = async () => {
+        try {
+            const response = await fetchRowsService({ pageNumber: 0, pageSize: 10, endPoint }) as IBranchesAxiosResponse;
+            if (response.status === 200) {
+                dispatch(loadUsers(response.data.content))
+            }
+
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
     useEffect(() => { updateReduxStore() }, []);
 
     useEffect(() => {
         setOptionsObject({
-            usersOptions: usersList?.map(user => ({ label: user.name as string, value: user.id as number })) || [],
+            usersOptions: users?.map(user => ({ label: user.name as string, value: user.id as number })) || [],
             rolesOptions: rolesList?.map(role => ({ label: role.name, value: role.id as string })) || [],
         })
-    }, [usersList, rolesList])
+    }, [users, rolesList])
 
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
@@ -244,7 +260,8 @@ const UserUtils = () => {
         userFields,
         filterCurrentUser,
         getSingleUser,
-        replaceUpdatedUser
+        replaceUpdatedUser,
+        fetchAllUsers
     })
 }
 

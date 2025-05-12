@@ -78,6 +78,7 @@ export interface IUseFormInput<T extends FieldValues> {
     multiline?: boolean;
     multiple?: boolean;
     required?: boolean;
+    fetchOptions?: (query: string) => Promise<void>;
 }
 
 export interface IDatePickerComponent {
