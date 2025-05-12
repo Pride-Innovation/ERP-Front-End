@@ -9,7 +9,7 @@ import {
     GridToolbarContainer,
 } from '@mui/x-data-grid';
 import ButtonComponent from '../forms/Button';
-import { Box, Stack } from '@mui/material';
+import { Box, Stack, TextField, useTheme } from '@mui/material';
 import { TypographyComponent } from '../headers/TypographyComponent';
 import { CustomToolbarWrapperProps, ITableToolBar } from './interface';
 import FileUploadButton from '../forms/FileUploadButton';
@@ -27,12 +27,15 @@ const TableToolBar = ({
 }: ITableToolBar) => {
     const { setFileName } = useContext(FileContext);
     useEffect(() => { setFileName(module) }, [module]);
+    const theme = useTheme();
 
     return (
         <GridToolbarContainer
             sx={{ width: '100%', display: 'flex', p: '20px' }}>
             <TypographyComponent size='17px' color="#BC892C" weight={600} sx={{ textTransform: "uppercase" }}>{header.plural}</TypographyComponent>
             <Stack direction="row" spacing={2} sx={{ ml: "auto" }}>
+                {/* TO DO implement api search using debounce */}
+                <TextField size='small' placeholder="Search" variant='outlined' sx={{ color: theme.palette.success.main }} />
                 {createAction && <Box>
                     <ButtonComponent
                         handleClick={() => onCreationHandler()}

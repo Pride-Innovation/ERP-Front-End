@@ -167,6 +167,19 @@ export interface ITransportRequestTableData {
     requester?: IUser
 }
 
+export interface IRequestReport {
+    id?: number | string;
+    request: IRequest;
+    approver: IUser;
+    status: IStatus;
+    comment: string;
+    createDate: string;
+    lastModified: string;
+    createdBy: IUser;
+    lastModifiedBy: IUser;
+    message?: string;
+}
+
 
 export interface ITransportRequestForm {
     formState: FormState<ITransportRequest> & {

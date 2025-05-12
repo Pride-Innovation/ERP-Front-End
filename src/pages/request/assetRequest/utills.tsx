@@ -91,11 +91,11 @@ const RequestUtills = () => {
     const rowData = {
         name: requestMock[0]?.name,
         requestDate: requestMock[0]?.createDate,
-        timeOfSubmissionOfRequest: requestMock[0]?.timeOfSubmissionOfRequest,
         ...data,
         status: requestMock[0]?.status?.status,
         requestedBy: `${requestMock[0].requester?.firstName} ${requestMock[0].requester?.lastName}`,
-        toBeApprovedBy: `${requestMock[0].currentApprover?.firstName} ${requestMock[0].currentApprover?.lastName}`,
+        approvedBy: `${requestMock[0].currentApprover?.firstName} ${requestMock[0].currentApprover?.lastName}`,
+        department: `${requestMock[0].requester?.department}`,
         action: {
             label: "options",
             options: [
@@ -148,10 +148,11 @@ const RequestUtills = () => {
                 {
                     ...fielsdata,
                     requestDate: moment(request.createDate).format('LL'),
-                    timeOfSubmissionOfRequest: moment(request.createDate).format('LT'),
                     status: determineStatusColor(request.status as IStatus),
                     requestedBy: `${request.requester?.firstName} ${request.requester?.lastName}`,
-                    toBeApprovedBy: `${request.currentApprover?.firstName} ${request.currentApprover?.lastName}`,
+                    approvedBy: `${request.currentApprover?.firstName} ${request.currentApprover?.lastName}`,
+                    department: `${requestMock[0].requester?.department}`,
+
                 }
             )
         })
