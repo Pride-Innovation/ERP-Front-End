@@ -10,6 +10,7 @@ import { Outlet, useLocation, useNavigate } from "react-router";
 import { useEffect, useState } from "react";
 import { ISettingsNavigation } from "./interface";
 import SettingsUtills from "./utills";
+import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 
 const Settings = () => {
     const [path, setPath] = useState<string>("");
@@ -52,9 +53,13 @@ const Settings = () => {
                         fontWeight: 700,
                         textTransform: "uppercase",
                         mb: 2,
-                        color: theme.palette.secondary.main
+                        color: theme.palette.secondary.main,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between"
                     }}
                 >
+                    <SettingsOutlinedIcon fontSize="medium" sx={{ color: theme.palette.secondary.main, ml: "10px" }} />
                     System Settings
                 </Typography>
 

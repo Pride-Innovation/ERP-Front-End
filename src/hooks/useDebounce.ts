@@ -12,11 +12,11 @@ export const useDebounce = <T>(value: T, delay = 500) => {
 
     useEffect(() => {
         const timeout = setTimeout(() => {
-            setDebounceValue(value)
+            setDebounceValue(value);
         }, delay);
 
-        return () => clearTimeout(timeout)
-    }, [value, delay])
+        return () => clearTimeout(timeout);
+    }, [value, delay]);
 
     return debounceValue;
 };

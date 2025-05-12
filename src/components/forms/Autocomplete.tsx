@@ -10,21 +10,45 @@ import Autocomplete from '@mui/material/Autocomplete';
 import { IAutocompleteComponent } from './interface';
 import { useState, useEffect } from 'react';
 import { IOptions } from '../tables/interface';
+import { useDebounce } from '../../hooks/useDebounce';
+
+/**
+ * AutocompleteComponent
+ * 
+ * A reusable Autocomplete input field with optional async search capability.
+ * 
+ * @param label - The label for the input field.
+ * @param field - React Hook Form field binding object.
+ * @param options - List of selectable options.
+ * @param error - Validation error from React Hook Form.
+ * @param multiple - Whether multiple selections are allowed.
+ * @param fetchOptions - Optional async function to fetch options based on input (debounced).
+ */
 
 const AutocompleteComponent = ({
     label,
     field,
     options,
     error,
-    multiple = false
+    multiple = false,
+    fetchOptions
 }: IAutocompleteComponent) => {
     const [value, setValue] = useState<Array<IOptions>>([]);
+    const [inputValue, setInputValue] = useState<string>("");
+
+    const debouncedValue = useDebounce(inputValue, 500);
 
     useEffect(() => {
-        if (field.value && Array.isArray(field.value)) {
-            setValue(options.filter(option => field.value.includes(option.value)));
+        if (!options.length) {
+            fetchOptions?.("");
         }
-    }, [field.value, options]);
+    }, [options, fetchOptions]);
+
+    useEffect(() => {
+        if (debouncedValue) {
+            fetchOptions?.(debouncedValue);
+        }
+    }, [debouncedValue, fetchOptions]);
 
     const handleChange = (
         _: React.SyntheticEvent<Element, Event>,
@@ -52,6 +76,7 @@ const AutocompleteComponent = ({
             getOptionLabel={(option: IOptions) => option.label || ""}
             size='small'
             fullWidth
+            onInputChange={(_, newInputValue) => setInputValue(newInputValue)}
             renderInput={(params) => (
                 <TextField
                     {...params}
