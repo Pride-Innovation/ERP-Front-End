@@ -8,9 +8,10 @@ Managing Director
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 import { IAutocompleteComponent } from './interface';
-import { useState, useEffect } from 'react';
+import { useEffect, useContext } from 'react';
 import { IOptions } from '../tables/interface';
 import { useDebounce } from '../../hooks/useDebounce';
+import { AutocompleteContext } from '../../context/autocomplete';
 
 /**
  * AutocompleteComponent
@@ -33,8 +34,7 @@ const AutocompleteComponent = ({
     multiple = false,
     fetchOptions
 }: IAutocompleteComponent) => {
-    const [value, setValue] = useState<Array<IOptions>>([]);
-    const [inputValue, setInputValue] = useState<string>("");
+    const { value, inputValue, setInputValue, setValue } = useContext(AutocompleteContext)
 
     const debouncedValue = useDebounce(inputValue, 500);
 

@@ -12,7 +12,6 @@ import { AppDispatch, RootState } from "../../../store";
 import { addBranch, loadBranches, removeBranch, updateBranch } from "./slice";
 import { IBranch, IBranchesAxiosResponse } from "./interface";
 import { listBranchesService } from "./service";
-import UserUtils from "../../users/utils";
 import { useSelector } from "react-redux";
 import { IOptions } from "../../../components/tables/interface";
 
@@ -28,8 +27,6 @@ const BranchUtills = () => {
     });
     const { users } = useSelector((state: RootState) => state.UserStore);
 
-    const { fetchAllUsers } = UserUtils()
-
     const fetchAllBranches = async () => {
         setLoading(true)
         try {
@@ -43,10 +40,16 @@ const BranchUtills = () => {
         setLoading(false)
     }
 
+    const filterAllUsers = async (value: string) => {
+        console.log(value)
+    }
+
     useEffect(() => {
-        setOptionsObject({
-            usersOptions: users?.map(user => ({ label: `${user.firstName} ${user.lastName}`, value: user.id as number })) || [],
-        });
+        if (users?.length > 0) {
+            setOptionsObject({
+                usersOptions: users?.map(user => ({ label: `${user.firstName} ${user.lastName}`, value: user.id as number })) || [],
+            });
+        }
 
     }, [users])
 
@@ -99,19 +102,19 @@ const BranchUtills = () => {
             value: "branchOperationsManager",
             label: "Branch Operations Manager",
             type: "select",
-            options: []
+            options: optionsObject.usersOptions
         },
         {
             value: "relationshipManager",
             label: "Relationship Manager",
             type: "select",
-            options: []
+            options: optionsObject.usersOptions
         },
         {
             value: "creditAdministrator",
             label: "Credit Administrator",
             type: "select",
-            options: []
+            options: optionsObject.usersOptions
         },
         {
             value: "region",
@@ -142,7 +145,7 @@ const BranchUtills = () => {
             loading,
             fetchAllBranches,
             users,
-            fetchAllUsers
+            filterAllUsers
         }
     )
 }

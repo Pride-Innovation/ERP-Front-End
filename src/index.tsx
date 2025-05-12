@@ -20,6 +20,7 @@ import { store } from './store';
 import { InventoryContextProvider } from './context/inventory';
 import { ThemeProvider, CssBaseline } from '@mui/material';
 import customThemes from './utils/customThemes';
+import AutocompleteContextProvider from './context/autocomplete';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -29,21 +30,23 @@ root.render(
     <ThemeProvider theme={customThemes} >
       <CssBaseline />
       <Provider store={store}>
-        <InventoryContextProvider>
-          <RowContextProvider>
-            <UserContextProvider>
-              <RequestContextProvider>
-                <TransportRequestContextProvider>
-                  <FileContextProvider>
-                    <TestContextProvider>
-                      <App />
-                    </TestContextProvider>
-                  </FileContextProvider>
-                </TransportRequestContextProvider>
-              </RequestContextProvider>
-            </UserContextProvider>
-          </RowContextProvider>
-        </InventoryContextProvider>
+        <AutocompleteContextProvider>
+          <InventoryContextProvider>
+            <RowContextProvider>
+              <UserContextProvider>
+                <RequestContextProvider>
+                  <TransportRequestContextProvider>
+                    <FileContextProvider>
+                      <TestContextProvider>
+                        <App />
+                      </TestContextProvider>
+                    </FileContextProvider>
+                  </TransportRequestContextProvider>
+                </RequestContextProvider>
+              </UserContextProvider>
+            </RowContextProvider>
+          </InventoryContextProvider>
+        </AutocompleteContextProvider>
       </Provider>
     </ThemeProvider>
   </React.StrictMode>

@@ -8,6 +8,8 @@ import {
 import ButtonComponent from "../../../components/forms/Button";
 import { IBranchForm } from "./interface";
 import BranchUtills from "./utills";
+import UserUtils from "../../users/utils";
+import { useEffect } from "react";
 
 const BranchForm = ({
     register,
@@ -18,7 +20,9 @@ const BranchForm = ({
     handleClose,
     update = false,
 }: IBranchForm) => {
-    const { formFields, fetchAllUsers } = BranchUtills();
+    const { formFields, filterAllUsers } = BranchUtills();
+    const { fetchAllUsers } = UserUtils();
+    useEffect(() => { fetchAllUsers() }, [])
 
     return (
         <Box sx={{ width: "100%" }}>
@@ -44,7 +48,7 @@ const BranchForm = ({
                             )}
                             {field.type === "date" && <UseFormDatePicker {...commonProps} />}
                             {field.type === "autocomplete" && (
-                                <UseFormAutocompleteComponent fetchOptions={fetchAllUsers} {...commonProps} options={field.options} />
+                                <UseFormAutocompleteComponent fetchOptions={filterAllUsers} {...commonProps} options={field.options} />
                             )}
                         </Grid>
                     );
