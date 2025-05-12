@@ -5,7 +5,7 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { useEffect, useState } from "react"
+import { useContext, useEffect, useState } from "react"
 import { IFormData } from "../../assets/interface";
 import { useDispatch } from "react-redux";
 import { AppDispatch, RootState } from "../../../store";
@@ -14,6 +14,8 @@ import { IBranch, IBranchesAxiosResponse } from "./interface";
 import { listBranchesService } from "./service";
 import { useSelector } from "react-redux";
 import { IOptions } from "../../../components/tables/interface";
+import UserUtils from "../../users/utils";
+import { AutocompleteContext } from "../../../context/autocomplete";
 
 const BranchUtills = () => {
     const [modalState, setModalState] = useState<string>("");
@@ -26,7 +28,9 @@ const BranchUtills = () => {
         usersOptions: [],
     });
     const { users } = useSelector((state: RootState) => state.UserStore);
+    const { value, inputValue } = useContext(AutocompleteContext)
 
+    const { fetchAllUsers } = UserUtils()
     const fetchAllBranches = async () => {
         setLoading(true)
         try {
@@ -40,8 +44,13 @@ const BranchUtills = () => {
         setLoading(false)
     }
 
-    const filterAllUsers = async (value: string) => {
-        console.log(value)
+    const filterAllUsers = async (text: string) => {
+        if (value.length === 0) {
+            // console.log(text, value, inputValue, "Varoius values")
+            // const response = await fetchAllUsers({ first_name: text })
+            // console.log(response, "Response data!!")
+        }
+
     }
 
     useEffect(() => {
@@ -53,10 +62,10 @@ const BranchUtills = () => {
 
     }, [users])
 
-    const filterByName = (text: string) => {
+    const filterBranchByName = (text: string) => {
         /**
          * TO DO
-         * Call an API to find a branch!!
+         * Call an API to find a branch by name!!
          */
     }
 
@@ -101,19 +110,19 @@ const BranchUtills = () => {
         {
             value: "branchOperationsManager",
             label: "Branch Operations Manager",
-            type: "select",
+            type: "autocomplete",
             options: optionsObject.usersOptions
         },
         {
             value: "relationshipManager",
             label: "Relationship Manager",
-            type: "select",
+            type: "autocomplete",
             options: optionsObject.usersOptions
         },
         {
             value: "creditAdministrator",
             label: "Credit Administrator",
-            type: "select",
+            type: "autocomplete",
             options: optionsObject.usersOptions
         },
         {
@@ -132,7 +141,7 @@ const BranchUtills = () => {
 
     return (
         {
-            filterByName,
+            filterBranchByName,
             formFields,
             modalState,
             setModalState,

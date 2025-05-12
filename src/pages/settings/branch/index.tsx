@@ -37,7 +37,7 @@ const Branches = () => {
   const [sendingRequest, setSendingRequest] = useState<boolean>(false);
   const { branches } = useSelector((state: RootState) => state.BranchStore);
   const {
-    filterByName,
+    filterBranchByName,
     modalState,
     open,
     handleClose,
@@ -119,7 +119,7 @@ const Branches = () => {
         <TextField
           placeholder="Filter by branch name"
           size="small"
-          onChange={(e: ChangeEvent<HTMLInputElement>) => filterByName(e.target.value)}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => filterBranchByName(e.target.value)}
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">

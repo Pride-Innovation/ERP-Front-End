@@ -20,10 +20,8 @@ import { fetchSingleUserService } from './service';
 import { useDispatch } from 'react-redux';
 import { AppDispatch, RootState } from '../../store';
 import { useSelector } from 'react-redux';
-import { loadRoles, loadUsers } from './slice';
-import { listUsersService } from '../assets/ITEquipment/service';
+import { loadUsers } from './slice';
 import { fetchRowsService } from '../../core/apis/globalService';
-// import { fetchAllRolesService } from '../settings/roles/service';
 
 const UserUtils = () => {
     const endPoint: string = "users";
@@ -36,18 +34,11 @@ const UserUtils = () => {
         rolesOptions: Array<IOptions>;
     }>({ usersOptions: [], rolesOptions: [] });
     const { users, rolesList } = useSelector((state: RootState) => state.UserStore);
-    const { setUsersTableData, 
-        // users, 
-        setUsers } = useContext(UserContext);
+    const { setUsersTableData, setUsers } = useContext(UserContext);
 
-    const updateReduxStore = async () => {
-        dispatch(loadUsers(await listUsersService()));
-        // dispatch(loadRoles(await fetchAllRolesService()));
-    }
-
-    const fetchAllUsers = async () => {
+    const fetchAllUsers = async (params?: Record<string, any>) => {
         try {
-            const response = await fetchRowsService({ pageNumber: 0, pageSize: 10, endPoint }) as IBranchesAxiosResponse;
+            const response = await fetchRowsService({ pageNumber: 0, pageSize: 10, endPoint, params }) as IBranchesAxiosResponse;
             if (response.status === 200) {
                 dispatch(loadUsers(response.data.content))
             }
@@ -56,8 +47,6 @@ const UserUtils = () => {
             console.log(error)
         }
     }
-
-    useEffect(() => { updateReduxStore() }, []);
 
     useEffect(() => {
         setOptionsObject({
