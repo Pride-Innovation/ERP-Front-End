@@ -46,21 +46,23 @@ const CreateBranch = ({
 
     const onSubmit = async (formData: IBranch) => {
         setSendingRequest(true);
-        const request = {
-            ...formData,
-            user_id: 1,
-        };
-        const response = (await createBranchService(request)) as IResponseData;
+        console.log(formData, "Form Data")
+        // const request = {
+        //     ...formData,
+        //     user_id: 1,
+        // };
+        // const response = (await createBranchService(request)) as IResponseData;
 
-        if (response.status === "success") {
-            addBranchToStore(response.data[0] as IBranch);
-            toast.success("Branch created successfully.");
-            setSendingRequest(false);
-            handleClose();
-        } else {
-            toast.error("An error occurred while creating the branch.");
-            setSendingRequest(false);
-        }
+        // if (response.status === "success") {
+        //     addBranchToStore(response.data[0] as IBranch);
+        //     toast.success("Branch created successfully.");
+        //     setSendingRequest(false);
+        //     handleClose();
+        // } else {
+        //     toast.error("An error occurred while creating the branch.");
+        // }
+        setSendingRequest(false);
+
     };
 
     return (

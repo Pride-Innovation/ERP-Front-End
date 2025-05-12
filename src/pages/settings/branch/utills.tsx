@@ -119,14 +119,14 @@ const BranchUtills = () => {
         {
             value: "region",
             label: "Region",
-            type: "select",
-            options: []
+            type: "input",
+            // options: []
         },
         {
             value: "district",
             label: "District",
-            type: "select",
-            options: []
+            type: "input",
+            // options: []
         }
     ]
 
