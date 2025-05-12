@@ -74,7 +74,7 @@ const Branches = () => {
   return (
     <>
       {modalState === crudStates.create && (
-        <ModalComponent width="50%" title="Create Branch" open={open} handleClose={handleClose}>
+        <ModalComponent width="60%" title="Create Branch" open={open} handleClose={handleClose}>
           <CreateBranch
             handleClose={handleClose}
             sendingRequest={sendingRequest}

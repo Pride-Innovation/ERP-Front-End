@@ -69,7 +69,44 @@ const BranchUtills = () => {
             value: "telephone",
             label: 'Branch Telephone',
             type: "input"
-        }]
+        },
+        {
+            value: "branchManager",
+            label: "Branch Manager",
+            type: "select",
+            options: []
+        },
+        {
+            value: "branchOperationsManager",
+            label: "Branch Operations Manager",
+            type: "select",
+            options: []
+        },
+        {
+            value: "relationshipManager",
+            label: "Relationship Manager",
+            type: "select",
+            options: []
+        },
+        {
+            value: "creditAdministrator",
+            label: "Credit Administrator",
+            type: "select",
+            options: []
+        },
+        {
+            value: "region",
+            label: "Region",
+            type: "select",
+            options: []
+        },
+        {
+            value: "district",
+            label: "District",
+            type: "select",
+            options: []
+        }
+    ]
 
     return (
         {

@@ -32,7 +32,7 @@ const BranchForm = ({
                         label: field.label,
                     };
 
-                    const gridSize = field.type === "textarea" ? 12 : 6;
+                    const gridSize = field.type === "textarea" ? 12 : 4;
 
                     return (
                         <Grid item xs={12} md={gridSize} key={field.value}>
