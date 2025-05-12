@@ -10,9 +10,9 @@ import axiosInstance from "../../../../core/apis/axiosInstance"
 const listBranchesService = async () => {
     try {
         const response = await axiosInstance.get('branches');
-        return response.data?.data;
+        return response;
     } catch (error) {
-        throw error;
+        return error;
     }
 }
 
@@ -21,7 +21,7 @@ const createBranchService = async (body: Object) => {
         const response = await axiosInstance.post('branches/create', body);
         return response?.data
     } catch (error) {
-        throw error
+        return error
     }
 }
 
@@ -30,7 +30,7 @@ const updateBranchService = async (body: Object, id: string | number) => {
         const response = await axiosInstance.post(`branches/update/${id}`, body)
         return response?.data
     } catch (error) {
-        throw error
+        return error
     }
 }
 
@@ -39,7 +39,7 @@ const deleteBranchService = async (id: string | number) => {
         const response = await axiosInstance.get(`branches/delete/${id}`)
         return response?.data
     } catch (error) {
-        throw error
+        return error
     }
 }
 

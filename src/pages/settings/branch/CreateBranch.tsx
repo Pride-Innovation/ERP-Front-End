@@ -5,33 +5,38 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { Grid } from "@mui/material"
+import {
+    Grid,
+    Paper,
+} from "@mui/material";
 import { useForm } from "react-hook-form";
 import { useEffect } from "react";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { toast } from "react-toastify";
+
 import BranchForm from "./BranchForm";
 import { IBranch, ICreateBranch } from "./interface";
-import { yupResolver } from "@hookform/resolvers/yup";
 import { branchSchema } from "./schema";
 import { createBranchService } from "./service";
 import { IResponseData } from "../../users/interface";
-import { toast } from "react-toastify";
 import BranchUtills from "./utills";
 
 const CreateBranch = ({
     handleClose,
     sendingRequest,
-    setSendingRequest
+    setSendingRequest,
 }: ICreateBranch) => {
     const defaultBranch: IBranch = {} as IBranch;
     const { addBranchToStore } = BranchUtills();
+
     const {
         control,
         handleSubmit,
         formState,
         register,
-        reset
+        reset,
     } = useForm<IBranch>({
-        mode: 'onChange',
+        mode: "onChange",
         resolver: yupResolver(branchSchema),
     });
 
@@ -40,40 +45,42 @@ const CreateBranch = ({
     }, [reset]);
 
     const onSubmit = async (formData: IBranch) => {
-        setSendingRequest(true)
+        setSendingRequest(true);
         const request = {
             ...formData,
-            user_id: 1
-        }
-        const response = await createBranchService(request) as IResponseData;
-        if (response.status === 'success') {
-            addBranchToStore(response.data[0] as IBranch)
-            toast.success(response.data.message)
+            user_id: 1,
+        };
+        const response = (await createBranchService(request)) as IResponseData;
+
+        if (response.status === "success") {
+            addBranchToStore(response.data[0] as IBranch);
+            toast.success("Branch created successfully.");
             setSendingRequest(false);
-            handleClose()
+            handleClose();
+        } else {
+            toast.error("An error occurred while creating the branch.");
+            setSendingRequest(false);
         }
     };
 
     return (
-        <Grid container xs={12}>
-            <Grid item xs={12}>
-                <form
-                    style={{ width: "100%" }}
-                    autoComplete="off"
-                    onSubmit={handleSubmit(onSubmit)}
-                >
-                    <BranchForm
-                        handleClose={handleClose}
-                        buttonText="Submit"
-                        formState={formState}
-                        control={control}
-                        sendingRequest={sendingRequest}
-                        register={register}
-                    />
-                </form>
-            </Grid>
-        </Grid>
-    )
-}
+        <Paper elevation={3} sx={{ borderRadius: 3, boxShadow: "none", maxWidth: "1200px", mx: "auto" }}>
+            <form autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
+                <Grid container spacing={2}>
+                    <Grid item xs={12}>
+                        <BranchForm
+                            handleClose={handleClose}
+                            buttonText="Submit"
+                            formState={formState}
+                            control={control}
+                            sendingRequest={sendingRequest}
+                            register={register}
+                        />
+                    </Grid>
+                </Grid>
+            </form>
+        </Paper>
+    );
+};
 
-export default CreateBranch
+export default CreateBranch;

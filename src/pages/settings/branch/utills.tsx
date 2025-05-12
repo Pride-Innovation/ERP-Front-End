@@ -8,28 +8,34 @@ Managing Director
 import { useEffect, useState } from "react"
 import { IFormData } from "../../assets/interface";
 import { useDispatch } from "react-redux";
-import { useSelector } from "react-redux";
-import { AppDispatch, RootState } from "../../../store";
+import { AppDispatch } from "../../../store";
 import { addBranch, loadBranches, removeBranch, updateBranch } from "./slice";
-import { IBranch } from "./interface";
+import { IBranch, IBranchesAxiosResponse } from "./interface";
 import { listBranchesService } from "./service";
 
 const BranchUtills = () => {
-    const [branchList, setBranchList] = useState<IBranch[]>([] as Array<IBranch>);
     const [modalState, setModalState] = useState<string>("");
     const [open, setOpen] = useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(false);
     const dispatch = useDispatch<AppDispatch>();
 
-    const { branches } = useSelector((state: RootState) => state.BranchStore);
-
     const fetchAllBranches = async () => {
-        const response = await listBranchesService() as Array<IBranch>;
-        dispatch(loadBranches(response))
-        setBranchList(response);
+        setLoading(true)
+        try {
+            const response = await listBranchesService() as IBranchesAxiosResponse;
+            if (response.status === 200) {
+                dispatch(loadBranches(response?.data?.content))
+            }
+        } catch (error) {
+            console.log(error)
+        }
+        setLoading(false)
     }
     const filterByName = (text: string) => {
-        const filteredBranches = branches.filter(branch => branch.name.toLowerCase().indexOf(text.toLowerCase()) !== -1);
-        setBranchList(filteredBranches);
+        /**
+         * TO DO
+         * Call an API to find a branch!!
+         */
     }
 
     const addBranchToStore = (branch: IBranch) => {
@@ -60,34 +66,13 @@ const BranchUtills = () => {
             type: "input"
         },
         {
-            value: "tel",
+            value: "telephone",
             label: 'Branch Telephone',
             type: "input"
-        },
-        {
-            value: "status",
-            label: 'Branch Status',
-            type: "select",
-            options: [
-                {
-                    label: "Full Branch",
-                    value: 1
-                },
-                {
-                    label: "Echo Branch",
-                    value: 2
-                }
-            ]
-        },
-        {
-            value: "desc",
-            label: 'Description',
-            type: "textarea"
         }]
 
     return (
         {
-            branches,
             filterByName,
             formFields,
             modalState,
@@ -98,7 +83,8 @@ const BranchUtills = () => {
             addBranchToStore,
             removeBranchToStore,
             updateBranchInStore,
-            branchList
+            loading,
+            fetchAllBranches
         }
     )
 }

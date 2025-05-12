@@ -7,18 +7,31 @@ Managing Director
 
 import { Control, FieldError, FormState, UseFormRegister } from "react-hook-form";
 import { Dispatch, SetStateAction } from "react";
+import { IUser } from "../../users/interface";
+import { IAxiosResponse, IFetchDataRequest } from "../../../core/apis/interface";
+
+export interface IRegion {
+    id?: string | number;
+    name: string;
+}
+
+export interface IDistrict {
+    id?: string | number;
+    name: string;
+}
 
 export interface IBranch {
     id?: string | number;
     name: string
     email: string
-    tel?: string | null
-    desc?: string | null
-    status?: string | null,
-    user_id?: number | null,
-    image?: any | null
+    telephone?: string | null;
+    branchManager?: IUser;
+    branchOperationsManager?: IUser;
+    relationshipManager?: IUser;
+    creditAdministrator?: IUser;
+    region?: IRegion;
+    district?: IDistrict;
 }
-
 
 export interface IBranchForm {
     formState: FormState<IBranch> & {
@@ -63,4 +76,16 @@ export interface IDeleteBranch {
     setSendingRequest: Dispatch<SetStateAction<boolean>>
     buttonText: string;
     branch: IBranch
+}
+
+export interface IBranchResponse extends IFetchDataRequest {
+    content: Array<IBranch>
+}
+
+export interface IBranchesAxiosResponse extends IAxiosResponse {
+    data: IBranchResponse
+}
+
+export interface IBranchAxiosResponse extends IAxiosResponse {
+    data: IBranch
 }
