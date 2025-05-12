@@ -5,7 +5,7 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { Box, Button, Card, Grid, IconButton, Stack, Typography } from "@mui/material"
+import { Box, Button, Card, Grid, IconButton, Stack, Typography, useTheme } from "@mui/material"
 import { grey } from "@mui/material/colors"
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
@@ -16,7 +16,8 @@ import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined
 import SettingsSuggestIcon from '@mui/icons-material/SettingsSuggest';
 
 const RoleDetails = ({ role, deleteRole, updateRole }: IRoleDetails) => {
-    const { modulesList } = RoleUtills()
+    const { modulesList } = RoleUtills();
+    const theme = useTheme()
     return (
         <Grid container xs={12} >
             <Box
@@ -34,7 +35,7 @@ const RoleDetails = ({ role, deleteRole, updateRole }: IRoleDetails) => {
                         px={3}
                         py={1.5}
                     >
-                        <Typography noWrap variant="body2">
+                        <Typography noWrap variant="body2" color={theme.palette.primary.main}>
                             Manage Role
                         </Typography>
                     </Box>
@@ -73,11 +74,11 @@ const RoleDetails = ({ role, deleteRole, updateRole }: IRoleDetails) => {
                         px={3}
                         py={1.5}
                     >
-                        <Typography variant="body1">Action</Typography>
-                        <Typography variant='body2'>Create</Typography>
-                        <Typography variant='body2'>Read</Typography>
-                        <Typography variant='body2'>Update</Typography>
-                        <Typography variant='body2'>Delete</Typography>
+                        <Typography variant="body1" color={theme.palette.primary.main}>Action</Typography>
+                        <Typography variant='body2' color={theme.palette.primary.main}>Create</Typography>
+                        <Typography variant='body2' color={theme.palette.primary.main}>Read</Typography>
+                        <Typography variant='body2' color={theme.palette.primary.main}>Update</Typography>
+                        <Typography variant='body2' color={theme.palette.primary.main}>Delete</Typography>
                     </Box>
                     <Box sx={{
                         borderTop: `2px solid ${grey[200]}`,
@@ -91,7 +92,7 @@ const RoleDetails = ({ role, deleteRole, updateRole }: IRoleDetails) => {
                         <IconButton>
                             <SettingsSuggestIcon fontSize="medium" color="info" />
                         </IconButton>
-                        <Typography variant='body2' sx={{ fontWeight: 600 }}>
+                        <Typography variant='body2' sx={{ fontWeight: 600, color: theme.palette.secondary.main }}>
                             {role.name} Permissions
                         </Typography>
                     </Box>
