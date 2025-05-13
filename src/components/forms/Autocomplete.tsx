@@ -55,13 +55,13 @@ const AutocompleteComponent = ({
         newValue: IOptions | IOptions[] | null
     ) => {
         if (newValue === null) {
-            setValue([]);
+            setValue(null);
             field.onChange([]);
         } else {
             const newValueArray = multiple
                 ? (newValue as IOptions[]).map(option => option.value)
                 : (newValue as IOptions)?.value;
-            setValue(newValue as Array<IOptions>);
+            setValue(newValue as IOptions);
             field.onChange(newValueArray);
         }
     };

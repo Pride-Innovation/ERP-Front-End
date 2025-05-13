@@ -28,9 +28,9 @@ const BranchUtills = () => {
         usersOptions: [],
     });
     const { users } = useSelector((state: RootState) => state.UserStore);
-    const { value, inputValue } = useContext(AutocompleteContext)
+    const { value, inputValue, setInputValue } = useContext(AutocompleteContext)
+    const { fetchAllUsers } = UserUtils();
 
-    const { fetchAllUsers } = UserUtils()
     const fetchAllBranches = async () => {
         setLoading(true)
         try {
@@ -45,12 +45,11 @@ const BranchUtills = () => {
     }
 
     const filterAllUsers = async (text: string) => {
-        if (value.length === 0) {
-            // console.log(text, value, inputValue, "Varoius values")
-            // const response = await fetchAllUsers({ first_name: text })
-            // console.log(response, "Response data!!")
+        if (!value && text && inputValue) {
+            return await fetchAllUsers({ first_name: text });
         }
-
+        setInputValue("")
+        return;
     }
 
     useEffect(() => {
@@ -110,19 +109,19 @@ const BranchUtills = () => {
         {
             value: "branchOperationsManager",
             label: "Branch Operations Manager",
-            type: "autocomplete",
+            type: "select",
             options: optionsObject.usersOptions
         },
         {
             value: "relationshipManager",
             label: "Relationship Manager",
-            type: "autocomplete",
+            type: "select",
             options: optionsObject.usersOptions
         },
         {
             value: "creditAdministrator",
             label: "Credit Administrator",
-            type: "autocomplete",
+            type: "select",
             options: optionsObject.usersOptions
         },
         {

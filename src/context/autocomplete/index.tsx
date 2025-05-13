@@ -2,8 +2,8 @@ import { createContext, Dispatch, FC, ReactNode, SetStateAction, useState } from
 import { IOptions } from "../../components/tables/interface";
 
 interface IAutocompleteContext {
-    value: Array<IOptions>;
-    setValue: Dispatch<SetStateAction<Array<IOptions>>>;
+    value: IOptions | null;
+    setValue: Dispatch<SetStateAction<IOptions | null>>;
     inputValue: string;
     setInputValue: Dispatch<SetStateAction<string>>
 }
@@ -11,14 +11,14 @@ interface IAutocompleteContext {
 export const AutocompleteContext = createContext({} as IAutocompleteContext);
 
 const AutocompleteContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
-    const [value, setValue] = useState<Array<IOptions>>([]);
+    const [value, setValue] = useState<IOptions | null>(null);
     const [inputValue, setInputValue] = useState<string>("");
 
     return <AutocompleteContext.Provider value={{
         value,
         setValue,
         inputValue,
-        setInputValue
+        setInputValue,
     }}>
         {children}
     </AutocompleteContext.Provider>
