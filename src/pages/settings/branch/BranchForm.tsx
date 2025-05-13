@@ -11,6 +11,7 @@ import BranchUtills from "./utills";
 import UserUtils from "../../users/utils";
 import { useEffect } from "react";
 import RegionUtills from "../regions/utills";
+import DistrictUtills from "../districts/utills";
 
 const BranchForm = ({
     register,
@@ -24,9 +25,11 @@ const BranchForm = ({
     const { formFields } = BranchUtills();
     const { fetchAllUsers } = UserUtils();
     const { fetchAllRegions } = RegionUtills()
+    const { fetchAllDistricts } = DistrictUtills()
 
     useEffect(() => { fetchAllUsers() }, [])
     useEffect(() => { fetchAllRegions() }, [])
+    useEffect(() => { fetchAllDistricts() }, [])
 
     return (
         <Box sx={{ width: "100%" }}>

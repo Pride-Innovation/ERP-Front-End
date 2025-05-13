@@ -25,12 +25,16 @@ const BranchUtills = () => {
     const [optionsObject, setOptionsObject] = useState<{
         usersOptions: Array<IOptions>,
         regionsOptions: Array<IOptions>,
+        districtsOptions: Array<IOptions>,
     }>({
         usersOptions: [],
         regionsOptions: [],
+        districtsOptions: [],
     });
     const { users } = useSelector((state: RootState) => state.UserStore);
     const { regions } = useSelector((state: RootState) => state.RegionStore);
+    const { districts } = useSelector((state: RootState) => state.DistrictStore);
+
     const { value, inputValue, setInputValue } = useContext(AutocompleteContext)
     const { fetchAllUsers } = UserUtils();
 
@@ -51,7 +55,7 @@ const BranchUtills = () => {
     const filterAllUsers = async () => {
         if (!value && inputValue.length > 0) {
             await fetchAllUsers({ first_name: inputValue });
-            // setInputValue("")
+            setInputValue("")
         }
         return;
     }
@@ -67,10 +71,11 @@ const BranchUtills = () => {
             setOptionsObject({
                 usersOptions: users?.map(user => ({ label: `${user.firstName} ${user.lastName}`, value: user.id as number })) || [],
                 regionsOptions: regions?.map(region => ({ label: region.name, value: region.id as number })) || [],
+                districtsOptions: districts?.map(district => ({ label: district.name, value: district.id as number })) || [],
             });
         }
 
-    }, [users])
+    }, [users, regions, districts])
 
     const filterBranchByName = (text: string) => {
         /**
@@ -144,8 +149,8 @@ const BranchUtills = () => {
         {
             value: "district",
             label: "District",
-            type: "input",
-            // options: []
+            type: "select",
+            options: optionsObject.districtsOptions
         }
     ]
 
