@@ -7,7 +7,6 @@ Managing Director
 
 import { Control, FieldError, FormState, UseFormRegister } from "react-hook-form";
 import { IUser } from "../../users/interface";
-import { IUnit } from "../unit/interface";
 import { Dispatch, SetStateAction } from "react";
 
 interface IDepartment {
@@ -17,7 +16,6 @@ interface IDepartment {
     desc?: string | null;
     image?: any | null;
     head?: string | number | IUser | null;
-    units?: Array<IUnit> | null
 }
 
 interface IDepartmentDetails {

@@ -19,7 +19,6 @@ import TransportRequestReducer from "../pages/request/transportRequest/slice"
 import StatusesReducer from "../pages/settings/statuses/slice"
 import AssetsRequestsReducer from "../pages/request/assetRequest/slice"
 import InventoryReducer from "../pages/inventory/slice"
-import UnitReducer from "../pages/settings/unit/slice"
 import DepartmentReducer from "../pages/settings/departments/slice"
 import RoleReducer from "../pages/settings/roles/slice"
 import RegionReducer from "../pages/settings/regions/slice"
@@ -36,7 +35,6 @@ export const store = configureStore({
         StatusesStore: StatusesReducer,
         AssetsRequestsStore: AssetsRequestsReducer,
         InventoryStore: InventoryReducer,
-        UnitStore: UnitReducer,
         DepartmentStore: DepartmentReducer,
         RoleStore: RoleReducer,
         RegionStore: RegionReducer,

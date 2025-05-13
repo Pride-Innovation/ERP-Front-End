@@ -32,8 +32,8 @@ const SettingsUtills = () => {
         },
         {
             id: 3,
-            text: "Units",
-            path: ROUTES.UNITS,
+            text: "Commodities",
+            path: ROUTES.COMMODITY,
             icon: <BedroomBabyOutlinedIcon />
         },
         {
