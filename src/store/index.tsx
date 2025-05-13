@@ -22,6 +22,7 @@ import InventoryReducer from "../pages/inventory/slice"
 import UnitReducer from "../pages/settings/unit/slice"
 import DepartmentReducer from "../pages/settings/departments/slice"
 import RoleReducer from "../pages/settings/roles/slice"
+import RegionReducer from "../pages/settings/regions/slice"
 
 export const store = configureStore({
     reducer: {
@@ -37,6 +38,7 @@ export const store = configureStore({
         UnitStore: UnitReducer,
         DepartmentStore: DepartmentReducer,
         RoleStore: RoleReducer,
+        RegionStore: RegionReducer,
     },
 });
 

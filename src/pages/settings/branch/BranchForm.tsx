@@ -10,6 +10,7 @@ import { IBranchForm } from "./interface";
 import BranchUtills from "./utills";
 import UserUtils from "../../users/utils";
 import { useEffect } from "react";
+import RegionUtills from "../regions/utills";
 
 const BranchForm = ({
     register,
@@ -22,7 +23,10 @@ const BranchForm = ({
 }: IBranchForm) => {
     const { formFields } = BranchUtills();
     const { fetchAllUsers } = UserUtils();
+    const { fetchAllRegions } = RegionUtills()
+
     useEffect(() => { fetchAllUsers() }, [])
+    useEffect(() => { fetchAllRegions() }, [])
 
     return (
         <Box sx={{ width: "100%" }}>

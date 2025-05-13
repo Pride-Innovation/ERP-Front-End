@@ -24,10 +24,13 @@ const BranchUtills = () => {
     const dispatch = useDispatch<AppDispatch>();
     const [optionsObject, setOptionsObject] = useState<{
         usersOptions: Array<IOptions>,
+        regionsOptions: Array<IOptions>,
     }>({
         usersOptions: [],
+        regionsOptions: [],
     });
     const { users } = useSelector((state: RootState) => state.UserStore);
+    const { regions } = useSelector((state: RootState) => state.RegionStore);
     const { value, inputValue, setInputValue } = useContext(AutocompleteContext)
     const { fetchAllUsers } = UserUtils();
 
@@ -63,6 +66,7 @@ const BranchUtills = () => {
         if (users?.length > 0) {
             setOptionsObject({
                 usersOptions: users?.map(user => ({ label: `${user.firstName} ${user.lastName}`, value: user.id as number })) || [],
+                regionsOptions: regions?.map(region => ({ label: region.name, value: region.id as number })) || [],
             });
         }
 
@@ -134,8 +138,8 @@ const BranchUtills = () => {
         {
             value: "region",
             label: "Region",
-            type: "input",
-            // options: []
+            type: "select",
+            options: optionsObject.regionsOptions
         },
         {
             value: "district",
