@@ -38,9 +38,7 @@ export interface IBranchForm {
         errors: {
             name?: FieldError;
             email?: FieldError;
-            tel?: FieldError;
-            desc?: FieldError;
-            status?: FieldError;
+            telephone?: FieldError;
         };
     };
     control: Control<IBranch>;

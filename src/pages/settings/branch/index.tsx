@@ -8,17 +8,13 @@ Managing Director
 import {
   Box,
   Card,
-  CircularProgress,
   Grid,
   InputAdornment,
-  Stack,
   TextField,
-  Typography,
   useMediaQuery,
   useTheme,
 } from "@mui/material";
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
-import FolderOffOutlinedIcon from '@mui/icons-material/FolderOffOutlined';
 import ButtonComponent from "../../../components/forms/Button";
 import ModalComponent from "../../../components/modal";
 import CreateBranch from "./CreateBranch";
@@ -31,6 +27,8 @@ import { useEffect, useState, ChangeEvent } from "react";
 import { crudStates } from "../../../utils/constants";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../store";
+import NoContent from "../../../components/noContent";
+import Loading from "../../../components/loading";
 
 const Branches = () => {
   const [currentBranch, setCurrentBranch] = useState<IBranch>({} as IBranch);
@@ -117,7 +115,7 @@ const Branches = () => {
         }}
       >
         <TextField
-          placeholder="Filter by branch name"
+          placeholder="Filter by name"
           size="small"
           onChange={(e: ChangeEvent<HTMLInputElement>) => filterBranchByName(e.target.value)}
           InputProps={{
@@ -141,12 +139,7 @@ const Branches = () => {
 
       <Box>
         {loading ? (
-          <Stack alignItems="center" justifyContent="center" sx={{ minHeight: 300 }}>
-            <CircularProgress color="info" />
-            <Typography variant="body2" mt={2}>
-              Loading branches...
-            </Typography>
-          </Stack>
+          <Loading items="branches" />
         ) : branches.length > 0 ? (
           <Grid container spacing={3}>
             {branches.map((branch) => (
@@ -156,15 +149,7 @@ const Branches = () => {
             ))}
           </Grid>
         ) : (
-          <Stack alignItems="center" justifyContent="center" sx={{ py: 10 }}>
-            <FolderOffOutlinedIcon sx={{ fontSize: 60, color: "#835F1E" }} />
-            <Typography variant="h6" sx={{ mt: 2, color: "text.secondary" }}>
-              No branches available
-            </Typography>
-            <Typography variant="body2" color="text.disabled">
-              Create your first branch to get started.
-            </Typography>
-          </Stack>
+          <NoContent item="branch" items="branches" />
         )}
       </Box>
     </>
