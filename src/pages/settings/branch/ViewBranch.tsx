@@ -63,7 +63,7 @@ const ViewBranch = ({ branch, deleteBranch, updateBranch }: IBranchDetails) => {
                 <Stack spacing={1.2}>
                     {[
                         { label: 'Manager', person: branch.branchManager },
-                        { label: 'Ops Manager', person: branch.branchOperationsManager },
+                        { label: 'BOM', person: branch.branchOperationsManager },
                         { label: 'Credit Admin', person: branch.creditAdministrator },
                         { label: 'Relationship Mgr', person: branch.relationshipManager }
                     ].map(({ label, person }, index) =>
