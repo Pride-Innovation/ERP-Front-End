@@ -44,13 +44,20 @@ const BranchUtills = () => {
         setLoading(false)
     }
 
-    const filterAllUsers = async (text: string) => {
-        if (!value && text && inputValue) {
-            return await fetchAllUsers({ first_name: text });
+
+    const filterAllUsers = async () => {
+        if (!value && inputValue.length > 0) {
+            await fetchAllUsers({ first_name: inputValue });
+            // setInputValue("")
         }
-        setInputValue("")
         return;
     }
+
+    useEffect(() => {
+        if (inputValue.length > 0) { filterAllUsers() }
+    }, [inputValue])
+
+
 
     useEffect(() => {
         if (users?.length > 0) {
@@ -109,19 +116,19 @@ const BranchUtills = () => {
         {
             value: "branchOperationsManager",
             label: "Branch Operations Manager",
-            type: "select",
+            type: "autocomplete",
             options: optionsObject.usersOptions
         },
         {
             value: "relationshipManager",
             label: "Relationship Manager",
-            type: "select",
+            type: "autocomplete",
             options: optionsObject.usersOptions
         },
         {
             value: "creditAdministrator",
             label: "Credit Administrator",
-            type: "select",
+            type: "autocomplete",
             options: optionsObject.usersOptions
         },
         {
@@ -152,8 +159,7 @@ const BranchUtills = () => {
             updateBranchInStore,
             loading,
             fetchAllBranches,
-            users,
-            filterAllUsers
+            users
         }
     )
 }

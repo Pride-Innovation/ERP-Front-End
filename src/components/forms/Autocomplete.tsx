@@ -8,7 +8,7 @@ Managing Director
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 import { IAutocompleteComponent } from './interface';
-import { useEffect, useContext } from 'react';
+import { useEffect, useContext, useState } from 'react';
 import { IOptions } from '../tables/interface';
 import { useDebounce } from '../../hooks/useDebounce';
 import { AutocompleteContext } from '../../context/autocomplete';
@@ -23,7 +23,6 @@ import { AutocompleteContext } from '../../context/autocomplete';
  * @param options - List of selectable options.
  * @param error - Validation error from React Hook Form.
  * @param multiple - Whether multiple selections are allowed.
- * @param fetchOptions - Optional async function to fetch options based on input (debounced).
  */
 
 const AutocompleteComponent = ({
@@ -32,55 +31,48 @@ const AutocompleteComponent = ({
     options,
     error,
     multiple = false,
-    fetchOptions
 }: IAutocompleteComponent) => {
-    const { value, inputValue, setInputValue, setValue } = useContext(AutocompleteContext)
+    const [selectedValue, setSelectedValue] = useState<IOptions | IOptions[] | null>(null);
+    const [localInput, setLocalInput] = useState('');
+    const debouncedInput = useDebounce(localInput, 500);
 
-    const debouncedValue = useDebounce(inputValue, 500);
-
-    useEffect(() => {
-        if (!options.length) {
-            fetchOptions?.("");
-        }
-    }, [options, fetchOptions]);
+    const { setValue, setInputValue } = useContext(AutocompleteContext);
 
     useEffect(() => {
-        if (debouncedValue) {
-            fetchOptions?.(debouncedValue);
-        }
-    }, [debouncedValue, fetchOptions]);
+        setInputValue(debouncedInput);
+    }, [debouncedInput, setInputValue]);
 
     const handleChange = (
         _: React.SyntheticEvent<Element, Event>,
         newValue: IOptions | IOptions[] | null
     ) => {
+        setSelectedValue(newValue);
+        setValue(newValue as IOptions);
+
         if (newValue === null) {
-            setValue(null);
             field.onChange([]);
         } else {
             const newValueArray = multiple
                 ? (newValue as IOptions[]).map(option => option.value)
-                : (newValue as IOptions)?.value;
-            setValue(newValue as IOptions);
+                : (newValue as IOptions).value;
             field.onChange(newValueArray);
         }
     };
 
     return (
         <Autocomplete
-            value={value}
+            value={selectedValue}
             multiple={multiple}
             disablePortal
             onChange={handleChange}
             options={options}
-            getOptionLabel={(option: IOptions) => option.label || ""}
+            getOptionLabel={(option: IOptions) => option.label || ''}
             size='small'
             fullWidth
-            onInputChange={(_, newInputValue) => setInputValue(newInputValue)}
+            onInputChange={(_, newInputValue) => setLocalInput(newInputValue)}
             renderInput={(params) => (
                 <TextField
                     {...params}
-                    {...field}
                     label={label}
                     error={Boolean(error)}
                     helperText={error?.message}
@@ -91,3 +83,4 @@ const AutocompleteComponent = ({
 };
 
 export default AutocompleteComponent;
+

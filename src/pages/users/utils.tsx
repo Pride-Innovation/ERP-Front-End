@@ -39,7 +39,6 @@ const UserUtils = () => {
     const fetchAllUsers = async (params?: Record<string, any>) => {
         try {
             const response = await fetchRowsService({ pageNumber: 0, pageSize: 10, endPoint, params }) as IBranchesAxiosResponse;
-            console.log(response, "response information!!")
             if (response.status === 200) {
                 dispatch(loadUsers(response.data.content))
             }
