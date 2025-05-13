@@ -15,7 +15,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { toast } from "react-toastify";
 
 import BranchForm from "./BranchForm";
-import { IBranch, ICreateBranch } from "./interface";
+import { IBranch, IBranchAxiosResponse, ICreateBranch } from "./interface";
 import { branchSchema } from "./schema";
 import { createBranchService } from "./service";
 import { IResponseData } from "../../users/interface";
@@ -46,21 +46,16 @@ const CreateBranch = ({
 
     const onSubmit = async (formData: IBranch) => {
         setSendingRequest(true);
-        console.log(formData, "Form Data")
-        // const request = {
-        //     ...formData,
-        //     user_id: 1,
-        // };
-        // const response = (await createBranchService(request)) as IResponseData;
-
-        // if (response.status === "success") {
-        //     addBranchToStore(response.data[0] as IBranch);
-        //     toast.success("Branch created successfully.");
-        //     setSendingRequest(false);
-        //     handleClose();
-        // } else {
-        //     toast.error("An error occurred while creating the branch.");
-        // }
+        try {
+            const response = await createBranchService(formData) as IBranchAxiosResponse;
+            console.log(response, "Response")
+            if (response.status === 201) {
+                addBranchToStore(response.data);
+                toast.success("Branch created successfully")
+            }
+        } catch (error) {
+            console.log(error);
+        }
         setSendingRequest(false);
 
     };

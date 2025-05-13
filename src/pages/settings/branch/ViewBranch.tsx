@@ -1,60 +1,105 @@
-/*
-13.9 Pride's Standard Copyright Notice:
-Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
-and distribute this software and its documentation for any purpose is prohibited unless authorized in writing by the
-Managing Director
-*/
-
-import { Box, Button, Card, Stack, Typography } from '@mui/material'
-import { grey } from '@mui/material/colors'
+import {
+    Box,
+    Button,
+    Card,
+    Stack,
+    Typography,
+    Divider,
+    useTheme
+} from '@mui/material';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
 import CameraOutdoorOutlinedIcon from '@mui/icons-material/CameraOutdoorOutlined';
+import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
+import PhoneAndroidOutlinedIcon from '@mui/icons-material/PhoneAndroidOutlined';
+import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
+import SupervisorAccountOutlinedIcon from '@mui/icons-material/SupervisorAccountOutlined';
+
 import { IBranchDetails } from './interface';
 
 const ViewBranch = ({ branch, deleteBranch, updateBranch }: IBranchDetails) => {
+    const theme = useTheme()
     return (
-        <Card sx={{
-            boxShadow: 0,
-            p: 2,
-            border: `2px solid ${grey[200]}`,
-        }}>
-            <Box
-                sx={{ width: "100%", alignItems: "center" }}
-                py={1.5}
-            >
-                <Typography noWrap variant="body2" sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-                    <CameraOutdoorOutlinedIcon fontSize="small" color="info" sx={{ mr: "4px" }} />
+        <Card
+            sx={{
+                boxShadow: 3,
+                borderRadius: 2,
+                p: 3,
+                bgcolor: 'white',
+                color: 'black',
+                border: `1px solid ${theme.palette.primary.main}`,
+                minWidth: 300,
+                maxWidth: 400,
+            }}
+        >
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2 }}>
+                <CameraOutdoorOutlinedIcon sx={{ color: theme.palette.secondary.main, mr: 1 }} />
+                <Typography variant="h6" sx={{ fontWeight: 700, color: theme.palette.primary.main }}>
                     {branch.name}
                 </Typography>
             </Box>
-            <Stack
-                direction="column"
-                spacing={2}
-                sx={{
-                    pt: 3,
-                    borderTop: `2px solid ${grey[200]}`,
-                    alignItems: "center",
-                    height: "100%"
-                }} >
-                <Typography variant="body2" sx={{ fontWeight: 600, textAlign: "center" }}>
-                    Contact
+
+            <Stack spacing={1.2} divider={<Divider flexItem />}>
+                <Box display="flex" alignItems="center">
+                    <EmailOutlinedIcon fontSize="small" sx={{ mr: 1, color: theme.palette.secondary.main }} />
+                    <Typography variant="body2">{branch.email}</Typography>
+                </Box>
+                <Box display="flex" alignItems="center">
+                    <PhoneAndroidOutlinedIcon fontSize="small" sx={{ mr: 1, color: theme.palette.secondary.main }} />
+                    <Typography variant="body2">{branch.telephone}</Typography>
+                </Box>
+                <Box display="flex" alignItems="center">
+                    <LocationOnOutlinedIcon fontSize="small" sx={{ mr: 1, color: theme.palette.secondary.main }} />
+                    <Typography variant="body2">
+                        {branch.district?.name}, {branch.region?.name}
+                    </Typography>
+                </Box>
+            </Stack>
+
+            <Box mt={3}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 600, color: theme.palette.primary.main, mb: 1 }}>
+                    Management
                 </Typography>
-                <Typography variant="caption" sx={{ fontWeight: 400, textAlign: "center" }}>
-                    {branch.email}
-                </Typography>
-                <Typography variant="body2" sx={{ fontWeight: 400, textAlign: "center" }}>
-                    {branch.telephone}
-                </Typography>
+                <Stack spacing={1.2}>
+                    {[
+                        { label: 'Manager', person: branch.branchManager },
+                        { label: 'Ops Manager', person: branch.branchOperationsManager },
+                        { label: 'Credit Admin', person: branch.creditAdministrator },
+                        { label: 'Relationship Mgr', person: branch.relationshipManager }
+                    ].map(({ label, person }, index) =>
+                        person?.firstName ? (
+                            <Box key={index} display="flex" alignItems="center">
+                                <SupervisorAccountOutlinedIcon sx={{ fontSize: 18, mr: 1, color: theme.palette.secondary.main }} />
+                                <Typography variant="caption" sx={{ color: 'text.primary' }}>
+                                    <strong>{label}:</strong> {person.firstName} {person.lastName}
+                                </Typography>
+                            </Box>
+                        ) : null
+                    )}
+                </Stack>
+            </Box>
+
+            <Stack direction="row" spacing={2} mt={3} justifyContent="center">
                 <Button
                     onClick={() => updateBranch(branch)}
-                    sx={{ textTransform: "none" }} startIcon={<EditOutlinedIcon />} variant="contained" color="info">Update</Button>
+                    variant="contained"
+                    sx={{ textTransform: 'none', bgcolor: theme.palette.primary.main, '&:hover': { bgcolor: '#06685d' } }}
+                    startIcon={<EditOutlinedIcon />}
+                >
+                    Update
+                </Button>
                 <Button
                     onClick={() => deleteBranch(branch)}
-                    sx={{ textTransform: "none" }} startIcon={<DeleteOutlineOutlinedIcon />} variant="outlined" color="error">Delete</Button>
+                    variant="outlined"
+                    color="error"
+                    sx={{ textTransform: 'none' }}
+                    startIcon={<DeleteOutlineOutlinedIcon />}
+                >
+                    Delete
+                </Button>
             </Stack>
-        </Card >
-    )
-}
+        </Card>
+    );
+};
 
-export default ViewBranch
+export default ViewBranch;

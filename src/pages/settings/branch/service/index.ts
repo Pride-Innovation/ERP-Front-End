@@ -18,8 +18,8 @@ const listBranchesService = async () => {
 
 const createBranchService = async (body: Object) => {
     try {
-        const response = await axiosInstance.post('branches/create', body);
-        return response?.data
+        const response = await axiosInstance.post('branches', body);
+        return response
     } catch (error) {
         return error
     }
