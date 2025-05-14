@@ -12,18 +12,14 @@ import {
     FormState,
     UseFormRegister
 } from "react-hook-form";
+import { IAxiosResponse, IFetchDataRequest } from "../../../core/apis/interface";
 
 export interface ISupplier {
     id?: string | number;
     name: string;
-    status?: string | null;
-    desc?: string | null;
-    image?: any | null;
-    user_id?: number | null;
-    symbol?: string | null;
-    tel: string;
+    telephone: string;
     email: string;
-    // Nice to have a supplier product type!!!
+    address?: string | null;
 }
 
 interface ISupplierDetails {
@@ -70,10 +66,25 @@ interface ISupplierForm {
     handleClose: () => void;
 }
 
+interface ISupplierResponse extends IFetchDataRequest {
+    content: Array<ISupplier>
+}
+
+interface ISuppliersAxiosResponse extends IAxiosResponse {
+    data: ISupplierResponse
+}
+
+interface ISupplierAxiosResponse extends IAxiosResponse {
+    data: ISupplier
+}
+
 export type {
     ISupplierDetails,
     ISupplierForm,
     ICreateSupplier,
     IUpdateSupplier,
-    IDeleteSupplier
+    IDeleteSupplier,
+    ISupplierAxiosResponse,
+    ISupplierResponse,
+    ISuppliersAxiosResponse
 }

@@ -17,7 +17,7 @@ const initialState: ISupplierState = {
     suppliers: []
 }
 
-export const authSlice = createSlice({
+export const supplierSlice = createSlice({
     name: 'suppliers',
     initialState,
     reducers: {
@@ -36,7 +36,7 @@ export const authSlice = createSlice({
     }
 })
 
-const { reducer, actions } = authSlice
+const { reducer, actions } = supplierSlice
 
 export const {
     loadSuppliers,

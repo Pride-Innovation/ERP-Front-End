@@ -5,60 +5,86 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { Box, Button, Card, Stack, Typography } from "@mui/material"
-import { grey } from "@mui/material/colors"
+import {
+    Box,
+    Button,
+    Card,
+    Divider,
+    Stack,
+    Typography,
+    useTheme
+} from '@mui/material';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
-import { ISupplierDetails } from "./interface";
-import ProductionQuantityLimitsIcon from '@mui/icons-material/ProductionQuantityLimits';
+import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
+import PhoneAndroidOutlinedIcon from '@mui/icons-material/PhoneAndroidOutlined';
+import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
+import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
+import { ISupplierDetails } from './interface';
 
 const SupplierDetails = ({
     supplier,
     deleteSupplier,
     updateSupplier
 }: ISupplierDetails) => {
+    const theme = useTheme();
+
     return (
-        <Card sx={{
-            boxShadow: 0,
-            p: 2,
-            border: `2px solid ${grey[200]}`,
-        }}>
-            <Box
-                sx={{ width: "100%", alignItems: "center" }}
-                py={1.5}
-            >
-                <Typography noWrap variant="body2" sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-                    <ProductionQuantityLimitsIcon fontSize="small" color="info" sx={{ mr: "4px" }} />
+        <Card
+            sx={{
+                boxShadow: 3,
+                borderRadius: 2,
+                p: 3,
+                bgcolor: 'white',
+                color: 'black',
+                border: `1px solid ${theme.palette.primary.main}`,
+                minWidth: 300,
+                maxWidth: 400,
+            }}
+        >
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2 }}>
+                <LocalShippingOutlinedIcon sx={{ color: theme.palette.secondary.main, mr: 1 }} />
+                <Typography variant="h6" sx={{ fontWeight: 700, color: theme.palette.primary.main }}>
                     {supplier.name}
                 </Typography>
             </Box>
-            <Stack
-                direction="column"
-                spacing={2}
-                sx={{
-                    pt: 3,
-                    borderTop: `2px solid ${grey[200]}`,
-                    alignItems: "center",
-                    height: "100%"
-                }} >
-                <Typography variant="body2" sx={{ fontWeight: 600, textAlign: "center" }}>
-                    Contact
-                </Typography>
-                <Typography variant="caption" sx={{ fontWeight: 400, textAlign: "center" }}>
-                    {supplier.email}
-                </Typography>
-                <Typography variant="body2" sx={{ fontWeight: 400, textAlign: "center" }}>
-                    {supplier.tel}
-                </Typography>
+
+            <Stack spacing={1.2} divider={<Divider flexItem />}>
+                <Box display="flex" alignItems="center">
+                    <LocationOnOutlinedIcon fontSize="small" sx={{ mr: 1, color: theme.palette.secondary.main }} />
+                    <Typography variant="body2">{supplier.address}</Typography>
+                </Box>
+                <Box display="flex" alignItems="center">
+                    <PhoneAndroidOutlinedIcon fontSize="small" sx={{ mr: 1, color: theme.palette.secondary.main }} />
+                    <Typography variant="body2">{supplier.telephone}</Typography>
+                </Box>
+                <Box display="flex" alignItems="center">
+                    <EmailOutlinedIcon fontSize="small" sx={{ mr: 1, color: theme.palette.secondary.main }} />
+                    <Typography variant="body2">{supplier.email}</Typography>
+                </Box>
+            </Stack>
+
+            <Stack direction="row" spacing={2} mt={3} justifyContent="center">
                 <Button
                     onClick={() => updateSupplier(supplier)}
-                    sx={{ textTransform: "none" }} startIcon={<EditOutlinedIcon />} variant="contained" color="info">Update</Button>
+                    variant="contained"
+                    sx={{ textTransform: 'none', bgcolor: theme.palette.primary.main, '&:hover': { bgcolor: '#06685d' } }}
+                    startIcon={<EditOutlinedIcon />}
+                >
+                    Update
+                </Button>
                 <Button
                     onClick={() => deleteSupplier(supplier)}
-                    sx={{ textTransform: "none" }} startIcon={<DeleteOutlineOutlinedIcon />} variant="outlined" color="error">Delete</Button>
+                    variant="outlined"
+                    color="error"
+                    sx={{ textTransform: 'none' }}
+                    startIcon={<DeleteOutlineOutlinedIcon />}
+                >
+                    Delete
+                </Button>
             </Stack>
-        </Card >
-    )
+        </Card>
+    );
 }
 
 export default SupplierDetails

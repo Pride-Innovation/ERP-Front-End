@@ -19,9 +19,7 @@ import { getTableHeaders } from "../../components/tables/getTableHeaders";
 import { loadAllInventory } from "./slice";
 import { IInventory } from "./interface";
 import { IFormData } from "../assets/interface";
-import { listUnitOfMeasuresService } from "../assets/ITEquipment/service";
 import { loadSuppliers } from "../settings/suppliers/slice";
-import { listSuppliersService } from "../settings/suppliers/service";
 import { InventoryContext } from "../../context/inventory";
 
 
@@ -48,7 +46,7 @@ const InventoryUtills = () => {
     }
 
     const updateReduxStore = async () => {
-        dispatch(loadSuppliers(await listSuppliersService()));
+        // dispatch(loadSuppliers(await listSuppliersService()));
 
     }
 

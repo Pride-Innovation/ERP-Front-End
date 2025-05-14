@@ -5,23 +5,32 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { Box, TextField } from "@mui/material"
-import { ChangeEvent, useState } from "react"
+import { Box, Card, Grid, InputAdornment, TextField, useMediaQuery, useTheme } from "@mui/material"
+import { ChangeEvent, useEffect, useState } from "react"
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import ButtonComponent from "../../../components/forms/Button";
 import SupplierUtills from "./Utills";
-import SupplierDetails from "./SupplierDetails";
 import { crudStates } from "../../../utils/constants";
 import ModalComponent from "../../../components/modal";
 import CreateSupplier from "./CreateSupplier";
 import UpdateSupplier from "./UpdateSupplier";
 import DeleteSupplier from "./DeleteSupplier";
 import { ISupplier } from "./interface";
+import Loading from "../../../components/loading";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../store";
+import SupplierDetails from "./SupplierDetails";
+import NoContent from "../../../components/noContent";
 
 const Suppliers = () => {
     const [currentSupplier, setCurrentSupplier] = useState<ISupplier>({} as ISupplier);
-    const { suppliers, setModalState, handleOpen, modalState, open, handleClose } = SupplierUtills()
+    const { setModalState, handleOpen, modalState, open, handleClose, loading, fetchAllSuppliers } = SupplierUtills()
     const [sendingRequest, setSendingRequest] = useState<boolean>(false)
+    const theme = useTheme();
+    const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+    const { suppliers } = useSelector((state: RootState) => state.SuppliersStore)
+
+    useEffect(() => { fetchAllSuppliers() }, [])
 
     const createSupplier = () => {
         setModalState(crudStates.create);
@@ -69,53 +78,55 @@ const Suppliers = () => {
                         setSendingRequest={setSendingRequest} />
                 </ModalComponent>
             }
-            <Box sx={{ width: "100%" }}>
-                <Box sx={{
-                    width: "100%",
-                    display: "flex",
-                    justifyContent: "flex-end",
+            <Card
+                elevation={2}
+                sx={{
+                    p: 3,
                     mb: 4,
+                    display: "flex",
+                    flexDirection: isSmallScreen ? "column" : "row",
                     alignItems: "center",
-                }}>
-                    <Box sx={{ mr: "10px" }}>
-                        <TextField
-                            onChange={(e: ChangeEvent<HTMLInputElement>) => () => console.log(e.target.value)}
-                            size="small"
-                            placeholder="Filter by supplier name"
-                            InputProps={
-                                {
-                                    startAdornment: (<SearchOutlinedIcon color="info" fontSize="small" sx={{ mr: "10px" }} />)
-                                }
-                            }
-                        />
-                    </Box>
-                    <Box>
-                        <ButtonComponent
-                            handleClick={createSupplier}
-                            sendingRequest={false}
-                            buttonText="Create New Supplier"
-                            variant='contained'
-                            buttonColor='info'
-                            type='button' />
-                    </Box>
-                </Box>
-                <Box
-                    display="grid"
-                    gridTemplateColumns="repeat(3, 1fr)"
-                    gap={3}
-                    sx={{
-                        width: "100%",
-                        alignItems: "center",
-                    }}>
-                    {/* {
-                        suppliers.map(supplier => (
-                            <SupplierDetails
-                                supplier={supplier}
-                                deleteSupplier={deleteSupplier}
-                                updateSupplier={updateSupplier} />
-                        ))
-                    } */}
-                </Box>
+                    justifyContent: "space-between",
+                    gap: 2,
+                }}
+            >
+                <TextField
+                    placeholder="Filter by name"
+                    size="small"
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => console.log(e.target.value)}
+                    InputProps={{
+                        startAdornment: (
+                            <InputAdornment position="start">
+                                <SearchOutlinedIcon color="info" />
+                            </InputAdornment>
+                        ),
+                    }}
+                    sx={{ width: isSmallScreen ? "100%" : "300px" }}
+                />
+                <ButtonComponent
+                    handleClick={createSupplier}
+                    sendingRequest={false}
+                    buttonText="Create New Title"
+                    variant="contained"
+                    buttonColor="info"
+                    type="button"
+                />
+            </Card>
+
+            <Box>
+                {loading ? (
+                    <Loading items="suppliers" />
+                ) : suppliers.length > 0 ? (
+                    <Grid container spacing={3}>
+                        {suppliers.map((supplier) => (
+                            <Grid item xs={12} sm={6} md={4} key={supplier.id}>
+                                <SupplierDetails supplier={supplier} deleteSupplier={deleteSupplier} updateSupplier={updateSupplier} />
+                            </Grid>
+                        ))}
+                    </Grid>
+                ) : (
+                    <NoContent item="supplier" items="suppliers" />
+                )}
             </Box>
         </>
     )

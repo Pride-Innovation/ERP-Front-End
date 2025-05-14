@@ -27,7 +27,6 @@ import {
 import { loadBranches } from "../../settings/branch/slice";
 import { listBranchesService } from "../../settings/branch/service";
 import { loadSuppliers } from "../../settings/suppliers/slice";
-import { listSuppliersService } from "../../settings/suppliers/service";
 import { loadStatuses } from "../../settings/statuses/slice";
 import { listAssetStatusesService } from "../../settings/statuses/service";
 
@@ -64,7 +63,6 @@ const ITEquipmentUtills = () => {
         dispatch(loadUsers(await listUsersService()));
         dispatch(loadAssetCategories(await listCategoriesService()));
         dispatch(loadStatuses(await listAssetStatusesService()));
-        dispatch(loadSuppliers(await listSuppliersService()));
     }
 
     useEffect(() => { updateReduxStore() }, []);

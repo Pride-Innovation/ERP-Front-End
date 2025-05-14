@@ -23,14 +23,6 @@ const DeleteSupplier = ({
     const { removeSupplierToStore } = SupplierUtills();
 
     const deleteSupplier = async () => {
-        setSendingRequest(true)
-        const response = await deleteSupplierService(supplier?.id as string);
-        setSendingRequest(false)
-        if (response?.status === "success") {
-            removeSupplierToStore(supplier)
-            handleClose();
-            toast.success(response?.data?.message)
-        }
     }
     return (
         <Grid item container spacing={4} xs={12}>

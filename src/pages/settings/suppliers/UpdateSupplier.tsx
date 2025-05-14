@@ -36,18 +36,6 @@ const UpdateSupplier = ({ handleClose, sendingRequest, supplier, setSendingReque
 
     const onSubmit = async (formData: ISupplier) => {
         setSendingRequest(true);
-        const request = {
-            ...formData,
-            user_id: 1
-        }
-
-        const response = await updateSupplierService(request, formData?.id as string) as IResponseData;
-        if (response.status === 'success') {
-            updateSupplierInStore(response.data[0] as unknown as ISupplier)
-            toast.success(response.data.message)
-            setSendingRequest(false);
-            handleClose()
-        }
         setSendingRequest(true);
     };
 

@@ -37,17 +37,7 @@ const CreateSupplier = ({ handleClose, sendingRequest, setSendingRequest }: ICre
 
   const onSubmit = async (formData: ISupplier) => {
     setSendingRequest(true)
-    const request = {
-      ...formData,
-      user_id: 1
-    }
-    const response = await createSupplierService(request) as IResponseData;
-    if (response.status === 'success') {
-      addSupplierToStore(response.data[0] as unknown as ISupplier)
-      toast.success(response.data.message)
-      setSendingRequest(false);
-      handleClose()
-    }
+
   };
 
   return (

@@ -7,27 +7,31 @@ Managing Director
 
 import { useEffect, useState } from "react"
 import { IFormData } from "../../assets/interface";
-import { ISupplier } from "./interface";
-import { useSelector } from "react-redux";
-import { AppDispatch, RootState } from "../../../store";
+import { ISupplier, ISuppliersAxiosResponse } from "./interface";
+import { AppDispatch } from "../../../store";
 import { useDispatch } from "react-redux";
 import { addSupplier, loadSuppliers, removeSupplier, updateSupplier } from "./slice";
-import { listSuppliersService } from "./service";
+import { fetchRowsService } from "../../../core/apis/globalService";
 
 const SupplierUtills = () => {
+    const endPoint: string = "suppliers";
     const [modalState, setModalState] = useState<string>("");
     const [open, setOpen] = useState<boolean>(false);
-    const { suppliers } = useSelector((state: RootState) => state.SuppliersStore);
+    const [loading, setLoading] = useState<boolean>(false);
     const dispatch = useDispatch<AppDispatch>()
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
 
     const fetchAllSuppliers = async () => {
-        const response = await listSuppliersService() as Array<ISupplier>;
-        dispatch(loadSuppliers(response))
+        try {
+            const response = await fetchRowsService({ pageNumber: 0, pageSize: 10, endPoint }) as ISuppliersAxiosResponse;
+            if (response.status === 200) {
+                dispatch(loadSuppliers(response.data.content))
+            }
+        } catch (error) {
+            console.log(error)
+        }
     }
-
-    useEffect(() => { fetchAllSuppliers() }, []);
 
     const addSupplierToStore = (supplier: ISupplier) => {
         dispatch(addSupplier(supplier))
@@ -48,38 +52,23 @@ const SupplierUtills = () => {
             type: "input"
         },
         {
+            value: "telephone",
+            label: 'Telephone Number',
+            type: "input"
+        },
+        {
+            value: "address",
+            label: 'Physical Address',
+            type: "input"
+        },
+        {
             value: "email",
-            label: 'Supplier Email',
+            label: 'Email Address',
             type: "input"
-        },
-        {
-            value: "tel",
-            label: 'Supplier Telephone',
-            type: "input"
-        },
-        {
-            value: "status",
-            label: 'Supplier Status',
-            type: "select",
-            options: [
-                {
-                    label: "Full Supplier",
-                    value: 1
-                },
-                {
-                    label: "Minor Supplier",
-                    value: 2
-                }
-            ]
-        },
-        {
-            value: "desc",
-            label: 'Description',
-            type: "textarea"
-        }]
+        }
+    ]
 
     return ({
-        suppliers,
         handleClose,
         handleOpen,
         modalState,
@@ -88,7 +77,9 @@ const SupplierUtills = () => {
         formFields,
         addSupplierToStore,
         removeSupplierToStore,
-        updateSupplierInStore
+        updateSupplierInStore,
+        loading,
+        fetchAllSuppliers
     }
     )
 }
