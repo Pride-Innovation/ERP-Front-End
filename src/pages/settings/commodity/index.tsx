@@ -11,17 +11,21 @@ import { ICommodity } from './interface';
 import { crudStates } from '../../../utils/constants';
 import CommodityUtills from './utills';
 import ModalComponent from '../../../components/modal';
-import { Box, Card, InputAdornment, TextField, useMediaQuery, useTheme } from '@mui/material';
+import { Box, Card, Grid, InputAdornment, TextField, useMediaQuery, useTheme } from '@mui/material';
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import ButtonComponent from '../../../components/forms/Button';
 import Loading from '../../../components/loading';
 import NoContent from '../../../components/noContent';
 import CreateCommodity from './CreateCommodity';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../store';
+import CommodityCard from './ViewCommodity';
 
 
 const Commodities = () => {
   const [currentCommodity, setCurrentCommodity] = useState<ICommodity>({} as ICommodity);
   const [sendingRequest, setSendingRequest] = useState<boolean>(false);
+  const { commodities } = useSelector((state: RootState) => state.CommodityStore)
 
   const { modalState, handleClose, open, handleOpen, setModalState, loading, fetchAllCommodities } = CommodityUtills()
 
@@ -33,6 +37,19 @@ const Commodities = () => {
     setModalState(crudStates.create);
     handleOpen();
   };
+
+  const updateCommodity = (commodity: ICommodity) => {
+    setCurrentCommodity(commodity);
+    setModalState(crudStates.update);
+    handleOpen();
+  };
+
+  const deleteCommodity = (commodity: ICommodity) => {
+    setCurrentCommodity(commodity);
+    setModalState(crudStates.delete);
+    handleOpen();
+  };
+
 
   return (
     <>
@@ -108,19 +125,19 @@ const Commodities = () => {
         {loading ? (
           <Loading items='commodities' />
         )
-          // : branches.length > 0 ? (
-          //   <Grid container spacing={3}>
-          //     {branches.map((branch) => (
-          //       <Grid item xs={12} sm={6} md={4} key={branch.id}>
-          //         <ViewBranch branch={branch} deleteBranch={deleteBranch} updateBranch={updateBranch} />
-          //       </Grid>
-          //     ))}
-          //   </Grid>
-          // ) 
+          : commodities.length > 0 ? (
+            <Grid container spacing={3}>
+              {commodities.map((commodity) => (
+                <Grid item xs={12} sm={6} md={4} key={commodity.id}>
+                  <CommodityCard commodity={commodity} deleteCommodity={deleteCommodity} updateCommodity={updateCommodity} />
+                </Grid>
+              ))}
+            </Grid>
+          )
 
-          : (
-            <NoContent item="commodity" items="commodities" />
-          )}
+            : (
+              <NoContent item="commodity" items="commodities" />
+            )}
       </Box>
     </>
   )

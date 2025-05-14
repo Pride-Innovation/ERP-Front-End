@@ -18,7 +18,7 @@ import { IOptions } from "../../../components/tables/interface";
 import { useSelector } from "react-redux";
 
 const CommodityUtills = () => {
-    const endPoint: string = "asset-types";
+    const endPoint: string = "commodities";
     const [modalState, setModalState] = useState<string>("");
     const [open, setOpen] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false);

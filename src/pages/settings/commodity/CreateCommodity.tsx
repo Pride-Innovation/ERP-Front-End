@@ -14,6 +14,7 @@ import { useEffect } from "react";
 import { toast } from "react-toastify";
 import { Grid, Paper } from "@mui/material";
 import CommodityForm from "./CommodityForm";
+import { createCommodityService } from "./service";
 
 const CreateCommodity = ({
     setSendingRequest,
@@ -40,16 +41,15 @@ const CreateCommodity = ({
 
     const onSubmit = async (formData: ICommodity) => {
         setSendingRequest(true);
-        // try {
-        //     const response = await createBranchService(formData) as ICommodityAxiosResponse;
-        //     console.log(response, "Response")
-        //     if (response.status === 201) {
-        //         addCommodityToStore(response.data);
-        //         toast.success("Commodity created successfully")
-        //     }
-        // } catch (error) {
-        //     console.log(error);
-        // }
+        try {
+            const response = await createCommodityService(formData) as ICommodityAxiosResponse;
+            if (response.status === 201) {
+                addCommodityToStore(response.data);
+                toast.success("Commodity created successfully")
+            }
+        } catch (error) {
+            console.log(error);
+        }
         setSendingRequest(false);
 
     };

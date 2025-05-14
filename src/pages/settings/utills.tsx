@@ -7,13 +7,13 @@ Managing Director
 
 import VpnKeyOutlinedIcon from '@mui/icons-material/VpnKeyOutlined';
 import CameraOutdoorOutlinedIcon from '@mui/icons-material/CameraOutdoorOutlined';
-import BedroomBabyOutlinedIcon from '@mui/icons-material/BedroomBabyOutlined';
 import ScaleIcon from '@mui/icons-material/Scale';
 import { ISettingsNavigation } from './interface';
 import { ROUTES } from '../../core/routes/routes';
 import ListAltIcon from '@mui/icons-material/ListAlt';
 import DownloadingIcon from '@mui/icons-material/Downloading';
 import ApartmentIcon from '@mui/icons-material/Apartment';
+import CategoryOutlinedIcon from '@mui/icons-material/CategoryOutlined';
 
 const SettingsUtills = () => {
 
@@ -34,7 +34,7 @@ const SettingsUtills = () => {
             id: 3,
             text: "Commodities",
             path: ROUTES.COMMODITY,
-            icon: <BedroomBabyOutlinedIcon />
+            icon: <CategoryOutlinedIcon />
         },
         {
             id: 4,

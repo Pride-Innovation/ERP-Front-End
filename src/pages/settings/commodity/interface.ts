@@ -47,7 +47,7 @@ export interface IUpdateCommodity {
 }
 
 export interface ICommodityDetails {
-    Commodity: ICommodity;
+    commodity: ICommodity;
     deleteCommodity: (role: ICommodity) => void;
     updateCommodity: (role: ICommodity) => void;
 }
