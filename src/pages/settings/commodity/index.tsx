@@ -20,6 +20,7 @@ import CreateCommodity from './CreateCommodity';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../store';
 import CommodityCard from './ViewCommodity';
+import SettingsHeader from '../../../components/settingsNavigationCard';
 
 
 const Commodities = () => {
@@ -85,42 +86,7 @@ const Commodities = () => {
           <p>Delete Commodity</p>
         </ModalComponent>
       )}
-
-      <Card
-        elevation={2}
-        sx={{
-          p: 3,
-          mb: 4,
-          display: "flex",
-          flexDirection: isSmallScreen ? "column" : "row",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 2,
-        }}
-      >
-        <TextField
-          placeholder="Filter by name"
-          size="small"
-          onChange={(e: ChangeEvent<HTMLInputElement>) => console.log("Filter by name")}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchOutlinedIcon color="info" />
-              </InputAdornment>
-            ),
-          }}
-          sx={{ width: isSmallScreen ? "100%" : "300px" }}
-        />
-        <ButtonComponent
-          handleClick={createCommodity}
-          sendingRequest={false}
-          buttonText="Create New Commodity"
-          variant="contained"
-          buttonColor="info"
-          type="button"
-        />
-      </Card>
-
+      <SettingsHeader handleCreationClicked={createCommodity} title="Commodity" />
       <Box>
         {loading ? (
           <Loading items='commodities' />

@@ -5,10 +5,8 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { Box, Card, Grid, InputAdornment, TextField, useMediaQuery, useTheme } from "@mui/material"
-import { ChangeEvent, useEffect, useState } from "react"
-import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
-import ButtonComponent from "../../../components/forms/Button";
+import { Box, Grid } from "@mui/material"
+import { useEffect, useState } from "react"
 import SupplierUtills from "./Utills";
 import { crudStates } from "../../../utils/constants";
 import ModalComponent from "../../../components/modal";
@@ -21,13 +19,12 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../../store";
 import SupplierDetails from "./SupplierDetails";
 import NoContent from "../../../components/noContent";
+import SettingsHeader from "../../../components/settingsNavigationCard";
 
 const Suppliers = () => {
     const [currentSupplier, setCurrentSupplier] = useState<ISupplier>({} as ISupplier);
     const { setModalState, handleOpen, modalState, open, handleClose, loading, fetchAllSuppliers } = SupplierUtills()
     const [sendingRequest, setSendingRequest] = useState<boolean>(false)
-    const theme = useTheme();
-    const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
     const { suppliers } = useSelector((state: RootState) => state.SuppliersStore)
 
     useEffect(() => { fetchAllSuppliers() }, [])
@@ -78,41 +75,7 @@ const Suppliers = () => {
                         setSendingRequest={setSendingRequest} />
                 </ModalComponent>
             }
-            <Card
-                elevation={2}
-                sx={{
-                    p: 3,
-                    mb: 4,
-                    display: "flex",
-                    flexDirection: isSmallScreen ? "column" : "row",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    gap: 2,
-                }}
-            >
-                <TextField
-                    placeholder="Filter by name"
-                    size="small"
-                    onChange={(e: ChangeEvent<HTMLInputElement>) => console.log(e.target.value)}
-                    InputProps={{
-                        startAdornment: (
-                            <InputAdornment position="start">
-                                <SearchOutlinedIcon color="info" />
-                            </InputAdornment>
-                        ),
-                    }}
-                    sx={{ width: isSmallScreen ? "100%" : "300px" }}
-                />
-                <ButtonComponent
-                    handleClick={createSupplier}
-                    sendingRequest={false}
-                    buttonText="Create New Title"
-                    variant="contained"
-                    buttonColor="info"
-                    type="button"
-                />
-            </Card>
-
+            <SettingsHeader handleCreationClicked={createSupplier} title="Supplier"/>
             <Box>
                 {loading ? (
                     <Loading items="suppliers" />

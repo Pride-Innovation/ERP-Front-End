@@ -7,15 +7,10 @@ Managing Director
 
 import {
   Box,
-  Card,
   Grid,
-  InputAdornment,
-  TextField,
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
-import ButtonComponent from "../../../components/forms/Button";
 import ModalComponent from "../../../components/modal";
 import CreateBranch from "./CreateBranch";
 import ViewBranch from "./ViewBranch";
@@ -23,19 +18,19 @@ import UpdateBranch from "./UpdateBranch";
 import DeleteBranch from "./DeleteBranch";
 import { IBranch } from "./interface";
 import BranchUtills from "./utills";
-import { useEffect, useState, ChangeEvent } from "react";
+import { useEffect, useState } from "react";
 import { crudStates } from "../../../utils/constants";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../store";
 import NoContent from "../../../components/noContent";
 import Loading from "../../../components/loading";
+import SettingsHeader from "../../../components/settingsNavigationCard";
 
 const Branches = () => {
   const [currentBranch, setCurrentBranch] = useState<IBranch>({} as IBranch);
   const [sendingRequest, setSendingRequest] = useState<boolean>(false);
   const { branches } = useSelector((state: RootState) => state.BranchStore);
   const {
-    filterBranchByName,
     modalState,
     open,
     handleClose,
@@ -102,41 +97,7 @@ const Branches = () => {
         </ModalComponent>
       )}
 
-      <Card
-        elevation={2}
-        sx={{
-          p: 3,
-          mb: 4,
-          display: "flex",
-          flexDirection: isSmallScreen ? "column" : "row",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 2,
-        }}
-      >
-        <TextField
-          placeholder="Filter by name"
-          size="small"
-          onChange={(e: ChangeEvent<HTMLInputElement>) => filterBranchByName(e.target.value)}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchOutlinedIcon color="info" />
-              </InputAdornment>
-            ),
-          }}
-          sx={{ width: isSmallScreen ? "100%" : "300px" }}
-        />
-        <ButtonComponent
-          handleClick={createBranch}
-          sendingRequest={false}
-          buttonText="Create New Branch"
-          variant="contained"
-          buttonColor="info"
-          type="button"
-        />
-      </Card>
-
+      <SettingsHeader handleCreationClicked={createBranch} title="Branch" />
       <Box>
         {loading ? (
           <Loading items="branches" />
