@@ -1,4 +1,12 @@
-import { ChangeEvent, useState } from 'react'
+/*
+13.9 Pride's Standard Copyright Notice:
+Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
+and distribute this software and its documentation for any purpose is prohibited unless authorized in writing by the
+Managing Director
+*/
+
+
+import { ChangeEvent, useEffect, useState } from 'react'
 import { ICommodity } from './interface';
 import { crudStates } from '../../../utils/constants';
 import CommodityUtills from './utills';
@@ -15,10 +23,11 @@ const Commodities = () => {
   const [currentCommodity, setCurrentCommodity] = useState<ICommodity>({} as ICommodity);
   const [sendingRequest, setSendingRequest] = useState<boolean>(false);
 
-  const { modalState, handleClose, open, handleOpen, setModalState, loading } = CommodityUtills()
+  const { modalState, handleClose, open, handleOpen, setModalState, loading, fetchAllCommodities } = CommodityUtills()
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+  useEffect(() => { fetchAllCommodities() }, [])
 
   const createCommodity = () => {
     setModalState(crudStates.create);
@@ -28,7 +37,7 @@ const Commodities = () => {
   return (
     <>
       {modalState === crudStates.create && (
-        <ModalComponent width="40%" title="Create Commodity" open={open} handleClose={handleClose}>
+        <ModalComponent width="45%" title="Create Commodity" open={open} handleClose={handleClose}>
           <CreateCommodity
             handleClose={handleClose}
             sendingRequest={sendingRequest}

@@ -6,21 +6,60 @@ Managing Director
 */
 
 
-import { useState } from "react";
-import { ICommodity } from "./interface";
+import { useEffect, useState } from "react";
+import { ICommoditiesAxiosResponse, ICommodity } from "./interface";
 import { IFormData } from "../../assets/interface";
+import { fetchRowsService } from "../../../core/apis/globalService";
+import { useDispatch } from "react-redux";
+import { AppDispatch, RootState } from "../../../store";
+import { loadAllCommodities } from "./slice";
+import AssetTypeUtills from "../assetTypes/utills";
+import { IOptions } from "../../../components/tables/interface";
+import { useSelector } from "react-redux";
 
 const CommodityUtills = () => {
+    const endPoint: string = "asset-types";
     const [modalState, setModalState] = useState<string>("");
     const [open, setOpen] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false);
+    const dispatch = useDispatch<AppDispatch>();
+    const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore)
+    const { fetchAllAssetTypes } = AssetTypeUtills();
+    const [optionsObject, setOptionsObject] = useState<{
+        assetTypesOptions: Array<IOptions>
+    }>({
+        assetTypesOptions: []
+    });
 
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
+    useEffect(() => { fetchAllAssetTypes() }, []);
+
+    const fetchAllCommodities = async () => {
+        setLoading(true)
+        try {
+            const response = await fetchRowsService({ pageNumber: 0, pageSize: 10, endPoint }) as ICommoditiesAxiosResponse;
+            if (response.status === 200) {
+                dispatch(loadAllCommodities(response.data.content))
+            }
+        } catch (error) {
+            console.log(error)
+        }
+        setLoading(false)
+    }
 
     const addCommodityToStore = (commodity: ICommodity) => {
 
     }
+
+    useEffect(() => {
+        if (assetTypes?.length > 0) {
+            setOptionsObject({
+                assetTypesOptions: assetTypes?.map(assetType => ({ label: assetType.name, value: assetType.id as number })) || []
+            });
+        }
+
+    }, [assetTypes])
 
     const formFields: Array<IFormData<ICommodity>> = [
         {
@@ -37,8 +76,7 @@ const CommodityUtills = () => {
             value: "assetType",
             label: "Asset Type",
             type: "select",
-            // options: optionsObject.usersOptions
-            options: []
+            options: optionsObject.assetTypesOptions
         }
     ]
     return ({
@@ -50,7 +88,8 @@ const CommodityUtills = () => {
         setModalState,
         setLoading,
         addCommodityToStore,
-        formFields
+        formFields,
+        fetchAllCommodities
     }
     )
 }

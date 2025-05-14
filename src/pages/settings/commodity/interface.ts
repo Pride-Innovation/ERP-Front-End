@@ -1,12 +1,15 @@
+/*
+13.9 Pride's Standard Copyright Notice:
+Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
+and distribute this software and its documentation for any purpose is prohibited unless authorized in writing by the
+Managing Director
+*/
+
+
 import { Dispatch, SetStateAction } from "react";
 import { Control, FieldError, FormState, UseFormRegister } from "react-hook-form";
 import { IAxiosResponse, IFetchDataRequest } from "../../../core/apis/interface";
-
-export interface IAssetType {
-    id: string | number;
-    name: string;
-    description: string;
-}
+import { IAssetType } from "../assetTypes/interface";
 
 export interface ICommodity {
     id?: string | number;

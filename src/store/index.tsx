@@ -23,6 +23,8 @@ import DepartmentReducer from "../pages/settings/departments/slice"
 import RoleReducer from "../pages/settings/roles/slice"
 import RegionReducer from "../pages/settings/regions/slice"
 import DistrictReducer from "../pages/settings/districts/slice"
+import CommodityReducer from "../pages/settings/commodity/slice"
+import AssetTypeReducer from "../pages/settings/assetTypes/slice"
 
 export const store = configureStore({
     reducer: {
@@ -39,6 +41,8 @@ export const store = configureStore({
         RoleStore: RoleReducer,
         RegionStore: RegionReducer,
         DistrictStore: DistrictReducer,
+        CommodityStore: CommodityReducer,
+        AssetTypeStore: AssetTypeReducer,
     },
 });
 
