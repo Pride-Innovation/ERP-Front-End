@@ -13,7 +13,6 @@ import {
 import EquipmentReducer from "../pages/assets/slice/index"
 import UserReducer from "../pages/users/slice/index"
 import BranchReducer from "../pages/settings/branch/slice"
-import UnitsOfMeasureReducer from "../pages/settings/unitMeasure/slice"
 import SuppliersReducer from "../pages/settings/suppliers/slice"
 import TransportRequestReducer from "../pages/request/transportRequest/slice"
 import StatusesReducer from "../pages/settings/statuses/slice"
@@ -25,13 +24,13 @@ import RegionReducer from "../pages/settings/regions/slice"
 import DistrictReducer from "../pages/settings/districts/slice"
 import CommodityReducer from "../pages/settings/commodity/slice"
 import AssetTypeReducer from "../pages/settings/assetTypes/slice"
+import TitleReducer from "../pages/settings/titles/slice"
 
 export const store = configureStore({
     reducer: {
         EquipmentStore: EquipmentReducer,
         UserStore: UserReducer,
         BranchStore: BranchReducer,
-        UnitsOfMeasureStore: UnitsOfMeasureReducer,
         SuppliersStore: SuppliersReducer,
         TransportRequestStore: TransportRequestReducer,
         StatusesStore: StatusesReducer,
@@ -43,6 +42,7 @@ export const store = configureStore({
         DistrictStore: DistrictReducer,
         CommodityStore: CommodityReducer,
         AssetTypeStore: AssetTypeReducer,
+        TitleStore: TitleReducer,
     },
 });
 

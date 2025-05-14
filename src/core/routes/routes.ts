@@ -52,7 +52,7 @@ const UPDATE_OFFICE_EQUIPMENT: string = `${LIST_ASSETS}/office-equipment/update`
 /* Settings Routes */
 const BRANCHES: string = `${ASSETS_MANAGEMENT}/settings/branches`;
 const COMMODITY: string = `${ASSETS_MANAGEMENT}/settings/commodities`;
-const UNITS_MEASURE: string = `${ASSETS_MANAGEMENT}/settings/units-of-measure`;
+const TITLES: string = `${ASSETS_MANAGEMENT}/settings/titles`;
 const SUPPLIERS: string = `${ASSETS_MANAGEMENT}/settings/suppliers`;
 const STATUSES: string = `${ASSETS_MANAGEMENT}/settings/statuses`;
 const DEPARTMENT: string = `${ASSETS_MANAGEMENT}/settings/departments`;
@@ -92,7 +92,7 @@ export const ROUTES = {
     LIST_TRANSPORT_REJECTED,
     BRANCHES,
     COMMODITY,
-    UNITS_MEASURE,
+    TITLES,
     SUPPLIERS,
     STATUSES,
     INVENTORY,

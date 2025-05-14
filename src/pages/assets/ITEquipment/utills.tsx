@@ -17,7 +17,6 @@ import { IITEquipment } from "./interface";
 import { itEquipmentMock } from "../../../mocks/itEquipment";
 import {
     listCategoriesService,
-    listUnitOfMeasuresService,
     listUsersService
 } from "./service";
 import { AppDispatch, RootState } from "../../../store";
@@ -27,7 +26,6 @@ import {
 } from "../slice";
 import { loadBranches } from "../../settings/branch/slice";
 import { listBranchesService } from "../../settings/branch/service";
-import { loadUnitOfMeasures } from "../../settings/unitMeasure/slice";
 import { loadSuppliers } from "../../settings/suppliers/slice";
 import { listSuppliersService } from "../../settings/suppliers/service";
 import { loadStatuses } from "../../settings/statuses/slice";
@@ -44,14 +42,12 @@ const ITEquipmentUtills = () => {
         assetsStatusesOptions: Array<IOptions>,
         branchesOptions: Array<IOptions>,
         assetCategoriesOptions: Array<IOptions>,
-        unitsOfMeasuresOptions: Array<IOptions>
         usersOptions: Array<IOptions>
         suppliersOptions: Array<IOptions>
     }>({
         assetsStatusesOptions: [],
         branchesOptions: [],
         assetCategoriesOptions: [],
-        unitsOfMeasuresOptions: [],
         usersOptions: [],
         suppliersOptions: []
     });
@@ -61,14 +57,12 @@ const ITEquipmentUtills = () => {
     } = useSelector((state: RootState) => state.EquipmentStore);
     const { statuses } = useSelector((state: RootState) => state.StatusesStore);
     const { suppliers } = useSelector((state: RootState) => state.SuppliersStore);
-    const { unitsOfMeasure } = useSelector((state: RootState) => state.UnitsOfMeasureStore);
     const { branches } = useSelector((state: RootState) => state.BranchStore);
 
     const updateReduxStore = async () => {
         dispatch(loadBranches(await listBranchesService()));
         dispatch(loadUsers(await listUsersService()));
         dispatch(loadAssetCategories(await listCategoriesService()));
-        dispatch(loadUnitOfMeasures(await listUnitOfMeasuresService()));
         dispatch(loadStatuses(await listAssetStatusesService()));
         dispatch(loadSuppliers(await listSuppliersService()));
     }
@@ -80,12 +74,11 @@ const ITEquipmentUtills = () => {
             assetCategoriesOptions: assetCategories?.map(category => ({ label: category.name, value: category.id })) || [],
             branchesOptions: branches?.map(branch => ({ label: branch.name, value: branch?.id as number })),
             assetsStatusesOptions: statuses?.map(status => ({ label: status.name, value: status.id as number })) || [],
-            unitsOfMeasuresOptions: unitsOfMeasure?.map(unit => ({ label: unit.name, value: unit?.id as number })) || [],
             usersOptions: users?.map(user => ({ label: user.name as string, value: user.id as number })) || [],
             suppliersOptions: suppliers?.map(supplier => ({ label: supplier.name, value: supplier?.id as number })) || [],
         })
 
-    }, [statuses, users, assetCategories, unitsOfMeasure, branches, suppliers])
+    }, [statuses, users, assetCategories, branches, suppliers])
 
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
@@ -237,12 +230,6 @@ const ITEquipmentUtills = () => {
             label: 'Asset Category',
             type: "select",
             options: optionsObject.assetCategoriesOptions
-        },
-        {
-            value: "unitOfMeasure",
-            label: 'Unit Of Measure',
-            type: "select",
-            options: optionsObject.unitsOfMeasuresOptions
         },
         {
             value: "costOfTheAsset",

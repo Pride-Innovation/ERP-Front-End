@@ -19,7 +19,6 @@ import { getTableHeaders } from "../../components/tables/getTableHeaders";
 import { loadAllInventory } from "./slice";
 import { IInventory } from "./interface";
 import { IFormData } from "../assets/interface";
-import { loadUnitOfMeasures } from "../settings/unitMeasure/slice";
 import { listUnitOfMeasuresService } from "../assets/ITEquipment/service";
 import { loadSuppliers } from "../settings/suppliers/slice";
 import { listSuppliersService } from "../settings/suppliers/service";
@@ -33,14 +32,11 @@ const InventoryUtills = () => {
     const [open, setOpen] = useState<boolean>(false);
     const dispatch = useDispatch<AppDispatch>();
     const { setCurrentInventory } = useContext(InventoryContext);
-    const { unitsOfMeasure } = useSelector((state: RootState) => state.UnitsOfMeasureStore);
     const { inventoryList } = useSelector((state: RootState) => state.InventoryStore);
     const { suppliers } = useSelector((state: RootState) => state.SuppliersStore);
     const [optionsObject, setOptionsObject] = useState<{
-        unitsOfMeasuresOptions: Array<IOptions>;
         suppliersOptions: Array<IOptions>
     }>({
-        unitsOfMeasuresOptions: [],
         suppliersOptions: []
     });
 
@@ -52,7 +48,6 @@ const InventoryUtills = () => {
     }
 
     const updateReduxStore = async () => {
-        dispatch(loadUnitOfMeasures(await listUnitOfMeasuresService()));
         dispatch(loadSuppliers(await listSuppliersService()));
 
     }
@@ -67,11 +62,10 @@ const InventoryUtills = () => {
 
     useEffect(() => {
         setOptionsObject({
-            unitsOfMeasuresOptions: unitsOfMeasure?.map(unit => ({ label: unit.name, value: unit?.id as number })) || [],
             suppliersOptions: suppliers?.map(supplier => ({ label: supplier.name, value: supplier?.id as number })) || [],
         })
 
-    }, [unitsOfMeasure, suppliers])
+    }, [suppliers])
 
     const handleCreation = () => {
         setModalState(crudStates.create);
@@ -111,12 +105,6 @@ const InventoryUtills = () => {
             value: "quantityInStock",
             label: 'Quantity In Stock',
             type: "number"
-        },
-        {
-            value: "unitOfMeasure",
-            label: 'Unit',
-            type: "select",
-            options: optionsObject.unitsOfMeasuresOptions
         },
         {
             value: "location",

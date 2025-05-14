@@ -7,13 +7,13 @@ Managing Director
 
 import VpnKeyOutlinedIcon from '@mui/icons-material/VpnKeyOutlined';
 import CameraOutdoorOutlinedIcon from '@mui/icons-material/CameraOutdoorOutlined';
-import ScaleIcon from '@mui/icons-material/Scale';
 import { ISettingsNavigation } from './interface';
 import { ROUTES } from '../../core/routes/routes';
 import ListAltIcon from '@mui/icons-material/ListAlt';
 import DownloadingIcon from '@mui/icons-material/Downloading';
 import ApartmentIcon from '@mui/icons-material/Apartment';
 import CategoryOutlinedIcon from '@mui/icons-material/CategoryOutlined';
+import WorkOutlineOutlinedIcon from '@mui/icons-material/WorkOutlineOutlined';
 
 const SettingsUtills = () => {
 
@@ -38,9 +38,9 @@ const SettingsUtills = () => {
         },
         {
             id: 4,
-            text: "Units of Measure",
-            path: ROUTES.UNITS_MEASURE,
-            icon: <ScaleIcon />
+            text: "Titles",
+            path: ROUTES.TITLES,
+            icon: <WorkOutlineOutlinedIcon />
         },
         {
             id: 5,
