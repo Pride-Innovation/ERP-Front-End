@@ -5,22 +5,32 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { useState } from 'react'
+import { ChangeEvent, useEffect, useState } from 'react'
 import { IDepartment } from './interface';
 import { crudStates } from '../../../utils/constants';
-import { Box } from '@mui/material';
+import { Box, Card, Grid, InputAdornment, TextField, useMediaQuery, useTheme } from '@mui/material';
+import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import ButtonComponent from '../../../components/forms/Button';
 import DepartmentUtills from './utills';
-import DepartmentDetails from './DepartmentDetails';
 import ModalComponent from '../../../components/modal';
 import CreateDepartment from './CreateDepartment';
 import UpdateDepartment from './UpdateDepartment';
 import DeleteDepartment from './DeleteDepartment';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../store';
+import Loading from '../../../components/loading';
+import NoContent from '../../../components/noContent';
+import DepartmentDetails from './DepartmentDetails';
 
 const Departments = () => {
-    const { departments, setModalState, handleClose, handleOpen, modalState, open } = DepartmentUtills();
+    const { setModalState, handleClose, handleOpen, modalState, open, fetchAllDepartments, loading } = DepartmentUtills();
     const [currentDepartment, setCurrentDepartment] = useState<IDepartment>({} as IDepartment);
     const [sendingRequest, setSendingRequest] = useState<boolean>(false)
+    const theme = useTheme();
+    const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+    const { departments } = useSelector((state: RootState) => state.DepartmentStore)
+
+    useEffect(() => { fetchAllDepartments() }, [])
 
     const createDepartment = () => {
         setModalState(crudStates.create);
@@ -67,42 +77,55 @@ const Departments = () => {
                     />
                 </ModalComponent>
             }
-            <Box sx={{ width: "100%" }}>
-                <Box sx={{
-                    width: "100%",
-                    display: "flex",
-                    justifyContent: "flex-end",
+            <Card
+                elevation={2}
+                sx={{
+                    p: 3,
                     mb: 4,
+                    display: "flex",
+                    flexDirection: isSmallScreen ? "column" : "row",
                     alignItems: "center",
-                }}>
-                    <Box>
-                        <ButtonComponent
-                            handleClick={createDepartment}
-                            sendingRequest={false}
-                            buttonText="Create New Department"
-                            variant='contained'
-                            buttonColor='info'
-                            type='button' />
-                    </Box>
-                </Box>
-                <Box
-                    display="grid"
-                    gridTemplateColumns="repeat(4, 1fr)"
-                    gap={3}
-                    sx={{
-                        width: "100%",
-                        alignItems: "center",
-                    }}>
-                    {
-                        departments.map(department => (
-                            <DepartmentDetails
-                                department={department}
-                                deleteDepartment={deleteDepartment}
-                                updateDepartment={updateDepartment}
-                            />
-                        ))
-                    }
-                </Box>
+                    justifyContent: "space-between",
+                    gap: 2,
+                }}
+            >
+                <TextField
+                    placeholder="Filter by name"
+                    size="small"
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => console.log(e.target.value)}
+                    InputProps={{
+                        startAdornment: (
+                            <InputAdornment position="start">
+                                <SearchOutlinedIcon color="info" />
+                            </InputAdornment>
+                        ),
+                    }}
+                    sx={{ width: isSmallScreen ? "100%" : "300px" }}
+                />
+                <ButtonComponent
+                    handleClick={createDepartment}
+                    sendingRequest={false}
+                    buttonText="Create New Dept"
+                    variant="contained"
+                    buttonColor="info"
+                    type="button"
+                />
+            </Card>
+
+            <Box>
+                {loading ? (
+                    <Loading items="departments" />
+                ) : departments.length > 0 ? (
+                    <Grid container spacing={3}>
+                        {departments.map((department) => (
+                            <Grid item xs={12} sm={6} md={4} key={department.id}>
+                                <DepartmentDetails department={department} deleteDepartment={deleteDepartment} updateDepartment={updateDepartment} />
+                            </Grid>
+                        ))}
+                    </Grid>
+                ) : (
+                    <NoContent item="department" items="departments" />
+                )}
             </Box>
         </>
     )

@@ -5,29 +5,36 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { AppDispatch, RootState } from "../../../store";
 import { useSelector } from "react-redux";
-import { IDepartment } from "./interface";
+import { IDepartment, IDepartmentsAxiosResponse } from "./interface";
 import { IFormData } from "../../assets/interface";
 import { addDepartment, loadAllDepartments, removeDepartment, updateDepartment } from "./slice";
-import { listDepartmentsService } from "./service";
+import { fetchRowsService } from "../../../core/apis/globalService";
 
 const DepartmentUtills = () => {
+    const endPoint: string = "departments"
     const [modalState, setModalState] = useState<string>("");
     const [open, setOpen] = useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(false);
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
     const dispatch = useDispatch<AppDispatch>()
-    const { departments } = useSelector((state: RootState) => state.DepartmentStore);
 
     const fetchAllDepartments = async () => {
-        const response = await listDepartmentsService() as Array<IDepartment>;
-        dispatch(loadAllDepartments(response))
+        setLoading(true)
+        try {
+            const response = await fetchRowsService({ pageNumber: 0, pageSize: 10, endPoint }) as IDepartmentsAxiosResponse;
+            if (response.status === 200) {
+                dispatch(loadAllDepartments(response.data.content))
+            }
+        } catch (error) {
+            console.log(error)
+        }
+        setLoading(false)
     }
-
-    useEffect(() => { fetchAllDepartments() }, []);
 
     const addDepartmentToStore = (department: IDepartment) => {
         dispatch(addDepartment(department))
@@ -49,38 +56,14 @@ const DepartmentUtills = () => {
             type: "input"
         },
         {
-            value: "head",
-            label: "Manager",
-            type: "select",
-            options: [
-                { label: "Manager One", value: 1 },
-                { label: "Manager Two", value: 2 }
-            ]
-        },
-        {
-            value: "status",
-            label: 'Unit Status',
-            type: "select",
-            options: [
-                {
-                    label: "Full Branch",
-                    value: 1
-                },
-                {
-                    label: "Minor Branch",
-                    value: 2
-                }
-            ]
-        },
-        {
-            value: "desc",
-            label: 'Description',
-            type: "textarea",
-            required: false
-        }]
+            value: "headOfDepartment",
+            label: "Head 0f Department",
+            type: "autocomplete",
+            options: []
+        }
+    ]
 
     return ({
-        departments,
         handleClose,
         handleOpen,
         setModalState,
@@ -89,7 +72,9 @@ const DepartmentUtills = () => {
         formFields,
         addDepartmentToStore,
         removeDepartmentFromStore,
-        updateDepartmentInStore
+        updateDepartmentInStore,
+        fetchAllDepartments,
+        loading
     })
 }
 

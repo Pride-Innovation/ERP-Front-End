@@ -8,14 +8,14 @@ Managing Director
 import { Control, FieldError, FormState, UseFormRegister } from "react-hook-form";
 import { IUser } from "../../users/interface";
 import { Dispatch, SetStateAction } from "react";
+import { IAxiosResponse, IFetchDataRequest } from "../../../core/apis/interface";
+import { IBranch } from "../branch/interface";
 
 interface IDepartment {
     id?: string | number;
     name: string;
-    status?: number | null;
-    desc?: string | null;
-    image?: any | null;
-    head?: string | number | IUser | null;
+    headOfDepartment?: IUser | null;
+    branch?: IBranch | null;
 }
 
 interface IDepartmentDetails {
@@ -63,10 +63,26 @@ export interface IDeleteDepartment {
     department: IDepartment
 }
 
+
+interface IDepartmentResponse extends IFetchDataRequest {
+    content: Array<IDepartment>
+}
+
+interface IDepartmentsAxiosResponse extends IAxiosResponse {
+    data: IDepartmentResponse
+}
+
+interface IDepartmentAxiosResponse extends IAxiosResponse {
+    data: IDepartment
+}
+
 export type {
     IDepartment,
     IDepartmentDetails,
     IDepartmentForm,
     ICreateDepartment,
-    IUpdateDepartment
+    IUpdateDepartment,
+    IDepartmentResponse,
+    IDepartmentsAxiosResponse,
+    IDepartmentAxiosResponse
 }

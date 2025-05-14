@@ -46,9 +46,9 @@ const DeleteDepartment = ({
                         {department.name}
                     </Typography>
                 </Stack>
-                {(department.head as IUser)?.name && <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 1 }}>
+                {(department.headOfDepartment as IUser)?.name && <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 1 }}>
                     <Typography variant="subtitle1" color="textSecondary">
-                        Head of Department: {(department.head as IUser)?.name}
+                        Head of Department: {(department.headOfDepartment as IUser)?.name}
                     </Typography>
                 </Stack>}
             </Grid>

@@ -5,57 +5,93 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { Box, Button, Card, Stack, Typography } from "@mui/material";
-import { grey } from "@mui/material/colors";
-import { IDepartmentDetails } from "./interface";
+import {
+    Box,
+    Button,
+    Card,
+    Divider,
+    Stack,
+    Typography,
+    useTheme
+} from '@mui/material';
+import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined';
+import SupervisorAccountOutlinedIcon from '@mui/icons-material/SupervisorAccountOutlined';
+import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
-import { IUser } from "../../users/interface";
-import ApartmentIcon from '@mui/icons-material/Apartment';
+import { IDepartmentDetails } from './interface';
 
 const DepartmentDetails = ({
     deleteDepartment,
     department,
     updateDepartment
 }: IDepartmentDetails) => {
+    const theme = useTheme();
+
     return (
-        <Card sx={{
-            boxShadow: 0,
-            p: 2,
-            border: `2px solid ${grey[200]}`,
-        }}>
-            <Box
-                sx={{ width: "100%", alignItems: "center" }}
-                py={1.5}
-            >
-                <Typography noWrap variant="body2" sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-                    <ApartmentIcon fontSize="small" color="info" sx={{ mr: "4px", fontSize: "16px" }} />
+        <Card
+            sx={{
+                boxShadow: 3,
+                borderRadius: 2,
+                p: 3,
+                bgcolor: 'white',
+                color: 'black',
+                border: `1px solid ${theme.palette.primary.main}`,
+                minWidth: 300,
+                maxWidth: 400,
+            }}
+        >
+            {/* Title Section */}
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2 }}>
+                <AccountTreeOutlinedIcon sx={{ color: theme.palette.secondary.main, mr: 1 }} />
+                <Typography variant="h6" sx={{ fontWeight: 700, color: theme.palette.primary.main }}>
                     {department.name}
                 </Typography>
             </Box>
-            <Stack
-                direction="column"
-                spacing={2}
-                sx={{
-                    pt: 3,
-                    borderTop: `2px solid ${grey[200]}`,
-                    alignItems: "center",
-                    height: "100%"
-                }} >
-                <Typography variant="caption" sx={{ fontWeight: 400, textAlign: "center" }}>
-                    Head of Department
-                    <br />
-                    <b> {(department.head as IUser)?.name}</b>
-                </Typography>
+
+            {/* Info Stack */}
+            <Stack spacing={1.2} divider={<Divider flexItem />}>
+                {department.headOfDepartment && (
+                    <Box display="flex" alignItems="center">
+                        <SupervisorAccountOutlinedIcon fontSize="small" sx={{ mr: 1, color: theme.palette.secondary.main }} />
+                        <Typography variant="body2">
+                            <strong>Head:</strong> {department.headOfDepartment.firstName} {department.headOfDepartment.lastName}
+                        </Typography>
+                    </Box>
+                )}
+
+                {department.branch && (
+                    <Box display="flex" alignItems="center">
+                        <LocationOnOutlinedIcon fontSize="small" sx={{ mr: 1, color: theme.palette.secondary.main }} />
+                        <Typography variant="body2">
+                            <strong>Branch:</strong> {department.branch.name}
+                        </Typography>
+                    </Box>
+                )}
+            </Stack>
+
+            {/* Action Buttons */}
+            <Stack direction="row" spacing={2} mt={3} justifyContent="center">
                 <Button
                     onClick={() => updateDepartment(department)}
-                    sx={{ textTransform: "none" }} startIcon={<EditOutlinedIcon />} variant="contained" color="info">Update</Button>
+                    variant="contained"
+                    sx={{ textTransform: 'none', bgcolor: theme.palette.primary.main, '&:hover': { bgcolor: '#06685d' } }}
+                    startIcon={<EditOutlinedIcon />}
+                >
+                    Update
+                </Button>
                 <Button
                     onClick={() => deleteDepartment(department)}
-                    sx={{ textTransform: "none" }} startIcon={<DeleteOutlineOutlinedIcon />} variant="outlined" color="error">Delete</Button>
+                    variant="outlined"
+                    color="error"
+                    sx={{ textTransform: 'none' }}
+                    startIcon={<DeleteOutlineOutlinedIcon />}
+                >
+                    Delete
+                </Button>
             </Stack>
-        </Card >
-    )
+        </Card>
+    );
 }
 
 export default DepartmentDetails

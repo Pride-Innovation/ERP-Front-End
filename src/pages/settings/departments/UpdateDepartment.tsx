@@ -41,7 +41,7 @@ const UpdateDepartment = ({
 
     const onSubmit = async (formData: IDepartment) => {
         setSendingRequest(true);
-        const { image, ...data } = formData
+        const { ...data } = formData
         const response = await updateDepartmentService(data, formData?.id as string) as IResponseData;
         if (response.status === 'success') {
             updateDepartmentInStore(response.data[0] as unknown as IDepartment)
