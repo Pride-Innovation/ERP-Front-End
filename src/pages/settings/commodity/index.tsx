@@ -8,6 +8,7 @@ import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import ButtonComponent from '../../../components/forms/Button';
 import Loading from '../../../components/loading';
 import NoContent from '../../../components/noContent';
+import CreateCommodity from './CreateCommodity';
 
 
 const Commodities = () => {
@@ -27,13 +28,12 @@ const Commodities = () => {
   return (
     <>
       {modalState === crudStates.create && (
-        <ModalComponent width="60%" title="Create Commodity" open={open} handleClose={handleClose}>
-          {/* <CreateBranch
+        <ModalComponent width="40%" title="Create Commodity" open={open} handleClose={handleClose}>
+          <CreateCommodity
             handleClose={handleClose}
             sendingRequest={sendingRequest}
             setSendingRequest={setSendingRequest}
-          /> */}
-          <p>Create Commodity</p>
+          />
         </ModalComponent>
       )}
       {modalState === crudStates.update && (

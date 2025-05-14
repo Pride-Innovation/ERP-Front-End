@@ -5,7 +5,7 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { ICommodity } from "../../pages/request/interface";
+import { ICommodity } from "../../pages/settings/commodity/interface"
 
 export const requestCommoditiesMocks: Array<{
     commodity: ICommodity,

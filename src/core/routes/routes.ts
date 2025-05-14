@@ -51,7 +51,7 @@ const UPDATE_OFFICE_EQUIPMENT: string = `${LIST_ASSETS}/office-equipment/update`
 
 /* Settings Routes */
 const BRANCHES: string = `${ASSETS_MANAGEMENT}/settings/branches`;
-const COMMODITY: string = `${ASSETS_MANAGEMENT}/settings/commodity`;
+const COMMODITY: string = `${ASSETS_MANAGEMENT}/settings/commodities`;
 const UNITS_MEASURE: string = `${ASSETS_MANAGEMENT}/settings/units-of-measure`;
 const SUPPLIERS: string = `${ASSETS_MANAGEMENT}/settings/suppliers`;
 const STATUSES: string = `${ASSETS_MANAGEMENT}/settings/statuses`;

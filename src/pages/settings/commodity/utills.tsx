@@ -7,6 +7,8 @@ Managing Director
 
 
 import { useState } from "react";
+import { ICommodity } from "./interface";
+import { IFormData } from "../../assets/interface";
 
 const CommodityUtills = () => {
     const [modalState, setModalState] = useState<string>("");
@@ -15,6 +17,30 @@ const CommodityUtills = () => {
 
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
+
+    const addCommodityToStore = (commodity: ICommodity) => {
+
+    }
+
+    const formFields: Array<IFormData<ICommodity>> = [
+        {
+            value: "name",
+            label: 'Commodity Name',
+            type: "input"
+        },
+        {
+            value: "groupName",
+            label: 'Group Name',
+            type: "input"
+        },
+        {
+            value: "assetType",
+            label: "Asset Type",
+            type: "select",
+            // options: optionsObject.usersOptions
+            options: []
+        }
+    ]
     return ({
         handleClose,
         handleOpen,
@@ -22,7 +48,9 @@ const CommodityUtills = () => {
         open,
         loading,
         setModalState,
-        setLoading
+        setLoading,
+        addCommodityToStore,
+        formFields
     }
     )
 }

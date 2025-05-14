@@ -5,28 +5,23 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import {
-    Grid,
-    Paper,
-} from "@mui/material";
 import { useForm } from "react-hook-form";
-import { useEffect } from "react";
+import { ICommodity, ICommodityAxiosResponse, ICreateCommodity } from "./interface";
+import CommodityUtills from "./utills";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { commoditySchema } from "./schema";
+import { useEffect } from "react";
 import { toast } from "react-toastify";
+import { Grid, Paper } from "@mui/material";
+import CommodityForm from "./CommodityForm";
 
-import BranchForm from "./BranchForm";
-import { IBranch, IBranchAxiosResponse, ICreateBranch } from "./interface";
-import { branchSchema } from "./schema";
-import { createBranchService } from "./service";
-import BranchUtills from "./utills";
-
-const CreateBranch = ({
-    handleClose,
-    sendingRequest,
+const CreateCommodity = ({
     setSendingRequest,
-}: ICreateBranch) => {
-    const defaultBranch: IBranch = {} as IBranch;
-    const { addBranchToStore } = BranchUtills();
+    handleClose,
+    sendingRequest
+}: ICreateCommodity) => {
+    const defaultCommodity: ICommodity = {} as ICommodity;
+    const { addCommodityToStore } = CommodityUtills();
 
     const {
         control,
@@ -34,27 +29,27 @@ const CreateBranch = ({
         formState,
         register,
         reset,
-    } = useForm<IBranch>({
+    } = useForm<ICommodity>({
         mode: "onChange",
-        resolver: yupResolver(branchSchema),
+        resolver: yupResolver(commoditySchema),
     });
 
     useEffect(() => {
-        reset({ ...defaultBranch });
+        reset({ ...defaultCommodity });
     }, [reset]);
 
-    const onSubmit = async (formData: IBranch) => {
+    const onSubmit = async (formData: ICommodity) => {
         setSendingRequest(true);
-        try {
-            const response = await createBranchService(formData) as IBranchAxiosResponse;
-            console.log(response, "Response")
-            if (response.status === 201) {
-                addBranchToStore(response.data);
-                toast.success("Branch created successfully")
-            }
-        } catch (error) {
-            console.log(error);
-        }
+        // try {
+        //     const response = await createBranchService(formData) as ICommodityAxiosResponse;
+        //     console.log(response, "Response")
+        //     if (response.status === 201) {
+        //         addCommodityToStore(response.data);
+        //         toast.success("Commodity created successfully")
+        //     }
+        // } catch (error) {
+        //     console.log(error);
+        // }
         setSendingRequest(false);
 
     };
@@ -64,7 +59,7 @@ const CreateBranch = ({
             <form autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
                 <Grid container spacing={2}>
                     <Grid item xs={12}>
-                        <BranchForm
+                        <CommodityForm
                             handleClose={handleClose}
                             buttonText="Submit"
                             formState={formState}
@@ -77,6 +72,6 @@ const CreateBranch = ({
             </form>
         </Paper>
     );
-};
+}
 
-export default CreateBranch;
+export default CreateCommodity

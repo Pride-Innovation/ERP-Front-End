@@ -12,7 +12,7 @@ export interface ICommodity {
     id?: string | number;
     name: string
     groupName: string;
-    assetType: IAssetType
+    assetType?: IAssetType | null
 }
 
 export interface ICommodityForm {
@@ -30,31 +30,31 @@ export interface ICommodityForm {
     update?: boolean;
 }
 
-export interface ICreateCoICommodity {
+export interface ICreateCommodity {
     handleClose: () => void;
     sendingRequest: boolean;
     setSendingRequest: Dispatch<SetStateAction<boolean>>
 }
 
-export interface IUpdateCoICommodity {
+export interface IUpdateCommodity {
     handleClose: () => void;
     sendingRequest: boolean;
     setSendingRequest: Dispatch<SetStateAction<boolean>>
-    CoICommodity: ICommodity
+    commodity: ICommodity
 }
 
 export interface ICommodityDetails {
-    CoICommodity: ICommodity;
-    deleteCoICommodity: (role: ICommodity) => void;
-    updateCoICommodity: (role: ICommodity) => void;
+    Commodity: ICommodity;
+    deleteCommodity: (role: ICommodity) => void;
+    updateCommodity: (role: ICommodity) => void;
 }
 
-export interface IDeleteCoICommodity {
+export interface IDeleteCommodity {
     handleClose: () => void;
     sendingRequest: boolean;
     setSendingRequest: Dispatch<SetStateAction<boolean>>
     buttonText: string;
-    CoICommodity: ICommodity
+    commodity: ICommodity
 }
 
 export interface ICommodityResponse extends IFetchDataRequest {

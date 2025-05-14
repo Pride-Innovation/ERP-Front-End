@@ -1,0 +1,89 @@
+import { Box, Divider, Grid, Stack } from '@mui/material';
+import { ICommodityForm } from './interface';
+import { UseFormAutocompleteComponent, UseFormDatePicker, UseFormInput, UseFormSelect } from '../../../components/forms';
+import ButtonComponent from '../../../components/forms/Button';
+import CommodityUtills from './utills';
+
+const CommodityForm = ({
+    register,
+    control,
+    formState,
+    buttonText,
+    sendingRequest,
+    handleClose,
+    update = false,
+}: ICommodityForm) => {
+    const { formFields } = CommodityUtills();
+
+    return (
+        <Box sx={{ width: "100%" }}>
+            <Grid container spacing={3}>
+                {formFields.map((field) => {
+                    const commonProps = {
+                        register,
+                        control,
+                        formState,
+                        value: field.value,
+                        label: field.label,
+                    };
+
+                    const gridSize = field.type === "textarea" ? 12 : 6;
+
+                    return (
+                        <Grid item xs={12} md={gridSize} key={field.value}>
+                            {field.type === "input" && <UseFormInput {...commonProps} />}
+                            {field.type === "textarea" && <UseFormInput {...commonProps} multiline row={4} />}
+                            {field.type === "number" && <UseFormInput {...commonProps} type="number" />}
+                            {field.type === "select" && (
+                                <UseFormSelect {...commonProps} options={field.options} />
+                            )}
+                            {field.type === "date" && <UseFormDatePicker {...commonProps} />}
+                            {field.type === "autocomplete" && (
+                                <UseFormAutocompleteComponent {...commonProps} options={field.options} />
+                            )}
+                        </Grid>
+                    );
+                })}
+
+                <Grid item xs={12}>
+                    <Divider sx={{ my: 2 }} />
+                    <Stack
+                        direction={{ xs: "column", sm: "row" }}
+                        spacing={2}
+                        justifyContent="space-between"
+                        alignItems={{ xs: "stretch", sm: "center" }}
+                    >
+                        {update && (
+                            <ButtonComponent
+                                variant="outlined"
+                                handleClick={handleClose}
+                                buttonColor="info"
+                                type="button"
+                                sendingRequest={false}
+                                buttonText="Update Permissions"
+                            />
+                        )}
+
+                        <Stack direction="row" spacing={2}>
+                            <ButtonComponent
+                                handleClick={handleClose}
+                                buttonColor="error"
+                                type="button"
+                                sendingRequest={false}
+                                buttonText="Cancel"
+                            />
+                            <ButtonComponent
+                                buttonColor="success"
+                                type="submit"
+                                sendingRequest={sendingRequest}
+                                buttonText={buttonText}
+                            />
+                        </Stack>
+                    </Stack>
+                </Grid>
+            </Grid>
+        </Box>
+    )
+}
+
+export default CommodityForm

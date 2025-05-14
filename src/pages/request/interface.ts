@@ -16,24 +16,12 @@ import { IPermission } from "../settings/interface";
 import { Dispatch, SetStateAction } from "react";
 import { IStatus } from "../settings/statuses/interface";
 import { IAxiosResponse, IFetchDataRequest } from "../../core/apis/interface";
+import { ICommodity } from "../settings/commodity/interface";
 
 export interface IAssetParticulars {
     name: string;
     serialNumber: string;
     engravedNumber: string;
-}
-
-export interface IAssetType {
-    id: number | string,
-    name: string,
-    description: string,
-}
-
-export interface ICommodity {
-    id: number | string,
-    name: string,
-    groupName: string,
-    assetType: IAssetType | null
 }
 
 export interface IRequest {
