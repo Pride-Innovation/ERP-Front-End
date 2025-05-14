@@ -23,10 +23,13 @@ const commoditySlice = createSlice({
     reducers: {
         loadAllCommodities: (state, action) => {
             state.commodities = action.payload
+        },
+        addCommodity: (state, action) => {
+            state.commodities = [...state.commodities, action.payload]
         }
     }
 });
 
 const { actions, reducer } = commoditySlice;
-export const { loadAllCommodities } = actions;
+export const { loadAllCommodities, addCommodity } = actions;
 export default reducer;

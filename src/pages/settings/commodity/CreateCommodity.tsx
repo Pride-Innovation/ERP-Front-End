@@ -51,7 +51,7 @@ const CreateCommodity = ({
             console.log(error);
         }
         setSendingRequest(false);
-
+        handleClose()
     };
 
     return (
