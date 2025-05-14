@@ -12,7 +12,7 @@ const createSupplierService = async (body: Object) => {
         const response = await axiosInstance.post('suppliers', body);
         return response
     } catch (error) {
-        throw error
+        return error
     }
 }
 
@@ -21,7 +21,7 @@ const updateSupplierService = async (body: Object, id: string | number) => {
         const response = await axiosInstance.post(`suppliers/${id}`, body)
         return response
     } catch (error) {
-        throw error
+        return error
     }
 }
 
@@ -30,7 +30,7 @@ const deleteSupplierService = async (id: string | number) => {
         const response = await axiosInstance.get(`suppliers/${id}`)
         return response
     } catch (error) {
-        throw error
+        return error
     }
 }
 

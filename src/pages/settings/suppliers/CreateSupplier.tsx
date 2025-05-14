@@ -7,12 +7,11 @@ Managing Director
 
 import { useForm } from "react-hook-form";
 import { useEffect } from "react";
-import { Grid } from "@mui/material";
+import { Grid, Paper } from "@mui/material";
 import SupplierForm from "./SupplierForm";
-import { ICreateSupplier, ISupplier } from "./interface";
+import { ICreateSupplier, ISupplier, ISupplierAxiosResponse } from "./interface";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { supplierSchema } from "./schema";
-import { IResponseData } from "../../users/interface";
 import { createSupplierService } from "./service";
 import SupplierUtills from "./Utills";
 import { toast } from "react-toastify";
@@ -37,28 +36,40 @@ const CreateSupplier = ({ handleClose, sendingRequest, setSendingRequest }: ICre
 
   const onSubmit = async (formData: ISupplier) => {
     setSendingRequest(true)
-
+    try {
+      const response = await createSupplierService(formData) as ISupplierAxiosResponse;
+      if (response.status === 201) {
+        toast.success("Supplier created successfully");
+        addSupplierToStore(response.data)
+      }
+    } catch (error) {
+      console.log(error)
+    }
+    setSendingRequest(false);
+    handleClose()
   };
 
   return (
-    <Grid container xs={12}>
-      <Grid item xs={12}>
-        <form
-          style={{ width: "100%" }}
-          autoComplete="off"
-          onSubmit={handleSubmit(onSubmit)}
-        >
-          <SupplierForm
-            handleClose={handleClose}
-            buttonText="Submit"
-            formState={formState}
-            control={control}
-            sendingRequest={sendingRequest}
-            register={register}
-          />
-        </form>
-      </Grid>
-    </Grid>
+    <Paper elevation={3} sx={{ borderRadius: 3, boxShadow: "none", maxWidth: "1200px", mx: "auto" }}>
+      <form
+        style={{ width: "100%" }}
+        autoComplete="off"
+        onSubmit={handleSubmit(onSubmit)}
+      >
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
+            <SupplierForm
+              handleClose={handleClose}
+              buttonText="Submit"
+              formState={formState}
+              control={control}
+              sendingRequest={sendingRequest}
+              register={register}
+            />
+          </Grid>
+        </Grid>
+      </form>
+    </Paper >
   )
 }
 
