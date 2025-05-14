@@ -11,6 +11,7 @@ import { ITitle } from "./interface"
 import { useSelector } from "react-redux"
 import { RootState } from "../../../store"
 import TitleCard from "./TitleCard"
+import CreateTitle from "./CreateTitle"
 
 const Titles = () => {
   const [currentTitle, setCurrentTitle] = useState<ITitle>({} as ITitle);
@@ -51,13 +52,12 @@ const Titles = () => {
   return (
     <>
       {modalState === crudStates.create && (
-        <ModalComponent width="60%" title="Create Title" open={open} handleClose={handleClose}>
-          {/* <CreateBranch
+        <ModalComponent width="45%" title="Create Title" open={open} handleClose={handleClose}>
+          <CreateTitle
             handleClose={handleClose}
             sendingRequest={sendingRequest}
             setSendingRequest={setSendingRequest}
-          /> */}
-          <p>Create Title</p>
+          />
         </ModalComponent>
       )}
       {modalState === crudStates.update && (
