@@ -28,10 +28,13 @@ const titleSlice = createSlice({
         },
         updateTitle: (state, action) => {
             state.titles = state.titles.map(title => title.id === action.payload.id ? action.payload : title)
+        },
+        removeTitle: (state, action) => {
+            state.titles = state.titles.filter(title => title.id !== action.payload?.id)
         }
     }
 });
 
 const { actions, reducer } = titleSlice;
-export const { loadAllTitles, addTitle, updateTitle } = actions;
+export const { loadAllTitles, addTitle, updateTitle, removeTitle } = actions;
 export default reducer;

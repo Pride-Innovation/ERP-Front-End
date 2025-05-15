@@ -10,7 +10,7 @@ import { fetchRowsService } from "../../../core/apis/globalService";
 import { ITitle, ITitlesAxiosResponse } from "./interface";
 import { useDispatch } from "react-redux";
 import { AppDispatch, RootState } from "../../../store";
-import { addTitle, loadAllTitles, updateTitle } from "./slice";
+import { addTitle, loadAllTitles, removeTitle, updateTitle } from "./slice";
 import { IFormData } from "../../assets/interface";
 import { useSelector } from "react-redux";
 import { IOptions } from "../../../components/tables/interface";
@@ -60,6 +60,10 @@ const TitleUtills = () => {
         dispatch(updateTitle(title))
     }
 
+    const removeTitleFromStore = (title: ITitle) => {
+        dispatch(removeTitle(title))
+    }
+
     const formFields: Array<IFormData<ITitle>> = [
         {
             value: "name",
@@ -86,7 +90,8 @@ const TitleUtills = () => {
         fetchAllTitles,
         formFields,
         addTitleToStore,
-        updateTitleInStore
+        updateTitleInStore,
+        removeTitleFromStore
     })
 }
 

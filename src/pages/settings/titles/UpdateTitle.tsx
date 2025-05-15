@@ -47,7 +47,7 @@ const UpdateTitle = ({ handleClose, sendingRequest, setSendingRequest, title }: 
         try {
             const response = await updateTitleService(formData, title.id as number) as ITitleAxiosResponse;
             if (response.status === 201) {
-                toast.success("Title created successfully")
+                toast.success("Title updated successfully")
                 updateTitleInStore(response.data)
             }
         } catch (error) {

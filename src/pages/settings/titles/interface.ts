@@ -49,6 +49,15 @@ export interface IUpdateTitle {
     title: ITitle
 }
 
+
+export interface IDeleteTitle {
+    handleClose: () => void;
+    sendingRequest: boolean;
+    setSendingRequest: Dispatch<SetStateAction<boolean>>
+    buttonText: string;
+    title: ITitle
+}
+
 export interface ITitleResponse extends IFetchDataRequest {
     content: Array<ITitle>
 }

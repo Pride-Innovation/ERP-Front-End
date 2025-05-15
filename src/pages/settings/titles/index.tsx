@@ -19,6 +19,7 @@ import TitleCard from "./TitleCard"
 import CreateTitle from "./CreateTitle"
 import SettingsHeader from "../../../components/settingsNavigationCard"
 import UpdateTitle from "./UpdateTitle"
+import DeleteTitle from "./DeleteTitle"
 
 const Titles = () => {
   const [currentTitle, setCurrentTitle] = useState<ITitle>({} as ITitle);
@@ -78,14 +79,13 @@ const Titles = () => {
       )}
       {modalState === crudStates.delete && (
         <ModalComponent width="35%" title="Delete Title" open={open} handleClose={handleClose}>
-          {/* <DeleteBranch
-            branch={currentTitle}
+          <DeleteTitle
+            title={currentTitle}
             handleClose={handleClose}
             setSendingRequest={setSendingRequest}
             sendingRequest={sendingRequest}
             buttonText="Delete"
-          /> */}
-          <p>Delete Title</p>
+          />
         </ModalComponent>
       )}
       <SettingsHeader handleCreationClicked={createTitle} title="Title" />

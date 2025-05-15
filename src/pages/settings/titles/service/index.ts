@@ -25,7 +25,17 @@ const updateTitleService = async (body: Object, id: string | number) => {
     }
 }
 
+const deleteTitleService = async (id: string | number) => {
+    try {
+        const response = await axiosInstance.delete(`titles/${id}`);
+        return response;
+    } catch (error) {
+        return error;
+    }
+}
+
 export {
     createTitleService,
-    updateTitleService
+    updateTitleService,
+    deleteTitleService
 }
