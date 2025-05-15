@@ -12,7 +12,7 @@ import { Grid, Stack, Typography } from "@mui/material";
 import ButtonComponent from "../../../components/forms/Button";
 import { deleteDepartmentService } from "./service";
 import { IUser } from "../../users/interface";
-import ApartmentIcon from '@mui/icons-material/Apartment';
+import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined';
 
 
 const DeleteDepartment = ({
@@ -41,7 +41,7 @@ const DeleteDepartment = ({
                     Are you sure you want to delete this Department?
                 </Typography>
                 <Stack direction="row" spacing={1} alignItems="center">
-                    <ApartmentIcon color="primary" />
+                    <AccountTreeOutlinedIcon color="primary" />
                     <Typography variant="h6" color="primary">
                         {department.name}
                     </Typography>
