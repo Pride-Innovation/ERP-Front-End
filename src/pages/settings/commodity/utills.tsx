@@ -52,6 +52,11 @@ const CommodityUtills = () => {
         dispatch(addCommodity(commodity))
     }
 
+
+        const updateCommodityInStore = (commodity: ICommodity) => {
+        // dispatch(addCommodity(commodity))
+    }
+
     useEffect(() => {
         if (assetTypes?.length > 0) {
             setOptionsObject({
@@ -89,7 +94,8 @@ const CommodityUtills = () => {
         setLoading,
         addCommodityToStore,
         formFields,
-        fetchAllCommodities
+        fetchAllCommodities,
+        updateCommodityInStore
     }
     )
 }

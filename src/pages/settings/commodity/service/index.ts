@@ -16,6 +16,16 @@ const createCommodityService = async (body: Object) => {
     }
 };
 
+const updateCommodityService = async (body: Object, id: string | number) => {
+    try {
+        const response = await axiosInstance.put(`commodities/${id}`, body);
+        return response;
+    } catch (error) {
+        return error;
+    }
+}
+
 export {
-    createCommodityService
+    createCommodityService,
+    updateCommodityService
 }

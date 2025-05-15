@@ -21,6 +21,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../../../store';
 import CommodityCard from './ViewCommodity';
 import SettingsHeader from '../../../components/settingsNavigationCard';
+import UpdateCommodity from './UpdateCommodity';
 
 
 const Commodities = () => {
@@ -65,13 +66,12 @@ const Commodities = () => {
       )}
       {modalState === crudStates.update && (
         <ModalComponent width="50%" title="Update Commodity" open={open} handleClose={handleClose}>
-          {/* <UpdateBranch
-            branch={currentBranch}
+          <UpdateCommodity
+            commodity={currentCommodity}
             handleClose={handleClose}
             setSendingRequest={setSendingRequest}
             sendingRequest={sendingRequest}
-          /> */}
-          <p>Update Commodity</p>
+          />
         </ModalComponent>
       )}
       {modalState === crudStates.delete && (
