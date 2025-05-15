@@ -8,7 +8,7 @@ Managing Director
 import { Grid, Stack, Typography } from '@mui/material'
 import CameraOutdoorOutlinedIcon from '@mui/icons-material/CameraOutdoorOutlined';
 import ButtonComponent from '../../../components/forms/Button';
-import { IDeleteBranch } from './interface';
+import { IBranchAxiosResponse, IDeleteBranch } from './interface';
 import { deleteBranchService } from './service';
 import { toast } from 'react-toastify';
 import BranchUtills from './utills';
@@ -24,13 +24,17 @@ const DeleteBranch = ({
 
     const deleteBranch = async () => {
         setSendingRequest(true)
-        const response = await deleteBranchService(branch?.id as string);
+        try {
+            const response = await deleteBranchService(branch?.id as string) as IBranchAxiosResponse;
+            if(response.status === 204){
+                toast.success("Branch deleted successfully")
+                removeBranchToStore(branch)
+            }
+        } catch (error) {
+            console.log(error)
+        }
         setSendingRequest(false)
-        // if (response?.status === "success") {
-        //     removeBranchToStore(branch)
-        //     handleClose();
-        //     toast.success(response?.data?.message)
-        // }
+        handleClose()
     }
 
     return (

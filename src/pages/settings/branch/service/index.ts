@@ -27,7 +27,7 @@ const updateBranchService = async (body: Object, id: string | number) => {
 
 const deleteBranchService = async (id: string | number) => {
     try {
-        const response = await axiosInstance.get(`branches/delete/${id}`)
+        const response = await axiosInstance.delete(`branches/${id}`)
         return response
     } catch (error) {
         return error
