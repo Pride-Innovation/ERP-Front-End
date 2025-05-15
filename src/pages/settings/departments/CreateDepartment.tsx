@@ -11,7 +11,6 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useEffect } from "react";
 import DepartmentUtills from "./utills";
 import { toast } from "react-toastify";
-import { IResponseData } from "../../users/interface";
 import { Grid, Paper } from "@mui/material";
 import DepartmentForm from "./DepartmentForm";
 import { departmentSchema } from "./schema";

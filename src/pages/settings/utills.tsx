@@ -9,12 +9,11 @@ import VpnKeyOutlinedIcon from '@mui/icons-material/VpnKeyOutlined';
 import CameraOutdoorOutlinedIcon from '@mui/icons-material/CameraOutdoorOutlined';
 import { ISettingsNavigation } from './interface';
 import { ROUTES } from '../../core/routes/routes';
-import DownloadingIcon from '@mui/icons-material/Downloading';
 import CategoryOutlinedIcon from '@mui/icons-material/CategoryOutlined';
 import WorkOutlineOutlinedIcon from '@mui/icons-material/WorkOutlineOutlined';
 import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
 import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined';
-
+import PublicOutlinedIcon from '@mui/icons-material/PublicOutlined';
 
 const SettingsUtills = () => {
 
@@ -52,8 +51,8 @@ const SettingsUtills = () => {
         {
             id: 6,
             text: "Regions",
-            path: ROUTES.STATUSES,
-            icon: <DownloadingIcon />
+            path: ROUTES.REGIONS,
+            icon: <PublicOutlinedIcon />
         },
         {
             id: 6,

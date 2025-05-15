@@ -54,7 +54,7 @@ const BRANCHES: string = `${ASSETS_MANAGEMENT}/settings/branches`;
 const COMMODITY: string = `${ASSETS_MANAGEMENT}/settings/commodities`;
 const TITLES: string = `${ASSETS_MANAGEMENT}/settings/titles`;
 const SUPPLIERS: string = `${ASSETS_MANAGEMENT}/settings/suppliers`;
-const STATUSES: string = `${ASSETS_MANAGEMENT}/settings/statuses`;
+const REGIONS: string = `${ASSETS_MANAGEMENT}/settings/regions`;
 const DEPARTMENT: string = `${ASSETS_MANAGEMENT}/settings/departments`;
 
 /* Errors Page */
@@ -94,7 +94,7 @@ export const ROUTES = {
     COMMODITY,
     TITLES,
     SUPPLIERS,
-    STATUSES,
+    REGIONS,
     INVENTORY,
     DEPARTMENT
 }

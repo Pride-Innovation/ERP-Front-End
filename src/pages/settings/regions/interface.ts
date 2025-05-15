@@ -1,8 +1,58 @@
+/*
+13.9 Pride's Standard Copyright Notice:
+Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
+and distribute this software and its documentation for any purpose is prohibited unless authorized in writing by the
+Managing Director
+*/
+
+import { Control, FieldError, FormState, UseFormRegister } from "react-hook-form";
 import { IAxiosResponse, IFetchDataRequest } from "../../../core/apis/interface";
+import { Dispatch, SetStateAction } from "react";
 
 export interface IRegion {
-    id: string | number;
+    id?: string | number;
     name: string;
+}
+
+export interface IRegionDetails {
+    region: IRegion;
+    deleteRegion: (role: IRegion) => void;
+    updateRegion: (role: IRegion) => void;
+}
+
+
+export interface IRegionForm {
+    formState: FormState<IRegion> & {
+        errors: {
+            name?: FieldError;
+        };
+    };
+    control: Control<IRegion>;
+    register: UseFormRegister<IRegion>;
+    buttonText: string;
+    sendingRequest: boolean;
+    handleClose: () => void;
+}
+
+export interface ICreateRegion {
+    handleClose: () => void;
+    sendingRequest: boolean;
+    setSendingRequest: Dispatch<SetStateAction<boolean>>;
+}
+
+export interface IUpdateRegion {
+    handleClose: () => void;
+    sendingRequest: boolean;
+    setSendingRequest: Dispatch<SetStateAction<boolean>>;
+    region: IRegion
+}
+
+export interface IDeleteRegion {
+    handleClose: () => void;
+    sendingRequest: boolean;
+    setSendingRequest: Dispatch<SetStateAction<boolean>>;
+    buttonText: string;
+    region: IRegion
 }
 
 
