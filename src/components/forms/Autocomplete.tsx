@@ -36,26 +36,49 @@ const AutocompleteComponent = ({
     const [localInput, setLocalInput] = useState('');
     const debouncedInput = useDebounce(localInput, 500);
 
-    const { setValue, setInputValue } = useContext(AutocompleteContext);
+    const { setValue: setGlobalValue, setInputValue } = useContext(AutocompleteContext);
 
+    // Sync debounced input value to context for filtering/searching
     useEffect(() => {
         setInputValue(debouncedInput);
     }, [debouncedInput, setInputValue]);
 
+    // Sync form value to Autocomplete's local state
+    useEffect(() => {
+        if (!field?.value || options.length === 0) {
+            setSelectedValue(multiple ? [] : null);
+            return;
+        }
+
+        if (multiple && Array.isArray(field.value)) {
+            const matchedOptions = options.filter(option => field.value.includes(option.value));
+            setSelectedValue(matchedOptions);
+        } else {
+            const matchedOption = options.find(option => option.value === field.value);
+            setSelectedValue(matchedOption ?? null);
+        }
+    }, [field.value, options, multiple]);
+
+    // Handle selection changes
     const handleChange = (
         _: React.SyntheticEvent<Element, Event>,
         newValue: IOptions | IOptions[] | null
     ) => {
         setSelectedValue(newValue);
-        setValue(newValue as IOptions);
 
-        if (newValue === null) {
-            field.onChange([]);
+        // Only set global context value when it's single selection
+        if (!multiple && newValue) {
+            setGlobalValue(newValue as IOptions);
+        }
+
+        if (newValue === null || (Array.isArray(newValue) && newValue.length === 0)) {
+            field.onChange(multiple ? [] : null);
         } else {
-            const newValueArray = multiple
+            const newValueToSet = multiple
                 ? (newValue as IOptions[]).map(option => option.value)
                 : (newValue as IOptions).value;
-            field.onChange(newValueArray);
+
+            field.onChange(newValueToSet);
         }
     };
 
@@ -67,7 +90,8 @@ const AutocompleteComponent = ({
             onChange={handleChange}
             options={options}
             getOptionLabel={(option: IOptions) => option.label || ''}
-            size='small'
+            isOptionEqualToValue={(option, value) => option.value === value.value}
+            size="small"
             fullWidth
             onInputChange={(_, newInputValue) => setLocalInput(newInputValue)}
             renderInput={(params) => (

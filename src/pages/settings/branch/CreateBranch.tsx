@@ -13,7 +13,6 @@ import { useForm } from "react-hook-form";
 import { useEffect } from "react";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { toast } from "react-toastify";
-
 import BranchForm from "./BranchForm";
 import { IBranch, IBranchAxiosResponse, ICreateBranch } from "./interface";
 import { branchSchema } from "./schema";
@@ -47,7 +46,6 @@ const CreateBranch = ({
         setSendingRequest(true);
         try {
             const response = await createBranchService(formData) as IBranchAxiosResponse;
-            console.log(response, "Response")
             if (response.status === 201) {
                 addBranchToStore(response.data);
                 toast.success("Branch created successfully")
@@ -56,7 +54,7 @@ const CreateBranch = ({
             console.log(error);
         }
         setSendingRequest(false);
-
+        handleClose()
     };
 
     return (

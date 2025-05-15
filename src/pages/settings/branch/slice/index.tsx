@@ -24,7 +24,7 @@ export const authSlice = createSlice({
             state.branches = action.payload;
         },
         addBranch: (state, action) => {
-            state.branches = [action.payload, ...state.branches]
+            state.branches = [...state.branches, action.payload]
         },
         removeBranch: (state, action) => {
             state.branches = state.branches.filter(branch => branch?.id !== action.payload?.id)
