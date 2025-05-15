@@ -18,7 +18,7 @@ const createSupplierService = async (body: Object) => {
 
 const updateSupplierService = async (body: Object, id: string | number) => {
     try {
-        const response = await axiosInstance.post(`suppliers/${id}`, body)
+        const response = await axiosInstance.put(`suppliers/${id}`, body)
         return response
     } catch (error) {
         return error
@@ -27,7 +27,7 @@ const updateSupplierService = async (body: Object, id: string | number) => {
 
 const deleteSupplierService = async (id: string | number) => {
     try {
-        const response = await axiosInstance.get(`suppliers/${id}`)
+        const response = await axiosInstance.delete(`suppliers/${id}`)
         return response
     } catch (error) {
         return error

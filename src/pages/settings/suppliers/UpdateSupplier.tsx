@@ -7,15 +7,14 @@ Managing Director
 
 import { useForm } from "react-hook-form";
 import { useEffect } from "react";
-import { ISupplier, IUpdateSupplier } from "./interface";
+import { ISupplier, ISupplierAxiosResponse, IUpdateSupplier } from "./interface";
 import { Grid } from "@mui/material";
 import SupplierForm from "./SupplierForm";
-import { IResponseData } from "../../users/interface";
-import { updateSupplierService } from "./service";
 import SupplierUtills from "./Utills";
-import { toast } from "react-toastify";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { supplierSchema } from "./schema";
+import { updateSupplierService } from "./service";
+import { toast } from "react-toastify";
 
 const UpdateSupplier = ({ handleClose, sendingRequest, supplier, setSendingRequest }: IUpdateSupplier) => {
     const { updateSupplierInStore } = SupplierUtills()
@@ -36,7 +35,17 @@ const UpdateSupplier = ({ handleClose, sendingRequest, supplier, setSendingReque
 
     const onSubmit = async (formData: ISupplier) => {
         setSendingRequest(true);
-        setSendingRequest(true);
+        try {
+            const response = await updateSupplierService(formData, supplier.id as number) as ISupplierAxiosResponse
+            if (response.status === 201) {
+                toast.success("Supplier updated successfully")
+                updateSupplierInStore(response.data)
+            }
+        } catch (error) {
+            console.log(error)
+        }
+        setSendingRequest(false);
+        handleClose()
     };
 
     return (

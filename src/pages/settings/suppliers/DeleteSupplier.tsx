@@ -5,13 +5,14 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { IDeleteSupplier } from './interface'
+import { IDeleteSupplier, ISupplierAxiosResponse } from './interface'
 import { Grid, Stack, Typography } from '@mui/material'
-import ProductionQuantityLimitsIcon from '@mui/icons-material/ProductionQuantityLimits';
 import ButtonComponent from '../../../components/forms/Button';
 import SupplierUtills from './Utills';
 import { toast } from 'react-toastify';
 import { deleteSupplierService } from './service';
+import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
+
 
 const DeleteSupplier = ({
     sendingRequest,
@@ -23,6 +24,17 @@ const DeleteSupplier = ({
     const { removeSupplierToStore } = SupplierUtills();
 
     const deleteSupplier = async () => {
+        setSendingRequest(true)
+        try {
+            const response = await deleteSupplierService(supplier.id as number) as ISupplierAxiosResponse;
+            if(response.status === 204){
+                toast.success("Supplier deleted successfully");
+                removeSupplierToStore(supplier)
+            }
+        } catch (error) {
+            console.log(error)
+        }
+        setSendingRequest(false)
     }
     return (
         <Grid item container spacing={4} xs={12}>
@@ -31,7 +43,7 @@ const DeleteSupplier = ({
                     Are you sure you want to delete this Supplier?
                 </Typography>
                 <Stack direction="row" spacing={1} alignItems="center">
-                    <ProductionQuantityLimitsIcon color="primary" />
+                    <LocalShippingOutlinedIcon color="primary" />
                     <Typography variant="h6" color="primary">
                         {supplier.name}
                     </Typography>
