@@ -35,6 +35,7 @@ const DeleteSupplier = ({
             console.log(error)
         }
         setSendingRequest(false)
+        handleClose()
     }
     return (
         <Grid item container spacing={4} xs={12}>
