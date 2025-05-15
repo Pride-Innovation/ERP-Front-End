@@ -25,7 +25,17 @@ const updateCommodityService = async (body: Object, id: string | number) => {
     }
 }
 
+const deleteCommodityService = async (id: string | number) => {
+    try {
+        const response = await axiosInstance.delete(`commodities/${id}`);
+        return response;
+    } catch (error) {
+        return error;
+    }
+}
+
 export {
     createCommodityService,
-    updateCommodityService
+    updateCommodityService,
+    deleteCommodityService
 }

@@ -12,7 +12,7 @@ import { IFormData } from "../../assets/interface";
 import { fetchRowsService } from "../../../core/apis/globalService";
 import { useDispatch } from "react-redux";
 import { AppDispatch, RootState } from "../../../store";
-import { addCommodity, loadAllCommodities, updateCommodity } from "./slice";
+import { addCommodity, deleteCommodity, loadAllCommodities, updateCommodity } from "./slice";
 import AssetTypeUtills from "../assetTypes/utills";
 import { IOptions } from "../../../components/tables/interface";
 import { useSelector } from "react-redux";
@@ -57,6 +57,10 @@ const CommodityUtills = () => {
         dispatch(updateCommodity(commodity))
     }
 
+    const removeCommodityFromStore = (commodity: ICommodity) => {
+        dispatch(deleteCommodity(commodity))
+    }
+
     useEffect(() => {
         if (assetTypes?.length > 0) {
             setOptionsObject({
@@ -95,7 +99,8 @@ const CommodityUtills = () => {
         addCommodityToStore,
         formFields,
         fetchAllCommodities,
-        updateCommodityInStore
+        updateCommodityInStore,
+        removeCommodityFromStore
     }
     )
 }

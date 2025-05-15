@@ -22,6 +22,7 @@ import { RootState } from '../../../store';
 import CommodityCard from './ViewCommodity';
 import SettingsHeader from '../../../components/settingsNavigationCard';
 import UpdateCommodity from './UpdateCommodity';
+import DeleteCommodity from './DeleteCommodity';
 
 
 const Commodities = () => {
@@ -76,14 +77,13 @@ const Commodities = () => {
       )}
       {modalState === crudStates.delete && (
         <ModalComponent width="35%" title="Delete Commodity" open={open} handleClose={handleClose}>
-          {/* <DeleteBranch
-            branch={currentBranch}
+          <DeleteCommodity
+            commodity={currentCommodity}
             handleClose={handleClose}
             setSendingRequest={setSendingRequest}
             sendingRequest={sendingRequest}
             buttonText="Delete"
-          /> */}
-          <p>Delete Commodity</p>
+          />
         </ModalComponent>
       )}
       <SettingsHeader handleCreationClicked={createCommodity} title="Commodity" />

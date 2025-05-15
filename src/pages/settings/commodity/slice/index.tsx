@@ -29,10 +29,13 @@ const commoditySlice = createSlice({
         },
         updateCommodity: (state, action) => {
             state.commodities = state.commodities.map(commodity => commodity.id === action.payload?.id ? action.payload : commodity)
+        },
+        deleteCommodity: (state, action) => {
+            state.commodities = state.commodities.filter(commodity => commodity.id !== action.payload?.id)
         }
     }
 });
 
 const { actions, reducer } = commoditySlice;
-export const { loadAllCommodities, addCommodity, updateCommodity } = actions;
+export const { loadAllCommodities, addCommodity, updateCommodity, deleteCommodity } = actions;
 export default reducer;
