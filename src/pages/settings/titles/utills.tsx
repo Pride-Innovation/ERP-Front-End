@@ -1,9 +1,16 @@
+/*
+13.9 Pride's Standard Copyright Notice:
+Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
+and distribute this software and its documentation for any purpose is prohibited unless authorized in writing by the
+Managing Director
+*/
+
 import { useEffect, useState } from "react";
 import { fetchRowsService } from "../../../core/apis/globalService";
 import { ITitle, ITitlesAxiosResponse } from "./interface";
 import { useDispatch } from "react-redux";
 import { AppDispatch, RootState } from "../../../store";
-import { addTitle, loadAllTitles } from "./slice";
+import { addTitle, loadAllTitles, updateTitle } from "./slice";
 import { IFormData } from "../../assets/interface";
 import { useSelector } from "react-redux";
 import { IOptions } from "../../../components/tables/interface";
@@ -49,6 +56,10 @@ const TitleUtills = () => {
         dispatch(addTitle(title))
     }
 
+    const updateTitleInStore = (title: ITitle) => {
+        dispatch(updateTitle(title))
+    }
+
     const formFields: Array<IFormData<ITitle>> = [
         {
             value: "name",
@@ -74,7 +85,8 @@ const TitleUtills = () => {
         handleOpen,
         fetchAllTitles,
         formFields,
-        addTitleToStore
+        addTitleToStore,
+        updateTitleInStore
     })
 }
 

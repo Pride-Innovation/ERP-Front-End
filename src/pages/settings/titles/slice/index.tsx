@@ -1,3 +1,10 @@
+/*
+13.9 Pride's Standard Copyright Notice:
+Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
+and distribute this software and its documentation for any purpose is prohibited unless authorized in writing by the
+Managing Director
+*/
+
 import { createSlice } from "@reduxjs/toolkit";
 import { ITitle } from "../interface";
 
@@ -18,10 +25,13 @@ const titleSlice = createSlice({
         },
         addTitle: (state, action) => {
             state.titles = [...state.titles, action.payload]
+        },
+        updateTitle: (state, action) => {
+            state.titles = state.titles.map(title => title.id === action.payload.id ? action.payload : title)
         }
     }
 });
 
 const { actions, reducer } = titleSlice;
-export const { loadAllTitles, addTitle } = actions;
+export const { loadAllTitles, addTitle, updateTitle } = actions;
 export default reducer;

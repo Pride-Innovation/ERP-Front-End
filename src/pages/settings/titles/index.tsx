@@ -1,3 +1,10 @@
+/*
+13.9 Pride's Standard Copyright Notice:
+Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
+and distribute this software and its documentation for any purpose is prohibited unless authorized in writing by the
+Managing Director
+*/
+
 import { Box, Grid } from "@mui/material"
 import ModalComponent from "../../../components/modal"
 import { crudStates } from "../../../utils/constants"
@@ -11,6 +18,7 @@ import { RootState } from "../../../store"
 import TitleCard from "./TitleCard"
 import CreateTitle from "./CreateTitle"
 import SettingsHeader from "../../../components/settingsNavigationCard"
+import UpdateTitle from "./UpdateTitle"
 
 const Titles = () => {
   const [currentTitle, setCurrentTitle] = useState<ITitle>({} as ITitle);
@@ -60,13 +68,12 @@ const Titles = () => {
       )}
       {modalState === crudStates.update && (
         <ModalComponent width="50%" title="Update Title" open={open} handleClose={handleClose}>
-          {/* <UpdateBranch
-            branch={currentTitle}
+          <UpdateTitle
+            title={currentTitle}
             handleClose={handleClose}
             setSendingRequest={setSendingRequest}
             sendingRequest={sendingRequest}
-          /> */}
-          <p>Update Title</p>
+          />
         </ModalComponent>
       )}
       {modalState === crudStates.delete && (

@@ -5,20 +5,27 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { useForm } from 'react-hook-form';
-import { ICreateTitle, ITitle, ITitleAxiosResponse } from './interface';
-import { yupResolver } from '@hookform/resolvers/yup';
-import { useEffect } from 'react';
-import TitleUtills from './utills';
-import { titleSchema } from './schema';
-import { toast } from 'react-toastify';
-import { createTitleService } from './service';
-import { Grid, Paper } from '@mui/material';
-import TitleForm from './TitleForm';
+import { useEffect, useState } from "react";
+import { ITitle, ITitleAxiosResponse, IUpdateTitle } from "./interface";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { titleSchema } from "./schema";
+import { Grid, Paper } from "@mui/material";
+import TitleForm from "./TitleForm";
+import { updateTitleService } from "./service";
+import { toast } from "react-toastify";
+import TitleUtills from "./utills";
 
-const CreateTitle = ({ sendingRequest, setSendingRequest, handleClose }: ICreateTitle) => {
-    const defaultCommodity: ITitle = {} as ITitle;
-    const { addTitleToStore } = TitleUtills();
+const UpdateTitle = ({ handleClose, sendingRequest, setSendingRequest, title }: IUpdateTitle) => {
+    const [defaultTitle, setDefaultTitle] = useState<any>(title);
+    const { updateTitleInStore } = TitleUtills()
+
+    useEffect(() => {
+        setDefaultTitle({
+            ...title,
+            reportsTo: title.reportsTo?.id
+        })
+    }, [title]);
 
     const {
         control,
@@ -32,16 +39,16 @@ const CreateTitle = ({ sendingRequest, setSendingRequest, handleClose }: ICreate
     });
 
     useEffect(() => {
-        reset({ ...defaultCommodity });
-    }, [reset]);
+        reset({ ...defaultTitle });
+    }, [defaultTitle]);
 
     const onSubmit = async (formData: ITitle) => {
         setSendingRequest(true);
         try {
-            const response = await createTitleService(formData) as ITitleAxiosResponse;
+            const response = await updateTitleService(formData, title.id as number) as ITitleAxiosResponse;
             if (response.status === 201) {
-                addTitleToStore(response.data);
                 toast.success("Title created successfully")
+                updateTitleInStore(response.data)
             }
         } catch (error) {
             console.log(error);
@@ -57,7 +64,7 @@ const CreateTitle = ({ sendingRequest, setSendingRequest, handleClose }: ICreate
                     <Grid item xs={12}>
                         <TitleForm
                             handleClose={handleClose}
-                            buttonText="Submit"
+                            buttonText="Update"
                             formState={formState}
                             control={control}
                             sendingRequest={sendingRequest}
@@ -70,4 +77,4 @@ const CreateTitle = ({ sendingRequest, setSendingRequest, handleClose }: ICreate
     );
 }
 
-export default CreateTitle
+export default UpdateTitle
