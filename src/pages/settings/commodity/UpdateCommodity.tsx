@@ -47,6 +47,7 @@ const UpdateCommodity = ({ handleClose, sendingRequest, setSendingRequest, commo
         try {
             const response = await updateCommodityService(formData, commodity?.id as number) as ICommodityAxiosResponse;
             if (response.status === 201) {
+                console.log(response.data, "Response data!!!")
                 updateCommodityInStore(response.data)
                 toast.success("Commodity updated successfully")
             }
