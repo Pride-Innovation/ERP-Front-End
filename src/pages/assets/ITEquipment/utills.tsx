@@ -25,8 +25,6 @@ import {
     loadUsers,
 } from "../slice";
 import { loadBranches } from "../../settings/branch/slice";
-import { listBranchesService } from "../../settings/branch/service";
-import { loadSuppliers } from "../../settings/suppliers/slice";
 import { loadStatuses } from "../../settings/statuses/slice";
 import { listAssetStatusesService } from "../../settings/statuses/service";
 
@@ -59,7 +57,6 @@ const ITEquipmentUtills = () => {
     const { branches } = useSelector((state: RootState) => state.BranchStore);
 
     const updateReduxStore = async () => {
-        dispatch(loadBranches(await listBranchesService()));
         dispatch(loadUsers(await listUsersService()));
         dispatch(loadAssetCategories(await listCategoriesService()));
         dispatch(loadStatuses(await listAssetStatusesService()));

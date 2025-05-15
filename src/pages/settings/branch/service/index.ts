@@ -7,15 +7,6 @@ Managing Director
 
 import axiosInstance from "../../../../core/apis/axiosInstance"
 
-const listBranchesService = async () => {
-    try {
-        const response = await axiosInstance.get('branches');
-        return response;
-    } catch (error) {
-        return error;
-    }
-}
-
 const createBranchService = async (body: Object) => {
     try {
         const response = await axiosInstance.post('branches', body);
@@ -45,7 +36,6 @@ const deleteBranchService = async (id: string | number) => {
 
 
 export {
-    listBranchesService,
     createBranchService,
     updateBranchService,
     deleteBranchService

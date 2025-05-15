@@ -11,13 +11,14 @@ import { useDispatch } from "react-redux";
 import { AppDispatch, RootState } from "../../../store";
 import { addBranch, loadBranches, removeBranch, updateBranch } from "./slice";
 import { IBranch, IBranchesAxiosResponse } from "./interface";
-import { listBranchesService } from "./service";
 import { useSelector } from "react-redux";
 import { IOptions } from "../../../components/tables/interface";
 import UserUtils from "../../users/utils";
 import { AutocompleteContext } from "../../../context/autocomplete";
+import { fetchRowsService } from "../../../core/apis/globalService";
 
 const BranchUtills = () => {
+    const endPoint: string = "branches"
     const [modalState, setModalState] = useState<string>("");
     const [open, setOpen] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false);
@@ -41,7 +42,7 @@ const BranchUtills = () => {
     const fetchAllBranches = async () => {
         setLoading(true)
         try {
-            const response = await listBranchesService() as IBranchesAxiosResponse;
+            const response = await fetchRowsService({pageNumber: 0, pageSize: 10, endPoint}) as IBranchesAxiosResponse;
             if (response.status === 200) {
                 dispatch(loadBranches(response?.data?.content))
             }
