@@ -5,12 +5,10 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { ChangeEvent, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { IDepartment } from './interface';
 import { crudStates } from '../../../utils/constants';
-import { Box, Card, Grid, InputAdornment, TextField, useMediaQuery, useTheme } from '@mui/material';
-import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
-import ButtonComponent from '../../../components/forms/Button';
+import { Box, Grid } from '@mui/material';
 import DepartmentUtills from './utills';
 import ModalComponent from '../../../components/modal';
 import CreateDepartment from './CreateDepartment';
@@ -52,7 +50,7 @@ const Departments = () => {
     return (
         <>
             {
-                crudStates.create === modalState && <ModalComponent width={"50%"} title='Create Department' open={open} handleClose={handleClose}>
+                crudStates.create === modalState && <ModalComponent width={"40%"} title='Create Department' open={open} handleClose={handleClose}>
                     <CreateDepartment handleClose={handleClose} sendingRequest={sendingRequest} setSendingRequest={setSendingRequest} />
                 </ModalComponent>
             }
@@ -77,7 +75,7 @@ const Departments = () => {
                     />
                 </ModalComponent>
             }
-            <SettingsHeader handleCreationClicked={createDepartment} title='Department'/>
+            <SettingsHeader handleCreationClicked={createDepartment} title='Department' />
             <Box>
                 {loading ? (
                     <Loading items="departments" />

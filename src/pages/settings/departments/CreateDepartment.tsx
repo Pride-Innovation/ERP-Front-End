@@ -6,13 +6,13 @@ Managing Director
 */
 
 import { useForm } from "react-hook-form";
-import { ICreateDepartment, IDepartment } from "./interface";
+import { ICreateDepartment, IDepartment, IDepartmentAxiosResponse } from "./interface";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useEffect } from "react";
 import DepartmentUtills from "./utills";
 import { toast } from "react-toastify";
 import { IResponseData } from "../../users/interface";
-import { Grid } from "@mui/material";
+import { Grid, Paper } from "@mui/material";
 import DepartmentForm from "./DepartmentForm";
 import { departmentSchema } from "./schema";
 import { createDepartmentService } from "./service";
@@ -41,35 +41,36 @@ const CreateDepartment = ({
 
     const onSubmit = async (formData: IDepartment) => {
         setSendingRequest(true)
-
-        const response = await createDepartmentService(formData) as IResponseData;
-        if (response.status === 'success') {
-            addDepartmentToStore(response.data[0] as unknown as IDepartment)
-            toast.success(response.data.message)
-            setSendingRequest(false);
-            handleClose()
+        try {
+            const response = await createDepartmentService(formData) as IDepartmentAxiosResponse;
+            if (response.status === 201) {
+                toast.success("Department created successfully")
+                addDepartmentToStore(response.data)
+            }
+        } catch (error) {
+            console.log(error)
         }
+        setSendingRequest(false)
+        handleClose()
     };
 
     return (
-        <Grid container xs={12}>
-            <Grid item xs={12}>
-                <form
-                    style={{ width: "100%" }}
-                    autoComplete="off"
-                    onSubmit={handleSubmit(onSubmit)}
-                >
-                    <DepartmentForm
-                        handleClose={handleClose}
-                        buttonText="Submit"
-                        formState={formState}
-                        control={control}
-                        sendingRequest={sendingRequest}
-                        register={register}
-                    />
-                </form>
-            </Grid>
-        </Grid>
+        <Paper elevation={3} sx={{ borderRadius: 3, boxShadow: "none", maxWidth: "1200px", mx: "auto" }}>
+            <form autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
+                <Grid container spacing={2}>
+                    <Grid item xs={12}>
+                        <DepartmentForm
+                            handleClose={handleClose}
+                            buttonText="Submit"
+                            formState={formState}
+                            control={control}
+                            sendingRequest={sendingRequest}
+                            register={register}
+                        />
+                    </Grid>
+                </Grid>
+            </form>
+        </Paper>
     )
 }
 

@@ -9,10 +9,10 @@ import axiosInstance from "../../../../core/apis/axiosInstance";
 
 const createDepartmentService = async (body: Object) => {
     try {
-        const response = await axiosInstance.post('departments/create', body);
-        return response.data
+        const response = await axiosInstance.post('departments', body);
+        return response
     } catch (error) {
-        throw error;
+        return error;
     }
 }
 
@@ -21,7 +21,7 @@ const updateDepartmentService = async (body: Object, id: string | number) => {
         const response = await axiosInstance.post(`departments/update/${id}`, body);
         return response.data
     } catch (error) {
-        throw error;
+        return error;
     }
 }
 
@@ -30,7 +30,7 @@ const deleteDepartmentService = async (id: string | number) => {
         const response = await axiosInstance.get(`departments/delete/${id}`);
         return response.data
     } catch (error) {
-        throw error;
+        return error;
     }
 }
 

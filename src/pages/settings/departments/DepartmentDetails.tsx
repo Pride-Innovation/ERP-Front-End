@@ -41,7 +41,6 @@ const DepartmentDetails = ({
                 maxWidth: 400,
             }}
         >
-            {/* Title Section */}
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2 }}>
                 <AccountTreeOutlinedIcon sx={{ color: theme.palette.secondary.main, mr: 1 }} />
                 <Typography variant="h6" sx={{ fontWeight: 700, color: theme.palette.primary.main }}>
@@ -49,7 +48,6 @@ const DepartmentDetails = ({
                 </Typography>
             </Box>
 
-            {/* Info Stack */}
             <Stack spacing={1.2} divider={<Divider flexItem />}>
                 {department.headOfDepartment && (
                     <Box display="flex" alignItems="center">
@@ -60,17 +58,14 @@ const DepartmentDetails = ({
                     </Box>
                 )}
 
-                {department.branch && (
-                    <Box display="flex" alignItems="center">
-                        <LocationOnOutlinedIcon fontSize="small" sx={{ mr: 1, color: theme.palette.secondary.main }} />
-                        <Typography variant="body2">
-                            <strong>Branch:</strong> {department.branch.name}
-                        </Typography>
-                    </Box>
-                )}
+                <Box display="flex" alignItems="center">
+                    <LocationOnOutlinedIcon fontSize="small" sx={{ mr: 1, color: theme.palette.secondary.main }} />
+                    <Typography variant="body2">
+                        <strong>Branch:</strong> Head Office
+                    </Typography>
+                </Box>
             </Stack>
 
-            {/* Action Buttons */}
             <Stack direction="row" spacing={2} mt={3} justifyContent="center">
                 <Button
                     onClick={() => updateDepartment(department)}

@@ -5,7 +5,7 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { AppDispatch, RootState } from "../../../store";
 import { useSelector } from "react-redux";
@@ -13,6 +13,7 @@ import { IDepartment, IDepartmentsAxiosResponse } from "./interface";
 import { IFormData } from "../../assets/interface";
 import { addDepartment, loadAllDepartments, removeDepartment, updateDepartment } from "./slice";
 import { fetchRowsService } from "../../../core/apis/globalService";
+import { IOptions } from "../../../components/tables/interface";
 
 const DepartmentUtills = () => {
     const endPoint: string = "departments"
@@ -21,7 +22,11 @@ const DepartmentUtills = () => {
     const [loading, setLoading] = useState<boolean>(false);
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
-    const dispatch = useDispatch<AppDispatch>()
+    const dispatch = useDispatch<AppDispatch>();
+    const { users } = useSelector((state: RootState) => state.UserStore);
+    const [optionsObject, setOptionsObject] = useState<{
+        usersOptions: Array<IOptions>
+    }>({ usersOptions: [] });
 
     const fetchAllDepartments = async () => {
         setLoading(true)
@@ -48,6 +53,15 @@ const DepartmentUtills = () => {
         dispatch(updateDepartment(department))
     }
 
+    useEffect(() => {
+        if (users?.length > 0) {
+            setOptionsObject({
+                usersOptions: users?.map(user => ({ label: `${user.firstName} ${user.lastName}`, value: user.id as number })) || []
+            });
+        }
+
+    }, [users])
+
 
     const formFields: Array<IFormData<IDepartment>> = [
         {
@@ -57,9 +71,9 @@ const DepartmentUtills = () => {
         },
         {
             value: "headOfDepartment",
-            label: "Head 0f Department",
+            label: "Head of Department",
             type: "autocomplete",
-            options: []
+            options: optionsObject.usersOptions
         }
     ]
 

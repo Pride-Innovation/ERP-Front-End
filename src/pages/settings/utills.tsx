@@ -51,7 +51,7 @@ const SettingsUtills = () => {
         },
         {
             id: 6,
-            text: "Statuses",
+            text: "Regions",
             path: ROUTES.STATUSES,
             icon: <DownloadingIcon />
         },
