@@ -18,8 +18,8 @@ const createBranchService = async (body: Object) => {
 
 const updateBranchService = async (body: Object, id: string | number) => {
     try {
-        const response = await axiosInstance.post(`branches/update/${id}`, body)
-        return response?.data
+        const response = await axiosInstance.put(`branches/${id}`, body)
+        return response
     } catch (error) {
         return error
     }
@@ -28,7 +28,7 @@ const updateBranchService = async (body: Object, id: string | number) => {
 const deleteBranchService = async (id: string | number) => {
     try {
         const response = await axiosInstance.get(`branches/delete/${id}`)
-        return response?.data
+        return response
     } catch (error) {
         return error
     }

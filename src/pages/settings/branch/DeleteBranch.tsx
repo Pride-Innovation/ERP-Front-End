@@ -26,11 +26,11 @@ const DeleteBranch = ({
         setSendingRequest(true)
         const response = await deleteBranchService(branch?.id as string);
         setSendingRequest(false)
-        if (response?.status === "success") {
-            removeBranchToStore(branch)
-            handleClose();
-            toast.success(response?.data?.message)
-        }
+        // if (response?.status === "success") {
+        //     removeBranchToStore(branch)
+        //     handleClose();
+        //     toast.success(response?.data?.message)
+        // }
     }
 
     return (

@@ -7,12 +7,14 @@ Managing Director
 
 import { useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
-import { IBranch, IUpdateBranch } from "./interface";
+import { IBranch, IBranchAxiosResponse, IUpdateBranch } from "./interface";
 import { Grid, Paper } from "@mui/material";
 import BranchForm from "./BranchForm";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { branchSchema } from "./schema";
 import BranchUtills from "./utills";
+import { updateBranchService } from "./service";
+import { toast } from "react-toastify";
 
 const UpdateBranch = ({ handleClose, sendingRequest, branch, setSendingRequest }: IUpdateBranch) => {
     const [defaultBranch, setDefaultBranch] = useState<any>(branch);
@@ -47,9 +49,17 @@ const UpdateBranch = ({ handleClose, sendingRequest, branch, setSendingRequest }
 
     const onSubmit = async (formData: IBranch) => {
         setSendingRequest(true);
-        console.log(formData, "Form Data!!")
+        try {
+            const response = await updateBranchService(formData, branch?.id as number) as IBranchAxiosResponse;
+            if (response.status === 201) {
+                updateBranchInStore(response.data)
+                toast.success("Branch updated successfully")
+            }
+        } catch (error) {
+            console.log(error)
+        }
         setSendingRequest(false);
-
+        handleClose()
     };
 
     return (
