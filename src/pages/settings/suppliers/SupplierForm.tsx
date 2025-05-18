@@ -15,6 +15,8 @@ import {
 import ButtonComponent from "../../../components/forms/Button"
 import SupplierUtills from "./Utills"
 import { ISupplierForm } from "./interface"
+import { useEffect } from "react"
+import CommodityUtills from "../commodity/utills"
 
 const SupplierForm = ({
     register,
@@ -25,7 +27,10 @@ const SupplierForm = ({
     buttonText,
 
 }: ISupplierForm) => {
-    const { formFields } = SupplierUtills()
+    const { formFields } = SupplierUtills();
+    const { fetchAllCommodities } = CommodityUtills()
+    useEffect(() => { fetchAllCommodities() }, []);
+    
     return (
         <Box sx={{ width: "100%" }}>
             <Grid container spacing={3}>

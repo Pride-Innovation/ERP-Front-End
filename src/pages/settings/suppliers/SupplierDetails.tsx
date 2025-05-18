@@ -20,6 +20,8 @@ import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
 import PhoneAndroidOutlinedIcon from '@mui/icons-material/PhoneAndroidOutlined';
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
 import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
+import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
+import CategoryOutlinedIcon from '@mui/icons-material/CategoryOutlined';
 import { ISupplierDetails } from './interface';
 
 const SupplierDetails = ({
@@ -42,6 +44,7 @@ const SupplierDetails = ({
                 maxWidth: 400,
             }}
         >
+            {/* Supplier Header */}
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2 }}>
                 <LocalShippingOutlinedIcon sx={{ color: theme.palette.secondary.main, mr: 1 }} />
                 <Typography variant="h6" sx={{ fontWeight: 700, color: theme.palette.primary.main }}>
@@ -49,6 +52,7 @@ const SupplierDetails = ({
                 </Typography>
             </Box>
 
+            {/* Contact Details */}
             <Stack spacing={1.2} divider={<Divider flexItem />}>
                 <Box display="flex" alignItems="center">
                     <LocationOnOutlinedIcon fontSize="small" sx={{ mr: 1, color: theme.palette.secondary.main }} />
@@ -64,11 +68,38 @@ const SupplierDetails = ({
                 </Box>
             </Stack>
 
+            {supplier.commodity && (
+                <Box mt={3}>
+                    <Divider sx={{ mb: 2 }} />
+                    <Typography variant="subtitle1" fontWeight={600} sx={{ color: theme.palette.primary.main, mb: 1 }}>
+                        Commodity Supplied
+                    </Typography>
+                    <Stack spacing={1}>
+                        <Box display="flex" alignItems="center">
+                            <Inventory2OutlinedIcon fontSize="small" sx={{ mr: 1, color: theme.palette.secondary.main }} />
+                            <Typography variant="body2">
+                                <strong>Name:</strong> {supplier.commodity.name}
+                            </Typography>
+                        </Box>
+                        <Box display="flex" alignItems="center">
+                            <CategoryOutlinedIcon fontSize="small" sx={{ mr: 1, color: theme.palette.secondary.main }} />
+                            <Typography variant="body2">
+                                <strong>Group:</strong> {supplier.commodity.groupName}
+                            </Typography>
+                        </Box>
+                    </Stack>
+                </Box>
+            )}
+
             <Stack direction="row" spacing={2} mt={3} justifyContent="center">
                 <Button
                     onClick={() => updateSupplier(supplier)}
                     variant="contained"
-                    sx={{ textTransform: 'none', bgcolor: theme.palette.primary.main, '&:hover': { bgcolor: '#06685d' } }}
+                    sx={{
+                        textTransform: 'none',
+                        bgcolor: theme.palette.primary.main,
+                        '&:hover': { bgcolor: '#06685d' }
+                    }}
                     startIcon={<EditOutlinedIcon />}
                 >
                     Update
@@ -87,4 +118,4 @@ const SupplierDetails = ({
     );
 }
 
-export default SupplierDetails
+export default SupplierDetails;

@@ -6,7 +6,7 @@ Managing Director
 */
 
 import { useForm } from "react-hook-form";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { ISupplier, ISupplierAxiosResponse, IUpdateSupplier } from "./interface";
 import { Grid } from "@mui/material";
 import SupplierForm from "./SupplierForm";
@@ -17,7 +17,16 @@ import { updateSupplierService } from "./service";
 import { toast } from "react-toastify";
 
 const UpdateSupplier = ({ handleClose, sendingRequest, supplier, setSendingRequest }: IUpdateSupplier) => {
-    const { updateSupplierInStore } = SupplierUtills()
+    const [defaultSupplier, setDefaultSupplier] = useState<any>(supplier);
+    const { updateSupplierInStore } = SupplierUtills();
+
+    useEffect(() => {
+        setDefaultSupplier({
+            ...supplier,
+            commodity: supplier.commodity?.id
+        })
+    }, [supplier]);
+
     const {
         control,
         handleSubmit,
@@ -30,8 +39,8 @@ const UpdateSupplier = ({ handleClose, sendingRequest, supplier, setSendingReque
     });
 
     useEffect(() => {
-        reset({ ...supplier });
-    }, [reset]);
+        reset({ ...defaultSupplier });
+    }, [defaultSupplier]);
 
     const onSubmit = async (formData: ISupplier) => {
         setSendingRequest(true);

@@ -8,10 +8,12 @@ Managing Director
 import { useEffect, useState } from "react"
 import { IFormData } from "../../assets/interface";
 import { ISupplier, ISuppliersAxiosResponse } from "./interface";
-import { AppDispatch } from "../../../store";
+import { AppDispatch, RootState } from "../../../store";
 import { useDispatch } from "react-redux";
 import { addSupplier, loadSuppliers, removeSupplier, updateSupplier } from "./slice";
 import { fetchRowsService } from "../../../core/apis/globalService";
+import { IOptions } from "../../../components/tables/interface";
+import { useSelector } from "react-redux";
 
 const SupplierUtills = () => {
     const endPoint: string = "suppliers";
@@ -21,8 +23,15 @@ const SupplierUtills = () => {
     const dispatch = useDispatch<AppDispatch>()
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
+    const { commodities } = useSelector((state: RootState) => state.CommodityStore);
+    const [optionsObject, setOptionsObject] = useState<{
+        commodityOptions: Array<IOptions>
+    }>({
+        commodityOptions: []
+    });
 
     const fetchAllSuppliers = async () => {
+        setLoading(true)
         try {
             const response = await fetchRowsService({ pageNumber: 0, pageSize: 10, endPoint }) as ISuppliersAxiosResponse;
             if (response.status === 200) {
@@ -31,6 +40,7 @@ const SupplierUtills = () => {
         } catch (error) {
             console.log(error)
         }
+        setLoading(false)
     }
 
     const addSupplierToStore = (supplier: ISupplier) => {
@@ -44,6 +54,14 @@ const SupplierUtills = () => {
     const updateSupplierInStore = (supplier: ISupplier) => {
         dispatch(updateSupplier(supplier))
     }
+
+    useEffect(() => {
+        if (commodities.length > 0) {
+            setOptionsObject({
+                commodityOptions: commodities.map(commodity => ({ label: commodity.name, value: commodity.id as number })) || []
+            })
+        }
+    }, [commodities])
 
     const formFields: Array<IFormData<ISupplier>> = [
         {
@@ -65,6 +83,12 @@ const SupplierUtills = () => {
             value: "email",
             label: 'Email Address',
             type: "input"
+        },
+        {
+            value: "commodity",
+            label: 'Supplied commodity',
+            type: "select",
+            options: optionsObject.commodityOptions
         }
     ]
 

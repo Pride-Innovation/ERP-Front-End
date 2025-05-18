@@ -13,6 +13,7 @@ import {
     UseFormRegister
 } from "react-hook-form";
 import { IAxiosResponse, IFetchDataRequest } from "../../../core/apis/interface";
+import { ICommodity } from "../commodity/interface";
 
 export interface ISupplier {
     id?: string | number;
@@ -20,6 +21,7 @@ export interface ISupplier {
     telephone: string;
     email: string;
     address?: string | null;
+    commodity?: ICommodity | null
 }
 
 interface ISupplierDetails {
