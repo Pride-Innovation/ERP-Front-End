@@ -22,7 +22,6 @@ import { useNavigate } from 'react-router';
 import { ROUTES } from '../../core/routes/routes';
 
 const Users = () => {
-  const { usersTableData } = useContext(UserContext);
   const header = { plural: 'Users', singular: 'User' };
   const { user, users, setUsers, setUser } = useContext(UserContext);
   const navigate = useNavigate();
@@ -34,8 +33,8 @@ const Users = () => {
     modalState,
     open,
     handleClose,
-    handleUsers,
-    filterCurrentUser,
+    // handleUsers,
+    // filterCurrentUser,
     removeUserFromTable
   } = UserUtils();
 
@@ -49,19 +48,19 @@ const Users = () => {
   }
 
   useEffect(() => { fetchUsers() }, [])
-  useEffect(() => { if (users?.length > 0) handleUsers(users) }, [users])
+  // useEffect(() => { if (users?.length > 0) handleUsers(users) }, [users])
 
   const handleOptionClicked = async (option: string | number, moduleID?: string | number) => {
     switch (option) {
       case crudStates.deactivate:
 
         setModalState(option as string)
-        setUser(filterCurrentUser(users, moduleID as string))
+        // setUser(filterCurrentUser(users, moduleID as string))
         handleOpen();
         break;
       case crudStates.update:
         setModalState(option as string)
-        setUser(filterCurrentUser(users, moduleID as string))
+        // setUser(filterCurrentUser(users, moduleID as string))
         handleOpen();
         break;
       case crudStates.read:
@@ -105,7 +104,7 @@ const Users = () => {
           onCreationHandler={handleCreation}
           module='user'
           header={header}
-          rows={usersTableData}
+          rows={[]}
           columnHeaders={columnHeaders}
         />}
     </Grid>

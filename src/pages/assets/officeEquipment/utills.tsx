@@ -72,16 +72,16 @@ const OfficeEquipmentUtills = () => {
 
     useEffect(() => { updateReduxStore() }, []);
 
-    useEffect(() => {
-        setOptionsObject({
-            assetCategoriesOptions: assetCategories?.map(category => ({ label: category.name, value: category.id })) || [],
-            branchesOptions: branches?.map(branch => ({ label: branch.name, value: branch.id as number })),
-            assetsStatusesOptions: statuses?.map(status => ({ label: status.name, value: status.id as number })) || [],
-            usersOptions: users?.map(user => ({ label: user.name as string, value: user.id as number })) || [],
-            suppliersOptions: suppliers?.map(supplier => ({ label: supplier.name, value: supplier?.id as number })) || [],
-        })
+    // useEffect(() => {
+    //     setOptionsObject({
+    //         assetCategoriesOptions: assetCategories?.map(category => ({ label: category.name, value: category.id })) || [],
+    //         branchesOptions: branches?.map(branch => ({ label: branch.name, value: branch.id as number })),
+    //         assetsStatusesOptions: statuses?.map(status => ({ label: status.name, value: status.id as number })) || [],
+    //         // usersOptions: users?.map(user => ({ label: user.name as string, value: user.id as number })) || [],
+    //         suppliersOptions: suppliers?.map(supplier => ({ label: supplier.name, value: supplier?.id as number })) || [],
+    //     })
 
-    }, [statuses, users, assetCategories, branches, suppliers])
+    // }, [statuses, users, assetCategories, branches, suppliers])
 
     const {
         id,

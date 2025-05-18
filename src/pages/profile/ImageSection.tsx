@@ -29,19 +29,19 @@ import UpdateProfileImage from './UpdateProfileImage';
 const ImageSection = () => {
     const { setUser, user } = useContext(UserContext);
     const { id } = useParams<{ id: string | undefined }>();
-    const { getSingleUser } = UserUtils();
+    // const { getSingleUser } = UserUtils();
     const { handleClose, modalState, open, handleOptionClicked } = AppBarUtills();
     const { getCurrentUser } = RoutesUtills();
     const [image, setImage] = useState<string>('');
 
     const getUserDetails = async () => {
-        const response = await getSingleUser(id as string);
-        setUser(response);
+        // const response = await getSingleUser(id as string);
+        // setUser(response);
     };
 
     useEffect(() => { getUserDetails() }, [id]);
 
-    const userImage = image || (user?.image && user?.image.length > 0 ? user?.image : (user?.gender === 'male' ? MaleProfile : FemaleProfile));
+    // const userImage = image || (user?.image && user?.image.length > 0 ? user?.image : (user?.gender === 'male' ? MaleProfile : FemaleProfile));
 
     return (
         <Grid container direction="column" alignItems="center" justifyContent="center">
@@ -55,17 +55,17 @@ const ImageSection = () => {
                     <LeaveComponent />
                 </ModalComponent>
             }
-            {modalState === modalStates.image &&
+            {/* {modalState === modalStates.image &&
                 <ModalComponent title='Update Profile' open={open} handleClose={handleClose} width="40%">
                     <UpdateProfileImage setImage={setImage} userImage={userImage} />
                 </ModalComponent>
-            }
+            } */}
             <Box sx={{ position: "relative" }}>
-                <Box
+                {/* <Box
                     component="img"
                     sx={{ width: 150, height: 150 }}
                     src={userImage}
-                />
+                /> */}
                 {getCurrentUser()?.id === parseInt(id as string, 10) && (
                     <IconButton
                         onClick={() => handleOptionClicked(modalStates.image)}
@@ -75,10 +75,10 @@ const ImageSection = () => {
                 )}
             </Box>
             <TypographyComponent weight={600} size='18px' sx={{ mt: 2 }}>
-                {user?.name}
+                {/* {user?.name} */}
             </TypographyComponent>
             <TypographyComponent weight={400} size='14px' sx={{ m: 0.5 }} color={grey[600]} >
-                {user.title}
+                {/* {user.title} */}
             </TypographyComponent>
             <Stack direction="column" spacing={1.5}>
                 {getCurrentUser()?.id === parseInt(id as string, 10) && (
@@ -107,15 +107,15 @@ const ImageSection = () => {
 const ProfileLine = () => {
     const { setUser, user } = useContext(UserContext);
     const { id } = useParams<{ id: string | undefined }>();
-    const { getSingleUser } = UserUtils();
+    // const { getSingleUser } = UserUtils();
     const { getCurrentUser } = RoutesUtills();
 
     const excludedFields = ['id', 'role', 'image', 'firstName', 'lastName', 'otherName'];
     const { open, handleClose, modalState, setModalState, handleOpen } = UserUtils();
 
     const getUserDetails = async () => {
-        const response = await getSingleUser(id as string);
-        setUser(response);
+        // const response = await getSingleUser(id as string);
+        // setUser(response);
     };
 
     useEffect(() => { getUserDetails() }, [id]);
@@ -132,7 +132,7 @@ const ProfileLine = () => {
                     <UpdateUsers handleClose={handleClose} />
                 </ModalComponent>
             }
-            {Object.entries({
+            {/* {Object.entries({
                 ...user,
                 availability: user?.availability ? availability.available : availability.on_leave
             })
@@ -154,7 +154,7 @@ const ProfileLine = () => {
                             )}
                         </Grid>
                     </React.Fragment>
-                ))}
+                ))} */}
             {getCurrentUser()?.id === parseInt(id as string, 10) && (
                 <Box sx={{ width: "100%", mt: 1, display: "flex", justifyContent: "end" }}>
                     <Box>

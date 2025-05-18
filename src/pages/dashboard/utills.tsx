@@ -41,29 +41,29 @@ const DashBoardUtills = () => {
 
     const rowData = {
         name: `${requestMock[0].requester?.firstName} ${requestMock[0].requester?.lastName}`,
-        department: requestMock[0].requester?.department,
+        // department: requestMock[0].requester?.department,
         status: requestMock[0].status?.name,
         ...data,
     };
 
     const handleRequest = (list: Array<IRequest>) => {
-        const data: Array<IRequestTableData> = list.map((request, index) => {
-            const {
-                requester,
-                name,
-                ...fielsdata
-            } = list[index];
+        // const data: Array<IRequestTableData> = list.map((request, index) => {
+        //     const {
+        //         requester,
+        //         name,
+        //         ...fielsdata
+        //     } = list[index];
 
-            return (
-                {
-                    name: `${request.requester?.firstName} ${request.requester?.lastName}`,
-                    department: request.requester?.department,
-                    ...fielsdata,
-                    status: request.status?.status
-                }
-            )
-        })
-        setRequestTableData(data);
+        //     return (
+        //         {
+        //             name: `${request.requester?.firstName} ${request.requester?.lastName}`,
+        //             department: request.requester?.department,
+        //             ...fielsdata,
+        //             status: request.status?.status
+        //         }
+        //     )
+        // })
+        // setRequestTableData(data);
     }
 
     useEffect(() => {

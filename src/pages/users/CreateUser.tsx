@@ -21,20 +21,20 @@ const CreateUser = ({ handleClose }: ICreateUser) => {
 
     const defaultUser: IUser = {} as IUser;
 
-    const {
-        control,
-        handleSubmit,
-        formState,
-        register,
-        reset
-    } = useForm<IUser>({
-        mode: 'onChange',
-        resolver: yupResolver(userSchema),
-    });
+    // const {
+    //     control,
+    //     handleSubmit,
+    //     formState,
+    //     register,
+    //     reset
+    // } = useForm<IUser>({
+    //     mode: 'onChange',
+    //     resolver: yupResolver(userSchema),
+    // });
 
-    useEffect(() => {
-        reset({ ...defaultUser });
-    }, [reset]);
+    // useEffect(() => {
+    //     reset({ ...defaultUser });
+    // }, [reset]);
 
     const onSubmit = async (formData: IUser) => {
         setSendingRequest(true);
@@ -44,21 +44,6 @@ const CreateUser = ({ handleClose }: ICreateUser) => {
         const data = new FormData();
         data.append('email', formData.email);
         data.append('name', formData.firstName + " " + formData.lastName + " " + formData.otherName);
-        data.append('title', formData.title);
-        data.append('reportsTo', formData.reportsTo as string);
-        data.append('department_id', "1");
-        data.append('gender', formData.gender);
-        data.append('staffNumber', formData.staffNumber);
-        data.append('availability', (formData?.availability as string));
-
-        const roles = formData?.role as unknown as Array<string>
-
-        data.append('password', "12345678");
-        data.append('password_confirmation', "12345678");
-
-        roles?.forEach((role, index) => {
-            data.append(`roles[${index}]`, role);
-        });
 
         try {
             const response = await createUSerService(data) as IResponseData;
@@ -80,16 +65,16 @@ const CreateUser = ({ handleClose }: ICreateUser) => {
                 <form
                     style={{ width: "100%" }}
                     autoComplete="off"
-                    onSubmit={handleSubmit(onSubmit)}
+                    // onSubmit={handleSubmit(onSubmit)}
                 >
-                    <UserForm
+                    {/* <UserForm
                         handleClose={handleClose}
                         buttonText="Submit"
                         formState={formState}
                         control={control}
                         sendingRequest={sendingRequest}
                         register={register}
-                    />
+                    /> */}
                 </form>
             </Grid>
         </Grid>

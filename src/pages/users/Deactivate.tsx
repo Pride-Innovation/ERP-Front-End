@@ -26,12 +26,12 @@ const Deactivate = ({
                 <Stack direction="row" spacing={1} alignItems="center">
                     <AccountCircleOutlinedIcon color="primary" />
                     <Typography variant="h6" color="primary">
-                        {user.name}
+                        {/* {user.name} */}
                     </Typography>
                 </Stack>
                 <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 1 }}>
                     <Typography variant="subtitle1" color="textSecondary">
-                        Title: {user.title}
+                        {/* Title: {user.title} */}
                     </Typography>
                 </Stack>
             </Grid>

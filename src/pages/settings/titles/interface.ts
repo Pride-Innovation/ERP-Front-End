@@ -9,12 +9,14 @@ import { Control, FieldError, FormState, UseFormRegister } from "react-hook-form
 import { IAxiosResponse, IFetchDataRequest } from "../../../core/apis/interface";
 import { Dispatch, SetStateAction } from "react";
 import { IRole } from "../interface";
+import { IBranch } from "../branch/interface";
 
 export interface ITitle {
     id?: string | number;
     name: string;
     reportsTo?: ITitle | null;
     role?: IRole | null;
+    branch?: IBranch | null
 }
 
 export interface ITitleDetails {

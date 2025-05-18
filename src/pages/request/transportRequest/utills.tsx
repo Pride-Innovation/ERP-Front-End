@@ -182,23 +182,23 @@ const TransportRequestUtills = () => {
     }
 
     const handleRequest = (list: Array<ITransportRequest>) => {
-        const data: Array<ITransportRequestTableData> = list.map((request, index) => {
-            const { requester, signature, ...fielsdata } = list[index];
+        // const data: Array<ITransportRequestTableData> = list.map((request, index) => {
+        //     const { requester, signature, ...fielsdata } = list[index];
 
-            return (
-                {
-                    name: `${request.requester?.name}`,
-                    ...fielsdata,
-                    duration: `${request.duration} hrs`,
-                    requestDate: moment(request.requestDate).format('LL'),
-                    timeOfSubmissionOfRequest: moment(request.timeOfSubmissionOfRequest).format('LT'),
-                    dateVehicleIsRequired: moment(request.dateVehicleIsRequired).format('LL'),
-                    timeVehicleIsRequired: moment(request.timeVehicleIsRequired).format('LL'),
-                    status: determineStatusColor(request.status as string)
-                }
-            )
-        });
-        setTransportRequestTableData(data);
+        //     return (
+        //         {
+        //             // name: `${request.requester?.name}`,
+        //             ...fielsdata,
+        //             duration: `${request.duration} hrs`,
+        //             requestDate: moment(request.requestDate).format('LL'),
+        //             timeOfSubmissionOfRequest: moment(request.timeOfSubmissionOfRequest).format('LT'),
+        //             dateVehicleIsRequired: moment(request.dateVehicleIsRequired).format('LL'),
+        //             timeVehicleIsRequired: moment(request.timeVehicleIsRequired).format('LL'),
+        //             status: determineStatusColor(request.status as string)
+        //         }
+        //     )
+        // });
+        // setTransportRequestTableData(data);
     }
 
     const determineCurrentRequest = (id: number, itemList: Array<ITransportRequest>): ITransportRequest => {

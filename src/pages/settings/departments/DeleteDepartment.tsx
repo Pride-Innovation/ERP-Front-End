@@ -11,7 +11,7 @@ import DepartmentUtills from "./utills";
 import { Grid, Stack, Typography } from "@mui/material";
 import ButtonComponent from "../../../components/forms/Button";
 import { deleteDepartmentService } from "./service";
-import { IUser } from "../../users/interface";
+// import { IUser } from "../../users/interface";
 import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined';
 
 
@@ -46,11 +46,11 @@ const DeleteDepartment = ({
                         {department.name}
                     </Typography>
                 </Stack>
-                {(department.headOfDepartment as IUser)?.name && <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 1 }}>
+                {/* {(department.headOfDepartment as IUser)?.name && <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 1 }}>
                     <Typography variant="subtitle1" color="textSecondary">
                         Head of Department: {(department.headOfDepartment as IUser)?.name}
                     </Typography>
-                </Stack>}
+                </Stack>} */}
             </Grid>
             <Grid item xs={12} sx={{ display: "flex", justifyContent: "end" }}>
                 <Stack direction="row" spacing={3} sx={{ width: "50%" }}>

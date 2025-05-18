@@ -61,11 +61,11 @@ const RequestDetails: React.FC<IRequestDetails> = ({ handleClose, data, sendingR
 
                 <Grid item xs={12} sm={6}>
                     <Stack spacing={2} sx={{ padding: 1 }}>
-                        {details.requester?.department && (
+                        {/* {details.requester?.department && (
                             <Typography variant="body1" fontWeight={500}>
                                 <strong>Department:</strong> {details.requester.department}
                             </Typography>
-                        )}
+                        )} */}
 
                         <Typography variant="body1" fontWeight={600}>
                             <strong>Requested By:</strong> {details.requester?.firstName + " " + details.requester?.lastName}

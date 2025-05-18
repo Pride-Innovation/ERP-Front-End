@@ -11,31 +11,31 @@ import {
     FormState,
     UseFormRegister
 } from "react-hook-form";
-import { IRole } from "../settings/interface";
 import { IAxiosResponse, IFetchDataRequest } from "../../core/apis/interface";
+import { ITitle } from "../settings/titles/interface";
+import { IBranch } from "../settings/branch/interface";
+import { IDepartment } from "../settings/departments/interface";
 
-export interface IUsersExcludedTableData {
+export interface IUser {
     id?: string | number;
-    name?: string;
-    reportsTo?: string;
     firstName: string;
     lastName: string;
     otherName?: string | null;
-    image?: string;
-    role?: IRole
-}
-
-export interface IUsersTableData {
     email: string;
-    title: string;
-    department: string;
-    unit: string;
-    gender: string;
+    title: ITitle;
+    profileImage: any
     staffNumber: string;
-    availability?: string;
+    gender: string;
+    password?: string | null;
+    available: boolean;
+    branch?: IBranch;
+    department?: IDepartment | null
+    isEnabled?: boolean
+    lastModifiedBy?: IUser
+    createdBy?: IUser
+    createDate?: string
+    lastModified?: string
 }
-
-export interface IUser extends IUsersExcludedTableData, IUsersTableData { }
 
 
 export interface ICreateUser {

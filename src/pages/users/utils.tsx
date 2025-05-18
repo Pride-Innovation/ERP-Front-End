@@ -12,11 +12,10 @@ import { IOptions, ITableHeader } from '../../components/tables/interface';
 import InfoIcon from '@mui/icons-material/Info';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import { UserContext } from '../../context/user/UserContext';
-import { IBranchesAxiosResponse, IUser, IUsersTableData } from './interface';
+import { IBranchesAxiosResponse, IUser } from './interface';
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import { crudStates } from '../../utils/constants';
 import { IFormData } from '../assets/interface';
-import { fetchSingleUserService } from './service';
 import { useDispatch } from 'react-redux';
 import { AppDispatch, RootState } from '../../store';
 import { useSelector } from 'react-redux';
@@ -34,7 +33,7 @@ const UserUtils = () => {
         rolesOptions: Array<IOptions>;
     }>({ usersOptions: [], rolesOptions: [] });
     const { users, rolesList } = useSelector((state: RootState) => state.UserStore);
-    const { setUsersTableData, setUsers } = useContext(UserContext);
+    const { setUsers } = useContext(UserContext);
 
     const fetchAllUsers = async (params?: Record<string, any>) => {
         try {
@@ -49,11 +48,9 @@ const UserUtils = () => {
     }
 
     useEffect(() => {
-        setOptionsObject({
-            usersOptions: users?.map(user => ({ label: user.name as string, value: user.id as number })) || [],
-            rolesOptions: rolesList?.map(role => ({ label: role.name, value: role.id as string })) || [],
-        })
-    }, [users, rolesList])
+        // setOptionsObject({
+        // })
+    }, [])
 
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
@@ -65,23 +62,11 @@ const UserUtils = () => {
 
     const {
         id,
-        reportsTo,
-        firstName,
-        lastName,
-        otherName,
-        role,
-        name,
-        email,
-        department,
-        unit,
-        image,
         ...data
     } = usersMock[0];
 
     const rowData = {
-        image: usersMock[0].image,
-        name,
-        email,
+        // name,
         ...data,
         action: {
             label: "options",
@@ -101,57 +86,31 @@ const UserUtils = () => {
         setUsers(() => users.map(user => user?.id === id ? updatedUser : user))
     }
 
-    const handleUsers = (users: Array<IUser>) => {
-        const data: Array<IUsersTableData> = users.map((user, index) => {
-            const {
-                reportsTo,
-                firstName,
-                lastName,
-                otherName,
-                ...data
-            } = users[index];
+    // const handleUsers = (users: Array<IUser>) => {
+    //     const data: Array<IUsersTableData> = users.map((user, index) => {
+    //         const {
+    //             reportsTo,
+    //             firstName,
+    //             lastName,
+    //             otherName,
+    //             ...data
+    //         } = users[index];
 
-            return (
-                { ...data }
-            )
-        })
+    //         return (
+    //             { ...data }
+    //         )
+    //     })
 
-        setUsersTableData(data)
+    //     setUsersTableData(data)
 
-    }
+    // }
 
     useEffect(() => {
         setColumnHeaders(getTableHeaders(rowData))
     }, []);
 
 
-    const formatName = (name: string): Array<string> => {
-        const nameParts = name.split(' ');
-        const firstName = nameParts[0];
-        const lastName = nameParts[1];
-        const otherNames = nameParts.slice(2, nameParts.length).join(" ");
-        return [firstName, lastName, otherNames];
-    }
 
-    const filterCurrentUser = (users: Array<IUser>, userID: string | number): IUser => {
-        const user = users?.find(user => user.id === userID) as IUser;
-        return ({
-            ...user,
-            firstName: formatName(user?.name as string)[0],
-            lastName: formatName(user?.name as string)[1],
-            otherName: formatName(user?.name as string)[2]
-        })
-    }
-
-    const getSingleUser = async (id: string | number): Promise<IUser> => {
-        const user = await fetchSingleUserService(id) as unknown as IUser;
-        return ({
-            ...user,
-            firstName: formatName(user?.name as string)[0],
-            lastName: formatName(user?.name as string)[1],
-            otherName: formatName(user?.name as string)[2]
-        });
-    }
 
     const userFields: Array<IFormData<IUser>> = [
         {
@@ -164,12 +123,7 @@ const UserUtils = () => {
             label: 'Last Name',
             type: "input"
         },
-        {
-            value: "otherName",
-            label: 'Other Name',
-            type: "input",
-            required: false
-        },
+
         {
             value: "email",
             label: 'Email address',
@@ -180,31 +134,7 @@ const UserUtils = () => {
             label: 'Title',
             type: "input"
         },
-        {
-            value: "reportsTo",
-            label: 'Reports To',
-            type: "select",
-            options: optionsObject.usersOptions
-        },
-        {
-            value: "department",
-            label: 'Department',
-            type: "select",
-            options: [
-                { label: "Business Technology", value: 1 },
-                { label: "Legal Department", value: 2 },
-                { label: "Credit Department", value: 3 },
-            ]
-        },
-        {
-            value: "unit",
-            label: 'Unit',
-            type: "select",
-            options: [
-                { label: "Innovation", value: 1 },
-                { label: "Security", value: 2 },
-            ]
-        },
+
         {
             value: "gender",
             label: 'Gender',
@@ -220,7 +150,7 @@ const UserUtils = () => {
             type: "input"
         },
         {
-            value: "availability",
+            value: "available",
             label: 'Availability',
             type: "select",
             options: [
@@ -228,12 +158,7 @@ const UserUtils = () => {
                 { label: "Absent", value: "absent" },
             ]
         },
-        {
-            value: "role",
-            label: 'Role',
-            type: "autocomplete",
-            options: optionsObject.rolesOptions
-        },
+
     ]
 
     return ({
@@ -244,11 +169,8 @@ const UserUtils = () => {
         modalState,
         open,
         handleClose,
-        handleUsers,
         removeUserFromTable,
         userFields,
-        filterCurrentUser,
-        getSingleUser,
         replaceUpdatedUser,
         fetchAllUsers
     })

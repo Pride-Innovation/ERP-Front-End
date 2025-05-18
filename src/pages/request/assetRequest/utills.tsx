@@ -95,7 +95,7 @@ const RequestUtills = () => {
         status: requestMock[0]?.status?.status,
         requestedBy: `${requestMock[0].requester?.firstName} ${requestMock[0].requester?.lastName}`,
         approvedBy: `${requestMock[0].currentApprover?.firstName} ${requestMock[0].currentApprover?.lastName}`,
-        department: `${requestMock[0].requester?.department}`,
+        // department: `${requestMock[0].requester?.department}`,
         action: {
             label: "options",
             options: [
@@ -138,25 +138,25 @@ const RequestUtills = () => {
     }
 
     const handleRequest = (list: Array<IRequest>) => {
-        const data: Array<IRequestTableData> = list.map((request, index) => {
-            const {
-                requester,
-                ...fielsdata
-            } = list[index];
+        // const data: Array<IRequestTableData> = list.map((request, index) => {
+        //     const {
+        //         requester,
+        //         ...fielsdata
+        //     } = list[index];
 
-            return (
-                {
-                    ...fielsdata,
-                    requestDate: moment(request.createDate).format('LL'),
-                    status: determineStatusColor(request.status as IStatus),
-                    requestedBy: `${request.requester?.firstName} ${request.requester?.lastName}`,
-                    approvedBy: `${request.currentApprover?.firstName} ${request.currentApprover?.lastName}`,
-                    department: `${requestMock[0].requester?.department}`,
+        //     return (
+        //         {
+        //             ...fielsdata,
+        //             requestDate: moment(request.createDate).format('LL'),
+        //             status: determineStatusColor(request.status as IStatus),
+        //             requestedBy: `${request.requester?.firstName} ${request.requester?.lastName}`,
+        //             approvedBy: `${request.currentApprover?.firstName} ${request.currentApprover?.lastName}`,
+        //             department: `${requestMock[0].requester?.department}`,
 
-                }
-            )
-        })
-        setRequestTableData(data);
+        //         }
+        //     )
+        // })
+        // setRequestTableData(data);
     }
 
     const determineCurrentRequest = (id: number, itemList: Array<IRequest>): IRequest => {
