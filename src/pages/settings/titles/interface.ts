@@ -8,11 +8,13 @@ Managing Director
 import { Control, FieldError, FormState, UseFormRegister } from "react-hook-form";
 import { IAxiosResponse, IFetchDataRequest } from "../../../core/apis/interface";
 import { Dispatch, SetStateAction } from "react";
+import { IRole } from "../interface";
 
 export interface ITitle {
     id?: string | number;
     name: string;
-    reportsTo?: ITitle | null
+    reportsTo?: ITitle | null;
+    role?: IRole | null;
 }
 
 export interface ITitleDetails {

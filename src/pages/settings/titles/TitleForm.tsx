@@ -10,6 +10,8 @@ import { UseFormAutocompleteComponent, UseFormDatePicker, UseFormInput, UseFormS
 import ButtonComponent from '../../../components/forms/Button';
 import TitleUtills from './utills';
 import { ITitleForm } from './interface';
+import RoleUtills from '../roles/utills';
+import { useEffect } from 'react';
 
 const TitleForm = ({
     register,
@@ -21,6 +23,9 @@ const TitleForm = ({
     update
 }: ITitleForm) => {
     const { formFields } = TitleUtills();
+    const { fetchAllRoles } = RoleUtills();
+    useEffect(() => { fetchAllRoles() }, []);
+    
     return (
         <Box sx={{ width: "100%" }}>
             <Grid container spacing={3}>

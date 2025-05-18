@@ -24,10 +24,13 @@ const TitleUtills = () => {
     const handleClose = () => setOpen(false);
     const dispatch = useDispatch<AppDispatch>();
     const { titles } = useSelector((state: RootState) => state.TitleStore);
+    const { roles } = useSelector((state: RootState) => state.RoleStore)
     const [optionsObject, setOptionsObject] = useState<{
-        titlesOptions: Array<IOptions>
+        titlesOptions: Array<IOptions>,
+        roleOptions: Array<IOptions>,
     }>({
-        titlesOptions: []
+        titlesOptions: [],
+        roleOptions: [],
     });
 
     const fetchAllTitles = async () => {
@@ -46,11 +49,12 @@ const TitleUtills = () => {
     useEffect(() => {
         if (titles?.length > 0) {
             setOptionsObject({
-                titlesOptions: titles?.map(title => ({ label: title.name, value: title.id as number })) || []
+                titlesOptions: titles?.map(title => ({ label: title.name, value: title.id as number })) || [],
+                roleOptions: roles?.map(role => ({ label: role.name, value: role.id as number })) || [],
             });
         }
 
-    }, [titles]);
+    }, [titles, roles]);
 
     const addTitleToStore = (title: ITitle) => {
         dispatch(addTitle(title))
@@ -75,6 +79,12 @@ const TitleUtills = () => {
             label: 'Reports To',
             type: "select",
             options: optionsObject.titlesOptions
+        },
+        {
+            value: "role",
+            label: "Role",
+            type: "select",
+            options: optionsObject.roleOptions
         }
     ]
 

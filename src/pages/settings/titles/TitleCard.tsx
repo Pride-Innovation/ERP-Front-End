@@ -18,6 +18,7 @@ import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
 import WorkOutlineOutlinedIcon from '@mui/icons-material/WorkOutlineOutlined';
 import SupervisorAccountOutlinedIcon from '@mui/icons-material/SupervisorAccountOutlined';
+import SecurityOutlinedIcon from '@mui/icons-material/SecurityOutlined';
 import { ITitleDetails } from './interface';
 
 const TitleCard = ({ title, updateTitle, deleteTitle }: ITitleDetails) => {
@@ -51,6 +52,17 @@ const TitleCard = ({ title, updateTitle, deleteTitle }: ITitleDetails) => {
                         {title.reportsTo ? title.reportsTo.name : 'None'}
                     </Typography>
                 </Box>
+
+                {title.role && (
+                    <Box display="flex" alignItems="center">
+                        <SecurityOutlinedIcon fontSize="small" sx={{ mr: 1, color: theme.palette.secondary.main }} />
+                        <Box>
+                            <Typography variant="body2">
+                                <strong>Role:</strong> {title.role.name}
+                            </Typography>
+                        </Box>
+                    </Box>
+                )}
             </Stack>
 
             <Stack direction="row" spacing={2} mt={3} justifyContent="center">
