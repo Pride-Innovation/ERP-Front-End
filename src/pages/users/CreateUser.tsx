@@ -11,7 +11,7 @@ import { ICreateUser, IResponseData, IUser } from './interface';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { userSchema } from './schema';
-import { Grid } from '@mui/material';
+import { Grid, Paper } from '@mui/material';
 import { createUSerService } from './service';
 import { toast } from 'react-toastify';
 import { ErrorMessage } from '../../utils/constants';
@@ -59,24 +59,22 @@ const CreateUser = ({ handleClose }: ICreateUser) => {
     };
 
     return (
-        <Grid container xs={12}>
-            <Grid item xs={12}>
-                <form
-                    style={{ width: "100%" }}
-                    autoComplete="off"
-                    onSubmit={handleSubmit(onSubmit)}
-                >
-                    <UserForm
-                        handleClose={handleClose}
-                        buttonText="Submit"
-                        formState={formState}
-                        control={control}
-                        sendingRequest={sendingRequest}
-                        register={register}
-                    />
-                </form>
-            </Grid>
-        </Grid>
+        <Paper elevation={3} sx={{ borderRadius: 3, boxShadow: "none", maxWidth: "1200px", mx: "auto" }}>
+            <form autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
+                <Grid container spacing={2}>
+                    <Grid item xs={12}>
+                        <UserForm
+                            handleClose={handleClose}
+                            buttonText="Submit"
+                            formState={formState}
+                            control={control}
+                            sendingRequest={sendingRequest}
+                            register={register}
+                        />
+                    </Grid>
+                </Grid>
+            </form>
+        </Paper>
     );
 }
 

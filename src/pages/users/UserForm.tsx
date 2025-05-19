@@ -21,6 +21,9 @@ import {
     UseFormSelect
 } from '../../components/forms';
 import { IUserForm } from './interface';
+import TitleUtills from '../settings/titles/utills';
+import { useEffect } from 'react';
+import BranchUtills from '../settings/branch/utills';
 
 const UserForm = ({
     formState,
@@ -31,6 +34,11 @@ const UserForm = ({
     handleClose,
 }: IUserForm) => {
     const { userFields } = UserUtils();
+    const { fetchAllTitles } = TitleUtills();
+    const { fetchAllBranches } = BranchUtills()
+    useEffect(() => { fetchAllTitles() }, []);
+    useEffect(() => { fetchAllBranches() }, []);
+
     return (
         <Box sx={{ width: "100%" }}>
             <Grid container spacing={3}>

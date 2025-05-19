@@ -31,16 +31,30 @@ const UserUtils = () => {
     const [loading, setLoading] = useState<boolean>(false);
     const [usersTableData, setUsersTableData] = useState<Array<IUserTableData>>([] as Array<IUserTableData>);
     const dispatch = useDispatch<AppDispatch>();
+    const { titles } = useSelector((state: RootState) => state.TitleStore);
+    const { branches } = useSelector((state: RootState) => state.BranchStore);
 
     const [optionsObject, setOptionsObject] = useState<{
-        usersOptions: Array<IOptions>;
-        rolesOptions: Array<IOptions>;
-    }>({ usersOptions: [], rolesOptions: [] });
+        titlesOptions: Array<IOptions>;
+        branchesOptions: Array<IOptions>;
+    }>({
+        titlesOptions: [],
+        branchesOptions: []
+    });
 
     const { users } = useSelector((state: RootState) => state.UserStore);
     const navigate = useNavigate();
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
+
+    useEffect(() => {
+        if (titles.length > 0) {
+            setOptionsObject({
+                titlesOptions: titles?.map(title => ({ label: title.name, value: title.id as number })) || [],
+                branchesOptions: branches?.map(branch => ({ label: branch.name, value: branch.id as number })) || [],
+            });
+        }
+    }, [titles])
 
     const fetchAllUsers = async (params?: Record<string, any>) => {
         setLoading(true)
@@ -184,7 +198,8 @@ const UserUtils = () => {
         {
             value: "title",
             label: 'Title',
-            type: "input"
+            type: "autocomplete",
+            options: optionsObject.titlesOptions
         },
 
         {
@@ -209,6 +224,12 @@ const UserUtils = () => {
                 { label: "Present", value: "present" },
                 { label: "Absent", value: "absent" },
             ]
+        },
+        {
+            value: "branch",
+            label: 'Duty Station / Branch',
+            type: "autocomplete",
+            options: optionsObject.branchesOptions
         },
 
     ]
