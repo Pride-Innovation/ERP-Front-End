@@ -74,6 +74,7 @@ const UserUtils = () => {
         lastName,
         staffNumber,
         branch,
+        email,
         otherName,
         available,
         lastModified,
@@ -85,7 +86,8 @@ const UserUtils = () => {
         image: usersMock[0]?.profileImage,
         name: `${usersMock[0].firstName} ${usersMock[0].lastName} ${(usersMock[0].otherName !== null ? usersMock[0].otherName : "")}`,
         staffNumber: usersMock[0].staffNumber,
-        title: usersMock[0].title.name,
+        email: usersMock[0].email,
+        title: usersMock[0].title?.name,
         dutyStation: usersMock[0].branch?.name,
         availability: usersMock[0].available ? "present" : "leave",
         ...data,
@@ -143,7 +145,8 @@ const UserUtils = () => {
                     image: user?.profileImage,
                     name: `${user.firstName} ${user.lastName} ${(user.otherName !== null ? user.otherName : "")}`,
                     staffNumber: user.staffNumber,
-                    title: user.title.name,
+                    email: user.email,
+                    title: user.title?.name as string,
                     dutyStation: (user.branch?.name) as string,
                     availability: user.available ? "present" : "leave"
                 }
@@ -168,7 +171,11 @@ const UserUtils = () => {
             label: 'Last Name',
             type: "input"
         },
-
+        {
+            value: "otherName",
+            label: 'Other Name',
+            type: "input"
+        },
         {
             value: "email",
             label: 'Email address',

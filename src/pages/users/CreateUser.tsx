@@ -18,23 +18,22 @@ import { ErrorMessage } from '../../utils/constants';
 
 const CreateUser = ({ handleClose }: ICreateUser) => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
-
     const defaultUser: IUser = {} as IUser;
 
-    // const {
-    //     control,
-    //     handleSubmit,
-    //     formState,
-    //     register,
-    //     reset
-    // } = useForm<IUser>({
-    //     mode: 'onChange',
-    //     resolver: yupResolver(userSchema),
-    // });
+    const {
+        control,
+        handleSubmit,
+        formState,
+        register,
+        reset
+    } = useForm<IUser>({
+        mode: 'onChange',
+        resolver: yupResolver(userSchema),
+    });
 
-    // useEffect(() => {
-    //     reset({ ...defaultUser });
-    // }, [reset]);
+    useEffect(() => {
+        reset({ ...defaultUser });
+    }, [reset]);
 
     const onSubmit = async (formData: IUser) => {
         setSendingRequest(true);
@@ -65,16 +64,16 @@ const CreateUser = ({ handleClose }: ICreateUser) => {
                 <form
                     style={{ width: "100%" }}
                     autoComplete="off"
-                    // onSubmit={handleSubmit(onSubmit)}
+                    onSubmit={handleSubmit(onSubmit)}
                 >
-                    {/* <UserForm
+                    <UserForm
                         handleClose={handleClose}
                         buttonText="Submit"
                         formState={formState}
                         control={control}
                         sendingRequest={sendingRequest}
                         register={register}
-                    /> */}
+                    />
                 </form>
             </Grid>
         </Grid>

@@ -22,19 +22,19 @@ export interface IUser {
     lastName: string;
     otherName?: string | null;
     email: string;
-    title: ITitle;
-    profileImage: any
+    title?: ITitle | null;
+    profileImage?: any | null;
     staffNumber: string;
     gender: string;
     password?: string | null;
-    available: boolean;
-    branch?: IBranch;
+    available?: boolean | null;
+    branch?: IBranch | null;
     department?: IDepartment | null
-    isEnabled?: boolean
-    lastModifiedBy?: IUser
-    createdBy?: IUser
-    createDate?: string
-    lastModified?: string
+    isEnabled?: boolean | null;
+    lastModifiedBy?: IUser | null
+    createdBy?: IUser | null
+    createDate?: string | null
+    lastModified?: string | null
 }
 
 export interface IUserTableData {
@@ -77,13 +77,9 @@ export interface IUserForm {
     formState: FormState<IUser> & {
         errors: {
             email?: FieldError;
-            reportsTo?: FieldError;
             firstName?: FieldError;
             lastName?: FieldError;
             otherName?: FieldError;
-            title?: FieldError;
-            department?: FieldError;
-            unit?: FieldError;
             gender?: FieldError;
             staffNumber?: FieldError;
         };

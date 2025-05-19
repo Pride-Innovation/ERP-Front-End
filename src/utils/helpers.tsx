@@ -47,7 +47,6 @@ export const determineImage = (row: GridRowModel): string => {
         }
     }
 
-    console.log(row?.image, "image url")
     return row?.image;
 }
 

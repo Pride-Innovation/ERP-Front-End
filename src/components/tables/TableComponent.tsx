@@ -12,7 +12,6 @@ import { camelCaseToWords, determineImage, formatToUGXMoney, isCamelCase } from 
 import { ITableComponent } from './interface';
 import { TypographyComponent } from '../headers/TypographyComponent';
 import ChipComponent from '../forms/Chip';
-import CheckIcon from '@mui/icons-material/Check';
 import SpeedIcon from '@mui/icons-material/Speed';
 import DoNotDisturbAltIcon from '@mui/icons-material/DoNotDisturbAlt';
 import AccessAlarmsIcon from '@mui/icons-material/AccessAlarms';
@@ -24,6 +23,9 @@ import CustomTablePagination from './TablePagination';
 import ButtonComponent from '../forms/Button';
 import TimeLineDot from '../timeLineDots';
 import TableUtills from './utills';
+import MailOutlineIcon from '@mui/icons-material/MailOutline';
+import NoAccountsIcon from '@mui/icons-material/NoAccounts';
+import HowToRegOutlinedIcon from '@mui/icons-material/HowToRegOutlined';
 
 const TableComponent = ({
     columnHeaders,
@@ -58,7 +60,7 @@ const TableComponent = ({
     const columns: GridColDef[] = columnHeaders.map((column) => ({
         field: `${column.label}`,
         headerName: camelCaseToWords(column.label),
-        flex: 1,
+        flex: column.label === "image" ? 0.5 : column.label === "email" ? 1.5 : 1,
         minWidth: 100,
         renderCell: (param) => {
             const value = param.row[column.label];
@@ -71,6 +73,7 @@ const TableComponent = ({
                 : (column.isText || column.isNumber) ?
                     (
                         <StyledBox>
+                            {column.label === "email" && <MailOutlineIcon fontSize='small' color='secondary' sx={{ mr: "5px" }} />}
                             <TypographyComponent weight={400} size='13.5px'>{
                                 (isCamelCase(value as string) && value) ?
                                     camelCaseToWords(value) : value}</TypographyComponent>
@@ -100,8 +103,8 @@ const TableComponent = ({
                             : (column.isBoolen) ? (
                                 <StyledBox >
                                     {value === "present" ?
-                                        <ChipComponent variant='filled' label='Present' icon={<CheckIcon fontSize='small' />} size='medium' color='success' /> :
-                                        <ChipComponent variant='filled' label='Leave' icon={<DoNotDisturbAltIcon fontSize='small' />} size='medium' color='warning' />
+                                        <ChipComponent variant='filled' label='Present' icon={<HowToRegOutlinedIcon fontSize='small' />} size='medium' color='success' /> :
+                                        <ChipComponent variant='filled' label='Leave' icon={<NoAccountsIcon fontSize='small' />} size='medium' color='warning' />
                                     }
                                 </StyledBox>
                             )
