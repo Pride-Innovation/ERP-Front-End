@@ -6,12 +6,11 @@ Managing Director
 */
 
 import { usersMock } from '../../mocks/users';
-import { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { getTableHeaders } from '../../components/tables/getTableHeaders';
 import { IOptions, ITableHeader } from '../../components/tables/interface';
 import InfoIcon from '@mui/icons-material/Info';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
-import { UserContext } from '../../context/user/UserContext';
 import { IBranchesAxiosResponse, IUser, IUserTableData } from './interface';
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import { crudStates } from '../../utils/constants';
@@ -39,13 +38,18 @@ const UserUtils = () => {
     }>({ usersOptions: [], rolesOptions: [] });
 
     const { users } = useSelector((state: RootState) => state.UserStore);
-    const { setUsers } = useContext(UserContext);
     const navigate = useNavigate();
+    const handleOpen = () => setOpen(true);
+    const handleClose = () => setOpen(false);
 
     const fetchAllUsers = async (params?: Record<string, any>) => {
         setLoading(true)
         try {
-            const response = await fetchRowsService({ pageNumber: 0, pageSize: 10, endPoint, params }) as IBranchesAxiosResponse;
+            const response = await fetchRowsService({
+                pageNumber: 0,
+                pageSize: 10,
+                endPoint, params
+            }) as IBranchesAxiosResponse;
             if (response.status === 200) {
                 dispatch(loadUsers(response.data.content))
             }
@@ -55,9 +59,6 @@ const UserUtils = () => {
         }
         setLoading(false)
     }
-
-    const handleOpen = () => setOpen(true);
-    const handleClose = () => setOpen(false);
 
     const handleCreation = () => {
         setModalState(crudStates.create);
@@ -86,7 +87,7 @@ const UserUtils = () => {
         staffNumber: usersMock[0].staffNumber,
         title: usersMock[0].title.name,
         dutyStation: usersMock[0].branch?.name,
-        // available: usersMock[0].available,
+        availability: usersMock[0].available ? "present" : "leave",
         ...data,
         action: {
             label: "options",
@@ -144,6 +145,7 @@ const UserUtils = () => {
                     staffNumber: user.staffNumber,
                     title: user.title.name,
                     dutyStation: (user.branch?.name) as string,
+                    availability: user.available ? "present" : "leave"
                 }
             )
         })
@@ -215,7 +217,8 @@ const UserUtils = () => {
         userFields,
         fetchAllUsers,
         handleOptionClicked,
-        usersTableData
+        usersTableData,
+        loading
     })
 }
 

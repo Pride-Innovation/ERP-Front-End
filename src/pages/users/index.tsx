@@ -31,7 +31,8 @@ const Users = () => {
     handleClose,
     usersTableData,
     fetchAllUsers,
-    handleOptionClicked
+    handleOptionClicked,
+    loading
   } = UserUtils();
 
   useEffect(() => { fetchAllUsers() }, []);
@@ -68,6 +69,7 @@ const Users = () => {
           onCreationHandler={handleCreation}
           module='user'
           header={header}
+          loading={loading}
           rows={usersTableData}
           columnHeaders={columnHeaders}
         />}
