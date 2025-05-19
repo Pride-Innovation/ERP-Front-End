@@ -33,15 +33,6 @@ const updateUSerService = async (body: object, id: string | number) => {
   }
 };
 
-const fetchUsersService = async () => {
-  try {
-    const response = await axiosInstance.get("users");
-    return response.data?.data;
-  } catch (error) {
-    throw error
-  }
-}
-
 const deleteUserService = async (id: string | number) => {
   try {
     const response = await axiosInstance.get(`users/delete/${id}`);
@@ -73,7 +64,6 @@ export {
   createUSerService,
   fetchSingleUserService,
   deleteUserService,
-  fetchUsersService,
   updateUSerService,
   fetchRolesService
 }

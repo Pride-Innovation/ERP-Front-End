@@ -37,6 +37,16 @@ export interface IUser {
     lastModified?: string
 }
 
+export interface IUserTableData {
+    image: any,
+    name: string;
+    staffNumber: string;
+    title: string;
+    dutyStation: string;
+    email: string;
+    gender: string;
+}
+
 
 export interface ICreateUser {
     handleClose: () => void;

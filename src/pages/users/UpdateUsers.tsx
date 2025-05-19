@@ -17,7 +17,7 @@ import UserUtils from './utils';
 const UpdateUsers = ({ handleClose }: IUpdateUser) => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
     const { user } = useContext(UserContext);
-    const { replaceUpdatedUser } = UserUtils()
+    // const { replaceUpdatedUser } = UserUtils()
     // const {
     //     control,
     //     handleSubmit,
@@ -45,8 +45,8 @@ const UpdateUsers = ({ handleClose }: IUpdateUser) => {
             if (response.status === "success") {
                 handleClose();
                 const updatedUser: IUser = { ...(response["data"]?.[0] as IUser), id: user?.id }
-                replaceUpdatedUser((user?.id as string), updatedUser)
-                return toast.success(response?.data?.message)
+                // replaceUpdatedUser((user?.id as string), updatedUser)
+                // return toast.success(response?.data?.message)
             }
             return toast.error(ErrorMessage)
         } catch (error) {

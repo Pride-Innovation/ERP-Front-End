@@ -25,10 +25,10 @@ export interface IBranch {
     name: string
     email: string
     telephone?: string | null;
-    branchManager?: IUser;
-    branchOperationsManager?: IUser;
-    relationshipManager?: IUser;
-    creditAdministrator?: IUser;
+    branchManager?: IUser | null;
+    branchOperationsManager?: IUser | null;
+    relationshipManager?: IUser | null;
+    creditAdministrator?: IUser | null;
     region?: IRegion;
     district?: IDistrict;
 }

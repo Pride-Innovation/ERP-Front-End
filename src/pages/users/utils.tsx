@@ -12,7 +12,7 @@ import { IOptions, ITableHeader } from '../../components/tables/interface';
 import InfoIcon from '@mui/icons-material/Info';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import { UserContext } from '../../context/user/UserContext';
-import { IBranchesAxiosResponse, IUser } from './interface';
+import { IBranchesAxiosResponse, IUser, IUserTableData } from './interface';
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import { crudStates } from '../../utils/constants';
 import { IFormData } from '../assets/interface';
@@ -21,21 +21,29 @@ import { AppDispatch, RootState } from '../../store';
 import { useSelector } from 'react-redux';
 import { loadUsers } from './slice';
 import { fetchRowsService } from '../../core/apis/globalService';
+import { useNavigate } from 'react-router';
+import { ROUTES } from '../../core/routes/routes';
 
 const UserUtils = () => {
     const endPoint: string = "users";
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
     const [modalState, setModalState] = useState<string>("");
     const [open, setOpen] = useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(false);
+    const [usersTableData, setUsersTableData] = useState<Array<IUserTableData>>([] as Array<IUserTableData>);
     const dispatch = useDispatch<AppDispatch>();
+
     const [optionsObject, setOptionsObject] = useState<{
         usersOptions: Array<IOptions>;
         rolesOptions: Array<IOptions>;
     }>({ usersOptions: [], rolesOptions: [] });
-    const { users, rolesList } = useSelector((state: RootState) => state.UserStore);
+
+    const { users } = useSelector((state: RootState) => state.UserStore);
     const { setUsers } = useContext(UserContext);
+    const navigate = useNavigate();
 
     const fetchAllUsers = async (params?: Record<string, any>) => {
+        setLoading(true)
         try {
             const response = await fetchRowsService({ pageNumber: 0, pageSize: 10, endPoint, params }) as IBranchesAxiosResponse;
             if (response.status === 200) {
@@ -45,12 +53,8 @@ const UserUtils = () => {
         } catch (error) {
             console.log(error)
         }
+        setLoading(false)
     }
-
-    useEffect(() => {
-        // setOptionsObject({
-        // })
-    }, [])
 
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
@@ -62,11 +66,27 @@ const UserUtils = () => {
 
     const {
         id,
+        title,
+        department,
+        profileImage,
+        firstName,
+        lastName,
+        staffNumber,
+        branch,
+        otherName,
+        available,
+        lastModified,
+        createdBy,
         ...data
     } = usersMock[0];
 
     const rowData = {
-        // name,
+        image: usersMock[0]?.profileImage,
+        name: `${usersMock[0].firstName} ${usersMock[0].lastName} ${(usersMock[0].otherName !== null ? usersMock[0].otherName : "")}`,
+        staffNumber: usersMock[0].staffNumber,
+        title: usersMock[0].title.name,
+        dutyStation: usersMock[0].branch?.name,
+        // available: usersMock[0].available,
         ...data,
         action: {
             label: "options",
@@ -78,39 +98,62 @@ const UserUtils = () => {
         },
     };
 
-    const removeUserFromTable = (id: string | number) => {
-        setUsers(() => users.filter(user => user.id !== id))
-    };
+    const handleOptionClicked = async (option: string | number, moduleID?: string | number) => {
+        switch (option) {
+            case crudStates.deactivate:
 
-    const replaceUpdatedUser = (id: string | number, updatedUser: IUser) => {
-        setUsers(() => users.map(user => user?.id === id ? updatedUser : user))
+                setModalState(option as string)
+                // setUser(filterCurrentUser(users, moduleID as string))
+                handleOpen();
+                break;
+            case crudStates.update:
+                setModalState(option as string)
+                // setUser(filterCurrentUser(users, moduleID as string))
+                handleOpen();
+                break;
+            case crudStates.read:
+                navigate(`${ROUTES.PROFILE}/${moduleID}`)
+                break;
+            default:
+                break
+        }
     }
-
-    // const handleUsers = (users: Array<IUser>) => {
-    //     const data: Array<IUsersTableData> = users.map((user, index) => {
-    //         const {
-    //             reportsTo,
-    //             firstName,
-    //             lastName,
-    //             otherName,
-    //             ...data
-    //         } = users[index];
-
-    //         return (
-    //             { ...data }
-    //         )
-    //     })
-
-    //     setUsersTableData(data)
-
-    // }
 
     useEffect(() => {
         setColumnHeaders(getTableHeaders(rowData))
     }, []);
 
 
+    const handleUsersTableData = (users: Array<IUser>) => {
+        const data: Array<IUserTableData> = users.map((user, index) => {
+            const {
+                branch,
+                department,
+                lastModifiedBy,
+                title,
+                createdBy,
+                profileImage,
+                ...fielsdata
+            } = users[index];
 
+            return (
+                {
+                    ...fielsdata,
+                    image: user?.profileImage,
+                    name: `${user.firstName} ${user.lastName} ${(user.otherName !== null ? user.otherName : "")}`,
+                    staffNumber: user.staffNumber,
+                    title: user.title.name,
+                    dutyStation: (user.branch?.name) as string,
+                }
+            )
+        })
+
+        setUsersTableData(data);
+    }
+
+    useEffect(() => {
+        if (users.length > 0) { handleUsersTableData(users) }
+    }, [users]);
 
     const userFields: Array<IFormData<IUser>> = [
         {
@@ -169,10 +212,10 @@ const UserUtils = () => {
         modalState,
         open,
         handleClose,
-        removeUserFromTable,
         userFields,
-        replaceUpdatedUser,
-        fetchAllUsers
+        fetchAllUsers,
+        handleOptionClicked,
+        usersTableData
     })
 }
 

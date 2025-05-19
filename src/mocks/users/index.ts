@@ -6,7 +6,7 @@ Managing Director
 */
 
 import { IUser } from "../../pages/users/interface";
-import { rolesMock } from "../settings";
+import { branchesMock } from "../branch";
 import { titlesMock } from "../title";
 
 export const usersMock: IUser[] = [
@@ -22,5 +22,6 @@ export const usersMock: IUser[] = [
         gender: 'Male',
         profileImage: "",
         available: true,
+        branch: branchesMock[0]
     }
 ];
