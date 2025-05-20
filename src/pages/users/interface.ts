@@ -27,7 +27,7 @@ export interface IUser {
     staffNumber: string;
     gender: string;
     password?: string | null;
-    available?: boolean | null;
+    availability?: string | null;
     branch?: IBranch | null;
     department?: IDepartment | null
     isEnabled?: boolean | null;

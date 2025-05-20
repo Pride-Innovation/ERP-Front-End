@@ -90,7 +90,7 @@ const UserUtils = () => {
         branch,
         email,
         otherName,
-        available,
+        availability,
         lastModified,
         createdBy,
         ...data
@@ -103,7 +103,7 @@ const UserUtils = () => {
         email: usersMock[0].email,
         title: usersMock[0].title?.name,
         dutyStation: usersMock[0].branch?.name,
-        availability: usersMock[0].available ? "present" : "leave",
+        availability: usersMock[0].availability,
         ...data,
         action: {
             label: "options",
@@ -162,7 +162,7 @@ const UserUtils = () => {
                     email: user.email,
                     title: user.title?.name as string,
                     dutyStation: (user.branch?.name) as string,
-                    availability: user.available ? "present" : "leave"
+                    availability: user.availability
                 }
             )
         })
@@ -217,7 +217,7 @@ const UserUtils = () => {
             type: "input"
         },
         {
-            value: "available",
+            value: "availability",
             label: 'Availability',
             type: "select",
             options: [

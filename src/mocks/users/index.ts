@@ -21,7 +21,7 @@ export const usersMock: IUser[] = [
         department: null,
         gender: 'Male',
         profileImage: "",
-        available: true,
+        availability: "present",
         branch: branchesMock[0]
     }
 ];
