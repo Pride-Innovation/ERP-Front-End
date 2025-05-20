@@ -136,6 +136,7 @@ export const UseFormAutocompleteComponent = <T extends FieldValues>({
                     rules={{ required: true }}
                     render={({ field }) => (
                         <AutocompleteComponent
+                            name={value}
                             multiple={multiple}
                             options={options as Array<IOptions>}
                             field={field}

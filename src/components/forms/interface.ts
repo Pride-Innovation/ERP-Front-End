@@ -101,6 +101,7 @@ export interface IAutocompleteComponent {
     field: FieldValues;
     error: FieldError | undefined;
     multiple?: boolean;
+    name?: string
 }
 
 export interface IFileUploadButton {

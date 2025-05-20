@@ -22,8 +22,9 @@ import {
 } from '../../components/forms';
 import { IUserForm } from './interface';
 import TitleUtills from '../settings/titles/utills';
-import { useEffect } from 'react';
+import { useContext, useEffect } from 'react';
 import BranchUtills from '../settings/branch/utills';
+import { AutocompleteContext } from '../../context/autocomplete';
 
 const UserForm = ({
     formState,
@@ -36,6 +37,8 @@ const UserForm = ({
     const { userFields } = UserUtils();
     const { fetchAllTitles } = TitleUtills();
     const { fetchAllBranches } = BranchUtills()
+    const { displayDepartment } = useContext(AutocompleteContext)
+
     useEffect(() => { fetchAllTitles() }, []);
     useEffect(() => { fetchAllBranches() }, []);
 
@@ -62,7 +65,10 @@ const UserForm = ({
                                 <UseFormSelect {...commonProps} options={field.options} />
                             )}
                             {field.type === "date" && <UseFormDatePicker {...commonProps} />}
-                            {field.type === "autocomplete" && (
+                            {field.type === "autocomplete" && !displayDepartment && (
+                                <UseFormAutocompleteComponent {...commonProps} options={field.options} />
+                            )}
+                            {field.type === "autocomplete" && displayDepartment && (
                                 <UseFormAutocompleteComponent {...commonProps} options={field.options} />
                             )}
                         </Grid>

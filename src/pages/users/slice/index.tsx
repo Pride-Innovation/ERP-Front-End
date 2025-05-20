@@ -23,6 +23,9 @@ export const authSlice = createSlice({
         loadUsers: (state, action) => {
             state.users = action.payload;
         },
+        addUser: (state, action) => {
+            state.users = [...state.users, action.payload]
+        }
     }
 })
 
@@ -30,6 +33,7 @@ const { reducer, actions } = authSlice
 
 export const {
     loadUsers,
+    addUser
 } = actions
 
 export default reducer;

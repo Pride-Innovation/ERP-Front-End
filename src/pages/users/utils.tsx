@@ -6,12 +6,12 @@ Managing Director
 */
 
 import { usersMock } from '../../mocks/users';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { getTableHeaders } from '../../components/tables/getTableHeaders';
 import { IOptions, ITableHeader } from '../../components/tables/interface';
 import InfoIcon from '@mui/icons-material/Info';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
-import { IBranchesAxiosResponse, IUser, IUserTableData } from './interface';
+import { IUsersAxiosResponse, IUser, IUserTableData } from './interface';
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import { crudStates } from '../../utils/constants';
 import { IFormData } from '../assets/interface';
@@ -22,6 +22,7 @@ import { loadUsers } from './slice';
 import { fetchRowsService } from '../../core/apis/globalService';
 import { useNavigate } from 'react-router';
 import { ROUTES } from '../../core/routes/routes';
+import { AutocompleteContext } from '../../context/autocomplete';
 
 const UserUtils = () => {
     const endPoint: string = "users";
@@ -33,13 +34,17 @@ const UserUtils = () => {
     const dispatch = useDispatch<AppDispatch>();
     const { titles } = useSelector((state: RootState) => state.TitleStore);
     const { branches } = useSelector((state: RootState) => state.BranchStore);
+    const { departments } = useSelector((state: RootState) => state.DepartmentStore)
+    const { selectedItemDetails, value, setDisplayDepartment, displayDepartment } = useContext(AutocompleteContext)
 
     const [optionsObject, setOptionsObject] = useState<{
         titlesOptions: Array<IOptions>;
         branchesOptions: Array<IOptions>;
+        departmentsOptions: Array<IOptions>;
     }>({
         titlesOptions: [],
-        branchesOptions: []
+        branchesOptions: [],
+        departmentsOptions: [],
     });
 
     const { users } = useSelector((state: RootState) => state.UserStore);
@@ -52,9 +57,18 @@ const UserUtils = () => {
             setOptionsObject({
                 titlesOptions: titles?.map(title => ({ label: title.name, value: title.id as number })) || [],
                 branchesOptions: branches?.map(branch => ({ label: branch.name, value: branch.id as number })) || [],
+                departmentsOptions: departments?.map(department => ({ label: department.name, value: department.id as number })) || [],
             });
         }
-    }, [titles])
+    }, [titles, branches, departments]);
+
+    useEffect(() => {
+        if (selectedItemDetails.item === 'branch') {
+            if (value?.value === 1) { setDisplayDepartment(true) }
+            if (value?.value !== 1) { setDisplayDepartment(false) }
+        }
+    }, [selectedItemDetails]);
+
 
     const fetchAllUsers = async (params?: Record<string, any>) => {
         setLoading(true)
@@ -63,7 +77,7 @@ const UserUtils = () => {
                 pageNumber: 0,
                 pageSize: 10,
                 endPoint, params
-            }) as IBranchesAxiosResponse;
+            }) as IUsersAxiosResponse;
             if (response.status === 200) {
                 dispatch(loadUsers(response.data.content))
             }
@@ -174,65 +188,79 @@ const UserUtils = () => {
         if (users.length > 0) { handleUsersTableData(users) }
     }, [users]);
 
-    const userFields: Array<IFormData<IUser>> = [
-        {
-            value: "firstName",
-            label: 'First Name',
-            type: "input"
-        },
-        {
-            value: "lastName",
-            label: 'Last Name',
-            type: "input"
-        },
-        {
-            value: "otherName",
-            label: 'Other Name',
-            type: "input"
-        },
-        {
-            value: "email",
-            label: 'Email address',
-            type: "input"
-        },
-        {
-            value: "title",
-            label: 'Title',
-            type: "autocomplete",
-            options: optionsObject.titlesOptions
-        },
+    const generateUserFields = (): Array<IFormData<IUser>> => {
 
-        {
-            value: "gender",
-            label: 'Gender',
-            type: "select",
-            options: [
-                { label: "Male", value: "male" },
-                { label: "Female", value: "female" },
-            ]
-        },
-        {
-            value: "staffNumber",
-            label: 'Staff Number',
-            type: "input"
-        },
-        {
-            value: "availability",
-            label: 'Availability',
-            type: "select",
-            options: [
-                { label: "Present", value: "present" },
-                { label: "Absent", value: "absent" },
-            ]
-        },
-        {
-            value: "branch",
-            label: 'Duty Station / Branch',
-            type: "autocomplete",
-            options: optionsObject.branchesOptions
-        },
+        const fields: Array<IFormData<IUser>> = [
+            {
+                value: "firstName",
+                label: 'First Name',
+                type: "input"
+            },
+            {
+                value: "lastName",
+                label: 'Last Name',
+                type: "input"
+            },
+            {
+                value: "otherName",
+                label: 'Other Name',
+                type: "input"
+            },
+            {
+                value: "email",
+                label: 'Email address',
+                type: "input"
+            },
+            {
+                value: "title",
+                label: 'Title',
+                type: "autocomplete",
+                options: optionsObject.titlesOptions
+            },
 
-    ]
+            {
+                value: "gender",
+                label: 'Gender',
+                type: "select",
+                options: [
+                    { label: "Male", value: "male" },
+                    { label: "Female", value: "female" },
+                ]
+            },
+            {
+                value: "staffNumber",
+                label: 'Staff Number',
+                type: "input"
+            },
+            {
+                value: "availability",
+                label: 'Availability',
+                type: "select",
+                options: [
+                    { label: "Present", value: "present" },
+                    { label: "Absent", value: "absent" },
+                ]
+            },
+            {
+                value: "branch",
+                label: 'Duty Station / Branch',
+                type: "autocomplete",
+                options: optionsObject.branchesOptions
+            }
+
+        ]
+
+        if (displayDepartment) {
+            fields.push({
+                value: "department",
+                label: 'Department',
+                type: "autocomplete",
+                options: optionsObject.departmentsOptions
+            });
+        }
+
+        return fields;
+    };
 
     return ({
         columnHeaders,
@@ -242,7 +270,7 @@ const UserUtils = () => {
         modalState,
         open,
         handleClose,
-        userFields,
+        userFields: generateUserFields(),
         fetchAllUsers,
         handleOptionClicked,
         usersTableData,

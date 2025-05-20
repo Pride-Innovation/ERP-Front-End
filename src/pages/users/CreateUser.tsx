@@ -7,18 +7,21 @@ Managing Director
 
 import { useEffect, useState } from 'react';
 import UserForm from './UserForm';
-import { ICreateUser, IResponseData, IUser } from './interface';
+import { ICreateUser, IUser, IUserCreationResponseAxiosResponse } from './interface';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { userSchema } from './schema';
 import { Grid, Paper } from '@mui/material';
 import { createUSerService } from './service';
 import { toast } from 'react-toastify';
-import { ErrorMessage } from '../../utils/constants';
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from '../../store';
+import { addUser } from './slice';
 
 const CreateUser = ({ handleClose }: ICreateUser) => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
     const defaultUser: IUser = {} as IUser;
+    const dispatch = useDispatch<AppDispatch>()
 
     const {
         control,
@@ -37,23 +40,14 @@ const CreateUser = ({ handleClose }: ICreateUser) => {
 
     const onSubmit = async (formData: IUser) => {
         setSendingRequest(true);
-
-        console.log(formData, "Form Data!!")
-
-        const data = new FormData();
-        data.append('email', formData.email);
-        data.append('name', formData.firstName + " " + formData.lastName + " " + formData.otherName);
-
         try {
-            const response = await createUSerService(data) as IResponseData;
-            if (response.status === "success") {
-                handleClose();
-                return toast.success(response?.data?.message)
+            const response = await createUSerService(formData) as IUserCreationResponseAxiosResponse;
+            if (response.status === 201) {
+                toast.success("User created successfully")
+                dispatch(addUser(response.data.user))
             }
-            return toast.error(ErrorMessage)
         } catch (error) {
             console.log(error)
-            toast.error(ErrorMessage)
         }
         setSendingRequest(false);
     };

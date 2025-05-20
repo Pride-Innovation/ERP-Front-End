@@ -96,10 +96,22 @@ export interface IUserResponse extends IFetchDataRequest {
     content: Array<IUser>
 }
 
-export interface IBranchesAxiosResponse extends IAxiosResponse {
+export interface IUsersAxiosResponse extends IAxiosResponse {
     data: IUserResponse
 }
 
-export interface IBranchAxiosResponse extends IAxiosResponse {
+interface IUserCreationResponse {
+    user: IUser;
+    response: {
+        status: string;
+        message: string;
+    }
+}
+
+export interface IUserAxiosResponse extends IAxiosResponse {
     data: IUser
+}
+
+export interface IUserCreationResponseAxiosResponse extends IAxiosResponse {
+    data: IUserCreationResponse
 }

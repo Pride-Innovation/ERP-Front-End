@@ -31,12 +31,13 @@ const AutocompleteComponent = ({
     options,
     error,
     multiple = false,
+    name
 }: IAutocompleteComponent) => {
     const [selectedValue, setSelectedValue] = useState<IOptions | IOptions[] | null>(null);
     const [localInput, setLocalInput] = useState('');
     const debouncedInput = useDebounce(localInput, 500);
 
-    const { setValue: setGlobalValue, setInputValue } = useContext(AutocompleteContext);
+    const { setValue: setGlobalValue, setInputValue, setSelectedItemDetails } = useContext(AutocompleteContext);
 
     // Sync debounced input value to context for filtering/searching
     useEffect(() => {
@@ -69,6 +70,7 @@ const AutocompleteComponent = ({
         // Only set global context value when it's single selection
         if (!multiple && newValue) {
             setGlobalValue(newValue as IOptions);
+            setSelectedItemDetails({ item: name as string, id: (newValue as IOptions).value as number });
         }
 
         if (newValue === null || (Array.isArray(newValue) && newValue.length === 0)) {

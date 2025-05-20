@@ -9,14 +9,10 @@ import axiosInstance from "../../../core/apis/axiosInstance";
 
 const createUSerService = async (body: object) => {
   try {
-    const response = await axiosInstance.post("users/create", body, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      }
-    });
-    return response.data;
+    const response = await axiosInstance.post("users", body);
+    return response;
   } catch (error) {
-    throw error
+    return error
   }
 };
 
@@ -29,7 +25,7 @@ const updateUSerService = async (body: object, id: string | number) => {
     });
     return response.data;
   } catch (error) {
-    throw error
+    return error
   }
 };
 
@@ -38,7 +34,7 @@ const deleteUserService = async (id: string | number) => {
     const response = await axiosInstance.get(`users/delete/${id}`);
     return response.data;
   } catch (error) {
-    throw error;
+    return error;
   }
 }
 
@@ -47,7 +43,7 @@ const fetchSingleUserService = async (id: string | number) => {
     const response = await axiosInstance.get(`users/${id}`);
     return response.data?.data;
   } catch (error) {
-    throw error
+    return error
   }
 }
 
@@ -56,7 +52,7 @@ const fetchRolesService = async () => {
     const response = await axiosInstance.get("roles");
     return response.data?.data;
   } catch (error) {
-    throw error
+    return error
   }
 }
 
