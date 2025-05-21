@@ -9,6 +9,8 @@ import { ITimeLineDot } from './interface'
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import DoDisturbAltIcon from '@mui/icons-material/DoDisturbAlt';
 // import BlockIcon from '@mui/icons-material/Block';
+import HighlightOffIcon from '@mui/icons-material/HighlightOff';
+import LockPersonOutlinedIcon from '@mui/icons-material/LockPersonOutlined';
 
 /**
  * 
@@ -17,16 +19,16 @@ import DoDisturbAltIcon from '@mui/icons-material/DoDisturbAlt';
  */
 
 /*
- ******TO DO******
- Add icons for all different statuses. 
 */
 
 const TimeLineDot = ({ status }: ITimeLineDot) => {
-    return status === "active" ? (
+    return status === "disabled" ? (
+        <HighlightOffIcon fontSize='small' color="error" sx={{ mr: "5px" }} />
+    ) : status === "blocked" ? (
+        <LockPersonOutlinedIcon fontSize='small' color="warning" sx={{ mr: "5px" }} />
+    ) : status === "active" ? (
         <CheckCircleOutlineIcon fontSize='small' color="primary" sx={{ mr: "5px" }} />
-    ) : (
-        <DoDisturbAltIcon fontSize='small' color="secondary" sx={{ mr: "5px" }} />
-    )
+    ) : <DoDisturbAltIcon fontSize='small' color="secondary" sx={{ mr: "5px" }} />
 }
 
 export default TimeLineDot

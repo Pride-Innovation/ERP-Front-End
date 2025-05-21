@@ -24,6 +24,7 @@ export const usersMock: IUser[] = [
         availability: "present",
         branch: branchesMock[0],
         enabled: false,
-        accountNonLocked: false
+        accountNonLocked: false,
+        blocked: false
     }
 ];

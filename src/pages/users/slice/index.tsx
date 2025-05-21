@@ -28,7 +28,7 @@ export const authSlice = createSlice({
         },
         updateUser: (state, action) => {
             state.users = state.users.map(user => user.id === action.payload?.id ? action.payload : user);
-        }
+        },
     }
 })
 

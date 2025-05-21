@@ -13,10 +13,8 @@ import { useContext, useEffect, useState } from 'react';
 import { crudStates } from '../../utils/constants';
 import ModalComponent from '../../components/modal';
 import CreateUser from './CreateUser';
-import { IResponseData } from './interface';
 import UpdateUsers from './UpdateUsers';
-import Deactivate from './Deactivate';
-import { deleteUserService } from './service';
+import DisableUser from './DisableUser';
 
 const Users = () => {
   const header = { plural: 'Users', singular: 'User' };
@@ -33,16 +31,9 @@ const Users = () => {
     fetchAllUsers,
     handleOptionClicked,
     loading,
-
   } = UserUtils();
 
   useEffect(() => { fetchAllUsers() }, []);
-
-  const deactivateUser = async (id: string | number) => {
-    const response = await deleteUserService(id as string) as IResponseData;
-
-    handleClose()
-  }
 
   return (
     <Grid xs={12} container>
@@ -56,9 +47,9 @@ const Users = () => {
           <UpdateUsers user={user} sendingRequest={sendingRequest} setSendingRequest={setSendingRequest} handleClose={handleClose} />
         </ModalComponent>
       }
-      {modalState === crudStates.deactivate &&
-        <ModalComponent title='Deactivate User' open={open} handleClose={handleClose} width="40%">
-          <Deactivate handleDeactivate={deactivateUser} user={user} handleClose={handleClose} buttonText='Deactivate' sendingRequest={false} />
+      {modalState === crudStates.disable &&
+        <ModalComponent title='Disable User Account' open={open} handleClose={handleClose} width="40%">
+          <DisableUser setSendingRequest={setSendingRequest} user={user} handleClose={handleClose} buttonText='Disable' sendingRequest={false} />
         </ModalComponent>
       }
       {columnHeaders.length > 0 &&

@@ -37,6 +37,7 @@ export interface IUser {
     createDate?: string | null
     lastModified?: string | null
     accountNonLocked?: boolean | null;
+    blocked?: boolean | null;
 }
 
 export interface IUserTableData {
@@ -62,12 +63,12 @@ export interface IUpdateUser {
     user: IUser
 }
 
-export interface IDeactivate {
+export interface IDisable {
     handleClose: () => void;
     sendingRequest: boolean;
     buttonText: string;
     user: IUser;
-    handleDeactivate?: (id: string | number) => void
+    setSendingRequest: Dispatch<SetStateAction<boolean>>
 }
 
 export interface IResponseData {

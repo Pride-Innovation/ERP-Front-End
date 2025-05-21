@@ -8,30 +8,52 @@ Managing Director
 import { Grid, Stack, Typography } from '@mui/material'
 import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
 import ButtonComponent from '../../components/forms/Button';
-import { IDeactivate } from './interface';
+import { IDisable, IUserAxiosResponse } from './interface';
+import { deleteUserService } from './service';
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from '../../store';
+import { toast } from 'react-toastify';
+import { updateUser } from './slice';
 
-const Deactivate = ({
+const DisableUserAccount = ({
     user,
     handleClose,
     sendingRequest,
+    setSendingRequest,
     buttonText,
-    handleDeactivate
-}: IDeactivate) => {
+}: IDisable) => {
+    const dispatch = useDispatch<AppDispatch>();
+    const handleDisable = async () => {
+        setSendingRequest(true)
+        try {
+            const response = await deleteUserService(user.id as number) as IUserAxiosResponse;
+            if (response.status === 204) {
+                toast.success("User account disabled successfully!!")
+                dispatch(updateUser(response.data))
+            }
+
+        } catch (error) {
+            console.log(error)
+        }
+        setSendingRequest(false)
+        handleClose()
+    }
+
     return (
         <Grid item container spacing={4} xs={12}>
             <Grid item xs={12}>
                 <Typography variant="body1" sx={{ mb: 1 }}>
-                    Are you sure you want to deactivate this User?
+                    Are you sure you want to disable this user account?
                 </Typography>
                 <Stack direction="row" spacing={1} alignItems="center">
                     <AccountCircleOutlinedIcon color="primary" />
                     <Typography variant="h6" color="primary">
-                        {/* {user.name} */}
+                        {user.firstName} {user.lastName} {user.otherName}
                     </Typography>
                 </Stack>
                 <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 1 }}>
                     <Typography variant="subtitle1" color="textSecondary">
-                        {/* Title: {user.title} */}
+                        {user.title?.name}
                     </Typography>
                 </Stack>
             </Grid>
@@ -46,7 +68,7 @@ const Deactivate = ({
                         buttonText="Close"
                     />
                     <ButtonComponent
-                        handleClick={() => handleDeactivate?.(user?.id as string)}
+                        handleClick={() => handleDisable()}
                         buttonColor='error'
                         type='submit'
                         sendingRequest={sendingRequest}
@@ -58,4 +80,4 @@ const Deactivate = ({
     )
 }
 
-export default Deactivate
+export default DisableUserAccount

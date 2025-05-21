@@ -94,6 +94,7 @@ const UserUtils = () => {
         return users.find(user => user.id === id) as IUser;
     }
 
+
     const handleCreation = () => {
         setModalState(crudStates.create);
         handleOpen();
@@ -115,6 +116,7 @@ const UserUtils = () => {
         enabled,
         createdBy,
         accountNonLocked,
+        blocked,
         ...data
     } = usersMock[0];
 
@@ -131,7 +133,7 @@ const UserUtils = () => {
         action: {
             label: "options",
             options: [
-                { value: crudStates.deactivate, label: "Deactivate", icon: <InfoIcon fontSize='small' color='error' /> },
+                { value: crudStates.disable, label: "Disable Account", icon: <InfoIcon fontSize='small' color='error' /> },
                 { value: crudStates.update, label: "Update", icon: <ModeEditIcon fontSize='small' color='info' /> },
                 { value: crudStates.read, label: "View Details", icon: <RemoveRedEyeIcon fontSize='small' color='inherit' /> }
             ]
@@ -140,7 +142,7 @@ const UserUtils = () => {
 
     const handleOptionClicked = async (option: string | number, moduleID?: string | number) => {
         switch (option) {
-            case crudStates.deactivate:
+            case crudStates.disable:
                 setModalState(option as string)
                 setUser(findUser(moduleID as number))
                 handleOpen();
@@ -163,13 +165,21 @@ const UserUtils = () => {
     }, []);
 
     const determineUserStatus = (user: IUser): string => {
-        /**
-         * TO DO
-         * Determine the most important and relevant status to return. This can be active or inactive (When account is created)
-         * locked ( when account is locked due to multiple failed logins)
-         * disabled (when a user leaves pride.)
-         */
-        return user.accountNonLocked === false ? "locked" : user.enabled === false ? "disabled" : "active"
+        let status: string;
+        if (user.accountNonLocked === false) {
+            return status = "disabled";
+        }
+        if (user.blocked) {
+            return status = 'blocked'
+        }
+        if (user.enabled) {
+            return status = 'active'
+        }
+        if (user.enabled === false) {
+            return status = 'inactive'
+        }
+
+        return "";
     }
 
 
