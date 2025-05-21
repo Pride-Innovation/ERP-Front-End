@@ -15,6 +15,7 @@ import { IAxiosResponse, IFetchDataRequest } from "../../core/apis/interface";
 import { ITitle } from "../settings/titles/interface";
 import { IBranch } from "../settings/branch/interface";
 import { IDepartment } from "../settings/departments/interface";
+import { Dispatch, SetStateAction } from "react";
 
 export interface IUser {
     id?: string | number;
@@ -56,6 +57,9 @@ export interface ICreateUser {
 
 export interface IUpdateUser {
     handleClose: () => void;
+    sendingRequest: boolean;
+    setSendingRequest: Dispatch<SetStateAction<boolean>>
+    user: IUser
 }
 
 export interface IDeactivate {

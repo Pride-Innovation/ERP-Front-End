@@ -18,12 +18,8 @@ const createUSerService = async (body: object) => {
 
 const updateUSerService = async (body: object, id: string | number) => {
   try {
-    const response = await axiosInstance.post(`users/update/${id}`, body, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      }
-    });
-    return response.data;
+    const response = await axiosInstance.put(`users/${id}`, body);
+    return response;
   } catch (error) {
     return error
   }
@@ -32,7 +28,7 @@ const updateUSerService = async (body: object, id: string | number) => {
 const deleteUserService = async (id: string | number) => {
   try {
     const response = await axiosInstance.get(`users/delete/${id}`);
-    return response.data;
+    return response;
   } catch (error) {
     return error;
   }
@@ -41,7 +37,7 @@ const deleteUserService = async (id: string | number) => {
 const fetchSingleUserService = async (id: string | number) => {
   try {
     const response = await axiosInstance.get(`users/${id}`);
-    return response.data?.data;
+    return response;
   } catch (error) {
     return error
   }
@@ -50,7 +46,7 @@ const fetchSingleUserService = async (id: string | number) => {
 const fetchRolesService = async () => {
   try {
     const response = await axiosInstance.get("roles");
-    return response.data?.data;
+    return response;
   } catch (error) {
     return error
   }

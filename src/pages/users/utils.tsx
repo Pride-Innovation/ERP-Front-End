@@ -23,6 +23,7 @@ import { fetchRowsService } from '../../core/apis/globalService';
 import { useNavigate } from 'react-router';
 import { ROUTES } from '../../core/routes/routes';
 import { AutocompleteContext } from '../../context/autocomplete';
+import { UserContext } from '../../context/user/UserContext';
 
 const UserUtils = () => {
     const endPoint: string = "users";
@@ -36,6 +37,7 @@ const UserUtils = () => {
     const { branches } = useSelector((state: RootState) => state.BranchStore);
     const { departments } = useSelector((state: RootState) => state.DepartmentStore)
     const { selectedItemDetails, value, setDisplayDepartment, displayDepartment } = useContext(AutocompleteContext)
+    const { setUser } = useContext(UserContext);
 
     const [optionsObject, setOptionsObject] = useState<{
         titlesOptions: Array<IOptions>;
@@ -88,6 +90,10 @@ const UserUtils = () => {
         setLoading(false)
     }
 
+    const findUser = (id: number): IUser => {
+        return users.find(user => user.id === id) as IUser;
+    }
+
     const handleCreation = () => {
         setModalState(crudStates.create);
         handleOpen();
@@ -135,14 +141,13 @@ const UserUtils = () => {
     const handleOptionClicked = async (option: string | number, moduleID?: string | number) => {
         switch (option) {
             case crudStates.deactivate:
-
                 setModalState(option as string)
-                // setUser(filterCurrentUser(users, moduleID as string))
+                setUser(findUser(moduleID as number))
                 handleOpen();
                 break;
             case crudStates.update:
                 setModalState(option as string)
-                // setUser(filterCurrentUser(users, moduleID as string))
+                setUser(findUser(moduleID as number))
                 handleOpen();
                 break;
             case crudStates.read:
@@ -218,7 +223,8 @@ const UserUtils = () => {
             {
                 value: "otherName",
                 label: 'Other Name',
-                type: "input"
+                type: "input",
+                required: false
             },
             {
                 value: "email",

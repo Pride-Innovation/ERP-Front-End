@@ -50,6 +50,7 @@ const CreateUser = ({ handleClose }: ICreateUser) => {
             console.log(error)
         }
         setSendingRequest(false);
+        handleClose();
     };
 
     return (

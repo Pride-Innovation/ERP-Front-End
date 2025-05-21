@@ -9,7 +9,7 @@ import { Grid } from '@mui/material';
 import TableComponent from '../../components/tables/TableComponent';
 import UserUtils from './utils';
 import { UserContext } from '../../context/user/UserContext';
-import { useContext, useEffect } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { crudStates } from '../../utils/constants';
 import ModalComponent from '../../components/modal';
 import CreateUser from './CreateUser';
@@ -20,6 +20,7 @@ import { deleteUserService } from './service';
 
 const Users = () => {
   const header = { plural: 'Users', singular: 'User' };
+  const [sendingRequest, setSendingRequest] = useState<boolean>(false);
   const { user } = useContext(UserContext);
 
   const {
@@ -31,7 +32,8 @@ const Users = () => {
     usersTableData,
     fetchAllUsers,
     handleOptionClicked,
-    loading
+    loading,
+
   } = UserUtils();
 
   useEffect(() => { fetchAllUsers() }, []);
@@ -51,7 +53,7 @@ const Users = () => {
       }
       {modalState === crudStates.update &&
         <ModalComponent title='Update User' open={open} handleClose={handleClose} width="60%">
-          <UpdateUsers handleClose={handleClose} />
+          <UpdateUsers user={user} sendingRequest={sendingRequest} setSendingRequest={setSendingRequest} handleClose={handleClose} />
         </ModalComponent>
       }
       {modalState === crudStates.deactivate &&

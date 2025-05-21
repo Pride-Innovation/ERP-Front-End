@@ -55,6 +55,7 @@ const UserForm = ({
                         formState,
                         value: field.value,
                         label: field.label,
+                        required: field.required === false ? field.required : true
                     };
 
                     const gridSize = field.type === "textarea" ? 12 : 4;

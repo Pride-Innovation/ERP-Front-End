@@ -25,6 +25,9 @@ export const authSlice = createSlice({
         },
         addUser: (state, action) => {
             state.users = [...state.users, action.payload]
+        },
+        updateUser: (state, action) => {
+            state.users = state.users.map(user => user.id === action.payload?.id ? action.payload : user);
         }
     }
 })
@@ -33,7 +36,8 @@ const { reducer, actions } = authSlice
 
 export const {
     loadUsers,
-    addUser
+    addUser,
+    updateUser
 } = actions
 
 export default reducer;

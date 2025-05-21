@@ -129,7 +129,8 @@ const ProfileLine = () => {
         <Grid container xs={12} spacing={1}>
             {modalState === crudStates.update &&
                 <ModalComponent title='Update Personal Information' open={open} handleClose={handleClose} width="60%">
-                    <UpdateUsers handleClose={handleClose} />
+                    {/* <UpdateUsers handleClose={handleClose} /> */}
+                    <p>Update user</p>
                 </ModalComponent>
             }
             {/* {Object.entries({
