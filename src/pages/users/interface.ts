@@ -71,6 +71,14 @@ export interface IDisable {
     setSendingRequest: Dispatch<SetStateAction<boolean>>
 }
 
+export interface IUnBolock {
+    handleClose: () => void;
+    sendingRequest: boolean;
+    buttonText: string;
+    user: IUser;
+    setSendingRequest: Dispatch<SetStateAction<boolean>>
+}
+
 export interface IResponseData {
 
     status: "success" | "failed",

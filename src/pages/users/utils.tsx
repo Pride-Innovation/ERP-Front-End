@@ -24,6 +24,7 @@ import { useNavigate } from 'react-router';
 import { ROUTES } from '../../core/routes/routes';
 import { AutocompleteContext } from '../../context/autocomplete';
 import { UserContext } from '../../context/user/UserContext';
+import LockPersonOutlinedIcon from '@mui/icons-material/LockPersonOutlined';
 
 const UserUtils = () => {
     const endPoint: string = "users";
@@ -135,7 +136,8 @@ const UserUtils = () => {
             options: [
                 { value: crudStates.disable, label: "Disable Account", icon: <InfoIcon fontSize='small' color='error' /> },
                 { value: crudStates.update, label: "Update", icon: <ModeEditIcon fontSize='small' color='info' /> },
-                { value: crudStates.read, label: "View Details", icon: <RemoveRedEyeIcon fontSize='small' color='inherit' /> }
+                { value: crudStates.read, label: "View Details", icon: <RemoveRedEyeIcon fontSize='small' color='inherit' /> },
+                { value: crudStates.unblock, label: "Unblock", icon: <LockPersonOutlinedIcon fontSize='small' color='warning' /> },
             ]
         },
     };
@@ -154,6 +156,11 @@ const UserUtils = () => {
                 break;
             case crudStates.read:
                 navigate(`${ROUTES.PROFILE}/${moduleID}`)
+                break;
+            case crudStates.unblock:
+                setModalState(option as string)
+                setUser(findUser(moduleID as number))
+                handleOpen();
                 break;
             default:
                 break

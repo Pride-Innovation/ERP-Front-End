@@ -34,6 +34,15 @@ const deleteUserService = async (id: string | number) => {
   }
 }
 
+const unBlockUserService = async (id: string | number) => {
+  try {
+    const response = await axiosInstance.delete(`users/${id}`);
+    return response;
+  } catch (error) {
+    return error;
+  }
+}
+
 const fetchSingleUserService = async (id: string | number) => {
   try {
     const response = await axiosInstance.get(`users/${id}`);
@@ -57,5 +66,6 @@ export {
   fetchSingleUserService,
   deleteUserService,
   updateUSerService,
-  fetchRolesService
+  fetchRolesService,
+  unBlockUserService
 }
