@@ -25,6 +25,7 @@ import TitleUtills from '../settings/titles/utills';
 import { useContext, useEffect } from 'react';
 import BranchUtills from '../settings/branch/utills';
 import { AutocompleteContext } from '../../context/autocomplete';
+import DepartmentUtills from '../settings/departments/utills';
 
 const UserForm = ({
     formState,
@@ -36,11 +37,13 @@ const UserForm = ({
 }: IUserForm) => {
     const { userFields } = UserUtils();
     const { fetchAllTitles } = TitleUtills();
-    const { fetchAllBranches } = BranchUtills()
-    const { displayDepartment } = useContext(AutocompleteContext)
+    const { fetchAllBranches } = BranchUtills();
+    const { fetchAllDepartments } = DepartmentUtills();
+    const { displayDepartment } = useContext(AutocompleteContext);
 
     useEffect(() => { fetchAllTitles() }, []);
     useEffect(() => { fetchAllBranches() }, []);
+    useEffect(() => { fetchAllDepartments() }, []);
 
     return (
         <Box sx={{ width: "100%" }}>
@@ -83,17 +86,6 @@ const UserForm = ({
                         justifyContent="space-between"
                         alignItems={{ xs: "stretch", sm: "center" }}
                     >
-                        {/* {update && (
-                            <ButtonComponent
-                                variant="outlined"
-                                handleClick={handleClose}
-                                buttonColor="info"
-                                type="button"
-                                sendingRequest={false}
-                                buttonText="Update Permissions"
-                            />
-                        )} */}
-
                         <Stack direction="row" spacing={2}>
                             <ButtonComponent
                                 handleClick={handleClose}

@@ -22,7 +22,6 @@ import { useEffect, useState } from 'react';
 import CustomTablePagination from './TablePagination';
 import ButtonComponent from '../forms/Button';
 import TimeLineDot from '../timeLineDots';
-import TableUtills from './utills';
 import MailOutlineIcon from '@mui/icons-material/MailOutline';
 import NoAccountsIcon from '@mui/icons-material/NoAccounts';
 import HowToRegOutlinedIcon from '@mui/icons-material/HowToRegOutlined';
@@ -45,7 +44,6 @@ const TableComponent = ({
     const [filteredRows, setFilteredRows] = useState<GridRowsProp>(rows);
     const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
     const [currentID, setCurrentId] = useState<string | number>("")
-    const { determineTimeLineDotColor } = TableUtills();
     const theme = useTheme()
 
     const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -96,7 +94,7 @@ const TableComponent = ({
                                             textTransform: "capitalize"
                                         }}
                                         weight={400} size='13.5px'>
-                                        <TimeLineDot color={determineTimeLineDotColor(value)} />
+                                        <TimeLineDot status={value} />
                                         {value}</TypographyComponent>
                                 </StyledBox>
                             )

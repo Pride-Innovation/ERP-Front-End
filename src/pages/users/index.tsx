@@ -17,7 +17,6 @@ import { IResponseData } from './interface';
 import UpdateUsers from './UpdateUsers';
 import Deactivate from './Deactivate';
 import { deleteUserService } from './service';
-import { toast } from 'react-toastify';
 
 const Users = () => {
   const header = { plural: 'Users', singular: 'User' };

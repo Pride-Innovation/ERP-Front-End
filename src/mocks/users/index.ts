@@ -22,6 +22,8 @@ export const usersMock: IUser[] = [
         gender: 'Male',
         profileImage: "",
         availability: "present",
-        branch: branchesMock[0]
+        branch: branchesMock[0],
+        enabled: false,
+        accountNonLocked: false
     }
 ];

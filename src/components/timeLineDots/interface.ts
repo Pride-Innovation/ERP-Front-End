@@ -6,5 +6,5 @@ Managing Director
 */
 
 export interface ITimeLineDot {
-    color: string;
+    status: string;
 }

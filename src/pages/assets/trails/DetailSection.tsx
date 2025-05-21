@@ -34,7 +34,7 @@ const DetailSection = ({
                 <span style={{ display: "flex", alignItems: "center" }}>
                     {
                         label === "Status" &&
-                        <TimeLineDot color={determineTimeLineDotColor(text.toLocaleLowerCase())} />
+                        <TimeLineDot status={determineTimeLineDotColor(text.toLocaleLowerCase())} />
 
                     }
                     {text}

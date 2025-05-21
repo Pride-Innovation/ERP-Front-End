@@ -30,11 +30,12 @@ export interface IUser {
     availability?: string | null;
     branch?: IBranch | null;
     department?: IDepartment | null
-    isEnabled?: boolean | null;
+    enabled?: boolean | null;
     lastModifiedBy?: IUser | null
     createdBy?: IUser | null
     createDate?: string | null
     lastModified?: string | null
+    accountNonLocked?: boolean | null;
 }
 
 export interface IUserTableData {
@@ -45,6 +46,7 @@ export interface IUserTableData {
     dutyStation: string;
     email: string;
     gender: string;
+    status: string;
 }
 
 

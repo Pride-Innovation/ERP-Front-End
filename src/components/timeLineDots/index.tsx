@@ -5,20 +5,27 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { Box } from '@mui/material'
 import { ITimeLineDot } from './interface'
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import DoDisturbAltIcon from '@mui/icons-material/DoDisturbAlt';
+// import BlockIcon from '@mui/icons-material/Block';
 
-const TimeLineDot = ({ color }: ITimeLineDot) => {
-    return (
-        <Box
-            color={color}
-            sx={{
-                height: 12,
-                width: 12,
-                borderRadius: '50%',
-                bgcolor: color,
-                m: 1
-            }} />
+/**
+ * 
+ * @param status 
+ * @returns Icon based on the statuses, Active, Inactive, Disabled or Blocked
+ */
+
+/*
+ ******TO DO******
+ Add icons for all different statuses. 
+*/
+
+const TimeLineDot = ({ status }: ITimeLineDot) => {
+    return status === "active" ? (
+        <CheckCircleOutlineIcon fontSize='small' color="primary" sx={{ mr: "5px" }} />
+    ) : (
+        <DoDisturbAltIcon fontSize='small' color="secondary" sx={{ mr: "5px" }} />
     )
 }
 

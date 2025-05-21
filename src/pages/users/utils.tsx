@@ -106,7 +106,9 @@ const UserUtils = () => {
         otherName,
         availability,
         lastModified,
+        enabled,
         createdBy,
+        accountNonLocked,
         ...data
     } = usersMock[0];
 
@@ -119,6 +121,7 @@ const UserUtils = () => {
         dutyStation: usersMock[0].branch?.name,
         availability: usersMock[0].availability,
         ...data,
+        status: "",
         action: {
             label: "options",
             options: [
@@ -154,6 +157,16 @@ const UserUtils = () => {
         setColumnHeaders(getTableHeaders(rowData))
     }, []);
 
+    const determineUserStatus = (user: IUser): string => {
+        /**
+         * TO DO
+         * Determine the most important and relevant status to return. This can be active or inactive (When account is created)
+         * locked ( when account is locked due to multiple failed logins)
+         * disabled (when a user leaves pride.)
+         */
+        return user.accountNonLocked === false ? "locked" : user.enabled === false ? "disabled" : "active"
+    }
+
 
     const handleUsersTableData = (users: Array<IUser>) => {
         const data: Array<IUserTableData> = users.map((user, index) => {
@@ -176,7 +189,8 @@ const UserUtils = () => {
                     email: user.email,
                     title: user.title?.name as string,
                     dutyStation: (user.branch?.name) as string,
-                    availability: user.availability
+                    availability: user.availability,
+                    status: determineUserStatus(user)
                 }
             )
         })
