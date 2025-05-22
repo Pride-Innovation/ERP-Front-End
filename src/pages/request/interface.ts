@@ -46,24 +46,14 @@ export interface IRequest {
     emailMessage?: string | null
 }
 
-export interface IRequestResponse extends IFetchDataRequest {
-    content: Array<IRequest>
-}
 
 export interface IRequestTableData {
     name: string;
     requestDate?: string | null;
-    requesterID?: number | null,
-    quantity?: number | null,
     priority: string;
-    timeOfSubmissionOfRequest?: string | null;
-    desc?: string | null;
-    signature?: any | null,
     status?: string | null;
-    position?: string | null;
-    fromPosition?: string | null
-    Narration?: string | null,
-    requester?: IUser
+    requester?: string;
+    currentApprover?: string;
 }
 
 
@@ -192,6 +182,14 @@ export interface ITransportRequestForm {
     sendingRequest: boolean;
 }
 
-export interface IRequestAxiosResponse extends IAxiosResponse {
+export interface IRequestResponse extends IFetchDataRequest {
+    content: Array<IRequest>
+}
+
+export interface IRequestsAxiosResponse extends IAxiosResponse {
     data: IRequestResponse
+}
+
+export interface IRequestAxiosResponse extends IAxiosResponse {
+    data: IRequest
 }

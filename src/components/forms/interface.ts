@@ -114,3 +114,16 @@ export interface ICheckboxComponent {
     name?: string;
     handleChangeEvent: (event: ChangeEvent<HTMLInputElement>) => void
 }
+
+export interface RowData {
+    id: number;
+    name: string | '';
+    groupName: string;
+    quantity: number;
+}
+
+export interface ValidationResult {
+    isValid: boolean;
+    errors: string[];
+    validData?: RowData[];
+}

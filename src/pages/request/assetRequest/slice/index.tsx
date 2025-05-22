@@ -9,22 +9,22 @@ import { createSlice } from "@reduxjs/toolkit";
 import { IRequest } from "../../interface";
 
 interface IRequestState {
-    assetsRequests: Array<IRequest>
+    requests: Array<IRequest>
 }
 
 const initialState: IRequestState = {
-    assetsRequests: []
+    requests: []
 }
 
 export const requestSlice = createSlice({
-    name: "assetsRequests",
+    name: "requests",
     initialState,
     reducers: {
         loadAllRequests: (state, action) => {
-            state.assetsRequests = action?.payload
+            state.requests = action?.payload
         },
         removeAssetRequest: (state, action) => {
-            state.assetsRequests = state.assetsRequests.filter(asset => asset?.id !== action?.payload?.id)
+            state.requests = state.requests.filter(asset => asset?.id !== action?.payload?.id)
         }
     }
 });

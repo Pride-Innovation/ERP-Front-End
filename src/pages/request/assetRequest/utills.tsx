@@ -13,9 +13,8 @@ import {
 import InfoIcon from '@mui/icons-material/Info';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
-import { IOptions, ITableHeader } from '../../../components/tables/interface';
-import { IRequest, IRequestTableData } from '../interface';
-import { RequestContext } from '../../../context/request/RequestContext';
+import { ITableHeader } from '../../../components/tables/interface';
+import { IRequest, IRequestsAxiosResponse, IRequestTableData } from '../interface';
 import { requestMock } from '../../../mocks/request';
 import { crudStates, requestStatus } from '../../../utils/constants';
 import { IFormData } from '../../assets/interface';
@@ -24,47 +23,51 @@ import { useDispatch } from 'react-redux';
 import { AppDispatch, RootState } from '../../../store';
 import { loadAllRequests, removeAssetRequest } from './slice';
 import { useSelector } from 'react-redux';
-import { listAssetStatusesService } from '../../settings/statuses/service';
-import { IStatus, IStatusFetchResponse } from '../../settings/statuses/interface';
-import { loadStatuses } from '../../settings/statuses/slice';
-import moment from 'moment';
+import { fetchRowsService } from '../../../core/apis/globalService';
+import { useNavigate } from 'react-router';
+import { ROUTES } from '../../../core/routes/routes';
+import { RequestContext } from '../../../context/request/RequestContext';
 
 const RequestUtills = () => {
     const endPoint = 'requests';
     const module = "request";
     const header = { plural: 'Requests', singular: 'Request' };
+    const [modalState, setModalState] = useState<string>("");
+    const [count, setCount] = useState<number>(0)
+    const [currentRequest, setCurrentRequest] = useState<IRequest>({} as IRequest);
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
     const [pendingRequests, setPendingRequests] = useState<Array<IRequest>>([] as IRequest[])
     const [rejectedRequests, setRejectedRequests] = useState<Array<IRequest>>([] as IRequest[])
     const { setRequestTableData } = useContext(RequestContext);
     const [open, setOpen] = useState<boolean>(false);
-    const { statuses } = useSelector((state: RootState) => state.StatusesStore)
-    const [optionsObject, setOptionsObject] = useState<{ statusesOptions: Array<IOptions> }>({ statusesOptions: [] });
     const dispatch = useDispatch<AppDispatch>();
-    const { assetsRequests } = useSelector((state: RootState) => state.AssetsRequestsStore)
+    const { requests } = useSelector((state: RootState) => state.AssetsRequestsStore)
+    const [loading, setLoading] = useState<boolean>(false);
+    const navigate = useNavigate();
 
-    useEffect(() => {
-        if (statuses?.length > 0) {
-            setOptionsObject({
-                statusesOptions: statuses?.map(status => ({ label: status.name, value: status.id as number })) || [],
-            })
-        }
-
-    }, [statuses])
 
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
 
+
+    const fetchAllRequests = async () => {
+        setLoading(true)
+        try {
+            const response = await fetchRowsService({ pageNumber: 0, pageSize: 10, endPoint }) as IRequestsAxiosResponse;
+            if (response.status === 200) {
+                dispatch(loadAllRequests(response.data.content));
+                setCount(response.data.totalElements)
+            }
+
+        } catch (error) {
+            console.log(error)
+        }
+        setLoading(false)
+    }
+
     const addAllRequestsInStore = (assetRequests: Array<IRequest>) => {
         dispatch(loadAllRequests(assetRequests))
     }
-
-    const fetchAllStatuses = async () => {
-        const response = await listAssetStatusesService() as IStatusFetchResponse;
-        dispatch(loadStatuses(response.content))
-    }
-
-    useEffect(() => { fetchAllStatuses() }, []);
 
     const removeAssetRequestFromStore = (request: IRequest) => {
         dispatch(removeAssetRequest(request))
@@ -83,6 +86,7 @@ const RequestUtills = () => {
         commodities,
         emailMessage,
         currentApprover,
+        priority,
         status,
         signaturePath,
         ...data
@@ -91,11 +95,11 @@ const RequestUtills = () => {
     const rowData = {
         name: requestMock[0]?.name,
         requestDate: requestMock[0]?.createDate,
-        ...data,
+        priority: requestMock[0]?.priority,
         status: requestMock[0]?.status?.status,
+        ...data,
         requestedBy: `${requestMock[0].requester?.firstName} ${requestMock[0].requester?.lastName}`,
         approvedBy: `${requestMock[0].currentApprover?.firstName} ${requestMock[0].currentApprover?.lastName}`,
-        // department: `${requestMock[0].requester?.department}`,
         action: {
             label: "options",
             options: [
@@ -106,6 +110,26 @@ const RequestUtills = () => {
         },
     };
 
+
+    const handleOptionClicked = (option: string | number, moduleID?: string | number) => {
+        switch (option) {
+            case crudStates.update:
+                navigate(`${ROUTES.UPDATE_REQUEST}/${moduleID}`);
+                break;
+            case crudStates.delete:
+                setModalState(crudStates.delete)
+                setCurrentRequest(determineCurrentRequest(moduleID as number, requests as IRequest[]))
+                handleOpen();
+                break;
+            case crudStates.read:
+                setModalState(crudStates.read)
+                setCurrentRequest(determineCurrentRequest(moduleID as number, requests as IRequest[]))
+                handleOpen();
+                break;
+            default:
+                break;
+        }
+    }
 
 
     const formFields: Array<IFormData<IRequest>> = [
@@ -130,33 +154,35 @@ const RequestUtills = () => {
         },
     ];
 
-    const determineStatusColor = (stat: IStatus): string => {
-        const statusColor = (statuses.find(status => status.id === stat.id))?.status
-        return statusColor === requestStatus.approved ? requestStatus.approved
-            : statusColor === requestStatus.pending ? requestStatus.pending
-                : requestStatus.rejected
-    }
+    const handleRequestTableData = (list: Array<IRequest>) => {
+        const data: Array<IRequestTableData> = list.map((request, index) => {
+            const {
+                status,
+                timeOfSubmissionOfRequest,
+                lastModified,
+                lastModifiedBy,
+                signaturePath,
+                createdBy,
+                requester,
+                currentApprover,
+                ...fielsdata
+            } = list[index];
 
-    const handleRequest = (list: Array<IRequest>) => {
-        // const data: Array<IRequestTableData> = list.map((request, index) => {
-        //     const {
-        //         requester,
-        //         ...fielsdata
-        //     } = list[index];
+            return (
+                {
+                    ...fielsdata,
+                    image: request.signaturePath,
+                    name: request.name,
+                    requestDate: request.createDate,
+                    priority: request.priority,
+                    status: request.status?.name,
+                    requestedBy: `${request.requester?.firstName} ${request.requester?.lastName}`,
+                    approvedBy: `${request.currentApprover?.firstName} ${request.currentApprover?.lastName}`,
+                }
+            )
+        })
+        setRequestTableData(data);
 
-        //     return (
-        //         {
-        //             ...fielsdata,
-        //             requestDate: moment(request.createDate).format('LL'),
-        //             status: determineStatusColor(request.status as IStatus),
-        //             requestedBy: `${request.requester?.firstName} ${request.requester?.lastName}`,
-        //             approvedBy: `${request.currentApprover?.firstName} ${request.currentApprover?.lastName}`,
-        //             department: `${requestMock[0].requester?.department}`,
-
-        //         }
-        //     )
-        // })
-        // setRequestTableData(data);
     }
 
     const determineCurrentRequest = (id: number, itemList: Array<IRequest>): IRequest => {
@@ -182,7 +208,7 @@ const RequestUtills = () => {
             header,
             columnHeaders,
             formFields,
-            handleRequest,
+            handleRequest: handleRequestTableData,
             module,
             determineCurrentRequest,
             handleClose,
@@ -193,8 +219,14 @@ const RequestUtills = () => {
             filterRejectedRecords,
             rejectedRequests,
             addAllRequestsInStore,
-            assetsRequests,
-            removeAssetRequestFromStore
+            requests,
+            removeAssetRequestFromStore,
+            fetchAllRequests,
+            modalState,
+            handleOptionClicked,
+            count,
+            currentRequest,
+            loading
         }
     )
 }

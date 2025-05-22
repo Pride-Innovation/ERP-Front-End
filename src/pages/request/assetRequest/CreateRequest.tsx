@@ -5,7 +5,7 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import {
@@ -16,18 +16,18 @@ import {
     Paper
 } from "@mui/material";
 import RequestForm from "./RequestForm";
-import { IRequest } from "../interface";
+import { IRequest, IRequestAxiosResponse } from "../interface";
 import { requestSchema } from "./schema";
-import { createAssetRequestService } from "./service";
-import { IResponseData } from "../../users/interface";
+import { RequestContext } from "../../../context/request/RequestContext";
+import { validateInventoryItems } from "../../../utils/helpers";
 import { toast } from "react-toastify";
-import RoutesUtills from "../../../core/routes/utills";
+import { createAssetRequestService } from "./service";
 
 const CreateRequest = () => {
     const [sendingRequest, setSendingRequest] = useState(false);
     const [signature, setSignature] = useState("");
     const [file, setFile] = useState<File | null>(null);
-    const { getCurrentUser } = RoutesUtills();
+    const { requestCommodities } = useContext(RequestContext);
 
     const {
         control,
@@ -46,20 +46,41 @@ const CreateRequest = () => {
 
     const onSubmit = async (formData: IRequest) => {
         setSendingRequest(true);
+        const result = validateInventoryItems(requestCommodities);
 
-        const formPayload = new FormData();
-        formPayload.append("priority", formData.priority);
-        formPayload.append("name", formData.name);
-        formPayload.append("status", String(formData.status));
-        if (file) formPayload.append("file", file);
+        if (result.isValid && result.validData) {
 
-        const response = await createAssetRequestService(formPayload) as IResponseData;
-        toast.success(response?.data?.message || "Request submitted");
+            const payload = new FormData();
+            payload.append("priority", formData.priority);
+            payload.append("name", formData.name);
+            payload.append("description", formData.description as string);
+
+            if (file) payload.append("file", file);
+
+            const formattedCommodities = result.validData.map(item => ({
+                commodityId: item.id,
+                quantity: item.quantity
+            }));
+
+            payload.append("requestCommodities", JSON.stringify(formattedCommodities));
+
+            try {
+                const response = await createAssetRequestService(payload) as IRequestAxiosResponse
+                if (response.status === 201) {
+                    toast.success("Request created successfully")
+                }
+            } catch (error) {
+                console.log(error)
+            }
+
+        } else {
+            toast.error(`Requests validation errors: ${result.errors}`)
+        }
         setSendingRequest(false);
     };
 
     return (
-        <Paper elevation={3} sx={{ p: 4, borderRadius: 3, boxShadow: 3, maxWidth: "1200px", mx: "auto" }}>
+        <Paper elevation={3} sx={{ p: 4, borderRadius: 3, boxShadow: "none", maxWidth: "1200px", mx: "auto" }}>
             <Typography
                 sx={{
                     fontWeight: 600,

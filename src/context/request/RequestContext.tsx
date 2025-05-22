@@ -7,18 +7,27 @@ Managing Director
 
 import React, { createContext, Dispatch, SetStateAction, useState } from 'react'
 import { IRequestTableData } from '../../pages/request/interface'
+import { RowData } from '../../components/forms/interface';
 
 interface IRequestContext {
     requestTableData: Array<IRequestTableData>;
     setRequestTableData: Dispatch<SetStateAction<Array<IRequestTableData>>>;
+    requestCommodities: Array<RowData>;
+    setRequestCommodities: Dispatch<SetStateAction<Array<RowData>>>
 }
 
 export const RequestContext = createContext<IRequestContext>({} as IRequestContext);
 
 const RequestContextProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [requestTableData, setRequestTableData] = useState<IRequestTableData[]>([] as Array<IRequestTableData>)
+    const [requestCommodities, setRequestCommodities] = useState<Array<RowData>>([] as Array<RowData>)
     return (
-        <RequestContext.Provider value={{ requestTableData, setRequestTableData }}>
+        <RequestContext.Provider value={{
+            requestTableData,
+            setRequestTableData,
+            requestCommodities,
+            setRequestCommodities
+        }}>
             {children}
         </RequestContext.Provider>
     )

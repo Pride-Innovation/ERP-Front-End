@@ -8,6 +8,7 @@ Managing Director
 import { GridRowModel } from "@mui/x-data-grid";
 import MaleAvatar from '../statics/images/male.jpg';
 import FemaleAvatar from '../statics/images/Female.jpg';
+import { RowData, ValidationResult } from "../components/forms/interface";
 
 export const camelCaseToWords = (camelCaseString: string) => {
     return camelCaseString
@@ -90,4 +91,58 @@ export const formatToUGXMoney = (amount: string): string => {
     });
 
     return formatter.format(numAmount);
+}
+
+
+export function validateInventoryItems(items: any[]): ValidationResult {
+    const errors: string[] = [];
+
+    if (!Array.isArray(items) || items.length === 0) {
+        errors.push('At least one inventory item is required.');
+        return { isValid: false, errors };
+    }
+
+    const validItems: RowData[] = [];
+
+    items.forEach((item, index) => {
+        const prefix = `Item ${index + 1}:`;
+
+        if (typeof item !== 'object' || item === null) {
+            errors.push(`${prefix} Item must be an object.`);
+            return;
+        }
+
+        const { id, name, groupName, quantity } = item;
+
+        if (typeof id !== 'number') {
+            errors.push(`${prefix} ID must be a number.`);
+        }
+
+        if (typeof name !== 'string' || name.trim() === '') {
+            errors.push(`${prefix} Name is required and must be a non-empty string.`);
+        }
+
+        if (typeof groupName !== 'string' || groupName.trim() === '') {
+            errors.push(`${prefix} Group Name is required and must be a non-empty string.`);
+        }
+
+        if (typeof quantity !== 'number' || quantity <= 0) {
+            errors.push(`${prefix} Quantity must be a number greater than 0.`);
+        }
+
+        if (
+            typeof id === 'number' &&
+            typeof name === 'string' && name.trim() !== '' &&
+            typeof groupName === 'string' && groupName.trim() !== '' &&
+            typeof quantity === 'number' && quantity > 0
+        ) {
+            validItems.push({ id, name: name.trim(), groupName: groupName.trim(), quantity });
+        }
+    });
+
+    return {
+        isValid: errors.length === 0,
+        errors,
+        validData: errors.length === 0 ? validItems : undefined,
+    };
 }

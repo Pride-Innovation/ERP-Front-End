@@ -8,82 +8,44 @@ Managing Director
 import React, { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { Grid } from "@mui/material";
-import { IRequest, IRequestAxiosResponse } from "../../interface";
 import { RequestContext } from "../../../../context/request/RequestContext";
 import { FileContext } from "../../../../context/file/FileContext";
-import { fetchRowsService } from "../../../../core/apis/globalService";
 import { crudStates } from "../../../../utils/constants";
 import { ROUTES } from "../../../../core/routes/routes";
 import ModalComponent from "../../../../components/modal";
-import DeleteRequest from "../../DeleteRequest";
 import TableComponent from "../../../../components/tables/TableComponent";
 import RequestUtills from "../utills";
-import RequestDetails from "../../RequestDetails";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../../store";
 
 const Request = () => {
-    const [loading, setLoading] = useState<boolean>(false);
-    const [count, setCount] = useState<number>(0)
-    const [modalState, setModalState] = useState<string>("");
-    const [currentRequest, setCurrentRequest] = useState<IRequest>({} as IRequest);
-    const navigate = useNavigate();
     const { requestTableData } = useContext(RequestContext);
-    const { setFileData, fileData } = useContext(FileContext)
+    const { setFileData, fileData } = useContext(FileContext);
+    const { requests } = useSelector((state: RootState) => state.AssetsRequestsStore)
+
+    const navigate = useNavigate()
 
     const {
         columnHeaders,
         endPoint,
         header,
-        handleRequest,
         module,
-        determineCurrentRequest,
         handleClose,
-        handleOpen,
         open,
-        assetsRequests,
-        addAllRequestsInStore
+        fetchAllRequests,
+        modalState,
+        handleOptionClicked,
+        count,
+        handleRequest,
+        loading
     } = RequestUtills();
 
-    const fetchResources = async () => {
-        setLoading(true)
-        try {
-            const response = await fetchRowsService({ pageNumber: 0, pageSize: 10, endPoint }) as IRequestAxiosResponse;
-            if (response.status === 200) {
-                addAllRequestsInStore(response.data.content);
-                setCount(response.data.totalElements)
-            }
-
-        } catch (error) {
-            console.log(error)
-        }
-        setLoading(false)
-    }
-
+    useEffect(() => { fetchAllRequests() }, []);
     useEffect(() => {
-        fetchResources();
-        setFileData({ file: "", module: "", jsonData: [] });
-    }, []);
-
-    useEffect(() => { if (assetsRequests?.length > 0) { handleRequest(assetsRequests) } }, [assetsRequests])
-
-    const handleOptionClicked = (option: string | number, moduleID?: string | number) => {
-        switch (option) {
-            case crudStates.update:
-                navigate(`${ROUTES.UPDATE_REQUEST}/${moduleID}`);
-                break;
-            case crudStates.delete:
-                setModalState(crudStates.delete)
-                setCurrentRequest(determineCurrentRequest(moduleID as number, assetsRequests as IRequest[]))
-                handleOpen();
-                break;
-            case crudStates.read:
-                setModalState(crudStates.read)
-                setCurrentRequest(determineCurrentRequest(moduleID as number, assetsRequests as IRequest[]))
-                handleOpen();
-                break;
-            default:
-                break;
+        if (requests.length > 0) {
+            handleRequest(requests)
         }
-    }
+    }, [requests]);
 
     useEffect(() => {
         if (fileData.module === module) {
@@ -95,18 +57,20 @@ const Request = () => {
         <React.Fragment>
             {crudStates.delete === modalState &&
                 <ModalComponent width={"40%"} title='Delete Request' open={open} handleClose={handleClose}>
-                    <DeleteRequest
+                    {/* <DeleteRequest
                         setSendingRequest={setLoading}
                         sendingRequest={loading}
                         handleClose={handleClose}
                         buttonText='Confirm'
                         request={currentRequest}
-                    />
+                    /> */}
+                    <p>Delete Request</p>
                 </ModalComponent>
             }
             {crudStates.read === modalState &&
                 <ModalComponent width={"60%"} title='Request Details' open={open} handleClose={handleClose}>
-                    <RequestDetails sendingRequest={loading} setSendingRequest={setLoading} open={open} handleClose={handleClose} data={currentRequest} />
+                    {/* <RequestDetails sendingRequest={loading} setSendingRequest={setLoading} open={open} handleClose={handleClose} data={currentRequest} /> */}
+                    <p>REquest Details</p>
                 </ModalComponent>
             }
             <Grid xs={12} container>

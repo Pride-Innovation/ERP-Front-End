@@ -14,9 +14,9 @@ const createAssetRequestService = async (object: Object) => {
                 'Content-Type': 'multipart/form-data',
             }
         });
-        return response?.data
+        return response
     } catch (error) {
-        console.log(error)
+        return error
     }
 }
 

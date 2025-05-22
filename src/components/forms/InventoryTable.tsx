@@ -5,7 +5,7 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import {
     Box,
     Table,
@@ -25,30 +25,26 @@ import {
 } from '@mui/material';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import AddIcon from '@mui/icons-material/Add';
-
-type ItemName = 'Book' | 'Pen' | 'Notebook' | 'Computer';
-
-const itemGroups: Record<ItemName, string> = {
-    Book: 'Dozen',
-    Pen: 'Pack',
-    Notebook: 'Piece',
-    Computer: 'Piece',
-};
-
-interface RowData {
-    id: number;
-    name: ItemName | '';
-    group: string;
-    quantity: number;
-}
+import CommodityUtills from '../../pages/settings/commodity/utills';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../store';
+import { RequestContext } from '../../context/request/RequestContext';
+import { RowData } from './interface';
 
 const initialData: RowData[] = [
-    { id: 1, name: '', group: '', quantity: 0 },
+    { id: 1, name: '', groupName: '', quantity: 0 },
 ];
 
 const InventoryTable = () => {
+    const { fetchAllCommodities } = CommodityUtills()
     const [rows, setRows] = useState<RowData[]>(initialData);
+    const [itemOptions, setItemOptions] = useState<{ name: string; groupName: string }[]>([]);
+    const { setRequestCommodities } = useContext(RequestContext);
+
     const theme = useTheme();
+    const { commodities } = useSelector((state: RootState) => state.CommodityStore);
+
+    useEffect(() => { fetchAllCommodities() }, [])
 
     const handleInputChange = (id: number, field: keyof RowData, value: any) => {
         const updatedRows = rows.map((row) =>
@@ -57,25 +53,41 @@ const InventoryTable = () => {
         setRows(updatedRows);
     };
 
-    const handleNameChange = (id: number, value: ItemName) => {
-        const group = itemGroups[value];
+    const handleNameChange = (id: number, value: string) => {
+        const selectedItem = itemOptions.find(item => item.name === value);
+        const group = selectedItem?.groupName || '';
         const updatedRows = rows.map((row) =>
-            row.id === id ? { ...row, name: value, group } : row
+            row.id === id ? { ...row, name: value, groupName: group } : row
         );
         setRows(updatedRows);
     };
-
     const handleAddRow = () => {
         const newId = rows.length > 0 ? Math.max(...rows.map(r => r.id)) + 1 : 1;
-        setRows([...rows, { id: newId, name: '', group: '', quantity: 0 }]);
+        setRows([...rows, { id: newId, name: '', groupName: '', quantity: 0 }]);
     };
 
     const handleRemoveRow = (id: number) => {
         setRows(rows.filter((row) => row.id !== id));
     };
 
+    useEffect(() => {
+        if (commodities && commodities.length > 0) {
+            const options = commodities.map((item: any) => ({
+                name: item.name,
+                groupName: item.groupName,
+            }));
+            setItemOptions(options);
+        }
+    }, [commodities]);
+
+    useEffect(() => {
+        if (rows.length > 0) {
+            setRequestCommodities(rows)
+        }
+    }, [rows])
+
     return (
-        <Paper elevation={4} sx={{ p: 4, borderRadius: 2, bgcolor: '#FFFFFF' }}>
+        <Paper elevation={4} sx={{ p: 4, borderRadius: 2, boxShadow: "none", border: "1px solid #C9C9C9" }}>
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
                 <Typography sx={{
                     fontWeight: 600,
@@ -121,15 +133,15 @@ const InventoryTable = () => {
                                     <Select
                                         fullWidth
                                         value={row.name}
-                                        onChange={(e) => handleNameChange(row.id, e.target.value as ItemName)}
+                                        onChange={(e) => handleNameChange(row.id, e.target.value)}
                                         displayEmpty
                                         size="small"
                                         sx={{ backgroundColor: '#f9f9f9', borderRadius: 1 }}
                                     >
                                         <MenuItem value="" disabled>Select Item</MenuItem>
-                                        {(Object.keys(itemGroups) as ItemName[]).map((item) => (
-                                            <MenuItem key={item} value={item}>
-                                                {item}
+                                        {itemOptions.map((item) => (
+                                            <MenuItem key={item.name} value={item.name}>
+                                                {item.name}
                                             </MenuItem>
                                         ))}
                                     </Select>
@@ -138,7 +150,7 @@ const InventoryTable = () => {
                                     <TextField
                                         fullWidth
                                         size="small"
-                                        value={row.group}
+                                        value={row.groupName}
                                         InputProps={{ readOnly: true }}
                                         variant="outlined"
                                         sx={{ backgroundColor: '#f9f9f9', borderRadius: 1 }}
