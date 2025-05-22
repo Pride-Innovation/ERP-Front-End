@@ -8,9 +8,9 @@ Managing Director
 import { ITimeLineDot } from './interface'
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import DoDisturbAltIcon from '@mui/icons-material/DoDisturbAlt';
-// import BlockIcon from '@mui/icons-material/Block';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import LockPersonOutlinedIcon from '@mui/icons-material/LockPersonOutlined';
+import AutorenewIcon from '@mui/icons-material/Autorenew';
 
 /**
  * 
@@ -28,6 +28,8 @@ const TimeLineDot = ({ status }: ITimeLineDot) => {
         <LockPersonOutlinedIcon fontSize='small' color="warning" sx={{ mr: "5px" }} />
     ) : status === "active" ? (
         <CheckCircleOutlineIcon fontSize='small' color="primary" sx={{ mr: "5px" }} />
+    ) : status === "pending" ? (
+        <AutorenewIcon fontSize='small' color="warning" sx={{ mr: "5px" }} />
     ) : <DoDisturbAltIcon fontSize='small' color="secondary" sx={{ mr: "5px" }} />
 }
 

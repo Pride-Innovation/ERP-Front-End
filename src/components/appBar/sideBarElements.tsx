@@ -58,7 +58,7 @@ const SideBarElements = () => {
         },
         {
             id: 4,
-            name: "Asset Request",
+            name: "Requests",
             route: ROUTES.REQUEST,
             icon: <RecentActorsIcon />,
             subroutes: []

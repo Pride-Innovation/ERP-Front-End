@@ -100,7 +100,7 @@ const RequestUtills = () => {
         priority: requestMock[0]?.priority,
         ...data,
         requestedBy: `${requestMock[0].requester?.firstName} ${requestMock[0].requester?.lastName}`,
-        approvedBy: `${requestMock[0].currentApprover?.firstName} ${requestMock[0].currentApprover?.lastName}`,
+        approver: `${requestMock[0].currentApprover?.firstName} ${requestMock[0].currentApprover?.lastName}`,
         requestedFrom: requestMock[0].requester?.branch?.name,
         status: requestMock[0]?.status?.status,
         action: {
@@ -179,9 +179,9 @@ const RequestUtills = () => {
                     requestDate: moment(request.createDate).format('Do MMMM YYYY, h:mm a'),
                     priority: request.priority,
                     requestedBy: `${request.requester?.firstName} ${request.requester?.lastName}`,
-                    approvedBy: `${request.currentApprover?.firstName} ${request.currentApprover?.lastName}`,
+                    approver: `${request.currentApprover?.firstName} ${request.currentApprover?.lastName}`,
                     requestedFrom: request.requester?.branch?.name,
-                    status: request.status?.name,
+                    status: request.status?.status,
                 }
             )
         })
