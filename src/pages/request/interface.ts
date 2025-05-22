@@ -54,6 +54,7 @@ export interface IRequestTableData {
     status?: string | null;
     requester?: string;
     currentApprover?: string;
+    requestedFrom?: string;
 }
 
 

@@ -27,6 +27,7 @@ import { fetchRowsService } from '../../../core/apis/globalService';
 import { useNavigate } from 'react-router';
 import { ROUTES } from '../../../core/routes/routes';
 import { RequestContext } from '../../../context/request/RequestContext';
+import moment from 'moment';
 
 const RequestUtills = () => {
     const endPoint = 'requests';
@@ -93,13 +94,15 @@ const RequestUtills = () => {
     } = requestMock[0];
 
     const rowData = {
+        image: requestMock[0]?.signaturePath,
         name: requestMock[0]?.name,
         requestDate: requestMock[0]?.createDate,
         priority: requestMock[0]?.priority,
-        status: requestMock[0]?.status?.status,
         ...data,
         requestedBy: `${requestMock[0].requester?.firstName} ${requestMock[0].requester?.lastName}`,
         approvedBy: `${requestMock[0].currentApprover?.firstName} ${requestMock[0].currentApprover?.lastName}`,
+        requestedFrom: requestMock[0].requester?.branch?.name,
+        status: requestMock[0]?.status?.status,
         action: {
             label: "options",
             options: [
@@ -173,11 +176,12 @@ const RequestUtills = () => {
                     ...fielsdata,
                     image: request.signaturePath,
                     name: request.name,
-                    requestDate: request.createDate,
+                    requestDate: moment(request.createDate).format('Do MMMM YYYY, h:mm a'),
                     priority: request.priority,
-                    status: request.status?.name,
                     requestedBy: `${request.requester?.firstName} ${request.requester?.lastName}`,
                     approvedBy: `${request.currentApprover?.firstName} ${request.currentApprover?.lastName}`,
+                    requestedFrom: request.requester?.branch?.name,
+                    status: request.status?.name,
                 }
             )
         })
