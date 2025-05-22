@@ -12,21 +12,21 @@ import { RowData } from '../../components/forms/interface';
 interface IRequestContext {
     requestTableData: Array<IRequestTableData>;
     setRequestTableData: Dispatch<SetStateAction<Array<IRequestTableData>>>;
-    requestCommodities: Array<RowData>;
-    setRequestCommodities: Dispatch<SetStateAction<Array<RowData>>>
+    rows: Array<RowData>;
+    setRows: Dispatch<SetStateAction<Array<RowData>>>
 }
 
 export const RequestContext = createContext<IRequestContext>({} as IRequestContext);
 
 const RequestContextProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [requestTableData, setRequestTableData] = useState<IRequestTableData[]>([] as Array<IRequestTableData>)
-    const [requestCommodities, setRequestCommodities] = useState<Array<RowData>>([] as Array<RowData>)
+    const [rows, setRows] = useState<Array<RowData>>([] as Array<RowData>)
     return (
         <RequestContext.Provider value={{
             requestTableData,
             setRequestTableData,
-            requestCommodities,
-            setRequestCommodities
+            rows,
+            setRows
         }}>
             {children}
         </RequestContext.Provider>

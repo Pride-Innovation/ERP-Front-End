@@ -5,17 +5,20 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { useParams } from 'react-router';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { Box, Card, Divider, Grid, Typography } from '@mui/material';
+import { Box, Divider, Grid, Paper, Typography } from '@mui/material';
 import RequestForm from './RequestForm';
 import { requestMock } from '../../../mocks/request';
-import { IRequest } from '../interface';
+import { IRequest, IRequestAxiosResponse } from '../interface';
 import { requestSchema } from './schema';
 import { findAssetRequestByIDService, updateAssetRequestService } from './service';
-import { IResponseData } from '../../users/interface';
+import { RequestContext } from '../../../context/request/RequestContext';
+import { ICommodity } from '../../settings/commodity/interface';
+import { RowData } from '../../../components/forms/interface';
+import { validateInventoryItems } from '../../../utils/helpers';
 import { toast } from 'react-toastify';
 
 const UpdateRequest = () => {
@@ -23,6 +26,7 @@ const UpdateRequest = () => {
     const [signature, setSignature] = useState<string>("")
     const { id } = useParams<{ id: string }>();
     const [defaultRequest, setDefaultRequest] = useState<IRequest>(requestMock[0]);
+    const { setRows, rows } = useContext(RequestContext);
 
     const findAssetRequestById = async () => {
         const response = await findAssetRequestByIDService(id as string);
@@ -30,6 +34,18 @@ const UpdateRequest = () => {
     }
 
     useEffect(() => { findAssetRequestById() }, [id]);
+
+    const handleRows = () => {
+        const commodities = defaultRequest?.commodities as Array<{ commodity: ICommodity, quantity: number }>
+        const rowData = commodities.map(commodity => ({
+            id: commodity.commodity.id,
+            name: commodity.commodity.name,
+            groupName: commodity.commodity.groupName,
+            quantity: commodity.quantity
+        })) as Array<RowData>;
+
+        setRows(rowData);
+    }
 
     const {
         control,
@@ -43,59 +59,77 @@ const UpdateRequest = () => {
     });
 
     useEffect(() => {
+        handleRows()
         reset({ ...defaultRequest });
     }, [defaultRequest]);
 
     const onSubmit = async (formData: IRequest) => {
         setSendingRequest(true);
+        const result = validateInventoryItems(rows);
+        console.log(formData, result.validData, "Information!!")
 
-        const request = new FormData();
-        request.append("priority", formData.priority)
-        // request.append("quantity", (formData.quantity as number).toString())
-        request.append("name", formData.name)
-        request.append("status", formData.status as unknown as string)
-        request.append("description", formData.description as string)
-        // request.append("file", "file")
+        if (result.isValid && result.validData) {
 
-        const response = await updateAssetRequestService(request, id as string) as IResponseData;
-        console.log(response, "request updated!!")
+            const payload = new FormData();
+            payload.append("priority", formData.priority);
+            payload.append("name", formData.name);
+            payload.append("description", formData.description as string);
 
-        // toast.success(response.data.message);
+            // if (file) payload.append("file", file);
+
+            const formattedCommodities = result.validData.map(item => ({
+                commodityId: item.id,
+                quantity: item.quantity
+            }));
+
+            payload.append("requestCommodities", JSON.stringify(formattedCommodities));
+
+            try {
+                const response = await updateAssetRequestService(payload, id as string) as IRequestAxiosResponse
+                if (response.status === 201) {
+                    toast.success("Request created successfully")
+                }
+            } catch (error) {
+                console.log(error)
+            }
+
+        } else {
+            toast.error(`Requests validation errors: ${result.errors}`)
+        }
+
         setSendingRequest(false)
     };
 
     return (
-        <Card sx={{ py: 4 }}>
-            <Grid container xs={12}>
-                <Grid item xs={12}>
-                    <Typography sx={{
-                        mb: 4,
-                        fontWeight: 600,
-                        textTransform: "uppercase",
-                        fontSize: '17px',
-                        px: 4
-                    }}>Update Request</Typography>
-                    <Divider sx={{ mb: 4 }} />
-                    <Box sx={{ px: 4 }}>
-                        <form
-                            style={{ width: "100%" }}
-                            autoComplete="off"
-                            onSubmit={handleSubmit(onSubmit)}
-                        >
-                            <RequestForm
-                                setImage={setSignature}
-                                image={signature}
-                                formState={formState}
-                                control={control}
-                                register={register}
-                                sendingRequest={sendingRequest}
-                                buttonText="Request Asset"
-                            />
-                        </form>
-                    </Box>
+        <Paper elevation={3} sx={{ p: 4, borderRadius: 3, boxShadow: "none", maxWidth: "1200px", mx: "auto" }}>
+            <Typography
+                sx={{
+                    fontWeight: 600,
+                    textTransform: "uppercase",
+                    color: "#BC892C",
+                    mb: 3
+                }}
+            >
+                Update Request
+            </Typography>
+            <Divider sx={{ mb: 4 }} />
+            <Box component="form" autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
+                <Grid container spacing={4}>
+                    <Grid item xs={12}>
+                        <RequestForm
+                            setImage={setSignature}
+                            image={signature}
+                            formState={formState}
+                            control={control}
+                            register={register}
+                            sendingRequest={sendingRequest}
+                            buttonText="Update"
+                        />
+                    </Grid>
+
                 </Grid>
-            </Grid>
-        </Card>
+            </Box>
+        </Paper>
     )
 }
 

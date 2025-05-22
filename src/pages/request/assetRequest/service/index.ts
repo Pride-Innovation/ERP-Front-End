@@ -29,7 +29,7 @@ const updateAssetRequestService = async (body: Object, id: string | number) => {
         });
         return response?.data
     } catch (error) {
-        throw (error)
+        return (error)
     }
 }
 

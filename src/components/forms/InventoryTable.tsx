@@ -31,15 +31,14 @@ import { RootState } from '../../store';
 import { RequestContext } from '../../context/request/RequestContext';
 import { RowData } from './interface';
 
-const initialData: RowData[] = [
-    { id: 1, name: '', groupName: '', quantity: 0 },
-];
+// const initialData: RowData[] = [
+//     { id: 1, name: '', groupName: '', quantity: 0 },
+// ];
 
 const InventoryTable = () => {
     const { fetchAllCommodities } = CommodityUtills()
-    const [rows, setRows] = useState<RowData[]>(initialData);
     const [itemOptions, setItemOptions] = useState<{ name: string; groupName: string }[]>([]);
-    const { setRequestCommodities } = useContext(RequestContext);
+    const { rows, setRows } = useContext(RequestContext);
 
     const theme = useTheme();
     const { commodities } = useSelector((state: RootState) => state.CommodityStore);
@@ -79,12 +78,6 @@ const InventoryTable = () => {
             setItemOptions(options);
         }
     }, [commodities]);
-
-    useEffect(() => {
-        if (rows.length > 0) {
-            setRequestCommodities(rows)
-        }
-    }, [rows])
 
     return (
         <Paper elevation={4} sx={{ p: 4, borderRadius: 2, boxShadow: "none", border: "1px solid #C9C9C9" }}>

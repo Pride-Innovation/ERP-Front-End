@@ -27,7 +27,7 @@ const CreateRequest = () => {
     const [sendingRequest, setSendingRequest] = useState(false);
     const [signature, setSignature] = useState("");
     const [file, setFile] = useState<File | null>(null);
-    const { requestCommodities } = useContext(RequestContext);
+    const { rows } = useContext(RequestContext);
 
     const {
         control,
@@ -46,7 +46,7 @@ const CreateRequest = () => {
 
     const onSubmit = async (formData: IRequest) => {
         setSendingRequest(true);
-        const result = validateInventoryItems(requestCommodities);
+        const result = validateInventoryItems(rows);
 
         if (result.isValid && result.validData) {
 
@@ -89,7 +89,7 @@ const CreateRequest = () => {
                     mb: 3
                 }}
             >
-                Create a Request
+                Create Request
             </Typography>
             <Divider sx={{ mb: 4 }} />
             <Box component="form" autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
