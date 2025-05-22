@@ -22,12 +22,19 @@ import { RequestContext } from "../../../context/request/RequestContext";
 import { validateInventoryItems } from "../../../utils/helpers";
 import { toast } from "react-toastify";
 import { createAssetRequestService } from "./service";
+import { RowData } from "../../../components/forms/interface";
+
+const initialData: RowData[] = [
+    { id: 1, name: '', groupName: '', quantity: 0 },
+];
 
 const CreateRequest = () => {
     const [sendingRequest, setSendingRequest] = useState(false);
     const [signature, setSignature] = useState("");
     const [file, setFile] = useState<File | null>(null);
-    const { rows } = useContext(RequestContext);
+    const { rows, setRows } = useContext(RequestContext);
+
+    useEffect(() => { setRows(initialData) }, []);
 
     const {
         control,

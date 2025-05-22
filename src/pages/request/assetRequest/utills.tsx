@@ -28,6 +28,8 @@ import { useNavigate } from 'react-router';
 import { ROUTES } from '../../../core/routes/routes';
 import { RequestContext } from '../../../context/request/RequestContext';
 import moment from 'moment';
+import AddTaskIcon from '@mui/icons-material/AddTask';
+import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 
 const RequestUtills = () => {
     const endPoint = 'requests';
@@ -94,7 +96,7 @@ const RequestUtills = () => {
     } = requestMock[0];
 
     const rowData = {
-        image: requestMock[0]?.signaturePath,
+        // image: requestMock[0]?.signaturePath,
         name: requestMock[0]?.name,
         requestDate: requestMock[0]?.createDate,
         priority: requestMock[0]?.priority,
@@ -108,7 +110,9 @@ const RequestUtills = () => {
             options: [
                 { value: crudStates.delete, label: "Delete", icon: <InfoIcon fontSize='small' color='error' /> },
                 { value: crudStates.update, label: "Update", icon: <ModeEditIcon fontSize='small' color='info' /> },
-                { value: crudStates.read, label: "View Details", icon: <RemoveRedEyeIcon fontSize='small' color='inherit' /> }
+                { value: crudStates.read, label: "View Details", icon: <RemoveRedEyeIcon fontSize='small' color='inherit' /> },
+                { value: crudStates.approve, label: "Approve Request", icon: <AddTaskIcon fontSize='small' color='primary' /> },
+                { value: crudStates.read, label: "Reject Request", icon: <RemoveCircleOutlineIcon fontSize='small' color='error' /> }
             ]
         },
     };
@@ -148,6 +152,7 @@ const RequestUtills = () => {
             options: [
                 { label: "High", value: "high" },
                 { label: "Low", value: "low" },
+                { label: "Medium", value: "medium" },
             ]
         },
         {
@@ -174,7 +179,7 @@ const RequestUtills = () => {
             return (
                 {
                     ...fielsdata,
-                    image: request.signaturePath,
+                    // image: request.signaturePath,
                     name: request.name,
                     requestDate: moment(request.createDate).format('Do MMMM YYYY, h:mm a'),
                     priority: request.priority,

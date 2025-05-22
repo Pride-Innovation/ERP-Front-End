@@ -31,9 +31,6 @@ import { RootState } from '../../store';
 import { RequestContext } from '../../context/request/RequestContext';
 import { RowData } from './interface';
 
-// const initialData: RowData[] = [
-//     { id: 1, name: '', groupName: '', quantity: 0 },
-// ];
 
 const InventoryTable = () => {
     const { fetchAllCommodities } = CommodityUtills()

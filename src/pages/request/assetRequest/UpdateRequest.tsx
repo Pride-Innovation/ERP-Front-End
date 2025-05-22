@@ -27,6 +27,7 @@ const UpdateRequest = () => {
     const { id } = useParams<{ id: string }>();
     const [defaultRequest, setDefaultRequest] = useState<IRequest>(requestMock[0]);
     const { setRows, rows } = useContext(RequestContext);
+    const [file, setFile] = useState<File | null>(null);
 
     const findAssetRequestById = async () => {
         const response = await findAssetRequestByIDService(id as string);
@@ -66,7 +67,6 @@ const UpdateRequest = () => {
     const onSubmit = async (formData: IRequest) => {
         setSendingRequest(true);
         const result = validateInventoryItems(rows);
-        console.log(formData, result.validData, "Information!!")
 
         if (result.isValid && result.validData) {
 
@@ -75,7 +75,7 @@ const UpdateRequest = () => {
             payload.append("name", formData.name);
             payload.append("description", formData.description as string);
 
-            // if (file) payload.append("file", file);
+            if (file) payload.append("file", file);
 
             const formattedCommodities = result.validData.map(item => ({
                 commodityId: item.id,
@@ -87,7 +87,7 @@ const UpdateRequest = () => {
             try {
                 const response = await updateAssetRequestService(payload, id as string) as IRequestAxiosResponse
                 if (response.status === 201) {
-                    toast.success("Request created successfully")
+                    toast.success("Request updated successfully")
                 }
             } catch (error) {
                 console.log(error)
@@ -118,6 +118,7 @@ const UpdateRequest = () => {
                     <Grid item xs={12}>
                         <RequestForm
                             setImage={setSignature}
+                            setFile={setFile}
                             image={signature}
                             formState={formState}
                             control={control}
