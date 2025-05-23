@@ -106,7 +106,7 @@ const RejectRequest = ({
             </Grid>
 
             <Grid item xs={12}>
-                <Typography variant="subtitle1" sx={{ mb: 1 }}>
+                <Typography variant="subtitle1" sx={{ mb: 1, color: theme.palette.secondary.main }}>
                     Requested Commodities:
                 </Typography>
                 {loading ? (
