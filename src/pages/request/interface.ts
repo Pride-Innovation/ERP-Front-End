@@ -194,3 +194,12 @@ export interface IRequestsAxiosResponse extends IAxiosResponse {
 export interface IRequestAxiosResponse extends IAxiosResponse {
     data: IRequest
 }
+
+
+export interface IRejectRequest {
+    handleClose: () => void;
+    sendingRequest: boolean;
+    buttonText: string;
+    request: IRequest;
+    setSendingRequest: Dispatch<SetStateAction<boolean>>
+}

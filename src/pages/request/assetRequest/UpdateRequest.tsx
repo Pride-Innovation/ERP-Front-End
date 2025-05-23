@@ -25,13 +25,21 @@ const UpdateRequest = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
     const [signature, setSignature] = useState<string>("")
     const { id } = useParams<{ id: string }>();
-    const [defaultRequest, setDefaultRequest] = useState<IRequest>(requestMock[0]);
+    const [defaultRequest, setDefaultRequest] = useState<any>(requestMock[0]);
     const { setRows, rows } = useContext(RequestContext);
     const [file, setFile] = useState<File | null>(null);
 
     const findAssetRequestById = async () => {
-        const response = await findAssetRequestByIDService(id as string);
-        setDefaultRequest({ ...response, status: response?.status?.id })
+        try {
+            const response = await findAssetRequestByIDService(id as string) as IRequestAxiosResponse;
+            if (response.status === 200) {
+                const { data } = response
+                setDefaultRequest({ ...data, status: data.status?.id })
+            }
+        } catch (error) {
+            console.log(error)
+        }
+
     }
 
     useEffect(() => { findAssetRequestById() }, [id]);

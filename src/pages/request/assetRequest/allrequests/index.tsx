@@ -5,7 +5,7 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { Grid } from "@mui/material";
 import { RequestContext } from "../../../../context/request/RequestContext";
@@ -17,10 +17,12 @@ import TableComponent from "../../../../components/tables/TableComponent";
 import RequestUtills from "../utills";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../store";
+import RejectRequest from "../RejectRequest";
 
 const Request = () => {
     const { requestTableData } = useContext(RequestContext);
     const { fileData } = useContext(FileContext);
+    const [sendingRequest, setSendingRequest] = useState<boolean>(false);
     const { requests } = useSelector((state: RootState) => state.AssetsRequestsStore)
 
     const navigate = useNavigate()
@@ -37,7 +39,8 @@ const Request = () => {
         handleOptionClicked,
         count,
         handleRequest,
-        loading
+        loading,
+        currentRequest
     } = RequestUtills();
 
     useEffect(() => { fetchAllRequests() }, []);
@@ -55,22 +58,14 @@ const Request = () => {
 
     return (
         <React.Fragment>
-            {crudStates.delete === modalState &&
-                <ModalComponent width={"40%"} title='Delete Request' open={open} handleClose={handleClose}>
-                    {/* <DeleteRequest
-                        setSendingRequest={setLoading}
-                        sendingRequest={loading}
-                        handleClose={handleClose}
-                        buttonText='Confirm'
+            {crudStates.reject === modalState &&
+                <ModalComponent width={"40%"} title='Reject Request' open={open} handleClose={handleClose}>
+                    <RejectRequest
                         request={currentRequest}
-                    /> */}
-                    <p>Delete Request</p>
-                </ModalComponent>
-            }
-            {crudStates.read === modalState &&
-                <ModalComponent width={"60%"} title='Request Details' open={open} handleClose={handleClose}>
-                    {/* <RequestDetails sendingRequest={loading} setSendingRequest={setLoading} open={open} handleClose={handleClose} data={currentRequest} /> */}
-                    <p>REquest Details</p>
+                        sendingRequest={sendingRequest}
+                        setSendingRequest={setSendingRequest}
+                        handleClose={handleClose}
+                        buttonText="Reject" />
                 </ModalComponent>
             }
             <Grid xs={12} container>

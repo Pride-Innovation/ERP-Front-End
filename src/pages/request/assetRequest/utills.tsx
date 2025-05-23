@@ -112,7 +112,7 @@ const RequestUtills = () => {
                 { value: crudStates.update, label: "Update", icon: <ModeEditIcon fontSize='small' color='info' /> },
                 { value: crudStates.read, label: "View Details", icon: <RemoveRedEyeIcon fontSize='small' color='inherit' /> },
                 { value: crudStates.approve, label: "Approve Request", icon: <AddTaskIcon fontSize='small' color='primary' /> },
-                { value: crudStates.read, label: "Reject Request", icon: <RemoveCircleOutlineIcon fontSize='small' color='error' /> }
+                { value: crudStates.reject, label: "Reject Request", icon: <RemoveCircleOutlineIcon fontSize='small' color='error' /> }
             ]
         },
     };
@@ -130,6 +130,11 @@ const RequestUtills = () => {
                 break;
             case crudStates.read:
                 setModalState(crudStates.read)
+                setCurrentRequest(determineCurrentRequest(moduleID as number, requests as IRequest[]))
+                handleOpen();
+                break;
+            case crudStates.reject:
+                setModalState(crudStates.reject)
                 setCurrentRequest(determineCurrentRequest(moduleID as number, requests as IRequest[]))
                 handleOpen();
                 break;
