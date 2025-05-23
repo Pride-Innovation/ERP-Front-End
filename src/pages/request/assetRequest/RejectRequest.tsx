@@ -20,12 +20,12 @@ import {
     Paper,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
 import ButtonComponent from "../../../components/forms/Button";
 import { toast } from "react-toastify";
 import { findAssetRequestByIDService } from "./service";
 import { ICommodity } from "../../settings/commodity/interface";
 import { IRejectRequest, IRequestAxiosResponse } from "../interface";
+import InventoryOutlinedIcon from '@mui/icons-material/InventoryOutlined';
 
 const RejectRequest = ({
     setSendingRequest,
@@ -78,8 +78,18 @@ const RejectRequest = ({
 
         setSendingRequest(true);
         try {
-            // Place your API call or rejection logic here
-            // e.g. await rejectRequest({ id: request.id, comment })
+
+            /**
+             * NB: Please note that the status ID must match the Rejected Status ID in the Database.
+             */
+
+            const data = {
+                requestId: request.id,
+                approverId: request.currentApprover?.id,
+                statusId: 2,
+                comment
+            }
+
         } catch (error) {
             console.error(error);
         } finally {
@@ -95,7 +105,7 @@ const RejectRequest = ({
                     Are you sure you want to reject this request?
                 </Typography>
                 <Stack direction="row" spacing={1} alignItems="center">
-                    <CancelOutlinedIcon color="primary" />
+                    <InventoryOutlinedIcon color="primary" />
                     <Typography variant="h6" color="primary">
                         {request.name}
                     </Typography>
