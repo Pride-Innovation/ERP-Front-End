@@ -49,7 +49,7 @@ const CommodityCard = ({ commodity, updateCommodity, deleteCommodity }: ICommodi
                 <Box display="flex" alignItems="center">
                     <LayersOutlinedIcon fontSize="small" sx={{ mr: 1, color: theme.palette.secondary.main }} />
                     <Typography variant="body2">
-                        <strong>Group:</strong> {commodity.groupName}
+                        <strong>Unit of Measure:</strong> {commodity.groupName}
                     </Typography>
                 </Box>
                 <Box display="flex" alignItems="center">

@@ -203,3 +203,12 @@ export interface IRejectRequest {
     request: IRequest;
     setSendingRequest: Dispatch<SetStateAction<boolean>>
 }
+
+
+export interface IApproveRequest {
+    handleClose: () => void;
+    sendingRequest: boolean;
+    buttonText: string;
+    request: IRequest;
+    setSendingRequest: Dispatch<SetStateAction<boolean>>
+}

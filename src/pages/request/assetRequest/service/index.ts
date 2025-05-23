@@ -52,9 +52,19 @@ const findAssetRequestByIDService = async (id: string | number) => {
     }
 }
 
+const assetRequestApprovalRejectionService = async (body: Object) => {
+    try {
+        const response = await axiosInstance.post("approvals", body);
+        return response;
+    } catch (error) {
+        return error;
+    }
+}
+
 export {
     createAssetRequestService,
     updateAssetRequestService,
     deleteAssetRequestService,
-    findAssetRequestByIDService
+    findAssetRequestByIDService,
+    assetRequestApprovalRejectionService
 }

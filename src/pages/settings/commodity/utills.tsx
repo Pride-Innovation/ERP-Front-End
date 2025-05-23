@@ -78,7 +78,7 @@ const CommodityUtills = () => {
         },
         {
             value: "groupName",
-            label: 'Group Name',
+            label: 'Unit of Measure',
             type: "input"
         },
         {
@@ -101,8 +101,7 @@ const CommodityUtills = () => {
         fetchAllCommodities,
         updateCommodityInStore,
         removeCommodityFromStore
-    }
-    )
+    })
 }
 
-export default CommodityUtills
+export default CommodityUtills;

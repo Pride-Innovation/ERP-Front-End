@@ -24,16 +24,16 @@ import ButtonComponent from "../../../components/forms/Button";
 import { toast } from "react-toastify";
 import { assetRequestApprovalRejectionService, findAssetRequestByIDService } from "./service";
 import { ICommodity } from "../../settings/commodity/interface";
-import { IRejectRequest, IRequestAxiosResponse } from "../interface";
+import { IApproveRequest, IRequestAxiosResponse } from "../interface";
 import InventoryOutlinedIcon from '@mui/icons-material/InventoryOutlined';
 
-const RejectRequest = ({
+const ApproveRequest = ({
     setSendingRequest,
     handleClose,
     request,
     sendingRequest,
     buttonText,
-}: IRejectRequest) => {
+}: IApproveRequest) => {
     const theme = useTheme();
 
     const [comment, setComment] = useState("");
@@ -72,7 +72,7 @@ const RejectRequest = ({
 
     const handleRequestRejection = async () => {
         if (!comment.trim()) {
-            toast.error("Please provide a comment before rejecting.");
+            toast.error("Please provide a comment before approving.");
             return;
         }
 
@@ -80,13 +80,13 @@ const RejectRequest = ({
         try {
 
             /**
-             * NB: Please note that the status ID must match the Rejected Status ID in the Database.
+             * NB: Please note that the status ID must match the Approved Status ID in the Database.
              */
 
             const data = {
                 requestId: request.id,
                 approverId: request.currentApprover?.id,
-                statusId: 2,
+                statusId: 3,
                 comment
             }
             const response = await assetRequestApprovalRejectionService(data) as IRequestAxiosResponse;
@@ -104,7 +104,7 @@ const RejectRequest = ({
         <Grid container spacing={4}>
             <Grid item xs={12}>
                 <Typography variant="body1" sx={{ mb: 1 }}>
-                    Are you sure you want to reject this request?
+                    Are you sure you want to approve this request?
                 </Typography>
                 <Stack direction="row" spacing={1} alignItems="center">
                     <InventoryOutlinedIcon color="primary" />
@@ -208,7 +208,7 @@ const RejectRequest = ({
                     />
                     <ButtonComponent
                         handleClick={handleRequestRejection}
-                        buttonColor="error"
+                        buttonColor="primary"
                         type="submit"
                         sendingRequest={sendingRequest}
                         buttonText={buttonText}
@@ -219,4 +219,4 @@ const RejectRequest = ({
     );
 };
 
-export default RejectRequest;
+export default ApproveRequest;
