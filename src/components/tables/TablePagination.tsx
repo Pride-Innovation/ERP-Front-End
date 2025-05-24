@@ -5,7 +5,7 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { GridPaginationModel, GridRowsProp } from "@mui/x-data-grid";
+import { GridPaginationModel } from "@mui/x-data-grid";
 import { ICustomTablePagination } from "./interface";
 import { useContext } from "react";
 import { fetchRowsService } from "../../core/apis/globalService";
@@ -21,7 +21,6 @@ const CustomTablePagination = ({ endPoint }: ICustomTablePagination) => {
     const { setRows } = useContext(RowContext);
 
     const handleTablePagination = async (model: GridPaginationModel) => {
-        console.log(model, "Model Details Point")
         try {
             const response = await fetchRowsService({
                 pageNumber: model.page,
