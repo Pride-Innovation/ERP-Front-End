@@ -11,25 +11,37 @@ import { useContext } from "react";
 import { fetchRowsService } from "../../core/apis/globalService";
 import RowContext from "../../context/row/RowContext";
 import { ErrorMessage } from "../../core/apis/axiosInstance";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "../../store";
+import { loadAllRequests } from "../../pages/request/assetRequest/slice";
 
 const CustomTablePagination = ({ endPoint }: ICustomTablePagination) => {
+    const dispatch = useDispatch<AppDispatch>();
 
     const { setRows } = useContext(RowContext);
 
     const handleTablePagination = async (model: GridPaginationModel) => {
+        console.log(model, "Model Details Point")
         try {
             const response = await fetchRowsService({
-                pageNumber: (model.page + 1),
+                pageNumber: model.page,
                 pageSize: model.pageSize,
                 endPoint
-            }) as unknown as GridRowsProp;
-            setRows([...response]);
+            }) as any;
+
+            // setRows([...response]);
+            dispatch(loadAllRequests(response.data.content));
+            console.log(response?.data?.content, "Response Data")
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : ErrorMessage;
             console.log(errorMessage)
         }
 
     }
+    /**
+     * TO DO
+     * handle pagination based on current endpoint. If users, we will have to
+     */
     return (
         { handleTablePagination }
     )
