@@ -31,6 +31,8 @@ import DoNotDisturbAltIcon from '@mui/icons-material/DoNotDisturbAlt';
 import SpeedIcon from '@mui/icons-material/Speed';
 import TabComponent from "../../../../components/tabs";
 import OtherDetails from "./OtherDetails";
+import RequestCommodties from "./RequestCommodties";
+import { ICommodity } from "../../../settings/commodity/interface";
 
 
 const RequestDetails = () => {
@@ -119,11 +121,14 @@ const RequestDetails = () => {
                                         position: 0,
                                         content: <OtherDetails request={request} />
                                     },
-                                    // {
-                                    //     label: "ASSIGNMENT HISTORY",
-                                    //     position: 1,
-                                    //     content: <AssignmentHistory id={currentInventory?.id as string} />
-                                    // }
+                                    {
+                                        label: "Asset Commodities",
+                                        position: 1,
+                                        content: <RequestCommodties requestCommodties={request.commodities as Array<{
+                                            commodity: ICommodity
+                                            quantity: number
+                                        }>} />
+                                    }
                                 ]}
                             />
                         </CardContent>

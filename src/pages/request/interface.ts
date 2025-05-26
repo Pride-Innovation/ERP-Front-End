@@ -212,3 +212,12 @@ export interface IApproveRequest {
     request: IRequest;
     setSendingRequest: Dispatch<SetStateAction<boolean>>
 }
+
+
+export interface ICommodityTableData {
+    id: number,
+    name: string;
+    unitOfMeasure: string;
+    assetType: string;
+    quantity: number;
+}
