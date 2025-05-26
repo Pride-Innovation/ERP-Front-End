@@ -30,6 +30,7 @@ const UserUtils = () => {
     const endPoint: string = "users";
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
     const [modalState, setModalState] = useState<string>("");
+    const [count, setCount] = useState<number>(0)
     const [open, setOpen] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false);
     const [usersTableData, setUsersTableData] = useState<Array<IUserTableData>>([] as Array<IUserTableData>);
@@ -82,7 +83,8 @@ const UserUtils = () => {
                 endPoint, params
             }) as IUsersAxiosResponse;
             if (response.status === 200) {
-                dispatch(loadUsers(response.data.content))
+                dispatch(loadUsers(response.data.content));
+                setCount(response.data.totalElements)
             }
 
         } catch (error) {
@@ -311,7 +313,9 @@ const UserUtils = () => {
         fetchAllUsers,
         handleOptionClicked,
         usersTableData,
-        loading
+        loading,
+        endPoint,
+        count
     })
 }
 

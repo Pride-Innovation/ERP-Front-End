@@ -17,7 +17,7 @@ import { getTableHeaders } from "../../../components/tables/getTableHeaders";
 import { useDispatch } from "react-redux";
 import {
     loadAssetCategories,
-    loadUsers
+    // loadUsers
 } from "../slice";
 import {
     listCategoriesService,
@@ -65,7 +65,7 @@ const OfficeEquipmentUtills = () => {
     const handleClose = () => setOpen(false);
 
     const updateReduxStore = async () => {
-        dispatch(loadUsers(await listUsersService()));
+        // dispatch(loadUsers(await listUsersService()));
         dispatch(loadAssetCategories(await listCategoriesService()));
         dispatch(loadStatuses(await listAssetStatusesService()));
     }

@@ -6,6 +6,8 @@ Managing Director
 */
 
 import { GridRowsProp, GridToolbarProps } from "@mui/x-data-grid";
+import { IUsersAxiosResponse } from "../../pages/users/interface";
+import { IRequestsAxiosResponse } from "../../pages/request/interface";
 
 export interface IOptions {
     value: string | number, label: string, icon?: JSX.Element, header?: boolean;
@@ -81,3 +83,5 @@ export interface ICustomTableFilterOperator {
 export interface ICustomTablePagination {
     endPoint: string;
 }
+
+export type IhandleTablePagination = IUsersAxiosResponse | IRequestsAxiosResponse;

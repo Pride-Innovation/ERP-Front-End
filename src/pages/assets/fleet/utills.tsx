@@ -19,7 +19,7 @@ import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
 import {
     loadAssetCategories,
-    loadUsers
+    // loadUsers
 } from "../slice";
 import {
     listCategoriesService,
@@ -60,7 +60,7 @@ const FleetUtills = () => {
     const { branches } = useSelector((state: RootState) => state.BranchStore);
 
     const updateReduxStore = async () => {
-        dispatch(loadUsers(await listUsersService()));
+        // dispatch(loadUsers(await listUsersService()));
         dispatch(loadAssetCategories(await listCategoriesService()));
         dispatch(loadStatuses(await listAssetStatusesService()));
     }

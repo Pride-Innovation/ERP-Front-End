@@ -22,7 +22,7 @@ import {
 import { AppDispatch, RootState } from "../../../store";
 import {
     loadAssetCategories,
-    loadUsers,
+    // loadUsers,
 } from "../slice";
 import { loadBranches } from "../../settings/branch/slice";
 import { loadStatuses } from "../../settings/statuses/slice";
@@ -57,7 +57,7 @@ const ITEquipmentUtills = () => {
     const { branches } = useSelector((state: RootState) => state.BranchStore);
 
     const updateReduxStore = async () => {
-        dispatch(loadUsers(await listUsersService()));
+        // dispatch(loadUsers(await listUsersService()));
         dispatch(loadAssetCategories(await listCategoriesService()));
         dispatch(loadStatuses(await listAssetStatusesService()));
     }

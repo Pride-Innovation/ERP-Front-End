@@ -32,6 +32,8 @@ const Users = () => {
     fetchAllUsers,
     handleOptionClicked,
     loading,
+    endPoint,
+    count
   } = UserUtils();
 
   useEffect(() => { fetchAllUsers() }, []);
@@ -61,17 +63,21 @@ const Users = () => {
       }
       {columnHeaders.length > 0 &&
         <TableComponent
+          endPoint={endPoint}
+          loading={loading}
+          count={count}
+          exportData
           createAction
           importData
-          exportData
-          handleOptionClicked={handleOptionClicked}
-          onCreationHandler={handleCreation}
-          module='user'
+          module="user"
           header={header}
-          loading={loading}
           rows={usersTableData}
           columnHeaders={columnHeaders}
-        />}
+          onCreationHandler={handleCreation}
+          handleOptionClicked={handleOptionClicked}
+          paginationMode='server'
+        />
+      }
     </Grid>
   )
 }

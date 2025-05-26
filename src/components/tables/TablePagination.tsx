@@ -6,15 +6,30 @@ Managing Director
 */
 
 import { GridPaginationModel } from "@mui/x-data-grid";
-import { ICustomTablePagination } from "./interface";
+import { ICustomTablePagination, IhandleTablePagination } from "./interface";
 import { fetchRowsService } from "../../core/apis/globalService";
 import { ErrorMessage } from "../../core/apis/axiosInstance";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../../store";
 import { loadAllRequests } from "../../pages/request/assetRequest/slice";
+import { loadUsers } from "../../pages/users/slice";
+
 
 const CustomTablePagination = ({ endPoint }: ICustomTablePagination) => {
     const dispatch = useDispatch<AppDispatch>();
+
+    const handleReduxStoreUpdate = (url: string, content: Array<Record<string, any>>) => {
+        switch (url) {
+            case "requests":
+                dispatch(loadAllRequests(content));
+                break;
+            case "users":
+                dispatch(loadUsers(content))
+                break;
+            default:
+                break
+        }
+    }
 
 
     const handleTablePagination = async (model: GridPaginationModel) => {
@@ -23,23 +38,20 @@ const CustomTablePagination = ({ endPoint }: ICustomTablePagination) => {
                 pageNumber: model.page,
                 pageSize: model.pageSize,
                 endPoint
-            }) as any;
+            }) as IhandleTablePagination;
+            const { content } = response.data
 
-            dispatch(loadAllRequests(response.data.content));
-            console.log(response?.data?.content, "Response Data")
+            if (content.length > 0) {
+                handleReduxStoreUpdate(endPoint, content)
+            }
+
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : ErrorMessage;
             console.log(errorMessage)
         }
 
     }
-    /**
-     * TO DO
-     * handle pagination based on current endpoint. If users, we will have to
-     */
-    return (
-        { handleTablePagination }
-    )
+    return ({ handleTablePagination })
 }
 
 export default CustomTablePagination;
