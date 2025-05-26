@@ -129,9 +129,7 @@ const RequestUtills = () => {
                 handleOpen();
                 break;
             case crudStates.read:
-                setModalState(crudStates.read)
-                setCurrentRequest(determineCurrentRequest(moduleID as number, requests as IRequest[]))
-                handleOpen();
+                navigate(`${ROUTES.READ_REQUEST}/${moduleID}`)
                 break;
             case crudStates.reject:
                 setModalState(crudStates.reject)

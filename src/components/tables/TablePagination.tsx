@@ -7,9 +7,7 @@ Managing Director
 
 import { GridPaginationModel } from "@mui/x-data-grid";
 import { ICustomTablePagination } from "./interface";
-import { useContext } from "react";
 import { fetchRowsService } from "../../core/apis/globalService";
-import RowContext from "../../context/row/RowContext";
 import { ErrorMessage } from "../../core/apis/axiosInstance";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../../store";
@@ -18,7 +16,6 @@ import { loadAllRequests } from "../../pages/request/assetRequest/slice";
 const CustomTablePagination = ({ endPoint }: ICustomTablePagination) => {
     const dispatch = useDispatch<AppDispatch>();
 
-    const { setRows } = useContext(RowContext);
 
     const handleTablePagination = async (model: GridPaginationModel) => {
         try {
@@ -28,7 +25,6 @@ const CustomTablePagination = ({ endPoint }: ICustomTablePagination) => {
                 endPoint
             }) as any;
 
-            // setRows([...response]);
             dispatch(loadAllRequests(response.data.content));
             console.log(response?.data?.content, "Response Data")
         } catch (error) {

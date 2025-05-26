@@ -38,6 +38,8 @@ import UpdateTransportRequest from '../../pages/request/transportRequest/UpdateT
 import SettingsSubRoutes from './subroutes/SettingsSub'
 import Inventory from '../../pages/inventory'
 import InventoryDetails from '../../pages/inventory/view/InventoryDetails'
+import RequestSubroutes from './subroutes/Request'
+import RequestDetails from '../../pages/request/assetRequest/view'
 
 const AppRoutes = () => {
   // const { routePermission } = RoutesUtills();
@@ -71,10 +73,10 @@ const AppRoutes = () => {
           </Route>
 
           <Route path={ROUTES.REQUEST} element={<RequestsManagement />}>
-            <Route index element={<Request />} />
-            <Route path={ROUTES.LIST_PENDING} element={<PendingRequest />} />
-            <Route path={ROUTES.LIST_REJECTED} element={<RejectedRequest />} />
+            {RequestSubroutes()}
           </Route>
+          <Route path={`${ROUTES.READ_REQUEST}/:id`} element={<RequestDetails />} />
+
           <Route path={ROUTES.TRANSPORT_REQUEST} element={<TransportRequestsManagement />}>
             <Route index element={<TransportRequest />} />
             <Route path={ROUTES.LIST_TRANSPORT_PENDING} element={<TransportPendingRequest />} />
