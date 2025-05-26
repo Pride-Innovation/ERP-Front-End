@@ -78,12 +78,22 @@ const RequestDetails = () => {
             <Grid container spacing={4}>
                 <Grid item xs={12} md={4}>
                     <Card sx={{ boxShadow: 0, bgcolor: grey[100] }}>
-                        <CardMedia
-                            component="img"
-                            height="250"
-                            image={PlaceHolder}
-                            alt="Equipment Image"
-                        />
+                        <Box sx={{ height: "250px", position: "relative" }}>
+                            <CardMedia
+                                component="img"
+                                height="250px"
+                                image={PlaceHolder}
+                                alt="Equipment Image"
+                            />
+                            <Box sx={{ position: "absolute", bottom: 20, right: 20, width: "40%" }}>
+                                <ButtonComponent
+                                    sendingRequest={false}
+                                    buttonText="View Attachment"
+                                    variant="contained"
+                                    buttonColor="secondary"
+                                    handleClick={() => console.log("Button Clicked")} />
+                            </Box>
+                        </Box>
                         <CardContent>
                             <Typography variant="h5" gutterBottom sx={{ color: "#1976d2" }}>
                                 {request?.name}
