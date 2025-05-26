@@ -12,8 +12,8 @@ import ContentPasteIcon from '@mui/icons-material/ContentPaste';
 
 
 const DetailSection = ({
-    text, label, icon
-}: { text: string; label: string; icon?: JSX.Element }) => {
+    text, label, icon, chip
+}: { text: string; label: string; icon?: JSX.Element, chip?: JSX.Element }) => {
     const { determineTimeLineDotColor } = TableUtills();
 
     return (
@@ -31,21 +31,27 @@ const DetailSection = ({
                     justifyContent: "space-between"
                 }}>
                 <strong>{label}:</strong>
-                <span style={{ display: "flex", alignItems: "center" }}>
-                    {
-                        label === "Status" &&
-                        <TimeLineDot status={determineTimeLineDotColor(text.toLocaleLowerCase())} />
+                {
+                    chip ? chip :
+                        (
+                            <span style={{ display: "flex", alignItems: "center" }}>
+                                {
+                                    label === "Status" &&
+                                    <TimeLineDot status={determineTimeLineDotColor(text.toLocaleLowerCase())} />
 
-                    }
-                    {text}
-                    {
-                        label === "Serial Number" &&
-                        <ContentPasteIcon fontSize='small' color='info' sx={{ ml: "5px" }} />
-                    }
-                    {
-                        label === "Purchase Cost" && <span style={{ marginLeft: "5px" }}>UGX</span>
-                    }
-                </span>
+                                }
+                                {text}
+                                {
+                                    label === "Serial Number" &&
+                                    <ContentPasteIcon fontSize='small' color='info' sx={{ ml: "5px" }} />
+                                }
+                                {
+                                    label === "Purchase Cost" && <span style={{ marginLeft: "5px" }}>UGX</span>
+                                }
+                            </span>
+                        )
+                }
+
             </Typography>
         </Box>
     );

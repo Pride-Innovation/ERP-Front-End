@@ -14,13 +14,64 @@ import {
     Divider,
     Grid,
     Stack,
-    Typography
+    Typography,
+    useTheme
 } from "@mui/material";
 import { grey } from "@mui/material/colors";
 import ButtonComponent from "../../../../components/forms/Button";
+import PlaceHolder from "../../../../statics/images/Placeholder.png"
+import { useParams } from "react-router";
+import { useEffect, useState } from "react";
+import { IRequest, IRequestAxiosResponse } from "../../interface";
+import { findAssetRequestByIDService } from "../service";
+import DetailSection from "../../../assets/trails/DetailSection";
+import ChipComponent from "../../../../components/forms/Chip";
+import AccessAlarmsIcon from '@mui/icons-material/AccessAlarms';
+import DoNotDisturbAltIcon from '@mui/icons-material/DoNotDisturbAlt';
+import SpeedIcon from '@mui/icons-material/Speed';
 
 
 const RequestDetails = () => {
+    const [request, setRequest] = useState<IRequest>({} as IRequest);
+    const { id } = useParams<{ id: string }>();
+    const theme = useTheme();
+
+    const fetchRequestDetails = async () => {
+        try {
+            const response = await findAssetRequestByIDService(id as string) as IRequestAxiosResponse;
+            if (response.status === 200) {
+                setRequest(response.data)
+            }
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    useEffect(() => {
+        if (id) { fetchRequestDetails() }
+    }, [id]);
+
+    const determinePriority = (
+        request?.priority === "high" ?
+            <ChipComponent variant='filled' label='High' icon={
+                <AccessAlarmsIcon
+                    fontSize='small' />
+            } size='medium' color='error' /> :
+            request?.priority === "medium" ?
+                <ChipComponent variant='filled' label='Medium'
+                    icon={
+                        <DoNotDisturbAltIcon
+                            fontSize='small' />
+                    } size='medium' color='secondary' /> :
+                <ChipComponent variant='filled' label='Low' icon={
+                    <SpeedIcon
+                        fontSize='small'
+                        sx={{ color: theme.palette.background.paper }}
+                    />}
+                    size='medium'
+                    color='success'
+                />
+    )
 
     return (
         <Card sx={{ p: 4, boxShadow: "none" }}>
@@ -30,19 +81,18 @@ const RequestDetails = () => {
                         <CardMedia
                             component="img"
                             height="250"
-                            // image={PlaceHolder}
+                            image={PlaceHolder}
                             alt="Equipment Image"
                         />
                         <CardContent>
                             <Typography variant="h5" gutterBottom sx={{ color: "#1976d2" }}>
-                                {/* {currentInventory?.name} */}
-                                curent name
+                                {request?.name}
                             </Typography>
                             <Divider />
-                            {/* <DetailSection label='Cost Price' text={currentInventory?.costPrice} /> */}
-                            {/* {currentInventory?.purchasePrice && <DetailSection label="Purchase Price" text={currentInventory?.purchasePrice} />}
-                            {currentInventory?.location && <DetailSection label="Location" text={currentInventory?.location} />}
-                            {currentInventory?.description && <DetailSection label="Description" text={currentInventory?.description} />} */}
+                            <DetailSection label='Requested By' text={`${request?.requester?.firstName} ${request.requester?.lastName}` as string} />
+                            {request.priority && <DetailSection label="Priority" text={request?.priority as string} chip={determinePriority} />}
+                            {request?.status && <DetailSection label="Status" text={request?.status.name as string} />}
+                            {request?.description && <DetailSection label="Description" text={request?.description} />}
                         </CardContent>
                     </Card>
                 </Grid>
