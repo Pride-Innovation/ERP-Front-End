@@ -29,6 +29,8 @@ import ChipComponent from "../../../../components/forms/Chip";
 import AccessAlarmsIcon from '@mui/icons-material/AccessAlarms';
 import DoNotDisturbAltIcon from '@mui/icons-material/DoNotDisturbAlt';
 import SpeedIcon from '@mui/icons-material/Speed';
+import TabComponent from "../../../../components/tabs";
+import OtherDetails from "./OtherDetails";
 
 
 const RequestDetails = () => {
@@ -110,20 +112,20 @@ const RequestDetails = () => {
                 <Grid item xs={12} md={8}>
                     <Card sx={{ boxShadow: 0, bgcolor: grey[100] }}>
                         <CardContent>
-                            {/* <TabComponent
+                            <TabComponent
                                 headers={[
                                     {
                                         label: "Other Details",
                                         position: 0,
-                                        content: <OtherDetails inventory={currentInventory} />
+                                        content: <OtherDetails request={request} />
                                     },
-                                    {
-                                        label: "ASSIGNMENT HISTORY",
-                                        position: 1,
-                                        content: <AssignmentHistory id={currentInventory?.id as string} />
-                                    }
+                                    // {
+                                    //     label: "ASSIGNMENT HISTORY",
+                                    //     position: 1,
+                                    //     content: <AssignmentHistory id={currentInventory?.id as string} />
+                                    // }
                                 ]}
-                            /> */}
+                            />
                         </CardContent>
                     </Card>
                 </Grid>
