@@ -76,6 +76,7 @@ const Users = () => {
           onCreationHandler={handleCreation}
           handleOptionClicked={handleOptionClicked}
           paginationMode='server'
+          searchAction
         />
       }
     </Grid>

@@ -82,12 +82,13 @@ const RequestCommodties = ({ requestCommodties }: {
                 endPoint=""
                 loading={false}
                 count={100}
-                exportData
-                createAction
-                header={{ plural: 'Assignment History', singular: 'Assignment' }}
+                exportData={false}
+                header={{ plural: 'Request Commodities', singular: 'Assignment' }}
                 module=""
                 rows={commoditiesTableData}
+                createAction={false}
                 columnHeaders={columnHeaders}
+                searchAction={false}
                 paginationMode='client'
             />)
 }

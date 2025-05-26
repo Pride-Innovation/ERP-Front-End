@@ -43,7 +43,8 @@ export interface ITableComponent {
     count?: number;
     loading?: boolean;
     endPoint?: string;
-    paginationMode?: 'server' | 'client'
+    paginationMode?: 'server' | 'client',
+    searchAction?: boolean;
 }
 
 export interface ITableToolBar {
@@ -57,6 +58,7 @@ export interface ITableToolBar {
     createAction: boolean;
     importData: boolean;
     exportData: boolean;
+    searchAction: boolean;
 }
 
 export interface CustomToolbarWrapperProps extends GridToolbarProps {
@@ -67,6 +69,7 @@ export interface CustomToolbarWrapperProps extends GridToolbarProps {
     createAction: boolean;
     importData: boolean;
     exportData: boolean;
+    searchAction: boolean;
 }
 
 export interface ITableFilter {

@@ -38,6 +38,7 @@ const TableComponent = ({
     exportData = false,
     count = 10,
     loading = false,
+    searchAction = false,
     endPoint = "users",
     paginationMode = 'server'
 }: ITableComponent) => {
@@ -157,6 +158,7 @@ const TableComponent = ({
                             <CustomToolbarWrapper
                                 createAction={createAction}
                                 exportData={exportData}
+                                searchAction={searchAction}
                                 importData={importData}
                                 header={header}
                                 onCreationHandler={() => onCreationHandler?.()}
