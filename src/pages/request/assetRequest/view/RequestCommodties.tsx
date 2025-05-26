@@ -10,17 +10,17 @@ const defaultCommodities: Array<{
     quantity: number
 }> = [
         {
-            "commodity": {
-                "id": 1,
-                "name": "Pens",
-                "groupName": "Box",
-                "assetType": {
-                    "id": 3,
-                    "name": "Stationery",
-                    "description": "Stationery"
+            commodity: {
+                id: 1,
+                name: "Pens",
+                groupName: "Box",
+                assetType: {
+                    id: 3,
+                    name: "Stationery",
+                    description: "Stationery"
                 }
             },
-            "quantity": 3
+            quantity: 3
         }]
 
 const RequestCommodties = ({ requestCommodties }: {
@@ -49,7 +49,7 @@ const RequestCommodties = ({ requestCommodties }: {
     }, []);
 
 
-    const handleUsersTableData = (commodities: Array<{
+    const handleCommoditiesTableData = (commodities: Array<{
         commodity: ICommodity
         quantity: number
     }>) => {
@@ -74,7 +74,7 @@ const RequestCommodties = ({ requestCommodties }: {
         setCommoditiesTableData(data);
     }
 
-    useEffect(() => { handleUsersTableData(requestCommodties) }, [requestCommodties]);
+    useEffect(() => { handleCommoditiesTableData(requestCommodties) }, [requestCommodties]);
 
     return columnHeaders.length === 0 || commoditiesTableData.length === 0 ? null :
         (
@@ -83,7 +83,7 @@ const RequestCommodties = ({ requestCommodties }: {
                 loading={false}
                 count={100}
                 exportData={false}
-                header={{ plural: 'Request Commodities', singular: 'Assignment' }}
+                header={{ plural: 'Request Commodities', singular: 'Commodities' }}
                 module=""
                 rows={commoditiesTableData}
                 createAction={false}

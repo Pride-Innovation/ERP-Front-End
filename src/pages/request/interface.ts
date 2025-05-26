@@ -24,6 +24,19 @@ export interface IAssetParticulars {
     engravedNumber: string;
 }
 
+export interface IRequestReport {
+    id?: number | string;
+    request: IRequest;
+    approver: IUser;
+    status: IStatus;
+    comment: string;
+    createDate: string;
+    lastModified: string;
+    createdBy: IUser;
+    lastModifiedBy: IUser;
+    message?: string;
+}
+
 export interface IRequest {
     id?: string | number,
     name: string,
@@ -37,7 +50,7 @@ export interface IRequest {
     createdBy?: IUser | null,
     lastModifiedBy?: IUser | null,
     requester?: IUser | null
-    // requestReports: [],
+    requestReports?: Array<IRequestReport>,
     currentApprover?: IUser | null,
     commodities?: Array<{
         commodity: ICommodity,
@@ -45,7 +58,6 @@ export interface IRequest {
     }> | null,
     emailMessage?: string | null
 }
-
 
 export interface IRequestTableData {
     name: string;
@@ -146,18 +158,7 @@ export interface ITransportRequestTableData {
     requester?: IUser
 }
 
-export interface IRequestReport {
-    id?: number | string;
-    request: IRequest;
-    approver: IUser;
-    status: IStatus;
-    comment: string;
-    createDate: string;
-    lastModified: string;
-    createdBy: IUser;
-    lastModifiedBy: IUser;
-    message?: string;
-}
+
 
 
 export interface ITransportRequestForm {
@@ -220,4 +221,13 @@ export interface ICommodityTableData {
     unitOfMeasure: string;
     assetType: string;
     quantity: number;
+}
+
+
+export interface IRequestReportTableData {
+    id: number;
+    approver: string;
+    status: string;
+    comment: string;
+    createDate: string;
 }

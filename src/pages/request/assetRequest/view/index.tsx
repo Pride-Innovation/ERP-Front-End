@@ -22,7 +22,7 @@ import ButtonComponent from "../../../../components/forms/Button";
 import PlaceHolder from "../../../../statics/images/Placeholder.png"
 import { useParams } from "react-router";
 import { useEffect, useState } from "react";
-import { IRequest, IRequestAxiosResponse } from "../../interface";
+import { IRequest, IRequestAxiosResponse, IRequestReport } from "../../interface";
 import { findAssetRequestByIDService } from "../service";
 import DetailSection from "../../../assets/trails/DetailSection";
 import ChipComponent from "../../../../components/forms/Chip";
@@ -33,6 +33,7 @@ import TabComponent from "../../../../components/tabs";
 import OtherDetails from "./OtherDetails";
 import RequestCommodties from "./RequestCommodties";
 import { ICommodity } from "../../../settings/commodity/interface";
+import RequestReports from "./RequestReports";
 
 
 const RequestDetails = () => {
@@ -122,12 +123,18 @@ const RequestDetails = () => {
                                         content: <OtherDetails request={request} />
                                     },
                                     {
-                                        label: "Asset Commodities",
+                                        label: "Request Commodities",
                                         position: 1,
-                                        content: <RequestCommodties requestCommodties={request.commodities as Array<{
-                                            commodity: ICommodity
-                                            quantity: number
-                                        }>} />
+                                        content: <RequestCommodties requestCommodties={
+                                            request.commodities as Array<{
+                                                commodity: ICommodity
+                                                quantity: number
+                                            }>} />
+                                    },
+                                    {
+                                        label: "Request Reports",
+                                        position: 2,
+                                        content: <RequestReports requestReports={request.requestReports as Array<IRequestReport>} />
                                     }
                                 ]}
                             />
