@@ -11,6 +11,8 @@ import CommentOutlinedIcon from '@mui/icons-material/CommentOutlined';
 import ModalComponent from '../../../../components/modal';
 import { Grid, Stack, Typography } from '@mui/material';
 import ButtonComponent from '../../../../components/forms/Button';
+import moment from 'moment';
+import EventOutlinedIcon from '@mui/icons-material/EventOutlined';
 
 const defaultRequestReport: Array<IRequestReport> = [
     {
@@ -91,7 +93,7 @@ const RequestReports = ({ requestReports }: {
                     approver: rep.approver.firstName + " " + rep.approver.lastName,
                     status: rep.status.status as string,
                     comment: rep.comment.length > 20 ? rep.comment.substring(0, 20) + "..." : rep.comment,
-                    createDate: rep.createDate
+                    createDate: rep.createDate ? moment(rep.createDate).format('Do MMMM YYYY') : ""
                 }
             )
         })
@@ -125,11 +127,16 @@ const RequestReports = ({ requestReports }: {
                     <ModalComponent width={"40%"} title='Comment' open={open} handleClose={handleClose} >
                         <Grid item container spacing={4} xs={12}>
                             <Grid item xs={12}>
-
                                 <Stack direction="row" spacing={1} alignItems="center">
                                     <CommentOutlinedIcon color="primary" />
                                     <Typography variant="subtitle1" color="textSecondary">
                                         {currentReport?.comment && currentReport.comment}
+                                    </Typography>
+                                </Stack>
+                                <Stack direction="row" spacing={1} alignItems="center" mt={2}>
+                                    <EventOutlinedIcon color="secondary" />
+                                    <Typography variant="subtitle1" color="textSecondary">
+                                        {currentReport?.createDate && moment(currentReport.createDate).format('Do MMMM YYYY, h:mm a')}
                                     </Typography>
                                 </Stack>
                             </Grid>
