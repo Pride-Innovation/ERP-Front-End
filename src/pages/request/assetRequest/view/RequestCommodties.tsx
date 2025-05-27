@@ -21,7 +21,8 @@ const defaultCommodities: Array<{
                 }
             },
             quantity: 3
-        }]
+        }
+    ]
 
 const RequestCommodties = ({ requestCommodties }: {
     requestCommodties: Array<{
@@ -76,21 +77,22 @@ const RequestCommodties = ({ requestCommodties }: {
 
     useEffect(() => { handleCommoditiesTableData(requestCommodties) }, [requestCommodties]);
 
-    return columnHeaders.length === 0 || commoditiesTableData.length === 0 ? null :
+    return columnHeaders.length === 0 ? null :
         (
             <TableComponent
                 endPoint=""
                 loading={false}
                 count={100}
-                exportData={false}
-                header={{ plural: 'Request Commodities', singular: 'Commodities' }}
+                exportData
+                header={{ plural: 'Request Commodities', singular: 'Commodity' }}
                 module=""
-                rows={commoditiesTableData}
+                rows={commoditiesTableData || []}
                 createAction={false}
                 columnHeaders={columnHeaders}
                 searchAction={false}
                 paginationMode='client'
-            />)
+            />
+        )
 }
 
 export default RequestCommodties
