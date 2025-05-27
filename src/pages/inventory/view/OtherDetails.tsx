@@ -15,11 +15,11 @@ import InventoryOutlinedIcon from '@mui/icons-material/InventoryOutlined';
 
 const OtherDetails = ({ inventory }: { inventory: IInventory }) => (
     <>
-        {inventory.reorderLevel && <DetailSection text={inventory.reorderLevel} label="Reorder Level" icon={<AddchartIcon />} />}
+        {/* {inventory.reorderLevel && <DetailSection text={inventory.reorderLevel} label="Reorder Level" icon={<AddchartIcon />} />}
         {inventory.unitOfMeasure && <DetailSection text={inventory.unitOfMeasure} label="Unit of Measure" icon={<ScaleIcon />} />}
         {inventory.expirationDate && <DetailSection text={inventory.expirationDate} label="Expiration Date" icon={<EventIcon />} />}
         {inventory.quantityInStock && <DetailSection text={(inventory.quantityInStock).toString()} label="Quantity in Stock" icon={<InventoryOutlinedIcon />} />}
-        {inventory.supplier && <DetailSection text={inventory.supplier} label="Supplier" icon={<AccountCircleOutlinedIcon />} />}
+        {inventory.supplier && <DetailSection text={inventory.supplier} label="Supplier" icon={<AccountCircleOutlinedIcon />} />} */}
     </>
 );
 

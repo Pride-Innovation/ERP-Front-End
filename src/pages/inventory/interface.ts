@@ -7,20 +7,46 @@ Managing Director
 
 import { Dispatch, SetStateAction } from "react";
 import { Control, FieldError, FormState, UseFormRegister } from "react-hook-form";
+import { ICommodity } from "../settings/commodity/interface";
+import { IBranch } from "../settings/branch/interface";
+import { ISupplier } from "../settings/suppliers/interface";
+import { IStatus } from "../settings/statuses/interface";
+
+
+interface IStockCommodities {
+    orderedQuantity: number;
+    deliveredQuantity: number;
+    costPrice: number;
+    purchasePrice: number;
+    commodity: ICommodity
+}
 
 interface IInventory {
     id?: string | number;
     name: string;
-    quantityInStock: number;
-    unitOfMeasure: string;
-    location: string;
-    category: string;
-    reorderLevel: string;
-    costPrice: string;
-    purchasePrice: string
-    supplier: string
-    description: string
-    expirationDate: string
+    stockCommodities?: Array<IStockCommodities> | null
+    referenceNumber: string;
+    totalCost?: number | null;
+    balanceCost?: number | null;
+    branch?: IBranch | null;
+    status?: IStatus | null;
+    deliveryNote?: any | null
+    // reorderLevel: string;
+    // costPrice: string;
+    // purchasePrice: string
+    supplier?: ISupplier | null
+    // description: string
+    // expirationDate: string
+}
+
+interface IInventoryTableData {
+    name: string
+    referenceNumber: string;
+    totalCost: number;
+    balanceCost: number;
+    branch: string;
+    status: string;
+    supplier: string;
 }
 
 interface ICreateInventory {
@@ -42,16 +68,7 @@ interface IInventoryForm {
     formState: FormState<IInventory> & {
         errors: {
             name?: FieldError;
-            quantityInStock?: FieldError;
-            unitOfMeasure?: FieldError;
-            location?: FieldError;
-            category?: FieldError;
-            reorderLevel?: FieldError;
-            costPrice?: FieldError;
-            purchasePrice?: FieldError;
-            supplier?: FieldError;
-            description?: FieldError;
-            expirationDate?: FieldError;
+            referenceNumber?: FieldError;
         };
     };
     control: Control<IInventory>;
@@ -66,5 +83,6 @@ export type {
     ICreateInventory,
     IInventoryForm,
     IUpdateInventory,
-    IDeleteInventory
+    IDeleteInventory,
+    IInventoryTableData
 }

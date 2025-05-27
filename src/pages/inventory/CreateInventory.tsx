@@ -5,7 +5,7 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { Box, Paper } from "@mui/material"
+import { Box, Grid, Paper } from "@mui/material"
 import { ICreateInventory, IInventory } from "./interface"
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -39,18 +39,22 @@ const CreateInventory = ({ handleClose }: ICreateInventory) => {
         setSendingRequest(false);
     }
     return (
-        <Box component="form" noValidate autoComplete="off" onSubmit={handleSubmit(onSubmit)} sx={{ px: 2, py: 1 }}>
-            <Paper elevation={0} sx={{ p: 2 }}>
-                <InventoryForm
-                    handleClose={handleClose}
-                    buttonText="Submit"
-                    formState={formState}
-                    control={control}
-                    sendingRequest={sendingRequest}
-                    register={register}
-                />
-            </Paper>
-        </Box >
+        <Paper elevation={3} sx={{ borderRadius: 3, boxShadow: "none", maxWidth: "1200px", mx: "auto" }}>
+            <form autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
+                <Grid container spacing={2}>
+                    <Grid item xs={12}>
+                        <InventoryForm
+                            handleClose={handleClose}
+                            buttonText="Submit"
+                            formState={formState}
+                            control={control}
+                            sendingRequest={sendingRequest}
+                            register={register}
+                        />
+                    </Grid>
+                </Grid>
+            </form>
+        </Paper>
     )
 }
 

@@ -5,9 +5,8 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { useContext, useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
-import { AppDispatch, RootState } from "../../store";
+import { useEffect, useState } from "react";
+import { RootState } from "../../store";
 import { IOptions, ITableHeader } from "../../components/tables/interface";
 import { useSelector } from "react-redux";
 import { inventoryMock } from "../../mocks/inventory";
@@ -16,11 +15,8 @@ import InfoIcon from '@mui/icons-material/Info';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import { getTableHeaders } from "../../components/tables/getTableHeaders";
-import { loadAllInventory } from "./slice";
-import { IInventory } from "./interface";
+import { IInventory, IInventoryTableData } from "./interface";
 import { IFormData } from "../assets/interface";
-import { loadSuppliers } from "../settings/suppliers/slice";
-import { InventoryContext } from "../../context/inventory";
 
 
 const InventoryUtills = () => {
@@ -28,10 +24,11 @@ const InventoryUtills = () => {
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
     const [modalState, setModalState] = useState<string>("");
     const [open, setOpen] = useState<boolean>(false);
-    const dispatch = useDispatch<AppDispatch>();
-    const { setCurrentInventory } = useContext(InventoryContext);
-    const { inventoryList } = useSelector((state: RootState) => state.InventoryStore);
-    const { suppliers } = useSelector((state: RootState) => state.SuppliersStore);
+    const { inventory } = useSelector((state: RootState) => state.InventoryStore);
+    const [stocksTableData, setStocksTableData] = useState<Array<IInventoryTableData>>([] as Array<IInventoryTableData>);
+    const { suppliers } = useSelector((state: RootState) => state.SuppliersStore)
+
+
     const [optionsObject, setOptionsObject] = useState<{
         suppliersOptions: Array<IOptions>
     }>({
@@ -41,44 +38,21 @@ const InventoryUtills = () => {
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
 
-    const loadAllInventoryInStore = (inventory: IInventory[]) => {
-        dispatch(loadAllInventory(inventory))
-    }
-
-    const updateReduxStore = async () => {
-        // dispatch(loadSuppliers(await listSuppliersService()));
-
-    }
-
-    useEffect(() => { updateReduxStore() }, []);
-
-    const findCurrentInventory = (id: string | number) => {
-        setCurrentInventory(() => {
-            return inventoryList.find(inventory => inventory?.id === id) as IInventory
-        })
-    }
-
-    useEffect(() => {
-        setOptionsObject({
-            suppliersOptions: suppliers?.map(supplier => ({ label: supplier.name, value: supplier?.id as number })) || [],
-        })
-
-    }, [suppliers])
-
-    const handleCreation = () => {
-        setModalState(crudStates.create);
-        handleOpen();
-    };
-
     const {
         id,
-        description,
-        expirationDate,
+        supplier,
+        branch,
+        status,
+        deliveryNote,
+        stockCommodities,
         ...data
     } = inventoryMock[0];
 
     const rowData = {
         ...data,
+        status: inventoryMock[0]?.status?.status,
+        supplier: inventoryMock[0]?.supplier?.name,
+        branch: inventoryMock[0].branch?.name,
         action: {
             label: "options",
             options: [
@@ -89,9 +63,55 @@ const InventoryUtills = () => {
         },
     };
 
+
+    const handleInventoryTableData = (inventory: Array<IInventory>) => {
+        const data: Array<IInventoryTableData> = inventory.map((stock, index) => {
+            const {
+                branch,
+                stockCommodities,
+                status,
+                supplier,
+                deliveryNote,
+                ...fielsdata
+            } = inventory[index];
+
+            return (
+                {
+                    ...fielsdata,
+                    name: stock.name,
+                    referenceNumber: stock.referenceNumber,
+                    totalCost: stock.totalCost as number,
+                    balanceCost: stock.totalCost as number,
+                    branch: stock.branch?.name as string,
+                    status: stock.status?.status as string,
+                    supplier: stock.supplier?.name as string
+
+                }
+            )
+        })
+
+        setStocksTableData(data);
+    }
+
+    useEffect(() => {
+        if (inventory.length > 0) {
+            handleInventoryTableData(inventory)
+        }
+    }, [inventory]);
+
+
     useEffect(() => {
         setColumnHeaders(getTableHeaders(rowData))
     }, []);
+
+    useEffect(() => {
+        if (suppliers.length > 0) {
+            setOptionsObject(() => ({
+                suppliersOptions: suppliers?.map(supplier => ({ label: supplier.name, value: supplier.id as number })) || []
+            }))
+        }
+
+    }, [suppliers])
 
     const formFields: Array<IFormData<IInventory>> = [
         {
@@ -100,73 +120,50 @@ const InventoryUtills = () => {
             type: "input"
         },
         {
-            value: "quantityInStock",
-            label: 'Quantity In Stock',
-            type: "number"
-        },
-        {
-            value: "location",
-            label: 'Location',
+            value: "referenceNumber",
+            label: 'Reference Number',
             type: "input"
         },
         {
-            value: "category",
-            label: 'category',
-            type: "select",
-            options: [
-                { label: "Furniture", value: 1 },
-                { label: "Office Equipment", value: 2 },
-            ]
-        },
-        {
-            value: "reorderLevel",
-            label: 'Reorder Level',
-            type: "number"
-        },
-        {
-            value: "costPrice",
-            label: 'Cost Price',
-            type: "number"
-        },
-        {
-            value: "purchasePrice",
-            label: 'Purchase Price',
-            type: "number",
-
-        },
-        {
             value: "supplier",
-            label: 'Supplier',
-            type: "select",
+            label: 'supplier',
+            type: "autocomplete",
             options: optionsObject.suppliersOptions
-
         },
-        {
-            value: "expirationDate",
-            label: 'Expiration Date',
-            type: "date"
-        },
-        {
-            value: "description",
-            label: 'Description',
-            type: "textarea"
-        }
     ]
+
+    const handleCreation = () => {
+        handleOpen();
+        setModalState(crudStates.create);
+    }
+
+    const handleOptionClicked = async (option: string | number, moduleID?: string | number) => {
+        switch (option) {
+            case crudStates.deactivate:
+                setModalState(option as string)
+                handleOpen();
+                break;
+            case crudStates.update:
+                setModalState(option as string)
+                handleOpen();
+                break;
+            case crudStates.read:
+                break;
+            default:
+                break
+        }
+    }
 
     return ({
         columnHeaders,
-        setModalState,
         handleClose,
-        handleOpen,
         modalState,
         open,
-        setOpen,
-        inventoryList,
         header,
-        loadAllInventoryInStore,
-        handleCreation,
         formFields,
-        findCurrentInventory
+        stocksTableData,
+        handleOptionClicked,
+        handleCreation
     })
 }
 

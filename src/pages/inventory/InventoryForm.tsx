@@ -5,7 +5,7 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { Grid, Stack, useTheme } from "@mui/material";
+import { Grid, Stack } from "@mui/material";
 import InventoryUtills from "./Utills";
 import {
     UseFormAutocompleteComponent,
@@ -16,6 +16,8 @@ import {
 } from "../../components/forms";
 import { IInventoryForm } from "./interface";
 import ButtonComponent from "../../components/forms/Button";
+import SupplierUtills from "../settings/suppliers/Utills";
+import { useEffect } from "react";
 
 const InventoryForm = ({
     register,
@@ -26,7 +28,8 @@ const InventoryForm = ({
     buttonText
 }: IInventoryForm) => {
     const { formFields } = InventoryUtills();
-    const theme = useTheme();
+    const { fetchAllSuppliers } = SupplierUtills();
+    useEffect(() => { fetchAllSuppliers() }, []);
 
     return (
         <Grid container spacing={3}>

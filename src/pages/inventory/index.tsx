@@ -11,60 +11,25 @@ import TableComponent from "../../components/tables/TableComponent";
 import InventoryUtills from "./Utills";
 import { crudStates } from "../../utils/constants";
 import ModalComponent from "../../components/modal";
-import { inventoryMock } from "../../mocks/inventory";
 import CreateInventory from "./CreateInventory";
 import UpdateInventory from "./UpdateInventory";
 import DeleteInventory from "./DeleteInventory";
-import { useNavigate } from "react-router";
-import { ROUTES } from "../../core/routes/routes";
 
 const Inventory = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
-    const navigate = useNavigate()
     const {
         columnHeaders,
-        setModalState,
-        handleOpen,
-        inventoryList,
+        stocksTableData,
         header,
         modalState,
         handleClose,
+        handleOptionClicked,
         open,
-        loadAllInventoryInStore,
-        handleCreation,
-        findCurrentInventory
+        handleCreation
     } = InventoryUtills()
 
-    const fetchInventory = async () => {
-        try {
-            // const response = await fetchUsersService() as unknown as Array<IUser>;
-            loadAllInventoryInStore(inventoryMock)
-        } catch (error) {
-            console.log(error, "response Error")
-        }
-    }
-
+    const fetchInventory = async () => { }
     useEffect(() => { fetchInventory() }, []);
-
-    const handleOptionClicked = async (option: string | number, moduleID?: string | number) => {
-        switch (option) {
-            case crudStates.deactivate:
-                findCurrentInventory(moduleID as number)
-                setModalState(option as string)
-                handleOpen();
-                break;
-            case crudStates.update:
-                findCurrentInventory(moduleID as number)
-                setModalState(option as string)
-                handleOpen();
-                break;
-            case crudStates.read:
-                navigate(`${ROUTES.INVENTORY}/${moduleID}`)
-                break;
-            default:
-                break
-        }
-    }
 
     return (
         <Grid xs={12} container>
@@ -97,7 +62,8 @@ const Inventory = () => {
                         onCreationHandler={handleCreation}
                         module='user'
                         header={header}
-                        rows={inventoryList}
+                        searchAction
+                        rows={stocksTableData}
                         columnHeaders={columnHeaders}
                     />
                 </Card>

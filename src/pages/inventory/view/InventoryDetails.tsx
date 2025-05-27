@@ -54,10 +54,10 @@ const InventoryDetails = () => {
                                 {currentInventory?.name}
                             </Typography>
                             <Divider />
-                            <DetailSection label='Cost Price' text={currentInventory?.costPrice} />
+                            {/* <DetailSection label='Cost Price' text={currentInventory?.costPrice} />
                             {currentInventory?.purchasePrice && <DetailSection label="Purchase Price" text={currentInventory?.purchasePrice} />}
                             {currentInventory?.location && <DetailSection label="Location" text={currentInventory?.location} />}
-                            {currentInventory?.description && <DetailSection label="Description" text={currentInventory?.description} />}
+                            {currentInventory?.description && <DetailSection label="Description" text={currentInventory?.description} />} */}
                         </CardContent>
                     </Card>
                 </Grid>

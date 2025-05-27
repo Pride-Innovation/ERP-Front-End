@@ -6,6 +6,28 @@ Managing Director
 */
 
 import { IPermission, IRole } from "../../pages/settings/interface";
+import { ISupplier } from "../../pages/settings/suppliers/interface";
+
+
+export const suppliersMock: Array<ISupplier> = [
+    {
+        id: 1,
+        name: "Alican & Sons",
+        telephone: "+1 345 2341426",
+        email: "alicomsons@test.gmail.com",
+        address: "Gulu City",
+        commodity: {
+            "id": 1,
+            "name": "Pens",
+            "groupName": "Box",
+            "assetType": {
+                "id": 3,
+                "name": "Stationery",
+                "description": "Stationery"
+            }
+        },
+    }
+]
 
 export const permissionsMock: IPermission[] = [
     {

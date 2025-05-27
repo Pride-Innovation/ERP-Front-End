@@ -9,11 +9,11 @@ import { createSlice } from "@reduxjs/toolkit";
 import { IInventory } from "../interface";
 
 interface IInventoryState {
-    inventoryList: IInventory[]
+    inventory: IInventory[]
 }
 
 const initialState: IInventoryState = {
-    inventoryList: []
+    inventory: []
 };
 
 export const inventorySlice = createSlice({
@@ -21,7 +21,7 @@ export const inventorySlice = createSlice({
     initialState,
     reducers: {
         loadAllInventory: (state, action) => {
-            state.inventoryList = action.payload
+            state.inventory = action.payload
         }
     }
 });

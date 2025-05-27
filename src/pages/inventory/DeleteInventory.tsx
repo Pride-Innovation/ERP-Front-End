@@ -38,9 +38,9 @@ const DeleteInventory = ({
                     </Typography>
                 </Stack>
 
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                {/* <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                     Unit of Measure: <b>{currentInventory?.unitOfMeasure?.toUpperCase()}</b>
-                </Typography>
+                </Typography> */}
 
                 <Divider sx={{ my: 2 }} />
             </Grid>

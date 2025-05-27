@@ -26,7 +26,7 @@ const UpdateInventory = ({ handleClose }: IUpdateInventory) => {
         reset
     } = useForm<IInventory>({
         mode: 'onChange',
-        resolver: yupResolver(inventorySchema),
+        // resolver: yupResolver(inventorySchema),
     });
 
     useEffect(() => {
@@ -43,14 +43,14 @@ const UpdateInventory = ({ handleClose }: IUpdateInventory) => {
     return (
         <Box component="form" noValidate autoComplete="off" onSubmit={handleSubmit(onSubmit)} sx={{ px: 2, py: 1 }}>
             <Paper elevation={0} sx={{ p: 2 }}>
-                <InventoryForm
+                {/* <InventoryForm
                     handleClose={handleClose}
                     buttonText="Update Inventory"
                     formState={formState}
                     control={control}
                     sendingRequest={sendingRequest}
                     register={register}
-                />
+                /> */}
             </Paper>
         </Box>
     );
