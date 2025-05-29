@@ -139,3 +139,10 @@ export interface ValidationResult {
     errors: string[];
     validData?: RowData[];
 }
+
+
+export interface StockValidationResult {
+    isValid: boolean;
+    errors: string[];
+    validData?: StockRowData[];
+}

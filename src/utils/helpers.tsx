@@ -8,7 +8,7 @@ Managing Director
 import { GridRowModel } from "@mui/x-data-grid";
 import MaleAvatar from '../statics/images/male.jpg';
 import FemaleAvatar from '../statics/images/Female.jpg';
-import { RowData, ValidationResult } from "../components/forms/interface";
+import { RowData, StockRowData, StockValidationResult, ValidationResult } from "../components/forms/interface";
 
 export const camelCaseToWords = (camelCaseString: string) => {
     return camelCaseString
@@ -137,6 +137,92 @@ export function validateInventoryItems(items: any[]): ValidationResult {
             typeof quantity === 'number' && quantity > 0
         ) {
             validItems.push({ id: commodityId, name: name.trim(), groupName: groupName.trim(), quantity });
+        }
+    });
+
+    return {
+        isValid: errors.length === 0,
+        errors,
+        validData: errors.length === 0 ? validItems : undefined,
+    };
+}
+
+
+export function validateStockItems(items: any[]): StockValidationResult {
+    const errors: string[] = [];
+
+    if (!Array.isArray(items) || items.length === 0) {
+        errors.push('At least one inventory item is required.');
+        return { isValid: false, errors };
+    }
+
+    const validItems: StockRowData[] = [];
+
+    items.forEach((item, index) => {
+        const prefix = `Item ${index + 1}:`;
+
+        if (typeof item !== 'object' || item === null) {
+            errors.push(`${prefix} Item must be an object.`);
+            return;
+        }
+
+        const {
+
+            name,
+            groupName,
+            orderedQuantity,
+            deliveredQuantity,
+            commodityId,
+            costPrice,
+            purchasePrice
+        } = item;
+
+        if (typeof commodityId !== 'number') {
+            errors.push(`${prefix} ID must be a number.`);
+        }
+
+        if (typeof name !== 'string' || name.trim() === '') {
+            errors.push(`${prefix} Name is required and must be a non-empty string.`);
+        }
+
+        if (typeof groupName !== 'string' || groupName.trim() === '') {
+            errors.push(`${prefix} Group Name is required and must be a non-empty string.`);
+        }
+
+        if (typeof orderedQuantity !== 'number' || orderedQuantity <= 0) {
+            errors.push(`${prefix} Ordered Quantity must be a number greater than 0.`);
+        }
+
+        if (typeof deliveredQuantity !== 'number' || deliveredQuantity <= 0) {
+            errors.push(`${prefix} Delivered Quantity must be a number greater than 0.`);
+        }
+
+        if (typeof costPrice !== 'number' || costPrice <= 0) {
+            errors.push(`${prefix} Cost Price must be a number greater than 0.`);
+        }
+
+        if (typeof purchasePrice !== 'number' || purchasePrice <= 0) {
+            errors.push(`${prefix} Purchase Price must be a number greater than 0.`);
+        }
+
+        if (
+            typeof commodityId === 'number' &&
+            typeof name === 'string' && name.trim() !== '' &&
+            typeof groupName === 'string' && groupName.trim() !== '' &&
+            typeof orderedQuantity === 'number' && orderedQuantity > 0 &&
+            typeof deliveredQuantity === 'number' && deliveredQuantity > 0 &&
+            typeof costPrice === 'number' && costPrice > 0 &&
+            typeof purchasePrice === 'number' && purchasePrice > 0
+        ) {
+            validItems.push({
+                id: commodityId,
+                name: name.trim(),
+                groupName: groupName.trim(),
+                orderedQuantity,
+                deliveredQuantity,
+                costPrice,
+                purchasePrice
+            });
         }
     });
 

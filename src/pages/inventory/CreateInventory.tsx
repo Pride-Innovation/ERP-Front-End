@@ -13,6 +13,8 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { inventorySchema } from "./schema";
 import InventoryForm from "./InventoryForm";
 import { RequestContext } from "../../context/request/RequestContext";
+import { toast } from "react-toastify";
+import { validateStockItems } from "../../utils/helpers";
 
 const CreateInventory = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
@@ -37,9 +39,28 @@ const CreateInventory = () => {
     }, [reset]);
 
     const onSubmit = async (formData: IInventory) => {
-        console.log(stockRows, "stockRows!!")
         setSendingRequest(true);
-        console.log(formData, "Form Data!!")
+        const result = validateStockItems(stockRows);
+
+        if (result.isValid && result.validData) {
+            console.log(result.validData, "Valid Data")
+
+            // const formattedCommodities = result.validData.map(item => ({
+            //     commodityId: item.id
+            // }));
+
+
+            try {
+                /**
+                 * TO DO ---> Call API to stock items
+                 */
+            } catch (error) {
+                console.log(error)
+            }
+
+        } else {
+            toast.error(`Requests validation errors: ${result.errors}`)
+        }
         setSendingRequest(false);
     }
     return (
