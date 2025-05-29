@@ -14,7 +14,11 @@ const PROFILE: string = `${ASSETS_MANAGEMENT}/profile`;
 const USERS: string = `${ASSETS_MANAGEMENT}/users`;
 const AUDIT_TRAILS: string = `${ASSETS_MANAGEMENT}/trails`;
 const TEST: string = `${ASSETS_MANAGEMENT}/test`;
+
+/* Inventory Routes */
 const INVENTORY: string = `${ASSETS_MANAGEMENT}/inventory`;
+const CREATE_INVENTORY: string = `${ASSETS_MANAGEMENT}/inventory/create`
+const UPDATE_INVENTORY: string = `${ASSETS_MANAGEMENT}/inventory/update`
 
 /* Request Routes */
 const REQUEST: string = `${ASSETS_MANAGEMENT}/asset-request`
@@ -98,5 +102,7 @@ export const ROUTES = {
     SUPPLIERS,
     REGIONS,
     INVENTORY,
-    DEPARTMENT
+    DEPARTMENT,
+    CREATE_INVENTORY,
+    UPDATE_INVENTORY
 }

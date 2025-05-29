@@ -6,15 +6,12 @@ Managing Director
 */
 
 import { Paper, Box } from "@mui/material";
-import InventoryForm from "./InventoryForm";
 import { useContext, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { IInventory, IUpdateInventory } from "./interface";
-import { yupResolver } from "@hookform/resolvers/yup";
-import { inventorySchema } from "./schema";
+import { IInventory } from "./interface";
 import { InventoryContext } from "../../context/inventory";
 
-const UpdateInventory = ({ handleClose }: IUpdateInventory) => {
+const UpdateInventory = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
     const { currentInventory } = useContext(InventoryContext);
 

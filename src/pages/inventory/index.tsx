@@ -11,8 +11,6 @@ import TableComponent from "../../components/tables/TableComponent";
 import InventoryUtills from "./Utills";
 import { crudStates } from "../../utils/constants";
 import ModalComponent from "../../components/modal";
-import CreateInventory from "./CreateInventory";
-import UpdateInventory from "./UpdateInventory";
 import DeleteInventory from "./DeleteInventory";
 
 const Inventory = () => {
@@ -33,16 +31,6 @@ const Inventory = () => {
 
     return (
         <Grid xs={12} container>
-            {modalState === crudStates.create &&
-                <ModalComponent title='Create Inventory' open={open} handleClose={handleClose} width="70%">
-                    <CreateInventory handleClose={handleClose} />
-                </ModalComponent>
-            }
-            {modalState === crudStates.update &&
-                <ModalComponent title='Update Inventory' open={open} handleClose={handleClose} width="70%">
-                    <UpdateInventory handleClose={handleClose} />
-                </ModalComponent>
-            }
             {modalState === crudStates.deactivate &&
                 <ModalComponent title='Deactivate Inventory' open={open} handleClose={handleClose} width="40%">
                     <DeleteInventory

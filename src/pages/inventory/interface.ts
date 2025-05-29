@@ -18,6 +18,7 @@ interface IStockCommodities {
     deliveredQuantity: number;
     costPrice: number;
     purchasePrice: number;
+    // reorderLevel: string;
     commodity: ICommodity
 }
 
@@ -31,11 +32,10 @@ interface IInventory {
     branch?: IBranch | null;
     status?: IStatus | null;
     deliveryNote?: any | null
-    // reorderLevel: string;
     // costPrice: string;
     // purchasePrice: string
     supplier?: ISupplier | null
-    // description: string
+    description?: string
     // expirationDate: string
 }
 
@@ -47,14 +47,6 @@ interface IInventoryTableData {
     branch: string;
     status: string;
     supplier: string;
-}
-
-interface ICreateInventory {
-    handleClose: () => void;
-}
-
-interface IUpdateInventory {
-    handleClose: () => void;
 }
 
 interface IDeleteInventory {
@@ -80,9 +72,7 @@ interface IInventoryForm {
 
 export type {
     IInventory,
-    ICreateInventory,
     IInventoryForm,
-    IUpdateInventory,
     IDeleteInventory,
     IInventoryTableData
 }

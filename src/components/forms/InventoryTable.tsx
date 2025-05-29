@@ -21,6 +21,7 @@ import {
     TextField,
     Button,
     Typography,
+    InputAdornment,
     useTheme,
 } from '@mui/material';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
@@ -30,14 +31,18 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import { RequestContext } from '../../context/request/RequestContext';
 import { RowData } from './interface';
-
+import ScaleOutlinedIcon from '@mui/icons-material/ScaleOutlined';
+import FeedOutlinedIcon from '@mui/icons-material/FeedOutlined';
+import RemoveCircleOutlineOutlinedIcon from '@mui/icons-material/RemoveCircleOutlineOutlined';
+import EighteenMpOutlinedIcon from '@mui/icons-material/EighteenMpOutlined';
+import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined';
 
 const InventoryTable = () => {
     const { fetchAllCommodities } = CommodityUtills()
     const [itemOptions, setItemOptions] = useState<{ name: string; groupName: string }[]>([]);
     const { rows, setRows } = useContext(RequestContext);
-
     const theme = useTheme();
+
     const { commodities } = useSelector((state: RootState) => state.CommodityStore);
 
     useEffect(() => { fetchAllCommodities() }, [])
@@ -77,13 +82,15 @@ const InventoryTable = () => {
     }, [commodities]);
 
     return (
-        <Paper elevation={4} sx={{ p: 4, borderRadius: 2, boxShadow: "none", border: "1px solid #C9C9C9" }}>
-            <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+        <Paper elevation={4} sx={{
+            borderRadius: 2, boxShadow: "none",
+        }}>
+            <Box display="flex" justifyContent="space-between" alignItems="center" mb={3} sx={{ bgcolor: "#007C7C", p: 2, borderRadius: 2 }}>
                 <Typography sx={{
                     fontWeight: 600,
-                    color: theme.palette.primary.main,
-                    fontSize: "16px",
-                    textTransform: "uppercase"
+                    fontSize: "15px",
+                    textTransform: "Capitalize",
+                    color: theme.palette.background.paper
                 }}>
                     Request Items
                 </Typography>
@@ -91,12 +98,8 @@ const InventoryTable = () => {
                     variant="contained"
                     startIcon={<AddIcon />}
                     onClick={handleAddRow}
+                    color='secondary'
                     sx={{
-                        backgroundColor: theme.palette.primary.main,
-                        '&:hover': {
-                            backgroundColor: '#065f55',
-                        },
-                        color: theme.palette.background.paper,
                         textTransform: 'none',
                         fontWeight: 500,
                     }}
@@ -104,31 +107,89 @@ const InventoryTable = () => {
                     Add Item
                 </Button>
             </Box>
-            <TableContainer component={Box}>
+            <TableContainer component={Box} sx={{ borderRadius: 2, border: 'none' }}>
                 <Table size="small">
                     <TableHead>
-                        <TableRow sx={{ bgcolor: '#BC892C' }}>
-                            <TableCell sx={{ color: 'white', fontWeight: 600 }}>Name</TableCell>
-                            <TableCell sx={{ color: 'white', fontWeight: 600 }}>Group</TableCell>
-                            <TableCell sx={{ color: 'white', fontWeight: 600 }}>Quantity</TableCell>
-                            <TableCell sx={{ color: 'white', fontWeight: 600 }} align="center">
-                                Remove
-                            </TableCell>
+                        <TableRow
+                            sx={{
+                                backgroundColor: '#CACACA',
+                            }}
+                        >
+                            {[{
+                                name: 'Name',
+                                icon: <FeedOutlinedIcon sx={{ fontSize: "12px", mr: "5px" }} />
+                            },
+                            {
+                                name: "Unit of Measure",
+                                icon: <ScaleOutlinedIcon sx={{ fontSize: "12px", mr: "5px" }} />
+                            },
+                            {
+                                name: "Quantity",
+                                icon: <EighteenMpOutlinedIcon sx={{ fontSize: "12px", mr: "5px" }} />
+                            },
+                            {
+                                name: "Remove",
+                                icon: <RemoveCircleOutlineOutlinedIcon sx={{ fontSize: "12px", mr: "5px" }} />
+                            }
+                            ].map((header, idx) => (
+                                <TableCell
+                                    key={header?.name}
+                                    align={idx === 3 ? 'center' : 'left'}
+                                    sx={{
+                                        color: 'teal',
+                                        fontWeight: 'bold',
+                                        textTransform: 'capitalize',
+                                        fontSize: 14,
+                                        borderBottom: 'none',
+                                        borderRight: idx !== 3 ? '1px solid rgba(224, 224, 224, 1)' : 'none',
+                                        px: 2,
+                                        py: 1.5,
+                                    }}
+                                >
+                                    <Typography sx={{ display: "flex", alignItems: "center" }}>
+                                        {header?.icon}
+                                        {header?.name}
+                                    </Typography>
+                                </TableCell>
+                            ))}
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {rows.map((row) => (
-                            <TableRow key={row.id} hover>
-                                <TableCell>
+                        {rows.map((row, index) => (
+                            <TableRow
+                                key={row.id}
+                                sx={{
+                                    backgroundColor: index % 2 === 0 ? '#fafafa' : '#ffffff',
+                                    '&:hover': {
+                                        backgroundColor: '#F1F1F1',
+                                    },
+                                    '&:last-child td, &:last-child th': { border: 0 },
+                                }}
+                            >
+                                <TableCell sx={{ borderBottom: 'none', px: 2, py: 1 }}>
                                     <Select
                                         fullWidth
                                         value={row.name}
                                         onChange={(e) => handleNameChange(row.id, e.target.value)}
                                         displayEmpty
                                         size="small"
-                                        sx={{ backgroundColor: '#f9f9f9', borderRadius: 1 }}
+                                        variant="standard"
+                                        disableUnderline
+                                        sx={{
+                                            fontSize: 14,
+                                            fontWeight: 400,
+                                            color: row.name ? 'text.primary' : 'text.secondary',
+                                            '& .MuiSelect-select': {
+                                                padding: '8px 12px',
+                                            },
+                                            '& .MuiSvgIcon-root': {
+                                                color: '#999',
+                                            },
+                                        }}
                                     >
-                                        <MenuItem value="" disabled>Select Item</MenuItem>
+                                        <MenuItem value="" disabled>
+                                            <em>Select Item</em>
+                                        </MenuItem>
                                         {itemOptions.map((item) => (
                                             <MenuItem key={item.name} value={item.name}>
                                                 {item.name}
@@ -136,33 +197,91 @@ const InventoryTable = () => {
                                         ))}
                                     </Select>
                                 </TableCell>
-                                <TableCell>
+                                <TableCell sx={{ borderBottom: 'none', px: 2, py: 1 }}>
                                     <TextField
                                         fullWidth
                                         size="small"
                                         value={row.groupName}
-                                        InputProps={{ readOnly: true }}
-                                        variant="outlined"
-                                        sx={{ backgroundColor: '#f9f9f9', borderRadius: 1 }}
+                                        InputProps={{
+                                            readOnly: true,
+                                            disableUnderline: true,
+                                            sx: {
+                                                fontSize: 14,
+                                                borderRadius: 2,
+                                                px: 1.5,
+                                            },
+                                        }}
+                                        variant="standard"
                                     />
                                 </TableCell>
-                                <TableCell>
+                                <TableCell sx={{ borderBottom: 'none', px: 2, py: 1 }}>
                                     <TextField
-                                        type="number"
                                         size="small"
+                                        type="number"
                                         fullWidth
                                         value={row.quantity}
+                                        variant="standard"
                                         onChange={(e) =>
                                             handleInputChange(row.id, 'quantity', parseInt(e.target.value) || 0)
                                         }
-                                        sx={{ backgroundColor: '#f9f9f9', borderRadius: 1 }}
+                                        InputProps={{
+                                            disableUnderline: true,
+                                            sx: {
+                                                fontSize: 14,
+                                                borderRadius: 2,
+                                                px: 1.5,
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                '& input[type=number]::-webkit-inner-spin-button': {
+                                                    display: 'none',
+                                                    WebkitAppearance: 'none',
+                                                    margin: 0,
+                                                },
+                                                '& input[type=number]::-webkit-outer-spin-button': {
+                                                    display: 'none',
+                                                    WebkitAppearance: 'none',
+                                                    margin: 0,
+                                                },
+                                                '& input[type=number]': {
+                                                    MozAppearance: 'textfield',
+                                                },
+                                            },
+                                            startAdornment: (
+                                                <InputAdornment position="start">
+                                                    <IconButton
+                                                        size="small"
+                                                        onClick={() =>
+                                                            handleInputChange(row.id, 'quantity', row.quantity - 1)
+                                                        }
+                                                        sx={{ p: 0.5, mr: 3 }}
+                                                    >
+                                                        <RemoveCircleOutlineIcon fontSize="small" color='secondary' />
+                                                    </IconButton>
+                                                </InputAdornment>
+                                            ),
+                                            endAdornment: (
+                                                <InputAdornment position="end">
+                                                    <IconButton
+                                                        size="small"
+                                                        onClick={() =>
+                                                            handleInputChange(row.id, 'quantity', row.quantity + 1)
+                                                        }
+                                                        sx={{ p: 0.5 }}
+                                                    >
+                                                        <AddCircleOutlineOutlinedIcon fontSize="small" color='primary' />
+                                                    </IconButton>
+                                                </InputAdornment>
+                                            ),
+                                        }}
                                     />
                                 </TableCell>
-                                <TableCell align="center">
+
+                                <TableCell align="center" sx={{ borderBottom: 'none', px: 2, py: 1 }}>
                                     <IconButton
                                         color="error"
                                         onClick={() => handleRemoveRow(row.id)}
                                         disabled={rows.length === 1}
+                                        sx={{ '&:disabled': { opacity: 0.3 } }}
                                     >
                                         <RemoveCircleOutlineIcon />
                                     </IconButton>
@@ -172,6 +291,7 @@ const InventoryTable = () => {
                     </TableBody>
                 </Table>
             </TableContainer>
+
         </Paper>
     );
 };

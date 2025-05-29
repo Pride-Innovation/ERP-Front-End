@@ -23,12 +23,8 @@ import ITEquipmentRoutes from './subroutes/ITEquipmentRoutes'
 import FleetRoutes from './subroutes/FleetRoutes'
 import OfficeEquipmentRoutes from './subroutes/OfficeEquipmentRoutes'
 import { PrivateRoute } from './PrivateRoutes'
-// import RoutesUtills from './utills'
 import ErrorsPage from '../../pages/errors'
 import RequestsManagement from '../../pages/request/assetRequest'
-import Request from '../../pages/request/assetRequest/allrequests'
-import PendingRequest from '../../pages/request/assetRequest/pending'
-import RejectedRequest from '../../pages/request/assetRequest/rejected'
 import TransportRequestsManagement from '../../pages/request/transportRequest'
 import TransportPendingRequest from '../../pages/request/transportRequest/pending'
 import TransportRejectedRequest from '../../pages/request/transportRequest/rejected'
@@ -40,6 +36,8 @@ import Inventory from '../../pages/inventory'
 import InventoryDetails from '../../pages/inventory/view/InventoryDetails'
 import RequestSubroutes from './subroutes/Request'
 import RequestDetails from '../../pages/request/assetRequest/view'
+import CreateInventory from '../../pages/inventory/CreateInventory'
+import UpdateInventory from '../../pages/inventory/UpdateInventory'
 
 const AppRoutes = () => {
   // const { routePermission } = RoutesUtills();
@@ -87,6 +85,9 @@ const AppRoutes = () => {
           <Route path={ROUTES.CREATE_TRANSPORT_REQUEST} element={<CreateTranportRequest />} />
           <Route path={`${ROUTES.UPDATE_TRANSPORT_REQUEST}/:id`} element={<UpdateTransportRequest />} />
           <Route path={ROUTES.ERRORS} element={<ErrorsPage />} />
+
+          <Route path={ROUTES.CREATE_INVENTORY} element={<CreateInventory />} />
+          <Route path={`${ROUTES.UPDATE_INVENTORY}/:id`} element={<UpdateInventory />} />
         </Route>
       </Route>
     </Routes>

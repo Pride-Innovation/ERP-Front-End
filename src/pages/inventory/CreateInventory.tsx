@@ -5,15 +5,15 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { Box, Grid, Paper } from "@mui/material"
-import { ICreateInventory, IInventory } from "./interface"
+import { Grid, Paper } from "@mui/material"
+import { IInventory } from "./interface"
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { inventorySchema } from "./schema";
 import InventoryForm from "./InventoryForm";
 
-const CreateInventory = ({ handleClose }: ICreateInventory) => {
+const CreateInventory = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
 
     const defaultInventory: IInventory = {} as IInventory;
@@ -39,12 +39,12 @@ const CreateInventory = ({ handleClose }: ICreateInventory) => {
         setSendingRequest(false);
     }
     return (
-        <Paper elevation={3} sx={{ borderRadius: 3, boxShadow: "none", maxWidth: "1200px", mx: "auto" }}>
+        <Paper elevation={3} sx={{ borderRadius: 3, boxShadow: "none", maxWidth: "1200px", mx: "auto", p: 6 }}>
             <form autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
                 <Grid container spacing={2}>
                     <Grid item xs={12}>
                         <InventoryForm
-                            handleClose={handleClose}
+                            handleClose={() => {}}
                             buttonText="Submit"
                             formState={formState}
                             control={control}

@@ -17,6 +17,8 @@ import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import { getTableHeaders } from "../../components/tables/getTableHeaders";
 import { IInventory, IInventoryTableData } from "./interface";
 import { IFormData } from "../assets/interface";
+import { useNavigate } from "react-router";
+import { ROUTES } from "../../core/routes/routes";
 
 
 const InventoryUtills = () => {
@@ -27,7 +29,7 @@ const InventoryUtills = () => {
     const { inventory } = useSelector((state: RootState) => state.InventoryStore);
     const [stocksTableData, setStocksTableData] = useState<Array<IInventoryTableData>>([] as Array<IInventoryTableData>);
     const { suppliers } = useSelector((state: RootState) => state.SuppliersStore)
-
+    const navigate = useNavigate()
 
     const [optionsObject, setOptionsObject] = useState<{
         suppliersOptions: Array<IOptions>
@@ -132,10 +134,7 @@ const InventoryUtills = () => {
         },
     ]
 
-    const handleCreation = () => {
-        handleOpen();
-        setModalState(crudStates.create);
-    }
+    const handleCreation = () => navigate(ROUTES.CREATE_INVENTORY)
 
     const handleOptionClicked = async (option: string | number, moduleID?: string | number) => {
         switch (option) {

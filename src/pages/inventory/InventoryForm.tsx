@@ -5,7 +5,7 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { Grid, Stack } from "@mui/material";
+import { Divider, Grid, Stack } from "@mui/material";
 import InventoryUtills from "./Utills";
 import {
     UseFormAutocompleteComponent,
@@ -42,10 +42,10 @@ const InventoryForm = ({
                     label: field.label
                 };
 
-                const gridSize = field.type === "textarea" ? 12 : 12;
+                const gridSize = field.type === "textarea" ? 12 : 4;
 
                 return (
-                    <Grid item xs={12} md={field.type === "textarea" ? 12 : 4} key={idx}>
+                    <Grid item xs={12} md={gridSize} key={idx}>
                         {field.type === "input" || field.type === "number" ? (
                             <UseFormInput {...commonProps} type={field.type === "number" ? "number" : "text"} />
                         ) : field.type === "textarea" ? (
@@ -63,22 +63,29 @@ const InventoryForm = ({
                 );
             })}
 
-            <Grid item xs={12} sx={{ mt: 2 }}>
-                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent="flex-end">
-                    <ButtonComponent
-                        handleClick={handleClose}
-                        buttonColor="error"
-                        type="button"
-                        variant="outlined"
-                        sendingRequest={false}
-                        buttonText="Cancel"
-                    />
-                    <ButtonComponent
-                        buttonColor="success"
-                        type="submit"
-                        sendingRequest={sendingRequest}
-                        buttonText={buttonText}
-                    />
+            <Grid item xs={12}>
+                <Divider sx={{ my: 2 }} />
+                <Stack
+                    direction={{ xs: "column", sm: "row" }}
+                    spacing={2}
+                    justifyContent="space-between"
+                    alignItems={{ xs: "stretch", sm: "center" }}
+                >
+                    <Stack direction="row" spacing={2}>
+                        <ButtonComponent
+                            handleClick={handleClose}
+                            buttonColor="error"
+                            type="button"
+                            sendingRequest={false}
+                            buttonText="Cancel"
+                        />
+                        <ButtonComponent
+                            buttonColor="success"
+                            type="submit"
+                            sendingRequest={sendingRequest}
+                            buttonText={buttonText}
+                        />
+                    </Stack>
                 </Stack>
             </Grid>
         </Grid>
