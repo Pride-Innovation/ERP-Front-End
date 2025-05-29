@@ -55,16 +55,29 @@ const InventoryTable = () => {
     };
 
     const handleNameChange = (id: number, value: string) => {
-        const selectedItem = itemOptions.find(item => item.name === value);
-        const group = selectedItem?.groupName || '';
-        const updatedRows = rows.map((row) =>
-            row.id === id ? { ...row, name: value, groupName: group } : row
+        const selectedItem = commodities.find(item => item.name === value);
+
+        if (!selectedItem) return;
+
+        const updatedRows = rows.map(row =>
+            row.id === id
+                ? {
+                    ...row,
+                    name: value,
+                    groupName: selectedItem.groupName,
+                    commodityId: selectedItem.id as number,
+                }
+                : row
         );
         setRows(updatedRows);
     };
+    
     const handleAddRow = () => {
-        const newId = rows.length > 0 ? Math.max(...rows.map(r => r.id)) + 1 : 1;
-        setRows([...rows, { id: newId, name: '', groupName: '', quantity: 0 }]);
+        const newId = Date.now();
+        setRows([
+            ...rows,
+            { id: newId, name: '', groupName: '', quantity: 0, commodityId: undefined },
+        ]);
     };
 
     const handleRemoveRow = (id: number) => {
@@ -85,7 +98,11 @@ const InventoryTable = () => {
         <Paper elevation={4} sx={{
             borderRadius: 2, boxShadow: "none",
         }}>
-            <Box display="flex" justifyContent="space-between" alignItems="center" mb={3} sx={{ bgcolor: "#007C7C", p: 2, borderRadius: 2 }}>
+            <Box
+                display="flex"
+                justifyContent="space-between"
+                alignItems="center"
+                mb={3} sx={{ bgcolor: "#007C7C", p: 2, borderRadius: 2 }}>
                 <Typography sx={{
                     fontWeight: 600,
                     fontSize: "15px",

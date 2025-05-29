@@ -120,6 +120,7 @@ export interface RowData {
     name: string | '';
     groupName: string;
     quantity: number;
+    commodityId?: number;
 }
 
 export interface ValidationResult {

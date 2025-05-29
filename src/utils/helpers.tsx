@@ -112,9 +112,9 @@ export function validateInventoryItems(items: any[]): ValidationResult {
             return;
         }
 
-        const { id, name, groupName, quantity } = item;
+        const { id, name, groupName, quantity, commodityId } = item;
 
-        if (typeof id !== 'number') {
+        if (typeof commodityId !== 'number') {
             errors.push(`${prefix} ID must be a number.`);
         }
 
@@ -131,12 +131,12 @@ export function validateInventoryItems(items: any[]): ValidationResult {
         }
 
         if (
-            typeof id === 'number' &&
+            typeof commodityId === 'number' &&
             typeof name === 'string' && name.trim() !== '' &&
             typeof groupName === 'string' && groupName.trim() !== '' &&
             typeof quantity === 'number' && quantity > 0
         ) {
-            validItems.push({ id, name: name.trim(), groupName: groupName.trim(), quantity });
+            validItems.push({ id: commodityId, name: name.trim(), groupName: groupName.trim(), quantity });
         }
     });
 
