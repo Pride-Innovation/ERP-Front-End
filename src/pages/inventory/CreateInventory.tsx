@@ -7,14 +7,17 @@ Managing Director
 
 import { Grid, Paper } from "@mui/material"
 import { IInventory } from "./interface"
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { inventorySchema } from "./schema";
 import InventoryForm from "./InventoryForm";
+import { RequestContext } from "../../context/request/RequestContext";
 
 const CreateInventory = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
+    const { stockRows } = useContext(RequestContext);
+
 
     const defaultInventory: IInventory = {} as IInventory;
 
@@ -34,6 +37,7 @@ const CreateInventory = () => {
     }, [reset]);
 
     const onSubmit = async (formData: IInventory) => {
+        console.log(stockRows, "stockRows!!")
         setSendingRequest(true);
         console.log(formData, "Form Data!!")
         setSendingRequest(false);

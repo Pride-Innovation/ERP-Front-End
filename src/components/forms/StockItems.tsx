@@ -39,6 +39,7 @@ import EighteenMpOutlinedIcon from '@mui/icons-material/EighteenMpOutlined';
 import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import MonetizationOnOutlinedIcon from '@mui/icons-material/MonetizationOnOutlined';
+import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
 
 const StockItems = () => {
     const { fetchAllCommodities } = CommodityUtills()
@@ -178,7 +179,7 @@ const StockItems = () => {
                             },
                             {
                                 name: "Delivered Qty",
-                                icon: <EighteenMpOutlinedIcon sx={{ fontSize: "12px", mr: "5px" }} />
+                                icon: <ShoppingCartOutlinedIcon sx={{ fontSize: "12px", mr: "5px" }} />
                             },
                             {
                                 name: "Cost Price",
