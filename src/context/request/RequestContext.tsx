@@ -7,13 +7,15 @@ Managing Director
 
 import React, { createContext, Dispatch, SetStateAction, useState } from 'react'
 import { IRequestTableData } from '../../pages/request/interface'
-import { RowData } from '../../components/forms/interface';
+import { RowData, StockRowData } from '../../components/forms/interface';
 
 interface IRequestContext {
     requestTableData: Array<IRequestTableData>;
     setRequestTableData: Dispatch<SetStateAction<Array<IRequestTableData>>>;
     rows: Array<RowData>;
+    stockRows: Array<StockRowData>;
     setRows: Dispatch<SetStateAction<Array<RowData>>>
+    setStockRows: Dispatch<SetStateAction<Array<StockRowData>>>
 }
 
 export const RequestContext = createContext<IRequestContext>({} as IRequestContext);
@@ -21,12 +23,15 @@ export const RequestContext = createContext<IRequestContext>({} as IRequestConte
 const RequestContextProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [requestTableData, setRequestTableData] = useState<IRequestTableData[]>([] as Array<IRequestTableData>)
     const [rows, setRows] = useState<Array<RowData>>([] as Array<RowData>)
+    const [stockRows, setStockRows] = useState<Array<StockRowData>>([] as Array<StockRowData>)
     return (
         <RequestContext.Provider value={{
             requestTableData,
             setRequestTableData,
             rows,
-            setRows
+            setRows,
+            setStockRows,
+            stockRows
         }}>
             {children}
         </RequestContext.Provider>

@@ -31,28 +31,30 @@ import CommodityUtills from '../../pages/settings/commodity/utills';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import { RequestContext } from '../../context/request/RequestContext';
-import { RowData } from './interface';
+import { StockRowData } from './interface';
 import ScaleOutlinedIcon from '@mui/icons-material/ScaleOutlined';
 import FeedOutlinedIcon from '@mui/icons-material/FeedOutlined';
 import RemoveCircleOutlineOutlinedIcon from '@mui/icons-material/RemoveCircleOutlineOutlined';
 import EighteenMpOutlinedIcon from '@mui/icons-material/EighteenMpOutlined';
 import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined';
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+import MonetizationOnOutlinedIcon from '@mui/icons-material/MonetizationOnOutlined';
 
-const InventoryTable = () => {
+const StockItems = () => {
     const { fetchAllCommodities } = CommodityUtills()
     const [itemOptions, setItemOptions] = useState<{ name: string; groupName: string }[]>([]);
-    const { rows, setRows } = useContext(RequestContext);
+    const { stockRows, setStockRows } = useContext(RequestContext);
     const theme = useTheme();
 
     const { commodities } = useSelector((state: RootState) => state.CommodityStore);
 
     useEffect(() => { fetchAllCommodities() }, [])
 
-    const handleInputChange = (id: number, field: keyof RowData, value: any) => {
-        const updatedRows = rows.map((row) =>
+    const handleInputChange = (id: number, field: keyof StockRowData, value: any) => {
+        const updatedRows = stockRows.map((row) =>
             row.id === id ? { ...row, [field]: value } : row
         );
-        setRows(updatedRows);
+        setStockRows(updatedRows);
     };
 
     const handleNameChange = (id: number, value: string) => {
@@ -60,7 +62,7 @@ const InventoryTable = () => {
 
         if (!selectedItem) return;
 
-        const updatedRows = rows.map(row =>
+        const updatedRows = stockRows.map(row =>
             row.id === id
                 ? {
                     ...row,
@@ -70,19 +72,27 @@ const InventoryTable = () => {
                 }
                 : row
         );
-        setRows(updatedRows);
+        setStockRows(updatedRows);
     };
 
     const handleAddRow = () => {
         const newId = Date.now();
-        setRows([
-            ...rows,
-            { id: newId, name: '', groupName: '', quantity: 0, commodityId: undefined },
+        setStockRows([
+            ...stockRows,
+            {
+                id: newId,
+                name: '',
+                groupName: '',
+                quantity: 0,
+                commodityId: undefined,
+                costPrice: '',
+                purchasePrice: ''
+            },
         ]);
     };
 
     const handleRemoveRow = (id: number) => {
-        setRows(rows.filter((row) => row.id !== id));
+        setStockRows(stockRows.filter((row) => row.id !== id));
     };
 
     useEffect(() => {
@@ -94,6 +104,16 @@ const InventoryTable = () => {
             setItemOptions(options);
         }
     }, [commodities]);
+
+    const formatNumberWithCommas = (value: number | string): string => {
+        if (value === '' || isNaN(Number(value))) return '';
+        return Number(value).toLocaleString('en-UG');
+    };
+
+    const parseFormattedNumber = (value: string): number => {
+        const cleaned = value.replace(/,/g, '');
+        return parseFloat(cleaned);
+    };
 
     return (
         <Paper elevation={4} sx={{
@@ -116,10 +136,10 @@ const InventoryTable = () => {
                         fontWeight: 600,
                         fontSize: "15px",
                         textTransform: "capitalize",
-                        color: "#007C7C",
+                        color: "#007C7C", // consistent with transparent background
                     }}
                 >
-                    Request Items
+                    Stock Items
                 </Typography>
                 <Button
                     variant="contained"
@@ -134,6 +154,7 @@ const InventoryTable = () => {
                     Add Item
                 </Button>
             </Box>
+
             <TableContainer component={Box} sx={{ borderRadius: 2, border: 'none' }}>
                 <Table size="small">
                     <TableHead>
@@ -153,6 +174,14 @@ const InventoryTable = () => {
                             {
                                 name: "Quantity",
                                 icon: <EighteenMpOutlinedIcon sx={{ fontSize: "12px", mr: "5px" }} />
+                            },
+                            {
+                                name: "Cost Price",
+                                icon: <AttachMoneyIcon sx={{ fontSize: "12px", mr: "5px" }} />
+                            },
+                            {
+                                name: "Purchase Price",
+                                icon: <MonetizationOnOutlinedIcon sx={{ fontSize: "12px", mr: "5px" }} />
                             },
                             {
                                 name: "Remove",
@@ -182,7 +211,7 @@ const InventoryTable = () => {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {rows.map((row, index) => (
+                        {stockRows.map((row, index) => (
                             <TableRow
                                 key={row.id}
                                 sx={{
@@ -303,11 +332,82 @@ const InventoryTable = () => {
                                     />
                                 </TableCell>
 
+                                <TableCell sx={{ borderBottom: 'none', px: 2, py: 1 }}>
+                                    <TextField
+                                        size="small"
+                                        type="text"
+                                        fullWidth
+                                        value={formatNumberWithCommas(row.costPrice)}
+                                        placeholder="Type here ..."
+                                        variant="standard"
+                                        onChange={(e) => {
+                                            const raw = e.target.value.replace(/,/g, '');
+                                            const numeric = parseFloat(raw);
+                                            if (!isNaN(numeric)) {
+                                                handleInputChange(row.id, 'costPrice', numeric);
+                                            } else if (e.target.value === '') {
+                                                handleInputChange(row.id, 'costPrice', '');
+                                            }
+                                        }}
+                                        InputProps={{
+                                            startAdornment: (
+                                                <InputAdornment position="start">
+                                                    <Typography sx={{ fontSize: 13, fontWeight: 500, color: 'text.secondary' }}>
+                                                        UGX
+                                                    </Typography>
+                                                </InputAdornment>
+                                            ),
+                                            disableUnderline: true,
+                                            sx: {
+                                                fontSize: 14,
+                                                borderRadius: 2,
+                                                px: 1.5,
+                                            },
+                                        }}
+                                    />
+                                </TableCell>
+
+                                <TableCell sx={{ borderBottom: 'none', px: 2, py: 1 }}>
+                                    <TextField
+                                        size="small"
+                                        type="text"
+                                        fullWidth
+                                        value={formatNumberWithCommas(row.purchasePrice)}
+                                        placeholder="Type here ..."
+                                        variant="standard"
+                                        onChange={(e) => {
+                                            const raw = e.target.value.replace(/,/g, '');
+                                            const numeric = parseFloat(raw);
+                                            if (!isNaN(numeric)) {
+                                                handleInputChange(row.id, 'purchasePrice', numeric);
+                                            } else if (e.target.value === '') {
+                                                handleInputChange(row.id, 'purchasePrice', '');
+                                            }
+                                        }}
+                                        InputProps={{
+                                            startAdornment: (
+                                                <InputAdornment position="start">
+                                                    <Typography sx={{ fontSize: 13, fontWeight: 500, color: 'text.secondary' }}>
+                                                        UGX
+                                                    </Typography>
+                                                </InputAdornment>
+                                            ),
+                                            disableUnderline: true,
+                                            sx: {
+                                                fontSize: 14,
+                                                borderRadius: 2,
+                                                px: 1.5,
+                                            },
+                                        }}
+                                    />
+
+                                </TableCell>
+
                                 <TableCell align="center" sx={{ borderBottom: 'none', px: 2, py: 1 }}>
                                     <IconButton
                                         color="error"
                                         onClick={() => handleRemoveRow(row.id)}
-                                        disabled={rows.length === 1}
+                                        disabled={stockRows.length === 1}
                                         sx={{ '&:disabled': { opacity: 0.3 } }}
                                     >
                                         <RemoveCircleOutlineIcon />
@@ -323,4 +423,4 @@ const InventoryTable = () => {
     );
 };
 
-export default InventoryTable;
+export default StockItems;

@@ -112,7 +112,7 @@ export function validateInventoryItems(items: any[]): ValidationResult {
             return;
         }
 
-        const { id, name, groupName, quantity, commodityId } = item;
+        const { name, groupName, quantity, commodityId } = item;
 
         if (typeof commodityId !== 'number') {
             errors.push(`${prefix} ID must be a number.`);

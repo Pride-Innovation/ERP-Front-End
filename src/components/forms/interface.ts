@@ -123,6 +123,16 @@ export interface RowData {
     commodityId?: number;
 }
 
+export interface StockRowData {
+    id: number;
+    name: string | '';
+    groupName: string;
+    quantity: number;
+    commodityId?: number;
+    costPrice: number | '';
+    purchasePrice: number | ''
+}
+
 export interface ValidationResult {
     isValid: boolean;
     errors: string[];

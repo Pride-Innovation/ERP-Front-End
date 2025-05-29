@@ -5,7 +5,7 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { Divider, Grid, Stack } from "@mui/material";
+import { Box, Divider, Grid, Stack } from "@mui/material";
 import InventoryUtills from "./Utills";
 import {
     UseFormAutocompleteComponent,
@@ -18,6 +18,7 @@ import { IInventoryForm } from "./interface";
 import ButtonComponent from "../../components/forms/Button";
 import SupplierUtills from "../settings/suppliers/Utills";
 import { useEffect } from "react";
+import StockItems from "../../components/forms/StockItems";
 
 const InventoryForm = ({
     register,
@@ -33,36 +34,43 @@ const InventoryForm = ({
 
     return (
         <Grid container spacing={3}>
-            {formFields.map((field, idx) => {
-                const commonProps = {
-                    register,
-                    control,
-                    formState,
-                    value: field.value,
-                    label: field.label
-                };
+            <Grid item xs={12}>
+                <Grid container spacing={3}>
 
-                const gridSize = field.type === "textarea" ? 12 : 4;
+                    {formFields.map((field, idx) => {
+                        const commonProps = {
+                            register,
+                            control,
+                            formState,
+                            value: field.value,
+                            label: field.label
+                        };
 
-                return (
-                    <Grid item xs={12} md={gridSize} key={idx}>
-                        {field.type === "input" || field.type === "number" ? (
-                            <UseFormInput {...commonProps} type={field.type === "number" ? "number" : "text"} />
-                        ) : field.type === "textarea" ? (
-                            <UseFormInput {...commonProps} multiline row={5} />
-                        ) : field.type === "select" ? (
-                            <UseFormSelect {...commonProps} options={field.options} />
-                        ) : field.type === "date" ? (
-                            <UseFormDatePicker {...commonProps} />
-                        ) : field.type === "time" ? (
-                            <UseFormTimePicker {...commonProps} />
-                        ) : field.type === "autocomplete" ? (
-                            <UseFormAutocompleteComponent {...commonProps} options={field.options} />
-                        ) : null}
-                    </Grid>
-                );
-            })}
+                        const gridSize = field.type === "textarea" ? 12 : 4;
 
+                        return (
+                            <Grid item xs={12} md={gridSize} key={idx}>
+                                {field.type === "input" || field.type === "number" ? (
+                                    <UseFormInput {...commonProps} type={field.type === "number" ? "number" : "text"} />
+                                ) : field.type === "textarea" ? (
+                                    <UseFormInput {...commonProps} multiline row={5} />
+                                ) : field.type === "select" ? (
+                                    <UseFormSelect {...commonProps} options={field.options} />
+                                ) : field.type === "date" ? (
+                                    <UseFormDatePicker {...commonProps} />
+                                ) : field.type === "time" ? (
+                                    <UseFormTimePicker {...commonProps} />
+                                ) : field.type === "autocomplete" ? (
+                                    <UseFormAutocompleteComponent {...commonProps} options={field.options} />
+                                ) : null}
+                            </Grid>
+                        );
+                    })}
+                </Grid>
+                <Box sx={{ width: "100%", mt: 3 }}>
+                    <StockItems />
+                </Box>
+            </Grid>
             <Grid item xs={12}>
                 <Divider sx={{ my: 2 }} />
                 <Stack

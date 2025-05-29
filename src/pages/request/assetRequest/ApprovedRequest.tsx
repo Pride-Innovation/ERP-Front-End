@@ -188,7 +188,7 @@ const ApproveRequest = ({
                     fullWidth
                     multiline
                     rows={3}
-                    label="Rejection Comment"
+                    label="Approval Comment"
                     variant="outlined"
                     value={comment}
                     onChange={(e) => setComment(e.target.value)}
