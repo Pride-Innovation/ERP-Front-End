@@ -127,7 +127,8 @@ export interface StockRowData {
     id: number;
     name: string | '';
     groupName: string;
-    quantity: number;
+    orderedQuantity: number;
+    deliveredQuantity: number;
     commodityId?: number;
     costPrice: number | '';
     purchasePrice: number | ''

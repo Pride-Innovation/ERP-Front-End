@@ -39,12 +39,12 @@ const CreateInventory = () => {
         setSendingRequest(false);
     }
     return (
-        <Paper elevation={3} sx={{ borderRadius: 3, boxShadow: "none", maxWidth: "1200px", mx: "auto", p: 6 }}>
+        <Paper elevation={3} sx={{ borderRadius: 3, boxShadow: "none", maxWidth: "1300px", mx: "auto", p: 6 }}>
             <form autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
                 <Grid container spacing={2}>
                     <Grid item xs={12}>
                         <InventoryForm
-                            handleClose={() => {}}
+                            handleClose={() => { }}
                             buttonText="Submit"
                             formState={formState}
                             control={control}

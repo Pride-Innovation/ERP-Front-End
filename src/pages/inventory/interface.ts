@@ -35,7 +35,7 @@ interface IInventory {
     // costPrice: string;
     // purchasePrice: string
     supplier?: ISupplier | null
-    description?: string
+    // description?: string
     // expirationDate: string
 }
 

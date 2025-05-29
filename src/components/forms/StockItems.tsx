@@ -83,7 +83,8 @@ const StockItems = () => {
                 id: newId,
                 name: '',
                 groupName: '',
-                quantity: 0,
+                orderedQuantity: 0,
+                deliveredQuantity: 0,
                 commodityId: undefined,
                 costPrice: '',
                 purchasePrice: ''
@@ -168,11 +169,15 @@ const StockItems = () => {
                                 icon: <FeedOutlinedIcon sx={{ fontSize: "12px", mr: "5px" }} />
                             },
                             {
-                                name: "Unit of Measure",
+                                name: "Measure",
                                 icon: <ScaleOutlinedIcon sx={{ fontSize: "12px", mr: "5px" }} />
                             },
                             {
-                                name: "Quantity",
+                                name: "Ordered Qty",
+                                icon: <EighteenMpOutlinedIcon sx={{ fontSize: "12px", mr: "5px" }} />
+                            },
+                            {
+                                name: "Delivered Qty",
                                 icon: <EighteenMpOutlinedIcon sx={{ fontSize: "12px", mr: "5px" }} />
                             },
                             {
@@ -197,7 +202,7 @@ const StockItems = () => {
                                         textTransform: 'capitalize',
                                         fontSize: 14,
                                         borderBottom: 'none',
-                                        borderRight: idx !== 3 ? '1px solid rgba(224, 224, 224, 1)' : 'none',
+                                        borderRight: idx !== 8 ? '1px solid rgba(224, 224, 224, 1)' : 'none',
                                         px: 2,
                                         py: 1.5,
                                     }}
@@ -275,10 +280,10 @@ const StockItems = () => {
                                         size="small"
                                         type="number"
                                         fullWidth
-                                        value={row.quantity}
+                                        value={row.orderedQuantity}
                                         variant="standard"
                                         onChange={(e) =>
-                                            handleInputChange(row.id, 'quantity', parseInt(e.target.value) || 0)
+                                            handleInputChange(row.id, 'orderedQuantity', parseInt(e.target.value) || 0)
                                         }
                                         InputProps={{
                                             disableUnderline: true,
@@ -307,7 +312,7 @@ const StockItems = () => {
                                                     <IconButton
                                                         size="small"
                                                         onClick={() =>
-                                                            handleInputChange(row.id, 'quantity', row.quantity - 1)
+                                                            handleInputChange(row.id, 'orderedQuantity', row.orderedQuantity - 1)
                                                         }
                                                         sx={{ p: 0.5, mr: 3 }}
                                                     >
@@ -320,7 +325,7 @@ const StockItems = () => {
                                                     <IconButton
                                                         size="small"
                                                         onClick={() =>
-                                                            handleInputChange(row.id, 'quantity', row.quantity + 1)
+                                                            handleInputChange(row.id, 'orderedQuantity', row.orderedQuantity + 1)
                                                         }
                                                         sx={{ p: 0.5 }}
                                                     >
@@ -331,7 +336,67 @@ const StockItems = () => {
                                         }}
                                     />
                                 </TableCell>
-
+                                <TableCell sx={{ borderBottom: 'none', px: 2, py: 1 }}>
+                                    <TextField
+                                        size="small"
+                                        type="number"
+                                        fullWidth
+                                        value={row.deliveredQuantity}
+                                        variant="standard"
+                                        onChange={(e) =>
+                                            handleInputChange(row.id, 'deliveredQuantity', parseInt(e.target.value) || 0)
+                                        }
+                                        InputProps={{
+                                            disableUnderline: true,
+                                            sx: {
+                                                fontSize: 14,
+                                                borderRadius: 2,
+                                                px: 1.5,
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                '& input[type=number]::-webkit-inner-spin-button': {
+                                                    display: 'none',
+                                                    WebkitAppearance: 'none',
+                                                    margin: 0,
+                                                },
+                                                '& input[type=number]::-webkit-outer-spin-button': {
+                                                    display: 'none',
+                                                    WebkitAppearance: 'none',
+                                                    margin: 0,
+                                                },
+                                                '& input[type=number]': {
+                                                    MozAppearance: 'textfield',
+                                                },
+                                            },
+                                            startAdornment: (
+                                                <InputAdornment position="start">
+                                                    <IconButton
+                                                        size="small"
+                                                        onClick={() =>
+                                                            handleInputChange(row.id, 'deliveredQuantity', row.deliveredQuantity - 1)
+                                                        }
+                                                        sx={{ p: 0.5, mr: 3 }}
+                                                    >
+                                                        <RemoveCircleOutlineIcon fontSize="small" color='secondary' />
+                                                    </IconButton>
+                                                </InputAdornment>
+                                            ),
+                                            endAdornment: (
+                                                <InputAdornment position="end">
+                                                    <IconButton
+                                                        size="small"
+                                                        onClick={() =>
+                                                            handleInputChange(row.id, 'deliveredQuantity', row.deliveredQuantity + 1)
+                                                        }
+                                                        sx={{ p: 0.5 }}
+                                                    >
+                                                        <AddCircleOutlineOutlinedIcon fontSize="small" color='primary' />
+                                                    </IconButton>
+                                                </InputAdornment>
+                                            ),
+                                        }}
+                                    />
+                                </TableCell>
                                 <TableCell sx={{ borderBottom: 'none', px: 2, py: 1 }}>
                                     <TextField
                                         size="small"
@@ -350,13 +415,6 @@ const StockItems = () => {
                                             }
                                         }}
                                         InputProps={{
-                                            startAdornment: (
-                                                <InputAdornment position="start">
-                                                    <Typography sx={{ fontSize: 13, fontWeight: 500, color: 'text.secondary' }}>
-                                                        UGX
-                                                    </Typography>
-                                                </InputAdornment>
-                                            ),
                                             disableUnderline: true,
                                             sx: {
                                                 fontSize: 14,
@@ -385,13 +443,6 @@ const StockItems = () => {
                                             }
                                         }}
                                         InputProps={{
-                                            startAdornment: (
-                                                <InputAdornment position="start">
-                                                    <Typography sx={{ fontSize: 13, fontWeight: 500, color: 'text.secondary' }}>
-                                                        UGX
-                                                    </Typography>
-                                                </InputAdornment>
-                                            ),
                                             disableUnderline: true,
                                             sx: {
                                                 fontSize: 14,
