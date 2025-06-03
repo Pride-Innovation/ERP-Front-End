@@ -42,7 +42,7 @@ const PriceTotals = () => {
                 <Typography
                     sx={{
                         fontWeight: 600,
-                        fontSize: "15px",
+                        fontSize: "14px",
                         textTransform: "capitalize",
                         color: "#0A796C", // consistent with transparent background
                     }}
@@ -70,7 +70,7 @@ const PriceTotals = () => {
                 <Typography
                     sx={{
                         fontWeight: 600,
-                        fontSize: "15px",
+                        fontSize: "14px",
                         textTransform: "capitalize",
                         color: "#0A796C", // consistent with transparent background
                     }}

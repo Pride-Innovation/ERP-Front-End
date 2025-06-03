@@ -166,7 +166,7 @@ const StockItems = () => {
                                 icon: <FeedOutlinedIcon sx={{ fontSize: "12px", mr: "5px" }} />
                             },
                             {
-                                name: "Measure",
+                                name: "Unit Measure",
                                 icon: <ScaleOutlinedIcon sx={{ fontSize: "12px", mr: "5px" }} />
                             },
                             {
