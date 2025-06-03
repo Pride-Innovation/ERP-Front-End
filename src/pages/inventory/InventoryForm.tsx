@@ -18,7 +18,7 @@ import { IInventoryForm } from "./interface";
 import ButtonComponent from "../../components/forms/Button";
 import SupplierUtills from "../settings/suppliers/Utills";
 import { useEffect } from "react";
-import StockItems from "../../components/forms/StockItems";
+import StockItems from "../../components/stockForm/StockItems";
 
 const InventoryForm = ({
     register,

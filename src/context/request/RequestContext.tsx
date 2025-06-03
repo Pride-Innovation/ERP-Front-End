@@ -16,6 +16,10 @@ interface IRequestContext {
     stockRows: Array<StockRowData>;
     setRows: Dispatch<SetStateAction<Array<RowData>>>
     setStockRows: Dispatch<SetStateAction<Array<StockRowData>>>
+    totalCostPrice: number;
+    totalPurchasePrice: number;
+    setTotalCostPrice: Dispatch<SetStateAction<number>>;
+    setTotalPurchasePrice: Dispatch<SetStateAction<number>>;
 }
 
 export const RequestContext = createContext<IRequestContext>({} as IRequestContext);
@@ -24,6 +28,8 @@ const RequestContextProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const [requestTableData, setRequestTableData] = useState<IRequestTableData[]>([] as Array<IRequestTableData>)
     const [rows, setRows] = useState<Array<RowData>>([] as Array<RowData>)
     const [stockRows, setStockRows] = useState<Array<StockRowData>>([] as Array<StockRowData>)
+    const [totalCostPrice, setTotalCostPrice] = useState<number>(0);
+    const [totalPurchasePrice, setTotalPurchasePrice] = useState<number>(0);
     return (
         <RequestContext.Provider value={{
             requestTableData,
@@ -31,7 +37,11 @@ const RequestContextProvider: React.FC<{ children: React.ReactNode }> = ({ child
             rows,
             setRows,
             setStockRows,
-            stockRows
+            stockRows,
+            totalCostPrice,
+            setTotalCostPrice,
+            totalPurchasePrice,
+            setTotalPurchasePrice
         }}>
             {children}
         </RequestContext.Provider>

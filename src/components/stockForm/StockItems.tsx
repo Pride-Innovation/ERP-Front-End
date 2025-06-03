@@ -31,7 +31,7 @@ import CommodityUtills from '../../pages/settings/commodity/utills';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import { RequestContext } from '../../context/request/RequestContext';
-import { StockRowData } from './interface';
+import { StockRowData } from '../forms/interface';
 import ScaleOutlinedIcon from '@mui/icons-material/ScaleOutlined';
 import FeedOutlinedIcon from '@mui/icons-material/FeedOutlined';
 import RemoveCircleOutlineOutlinedIcon from '@mui/icons-material/RemoveCircleOutlineOutlined';
@@ -40,6 +40,8 @@ import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOu
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import MonetizationOnOutlinedIcon from '@mui/icons-material/MonetizationOnOutlined';
 import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
+import PriceTotals from './priceTotals';
+import { formatNumberWithCommas } from './helper';
 
 const StockItems = () => {
     const { fetchAllCommodities } = CommodityUtills()
@@ -105,11 +107,6 @@ const StockItems = () => {
             setItemOptions(options);
         }
     }, [commodities]);
-
-    const formatNumberWithCommas = (value: number | string): string => {
-        if (value === '' || isNaN(Number(value))) return '';
-        return Number(value).toLocaleString('en-UG');
-    };
 
     const parseFormattedNumber = (value: string): number => {
         const cleaned = value.replace(/,/g, '');
@@ -469,60 +466,8 @@ const StockItems = () => {
                     </TableBody>
                 </Table>
             </TableContainer>
-
             <Divider sx={{ my: 2 }} />
-            <Box sx={{ display: "flex",  ml: "auto", justifyContent: "flex-end" }}>
-                <Box
-                    display="flex"
-                    justifyContent="space-between"
-                    alignItems="center"
-                    mb={3}
-                    sx={{
-                        bgcolor: alpha("#BC892C", 0.1),
-                        p: 2,
-                        py: 1,
-                        borderRadius: 2,
-                        border: `1px solid ${alpha("#BC892C", 0.3)}`,
-                    }}
-                >
-                    <Typography
-                        sx={{
-                            fontWeight: 600,
-                            fontSize: "15px",
-                            textTransform: "capitalize",
-                            color: "#BC892C", // consistent with transparent background
-                        }}
-                    >
-                        Total Cost Price: 
-                    </Typography>
-                </Box>
-                <Box
-                    display="flex"
-                    justifyContent="space-between"
-                    alignItems="center"
-                    mb={3}
-                    ml={3}
-                    sx={{
-                        bgcolor: alpha("#BC892C", 0.1),
-                        p: 2,
-                        py: 1,
-                        borderRadius: 2,
-                        border: `1px solid ${alpha("#BC892C", 0.3)}`,
-                    }}
-                >
-                    <Typography
-                        sx={{
-                            fontWeight: 600,
-                            fontSize: "15px",
-                            textTransform: "capitalize",
-                            color: "#BC892C", // consistent with transparent background
-                        }}
-                    >
-                        Total Purchase Price:
-                    </Typography>
-                </Box>
-
-            </Box>
+            <PriceTotals />
         </Paper>
     );
 };
