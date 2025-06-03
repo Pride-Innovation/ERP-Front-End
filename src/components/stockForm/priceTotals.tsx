@@ -32,11 +32,11 @@ const PriceTotals = () => {
                 alignItems="center"
                 mb={3}
                 sx={{
-                    bgcolor: alpha("#BC892C", 0.1),
+                    bgcolor: alpha("#0A796C", 0.1),
                     p: 2,
                     py: 1,
                     borderRadius: 2,
-                    border: `1px solid ${alpha("#BC892C", 0.3)}`,
+                    border: `1px solid ${alpha("#0A796C", 0.3)}`,
                 }}
             >
                 <Typography
@@ -44,7 +44,7 @@ const PriceTotals = () => {
                         fontWeight: 600,
                         fontSize: "15px",
                         textTransform: "capitalize",
-                        color: "#BC892C", // consistent with transparent background
+                        color: "#0A796C", // consistent with transparent background
                     }}
                 >
                     <span style={{ color: "#000", marginRight: "10px" }}>
@@ -60,11 +60,11 @@ const PriceTotals = () => {
                 mb={3}
                 ml={3}
                 sx={{
-                    bgcolor: alpha("#BC892C", 0.1),
+                    bgcolor: alpha("#0A796C", 0.1),
                     p: 2,
                     py: 1,
                     borderRadius: 2,
-                    border: `1px solid ${alpha("#BC892C", 0.3)}`,
+                    border: `1px solid ${alpha("#0A796C", 0.3)}`,
                 }}
             >
                 <Typography
@@ -72,7 +72,7 @@ const PriceTotals = () => {
                         fontWeight: 600,
                         fontSize: "15px",
                         textTransform: "capitalize",
-                        color: "#BC892C", // consistent with transparent background
+                        color: "#0A796C", // consistent with transparent background
                     }}
                 >
                     <span style={{ color: "#000", marginRight: "10px" }}>
