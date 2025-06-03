@@ -44,6 +44,7 @@ const CreateInventory = () => {
 
         if (result.isValid && result.validData) {
             console.log(result.validData, "Valid Data")
+            console.log(formData, "Form data!!")
 
             // const formattedCommodities = result.validData.map(item => ({
             //     commodityId: item.id

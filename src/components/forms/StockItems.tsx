@@ -22,8 +22,8 @@ import {
     Button,
     Typography,
     InputAdornment,
-    useTheme,
     alpha,
+    Divider,
 } from '@mui/material';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import AddIcon from '@mui/icons-material/Add';
@@ -45,7 +45,6 @@ const StockItems = () => {
     const { fetchAllCommodities } = CommodityUtills()
     const [itemOptions, setItemOptions] = useState<{ name: string; groupName: string }[]>([]);
     const { stockRows, setStockRows } = useContext(RequestContext);
-    const theme = useTheme();
 
     const { commodities } = useSelector((state: RootState) => state.CommodityStore);
 
@@ -471,6 +470,59 @@ const StockItems = () => {
                 </Table>
             </TableContainer>
 
+            <Divider sx={{ my: 2 }} />
+            <Box sx={{ display: "flex",  ml: "auto", justifyContent: "flex-end" }}>
+                <Box
+                    display="flex"
+                    justifyContent="space-between"
+                    alignItems="center"
+                    mb={3}
+                    sx={{
+                        bgcolor: alpha("#BC892C", 0.1),
+                        p: 2,
+                        py: 1,
+                        borderRadius: 2,
+                        border: `1px solid ${alpha("#BC892C", 0.3)}`,
+                    }}
+                >
+                    <Typography
+                        sx={{
+                            fontWeight: 600,
+                            fontSize: "15px",
+                            textTransform: "capitalize",
+                            color: "#BC892C", // consistent with transparent background
+                        }}
+                    >
+                        Total Cost Price: 
+                    </Typography>
+                </Box>
+                <Box
+                    display="flex"
+                    justifyContent="space-between"
+                    alignItems="center"
+                    mb={3}
+                    ml={3}
+                    sx={{
+                        bgcolor: alpha("#BC892C", 0.1),
+                        p: 2,
+                        py: 1,
+                        borderRadius: 2,
+                        border: `1px solid ${alpha("#BC892C", 0.3)}`,
+                    }}
+                >
+                    <Typography
+                        sx={{
+                            fontWeight: 600,
+                            fontSize: "15px",
+                            textTransform: "capitalize",
+                            color: "#BC892C", // consistent with transparent background
+                        }}
+                    >
+                        Total Purchase Price:
+                    </Typography>
+                </Box>
+
+            </Box>
         </Paper>
     );
 };
