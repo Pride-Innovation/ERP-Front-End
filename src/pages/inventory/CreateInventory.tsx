@@ -6,7 +6,7 @@ Managing Director
 */
 
 import { Grid, Paper } from "@mui/material"
-import { IInventory } from "./interface"
+import { IInventory, IInventoryAxiosResponse } from "./interface"
 import { useContext, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -15,12 +15,11 @@ import InventoryForm from "./InventoryForm";
 import { RequestContext } from "../../context/request/RequestContext";
 import { toast } from "react-toastify";
 import { validateStockItems } from "../../utils/helpers";
+import { addStockService } from "./service";
 
 const CreateInventory = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
-    const { stockRows } = useContext(RequestContext);
-
-
+    const { stockRows, totalCostPrice, totalPurchasePrice } = useContext(RequestContext);
     const defaultInventory: IInventory = {} as IInventory;
 
     const {
@@ -43,18 +42,22 @@ const CreateInventory = () => {
         const result = validateStockItems(stockRows);
 
         if (result.isValid && result.validData) {
-            console.log(result.validData, "Valid Data")
-            console.log(formData, "Form data!!")
 
-            // const formattedCommodities = result.validData.map(item => ({
-            //     commodityId: item.id
-            // }));
-
+            const data = {
+                stock: {
+                    name: formData.name,
+                    referenceNumber: formData.referenceNumber,
+                    totalCost: totalCostPrice,
+                    balanceCost: totalPurchasePrice
+                },
+                status: 1,
+                supplier: formData.supplier,
+                stockCommoditiesRequest: result.validData
+            }
 
             try {
-                /**
-                 * TO DO ---> Call API to stock items
-                 */
+                const response = await addStockService(data) as IInventoryAxiosResponse;
+                console.log(response, "Response!!!")
             } catch (error) {
                 console.log(error)
             }

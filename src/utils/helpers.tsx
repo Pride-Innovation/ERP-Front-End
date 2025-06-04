@@ -221,7 +221,8 @@ export function validateStockItems(items: any[]): StockValidationResult {
                 orderedQuantity,
                 deliveredQuantity,
                 costPrice,
-                purchasePrice
+                purchasePrice,
+                commodityId
             });
         }
     });

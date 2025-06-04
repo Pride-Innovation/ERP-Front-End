@@ -23,10 +23,10 @@ const Inventory = () => {
         handleClose,
         handleOptionClicked,
         open,
-        handleCreation
+        handleCreation,
+        fetchInventory
     } = InventoryUtills()
 
-    const fetchInventory = async () => { }
     useEffect(() => { fetchInventory() }, []);
 
     return (

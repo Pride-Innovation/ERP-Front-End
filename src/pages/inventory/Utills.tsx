@@ -6,7 +6,7 @@ Managing Director
 */
 
 import { useEffect, useState } from "react";
-import { RootState } from "../../store";
+import { AppDispatch, RootState } from "../../store";
 import { IOptions, ITableHeader } from "../../components/tables/interface";
 import { useSelector } from "react-redux";
 import { inventoryMock } from "../../mocks/inventory";
@@ -15,10 +15,13 @@ import InfoIcon from '@mui/icons-material/Info';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import { getTableHeaders } from "../../components/tables/getTableHeaders";
-import { IInventory, IInventoryTableData } from "./interface";
+import { IInventoriesAxiosResponse, IInventory, IInventoryTableData } from "./interface";
 import { IFormData } from "../assets/interface";
 import { useNavigate } from "react-router";
 import { ROUTES } from "../../core/routes/routes";
+import axiosInstance from "../../core/apis/axiosInstance";
+import { useDispatch } from "react-redux";
+import { loadAllInventory } from "./slice";
 
 
 const InventoryUtills = () => {
@@ -29,7 +32,8 @@ const InventoryUtills = () => {
     const { inventory } = useSelector((state: RootState) => state.InventoryStore);
     const [stocksTableData, setStocksTableData] = useState<Array<IInventoryTableData>>([] as Array<IInventoryTableData>);
     const { suppliers } = useSelector((state: RootState) => state.SuppliersStore)
-    const navigate = useNavigate()
+    const navigate = useNavigate();
+    const dispatch = useDispatch<AppDispatch>();
 
     const [optionsObject, setOptionsObject] = useState<{
         suppliersOptions: Array<IOptions>
@@ -65,6 +69,16 @@ const InventoryUtills = () => {
         },
     };
 
+    const fetchInventory = async () => {
+        try {
+            const response = await axiosInstance.get("stocks") as IInventoriesAxiosResponse;
+            if (response.status === 200) {
+                dispatch(loadAllInventory(response.data.content))
+            }
+        } catch (error) {
+            console.log(error)
+        }
+    }
 
     const handleInventoryTableData = (inventory: Array<IInventory>) => {
         const data: Array<IInventoryTableData> = inventory.map((stock, index) => {
@@ -162,7 +176,8 @@ const InventoryUtills = () => {
         formFields,
         stocksTableData,
         handleOptionClicked,
-        handleCreation
+        handleCreation,
+        fetchInventory
     })
 }
 

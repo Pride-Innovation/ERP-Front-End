@@ -11,6 +11,7 @@ import { ICommodity } from "../settings/commodity/interface";
 import { IBranch } from "../settings/branch/interface";
 import { ISupplier } from "../settings/suppliers/interface";
 import { IStatus } from "../settings/statuses/interface";
+import { IAxiosResponse, IFetchDataRequest } from "../../core/apis/interface";
 
 
 interface IStockCommodities {
@@ -70,9 +71,24 @@ interface IInventoryForm {
     handleClose: () => void;
 }
 
+
+interface IInventoryResponse extends IFetchDataRequest {
+    content: Array<IInventory>
+}
+
+interface IInventoriesAxiosResponse extends IAxiosResponse {
+    data: IInventoryResponse
+}
+
+interface IInventoryAxiosResponse extends IAxiosResponse {
+    data: IInventory
+}
+
 export type {
     IInventory,
     IInventoryForm,
     IDeleteInventory,
-    IInventoryTableData
+    IInventoryTableData,
+    IInventoriesAxiosResponse,
+    IInventoryAxiosResponse
 }
