@@ -24,12 +24,13 @@ import {
 import { IFormData } from "../assets/interface";
 import { useNavigate } from "react-router";
 import { ROUTES } from "../../core/routes/routes";
-import axiosInstance from "../../core/apis/axiosInstance";
 import { useDispatch } from "react-redux";
 import { loadAllInventory } from "./slice";
+import { fetchRowsService } from "../../core/apis/globalService";
 
 
 const InventoryUtills = () => {
+    const endPoint: string = "stocks";
     const header = { plural: 'Inventory', singular: 'Inventory' }
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
     const [modalState, setModalState] = useState<string>("");
@@ -40,6 +41,7 @@ const InventoryUtills = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch<AppDispatch>();
     const [loading, setLoading] = useState<boolean>(false);
+    const [count, setCount] = useState<number>(0)
 
     const [optionsObject, setOptionsObject] = useState<{
         suppliersOptions: Array<IOptions>
@@ -82,9 +84,10 @@ const InventoryUtills = () => {
     const fetchInventory = async () => {
         setLoading(true)
         try {
-            const response = await axiosInstance.get("stocks") as IInventoriesAxiosResponse;
+            const response = await fetchRowsService({ pageNumber: 0, pageSize: 10, endPoint }) as IInventoriesAxiosResponse;
             if (response.status === 200) {
-                dispatch(loadAllInventory(response.data.content))
+                dispatch(loadAllInventory(response.data.content));
+                setCount(response.data.totalElements);
             }
         } catch (error) {
             console.log(error)
@@ -200,7 +203,9 @@ const InventoryUtills = () => {
         handleOptionClicked,
         handleCreation,
         fetchInventory,
-        loading
+        loading,
+        count,
+        endPoint
     })
 }
 

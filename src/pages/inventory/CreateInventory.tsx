@@ -57,7 +57,9 @@ const CreateInventory = () => {
 
             try {
                 const response = await addStockService(data) as IInventoryAxiosResponse;
-                console.log(response, "Response!!!")
+                if (response.status === 201) {
+                    toast.success("Stock created successfully")
+                }
             } catch (error) {
                 console.log(error)
             }

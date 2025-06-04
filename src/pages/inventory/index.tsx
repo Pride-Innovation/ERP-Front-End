@@ -25,7 +25,9 @@ const Inventory = () => {
         open,
         handleCreation,
         fetchInventory,
-        loading
+        loading,
+        count,
+        endPoint
     } = InventoryUtills()
 
     useEffect(() => { fetchInventory() }, []);
@@ -53,8 +55,11 @@ const Inventory = () => {
                         module='user'
                         header={header}
                         searchAction
+                        count={count}
                         rows={stocksTableData}
                         columnHeaders={columnHeaders}
+                        paginationMode="server"
+                        endPoint={endPoint}
                     />
                 </Card>
             }

@@ -13,6 +13,7 @@ import { useDispatch } from "react-redux";
 import { AppDispatch } from "../../store";
 import { loadAllRequests } from "../../pages/request/assetRequest/slice";
 import { loadUsers } from "../../pages/users/slice";
+import { loadAllInventory } from "../../pages/inventory/slice";
 
 
 const CustomTablePagination = ({ endPoint }: ICustomTablePagination) => {
@@ -25,6 +26,9 @@ const CustomTablePagination = ({ endPoint }: ICustomTablePagination) => {
                 break;
             case "users":
                 dispatch(loadUsers(content))
+                break;
+            case "stocks":
+                dispatch(loadAllInventory(content))
                 break;
             default:
                 break
