@@ -14,7 +14,7 @@ import { inventorySchema } from "./schema";
 import InventoryForm from "./InventoryForm";
 import { RequestContext } from "../../context/request/RequestContext";
 import { toast } from "react-toastify";
-import { validateStockItems } from "../../utils/helpers";
+import { generateReferenceNumber, validateStockItems } from "../../utils/helpers";
 import { addStockService } from "./service";
 
 const CreateInventory = () => {
@@ -46,7 +46,7 @@ const CreateInventory = () => {
             const data = {
                 stock: {
                     name: formData.name,
-                    referenceNumber: formData.referenceNumber,
+                    referenceNumber: generateReferenceNumber(),
                     totalCost: totalCostPrice,
                     balanceCost: totalPurchasePrice
                 },

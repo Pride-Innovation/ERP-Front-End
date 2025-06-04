@@ -233,3 +233,30 @@ export function validateStockItems(items: any[]): StockValidationResult {
         validData: errors.length === 0 ? validItems : undefined,
     };
 }
+
+
+const generatedRefs = new Set<string>();
+
+export const generateReferenceNumber = (): string => {
+    const prefix = 'PRD';
+    const totalLength = 12;
+    const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+
+    let ref: string;
+
+    do {
+        const timestamp = Date.now().toString(36).toUpperCase();
+        const randomPartLength = totalLength - prefix.length - timestamp.length;
+
+        let randomPart = '';
+        for (let i = 0; i < randomPartLength; i++) {
+            const randIndex = Math.floor(Math.random() * charset.length);
+            randomPart += charset[randIndex];
+        }
+
+        ref = `${prefix}${timestamp}${randomPart}`;
+    } while (generatedRefs.has(ref));
+
+    generatedRefs.add(ref);
+    return ref;
+}

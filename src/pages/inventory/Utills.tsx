@@ -64,8 +64,8 @@ const InventoryUtills = () => {
 
     const rowData = {
         ...data,
-        totalOrdered: '',
-        totalDelivered: '',
+        totalItemsOrdered: '',
+        totalItemsDelivered: '',
         status: inventoryMock[0]?.status?.status,
         supplier: inventoryMock[0]?.supplier?.name,
         branch: inventoryMock[0].branch?.name,
@@ -118,8 +118,8 @@ const InventoryUtills = () => {
                     ...fielsdata,
                     name: stock.name,
                     referenceNumber: stock.referenceNumber,
-                    totalOrdered: sumTotalOrdered(stock.commodities as IStockCommodities[]),
-                    totalDelivered: sumTotalDelivered(stock.commodities as IStockCommodities[]),
+                    totalItemsOrdered: sumTotalOrdered(stock.commodities as IStockCommodities[]),
+                    totalItemsDelivered: sumTotalDelivered(stock.commodities as IStockCommodities[]),
                     branch: stock.branch?.name as string,
                     status: stock.status?.status as string,
                     supplier: stock.supplier?.name as string

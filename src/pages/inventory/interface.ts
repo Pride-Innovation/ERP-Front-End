@@ -43,8 +43,8 @@ interface IInventory {
 interface IInventoryTableData {
     name: string
     referenceNumber: string;
-    totalOrdered: number;
-    totalDelivered: number;
+    totalItemsOrdered: number;
+    totalItemsDelivered: number;
     branch: string;
     status: string;
     supplier: string;

@@ -34,6 +34,8 @@ const TimeLineDot = ({ status }: ITimeLineDot) => {
     ) : status === "rejected" ? (
         <CancelOutlinedIcon fontSize='small' color="error" sx={{ mr: "5px" }} />
     ) : status === "approved" ? (
+        <CheckCircleOutlineOutlinedIcon fontSize='small' color="primary" sx={{ mr: "5px" }} />
+    ) : status === "completed" ? (
         <CheckCircleOutlineOutlinedIcon fontSize='small' color="primary" sx={{ mr: "5px" }} />)
         : <DoDisturbAltIcon fontSize='small' color="secondary" sx={{ mr: "5px" }} />
 }
