@@ -69,7 +69,7 @@ const Dashboard = () => {
           </Grid>
           <Grid item xs={12} md={7}>
             <Card sx={{ boxShadow: 2, borderRadius: 3, p: 3, backgroundColor: '#F5F9F8' }}>
-              <DashboardRequests />
+              {/* <DashboardRequests /> */}
             </Card>
           </Grid>
         </Grid>
