@@ -14,6 +14,7 @@ const PROFILE: string = `${ASSETS_MANAGEMENT}/profile`;
 const USERS: string = `${ASSETS_MANAGEMENT}/users`;
 const AUDIT_TRAILS: string = `${ASSETS_MANAGEMENT}/trails`;
 const TEST: string = `${ASSETS_MANAGEMENT}/test`;
+const STORE: string = `${ASSETS_MANAGEMENT}/store`;
 
 /* Inventory Routes */
 const INVENTORY: string = `${ASSETS_MANAGEMENT}/inventory`;
@@ -104,5 +105,6 @@ export const ROUTES = {
     INVENTORY,
     DEPARTMENT,
     CREATE_INVENTORY,
-    UPDATE_INVENTORY
+    UPDATE_INVENTORY,
+    STORE
 }

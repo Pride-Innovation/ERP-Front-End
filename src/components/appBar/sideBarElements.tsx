@@ -17,6 +17,8 @@ import RoutesUtills from '../../core/routes/utills';
 import { IPermission } from '../../pages/settings/interface';
 import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
 import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
+import { Store } from '@mui/icons-material'
+
 
 const SideBarElements = () => {
     const { getCurrentUser } = RoutesUtills();
@@ -89,6 +91,13 @@ const SideBarElements = () => {
             name: "Audit Trails",
             route: ROUTES.AUDIT_TRAILS,
             icon: <ReceiptLongIcon />,
+            subroutes: []
+        },
+        {
+            id: 9,
+            name: "Store",
+            route: ROUTES.STORE,
+            icon: <Store />,
             subroutes: []
         },
     ]
