@@ -14,7 +14,7 @@ import { IStatus } from "../settings/statuses/interface";
 import { IAxiosResponse, IFetchDataRequest } from "../../core/apis/interface";
 
 
-interface IStockCommodities {
+export interface IStockCommodities {
     orderedQuantity: number;
     deliveredQuantity: number;
     costPrice: number;
@@ -26,7 +26,7 @@ interface IStockCommodities {
 interface IInventory {
     id?: string | number;
     name: string;
-    stockCommodities?: Array<IStockCommodities> | null
+    commodities?: Array<IStockCommodities> | null
     referenceNumber: string;
     totalCost?: number | null;
     balanceCost?: number | null;
@@ -43,8 +43,8 @@ interface IInventory {
 interface IInventoryTableData {
     name: string
     referenceNumber: string;
-    totalCost: number;
-    balanceCost: number;
+    totalOrdered: number;
+    totalDelivered: number;
     branch: string;
     status: string;
     supplier: string;

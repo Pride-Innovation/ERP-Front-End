@@ -24,7 +24,8 @@ const Inventory = () => {
         handleOptionClicked,
         open,
         handleCreation,
-        fetchInventory
+        fetchInventory,
+        loading
     } = InventoryUtills()
 
     useEffect(() => { fetchInventory() }, []);
@@ -44,6 +45,7 @@ const Inventory = () => {
                 <Card sx={{ width: "100%" }}>
                     <TableComponent
                         createAction
+                        loading={loading}
                         importData
                         exportData
                         handleOptionClicked={handleOptionClicked}

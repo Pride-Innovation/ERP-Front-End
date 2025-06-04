@@ -15,7 +15,12 @@ import InfoIcon from '@mui/icons-material/Info';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import { getTableHeaders } from "../../components/tables/getTableHeaders";
-import { IInventoriesAxiosResponse, IInventory, IInventoryTableData } from "./interface";
+import {
+    IInventoriesAxiosResponse,
+    IInventory,
+    IInventoryTableData,
+    IStockCommodities
+} from "./interface";
 import { IFormData } from "../assets/interface";
 import { useNavigate } from "react-router";
 import { ROUTES } from "../../core/routes/routes";
@@ -34,6 +39,7 @@ const InventoryUtills = () => {
     const { suppliers } = useSelector((state: RootState) => state.SuppliersStore)
     const navigate = useNavigate();
     const dispatch = useDispatch<AppDispatch>();
+    const [loading, setLoading] = useState<boolean>(false);
 
     const [optionsObject, setOptionsObject] = useState<{
         suppliersOptions: Array<IOptions>
@@ -50,12 +56,16 @@ const InventoryUtills = () => {
         branch,
         status,
         deliveryNote,
-        stockCommodities,
+        commodities,
+        balanceCost,
+        totalCost,
         ...data
     } = inventoryMock[0];
 
     const rowData = {
         ...data,
+        totalOrdered: '',
+        totalDelivered: '',
         status: inventoryMock[0]?.status?.status,
         supplier: inventoryMock[0]?.supplier?.name,
         branch: inventoryMock[0].branch?.name,
@@ -70,6 +80,7 @@ const InventoryUtills = () => {
     };
 
     const fetchInventory = async () => {
+        setLoading(true)
         try {
             const response = await axiosInstance.get("stocks") as IInventoriesAxiosResponse;
             if (response.status === 200) {
@@ -78,14 +89,25 @@ const InventoryUtills = () => {
         } catch (error) {
             console.log(error)
         }
+        setLoading(false)
+    }
+
+    const sumTotalOrdered = (commodities: Array<IStockCommodities>): number => {
+        return commodities.reduce((acc, val) => (acc + val.orderedQuantity), 0)
+    }
+
+    const sumTotalDelivered = (commodities: Array<IStockCommodities>): number => {
+        return commodities.reduce((acc, val) => (acc + val.deliveredQuantity), 0)
     }
 
     const handleInventoryTableData = (inventory: Array<IInventory>) => {
         const data: Array<IInventoryTableData> = inventory.map((stock, index) => {
             const {
                 branch,
-                stockCommodities,
+                commodities,
                 status,
+                balanceCost,
+                totalCost,
                 supplier,
                 deliveryNote,
                 ...fielsdata
@@ -96,8 +118,8 @@ const InventoryUtills = () => {
                     ...fielsdata,
                     name: stock.name,
                     referenceNumber: stock.referenceNumber,
-                    totalCost: stock.totalCost as number,
-                    balanceCost: stock.totalCost as number,
+                    totalOrdered: sumTotalOrdered(stock.commodities as IStockCommodities[]),
+                    totalDelivered: sumTotalDelivered(stock.commodities as IStockCommodities[]),
                     branch: stock.branch?.name as string,
                     status: stock.status?.status as string,
                     supplier: stock.supplier?.name as string
@@ -177,7 +199,8 @@ const InventoryUtills = () => {
         stocksTableData,
         handleOptionClicked,
         handleCreation,
-        fetchInventory
+        fetchInventory,
+        loading
     })
 }
 

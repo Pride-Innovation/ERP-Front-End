@@ -21,7 +21,7 @@ export const inventoryMock: IInventory[] = [
         branch: branchesMock[0],
         status: statusMocks[0],
         deliveryNote: "",
-        stockCommodities: [
+        commodities: [
             {
                 orderedQuantity: 20,
                 deliveredQuantity: 15,
