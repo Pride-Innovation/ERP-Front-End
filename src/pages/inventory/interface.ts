@@ -12,6 +12,7 @@ import { IBranch } from "../settings/branch/interface";
 import { ISupplier } from "../settings/suppliers/interface";
 import { IStatus } from "../settings/statuses/interface";
 import { IAxiosResponse, IFetchDataRequest } from "../../core/apis/interface";
+import { IUser } from "../users/interface";
 
 
 export interface IStockCommodities {
@@ -32,12 +33,12 @@ interface IInventory {
     balanceCost?: number | null;
     branch?: IBranch | null;
     status?: IStatus | null;
-    deliveryNote?: any | null
-    // costPrice: string;
-    // purchasePrice: string
-    supplier?: ISupplier | null
-    // description?: string
-    // expirationDate: string
+    deliveryNote?: any | null;
+    supplier?: ISupplier | null;
+    createDate?: string | null;
+    lastModified?: string | null;
+    createdBy?: IUser | null;
+    lastModifiedBy?: IUser | null;
 }
 
 interface IInventoryTableData {
@@ -48,6 +49,7 @@ interface IInventoryTableData {
     branch: string;
     status: string;
     supplier: string;
+    date: string;
 }
 
 interface IDeleteInventory {

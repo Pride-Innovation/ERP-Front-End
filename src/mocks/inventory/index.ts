@@ -9,6 +9,7 @@ import { IInventory } from "../../pages/inventory/interface";
 import { branchesMock } from "../branch";
 import { suppliersMock } from "../settings";
 import { statusMocks } from "../status";
+import { usersMock } from "../users";
 
 export const inventoryMock: IInventory[] = [
     {
@@ -38,6 +39,10 @@ export const inventoryMock: IInventory[] = [
                     }
                 }
             }
-        ]
+        ],
+        createDate: "2025-05-07T12:21:29.278878",
+        lastModified: "2025-05-07T12:21:29.278878",
+        createdBy: usersMock[0],
+        lastModifiedBy: usersMock[0],
     }
 ];

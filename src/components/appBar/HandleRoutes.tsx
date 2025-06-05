@@ -77,6 +77,10 @@ const HandleRoutes = () => {
             handleClick(sideBarList[7])
             handleActiveRoute(sideBarList[7])
         }
+        if (route === ROUTES.STORE) {
+            handleClick(sideBarList[8])
+            handleActiveRoute(sideBarList[8])
+        }
     }
 
     return (

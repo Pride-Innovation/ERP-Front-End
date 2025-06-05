@@ -27,6 +27,7 @@ import { ROUTES } from "../../core/routes/routes";
 import { useDispatch } from "react-redux";
 import { loadAllInventory } from "./slice";
 import { fetchRowsService } from "../../core/apis/globalService";
+import moment from "moment";
 
 
 const InventoryUtills = () => {
@@ -61,6 +62,10 @@ const InventoryUtills = () => {
         commodities,
         balanceCost,
         totalCost,
+        createDate,
+        createdBy,
+        lastModified,
+        lastModifiedBy,
         ...data
     } = inventoryMock[0];
 
@@ -71,6 +76,7 @@ const InventoryUtills = () => {
         status: inventoryMock[0]?.status?.status,
         supplier: inventoryMock[0]?.supplier?.name,
         branch: inventoryMock[0].branch?.name,
+        date: "",
         action: {
             label: "options",
             options: [
@@ -113,6 +119,10 @@ const InventoryUtills = () => {
                 totalCost,
                 supplier,
                 deliveryNote,
+                createDate,
+                createdBy,
+                lastModified,
+                lastModifiedBy,
                 ...fielsdata
             } = inventory[index];
 
@@ -125,7 +135,8 @@ const InventoryUtills = () => {
                     totalItemsDelivered: sumTotalDelivered(stock.commodities as IStockCommodities[]),
                     branch: stock.branch?.name as string,
                     status: stock.status?.status as string,
-                    supplier: stock.supplier?.name as string
+                    supplier: stock.supplier?.name as string,
+                    date: moment(stock.createDate as string).format("Do MMM YYYY")
 
                 }
             )
