@@ -21,6 +21,7 @@ import { InventoryContextProvider } from './context/inventory';
 import { ThemeProvider, CssBaseline } from '@mui/material';
 import customThemes from './utils/customThemes';
 import AutocompleteContextProvider from './context/autocomplete';
+import StoreContextProvider from './context/store';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -38,7 +39,9 @@ root.render(
                   <TransportRequestContextProvider>
                     <FileContextProvider>
                       <TestContextProvider>
-                        <App />
+                        <StoreContextProvider>
+                          <App />
+                        </StoreContextProvider>
                       </TestContextProvider>
                     </FileContextProvider>
                   </TransportRequestContextProvider>

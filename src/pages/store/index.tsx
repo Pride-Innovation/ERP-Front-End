@@ -9,16 +9,33 @@ Managing Director
 import {
     Box,
     Divider,
+    Grid,
     Paper,
     Stack,
     Typography,
     useTheme
 } from "@mui/material";
 import RoofingOutlinedIcon from '@mui/icons-material/RoofingOutlined';
-import { Outlet } from "react-router";
+import { useContext, useEffect } from "react";
+import StoreUtills from "./utillls";
+import Loading from "../../components/loading";
+import NoContent from "../../components/noContent";
+import { StoreContext } from "../../context/store";
+import BranchStoreReport from "./BranchStoreReport";
 
 const Store = () => {
     const theme = useTheme();
+    const { storeCommodities } = useContext(StoreContext);
+    const {
+        fetchStoreDetailsPerBranch,
+        setCurrentUserBranch,
+        branchId,
+        sendingRequest
+    } = StoreUtills()
+
+    useEffect(() => { setCurrentUserBranch() }, []);
+    useEffect(() => { if (branchId) { fetchStoreDetailsPerBranch(branchId) } }, [branchId]);
+
     return (
         <Paper
             elevation={3}
@@ -69,7 +86,21 @@ const Store = () => {
                     bgcolor: theme.palette.background.paper,
                 }}
             >
-                <Outlet />
+                <Box>
+                    {sendingRequest ? (
+                        <Loading items="Store Commodity" />
+                    ) : storeCommodities.length > 0 ? (
+                        <Grid container xs>
+                            <BranchStoreReport storeData={storeCommodities} />
+                            {/* {storeCommodities.map((comm) => (
+                                    <BranchStoreReport storeData={comm} />
+                                </Grid>
+                            ))} */}
+                        </Grid>
+                    ) : (
+                        <NoContent item="stock" items="stocks" />
+                    )}
+                </Box>
             </Box>
         </Paper>
     )
