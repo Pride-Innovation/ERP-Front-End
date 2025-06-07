@@ -8,6 +8,7 @@ Managing Director
 
 import {
     Box,
+    Card,
     Divider,
     Grid,
     Paper,
@@ -51,7 +52,7 @@ const Store = () => {
         >
             <Box
                 sx={{
-                    width: { xs: "100%", md: "250px" },
+                    width: { xs: "100%", md: "350px" },
                     bgcolor: theme.palette.grey[100],
                     borderRight: { md: `1px solid ${theme.palette.divider}` },
                     p: 3,
@@ -72,11 +73,30 @@ const Store = () => {
                     <RoofingOutlinedIcon fontSize="medium" sx={{ color: theme.palette.secondary.main, mx: "10px" }} />
                     Store Report
                 </Typography>
-
                 <Divider sx={{ mb: 2 }} />
-
                 <Stack spacing={1}>
-                    banks list
+                    <Card
+                        sx={{
+                            mb: 4,
+                            p: 3,
+                            bgcolor: '#f5f7fa',
+                            border: `1px solid ${theme.palette.primary.main}`,
+                            boxShadow: 4,
+                            borderRadius: 2,
+                        }}
+                    >
+                        <Typography variant="h5" sx={{ color: theme.palette.primary.main, fontWeight: 700 }}>
+                            Branch Store Report
+                        </Typography>
+                        <Typography variant="subtitle1" sx={{ fontWeight: 500, mt: 1 }}>
+                            {/* {branch?.name} */}
+                            Head Office
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                            {/* Email: {branch?.email} | Telephone: {branch?.telephone} */}
+                            Email: headOffice@prideban.co.ug | Telephone: +256778341692
+                        </Typography>
+                    </Card>
                 </Stack>
             </Box>
             <Box
@@ -92,10 +112,6 @@ const Store = () => {
                     ) : storeCommodities.length > 0 ? (
                         <Grid container xs>
                             <BranchStoreReport storeData={storeCommodities} />
-                            {/* {storeCommodities.map((comm) => (
-                                    <BranchStoreReport storeData={comm} />
-                                </Grid>
-                            ))} */}
                         </Grid>
                     ) : (
                         <NoContent item="stock" items="stocks" />
