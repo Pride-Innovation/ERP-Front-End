@@ -8,7 +8,8 @@ Managing Director
 export interface ITabHeader {
     label: string;
     position: number;
-    content: JSX.Element
+    content: JSX.Element;
+    id?: number | string
 }
 
 export interface ITabComponent {

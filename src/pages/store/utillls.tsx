@@ -44,7 +44,8 @@ const StoreUtills = () => {
         const headers = assetTypes.map((assetType, index) => ({
             label: assetType.name,
             position: index,
-            content: <p>First content</p>
+            content: <p>{assetType.description}</p>,
+            id: assetType.id
         }))
 
         setTableHeaders(headers)

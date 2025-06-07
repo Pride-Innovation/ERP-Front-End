@@ -28,9 +28,9 @@ const BranchStoreReport: React.FC<BranchStoreReportProps> = ({ storeData }) => {
             <Grid item xs={12} >
                 <Card sx={{ boxShadow: 0, bgcolor: grey[100] }}>
                     <CardContent>
-                        {tableHeaders.length > 0 && <TabComponent
-                            headers={tableHeaders}
-                        />}
+                        {tableHeaders.length > 0
+                            && <TabComponent headers={tableHeaders} />
+                        }
                     </CardContent>
                 </Card>
             </Grid>
