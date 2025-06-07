@@ -10,11 +10,14 @@ import { fetchStoreDetailsPerBranchService } from "./service";
 import { IStore, IStoresAxiosResponse } from "./interface";
 import RoutesUtills from "../../core/routes/utills";
 import { StoreContext } from "../../context/store";
+import { ITabHeader } from "../../components/tabs/interface";
+import { IAssetType } from "../settings/assetTypes/interface";
 
 const StoreUtills = () => {
     const [branchId, setBranchId] = useState<string | number>("")
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
     const { setStoreCommoditiesData } = useContext(StoreContext);
+    const [tableHeaders, setTableHeaders] = useState<ITabHeader[]>([] as ITabHeader[]);
 
     const { getCurrentUser } = RoutesUtills();
 
@@ -27,7 +30,6 @@ const StoreUtills = () => {
         try {
             const response = await fetchStoreDetailsPerBranchService(id) as IStoresAxiosResponse;
             if (response.status === 200) {
-                console.log(response.data)
                 setStoreCommoditiesData(response.data as unknown as IStore[])
             }
         } catch (error) {
@@ -36,11 +38,25 @@ const StoreUtills = () => {
         setSendingRequest(false)
     }
 
+    const handleTableColumns = (assetTypes: IAssetType[]) => {
+        if (assetTypes.length < 1) return [];
+
+        const headers = assetTypes.map((assetType, index) => ({
+            label: assetType.name,
+            position: index,
+            content: <p>First content</p>
+        }))
+
+        setTableHeaders(headers)
+    }
+
     return ({
         fetchStoreDetailsPerBranch,
         setCurrentUserBranch,
         branchId,
-        sendingRequest
+        sendingRequest,
+        handleTableColumns,
+        tableHeaders
     })
 }
 

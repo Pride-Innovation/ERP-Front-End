@@ -23,10 +23,12 @@ import Loading from "../../components/loading";
 import NoContent from "../../components/noContent";
 import { StoreContext } from "../../context/store";
 import BranchStoreReport from "./BranchStoreReport";
+import AssetTypeUtills from "../settings/assetTypes/utills";
 
 const Store = () => {
     const theme = useTheme();
     const { storeCommodities } = useContext(StoreContext);
+    const { fetchAllAssetTypes } = AssetTypeUtills();
     const {
         fetchStoreDetailsPerBranch,
         setCurrentUserBranch,
@@ -35,6 +37,7 @@ const Store = () => {
     } = StoreUtills()
 
     useEffect(() => { setCurrentUserBranch() }, []);
+    useEffect(() => { fetchAllAssetTypes() }, []);
     useEffect(() => { if (branchId) { fetchStoreDetailsPerBranch(branchId) } }, [branchId]);
 
     return (
