@@ -11,17 +11,52 @@ import TabComponent from '../../components/tabs';
 import { grey } from '@mui/material/colors';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import StoreUtills from './utillls';
+import { ITabHeader } from '../../components/tabs/interface';
+import { fetchStoreDetailsPerBranchServicePerAssetType } from './service';
 
 interface BranchStoreReportProps {
     storeData: IStore[];
 }
 
 const BranchStoreReport: React.FC<BranchStoreReportProps> = ({ storeData }) => {
-    const { handleTableColumns, tableHeaders } = StoreUtills();
+    const {
+        handleTableColumns,
+        tableHeaders,
+        setCurrentUserBranch,
+        branchId,
+        setCurrentAssetType,
+        currentAssetType
+    } = StoreUtills();
     const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore);
+
     useEffect(() => { handleTableColumns(assetTypes) }, [assetTypes]);
+    useEffect(() => { setCurrentUserBranch() }, [])
+
+    const handleTabChange = (value: string | number) => {
+        console.log(tableHeaders, value, "Form values")
+        if (tableHeaders.length > 0) {
+            setCurrentAssetType(tableHeaders[value as number]);
+        }
+    }
+
+    const fetchStoresCommoditiesPerBranchPerAsset = async () => {
+        try {
+            if (branchId && currentAssetType) {
+                const response = await fetchStoreDetailsPerBranchServicePerAssetType(branchId, currentAssetType.id as number);
+                console.log(response, "response data!!")
+            }
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    useEffect(() => {
+        if (currentAssetType.id !== null && branchId !== null) {
+            fetchStoresCommoditiesPerBranchPerAsset()
+        }
+    }, [currentAssetType])
 
     return (
         <Box sx={{ p: 2, width: '100%' }}>
@@ -29,7 +64,9 @@ const BranchStoreReport: React.FC<BranchStoreReportProps> = ({ storeData }) => {
                 <Card sx={{ boxShadow: 0, bgcolor: grey[100] }}>
                     <CardContent>
                         {tableHeaders.length > 0
-                            && <TabComponent headers={tableHeaders} />
+                            && <TabComponent
+                                handleTabChange={handleTabChange}
+                                headers={tableHeaders} />
                         }
                     </CardContent>
                 </Card>

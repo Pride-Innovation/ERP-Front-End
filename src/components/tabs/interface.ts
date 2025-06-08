@@ -14,4 +14,5 @@ export interface ITabHeader {
 
 export interface ITabComponent {
     headers: Array<ITabHeader>
+    handleTabChange?: (value: string | number) => void
 }

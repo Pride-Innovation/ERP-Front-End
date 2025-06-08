@@ -40,11 +40,12 @@ function a11yProps(index: number) {
     };
 }
 
-const TabComponent = ({ headers }: ITabComponent) => {
+const TabComponent = ({ headers, handleTabChange }: ITabComponent) => {
     const [value, setValue] = React.useState(0);
 
     const handleChange = (event: React.SyntheticEvent, newValue: number) => {
         setValue(newValue);
+        handleTabChange?.(newValue)
     };
 
     return (

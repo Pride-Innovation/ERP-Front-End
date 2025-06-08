@@ -18,6 +18,8 @@ const StoreUtills = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
     const { setStoreCommoditiesData } = useContext(StoreContext);
     const [tableHeaders, setTableHeaders] = useState<ITabHeader[]>([] as ITabHeader[]);
+    const [currentAssetType, setCurrentAssetType] = useState<ITabHeader>({} as ITabHeader)
+
 
     const { getCurrentUser } = RoutesUtills();
 
@@ -47,8 +49,9 @@ const StoreUtills = () => {
             content: <p>{assetType.description}</p>,
             id: assetType.id
         }))
-
+        setCurrentAssetType(headers[0])
         setTableHeaders(headers)
+
     }
 
     return ({
@@ -57,7 +60,9 @@ const StoreUtills = () => {
         branchId,
         sendingRequest,
         handleTableColumns,
-        tableHeaders
+        tableHeaders,
+        currentAssetType,
+        setCurrentAssetType
     })
 }
 
