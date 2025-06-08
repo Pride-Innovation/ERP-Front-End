@@ -6,20 +6,23 @@ Managing Director
 */
 
 import { Box, Card, CardContent, Grid } from '@mui/material';
-import { IStore } from './interface';
+import { IStore, IStoresAxiosResponse } from './interface';
 import TabComponent from '../../components/tabs';
 import { grey } from '@mui/material/colors';
 import { useSelector } from 'react-redux';
-import { RootState } from '../../store';
+import { AppDispatch, RootState } from '../../store';
 import { useEffect } from 'react';
 import StoreUtills from './utillls';
 import { fetchStoreDetailsPerBranchServicePerAssetType } from './service';
+import { useDispatch } from 'react-redux';
+import { loadAllStores } from './slice';
 
 interface BranchStoreReportProps {
     storeData: IStore[];
 }
 
 const BranchStoreReport: React.FC<BranchStoreReportProps> = ({ storeData }) => {
+    const dispatch = useDispatch<AppDispatch>();
     const {
         handleTableColumns,
         tableHeaders,
@@ -34,7 +37,6 @@ const BranchStoreReport: React.FC<BranchStoreReportProps> = ({ storeData }) => {
     useEffect(() => { setCurrentUserBranch() }, [])
 
     const handleTabChange = (value: string | number) => {
-        console.log(tableHeaders, value, "Form values")
         if (tableHeaders.length > 0) {
             setCurrentAssetType(tableHeaders[value as number]);
         }
@@ -43,8 +45,11 @@ const BranchStoreReport: React.FC<BranchStoreReportProps> = ({ storeData }) => {
     const fetchStoresCommoditiesPerBranchPerAsset = async () => {
         try {
             if (branchId && currentAssetType) {
-                const response = await fetchStoreDetailsPerBranchServicePerAssetType(branchId, currentAssetType.id as number);
-                console.log(response, "response data!!")
+                const response = await fetchStoreDetailsPerBranchServicePerAssetType(
+                    branchId, currentAssetType.id as number) as IStoresAxiosResponse;
+                if (response.status === 200) {
+                    dispatch(loadAllStores(response.data.content))
+                }
             }
         } catch (error) {
             console.log(error)

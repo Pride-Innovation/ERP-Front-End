@@ -25,6 +25,7 @@ import DistrictReducer from "../pages/settings/districts/slice"
 import CommodityReducer from "../pages/settings/commodity/slice"
 import AssetTypeReducer from "../pages/settings/assetTypes/slice"
 import TitleReducer from "../pages/settings/titles/slice"
+import StoreReducer from "../pages/store/slice"
 
 export const store = configureStore({
     reducer: {
@@ -43,6 +44,7 @@ export const store = configureStore({
         CommodityStore: CommodityReducer,
         AssetTypeStore: AssetTypeReducer,
         TitleStore: TitleReducer,
+        StoreStore: StoreReducer,
     },
 });
 
