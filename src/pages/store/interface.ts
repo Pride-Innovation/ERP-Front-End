@@ -30,3 +30,11 @@ export interface IStoresAxiosResponse extends IAxiosResponse {
 export interface IStoreAxiosResponse extends IAxiosResponse {
     data: IStore
 }
+
+export interface IStoreReportTableData {
+    name: string;
+    unitOfMeasure: string;
+    quantity: number;
+    branch: string;
+    status: string;
+}

@@ -29,8 +29,8 @@ export interface IBranch {
     branchOperationsManager?: IUser | null;
     relationshipManager?: IUser | null;
     creditAdministrator?: IUser | null;
-    region?: IRegion;
-    district?: IDistrict;
+    region?: IRegion | null;
+    district?: IDistrict | null;
 }
 
 export interface IBranchForm {

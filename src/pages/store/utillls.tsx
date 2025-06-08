@@ -12,6 +12,7 @@ import RoutesUtills from "../../core/routes/utills";
 import { StoreContext } from "../../context/store";
 import { ITabHeader } from "../../components/tabs/interface";
 import { IAssetType } from "../settings/assetTypes/interface";
+import TableData from "./TableData";
 
 const StoreUtills = () => {
     const [branchId, setBranchId] = useState<string | number>("")
@@ -46,7 +47,7 @@ const StoreUtills = () => {
         const headers = assetTypes.map((assetType, index) => ({
             label: assetType.name,
             position: index,
-            content: <p>{assetType.description}</p>,
+            content: <TableData />,
             id: assetType.id
         }))
         setCurrentAssetType(headers[0])

@@ -11,9 +11,8 @@ import TabComponent from '../../components/tabs';
 import { grey } from '@mui/material/colors';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import StoreUtills from './utillls';
-import { ITabHeader } from '../../components/tabs/interface';
 import { fetchStoreDetailsPerBranchServicePerAssetType } from './service';
 
 interface BranchStoreReportProps {
