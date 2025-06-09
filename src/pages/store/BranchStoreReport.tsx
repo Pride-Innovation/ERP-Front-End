@@ -29,7 +29,9 @@ const BranchStoreReport: React.FC<BranchStoreReportProps> = ({ storeData }) => {
         setCurrentUserBranch,
         branchId,
         setCurrentAssetType,
-        currentAssetType
+        currentAssetType,
+        setStoreReportTableData,
+        setSendingRequest
     } = StoreUtills();
     const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore);
 
@@ -37,19 +39,27 @@ const BranchStoreReport: React.FC<BranchStoreReportProps> = ({ storeData }) => {
     useEffect(() => { setCurrentUserBranch() }, [])
 
     const handleTabChange = (value: string | number) => {
+        setStoreReportTableData([])
         if (tableHeaders.length > 0) {
             setCurrentAssetType(tableHeaders[value as number]);
         }
     }
 
     const fetchStoresCommoditiesPerBranchPerAsset = async () => {
+        setSendingRequest(true)
+
         try {
             if (branchId && currentAssetType) {
                 const params = {
                     branchId,
                     assetTypeId: currentAssetType.id
                 }
-                const response = await fetchRowsService({ pageNumber: 0, pageSize: 10, endPoint: "store", params }) as IStoresAxiosResponse;
+                const response = await fetchRowsService({
+                    pageNumber: 0,
+                    pageSize: 10,
+                    endPoint: "store",
+                    params
+                }) as IStoresAxiosResponse;
                 if (response.status === 200) {
                     dispatch(loadAllStores(response.data.content))
                 }
@@ -57,6 +67,8 @@ const BranchStoreReport: React.FC<BranchStoreReportProps> = ({ storeData }) => {
         } catch (error) {
             console.log(error)
         }
+        setSendingRequest(false)
+
     }
 
     useEffect(() => {

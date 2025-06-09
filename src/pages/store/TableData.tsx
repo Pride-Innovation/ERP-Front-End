@@ -8,13 +8,13 @@ import { getTableHeaders } from '../../components/tables/getTableHeaders';
 import { IStore, IStoreReportTableData } from './interface';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
+import StoreUtills from './utillls';
 
 
 const TableData = () => {
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
-    const [storeReportTableData, setStoreReportTableData] = useState<Array<IStoreReportTableData>>([]);
     const { stores } = useSelector((state: RootState) => state.StoreStore)
-
+    const { setStoreReportTableData, storeReportTableData, sendingRequest } = StoreUtills()
     const {
         commodity,
         branch,
@@ -74,10 +74,10 @@ const TableData = () => {
     return (
         <TableComponent
             endPoint=""
-            loading={false}
+            loading={sendingRequest}
             count={100}
             exportData
-            header={{ plural: 'Request Reports', singular: 'Report' }}
+            header={{ plural: 'Store Reports', singular: 'Store' }}
             module=""
             rows={storeReportTableData || []}
             createAction={false}

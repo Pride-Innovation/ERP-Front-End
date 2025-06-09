@@ -7,7 +7,7 @@ Managing Director
 
 import { useContext, useState } from "react";
 import { fetchStoreDetailsPerBranchService } from "./service";
-import { IStore, IStoresAxiosResponse } from "./interface";
+import { IStore, IStoreReportTableData, IStoresAxiosResponse } from "./interface";
 import RoutesUtills from "../../core/routes/utills";
 import { StoreContext } from "../../context/store";
 import { ITabHeader } from "../../components/tabs/interface";
@@ -20,6 +20,7 @@ const StoreUtills = () => {
     const { setStoreCommoditiesData } = useContext(StoreContext);
     const [tableHeaders, setTableHeaders] = useState<ITabHeader[]>([] as ITabHeader[]);
     const [currentAssetType, setCurrentAssetType] = useState<ITabHeader>({} as ITabHeader)
+    const [storeReportTableData, setStoreReportTableData] = useState<Array<IStoreReportTableData>>([]);
 
 
     const { getCurrentUser } = RoutesUtills();
@@ -63,7 +64,10 @@ const StoreUtills = () => {
         handleTableColumns,
         tableHeaders,
         currentAssetType,
-        setCurrentAssetType
+        setCurrentAssetType,
+        setStoreReportTableData,
+        storeReportTableData,
+        setSendingRequest
     })
 }
 
