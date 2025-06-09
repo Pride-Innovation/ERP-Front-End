@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import TableComponent from '../../components/tables/TableComponent'
 import { ITableHeader } from '../../components/tables/interface';
 import { StoreMocks } from '../../mocks/store';
@@ -9,12 +9,19 @@ import { IStore, IStoreReportTableData } from './interface';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import StoreUtills from './utillls';
+import { StoreContext } from '../../context/store';
 
 
 const TableData = () => {
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
     const { stores } = useSelector((state: RootState) => state.StoreStore)
-    const { setStoreReportTableData, storeReportTableData, sendingRequest } = StoreUtills()
+    const { count } = useContext(StoreContext);
+
+    const {
+        setStoreReportTableData,
+        storeReportTableData,
+        sendingRequest,
+    } = StoreUtills()
     const {
         commodity,
         branch,
@@ -73,9 +80,9 @@ const TableData = () => {
 
     return (
         <TableComponent
-            endPoint=""
+            endPoint="store"
             loading={sendingRequest}
-            count={100}
+            count={count}
             exportData
             header={{ plural: 'Store Reports', singular: 'Store' }}
             module=""

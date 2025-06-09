@@ -18,15 +18,21 @@ import { IStore } from "../../pages/store/interface";
 interface IStoreContext {
     storeCommodities: IStore[],
     setStoreCommoditiesData: Dispatch<SetStateAction<IStore[]>>
+    count: number;
+    setCount: Dispatch<SetStateAction<number>>
 }
 
 export const StoreContext = createContext<IStoreContext>({} as IStoreContext);
 
 const StoreContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
     const [storeCommodities, setStoreCommoditiesData] = useState<IStore[]>([])
+    const [count, setCount] = useState<number>(0);
+
     return <StoreContext.Provider value={{
         setStoreCommoditiesData,
-        storeCommodities
+        storeCommodities,
+        count,
+        setCount
     }}>
         {children}
     </StoreContext.Provider>

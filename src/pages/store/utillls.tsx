@@ -22,7 +22,6 @@ const StoreUtills = () => {
     const [currentAssetType, setCurrentAssetType] = useState<ITabHeader>({} as ITabHeader)
     const [storeReportTableData, setStoreReportTableData] = useState<Array<IStoreReportTableData>>([]);
 
-
     const { getCurrentUser } = RoutesUtills();
 
     const setCurrentUserBranch = () => {
@@ -67,7 +66,7 @@ const StoreUtills = () => {
         setCurrentAssetType,
         setStoreReportTableData,
         storeReportTableData,
-        setSendingRequest
+        setSendingRequest,
     })
 }
 

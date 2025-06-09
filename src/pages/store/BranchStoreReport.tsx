@@ -11,11 +11,12 @@ import TabComponent from '../../components/tabs';
 import { grey } from '@mui/material/colors';
 import { useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../store';
-import { useEffect } from 'react';
+import { useContext, useEffect } from 'react';
 import StoreUtills from './utillls';
 import { useDispatch } from 'react-redux';
 import { loadAllStores } from './slice';
 import { fetchRowsService } from '../../core/apis/globalService';
+import { StoreContext } from '../../context/store';
 
 interface BranchStoreReportProps {
     storeData: IStore[];
@@ -23,6 +24,8 @@ interface BranchStoreReportProps {
 
 const BranchStoreReport: React.FC<BranchStoreReportProps> = ({ storeData }) => {
     const dispatch = useDispatch<AppDispatch>();
+    const { setCount } = useContext(StoreContext);
+
     const {
         handleTableColumns,
         tableHeaders,
@@ -31,7 +34,7 @@ const BranchStoreReport: React.FC<BranchStoreReportProps> = ({ storeData }) => {
         setCurrentAssetType,
         currentAssetType,
         setStoreReportTableData,
-        setSendingRequest
+        setSendingRequest,
     } = StoreUtills();
     const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore);
 
@@ -62,6 +65,7 @@ const BranchStoreReport: React.FC<BranchStoreReportProps> = ({ storeData }) => {
                 }) as IStoresAxiosResponse;
                 if (response.status === 200) {
                     dispatch(loadAllStores(response.data.content))
+                    setCount(response.data.totalElements)
                 }
             }
         } catch (error) {
