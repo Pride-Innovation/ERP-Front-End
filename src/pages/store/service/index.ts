@@ -16,16 +16,8 @@ const fetchStoreDetailsPerBranchService = async (id: string | number) => {
     }
 }
 
-const fetchStoreDetailsPerBranchServicePerAssetType = async (branchID: string | number, assetTypeId: string | number) => {
-    try {
-        const response = await axiosInstance.get(`store/${branchID}/${assetTypeId}`);
-        return response;
-    } catch (error) {
-        return error;
-    }
-}
+
 
 export {
     fetchStoreDetailsPerBranchService,
-    fetchStoreDetailsPerBranchServicePerAssetType
 }

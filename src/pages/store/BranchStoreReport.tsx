@@ -13,9 +13,9 @@ import { useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../store';
 import { useEffect } from 'react';
 import StoreUtills from './utillls';
-import { fetchStoreDetailsPerBranchServicePerAssetType } from './service';
 import { useDispatch } from 'react-redux';
 import { loadAllStores } from './slice';
+import { fetchRowsService } from '../../core/apis/globalService';
 
 interface BranchStoreReportProps {
     storeData: IStore[];
@@ -45,8 +45,11 @@ const BranchStoreReport: React.FC<BranchStoreReportProps> = ({ storeData }) => {
     const fetchStoresCommoditiesPerBranchPerAsset = async () => {
         try {
             if (branchId && currentAssetType) {
-                const response = await fetchStoreDetailsPerBranchServicePerAssetType(
-                    branchId, currentAssetType.id as number) as IStoresAxiosResponse;
+                const params = {
+                    branchId,
+                    assetTypeId: currentAssetType.id
+                }
+                const response = await fetchRowsService({ pageNumber: 0, pageSize: 10, endPoint: "store", params }) as IStoresAxiosResponse;
                 if (response.status === 200) {
                     dispatch(loadAllStores(response.data.content))
                 }
