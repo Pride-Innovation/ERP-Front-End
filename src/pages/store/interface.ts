@@ -32,6 +32,7 @@ export interface IStoreAxiosResponse extends IAxiosResponse {
 }
 
 export interface IStoreReportTableData {
+    id: number | string;
     name: string;
     unitOfMeasure: string;
     quantity: number;

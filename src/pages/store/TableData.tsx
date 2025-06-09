@@ -6,11 +6,14 @@ import { crudStates } from '../../utils/constants';
 import CommentOutlinedIcon from '@mui/icons-material/CommentOutlined';
 import { getTableHeaders } from '../../components/tables/getTableHeaders';
 import { IStore, IStoreReportTableData } from './interface';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../store';
 
 
 const TableData = () => {
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
     const [storeReportTableData, setStoreReportTableData] = useState<Array<IStoreReportTableData>>([]);
+    const { stores } = useSelector((state: RootState) => state.StoreStore)
 
     const {
         commodity,
@@ -48,6 +51,7 @@ const TableData = () => {
             return (
                 {
                     ...fielsdata,
+                    id: str.id as number,
                     name: str.commodity.name,
                     unitOfMeasure: str.commodity.groupName,
                     quantity: str.quantity,
@@ -60,6 +64,8 @@ const TableData = () => {
 
         setStoreReportTableData(data);
     }
+
+    useEffect(() => { handleReportsTableData(stores) }, [stores])
 
     useEffect(() => {
         setColumnHeaders(getTableHeaders(rowData))
