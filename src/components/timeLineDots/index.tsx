@@ -13,6 +13,8 @@ import LockPersonOutlinedIcon from '@mui/icons-material/LockPersonOutlined';
 import AutorenewIcon from '@mui/icons-material/Autorenew';
 import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
 import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import HourglassEmptyOutlinedIcon from '@mui/icons-material/HourglassEmptyOutlined';
 /**
  * 
  * @param status 
@@ -36,7 +38,14 @@ const TimeLineDot = ({ status }: ITimeLineDot) => {
     ) : status === "approved" ? (
         <CheckCircleOutlineOutlinedIcon fontSize='small' color="primary" sx={{ mr: "5px" }} />
     ) : status === "completed" ? (
-        <CheckCircleOutlineOutlinedIcon fontSize='small' color="primary" sx={{ mr: "5px" }} />)
+        <CheckCircleOutlineOutlinedIcon fontSize='small' color="primary" sx={{ mr: "5px" }} />
+    ) : status === "warning" ? (
+        <ErrorOutlineIcon fontSize='small' color="warning" sx={{ mr: "5px" }} />
+    ) : status === "low" ? (
+        <HourglassEmptyOutlinedIcon fontSize='small' color="error" sx={{ mr: "5px" }} />
+    ) : status === "in stock" ? (
+        <CheckCircleOutlineOutlinedIcon fontSize='small' color="primary" sx={{ mr: "5px" }} />
+    )
         : <DoDisturbAltIcon fontSize='small' color="secondary" sx={{ mr: "5px" }} />
 }
 
