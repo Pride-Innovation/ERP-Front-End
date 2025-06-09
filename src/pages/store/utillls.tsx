@@ -27,6 +27,7 @@ const StoreUtills = () => {
     const [open, setOpen] = useState<boolean>(false);
     const [cureentStoreData, setCurrentStoreData] = useState<IStore>({} as IStore);
     const { stores } = useSelector((state: RootState) => state.StoreStore)
+    const [currentState, setCurrentState] = useState<string>('')
 
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
@@ -71,9 +72,15 @@ const StoreUtills = () => {
     const handleOptionClicked = (option: string | number, moduleID?: string | number) => {
         switch (option) {
             case crudStates.read:
+                setCurrentState(crudStates.read)
                 setCurrentStoreData(findSingleStore(moduleID as number))
                 handleOpen()
                 break;
+            case crudStates.issue:
+                setCurrentState(crudStates.issue)
+                setCurrentStoreData(findSingleStore(moduleID as number))
+                handleOpen()
+                break
             default:
                 break;
         }
@@ -94,7 +101,8 @@ const StoreUtills = () => {
         setSendingRequest,
         handleOptionClicked,
         open,
-        handleClose
+        handleClose,
+        currentState
     })
 }
 

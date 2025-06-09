@@ -32,7 +32,8 @@ const TableData = () => {
         sendingRequest,
         handleOptionClicked,
         open,
-        handleClose
+        handleClose,
+        currentState
     } = StoreUtills()
     const {
         commodity,
@@ -53,7 +54,7 @@ const TableData = () => {
             label: "Options",
             options: [
                 { value: crudStates.read, label: "View Details", icon: <DisplaySettingsOutlinedIcon fontSize='small' color='primary' /> },
-                { value: crudStates.read, label: "Issue Item", icon: <ExitToAppOutlinedIcon fontSize='small' color='secondary' /> }
+                { value: crudStates.issue, label: "Issue Item", icon: <ExitToAppOutlinedIcon fontSize='small' color='secondary' /> }
             ]
         },
     };
@@ -94,9 +95,15 @@ const TableData = () => {
     return (
         <>
             {
-                crudStates.read &&
-                <ModalComponent width={"40%"} title='Comment' open={open} handleClose={handleClose} >
+                crudStates.read === currentState &&
+                <ModalComponent width={"40%"} title='Details' open={open} handleClose={handleClose} >
                     <p>Details</p>
+                </ModalComponent>
+            }
+            {
+                crudStates.issue === currentState &&
+                <ModalComponent width={"40%"} title='Issue Item' open={open} handleClose={handleClose}>
+                    <p>Issue Items</p>
                 </ModalComponent>
             }
             <TableComponent
