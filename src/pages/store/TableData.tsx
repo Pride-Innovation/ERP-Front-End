@@ -3,13 +3,15 @@ import TableComponent from '../../components/tables/TableComponent'
 import { ITableHeader } from '../../components/tables/interface';
 import { StoreMocks } from '../../mocks/store';
 import { crudStates } from '../../utils/constants';
-import CommentOutlinedIcon from '@mui/icons-material/CommentOutlined';
 import { getTableHeaders } from '../../components/tables/getTableHeaders';
 import { IStore, IStoreReportTableData } from './interface';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import StoreUtills from './utillls';
 import { StoreContext } from '../../context/store';
+import DisplaySettingsOutlinedIcon from '@mui/icons-material/DisplaySettingsOutlined';
+import ExitToAppOutlinedIcon from '@mui/icons-material/ExitToAppOutlined';
+import ModalComponent from '../../components/modal';
 
 
 const TableData = () => {
@@ -21,6 +23,9 @@ const TableData = () => {
         setStoreReportTableData,
         storeReportTableData,
         sendingRequest,
+        handleOptionClicked,
+        open,
+        handleClose
     } = StoreUtills()
     const {
         commodity,
@@ -38,9 +43,10 @@ const TableData = () => {
         status: StoreMocks[0].quantity < 5 ? 'low' :
             StoreMocks[0].quantity > 5 && StoreMocks[0].quantity < 10 ? 'warning' : 'in stock',
         action: {
-            label: "View Details",
+            label: "Options",
             options: [
-                { value: crudStates.read, label: "View Details", icon: <CommentOutlinedIcon fontSize='small' color='primary' /> }
+                { value: crudStates.read, label: "View Details", icon: <DisplaySettingsOutlinedIcon fontSize='small' color='primary' /> },
+                { value: crudStates.read, label: "Issue Item", icon: <ExitToAppOutlinedIcon fontSize='small' color='secondary' /> }
             ]
         },
     };
@@ -79,20 +85,28 @@ const TableData = () => {
     }, []);
 
     return (
-        <TableComponent
-            endPoint="store"
-            loading={sendingRequest}
-            count={count}
-            exportData
-            header={{ plural: 'Store Reports', singular: 'Store' }}
-            module=""
-            rows={storeReportTableData || []}
-            createAction={false}
-            columnHeaders={columnHeaders}
-            handleOptionClicked={() => console.log("clicked!!")}
-            searchAction={false}
-            paginationMode='client'
-        />
+        <>
+            {
+                crudStates.read &&
+                <ModalComponent width={"40%"} title='Comment' open={open} handleClose={handleClose} >
+                    <p>Details</p>
+                </ModalComponent>
+            }
+            <TableComponent
+                endPoint="store"
+                loading={sendingRequest}
+                count={count}
+                exportData
+                header={{ plural: 'Store Reports', singular: 'Store' }}
+                module=""
+                rows={storeReportTableData || []}
+                createAction={false}
+                columnHeaders={columnHeaders}
+                handleOptionClicked={handleOptionClicked}
+                searchAction={false}
+                paginationMode='client'
+            />
+        </>
     )
 }
 

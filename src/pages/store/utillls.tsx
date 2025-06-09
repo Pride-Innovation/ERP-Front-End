@@ -13,6 +13,9 @@ import { StoreContext } from "../../context/store";
 import { ITabHeader } from "../../components/tabs/interface";
 import { IAssetType } from "../settings/assetTypes/interface";
 import TableData from "./TableData";
+import { crudStates } from "../../utils/constants";
+import { useSelector } from "react-redux";
+import { RootState } from "../../store";
 
 const StoreUtills = () => {
     const [branchId, setBranchId] = useState<string | number>("")
@@ -21,6 +24,12 @@ const StoreUtills = () => {
     const [tableHeaders, setTableHeaders] = useState<ITabHeader[]>([] as ITabHeader[]);
     const [currentAssetType, setCurrentAssetType] = useState<ITabHeader>({} as ITabHeader)
     const [storeReportTableData, setStoreReportTableData] = useState<Array<IStoreReportTableData>>([]);
+    const [open, setOpen] = useState<boolean>(false);
+    const [cureentStoreData, setCurrentStoreData] = useState<IStore>({} as IStore);
+    const { stores } = useSelector((state: RootState) => state.StoreStore)
+
+    const handleOpen = () => setOpen(true);
+    const handleClose = () => setOpen(false);
 
     const { getCurrentUser } = RoutesUtills();
 
@@ -55,6 +64,22 @@ const StoreUtills = () => {
 
     }
 
+    const findSingleStore = (id: number): IStore => {
+        return stores.find(store => store.id === id) as IStore;
+    }
+
+    const handleOptionClicked = (option: string | number, moduleID?: string | number) => {
+        switch (option) {
+            case crudStates.read:
+                setCurrentStoreData(findSingleStore(moduleID as number))
+                handleOpen()
+                break;
+            default:
+                break;
+        }
+
+    }
+
     return ({
         fetchStoreDetailsPerBranch,
         setCurrentUserBranch,
@@ -67,6 +92,9 @@ const StoreUtills = () => {
         setStoreReportTableData,
         storeReportTableData,
         setSendingRequest,
+        handleOptionClicked,
+        open,
+        handleClose
     })
 }
 
