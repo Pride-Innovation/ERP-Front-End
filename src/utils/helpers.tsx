@@ -9,6 +9,7 @@ import { GridRowModel } from "@mui/x-data-grid";
 import MaleAvatar from '../statics/images/male.jpg';
 import FemaleAvatar from '../statics/images/Female.jpg';
 import { RowData, StockRowData, StockValidationResult, ValidationResult } from "../components/forms/interface";
+import { ICommodity } from "../pages/settings/commodity/interface";
 
 export const camelCaseToWords = (camelCaseString: string) => {
     return camelCaseString
@@ -123,7 +124,7 @@ export function validateInventoryItems(items: any[]): ValidationResult {
         }
 
         if (typeof groupName !== 'string' || groupName.trim() === '') {
-            errors.push(`${prefix} Group Name is required and must be a non-empty string.`);
+            errors.push(`${prefix} Unit of Measure is required and must be a non-empty string.`);
         }
 
         if (typeof quantity !== 'number' || quantity <= 0) {
@@ -259,4 +260,31 @@ export const generateReferenceNumber = (): string => {
 
     generatedRefs.add(ref);
     return ref;
+}
+
+
+export const validateCommodityQuantities = (
+    inputData: Array<{ commodity: ICommodity; quantity: number }>,
+    records: RowData[]
+): StockValidationResult => {
+    const errors: string[] = [];
+
+    inputData.forEach(input => {
+        const matchingRecord = records.find(
+            record => record.commodityId === input.commodity.id
+        );
+
+        if (!matchingRecord) {
+            errors.push(`Commodity '${input.commodity.name}' not found in records.`);
+        } else if (matchingRecord.quantity !== input.quantity) {
+            errors.push(
+                `Quantity mismatch for '${input.commodity.name}': expected ${input.quantity}, found ${matchingRecord.quantity}.`
+            );
+        }
+    });
+
+    return {
+        isValid: errors.length === 0,
+        errors
+    };
 }

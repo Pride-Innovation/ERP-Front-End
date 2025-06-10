@@ -5,7 +5,7 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
     Grid,
     Stack,
@@ -30,6 +30,13 @@ import { IRequestAxiosResponse, IIssueRequest } from "../interface";
 import InventoryOutlinedIcon from '@mui/icons-material/InventoryOutlined';
 import InventoryTable from "../../../components/forms/InventoryTable";
 import Person2OutlinedIcon from '@mui/icons-material/Person2Outlined';
+import { RequestContext } from "../../../context/request/RequestContext";
+import { RowData } from "../../../components/forms/interface";
+import { validateCommodityQuantities, validateInventoryItems } from "../../../utils/helpers";
+
+const initialData: RowData[] = [
+    { id: 1, name: '', groupName: '', quantity: 0 },
+];
 
 const IssueRequest = ({
     setSendingRequest,
@@ -40,9 +47,12 @@ const IssueRequest = ({
 }: IIssueRequest) => {
     const theme = useTheme();
     const [loading, setLoading] = useState(true);
+    const { rows, setRows } = useContext(RequestContext);
     const [requestCommodities, setRequestCommodities] = useState<
         Array<{ commodity: ICommodity; quantity: number }>
     >([]);
+
+    useEffect(() => { setRows(initialData) }, []);
 
     const fetchRequestCommodities = async () => {
         setLoading(true);
@@ -73,21 +83,39 @@ const IssueRequest = ({
     }, []);
 
     const handleRequestRejection = async () => {
-
         setSendingRequest(true);
-        try {
 
-            /**
-             * NB: Make an API call to issue Items
-             */
+        const result = validateInventoryItems(rows);
+        const validate = validateCommodityQuantities(requestCommodities, rows);
 
-        } catch (error) {
-            console.error(error);
-        } finally {
+        if (result.isValid && result.validData && validate.isValid) {
+
+            const formattedCommodities = result.validData.map(item => ({
+                commodityId: item.id,
+                quantity: item.quantity
+            }));
+
+            // console.log(formattedCommodities, "Formatted Commodities!!")
+
+            try {
+                /**
+                 * TO DO --- Make an API call
+                 */
+            } catch (error) {
+                console.log(error)
+            }
+
+        } else {
             setSendingRequest(false);
-            handleClose();
+            if (result.errors.length > 0) {
+                return toast.error(`Requests validation errors: ${result.errors}`)
+            }
+            if (validate.errors.length > 0) {
+                return toast.error(`Requests validation errors: ${validate.errors}`)
+            }
         }
-    };
+        setSendingRequest(false);
+    }
 
     return (
         <Grid container spacing={4}>
