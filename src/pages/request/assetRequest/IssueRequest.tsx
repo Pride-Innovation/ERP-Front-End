@@ -10,7 +10,6 @@ import {
     Grid,
     Stack,
     Typography,
-    TextField,
     CircularProgress,
     Table,
     TableBody,
@@ -95,7 +94,7 @@ const IssueRequest = ({
                 quantity: item.quantity
             }));
 
-            // console.log(formattedCommodities, "Formatted Commodities!!")
+            console.log(formattedCommodities, "Formatted Commodities!!")
 
             try {
                 /**
