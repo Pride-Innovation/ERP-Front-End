@@ -17,8 +17,8 @@ import { RootState } from '../../store';
 import StoreUtills from './utillls';
 import { StoreContext } from '../../context/store';
 import DisplaySettingsOutlinedIcon from '@mui/icons-material/DisplaySettingsOutlined';
-import ExitToAppOutlinedIcon from '@mui/icons-material/ExitToAppOutlined';
 import ModalComponent from '../../components/modal';
+import StoreDetails from './StoreDetails';
 
 
 const TableData = () => {
@@ -54,7 +54,6 @@ const TableData = () => {
             label: "Options",
             options: [
                 { value: crudStates.read, label: "View Details", icon: <DisplaySettingsOutlinedIcon fontSize='small' color='primary' /> },
-                { value: crudStates.issue, label: "Issue Item", icon: <ExitToAppOutlinedIcon fontSize='small' color='secondary' /> }
             ]
         },
     };
@@ -97,13 +96,7 @@ const TableData = () => {
             {
                 crudStates.read === currentState &&
                 <ModalComponent width={"40%"} title='Details' open={open} handleClose={handleClose} >
-                    <p>Details</p>
-                </ModalComponent>
-            }
-            {
-                crudStates.issue === currentState &&
-                <ModalComponent width={"40%"} title='Issue Item' open={open} handleClose={handleClose}>
-                    <p>Issue Items</p>
+                    <StoreDetails />
                 </ModalComponent>
             }
             <TableComponent

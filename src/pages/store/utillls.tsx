@@ -22,12 +22,11 @@ import { fetchSingleBranchService } from "../settings/branch/service";
 const StoreUtills = () => {
     const [branchId, setBranchId] = useState<string | number>("")
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
-    const { setStoreCommoditiesData } = useContext(StoreContext);
+    const { setStoreCommoditiesData, setCurrentStoreData } = useContext(StoreContext);
     const [tableHeaders, setTableHeaders] = useState<ITabHeader[]>([] as ITabHeader[]);
     const [currentAssetType, setCurrentAssetType] = useState<ITabHeader>({} as ITabHeader)
     const [storeReportTableData, setStoreReportTableData] = useState<Array<IStoreReportTableData>>([]);
     const [open, setOpen] = useState<boolean>(false);
-    const [cureentStoreData, setCurrentStoreData] = useState<IStore>({} as IStore);
     const { stores } = useSelector((state: RootState) => state.StoreStore)
     const [currentState, setCurrentState] = useState<string>('')
     const [currentBranch, setCurrentBranch] = useState<IBranch>({} as IBranch)
@@ -81,7 +80,7 @@ const StoreUtills = () => {
     }
 
     const findSingleStore = (id: number): IStore => {
-        return stores.find(store => store.id === id) as IStore;
+        return stores.find(store => store.id === id) as IStore;;
     }
 
     const handleOptionClicked = (option: string | number, moduleID?: string | number) => {
@@ -91,11 +90,6 @@ const StoreUtills = () => {
                 setCurrentStoreData(findSingleStore(moduleID as number))
                 handleOpen()
                 break;
-            case crudStates.issue:
-                setCurrentState(crudStates.issue)
-                setCurrentStoreData(findSingleStore(moduleID as number))
-                handleOpen()
-                break
             default:
                 break;
         }
@@ -119,7 +113,7 @@ const StoreUtills = () => {
         handleClose,
         currentState,
         fetchBranchDetails,
-        currentBranch
+        currentBranch,
     })
 }
 
