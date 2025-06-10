@@ -6,7 +6,7 @@ Managing Director
 */
 
 import { Box, Card, CardContent, Grid } from '@mui/material';
-import { IStore, IStoresAxiosResponse } from './interface';
+import { IStoresAxiosResponse } from './interface';
 import TabComponent from '../../components/tabs';
 import { grey } from '@mui/material/colors';
 import { useSelector } from 'react-redux';
@@ -18,11 +18,8 @@ import { loadAllStores } from './slice';
 import { fetchRowsService } from '../../core/apis/globalService';
 import { StoreContext } from '../../context/store';
 
-interface BranchStoreReportProps {
-    storeData: IStore[];
-}
 
-const BranchStoreReport: React.FC<BranchStoreReportProps> = ({ storeData }) => {
+const BranchStoreReport = () => {
     const dispatch = useDispatch<AppDispatch>();
     const { setCount } = useContext(StoreContext);
 

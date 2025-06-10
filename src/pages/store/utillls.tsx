@@ -16,6 +16,8 @@ import TableData from "./TableData";
 import { crudStates } from "../../utils/constants";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store";
+import { IBranch, IBranchAxiosResponse } from "../settings/branch/interface";
+import { fetchSingleBranchService } from "../settings/branch/service";
 
 const StoreUtills = () => {
     const [branchId, setBranchId] = useState<string | number>("")
@@ -28,6 +30,7 @@ const StoreUtills = () => {
     const [cureentStoreData, setCurrentStoreData] = useState<IStore>({} as IStore);
     const { stores } = useSelector((state: RootState) => state.StoreStore)
     const [currentState, setCurrentState] = useState<string>('')
+    const [currentBranch, setCurrentBranch] = useState<IBranch>({} as IBranch)
 
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
@@ -49,6 +52,18 @@ const StoreUtills = () => {
             console.log(error)
         }
         setSendingRequest(false)
+    }
+
+    const fetchBranchDetails = async (id: number) => {
+        try {
+            const response = await fetchSingleBranchService(id) as IBranchAxiosResponse
+            if (response.status === 200) {
+                setCurrentBranch(response.data)
+            }
+
+        } catch (error) {
+            console.log(error)
+        }
     }
 
     const handleTableColumns = (assetTypes: IAssetType[]) => {
@@ -102,7 +117,9 @@ const StoreUtills = () => {
         handleOptionClicked,
         open,
         handleClose,
-        currentState
+        currentState,
+        fetchBranchDetails,
+        currentBranch
     })
 }
 

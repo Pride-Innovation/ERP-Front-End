@@ -33,12 +33,15 @@ const Store = () => {
         fetchStoreDetailsPerBranch,
         setCurrentUserBranch,
         branchId,
-        sendingRequest
+        fetchBranchDetails,
+        sendingRequest,
+        currentBranch
     } = StoreUtills()
 
     useEffect(() => { setCurrentUserBranch() }, []);
     useEffect(() => { fetchAllAssetTypes() }, []);
     useEffect(() => { if (branchId) { fetchStoreDetailsPerBranch(branchId) } }, [branchId]);
+    useEffect(() => { if (branchId) { fetchBranchDetails(branchId as number) } }, [branchId]);
 
     return (
         <Paper
@@ -92,12 +95,10 @@ const Store = () => {
                             Branch Store Report
                         </Typography>
                         <Typography variant="subtitle1" sx={{ fontWeight: 500, mt: 1 }}>
-                            {/* {branch?.name} */}
-                            Head Office
+                            {currentBranch?.name}
                         </Typography>
                         <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                            {/* Email: {branch?.email} | Telephone: {branch?.telephone} */}
-                            Email: headOffice@prideban.co.ug | Telephone: +256778341692
+                            Email: {currentBranch?.email} | Telephone: {currentBranch?.telephone}
                         </Typography>
                     </Card>
                 </Stack>
@@ -114,7 +115,7 @@ const Store = () => {
                         <Loading items="Store Commodity" />
                     ) : storeCommodities.length > 0 ? (
                         <Grid container xs>
-                            <BranchStoreReport storeData={storeCommodities} />
+                            <BranchStoreReport />
                         </Grid>
                     ) : (
                         <NoContent item="stock" items="stocks" />

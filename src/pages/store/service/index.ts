@@ -17,7 +17,6 @@ const fetchStoreDetailsPerBranchService = async (id: string | number) => {
 }
 
 
-
 export {
     fetchStoreDetailsPerBranchService,
 }

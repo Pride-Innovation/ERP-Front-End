@@ -34,9 +34,19 @@ const deleteBranchService = async (id: string | number) => {
     }
 }
 
+const fetchSingleBranchService = async (id: string | number) => {
+    try {
+        const response = await axiosInstance.get(`branches/${id}`)
+        return response;
+    } catch (error) {
+        return error;
+    }
+}
+
 
 export {
     createBranchService,
     updateBranchService,
-    deleteBranchService
+    deleteBranchService,
+    fetchSingleBranchService
 }
