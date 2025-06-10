@@ -30,6 +30,7 @@ import { RequestContext } from '../../../context/request/RequestContext';
 import moment from 'moment';
 import AddTaskIcon from '@mui/icons-material/AddTask';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
+import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 
 const RequestUtills = () => {
     const endPoint = 'requests';
@@ -96,7 +97,6 @@ const RequestUtills = () => {
     } = requestMock[0];
 
     const rowData = {
-        // image: requestMock[0]?.signaturePath,
         name: requestMock[0]?.name,
         requestDate: requestMock[0]?.createDate,
         priority: requestMock[0]?.priority,
@@ -112,7 +112,8 @@ const RequestUtills = () => {
                 { value: crudStates.update, label: "Update", icon: <ModeEditIcon fontSize='small' color='info' /> },
                 { value: crudStates.read, label: "View Details", icon: <RemoveRedEyeIcon fontSize='small' color='inherit' /> },
                 { value: crudStates.approve, label: "Approve Request", icon: <AddTaskIcon fontSize='small' color='primary' /> },
-                { value: crudStates.reject, label: "Reject Request", icon: <RemoveCircleOutlineIcon fontSize='small' color='error' /> }
+                { value: crudStates.reject, label: "Reject Request", icon: <RemoveCircleOutlineIcon fontSize='small' color='error' /> },
+                { value: crudStates.issue, label: "Issue Items", icon: <ExitToAppIcon fontSize='small' color='primary' /> },
             ]
         },
     };
@@ -138,6 +139,11 @@ const RequestUtills = () => {
                 break;
             case crudStates.approve:
                 setModalState(crudStates.approve)
+                setCurrentRequest(determineCurrentRequest(moduleID as number, requests as IRequest[]))
+                handleOpen();
+                break;
+            case crudStates.issue:
+                setModalState(crudStates.issue)
                 setCurrentRequest(determineCurrentRequest(moduleID as number, requests as IRequest[]))
                 handleOpen();
                 break;
@@ -187,7 +193,6 @@ const RequestUtills = () => {
             return (
                 {
                     ...fielsdata,
-                    // image: request.signaturePath,
                     name: request.name,
                     requestDate: moment(request.createDate).format('Do MMMM YYYY, h:mm a'),
                     priority: request.priority,

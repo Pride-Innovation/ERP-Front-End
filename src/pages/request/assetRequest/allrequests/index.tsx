@@ -19,6 +19,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../../../store";
 import RejectRequest from "../RejectRequest";
 import ApproveRequest from "../ApprovedRequest";
+import IssueRequest from "../IssueRequest";
 
 const Request = () => {
     const { requestTableData } = useContext(RequestContext);
@@ -77,6 +78,17 @@ const Request = () => {
                         setSendingRequest={setSendingRequest}
                         handleClose={handleClose}
                         buttonText="Approve" />
+                </ModalComponent>
+            }
+
+            {crudStates.issue === modalState &&
+                <ModalComponent width={"90%"} title='Issue Request' open={open} handleClose={handleClose}>
+                    <IssueRequest
+                        request={currentRequest}
+                        sendingRequest={sendingRequest}
+                        setSendingRequest={setSendingRequest}
+                        handleClose={handleClose}
+                        buttonText="Issue Items" />
                 </ModalComponent>
             }
             <Grid xs={12} container>

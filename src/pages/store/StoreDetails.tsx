@@ -1,3 +1,10 @@
+/*
+13.9 Pride's Standard Copyright Notice:
+Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
+and distribute this software and its documentation for any purpose is prohibited unless authorized in writing by the
+Managing Director
+*/
+
 import {
     Box,
     Card,
@@ -17,9 +24,11 @@ import { StoreContext } from '../../context/store';
 import EventNoteOutlinedIcon from '@mui/icons-material/EventNoteOutlined';
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
 import ButtonComponent from '../../components/forms/Button';
+import StoreUtills from './utillls';
 
 const StoreDetails = () => {
     const { curentStoreData } = useContext(StoreContext);
+    const { handleClose } = StoreUtills()
 
     return (
         <Card
@@ -111,7 +120,7 @@ const StoreDetails = () => {
                         <Box display="flex" alignItems="center">
                             <PersonOutlineOutlinedIcon sx={{ mr: 1, color: '#08796C' }} />
                             <Typography variant="body2">
-                                <strong>Issued To:</strong>  N/A
+                                <strong>Issued To:</strong>  Sunday Odong - Gulu Branch
                             </Typography>
                         </Box>
                     </Stack>
@@ -119,12 +128,12 @@ const StoreDetails = () => {
 
                 <Stack direction="row" spacing={2} justifyContent="center" pt={2}>
                     <ButtonComponent
-                        handleClick={() => console.log("information!!")}
+                        handleClick={handleClose}
                         buttonColor='primary'
                         type='button'
                         variant='contained'
                         sendingRequest={false}
-                        buttonText="Back"
+                        buttonText="Close"
                     />
                 </Stack>
             </Stack>
