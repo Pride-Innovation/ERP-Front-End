@@ -20,7 +20,6 @@ import RoofingOutlinedIcon from '@mui/icons-material/RoofingOutlined';
 import { useContext, useEffect } from "react";
 import StoreUtills from "./utillls";
 import Loading from "../../components/loading";
-import NoContent from "../../components/noContent";
 import { StoreContext } from "../../context/store";
 import BranchStoreReport from "./BranchStoreReport";
 import AssetTypeUtills from "../settings/assetTypes/utills";
@@ -114,18 +113,11 @@ const Store = () => {
                 <Box>
                     {sendingRequest ? (
                         <Loading items="Store Commodity" />
-                    )
-                        // : storeCommodities.length > 0 ? (
-                        //     <Grid container xs>
-                        //         <BranchStoreReport />
-                        //     </Grid>
-                        // ) 
-                        : (
-                            // <NoContent item="stock" items="stocks" />
-                            <Grid container xs>
-                                <BranchStoreReport />
-                            </Grid>
-                        )}
+                    ) : (
+                        <Grid container xs>
+                            <BranchStoreReport />
+                        </Grid>
+                    )}
                 </Box>
             </Box>
         </Paper>
