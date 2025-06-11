@@ -59,6 +59,7 @@ const UserForm = ({
                     };
 
                     const gridSize = field.type === "textarea" ? 12 : 4;
+                    console.log(formState, field, "Form state")
 
                     return (
                         <Grid item xs={12} md={gridSize} key={field.value}>

@@ -61,10 +61,20 @@ const assetRequestApprovalRejectionService = async (body: Object) => {
     }
 }
 
+const issueCommodities = async (body: Object) => {
+    try {
+        const response = await axiosInstance.post("issuance", body);
+        return response;
+    } catch (error) {
+        return error;
+    }
+}
+
 export {
     createAssetRequestService,
     updateAssetRequestService,
     deleteAssetRequestService,
     findAssetRequestByIDService,
-    assetRequestApprovalRejectionService
+    assetRequestApprovalRejectionService,
+    issueCommodities
 }

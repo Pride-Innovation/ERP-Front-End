@@ -23,7 +23,7 @@ import {
 import { useTheme } from "@mui/material/styles";
 import ButtonComponent from "../../../components/forms/Button";
 import { toast } from "react-toastify";
-import { findAssetRequestByIDService } from "./service";
+import { findAssetRequestByIDService, issueCommodities } from "./service";
 import { ICommodity } from "../../settings/commodity/interface";
 import { IRequestAxiosResponse, IIssueRequest } from "../interface";
 import InventoryOutlinedIcon from '@mui/icons-material/InventoryOutlined';
@@ -94,12 +94,19 @@ const IssueRequest = ({
                 quantity: item.quantity
             }));
 
-            console.log(formattedCommodities, "Formatted Commodities!!")
+            const data = {
+                requester: request.requester?.id,
+                commodities: formattedCommodities,
+                comment: ""
+            }
+            console.log(data, "Information!!")
 
             try {
                 /**
                  * TO DO --- Make an API call
                  */
+                const response = await issueCommodities(data);
+                console.log(response, "Issue Items")
             } catch (error) {
                 console.log(error)
             }

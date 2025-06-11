@@ -24,6 +24,7 @@ import NoContent from "../../components/noContent";
 import { StoreContext } from "../../context/store";
 import BranchStoreReport from "./BranchStoreReport";
 import AssetTypeUtills from "../settings/assetTypes/utills";
+import FilterBranchForm from "./FilterBranchForm";
 
 const Store = () => {
     const theme = useTheme();
@@ -79,7 +80,7 @@ const Store = () => {
                     <RoofingOutlinedIcon fontSize="medium" sx={{ color: theme.palette.secondary.main, mx: "10px" }} />
                     Store Report
                 </Typography>
-                <Divider sx={{ mb: 2 }} />
+                <Divider sx={{ mb: 3 }} />
                 <Stack spacing={1}>
                     <Card
                         sx={{
@@ -102,6 +103,9 @@ const Store = () => {
                         </Typography>
                     </Card>
                 </Stack>
+                <Box mt={2}>
+                    <FilterBranchForm />
+                </Box>
             </Box>
             <Box
                 sx={{
