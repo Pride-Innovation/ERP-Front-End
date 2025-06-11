@@ -28,20 +28,17 @@ import FilterBranchForm from "./FilterBranchForm";
 
 const Store = () => {
     const theme = useTheme();
-    const { storeCommodities } = useContext(StoreContext);
+    const { branchId, currentBranch } = useContext(StoreContext);
     const { fetchAllAssetTypes } = AssetTypeUtills();
     const {
-        fetchStoreDetailsPerBranch,
         setCurrentUserBranch,
-        branchId,
         fetchBranchDetails,
         sendingRequest,
-        currentBranch
     } = StoreUtills()
 
     useEffect(() => { setCurrentUserBranch() }, []);
     useEffect(() => { fetchAllAssetTypes() }, []);
-    useEffect(() => { if (branchId) { fetchStoreDetailsPerBranch(branchId) } }, [branchId]);
+
     useEffect(() => { if (branchId) { fetchBranchDetails(branchId as number) } }, [branchId]);
 
     return (
@@ -117,13 +114,18 @@ const Store = () => {
                 <Box>
                     {sendingRequest ? (
                         <Loading items="Store Commodity" />
-                    ) : storeCommodities.length > 0 ? (
-                        <Grid container xs>
-                            <BranchStoreReport />
-                        </Grid>
-                    ) : (
-                        <NoContent item="stock" items="stocks" />
-                    )}
+                    )
+                        // : storeCommodities.length > 0 ? (
+                        //     <Grid container xs>
+                        //         <BranchStoreReport />
+                        //     </Grid>
+                        // ) 
+                        : (
+                            // <NoContent item="stock" items="stocks" />
+                            <Grid container xs>
+                                <BranchStoreReport />
+                            </Grid>
+                        )}
                 </Box>
             </Box>
         </Paper>

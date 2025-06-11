@@ -24,11 +24,9 @@ import StoreDetails from './StoreDetails';
 const TableData = () => {
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
     const { stores } = useSelector((state: RootState) => state.StoreStore)
-    const { count } = useContext(StoreContext);
+    const { count, setStoreReportTableData, storeReportTableData } = useContext(StoreContext);
 
     const {
-        setStoreReportTableData,
-        storeReportTableData,
         sendingRequest,
         handleOptionClicked,
         open,

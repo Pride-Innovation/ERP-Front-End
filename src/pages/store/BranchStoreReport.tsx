@@ -6,34 +6,26 @@ Managing Director
 */
 
 import { Box, Card, CardContent, Grid } from '@mui/material';
-import { IStoresAxiosResponse } from './interface';
 import TabComponent from '../../components/tabs';
 import { grey } from '@mui/material/colors';
 import { useSelector } from 'react-redux';
-import { AppDispatch, RootState } from '../../store';
+import { RootState } from '../../store';
 import { useContext, useEffect } from 'react';
 import StoreUtills from './utillls';
-import { useDispatch } from 'react-redux';
-import { loadAllStores } from './slice';
-import { fetchRowsService } from '../../core/apis/globalService';
 import { StoreContext } from '../../context/store';
 
 
 const BranchStoreReport = () => {
-    const dispatch = useDispatch<AppDispatch>();
-    const { setCount } = useContext(StoreContext);
+    const { branchId, currentAssetType, setStoreReportTableData } = useContext(StoreContext);
+    const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore);
 
     const {
         handleTableColumns,
         tableHeaders,
         setCurrentUserBranch,
-        branchId,
         setCurrentAssetType,
-        currentAssetType,
-        setStoreReportTableData,
-        setSendingRequest,
+        fetchStoresCommoditiesPerBranchPerAsset
     } = StoreUtills();
-    const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore);
 
     useEffect(() => { handleTableColumns(assetTypes) }, [assetTypes]);
     useEffect(() => { setCurrentUserBranch() }, [])
@@ -43,33 +35,6 @@ const BranchStoreReport = () => {
         if (tableHeaders.length > 0) {
             setCurrentAssetType(tableHeaders[value as number]);
         }
-    }
-
-    const fetchStoresCommoditiesPerBranchPerAsset = async () => {
-        setSendingRequest(true)
-
-        try {
-            if (branchId && currentAssetType) {
-                const params = {
-                    branchId,
-                    assetTypeId: currentAssetType.id
-                }
-                const response = await fetchRowsService({
-                    pageNumber: 0,
-                    pageSize: 10,
-                    endPoint: "store",
-                    params
-                }) as IStoresAxiosResponse;
-                if (response.status === 200) {
-                    dispatch(loadAllStores(response.data.content))
-                    setCount(response.data.totalElements)
-                }
-            }
-        } catch (error) {
-            console.log(error)
-        }
-        setSendingRequest(false)
-
     }
 
     useEffect(() => {

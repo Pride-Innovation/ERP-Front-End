@@ -13,32 +13,49 @@ import {
     SetStateAction,
     useState
 } from "react";
-import { IStore } from "../../pages/store/interface";
+import { IStore, IStoreReportTableData } from "../../pages/store/interface";
+import { ITabHeader } from "../../components/tabs/interface";
+import { IBranch } from "../../pages/settings/branch/interface";
 
 interface IStoreContext {
-    storeCommodities: IStore[],
-    setStoreCommoditiesData: Dispatch<SetStateAction<IStore[]>>
     count: number;
     setCount: Dispatch<SetStateAction<number>>;
     curentStoreData: IStore;
-    setCurrentStoreData: Dispatch<SetStateAction<IStore>>
+    setCurrentStoreData: Dispatch<SetStateAction<IStore>>;
+    branchId: string | number;
+    setBranchId: Dispatch<SetStateAction<string | number>>;
+    currentAssetType: ITabHeader;
+    setCurrentAssetType: Dispatch<SetStateAction<ITabHeader>>;
+    storeReportTableData: IStoreReportTableData[];
+    setStoreReportTableData: Dispatch<SetStateAction<IStoreReportTableData[]>>;
+    currentBranch: IBranch;
+    setCurrentBranch: Dispatch<SetStateAction<IBranch>>
 }
 
 export const StoreContext = createContext<IStoreContext>({} as IStoreContext);
 
 const StoreContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
-    const [storeCommodities, setStoreCommoditiesData] = useState<IStore[]>([])
     const [count, setCount] = useState<number>(0);
     const [curentStoreData, setCurrentStoreData] = useState<IStore>({} as IStore);
+    const [branchId, setBranchId] = useState<string | number>("")
+    const [currentAssetType, setCurrentAssetType] = useState<ITabHeader>({} as ITabHeader)
+    const [storeReportTableData, setStoreReportTableData] = useState<Array<IStoreReportTableData>>([]);
+    const [currentBranch, setCurrentBranch] = useState<IBranch>({} as IBranch)
 
 
     return <StoreContext.Provider value={{
-        setStoreCommoditiesData,
-        storeCommodities,
         count,
         setCount,
         curentStoreData,
-        setCurrentStoreData
+        setCurrentStoreData,
+        branchId,
+        setBranchId,
+        currentAssetType,
+        setCurrentAssetType,
+        setStoreReportTableData,
+        storeReportTableData,
+        currentBranch,
+        setCurrentBranch
     }}>
         {children}
     </StoreContext.Provider>

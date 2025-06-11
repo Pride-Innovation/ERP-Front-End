@@ -5,13 +5,15 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import BranchUtills from '../settings/branch/utills'
 import { IOptions } from '../../components/tables/interface';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import { Autocomplete, TextField } from '@mui/material';
 import CircularProgress from '@mui/material/CircularProgress';
+import StoreUtills from './utillls';
+import { StoreContext } from '../../context/store';
 
 
 const FilterBranchForm = () => {
@@ -21,6 +23,8 @@ const FilterBranchForm = () => {
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const [selectedBranch, setSelectedBranch] = useState<IOptions | null>(null);
+    const { setCurrentUserBranch, fetchStoresCommoditiesPerBranchPerAsset } = StoreUtills()
+    const { branchId } = useContext(StoreContext);
 
     const handleOpen = () => {
         setOpen(true);
@@ -46,6 +50,20 @@ const FilterBranchForm = () => {
             });
         }
     }, [branches]);
+
+    useEffect(() => {
+        if (selectedBranch?.label && selectedBranch.value) {
+            setCurrentUserBranch(selectedBranch.value as number)
+        }
+    }, [selectedBranch])
+
+
+    useEffect(() => {
+        if (branchId) {
+            fetchStoresCommoditiesPerBranchPerAsset()
+        }
+    }, [branchId]);
+    
 
     return (
         <Autocomplete

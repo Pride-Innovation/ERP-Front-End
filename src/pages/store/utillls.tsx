@@ -6,8 +6,7 @@ Managing Director
 */
 
 import { useContext, useState } from "react";
-import { fetchStoreDetailsPerBranchService } from "./service";
-import { IStore, IStoreReportTableData, IStoresAxiosResponse } from "./interface";
+import { IStore, IStoresAxiosResponse } from "./interface";
 import RoutesUtills from "../../core/routes/utills";
 import { StoreContext } from "../../context/store";
 import { ITabHeader } from "../../components/tabs/interface";
@@ -15,42 +14,43 @@ import { IAssetType } from "../settings/assetTypes/interface";
 import TableData from "./TableData";
 import { crudStates } from "../../utils/constants";
 import { useSelector } from "react-redux";
-import { RootState } from "../../store";
-import { IBranch, IBranchAxiosResponse } from "../settings/branch/interface";
+import { AppDispatch, RootState } from "../../store";
+import { IBranchAxiosResponse } from "../settings/branch/interface";
 import { fetchSingleBranchService } from "../settings/branch/service";
+import { fetchRowsService } from "../../core/apis/globalService";
+import { useDispatch } from "react-redux";
+import { loadAllStores } from "./slice";
 
 const StoreUtills = () => {
-    const [branchId, setBranchId] = useState<string | number>("")
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
-    const { setStoreCommoditiesData, setCurrentStoreData } = useContext(StoreContext);
     const [tableHeaders, setTableHeaders] = useState<ITabHeader[]>([] as ITabHeader[]);
-    const [currentAssetType, setCurrentAssetType] = useState<ITabHeader>({} as ITabHeader)
-    const [storeReportTableData, setStoreReportTableData] = useState<Array<IStoreReportTableData>>([]);
     const [open, setOpen] = useState<boolean>(false);
     const { stores } = useSelector((state: RootState) => state.StoreStore)
     const [currentState, setCurrentState] = useState<string>('')
-    const [currentBranch, setCurrentBranch] = useState<IBranch>({} as IBranch)
+    const dispatch = useDispatch<AppDispatch>();
+
+    const {
+        setCurrentStoreData,
+        setBranchId,
+        setCurrentAssetType,
+        setCurrentBranch,
+        branchId,
+        currentAssetType,
+        setCount
+    } = useContext(StoreContext);
+
 
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
 
     const { getCurrentUser } = RoutesUtills();
 
-    const setCurrentUserBranch = () => {
-        setBranchId(getCurrentUser()?.title?.branch?.id as number)
-    }
-
-    const fetchStoreDetailsPerBranch = async (id: string | number) => {
-        setSendingRequest(true);
-        try {
-            const response = await fetchStoreDetailsPerBranchService(id) as IStoresAxiosResponse;
-            if (response.status === 200) {
-                setStoreCommoditiesData(response.data as unknown as IStore[])
-            }
-        } catch (error) {
-            console.log(error)
+    const setCurrentUserBranch = (id?: number) => {
+        if (id) {
+            setBranchId(id)
+        } else {
+            setBranchId(getCurrentUser()?.title?.branch?.id as number)
         }
-        setSendingRequest(false)
     }
 
     const fetchBranchDetails = async (id: number) => {
@@ -96,24 +96,46 @@ const StoreUtills = () => {
 
     }
 
+    const fetchStoresCommoditiesPerBranchPerAsset = async () => {
+        setSendingRequest(true)
+        try {
+            if (branchId && currentAssetType.id) {
+                const params = {
+                    branchId,
+                    assetTypeId: currentAssetType.id
+                }
+                const response = await fetchRowsService({
+                    pageNumber: 0,
+                    pageSize: 10,
+                    endPoint: "store",
+                    params
+                }) as IStoresAxiosResponse;
+                if (response.status === 200) {
+                    console.log(response.data.content, "Response asset details")
+                    dispatch(loadAllStores(response.data.content))
+                    setCount(response.data.totalElements)
+                }
+            }
+        } catch (error) {
+            console.log(error)
+        }
+        setSendingRequest(false)
+
+    }
+
     return ({
-        fetchStoreDetailsPerBranch,
         setCurrentUserBranch,
-        branchId,
         sendingRequest,
         handleTableColumns,
         tableHeaders,
-        currentAssetType,
         setCurrentAssetType,
-        setStoreReportTableData,
-        storeReportTableData,
         setSendingRequest,
         handleOptionClicked,
         open,
         handleClose,
         currentState,
         fetchBranchDetails,
-        currentBranch,
+        fetchStoresCommoditiesPerBranchPerAsset
     })
 }
 
