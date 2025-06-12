@@ -16,7 +16,16 @@ const fetchStoreDetailsPerBranchService = async (id: string | number) => {
     }
 }
 
+const fetchLastIssuedCommodityService = async (id: string | number) => {
+    try {
+        const response = await axiosInstance.get(`last-issued/${id}`);
+        return response;
+    } catch (error) {
+        return error;
+    }
+}
 
 export {
     fetchStoreDetailsPerBranchService,
+    fetchLastIssuedCommodityService
 }

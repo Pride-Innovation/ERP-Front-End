@@ -19,7 +19,7 @@ import LocationCityOutlinedIcon from '@mui/icons-material/LocationCityOutlined';
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
 import PhoneIphoneOutlinedIcon from '@mui/icons-material/PhoneIphoneOutlined';
 import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 import { StoreContext } from '../../context/store';
 import EventNoteOutlinedIcon from '@mui/icons-material/EventNoteOutlined';
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
@@ -28,7 +28,14 @@ import StoreUtills from './utillls';
 
 const StoreDetails = () => {
     const { curentStoreData } = useContext(StoreContext);
-    const { handleClose } = StoreUtills()
+    const { handleClose, fetchLastIssuedCommodity } = StoreUtills()
+
+    useEffect(() => {
+        if (curentStoreData.commodity.id) {
+            fetchLastIssuedCommodity(curentStoreData.commodity.id)
+        }
+
+    }, [curentStoreData])
 
     return (
         <Card

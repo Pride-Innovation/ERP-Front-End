@@ -9,6 +9,8 @@ Managing Director
 import { IAxiosResponse, IFetchDataRequest } from "../../core/apis/interface";
 import { IBranch } from "../settings/branch/interface";
 import { ICommodity } from "../settings/commodity/interface";
+import { IStatus } from "../settings/statuses/interface";
+import { IUser } from "../users/interface";
 
 
 export interface IStore {
@@ -38,4 +40,28 @@ export interface IStoreReportTableData {
     quantity: number;
     branch: string;
     status: string;
+}
+
+/**
+ * Show issuance report
+ */
+
+interface IIssuance {
+    id: string | number,
+    comment: string,
+    requester: IUser
+    status: IStatus
+    createDate: string,
+    lastModified: string,
+    createdBy: string,
+    lastModifiedBy: string
+}
+
+export interface ILastIssuedCommodity extends IAxiosResponse {
+    data: {
+        id: number;
+        issuance: IIssuance;
+        commodity: ICommodity;
+        quantity: number
+    }
 }

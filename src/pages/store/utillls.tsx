@@ -6,7 +6,7 @@ Managing Director
 */
 
 import { useContext, useState } from "react";
-import { IStore, IStoresAxiosResponse } from "./interface";
+import { ILastIssuedCommodity, IStore, IStoresAxiosResponse } from "./interface";
 import RoutesUtills from "../../core/routes/utills";
 import { StoreContext } from "../../context/store";
 import { ITabHeader } from "../../components/tabs/interface";
@@ -20,6 +20,7 @@ import { fetchSingleBranchService } from "../settings/branch/service";
 import { fetchRowsService } from "../../core/apis/globalService";
 import { useDispatch } from "react-redux";
 import { loadAllStores } from "./slice";
+import { fetchLastIssuedCommodityService } from "./service";
 
 const StoreUtills = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
@@ -123,6 +124,18 @@ const StoreUtills = () => {
 
     }
 
+
+    const fetchLastIssuedCommodity = async (commodityId: string | number) => {
+        try {
+            const response = await fetchLastIssuedCommodityService(commodityId) as ILastIssuedCommodity
+            if (response.status === 200) {
+                console.log(response.data, "Issued Information")
+            }
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
     return ({
         setCurrentUserBranch,
         sendingRequest,
@@ -135,7 +148,8 @@ const StoreUtills = () => {
         handleClose,
         currentState,
         fetchBranchDetails,
-        fetchStoresCommoditiesPerBranchPerAsset
+        fetchStoresCommoditiesPerBranchPerAsset,
+        fetchLastIssuedCommodity
     })
 }
 
