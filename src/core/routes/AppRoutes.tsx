@@ -39,6 +39,7 @@ import RequestDetails from '../../pages/request/assetRequest/view'
 import CreateInventory from '../../pages/inventory/CreateInventory'
 import UpdateInventory from '../../pages/inventory/UpdateInventory'
 import Store from '../../pages/store'
+import IssueRequestDetails from '../../pages/request/assetRequest/issue'
 
 const AppRoutes = () => {
   // const { routePermission } = RoutesUtills();
@@ -75,6 +76,7 @@ const AppRoutes = () => {
             {RequestSubroutes()}
           </Route>
           <Route path={`${ROUTES.READ_REQUEST}/:id`} element={<RequestDetails />} />
+          <Route path={`${ROUTES.ISSUE_REQUEST}/:id`} element={<IssueRequestDetails />} />
 
           <Route path={ROUTES.TRANSPORT_REQUEST} element={<TransportRequestsManagement />}>
             <Route index element={<TransportRequest />} />

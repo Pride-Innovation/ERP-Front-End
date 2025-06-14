@@ -38,7 +38,7 @@ import RemoveCircleOutlineOutlinedIcon from '@mui/icons-material/RemoveCircleOut
 import EighteenMpOutlinedIcon from '@mui/icons-material/EighteenMpOutlined';
 import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined';
 
-const InventoryTable = () => {
+const InventoryTable = ({ issue, title }: { issue?: boolean, title: string }) => {
     const { fetchAllCommodities } = CommodityUtills()
     const [itemOptions, setItemOptions] = useState<{ name: string; groupName: string }[]>([]);
     const { rows, setRows } = useContext(RequestContext);
@@ -95,6 +95,19 @@ const InventoryTable = () => {
         }
     }, [commodities]);
 
+    /**
+     * Handle Engraved Number additions
+     */
+    const optionalSelectOptions = commodities.map(c => c.name); // or any other source
+
+
+    const handleSelectChange = (id: number, value: string[]) => {
+        const updatedRows = rows.map(row =>
+            row.id === id ? { ...row, selectedOptions: value } : row
+        );
+        setRows(updatedRows);
+    };
+
     return (
         <Paper elevation={4} sx={{
             borderRadius: 2, boxShadow: "none",
@@ -119,7 +132,7 @@ const InventoryTable = () => {
                         color: "#007C7C",
                     }}
                 >
-                    Request Items
+                    {title}
                 </Typography>
                 <Button
                     variant="contained"
@@ -154,6 +167,12 @@ const InventoryTable = () => {
                                 name: "Quantity",
                                 icon: <EighteenMpOutlinedIcon sx={{ fontSize: "12px", mr: "5px" }} />
                             },
+                            ...(issue
+                                ? [{
+                                    name: "Engraved Nos.",
+                                    icon: <FeedOutlinedIcon sx={{ fontSize: "12px", mr: "5px" }} />
+                                }]
+                                : []),
                             {
                                 name: "Remove",
                                 icon: <RemoveCircleOutlineOutlinedIcon sx={{ fontSize: "12px", mr: "5px" }} />
@@ -302,6 +321,62 @@ const InventoryTable = () => {
                                         }}
                                     />
                                 </TableCell>
+
+                                {/* Handle Engraved numbers */}
+
+                                {issue && <TableCell sx={{ borderBottom: 'none', px: 2, py: 1 }}>
+                                    <Select
+                                        multiple
+                                        displayEmpty
+                                        fullWidth
+                                        variant="standard"
+                                        disableUnderline
+                                        value={row.selectedOptions || []}
+                                        onChange={(e) =>
+                                            handleSelectChange(row.id, typeof e.target.value === 'string' ? e.target.value.split(',') : e.target.value)
+                                        }
+                                        renderValue={(selected) => {
+                                            if (!selected.length) return <em>Select tags</em>;
+                                            return (
+                                                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                                                    {selected.map((value: string, idx) => (
+                                                        <Box
+                                                            key={idx}
+                                                            sx={{
+                                                                bgcolor: alpha(theme.palette.primary.main, 0.1),
+                                                                color: theme.palette.primary.main,
+                                                                px: 1.2,
+                                                                py: 0.5,
+                                                                borderRadius: 1.5,
+                                                                fontSize: 12,
+                                                                fontWeight: 500,
+                                                            }}
+                                                        >
+                                                            {value}
+                                                        </Box>
+                                                    ))}
+                                                </Box>
+                                            );
+                                        }}
+                                        sx={{
+                                            fontSize: 14,
+                                            fontWeight: 400,
+                                            color: 'text.primary',
+                                            '& .MuiSelect-select': {
+                                                padding: '8px 12px',
+                                            },
+                                            '& .MuiSvgIcon-root': {
+                                                color: '#999',
+                                            },
+                                        }}
+                                    >
+                                        {optionalSelectOptions.map((option) => (
+                                            <MenuItem key={option} value={option}>
+                                                {option}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </TableCell>}
 
                                 <TableCell align="center" sx={{ borderBottom: 'none', px: 2, py: 1 }}>
                                     <IconButton

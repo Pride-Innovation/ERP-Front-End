@@ -26,6 +26,7 @@ const REQUEST: string = `${ASSETS_MANAGEMENT}/asset-request`
 const CREATE_REQUEST: string = `${ASSETS_MANAGEMENT}/asset-request/create`
 const UPDATE_REQUEST: string = `${ASSETS_MANAGEMENT}/asset-request/update`
 const READ_REQUEST: string = `${ASSETS_MANAGEMENT}/asset-request/view`
+const ISSUE_REQUEST: string = `${ASSETS_MANAGEMENT}/issue-request/view`
 
 /* Transport Request Routes */
 const TRANSPORT_REQUEST: string = `${ASSETS_MANAGEMENT}/transport-request`
@@ -83,6 +84,7 @@ export const ROUTES = {
     CREATE_REQUEST,
     UPDATE_REQUEST,
     READ_REQUEST,
+    ISSUE_REQUEST,
     LIST_OFFICE_EQUIPMENT,
     LIST_FLEET,
     CREATE_FLEET,
