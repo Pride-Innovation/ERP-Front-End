@@ -9,15 +9,13 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { IITEquipment } from "./interface";
 import { useForm } from "react-hook-form";
-// import { yupResolver } from "@hookform/resolvers/yup";
-// import { ITEquipmentSchema } from "./schema";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { ITEquipmentSchema } from "./schema";
 import { Card, Grid, SelectChangeEvent } from "@mui/material";
 import { FormHeader } from "../../../components/headers/TypographyComponent";
 import ITEquipmentForm from "./ITEquipmentForm";
 import { itEquipmentMock } from "../../../mocks/itEquipment";
-import { getITEquipmentByIDService, updateITEquipmentService } from "./service";
-import { IResponseData } from "../../users/interface";
-import { toast } from "react-toastify";
+import { getITEquipmentByIDService } from "./service";
 
 const UpdateITEquipment = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
@@ -48,7 +46,7 @@ const UpdateITEquipment = () => {
         reset
     } = useForm<IITEquipment>({
         mode: 'onChange',
-        // resolver: yupResolver(ITEquipmentSchema),
+        resolver: yupResolver(ITEquipmentSchema),
     });
 
     useEffect(() => {
@@ -58,18 +56,7 @@ const UpdateITEquipment = () => {
 
     const onSubmit = async (formData: IITEquipment) => {
         setSendingRequest(true);
-        const { assetSubCategory_id, ...data } = formData;
-        const request = {
-            ...data,
-            branch_id: parseInt(formData.branch_id as string),
-            assetStatus_id: parseInt(formData.assetStatus as string),
-            ItAssetCategory_id: parseInt(formData.assetCategory_id),
-            unitOfMeasure_id: parseInt(formData.unitOfMeasure),
-            supplier_id: parseInt(formData.supplier),
-            user_id: parseInt(formData.user_id as string),
-        }
-        const response = await updateITEquipmentService(request, id as string) as IResponseData;
-        toast.success(response.data.message)
+
         setSendingRequest(false)
     };
 

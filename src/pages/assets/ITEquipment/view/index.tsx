@@ -58,11 +58,11 @@ const ITEquipmentDetails = () => {
                             <DetailSection label='Hostname' text={equipment.hostname} />
                             {equipment.model && <DetailSection label="Model" text={equipment.model} />}
                             {equipment.serialNumber && <DetailSection label="Serial Number" text={equipment.serialNumber} />}
-                            <DetailSection label="Supplier" text={equipment.supplier} />
+                            {equipment.supplier && <DetailSection label="Supplier" text={equipment.supplier?.name} />}
                             <DetailSection label="Purchase Cost" text={equipment.purchaseCost} />
                             <DetailSection label="Date of Receipt" text={equipment.dateReceipt} />
-                            {equipment.location && <DetailSection label="Location" text={equipment.location} />}
-                            {equipment.assetStatus && <DetailSection label="Status" text={equipment.assetStatus} />}
+                            {equipment.branch && <DetailSection label="Location" text={equipment.branch.name} />}
+                            {equipment.assetStatus && <DetailSection label="Status" text={equipment.assetStatus.name} />}
                             {equipment.desc && <DetailSection label="Description" text={equipment.desc} />}
                         </CardContent>
                     </Card>

@@ -32,14 +32,11 @@ const DisposalAssetsUtills = () => {
         supplier,
         unitOfMeasure,
         assetDepreciationRate,
-        assetSubCategory_id,
         desc,
         netValueB,
         costOfTheAsset,
         assetStatus,
         hostname,
-        assetCategory_id,
-        location,
         make,
         ...data
     } = itEquipmentMock[0];

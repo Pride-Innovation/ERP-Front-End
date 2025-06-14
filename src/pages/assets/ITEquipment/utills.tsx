@@ -105,15 +105,11 @@ const ITEquipmentUtills = () => {
         supplier,
         unitOfMeasure,
         assetDepreciationRate,
-        assetSubCategory_id,
-        assetCategory_id,
-        location,
         desc,
         serialNumber,
         netValueB,
         costOfTheAsset,
         hostname,
-        name,
         ...data
     } = itEquipmentMock[0];
 
@@ -189,13 +185,13 @@ const ITEquipmentUtills = () => {
             type: "input"
         },
         {
-            value: "user_id",
+            value: "assignedTo",
             label: 'Assigned To',
             type: "select",
             options: optionsObject.usersOptions
         },
         {
-            value: "branch_id",
+            value: "branch",
             label: 'Branch',
             type: "select",
             options: optionsObject.branchesOptions
@@ -219,12 +215,6 @@ const ITEquipmentUtills = () => {
             value: "dateReceipt",
             label: 'Receipt Date',
             type: "date",
-        },
-        {
-            value: "assetCategory_id",
-            label: 'Asset Category',
-            type: "select",
-            options: optionsObject.assetCategoriesOptions
         },
         {
             value: "costOfTheAsset",

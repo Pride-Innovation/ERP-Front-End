@@ -95,7 +95,7 @@ const RequestForm = ({
                         })}
                     </Grid>
                     <Box sx={{ width: "100%", mt: 3 }}>
-                        <InventoryTable title='Issue Items'/>
+                        <InventoryTable title='Request Items'/>
                     </Box>
                 </Grid>
                 <Grid item xs={12} md={4}>

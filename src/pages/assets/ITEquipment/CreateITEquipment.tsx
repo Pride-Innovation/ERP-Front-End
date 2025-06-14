@@ -13,9 +13,6 @@ import { ITEquipmentSchema } from './schema';
 import { Card, Grid, SelectChangeEvent } from '@mui/material';
 import ITEquipmentForm from './ITEquipmentForm';
 import { FormHeader } from '../../../components/headers/TypographyComponent';
-import { createITEquipmentService } from './service';
-import { IResponseData } from '../../users/interface';
-import { toast } from 'react-toastify';
 
 const CreateITEquipment = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
@@ -29,7 +26,7 @@ const CreateITEquipment = () => {
         formState,
         register,
         reset
-    } = useForm<IITEquipment>({
+    } = useForm<IITEquipment>({ 
         mode: 'onChange',
         resolver: yupResolver(ITEquipmentSchema),
     });
@@ -40,27 +37,7 @@ const CreateITEquipment = () => {
 
     const onSubmit = async (formData: IITEquipment) => {
         setSendingRequest(true);
-        const request = {
-            ...formData,
-            branch_id: parseInt(formData.branch_id as string),
-            assetStatus_id: parseInt(formData.assetStatus as string),
-            ItAssetCategory_id: parseInt(formData.assetCategory_id),
-            unitOfMeasure_id: parseInt(formData.unitOfMeasure),
-            supplier_id: parseInt(formData.supplier),
-            user_id: parseInt(formData.user_id as string),
-            desc: "Test Decription",
-
-            /** Extra fields */
-            ram: "8GB",
-            cpuSpeed: "2.7GH",
-            hardDiskSize: "500GB",
-            macAddress: "128H1234455",
-            ipAddress: "143543ERTYY",
-            interfaceType: "223"
-        }
-
-        const response = await createITEquipmentService(request) as IResponseData;
-        toast.success(response.data.message)
+        console.log(formData)
         setSendingRequest(false)
     };
 

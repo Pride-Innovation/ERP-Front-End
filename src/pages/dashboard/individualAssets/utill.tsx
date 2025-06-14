@@ -30,13 +30,10 @@ const IndividualRequestUtill = () => {
         supplier,
         unitOfMeasure,
         assetDepreciationRate,
-        assetSubCategory_id,
         desc,
         netValueB,
         costOfTheAsset,
         hostname,
-        assetCategory_id,
-        location,
         assetStatus,
         ...data
     } = itEquipmentMock[0];
