@@ -15,18 +15,12 @@ import { getTableHeaders } from "../../../components/tables/getTableHeaders";
 import { IFormData } from "../interface";
 import { IITEquipment } from "./interface";
 import { itEquipmentMock } from "../../../mocks/itEquipment";
-import {
-    listCategoriesService,
-    listUsersService
-} from "./service";
 import { AppDispatch, RootState } from "../../../store";
-import {
-    loadAssetCategories,
-    // loadUsers,
-} from "../slice";
-import { loadBranches } from "../../settings/branch/slice";
 import { loadStatuses } from "../../settings/statuses/slice";
 import { listAssetStatusesService } from "../../settings/statuses/service";
+import { crudStates } from "../../../utils/constants";
+import { useNavigate } from "react-router";
+import { ROUTES } from "../../../core/routes/routes";
 
 const ITEquipmentUtills = () => {
     const endPoint = 'posts';
@@ -34,6 +28,8 @@ const ITEquipmentUtills = () => {
     const header = { plural: 'IT Equipment', singular: 'IT Equipment' };
     const [open, setOpen] = useState<boolean>(false);
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
+    const [currentAsset, setCurrentAsset] = useState<IITEquipment>({} as IITEquipment);
+
     const dispatch = useDispatch<AppDispatch>();
     const [optionsObject, setOptionsObject] = useState<{
         assetsStatusesOptions: Array<IOptions>,
@@ -55,10 +51,11 @@ const ITEquipmentUtills = () => {
     const { statuses } = useSelector((state: RootState) => state.StatusesStore);
     const { suppliers } = useSelector((state: RootState) => state.SuppliersStore);
     const { branches } = useSelector((state: RootState) => state.BranchStore);
+    const navigate = useNavigate()
 
     const updateReduxStore = async () => {
         // dispatch(loadUsers(await listUsersService()));
-        dispatch(loadAssetCategories(await listCategoriesService()));
+        // dispatch(loadAssetCategories(await listCategoriesService()));
         dispatch(loadStatuses(await listAssetStatusesService()));
     }
 
@@ -93,23 +90,23 @@ const ITEquipmentUtills = () => {
 
     const {
         id,
-        model,
-        ram,
-        cpuSpeed,
-        hardDiskSize,
+        branch,
+        assignedTo,
+        assetType,
+        assetStatus,
+        supplier,
+        desc,
+        assetDepreciationRate,
+        interfaceType,
         ipAddress,
         macAddress,
-        image,
-        interfaceType,
-        detailNetBookValue,
-        supplier,
-        unitOfMeasure,
-        assetDepreciationRate,
-        desc,
-        serialNumber,
-        netValueB,
-        costOfTheAsset,
+        hardDiskSize,
         hostname,
+        cpuSpeed,
+        ram,
+        detailNetBookValue,
+        netValueB,
+        unitOfMeasure,
         ...data
     } = itEquipmentMock[0];
 
@@ -130,6 +127,27 @@ const ITEquipmentUtills = () => {
     useEffect(() => {
         setColumnHeaders(getTableHeaders(rowData))
     }, []);
+
+    const handleOptionClicked = async (option: string | number, moduleID?: string | number) => {
+        switch (option) {
+            case crudStates.update:
+                navigate(`${ROUTES.UPDATE_ITEQUIPMENT}/${moduleID}`);
+                break;
+            case crudStates.dispose:
+                // setCurrentAsset(determineCurrentAsset(moduleID as number, rows as IITEquipment[]))
+                handleOpen();
+                break;
+            case crudStates.read:
+                navigate(`${ROUTES.LIST_ASSETS}/${moduleID}`);
+                break;
+            case crudStates.delete:
+                // const response = await deleteITEquipmentService(moduleID as number);
+                // console.log(response, "response information")
+                break;
+            default:
+                break;
+        }
+    }
 
 
     const formFields: Array<IFormData<IITEquipment>> = [
@@ -285,7 +303,9 @@ const ITEquipmentUtills = () => {
             computerFields,
             categories,
             determineCurrentAsset,
-            module
+            module,
+            handleOptionClicked,
+            currentAsset
         }
     )
 }

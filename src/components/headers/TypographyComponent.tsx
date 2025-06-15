@@ -10,6 +10,7 @@ import {
   styled,
   Typography,
   TypographyProps,
+  useTheme,
 } from '@mui/material';
 
 interface ITypographyComponent {
@@ -54,6 +55,15 @@ export const LinkComponent = ({
   <Link href={href} underline='hover' fontSize={size} sx={{ cursor: "pointer" }} fontWeight={weight}>{text}</Link>
 )
 
-export const FormHeader = ({ header }: { header: string }) => (
-  <Typography sx={{ mb: 4, fontWeight: 600, textTransform: "uppercase", fontSize: '17px' }}>{header}</Typography>
-)
+export const FormHeader = ({ header }: { header: string }) => {
+  const theme = useTheme()
+  return (
+    <Typography sx={{
+      mb: 4,
+      fontWeight: 600,
+      textTransform: "uppercase",
+      fontSize: '17px',
+      color: theme.palette.secondary.main
+    }}>{header}</Typography>
+  )
+}

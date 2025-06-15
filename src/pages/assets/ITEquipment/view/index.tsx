@@ -24,9 +24,9 @@ import OtherDetails from './OtherDetails';
 import AssignmentHistory from '../../trails/AssignmentHistory';
 import RepairHistory from '../../trails/RepairHistory';
 import { useEffect, useState } from 'react';
-import { getITEquipmentByIDService } from '../service';
 import { useParams } from 'react-router';
 import { IITEquipment } from '../interface';
+import { getITEquipmentByIDService } from '../service';
 
 const ITEquipmentDetails = () => {
     const [equipment, setEquipment] = useState<IITEquipment>({} as IITEquipment)

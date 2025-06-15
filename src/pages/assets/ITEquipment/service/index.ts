@@ -7,15 +7,6 @@ Managing Director
 
 import axiosInstance from "../../../../core/apis/axiosInstance"
 
-const fetchITEquipmentService = async () => {
-    try {
-        const response = await axiosInstance.get("itAssets");
-        return response.data?.data
-    } catch (error) {
-        return error;
-    }
-}
-
 const createITEquipmentService = async (body: object) => {
     try {
         const response = await axiosInstance.post("itAssets/create", body);
@@ -53,42 +44,10 @@ const updateITEquipmentService = async (body: object, id: string | number) => {
     }
 }
 
-const listUsersService = async () => {
-    try {
-        const response = await axiosInstance.get('users');
-        return response.data?.data;
-    } catch (error) {
-        return error;
-    }
-}
-
-const listCategoriesService = async () => {
-    try {
-        const response = await axiosInstance.get('itAssetCategories');
-        return response.data?.data;
-    } catch (error) {
-        return error;
-    }
-}
-
-const listUnitOfMeasuresService = async () => {
-    try {
-        const response = await axiosInstance.get('unitMeasures');
-        return response.data?.data;
-    } catch (error) {
-        return error;
-    }
-}
-
-
-
 export {
-    fetchITEquipmentService,
     createITEquipmentService,
     deleteITEquipmentService,
     getITEquipmentByIDService,
     updateITEquipmentService,
-    listUsersService,
-    listCategoriesService,
-    listUnitOfMeasuresService,
+
 }

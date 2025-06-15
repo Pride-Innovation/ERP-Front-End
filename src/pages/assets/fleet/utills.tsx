@@ -19,9 +19,6 @@ import { useDispatch } from "react-redux";
 import {
     loadAssetCategories,
 } from "../slice";
-import {
-    listCategoriesService,
-} from "../ITEquipment/service";
 import { loadStatuses } from "../../settings/statuses/slice";
 import { listAssetStatusesService } from "../../settings/statuses/service";
 
@@ -49,7 +46,7 @@ const FleetUtills = () => {
     const handleClose = () => setOpen(false);
 
     const updateReduxStore = async () => {
-        dispatch(loadAssetCategories(await listCategoriesService()));
+        // dispatch(loadAssetCategories(await listCategoriesService()));
         dispatch(loadStatuses(await listAssetStatusesService()));
     }
 
