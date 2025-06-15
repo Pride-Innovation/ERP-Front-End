@@ -7,15 +7,6 @@ Managing Director
 
 import axiosInstance from "../../../../core/apis/axiosInstance";
 
-const listAssetStatusesService = async () => {
-    try {
-        const response = await axiosInstance.get('/statuses');
-        return response.data;
-    } catch (error) {
-        return error;
-    }
-}
-
 const createStatusService = async (body: Object) => {
     try {
         const response = await axiosInstance.post('assetStatuses/create', body);
@@ -44,7 +35,6 @@ const deleteStatusService = async (id: number) => {
 }
 
 export {
-    listAssetStatusesService,
     createStatusService,
     updateStatusService,
     deleteStatusService

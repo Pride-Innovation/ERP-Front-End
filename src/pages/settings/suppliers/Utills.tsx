@@ -35,6 +35,7 @@ const SupplierUtills = () => {
         try {
             const response = await fetchRowsService({ pageNumber: 0, pageSize: 10, endPoint }) as ISuppliersAxiosResponse;
             if (response.status === 200) {
+                console.log(response.data.content, "before dispatch!!")
                 dispatch(loadSuppliers(response.data.content))
             }
         } catch (error) {

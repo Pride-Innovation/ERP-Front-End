@@ -14,20 +14,12 @@ import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import { getTableHeaders } from "../../../components/tables/getTableHeaders";
 import { IFormData } from "../interface";
 import { IFleet } from "./interface";
-import { AppDispatch } from "../../../store";
-import { useDispatch } from "react-redux";
-import {
-    loadAssetCategories,
-} from "../slice";
-import { loadStatuses } from "../../settings/statuses/slice";
-import { listAssetStatusesService } from "../../settings/statuses/service";
 
 const FleetUtills = () => {
     const endPoint = 'posts';
     const module = "fleet";
     const header = { plural: 'Fleet', singular: 'Fleet' };
     const [open, setOpen] = useState<boolean>(false);
-    const dispatch = useDispatch<AppDispatch>()
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
     const [optionsObject, setOptionsObject] = useState<{
         assetsStatusesOptions: Array<IOptions>,
@@ -44,13 +36,6 @@ const FleetUtills = () => {
     });
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
-
-    const updateReduxStore = async () => {
-        // dispatch(loadAssetCategories(await listCategoriesService()));
-        dispatch(loadStatuses(await listAssetStatusesService()));
-    }
-
-    useEffect(() => { updateReduxStore() }, []);
 
     const {
         id,

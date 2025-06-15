@@ -5,25 +5,20 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { IOptions, ITableHeader } from "../../../components/tables/interface";
-import { ITransportRequest, ITransportRequestTableData } from "../interface";
+import { ITransportRequest } from "../interface";
 import { transportRequest } from "../../../mocks/request";
 import { crudStates, requestStatus } from "../../../utils/constants";
 import InfoIcon from '@mui/icons-material/Info';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import { IFormData } from "../../assets/interface";
-import { TransportRequestContext } from "../../../context/request/TransportRequestContext";
 import { getTableHeaders } from "../../../components/tables/getTableHeaders";
 import { useDispatch } from "react-redux";
 import { addNewTransportRequest, loadAllTransportRequest, removeTransportRequest } from "./slice";
 import { useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../../store";
-import moment from "moment";
-import { listAssetStatusesService } from "../../settings/statuses/service";
-import { loadStatuses } from "../../settings/statuses/slice";
-import { IStatus } from "../../settings/statuses/interface";
 
 const TransportRequestUtills = () => {
     const endPoint = 'fleetRequisitions';
@@ -32,7 +27,6 @@ const TransportRequestUtills = () => {
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
     const [pendingRequests, setPendingRequests] = useState<Array<ITransportRequest>>([] as ITransportRequest[])
     const [rejectedRequests, setRejectedRequests] = useState<Array<ITransportRequest>>([] as ITransportRequest[])
-    const { setTransportRequestTableData } = useContext(TransportRequestContext);
     const { statuses } = useSelector((state: RootState) => state.StatusesStore)
     const [open, setOpen] = useState<boolean>(false);
     const [optionsObject, setOptionsObject] = useState<{
@@ -47,12 +41,6 @@ const TransportRequestUtills = () => {
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
 
-    const fetchAllStatuses = async () => {
-        const response = await listAssetStatusesService() as Array<IStatus>;
-        dispatch(loadStatuses(response))
-    }
-
-    useEffect(() => { fetchAllStatuses() }, []);
 
     const addAllTransportRequestsInStore = (transportRequests: Array<ITransportRequest>) => {
         dispatch(loadAllTransportRequest(transportRequests))

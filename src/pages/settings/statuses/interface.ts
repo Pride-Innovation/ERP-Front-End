@@ -7,7 +7,7 @@ Managing Director
 
 import { Dispatch, SetStateAction } from "react";
 import { Control, FieldError, FormState, UseFormRegister } from "react-hook-form";
-import { IFetchDataRequest } from "../../../core/apis/interface";
+import { IAxiosResponse, IFetchDataRequest } from "../../../core/apis/interface";
 
 export interface IStatus {
     id?: number;
@@ -61,4 +61,16 @@ export interface IDeleteStatus {
     setSendingRequest: Dispatch<SetStateAction<boolean>>;
     buttonText: string;
     status: IStatus
+}
+
+export interface IStatusResponse extends IFetchDataRequest {
+    content: Array<IStatus>
+}
+
+export interface IStatusesAxiosResponse extends IAxiosResponse {
+    data: IStatusResponse
+}
+
+export interface IStatusAxiosResponse extends IAxiosResponse {
+    data: IStatus
 }

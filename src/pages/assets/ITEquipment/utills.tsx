@@ -6,7 +6,7 @@ Managing Director
 */
 
 import { useEffect, useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 import InfoIcon from '@mui/icons-material/Info';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
@@ -15,12 +15,10 @@ import { getTableHeaders } from "../../../components/tables/getTableHeaders";
 import { IFormData } from "../interface";
 import { IITEquipment } from "./interface";
 import { itEquipmentMock } from "../../../mocks/itEquipment";
-import { AppDispatch, RootState } from "../../../store";
-import { loadStatuses } from "../../settings/statuses/slice";
-import { listAssetStatusesService } from "../../settings/statuses/service";
 import { crudStates } from "../../../utils/constants";
 import { useNavigate } from "react-router";
 import { ROUTES } from "../../../core/routes/routes";
+import { RootState } from "../../../store";
 
 const ITEquipmentUtills = () => {
     const endPoint = 'posts';
@@ -30,47 +28,38 @@ const ITEquipmentUtills = () => {
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
     const [currentAsset, setCurrentAsset] = useState<IITEquipment>({} as IITEquipment);
 
-    const dispatch = useDispatch<AppDispatch>();
     const [optionsObject, setOptionsObject] = useState<{
         assetsStatusesOptions: Array<IOptions>,
         branchesOptions: Array<IOptions>,
-        assetCategoriesOptions: Array<IOptions>,
+        assetTypesOptions: Array<IOptions>,
         usersOptions: Array<IOptions>
         suppliersOptions: Array<IOptions>
     }>({
         assetsStatusesOptions: [],
         branchesOptions: [],
-        assetCategoriesOptions: [],
+        assetTypesOptions: [],
         usersOptions: [],
         suppliersOptions: []
     });
-    const {
-        users,
-        assetCategories,
-    } = useSelector((state: RootState) => state.EquipmentStore);
+
     const { statuses } = useSelector((state: RootState) => state.StatusesStore);
     const { suppliers } = useSelector((state: RootState) => state.SuppliersStore);
     const { branches } = useSelector((state: RootState) => state.BranchStore);
+    const { users } = useSelector((state: RootState) => state.UserStore);
+    const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore)
     const navigate = useNavigate()
 
-    const updateReduxStore = async () => {
-        // dispatch(loadUsers(await listUsersService()));
-        // dispatch(loadAssetCategories(await listCategoriesService()));
-        dispatch(loadStatuses(await listAssetStatusesService()));
-    }
+    useEffect(() => {
+        if (statuses.length > 0)
+            setOptionsObject({
+                assetTypesOptions: assetTypes?.map(type => ({ label: type.name, value: type.id })) || [],
+                branchesOptions: branches?.map(branch => ({ label: branch.name, value: branch?.id as number })),
+                assetsStatusesOptions: statuses?.map(status => ({ label: status.name, value: status.id as number })) || [],
+                usersOptions: users?.map(user => ({ label: `${user.firstName} ${user.lastName}` as string, value: user.id as number })) || [],
+                suppliersOptions: suppliers?.map(supplier => ({ label: supplier.name, value: supplier?.id as number })) || [],
+            })
 
-    useEffect(() => { updateReduxStore() }, []);
-
-    // useEffect(() => {
-    //     setOptionsObject({
-    //         assetCategoriesOptions: assetCategories?.map(category => ({ label: category.name, value: category.id })) || [],
-    //         branchesOptions: branches?.map(branch => ({ label: branch.name, value: branch?.id as number })),
-    //         assetsStatusesOptions: statuses?.map(status => ({ label: status.name, value: status.id as number })) || [],
-    //         usersOptions: users?.map(user => ({ label: user.name as string, value: user.id as number })) || [],
-    //         suppliersOptions: suppliers?.map(supplier => ({ label: supplier.name, value: supplier?.id as number })) || [],
-    //     })
-
-    // }, [statuses, users, assetCategories, branches, suppliers])
+    }, [statuses, users, assetTypes, branches, suppliers])
 
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
@@ -184,6 +173,11 @@ const ITEquipmentUtills = () => {
         {
             value: "serialNumber",
             label: 'Serial Number',
+            type: "input"
+        },
+        {
+            value: "unitOfMeasure",
+            label: 'Unit of Measure',
             type: "input"
         },
         {

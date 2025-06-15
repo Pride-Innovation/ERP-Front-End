@@ -7,15 +7,12 @@ Managing Director
 
 import { createSlice } from '@reduxjs/toolkit';
 import { IAsssetCategory } from '../ITEquipment/interface';
-import { IUser } from '../../users/interface';
 
 interface IITEquipmentState {
-    users: IUser[];
     assetCategories: IAsssetCategory[];
 }
 
 const initialState: IITEquipmentState = {
-    users: [],
     assetCategories: [],
 }
 
@@ -23,9 +20,6 @@ export const authSlice = createSlice({
     name: 'assets',
     initialState,
     reducers: {
-        // loadUsers: (state, action) => {
-        //     state.users = action.payload;
-        // },
         loadAssetCategories: (state, action) => {
             state.assetCategories = action.payload;
         },
@@ -35,7 +29,6 @@ export const authSlice = createSlice({
 const { reducer, actions } = authSlice
 
 export const {
-    // loadUsers,
     loadAssetCategories,
 } = actions
 

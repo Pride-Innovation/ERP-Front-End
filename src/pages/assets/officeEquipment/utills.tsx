@@ -14,19 +14,11 @@ import InfoIcon from '@mui/icons-material/Info';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import { getTableHeaders } from "../../../components/tables/getTableHeaders";
-import { useDispatch } from "react-redux";
-import {
-    loadAssetCategories,
-} from "../slice";
-import { AppDispatch } from "../../../store";
-import { loadStatuses } from "../../settings/statuses/slice";
-import { listAssetStatusesService } from "../../settings/statuses/service";
 
 const OfficeEquipmentUtills = () => {
     const endPoint = 'posts';
     const module = 'office equipment';
     const header = { plural: 'Office Equipment', singular: 'Office Equipment' };
-    const dispatch = useDispatch<AppDispatch>();
     const [open, setOpen] = useState<boolean>(false);
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
     const [optionsObject, setOptionsObject] = useState<{
@@ -45,13 +37,6 @@ const OfficeEquipmentUtills = () => {
 
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
-
-    const updateReduxStore = async () => {
-        dispatch(loadStatuses(await listAssetStatusesService()));
-    }
-
-    useEffect(() => { updateReduxStore() }, []);
-
 
     const {
         id,
