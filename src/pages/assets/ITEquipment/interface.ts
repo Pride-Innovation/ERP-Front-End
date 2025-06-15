@@ -37,7 +37,7 @@ export interface IITEquipment {
     ipAddress?: string | null;
     interfaceType?: string | null;
     assetDepreciationRate?: string | null;
-    desc?: string | null;
+    description?: string | null;
     image?: string | null;
     assetStatus?: IStatus | null;
     assetType?: IAssetType | null;

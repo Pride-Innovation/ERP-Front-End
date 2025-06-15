@@ -84,7 +84,7 @@ const ITEquipmentUtills = () => {
         assetType,
         assetStatus,
         supplier,
-        desc,
+        description,
         assetDepreciationRate,
         interfaceType,
         ipAddress,

@@ -32,7 +32,7 @@ export const ITEquipmentSchema = yup.object().shape({
     ipAddress: yup.string().nullable().optional(),
     interfaceType: yup.string().nullable().optional(),
     assetDepreciationRate: yup.string().nullable().optional(),
-    desc: yup.string().nullable().optional(),
+    description: yup.string().nullable().optional(),
     category: yup.string().nullable().optional(),
     supplier: yup.mixed<ISupplier>().nullable().optional(),
     assignedTo: yup.mixed<IUser>().nullable().optional(),
