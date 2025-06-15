@@ -11,6 +11,8 @@ import { useEffect, useState } from "react";
 import { IFormData } from "../interface";
 import { IITEquipment, IITEquipmentForm } from "./interface";
 import {
+    Box,
+    Divider,
     FormControl,
     Grid,
     InputLabel,
@@ -28,6 +30,10 @@ import {
 } from "../../../components/forms";
 import ButtonComponent from "../../../components/forms/Button";
 import { ROUTES } from "../../../core/routes/routes";
+import BranchUtills from "../../settings/branch/utills";
+import StatusUtills from "../../settings/statuses/Utills";
+import UserUtils from "../../users/utils";
+import SupplierUtills from "../../settings/suppliers/Utills";
 
 const ITEquipmentForm = ({
     formState,
@@ -40,6 +46,16 @@ const ITEquipmentForm = ({
 }: IITEquipmentForm) => {
     const navigate = useNavigate();
     const { formFields, categories, computerFields } = ITEquipmentUtills();
+    const { fetchAllBranches } = BranchUtills();
+    const { fetchAllStatuses } = StatusUtills();
+    const { fetchAllUsers } = UserUtils();
+    const { fetchAllSuppliers } = SupplierUtills();
+
+    useEffect(() => { fetchAllBranches() }, []);
+    useEffect(() => { fetchAllStatuses() }, []);
+    useEffect(() => { fetchAllUsers() }, []);
+    useEffect(() => { fetchAllSuppliers() }, []);
+
     const [stateFormFields, setStateFormFields] = useState<Array<IFormData<IITEquipment>>>(formFields.slice(1));
 
     useEffect(() => {
@@ -59,8 +75,8 @@ const ITEquipmentForm = ({
     }, [formFields])
 
     return (
-        <Grid item container xs={12}>
-            <Grid item container spacing={4} xs={12}>
+        <Box sx={{ width: "100%" }}>
+            <Grid container spacing={3}>
                 <Grid item xs={12} md={4}>
                     <FormControl size='small' fullWidth>
                         <InputLabel id={"category"}>Select Category</InputLabel>
@@ -94,73 +110,61 @@ const ITEquipmentForm = ({
                         />
                     </FormControl>
                 </Grid>
-                {
-                    stateFormFields.map(formField => {
-                        return formField.type === 'input' ? (
-                            <Grid item xs={12} md={4}>
-                                <UseFormInput
-                                    register={register}
-                                    control={control}
-                                    formState={formState}
-                                    value={formField.value}
-                                    label={formField.label}
-                                />
-                            </Grid>
-                        ) :
-                            formField.type === 'number' ? (
-                                <Grid item xs={12} md={4}>
-                                    <UseFormInput
-                                        type="number"
-                                        register={register}
-                                        control={control}
-                                        formState={formState}
-                                        value={formField.value}
-                                        label={formField.label}
-                                    />
-                                </Grid>
-                            ) :
-                                formField.type === 'select' ? (
-                                    <Grid item xs={12} md={4}>
-                                        <UseFormSelect
-                                            options={formField.options}
-                                            register={register}
-                                            control={control}
-                                            formState={formState}
-                                            value={formField.value}
-                                            label={formField.label} />
-                                    </Grid>
-                                ) : formField.type === 'date' ? (
-                                    <Grid item xs={12} md={4}>
-                                        <UseFormDatePicker
-                                            register={register}
-                                            control={control}
-                                            formState={formState}
-                                            value={formField.value}
-                                            label={formField.label} />
-                                    </Grid>
-                                ) : formField.type === 'autocomplete' ? (
-                                    <Grid item xs={12} md={4}>
-                                        <UseFormAutocompleteComponent
-                                            register={register}
-                                            control={control}
-                                            formState={formState}
-                                            value={formField.value}
-                                            label={formField.label}
-                                            options={formField.options}
-                                        />
-                                    </Grid>
-                                )
-                                    : null
-                    })
-                }
-                <Grid item xs={12} sx={{ display: "flex", justifyContent: "end" }}>
-                    <Stack direction="row" spacing={3} sx={{ width: "30%" }}>
-                        <ButtonComponent handleClick={() => navigate(ROUTES.LIST_ASSETS)} buttonColor='error' type='button' sendingRequest={false} buttonText="Back" />
-                        <ButtonComponent buttonColor='success' type='submit' sendingRequest={sendingRequest} buttonText={buttonText} />
+                {stateFormFields.map((field) => {
+                    const commonProps = {
+                        register,
+                        control,
+                        formState,
+                        value: field.value,
+                        label: field.label,
+                        required: field.required === false ? field.required : true
+                    };
+
+                    const gridSize = field.type === "textarea" ? 12 : 4;
+
+                    return (
+                        <Grid item xs={12} md={gridSize} key={field.value}>
+                            {field.type === "input" && <UseFormInput {...commonProps} />}
+                            {field.type === "textarea" && <UseFormInput {...commonProps} multiline row={4} />}
+                            {field.type === "number" && <UseFormInput {...commonProps} type="number" />}
+                            {field.type === "select" && (
+                                <UseFormSelect {...commonProps} options={field.options} />
+                            )}
+                            {field.type === "date" && <UseFormDatePicker {...commonProps} />}
+                            {field.type === "autocomplete" && (
+                                <UseFormAutocompleteComponent {...commonProps} options={field.options} />
+                            )}
+                        </Grid>
+                    );
+                })}
+
+                <Grid item xs={12}>
+                    <Divider sx={{ my: 2 }} />
+                    <Stack
+                        direction={{ xs: "column", sm: "row" }}
+                        spacing={2}
+                        justifyContent="space-between"
+                        alignItems={{ xs: "stretch", sm: "center" }}
+                    >
+                        <Stack direction="row" spacing={2}>
+                            <ButtonComponent
+                                handleClick={() => navigate(ROUTES.LIST_ASSETS)}
+                                buttonColor="error"
+                                type="button"
+                                sendingRequest={false}
+                                buttonText="Cancel"
+                            />
+                            <ButtonComponent
+                                buttonColor="success"
+                                type="submit"
+                                sendingRequest={sendingRequest}
+                                buttonText={buttonText}
+                            />
+                        </Stack>
                     </Stack>
                 </Grid>
             </Grid>
-        </Grid>
+        </Box>
     )
 }
 

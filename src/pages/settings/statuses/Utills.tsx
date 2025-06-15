@@ -76,7 +76,8 @@ const StatusUtills = () => {
             formFields,
             addStatusToStore,
             updateStatusInStore,
-            removeStatusFromStore
+            removeStatusFromStore,
+            fetchAllStatuses
         }
     )
 }
