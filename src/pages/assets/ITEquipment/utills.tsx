@@ -104,7 +104,7 @@ const ITEquipmentUtills = () => {
 
     const rowData = {
         ...data,
-        assetStatus: itEquipmentMock[0].assetStatus?.name,
+        status: itEquipmentMock[0].assetStatus?.name,
         assignedTo: itEquipmentMock[0].assignedTo?.firstName,
         location: "",
         action: {
