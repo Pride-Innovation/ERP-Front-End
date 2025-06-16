@@ -13,20 +13,22 @@ import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import { IOptions, ITableHeader } from "../../../components/tables/interface";
 import { getTableHeaders } from "../../../components/tables/getTableHeaders";
 import { IFormData } from "../interface";
-import { IITEquipment } from "./interface";
+import { IITEquipment, IITEquipmentTableData } from "./interface";
 import { itEquipmentMock } from "../../../mocks/itEquipment";
 import { crudStates } from "../../../utils/constants";
 import { useNavigate } from "react-router";
 import { ROUTES } from "../../../core/routes/routes";
 import { RootState } from "../../../store";
+import moment from "moment";
 
 const ITEquipmentUtills = () => {
-    const endPoint = 'posts';
+    const endPoint = 'assets';
     const module = 'IT Equipment';
     const header = { plural: 'IT Equipment', singular: 'IT Equipment' };
     const [open, setOpen] = useState<boolean>(false);
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
     const [currentAsset, setCurrentAsset] = useState<IITEquipment>({} as IITEquipment);
+    const [iTEquipmentTableData, setITEquipmentTableData] = useState<IITEquipmentTableData[]>([] as IITEquipmentTableData[])
 
     const [optionsObject, setOptionsObject] = useState<{
         assetsStatusesOptions: Array<IOptions>,
@@ -96,12 +98,15 @@ const ITEquipmentUtills = () => {
         detailNetBookValue,
         netValueB,
         unitOfMeasure,
+        image,
         ...data
     } = itEquipmentMock[0];
 
     const rowData = {
-        image: itEquipmentMock[0].image,
         ...data,
+        assetStatus: itEquipmentMock[0].assetStatus?.name,
+        assignedTo: itEquipmentMock[0].assignedTo?.firstName,
+        location: "",
         action: {
             label: "options",
             options: [
@@ -116,6 +121,52 @@ const ITEquipmentUtills = () => {
     useEffect(() => {
         setColumnHeaders(getTableHeaders(rowData))
     }, []);
+
+
+    const handleITEquipmentTableData = (list: Array<IITEquipment>) => {
+        const data: Array<IITEquipmentTableData> = list.map((item, index) => {
+            const {
+                branch,
+                assignedTo,
+                assetType,
+                assetStatus,
+                supplier,
+                description,
+                assetDepreciationRate,
+                interfaceType,
+                ipAddress,
+                macAddress,
+                hardDiskSize,
+                hostname,
+                cpuSpeed,
+                ram,
+                detailNetBookValue,
+                netValueB,
+                unitOfMeasure,
+                image,
+                ...fielsdata
+            } = list[index];
+
+            return (
+                {
+                    ...fielsdata,
+                    assetName: item.assetName,
+                    engravedNumber: item.engravedNumber,
+                    dateReceived: moment(item.dateReceipt).format('Do MMMM YYYY'),
+                    make: item.make,
+                    purchaseCost: item.purchaseCost,
+                    costOfAsset: item.costOfTheAsset,
+                    model: item.model as string,
+                    serialNumber: item.serialNumber as string,
+                    status: item?.assetStatus?.status as string,
+                    assignedTo: `${item.assignedTo?.lastName} ${item.assignedTo?.firstName}`,
+                    location: item.branch?.name as string
+                }
+            )
+        })
+        setITEquipmentTableData(data);
+
+    }
 
     const handleOptionClicked = async (option: string | number, moduleID?: string | number) => {
         switch (option) {
@@ -299,7 +350,9 @@ const ITEquipmentUtills = () => {
             determineCurrentAsset,
             module,
             handleOptionClicked,
-            currentAsset
+            currentAsset,
+            handleRequest: handleITEquipmentTableData,
+            iTEquipmentTableData
         }
     )
 }

@@ -30,7 +30,7 @@ const IndividualRequestUtill = () => {
         supplier,
         unitOfMeasure,
         assetDepreciationRate,
-        desc,
+        description,
         netValueB,
         costOfTheAsset,
         hostname,

@@ -34,7 +34,7 @@ export const itEquipmentMock: IITEquipment[] = [
         ipAddress: "192.168.1.101",
         interfaceType: "Ethernet",
         assetDepreciationRate: "20%",
-        desc: "Lightweight business laptop",
+        description: "Lightweight business laptop",
         image: "url_to_image_1",
         assetStatus: statusMocks[0],
         assignedTo: usersMock[0],

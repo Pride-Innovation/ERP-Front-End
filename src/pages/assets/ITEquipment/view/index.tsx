@@ -63,7 +63,7 @@ const ITEquipmentDetails = () => {
                             <DetailSection label="Date of Receipt" text={equipment.dateReceipt} />
                             {equipment.branch && <DetailSection label="Location" text={equipment.branch.name} />}
                             {equipment.assetStatus && <DetailSection label="Status" text={equipment.assetStatus.name} />}
-                            {equipment.desc && <DetailSection label="Description" text={equipment.desc} />}
+                            {equipment.description && <DetailSection label="Description" text={equipment.description} />}
                         </CardContent>
                     </Card>
                 </Grid>

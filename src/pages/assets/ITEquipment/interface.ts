@@ -12,6 +12,7 @@ import { IBranch } from "../../settings/branch/interface";
 import { IUser } from "../../users/interface";
 import { ISupplier } from "../../settings/suppliers/interface";
 import { IStatus } from "../../settings/statuses/interface";
+import { IAxiosResponse, IFetchDataRequest } from "../../../core/apis/interface";
 
 export interface IITEquipment {
     id?: string | number;
@@ -85,4 +86,30 @@ export interface IAsssetCategory {
     desc: string,
     image: any,
     user_id: number
+}
+
+export interface IITEquipmentResponse extends IFetchDataRequest {
+    content: Array<IITEquipment>
+}
+
+export interface IITEquipmentsAxiosResponse extends IAxiosResponse {
+    data: IITEquipmentResponse
+}
+
+export interface IITEquipmentAxiosResponse extends IAxiosResponse {
+    data: IITEquipment
+}
+
+export interface IITEquipmentTableData {
+    assetName: string;
+    engravedNumber?: string | null;
+    dateReceived: string;
+    make: string | null;
+    purchaseCost?: string;
+    costOfAsset?: string;
+    model?: string;
+    serialNumber?: string;
+    status: string;
+    assignedTo: string;
+    location: string;
 }

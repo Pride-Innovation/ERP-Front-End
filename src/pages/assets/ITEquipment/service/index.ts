@@ -9,8 +9,8 @@ import axiosInstance from "../../../../core/apis/axiosInstance"
 
 const createITEquipmentService = async (body: object) => {
     try {
-        const response = await axiosInstance.post("itAssets/create", body);
-        return response.data
+        const response = await axiosInstance.post("assets", body);
+        return response
     } catch (error) {
         return error;
     }

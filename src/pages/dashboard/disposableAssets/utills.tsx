@@ -32,7 +32,7 @@ const DisposalAssetsUtills = () => {
         supplier,
         unitOfMeasure,
         assetDepreciationRate,
-        desc,
+        description,
         netValueB,
         costOfTheAsset,
         assetStatus,

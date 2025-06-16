@@ -10,7 +10,6 @@ import {
     ThunkAction,
     Action
 } from '@reduxjs/toolkit';
-import EquipmentReducer from "../pages/assets/slice/index"
 import UserReducer from "../pages/users/slice/index"
 import BranchReducer from "../pages/settings/branch/slice"
 import SuppliersReducer from "../pages/settings/suppliers/slice"
@@ -26,10 +25,10 @@ import CommodityReducer from "../pages/settings/commodity/slice"
 import AssetTypeReducer from "../pages/settings/assetTypes/slice"
 import TitleReducer from "../pages/settings/titles/slice"
 import StoreReducer from "../pages/store/slice"
+import ITAssetReducer from "../pages/assets/ITEquipment/slice"
 
 export const store = configureStore({
     reducer: {
-        EquipmentStore: EquipmentReducer,
         UserStore: UserReducer,
         BranchStore: BranchReducer,
         SuppliersStore: SuppliersReducer,
@@ -45,6 +44,7 @@ export const store = configureStore({
         AssetTypeStore: AssetTypeReducer,
         TitleStore: TitleReducer,
         StoreStore: StoreReducer,
+        ITAssetStore: ITAssetReducer,
     },
 });
 

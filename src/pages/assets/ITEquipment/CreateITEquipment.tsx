@@ -6,13 +6,15 @@ Managing Director
 */
 
 import { useEffect, useState } from 'react'
-import { IITEquipment } from './interface';
+import { IITEquipment, IITEquipmentAxiosResponse } from './interface';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { ITEquipmentSchema } from './schema';
 import { Card, Grid, SelectChangeEvent } from '@mui/material';
 import ITEquipmentForm from './ITEquipmentForm';
 import { FormHeader } from '../../../components/headers/TypographyComponent';
+import { createITEquipmentService } from './service';
+import { toast } from 'react-toastify';
 
 const CreateITEquipment = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
@@ -26,7 +28,7 @@ const CreateITEquipment = () => {
         formState,
         register,
         reset
-    } = useForm<IITEquipment>({ 
+    } = useForm<IITEquipment>({
         mode: 'onChange',
         resolver: yupResolver(ITEquipmentSchema),
     });
@@ -37,7 +39,14 @@ const CreateITEquipment = () => {
 
     const onSubmit = async (formData: IITEquipment) => {
         setSendingRequest(true);
-        console.log(formData)
+        try {
+            const response = await createITEquipmentService(formData) as IITEquipmentAxiosResponse
+            if (response.status === 201) {
+                toast.success("Asset created successfully!!")
+            }
+        } catch (error) {
+            console.log(error)
+        }
         setSendingRequest(false)
     };
 
