@@ -17,6 +17,12 @@ import {
 import { IOfficeEquipmentForm } from "./interface";
 import ButtonComponent from "../../../components/forms/Button";
 import { ROUTES } from "../../../core/routes/routes";
+import BranchUtills from "../../settings/branch/utills";
+import StatusUtills from "../../settings/statuses/Utills";
+import UserUtils from "../../users/utils";
+import AssetTypeUtills from "../../settings/assetTypes/utills";
+import SupplierUtills from "../../settings/suppliers/Utills";
+import { useEffect } from "react";
 
 const OfficeEquipmentForm = ({
     formState,
@@ -29,6 +35,17 @@ const OfficeEquipmentForm = ({
 ) => {
     const navigate = useNavigate();
     const { formFields } = OfficeEquipmentUtills();
+    const { fetchAllBranches } = BranchUtills();
+    const { fetchAllStatuses } = StatusUtills();
+    const { fetchAllUsers } = UserUtils();
+    const { fetchAllAssetTypes } = AssetTypeUtills()
+    const { fetchAllSuppliers } = SupplierUtills();
+
+    useEffect(() => { fetchAllBranches() }, []);
+    useEffect(() => { fetchAllStatuses() }, []);
+    useEffect(() => { fetchAllUsers() }, []);
+    useEffect(() => { fetchAllAssetTypes() }, []);
+    useEffect(() => { fetchAllSuppliers() }, []);
 
     return (
         <Box sx={{ width: "100%" }}>

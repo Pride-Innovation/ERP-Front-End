@@ -18,6 +18,8 @@ import { crudStates } from "../../../utils/constants";
 import { ROUTES } from "../../../core/routes/routes";
 import { useNavigate } from "react-router";
 import moment from "moment";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../store";
 
 const OfficeEquipmentUtills = () => {
     const endPoint = 'assets';
@@ -31,20 +33,40 @@ const OfficeEquipmentUtills = () => {
     const [optionsObject, setOptionsObject] = useState<{
         assetsStatusesOptions: Array<IOptions>,
         branchesOptions: Array<IOptions>,
-        assetCategoriesOptions: Array<IOptions>,
         usersOptions: Array<IOptions>
         suppliersOptions: Array<IOptions>
+        assetTypesOptions: Array<IOptions>,
+
     }>({
         assetsStatusesOptions: [],
         branchesOptions: [],
-        assetCategoriesOptions: [],
         usersOptions: [],
+        assetTypesOptions: [],
         suppliersOptions: []
     });
 
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
+
+    const { statuses } = useSelector((state: RootState) => state.StatusesStore);
+    const { suppliers } = useSelector((state: RootState) => state.SuppliersStore);
+    const { branches } = useSelector((state: RootState) => state.BranchStore);
+    const { users } = useSelector((state: RootState) => state.UserStore);
+    const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore)
     const navigate = useNavigate()
+
+    useEffect(() => {
+        if (statuses.length > 0)
+            setOptionsObject({
+                assetTypesOptions: assetTypes?.map(type => ({ label: type.name, value: type.id })) || [],
+                branchesOptions: branches?.map(branch => ({ label: branch.name, value: branch?.id as number })),
+                assetsStatusesOptions: statuses?.map(status => ({ label: status.name, value: status.id as number })) || [],
+                usersOptions: users?.map(user => ({ label: `${user.firstName} ${user.lastName}` as string, value: user.id as number })) || [],
+                suppliersOptions: suppliers?.map(supplier => ({ label: supplier.name, value: supplier?.id as number })) || [],
+            })
+
+    }, [statuses, users, assetTypes, branches, suppliers])
+
     const {
         id,
         branch,
@@ -123,73 +145,36 @@ const OfficeEquipmentUtills = () => {
             type: "input"
         },
         {
-            value: "hostname",
-            label: 'Host Name',
-            type: "input"
-        },
-        {
-            value: "detailNetBookValue",
-            label: 'Detail Net Book Value',
-            type: "input"
-        },
-        {
             value: "engravedNumber",
-            label: 'Engraved Number',
+            label: 'Engraved number',
             type: "input"
         },
         {
-            value: "dateReceipt",
-            label: 'Date Receipt',
-            type: "date"
-        },
-        {
-            value: "make",
-            label: 'Make',
+            value: "unitOfMeasure",
+            label: 'Unit of Measure',
             type: "input"
-        },
-        {
-            value: "assetStatus",
-            label: 'status',
-            type: "select",
-            options: optionsObject.assetCategoriesOptions
-        },
-        {
-            value: "assetType",
-            label: 'Asset Type',
-            type: "select",
-            options: optionsObject.assetCategoriesOptions
-        },
-        {
-            value: "supplier",
-            label: 'Supplier',
-            type: "select",
-            options: optionsObject.suppliersOptions
-        },
-        {
-            value: "purchaseCost",
-            label: 'Purchase Cost',
-            type: "number",
-        },
-        {
-            value: "costOfTheAsset",
-            label: 'Cost of Asset',
-            type: "number",
-        },
-        {
-            value: "netValueB",
-            label: 'Net Value B',
-            type: "input",
-        },
-        {
-            value: "description",
-            label: 'Description',
-            type: "input",
         },
         {
             value: "assetStatus",
             label: 'Status',
             type: "select",
             options: optionsObject.assetsStatusesOptions
+        },
+        {
+            value: "assetType",
+            label: 'Asset Type',
+            type: "select",
+            options: optionsObject.assetTypesOptions
+        },
+        {
+            value: "netValueB",
+            label: 'Net Value',
+            type: "input"
+        },
+        {
+            value: "assetDepreciationRate",
+            label: 'Depreciation Rate',
+            type: "input"
         },
         {
             value: "assignedTo",
@@ -203,6 +188,42 @@ const OfficeEquipmentUtills = () => {
             type: "select",
             options: optionsObject.branchesOptions
         },
+        {
+            value: "purchaseCost",
+            label: 'Purchase Cost',
+            type: "number",
+        },
+        {
+            value: "hostname",
+            label: 'Host Name',
+            type: "input",
+        },
+        {
+            value: "detailNetBookValue",
+            label: 'Detail Net Book Value',
+            type: "input",
+        },
+        {
+            value: "dateReceipt",
+            label: 'Receipt Date',
+            type: "date",
+        },
+        {
+            value: "costOfTheAsset",
+            label: 'Cost Of The Asset',
+            type: "number",
+        },
+        {
+            value: "make",
+            label: 'Make',
+            type: "input",
+        },
+        {
+            value: "supplier",
+            label: 'Supplier',
+            type: "select",
+            options: optionsObject.suppliersOptions
+        }
     ]
 
     const determineCurrentAsset = (id: number, itemList: Array<IOfficeEquipment>): IOfficeEquipment => {
