@@ -22,6 +22,12 @@ import {
 import ButtonComponent from "../../../components/forms/Button";
 import { ROUTES } from "../../../core/routes/routes";
 import FleetUtills from "./utills";
+import BranchUtills from "../../settings/branch/utills";
+import StatusUtills from "../../settings/statuses/Utills";
+import UserUtils from "../../users/utils";
+import AssetTypeUtills from "../../settings/assetTypes/utills";
+import SupplierUtills from "../../settings/suppliers/Utills";
+import { useEffect } from "react";
 
 const FleetForm = ({
     formState,
@@ -32,6 +38,18 @@ const FleetForm = ({
 }: IFleetForm) => {
     const navigate = useNavigate();
     const { formFields } = FleetUtills();
+    const { fetchAllBranches } = BranchUtills();
+    const { fetchAllStatuses } = StatusUtills();
+    const { fetchAllUsers } = UserUtils();
+    const { fetchAllAssetTypes } = AssetTypeUtills()
+    const { fetchAllSuppliers } = SupplierUtills();
+
+    useEffect(() => { fetchAllBranches() }, []);
+    useEffect(() => { fetchAllStatuses() }, []);
+    useEffect(() => { fetchAllUsers() }, []);
+    useEffect(() => { fetchAllAssetTypes() }, []);
+    useEffect(() => { fetchAllSuppliers() }, []);
+
     return (
         <Box sx={{ width: "100%" }}>
             <Grid container spacing={3}>
