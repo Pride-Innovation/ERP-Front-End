@@ -34,6 +34,7 @@ import BranchUtills from "../../settings/branch/utills";
 import StatusUtills from "../../settings/statuses/Utills";
 import UserUtils from "../../users/utils";
 import SupplierUtills from "../../settings/suppliers/Utills";
+import AssetTypeUtills from "../../settings/assetTypes/utills";
 
 const ITEquipmentForm = ({
     formState,
@@ -49,12 +50,14 @@ const ITEquipmentForm = ({
     const { fetchAllBranches } = BranchUtills();
     const { fetchAllStatuses } = StatusUtills();
     const { fetchAllUsers } = UserUtils();
+    const { fetchAllAssetTypes } = AssetTypeUtills()
     const { fetchAllSuppliers } = SupplierUtills();
 
     useEffect(() => { fetchAllBranches() }, []);
     useEffect(() => { fetchAllStatuses() }, []);
     useEffect(() => { fetchAllUsers() }, []);
     useEffect(() => { fetchAllSuppliers() }, []);
+    useEffect(() => { fetchAllAssetTypes() }, []);
 
     const [stateFormFields, setStateFormFields] = useState<Array<IFormData<IITEquipment>>>(formFields.slice(1));
 
@@ -77,7 +80,7 @@ const ITEquipmentForm = ({
     return (
         <Box sx={{ width: "100%" }}>
             <Grid container spacing={3}>
-                <Grid item xs={12} md={4}>
+                <Grid item xs={12} md={3}>
                     <FormControl size='small' fullWidth>
                         <InputLabel id={"category"}>Select Category</InputLabel>
                         <Controller
@@ -120,7 +123,8 @@ const ITEquipmentForm = ({
                         required: field.required === false ? field.required : true
                     };
 
-                    const gridSize = field.type === "textarea" ? 12 : 4;
+                    const gridSize = field.type === "textarea" ? 12 : 3;
+
 
                     return (
                         <Grid item xs={12} md={gridSize} key={field.value}>

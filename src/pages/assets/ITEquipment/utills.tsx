@@ -238,6 +238,12 @@ const ITEquipmentUtills = () => {
             options: optionsObject.assetsStatusesOptions
         },
         {
+            value: "assetType",
+            label: 'Asset Type',
+            type: "select",
+            options: optionsObject.assetTypesOptions
+        },
+        {
             value: "netValueB",
             label: 'Net Value',
             type: "input"
