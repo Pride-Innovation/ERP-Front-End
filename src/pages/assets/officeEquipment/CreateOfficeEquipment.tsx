@@ -6,13 +6,15 @@ Managing Director
 */
 
 import { useEffect, useState } from "react";
-import { IOfficeEquipment } from "./interface";
+import { IOfficeEquipment, IOfficeEquipmentAxiosResponse } from "./interface";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Card, Grid } from "@mui/material";
 import { FormHeader } from "../../../components/headers/TypographyComponent";
 import { officeEquipmentSchema } from "./schema";
 import OfficeEquipmentForm from "./OfficeEquipmentForm";
+import { toast } from "react-toastify";
+import { createOfficeEquipmentService } from "./service";
 
 
 const CreateOfficeEquipment = () => {
@@ -36,7 +38,14 @@ const CreateOfficeEquipment = () => {
 
     const onSubmit = async (formData: IOfficeEquipment) => {
         setSendingRequest(true);
-        console.log(formData, "formData")
+        try {
+            const response = await createOfficeEquipmentService(formData) as IOfficeEquipmentAxiosResponse
+            if (response.status === 201) {
+                toast.success("Asset created successfully!!")
+            }
+        } catch (error) {
+            console.log(error)
+        }
         setSendingRequest(false)
     };
 

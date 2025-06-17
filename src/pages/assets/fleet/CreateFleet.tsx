@@ -10,9 +10,11 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Card, Grid } from '@mui/material';
 import { FormHeader } from '../../../components/headers/TypographyComponent';
-import { IFleet } from './interface';
+import { IFleet, IFleetAxiosResponse } from './interface';
 import { fleetSchema } from './schema';
 import FleetForm from './FleetForm';
+import { createFleetService } from './service';
+import { toast } from 'react-toastify';
 
 const CreateFleet = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
@@ -36,7 +38,14 @@ const CreateFleet = () => {
 
     const onSubmit = async (formData: IFleet) => {
         setSendingRequest(true);
-        console.log(formData, "form data")
+        try {
+            const response = await createFleetService(formData) as IFleetAxiosResponse
+            if (response.status === 201) {
+                toast.success("Asset created successfully!!")
+            }
+        } catch (error) {
+            console.log(error)
+        }
         setSendingRequest(false)
     };
 

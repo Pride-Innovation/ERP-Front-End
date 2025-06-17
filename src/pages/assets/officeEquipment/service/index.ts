@@ -7,21 +7,13 @@ Managing Director
 
 import axiosInstance from "../../../../core/apis/axiosInstance"
 
-const fetchOfficeEquipmentService = async () => {
-    try {
-        const response = await axiosInstance.get("officeEquipmentAssets");
-        return response.data?.data
-    } catch (error) {
-        throw error;
-    }
-}
 
 const createOfficeEquipmentService = async (body: object) => {
     try {
-        const response = await axiosInstance.post("officeEquipmentAssets/create", body)
-        return response.data
+        const response = await axiosInstance.post("assets", body);
+        return response
     } catch (error) {
-        throw error;
+        return error;
     }
 }
 
@@ -53,7 +45,6 @@ const updateOfficeEquipmentService = async (body: object, id: string | number) =
 }
 
 export {
-    fetchOfficeEquipmentService,
     createOfficeEquipmentService,
     deleteOfficeEquipmentService,
     getOfficeEquipmentByIDService,

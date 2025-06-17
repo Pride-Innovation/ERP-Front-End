@@ -7,21 +7,12 @@ Managing Director
 
 import axiosInstance from "../../../../core/apis/axiosInstance"
 
-export const fetchFleetService = async () => {
-    try {
-        const response = await axiosInstance.get("fleetAssets");
-        return response.data?.data
-    } catch (error) {
-        throw error;
-    }
-}
-
 export const createFleetService = async (body: Object) => {
     try {
-        const response = await axiosInstance.post("fleetAssets/create", body);
-        return response.data
+        const response = await axiosInstance.post("assets", body);
+        return response
     } catch (error) {
-        throw error;
+        return error;
     }
 }
 

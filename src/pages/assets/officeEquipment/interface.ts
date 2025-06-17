@@ -95,6 +95,6 @@ export interface IOfficeEquipmentsAxiosResponse extends IAxiosResponse {
     data: IOfficeEquipmentResponse
 }
 
-export interface IITEquipmentAxiosResponse extends IAxiosResponse {
+export interface IOfficeEquipmentAxiosResponse extends IAxiosResponse {
     data: IOfficeEquipment
 }
