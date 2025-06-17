@@ -11,6 +11,7 @@ import { IUser } from "../../users/interface";
 import { IBranch } from "../../settings/branch/interface";
 import { IStatus } from "../../settings/statuses/interface";
 import { IAssetType } from "../../settings/assetTypes/interface";
+import { IAxiosResponse, IFetchDataRequest } from "../../../core/apis/interface";
 
 export interface IOfficeEquipment {
     id?: string | number;
@@ -70,4 +71,30 @@ export interface IOfficeEquipmentForm {
     register: UseFormRegister<IOfficeEquipment>;
     buttonText: string;
     sendingRequest: boolean;
+}
+
+
+export interface IOfficeEquipmentTableData {
+    assetName: string;
+    engravedNumber?: string | null;
+    dateReceived: string;
+    make: string | null;
+    purchaseCost?: string;
+    costOfAsset?: string;
+    model?: string;
+    status: string;
+    assignedTo: string;
+    location: string;
+}
+
+export interface IOfficeEquipmentResponse extends IFetchDataRequest {
+    content: Array<IOfficeEquipment>
+}
+
+export interface IOfficeEquipmentsAxiosResponse extends IAxiosResponse {
+    data: IOfficeEquipmentResponse
+}
+
+export interface IITEquipmentAxiosResponse extends IAxiosResponse {
+    data: IOfficeEquipment
 }

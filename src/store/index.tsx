@@ -26,6 +26,8 @@ import AssetTypeReducer from "../pages/settings/assetTypes/slice"
 import TitleReducer from "../pages/settings/titles/slice"
 import StoreReducer from "../pages/store/slice"
 import ITAssetReducer from "../pages/assets/ITEquipment/slice"
+import OfficeAssetReducer from "../pages/assets/officeEquipment/slice"
+
 
 export const store = configureStore({
     reducer: {
@@ -45,6 +47,7 @@ export const store = configureStore({
         TitleStore: TitleReducer,
         StoreStore: StoreReducer,
         ITAssetStore: ITAssetReducer,
+        OfficeAssetStore: OfficeAssetReducer,
     },
 });
 

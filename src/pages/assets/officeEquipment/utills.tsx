@@ -8,7 +8,7 @@ Managing Director
 import { useEffect, useState } from "react";
 import { IOptions, ITableHeader } from "../../../components/tables/interface";
 import { IFormData } from "../interface";
-import { IOfficeEquipment } from "./interface";
+import { IOfficeEquipment, IOfficeEquipmentTableData } from "./interface";
 import { officeEquipmentMock } from "../../../mocks/officeEquipment";
 import InfoIcon from '@mui/icons-material/Info';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
@@ -17,14 +17,16 @@ import { getTableHeaders } from "../../../components/tables/getTableHeaders";
 import { crudStates } from "../../../utils/constants";
 import { ROUTES } from "../../../core/routes/routes";
 import { useNavigate } from "react-router";
+import moment from "moment";
 
 const OfficeEquipmentUtills = () => {
-    const endPoint = 'posts';
+    const endPoint = 'assets';
     const module = 'office equipment';
     const header = { plural: 'Office Equipment', singular: 'Office Equipment' };
     const [open, setOpen] = useState<boolean>(false);
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
     const [currentAsset, setCurrentAsset] = useState<IOfficeEquipment>({} as IOfficeEquipment);
+    const [officeEquipmentTableData, setOfficeEquipmentTableData] = useState<IOfficeEquipmentTableData[]>([] as IOfficeEquipmentTableData[])
 
     const [optionsObject, setOptionsObject] = useState<{
         assetsStatusesOptions: Array<IOptions>,
@@ -45,20 +47,25 @@ const OfficeEquipmentUtills = () => {
     const navigate = useNavigate()
     const {
         id,
-        hostname,
-        detailNetBookValue,
-        description,
-        image,
-        unitOfMeasure,
+        branch,
+        assignedTo,
+        assetType,
+        assetStatus,
         supplier,
-        costOfTheAsset,
+        description,
+        assetDepreciationRate,
+        detailNetBookValue,
         netValueB,
+        unitOfMeasure,
+        image,
         ...data
     } = officeEquipmentMock[0];
 
     const rowData = {
-        image: officeEquipmentMock[0].image,
         ...data,
+        status: officeEquipmentMock[0].assetStatus?.name,
+        assignedTo: officeEquipmentMock[0].assignedTo?.firstName,
+        location: "",
         action: {
             label: "options",
             options: [
@@ -72,6 +79,42 @@ const OfficeEquipmentUtills = () => {
     useEffect(() => {
         setColumnHeaders(getTableHeaders(rowData))
     }, []);
+
+    const handleOfficeEquipmentTableData = (list: Array<IOfficeEquipment>) => {
+        const data: Array<IOfficeEquipmentTableData> = list.map((item, index) => {
+            const {
+                branch,
+                assignedTo,
+                assetType,
+                assetStatus,
+                supplier,
+                description,
+                assetDepreciationRate,
+                detailNetBookValue,
+                netValueB,
+                unitOfMeasure,
+                image,
+                ...fielsdata
+            } = list[index];
+
+            return (
+                {
+                    ...fielsdata,
+                    assetName: item.assetName,
+                    engravedNumber: item.engravedNumber,
+                    dateReceived: moment(item.dateReceipt).format('Do MMMM YYYY'),
+                    make: item.make,
+                    purchaseCost: item.purchaseCost,
+                    costOfAsset: item.costOfTheAsset,
+                    status: item?.assetStatus?.status as string,
+                    assignedTo: `${item.assignedTo?.lastName} ${item.assignedTo?.firstName}`,
+                    location: item.branch?.name as string
+                }
+            )
+        })
+        setOfficeEquipmentTableData(data);
+
+    }
 
     const formFields: Array<IFormData<IOfficeEquipment>> = [
         {
@@ -200,7 +243,9 @@ const OfficeEquipmentUtills = () => {
             determineCurrentAsset,
             module,
             handleOptionClicked,
-            currentAsset
+            currentAsset,
+            officeEquipmentTableData,
+            handleOfficeEquipmentTableData
         }
     )
 }

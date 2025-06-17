@@ -17,12 +17,14 @@ import { ROUTES } from "../../../core/routes/routes";
 import ModalComponent from "../../../components/modal";
 import Dispose from "../Dispose";
 import { ErrorMessage } from "../../../core/apis/axiosInstance";
-import { IITEquipmentsAxiosResponse } from "../ITEquipment/interface";
 import { fetchRowsService } from "../../../core/apis/globalService";
-import { loadAllITAssets } from "../ITEquipment/slice";
 import AssetUtills from "../Utills";
 import { useDispatch } from "react-redux";
-import { AppDispatch } from "../../../store";
+import { AppDispatch, RootState } from "../../../store";
+import { IOfficeEquipmentsAxiosResponse } from "./interface";
+import { loadAllOfficeAssets } from "./slice";
+import { useSelector } from "react-redux";
+import { IAssetType } from "../../settings/assetTypes/interface";
 
 const OfficeEquipment = () => {
     const [loading, setLoading] = useState<boolean>(false);
@@ -30,6 +32,8 @@ const OfficeEquipment = () => {
     const { currentAssetType, setCurrentAssetType } = AssetUtills();
     const dispatch = useDispatch<AppDispatch>();
     const [count, setCount] = useState<number>(0)
+    const { officeAsset } = useSelector((state: RootState) => state.OfficeAssetStore)
+    const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore);
 
     const {
         columnHeaders,
@@ -39,7 +43,9 @@ const OfficeEquipment = () => {
         handleClose,
         open,
         module,
-        currentAsset
+        currentAsset,
+        handleOfficeEquipmentTableData,
+        officeEquipmentTableData
     } = OfficeEquipmentUtills();
 
     const fetchResources = async () => {
@@ -53,9 +59,9 @@ const OfficeEquipment = () => {
                 pageSize: 10,
                 endPoint,
                 params
-            }) as IITEquipmentsAxiosResponse;
+            }) as IOfficeEquipmentsAxiosResponse;
             if (response.status === 200) {
-                dispatch(loadAllITAssets(response.data.content));
+                dispatch(loadAllOfficeAssets(response.data.content));
                 setCount(response.data.totalElements)
             }
         } catch (error) {
@@ -64,6 +70,27 @@ const OfficeEquipment = () => {
         }
         setLoading(false)
     }
+
+    useEffect(() => {
+        if (assetTypes.length > 0) {
+            const assetType = assetTypes.find(assetType => assetType
+                .name.toLocaleLowerCase().indexOf("Office Equipment".toLocaleLowerCase()) !== -1) as IAssetType
+            setCurrentAssetType(assetType);
+        }
+    }, [assetTypes]);
+
+    useEffect(() => {
+        if (currentAssetType.id) {
+            fetchResources()
+        }
+    }, [currentAssetType])
+
+
+    useEffect(() => {
+        if (officeAsset.length > 0) {
+            handleOfficeEquipmentTableData(officeAsset)
+        }
+    }, [officeAsset])
 
     return (
         <React.Fragment>
@@ -78,25 +105,25 @@ const OfficeEquipment = () => {
                     />
                 </ModalComponent>
             }
-                <Grid xs={12} container>
-                    {columnHeaders.length > 0 &&
-                        <TableComponent
-                            endPoint={endPoint}
-                            loading={loading}
-                            count={100}
-                            exportData
-                            createAction
-                            importData
-                            header={header}
-                            module={module}
-                            rows={[]}
-                            columnHeaders={columnHeaders}
-                            onCreationHandler={() => navigate(ROUTES.CREATE_OFFICE_EQUIPMENT)}
-                            handleOptionClicked={handleOptionClicked}
-                            paginationMode='client'
-                        />
-                    }
-                </Grid>
+            <Grid xs={12} container>
+                {columnHeaders.length > 0 &&
+                    <TableComponent
+                        endPoint={endPoint}
+                        loading={loading}
+                        count={count}
+                        exportData
+                        createAction
+                        importData
+                        header={header}
+                        module={module}
+                        rows={officeEquipmentTableData || []}
+                        columnHeaders={columnHeaders}
+                        onCreationHandler={() => navigate(ROUTES.CREATE_OFFICE_EQUIPMENT)}
+                        handleOptionClicked={handleOptionClicked}
+                        paginationMode='client'
+                    />
+                }
+            </Grid>
         </React.Fragment>
     )
 }

@@ -15,7 +15,6 @@ import { ROUTES } from "../../../core/routes/routes";
 import { crudStates } from "../../../utils/constants";
 import { IFleet } from "./interface";
 import ModalComponent from "../../../components/modal";
-import Dispose from "../Dispose";
 import { ErrorMessage } from "../../../core/apis/axiosInstance";
 import { fetchFleetService } from "./service";
 
