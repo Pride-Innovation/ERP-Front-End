@@ -32,7 +32,7 @@ const AssetUtills = () => {
             })
         }
 
-        if (assetType.name.toLocaleLowerCase().indexOf("Stationery".toLocaleLowerCase()) !== -1) {
+        if (assetType.name.toLocaleLowerCase().indexOf("Transport".toLocaleLowerCase()) !== -1) {
             return ({
                 id: assetType.id as number,
                 text: assetType.name,

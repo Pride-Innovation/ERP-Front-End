@@ -39,7 +39,9 @@ const AssetsManagement = () => {
   useEffect(() => { setPath(pathname) }, [pathname]);
 
   const determineNavigation = () => {
-    const data = assetTypes.map(assetType => determineAssetTypeByAssetName(assetType)) as Array<INavigation>
+    console.log(assetTypes)
+    const data = assetTypes.map(assetType => determineAssetTypeByAssetName(assetType))
+    .filter(item => item != null) as Array<INavigation>
     setNavigations(data);
   }
 
