@@ -6,6 +6,11 @@ Managing Director
 */
 
 import { Control, FieldError, FormState, UseFormRegister } from "react-hook-form";
+import { ISupplier } from "../../settings/suppliers/interface";
+import { IUser } from "../../users/interface";
+import { IBranch } from "../../settings/branch/interface";
+import { IStatus } from "../../settings/statuses/interface";
+import { IAssetType } from "../../settings/assetTypes/interface";
 
 export interface IOfficeEquipment {
     id?: string | number;
@@ -15,17 +20,18 @@ export interface IOfficeEquipment {
     engravedNumber: string;
     dateReceipt: string;
     make: string;
-    assetCategory_id: string;
-    supplier: string;
+    supplier?: ISupplier | null;
     unitOfMeasure: string;
     purchaseCost: string;
     costOfTheAsset: string;
-    netValueB: string;
-    assetStatus?: string | null;
-    desc?: string | null;
+    netValueB: string,
+    assignedTo?: IUser | null;
+    branch?: IBranch | null;
+    assetDepreciationRate?: string | null;
+    description?: string | null;
     image?: string | null;
-    user_id?: string | null;
-    branch_id?: string | null;
+    assetStatus?: IStatus | null;
+    assetType?: IAssetType | null;
 }
 
 export interface IOfficeEquipmentExtra {
@@ -51,15 +57,13 @@ export interface IOfficeEquipmentForm {
             engravedNumber?: FieldError;
             dateReceipt?: FieldError;
             make?: FieldError;
-            assetCategory_id?: FieldError;
-            supplier?: FieldError;
             unitOfMeasure?: FieldError;
             purchaseCost?: FieldError;
             costOfTheAsset?: FieldError;
-            netValueB?: FieldError;
-            desc?: FieldError;
+            netValueB?: FieldError,
+            assetDepreciationRate?: FieldError;
+            description?: FieldError;
             image?: FieldError;
-            assetStatus?: FieldError;
         };
     };
     control: Control<IOfficeEquipment>;

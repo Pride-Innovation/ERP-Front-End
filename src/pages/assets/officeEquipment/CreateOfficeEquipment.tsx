@@ -38,18 +38,8 @@ const CreateOfficeEquipment = () => {
 
     const onSubmit = async (formData: IOfficeEquipment) => {
         setSendingRequest(true);
-        const request = {
-            ...formData,
-            branch_id: parseInt(formData.branch_id as string),
-            assetStatus_id: parseInt(formData.assetStatus as string),
-            OfficeEquipmentAssetCategory_id: parseInt(formData.assetCategory_id),
-            unitOfMeasure_id: parseInt(formData.unitOfMeasure),
-            supplier_id: parseInt(formData.supplier),
-            user_id: parseInt(formData.user_id as string),
-        }
-
-        const response = await createOfficeEquipmentService(request) as IResponseData;
-        toast.success(response.data.message)
+        // const response = await createOfficeEquipmentService(request) as IResponseData;
+        // toast.success(response.data.message)
         setSendingRequest(false)
     };
 

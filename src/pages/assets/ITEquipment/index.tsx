@@ -30,7 +30,7 @@ const ITEquipment = () => {
     const { itAssets } = useSelector((state: RootState) => state.ITAssetStore)
     const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore);
     const [count, setCount] = useState<number>(0)
-    const { currentAssetType, setCurrentAssetType, determineAssetTypeByAssetName } = AssetUtills()
+    const { currentAssetType, setCurrentAssetType } = AssetUtills()
     const {
         open,
         handleClose,
@@ -68,7 +68,8 @@ const ITEquipment = () => {
 
     useEffect(() => {
         if (assetTypes.length > 0) {
-            const assetType = assetTypes.find(assetType => determineAssetTypeByAssetName(assetType)) as IAssetType
+            const assetType = assetTypes.find(assetType => assetType
+                .name.toLocaleLowerCase().indexOf("IT Equipment".toLocaleLowerCase()) !== -1) as IAssetType
             setCurrentAssetType(assetType);
         }
     }, [assetTypes]);

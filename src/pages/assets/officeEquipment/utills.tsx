@@ -14,6 +14,9 @@ import InfoIcon from '@mui/icons-material/Info';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import { getTableHeaders } from "../../../components/tables/getTableHeaders";
+import { crudStates } from "../../../utils/constants";
+import { ROUTES } from "../../../core/routes/routes";
+import { useNavigate } from "react-router";
 
 const OfficeEquipmentUtills = () => {
     const endPoint = 'posts';
@@ -21,6 +24,8 @@ const OfficeEquipmentUtills = () => {
     const header = { plural: 'Office Equipment', singular: 'Office Equipment' };
     const [open, setOpen] = useState<boolean>(false);
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
+    const [currentAsset, setCurrentAsset] = useState<IOfficeEquipment>({} as IOfficeEquipment);
+
     const [optionsObject, setOptionsObject] = useState<{
         assetsStatusesOptions: Array<IOptions>,
         branchesOptions: Array<IOptions>,
@@ -37,14 +42,13 @@ const OfficeEquipmentUtills = () => {
 
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
-
+    const navigate = useNavigate()
     const {
         id,
         hostname,
         detailNetBookValue,
-        desc,
+        description,
         image,
-        assetCategory_id,
         unitOfMeasure,
         supplier,
         costOfTheAsset,
@@ -101,8 +105,14 @@ const OfficeEquipmentUtills = () => {
             type: "input"
         },
         {
-            value: "assetCategory_id",
-            label: 'Category',
+            value: "assetStatus",
+            label: 'status',
+            type: "select",
+            options: optionsObject.assetCategoriesOptions
+        },
+        {
+            value: "assetType",
+            label: 'Asset Type',
             type: "select",
             options: optionsObject.assetCategoriesOptions
         },
@@ -128,7 +138,7 @@ const OfficeEquipmentUtills = () => {
             type: "input",
         },
         {
-            value: "desc",
+            value: "description",
             label: 'Description',
             type: "input",
         },
@@ -139,13 +149,13 @@ const OfficeEquipmentUtills = () => {
             options: optionsObject.assetsStatusesOptions
         },
         {
-            value: "user_id",
+            value: "assignedTo",
             label: 'Assigned To',
             type: "select",
             options: optionsObject.usersOptions
         },
         {
-            value: "branch_id",
+            value: "branch",
             label: 'Branch',
             type: "select",
             options: optionsObject.branchesOptions
@@ -155,6 +165,27 @@ const OfficeEquipmentUtills = () => {
     const determineCurrentAsset = (id: number, itemList: Array<IOfficeEquipment>): IOfficeEquipment => {
         const item = itemList.find(item => item.id === id);
         return item as IOfficeEquipment;
+    }
+
+    const handleOptionClicked = async (option: string | number, moduleID?: string | number) => {
+        switch (option) {
+            case crudStates.update:
+                navigate(`${ROUTES.UPDATE_OFFICE_EQUIPMENT}/${moduleID}`)
+                break;
+            case crudStates.dispose:
+                // setCurrentAsset(determineCurrentAsset(moduleID as number, rows as IOfficeEquipment[]))
+                handleOpen()
+                break;
+            case crudStates.read:
+                navigate(`${ROUTES.LIST_OFFICE_EQUIPMENT}/${moduleID}`);
+                break;
+            case crudStates.delete:
+                // const response = await deleteOfficeEquipmentService(moduleID as number);
+                // console.log(response, "Item deleted successfully!!")
+                break;
+            default:
+                break;
+        }
     }
 
     return (
@@ -167,7 +198,9 @@ const OfficeEquipmentUtills = () => {
             handleClose,
             formFields,
             determineCurrentAsset,
-            module
+            module,
+            handleOptionClicked,
+            currentAsset
         }
     )
 }

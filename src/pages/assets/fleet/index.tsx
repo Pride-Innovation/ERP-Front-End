@@ -62,12 +62,13 @@ const Fleet = () => {
         <React.Fragment>
             {
                 <ModalComponent width={"40%"} title='Dispose Fleet' open={open} handleClose={handleClose}>
-                    <Dispose
+                    {/* <Dispose
                         sendingRequest={loading}
                         handleClose={handleClose}
                         buttonText='Confirm'
                         asset={currentAsset}
-                    />
+                    /> */}
+                    <p>Dispose off asset</p>
                 </ModalComponent>
             }
             {rows?.length > 0 &&

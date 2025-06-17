@@ -10,14 +10,13 @@ import { IOfficeEquipment } from './interface';
 import { useParams } from 'react-router';
 import { officeEquipmentMock } from '../../../mocks/officeEquipment';
 import { useForm } from 'react-hook-form';
-// import { yupResolver } from '@hookform/resolvers/yup';
-// import { officeEquipmentSchema } from './schema';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { officeEquipmentSchema } from './schema';
 import { Card, Grid } from '@mui/material';
 import { FormHeader } from '../../../components/headers/TypographyComponent';
 import OfficeEquipmentForm from './OfficeEquipmentForm';
-import { getOfficeEquipmentByIDService, updateOfficeEquipmentService } from './service';
-import { IResponseData } from '../../users/interface';
-import { toast } from 'react-toastify';
+import { getOfficeEquipmentByIDService } from './service';
+
 
 const UpdateOfficeEquipment = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
@@ -46,7 +45,7 @@ const UpdateOfficeEquipment = () => {
         reset
     } = useForm<IOfficeEquipment>({
         mode: 'onChange',
-        // resolver: yupResolver(officeEquipmentSchema),
+        resolver: yupResolver(officeEquipmentSchema),
     });
 
     useEffect(() => {
@@ -56,17 +55,9 @@ const UpdateOfficeEquipment = () => {
 
     const onSubmit = async (formData: IOfficeEquipment) => {
         setSendingRequest(true);
-        const request = {
-            ...formData,
-            branch_id: parseInt(formData.branch_id as string),
-            assetStatus_id: parseInt(formData.assetStatus as string),
-            OfficeEquipmentAssetCategory_id: parseInt(formData.assetCategory_id),
-            unitOfMeasure_id: parseInt(formData.unitOfMeasure),
-            supplier_id: parseInt(formData.supplier),
-            user_id: parseInt(formData.user_id as string),
-        }
-        const response = await updateOfficeEquipmentService(request, id as string) as IResponseData;
-        toast.success(response.data.message)
+
+        // const response = await updateOfficeEquipmentService(request, id as string) as IResponseData;
+        // toast.success(response.data.message)
         setSendingRequest(false)
     };
 
