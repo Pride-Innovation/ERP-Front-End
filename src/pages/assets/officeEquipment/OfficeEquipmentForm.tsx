@@ -43,8 +43,7 @@ const OfficeEquipmentForm = ({
                         required: field.required === false ? field.required : true
                     };
 
-                    const gridSize = field.type === "textarea" ? 12 : 4;
-                    console.log(formState, field, "Form state")
+                    const gridSize = field.type === "textarea" ? 12 : 3;
 
                     return (
                         <Grid item xs={12} md={gridSize} key={field.value}>

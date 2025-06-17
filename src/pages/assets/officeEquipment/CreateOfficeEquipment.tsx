@@ -38,8 +38,7 @@ const CreateOfficeEquipment = () => {
 
     const onSubmit = async (formData: IOfficeEquipment) => {
         setSendingRequest(true);
-        // const response = await createOfficeEquipmentService(request) as IResponseData;
-        // toast.success(response.data.message)
+        console.log(formData, "formData")
         setSendingRequest(false)
     };
 
