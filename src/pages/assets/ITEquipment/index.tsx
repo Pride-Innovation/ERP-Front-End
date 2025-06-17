@@ -20,14 +20,17 @@ import { useDispatch } from "react-redux"
 import { AppDispatch, RootState } from "../../../store"
 import { loadAllITAssets } from "./slice"
 import { useSelector } from "react-redux"
+import { IAssetType } from "../../settings/assetTypes/interface"
+import AssetUtills from "../Utills"
 
 const ITEquipment = () => {
     const [loading, setLoading] = useState<boolean>(false);
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
     const { itAssets } = useSelector((state: RootState) => state.ITAssetStore)
+    const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore);
     const [count, setCount] = useState<number>(0)
-
+    const { currentAssetType, setCurrentAssetType, determineAssetTypeByAssetName } = AssetUtills()
     const {
         open,
         handleClose,
@@ -43,8 +46,15 @@ const ITEquipment = () => {
 
     const fetchResources = async () => {
         setLoading(true)
+        const params = { assetTypeId: currentAssetType.id }
+
         try {
-            const response = await fetchRowsService({ pageNumber: 0, pageSize: 10, endPoint }) as IITEquipmentsAxiosResponse;
+            const response = await fetchRowsService({
+                pageNumber: 0,
+                pageSize: 10,
+                endPoint,
+                params
+            }) as IITEquipmentsAxiosResponse;
             if (response.status === 200) {
                 dispatch(loadAllITAssets(response.data.content));
                 setCount(response.data.totalElements)
@@ -56,14 +66,26 @@ const ITEquipment = () => {
         setLoading(false)
     }
 
-    useEffect(() => { fetchResources() }, []);
+    useEffect(() => {
+        if (assetTypes.length > 0) {
+            const assetType = assetTypes.find(assetType => determineAssetTypeByAssetName(assetType)) as IAssetType
+            setCurrentAssetType(assetType);
+        }
+    }, [assetTypes]);
+
+    useEffect(() => {
+        if (currentAssetType.id) {
+            fetchResources()
+        }
+    }, [currentAssetType])
+
+
     useEffect(() => {
         if (itAssets.length > 0) {
             handleRequest(itAssets)
         }
     }, [itAssets])
 
-    console.log(iTEquipmentTableData, "iTEquipmentTableData")
 
     return (
         <>
