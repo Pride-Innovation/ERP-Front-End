@@ -44,11 +44,11 @@ const FleetDetails = () => {
                             </Typography>
                             <Divider />
                             <DetailSection label='Hostname' text={equipment.hostname} />
-                            <DetailSection label="Supplier" text={equipment.supplier} />
+                            {equipment.supplier && <DetailSection label="Supplier" text={equipment.supplier.name} />}
                             <DetailSection label="Purchase Cost" text={equipment.purchaseCost} />
                             <DetailSection label="Date of Receipt" text={equipment.dateReceipt} />
-                            {equipment.assetStatus && <DetailSection label="Status" text={equipment.assetStatus} />}
-                            {equipment.desc && <DetailSection label="Description" text={equipment.desc} />}
+                            {equipment.assetStatus && <DetailSection label="Status" text={equipment.assetStatus.name} />}
+                            {equipment.description && <DetailSection label="Description" text={equipment.description} />}
                         </CardContent>
                     </Card>
                 </Grid>

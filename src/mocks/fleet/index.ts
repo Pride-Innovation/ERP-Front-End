@@ -6,26 +6,29 @@ Managing Director
 */
 
 import { IFleet } from "../../pages/assets/fleet/interface";
+import { branchesMock } from "../branch";
+import { suppliersMock } from "../settings";
+import { statusMocks } from "../status";
+import { usersMock } from "../users";
 
 export const fleetsMock: IFleet[] = [
     {
         id: 1,
         assetName: "Forklift",
-        name: "",
         hostname: "FLK-001",
         detailNetBookValue: "15000",
         engravedNumber: "ENG-001",
         dateReceipt: "2022-01-15",
         make: "Toyota",
-        assetCategory_id: "equipment",
-        supplier: "ABC Supply Co.",
+        supplier: suppliersMock[0],
         unitOfMeasure: "units",
         purchaseCost: "12000",
         costOfTheAsset: "15000",
         netValueB: "8000",
-        registrationNumber: "REG-001",
-        desc: "Electric forklift for warehouse use.",
+        description: "Electric forklift for warehouse use.",
         image: "forklift.png",
-        assetStatus: "active",
+        assetStatus: statusMocks[0],
+        assignedTo: usersMock[0],
+        branch: branchesMock[0]
     }
 ];

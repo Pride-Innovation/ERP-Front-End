@@ -16,7 +16,6 @@ import TableComponent from "../../../components/tables/TableComponent";
 import { ROUTES } from "../../../core/routes/routes";
 import ModalComponent from "../../../components/modal";
 import Dispose from "../Dispose";
-import { ErrorMessage } from "../../../core/apis/axiosInstance";
 import { fetchRowsService } from "../../../core/apis/globalService";
 import AssetUtills from "../Utills";
 import { useDispatch } from "react-redux";
@@ -65,8 +64,7 @@ const OfficeEquipment = () => {
                 setCount(response.data.totalElements)
             }
         } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : ErrorMessage;
-            console.log(errorMessage)
+            console.log(error)
         }
         setLoading(false)
     }

@@ -13,14 +13,20 @@ import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import { getTableHeaders } from "../../../components/tables/getTableHeaders";
 import { IFormData } from "../interface";
-import { IFleet } from "./interface";
+import { IFleet, IFleetTableData } from "./interface";
+import { crudStates } from "../../../utils/constants";
+import { useNavigate } from "react-router";
+import { ROUTES } from "../../../core/routes/routes";
+import moment from "moment";
 
 const FleetUtills = () => {
-    const endPoint = 'posts';
+    const endPoint = 'assets';
     const module = "fleet";
     const header = { plural: 'Fleet', singular: 'Fleet' };
     const [open, setOpen] = useState<boolean>(false);
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
+    const [fleetTableData, setFleetTableData] = useState<IFleetTableData[]>([] as IFleetTableData[])
+
     const [optionsObject, setOptionsObject] = useState<{
         assetsStatusesOptions: Array<IOptions>,
         branchesOptions: Array<IOptions>,
@@ -36,26 +42,29 @@ const FleetUtills = () => {
     });
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
+    const navigate = useNavigate()
 
     const {
         id,
-        hostname,
-        detailNetBookValue,
-        desc,
-        image,
-        assetCategory_id,
-        unitOfMeasure,
+        branch,
+        assignedTo,
+        assetType,
+        assetStatus,
         supplier,
-        name,
-        costOfTheAsset,
+        description,
+        assetDepreciationRate,
+        detailNetBookValue,
         netValueB,
-        purchaseCost,
+        unitOfMeasure,
+        image,
         ...data
     } = fleetsMock[0];
 
     const rowData = {
-        image,
         ...data,
+        status: fleetsMock[0].assetStatus?.name,
+        assignedTo: fleetsMock[0].assignedTo?.firstName,
+        location: "",
         action: {
             label: "options",
             options: [
@@ -69,6 +78,44 @@ const FleetUtills = () => {
     useEffect(() => {
         setColumnHeaders(getTableHeaders(rowData))
     }, []);
+
+
+    const handleFleetTableData = (list: Array<IFleet>) => {
+        const data: Array<IFleetTableData> = list.map((item, index) => {
+            const {
+                branch,
+                assignedTo,
+                assetType,
+                assetStatus,
+                supplier,
+                description,
+                assetDepreciationRate,
+                detailNetBookValue,
+                netValueB,
+                unitOfMeasure,
+                image,
+                ...fielsdata
+            } = list[index];
+
+            return (
+                {
+                    ...fielsdata,
+                    assetName: item.assetName,
+                    engravedNumber: item.engravedNumber,
+                    dateReceived: moment(item.dateReceipt).format('Do MMMM YYYY'),
+                    make: item.make,
+                    model: item.model as string,
+                    purchaseCost: item.purchaseCost,
+                    costOfAsset: item.costOfTheAsset,
+                    status: item?.assetStatus?.status as string,
+                    assignedTo: `${item.assignedTo?.lastName} ${item.assignedTo?.firstName}`,
+                    location: item.branch?.name as string
+                }
+            )
+        })
+        setFleetTableData(data);
+
+    }
 
 
     const formFields: Array<IFormData<IFleet>> = [
@@ -103,8 +150,14 @@ const FleetUtills = () => {
             type: "input"
         },
         {
-            value: "assetCategory_id",
-            label: 'Category',
+            value: "assetStatus",
+            label: 'status',
+            type: "select",
+            options: optionsObject.assetCategoriesOptions
+        },
+        {
+            value: "assetType",
+            label: 'Asset Type',
             type: "select",
             options: optionsObject.assetCategoriesOptions
         },
@@ -117,12 +170,12 @@ const FleetUtills = () => {
         {
             value: "purchaseCost",
             label: 'Purchase Cost',
-            type: "input"
+            type: "number",
         },
         {
             value: "costOfTheAsset",
             label: 'Cost of Asset',
-            type: "input",
+            type: "number",
         },
         {
             value: "netValueB",
@@ -130,18 +183,8 @@ const FleetUtills = () => {
             type: "input",
         },
         {
-            value: "desc",
+            value: "description",
             label: 'Description',
-            type: "input",
-        },
-        {
-            value: "registrationNumber",
-            label: 'Registration Number',
-            type: "input",
-        },
-        {
-            value: "model",
-            label: 'Model',
             type: "input",
         },
         {
@@ -151,13 +194,13 @@ const FleetUtills = () => {
             options: optionsObject.assetsStatusesOptions
         },
         {
-            value: "user_id",
+            value: "assignedTo",
             label: 'Assigned To',
             type: "select",
             options: optionsObject.usersOptions
         },
         {
-            value: "branch_id",
+            value: "branch",
             label: 'Branch',
             type: "select",
             options: optionsObject.branchesOptions
@@ -167,6 +210,24 @@ const FleetUtills = () => {
     const determineCurrentAsset = (id: number, itemList: Array<IFleet>): IFleet => {
         const item = itemList.find(item => item.id === id);
         return item as IFleet;
+    }
+
+
+    const handleOptionClicked = (option: string | number, moduleID?: string | number) => {
+        switch (option) {
+            case crudStates.update:
+                navigate(`${ROUTES.UPDATE_FLEET}/${moduleID}`)
+                break;
+            case crudStates.dispose:
+                // setCurrentAsset(determineCurrentAsset(moduleID as number, rows as IFleet[]))
+                handleOpen();
+                break;
+            case crudStates.read:
+                navigate(`${ROUTES.LIST_FLEET}/${moduleID}`)
+                break;
+            default:
+                break;
+        }
     }
 
     return (
@@ -179,7 +240,10 @@ const FleetUtills = () => {
             header,
             formFields,
             determineCurrentAsset,
-            module
+            module,
+            handleOptionClicked,
+            fleetTableData,
+            handleFleetTableData
         }
     )
 }

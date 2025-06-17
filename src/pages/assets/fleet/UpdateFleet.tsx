@@ -15,9 +15,7 @@ import { IFleet } from "./interface";
 import { fleetsMock } from "../../../mocks/fleet";
 import { fleetSchema } from "./schema";
 import FleetForm from "./FleetForm";
-import { getFleetEquipmentByIDService, updateFleetEquipmentService } from "./service";
-import { IResponseData } from "../../users/interface";
-import { toast } from "react-toastify";
+import { getFleetEquipmentByIDService } from "./service";
 
 const UpdateFleet = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
@@ -55,18 +53,7 @@ const UpdateFleet = () => {
 
     const onSubmit = async (formData: IFleet) => {
         setSendingRequest(true);
-        const request = {
-            ...formData,
-            branch_id: parseInt(formData.branch_id as string),
-            assetStatus_id: parseInt(formData.assetStatus as string),
-            FleetAssetCategory_id: parseInt(formData.assetCategory_id),
-            unitOfMeasure_id: parseInt(formData.unitOfMeasure),
-            supplier_id: parseInt(formData.supplier),
-            user_id: parseInt(formData.user_id as string),
-        }
-
-        const response = await updateFleetEquipmentService(request, id as string) as IResponseData;
-        toast.success(response.data.message)
+        console.log(formData)
         setSendingRequest(false)
     };
 

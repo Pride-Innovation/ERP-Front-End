@@ -6,56 +6,86 @@ Managing Director
 */
 
 import { Grid } from "@mui/material";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import TableComponent from "../../../components/tables/TableComponent";
 import { useNavigate } from "react-router";
 import FleetUtills from "./utills";
-import RowContext from "../../../context/row/RowContext";
 import { ROUTES } from "../../../core/routes/routes";
-import { crudStates } from "../../../utils/constants";
-import { IFleet } from "./interface";
+import { IFleetsAxiosResponse } from "./interface";
 import ModalComponent from "../../../components/modal";
-import { ErrorMessage } from "../../../core/apis/axiosInstance";
-import { fetchFleetService } from "./service";
+import { fetchRowsService } from "../../../core/apis/globalService";
+import AssetUtills from "../Utills";
+import { useDispatch } from "react-redux";
+import { AppDispatch, RootState } from "../../../store";
+import { loadAllFleet } from "./slice";
+import { useSelector } from "react-redux";
+import { IAssetType } from "../../settings/assetTypes/interface";
 
 const Fleet = () => {
     const [loading, setLoading] = useState<boolean>(false);
-    const [currentAsset, setCurrentAsset] = useState<IFleet>({} as IFleet);
+    const [count, setCount] = useState<number>(0)
     const navigate = useNavigate();
-    const { columnHeaders, header, endPoint, handleOpen, determineCurrentAsset, open, handleClose, module } = FleetUtills();
-    const { setRows, rows } = useContext(RowContext);
+    const { currentAssetType, setCurrentAssetType } = AssetUtills();
+    const dispatch = useDispatch<AppDispatch>()
+    const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore);
+    const { fleetAssets } = useSelector((state: RootState) => state.FleetStore)
+
+    const {
+        columnHeaders,
+        header,
+        endPoint,
+        open,
+        handleClose,
+        handleOptionClicked,
+        handleFleetTableData,
+        fleetTableData,
+        module
+    } = FleetUtills();
 
     const fetchResources = async () => {
         setLoading(true)
-        try {
-            const response = await fetchFleetService();
-            setRows([...response]);
 
+        const params = { assetTypeId: currentAssetType.id }
+
+        try {
+            const response = await fetchRowsService({
+                pageNumber: 0,
+                pageSize: 10,
+                endPoint,
+                params
+            }) as IFleetsAxiosResponse;
+            if (response.status === 200) {
+                dispatch(loadAllFleet(response.data.content));
+                setCount(response.data.totalElements)
+            }
         } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : ErrorMessage;
-            console.log(errorMessage)
+            console.log(error)
         }
         setLoading(false)
     }
 
-    useEffect(() => { fetchResources() }, []);
-
-    const handleOptionClicked = (option: string | number, moduleID?: string | number) => {
-        switch (option) {
-            case crudStates.update:
-                navigate(`${ROUTES.UPDATE_FLEET}/${moduleID}`)
-                break;
-            case crudStates.dispose:
-                setCurrentAsset(determineCurrentAsset(moduleID as number, rows as IFleet[]))
-                handleOpen();
-                break;
-            case crudStates.read:
-                navigate(`${ROUTES.LIST_FLEET}/${moduleID}`)
-                break;
-            default:
-                break;
+    useEffect(() => {
+        if (assetTypes.length > 0) {
+            const assetType = assetTypes.find(assetType => assetType
+                .name.toLocaleLowerCase().indexOf("Transport".toLocaleLowerCase()) !== -1) as IAssetType
+            setCurrentAssetType(assetType);
         }
-    }
+    }, [assetTypes]);
+
+    useEffect(() => {
+        if (currentAssetType.id) {
+            fetchResources()
+        }
+    }, [currentAssetType])
+
+
+    useEffect(() => {
+        if (fleetAssets.length > 0) {
+            handleFleetTableData(fleetAssets)
+        }
+    }, [fleetAssets])
+
+
 
     return (
         <React.Fragment>
@@ -70,26 +100,25 @@ const Fleet = () => {
                     <p>Dispose off asset</p>
                 </ModalComponent>
             }
-            {rows?.length > 0 &&
-                <Grid xs={12} container>
-                    {columnHeaders.length > 0 &&
-                        <TableComponent
-                            endPoint={endPoint}
-                            loading={loading}
-                            count={100}
-                            exportData
-                            createAction
-                            module={module}
-                            importData
-                            header={header}
-                            rows={rows}
-                            columnHeaders={columnHeaders}
-                            onCreationHandler={() => navigate(ROUTES.CREATE_FLEET)}
-                            handleOptionClicked={handleOptionClicked}
-                            paginationMode='client'
-                        />
-                    }
-                </Grid>}
+            <Grid xs={12} container>
+                {columnHeaders.length > 0 &&
+                    <TableComponent
+                        endPoint={endPoint}
+                        loading={loading}
+                        count={count}
+                        exportData
+                        createAction
+                        module={module}
+                        importData
+                        header={header}
+                        rows={fleetTableData || []}
+                        columnHeaders={columnHeaders}
+                        onCreationHandler={() => navigate(ROUTES.CREATE_FLEET)}
+                        handleOptionClicked={handleOptionClicked}
+                        paginationMode='client'
+                    />
+                }
+            </Grid>
         </React.Fragment>
     )
 }

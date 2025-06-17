@@ -6,25 +6,29 @@ Managing Director
 */
 
 import * as yup from 'yup';
+import { ISupplier } from '../../settings/suppliers/interface';
+import { IUser } from '../../users/interface';
+import { IStatus } from '../../settings/statuses/interface';
+import { IAssetType } from '../../settings/assetTypes/interface';
+import { IBranch } from '../../settings/branch/interface';
 
 export const fleetSchema = yup.object().shape({
-    assetName: yup.string().required('Asset Name is required'),
-    hostname: yup.string().required('Host Name is required'),
-    detailNetBookValue: yup.string().required('Detail Net Book Value is required'),
-    engravedNumber: yup.string().required('Engraved Number is required'),
-    dateReceipt: yup.string().required('Date Receipt is required'),
+    assetName: yup.string().required('Asset name is required'),
+    hostname: yup.string().required('Host name is required'),
+    detailNetBookValue: yup.string().required('NetBook value is required'),
+    engravedNumber: yup.string().required('Engraved number is required'),
+    dateReceipt: yup.string().required('Receipt is required'),
     make: yup.string().required('Make is required'),
-    supplier: yup.string().required('Supplier is required'),
-    unitOfMeasure: yup.string().required('Unit of Measure is required'),
-    purchaseCost: yup.string().required('Purchase Cost is required'),
-    costOfTheAsset: yup.string().required('Cost of Asset is required'),
-    assetCategory_id: yup.string().required('Cost of Asset is required'),
-    netValueB: yup.string().required('Net Value is required'),
-    desc: yup.string().nullable().optional(),
+    unitOfMeasure: yup.string().required('Unit of measure is required'),
+    purchaseCost: yup.string().required('Purchase cost is required'),
+    costOfTheAsset: yup.string().required('Cost of asset is required'),
+    netValueB: yup.string().required('Net value is required'),
+    assetDepreciationRate: yup.string().nullable().optional(),
+    description: yup.string().nullable().optional(),
+    supplier: yup.mixed<ISupplier>().nullable().optional(),
+    assignedTo: yup.mixed<IUser>().nullable().optional(),
+    assetStatus: yup.mixed<IStatus>().nullable().optional(),
+    assetType: yup.mixed<IAssetType>().nullable().optional(),
     image: yup.string().nullable().optional(),
-    assetStatus: yup.string().nullable().optional(),
-    user_id: yup.string().nullable().optional(),
-    branch_id: yup.string().nullable().optional(),
-    registrationNumber: yup.string().nullable().optional(),
-    model: yup.string().nullable().optional(),
+    branch: yup.mixed<IBranch>().nullable().optional(),
 });

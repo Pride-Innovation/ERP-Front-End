@@ -6,42 +6,34 @@ Managing Director
 */
 
 import { Control, FieldError, FormState, UseFormRegister } from "react-hook-form";
+import { ISupplier } from "../../settings/suppliers/interface";
+import { IUser } from "../../users/interface";
+import { IBranch } from "../../settings/branch/interface";
+import { IStatus } from "../../settings/statuses/interface";
+import { IAssetType } from "../../settings/assetTypes/interface";
+import { IAxiosResponse, IFetchDataRequest } from "../../../core/apis/interface";
 
 export interface IFleet {
     id?: string | number;
     assetName: string;
-    name?: string;
     hostname: string;
     detailNetBookValue: string;
     engravedNumber: string;
     dateReceipt: string;
     make: string;
-    assetCategory_id: string;
-    supplier: string;
+    supplier?: ISupplier | null;
     unitOfMeasure: string;
     purchaseCost: string;
     costOfTheAsset: string;
-    netValueB: string;
-    registrationNumber?: string | null;
+    netValueB: string,
+    assignedTo?: IUser | null;
+    branch?: IBranch | null;
+    assetDepreciationRate?: string | null;
+    description?: string | null;
     model?: string | null;
-    desc?: string | null;
     image?: string | null;
-    assetStatus?: string | null;
-    user_id?: string | null;
-    branch_id?: string | null;
-}
-
-export interface IExtraFleetFields {
-    status1: string;
-    status2: string;
-    status3: string;
-    status4: string;
-    status5: string;
-    col1: string;
-    col2: string;
-    col3: string;
-    col4: string;
-    col5: string;
+    assetStatus?: IStatus | null;
+    assetType?: IAssetType | null;
 }
 
 
@@ -55,20 +47,42 @@ export interface IFleetForm {
             engravedNumber?: FieldError;
             dateReceipt?: FieldError;
             make?: FieldError;
-            assetCategory_id?: FieldError;
-            supplier?: FieldError;
             unitOfMeasure?: FieldError;
             purchaseCost?: FieldError;
             costOfTheAsset?: FieldError;
-            netValueB?: FieldError;
-            registrationNumber?: FieldError;
-            desc?: FieldError;
+            netValueB?: FieldError,
+            assetDepreciationRate?: FieldError;
+            description?: FieldError;
             image?: FieldError;
-            assetStatus?: FieldError;
         };
     };
     control: Control<IFleet>;
     register: UseFormRegister<IFleet>;
     buttonText: string;
     sendingRequest: boolean;
+}
+
+export interface IFleetTableData {
+    assetName: string;
+    engravedNumber?: string | null;
+    dateReceived: string;
+    make: string | null;
+    purchaseCost?: string;
+    costOfAsset?: string;
+    model?: string;
+    status: string;
+    assignedTo: string;
+    location: string;
+}
+
+export interface IFleetResponse extends IFetchDataRequest {
+    content: Array<IFleet>
+}
+
+export interface IFleetsAxiosResponse extends IAxiosResponse {
+    data: IFleetResponse
+}
+
+export interface IFleetAxiosResponse extends IAxiosResponse {
+    data: IFleet
 }
