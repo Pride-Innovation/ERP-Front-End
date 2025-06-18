@@ -20,6 +20,7 @@ import { useNavigate } from "react-router";
 import { ROUTES } from "../../../core/routes/routes";
 import { RootState } from "../../../store";
 import moment from "moment";
+import { IAssetType } from "../../settings/assetTypes/interface";
 
 const ITEquipmentUtills = () => {
     const endPoint = 'assets';
@@ -36,12 +37,14 @@ const ITEquipmentUtills = () => {
         assetTypesOptions: Array<IOptions>,
         usersOptions: Array<IOptions>
         suppliersOptions: Array<IOptions>
+        commoditiesOptions: Array<IOptions>
     }>({
         assetsStatusesOptions: [],
         branchesOptions: [],
         assetTypesOptions: [],
         usersOptions: [],
-        suppliersOptions: []
+        suppliersOptions: [],
+        commoditiesOptions: []
     });
 
     const { statuses } = useSelector((state: RootState) => state.StatusesStore);
@@ -49,6 +52,7 @@ const ITEquipmentUtills = () => {
     const { branches } = useSelector((state: RootState) => state.BranchStore);
     const { users } = useSelector((state: RootState) => state.UserStore);
     const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore)
+    const { commodities } = useSelector((state: RootState) => state.CommodityStore)
     const navigate = useNavigate()
 
     useEffect(() => {
@@ -59,15 +63,16 @@ const ITEquipmentUtills = () => {
                 assetsStatusesOptions: statuses?.map(status => ({ label: status.name, value: status.id as number })) || [],
                 usersOptions: users?.map(user => ({ label: `${user.firstName} ${user.lastName}` as string, value: user.id as number })) || [],
                 suppliersOptions: suppliers?.map(supplier => ({ label: supplier.name, value: supplier?.id as number })) || [],
+                commoditiesOptions: commodities?.map(supplier => ({ label: supplier.name, value: supplier?.id as number })) || [],
             })
 
-    }, [statuses, users, assetTypes, branches, suppliers])
+    }, [statuses, users, assetTypes, branches, suppliers, commodities])
 
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
 
     const categories = {
-        desktopComputer: "desktopComputer",
+        desktopComputer: "desktop",
         laptop: "laptop",
         scanner: "scanner",
         printer: "printer",
@@ -195,16 +200,7 @@ const ITEquipmentUtills = () => {
             value: "category",
             label: 'Category',
             type: "select",
-            options: [
-                { label: "Desktop Computer", value: categories.desktopComputer },
-                { label: "Laptop", value: categories.laptop },
-                { label: "Scanner", value: categories.scanner },
-                { label: "Printer", value: categories.printer },
-                { label: "Monitor", value: categories.monitor },
-                { label: "Accesories ( Mouse, Keyboard, etc )", value: categories.accesories },
-                { label: "Components ( RAM, SSD/HDD, etc )", value: categories.component },
-                { label: "Receipt Printer", value: categories.receiptPrinter },
-            ]
+            options: optionsObject.commoditiesOptions
         },
         {
             value: "assetName",
@@ -341,6 +337,11 @@ const ITEquipmentUtills = () => {
         return item as IITEquipment;
     }
 
+    const determineITAssetType = () => {
+        return assetTypes.find(assetType => assetType
+            .name.toLocaleLowerCase().indexOf("IT Equipment".toLocaleLowerCase()) !== -1) as IAssetType
+    }
+
     return (
         {
             open,
@@ -358,7 +359,8 @@ const ITEquipmentUtills = () => {
             handleOptionClicked,
             currentAsset,
             handleRequest: handleITEquipmentTableData,
-            iTEquipmentTableData
+            iTEquipmentTableData,
+            determineITAssetType
         }
     )
 }

@@ -35,6 +35,9 @@ import StatusUtills from "../../settings/statuses/Utills";
 import UserUtils from "../../users/utils";
 import SupplierUtills from "../../settings/suppliers/Utills";
 import AssetTypeUtills from "../../settings/assetTypes/utills";
+import CommodityUtills from "../../settings/commodity/utills";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../store";
 
 const ITEquipmentForm = ({
     formState,
@@ -46,12 +49,18 @@ const ITEquipmentForm = ({
     handleChange
 }: IITEquipmentForm) => {
     const navigate = useNavigate();
-    const { formFields, categories, computerFields } = ITEquipmentUtills();
+    const { formFields, categories, computerFields, determineITAssetType } = ITEquipmentUtills();
+    const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore);
+    const { commodities } = useSelector((state: RootState) => state.CommodityStore);
+
+    const [assetTypeId, setAssetTypeId] = useState<number | null>()
+
     const { fetchAllBranches } = BranchUtills();
     const { fetchAllStatuses } = StatusUtills();
     const { fetchAllUsers } = UserUtils();
     const { fetchAllAssetTypes } = AssetTypeUtills()
     const { fetchAllSuppliers } = SupplierUtills();
+    const { fetchAllCommodities } = CommodityUtills()
 
     useEffect(() => { fetchAllBranches() }, []);
     useEffect(() => { fetchAllStatuses() }, []);
@@ -59,11 +68,36 @@ const ITEquipmentForm = ({
     useEffect(() => { fetchAllSuppliers() }, []);
     useEffect(() => { fetchAllAssetTypes() }, []);
 
+    useEffect(() => {
+        if (assetTypes.length > 0) {
+            const assetType = determineITAssetType();
+            if (assetType !== null) {
+                setAssetTypeId(assetType.id as number)
+            }
+        }
+    }, [assetTypes]);
+
+    useEffect(() => {
+        if (assetTypeId) {
+            fetchAllCommodities({ assetTypeId })
+        }
+    }, [assetTypeId]);
+
     const [stateFormFields, setStateFormFields] = useState<Array<IFormData<IITEquipment>>>(formFields.slice(1));
+
+    const determineCommodityName = (id: number): string => {
+        return commodities.find(commodity => commodity.id === id)?.name.split(" ").join("").toLocaleLowerCase() as string;
+    }
 
     useEffect(() => {
         if (option) {
-            if ([categories.laptop, categories.desktopComputer].includes(option)) {
+
+            const val = parseInt(option);
+            const comodityName = determineCommodityName(val);
+
+            if ([categories.laptop.toLocaleLowerCase(),
+            categories.desktopComputer.toLocaleLowerCase()
+            ].includes(comodityName)) {
                 setStateFormFields(() => {
                     return [...(formFields.slice(1)), ...computerFields]
                 })

@@ -41,7 +41,8 @@ const ITEquipment = () => {
         handleOptionClicked,
         currentAsset,
         handleRequest,
-        iTEquipmentTableData
+        iTEquipmentTableData,
+        determineITAssetType
     } = ITEquipmentUtills();
 
     const fetchResources = async () => {
@@ -68,8 +69,7 @@ const ITEquipment = () => {
 
     useEffect(() => {
         if (assetTypes.length > 0) {
-            const assetType = assetTypes.find(assetType => assetType
-                .name.toLocaleLowerCase().indexOf("IT Equipment".toLocaleLowerCase()) !== -1) as IAssetType
+            const assetType = determineITAssetType()
             setCurrentAssetType(assetType);
         }
     }, [assetTypes]);

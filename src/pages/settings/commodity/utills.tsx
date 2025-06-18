@@ -35,10 +35,15 @@ const CommodityUtills = () => {
     const handleClose = () => setOpen(false);
     useEffect(() => { fetchAllAssetTypes() }, []);
 
-    const fetchAllCommodities = async () => {
+    const fetchAllCommodities = async (params?: Record<string, any>) => {
         setLoading(true)
         try {
-            const response = await fetchRowsService({ pageNumber: 0, pageSize: 10, endPoint }) as ICommoditiesAxiosResponse;
+            const response = await fetchRowsService({
+                pageNumber: 0,
+                pageSize: 10,
+                endPoint,
+                params
+            }) as ICommoditiesAxiosResponse;
             if (response.status === 200) {
                 dispatch(loadAllCommodities(response.data.content))
             }
