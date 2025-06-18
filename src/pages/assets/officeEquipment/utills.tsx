@@ -146,7 +146,7 @@ const OfficeEquipmentUtills = () => {
     const formFields: Array<IFormData<IOfficeEquipment>> = [
         {
             value: "category",
-            label: 'Category',
+            label: 'Select Category',
             type: "select",
             options: optionsObject.commoditiesOptions
         },

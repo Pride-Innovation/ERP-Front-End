@@ -149,7 +149,7 @@ const FleetUtills = () => {
     const formFields: Array<IFormData<IFleet>> = [
         {
             value: "category",
-            label: 'Category',
+            label: 'Select Category',
             type: "select",
             options: optionsObject.commoditiesOptions
         },
