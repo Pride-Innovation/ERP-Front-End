@@ -16,6 +16,8 @@ export const inventoryMock: IInventory[] = [
         id: 1,
         name: "ATM Machine",
         referenceNumber: "REF15267378PRIDE",
+        lponumber: "LPO13243",
+        grnnumber: "GRN2425464",
         totalCost: 8000.00,
         balanceCost: 10000.00,
         supplier: suppliersMock[0],

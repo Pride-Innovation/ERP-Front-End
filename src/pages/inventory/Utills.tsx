@@ -66,6 +66,7 @@ const InventoryUtills = () => {
         createdBy,
         lastModified,
         lastModifiedBy,
+        referenceNumber,
         ...data
     } = inventoryMock[0];
 
@@ -123,14 +124,13 @@ const InventoryUtills = () => {
                 createdBy,
                 lastModified,
                 lastModifiedBy,
+                referenceNumber,
                 ...fielsdata
             } = inventory[index];
 
             return (
                 {
                     ...fielsdata,
-                    name: stock.name,
-                    referenceNumber: stock.referenceNumber,
                     totalItemsOrdered: sumTotalOrdered(stock.commodities as IStockCommodities[]),
                     totalItemsDelivered: sumTotalDelivered(stock.commodities as IStockCommodities[]),
                     branch: stock.branch?.name as string,
@@ -172,8 +172,8 @@ const InventoryUtills = () => {
             type: "input"
         },
         {
-            value: "referenceNumber",
-            label: 'Reference Number',
+            value: "lponumber",
+            label: 'LPO Number',
             type: "input"
         },
         {

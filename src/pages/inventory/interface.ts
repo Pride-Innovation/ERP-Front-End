@@ -28,7 +28,8 @@ interface IInventory {
     id?: string | number;
     name: string;
     commodities?: Array<IStockCommodities> | null
-    referenceNumber: string;
+    referenceNumber?: string | null;
+    lponumber: string;
     totalCost?: number | null;
     balanceCost?: number | null;
     branch?: IBranch | null;
@@ -39,11 +40,11 @@ interface IInventory {
     lastModified?: string | null;
     createdBy?: IUser | null;
     lastModifiedBy?: IUser | null;
+    grnnumber?: string | null;
 }
 
 interface IInventoryTableData {
     name: string
-    referenceNumber: string;
     totalItemsOrdered: number;
     totalItemsDelivered: number;
     branch: string;
@@ -64,6 +65,7 @@ interface IInventoryForm {
         errors: {
             name?: FieldError;
             referenceNumber?: FieldError;
+            LPONumber?: FieldError;
         };
     };
     control: Control<IInventory>;
