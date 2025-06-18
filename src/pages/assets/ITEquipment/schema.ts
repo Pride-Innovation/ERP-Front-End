@@ -23,6 +23,7 @@ export const ITEquipmentSchema = yup.object().shape({
     purchaseCost: yup.string().required('Purchase cost is required'),
     costOfTheAsset: yup.string().required('Cost of asset is required'),
     netValueB: yup.string().required('Net value is required'),
+    lpoNumber: yup.string().required('LPO Number is required'),
     model: yup.string().nullable().optional(),
     serialNumber: yup.string().nullable().optional(),
     ram: yup.string().nullable().optional(),

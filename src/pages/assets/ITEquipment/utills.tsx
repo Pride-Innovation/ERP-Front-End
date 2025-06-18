@@ -38,13 +38,15 @@ const ITEquipmentUtills = () => {
         usersOptions: Array<IOptions>
         suppliersOptions: Array<IOptions>
         commoditiesOptions: Array<IOptions>
+        inventoryOptions: Array<IOptions>
     }>({
         assetsStatusesOptions: [],
         branchesOptions: [],
         assetTypesOptions: [],
         usersOptions: [],
         suppliersOptions: [],
-        commoditiesOptions: []
+        commoditiesOptions: [],
+        inventoryOptions: [],
     });
 
     const { statuses } = useSelector((state: RootState) => state.StatusesStore);
@@ -53,6 +55,7 @@ const ITEquipmentUtills = () => {
     const { users } = useSelector((state: RootState) => state.UserStore);
     const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore)
     const { commodities } = useSelector((state: RootState) => state.CommodityStore)
+    const { inventory } = useSelector((state: RootState) => state.InventoryStore)
     const navigate = useNavigate()
 
     useEffect(() => {
@@ -63,10 +66,11 @@ const ITEquipmentUtills = () => {
                 assetsStatusesOptions: statuses?.map(status => ({ label: status.name, value: status.id as number })) || [],
                 usersOptions: users?.map(user => ({ label: `${user.firstName} ${user.lastName}` as string, value: user.id as number })) || [],
                 suppliersOptions: suppliers?.map(supplier => ({ label: supplier.name, value: supplier?.id as number })) || [],
-                commoditiesOptions: commodities?.map(supplier => ({ label: supplier.name, value: supplier?.id as number })) || [],
+                commoditiesOptions: commodities?.map(commodity => ({ label: commodity.name, value: commodity?.id as number })) || [],
+                inventoryOptions: inventory?.map(invent => ({ label: invent.lponumber, value: invent?.lponumber as string })) || [],
             })
 
-    }, [statuses, users, assetTypes, branches, suppliers, commodities])
+    }, [statuses, users, assetTypes, branches, suppliers, commodities, inventory])
 
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
@@ -103,6 +107,7 @@ const ITEquipmentUtills = () => {
         detailNetBookValue,
         netValueB,
         unitOfMeasure,
+        lpoNumber,
         image,
         ...data
     } = itEquipmentMock[0];
@@ -148,6 +153,7 @@ const ITEquipmentUtills = () => {
                 detailNetBookValue,
                 netValueB,
                 unitOfMeasure,
+                lpoNumber,
                 image,
                 ...fielsdata
             } = list[index];
@@ -296,6 +302,12 @@ const ITEquipmentUtills = () => {
             label: 'Supplier',
             type: "select",
             options: optionsObject.suppliersOptions
+        },
+        {
+            value: "lpoNumber",
+            label: 'LPO Number',
+            type: "autocomplete",
+            options: optionsObject.inventoryOptions
         }
     ]
 

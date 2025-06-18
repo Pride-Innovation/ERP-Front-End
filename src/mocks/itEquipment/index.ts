@@ -38,6 +38,7 @@ export const itEquipmentMock: IITEquipment[] = [
         image: "url_to_image_1",
         assetStatus: statusMocks[0],
         assignedTo: usersMock[0],
-        branch: branchesMock[0]
+        branch: branchesMock[0],
+        lpoNumber: "LPONUMB"
     }
 ]

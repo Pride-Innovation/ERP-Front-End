@@ -27,6 +27,7 @@ export const officeEquipmentMock: IOfficeEquipment[] = [
         assetStatus: statusMocks[0],
         description: "Core i5, 8GB RAM, 256GB SSD",
         image: "url_to_image_1",
-        assignedTo: usersMock[0]
+        assignedTo: usersMock[0],
+        lpoNumber: ""
     }
 ];

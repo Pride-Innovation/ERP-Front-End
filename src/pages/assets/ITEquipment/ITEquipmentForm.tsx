@@ -38,6 +38,7 @@ import AssetTypeUtills from "../../settings/assetTypes/utills";
 import CommodityUtills from "../../settings/commodity/utills";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../store";
+import InventoryUtills from "../../inventory/Utills";
 
 const ITEquipmentForm = ({
     formState,
@@ -61,12 +62,14 @@ const ITEquipmentForm = ({
     const { fetchAllAssetTypes } = AssetTypeUtills()
     const { fetchAllSuppliers } = SupplierUtills();
     const { fetchAllCommodities } = CommodityUtills()
+    const { fetchInventory } = InventoryUtills()
 
     useEffect(() => { fetchAllBranches() }, []);
     useEffect(() => { fetchAllStatuses() }, []);
     useEffect(() => { fetchAllUsers() }, []);
     useEffect(() => { fetchAllSuppliers() }, []);
     useEffect(() => { fetchAllAssetTypes() }, []);
+    useEffect(() => { fetchInventory() }, []);
 
     useEffect(() => {
         if (assetTypes.length > 0) {

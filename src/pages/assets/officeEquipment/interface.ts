@@ -33,20 +33,8 @@ export interface IOfficeEquipment {
     image?: string | null;
     assetStatus?: IStatus | null;
     assetType?: IAssetType | null;
-    category?: string | null
-}
-
-export interface IOfficeEquipmentExtra {
-    status1: string;
-    status2: string;
-    status3: string;
-    status4: string;
-    status5: string;
-    col1: string;
-    col2: string;
-    col3: string;
-    col4: string;
-    col5: string;
+    category?: string | null;
+    lpoNumber: string;
 }
 
 export interface IOfficeEquipmentForm {
