@@ -31,4 +31,6 @@ export const officeEquipmentSchema = yup.object().shape({
     assetType: yup.mixed<IAssetType>().nullable().optional(),
     image: yup.string().nullable().optional(),
     branch: yup.mixed<IBranch>().nullable().optional(),
+    category: yup.string().nullable().optional(),
+
 });

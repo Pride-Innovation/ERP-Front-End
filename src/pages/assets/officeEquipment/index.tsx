@@ -44,7 +44,8 @@ const OfficeEquipment = () => {
         module,
         currentAsset,
         handleOfficeEquipmentTableData,
-        officeEquipmentTableData
+        officeEquipmentTableData,
+        determineOfficeAssetType
     } = OfficeEquipmentUtills();
 
     const fetchResources = async () => {
@@ -71,8 +72,7 @@ const OfficeEquipment = () => {
 
     useEffect(() => {
         if (assetTypes.length > 0) {
-            const assetType = assetTypes.find(assetType => assetType
-                .name.toLocaleLowerCase().indexOf("Office Equipment".toLocaleLowerCase()) !== -1) as IAssetType
+            const assetType = determineOfficeAssetType()
             setCurrentAssetType(assetType);
         }
     }, [assetTypes]);

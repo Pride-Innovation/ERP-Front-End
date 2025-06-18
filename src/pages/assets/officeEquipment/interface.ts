@@ -33,6 +33,7 @@ export interface IOfficeEquipment {
     image?: string | null;
     assetStatus?: IStatus | null;
     assetType?: IAssetType | null;
+    category?: string | null
 }
 
 export interface IOfficeEquipmentExtra {
@@ -65,6 +66,7 @@ export interface IOfficeEquipmentForm {
             assetDepreciationRate?: FieldError;
             description?: FieldError;
             image?: FieldError;
+            category?: FieldError;
         };
     };
     control: Control<IOfficeEquipment>;

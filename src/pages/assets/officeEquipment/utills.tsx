@@ -20,6 +20,7 @@ import { useNavigate } from "react-router";
 import moment from "moment";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../store";
+import { IAssetType } from "../../settings/assetTypes/interface";
 
 const OfficeEquipmentUtills = () => {
     const endPoint = 'assets';
@@ -36,13 +37,14 @@ const OfficeEquipmentUtills = () => {
         usersOptions: Array<IOptions>
         suppliersOptions: Array<IOptions>
         assetTypesOptions: Array<IOptions>,
-
+        commoditiesOptions: Array<IOptions>
     }>({
         assetsStatusesOptions: [],
         branchesOptions: [],
         usersOptions: [],
         assetTypesOptions: [],
-        suppliersOptions: []
+        suppliersOptions: [],
+        commoditiesOptions: []
     });
 
     const handleOpen = () => setOpen(true);
@@ -53,6 +55,7 @@ const OfficeEquipmentUtills = () => {
     const { branches } = useSelector((state: RootState) => state.BranchStore);
     const { users } = useSelector((state: RootState) => state.UserStore);
     const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore)
+    const { commodities } = useSelector((state: RootState) => state.CommodityStore)
     const navigate = useNavigate()
 
     useEffect(() => {
@@ -63,9 +66,11 @@ const OfficeEquipmentUtills = () => {
                 assetsStatusesOptions: statuses?.map(status => ({ label: status.name, value: status.id as number })) || [],
                 usersOptions: users?.map(user => ({ label: `${user.firstName} ${user.lastName}` as string, value: user.id as number })) || [],
                 suppliersOptions: suppliers?.map(supplier => ({ label: supplier.name, value: supplier?.id as number })) || [],
+                commoditiesOptions: commodities?.map(supplier => ({ label: supplier.name, value: supplier?.id as number })) || [],
+
             })
 
-    }, [statuses, users, assetTypes, branches, suppliers])
+    }, [statuses, users, assetTypes, branches, suppliers, commodities])
 
     const {
         id,
@@ -139,6 +144,12 @@ const OfficeEquipmentUtills = () => {
     }
 
     const formFields: Array<IFormData<IOfficeEquipment>> = [
+        {
+            value: "category",
+            label: 'Category',
+            type: "select",
+            options: optionsObject.commoditiesOptions
+        },
         {
             value: "assetName",
             label: 'Asset Name',
@@ -231,6 +242,11 @@ const OfficeEquipmentUtills = () => {
         return item as IOfficeEquipment;
     }
 
+    const determineOfficeAssetType = () => {
+        return assetTypes.find(assetType => assetType
+            .name.toLocaleLowerCase().indexOf("Office Equipment".toLocaleLowerCase()) !== -1) as IAssetType
+    }
+
     const handleOptionClicked = async (option: string | number, moduleID?: string | number) => {
         switch (option) {
             case crudStates.update:
@@ -266,7 +282,8 @@ const OfficeEquipmentUtills = () => {
             handleOptionClicked,
             currentAsset,
             officeEquipmentTableData,
-            handleOfficeEquipmentTableData
+            handleOfficeEquipmentTableData,
+            determineOfficeAssetType
         }
     )
 }
