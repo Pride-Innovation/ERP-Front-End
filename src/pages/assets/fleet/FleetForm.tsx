@@ -27,7 +27,10 @@ import StatusUtills from "../../settings/statuses/Utills";
 import UserUtils from "../../users/utils";
 import AssetTypeUtills from "../../settings/assetTypes/utills";
 import SupplierUtills from "../../settings/suppliers/Utills";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../store";
+import CommodityUtills from "../../settings/commodity/utills";
 
 const FleetForm = ({
     formState,
@@ -37,18 +40,37 @@ const FleetForm = ({
     sendingRequest,
 }: IFleetForm) => {
     const navigate = useNavigate();
-    const { formFields } = FleetUtills();
+    const [assetTypeId, setAssetTypeId] = useState<number | null>()
+    const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore);
+
+    const { formFields, determineFleetAssetType } = FleetUtills();
     const { fetchAllBranches } = BranchUtills();
     const { fetchAllStatuses } = StatusUtills();
     const { fetchAllUsers } = UserUtils();
     const { fetchAllAssetTypes } = AssetTypeUtills()
     const { fetchAllSuppliers } = SupplierUtills();
+    const { fetchAllCommodities } = CommodityUtills()
 
     useEffect(() => { fetchAllBranches() }, []);
     useEffect(() => { fetchAllStatuses() }, []);
     useEffect(() => { fetchAllUsers() }, []);
     useEffect(() => { fetchAllAssetTypes() }, []);
     useEffect(() => { fetchAllSuppliers() }, []);
+
+    useEffect(() => {
+        if (assetTypes.length > 0) {
+            const assetType = determineFleetAssetType();
+            if (assetType !== null) {
+                setAssetTypeId(assetType.id as number)
+            }
+        }
+    }, [assetTypes]);
+
+    useEffect(() => {
+        if (assetTypeId) {
+            fetchAllCommodities({ assetTypeId })
+        }
+    }, [assetTypeId]);
 
     return (
         <Box sx={{ width: "100%" }}>

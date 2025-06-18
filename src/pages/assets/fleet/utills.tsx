@@ -20,6 +20,7 @@ import { ROUTES } from "../../../core/routes/routes";
 import moment from "moment";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../store";
+import { IAssetType } from "../../settings/assetTypes/interface";
 
 const FleetUtills = () => {
     const endPoint = 'assets';
@@ -35,13 +36,15 @@ const FleetUtills = () => {
         usersOptions: Array<IOptions>
         suppliersOptions: Array<IOptions>
         assetTypesOptions: Array<IOptions>,
+        commoditiesOptions: Array<IOptions>
 
     }>({
         assetsStatusesOptions: [],
         branchesOptions: [],
         usersOptions: [],
         assetTypesOptions: [],
-        suppliersOptions: []
+        suppliersOptions: [],
+        commoditiesOptions: []
     });
 
     const handleOpen = () => setOpen(true);
@@ -52,6 +55,7 @@ const FleetUtills = () => {
     const { branches } = useSelector((state: RootState) => state.BranchStore);
     const { users } = useSelector((state: RootState) => state.UserStore);
     const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore)
+    const { commodities } = useSelector((state: RootState) => state.CommodityStore)
     const navigate = useNavigate()
 
 
@@ -63,9 +67,10 @@ const FleetUtills = () => {
                 assetsStatusesOptions: statuses?.map(status => ({ label: status.name, value: status.id as number })) || [],
                 usersOptions: users?.map(user => ({ label: `${user.firstName} ${user.lastName}` as string, value: user.id as number })) || [],
                 suppliersOptions: suppliers?.map(supplier => ({ label: supplier.name, value: supplier?.id as number })) || [],
+                commoditiesOptions: commodities?.map(supplier => ({ label: supplier.name, value: supplier?.id as number })) || [],
             })
 
-    }, [statuses, users, assetTypes, branches, suppliers])
+    }, [statuses, users, assetTypes, branches, suppliers, commodities])
 
     const {
         id,
@@ -142,6 +147,12 @@ const FleetUtills = () => {
 
 
     const formFields: Array<IFormData<IFleet>> = [
+        {
+            value: "category",
+            label: 'Category',
+            type: "select",
+            options: optionsObject.commoditiesOptions
+        },
         {
             value: "assetName",
             label: 'Asset Name',
@@ -239,6 +250,10 @@ const FleetUtills = () => {
         return item as IFleet;
     }
 
+    const determineFleetAssetType = () => {
+        return assetTypes.find(assetType => assetType
+            .name.toLocaleLowerCase().indexOf("Fleet".toLocaleLowerCase()) !== -1) as IAssetType
+    }
 
     const handleOptionClicked = (option: string | number, moduleID?: string | number) => {
         switch (option) {
@@ -270,7 +285,8 @@ const FleetUtills = () => {
             module,
             handleOptionClicked,
             fleetTableData,
-            handleFleetTableData
+            handleFleetTableData,
+            determineFleetAssetType
         }
     )
 }

@@ -19,7 +19,6 @@ import { useDispatch } from "react-redux";
 import { AppDispatch, RootState } from "../../../store";
 import { loadAllFleet } from "./slice";
 import { useSelector } from "react-redux";
-import { IAssetType } from "../../settings/assetTypes/interface";
 
 const Fleet = () => {
     const [loading, setLoading] = useState<boolean>(false);
@@ -39,7 +38,8 @@ const Fleet = () => {
         handleOptionClicked,
         handleFleetTableData,
         fleetTableData,
-        module
+        module,
+        determineFleetAssetType
     } = FleetUtills();
 
     const fetchResources = async () => {
@@ -66,8 +66,7 @@ const Fleet = () => {
 
     useEffect(() => {
         if (assetTypes.length > 0) {
-            const assetType = assetTypes.find(assetType => assetType
-                .name.toLocaleLowerCase().indexOf("Transport".toLocaleLowerCase()) !== -1) as IAssetType
+            const assetType = determineFleetAssetType()
             setCurrentAssetType(assetType);
         }
     }, [assetTypes]);

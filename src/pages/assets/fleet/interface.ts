@@ -34,6 +34,7 @@ export interface IFleet {
     image?: string | null;
     assetStatus?: IStatus | null;
     assetType?: IAssetType | null;
+    category?: string | null
 }
 
 
@@ -54,6 +55,7 @@ export interface IFleetForm {
             assetDepreciationRate?: FieldError;
             description?: FieldError;
             image?: FieldError;
+            category?: FieldError;
         };
     };
     control: Control<IFleet>;
