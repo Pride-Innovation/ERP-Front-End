@@ -47,7 +47,7 @@ const CreateInventory = () => {
                 stock: {
                     name: formData.name,
                     referenceNumber: formData.referenceNumber,
-                    LPONumber: formData.lponumber,
+                    LPONumber: formData.lpoNumber,
                     GRNNumber: generateReferenceNumber(),
                     totalCost: totalCostPrice,
                     balanceCost: totalPurchasePrice

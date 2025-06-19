@@ -9,5 +9,5 @@ import * as yup from 'yup';
 
 export const inventorySchema = yup.object().shape({
     name: yup.string().required('Name is required'),
-    lponumber: yup.string().required('LPO Number is required'),
+    lpoNumber: yup.string().required('LPO Number is required'),
 });

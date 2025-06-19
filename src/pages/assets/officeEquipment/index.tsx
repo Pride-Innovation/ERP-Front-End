@@ -23,7 +23,6 @@ import { AppDispatch, RootState } from "../../../store";
 import { IOfficeEquipmentsAxiosResponse } from "./interface";
 import { loadAllOfficeAssets } from "./slice";
 import { useSelector } from "react-redux";
-import { IAssetType } from "../../settings/assetTypes/interface";
 
 const OfficeEquipment = () => {
     const [loading, setLoading] = useState<boolean>(false);

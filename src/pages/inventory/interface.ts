@@ -29,7 +29,7 @@ interface IInventory {
     name: string;
     commodities?: Array<IStockCommodities> | null
     referenceNumber?: string | null;
-    lponumber: string;
+    lpoNumber: string;
     totalCost?: number | null;
     balanceCost?: number | null;
     branch?: IBranch | null;
@@ -40,7 +40,7 @@ interface IInventory {
     lastModified?: string | null;
     createdBy?: IUser | null;
     lastModifiedBy?: IUser | null;
-    grnnumber?: string | null;
+    grnNumber?: string | null;
 }
 
 interface IInventoryTableData {

@@ -88,10 +88,15 @@ const InventoryUtills = () => {
         },
     };
 
-    const fetchInventory = async () => {
+    const fetchInventory = async (params?: Record<string, any>) => {
         setLoading(true)
         try {
-            const response = await fetchRowsService({ pageNumber: 0, pageSize: 10, endPoint }) as IInventoriesAxiosResponse;
+            const response = await fetchRowsService({
+                pageNumber: 0,
+                pageSize: 10,
+                endPoint,
+                params
+            }) as IInventoriesAxiosResponse;
             if (response.status === 200) {
                 dispatch(loadAllInventory(response.data.content));
                 setCount(response.data.totalElements);
@@ -172,7 +177,7 @@ const InventoryUtills = () => {
             type: "input"
         },
         {
-            value: "lponumber",
+            value: "lpoNumber",
             label: 'LPO Number',
             type: "input"
         },

@@ -3,7 +3,7 @@ import { IOptions } from "../../components/tables/interface";
 
 interface ISelectedItem {
     item: string;
-    id: number
+    id: number | string
 }
 
 interface IAutocompleteContext {

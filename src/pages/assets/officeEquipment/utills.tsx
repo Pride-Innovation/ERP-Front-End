@@ -5,7 +5,7 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { IOptions, ITableHeader } from "../../../components/tables/interface";
 import { IFormData } from "../interface";
 import { IOfficeEquipment, IOfficeEquipmentTableData } from "./interface";
@@ -21,6 +21,8 @@ import moment from "moment";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../store";
 import { IAssetType } from "../../settings/assetTypes/interface";
+import { AutocompleteContext } from "../../../context/autocomplete";
+import InventoryUtills from "../../inventory/Utills";
 
 const OfficeEquipmentUtills = () => {
     const endPoint = 'assets';
@@ -30,6 +32,8 @@ const OfficeEquipmentUtills = () => {
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
     const [currentAsset, setCurrentAsset] = useState<IOfficeEquipment>({} as IOfficeEquipment);
     const [officeEquipmentTableData, setOfficeEquipmentTableData] = useState<IOfficeEquipmentTableData[]>([] as IOfficeEquipmentTableData[])
+    const { selectedItemDetails, value, inputValue } = useContext(AutocompleteContext)
+    const { fetchInventory } = InventoryUtills();
 
     const [optionsObject, setOptionsObject] = useState<{
         assetsStatusesOptions: Array<IOptions>,
@@ -70,7 +74,7 @@ const OfficeEquipmentUtills = () => {
                 usersOptions: users?.map(user => ({ label: `${user.firstName} ${user.lastName}` as string, value: user.id as number })) || [],
                 suppliersOptions: suppliers?.map(supplier => ({ label: supplier.name, value: supplier?.id as number })) || [],
                 commoditiesOptions: commodities?.map(commodity => ({ label: commodity.name, value: commodity?.id as number })) || [],
-                inventoryOptions: inventory?.map(invent => ({ label: invent.lponumber, value: invent?.lponumber as string })) || [],
+                inventoryOptions: inventory?.map(invent => ({ label: invent.lpoNumber, value: invent?.grnNumber as string })) || [],
             })
 
     }, [statuses, users, assetTypes, branches, suppliers, commodities, inventory])
@@ -147,6 +151,42 @@ const OfficeEquipmentUtills = () => {
         setOfficeEquipmentTableData(data);
 
     }
+
+    const searchStockByLPONumber = async (lpoNumber: string) => {
+        try {
+            const params = { lpoNumber }
+            await fetchInventory(params);
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    /**
+     * Determine that there is a search text.
+     * If the text is equal to an LPO number, then the 
+     * user has selected an existing Stock, but if the 
+     * text is not equal to an LPO number then the user is searching
+     */
+
+    useEffect(() => {
+        if (inputValue.length > 0
+            && selectedItemDetails.id
+            && value?.value
+            && (inputValue === selectedItemDetails.id)
+            && (inputValue === value?.value)
+        ) {
+            console.log(
+                "Selected Item",
+                inputValue,
+                selectedItemDetails,
+                value
+            )
+        }
+        else if (inputValue.length > 0) {
+            searchStockByLPONumber(inputValue)
+        }
+
+    }, [inputValue])
 
     const formFields: Array<IFormData<IOfficeEquipment>> = [
         {

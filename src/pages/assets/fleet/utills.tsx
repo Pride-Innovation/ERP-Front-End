@@ -5,7 +5,7 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { IOptions, ITableHeader } from "../../../components/tables/interface";
 import { fleetsMock } from "../../../mocks/fleet";
 import InfoIcon from '@mui/icons-material/Info';
@@ -21,6 +21,8 @@ import moment from "moment";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../store";
 import { IAssetType } from "../../settings/assetTypes/interface";
+import { AutocompleteContext } from "../../../context/autocomplete";
+import InventoryUtills from "../../inventory/Utills";
 
 const FleetUtills = () => {
     const endPoint = 'assets';
@@ -29,6 +31,8 @@ const FleetUtills = () => {
     const [open, setOpen] = useState<boolean>(false);
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
     const [fleetTableData, setFleetTableData] = useState<IFleetTableData[]>([] as IFleetTableData[])
+    const { selectedItemDetails, value, inputValue } = useContext(AutocompleteContext)
+    const { fetchInventory } = InventoryUtills();
 
     const [optionsObject, setOptionsObject] = useState<{
         assetsStatusesOptions: Array<IOptions>,
@@ -145,6 +149,42 @@ const FleetUtills = () => {
 
     }
 
+
+    const searchStockByLPONumber = async (lpoNumber: string) => {
+        try {
+            const params = { lpoNumber }
+            await fetchInventory(params);
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    /**
+     * Determine that there is a search text.
+     * If the text is equal to an LPO number, then the 
+     * user has selected an existing Stock, but if the 
+     * text is not equal to an LPO number then the user is searching
+     */
+
+    useEffect(() => {
+        if (inputValue.length > 0
+            && selectedItemDetails.id
+            && value?.value
+            && (inputValue === selectedItemDetails.id)
+            && (inputValue === value?.value)
+        ) {
+            console.log(
+                "Selected Item",
+                inputValue,
+                selectedItemDetails,
+                value
+            )
+        }
+        else if (inputValue.length > 0) {
+            searchStockByLPONumber(inputValue)
+        }
+
+    }, [inputValue])
 
     const formFields: Array<IFormData<IFleet>> = [
         {
