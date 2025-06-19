@@ -14,7 +14,7 @@ import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import { getTableHeaders } from "../../../components/tables/getTableHeaders";
 import { IFormData } from "../interface";
 import { IFleet, IFleetTableData } from "./interface";
-import { crudStates } from "../../../utils/constants";
+import { assetTypesStatusConstants, crudStates } from "../../../utils/constants";
 import { useNavigate } from "react-router";
 import { ROUTES } from "../../../core/routes/routes";
 import moment from "moment";
@@ -292,7 +292,8 @@ const FleetUtills = () => {
 
     const determineFleetAssetType = () => {
         return assetTypes.find(assetType => assetType
-            .name.toLocaleLowerCase().indexOf("Fleet".toLocaleLowerCase()) !== -1) as IAssetType
+            .name.toLocaleLowerCase()
+            .indexOf(assetTypesStatusConstants.fleet.toLocaleLowerCase()) !== -1) as IAssetType
     }
 
     const handleOptionClicked = (option: string | number, moduleID?: string | number) => {

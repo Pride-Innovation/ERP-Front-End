@@ -15,7 +15,7 @@ import { getTableHeaders } from "../../../components/tables/getTableHeaders";
 import { IFormData } from "../interface";
 import { IITEquipment, IITEquipmentTableData } from "./interface";
 import { itEquipmentMock } from "../../../mocks/itEquipment";
-import { crudStates } from "../../../utils/constants";
+import { assetTypesStatusConstants, crudStates } from "../../../utils/constants";
 import { useNavigate } from "react-router";
 import { ROUTES } from "../../../core/routes/routes";
 import { RootState } from "../../../store";
@@ -391,7 +391,8 @@ const ITEquipmentUtills = () => {
 
     const determineITAssetType = () => {
         return assetTypes.find(assetType => assetType
-            .name.toLocaleLowerCase().indexOf("IT Equipment".toLocaleLowerCase()) !== -1) as IAssetType
+            .name.toLocaleLowerCase()
+            .indexOf(assetTypesStatusConstants.itEquipment.toLocaleLowerCase()) !== -1) as IAssetType
     }
 
     return (

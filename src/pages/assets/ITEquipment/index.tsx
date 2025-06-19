@@ -20,7 +20,6 @@ import { useDispatch } from "react-redux"
 import { AppDispatch, RootState } from "../../../store"
 import { loadAllITAssets } from "./slice"
 import { useSelector } from "react-redux"
-import { IAssetType } from "../../settings/assetTypes/interface"
 import AssetUtills from "../Utills"
 
 const ITEquipment = () => {
@@ -115,6 +114,7 @@ const ITEquipment = () => {
                     columnHeaders={columnHeaders}
                     onCreationHandler={() => navigate(ROUTES.CREATE_ITEQUIPMENT)}
                     handleOptionClicked={handleOptionClicked}
+                    params={{ assetTypeId: currentAssetType.id }}
                 />
             </Grid>
         </>

@@ -14,12 +14,22 @@ import { AppDispatch } from "../../store";
 import { loadAllRequests } from "../../pages/request/assetRequest/slice";
 import { loadUsers } from "../../pages/users/slice";
 import { loadAllInventory } from "../../pages/inventory/slice";
+import AssetUtills from "../../pages/assets/Utills";
+import { assetTypesStatusConstants } from "../../utils/constants";
+import { loadAllFleet } from "../../pages/assets/fleet/slice";
+import { loadAllITAssets } from "../../pages/assets/ITEquipment/slice";
+import { loadAllOfficeAssets } from "../../pages/assets/officeEquipment/slice";
 
 
-const CustomTablePagination = ({ endPoint }: ICustomTablePagination) => {
+const CustomTablePagination = ({ endPoint, params }: ICustomTablePagination) => {
     const dispatch = useDispatch<AppDispatch>();
+    const { determineAssetTypeState } = AssetUtills()
 
-    const handleReduxStoreUpdate = (url: string, content: Array<Record<string, any>>) => {
+    const handleReduxStoreUpdate = (
+        url: string,
+        content: Array<Record<string, any>>,
+        params?: Record<string, any>
+    ) => {
         switch (url) {
             case "requests":
                 dispatch(loadAllRequests(content));
@@ -29,6 +39,20 @@ const CustomTablePagination = ({ endPoint }: ICustomTablePagination) => {
                 break;
             case "stocks":
                 dispatch(loadAllInventory(content))
+                break;
+            case "assets":
+                const assetType = determineAssetTypeState(params?.assetTypeId);
+
+                if (assetType.name === assetTypesStatusConstants.fleet) {
+                    dispatch(loadAllFleet(content))
+                }
+                if (assetType.name === assetTypesStatusConstants.itEquipment) {
+                    dispatch(loadAllITAssets(content))
+                }
+                if (assetType.name === assetTypesStatusConstants.officeEquipment) {
+                    dispatch(loadAllOfficeAssets(content))
+                }
+
                 break;
             default:
                 break
@@ -41,12 +65,13 @@ const CustomTablePagination = ({ endPoint }: ICustomTablePagination) => {
             const response = await fetchRowsService({
                 pageNumber: model.page,
                 pageSize: model.pageSize,
-                endPoint
+                endPoint,
+                params
             }) as IhandleTablePagination;
             const { content } = response.data
 
             if (content.length > 0) {
-                handleReduxStoreUpdate(endPoint, content)
+                handleReduxStoreUpdate(endPoint, content, params)
             }
 
         } catch (error) {

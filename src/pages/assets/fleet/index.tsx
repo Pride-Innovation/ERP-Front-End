@@ -115,6 +115,7 @@ const Fleet = () => {
                         onCreationHandler={() => navigate(ROUTES.CREATE_FLEET)}
                         handleOptionClicked={handleOptionClicked}
                         paginationMode='client'
+                        params={{ assetTypeId: currentAssetType.id }}
                     />
                 }
             </Grid>

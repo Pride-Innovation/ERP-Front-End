@@ -45,6 +45,7 @@ export interface ITableComponent {
     endPoint?: string;
     paginationMode?: 'server' | 'client',
     searchAction?: boolean;
+    params?: Record<string, any>
 }
 
 export interface ITableToolBar {
@@ -85,6 +86,7 @@ export interface ICustomTableFilterOperator {
 
 export interface ICustomTablePagination {
     endPoint: string;
+    params?: Record<string, any>
 }
 
 export type IhandleTablePagination = IUsersAxiosResponse | IRequestsAxiosResponse;

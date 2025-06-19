@@ -63,3 +63,14 @@ export const assetStatus: {
     disposed: "disposed",
     active: 'active'
 }
+
+
+export const assetTypesStatusConstants: {
+    itEquipment: string;
+    officeEquipment: string;
+    fleet: string
+} = {
+    itEquipment: "IT Equipment",
+    officeEquipment: "Office Equipment",
+    fleet: "Fleet"
+}

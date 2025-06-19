@@ -40,7 +40,8 @@ const TableComponent = ({
     loading = false,
     searchAction = false,
     endPoint = "users",
-    paginationMode = 'server'
+    paginationMode = 'server',
+    params
 }: ITableComponent) => {
     const [filteredRows, setFilteredRows] = useState<GridRowsProp>(rows);
     const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
@@ -54,7 +55,7 @@ const TableComponent = ({
     useEffect(() => setFilteredRows(rows), [rows]);
 
     const { handleTableFilter } = CustomTextFilterOperator({ rows: filteredRows, setFilteredRows, endPoint });
-    const { handleTablePagination } = CustomTablePagination({ endPoint });
+    const { handleTablePagination } = CustomTablePagination({ endPoint, params });
 
     const columns: GridColDef[] = columnHeaders.map((column) => ({
         field: `${column.label}`,

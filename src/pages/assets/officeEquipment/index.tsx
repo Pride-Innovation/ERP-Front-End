@@ -118,6 +118,7 @@ const OfficeEquipment = () => {
                         onCreationHandler={() => navigate(ROUTES.CREATE_OFFICE_EQUIPMENT)}
                         handleOptionClicked={handleOptionClicked}
                         paginationMode='client'
+                        params={{ assetTypeId: currentAssetType.id }}
                     />
                 }
             </Grid>

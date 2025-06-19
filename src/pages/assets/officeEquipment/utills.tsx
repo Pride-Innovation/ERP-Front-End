@@ -14,7 +14,7 @@ import InfoIcon from '@mui/icons-material/Info';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import { getTableHeaders } from "../../../components/tables/getTableHeaders";
-import { crudStates } from "../../../utils/constants";
+import { assetTypesStatusConstants, crudStates } from "../../../utils/constants";
 import { ROUTES } from "../../../core/routes/routes";
 import { useNavigate } from "react-router";
 import moment from "moment";
@@ -74,7 +74,7 @@ const OfficeEquipmentUtills = () => {
                 usersOptions: users?.map(user => ({ label: `${user.firstName} ${user.lastName}` as string, value: user.id as number })) || [],
                 suppliersOptions: suppliers?.map(supplier => ({ label: supplier.name, value: supplier?.id as number })) || [],
                 commoditiesOptions: commodities?.map(commodity => ({ label: commodity.name, value: commodity?.id as number })) || [],
-                inventoryOptions: inventory?.map(invent => ({ label: invent.lpoNumber, value: invent?.grnNumber as string })) || [],
+                inventoryOptions: inventory?.map(invent => ({ label: invent.lpoNumber, value: invent?.lpoNumber as string })) || [],
             })
 
     }, [statuses, users, assetTypes, branches, suppliers, commodities, inventory])
@@ -295,7 +295,8 @@ const OfficeEquipmentUtills = () => {
 
     const determineOfficeAssetType = () => {
         return assetTypes.find(assetType => assetType
-            .name.toLocaleLowerCase().indexOf("Office Equipment".toLocaleLowerCase()) !== -1) as IAssetType
+            .name.toLocaleLowerCase()
+            .indexOf(assetTypesStatusConstants.officeEquipment.toLocaleLowerCase()) !== -1) as IAssetType
     }
 
     const handleOptionClicked = async (option: string | number, moduleID?: string | number) => {
