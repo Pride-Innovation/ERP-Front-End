@@ -33,6 +33,7 @@ import { validateCommodityQuantities, validateInventoryItems } from "../../../..
 import InventoryTable from "../../../../components/forms/InventoryTable";
 import ButtonComponent from "../../../../components/forms/Button";
 import { useParams } from "react-router";
+import InventoryUtills from "../../../inventory/Utills";
 
 const initialData: RowData[] = [
     { id: 1, name: '', groupName: '', quantity: 0 },
@@ -45,6 +46,8 @@ const IssueRequestDetails = () => {
     const { rows, setRows } = useContext(RequestContext);
     const [request, setRequest] = useState<IRequest>({} as IRequest)
     const { id } = useParams<{ id: string }>();
+    const { fetchInventory } = InventoryUtills();
+
     const [requestCommodities, setRequestCommodities] = useState<
         Array<{ commodity: ICommodity; quantity: number }>
     >([]);
@@ -243,7 +246,7 @@ const IssueRequestDetails = () => {
                     >
                         <Grid xs={12} item container>
                             <Grid item xs={12}>
-                                <InventoryTable issue title="Issue Items"/>
+                                <InventoryTable issue title="Issue Items" />
                             </Grid>
                         </Grid>
                     </Card>

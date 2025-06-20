@@ -98,6 +98,8 @@ const FleetUtills = () => {
         netValueB,
         unitOfMeasure,
         image,
+        stock,
+        commodity,
         ...data
     } = fleetsMock[0];
 
@@ -135,6 +137,8 @@ const FleetUtills = () => {
                 netValueB,
                 unitOfMeasure,
                 image,
+                stock,
+                commodity,
                 ...fielsdata
             } = list[index];
 
