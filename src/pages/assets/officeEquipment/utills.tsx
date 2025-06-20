@@ -22,7 +22,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../../store";
 import { IAssetType } from "../../settings/assetTypes/interface";
 import { AutocompleteContext } from "../../../context/autocomplete";
-import InventoryUtills from "../../inventory/Utills";
+import AssetUtills from "../Utills";
 
 const OfficeEquipmentUtills = () => {
     const endPoint = 'assets';
@@ -32,8 +32,13 @@ const OfficeEquipmentUtills = () => {
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
     const [currentAsset, setCurrentAsset] = useState<IOfficeEquipment>({} as IOfficeEquipment);
     const [officeEquipmentTableData, setOfficeEquipmentTableData] = useState<IOfficeEquipmentTableData[]>([] as IOfficeEquipmentTableData[])
-    const { selectedItemDetails, value, inputValue } = useContext(AutocompleteContext)
-    const { fetchInventory } = InventoryUtills();
+    const { selectedItemDetails, value, inputValue, label } = useContext(AutocompleteContext)
+    const {
+        searchStockByLPONumber,
+        searchUserByName,
+        searchBranchByName,
+        searchSupplierByName
+    } = AssetUtills();
 
     const [optionsObject, setOptionsObject] = useState<{
         assetsStatusesOptions: Array<IOptions>,
@@ -156,15 +161,6 @@ const OfficeEquipmentUtills = () => {
 
     }
 
-    const searchStockByLPONumber = async (lpoNumber: string) => {
-        try {
-            const params = { lpoNumber }
-            await fetchInventory(params);
-        } catch (error) {
-            console.log(error)
-        }
-    }
-
     /**
      * Determine that there is a search text.
      * If the text is equal to an LPO number, then the 
@@ -187,7 +183,29 @@ const OfficeEquipmentUtills = () => {
             )
         }
         else if (inputValue.length > 0) {
-            searchStockByLPONumber(inputValue)
+
+            switch (label) {
+                case "LPO Number":
+                    searchStockByLPONumber(inputValue);
+                    break;
+                case "Branch":
+                    searchBranchByName(inputValue);
+                    break;
+                case "Supplier":
+                    searchSupplierByName(inputValue);
+                    break;
+                case "Assigned To":
+                    /**
+                     * Ensure that only first name 
+                     * TO DO -> Also filter by last name
+                     */
+                    if (inputValue.split(" ").length < 2) {
+                        searchUserByName(inputValue);
+                    }
+                    break;
+                default:
+                    break;
+            }
         }
 
     }, [inputValue])
@@ -239,13 +257,13 @@ const OfficeEquipmentUtills = () => {
         {
             value: "assignedTo",
             label: 'Assigned To',
-            type: "select",
+            type: "autocomplete",
             options: optionsObject.usersOptions
         },
         {
             value: "branch",
             label: 'Branch',
-            type: "select",
+            type: "autocomplete",
             options: optionsObject.branchesOptions
         },
         {
@@ -281,7 +299,7 @@ const OfficeEquipmentUtills = () => {
         {
             value: "supplier",
             label: 'Supplier',
-            type: "select",
+            type: "autocomplete",
             options: optionsObject.suppliersOptions
         },
         {
