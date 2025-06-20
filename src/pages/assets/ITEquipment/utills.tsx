@@ -38,7 +38,7 @@ const ITEquipmentUtills = () => {
         searchUserByName,
         searchBranchByName,
         searchSupplierByName
-    } = AssetUtills()
+    } = AssetUtills();
 
     const [optionsObject, setOptionsObject] = useState<{
         assetsStatusesOptions: Array<IOptions>,
@@ -249,9 +249,12 @@ const ITEquipmentUtills = () => {
                     searchSupplierByName(inputValue);
                     break;
                 case "Assigned To":
-                    const firstName = inputValue.split(" ")[0];
-                    if (firstName) {
-                        searchUserByName(firstName);
+                    /**
+                     * Ensure that only first name 
+                     * TO DO -> Also filter by last name
+                     */
+                    if (inputValue.split(" ").length < 2) {
+                        searchUserByName(inputValue);
                     }
                     break;
                 default:

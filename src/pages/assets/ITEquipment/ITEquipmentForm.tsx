@@ -66,7 +66,10 @@ const ITEquipmentForm = ({
 
     useEffect(() => { fetchAllBranches() }, []);
     useEffect(() => { fetchAllStatuses() }, []);
-    useEffect(() => { fetchAllUsers() }, []);
+    useEffect(() => { 
+        console.log("IT Equipment Form")
+        fetchAllUsers() 
+    }, []);
     useEffect(() => { fetchAllSuppliers() }, []);
     useEffect(() => { fetchAllAssetTypes() }, []);
     useEffect(() => { fetchInventory() }, []);

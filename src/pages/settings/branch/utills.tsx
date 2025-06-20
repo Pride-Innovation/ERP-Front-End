@@ -5,7 +5,7 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { useContext, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import { IFormData } from "../../assets/interface";
 import { useDispatch } from "react-redux";
 import { AppDispatch, RootState } from "../../../store";
@@ -13,8 +13,6 @@ import { addBranch, loadBranches, removeBranch, updateBranch } from "./slice";
 import { IBranch, IBranchesAxiosResponse } from "./interface";
 import { useSelector } from "react-redux";
 import { IOptions } from "../../../components/tables/interface";
-import UserUtils from "../../users/utils";
-import { AutocompleteContext } from "../../../context/autocomplete";
 import { fetchRowsService } from "../../../core/apis/globalService";
 
 const BranchUtills = () => {
@@ -36,9 +34,6 @@ const BranchUtills = () => {
     const { regions } = useSelector((state: RootState) => state.RegionStore);
     const { districts } = useSelector((state: RootState) => state.DistrictStore);
 
-    const { value, inputValue, setInputValue } = useContext(AutocompleteContext)
-    const { fetchAllUsers } = UserUtils();
-
     const fetchAllBranches = async (params?: Record<string, any>) => {
         setLoading(true)
         try {
@@ -56,21 +51,6 @@ const BranchUtills = () => {
         }
         setLoading(false)
     }
-
-
-    const filterAllUsers = async () => {
-        if (!value && inputValue.length > 0) {
-            await fetchAllUsers({ first_name: inputValue });
-            setInputValue("")
-        }
-        return;
-    }
-
-    useEffect(() => {
-        if (inputValue.length > 0) { filterAllUsers() }
-    }, [inputValue])
-
-
 
     useEffect(() => {
         if (users?.length > 0) {
