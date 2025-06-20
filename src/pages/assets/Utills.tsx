@@ -14,10 +14,18 @@ import { useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store";
 import { assetTypesStatusConstants } from "../../utils/constants";
+import InventoryUtills from "../inventory/Utills";
+import UserUtils from "../users/utils";
+import BranchUtills from "../settings/branch/utills";
+import SupplierUtills from "../settings/suppliers/Utills";
 
 const AssetUtills = () => {
     const [currentAssetType, setCurrentAssetType] = useState<IAssetType>({} as IAssetType);
     const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore);
+    const { fetchInventory } = InventoryUtills();
+    const { fetchAllUsers } = UserUtils();
+    const { fetchAllBranches } = BranchUtills();
+    const { fetchAllSuppliers } = SupplierUtills();
 
     const determineAssetTypeByAssetName = (assetType: IAssetType) => {
 
@@ -75,11 +83,54 @@ const AssetUtills = () => {
         return assetTypes.find(typ => typ.id === id) as IAssetType
     }
 
+
+    const searchStockByLPONumber = async (lpoNumber: string) => {
+        try {
+            const params = { lpoNumber }
+            await fetchInventory(params);
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+
+    const searchUserByName = async (firstName: string) => {
+        try {
+            const params = { firstName }
+            await fetchAllUsers(params);
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+
+    const searchBranchByName = async (name: string) => {
+        try {
+            const params = { name }
+            await fetchAllBranches(params);
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    const searchSupplierByName = async (name: string) => {
+        try {
+            const params = { name }
+            await fetchAllSuppliers(params);
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
     return ({
         determineAssetTypeByAssetName,
         currentAssetType,
         setCurrentAssetType,
-        determineAssetTypeState
+        determineAssetTypeState,
+        searchStockByLPONumber,
+        searchUserByName,
+        searchBranchByName,
+        searchSupplierByName
     })
 }
 

@@ -30,12 +30,16 @@ const SupplierUtills = () => {
         commodityOptions: []
     });
 
-    const fetchAllSuppliers = async () => {
+    const fetchAllSuppliers = async (params?: Record<string, any>) => {
         setLoading(true)
         try {
-            const response = await fetchRowsService({ pageNumber: 0, pageSize: 10, endPoint }) as ISuppliersAxiosResponse;
+            const response = await fetchRowsService({
+                pageNumber: 0,
+                pageSize: 10,
+                endPoint,
+                params
+            }) as ISuppliersAxiosResponse;
             if (response.status === 200) {
-                console.log(response.data.content, "before dispatch!!")
                 dispatch(loadSuppliers(response.data.content))
             }
         } catch (error) {

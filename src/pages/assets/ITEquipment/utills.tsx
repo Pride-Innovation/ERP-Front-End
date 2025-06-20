@@ -22,7 +22,7 @@ import { RootState } from "../../../store";
 import moment from "moment";
 import { IAssetType } from "../../settings/assetTypes/interface";
 import { AutocompleteContext } from "../../../context/autocomplete";
-import InventoryUtills from "../../inventory/Utills";
+import AssetUtills from "../Utills";
 
 const ITEquipmentUtills = () => {
     const endPoint = 'assets';
@@ -32,8 +32,13 @@ const ITEquipmentUtills = () => {
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
     const [currentAsset, setCurrentAsset] = useState<IITEquipment>({} as IITEquipment);
     const [iTEquipmentTableData, setITEquipmentTableData] = useState<IITEquipmentTableData[]>([] as IITEquipmentTableData[])
-    const { selectedItemDetails, value, inputValue } = useContext(AutocompleteContext)
-    const { fetchInventory } = InventoryUtills();
+    const { selectedItemDetails, value, inputValue, label } = useContext(AutocompleteContext)
+    const {
+        searchStockByLPONumber,
+        searchUserByName,
+        searchBranchByName,
+        searchSupplierByName
+    } = AssetUtills()
 
     const [optionsObject, setOptionsObject] = useState<{
         assetsStatusesOptions: Array<IOptions>,
@@ -60,6 +65,7 @@ const ITEquipmentUtills = () => {
     const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore)
     const { commodities } = useSelector((state: RootState) => state.CommodityStore)
     const { inventory } = useSelector((state: RootState) => state.InventoryStore)
+
     const navigate = useNavigate()
 
     useEffect(() => {
@@ -208,14 +214,6 @@ const ITEquipmentUtills = () => {
         }
     }
 
-    const searchStockByLPONumber = async (lpoNumber: string) => {
-        try {
-            const params = { lpoNumber }
-            await fetchInventory(params);
-        } catch (error) {
-            console.log(error)
-        }
-    }
 
     /**
      * Determine that there is a search text.
@@ -239,7 +237,26 @@ const ITEquipmentUtills = () => {
             )
         }
         else if (inputValue.length > 0) {
-            searchStockByLPONumber(inputValue)
+
+            switch (label) {
+                case "LPO Number":
+                    searchStockByLPONumber(inputValue);
+                    break;
+                case "Branch":
+                    searchBranchByName(inputValue);
+                    break;
+                case "Supplier":
+                    searchSupplierByName(inputValue);
+                    break;
+                case "Assigned To":
+                    const firstName = inputValue.split(" ")[0];
+                    if (firstName) {
+                        searchUserByName(firstName);
+                    }
+                    break;
+                default:
+                    break;
+            }
         }
 
     }, [inputValue])
@@ -302,13 +319,13 @@ const ITEquipmentUtills = () => {
         {
             value: "assignedTo",
             label: 'Assigned To',
-            type: "select",
+            type: "autocomplete",
             options: optionsObject.usersOptions
         },
         {
             value: "branch",
             label: 'Branch',
-            type: "select",
+            type: "autocomplete",
             options: optionsObject.branchesOptions
         },
         {
@@ -344,7 +361,7 @@ const ITEquipmentUtills = () => {
         {
             value: "supplier",
             label: 'Supplier',
-            type: "select",
+            type: "autocomplete",
             options: optionsObject.suppliersOptions
         },
         {

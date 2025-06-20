@@ -37,11 +37,12 @@ const AutocompleteComponent = ({
     const [localInput, setLocalInput] = useState('');
     const debouncedInput = useDebounce(localInput, 500);
 
-    const { setValue: setGlobalValue, setInputValue, setSelectedItemDetails } = useContext(AutocompleteContext);
+    const { setValue: setGlobalValue, setInputValue, setSelectedItemDetails, setLabel } = useContext(AutocompleteContext);
 
     // Sync debounced input value to context for filtering/searching
     useEffect(() => {
         setInputValue(debouncedInput);
+        setLabel(label)
     }, [debouncedInput, setInputValue]);
 
     // Sync form value to Autocomplete's local state

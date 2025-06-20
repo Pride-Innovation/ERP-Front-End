@@ -39,10 +39,15 @@ const BranchUtills = () => {
     const { value, inputValue, setInputValue } = useContext(AutocompleteContext)
     const { fetchAllUsers } = UserUtils();
 
-    const fetchAllBranches = async () => {
+    const fetchAllBranches = async (params?: Record<string, any>) => {
         setLoading(true)
         try {
-            const response = await fetchRowsService({pageNumber: 0, pageSize: 10, endPoint}) as IBranchesAxiosResponse;
+            const response = await fetchRowsService({
+                pageNumber: 0,
+                pageSize: 10,
+                endPoint,
+                params
+            }) as IBranchesAxiosResponse;
             if (response.status === 200) {
                 dispatch(loadBranches(response?.data?.content))
             }
