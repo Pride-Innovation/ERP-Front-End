@@ -5,7 +5,12 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { Control, FieldError, FormState, UseFormRegister } from "react-hook-form";
+import {
+    Control,
+    FieldError,
+    FormState,
+    UseFormRegister
+} from "react-hook-form";
 import { ISupplier } from "../../settings/suppliers/interface";
 import { IUser } from "../../users/interface";
 import { IBranch } from "../../settings/branch/interface";
