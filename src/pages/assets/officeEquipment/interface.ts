@@ -12,6 +12,8 @@ import { IBranch } from "../../settings/branch/interface";
 import { IStatus } from "../../settings/statuses/interface";
 import { IAssetType } from "../../settings/assetTypes/interface";
 import { IAxiosResponse, IFetchDataRequest } from "../../../core/apis/interface";
+import { ICommodity } from "../../settings/commodity/interface";
+import { IInventory } from "../../inventory/interface";
 
 export interface IOfficeEquipment {
     id?: string | number;
@@ -35,6 +37,8 @@ export interface IOfficeEquipment {
     assetType?: IAssetType | null;
     category?: string | null;
     lpoNumber: string;
+    commodity?: ICommodity | null;
+    stock?: IInventory | null
 }
 
 export interface IOfficeEquipmentForm {

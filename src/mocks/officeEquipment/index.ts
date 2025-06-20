@@ -6,6 +6,7 @@ Managing Director
 */
 
 import { IOfficeEquipment } from "../../pages/assets/officeEquipment/interface";
+import { inventoryMock } from "../inventory";
 import { suppliersMock } from "../settings";
 import { statusMocks } from "../status";
 import { usersMock } from "../users";
@@ -28,6 +29,8 @@ export const officeEquipmentMock: IOfficeEquipment[] = [
         description: "Core i5, 8GB RAM, 256GB SSD",
         image: "url_to_image_1",
         assignedTo: usersMock[0],
-        lpoNumber: ""
+        lpoNumber: "",
+        stock: inventoryMock[0],
+        commodity: null
     }
 ];

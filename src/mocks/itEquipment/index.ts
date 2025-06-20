@@ -7,6 +7,7 @@ Managing Director
 
 import { IITEquipment } from "../../pages/assets/ITEquipment/interface";
 import { branchesMock } from "../branch";
+import { inventoryMock } from "../inventory";
 import { suppliersMock } from "../settings";
 import { statusMocks } from "../status";
 import { usersMock } from "../users";
@@ -39,6 +40,8 @@ export const itEquipmentMock: IITEquipment[] = [
         assetStatus: statusMocks[0],
         assignedTo: usersMock[0],
         branch: branchesMock[0],
-        lpoNumber: "LPONUMB"
+        lpoNumber: "LPONUMB",
+        stock: inventoryMock[0],
+        commodity: null
     }
 ]

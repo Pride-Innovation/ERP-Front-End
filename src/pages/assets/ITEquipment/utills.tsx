@@ -112,6 +112,8 @@ const ITEquipmentUtills = () => {
         netValueB,
         unitOfMeasure,
         lpoNumber,
+        stock,
+        commodity,
         image,
         ...data
     } = itEquipmentMock[0];
@@ -158,6 +160,8 @@ const ITEquipmentUtills = () => {
                 netValueB,
                 unitOfMeasure,
                 lpoNumber,
+                stock,
+                commodity,
                 image,
                 ...fielsdata
             } = list[index];

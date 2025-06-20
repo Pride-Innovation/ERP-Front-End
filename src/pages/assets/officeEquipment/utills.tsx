@@ -92,6 +92,8 @@ const OfficeEquipmentUtills = () => {
         netValueB,
         unitOfMeasure,
         lpoNumber,
+        stock,
+        commodity,
         image,
         ...data
     } = officeEquipmentMock[0];
@@ -129,6 +131,8 @@ const OfficeEquipmentUtills = () => {
                 netValueB,
                 unitOfMeasure,
                 lpoNumber,
+                stock,
+                commodity,
                 image,
                 ...fielsdata
             } = list[index];

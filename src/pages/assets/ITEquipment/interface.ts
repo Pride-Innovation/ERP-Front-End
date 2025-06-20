@@ -13,6 +13,8 @@ import { IUser } from "../../users/interface";
 import { ISupplier } from "../../settings/suppliers/interface";
 import { IStatus } from "../../settings/statuses/interface";
 import { IAxiosResponse, IFetchDataRequest } from "../../../core/apis/interface";
+import { ICommodity } from "../../settings/commodity/interface";
+import { IInventory } from "../../inventory/interface";
 
 export interface IITEquipment {
     id?: string | number;
@@ -44,6 +46,8 @@ export interface IITEquipment {
     assetType?: IAssetType | null;
     category?: string | null;
     lpoNumber: string;
+    commodity?: ICommodity | null;
+    stock?: IInventory | null
 }
 
 export interface IITEquipmentForm {

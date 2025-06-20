@@ -114,7 +114,7 @@ const Fleet = () => {
                         columnHeaders={columnHeaders}
                         onCreationHandler={() => navigate(ROUTES.CREATE_FLEET)}
                         handleOptionClicked={handleOptionClicked}
-                        paginationMode='client'
+                        paginationMode='server'
                         params={{ assetTypeId: currentAssetType.id }}
                     />
                 }

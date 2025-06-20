@@ -117,7 +117,7 @@ const OfficeEquipment = () => {
                         columnHeaders={columnHeaders}
                         onCreationHandler={() => navigate(ROUTES.CREATE_OFFICE_EQUIPMENT)}
                         handleOptionClicked={handleOptionClicked}
-                        paginationMode='client'
+                        paginationMode='server'
                         params={{ assetTypeId: currentAssetType.id }}
                     />
                 }
