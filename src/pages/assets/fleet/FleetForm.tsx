@@ -31,6 +31,7 @@ import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../store";
 import CommodityUtills from "../../settings/commodity/utills";
+import InventoryUtills from "../../inventory/Utills";
 
 const FleetForm = ({
     formState,
@@ -50,12 +51,14 @@ const FleetForm = ({
     const { fetchAllAssetTypes } = AssetTypeUtills()
     const { fetchAllSuppliers } = SupplierUtills();
     const { fetchAllCommodities } = CommodityUtills()
+    const { fetchInventory } = InventoryUtills()
 
     useEffect(() => { fetchAllBranches() }, []);
     useEffect(() => { fetchAllStatuses() }, []);
     useEffect(() => { fetchAllUsers() }, []);
     useEffect(() => { fetchAllAssetTypes() }, []);
     useEffect(() => { fetchAllSuppliers() }, []);
+    useEffect(() => { fetchInventory() }, []);
 
     useEffect(() => {
         if (assetTypes.length > 0) {

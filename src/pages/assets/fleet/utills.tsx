@@ -22,7 +22,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../../store";
 import { IAssetType } from "../../settings/assetTypes/interface";
 import { AutocompleteContext } from "../../../context/autocomplete";
-import InventoryUtills from "../../inventory/Utills";
+import AssetUtills from "../Utills";
 
 const FleetUtills = () => {
     const endPoint = 'assets';
@@ -31,8 +31,14 @@ const FleetUtills = () => {
     const [open, setOpen] = useState<boolean>(false);
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
     const [fleetTableData, setFleetTableData] = useState<IFleetTableData[]>([] as IFleetTableData[])
-    const { selectedItemDetails, value, inputValue } = useContext(AutocompleteContext)
-    const { fetchInventory } = InventoryUtills();
+    const { selectedItemDetails, value, inputValue, label } = useContext(AutocompleteContext)
+    const {
+        searchStockByLPONumber,
+        searchUserByName,
+        searchBranchByName,
+        searchSupplierByName
+    } = AssetUtills();
+
 
     const [optionsObject, setOptionsObject] = useState<{
         assetsStatusesOptions: Array<IOptions>,
@@ -41,14 +47,15 @@ const FleetUtills = () => {
         suppliersOptions: Array<IOptions>
         assetTypesOptions: Array<IOptions>,
         commoditiesOptions: Array<IOptions>
-
+        inventoryOptions: Array<IOptions>
     }>({
         assetsStatusesOptions: [],
         branchesOptions: [],
         usersOptions: [],
         assetTypesOptions: [],
         suppliersOptions: [],
-        commoditiesOptions: []
+        commoditiesOptions: [],
+        inventoryOptions: []
     });
 
     const handleOpen = () => setOpen(true);
@@ -60,6 +67,7 @@ const FleetUtills = () => {
     const { users } = useSelector((state: RootState) => state.UserStore);
     const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore)
     const { commodities } = useSelector((state: RootState) => state.CommodityStore)
+    const { inventory } = useSelector((state: RootState) => state.InventoryStore)
     const navigate = useNavigate()
 
 
@@ -72,9 +80,10 @@ const FleetUtills = () => {
                 usersOptions: users?.map(user => ({ label: `${user.firstName} ${user.lastName}` as string, value: user.id as number })) || [],
                 suppliersOptions: suppliers?.map(supplier => ({ label: supplier.name, value: supplier?.id as number })) || [],
                 commoditiesOptions: commodities?.map(supplier => ({ label: supplier.name, value: supplier?.id as number })) || [],
+                inventoryOptions: inventory?.map(invent => ({ label: invent.lpoNumber, value: invent?.lpoNumber as string })) || [],
             })
 
-    }, [statuses, users, assetTypes, branches, suppliers, commodities])
+    }, [statuses, users, assetTypes, branches, suppliers, commodities, inventory])
 
     const {
         id,
@@ -150,15 +159,6 @@ const FleetUtills = () => {
     }
 
 
-    const searchStockByLPONumber = async (lpoNumber: string) => {
-        try {
-            const params = { lpoNumber }
-            await fetchInventory(params);
-        } catch (error) {
-            console.log(error)
-        }
-    }
-
     /**
      * Determine that there is a search text.
      * If the text is equal to an LPO number, then the 
@@ -181,7 +181,29 @@ const FleetUtills = () => {
             )
         }
         else if (inputValue.length > 0) {
-            searchStockByLPONumber(inputValue)
+
+            switch (label) {
+                case "LPO Number":
+                    searchStockByLPONumber(inputValue);
+                    break;
+                case "Branch":
+                    searchBranchByName(inputValue);
+                    break;
+                case "Supplier":
+                    searchSupplierByName(inputValue);
+                    break;
+                case "Assigned To":
+                    /**
+                     * Ensure that only first name 
+                     * TO DO -> Also filter by last name
+                     */
+                    if (inputValue.split(" ").length < 2) {
+                        searchUserByName(inputValue);
+                    }
+                    break;
+                default:
+                    break;
+            }
         }
 
     }, [inputValue])
@@ -233,13 +255,13 @@ const FleetUtills = () => {
         {
             value: "assignedTo",
             label: 'Assigned To',
-            type: "select",
+            type: "autocomplete",
             options: optionsObject.usersOptions
         },
         {
             value: "branch",
             label: 'Branch',
-            type: "select",
+            type: "autocomplete",
             options: optionsObject.branchesOptions
         },
         {
@@ -280,8 +302,14 @@ const FleetUtills = () => {
         {
             value: "supplier",
             label: 'Supplier',
-            type: "select",
+            type: "autocomplete",
             options: optionsObject.suppliersOptions
+        },
+        {
+            value: "lpoNumber",
+            label: 'LPO Number',
+            type: "autocomplete",
+            options: optionsObject.inventoryOptions
         }
     ]
 

@@ -23,6 +23,7 @@ export const fleetSchema = yup.object().shape({
     purchaseCost: yup.string().required('Purchase cost is required'),
     costOfTheAsset: yup.string().required('Cost of asset is required'),
     netValueB: yup.string().required('Net value is required'),
+    lpoNumber: yup.string().required('LPO Number is required'),
     assetDepreciationRate: yup.string().nullable().optional(),
     description: yup.string().nullable().optional(),
     supplier: yup.mixed<ISupplier>().nullable().optional(),

@@ -7,6 +7,7 @@ Managing Director
 
 import { IFleet } from "../../pages/assets/fleet/interface";
 import { branchesMock } from "../branch";
+import { inventoryMock } from "../inventory";
 import { suppliersMock } from "../settings";
 import { statusMocks } from "../status";
 import { usersMock } from "../users";
@@ -29,6 +30,9 @@ export const fleetsMock: IFleet[] = [
         image: "forklift.png",
         assetStatus: statusMocks[0],
         assignedTo: usersMock[0],
-        branch: branchesMock[0]
+        branch: branchesMock[0],
+        lpoNumber: "",
+        stock: inventoryMock[0],
+        commodity: null
     }
 ];
