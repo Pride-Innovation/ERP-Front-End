@@ -42,11 +42,13 @@ import MonetizationOnOutlinedIcon from '@mui/icons-material/MonetizationOnOutlin
 import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
 import PriceTotals from './priceTotals';
 import { formatNumberWithCommas } from './helper';
+import AppRegistrationOutlinedIcon from '@mui/icons-material/AppRegistrationOutlined';
 
 const StockItems = () => {
     const { fetchAllCommodities } = CommodityUtills()
     const [itemOptions, setItemOptions] = useState<{ name: string; groupName: string }[]>([]);
     const { stockRows, setStockRows } = useContext(RequestContext);
+    const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore);
 
     const { commodities } = useSelector((state: RootState) => state.CommodityStore);
 
@@ -161,34 +163,39 @@ const StockItems = () => {
                                 backgroundColor: '#CACACA',
                             }}
                         >
-                            {[{
-                                name: 'Name',
-                                icon: <FeedOutlinedIcon sx={{ fontSize: "12px", mr: "5px" }} />
-                            },
-                            {
-                                name: "Unit Measure",
-                                icon: <ScaleOutlinedIcon sx={{ fontSize: "12px", mr: "5px" }} />
-                            },
-                            {
-                                name: "Ordered Qty",
-                                icon: <EighteenMpOutlinedIcon sx={{ fontSize: "12px", mr: "5px" }} />
-                            },
-                            {
-                                name: "Delivered Qty",
-                                icon: <ShoppingCartOutlinedIcon sx={{ fontSize: "12px", mr: "5px" }} />
-                            },
-                            {
-                                name: "Cost Price",
-                                icon: <AttachMoneyIcon sx={{ fontSize: "12px", mr: "5px" }} />
-                            },
-                            {
-                                name: "Purchase Price",
-                                icon: <MonetizationOnOutlinedIcon sx={{ fontSize: "12px", mr: "5px" }} />
-                            },
-                            {
-                                name: "Remove",
-                                icon: <RemoveCircleOutlineOutlinedIcon sx={{ fontSize: "12px", mr: "5px" }} />
-                            }
+                            {[
+                                {
+                                    name: 'Asset Type',
+                                    icon: <AppRegistrationOutlinedIcon sx={{ fontSize: "12px", mr: "5px" }} />
+                                },
+                                {
+                                    name: 'Name',
+                                    icon: <FeedOutlinedIcon sx={{ fontSize: "12px", mr: "5px" }} />
+                                },
+                                {
+                                    name: "Unit Measure",
+                                    icon: <ScaleOutlinedIcon sx={{ fontSize: "12px", mr: "5px" }} />
+                                },
+                                {
+                                    name: "Ordered Qty",
+                                    icon: <EighteenMpOutlinedIcon sx={{ fontSize: "12px", mr: "5px" }} />
+                                },
+                                {
+                                    name: "Delivered Qty",
+                                    icon: <ShoppingCartOutlinedIcon sx={{ fontSize: "12px", mr: "5px" }} />
+                                },
+                                {
+                                    name: "Cost Price",
+                                    icon: <AttachMoneyIcon sx={{ fontSize: "12px", mr: "5px" }} />
+                                },
+                                {
+                                    name: "Purchase Price",
+                                    icon: <MonetizationOnOutlinedIcon sx={{ fontSize: "12px", mr: "5px" }} />
+                                },
+                                {
+                                    name: "Remove",
+                                    icon: <RemoveCircleOutlineOutlinedIcon sx={{ fontSize: "12px", mr: "5px" }} />
+                                }
                             ].map((header, idx) => (
                                 <TableCell
                                     key={header?.name}
@@ -224,6 +231,37 @@ const StockItems = () => {
                                     '&:last-child td, &:last-child th': { border: 0 },
                                 }}
                             >
+                                <TableCell sx={{ borderBottom: 'none', px: 2, py: 1 }}>
+                                    <Select
+                                        fullWidth
+                                        value={row.name}
+                                        onChange={(e) => handleNameChange(row.id, e.target.value)}
+                                        displayEmpty
+                                        size="small"
+                                        variant="standard"
+                                        disableUnderline
+                                        sx={{
+                                            fontSize: 14,
+                                            fontWeight: 400,
+                                            color: row.name ? 'text.primary' : 'text.secondary',
+                                            '& .MuiSelect-select': {
+                                                padding: '8px 12px',
+                                            },
+                                            '& .MuiSvgIcon-root': {
+                                                color: '#999',
+                                            },
+                                        }}
+                                    >
+                                        <MenuItem value="" disabled>
+                                            <em>Select Type</em>
+                                        </MenuItem>
+                                        {assetTypes.map((assetTyp) => (
+                                            <MenuItem key={assetTyp.id} value={assetTyp.name}>
+                                                {assetTyp.name}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </TableCell>
                                 <TableCell sx={{ borderBottom: 'none', px: 2, py: 1 }}>
                                     <Select
                                         fullWidth

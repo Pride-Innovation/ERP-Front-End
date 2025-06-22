@@ -19,6 +19,7 @@ import ButtonComponent from "../../components/forms/Button";
 import SupplierUtills from "../settings/suppliers/Utills";
 import { useEffect } from "react";
 import StockItems from "../../components/stockForm/StockItems";
+import AssetTypeUtills from "../settings/assetTypes/utills";
 
 const InventoryForm = ({
     register,
@@ -30,7 +31,10 @@ const InventoryForm = ({
 }: IInventoryForm) => {
     const { formFields } = InventoryUtills();
     const { fetchAllSuppliers } = SupplierUtills();
+    const { fetchAllAssetTypes } = AssetTypeUtills();
+    
     useEffect(() => { fetchAllSuppliers() }, []);
+    useEffect(() => { fetchAllAssetTypes() }, []);
 
     return (
         <Grid container spacing={3}>
