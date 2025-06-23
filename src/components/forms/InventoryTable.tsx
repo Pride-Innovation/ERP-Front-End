@@ -38,10 +38,12 @@ import RemoveCircleOutlineOutlinedIcon from '@mui/icons-material/RemoveCircleOut
 import EighteenMpOutlinedIcon from '@mui/icons-material/EighteenMpOutlined';
 import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined';
 import AppRegistrationOutlinedIcon from '@mui/icons-material/AppRegistrationOutlined';
+import FilterEngravedNumbers from './filterEngravedNumbers';
 
 const InventoryTable = ({ issue, title }: { issue?: boolean, title: string }) => {
     const { fetchAllCommodities } = CommodityUtills()
     const [itemOptions, setItemOptions] = useState<{ name: string; groupName: string, assetTypeId: number | string }[]>([]);
+    const [engravedNumbers, setEngravedNumbers] = useState<string[]>([] as string[])
     const { rows, setRows, assetType } = useContext(RequestContext);
     const theme = useTheme();
     const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore);
@@ -134,8 +136,11 @@ const InventoryTable = ({ issue, title }: { issue?: boolean, title: string }) =>
     };
 
     useEffect(() => {
-        console.log(itemOptions, rows, "rows!!")
-    }, [itemOptions])
+        if (rows.length > 0
+            && rows[0].groupName.length > 0) {
+            console.log(rows)
+        }
+    }, [rows])
 
 
     return (
@@ -392,59 +397,7 @@ const InventoryTable = ({ issue, title }: { issue?: boolean, title: string }) =>
 
                                 {/* Handle Engraved numbers */}
 
-                                {issue && <TableCell sx={{ borderBottom: 'none', px: 2, py: 1 }}>
-                                    <Select
-                                        multiple
-                                        displayEmpty
-                                        fullWidth
-                                        variant="standard"
-                                        disableUnderline
-                                        value={row.selectedOptions || []}
-                                        onChange={(e) =>
-                                            handleSelectChange(row.id, typeof e.target.value === 'string' ? e.target.value.split(',') : e.target.value)
-                                        }
-                                        renderValue={(selected) => {
-                                            if (!selected.length) return <em>Select tags</em>;
-                                            return (
-                                                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                                                    {selected.map((value: string, idx) => (
-                                                        <Box
-                                                            key={idx}
-                                                            sx={{
-                                                                bgcolor: alpha(theme.palette.primary.main, 0.1),
-                                                                color: theme.palette.primary.main,
-                                                                px: 1.2,
-                                                                py: 0.5,
-                                                                borderRadius: 1.5,
-                                                                fontSize: 12,
-                                                                fontWeight: 500,
-                                                            }}
-                                                        >
-                                                            {value}
-                                                        </Box>
-                                                    ))}
-                                                </Box>
-                                            );
-                                        }}
-                                        sx={{
-                                            fontSize: 14,
-                                            fontWeight: 400,
-                                            color: 'text.primary',
-                                            '& .MuiSelect-select': {
-                                                padding: '8px 12px',
-                                            },
-                                            '& .MuiSvgIcon-root': {
-                                                color: '#999',
-                                            },
-                                        }}
-                                    >
-                                        {optionalSelectOptions.map((option) => (
-                                            <MenuItem key={option} value={option}>
-                                                {option}
-                                            </MenuItem>
-                                        ))}
-                                    </Select>
-                                </TableCell>}
+                                {issue && <FilterEngravedNumbers />}
 
                                 <TableCell align="center" sx={{ borderBottom: 'none', px: 2, py: 1 }}>
                                     <IconButton

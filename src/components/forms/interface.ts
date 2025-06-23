@@ -123,6 +123,7 @@ export interface RowData {
     commodityId?: number;
     selectedOptions?: string[];
     assetTypeId?: string;
+    engravedNumbers?: string[]
 }
 
 export interface StockRowData {
