@@ -10,6 +10,14 @@ import { IOptions } from "../../components/tables/interface";
 import { IITEquipment } from "./ITEquipment/interface";
 import { IOfficeEquipment } from "./officeEquipment/interface";
 import { IPermission } from "../settings/interface";
+import { ISupplier } from "../settings/suppliers/interface";
+import { IUser } from "../users/interface";
+import { IBranch } from "../settings/branch/interface";
+import { IStatus } from "../settings/statuses/interface";
+import { IAssetType } from "../settings/assetTypes/interface";
+import { ICommodity } from "../settings/commodity/interface";
+import { IInventory } from "../inventory/interface";
+import { IAxiosResponse, IFetchDataRequest } from "../../core/apis/interface";
 
 export interface IFormData<T> {
     value: Path<T>;
@@ -52,4 +60,43 @@ export interface IRepairHistory {
     repairedPart: string;
     technician: string;
     serialNumber: string;
+}
+
+export interface IAsset {
+    id?: string | number;
+    assetName: string;
+    hostname: string;
+    detailNetBookValue: string;
+    engravedNumber: string;
+    dateReceipt: string;
+    make: string;
+    supplier?: ISupplier | null;
+    unitOfMeasure: string;
+    purchaseCost: string;
+    costOfTheAsset: string;
+    netValueB: string,
+    assignedTo?: IUser | null;
+    branch?: IBranch | null;
+    assetDepreciationRate?: string | null;
+    description?: string | null;
+    model?: string | null;
+    image?: string | null;
+    assetStatus?: IStatus | null;
+    assetType?: IAssetType | null;
+    category?: string | null
+    lpoNumber: string;
+    commodity?: ICommodity | null;
+    stock?: IInventory | null
+}
+
+export interface IAssetResponse extends IFetchDataRequest {
+    content: Array<IAsset>
+}
+
+export interface IAssetsAxiosResponse extends IAxiosResponse {
+    data: IAssetResponse
+}
+
+export interface IAssetAxiosResponse extends IAxiosResponse {
+    data: IAsset
 }

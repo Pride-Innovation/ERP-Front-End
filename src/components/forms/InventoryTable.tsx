@@ -22,7 +22,6 @@ import {
     Button,
     Typography,
     InputAdornment,
-    useTheme,
     alpha,
 } from '@mui/material';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
@@ -43,9 +42,7 @@ import FilterEngravedNumbers from './filterEngravedNumbers';
 const InventoryTable = ({ issue, title }: { issue?: boolean, title: string }) => {
     const { fetchAllCommodities } = CommodityUtills()
     const [itemOptions, setItemOptions] = useState<{ name: string; groupName: string, assetTypeId: number | string }[]>([]);
-    const [engravedNumbers, setEngravedNumbers] = useState<string[]>([] as string[])
-    const { rows, setRows, assetType } = useContext(RequestContext);
-    const theme = useTheme();
+    const { rows, setRows, setAssetType} = useContext(RequestContext);
     const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore);
     const { commodities } = useSelector((state: RootState) => state.CommodityStore);
 
@@ -64,6 +61,7 @@ const InventoryTable = ({ issue, title }: { issue?: boolean, title: string }) =>
 
         const selectedType = assetTypes.find((asstyp) => asstyp.id === value);
         if (selectedType) {
+            setAssetType(selectedType)
             fetchAllCommodities({ assetTypeId: selectedType.id });
         }
     };
@@ -113,35 +111,6 @@ const InventoryTable = ({ issue, title }: { issue?: boolean, title: string }) =>
             });
         }
     }, [commodities]);
-
-
-    useEffect(() => {
-        if (assetType.id) {
-            fetchAllCommodities({ assetTypeId: assetType.id })
-        }
-    }, [assetType])
-
-
-    /**
-     * Handle Engraved Number additions
-     */
-    const optionalSelectOptions = commodities.map(c => c.name); // or any other source
-
-
-    const handleSelectChange = (id: number, value: string[]) => {
-        const updatedRows = rows.map(row =>
-            row.id === id ? { ...row, selectedOptions: value } : row
-        );
-        setRows(updatedRows);
-    };
-
-    useEffect(() => {
-        if (rows.length > 0
-            && rows[0].groupName.length > 0) {
-            console.log(rows)
-        }
-    }, [rows])
-
 
     return (
         <Paper elevation={4} sx={{
@@ -397,7 +366,7 @@ const InventoryTable = ({ issue, title }: { issue?: boolean, title: string }) =>
 
                                 {/* Handle Engraved numbers */}
 
-                                {issue && <FilterEngravedNumbers />}
+                                {issue && <FilterEngravedNumbers row={row} />}
 
                                 <TableCell align="center" sx={{ borderBottom: 'none', px: 2, py: 1 }}>
                                     <IconButton

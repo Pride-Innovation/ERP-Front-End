@@ -5,24 +5,46 @@ import {
     Chip,
     useTheme
 } from '@mui/material';
+import { RequestContext } from '../../context/request/RequestContext';
+import { useContext, useEffect } from 'react';
+import { RowData } from './interface';
+import AssetUtills from '../../pages/assets/Utills';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../store';
 
-const FilterEngravedNumbers = () => {
-    const theme = useTheme()
+const FilterEngravedNumbers = ({ row }: { row: RowData }) => {
+    const { fetchAllAssets } = AssetUtills()
+    const theme = useTheme();
+    const { assetType } = useContext(RequestContext);
+    const { assets } = useSelector((state: RootState) => state.AssetStore);
+
+    useEffect(() => {
+        if (row.groupName.length > 0 && assetType.name.length > 0) {
+            const params = {
+                assetTypeId: row.assetTypeId,
+                assetStatusId: 7, // This should contain the actual IDs for asset status when it is just registered and not assigned to users. 
+                commodityId: row.commodityId
+            }
+            fetchAllAssets(params)
+        }
+
+    }, [row])
+
     return (
         <TableCell sx={{ borderBottom: 'none', px: 2, py: 1 }}>
             <Autocomplete
                 multiple
                 id="engraved-numbers"
                 size="small"
-                options={top100Films}
-                getOptionLabel={(option) => option?.title || ''}
-                // defaultValue={[top100Films[2]]}
+                options={assets}
+                getOptionLabel={(option) => option?.engravedNumber || ''}
+                onChange={(_, newValue) => console.log(newValue, "Asset value")}
                 filterSelectedOptions
                 renderTags={(value, getTagProps) =>
                     value.map((option, index) => (
                         <Chip
                             variant="filled"
-                            label={option.title}
+                            label={option.engravedNumber}
                             {...getTagProps({ index })}
                             sx={{
                                 backgroundColor: '#08796C',
@@ -68,14 +90,3 @@ const FilterEngravedNumbers = () => {
 };
 
 export default FilterEngravedNumbers;
-
-// Sample options
-const top100Films = [
-    { title: 'The Shawshank Redemption', year: 1994 },
-    { title: 'The Godfather', year: 1972 },
-    { title: 'The Godfather: Part II', year: 1974 },
-    { title: 'The Dark Knight', year: 2008 },
-    { title: '12 Angry Men', year: 1957 },
-    { title: "Schindler's List", year: 1993 },
-    { title: 'Pulp Fiction', year: 1994 },
-];

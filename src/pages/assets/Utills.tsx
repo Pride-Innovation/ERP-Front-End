@@ -12,16 +12,24 @@ import BalanceIcon from '@mui/icons-material/Balance';
 import DirectionsCarFilledIcon from '@mui/icons-material/DirectionsCarFilled';
 import { useState } from "react";
 import { useSelector } from "react-redux";
-import { RootState } from "../../store";
+import { AppDispatch, RootState } from "../../store";
 import { assetTypesStatusConstants } from "../../utils/constants";
 import InventoryUtills from "../inventory/Utills";
 import UserUtils from "../users/utils";
 import BranchUtills from "../settings/branch/utills";
 import SupplierUtills from "../settings/suppliers/Utills";
+import { fetchRowsService } from "../../core/apis/globalService";
+import { IAssetsAxiosResponse } from "./interface";
+import { useDispatch } from "react-redux";
+import { listAllAssets } from "./slice";
 
 const AssetUtills = () => {
     const [currentAssetType, setCurrentAssetType] = useState<IAssetType>({} as IAssetType);
     const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore);
+    const [loading, setLoading] = useState<boolean>(false);
+    const endPoint: string = "assets";
+    const dispatch = useDispatch<AppDispatch>();
+
     const { fetchInventory } = InventoryUtills();
     const { fetchAllUsers } = UserUtils();
     const { fetchAllBranches } = BranchUtills();
@@ -122,6 +130,25 @@ const AssetUtills = () => {
         }
     }
 
+    const fetchAllAssets = async (params?: Record<string, any>) => {
+        setLoading(true)
+        try {
+            const response = await fetchRowsService({
+                pageNumber: 0,
+                pageSize: 10,
+                endPoint,
+                params
+            }) as IAssetsAxiosResponse
+
+            if (response.status === 200) {
+                dispatch(listAllAssets(response.data.content));
+            }
+        } catch (error) {
+            console.log(error)
+        }
+        setLoading(false)
+    }
+
     return ({
         determineAssetTypeByAssetName,
         currentAssetType,
@@ -130,7 +157,8 @@ const AssetUtills = () => {
         searchStockByLPONumber,
         searchUserByName,
         searchBranchByName,
-        searchSupplierByName
+        searchSupplierByName,
+        fetchAllAssets
     })
 }
 
