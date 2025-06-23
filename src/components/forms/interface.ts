@@ -122,6 +122,7 @@ export interface RowData {
     quantity: number;
     commodityId?: number;
     selectedOptions?: string[];
+    assetTypeId?: string;
 }
 
 export interface StockRowData {

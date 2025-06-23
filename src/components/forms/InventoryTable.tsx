@@ -41,8 +41,8 @@ import AppRegistrationOutlinedIcon from '@mui/icons-material/AppRegistrationOutl
 
 const InventoryTable = ({ issue, title }: { issue?: boolean, title: string }) => {
     const { fetchAllCommodities } = CommodityUtills()
-    const [itemOptions, setItemOptions] = useState<{ name: string; groupName: string }[]>([]);
-    const { rows, setRows, assetType, setAssetType } = useContext(RequestContext);
+    const [itemOptions, setItemOptions] = useState<{ name: string; groupName: string, assetTypeId: number | string }[]>([]);
+    const { rows, setRows, assetType } = useContext(RequestContext);
     const theme = useTheme();
     const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore);
     const { commodities } = useSelector((state: RootState) => state.CommodityStore);
@@ -54,10 +54,15 @@ const InventoryTable = ({ issue, title }: { issue?: boolean, title: string }) =>
         setRows(updatedRows);
     };
 
-    const handleAssetTypeNameChange = (value: string) => {
-        const selectedType = assetTypes.find(asstyp => asstyp.id === value);
+    const handleAssetTypeNameChange = (id: number, value: string) => {
+        const updatedRows = rows.map((row) =>
+            row.id === id ? { ...row, assetTypeId: value } : row
+        );
+        setRows(updatedRows);
+
+        const selectedType = assetTypes.find((asstyp) => asstyp.id === value);
         if (selectedType) {
-            setAssetType(selectedType);
+            fetchAllCommodities({ assetTypeId: selectedType.id });
         }
     };
 
@@ -96,10 +101,19 @@ const InventoryTable = ({ issue, title }: { issue?: boolean, title: string }) =>
             const options = commodities.map((item: any) => ({
                 name: item.name,
                 groupName: item.groupName,
+                assetTypeId: item?.assetType?.id
             }));
-            setItemOptions(options);
+            setItemOptions([...options, ...itemOptions]);
         }
     }, [commodities]);
+
+
+    useEffect(() => {
+        if (assetType.id) {
+            fetchAllCommodities({ assetTypeId: assetType.id })
+        }
+    }, [assetType])
+
 
     /**
      * Handle Engraved Number additions
@@ -115,10 +129,9 @@ const InventoryTable = ({ issue, title }: { issue?: boolean, title: string }) =>
     };
 
     useEffect(() => {
-        if (assetType.id) {
-            fetchAllCommodities({ assetTypeId: assetType.id })
-        }
-    }, [assetType])
+        console.log(itemOptions, rows, "rows!!")
+    }, [itemOptions])
+
 
     return (
         <Paper elevation={4} sx={{
@@ -232,8 +245,8 @@ const InventoryTable = ({ issue, title }: { issue?: boolean, title: string }) =>
                                 <TableCell sx={{ borderBottom: 'none', px: 2, py: 1 }}>
                                     <Select
                                         fullWidth
-                                        value={assetType?.id || ""}
-                                        onChange={(e) => handleAssetTypeNameChange(e.target.value as string)}
+                                        value={row.assetTypeId || ""}
+                                        onChange={(e) => handleAssetTypeNameChange(row.id, e.target.value as string)}
                                         displayEmpty
                                         size="small"
                                         variant="standard"
@@ -241,7 +254,7 @@ const InventoryTable = ({ issue, title }: { issue?: boolean, title: string }) =>
                                         sx={{
                                             fontSize: 14,
                                             fontWeight: 400,
-                                            color: row.name ? 'text.primary' : 'text.secondary',
+                                            color: row.assetTypeId ? 'text.primary' : 'text.secondary',
                                             '& .MuiSelect-select': {
                                                 padding: '8px 12px',
                                             },
@@ -284,11 +297,13 @@ const InventoryTable = ({ issue, title }: { issue?: boolean, title: string }) =>
                                         <MenuItem value="" disabled>
                                             <em>Select Item</em>
                                         </MenuItem>
-                                        {itemOptions.map((item) => (
-                                            <MenuItem key={item.name} value={item.name}>
-                                                {item.name}
-                                            </MenuItem>
-                                        ))}
+                                        {itemOptions
+                                            .filter(ele => ele.assetTypeId === row.assetTypeId)
+                                            .map((item) => (
+                                                <MenuItem key={item.name} value={item.name}>
+                                                    {item.name}
+                                                </MenuItem>
+                                            ))}
                                     </Select>
                                 </TableCell>
                                 <TableCell sx={{ borderBottom: 'none', px: 2, py: 1 }}>
