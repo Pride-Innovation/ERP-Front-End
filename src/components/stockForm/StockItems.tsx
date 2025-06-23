@@ -43,7 +43,6 @@ import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
 import PriceTotals from './priceTotals';
 import { formatNumberWithCommas } from './helper';
 import AppRegistrationOutlinedIcon from '@mui/icons-material/AppRegistrationOutlined';
-import { IAssetType } from '../../pages/settings/assetTypes/interface';
 
 const StockItems = () => {
     const { fetchAllCommodities } = CommodityUtills()
@@ -61,9 +60,10 @@ const StockItems = () => {
 
 
     const handleAssetTypeNameChange = (value: string) => {
-        setAssetType(() => {
-            return assetTypes.find(asstyp => asstyp.id === value) as IAssetType
-        })
+        const selectedType = assetTypes.find(asstyp => asstyp.id === value);
+        if (selectedType) {
+            setAssetType(selectedType);
+        }
     };
 
     const handleNameChange = (id: number, value: string) => {
@@ -143,7 +143,7 @@ const StockItems = () => {
                         fontWeight: 600,
                         fontSize: "15px",
                         textTransform: "capitalize",
-                        color: "#007C7C", // consistent with transparent background
+                        color: "#007C7C",
                     }}
                 >
                     Stock Items
@@ -241,8 +241,8 @@ const StockItems = () => {
                                 <TableCell sx={{ borderBottom: 'none', px: 2, py: 1 }}>
                                     <Select
                                         fullWidth
-                                        value={assetType.name}
-                                        onChange={(e) => handleAssetTypeNameChange(e.target.value)}
+                                        value={assetType?.id || ""}
+                                        onChange={(e) => handleAssetTypeNameChange(e.target.value as string)}
                                         displayEmpty
                                         size="small"
                                         variant="standard"
