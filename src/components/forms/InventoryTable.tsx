@@ -37,22 +37,28 @@ import FeedOutlinedIcon from '@mui/icons-material/FeedOutlined';
 import RemoveCircleOutlineOutlinedIcon from '@mui/icons-material/RemoveCircleOutlineOutlined';
 import EighteenMpOutlinedIcon from '@mui/icons-material/EighteenMpOutlined';
 import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined';
+import AppRegistrationOutlinedIcon from '@mui/icons-material/AppRegistrationOutlined';
 
 const InventoryTable = ({ issue, title }: { issue?: boolean, title: string }) => {
     const { fetchAllCommodities } = CommodityUtills()
     const [itemOptions, setItemOptions] = useState<{ name: string; groupName: string }[]>([]);
-    const { rows, setRows } = useContext(RequestContext);
+    const { rows, setRows, assetType, setAssetType } = useContext(RequestContext);
     const theme = useTheme();
-
+    const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore);
     const { commodities } = useSelector((state: RootState) => state.CommodityStore);
-
-    useEffect(() => { fetchAllCommodities() }, [])
 
     const handleInputChange = (id: number, field: keyof RowData, value: any) => {
         const updatedRows = rows.map((row) =>
             row.id === id ? { ...row, [field]: value } : row
         );
         setRows(updatedRows);
+    };
+
+    const handleAssetTypeNameChange = (value: string) => {
+        const selectedType = assetTypes.find(asstyp => asstyp.id === value);
+        if (selectedType) {
+            setAssetType(selectedType);
+        }
     };
 
     const handleNameChange = (id: number, value: string) => {
@@ -108,6 +114,12 @@ const InventoryTable = ({ issue, title }: { issue?: boolean, title: string }) =>
         setRows(updatedRows);
     };
 
+    useEffect(() => {
+        if (assetType.id) {
+            fetchAllCommodities({ assetTypeId: assetType.id })
+        }
+    }, [assetType])
+
     return (
         <Paper elevation={4} sx={{
             borderRadius: 2, boxShadow: "none",
@@ -155,28 +167,33 @@ const InventoryTable = ({ issue, title }: { issue?: boolean, title: string }) =>
                                 backgroundColor: '#CACACA',
                             }}
                         >
-                            {[{
-                                name: 'Name',
-                                icon: <FeedOutlinedIcon sx={{ fontSize: "12px", mr: "5px" }} />
-                            },
-                            {
-                                name: "Unit of Measure",
-                                icon: <ScaleOutlinedIcon sx={{ fontSize: "12px", mr: "5px" }} />
-                            },
-                            {
-                                name: "Quantity",
-                                icon: <EighteenMpOutlinedIcon sx={{ fontSize: "12px", mr: "5px" }} />
-                            },
-                            ...(issue
-                                ? [{
-                                    name: "Engraved Nos.",
+                            {[
+                                {
+                                    name: 'Asset Type',
+                                    icon: <AppRegistrationOutlinedIcon sx={{ fontSize: "12px", mr: "5px" }} />
+                                },
+                                {
+                                    name: 'Name',
                                     icon: <FeedOutlinedIcon sx={{ fontSize: "12px", mr: "5px" }} />
-                                }]
-                                : []),
-                            {
-                                name: "Remove",
-                                icon: <RemoveCircleOutlineOutlinedIcon sx={{ fontSize: "12px", mr: "5px" }} />
-                            }
+                                },
+                                {
+                                    name: "Unit of Measure",
+                                    icon: <ScaleOutlinedIcon sx={{ fontSize: "12px", mr: "5px" }} />
+                                },
+                                {
+                                    name: "Quantity",
+                                    icon: <EighteenMpOutlinedIcon sx={{ fontSize: "12px", mr: "5px" }} />
+                                },
+                                ...(issue
+                                    ? [{
+                                        name: "Engraved Nos.",
+                                        icon: <FeedOutlinedIcon sx={{ fontSize: "12px", mr: "5px" }} />
+                                    }]
+                                    : []),
+                                {
+                                    name: "Remove",
+                                    icon: <RemoveCircleOutlineOutlinedIcon sx={{ fontSize: "12px", mr: "5px" }} />
+                                }
                             ].map((header, idx) => (
                                 <TableCell
                                     key={header?.name}
@@ -212,6 +229,37 @@ const InventoryTable = ({ issue, title }: { issue?: boolean, title: string }) =>
                                     '&:last-child td, &:last-child th': { border: 0 },
                                 }}
                             >
+                                <TableCell sx={{ borderBottom: 'none', px: 2, py: 1 }}>
+                                    <Select
+                                        fullWidth
+                                        value={assetType?.id || ""}
+                                        onChange={(e) => handleAssetTypeNameChange(e.target.value as string)}
+                                        displayEmpty
+                                        size="small"
+                                        variant="standard"
+                                        disableUnderline
+                                        sx={{
+                                            fontSize: 14,
+                                            fontWeight: 400,
+                                            color: row.name ? 'text.primary' : 'text.secondary',
+                                            '& .MuiSelect-select': {
+                                                padding: '8px 12px',
+                                            },
+                                            '& .MuiSvgIcon-root': {
+                                                color: '#999',
+                                            },
+                                        }}
+                                    >
+                                        <MenuItem value="" disabled>
+                                            <em>Select Type</em>
+                                        </MenuItem>
+                                        {assetTypes.map((assetTyp) => (
+                                            <MenuItem key={assetTyp.id} value={assetTyp.id}>
+                                                {assetTyp.name}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </TableCell>
                                 <TableCell sx={{ borderBottom: 'none', px: 2, py: 1 }}>
                                     <Select
                                         fullWidth
