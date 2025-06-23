@@ -103,7 +103,12 @@ const InventoryTable = ({ issue, title }: { issue?: boolean, title: string }) =>
                 groupName: item.groupName,
                 assetTypeId: item?.assetType?.id
             }));
-            setItemOptions([...options, ...itemOptions]);
+
+            setItemOptions(prev => {
+                const merged = [...options, ...prev];
+                const uniqueByName = Array.from(new Map(merged.map(item => [item.name, item])).values());
+                return uniqueByName;
+            });
         }
     }, [commodities]);
 
