@@ -1,3 +1,10 @@
+/*
+13.9 Pride's Standard Copyright Notice:
+Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
+and distribute this software and its documentation for any purpose is prohibited unless authorized in writing by the
+Managing Director
+*/
+
 import {
     Autocomplete,
     TableCell,
@@ -6,17 +13,21 @@ import {
     useTheme
 } from '@mui/material';
 import { RequestContext } from '../../context/request/RequestContext';
-import { useContext, useEffect } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { RowData } from './interface';
 import AssetUtills from '../../pages/assets/Utills';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
+import { useDebounce } from '../../hooks/useDebounce';
 
 const FilterEngravedNumbers = ({ row }: { row: RowData }) => {
-    const { fetchAllAssets } = AssetUtills()
+    const { fetchAllAssets } = AssetUtills();
     const theme = useTheme();
     const { assetType } = useContext(RequestContext);
     const { assets } = useSelector((state: RootState) => state.AssetStore);
+    const [localInput, setLocalInput] = useState<string>('');
+    const [inputValue, setInputValue] = useState<string>('');
+    const debouncedInput = useDebounce(localInput, 500);
 
     useEffect(() => {
         if (row.groupName.length > 0 && assetType.name.length > 0) {
@@ -30,6 +41,27 @@ const FilterEngravedNumbers = ({ row }: { row: RowData }) => {
 
     }, [row])
 
+    useEffect(() => {
+        setInputValue(debouncedInput);
+    }, [debouncedInput, setInputValue]);
+
+
+    useEffect(() => {
+        if (row.groupName.length > 0 &&
+            assetType.name.length > 0 &&
+            inputValue.length > 0
+        ) {
+            const params = {
+                assetTypeId: row.assetTypeId,
+                assetStatusId: 7, // This should contain the actual IDs for asset status when it is just registered and not assigned to users. 
+                commodityId: row.commodityId,
+                engravedNumber: inputValue
+            }
+            fetchAllAssets(params)
+        }
+    }, [inputValue]);
+
+
     return (
         <TableCell sx={{ borderBottom: 'none', px: 2, py: 1 }}>
             <Autocomplete
@@ -38,8 +70,11 @@ const FilterEngravedNumbers = ({ row }: { row: RowData }) => {
                 size="small"
                 options={assets}
                 getOptionLabel={(option) => option?.engravedNumber || ''}
+
                 onChange={(_, newValue) => console.log(newValue, "Asset value")}
+
                 filterSelectedOptions
+                onInputChange={(_, newInputValue) => setLocalInput(newInputValue)}
                 renderTags={(value, getTagProps) =>
                     value.map((option, index) => (
                         <Chip
