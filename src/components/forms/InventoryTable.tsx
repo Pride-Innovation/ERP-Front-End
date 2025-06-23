@@ -204,7 +204,7 @@ const InventoryTable = ({ issue, title }: { issue?: boolean, title: string }) =>
                                         textTransform: 'capitalize',
                                         fontSize: 14,
                                         borderBottom: 'none',
-                                        borderRight: idx !== 3 ? '1px solid rgba(224, 224, 224, 1)' : 'none',
+                                        borderRight: idx !== 7 ? '1px solid rgba(224, 224, 224, 1)' : 'none',
                                         px: 2,
                                         py: 1.5,
                                     }}
