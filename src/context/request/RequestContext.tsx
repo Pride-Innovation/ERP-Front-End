@@ -8,6 +8,7 @@ Managing Director
 import React, { createContext, Dispatch, SetStateAction, useState } from 'react'
 import { IRequestTableData } from '../../pages/request/interface'
 import { RowData, StockRowData } from '../../components/forms/interface';
+import { IAssetType } from '../../pages/settings/assetTypes/interface';
 
 interface IRequestContext {
     requestTableData: Array<IRequestTableData>;
@@ -20,6 +21,8 @@ interface IRequestContext {
     totalPurchasePrice: number;
     setTotalCostPrice: Dispatch<SetStateAction<number>>;
     setTotalPurchasePrice: Dispatch<SetStateAction<number>>;
+    assetType: IAssetType;
+    setAssetType: Dispatch<SetStateAction<IAssetType>>
 }
 
 export const RequestContext = createContext<IRequestContext>({} as IRequestContext);
@@ -30,6 +33,8 @@ const RequestContextProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const [stockRows, setStockRows] = useState<Array<StockRowData>>([] as Array<StockRowData>)
     const [totalCostPrice, setTotalCostPrice] = useState<number>(0);
     const [totalPurchasePrice, setTotalPurchasePrice] = useState<number>(0);
+    const [assetType, setAssetType] = useState<IAssetType>({} as IAssetType);
+
     return (
         <RequestContext.Provider value={{
             requestTableData,
@@ -41,7 +46,9 @@ const RequestContextProvider: React.FC<{ children: React.ReactNode }> = ({ child
             totalCostPrice,
             setTotalCostPrice,
             totalPurchasePrice,
-            setTotalPurchasePrice
+            setTotalPurchasePrice,
+            assetType,
+            setAssetType
         }}>
             {children}
         </RequestContext.Provider>

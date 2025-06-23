@@ -43,22 +43,27 @@ import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
 import PriceTotals from './priceTotals';
 import { formatNumberWithCommas } from './helper';
 import AppRegistrationOutlinedIcon from '@mui/icons-material/AppRegistrationOutlined';
+import { IAssetType } from '../../pages/settings/assetTypes/interface';
 
 const StockItems = () => {
     const { fetchAllCommodities } = CommodityUtills()
     const [itemOptions, setItemOptions] = useState<{ name: string; groupName: string }[]>([]);
-    const { stockRows, setStockRows } = useContext(RequestContext);
+    const { stockRows, setStockRows, setAssetType, assetType } = useContext(RequestContext);
     const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore);
-
     const { commodities } = useSelector((state: RootState) => state.CommodityStore);
-
-    useEffect(() => { fetchAllCommodities() }, [])
 
     const handleInputChange = (id: number, field: keyof StockRowData, value: any) => {
         const updatedRows = stockRows.map((row) =>
             row.id === id ? { ...row, [field]: value } : row
         );
         setStockRows(updatedRows);
+    };
+
+
+    const handleAssetTypeNameChange = (value: string) => {
+        setAssetType(() => {
+            return assetTypes.find(asstyp => asstyp.id === value) as IAssetType
+        })
     };
 
     const handleNameChange = (id: number, value: string) => {
@@ -110,10 +115,12 @@ const StockItems = () => {
         }
     }, [commodities]);
 
-    const parseFormattedNumber = (value: string): number => {
-        const cleaned = value.replace(/,/g, '');
-        return parseFloat(cleaned);
-    };
+
+    useEffect(() => {
+        if (assetType.id) {
+            fetchAllCommodities({ assetTypeId: assetType.id })
+        }
+    }, [assetType])
 
     return (
         <Paper elevation={4} sx={{
@@ -234,8 +241,8 @@ const StockItems = () => {
                                 <TableCell sx={{ borderBottom: 'none', px: 2, py: 1 }}>
                                     <Select
                                         fullWidth
-                                        value={row.name}
-                                        onChange={(e) => handleNameChange(row.id, e.target.value)}
+                                        value={assetType.name}
+                                        onChange={(e) => handleAssetTypeNameChange(e.target.value)}
                                         displayEmpty
                                         size="small"
                                         variant="standard"
@@ -256,7 +263,7 @@ const StockItems = () => {
                                             <em>Select Type</em>
                                         </MenuItem>
                                         {assetTypes.map((assetTyp) => (
-                                            <MenuItem key={assetTyp.id} value={assetTyp.name}>
+                                            <MenuItem key={assetTyp.id} value={assetTyp.id}>
                                                 {assetTyp.name}
                                             </MenuItem>
                                         ))}
