@@ -68,9 +68,11 @@ export const assetStatus: {
 export const assetTypesStatusConstants: {
     itEquipment: string;
     officeEquipment: string;
-    fleet: string
+    fleet: string;
+    stationery: string;
 } = {
     itEquipment: "IT Equipment",
     officeEquipment: "Office Equipment",
-    fleet: "Fleet"
+    fleet: "Fleet",
+    stationery: "Stationery"
 }

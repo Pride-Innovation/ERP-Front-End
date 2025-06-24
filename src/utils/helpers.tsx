@@ -10,6 +10,8 @@ import MaleAvatar from '../statics/images/male.jpg';
 import FemaleAvatar from '../statics/images/Female.jpg';
 import { RowData, StockRowData, StockValidationResult, ValidationResult } from "../components/forms/interface";
 import { ICommodity } from "../pages/settings/commodity/interface";
+import { IAssetType } from "../pages/settings/assetTypes/interface";
+import { assetTypesStatusConstants } from "./constants";
 
 export const camelCaseToWords = (camelCaseString: string) => {
     return camelCaseString
@@ -290,19 +292,36 @@ export const validateCommodityQuantities = (
 }
 
 
-export const validateAssetsOfItems = (rows: RowData[]) => {
+export const validateAssetsOfItems = (rows: RowData[], assetTypes: IAssetType[]) => {
     const errors: string[] = [];
     const engravedNumbersSet: Set<string> = new Set();
 
     rows.forEach(record => {
         const { quantity, selectedAssets } = record;
 
-        if (selectedAssets?.length !== quantity) {
+        /**
+         * Determine that is is not a stationery
+         */
+
+        const assetTypeName = assetTypes.find(ast => record.id === ast.id)?.name as string;
+
+        /**
+         * Validate the quantity is the same as the number of quantity
+         */
+        
+        if (selectedAssets?.length !== quantity
+            && assetTypeName 
+            && assetTypeName !== assetTypesStatusConstants.stationery
+        ) {
             errors.push(
-                `Quantity mismatch for commodity '${record.name}': expected ${quantity}, found ${selectedAssets?.length}.`
+                `Quantity mismatch for commodity '${record.name}': 
+                expected ${quantity}, found ${selectedAssets?.length ? selectedAssets?.length : 0}.`
             );
         }
 
+        /*
+         * Validate that Engraved Number (ie Asset ) is not assigned twice. 
+         */
         selectedAssets?.forEach(asset => {
             if (engravedNumbersSet.has(asset.engravedNumber)) {
                 errors.push(

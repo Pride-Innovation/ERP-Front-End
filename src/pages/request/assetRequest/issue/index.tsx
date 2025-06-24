@@ -32,6 +32,8 @@ import { validateAssetsOfItems, validateCommodityQuantities, validateInventoryIt
 import InventoryTable from "../../../../components/forms/InventoryTable";
 import ButtonComponent from "../../../../components/forms/Button";
 import { useParams } from "react-router";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../../store";
 
 const initialData: RowData[] = [
     { id: 1, name: '', groupName: '', quantity: 0 },
@@ -44,6 +46,7 @@ const IssueRequestDetails = () => {
     const { rows, setRows } = useContext(RequestContext);
     const [request, setRequest] = useState<IRequest>({} as IRequest)
     const { id } = useParams<{ id: string }>();
+    const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore)
 
     const [requestCommodities, setRequestCommodities] = useState<
         Array<{ commodity: ICommodity; quantity: number }>
@@ -97,7 +100,7 @@ const IssueRequestDetails = () => {
     const handleRequestRejection = async () => {
         setSendingRequest(true);
 
-        const countValidation = validateAssetsOfItems(rows)
+        const countValidation = validateAssetsOfItems(rows, assetTypes)
         const result = validateInventoryItems(rows);
         const validate = validateCommodityQuantities(requestCommodities, rows);
 
