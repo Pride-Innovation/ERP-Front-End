@@ -23,7 +23,6 @@ const FilterEngravedNumbers = ({ row }: { row: RowData }) => {
     const theme = useTheme();
     const { assetType } = useContext(RequestContext);
     const { assetsEngravedInStore } = useContext(RequestContext);
-
     const [localInput, setLocalInput] = useState<string>('');
     const [inputValue, setInputValue] = useState<string>('');
     const debouncedInput = useDebounce(localInput, 500);
@@ -67,11 +66,16 @@ const FilterEngravedNumbers = ({ row }: { row: RowData }) => {
                 multiple
                 id="engraved-numbers"
                 size="small"
-                options={assetsEngravedInStore}
+                options={
+                    /**
+                     * Filter assets based on the asset type
+                     * to display engraved number for that particular asset type.
+                     */
+                    [...(assetsEngravedInStore
+                        .filter(asst => asst.commodity?.id === row.commodityId))]
+                }
                 getOptionLabel={(option) => option?.engravedNumber || ''}
-
                 onChange={(_, newValue) => console.log(newValue, "Asset value")}
-
                 filterSelectedOptions
                 onInputChange={(_, newInputValue) => setLocalInput(newInputValue)}
                 renderTags={(value, getTagProps) =>

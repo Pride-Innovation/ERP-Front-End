@@ -30,7 +30,7 @@ const AssetUtills = () => {
     const [loading, setLoading] = useState<boolean>(false);
     const endPoint: string = "assets";
     const dispatch = useDispatch<AppDispatch>();
-    const { setAssetsEngravedInStore, assetsEngravedInStore } = useContext(RequestContext);
+    const { setAssetsEngravedInStore } = useContext(RequestContext);
 
     const { fetchInventory } = InventoryUtills();
     const { fetchAllUsers } = UserUtils();
