@@ -9,6 +9,7 @@ import React, { createContext, Dispatch, SetStateAction, useState } from 'react'
 import { IRequestTableData } from '../../pages/request/interface'
 import { RowData, StockRowData } from '../../components/forms/interface';
 import { IAssetType } from '../../pages/settings/assetTypes/interface';
+import { IAsset } from '../../pages/assets/interface';
 
 interface IRequestContext {
     requestTableData: Array<IRequestTableData>;
@@ -23,6 +24,8 @@ interface IRequestContext {
     setTotalPurchasePrice: Dispatch<SetStateAction<number>>;
     assetType: IAssetType;
     setAssetType: Dispatch<SetStateAction<IAssetType>>
+    setAssetsEngravedInStore: Dispatch<SetStateAction<IAsset[]>>
+    assetsEngravedInStore: IAsset[]
 }
 
 export const RequestContext = createContext<IRequestContext>({} as IRequestContext);
@@ -34,6 +37,7 @@ const RequestContextProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const [totalCostPrice, setTotalCostPrice] = useState<number>(0);
     const [totalPurchasePrice, setTotalPurchasePrice] = useState<number>(0);
     const [assetType, setAssetType] = useState<IAssetType>({} as IAssetType);
+    const [assetsEngravedInStore, setAssetsEngravedInStore] = useState<IAsset[]>([] as IAsset[])
 
     return (
         <RequestContext.Provider value={{
@@ -48,7 +52,9 @@ const RequestContextProvider: React.FC<{ children: React.ReactNode }> = ({ child
             totalPurchasePrice,
             setTotalPurchasePrice,
             assetType,
-            setAssetType
+            setAssetType,
+            assetsEngravedInStore,
+            setAssetsEngravedInStore
         }}>
             {children}
         </RequestContext.Provider>

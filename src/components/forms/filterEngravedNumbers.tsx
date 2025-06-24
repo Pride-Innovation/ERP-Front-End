@@ -16,15 +16,14 @@ import { RequestContext } from '../../context/request/RequestContext';
 import { useContext, useEffect, useState } from 'react';
 import { RowData } from './interface';
 import AssetUtills from '../../pages/assets/Utills';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../store';
 import { useDebounce } from '../../hooks/useDebounce';
 
 const FilterEngravedNumbers = ({ row }: { row: RowData }) => {
     const { fetchAllAssets } = AssetUtills();
     const theme = useTheme();
     const { assetType } = useContext(RequestContext);
-    const { assets } = useSelector((state: RootState) => state.AssetStore);
+    const { assetsEngravedInStore } = useContext(RequestContext);
+
     const [localInput, setLocalInput] = useState<string>('');
     const [inputValue, setInputValue] = useState<string>('');
     const debouncedInput = useDebounce(localInput, 500);
@@ -39,7 +38,7 @@ const FilterEngravedNumbers = ({ row }: { row: RowData }) => {
             fetchAllAssets(params)
         }
 
-    }, [row])
+    }, [row]);
 
     useEffect(() => {
         setInputValue(debouncedInput);
@@ -68,7 +67,7 @@ const FilterEngravedNumbers = ({ row }: { row: RowData }) => {
                 multiple
                 id="engraved-numbers"
                 size="small"
-                options={assets}
+                options={assetsEngravedInStore}
                 getOptionLabel={(option) => option?.engravedNumber || ''}
 
                 onChange={(_, newValue) => console.log(newValue, "Asset value")}

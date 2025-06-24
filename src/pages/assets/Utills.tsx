@@ -10,7 +10,7 @@ import { IAssetType } from "../settings/assetTypes/interface"
 import SettingsBrightnessIcon from '@mui/icons-material/SettingsBrightness';
 import BalanceIcon from '@mui/icons-material/Balance';
 import DirectionsCarFilledIcon from '@mui/icons-material/DirectionsCarFilled';
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../store";
 import { assetTypesStatusConstants } from "../../utils/constants";
@@ -22,6 +22,7 @@ import { fetchRowsService } from "../../core/apis/globalService";
 import { IAssetsAxiosResponse } from "./interface";
 import { useDispatch } from "react-redux";
 import { listAllAssets } from "./slice";
+import { RequestContext } from "../../context/request/RequestContext";
 
 const AssetUtills = () => {
     const [currentAssetType, setCurrentAssetType] = useState<IAssetType>({} as IAssetType);
@@ -29,6 +30,7 @@ const AssetUtills = () => {
     const [loading, setLoading] = useState<boolean>(false);
     const endPoint: string = "assets";
     const dispatch = useDispatch<AppDispatch>();
+    const { setAssetsEngravedInStore, assetsEngravedInStore } = useContext(RequestContext);
 
     const { fetchInventory } = InventoryUtills();
     const { fetchAllUsers } = UserUtils();
@@ -141,6 +143,11 @@ const AssetUtills = () => {
             }) as IAssetsAxiosResponse
 
             if (response.status === 200) {
+                setAssetsEngravedInStore(prev => {
+                    const merged = [...response.data.content, ...prev];
+                    const uniqueByName = Array.from(new Map(merged.map(item => [item.engravedNumber, item])).values());
+                    return uniqueByName;
+                });
                 dispatch(listAllAssets(response.data.content));
             }
         } catch (error) {
