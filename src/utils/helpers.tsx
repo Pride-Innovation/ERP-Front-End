@@ -288,3 +288,24 @@ export const validateCommodityQuantities = (
         errors
     };
 }
+
+
+export const validateAssetsOfItems = (rows: RowData[]) => {
+    const errors: string[] = [];
+    
+    rows.forEach(record => {
+        const { quantity, selectedAssets } = record;
+
+        if (selectedAssets?.length !== quantity) {
+            errors.push(
+                `Quantity mismatch for commodity '${record.name}': expected ${quantity}, found ${selectedAssets?.length}.`
+            );
+        }
+    });
+
+    return {
+        isValid: errors.length === 0,
+        errors
+    };
+}
+

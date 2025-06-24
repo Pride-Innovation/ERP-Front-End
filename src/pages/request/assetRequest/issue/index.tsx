@@ -28,7 +28,7 @@ import { IRequest, IRequestAxiosResponse } from "../../interface";
 import { RequestContext } from "../../../../context/request/RequestContext";
 import { ICommodity } from "../../../settings/commodity/interface";
 import { findAssetRequestByIDService, issueCommodities } from "../service";
-import { validateCommodityQuantities, validateInventoryItems } from "../../../../utils/helpers";
+import { validateAssetsOfItems, validateCommodityQuantities, validateInventoryItems } from "../../../../utils/helpers";
 import InventoryTable from "../../../../components/forms/InventoryTable";
 import ButtonComponent from "../../../../components/forms/Button";
 import { useParams } from "react-router";
@@ -97,10 +97,15 @@ const IssueRequestDetails = () => {
     const handleRequestRejection = async () => {
         setSendingRequest(true);
 
+        const countValidation = validateAssetsOfItems(rows)
         const result = validateInventoryItems(rows);
         const validate = validateCommodityQuantities(requestCommodities, rows);
 
-        if (result.isValid && result.validData && validate.isValid) {
+        if (result.isValid
+            && result.validData
+            && validate.isValid
+            && countValidation.isValid
+        ) {
 
             const formattedCommodities = result.validData.map(item => ({
                 commodityId: item.id,
@@ -126,6 +131,9 @@ const IssueRequestDetails = () => {
 
         } else {
             setSendingRequest(false);
+            if (countValidation.errors.length > 0) {
+                return toast.error(`Requests validation errors: ${countValidation.errors}`)
+            }
             if (result.errors.length > 0) {
                 return toast.error(`Requests validation errors: ${result.errors}`)
             }
