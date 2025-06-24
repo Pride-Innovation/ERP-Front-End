@@ -292,7 +292,8 @@ export const validateCommodityQuantities = (
 
 export const validateAssetsOfItems = (rows: RowData[]) => {
     const errors: string[] = [];
-    
+    const engravedNumbersSet: Set<string> = new Set();
+
     rows.forEach(record => {
         const { quantity, selectedAssets } = record;
 
@@ -301,6 +302,17 @@ export const validateAssetsOfItems = (rows: RowData[]) => {
                 `Quantity mismatch for commodity '${record.name}': expected ${quantity}, found ${selectedAssets?.length}.`
             );
         }
+
+        selectedAssets?.forEach(asset => {
+            if (engravedNumbersSet.has(asset.engravedNumber)) {
+                errors.push(
+                    `Duplicate engravedNumber '${asset.engravedNumber}' found in commodity '${record.name}'.`
+                );
+            } else {
+                engravedNumbersSet.add(asset.engravedNumber);
+            }
+        });
+
     });
 
     return {
