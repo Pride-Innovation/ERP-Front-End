@@ -118,8 +118,8 @@ const IssueRequestDetails = () => {
                 /**
                  * TO DO --- Make an API call
                  */
-                const response = await issueCommodities(data);
-                console.log(response, "Issue Items")
+                // const response = await issueCommodities(data);
+                // console.log(response, "Issue Items")
             } catch (error) {
                 console.log(error)
             }

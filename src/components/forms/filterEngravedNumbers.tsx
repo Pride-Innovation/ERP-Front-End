@@ -17,12 +17,18 @@ import { useContext, useEffect, useState } from 'react';
 import { RowData } from './interface';
 import AssetUtills from '../../pages/assets/Utills';
 import { useDebounce } from '../../hooks/useDebounce';
+import { IAsset } from '../../pages/assets/interface';
 
 const FilterEngravedNumbers = ({ row }: { row: RowData }) => {
     const { fetchAllAssets } = AssetUtills();
     const theme = useTheme();
-    const { assetType } = useContext(RequestContext);
-    const { assetsEngravedInStore } = useContext(RequestContext);
+    const {
+        assetType,
+        assetsEngravedInStore,
+        rows,
+        setRows
+    } = useContext(RequestContext);
+
     const [localInput, setLocalInput] = useState<string>('');
     const [inputValue, setInputValue] = useState<string>('');
     const debouncedInput = useDebounce(localInput, 500);
@@ -59,6 +65,16 @@ const FilterEngravedNumbers = ({ row }: { row: RowData }) => {
         }
     }, [inputValue]);
 
+    const addEngravedNumberListToRow = (list: IAsset[]) => {
+        const currentRow = rows.find(rw => rw.id === row.id) as RowData;
+
+        setRows((prev) => {
+            return prev.map(ele => ele.id === currentRow.id ? ({
+                ...ele,
+                selectedAssets: list
+            }) : ele)
+        })
+    }
 
     return (
         <TableCell sx={{ borderBottom: 'none', px: 2, py: 1 }}>
@@ -75,7 +91,7 @@ const FilterEngravedNumbers = ({ row }: { row: RowData }) => {
                         .filter(asst => asst.commodity?.id === row.commodityId))]
                 }
                 getOptionLabel={(option) => option?.engravedNumber || ''}
-                onChange={(_, newValue) => console.log(newValue, "Asset value")}
+                onChange={(_, newValue) => addEngravedNumberListToRow(newValue)}
                 filterSelectedOptions
                 onInputChange={(_, newInputValue) => setLocalInput(newInputValue)}
                 renderTags={(value, getTagProps) =>

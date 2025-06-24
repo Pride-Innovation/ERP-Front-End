@@ -8,6 +8,7 @@ Managing Director
 import { Control, FieldError, FieldValues, FormState, Path, UseFormRegister } from 'react-hook-form';
 import { IOptions } from '../tables/interface';
 import { ChangeEvent, Dispatch, SetStateAction } from 'react';
+import { IAsset } from '../../pages/assets/interface';
 
 export interface IButton {
     sendingRequest: boolean;
@@ -123,7 +124,7 @@ export interface RowData {
     commodityId?: number;
     selectedOptions?: string[];
     assetTypeId?: string;
-    engravedNumbers?: string[]
+    selectedAssets?: IAsset[]
 }
 
 export interface StockRowData {
