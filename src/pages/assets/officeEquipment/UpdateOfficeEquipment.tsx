@@ -16,20 +16,39 @@ import { Card, Grid } from '@mui/material';
 import { FormHeader } from '../../../components/headers/TypographyComponent';
 import OfficeEquipmentForm from './OfficeEquipmentForm';
 import { getOfficeEquipmentByIDService } from './service';
+import Loading from '../../../components/loading';
 
 
 const UpdateOfficeEquipment = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(false);
     const { id } = useParams<{ id: string }>();
-    const [defaultAsset, setDefaultAsset] = useState<IOfficeEquipment>(officeEquipmentMock[0]);
+    const [defaultAsset, setDefaultAsset] = useState<any>(officeEquipmentMock[0]);
 
     const findOfficeEquipmentByID = async () => {
+        setLoading(true)
         const response = await getOfficeEquipmentByIDService(id as string) as IOfficeEquipmentAxiosResponse;
         if (response.status === 200) {
+
             setDefaultAsset({
-                ...response.data
+                ...response.data,
+                supplier: response.data.supplier?.id,
+                assignedTo: response.data.assignedTo?.id,
+                branch: response.data.branch?.id,
+                assetStatus: response.data.assetStatus?.id,
+                assetType: response.data.assetType?.id,
+                category: response.data.commodity?.id,
+                engravedNumber: response.data.engravedNumber ? response.data.engravedNumber : "",
+                unitOfMeasure: response.data.unitOfMeasure ? response.data.unitOfMeasure : "",
+                netValueB: response.data.netValueB ? response.data.netValueB : "",
+                assetDepreciationRate: response.data.assetDepreciationRate ? response.data.assetDepreciationRate : "",
+                hostname: response.data.hostname ? response.data.hostname : "",
+                detailNetBookValue: response.data.detailNetBookValue ? response.data.detailNetBookValue : "",
+                make: response.data.make ? response.data.make : "",
+                lpoNumber: response.data.stock?.lpoNumber
             })
         }
+        setLoading(false)
     }
 
     useEffect(() => { findOfficeEquipmentByID(); }, [id]);
@@ -46,15 +65,12 @@ const UpdateOfficeEquipment = () => {
     });
 
     useEffect(() => {
-        console.log(defaultAsset, "default asset information!!")
         reset({ ...defaultAsset });
     }, [defaultAsset]);
 
     const onSubmit = async (formData: IOfficeEquipment) => {
         setSendingRequest(true);
-
-        // const response = await updateOfficeEquipmentService(request, id as string) as IResponseData;
-        // toast.success(response.data.message)
+        console.log(formData, "Form Data!!")
         setSendingRequest(false)
     };
 
@@ -63,18 +79,22 @@ const UpdateOfficeEquipment = () => {
             <Grid container xs={12}>
                 <Grid item xs={12}>
                     <FormHeader header="Update Office Equipment" />
-                    <form
-                        style={{ width: "100%" }}
-                        autoComplete="off"
-                        onSubmit={handleSubmit(onSubmit)}
-                    >
-                        <OfficeEquipmentForm
-                            buttonText="Submit"
-                            formState={formState}
-                            control={control}
-                            sendingRequest={sendingRequest}
-                            register={register} />
-                    </form>
+                    {loading ? <Loading items='Office Equipment' /> :
+                        (<form
+                            style={{ width: "100%" }}
+                            autoComplete="off"
+                            onSubmit={handleSubmit(onSubmit)}
+                        >
+                            <OfficeEquipmentForm
+                                buttonText="Submit"
+                                formState={formState}
+                                control={control}
+                                sendingRequest={sendingRequest}
+                                register={register}
+                                params={{ lpoNumber: defaultAsset?.lpoNumber }}
+                            />
+                        </form>)
+                    }
                 </Grid>
             </Grid>
         </Card>

@@ -34,6 +34,7 @@ const OfficeEquipmentForm = ({
     register,
     buttonText,
     sendingRequest,
+    params
 }:
     IOfficeEquipmentForm
 ) => {
@@ -57,7 +58,7 @@ const OfficeEquipmentForm = ({
     useEffect(() => { fetchAllUsers() }, []);
     useEffect(() => { fetchAllAssetTypes() }, []);
     useEffect(() => { fetchAllSuppliers() }, []);
-    useEffect(() => { fetchInventory() }, []);
+    useEffect(() => { fetchInventory(params) }, []);
 
     useEffect(() => {
         if (assetTypes.length > 0) {

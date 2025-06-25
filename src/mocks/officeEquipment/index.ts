@@ -31,6 +31,7 @@ export const officeEquipmentMock: IOfficeEquipment[] = [
         assignedTo: usersMock[0],
         lpoNumber: "",
         stock: inventoryMock[0],
-        commodity: null
+        commodity: null,
+        assetDepreciationRate: "DPR"
     }
 ];
