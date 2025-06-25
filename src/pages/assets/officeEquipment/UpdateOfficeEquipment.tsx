@@ -15,8 +15,12 @@ import { officeEquipmentSchema } from './schema';
 import { Card, Grid } from '@mui/material';
 import { FormHeader } from '../../../components/headers/TypographyComponent';
 import OfficeEquipmentForm from './OfficeEquipmentForm';
-import { getOfficeEquipmentByIDService } from './service';
+import { getOfficeEquipmentByIDService, updateOfficeEquipmentService } from './service';
 import Loading from '../../../components/loading';
+import { toast } from 'react-toastify';
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from '../../../store';
+import { updateOfficeAsset } from './slice';
 
 
 const UpdateOfficeEquipment = () => {
@@ -25,6 +29,7 @@ const UpdateOfficeEquipment = () => {
     const { id } = useParams<{ id: string }>();
     const [defaultAsset, setDefaultAsset] = useState<any>(officeEquipmentMock[0]);
     const [params, setParams] = useState<Record<string, any>>();
+    const dispatch = useDispatch<AppDispatch>();
 
     const findOfficeEquipmentByID = async () => {
         setLoading(true)
@@ -78,7 +83,16 @@ const UpdateOfficeEquipment = () => {
 
     const onSubmit = async (formData: IOfficeEquipment) => {
         setSendingRequest(true);
-        console.log(formData, "Form Data!!")
+        try {
+            const response = await updateOfficeEquipmentService(formData, id as string) as IOfficeEquipmentAxiosResponse;
+            if (response.status === 201) {
+                toast.success("Asset Updated Successfully");
+                console.log(response.data, "Update information")
+                dispatch(updateOfficeAsset(response.data));
+            }
+        } catch (error) {
+            console.log(error)
+        }
         setSendingRequest(false)
     };
 

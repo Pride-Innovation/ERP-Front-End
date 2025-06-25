@@ -99,12 +99,14 @@ const OfficeEquipmentUtills = () => {
         lpoNumber,
         stock,
         commodity,
+        dateReceipt,
         image,
         ...data
     } = officeEquipmentMock[0];
 
     const rowData = {
         ...data,
+        dateReceived: "",
         status: officeEquipmentMock[0].assetStatus?.name,
         assignedTo: officeEquipmentMock[0].assignedTo?.firstName,
         location: "",
@@ -138,6 +140,7 @@ const OfficeEquipmentUtills = () => {
                 lpoNumber,
                 stock,
                 commodity,
+                dateReceipt,
                 image,
                 ...fielsdata
             } = list[index];

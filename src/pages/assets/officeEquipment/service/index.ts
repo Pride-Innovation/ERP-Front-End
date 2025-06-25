@@ -37,7 +37,7 @@ const getOfficeEquipmentByIDService = async (id: string | number) => {
 
 const updateOfficeEquipmentService = async (body: object, id: string | number) => {
     try {
-        const response = await axiosInstance.post(`officeEquipmentAssets/update/${id}`, body);
+        const response = await axiosInstance.put(`assets/${id}`, body);
         return response?.data
     } catch (error) {
         return error

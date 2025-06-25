@@ -20,20 +20,13 @@ import { getITEquipmentByIDService } from "./service";
 const UpdateITEquipment = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
     const { id } = useParams<{ id: string }>();
-    const [defaultAsset, setDefaultAsset] = useState<IITEquipment>(itEquipmentMock[0]);
+    const [defaultAsset, setDefaultAsset] = useState<any>(itEquipmentMock[0]);
     const [option, setOption] = useState<string | undefined>('');
 
     const findITEquipmentByID = async () => {
         const response = await getITEquipmentByIDService(id as string);
-        // setDefaultAsset({
-        //     ...response,
-        //     assetCategory_id: (response?.ItAssetCategory_id).toString(),
-        //     supplier: (response?.supplier_id).toString(),
-        //     unitOfMeasure: (response?.unitOfMeasure_id).toString(),
-        //     user_id: (response?.user_id).toString(),
-        //     assetSubCategory_id: null,
-        //     assetStatus: (response?.assetStatus_id).toString()
-        // });
+        setDefaultAsset({
+        });
     }
 
     useEffect(() => { findITEquipmentByID(); }, [id]);
