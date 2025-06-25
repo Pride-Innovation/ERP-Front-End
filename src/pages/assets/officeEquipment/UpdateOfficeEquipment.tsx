@@ -24,11 +24,19 @@ const UpdateOfficeEquipment = () => {
     const [loading, setLoading] = useState<boolean>(false);
     const { id } = useParams<{ id: string }>();
     const [defaultAsset, setDefaultAsset] = useState<any>(officeEquipmentMock[0]);
+    const [params, setParams] = useState<Record<string, any>>();
 
     const findOfficeEquipmentByID = async () => {
         setLoading(true)
         const response = await getOfficeEquipmentByIDService(id as string) as IOfficeEquipmentAxiosResponse;
         if (response.status === 200) {
+
+            setParams({
+                branchName: response.data.branch?.name,
+                assignedToFirstName: response.data.assignedTo?.firstName,
+                lpoNumber: response.data.stock?.lpoNumber,
+                supplierName: response.data.supplier?.name
+            })
 
             setDefaultAsset({
                 ...response.data,
@@ -91,7 +99,10 @@ const UpdateOfficeEquipment = () => {
                                 control={control}
                                 sendingRequest={sendingRequest}
                                 register={register}
-                                params={{ lpoNumber: defaultAsset?.lpoNumber }}
+                                lpoParams={{ lpoNumber: params?.lpoNumber }}
+                                userParams={{ firstName: params?.assignedToFirstName }}
+                                supplierParams={{ name: params?.supplierName }}
+                                branchParams={{ name: params?.branchName }}
                             />
                         </form>)
                     }

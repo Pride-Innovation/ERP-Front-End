@@ -65,7 +65,10 @@ export interface IOfficeEquipmentForm {
     register: UseFormRegister<IOfficeEquipment>;
     buttonText: string;
     sendingRequest: boolean;
-    params?: Record<string, any>
+    lpoParams?: Record<string, any>
+    userParams?: Record<string, any>
+    supplierParams?: Record<string, any>
+    branchParams?: Record<string, any>
 }
 
 

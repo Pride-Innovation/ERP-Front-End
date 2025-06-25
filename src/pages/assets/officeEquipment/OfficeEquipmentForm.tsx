@@ -34,7 +34,10 @@ const OfficeEquipmentForm = ({
     register,
     buttonText,
     sendingRequest,
-    params
+    lpoParams,
+    userParams,
+    supplierParams,
+    branchParams
 }:
     IOfficeEquipmentForm
 ) => {
@@ -53,12 +56,12 @@ const OfficeEquipmentForm = ({
     const { fetchInventory } = InventoryUtills()
 
 
-    useEffect(() => { fetchAllBranches() }, []);
+    useEffect(() => { fetchAllBranches(branchParams) }, []);
     useEffect(() => { fetchAllStatuses() }, []);
-    useEffect(() => { fetchAllUsers() }, []);
+    useEffect(() => { fetchAllUsers(userParams) }, []);
     useEffect(() => { fetchAllAssetTypes() }, []);
-    useEffect(() => { fetchAllSuppliers() }, []);
-    useEffect(() => { fetchInventory(params) }, []);
+    useEffect(() => { fetchAllSuppliers(supplierParams) }, []);
+    useEffect(() => { fetchInventory(lpoParams) }, []);
 
     useEffect(() => {
         if (assetTypes.length > 0) {
