@@ -6,7 +6,7 @@ Managing Director
 */
 
 import { useEffect, useState } from 'react'
-import { IOfficeEquipment } from './interface';
+import { IOfficeEquipment, IOfficeEquipmentAxiosResponse } from './interface';
 import { useParams } from 'react-router';
 import { officeEquipmentMock } from '../../../mocks/officeEquipment';
 import { useForm } from 'react-hook-form';
@@ -24,15 +24,12 @@ const UpdateOfficeEquipment = () => {
     const [defaultAsset, setDefaultAsset] = useState<IOfficeEquipment>(officeEquipmentMock[0]);
 
     const findOfficeEquipmentByID = async () => {
-        const response = await getOfficeEquipmentByIDService(id as string);
-        setDefaultAsset({
-            ...response,
-            assetCategory_id: (response?.OfficeEquipmentAssetCategory_id).toString(),
-            supplier: (response?.supplier_id).toString(),
-            unitOfMeasure: (response?.unitOfMeasure_id).toString(),
-            user_id: (response?.user_id).toString(),
-            assetStatus: (response?.assetStatus_id).toString()
-        })
+        const response = await getOfficeEquipmentByIDService(id as string) as IOfficeEquipmentAxiosResponse;
+        if (response.status === 200) {
+            setDefaultAsset({
+                ...response.data
+            })
+        }
     }
 
     useEffect(() => { findOfficeEquipmentByID(); }, [id]);

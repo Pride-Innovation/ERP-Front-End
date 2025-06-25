@@ -22,16 +22,16 @@ const deleteOfficeEquipmentService = async (id: string | number) => {
         const response = await axiosInstance.get(`officeEquipmentAssets/delete/${id}`);
         return response.data;
     } catch (error) {
-        throw error
+        return error
     }
 }
 
 const getOfficeEquipmentByIDService = async (id: string | number) => {
     try {
-        const response = await axiosInstance.get(`officeEquipmentAssets/${id}`);
-        return response?.data?.data
+        const response = await axiosInstance.get(`assets/${id}`);
+        return response
     } catch (error) {
-        throw error;
+        return error;
     }
 }
 
@@ -40,7 +40,7 @@ const updateOfficeEquipmentService = async (body: object, id: string | number) =
         const response = await axiosInstance.post(`officeEquipmentAssets/update/${id}`, body);
         return response?.data
     } catch (error) {
-        throw error
+        return error
     }
 }
 
