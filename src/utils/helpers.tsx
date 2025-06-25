@@ -268,7 +268,7 @@ export const generateReferenceNumber = (): string => {
 export const validateCommodityQuantities = (
     inputData: Array<{ commodity: ICommodity; quantity: number }>,
     records: RowData[]
-): StockValidationResult => {
+): ValidationResult => {
     const errors: string[] = [];
 
     inputData.forEach(input => {
@@ -292,51 +292,55 @@ export const validateCommodityQuantities = (
 }
 
 
-export const validateAssetsOfItems = (rows: RowData[], assetTypes: IAssetType[]) => {
+export const validateAssetsOfItems = (
+    rows: RowData[],
+    assetTypes: IAssetType[]
+): ValidationResult => {
     const errors: string[] = [];
     const engravedNumbersSet: Set<string> = new Set();
+    const validItems: RowData[] = [];
 
-    rows.forEach(record => {
+    rows.forEach((record, index) => {
         const { quantity, selectedAssets } = record;
+        const prefix = `Item ${index + 1}:`;
 
-        /**
-         * Determine that is is not a stationery
-         */
+        const assetTypeName = assetTypes.find(ast => record.assetTypeId === ast.id)?.name;
 
-        const assetTypeName = assetTypes.find(ast => record.id === ast.id)?.name as string;
+        let hasError = false;
 
-        /**
-         * Validate the quantity is the same as the number of quantity
-         */
-        
-        if (selectedAssets?.length !== quantity
-            && assetTypeName 
-            && assetTypeName !== assetTypesStatusConstants.stationery
+        // Quantity mismatch validation (excluding stationery)
+        if (
+            assetTypeName &&
+            assetTypeName !== assetTypesStatusConstants.stationery &&
+            selectedAssets?.length !== quantity
         ) {
             errors.push(
-                `Quantity mismatch for commodity '${record.name}': 
-                expected ${quantity}, found ${selectedAssets?.length ? selectedAssets?.length : 0}.`
+                `${prefix} Quantity mismatch for '${record.name}': expected ${quantity}, found ${selectedAssets?.length || 0}.`
             );
+            hasError = true;
         }
 
-        /*
-         * Validate that Engraved Number (ie Asset ) is not assigned twice. 
-         */
+        // Duplicate engravedNumber validation
         selectedAssets?.forEach(asset => {
             if (engravedNumbersSet.has(asset.engravedNumber)) {
                 errors.push(
-                    `Duplicate engravedNumber '${asset.engravedNumber}' found in commodity '${record.name}'.`
+                    `${prefix} Duplicate engravedNumber '${asset.engravedNumber}' found in '${record.name}'.`
                 );
+                hasError = true;
             } else {
                 engravedNumbersSet.add(asset.engravedNumber);
             }
         });
 
+        if (!hasError) {
+            validItems.push(record);
+        }
     });
 
     return {
         isValid: errors.length === 0,
-        errors
+        errors,
+        validData: errors.length === 0 ? validItems : undefined
     };
-}
+};
 

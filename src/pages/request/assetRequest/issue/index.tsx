@@ -5,7 +5,11 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { useContext, useEffect, useState } from "react";
+import {
+    useContext,
+    useEffect,
+    useState
+} from "react";
 import {
     Grid,
     Stack,
@@ -27,8 +31,15 @@ import { RowData } from "../../../../components/forms/interface";
 import { IRequest, IRequestAxiosResponse } from "../../interface";
 import { RequestContext } from "../../../../context/request/RequestContext";
 import { ICommodity } from "../../../settings/commodity/interface";
-import { findAssetRequestByIDService, issueCommodities } from "../service";
-import { validateAssetsOfItems, validateCommodityQuantities, validateInventoryItems } from "../../../../utils/helpers";
+import {
+    findAssetRequestByIDService,
+    issueCommodities
+} from "../service";
+import {
+    validateAssetsOfItems,
+    validateCommodityQuantities,
+    validateInventoryItems
+} from "../../../../utils/helpers";
 import InventoryTable from "../../../../components/forms/InventoryTable";
 import ButtonComponent from "../../../../components/forms/Button";
 import { useParams } from "react-router";
@@ -100,9 +111,9 @@ const IssueRequestDetails = () => {
     const handleRequestRejection = async () => {
         setSendingRequest(true);
 
-        const countValidation = validateAssetsOfItems(rows, assetTypes)
         const result = validateInventoryItems(rows);
         const validate = validateCommodityQuantities(requestCommodities, rows);
+        const countValidation = validateAssetsOfItems(rows, assetTypes)
 
         if (result.isValid
             && result.validData
@@ -115,18 +126,24 @@ const IssueRequestDetails = () => {
                 quantity: item.quantity
             }));
 
+            const assets = countValidation.validData?.map(asst => [...(asst.selectedAssets ?? [])])
+                .flat().map(asst => ({
+                    id: asst.id,
+                    engravedNumber: asst.engravedNumber
+                }));
+
             const data = {
                 requester: request.requester?.id,
                 commodities: formattedCommodities,
-                comment: ""
+                comment: "",
+                assets
             }
-            console.log(data, "Information!!")
 
             try {
                 /**
                  * TO DO --- Make an API call
                  */
-                // const response = await issueCommodities(data);
+                const response = await issueCommodities(data);
                 // console.log(response, "Issue Items")
             } catch (error) {
                 console.log(error)
@@ -134,14 +151,14 @@ const IssueRequestDetails = () => {
 
         } else {
             setSendingRequest(false);
-            if (countValidation.errors.length > 0) {
-                return toast.error(`Requests validation errors: ${countValidation.errors}`)
-            }
             if (result.errors.length > 0) {
                 return toast.error(`Requests validation errors: ${result.errors}`)
             }
             if (validate.errors.length > 0) {
                 return toast.error(`Requests validation errors: ${validate.errors}`)
+            }
+            if (countValidation.errors.length > 0) {
+                return toast.error(`Requests validation errors: ${countValidation.errors}`)
             }
         }
         setSendingRequest(false);
