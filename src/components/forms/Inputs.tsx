@@ -55,12 +55,14 @@ export const InputComponent = ({
     handleMouseDown,
     multiline = false,
     required,
-    row = 0
+    row = 0,
+    disabled = false
 }: IInputForm) => (
     <BootstrapInput
         multiline={multiline}
         required={required}
         size='small'
+        disabled={disabled}
         rows={row}
         type={type}
         id={id}

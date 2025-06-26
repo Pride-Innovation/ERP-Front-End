@@ -313,7 +313,8 @@ const FleetUtills = () => {
             value: "lpoNumber",
             label: 'LPO Number',
             type: "autocomplete",
-            options: optionsObject.inventoryOptions
+            options: optionsObject.inventoryOptions,
+            disabled: true
         }
     ]
 

@@ -87,7 +87,6 @@ const UpdateOfficeEquipment = () => {
             const response = await updateOfficeEquipmentService(formData, id as string) as IOfficeEquipmentAxiosResponse;
             if (response.status === 201) {
                 toast.success("Asset Updated Successfully");
-                console.log(response.data, "Update information")
                 dispatch(updateOfficeAsset(response.data));
             }
         } catch (error) {

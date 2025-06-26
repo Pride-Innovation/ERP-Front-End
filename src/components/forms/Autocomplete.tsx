@@ -31,7 +31,8 @@ const AutocompleteComponent = ({
     options,
     error,
     multiple = false,
-    name
+    name,
+    disabled = false
 }: IAutocompleteComponent) => {
     const [selectedValue, setSelectedValue] = useState<IOptions | IOptions[] | null>(null);
     const [localInput, setLocalInput] = useState('');
@@ -95,6 +96,7 @@ const AutocompleteComponent = ({
             getOptionLabel={(option: IOptions) => option.label || ''}
             isOptionEqualToValue={(option, value) => option.value === value.value}
             size="small"
+            disabled={disabled}
             fullWidth
             onInputChange={(_, newInputValue) => setLocalInput(newInputValue)}
             renderInput={(params) => (
@@ -103,6 +105,7 @@ const AutocompleteComponent = ({
                     label={label}
                     error={Boolean(error)}
                     helperText={error?.message}
+                    disabled={disabled}
                 />
             )}
         />

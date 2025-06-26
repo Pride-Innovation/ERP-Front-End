@@ -25,6 +25,7 @@ export interface IFormData<T> {
     type: "input" | "select" | "date" | "autocomplete" | "textarea" | "time" | "number";
     options?: Array<IOptions>;
     required?: boolean;
+    disabled?: boolean;
 }
 
 export interface IDispose {

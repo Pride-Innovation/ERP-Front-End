@@ -20,7 +20,7 @@ const createOfficeEquipmentService = async (body: object) => {
 const deleteOfficeEquipmentService = async (id: string | number) => {
     try {
         const response = await axiosInstance.get(`officeEquipmentAssets/delete/${id}`);
-        return response.data;
+        return response
     } catch (error) {
         return error
     }
@@ -38,7 +38,7 @@ const getOfficeEquipmentByIDService = async (id: string | number) => {
 const updateOfficeEquipmentService = async (body: object, id: string | number) => {
     try {
         const response = await axiosInstance.put(`assets/${id}`, body);
-        return response?.data
+        return response
     } catch (error) {
         return error
     }

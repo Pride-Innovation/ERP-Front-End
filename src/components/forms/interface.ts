@@ -30,7 +30,8 @@ export interface IInputForm {
     required?: boolean
     handleClick?: () => void;
     handleMouseDown?: (event: React.MouseEvent<HTMLButtonElement>) => void;
-    row?: number
+    row?: number;
+    disabled?: boolean
 }
 
 export interface IInputPropAdornment {
@@ -80,6 +81,7 @@ export interface IUseFormInput<T extends FieldValues> {
     multiple?: boolean;
     required?: boolean;
     fetchOptions?: (query: string) => Promise<void>;
+    disabled?: boolean
 }
 
 export interface IDatePickerComponent {
@@ -102,7 +104,8 @@ export interface IAutocompleteComponent {
     field: FieldValues;
     error: FieldError | undefined;
     multiple?: boolean;
-    name?: string
+    name?: string;
+    disabled?: boolean
 }
 
 export interface IFileUploadButton {

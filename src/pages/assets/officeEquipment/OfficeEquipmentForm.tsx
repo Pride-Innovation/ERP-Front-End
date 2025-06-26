@@ -88,7 +88,8 @@ const OfficeEquipmentForm = ({
                         formState,
                         value: field.value,
                         label: field.label,
-                        required: field.required === false ? field.required : true
+                        required: field.required === false ? field.required : true,
+                        disabled: field.disabled ? true : false
                     };
 
                     const gridSize = field.type === "textarea" ? 12 : 3;

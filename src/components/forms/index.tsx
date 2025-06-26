@@ -25,7 +25,8 @@ export const UseFormInput = <T extends FieldValues>({
     type = "input",
     row = 0,
     multiline = false,
-    required = true
+    required = true,
+    disabled = false
 }: IUseFormInput<T>) => {
     return (
         <React.Fragment>
@@ -44,6 +45,7 @@ export const UseFormInput = <T extends FieldValues>({
                             field={field}
                             error={formState.errors[value]?.message}
                             id={value}
+                            disabled={disabled}
                         />
                     )}
                 />
@@ -125,6 +127,7 @@ export const UseFormAutocompleteComponent = <T extends FieldValues>({
     label,
     options,
     multiple = false,
+    disabled = false
     // fetchOptions
 }: IUseFormInput<T>) => {
     return (
@@ -141,8 +144,9 @@ export const UseFormAutocompleteComponent = <T extends FieldValues>({
                             options={options as Array<IOptions>}
                             field={field}
                             label={label}
+                            disabled={disabled}
                             error={formState.errors[value]?.message}
-                            // fetchOptions={fetchOptions}
+                        // fetchOptions={fetchOptions}
                         />
                     )}
                 />
