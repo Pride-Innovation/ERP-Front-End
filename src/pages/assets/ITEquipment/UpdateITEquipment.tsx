@@ -7,7 +7,7 @@ Managing Director
 
 import { useEffect, useState } from "react";
 import { useParams } from "react-router";
-import { IITEquipment } from "./interface";
+import { IITEquipment, IITEquipmentAxiosResponse } from "./interface";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { ITEquipmentSchema } from "./schema";
@@ -16,17 +16,49 @@ import { FormHeader } from "../../../components/headers/TypographyComponent";
 import ITEquipmentForm from "./ITEquipmentForm";
 import { itEquipmentMock } from "../../../mocks/itEquipment";
 import { getITEquipmentByIDService } from "./service";
+import Loading from "../../../components/loading";
 
 const UpdateITEquipment = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
     const { id } = useParams<{ id: string }>();
     const [defaultAsset, setDefaultAsset] = useState<any>(itEquipmentMock[0]);
     const [option, setOption] = useState<string | undefined>('');
+    const [loading, setLoading] = useState<boolean>(false);
+    const [params, setParams] = useState<Record<string, any>>();
 
     const findITEquipmentByID = async () => {
-        const response = await getITEquipmentByIDService(id as string);
-        setDefaultAsset({
-        });
+        setLoading(true);
+
+        const response = await getITEquipmentByIDService(id as string) as IITEquipmentAxiosResponse;
+
+        if (response.status === 200) {
+            console.log(response.data, "Response data!!")
+            setParams({
+                branchName: response.data.branch?.name,
+                assignedToFirstName: response.data.assignedTo?.firstName,
+                lpoNumber: response.data.stock?.lpoNumber,
+                supplierName: response.data.supplier?.name
+            })
+
+            setDefaultAsset({
+                ...response.data,
+                supplier: response.data.supplier?.id,
+                assignedTo: response.data.assignedTo?.id,
+                branch: response.data.branch?.id,
+                assetStatus: response.data.assetStatus?.id,
+                assetType: response.data.assetType?.id,
+                category: response.data.commodity?.id,
+                engravedNumber: response.data.engravedNumber ? response.data.engravedNumber : "",
+                unitOfMeasure: response.data.unitOfMeasure ? response.data.unitOfMeasure : "",
+                netValueB: response.data.netValueB ? response.data.netValueB : "",
+                assetDepreciationRate: response.data.assetDepreciationRate ? response.data.assetDepreciationRate : "",
+                hostname: response.data.hostname ? response.data.hostname : "",
+                detailNetBookValue: response.data.detailNetBookValue ? response.data.detailNetBookValue : "",
+                make: response.data.make ? response.data.make : "",
+                lpoNumber: response.data.stock?.lpoNumber
+            })
+        }
+        setLoading(false)
     }
 
     useEffect(() => { findITEquipmentByID(); }, [id]);
@@ -62,21 +94,26 @@ const UpdateITEquipment = () => {
             <Grid container xs={12}>
                 <Grid item xs={12}>
                     <FormHeader header="Update Asset" />
-                    <form
-                        style={{ width: "100%" }}
-                        autoComplete="off"
-                        onSubmit={handleSubmit(onSubmit)}
-                    >
-                        <ITEquipmentForm
-                            option={option}
-                            handleChange={handleChange}
-                            buttonText="Submit"
-                            formState={formState}
-                            control={control}
-                            sendingRequest={sendingRequest}
-                            register={register}
-                        />
-                    </form>
+                    {loading ? <Loading items='IT Equipment' /> :
+                        (<form
+                            style={{ width: "100%" }}
+                            autoComplete="off"
+                            onSubmit={handleSubmit(onSubmit)}
+                        >
+                            <ITEquipmentForm
+                                option={option}
+                                handleChange={handleChange}
+                                buttonText="Submit"
+                                formState={formState}
+                                control={control}
+                                sendingRequest={sendingRequest}
+                                register={register}
+                                lpoParams={{ lpoNumber: params?.lpoNumber }}
+                                userParams={{ firstName: params?.assignedToFirstName }}
+                                supplierParams={{ name: params?.supplierName }}
+                                branchParams={{ name: params?.branchName }}
+                            />
+                        </form>)}
                 </Grid>
             </Grid>
         </Card>

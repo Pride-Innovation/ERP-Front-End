@@ -20,7 +20,7 @@ const createITEquipmentService = async (body: object) => {
 const deleteITEquipmentService = async (id: string | number) => {
     try {
         const response = await axiosInstance.get(`itAssets/delete/${id}`);
-        return response.data?.data
+        return response
     } catch (error) {
         return error;
     }
@@ -28,8 +28,8 @@ const deleteITEquipmentService = async (id: string | number) => {
 
 const getITEquipmentByIDService = async (id: string | number) => {
     try {
-        const response = await axiosInstance.get(`itAssets/${id}`);
-        return response.data?.data
+        const response = await axiosInstance.get(`assets/${id}`);
+        return response
     } catch (error) {
         return error;
     }
@@ -37,8 +37,8 @@ const getITEquipmentByIDService = async (id: string | number) => {
 
 const updateITEquipmentService = async (body: object, id: string | number) => {
     try {
-        const response = await axiosInstance.post(`itAssets/update/${id}`, body);
-        return response?.data;
+        const response = await axiosInstance.put(`assets/${id}`, body);
+        return response;
     } catch (error) {
         return error;
     }

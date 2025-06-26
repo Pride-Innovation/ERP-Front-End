@@ -99,7 +99,7 @@ const UpdateFleet = () => {
             <Grid container xs={12}>
                 <Grid item xs={12}>
                     <FormHeader header="Update Asset" />
-                    {loading ? <Loading items='Office Equipment' /> :
+                    {loading ? <Loading items='Fleet Equipment' /> :
                         (<form
                             style={{ width: "100%" }}
                             autoComplete="off"

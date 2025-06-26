@@ -82,6 +82,10 @@ export interface IITEquipmentForm {
     sendingRequest: boolean;
     option?: string | undefined;
     handleChange?: (event: SelectChangeEvent) => void;
+    lpoParams?: Record<string, any>
+    userParams?: Record<string, any>
+    supplierParams?: Record<string, any>
+    branchParams?: Record<string, any>
 }
 
 export interface IAsssetCategory {

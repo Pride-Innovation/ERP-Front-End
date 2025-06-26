@@ -47,7 +47,11 @@ const ITEquipmentForm = ({
     buttonText,
     sendingRequest,
     option,
-    handleChange
+    handleChange,
+    lpoParams,
+    userParams,
+    supplierParams,
+    branchParams
 }: IITEquipmentForm) => {
     const navigate = useNavigate();
     const { formFields, categories, computerFields, determineITAssetType } = ITEquipmentUtills();
@@ -64,15 +68,12 @@ const ITEquipmentForm = ({
     const { fetchAllCommodities } = CommodityUtills()
     const { fetchInventory } = InventoryUtills()
 
-    useEffect(() => { fetchAllBranches() }, []);
+    useEffect(() => { fetchAllBranches(branchParams) }, []);
     useEffect(() => { fetchAllStatuses() }, []);
-    useEffect(() => { 
-        console.log("IT Equipment Form")
-        fetchAllUsers() 
-    }, []);
-    useEffect(() => { fetchAllSuppliers() }, []);
+    useEffect(() => { fetchAllUsers(userParams) }, []);
+    useEffect(() => { fetchAllSuppliers(supplierParams) }, []);
     useEffect(() => { fetchAllAssetTypes() }, []);
-    useEffect(() => { fetchInventory() }, []);
+    useEffect(() => { fetchInventory(lpoParams) }, []);
 
     useEffect(() => {
         if (assetTypes.length > 0) {
