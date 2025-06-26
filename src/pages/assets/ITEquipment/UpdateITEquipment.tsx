@@ -15,8 +15,12 @@ import { Card, Grid, SelectChangeEvent } from "@mui/material";
 import { FormHeader } from "../../../components/headers/TypographyComponent";
 import ITEquipmentForm from "./ITEquipmentForm";
 import { itEquipmentMock } from "../../../mocks/itEquipment";
-import { getITEquipmentByIDService } from "./service";
+import { getITEquipmentByIDService, updateITEquipmentService } from "./service";
 import Loading from "../../../components/loading";
+import { toast } from "react-toastify";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "../../../store";
+import { updateITAsset } from "./slice";
 
 const UpdateITEquipment = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
@@ -25,6 +29,7 @@ const UpdateITEquipment = () => {
     const [option, setOption] = useState<string | undefined>('');
     const [loading, setLoading] = useState<boolean>(false);
     const [params, setParams] = useState<Record<string, any>>();
+    const dispatch = useDispatch<AppDispatch>();
 
     const findITEquipmentByID = async () => {
         setLoading(true);
@@ -82,7 +87,15 @@ const UpdateITEquipment = () => {
 
     const onSubmit = async (formData: IITEquipment) => {
         setSendingRequest(true);
-        console.log(formData, "Form Data!!")
+        try {
+            const response = await updateITEquipmentService(formData, id as string) as IITEquipmentAxiosResponse
+            if (response.status === 201) {
+                toast.success("Asset Updated Successfully");
+                dispatch(updateITAsset(response.data))
+            }
+        } catch (error) {
+            console.log(error)
+        }
         setSendingRequest(false)
     };
 

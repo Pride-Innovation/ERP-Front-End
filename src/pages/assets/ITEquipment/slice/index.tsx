@@ -16,10 +16,13 @@ const itAssetsSlice = createSlice({
     reducers: {
         loadAllITAssets: (state, action) => {
             state.itAssets = action.payload
+        },
+        updateITAsset: (state, action) => {
+            state.itAssets = state.itAssets.map((asset) => asset.id === action.payload.id ? action.payload : asset)
         }
     }
 })
 
 const { actions, reducer } = itAssetsSlice;
-export const { loadAllITAssets } = actions;
+export const { loadAllITAssets, updateITAsset } = actions;
 export default reducer;
