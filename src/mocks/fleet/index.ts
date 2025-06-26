@@ -33,6 +33,8 @@ export const fleetsMock: IFleet[] = [
         branch: branchesMock[0],
         lpoNumber: "",
         stock: inventoryMock[0],
-        commodity: null
+        commodity: null,
+        assetDepreciationRate: "DPR",
+        model: ""
     }
 ];

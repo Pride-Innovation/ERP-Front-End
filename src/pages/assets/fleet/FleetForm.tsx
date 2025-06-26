@@ -39,6 +39,10 @@ const FleetForm = ({
     register,
     buttonText,
     sendingRequest,
+    lpoParams,
+    userParams,
+    supplierParams,
+    branchParams
 }: IFleetForm) => {
     const navigate = useNavigate();
     const [assetTypeId, setAssetTypeId] = useState<number | null>()
@@ -53,12 +57,12 @@ const FleetForm = ({
     const { fetchAllCommodities } = CommodityUtills()
     const { fetchInventory } = InventoryUtills()
 
-    useEffect(() => { fetchAllBranches() }, []);
+    useEffect(() => { fetchAllBranches(branchParams) }, []);
     useEffect(() => { fetchAllStatuses() }, []);
-    useEffect(() => { fetchAllUsers() }, []);
+    useEffect(() => { fetchAllUsers(userParams) }, []);
     useEffect(() => { fetchAllAssetTypes() }, []);
-    useEffect(() => { fetchAllSuppliers() }, []);
-    useEffect(() => { fetchInventory() }, []);
+    useEffect(() => { fetchAllSuppliers(supplierParams) }, []);
+    useEffect(() => { fetchInventory(lpoParams) }, []);
 
     useEffect(() => {
         if (assetTypes.length > 0) {

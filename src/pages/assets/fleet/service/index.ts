@@ -18,18 +18,18 @@ export const createFleetService = async (body: Object) => {
 
 export const getFleetEquipmentByIDService = async (id: string | number) => {
     try {
-        const response = await axiosInstance.get(`fleetAssets/${id}`);
-        return response?.data?.data
+        const response = await axiosInstance.get(`assets/${id}`);
+        return response
     } catch (error) {
-        throw error;
+        return error;
     }
 }
 
 export const updateFleetEquipmentService = async (body: object, id: string | number) => {
     try {
-        const response = await axiosInstance.post(`fleetAssets/update/${id}`, body);
-        return response?.data
+        const response = await axiosInstance.put(`assets/${id}`, body);
+        return response
     } catch (error) {
-        throw error
+        return error
     }
 }

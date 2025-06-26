@@ -15,10 +15,13 @@ const fleetSlice = createSlice({
     reducers: {
         loadAllFleet: (state, action) => {
             state.fleetAssets = action.payload
+        },
+        updateFleetAsset: (state, action) => {
+            state.fleetAssets = state.fleetAssets.map(asset => asset.id === action.payload?.id ? action.payload : asset)
         }
     }
 });
 
 const { actions, reducer } = fleetSlice;
-export const { loadAllFleet } = actions;
+export const { loadAllFleet, updateFleetAsset } = actions;
 export default reducer;

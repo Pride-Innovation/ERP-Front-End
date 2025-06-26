@@ -72,6 +72,10 @@ export interface IFleetForm {
     register: UseFormRegister<IFleet>;
     buttonText: string;
     sendingRequest: boolean;
+    lpoParams?: Record<string, any>
+    userParams?: Record<string, any>
+    supplierParams?: Record<string, any>
+    branchParams?: Record<string, any>
 }
 
 export interface IFleetTableData {
