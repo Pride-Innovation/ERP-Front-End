@@ -42,6 +42,6 @@ export const itEquipmentMock: IITEquipment[] = [
         branch: branchesMock[0],
         lpoNumber: "LPONUMB",
         stock: inventoryMock[0],
-        commodity: null
+        commodity: null,
     }
 ]

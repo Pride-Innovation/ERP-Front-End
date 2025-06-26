@@ -28,11 +28,10 @@ const UpdateITEquipment = () => {
 
     const findITEquipmentByID = async () => {
         setLoading(true);
-
         const response = await getITEquipmentByIDService(id as string) as IITEquipmentAxiosResponse;
 
         if (response.status === 200) {
-            console.log(response.data, "Response data!!")
+
             setParams({
                 branchName: response.data.branch?.name,
                 assignedToFirstName: response.data.assignedTo?.firstName,
@@ -55,6 +54,8 @@ const UpdateITEquipment = () => {
                 hostname: response.data.hostname ? response.data.hostname : "",
                 detailNetBookValue: response.data.detailNetBookValue ? response.data.detailNetBookValue : "",
                 make: response.data.make ? response.data.make : "",
+                model: response.data.model ? response.data.model : "",
+                serialNumber: response.data.serialNumber ? response.data.serialNumber : "",
                 lpoNumber: response.data.stock?.lpoNumber
             })
         }
@@ -81,7 +82,7 @@ const UpdateITEquipment = () => {
 
     const onSubmit = async (formData: IITEquipment) => {
         setSendingRequest(true);
-
+        console.log(formData, "Form Data!!")
         setSendingRequest(false)
     };
 

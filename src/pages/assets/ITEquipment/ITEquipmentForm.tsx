@@ -58,15 +58,16 @@ const ITEquipmentForm = ({
     const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore);
     const { commodities } = useSelector((state: RootState) => state.CommodityStore);
 
-    const [assetTypeId, setAssetTypeId] = useState<number | null>()
+    const [assetTypeId, setAssetTypeId] = useState<number | null>();
+    const [selectedCategory, setSelectedCategory] = useState<string>('');
 
     const { fetchAllBranches } = BranchUtills();
     const { fetchAllStatuses } = StatusUtills();
     const { fetchAllUsers } = UserUtils();
-    const { fetchAllAssetTypes } = AssetTypeUtills()
+    const { fetchAllAssetTypes } = AssetTypeUtills();
     const { fetchAllSuppliers } = SupplierUtills();
-    const { fetchAllCommodities } = CommodityUtills()
-    const { fetchInventory } = InventoryUtills()
+    const { fetchAllCommodities } = CommodityUtills();
+    const { fetchInventory } = InventoryUtills();
 
     useEffect(() => { fetchAllBranches(branchParams) }, []);
     useEffect(() => { fetchAllStatuses() }, []);
@@ -97,26 +98,22 @@ const ITEquipmentForm = ({
     }
 
     useEffect(() => {
-        if (option) {
-
+        if (option && commodities.length > 0) {
             const val = parseInt(option);
-            const comodityName = determineCommodityName(val);
+            setSelectedCategory(val.toLocaleString());
 
-            if ([categories.laptop.toLocaleLowerCase(),
-            categories.desktopComputer.toLocaleLowerCase()
-            ].includes(comodityName)) {
-                setStateFormFields(() => {
-                    return [...(formFields.slice(1)), ...computerFields]
-                })
+            const commodityName = determineCommodityName(val);
+            if ([categories.laptop.toLowerCase(), categories.desktopComputer.toLowerCase()].includes(commodityName)) {
+                setStateFormFields([...formFields.slice(1), ...computerFields]);
             } else {
-                return setStateFormFields([...(formFields.slice(1))])
+                setStateFormFields([...formFields.slice(1)]);
             }
         }
-    }, [option]);
+    }, [option, commodities]);
 
     useEffect(() => {
         if (!option) { setStateFormFields(formFields.slice(1)) }
-    }, [formFields])
+    }, [formFields]);
 
     return (
         <Box sx={{ width: "100%" }}>
@@ -126,22 +123,22 @@ const ITEquipmentForm = ({
                         <InputLabel id={"category"}>Select Category</InputLabel>
                         <Controller
                             control={control}
-                            {...register("category")}
+                            name="category"
                             rules={{ required: true }}
-                            render={({ field: { onChange, onBlur } }) => (
+                            render={({ field: { onChange, onBlur, value } }) => (
                                 <Select
-                                    required={true}
-                                    labelId={"category"}
-                                    id={"category"}
-                                    value={option}
+                                    required
+                                    labelId="category"
+                                    id="category"
+                                    value={value ?? selectedCategory}
                                     label="Select Category"
                                     onBlur={onBlur}
-                                    onChange={
-                                        (e) => {
-                                            onChange(e);
-                                            handleChange?.(e)
-                                        }
-                                    }
+                                    onChange={(e) => {
+                                        const selectedValue = e.target.value;
+                                        setSelectedCategory(selectedValue);
+                                        onChange(selectedValue);
+                                        handleChange?.(e);
+                                    }}
                                 >
                                     {(formFields[0].options as Array<IOptions>).map((option) => (
                                         <MenuItem key={option.value} value={option.value}>
@@ -149,11 +146,11 @@ const ITEquipmentForm = ({
                                         </MenuItem>
                                     ))}
                                 </Select>
-
                             )}
                         />
                     </FormControl>
                 </Grid>
+
                 {stateFormFields.map((field) => {
                     const commonProps = {
                         register,
@@ -161,11 +158,11 @@ const ITEquipmentForm = ({
                         formState,
                         value: field.value,
                         label: field.label,
-                        required: field.required === false ? field.required : true
+                        required: field.required === false ? field.required : true,
+                        disabled: field.disabled ? true : false
                     };
 
                     const gridSize = field.type === "textarea" ? 12 : 3;
-
 
                     return (
                         <Grid item xs={12} md={gridSize} key={field.value}>
@@ -210,7 +207,7 @@ const ITEquipmentForm = ({
                 </Grid>
             </Grid>
         </Box>
-    )
-}
+    );
+};
 
-export default ITEquipmentForm
+export default ITEquipmentForm;
