@@ -45,6 +45,7 @@ import ButtonComponent from "../../../../components/forms/Button";
 import { useParams } from "react-router";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../store";
+import { IIssueAxiosResponse } from "./interface";
 
 const initialData: RowData[] = [
     { id: 1, name: '', groupName: '', quantity: 0 },
@@ -136,15 +137,18 @@ const IssueRequestDetails = () => {
                 requester: request.requester?.id,
                 commodities: formattedCommodities,
                 comment: "",
-                assets
+                assets,
+                requestId: id
             }
 
             try {
                 /**
                  * TO DO --- Make an API call
                  */
-                const response = await issueCommodities(data);
-                // console.log(response, "Issue Items")
+                const response = await issueCommodities(data) as IIssueAxiosResponse;
+                if (response.status === 201) {
+                    toast.success("Request Issued Successfully")
+                }
             } catch (error) {
                 console.log(error)
             }
