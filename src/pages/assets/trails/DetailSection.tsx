@@ -42,7 +42,7 @@ const DetailSection = ({
                                 }
                                 {text}
                                 {
-                                    label === "Serial Number" &&
+                                    label === "Engraved Number" &&
                                     <ContentPasteIcon fontSize='small' color='info' sx={{ ml: "5px" }} />
                                 }
                                 {

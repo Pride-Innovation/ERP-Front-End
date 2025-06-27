@@ -28,6 +28,7 @@ import { useParams } from 'react-router';
 import { IITEquipment, IITEquipmentAxiosResponse } from '../interface';
 import { getITEquipmentByIDService } from '../service';
 import Loading from '../../../../components/loading';
+import moment from 'moment';
 
 const ITEquipmentDetails = () => {
     const [equipment, setEquipment] = useState<IITEquipment>({} as IITEquipment)
@@ -71,10 +72,10 @@ const ITEquipmentDetails = () => {
                                     <Divider />
                                     <DetailSection label='Hostname' text={equipment.hostname} />
                                     {equipment.model && <DetailSection label="Model" text={equipment.model} />}
-                                    {equipment.serialNumber && <DetailSection label="Serial Number" text={equipment.serialNumber} />}
+                                    {equipment.engravedNumber && <DetailSection label="Engraved Number" text={equipment.engravedNumber} />}
                                     {equipment.supplier && <DetailSection label="Supplier" text={equipment.supplier?.name} />}
                                     <DetailSection label="Purchase Cost" text={equipment.purchaseCost} />
-                                    <DetailSection label="Date of Receipt" text={equipment.dateReceipt} />
+                                    <DetailSection label="Date of Receipt" text={moment(equipment.dateReceipt).format('Do MMMM YYYY')} />
                                     {equipment.branch && <DetailSection label="Location" text={equipment.branch.name} />}
                                     {equipment.assetStatus && <DetailSection label="Status" text={equipment.assetStatus.name} />}
                                     {equipment.description && <DetailSection label="Description" text={equipment.description} />}
