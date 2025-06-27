@@ -153,7 +153,7 @@ const FleetUtills = () => {
                     purchaseCost: item.purchaseCost,
                     costOfAsset: item.costOfTheAsset,
                     status: item?.assetStatus?.status as string,
-                    assignedTo: `${item.assignedTo?.lastName} ${item.assignedTo?.firstName}`,
+                    assignedTo: item.assignedTo?.firstName ? `${item.assignedTo?.lastName} ${item.assignedTo?.firstName}` : "",
                     location: item.branch?.name as string
                 }
             )
@@ -260,7 +260,8 @@ const FleetUtills = () => {
             value: "assignedTo",
             label: 'Assigned To',
             type: "autocomplete",
-            options: optionsObject.usersOptions
+            options: optionsObject.usersOptions,
+            required: false
         },
         {
             value: "branch",
