@@ -10,13 +10,19 @@ import { ITableHeader } from "../../../components/tables/interface";
 import assignmentHistoryMock from "../../../mocks/assignmentHistory";
 import { getTableHeaders } from "../../../components/tables/getTableHeaders";
 import { crudStates } from "../../../utils/constants";
+import { fetchRowsService } from "../../../core/apis/globalService";
+import { IAssetAssignmentHistorysAxiosResponse } from "./interface";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "../../../store";
+import { loadAssetAssignmentHistory } from "./slice";
 
 const AssignmentHistoryUtills = () => {
-    const endPoint = 'posts';
+    const endPoint = 'assignment-history';
     const header = { plural: 'Assignment History', singular: 'Assignment' };
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
     const [modalState, setModalState] = useState<string>("");
     const [open, setOpen] = useState<boolean>(false);
+    const dispatch = useDispatch<AppDispatch>()
 
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
@@ -43,6 +49,23 @@ const AssignmentHistoryUtills = () => {
         ...data,
     };
 
+    const fetchAssignmentHistory = async (params?: Record<string, any>) => {
+        try {
+            const response = await fetchRowsService({
+                pageNumber: 0,
+                pageSize: 10,
+                endPoint,
+                params
+            }) as IAssetAssignmentHistorysAxiosResponse
+            if (response.status === 200) {
+                console.log(response.data.content)
+                dispatch(loadAssetAssignmentHistory(response.data.content))
+            }
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
     useEffect(() => {
         setColumnHeaders(getTableHeaders(rowData))
     }, []);
@@ -55,7 +78,8 @@ const AssignmentHistoryUtills = () => {
         setModalState,
         open,
         handleClose,
-        handleCreation
+        handleCreation,
+        fetchAssignmentHistory
     }
     )
 }

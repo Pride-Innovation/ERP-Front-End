@@ -21,21 +21,12 @@ const AssignmentHistory = ({ id }: { id: string | number }) => {
         modalState,
         open,
         handleClose,
-        handleCreation
+        handleCreation,
+        fetchAssignmentHistory
     } = AssignmentHistoryUtills()
 
-    const fetchResources = async () => {
-        setLoading(true)
-        try {
-
-        } catch (error) {
-
-        }
-        setLoading(false)
-    }
-
     useEffect(() => {
-        fetchResources();
+        fetchAssignmentHistory();
     }, [id]);
 
     return (
