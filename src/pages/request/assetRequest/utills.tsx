@@ -54,10 +54,15 @@ const RequestUtills = () => {
     const handleClose = () => setOpen(false);
 
 
-    const fetchAllRequests = async () => {
+    const fetchAllRequests = async (params?: Record<string, any>) => {
         setLoading(true)
         try {
-            const response = await fetchRowsService({ pageNumber: 0, pageSize: 10, endPoint }) as IRequestsAxiosResponse;
+            const response = await fetchRowsService({ 
+                pageNumber: 0, 
+                pageSize: 10, 
+                endPoint,
+                params
+            }) as IRequestsAxiosResponse;
             if (response.status === 200) {
                 dispatch(loadAllRequests(response.data.content));
                 setCount(response.data.totalElements)

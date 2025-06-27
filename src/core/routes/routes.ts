@@ -36,6 +36,7 @@ const UPDATE_TRANSPORT_REQUEST: string = `${ASSETS_MANAGEMENT}/transport-request
 /* Request Subroutes Routes */
 const LIST_PENDING: string = `${REQUEST}/pending`
 const LIST_REJECTED: string = `${REQUEST}/rejected`
+const LIST_ISSUED: string = `${REQUEST}/issued`
 
 /* Request Subroutes Routes */
 const LIST_TRANSPORT_PENDING: string = `${TRANSPORT_REQUEST}/pending`
@@ -94,6 +95,7 @@ export const ROUTES = {
     ERRORS,
     LIST_PENDING,
     LIST_REJECTED,
+    LIST_ISSUED,
     TRANSPORT_REQUEST,
     CREATE_TRANSPORT_REQUEST,
     UPDATE_TRANSPORT_REQUEST,

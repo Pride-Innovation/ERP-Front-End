@@ -39,7 +39,7 @@ import RequestDetails from '../../pages/request/assetRequest/view'
 import CreateInventory from '../../pages/inventory/CreateInventory'
 import UpdateInventory from '../../pages/inventory/UpdateInventory'
 import Store from '../../pages/store'
-import IssueRequestDetails from '../../pages/request/assetRequest/issue'
+import IssueRequestDetails from '../../pages/request/assetRequest/issue/IssueRequestDetails'
 
 const AppRoutes = () => {
   // const { routePermission } = RoutesUtills();

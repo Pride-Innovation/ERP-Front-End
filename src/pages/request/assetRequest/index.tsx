@@ -25,6 +25,7 @@ import ListIcon from '@mui/icons-material/List';
 import RoutesUtills from '../../../core/routes/utills';
 import { IPermission } from '../../settings/interface';
 import { INavigation } from '../interface';
+import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
 
 const RequestsManagement = () => {
   const [path, setPath] = useState<string>("");
@@ -58,6 +59,13 @@ const RequestsManagement = () => {
       text: "Rejected Requests",
       path: ROUTES.LIST_REJECTED,
       icon: <CancelIcon color='error' />,
+      permission: routePermission(16) as IPermission
+    },
+    {
+      id: 4,
+      text: "Issued Requests",
+      path: ROUTES.LIST_ISSUED,
+      icon: <ShareOutlinedIcon sx={{ color: "blue"}} />,
       permission: routePermission(16) as IPermission
     }
   ]
