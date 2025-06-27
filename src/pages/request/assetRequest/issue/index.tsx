@@ -71,6 +71,7 @@ const IssuedRequest = () => {
                     rows={requestTableData}
                     columnHeaders={columnHeaders}
                     handleOptionClicked={handleOptionClicked}
+                    params={{ statusId: 5 }}
                 />
             }
         </Grid>

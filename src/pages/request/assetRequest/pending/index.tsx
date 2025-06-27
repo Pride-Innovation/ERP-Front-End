@@ -71,6 +71,7 @@ const PendingRequest = () => {
                     rows={requestTableData}
                     columnHeaders={columnHeaders}
                     handleOptionClicked={handleOptionClicked}
+                    params={{ statusId: 1 }}
                 />
             }
         </Grid>

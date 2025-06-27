@@ -70,6 +70,7 @@ const RejectedRequest = () => {
                     rows={requestTableData}
                     columnHeaders={columnHeaders}
                     handleOptionClicked={handleOptionClicked}
+                    params={{ statusId: 2 }}
                 />
             }
         </Grid>
