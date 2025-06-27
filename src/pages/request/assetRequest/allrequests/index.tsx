@@ -45,11 +45,7 @@ const Request = () => {
     } = RequestUtills();
 
     useEffect(() => { fetchAllRequests() }, []);
-    useEffect(() => {
-        if (requests.length > 0) {
-            handleRequest(requests)
-        }
-    }, [requests]);
+    useEffect(() => { handleRequest(requests) }, [requests]);
 
     useEffect(() => {
         if (fileData.module === module) {

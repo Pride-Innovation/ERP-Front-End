@@ -39,11 +39,7 @@ const PendingRequest = () => {
     }, []);
 
 
-    useEffect(() => {
-        if (requests.length > 0) {
-            handleRequest(requests)
-        }
-    }, [requests]);
+    useEffect(() => { handleRequest(requests) }, [requests]);
 
     return (
         <Grid xs={12} container>

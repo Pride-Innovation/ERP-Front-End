@@ -64,6 +64,7 @@ const RequestUtills = () => {
                 params
             }) as IRequestsAxiosResponse;
             if (response.status === 200) {
+                console.log(response.data.content, "Response data!!")
                 dispatch(loadAllRequests(response.data.content));
                 setCount(response.data.totalElements)
             }
