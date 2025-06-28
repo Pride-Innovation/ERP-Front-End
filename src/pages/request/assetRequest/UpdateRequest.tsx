@@ -20,6 +20,9 @@ import { ICommodity } from '../../settings/commodity/interface';
 import { RowData } from '../../../components/forms/interface';
 import { validateInventoryItems } from '../../../utils/helpers';
 import { toast } from 'react-toastify';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../store';
+import CommodityUtills from '../../settings/commodity/utills';
 
 const UpdateRequest = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
@@ -28,6 +31,10 @@ const UpdateRequest = () => {
     const [defaultRequest, setDefaultRequest] = useState<any>(requestMock[0]);
     const { setRows, rows } = useContext(RequestContext);
     const [file, setFile] = useState<File | null>(null);
+    const { commodities } = useSelector((state: RootState) => state.CommodityStore);
+    const { fetchAllCommodities } = CommodityUtills();
+
+    useEffect(() => { fetchAllCommodities() }, []);
 
     const findAssetRequestById = async () => {
         try {
@@ -45,15 +52,23 @@ const UpdateRequest = () => {
     useEffect(() => { findAssetRequestById() }, [id]);
 
     const handleRows = () => {
-        const commodities = defaultRequest?.commodities as Array<{ commodity: ICommodity, quantity: number }>
-        const rowData = commodities.map(commodity => ({
-            id: commodity.commodity.id,
-            name: commodity.commodity.name,
-            groupName: commodity.commodity.groupName,
-            quantity: commodity.quantity
-        })) as Array<RowData>;
+        if (defaultRequest?.commodities
+            && commodities?.length > 0) {
+            const rowData = (defaultRequest.commodities as Array<{
+                commodity: ICommodity,
+                quantity: number
+            }>
+            ).map((commodity, index) => ({
+                id: Date.now() + index,
+                name: commodity.commodity.name,
+                groupName: commodity.commodity.groupName,
+                quantity: commodity.quantity,
+                commodityId: commodity.commodity.id,
+                assetTypeId: commodity.commodity.assetType?.id,
+            })) as Array<RowData>;
 
-        setRows(rowData);
+            setRows(rowData);
+        }
     }
 
     const {

@@ -97,6 +97,7 @@ const FleetUtills = () => {
         detailNetBookValue,
         netValueB,
         unitOfMeasure,
+        dateReceipt,
         image,
         stock,
         commodity,
@@ -105,6 +106,7 @@ const FleetUtills = () => {
 
     const rowData = {
         ...data,
+        dateReceived: "",
         status: fleetsMock[0].assetStatus?.name,
         assignedTo: fleetsMock[0].assignedTo?.firstName,
         location: "",
@@ -136,6 +138,7 @@ const FleetUtills = () => {
                 detailNetBookValue,
                 netValueB,
                 unitOfMeasure,
+                dateReceipt,
                 image,
                 stock,
                 commodity,

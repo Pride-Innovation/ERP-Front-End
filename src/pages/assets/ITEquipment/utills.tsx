@@ -119,6 +119,7 @@ const ITEquipmentUtills = () => {
         unitOfMeasure,
         lpoNumber,
         stock,
+        dateReceipt,
         commodity,
         image,
         ...data
@@ -126,6 +127,7 @@ const ITEquipmentUtills = () => {
 
     const rowData = {
         ...data,
+        dateReceived: "",
         status: itEquipmentMock[0].assetStatus?.name,
         assignedTo: itEquipmentMock[0].assignedTo?.firstName,
         location: "",
@@ -168,6 +170,7 @@ const ITEquipmentUtills = () => {
                 lpoNumber,
                 stock,
                 commodity,
+                dateReceipt,
                 image,
                 ...fielsdata
             } = list[index];
