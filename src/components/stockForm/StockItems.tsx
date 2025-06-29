@@ -46,7 +46,7 @@ import AppRegistrationOutlinedIcon from '@mui/icons-material/AppRegistrationOutl
 
 const StockItems = () => {
     const { fetchAllCommodities } = CommodityUtills()
-    const [itemOptions, setItemOptions] = useState<{ name: string; groupName: string }[]>([]);
+    const [itemOptions, setItemOptions] = useState<{ name: string; groupName: string, assetTypeId: number | string }[]>([]);
     const { stockRows, setStockRows, setAssetType, assetType } = useContext(RequestContext);
     const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore);
     const { commodities } = useSelector((state: RootState) => state.CommodityStore);
@@ -59,10 +59,16 @@ const StockItems = () => {
     };
 
 
-    const handleAssetTypeNameChange = (value: string) => {
-        const selectedType = assetTypes.find(asstyp => asstyp.id === value);
+    const handleAssetTypeNameChange = (id: number, value: string) => {
+        const updatedRows = stockRows.map((row) =>
+            row.id === id ? { ...row, assetTypeId: value } : row
+        );
+        setStockRows(updatedRows);
+
+        const selectedType = assetTypes.find((asstyp) => asstyp.id === value);
         if (selectedType) {
-            setAssetType(selectedType);
+            setAssetType(selectedType)
+            fetchAllCommodities({ assetTypeId: selectedType.id });
         }
     };
 
@@ -110,17 +116,16 @@ const StockItems = () => {
             const options = commodities.map((item: any) => ({
                 name: item.name,
                 groupName: item.groupName,
+                assetTypeId: item?.assetType?.id
             }));
-            setItemOptions(options);
+            setItemOptions(prev => {
+                const merged = [...options, ...prev];
+                const uniqueByName = Array.from(new Map(merged.map(item => [item.name, item])).values());
+                return uniqueByName;
+            });
         }
     }, [commodities]);
 
-
-    useEffect(() => {
-        if (assetType.id) {
-            fetchAllCommodities({ assetTypeId: assetType.id })
-        }
-    }, [assetType])
 
     return (
         <Paper elevation={4} sx={{
@@ -241,8 +246,8 @@ const StockItems = () => {
                                 <TableCell sx={{ borderBottom: 'none', px: 2, py: 1 }}>
                                     <Select
                                         fullWidth
-                                        value={assetType?.id || ""}
-                                        onChange={(e) => handleAssetTypeNameChange(e.target.value as string)}
+                                        value={row.assetTypeId || ""}
+                                        onChange={(e) => handleAssetTypeNameChange(row.id, e.target.value as string)}
                                         displayEmpty
                                         size="small"
                                         variant="standard"
@@ -250,7 +255,7 @@ const StockItems = () => {
                                         sx={{
                                             fontSize: 14,
                                             fontWeight: 400,
-                                            color: row.name ? 'text.primary' : 'text.secondary',
+                                            color: row.assetTypeId ? 'text.primary' : 'text.secondary',
                                             '& .MuiSelect-select': {
                                                 padding: '8px 12px',
                                             },
@@ -293,11 +298,13 @@ const StockItems = () => {
                                         <MenuItem value="" disabled>
                                             <em>Select Item</em>
                                         </MenuItem>
-                                        {itemOptions.map((item) => (
-                                            <MenuItem key={item.name} value={item.name}>
-                                                {item.name}
-                                            </MenuItem>
-                                        ))}
+                                        {itemOptions
+                                            .filter(ele => ele.assetTypeId === row.assetTypeId)
+                                            .map((item) => (
+                                                <MenuItem key={item.name} value={item.name}>
+                                                    {item.name}
+                                                </MenuItem>
+                                            ))}
                                     </Select>
                                 </TableCell>
                                 <TableCell sx={{ borderBottom: 'none', px: 2, py: 1 }}>

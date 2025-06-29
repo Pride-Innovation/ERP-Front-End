@@ -138,7 +138,8 @@ export interface StockRowData {
     deliveredQuantity: number;
     commodityId?: number;
     costPrice: number | '';
-    purchasePrice: number | ''
+    purchasePrice: number | '';
+    assetTypeId?: string;
 }
 
 export interface ValidationResult {
