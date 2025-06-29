@@ -12,13 +12,73 @@ import {
 } from "react";
 import { Paper, Grid } from "@mui/material";
 import { useForm } from "react-hook-form";
-import { IInventory } from "./interface";
-import { InventoryContext } from "../../context/inventory";
+import { IInventory, IInventoryAxiosResponse } from "./interface";
 import InventoryForm from "./InventoryForm";
+import { useParams } from "react-router";
+import { fetchInventoryByIDService } from "./service";
+import { inventoryMock } from "../../mocks/inventory";
+import { useSelector } from "react-redux";
+import { RootState } from "../../store";
+import { ICommodity } from "../settings/commodity/interface";
+import { StockRowData } from "../../components/forms/interface";
+import { RequestContext } from "../../context/request/RequestContext";
+import CommodityUtills from "../settings/commodity/utills";
 
 const UpdateInventory = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
-    const { currentInventory } = useContext(InventoryContext);
+    const [defaultInventory, setDefaultInventory] = useState<any>(inventoryMock[0]);
+    const { commodities } = useSelector((state: RootState) => state.CommodityStore);
+    const { id } = useParams<{ id: string }>();
+    const { setStockRows } = useContext(RequestContext);
+    const { fetchAllCommodities } = CommodityUtills();
+
+
+    useEffect(() => { fetchAllCommodities() }, []);
+
+
+    const fetchInventory = async () => {
+        try {
+            const response = await fetchInventoryByIDService(id as string) as IInventoryAxiosResponse;
+            if (response.status === 200) {
+                const { data } = response;
+                setDefaultInventory({
+                    ...data,
+                    supplier: data.supplier?.id
+                })
+            }
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    useEffect(() => { fetchInventory() }, [id])
+
+
+    const handleRows = () => {
+        if (defaultInventory?.commodities
+            && commodities?.length > 0) {
+            const rowData = (defaultInventory.commodities as Array<{
+                commodity: ICommodity,
+                orderedQuantity: number,
+                deliveredQuantity: number,
+                costPrice: number,
+                purchasePrice: number,
+            }>
+            ).map((commodity, index) => ({
+                id: Date.now() + index,
+                assetTypeId: commodity.commodity.assetType?.id,
+                name: commodity.commodity.name,
+                groupName: commodity.commodity.groupName,
+                orderedQuantity: commodity.orderedQuantity,
+                deliveredQuantity: commodity.deliveredQuantity,
+                commodityId: commodity.commodity.id,
+                costPrice: commodity.costPrice,
+                purchasePrice: commodity.purchasePrice
+            })) as Array<StockRowData>;
+
+            setStockRows(rowData);
+        }
+    }
 
     const {
         control,
@@ -32,8 +92,9 @@ const UpdateInventory = () => {
     });
 
     useEffect(() => {
-        reset({ ...currentInventory });
-    }, [reset, currentInventory]);
+        handleRows()
+        reset({ ...defaultInventory });
+    }, [defaultInventory]);
 
     const onSubmit = async (formData: IInventory) => {
         setSendingRequest(true);

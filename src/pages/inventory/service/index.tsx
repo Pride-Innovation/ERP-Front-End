@@ -9,6 +9,16 @@ const addStockService = async (body: Object) => {
     }
 }
 
+const fetchInventoryByIDService = async (id: string | number) => {
+    try {
+        const response = await axiosInstance.get(`stocks/${id}`);
+        return response;
+    } catch (error) {
+        return error;
+    }
+}
+
 export {
-    addStockService
+    addStockService,
+    fetchInventoryByIDService
 }
