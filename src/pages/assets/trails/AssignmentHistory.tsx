@@ -33,8 +33,6 @@ const AssignmentHistory = ({ id }: { id: string | number }) => {
         }
     }, [id]);
 
-    console.log(columnHeaders, "Column Headers!!")
-
     return (
         <>
             <Grid xs={12} container>
@@ -51,10 +49,10 @@ const AssignmentHistory = ({ id }: { id: string | number }) => {
                         exportData
                         createAction
                         header={header}
-                        module=""
+                        module="assignment history"
                         rows={assetAssignmentHistoryTableData || []}
                         columnHeaders={columnHeaders}
-                        paginationMode='client'
+                        paginationMode='server'
                         onCreationHandler={handleCreation}
                     />
                 }
