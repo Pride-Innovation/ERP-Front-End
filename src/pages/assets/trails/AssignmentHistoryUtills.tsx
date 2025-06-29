@@ -11,10 +11,16 @@ import assignmentHistoryMock from "../../../mocks/assignmentHistory";
 import { getTableHeaders } from "../../../components/tables/getTableHeaders";
 import { crudStates } from "../../../utils/constants";
 import { fetchRowsService } from "../../../core/apis/globalService";
-import { IAssetAssignmentHistorysAxiosResponse } from "./interface";
+import {
+    IAssetAssignmentHistory,
+    IAssetAssignmentHistorysAxiosResponse,
+    IAssetAssignmentHistoryTableData
+} from "./interface";
 import { useDispatch } from "react-redux";
-import { AppDispatch } from "../../../store";
+import { AppDispatch, RootState } from "../../../store";
 import { loadAssetAssignmentHistory } from "./slice";
+import { useSelector } from "react-redux";
+import moment from "moment";
 
 const AssignmentHistoryUtills = () => {
     const endPoint = 'assignment-history';
@@ -23,6 +29,10 @@ const AssignmentHistoryUtills = () => {
     const [modalState, setModalState] = useState<string>("");
     const [open, setOpen] = useState<boolean>(false);
     const dispatch = useDispatch<AppDispatch>()
+    const [loading, setLoading] = useState<boolean>(false);
+    const { assetAssignmentHistory } = useSelector((state: RootState) => state.AssetAssignmentHistoryStore);
+    const [assetAssignmentHistoryTableData, setAssetAssignmentHistoryTableData] = useState<IAssetAssignmentHistoryTableData[]>([] as IAssetAssignmentHistoryTableData[])
+
 
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
@@ -35,21 +45,22 @@ const AssignmentHistoryUtills = () => {
     const {
         id,
         user,
-        serialNumber,
         statusBefore,
         statusAfter,
+        asset,
         ...data
     } = assignmentHistoryMock[0];
 
     const rowData = {
-        user: assignmentHistoryMock[0].user,
-        serialNumber: assignmentHistoryMock[0].serialNumber,
-        statusBefore: assignmentHistoryMock[0].statusBefore,
-        statusAfter: assignmentHistoryMock[0].statusAfter,
+        user: assignmentHistoryMock[0].user?.firstName,
+        engravedNumber: "",
+        statusBefore: assignmentHistoryMock[0].statusBefore?.name,
+        statusAfter: assignmentHistoryMock[0].statusAfter?.name,
         ...data,
     };
 
     const fetchAssignmentHistory = async (params?: Record<string, any>) => {
+        setLoading(true)
         try {
             const response = await fetchRowsService({
                 pageNumber: 0,
@@ -58,17 +69,48 @@ const AssignmentHistoryUtills = () => {
                 params
             }) as IAssetAssignmentHistorysAxiosResponse
             if (response.status === 200) {
-                console.log(response.data.content)
                 dispatch(loadAssetAssignmentHistory(response.data.content))
             }
         } catch (error) {
             console.log(error)
         }
+        setLoading(false)
     }
 
     useEffect(() => {
         setColumnHeaders(getTableHeaders(rowData))
     }, []);
+
+
+    const handleAssetAssignmentHistoryTableData = (list: Array<IAssetAssignmentHistory>) => {
+        const data: Array<IAssetAssignmentHistoryTableData> = list.map((item, index) => {
+            const {
+                user,
+                statusBefore,
+                statusAfter,
+                asset,
+                ...data
+            } = list[index];
+
+            return (
+                {
+                    ...data,
+                    user: item.user?.firstName ? `${item.user.firstName} ${item.user.lastName}` : '',
+                    engravedNumber: item.asset?.engravedNumber as string,
+                    statusBefore: item.statusBefore?.name as string,
+                    statusAfter: item.statusAfter?.name as string,
+                    startDate: item.startDate ? moment(item.startDate).format('Do MMMM YYYY') : '',
+                    endDate: item.endDate ? moment(item.endDate as string).format('Do MMMM YYYY') : ''
+                }
+            )
+        })
+        setAssetAssignmentHistoryTableData(data);
+
+    }
+
+    useEffect(() => {
+        handleAssetAssignmentHistoryTableData(assetAssignmentHistory)
+    }, [assetAssignmentHistory])
 
     return ({
         endPoint,
@@ -79,9 +121,10 @@ const AssignmentHistoryUtills = () => {
         open,
         handleClose,
         handleCreation,
-        fetchAssignmentHistory
-    }
-    )
+        fetchAssignmentHistory,
+        loading,
+        assetAssignmentHistoryTableData
+    })
 }
 
 export default AssignmentHistoryUtills

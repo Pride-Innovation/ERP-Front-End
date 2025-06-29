@@ -5,7 +5,7 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 import { Grid } from "@mui/material"
 import TableComponent from "../../../components/tables/TableComponent"
 import AssignmentHistoryUtills from "./AssignmentHistoryUtills"
@@ -13,7 +13,6 @@ import { crudStates } from "../../../utils/constants"
 import ModalComponent from "../../../components/modal"
 
 const AssignmentHistory = ({ id }: { id: string | number }) => {
-    const [loading, setLoading] = useState<boolean>(false);
     const {
         endPoint,
         columnHeaders,
@@ -22,12 +21,19 @@ const AssignmentHistory = ({ id }: { id: string | number }) => {
         open,
         handleClose,
         handleCreation,
-        fetchAssignmentHistory
+        fetchAssignmentHistory,
+        loading,
+        assetAssignmentHistoryTableData
     } = AssignmentHistoryUtills()
 
     useEffect(() => {
-        fetchAssignmentHistory();
+        if (id) {
+            const params = { assetId: id }
+            fetchAssignmentHistory(params);
+        }
     }, [id]);
+
+    console.log(columnHeaders, "Column Headers!!")
 
     return (
         <>
@@ -46,7 +52,7 @@ const AssignmentHistory = ({ id }: { id: string | number }) => {
                         createAction
                         header={header}
                         module=""
-                        rows={[]}
+                        rows={assetAssignmentHistoryTableData || []}
                         columnHeaders={columnHeaders}
                         paginationMode='client'
                         onCreationHandler={handleCreation}
