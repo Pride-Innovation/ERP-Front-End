@@ -198,8 +198,7 @@ const InventoryUtills = () => {
                 handleOpen();
                 break;
             case crudStates.update:
-                setModalState(option as string)
-                handleOpen();
+                navigate(`${ROUTES.UPDATE_INVENTORY}/${moduleID}`)
                 break;
             case crudStates.read:
                 break;

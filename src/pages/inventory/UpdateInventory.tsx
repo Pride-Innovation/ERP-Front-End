@@ -5,11 +5,16 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { Paper, Box } from "@mui/material";
-import { useContext, useEffect, useState } from "react";
+import {
+    useContext,
+    useEffect,
+    useState
+} from "react";
+import { Paper, Grid } from "@mui/material";
 import { useForm } from "react-hook-form";
 import { IInventory } from "./interface";
 import { InventoryContext } from "../../context/inventory";
+import InventoryForm from "./InventoryForm";
 
 const UpdateInventory = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
@@ -33,23 +38,26 @@ const UpdateInventory = () => {
     const onSubmit = async (formData: IInventory) => {
         setSendingRequest(true);
         console.log(formData, "Submitted Inventory Data");
-        // Simulate request
-        setTimeout(() => setSendingRequest(false), 1000);
+        setSendingRequest(false)
     };
 
     return (
-        <Box component="form" noValidate autoComplete="off" onSubmit={handleSubmit(onSubmit)} sx={{ px: 2, py: 1 }}>
-            <Paper elevation={0} sx={{ p: 2 }}>
-                {/* <InventoryForm
-                    handleClose={handleClose}
-                    buttonText="Update Inventory"
-                    formState={formState}
-                    control={control}
-                    sendingRequest={sendingRequest}
-                    register={register}
-                /> */}
-            </Paper>
-        </Box>
+        <Paper elevation={3} sx={{ borderRadius: 3, boxShadow: "none", maxWidth: "1300px", mx: "auto", p: 6 }}>
+            <form autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
+                <Grid container spacing={2}>
+                    <Grid item xs={12}>
+                        <InventoryForm
+                            handleClose={() => { }}
+                            buttonText="Submit"
+                            formState={formState}
+                            control={control}
+                            sendingRequest={sendingRequest}
+                            register={register}
+                        />
+                    </Grid>
+                </Grid>
+            </form>
+        </Paper>
     );
 };
 
