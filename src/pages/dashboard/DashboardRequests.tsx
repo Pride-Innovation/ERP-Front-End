@@ -18,14 +18,15 @@ import { ErrorMessage } from "../../core/apis/axiosInstance";
 const DashboardRequests = () => {
     const [loading, setLoading] = useState<boolean>(false)
     const { endPoint, columnHeaders, header, handleRequest } = DashBoardUtills();
-    const { setRows, rows } = useContext(RowContext);
     const { requestTableData } = useContext(RequestContext);
 
     const fetchResources = async () => {
         setLoading(true);
         try {
-            const response = await fetchRowsService({ pageNumber: 1, pageSize: 10, endPoint }) as unknown as GridRowsProp;
-            setRows([...response]);
+            // const response = await fetchRowsService({ 
+            //     pageNumber: 1, pageSize: 10, 
+            //     endPoint }) as unknown as GridRowsProp;
+            // setRows([...response]);
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : ErrorMessage;
             console.log(errorMessage)
@@ -34,7 +35,7 @@ const DashboardRequests = () => {
     }
 
     useEffect(() => { fetchResources() }, []);
-    useEffect(() => { if (rows.length > 0) { handleRequest(requestMock) } }, [rows])
+    console.log(columnHeaders, "Column Header!!")
 
     return (
         <TableComponent
@@ -42,7 +43,7 @@ const DashboardRequests = () => {
             loading={loading}
             count={100}
             header={header}
-            rows={requestTableData}
+            rows={[]}
             columnHeaders={columnHeaders}
             paginationMode='client'
         />

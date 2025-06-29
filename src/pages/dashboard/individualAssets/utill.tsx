@@ -35,6 +35,11 @@ const IndividualRequestUtill = () => {
         costOfTheAsset,
         hostname,
         assetStatus,
+        assignedTo,
+        branch,
+        lpoNumber,
+        stock,
+        commodity,
         ...data
     } = itEquipmentMock[0];
 

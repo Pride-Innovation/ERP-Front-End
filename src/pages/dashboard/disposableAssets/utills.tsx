@@ -37,7 +37,12 @@ const DisposalAssetsUtills = () => {
         costOfTheAsset,
         assetStatus,
         hostname,
+        branch,
+        stock,
+        assignedTo,
+        commodity,
         make,
+        lpoNumber,
         ...data
     } = itEquipmentMock[0];
 
