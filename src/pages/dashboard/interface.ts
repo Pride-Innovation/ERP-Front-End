@@ -5,6 +5,8 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
+import { IAxiosResponse } from "../../core/apis/interface";
+
 export interface IDashboardCard {
     image: string;
     number: number;
@@ -20,4 +22,22 @@ export interface IStockIndicatorProps {
 export interface IStockDetails {
     color: string;
     status: string;
+}
+
+export interface IDashboardAssetReport {
+    assetTypeName: string,
+    totalCount: number,
+    lastUpdatedDate: string
+}
+
+export interface IDashboardAssetCard {
+    name: string,
+    image: any,
+    stockLevel: string,
+    number: number;
+    date: string;
+}
+
+export interface IDashboardAssetReportAxiosResponse extends IAxiosResponse {
+    data: IDashboardAssetReport[]
 }

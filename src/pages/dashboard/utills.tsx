@@ -6,7 +6,13 @@ Managing Director
 */
 
 import { Box, Typography } from "@mui/material";
-import { IStockDetails, IStockIndicatorProps } from "./interface";
+import {
+    IDashboardAssetCard,
+    IDashboardAssetReport,
+    IDashboardAssetReportAxiosResponse,
+    IStockDetails,
+    IStockIndicatorProps
+} from "./interface";
 import { requestMock } from "../../mocks/request";
 import { useContext, useEffect, useState } from "react";
 import { ITableHeader } from "../../components/tables/interface";
@@ -15,6 +21,13 @@ import { IRequest, IRequestTableData } from "../request/interface";
 import { RequestContext } from "../../context/request/RequestContext";
 import RequestUtills from "../request/assetRequest/utills";
 import moment from "moment";
+import { assetTypesStatusConstants, crudStates } from "../../utils/constants";
+import ModeEditOutlineOutlinedIcon from '@mui/icons-material/ModeEditOutlineOutlined';
+import Laptop from "../../statics/images/computer-removebg-preview.png";
+import Furniture from "../../statics/images/chair-office-removebg-preview.png";
+import Books from "../../statics/images/Archives-removebg-preview.png";
+import Vehicle from "../../statics/images/car-image-removebg-preview.png";
+import { fetchDashboardAssetReportService } from "./service";
 
 const style = {
     bgcolor: '#ffffff',
@@ -32,7 +45,10 @@ const DashBoardUtills = () => {
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
     const { setRequestTableData } = useContext(RequestContext);
     const { fetchAllRequests } = RequestUtills();
-    const [loading, setLoading] = useState<boolean>(false)
+    const [loading, setLoading] = useState<boolean>(false);
+    const [loadingAssets, setLoadingAssets] = useState<boolean>(false);
+    const [assetReports, setAssetReports] = useState<Array<IDashboardAssetReport>>([])
+    const [assetCards, setAssetCards] = useState<Array<IDashboardAssetCard>>([])
 
     const {
         id,
@@ -59,9 +75,56 @@ const DashBoardUtills = () => {
         priority: "",
         status: "",
         requester: "",
-        currentApprover: "",
+        approver: "",
         ...data,
+        action: {
+            label: "options",
+            options: [
+                { value: crudStates.approve, label: "Approve", icon: <ModeEditOutlineOutlinedIcon fontSize='small' color='info' /> }
+            ]
+        },
     };
+
+    const listDashboardAssetReport = (list: IDashboardAssetReport[]): Array<IDashboardAssetCard> => {
+
+        return list.map((ele) => ({
+            name: ele.assetTypeName,
+            image: ele.assetTypeName === assetTypesStatusConstants.itEquipment ? Laptop :
+                ele.assetTypeName === assetTypesStatusConstants.officeEquipment ? Furniture :
+                    ele.assetTypeName === assetTypesStatusConstants.fleet ? Vehicle : Books
+            ,
+            stockLevel: ele.totalCount > 10 ? "normal" :
+                ele.totalCount >= 5 && ele.totalCount < 10 ? "average" : "low",
+            number: ele.totalCount,
+            date: ele.lastUpdatedDate
+        }))
+
+    }
+
+    useEffect(() => {
+        if (assetReports.length > 0) {
+            setAssetCards(listDashboardAssetReport(assetReports))
+        }
+    }, [assetReports])
+
+
+    const fetchDashboardAssetReport = async () => {
+        setLoadingAssets(true)
+        try {
+            const response = await fetchDashboardAssetReportService() as IDashboardAssetReportAxiosResponse;
+            if (response.status === 200) {
+                setAssetReports(response.data)
+            }
+        } catch (error) {
+            console.log(error)
+        }
+        setLoadingAssets(false)
+    }
+
+
+    useEffect(() => {
+        fetchDashboardAssetReport()
+    }, [])
 
     const handleRequest = (list: Array<IRequest>) => {
         const data: Array<IRequestTableData> = list.map((request, index) => {
@@ -88,7 +151,7 @@ const DashBoardUtills = () => {
                     priority: request.priority,
                     status: request.status?.name,
                     requester: request.requester?.firstName ? `${request.requester.firstName} ${request.requester.lastName}` : "",
-                    currentApprover: request.currentApprover?.firstName ? `${request.currentApprover?.firstName} ${request.currentApprover?.lastName}` : "",
+                    approver: request.currentApprover?.firstName ? `${request.currentApprover?.firstName} ${request.currentApprover?.lastName}` : "",
                 }
             )
         })
@@ -141,7 +204,9 @@ const DashBoardUtills = () => {
             columnHeaders,
             handleRequest,
             fetchLatestRequest,
-            loading
+            loading,
+            assetCards,
+            loadingAssets
         }
     )
 }

@@ -25,7 +25,9 @@ interface IRequestContext {
     assetType: IAssetType;
     setAssetType: Dispatch<SetStateAction<IAssetType>>
     setAssetsEngravedInStore: Dispatch<SetStateAction<IAsset[]>>
-    assetsEngravedInStore: IAsset[]
+    assetsEngravedInStore: IAsset[];
+    count: number;
+    setCount: Dispatch<SetStateAction<number>>
 }
 
 export const RequestContext = createContext<IRequestContext>({} as IRequestContext);
@@ -38,6 +40,7 @@ const RequestContextProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const [totalPurchasePrice, setTotalPurchasePrice] = useState<number>(0);
     const [assetType, setAssetType] = useState<IAssetType>({} as IAssetType);
     const [assetsEngravedInStore, setAssetsEngravedInStore] = useState<IAsset[]>([] as IAsset[])
+    const [count, setCount] = useState<number>(0)
 
     return (
         <RequestContext.Provider value={{
@@ -54,7 +57,9 @@ const RequestContextProvider: React.FC<{ children: React.ReactNode }> = ({ child
             assetType,
             setAssetType,
             assetsEngravedInStore,
-            setAssetsEngravedInStore
+            setAssetsEngravedInStore,
+            count,
+            setCount
         }}>
             {children}
         </RequestContext.Provider>

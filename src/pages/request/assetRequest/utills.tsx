@@ -37,12 +37,11 @@ const RequestUtills = () => {
     const module = "request";
     const header = { plural: 'Requests', singular: 'Request' };
     const [modalState, setModalState] = useState<string>("");
-    const [count, setCount] = useState<number>(0)
     const [currentRequest, setCurrentRequest] = useState<IRequest>({} as IRequest);
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
     const [pendingRequests, setPendingRequests] = useState<Array<IRequest>>([] as IRequest[])
     const [rejectedRequests, setRejectedRequests] = useState<Array<IRequest>>([] as IRequest[])
-    const { setRequestTableData } = useContext(RequestContext);
+    const { setRequestTableData, setCount, count } = useContext(RequestContext);
     const [open, setOpen] = useState<boolean>(false);
     const dispatch = useDispatch<AppDispatch>();
     const { requests } = useSelector((state: RootState) => state.AssetsRequestsStore)

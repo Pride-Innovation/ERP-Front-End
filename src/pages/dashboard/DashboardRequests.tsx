@@ -15,7 +15,7 @@ import { RequestContext } from "../../context/request/RequestContext";
 
 const DashboardRequests = () => {
     const { requests } = useSelector((state: RootState) => state.AssetsRequestsStore)
-    const { requestTableData } = useContext(RequestContext);
+    const { requestTableData, count } = useContext(RequestContext);
 
     const {
         endPoint,
@@ -34,7 +34,7 @@ const DashboardRequests = () => {
         <TableComponent
             endPoint={endPoint}
             loading={loading}
-            count={100}
+            count={count}
             header={header}
             rows={requestTableData || []}
             columnHeaders={columnHeaders}
