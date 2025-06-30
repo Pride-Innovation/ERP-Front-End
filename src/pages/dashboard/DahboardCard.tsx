@@ -27,8 +27,10 @@ const DashboardCard: React.FC<IDashboardCard> = ({
                 justifyContent: 'space-between',
                 alignItems: 'center',
                 p: 3,
-                background: 'linear-gradient(135deg, #FFFDF7, #F4F1EC)',
+                // background: 'linear-gradient(135deg, #FFFDF7, #F4F1EC)',
+                bgcolor: "#ffff",
                 borderRadius: 3,
+                boxShadow: "none",
                 height: '100%',
                 transition: 'transform 0.2s ease-in-out',
                 '&:hover': {

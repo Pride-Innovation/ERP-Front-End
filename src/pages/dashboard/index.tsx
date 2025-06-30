@@ -24,11 +24,7 @@ const Dashboard = () => {
 
   return (
     <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
-
       <Box sx={{ mb: 4 }}>
-        <Typography variant="h6" fontWeight={700} color="#08796C" sx={{ mb: 2 }}>
-          Assets Overview
-        </Typography>
         <Grid container spacing={3}>
           {[
             { name: 'IT Equipment', image: Laptop, stockLevel: 'low' },
@@ -50,16 +46,19 @@ const Dashboard = () => {
       </Box>
 
       <Box sx={{ mt: 6, mb: 4 }}>
-        <Typography variant="h6" fontWeight={700} color="#08796C" sx={{ mb: 2 }}>
-          Requests & Asset Distribution
-        </Typography>
+
         <Grid container spacing={3}>
           <Grid item xs={12} md={5}>
-            <Card sx={{ boxShadow: 2, borderRadius: 3, p: 3, backgroundColor: '#F5F9F8' }}>
+            <Card sx={{
+              boxShadow: "none",
+              borderRadius: 3,
+              p: 3,
+              backgroundColor: '#FFF'
+            }}>
               <DoughnutChart
                 headerText={headerText}
                 chartData={chartData}
-                cutout="25%"
+                cutout="70%"
                 labels={labels}
                 radius="70%"
                 title="ASSETS PERCENTAGE IN STORE"
@@ -68,8 +67,13 @@ const Dashboard = () => {
             </Card>
           </Grid>
           <Grid item xs={12} md={7}>
-            <Card sx={{ boxShadow: 2, borderRadius: 3, p: 3, backgroundColor: '#F5F9F8' }}>
-              {/* <DashboardRequests /> */}
+            <Card sx={{
+              boxShadow: "none",
+              borderRadius: 3,
+              p: 3,
+              backgroundColor: '#FFF'
+            }}>
+              <DashboardRequests />
             </Card>
           </Grid>
         </Grid>
@@ -81,12 +85,17 @@ const Dashboard = () => {
         </Typography>
         <Grid container spacing={3}>
           <Grid item xs={12} md={6}>
-            <Card sx={{ boxShadow: 2, borderRadius: 3, p: 3, backgroundColor: '#F5F9F8' }}>
+            <Card sx={{
+              boxShadow: "none",
+              borderRadius: 3,
+              p: 3,
+              backgroundColor: '#F5F9F8'
+            }}>
               <PersonalAssets />
             </Card>
           </Grid>
           <Grid item xs={12} md={6}>
-            <Card sx={{ boxShadow: 2, borderRadius: 3, p: 3, backgroundColor: '#F5F9F8' }}>
+            <Card sx={{ boxShadow: "none", borderRadius: 3, p: 3, backgroundColor: '#F5F9F8' }}>
               <DisposalAssets />
             </Card>
           </Grid>
@@ -97,7 +106,7 @@ const Dashboard = () => {
         <Typography variant="h6" fontWeight={700} color="#08796C" sx={{ mb: 2 }}>
           Trends & Performance
         </Typography>
-        <Card sx={{ boxShadow: 2, borderRadius: 3, p: 3, backgroundColor: '#F5F9F8' }}>
+        <Card sx={{ boxShadow: "none", borderRadius: 3, p: 3, backgroundColor: '#FFF' }}>
           <DashboardBarChart />
         </Card>
       </Box>

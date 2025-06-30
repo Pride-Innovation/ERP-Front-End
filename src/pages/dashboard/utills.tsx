@@ -13,6 +13,8 @@ import { ITableHeader } from "../../components/tables/interface";
 import { getTableHeaders } from "../../components/tables/getTableHeaders";
 import { IRequest, IRequestTableData } from "../request/interface";
 import { RequestContext } from "../../context/request/RequestContext";
+import RequestUtills from "../request/assetRequest/utills";
+import moment from "moment";
 
 const style = {
     bgcolor: '#ffffff',
@@ -25,10 +27,12 @@ const style = {
 }
 
 const DashBoardUtills = () => {
-    const endPoint = 'posts';
+    const endPoint = 'requests';
     const header = { plural: 'Latest Requests', singular: 'Request' };
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
-    const { setRequestTableData } = useContext(RequestContext)
+    const { setRequestTableData } = useContext(RequestContext);
+    const { fetchAllRequests } = RequestUtills();
+    const [loading, setLoading] = useState<boolean>(false)
 
     const {
         id,
@@ -36,39 +40,73 @@ const DashBoardUtills = () => {
         name,
         description,
         status,
+        timeOfSubmissionOfRequest,
+        createDate,
+        lastModified,
+        createdBy,
+        lastModifiedBy,
+        priority,
+        signaturePath,
+        emailMessage,
+        currentApprover,
+        commodities: requestCommoditiesMocks,
         ...data
     } = requestMock[0];
 
     const rowData = {
-        name: `${requestMock[0].requester?.firstName} ${requestMock[0].requester?.lastName}`,
-        // department: requestMock[0].requester?.department,
-        status: requestMock[0].status?.name,
+        name: "",
+        requestDate: "",
+        priority: "",
+        status: "",
+        requester: "",
+        currentApprover: "",
         ...data,
     };
 
     const handleRequest = (list: Array<IRequest>) => {
-        // const data: Array<IRequestTableData> = list.map((request, index) => {
-        //     const {
-        //         requester,
-        //         name,
-        //         ...fielsdata
-        //     } = list[index];
+        const data: Array<IRequestTableData> = list.map((request, index) => {
+            const {
+                requester,
+                name,
+                description,
+                status,
+                timeOfSubmissionOfRequest,
+                createDate,
+                lastModified,
+                createdBy,
+                lastModifiedBy,
+                signaturePath,
+                currentApprover,
+                ...fielsdata
+            } = list[index];
 
-        //     return (
-        //         {
-        //             name: `${request.requester?.firstName} ${request.requester?.lastName}`,
-        //             department: request.requester?.department,
-        //             ...fielsdata,
-        //             status: request.status?.status
-        //         }
-        //     )
-        // })
-        // setRequestTableData(data);
+            return (
+                {
+                    ...fielsdata,
+                    name: request.name,
+                    requestDate: moment(request.createDate as string).format("Do MMM YYYY"),
+                    priority: request.priority,
+                    status: request.status?.name,
+                    requester: request.requester?.firstName ? `${request.requester.firstName} ${request.requester.lastName}` : "",
+                    currentApprover: request.currentApprover?.firstName ? `${request.currentApprover?.firstName} ${request.currentApprover?.lastName}` : "",
+                }
+            )
+        })
+        setRequestTableData(data);
     }
 
     useEffect(() => {
         setColumnHeaders(getTableHeaders(rowData));
     }, []);
+
+
+    const fetchLatestRequest = async () => {
+        setLoading(true)
+        const params = { pageSize: 5 }
+        await fetchAllRequests(params)
+        setLoading(false)
+    }
+
 
     const getStockDetails = (stockLevel: string): IStockDetails => {
         switch (stockLevel) {
@@ -101,7 +139,9 @@ const DashBoardUtills = () => {
             endPoint,
             header,
             columnHeaders,
-            handleRequest
+            handleRequest,
+            fetchLatestRequest,
+            loading
         }
     )
 }

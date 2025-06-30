@@ -5,37 +5,30 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
+import { useSelector } from "react-redux";
 import TableComponent from "../../components/tables/TableComponent";
 import DashBoardUtills from "./utills";
-import { useContext, useEffect, useState } from "react";
-import { fetchRowsService } from "../../core/apis/globalService";
-import { GridRowsProp } from "@mui/x-data-grid";
-import { requestMock } from "../../mocks/request";
-import RowContext from "../../context/row/RowContext";
+import { useContext, useEffect } from "react";
+import { RootState } from "../../store";
 import { RequestContext } from "../../context/request/RequestContext";
-import { ErrorMessage } from "../../core/apis/axiosInstance";
+
 
 const DashboardRequests = () => {
-    const [loading, setLoading] = useState<boolean>(false)
-    const { endPoint, columnHeaders, header, handleRequest } = DashBoardUtills();
+    const { requests } = useSelector((state: RootState) => state.AssetsRequestsStore)
     const { requestTableData } = useContext(RequestContext);
 
-    const fetchResources = async () => {
-        setLoading(true);
-        try {
-            // const response = await fetchRowsService({ 
-            //     pageNumber: 1, pageSize: 10, 
-            //     endPoint }) as unknown as GridRowsProp;
-            // setRows([...response]);
-        } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : ErrorMessage;
-            console.log(errorMessage)
-        }
-        setLoading(false)
-    }
+    const {
+        endPoint,
+        columnHeaders,
+        header,
+        handleRequest,
+        fetchLatestRequest,
+        loading
+    } = DashBoardUtills();
 
-    useEffect(() => { fetchResources() }, []);
-    console.log(columnHeaders, "Column Header!!")
+
+    useEffect(() => { fetchLatestRequest() }, []);
+    useEffect(() => { handleRequest(requests) }, [requests])
 
     return (
         <TableComponent
@@ -43,9 +36,9 @@ const DashboardRequests = () => {
             loading={loading}
             count={100}
             header={header}
-            rows={[]}
+            rows={requestTableData || []}
             columnHeaders={columnHeaders}
-            paginationMode='client'
+            paginationMode='server'
         />
     )
 }

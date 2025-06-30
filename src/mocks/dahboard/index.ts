@@ -28,6 +28,6 @@ export const barGraphMock: Array<{
         {
             label: 'Stationery',
             data: [550, 380, 620, 480, 310, 400],
-            backgroundColor: '#E0B973',
+            backgroundColor: '#000068',
         },
     ];

@@ -51,7 +51,7 @@ export default function DoughnutChart({
                 backgroundColor: backgroundColor || [
                     '#08796C', // IT Equipment
                     '#BC892C', // Office Equipment
-                    '#000000', // Fleet
+                    '#000074', // Fleet
                     '#ACD1D1'  // Stationery
                 ],
                 borderColor: borderColor || ['#ffffff'],
