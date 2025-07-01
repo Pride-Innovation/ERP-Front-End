@@ -27,10 +27,10 @@ import RequestUtills from "../request/assetRequest/utills";
 import moment from "moment";
 import { assetTypesStatusConstants, crudStates } from "../../utils/constants";
 import ModeEditOutlineOutlinedIcon from '@mui/icons-material/ModeEditOutlineOutlined';
-import Laptop from "../../statics/images/computer-removebg-preview.png";
-import Furniture from "../../statics/images/chair-office-removebg-preview.png";
+import Laptop from "../../statics/images/icons8-laptop-96.png";
+import Furniture from "../../statics/images/icons8-chair-67.png";
 import Books from "../../statics/images/Archives-removebg-preview.png";
-import Vehicle from "../../statics/images/car-image-removebg-preview.png";
+import Vehicle from "../../statics/images/icons8-car-64.png";
 import {
     fetchDashboardAssetReportService,
     fetchMonthlyStockingReportService,

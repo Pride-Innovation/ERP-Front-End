@@ -52,10 +52,10 @@ const DashboardCard: React.FC<IDashboardCard> = ({
                     }}
                 />
                 <Box>
-                    <Typography variant="h6" sx={{ fontWeight: 700, color: '#08796C' }}>
+                    <Typography  sx={{ fontWeight: 700, color: '#000', fontSize: "19px" }}>
                         {name}
                     </Typography>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#333' }}>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#08796C' }}>
                         Total: {number}
                     </Typography>
                     <Typography variant="caption" sx={{ color: 'text.secondary' }}>
