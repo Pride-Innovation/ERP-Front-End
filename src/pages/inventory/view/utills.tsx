@@ -1,7 +1,11 @@
 import { useContext, useEffect, useState } from "react";
 import { ITableHeader } from "../../../components/tables/interface";
 import { fetchInventoryByIDService } from "../service";
-import { IInventoryAxiosResponse, IInventoryDetailsTableData, IStockCommodities } from "../interface";
+import {
+    IInventoryAxiosResponse,
+    IInventoryDetailsTableData,
+    IStockCommodities
+} from "../interface";
 import { InventoryContext } from "../../../context/inventory";
 import { inventoryMock } from "../../../mocks/inventory";
 import { getTableHeaders } from "../../../components/tables/getTableHeaders";
