@@ -7,9 +7,12 @@ Managing Director
 
 import { Box, Typography } from "@mui/material";
 import {
+    BarChartData,
     IDashboardAssetCard,
     IDashboardAssetReport,
     IDashboardAssetReportAxiosResponse,
+    IMonthlyAssetReport,
+    IMonthlyAssetReportAxiosResponse,
     IStationeryReportAxiosResponse,
     IStockDetails,
     IStockIndicatorProps
@@ -30,6 +33,7 @@ import Books from "../../statics/images/Archives-removebg-preview.png";
 import Vehicle from "../../statics/images/car-image-removebg-preview.png";
 import {
     fetchDashboardAssetReportService,
+    fetchMonthlyStockingReportService,
     fetchStationeryDataReportService
 } from "./service";
 
@@ -47,7 +51,7 @@ const DashBoardUtills = () => {
     const endPoint = 'requests';
     const header = { plural: 'Latest Requests', singular: 'Request' };
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
-    const { setRequestTableData } = useContext(RequestContext);
+    const { setRequestTableData, setMonthlyStockingReport } = useContext(RequestContext);
     const { fetchAllRequests } = RequestUtills();
     const [loading, setLoading] = useState<boolean>(false);
     const [loadingAssets, setLoadingAssets] = useState<boolean>(false);
@@ -148,8 +152,21 @@ const DashBoardUtills = () => {
         setLoadingAssets(false)
     }
 
+    const fetchMonthlyStockingReport = async () => {
+        setLoadingAssets(true)
+        try {
+            const response = await fetchMonthlyStockingReportService() as IMonthlyAssetReportAxiosResponse;
+            if (response.status === 200) {
+                setMonthlyStockingReport(response.data)
+            }
+        } catch (error) {
+            console.log(error)
+        }
+        setLoadingAssets(false)
+    }
+
     useEffect(() => {
-        fetchDashboardAssetReport()
+        fetchDashboardAssetReport();
     }, [])
 
     const handleRequest = (list: Array<IRequest>) => {
@@ -248,6 +265,21 @@ const DashBoardUtills = () => {
         </Box>
     );
 
+    function transformToBarChartData(summary: IMonthlyAssetReport[]): BarChartData[] {
+        const assetTypes = [
+            { key: 'itEquipment', label: 'IT Equipment', backgroundColor: '#08796C' },
+            { key: 'officeEquipment', label: 'Office Equipment', backgroundColor: '#5A005C' },
+            { key: 'fleet', label: 'Fleet', backgroundColor: '#BC892C' },
+            { key: 'stationery', label: 'Stationery', backgroundColor: '#000068' },
+        ];
+
+        return assetTypes.map(asset => ({
+            label: asset.label,
+            data: summary.map(month => Number(month[asset.key as keyof IMonthlyAssetReport]) || 0),
+            backgroundColor: asset.backgroundColor,
+        }));
+    }
+
     return (
         {
             getStockDetails,
@@ -261,7 +293,9 @@ const DashBoardUtills = () => {
             assetCards,
             loadingAssets,
             chartData,
-            labels
+            labels,
+            fetchMonthlyStockingReport,
+            transformToBarChartData
         }
     )
 }

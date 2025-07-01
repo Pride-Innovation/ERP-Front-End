@@ -46,3 +46,22 @@ export interface IStationeryReportAxiosResponse extends IAxiosResponse {
     data: IDashboardAssetReport
 }
 
+
+export interface IMonthlyAssetReport {
+    month: string,
+    itEquipment: number,
+    officeEquipment: number,
+    stationery: number,
+    fleet: number
+}
+
+export type BarChartData = {
+    label: string;
+    data: number[];
+    backgroundColor: string;
+};
+
+
+export interface IMonthlyAssetReportAxiosResponse extends IAxiosResponse {
+    data: IMonthlyAssetReport[]
+}

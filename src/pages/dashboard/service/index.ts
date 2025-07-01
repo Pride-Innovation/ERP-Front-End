@@ -18,3 +18,12 @@ export const fetchStationeryDataReportService = async () => {
         return error;
     }
 }
+
+export const fetchMonthlyStockingReportService = async () => {
+    try {
+        const response = axiosInstance.get("monthly-asset-stock");
+        return response;
+    } catch (error) {
+        return error;
+    }
+}
