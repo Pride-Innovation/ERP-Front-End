@@ -201,6 +201,7 @@ const InventoryUtills = () => {
                 navigate(`${ROUTES.UPDATE_INVENTORY}/${moduleID}`)
                 break;
             case crudStates.read:
+                navigate(`${ROUTES.READ_INVENTORY}/${moduleID}`)
                 break;
             default:
                 break

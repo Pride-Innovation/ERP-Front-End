@@ -91,6 +91,7 @@ const AppRoutes = () => {
 
           <Route path={ROUTES.CREATE_INVENTORY} element={<CreateInventory />} />
           <Route path={`${ROUTES.UPDATE_INVENTORY}/:id`} element={<UpdateInventory />} />
+          <Route path={`${ROUTES.READ_INVENTORY}/:id`} element={<InventoryDetails />} />
           <Route path={ROUTES.STORE} element={<Store />} />
         </Route>
       </Route>

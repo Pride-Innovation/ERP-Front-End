@@ -19,24 +19,33 @@ import {
     Typography
 } from "@mui/material";
 import { grey } from "@mui/material/colors";
-import DetailSection from "../../assets/trails/DetailSection";
 import TabComponent from "../../../components/tabs";
 import ButtonComponent from "../../../components/forms/Button";
-import AssignmentHistory from "../../assets/trails/AssignmentHistory";
 import OtherDetails from "./OtherDetails";
 import PlaceHolder from "../../../statics/images/Placeholder.png"
-import { inventoryMock } from "../../../mocks/inventory";
-import { IInventory } from "../interface";
+import { fetchInventoryByIDService } from "../service";
+import { IInventoryAxiosResponse } from "../interface";
+import DetailSection from "../../assets/trails/DetailSection";
+import LocalPhoneOutlinedIcon from '@mui/icons-material/LocalPhoneOutlined';
+import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
+import moment from "moment";
 
 const InventoryDetails = () => {
     const { currentInventory, setCurrentInventory } = useContext(InventoryContext);
     const { id } = useParams<{ id: string }>();
 
-    useEffect(() => {
-        setCurrentInventory(() => {
-            return inventoryMock.find(inventory => inventory?.id === parseInt(id as string)) as IInventory
-        })
-    }, []);
+    const fetchInventoryByID = async () => {
+        try {
+            const response = await fetchInventoryByIDService(id as string) as IInventoryAxiosResponse;
+            if (response.status === 200) {
+                setCurrentInventory(response.data)
+            }
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    useEffect(() => { fetchInventoryByID() }, []);
 
     return (
         <Card sx={{ p: 4, boxShadow: 3 }}>
@@ -54,10 +63,12 @@ const InventoryDetails = () => {
                                 {currentInventory?.name}
                             </Typography>
                             <Divider />
-                            {/* <DetailSection label='Cost Price' text={currentInventory?.costPrice} />
-                            {currentInventory?.purchasePrice && <DetailSection label="Purchase Price" text={currentInventory?.purchasePrice} />}
-                            {currentInventory?.location && <DetailSection label="Location" text={currentInventory?.location} />}
-                            {currentInventory?.description && <DetailSection label="Description" text={currentInventory?.description} />} */}
+                            <DetailSection label='Supplier Name' text={currentInventory?.supplier?.name as string} />
+                            <DetailSection label='Supplier Contact' icon={<LocalPhoneOutlinedIcon />} text={currentInventory?.supplier?.telephone as string} />
+                            {currentInventory?.supplier?.email && <DetailSection label='Supplier Email' icon={<EmailOutlinedIcon style={{ color: "#BC892C" }} />} text={currentInventory?.supplier?.email as string} />}
+                            {currentInventory?.lpoNumber && <DetailSection label="LPO Number" text={currentInventory?.lpoNumber} />}
+                            {currentInventory?.grnNumber && <DetailSection label="GRN Number" text={currentInventory?.grnNumber} />}
+                            {currentInventory?.createDate && <DetailSection label="Delivery Date" text={moment(currentInventory?.createDate).format('Do MMMM YYYY, h:mm')} />}
                         </CardContent>
                     </Card>
                 </Grid>
@@ -68,14 +79,9 @@ const InventoryDetails = () => {
                             <TabComponent
                                 headers={[
                                     {
-                                        label: "Other Details",
+                                        label: "Stock Commodities",
                                         position: 0,
                                         content: <OtherDetails inventory={currentInventory} />
-                                    },
-                                    {
-                                        label: "ASSIGNMENT HISTORY",
-                                        position: 1,
-                                        content: <AssignmentHistory id={currentInventory?.id as string} />
                                     }
                                 ]}
                             />
