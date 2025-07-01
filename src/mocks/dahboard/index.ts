@@ -18,7 +18,7 @@ export const barGraphMock: Array<{
         {
             label: 'Office Equipment',
             data: [520, 550, 380, 435, 220, 100],
-            backgroundColor: '#0D9986',
+            backgroundColor: '#5A005C',
         },
         {
             label: 'Fleet',

@@ -1,10 +1,3 @@
-/*
-13.9 Pride's Standard Copyright Notice:
-Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
-and distribute this software and its documentation for any purpose is prohibited unless authorized in writing by the
-Managing Director
-*/
-
 import {
     Chart as ChartJS,
     CategoryScale,
@@ -16,6 +9,7 @@ import {
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
 import { IBarChartProps } from './interface';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 ChartJS.register(
     CategoryScale,
@@ -23,7 +17,8 @@ ChartJS.register(
     BarElement,
     Title,
     Tooltip,
-    Legend
+    Legend,
+    ChartDataLabels
 );
 
 export default function BarChart({ data, options }: IBarChartProps) {
@@ -71,9 +66,21 @@ export default function BarChart({ data, options }: IBarChartProps) {
                             size: 13,
                         },
                     },
+                    datalabels: {
+                        display: true, // 🔑 Make sure it's enabled
+                        color: '#ffffff', // ✅ This sets label color
+                        anchor: 'end',
+                        align: 'start',
+                        formatter: (value: number) => value,
+                        font: {
+                            weight: 'bold',
+                            size: 14,
+                        }
+                    }
                 },
                 scales: {
                     y: {
+                        type: 'linear',
                         beginAtZero: true,
                         grid: {
                             color: '#e0e0e0',
@@ -99,7 +106,15 @@ export default function BarChart({ data, options }: IBarChartProps) {
                 },
                 ...options,
             }}
-            data={data}
+            data={{
+                ...data,
+                datasets: data.datasets.map(ds => ({
+                    ...ds,
+                    datalabels: {
+                        color: '#ffffff' // ✅ Ensures it's set per dataset
+                    }
+                }))
+            }}
         />
     );
 }

@@ -8,3 +8,13 @@ export const fetchDashboardAssetReportService = async () => {
         return error;
     }
 }
+
+
+export const fetchStationeryDataReportService = async () => {
+    try {
+        const response = axiosInstance.get("stationery-report");
+        return response;
+    } catch (error) {
+        return error;
+    }
+}

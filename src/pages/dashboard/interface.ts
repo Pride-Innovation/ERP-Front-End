@@ -41,3 +41,8 @@ export interface IDashboardAssetCard {
 export interface IDashboardAssetReportAxiosResponse extends IAxiosResponse {
     data: IDashboardAssetReport[]
 }
+
+export interface IStationeryReportAxiosResponse extends IAxiosResponse {
+    data: IDashboardAssetReport
+}
+

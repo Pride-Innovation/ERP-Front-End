@@ -10,6 +10,7 @@ import {
     IDashboardAssetCard,
     IDashboardAssetReport,
     IDashboardAssetReportAxiosResponse,
+    IStationeryReportAxiosResponse,
     IStockDetails,
     IStockIndicatorProps
 } from "./interface";
@@ -27,7 +28,10 @@ import Laptop from "../../statics/images/computer-removebg-preview.png";
 import Furniture from "../../statics/images/chair-office-removebg-preview.png";
 import Books from "../../statics/images/Archives-removebg-preview.png";
 import Vehicle from "../../statics/images/car-image-removebg-preview.png";
-import { fetchDashboardAssetReportService } from "./service";
+import {
+    fetchDashboardAssetReportService,
+    fetchStationeryDataReportService
+} from "./service";
 
 const style = {
     bgcolor: '#ffffff',
@@ -48,7 +52,15 @@ const DashBoardUtills = () => {
     const [loading, setLoading] = useState<boolean>(false);
     const [loadingAssets, setLoadingAssets] = useState<boolean>(false);
     const [assetReports, setAssetReports] = useState<Array<IDashboardAssetReport>>([])
-    const [assetCards, setAssetCards] = useState<Array<IDashboardAssetCard>>([])
+    const [assetCards, setAssetCards] = useState<Array<IDashboardAssetCard>>([]);
+    const [assetCardsWithStationery, setAssetCardsWithStationery] = useState<Array<IDashboardAssetReport>>([]);
+    const [chartData, setChartData] = useState<Array<number>>([])
+    const labels = [
+        assetTypesStatusConstants.itEquipment,
+        assetTypesStatusConstants.officeEquipment,
+        assetTypesStatusConstants.fleet,
+        assetTypesStatusConstants.stationery
+    ];
 
     const {
         id,
@@ -101,11 +113,26 @@ const DashBoardUtills = () => {
 
     }
 
-    useEffect(() => {
-        if (assetReports.length > 0) {
-            setAssetCards(listDashboardAssetReport(assetReports))
+    const fetchStationeryDataReport = async () => {
+        setLoadingAssets(true)
+        try {
+            const response = await fetchStationeryDataReportService() as IStationeryReportAxiosResponse;
+            if (response.status === 200) {
+                setAssetCardsWithStationery([...assetReports, response.data])
+            }
+        } catch (error) {
+            console.log(error)
         }
-    }, [assetReports])
+        setLoadingAssets(false)
+    }
+
+    useEffect(() => { fetchStationeryDataReport() }, [assetReports])
+
+    useEffect(() => {
+        if (assetCardsWithStationery.length > 0) {
+            setAssetCards(listDashboardAssetReport(assetCardsWithStationery))
+        }
+    }, [assetCardsWithStationery])
 
 
     const fetchDashboardAssetReport = async () => {
@@ -120,7 +147,6 @@ const DashBoardUtills = () => {
         }
         setLoadingAssets(false)
     }
-
 
     useEffect(() => {
         fetchDashboardAssetReport()
@@ -150,8 +176,10 @@ const DashBoardUtills = () => {
                     requestDate: moment(request.createDate as string).format("Do MMM YYYY"),
                     priority: request.priority,
                     status: request.status?.name,
-                    requester: request.requester?.firstName ? `${request.requester.firstName} ${request.requester.lastName}` : "",
-                    approver: request.currentApprover?.firstName ? `${request.currentApprover?.firstName} ${request.currentApprover?.lastName}` : "",
+                    requester: request.requester?.firstName ?
+                        `${request.requester.firstName} ${request.requester.lastName}` : "",
+                    approver: request.currentApprover?.firstName ?
+                        `${request.currentApprover?.firstName} ${request.currentApprover?.lastName}` : "",
                 }
             )
         })
@@ -182,6 +210,31 @@ const DashBoardUtills = () => {
         }
     };
 
+    const setDoghnutChartData = (data: IDashboardAssetCard[]) => {
+        const res: Array<number> = []
+        data.forEach(ele => {
+            if (ele.name === assetTypesStatusConstants.itEquipment) {
+                res[0] = ele.number
+            }
+            if (ele.name === assetTypesStatusConstants.officeEquipment) {
+                res[1] = ele.number
+            }
+            if (ele.name === assetTypesStatusConstants.fleet) {
+                res[2] = ele.number
+            }
+            if (ele.name === assetTypesStatusConstants.stationery) {
+                res[3] = ele.number
+            }
+        })
+        setChartData(res);
+    }
+
+    useEffect(() => {
+        if (assetCards.length > 0) {
+            setDoghnutChartData(assetCards)
+        }
+    }, [assetCards])
+
     const StockIndicator: React.FC<IStockIndicatorProps> = ({ color }) => (
         <Box
             sx={{
@@ -206,7 +259,9 @@ const DashBoardUtills = () => {
             fetchLatestRequest,
             loading,
             assetCards,
-            loadingAssets
+            loadingAssets,
+            chartData,
+            labels
         }
     )
 }

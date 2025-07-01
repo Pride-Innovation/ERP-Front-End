@@ -17,9 +17,14 @@ import Loading from '../../components/loading';
 
 const Dashboard = () => {
   const headerText = '% of Assets';
-  const chartData = [40, 27, 34, 51];
-  const labels = ["IT Equipment", "Office Equipment", "Fleet", "Stationery"];
-  const { assetCards, loadingAssets } = DashBoardUtills()
+  const {
+    assetCards,
+    loadingAssets,
+    labels,
+    chartData
+  } = DashBoardUtills()
+
+  console.log(chartData, "Chart Data!!")
 
   return (
     <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
