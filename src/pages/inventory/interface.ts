@@ -88,11 +88,23 @@ interface IInventoryAxiosResponse extends IAxiosResponse {
     data: IInventory
 }
 
+
+interface IInventoryDetailsTableData {
+    id: string | number,
+    name: string
+    orderedQuantity: number;
+    deliveredQuantity: number;
+    costPrice: number;
+    purchasePrice: number;
+}
+
+
 export type {
     IInventory,
     IInventoryForm,
     IDeleteInventory,
     IInventoryTableData,
     IInventoriesAxiosResponse,
-    IInventoryAxiosResponse
+    IInventoryAxiosResponse,
+    IInventoryDetailsTableData
 }

@@ -23,29 +23,19 @@ import TabComponent from "../../../components/tabs";
 import ButtonComponent from "../../../components/forms/Button";
 import OtherDetails from "./OtherDetails";
 import PlaceHolder from "../../../statics/images/Placeholder.png"
-import { fetchInventoryByIDService } from "../service";
-import { IInventoryAxiosResponse } from "../interface";
 import DetailSection from "../../assets/trails/DetailSection";
 import LocalPhoneOutlinedIcon from '@mui/icons-material/LocalPhoneOutlined';
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
 import moment from "moment";
+import ViewInventoryutills from "./utills";
 
 const InventoryDetails = () => {
-    const { currentInventory, setCurrentInventory } = useContext(InventoryContext);
+    const { currentInventory } = useContext(InventoryContext);
     const { id } = useParams<{ id: string }>();
+    const { fetchInventoryByID, handleInventoryTableData } = ViewInventoryutills()
 
-    const fetchInventoryByID = async () => {
-        try {
-            const response = await fetchInventoryByIDService(id as string) as IInventoryAxiosResponse;
-            if (response.status === 200) {
-                setCurrentInventory(response.data)
-            }
-        } catch (error) {
-            console.log(error)
-        }
-    }
 
-    useEffect(() => { fetchInventoryByID() }, []);
+    useEffect(() => { fetchInventoryByID(id as string) }, []);
 
     return (
         <Card sx={{ p: 4, boxShadow: 3 }}>
