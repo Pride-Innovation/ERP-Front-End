@@ -6,7 +6,7 @@ Managing Director
 */
 
 import { useParams } from "react-router"
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import { InventoryContext } from "../../../context/inventory";
 import {
     Box,
@@ -32,22 +32,58 @@ import ViewInventoryutills from "./utills";
 const InventoryDetails = () => {
     const { currentInventory } = useContext(InventoryContext);
     const { id } = useParams<{ id: string }>();
-    const { fetchInventoryByID, handleInventoryTableData } = ViewInventoryutills()
-
+    const { fetchInventoryByID } = ViewInventoryutills()
+    const [fileURL, setFileURL] = useState<string>("");
 
     useEffect(() => { fetchInventoryByID(id as string) }, []);
+
+    useEffect(() => {
+        if (currentInventory?.id) {
+            if (currentInventory.grnReports && currentInventory.grnReports.length > 0) {
+                const report = currentInventory.grnReports[0];
+                const filename = report.documentPath.split('/').pop();
+                const publicPath = `/statics/${filename}`;
+                setFileURL(publicPath);
+            }
+        }
+    }, [currentInventory?.id]);
 
     return (
         <Card sx={{ p: 4, boxShadow: 3 }}>
             <Grid container spacing={4}>
                 <Grid item xs={12} md={4}>
                     <Card sx={{ boxShadow: 0, bgcolor: grey[100] }}>
-                        <CardMedia
-                            component="img"
-                            height="250"
-                            image={PlaceHolder}
-                            alt="Equipment Image"
-                        />
+                        <Box sx={{ height: "250px", position: "relative" }}>
+                            {fileURL ? (
+                                <iframe
+                                    src={`${fileURL}#toolbar=0&navpanes=0&scrollbar=0`}
+                                    title="GRN PDF Preview"
+                                    width="100%"
+                                    height="250px"
+                                    style={{
+                                        border: 'none',
+                                        overflow: 'hidden',
+                                    }}
+                                />
+                            ) : (
+                                <CardMedia
+                                    component="img"
+                                    width={"100%"}
+                                    height="250px"
+                                    image={PlaceHolder}
+                                    alt="GRN Placeholder"
+                                    sx={{ objectFit: 'contain' }}
+                                />
+                            )}
+                            <Box sx={{ position: "absolute", bottom: 20, right: 20, width: "40%" }}>
+                                <ButtonComponent
+                                    sendingRequest={false}
+                                    buttonText="View GRN"
+                                    variant="contained"
+                                    buttonColor="secondary"
+                                    handleClick={() => console.log("Button Clicked")} />
+                            </Box>
+                        </Box>
                         <CardContent>
                             <Typography variant="h5" gutterBottom sx={{ color: "#1976d2" }}>
                                 {currentInventory?.name}

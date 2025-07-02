@@ -41,6 +41,12 @@ interface IInventory {
     createdBy?: IUser | null;
     lastModifiedBy?: IUser | null;
     grnNumber?: string | null;
+    grnReports
+    ?: Array<{
+        id: string | number;
+        name: string;
+        documentPath: string;
+    }> | null;
 }
 
 interface IInventoryTableData {
