@@ -68,22 +68,32 @@ const InventoryDetails = () => {
                     width="100%"
                     style={{ border: 'none', minHeight: '500px', overflow: 'hidden' }}
                 />
+                <Box sx={{ width: "100px", ml: "auto", mt: 2 }}>
+                    <ButtonComponent
+                        sendingRequest={false}
+                        buttonText="Close"
+                        variant="contained"
+                        buttonColor="secondary"
+                        handleClick={handleClose} />
+                </Box>
             </ModalComponent>}
             <Grid container spacing={4}>
                 <Grid item xs={12} md={4}>
                     <Card sx={{ boxShadow: 0, bgcolor: grey[100] }}>
                         <Box sx={{ height: "250px", position: "relative" }}>
                             {fileURL ? (
-                                <iframe
-                                    src={`${fileURL}#toolbar=0&navpanes=0&scrollbar=0`}
-                                    title="GRN PDF Preview"
-                                    width="100%"
-                                    height="250px"
-                                    style={{
-                                        border: 'none',
-                                        overflow: 'hidden',
-                                    }}
-                                />
+                                <Box sx={{ height: 250, overflow: 'hidden', position: 'relative' }}>
+                                    <iframe
+                                        src={`${fileURL}#toolbar=0&navpanes=0&scrollbar=0`}
+                                        title="GRN PDF Preview"
+                                        style={{
+                                            width: '100%',
+                                            height: '800px',
+                                            border: 'none',
+                                            pointerEvents: 'none',
+                                        }}
+                                    />
+                                </Box>
                             ) : (
                                 <CardMedia
                                     component="img"
