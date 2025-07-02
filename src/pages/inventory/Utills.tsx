@@ -242,7 +242,8 @@ const InventoryUtills = () => {
         fetchInventory,
         loading,
         count,
-        endPoint
+        endPoint,
+        handleOpen
     })
 }
 

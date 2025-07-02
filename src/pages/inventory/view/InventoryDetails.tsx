@@ -28,12 +28,20 @@ import LocalPhoneOutlinedIcon from '@mui/icons-material/LocalPhoneOutlined';
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
 import moment from "moment";
 import ViewInventoryutills from "./utills";
+import ModalComponent from "../../../components/modal";
+import InventoryUtills from "../Utills";
 
 const InventoryDetails = () => {
     const { currentInventory } = useContext(InventoryContext);
     const { id } = useParams<{ id: string }>();
     const { fetchInventoryByID } = ViewInventoryutills()
     const [fileURL, setFileURL] = useState<string>("");
+
+    const {
+        handleClose,
+        open,
+        handleOpen
+    } = InventoryUtills()
 
     useEffect(() => { fetchInventoryByID(id as string) }, []);
 
@@ -50,6 +58,17 @@ const InventoryDetails = () => {
 
     return (
         <Card sx={{ p: 4, boxShadow: 3 }}>
+            {<ModalComponent title='View Signed Inventory'
+                open={open}
+                handleClose={handleClose}
+                width="80%">
+                <iframe
+                    src={fileURL}
+                    title="PDF Preview"
+                    width="100%"
+                    style={{ border: 'none', minHeight: '500px', overflow: 'hidden' }}
+                />
+            </ModalComponent>}
             <Grid container spacing={4}>
                 <Grid item xs={12} md={4}>
                     <Card sx={{ boxShadow: 0, bgcolor: grey[100] }}>
@@ -81,7 +100,7 @@ const InventoryDetails = () => {
                                     buttonText="View GRN"
                                     variant="contained"
                                     buttonColor="secondary"
-                                    handleClick={() => console.log("Button Clicked")} />
+                                    handleClick={handleOpen} />
                             </Box>
                         </Box>
                         <CardContent>
