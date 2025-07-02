@@ -18,7 +18,21 @@ const fetchInventoryByIDService = async (id: string | number) => {
     }
 }
 
+const uploadGRNService = async (body: Object, id: string | number) => {
+    try {
+        const response = await axiosInstance.post(`upload-grn/${id}`, body, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            }
+        });
+        return response;
+    } catch (error) {
+        return error;
+    }
+}
+
 export {
     addStockService,
-    fetchInventoryByIDService
+    fetchInventoryByIDService,
+    uploadGRNService
 }

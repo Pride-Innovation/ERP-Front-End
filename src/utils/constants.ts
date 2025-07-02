@@ -24,6 +24,8 @@ export const crudStates: {
     approve: string;
     reject: string;
     issue: string;
+    download: string;
+    upload: string;
 } = {
     create: "create",
     update: "update",
@@ -36,6 +38,8 @@ export const crudStates: {
     approve: "approve",
     reject: "reject",
     issue: "issue",
+    download: "download",
+    upload: "upload"
 }
 
 export const requestStatus: {

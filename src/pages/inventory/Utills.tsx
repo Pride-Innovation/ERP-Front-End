@@ -5,7 +5,7 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { AppDispatch, RootState } from "../../store";
 import { IOptions, ITableHeader } from "../../components/tables/interface";
 import { useSelector } from "react-redux";
@@ -28,7 +28,11 @@ import { useDispatch } from "react-redux";
 import { loadAllInventory } from "./slice";
 import { fetchRowsService } from "../../core/apis/globalService";
 import moment from "moment";
-
+import ArrowCircleDownOutlinedIcon from '@mui/icons-material/ArrowCircleDownOutlined';
+import { generateGoodsReceivedNote } from "../../utils/goodReceivedNotes";
+import Logo from "../../statics/images/grnFormLogo.png";
+import EditCalendarOutlinedIcon from '@mui/icons-material/EditCalendarOutlined';
+import { InventoryContext } from "../../context/inventory";
 
 const InventoryUtills = () => {
     const endPoint: string = "stocks";
@@ -43,6 +47,7 @@ const InventoryUtills = () => {
     const dispatch = useDispatch<AppDispatch>();
     const [loading, setLoading] = useState<boolean>(false);
     const [count, setCount] = useState<number>(0)
+    const {setCurrentInventory} = useContext(InventoryContext)
 
     const [optionsObject, setOptionsObject] = useState<{
         suppliersOptions: Array<IOptions>
@@ -83,7 +88,9 @@ const InventoryUtills = () => {
             options: [
                 { value: crudStates.deactivate, label: "Deactivate", icon: <InfoIcon fontSize='small' color='error' /> },
                 { value: crudStates.update, label: "Update", icon: <ModeEditIcon fontSize='small' color='info' /> },
-                { value: crudStates.read, label: "View Details", icon: <RemoveRedEyeIcon fontSize='small' color='inherit' /> }
+                { value: crudStates.read, label: "View Details", icon: <RemoveRedEyeIcon fontSize='small' color='inherit' /> },
+                { value: crudStates.download, label: "Generate GRN", icon: <ArrowCircleDownOutlinedIcon fontSize='small' color='secondary' /> },
+                { value: crudStates.upload, label: "Upload Signed GRN", icon: <EditCalendarOutlinedIcon fontSize='small' color='info' /> },
             ]
         },
     };
@@ -191,6 +198,10 @@ const InventoryUtills = () => {
 
     const handleCreation = () => navigate(ROUTES.CREATE_INVENTORY)
 
+    const findStockById = (id: string | number) => {
+        return inventory.find((stock: IInventory) => stock.id === id);
+    }
+
     const handleOptionClicked = async (option: string | number, moduleID?: string | number) => {
         switch (option) {
             case crudStates.deactivate:
@@ -202,6 +213,16 @@ const InventoryUtills = () => {
                 break;
             case crudStates.read:
                 navigate(`${ROUTES.READ_INVENTORY}/${moduleID}`)
+                break;
+            case crudStates.download:
+                const data = findStockById(moduleID as number);
+                generateGoodsReceivedNote(data as IInventory, Logo);
+                break;
+            case crudStates.upload:
+                const val = findStockById(moduleID as number) as IInventory;
+                setCurrentInventory(val);
+                setModalState(option as string);
+                handleOpen();
                 break;
             default:
                 break

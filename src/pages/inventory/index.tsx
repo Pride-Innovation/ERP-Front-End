@@ -12,6 +12,7 @@ import InventoryUtills from "./Utills";
 import { crudStates } from "../../utils/constants";
 import ModalComponent from "../../components/modal";
 import DeleteInventory from "./DeleteInventory";
+import UploadGRN from "./UploadGRN";
 
 const Inventory = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
@@ -41,6 +42,11 @@ const Inventory = () => {
                         handleClose={handleClose}
                         buttonText='Confirm'
                         sendingRequest={sendingRequest} />
+                </ModalComponent>
+            }
+            {modalState === crudStates.upload &&
+                <ModalComponent title='Upload Signed Inventory' open={open} handleClose={handleClose} width="40%">
+                    <UploadGRN />
                 </ModalComponent>
             }
             {columnHeaders.length > 0 &&

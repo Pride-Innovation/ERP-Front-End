@@ -88,6 +88,14 @@ interface IInventoryAxiosResponse extends IAxiosResponse {
     data: IInventory
 }
 
+interface IGRNUploadResponse extends IAxiosResponse {
+    data: {
+        id: string | number;
+        name: string;
+        documentPath: string;
+    }
+}
+
 
 interface IInventoryDetailsTableData {
     id: string | number,
@@ -106,5 +114,6 @@ export type {
     IInventoryTableData,
     IInventoriesAxiosResponse,
     IInventoryAxiosResponse,
-    IInventoryDetailsTableData
+    IInventoryDetailsTableData,
+    IGRNUploadResponse
 }
