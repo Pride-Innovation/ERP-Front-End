@@ -47,7 +47,7 @@ import AppRegistrationOutlinedIcon from '@mui/icons-material/AppRegistrationOutl
 const StockItems = () => {
     const { fetchAllCommodities } = CommodityUtills()
     const [itemOptions, setItemOptions] = useState<{ name: string; groupName: string, assetTypeId: number | string }[]>([]);
-    const { stockRows, setStockRows, setAssetType, assetType } = useContext(RequestContext);
+    const { stockRows, setStockRows, setAssetType } = useContext(RequestContext);
     const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore);
     const { commodities } = useSelector((state: RootState) => state.CommodityStore);
 

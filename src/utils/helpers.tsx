@@ -344,3 +344,49 @@ export const validateAssetsOfItems = (
     };
 };
 
+export function validatePartialDeliveries(data: any[], current: any[]): string[] {
+    const errors: string[] = [];
+
+    data.forEach(newItem => {
+        const oldItem = current.find(
+            c => c.commodity.id === newItem.commodityId
+        );
+
+        if (!oldItem) {
+            errors.push(`Commodity with ID ${newItem.commodityId} not found in current records.`);
+            return;
+        }
+
+        const ordered = oldItem.orderedQuantity;
+        const oldDelivered = oldItem.deliveredQuantity;
+        const newDelivered = newItem.deliveredQuantity;
+
+        if (newItem.orderedQuantity !== ordered) {
+            errors.push(
+                `Ordered quantity mismatch for "${newItem.name}". Expected ${ordered}, got ${newItem.orderedQuantity}.`
+            );
+        }
+
+        if (newDelivered < oldDelivered) {
+            errors.push(
+                `Delivered quantity for "${newItem.name}" cannot be less than previously delivered (${oldDelivered}).`
+            );
+        }
+
+        const isAlreadyComplete = oldDelivered >= ordered;
+        if (!isAlreadyComplete && newDelivered === oldDelivered) {
+            errors.push(
+                `Delivered quantity for "${newItem.name}" is the same as before (${oldDelivered}). No new items delivered.`
+            );
+        }
+
+        if (newDelivered > ordered) {
+            errors.push(
+                `Delivered quantity for "${newItem.name}" cannot exceed ordered quantity (${ordered}).`
+            );
+        }
+    });
+
+    return errors;
+}
+

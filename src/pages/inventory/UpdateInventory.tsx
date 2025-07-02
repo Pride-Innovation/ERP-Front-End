@@ -23,13 +23,15 @@ import { ICommodity } from "../settings/commodity/interface";
 import { StockRowData } from "../../components/forms/interface";
 import { RequestContext } from "../../context/request/RequestContext";
 import CommodityUtills from "../settings/commodity/utills";
+import { validatePartialDeliveries } from "../../utils/helpers";
+import { toast } from "react-toastify";
 
 const UpdateInventory = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
     const [defaultInventory, setDefaultInventory] = useState<any>(inventoryMock[0]);
     const { commodities } = useSelector((state: RootState) => state.CommodityStore);
     const { id } = useParams<{ id: string }>();
-    const { setStockRows } = useContext(RequestContext);
+    const { setStockRows, stockRows } = useContext(RequestContext);
     const { fetchAllCommodities } = CommodityUtills();
 
 
@@ -98,7 +100,14 @@ const UpdateInventory = () => {
 
     const onSubmit = async (formData: IInventory) => {
         setSendingRequest(true);
-        console.log(formData, "Submitted Inventory Data");
+        const errors = validatePartialDeliveries(stockRows, formData?.commodities as any);
+
+        if (errors.length > 0) {
+            setSendingRequest(false);
+            return toast.error(`Requests validation errors: ${errors}`)
+        }
+        console.log("Form Data: ", formData, stockRows)
+
         setSendingRequest(false)
     };
 
