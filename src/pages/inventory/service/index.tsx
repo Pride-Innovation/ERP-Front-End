@@ -31,8 +31,18 @@ const uploadGRNService = async (body: Object, id: string | number) => {
     }
 }
 
+const completeDeliveryService = async (body: Object, id: string | number) => {
+    try {
+        const response = await axiosInstance.post(`stocks/${id}/complete-delivery`, body);
+        return response;
+    } catch (error) {
+        return error;
+    }
+}
+
 export {
     addStockService,
     fetchInventoryByIDService,
-    uploadGRNService
+    uploadGRNService,
+    completeDeliveryService
 }

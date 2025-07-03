@@ -12,6 +12,7 @@ import { RowData, StockRowData, StockValidationResult, ValidationResult } from "
 import { ICommodity } from "../pages/settings/commodity/interface";
 import { IAssetType } from "../pages/settings/assetTypes/interface";
 import { assetTypesStatusConstants } from "./constants";
+import { IStockCommodities } from "../pages/inventory/interface";
 
 export const camelCaseToWords = (camelCaseString: string) => {
     return camelCaseString
@@ -346,6 +347,7 @@ export const validateAssetsOfItems = (
 
 export function validatePartialDeliveries(data: any[], current: any[]): string[] {
     const errors: string[] = [];
+    let hasNewDelivery = false;
 
     data.forEach(newItem => {
         const oldItem = current.find(
@@ -361,6 +363,11 @@ export function validatePartialDeliveries(data: any[], current: any[]): string[]
         const oldDelivered = oldItem.deliveredQuantity;
         const newDelivered = newItem.deliveredQuantity;
 
+        // Track if any new delivery happened
+        if (newDelivered > oldDelivered) {
+            hasNewDelivery = true;
+        }
+
         if (newItem.orderedQuantity !== ordered) {
             errors.push(
                 `Ordered quantity mismatch for "${newItem.name}". Expected ${ordered}, got ${newItem.orderedQuantity}.`
@@ -373,13 +380,6 @@ export function validatePartialDeliveries(data: any[], current: any[]): string[]
             );
         }
 
-        const isAlreadyComplete = oldDelivered >= ordered;
-        if (!isAlreadyComplete && newDelivered === oldDelivered) {
-            errors.push(
-                `Delivered quantity for "${newItem.name}" is the same as before (${oldDelivered}). No new items delivered.`
-            );
-        }
-
         if (newDelivered > ordered) {
             errors.push(
                 `Delivered quantity for "${newItem.name}" cannot exceed ordered quantity (${ordered}).`
@@ -387,6 +387,50 @@ export function validatePartialDeliveries(data: any[], current: any[]): string[]
         }
     });
 
+    // Final check: no item was newly delivered
+    if (!hasNewDelivery) {
+        errors.push("No new items have been delivered. Please update at least one item's delivery quantity.");
+    }
+
     return errors;
 }
+
+
+export function cleanNewDeliveries(
+    oldCommodities: IStockCommodities[],
+    newCommodities: StockRowData[]
+): StockRowData[] {
+    const cleaned: StockRowData[] = [];
+
+    // Map old commodities by ID for quick lookup
+    const oldMap = new Map<number, IStockCommodities>();
+    oldCommodities.forEach(item => {
+        oldMap.set(item.commodity.id as number, item);
+    });
+
+    for (const newItem of newCommodities) {
+        const oldItem = oldMap.get(newItem.commodityId as number);
+        if (!oldItem) continue;
+
+        const oldDelivered = oldItem.deliveredQuantity;
+        const newDelivered = newItem.deliveredQuantity;
+
+        // Only add if delivery increased
+        if (newDelivered > oldDelivered) {
+            cleaned.push({
+                id: newItem.id,
+                name: newItem.name,
+                groupName: newItem.groupName,
+                commodityId: newItem.commodityId as number,
+                orderedQuantity: newItem.orderedQuantity,
+                deliveredQuantity: newDelivered - oldDelivered, // ✅ delta only
+                costPrice: newItem.costPrice as number,
+                purchasePrice: newItem.purchasePrice as number,
+            });
+        }
+    }
+
+    return cleaned;
+}
+
 

@@ -49,7 +49,7 @@ const InventoryDetails = () => {
         if (currentInventory?.id) {
             if (currentInventory.grnReports && currentInventory.grnReports.length > 0) {
                 const report = currentInventory.grnReports[0];
-                const filename = report.documentPath.split('/').pop();
+                const filename = report.documentPath?.split('/').pop();
                 const publicPath = `/statics/${filename}`;
                 setFileURL(publicPath);
             }

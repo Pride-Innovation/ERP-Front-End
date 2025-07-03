@@ -15,7 +15,7 @@ import { useForm } from "react-hook-form";
 import { IInventory, IInventoryAxiosResponse } from "./interface";
 import InventoryForm from "./InventoryForm";
 import { useParams } from "react-router";
-import { fetchInventoryByIDService } from "./service";
+import { completeDeliveryService, fetchInventoryByIDService } from "./service";
 import { inventoryMock } from "../../mocks/inventory";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store";
@@ -23,7 +23,7 @@ import { ICommodity } from "../settings/commodity/interface";
 import { StockRowData } from "../../components/forms/interface";
 import { RequestContext } from "../../context/request/RequestContext";
 import CommodityUtills from "../settings/commodity/utills";
-import { validatePartialDeliveries } from "../../utils/helpers";
+import { cleanNewDeliveries, generateReferenceNumber, validatePartialDeliveries } from "../../utils/helpers";
 import { toast } from "react-toastify";
 
 const UpdateInventory = () => {
@@ -102,11 +102,37 @@ const UpdateInventory = () => {
         setSendingRequest(true);
         const errors = validatePartialDeliveries(stockRows, formData?.commodities as any);
 
+
         if (errors.length > 0) {
             setSendingRequest(false);
             return toast.error(`Requests validation errors: ${errors}`)
         }
-        console.log("Form Data: ", formData, stockRows)
+
+        const cleanedCommodities = cleanNewDeliveries(
+            formData.commodities ?? [], // fallback to empty array if null/undefined
+            stockRows as Array<StockRowData>
+        );
+
+        try {
+            const data = {
+                additionalDeliveries: cleanedCommodities,
+                grnNumber: generateReferenceNumber()
+            }
+
+            const response = await completeDeliveryService(data, id as string) as IInventoryAxiosResponse;
+            if (response.status === 201) {
+                toast.success("Inventory updated successfully");
+                // setStockRows([]);
+                // reset({ ...defaultInventory });
+            } else {
+                toast.error("Failed to update inventory. Please try again.");
+            }
+        } catch (error) {
+            console.error("Error updating inventory:", error);
+            setSendingRequest(false);
+            return toast.error("Failed to update inventory. Please try again.");
+
+        }
 
         setSendingRequest(false)
     };

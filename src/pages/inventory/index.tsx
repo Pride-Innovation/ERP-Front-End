@@ -45,7 +45,7 @@ const Inventory = () => {
                 </ModalComponent>
             }
             {modalState === crudStates.upload &&
-                <ModalComponent title='Upload Signed Inventory' open={open} handleClose={handleClose} width="40%">
+                <ModalComponent title='Upload Signed GRN' open={open} handleClose={handleClose} width="40%">
                     <UploadGRN />
                 </ModalComponent>
             }
