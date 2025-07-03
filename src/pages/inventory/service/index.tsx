@@ -40,9 +40,19 @@ const completeDeliveryService = async (body: Object, id: string | number) => {
     }
 }
 
+const fetchGrnCommoditiesByStockIDService = async (id: string | number) => {
+    try {
+        const response = await axiosInstance.get(`grn-commodities/${id}`);
+        return response;
+    } catch (error) {
+        return error;
+    }
+}
+
 export {
     addStockService,
     fetchInventoryByIDService,
     uploadGRNService,
-    completeDeliveryService
+    completeDeliveryService,
+    fetchGrnCommoditiesByStockIDService
 }

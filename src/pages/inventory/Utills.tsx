@@ -28,10 +28,10 @@ import { useDispatch } from "react-redux";
 import { loadAllInventory } from "./slice";
 import { fetchRowsService } from "../../core/apis/globalService";
 import moment from "moment";
-import ArrowCircleDownOutlinedIcon from '@mui/icons-material/ArrowCircleDownOutlined';
+// import ArrowCircleDownOutlinedIcon from '@mui/icons-material/ArrowCircleDownOutlined';
 import { generateGoodsReceivedNote } from "../../utils/goodReceivedNotes";
 import Logo from "../../statics/images/grnFormLogo.png";
-import EditCalendarOutlinedIcon from '@mui/icons-material/EditCalendarOutlined';
+// import EditCalendarOutlinedIcon from '@mui/icons-material/EditCalendarOutlined';
 import { InventoryContext } from "../../context/inventory";
 
 const InventoryUtills = () => {
@@ -89,8 +89,8 @@ const InventoryUtills = () => {
                 { value: crudStates.deactivate, label: "Deactivate", icon: <InfoIcon fontSize='small' color='error' /> },
                 { value: crudStates.update, label: "Update", icon: <ModeEditIcon fontSize='small' color='info' /> },
                 { value: crudStates.read, label: "View Details", icon: <RemoveRedEyeIcon fontSize='small' color='inherit' /> },
-                { value: crudStates.download, label: "Generate GRN", icon: <ArrowCircleDownOutlinedIcon fontSize='small' color='secondary' /> },
-                { value: crudStates.upload, label: "Upload Signed GRN", icon: <EditCalendarOutlinedIcon fontSize='small' color='info' /> },
+                // { value: crudStates.download, label: "Generate GRN", icon: <ArrowCircleDownOutlinedIcon fontSize='small' color='secondary' /> },
+                // { value: crudStates.upload, label: "Upload Signed GRN", icon: <EditCalendarOutlinedIcon fontSize='small' color='info' /> },
             ]
         },
     };

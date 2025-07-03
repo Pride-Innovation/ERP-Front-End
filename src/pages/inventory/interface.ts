@@ -94,6 +94,25 @@ interface IInventoryAxiosResponse extends IAxiosResponse {
     data: IInventory
 }
 
+
+interface IGRNCommodity {
+    id?: string | number;
+    grnReport?: IGRNReport | null;
+    commodity?: ICommodity | null;
+    deliveredQuantity: number;
+    costPrice?: number | null;
+    purchasePrice?: number | null;
+}
+
+interface IGRNCommodityResponse extends IFetchDataRequest {
+    content: Array<IGRNCommodity>
+}
+
+interface IGRNCommoditiesAxiosResponse extends IAxiosResponse {
+    data: IGRNCommodityResponse
+}
+
+
 interface IGRNReport {
     id: string | number;
     name: string;
@@ -136,5 +155,6 @@ export type {
     IInventoryDetailsTableData,
     IGRNUploadResponse,
     IGRNReport,
-    IGRNReportTableData
+    IGRNReportTableData,
+    IGRNCommoditiesAxiosResponse
 }

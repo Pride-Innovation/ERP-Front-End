@@ -10,7 +10,8 @@ const InventoryGRN = ({ grnList }: { grnList: IGRNReport[] }) => {
         endPoint,
         header,
         stocksTableData,
-        handleInventoryTableData
+        handleInventoryTableData,
+        handleOptionClicked
     } = GrnReportUtills();
 
     useEffect(() => {
@@ -31,6 +32,7 @@ const InventoryGRN = ({ grnList }: { grnList: IGRNReport[] }) => {
                         rows={stocksTableData || []}
                         columnHeaders={columnHeaders}
                         paginationMode='server'
+                        handleOptionClicked={handleOptionClicked}
                     />
                 }
             </Grid>
