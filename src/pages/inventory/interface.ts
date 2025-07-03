@@ -156,5 +156,6 @@ export type {
     IGRNUploadResponse,
     IGRNReport,
     IGRNReportTableData,
-    IGRNCommoditiesAxiosResponse
+    IGRNCommoditiesAxiosResponse,
+    IGRNCommodity
 }

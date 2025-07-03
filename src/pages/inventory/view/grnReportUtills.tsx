@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import { ITableHeader } from "../../../components/tables/interface";
-import { IGRNCommoditiesAxiosResponse, IGRNReport, IGRNReportTableData } from "../interface";
+import { IGRNCommoditiesAxiosResponse, IGRNCommodity, IGRNReport, IGRNReportTableData } from "../interface";
 import { grnReportsMock } from "../../../mocks/inventory";
 import { getTableHeaders } from "../../../components/tables/getTableHeaders";
 import moment from "moment";
@@ -19,6 +19,7 @@ const GrnReportUtills = () => {
     const { currentInventory } = useContext(InventoryContext);
     const header = { plural: 'GRN Report', singular: 'GRN Report' }
     const [stocksTableData, setStocksTableData] = useState<Array<IGRNReportTableData>>([] as Array<IGRNReportTableData>);
+    const [filteredGRNCommodities, setFilteredGRNCommodities] = useState<Array<IGRNCommodity>>([] as Array<IGRNCommodity>);
 
     const {
         createdBy,
@@ -82,8 +83,9 @@ const GrnReportUtills = () => {
         try {
             const response = await fetchGrnCommoditiesByStockIDService(id as string) as IGRNCommoditiesAxiosResponse;
             if (response.status === 200) {
-                console.log("GRN commodities fetched successfully:", response.data.content);
-                console.log(currentInventory, "Current Inventory ID for GRN commodities fetch");
+                // console.log("GRN commodities fetched successfully:", response.data.content);
+                // console.log(currentInventory, "Current Inventory ID for GRN commodities fetch");
+                setFilteredGRNCommodities(response.data.content);
             }
         } catch (error) {
             console.error("Error fetching GRN commodities by stock ID:", error);
@@ -95,16 +97,40 @@ const GrnReportUtills = () => {
         if (currentInventory?.id) {
             fetchGrnCommoditiesByStockID(currentInventory.id);
         }
+
     }, [currentInventory?.id]);
+
+    /** Function to find a stock by its ID
+    * @param id - The ID of the stock to find
+    * @returns The stock object if found, otherwise undefined
+    */
+
+    const findGRNById = (id: number | string) => {
+        return (currentInventory?.grnReports as Array<IGRNReport>).find((grn) => grn.id === id);
+    }
+
+    /** Function to filter GRN commodities by GRN number
+    * @param grnNumber - The GRN number to filter by
+    * @returns An array of IGRNCommodity objects
+    */
+   
+    const filterGRNCommoditiesByGRNNumber = (grnNumber: string | number): Array<IGRNCommodity> => {
+        return filteredGRNCommodities.filter((commodity) => commodity.grnReport?.name === grnNumber);
+    }
+
 
     const handleOptionClicked = async (option: string | number, moduleID?: string | number) => {
         switch (option) {
             case crudStates.download:
                 // const data = findStockById(moduleID as number);
                 // generateGoodsReceivedNote(data as IInventory, Logo);
-                console.log(currentInventory.id, "Download GRN Report clicked");
-                console.log(moduleID, "Download GRN Report clicked");
+                // console.log(findGRNById(moduleID as number), "Download GRN Report clicked");
 
+                console.log(filterGRNCommoditiesByGRNNumber(
+                    findGRNById(moduleID as number)?.name as string
+                ));
+
+                console.log(currentInventory, "Current Inventory for GRN Report");
                 break;
             case crudStates.upload:
                 console.log(moduleID, "Upload GRN Report clicked");
