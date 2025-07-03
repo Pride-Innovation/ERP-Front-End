@@ -30,6 +30,8 @@ import moment from "moment";
 import ViewInventoryutills from "./utills";
 import ModalComponent from "../../../components/modal";
 import InventoryUtills from "../Utills";
+import InventoryPRN from "./InventoryGRN";
+import { IGRNReport } from "../interface";
 
 const InventoryDetails = () => {
     const { currentInventory } = useContext(InventoryContext);
@@ -137,6 +139,11 @@ const InventoryDetails = () => {
                                         label: "Stock Commodities",
                                         position: 0,
                                         content: <OtherDetails inventory={currentInventory} />
+                                    },
+                                    {
+                                        label: "Goods Received Notes (GRN)",
+                                        position: 1,
+                                        content: <InventoryPRN grnList={currentInventory.grnReports as Array<IGRNReport>} />
                                     }
                                 ]}
                             />

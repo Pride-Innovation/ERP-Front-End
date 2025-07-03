@@ -94,12 +94,18 @@ interface IInventoryAxiosResponse extends IAxiosResponse {
     data: IInventory
 }
 
+interface IGRNReport {
+    id: string | number;
+    name: string;
+    documentPath: string;
+    createDate: string | null;
+    lastModified: string | null;
+    createdBy: IUser | null;
+    lastModifiedBy: IUser | null;
+}
+
 interface IGRNUploadResponse extends IAxiosResponse {
-    data: {
-        id: string | number;
-        name: string;
-        documentPath: string;
-    }
+    data: IGRNReport
 }
 
 
@@ -112,6 +118,13 @@ interface IInventoryDetailsTableData {
     purchasePrice: number;
 }
 
+interface IGRNReportTableData {
+    grnNumber: string;
+    createDate: string;
+    lastModified: string;
+    grnUploaded?: string;
+}
+
 
 export type {
     IInventory,
@@ -121,5 +134,7 @@ export type {
     IInventoriesAxiosResponse,
     IInventoryAxiosResponse,
     IInventoryDetailsTableData,
-    IGRNUploadResponse
+    IGRNUploadResponse,
+    IGRNReport,
+    IGRNReportTableData
 }

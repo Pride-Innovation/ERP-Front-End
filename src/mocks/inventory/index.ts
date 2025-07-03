@@ -5,7 +5,7 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { IInventory } from "../../pages/inventory/interface";
+import { IGRNReport, IInventory } from "../../pages/inventory/interface";
 import { branchesMock } from "../branch";
 import { suppliersMock } from "../settings";
 import { statusMocks } from "../status";
@@ -48,3 +48,16 @@ export const inventoryMock: IInventory[] = [
         lastModifiedBy: usersMock[0],
     }
 ];
+
+
+export const grnReportsMock: IGRNReport[] = [
+    {
+        id: 152,
+        name: "PRDMCNAI6DH4",
+        documentPath: "",
+        createDate: "2025-07-03T14:16:04.854324",
+        lastModified: "2025-07-03T14:16:04.854324",
+        createdBy: usersMock[0],
+        lastModifiedBy: usersMock[0],
+    }
+]
