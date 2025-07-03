@@ -1,6 +1,15 @@
-import { useContext, useEffect, useState } from "react";
+import {
+    useContext,
+    useEffect,
+    useState
+} from "react";
 import { ITableHeader } from "../../../components/tables/interface";
-import { IGRNCommoditiesAxiosResponse, IGRNCommodity, IGRNReport, IGRNReportTableData } from "../interface";
+import {
+    IGRNCommoditiesAxiosResponse,
+    IGRNCommodity,
+    IGRNReport,
+    IGRNReportTableData
+} from "../interface";
 import { grnReportsMock } from "../../../mocks/inventory";
 import { getTableHeaders } from "../../../components/tables/getTableHeaders";
 import moment from "moment";
@@ -113,7 +122,7 @@ const GrnReportUtills = () => {
     * @param grnNumber - The GRN number to filter by
     * @returns An array of IGRNCommodity objects
     */
-   
+
     const filterGRNCommoditiesByGRNNumber = (grnNumber: string | number): Array<IGRNCommodity> => {
         return filteredGRNCommodities.filter((commodity) => commodity.grnReport?.name === grnNumber);
     }
