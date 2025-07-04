@@ -8,13 +8,14 @@ Managing Director
 
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import moment from 'moment';
 
 /**
  * Generates a professional GRN PDF.
  * @param {Object} data - The GRN JSON object.
  * @param {string} [logoBase64] - Optional Base64 image string (e.g. data:image/png;base64,...).
  */
-export function generateGoodsReceivedNote(data, logoBase64 = null) {
+export function generateGoodsReceivedNote(data, logoBase64 = null, username = 'Pride Bank Limited') {
     const doc = new jsPDF();
     const primaryColor = '#835F1E';
     const secondaryColor = '#08796C';
@@ -38,7 +39,7 @@ export function generateGoodsReceivedNote(data, logoBase64 = null) {
     // 📑 Details
     doc.setTextColor(black);
     doc.setFontSize(10);
-    doc.text(`GRN Ref No: ${data.grnNumber}`, 14, (cursorY += 10));
+    doc.text(`GRN Ref No: ${data.reports[0].grnReport.name}`, 14, (cursorY += 10));
     doc.text(`LPO No: ${data.lpoNumber}`, 14, (cursorY += 6));
     doc.text(`Date: ${new Date(data.createDate).toLocaleDateString()}`, 14, (cursorY += 6));
     doc.text(`Branch: ${data.branch.name}`, 14, (cursorY += 6));
@@ -56,7 +57,7 @@ export function generateGoodsReceivedNote(data, logoBase64 = null) {
     doc.text(`We acknowledge receipt of the items listed below as detailed in LPO No: ${data.lpoNumber}`, 14, (cursorY += 10));
 
     // 📦 Commodities Table
-    const tableData = data.commodities.map((item, index) => {
+    const tableData = data.reports.map((item, index) => {
         const variance = item.orderedQuantity - item.deliveredQuantity;
         return [
             index + 1,
@@ -100,7 +101,7 @@ export function generateGoodsReceivedNote(data, logoBase64 = null) {
     doc.text(`Total Cost: UGX ${data.totalCost.toLocaleString()}`, 14, afterTableY);
     doc.text(`Balance Cost: UGX ${data.balanceCost.toLocaleString()}`, 14, afterTableY + 6);
     // doc.text(`Status: ${data.status.name}`, 14, afterTableY + 12);
-    
+
     // 🎯 Status Color Logic
     const status = data.status.name?.toLowerCase();
     let statusColor = '#000000'; // default black
@@ -121,9 +122,9 @@ export function generateGoodsReceivedNote(data, logoBase64 = null) {
     const signatureY = afterTableY + 25;
     doc.setFontSize(10);
     doc.setTextColor(black);
-    doc.text('Delivered by: _____________________  Signature: ____________  Date: ___________', 14, signatureY);
-    doc.text('Received by: _____________________  Signature: ____________  Date: ___________', 14, signatureY + 10);
+    doc.text(`Delivered by: _____________________  Signature: ____________  Date: ${moment(new Date()).format('Do MMMM YYYY')}`, 14, signatureY);
+    doc.text(`Received by: ${username}  Signature: ____________  Date: ${moment(new Date()).format('Do MMMM YYYY')}`, 14, signatureY + 10);
 
     // 📤 Save
-    doc.save(`GRN_${data.grnNumber}.pdf`);
+    doc.save(`GRN_${data.reports[0].grnReport.name}.pdf`);
 }

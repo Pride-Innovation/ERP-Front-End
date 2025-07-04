@@ -19,7 +19,9 @@ import EditCalendarOutlinedIcon from '@mui/icons-material/EditCalendarOutlined';
 import ArrowCircleDownOutlinedIcon from '@mui/icons-material/ArrowCircleDownOutlined';
 import { InventoryContext } from "../../../context/inventory";
 import { fetchGrnCommoditiesByStockIDService } from "../service";
-
+import { generateGoodsReceivedNote } from "../../../utils/goodReceivedNotes";
+import Logo from "../../../statics/images/whitelogo.png"
+import RoutesUtills from "../../../core/routes/utills";
 
 
 const GrnReportUtills = () => {
@@ -29,6 +31,8 @@ const GrnReportUtills = () => {
     const header = { plural: 'GRN Report', singular: 'GRN Report' }
     const [stocksTableData, setStocksTableData] = useState<Array<IGRNReportTableData>>([] as Array<IGRNReportTableData>);
     const [filteredGRNCommodities, setFilteredGRNCommodities] = useState<Array<IGRNCommodity>>([] as Array<IGRNCommodity>);
+    const { getCurrentUser } = RoutesUtills();
+
 
     const {
         createdBy,
@@ -92,8 +96,6 @@ const GrnReportUtills = () => {
         try {
             const response = await fetchGrnCommoditiesByStockIDService(id as string) as IGRNCommoditiesAxiosResponse;
             if (response.status === 200) {
-                // console.log("GRN commodities fetched successfully:", response.data.content);
-                // console.log(currentInventory, "Current Inventory ID for GRN commodities fetch");
                 setFilteredGRNCommodities(response.data.content);
             }
         } catch (error) {
@@ -131,15 +133,17 @@ const GrnReportUtills = () => {
     const handleOptionClicked = async (option: string | number, moduleID?: string | number) => {
         switch (option) {
             case crudStates.download:
-                // const data = findStockById(moduleID as number);
-                // generateGoodsReceivedNote(data as IInventory, Logo);
-                // console.log(findGRNById(moduleID as number), "Download GRN Report clicked");
+                const grnData = {
+                    ...currentInventory,
+                    reports: filterGRNCommoditiesByGRNNumber(findGRNById(moduleID as number)?.name as string)
+                };
 
-                console.log(filterGRNCommoditiesByGRNNumber(
-                    findGRNById(moduleID as number)?.name as string
-                ));
+                generateGoodsReceivedNote(
+                    grnData,
+                    Logo,
+                    getCurrentUser()?.firstName + " " + getCurrentUser()?.lastName,
+                );
 
-                console.log(currentInventory, "Current Inventory for GRN Report");
                 break;
             case crudStates.upload:
                 console.log(moduleID, "Upload GRN Report clicked");

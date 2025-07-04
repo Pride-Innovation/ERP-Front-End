@@ -122,8 +122,6 @@ const UpdateInventory = () => {
             const response = await completeDeliveryService(data, id as string) as IInventoryAxiosResponse;
             if (response.status === 201) {
                 toast.success("Inventory updated successfully");
-                // setStockRows([]);
-                // reset({ ...defaultInventory });
             } else {
                 toast.error("Failed to update inventory. Please try again.");
             }
