@@ -58,12 +58,13 @@ export function generateGoodsReceivedNote(data, logoBase64 = null, username = 'P
 
     // 📦 Commodities Table
     const tableData = data.reports.map((item, index) => {
-        const variance = item.orderedQuantity - item.deliveredQuantity;
+        const variance = item.orderedQuantity - item.totalDeliveredQuantity;
+;
         return [
             index + 1,
             item.commodity.name,
             item.orderedQuantity,
-            item.deliveredQuantity,
+            item.totalDeliveredQuantity,
             variance,
             `UGX ${item.costPrice.toLocaleString()}`,
             `UGX ${item.purchasePrice.toLocaleString()}`

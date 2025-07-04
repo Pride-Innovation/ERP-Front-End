@@ -144,6 +144,8 @@ const GrnReportUtills = () => {
                     getCurrentUser()?.firstName + " " + getCurrentUser()?.lastName,
                 );
 
+                console.log(grnData, "GRN Data to be downloaded");
+
                 break;
             case crudStates.upload:
                 console.log(moduleID, "Upload GRN Report clicked");
