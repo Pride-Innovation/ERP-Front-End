@@ -31,6 +31,8 @@ import moment from 'moment';
 import AddTaskIcon from '@mui/icons-material/AddTask';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
+import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
+import ToggleOffOutlinedIcon from '@mui/icons-material/ToggleOffOutlined';
 
 const RequestUtills = () => {
     const endPoint = 'requests';
@@ -118,6 +120,8 @@ const RequestUtills = () => {
                 { value: crudStates.approve, label: "Approve Request", icon: <AddTaskIcon fontSize='small' color='primary' /> },
                 { value: crudStates.reject, label: "Reject Request", icon: <RemoveCircleOutlineIcon fontSize='small' color='error' /> },
                 { value: crudStates.issue, label: "Issue Items", icon: <ExitToAppIcon fontSize='small' color='primary' /> },
+                { value: crudStates.acknowledgeRequest, label: "Acknowledge Request", icon: <ThumbUpOffAltIcon fontSize='small' color='inherit' /> },
+                { value: crudStates.acknowledgeReceipt, label: "Acknowledge Receipt", icon: <ToggleOffOutlinedIcon fontSize='small' color='info' /> },
             ]
         },
     };

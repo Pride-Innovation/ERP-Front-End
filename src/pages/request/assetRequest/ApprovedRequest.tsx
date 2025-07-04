@@ -86,7 +86,7 @@ const ApproveRequest = ({
             const data = {
                 requestId: request.id,
                 approverId: request.currentApprover?.id,
-                statusId: 3,
+                statusId: 3, //  ID 3 must match the Approved Status ID in the Database
                 comment
             }
             const response = await assetRequestApprovalRejectionService(data) as IRequestAxiosResponse;
