@@ -124,7 +124,7 @@ const InventoryDetails = () => {
                             <DetailSection label='Supplier Contact' icon={<LocalPhoneOutlinedIcon />} text={currentInventory?.supplier?.telephone as string} />
                             {currentInventory?.supplier?.email && <DetailSection label='Supplier Email' icon={<EmailOutlinedIcon style={{ color: "#BC892C" }} />} text={currentInventory?.supplier?.email as string} />}
                             {currentInventory?.lpoNumber && <DetailSection label="LPO Number" text={currentInventory?.lpoNumber} />}
-                            {currentInventory?.grnNumber && <DetailSection label="GRN Number" text={currentInventory?.grnNumber} />}
+                            {currentInventory?.status && <DetailSection label="Status" text={currentInventory?.status?.name} />}
                             {currentInventory?.createDate && <DetailSection label="Delivery Date" text={moment(currentInventory?.createDate).format('Do MMMM YYYY, h:mm')} />}
                         </CardContent>
                     </Card>
