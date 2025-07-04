@@ -3,6 +3,9 @@ import { IGRNReport } from "../interface"
 import GrnReportUtills from "./grnReportUtills"
 import { Grid } from "@mui/material";
 import TableComponent from "../../../components/tables/TableComponent";
+import { crudStates } from "../../../utils/constants";
+import ModalComponent from "../../../components/modal";
+import UploadGRN from "../UploadGRN";
 
 const InventoryGRN = ({ grnList }: { grnList: IGRNReport[] }) => {
     const {
@@ -11,7 +14,11 @@ const InventoryGRN = ({ grnList }: { grnList: IGRNReport[] }) => {
         header,
         stocksTableData,
         handleInventoryTableData,
-        handleOptionClicked
+        handleOptionClicked,
+        modalState,
+        open,
+        currentGRN,
+        handleClose
     } = GrnReportUtills();
 
     useEffect(() => {
@@ -20,6 +27,11 @@ const InventoryGRN = ({ grnList }: { grnList: IGRNReport[] }) => {
 
     return (
         <>
+            {modalState === crudStates.upload &&
+                <ModalComponent title='Upload Signed GRN' open={open} handleClose={handleClose} width="40%">
+                    <UploadGRN id={currentGRN?.id} />
+                </ModalComponent>
+            }
             <Grid xs={12} container>
                 {columnHeaders.length > 0 &&
                     <TableComponent

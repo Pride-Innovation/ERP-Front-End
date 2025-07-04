@@ -1,19 +1,24 @@
-import { Box, Button, Card, Stack } from "@mui/material";
+import {
+    Box,
+    Button,
+    Card,
+    Stack
+} from "@mui/material";
 import { grey } from "@mui/material/colors";
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-import { useContext, useRef, useState } from "react";
+import {
+    useRef,
+    useState
+} from "react";
 import InputFileUpload from "../../components/forms/FileUpload";
-import { InventoryContext } from "../../context/inventory";
 import { uploadGRNService } from "./service";
 import { toast } from "react-toastify";
 import { IGRNUploadResponse } from "./interface";
 
-const UploadGRN = () => {
+const UploadGRN = ({ id }: { id?: string | number }) => {
     const inputRef = useRef<HTMLInputElement>(null);
     const [fileUrl, setFileUrl] = useState<string>("");
     const [file, setFile] = useState<File | null>(null);
-    const { currentInventory } = useContext(InventoryContext)
-
 
     const handleButtonClick = () => {
         if (inputRef.current) {
@@ -32,18 +37,17 @@ const UploadGRN = () => {
 
     const handleSubmit = async () => {
         const payload = new FormData();
-        payload.append("name", currentInventory?.grnNumber as string || "");
-
         if (!file) {
             toast.error("No file selected for upload.");
             return;
         }
-        
+
         if (file) {
             payload.append("file", file);
         }
+
         try {
-            const response = await uploadGRNService(payload, currentInventory?.id as string) as IGRNUploadResponse;
+            const response = await uploadGRNService(payload, id as string) as IGRNUploadResponse;
             if (response.status === 201) {
                 toast.success("File uploaded successfully!");
             }
@@ -72,7 +76,7 @@ const UploadGRN = () => {
                         fullWidth
                         onClick={handleButtonClick}
                     >
-                        Signed GRN Upload
+                        Upload Signed GRN
                     </Button>
                     <Button
                         variant="contained"

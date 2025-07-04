@@ -32,7 +32,11 @@ const GrnReportUtills = () => {
     const [stocksTableData, setStocksTableData] = useState<Array<IGRNReportTableData>>([] as Array<IGRNReportTableData>);
     const [filteredGRNCommodities, setFilteredGRNCommodities] = useState<Array<IGRNCommodity>>([] as Array<IGRNCommodity>);
     const { getCurrentUser } = RoutesUtills();
-
+    const [modalState, setModalState] = useState<string>("");
+    const [open, setOpen] = useState<boolean>(false);
+    const handleOpen = () => setOpen(true);
+    const handleClose = () => setOpen(false);
+    const [currentGRN, setCurrentGRN] = useState<IGRNReport | null>(null);
 
     const {
         createdBy,
@@ -143,16 +147,11 @@ const GrnReportUtills = () => {
                     Logo,
                     getCurrentUser()?.firstName + " " + getCurrentUser()?.lastName,
                 );
-
-                console.log(grnData, "GRN Data to be downloaded");
-
                 break;
             case crudStates.upload:
-                console.log(moduleID, "Upload GRN Report clicked");
-                // const val = findStockById(moduleID as number) as IInventory;
-                // setCurrentInventory(val);
-                // setModalState(option as string);
-                // handleOpen();
+                setModalState(option as string);
+                handleOpen();
+                setCurrentGRN(findGRNById(moduleID as number) || null);
                 break;
             default:
                 break
@@ -165,7 +164,11 @@ const GrnReportUtills = () => {
         header,
         handleInventoryTableData,
         stocksTableData,
-        handleOptionClicked
+        handleOptionClicked,
+        modalState,
+        open,
+        handleClose,
+        currentGRN
     }
     )
 }
