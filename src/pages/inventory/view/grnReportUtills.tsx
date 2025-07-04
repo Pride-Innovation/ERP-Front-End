@@ -149,9 +149,14 @@ const GrnReportUtills = () => {
                 );
                 break;
             case crudStates.upload:
+                setCurrentGRN(findGRNById(moduleID as number) || null);
                 setModalState(option as string);
                 handleOpen();
+                break;
+            case crudStates.read:
                 setCurrentGRN(findGRNById(moduleID as number) || null);
+                setModalState(option as string);
+                handleOpen();
                 break;
             default:
                 break
