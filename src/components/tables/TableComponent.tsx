@@ -97,7 +97,7 @@ const TableComponent = ({
                                         }}
                                         weight={400} size='13.5px'>
                                         <TimeLineDot status={value} />
-                                        {value}</TypographyComponent>
+                                        {camelCaseToWords(value)}</TypographyComponent>
                                 </StyledBox>
                             )
                             : (column.isBoolen) ? (

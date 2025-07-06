@@ -6,15 +6,17 @@ Managing Director
 */
 
 import { ITimeLineDot } from './interface'
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import DoDisturbAltIcon from '@mui/icons-material/DoDisturbAlt';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
-import LockPersonOutlinedIcon from '@mui/icons-material/LockPersonOutlined';
-import AutorenewIcon from '@mui/icons-material/Autorenew';
-import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
 import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
-import HourglassEmptyOutlinedIcon from '@mui/icons-material/HourglassEmptyOutlined';
+import AddTaskIcon from '@mui/icons-material/AddTask';
+import RecommendOutlinedIcon from '@mui/icons-material/RecommendOutlined';
+import HdrAutoOutlinedIcon from '@mui/icons-material/HdrAutoOutlined';
+import PublishedWithChangesOutlinedIcon from '@mui/icons-material/PublishedWithChangesOutlined';
+import PlaylistAddCheckCircleOutlinedIcon from '@mui/icons-material/PlaylistAddCheckCircleOutlined';
+import ThumbUpOffAltOutlinedIcon from '@mui/icons-material/ThumbUpOffAltOutlined';
+import EditCalendarOutlinedIcon from '@mui/icons-material/EditCalendarOutlined';
 /**
  * 
  * @param status 
@@ -25,24 +27,25 @@ import HourglassEmptyOutlinedIcon from '@mui/icons-material/HourglassEmptyOutlin
 */
 
 const TimeLineDot = ({ status }: ITimeLineDot) => {
-    return status === "disabled" ? (
-        <HighlightOffIcon fontSize='small' color="error" sx={{ mr: "5px" }} />
-    ) : status === "blocked" ? (
-        <LockPersonOutlinedIcon fontSize='small' color="warning" sx={{ mr: "5px" }} />
-    ) : status === "active" ? (
-        <CheckCircleOutlineIcon fontSize='small' color="primary" sx={{ mr: "5px" }} />
-    ) : status === "pending" ? (
-        <AutorenewIcon fontSize='small' color="warning" sx={{ mr: "5px" }} />
-    ) : status === "rejected" ? (
-        <CancelOutlinedIcon fontSize='small' color="error" sx={{ mr: "5px" }} />
-    ) : status === "approved" ? (
-        <CheckCircleOutlineOutlinedIcon fontSize='small' color="primary" sx={{ mr: "5px" }} />
-    ) : status === "completed" ? (
-        <CheckCircleOutlineOutlinedIcon fontSize='small' color="primary" sx={{ mr: "5px" }} />
-    ) : status === "warning" ? (
+
+    return status === "requestCreated" ? (
+        <AddTaskIcon fontSize='small' color="success" sx={{ mr: "5px" }} />
+    ) : status === "requestRejected" ? (
+        <HighlightOffIcon fontSize='small' color="warning" sx={{ mr: "5px" }} />
+    ) : status === "requestApproved" ? (
+        <RecommendOutlinedIcon fontSize='small' color="primary" sx={{ mr: "5px" }} />
+    ) : status === "requestAcknowledged" ? (
+        <HdrAutoOutlinedIcon fontSize='small' color="warning" sx={{ mr: "5px" }} />
+    ) : status === "requestIssued" ? (
+        <PublishedWithChangesOutlinedIcon fontSize='small' color="info" sx={{ mr: "5px" }} />
+    ) : status === "issuanceApproved" ? (
+        <PlaylistAddCheckCircleOutlinedIcon fontSize='small' color="primary" sx={{ mr: "5px" }} />
+    ) : status === "receiptAcknowledged" ? (
+        <ThumbUpOffAltOutlinedIcon fontSize='small' color="primary" sx={{ mr: "5px" }} />
+    ) : status === "issuanceAvailable" ? (
         <ErrorOutlineIcon fontSize='small' color="warning" sx={{ mr: "5px" }} />
-    ) : status === "low" ? (
-        <HourglassEmptyOutlinedIcon fontSize='small' color="error" sx={{ mr: "5px" }} />
+    ) : status === "requireUpdate" ? (
+        <EditCalendarOutlinedIcon fontSize='small' color="error" sx={{ mr: "5px" }} />
     ) : status === "in stock" ? (
         <CheckCircleOutlineOutlinedIcon fontSize='small' color="primary" sx={{ mr: "5px" }} />
     )
