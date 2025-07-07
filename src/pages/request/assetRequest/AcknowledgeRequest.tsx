@@ -5,12 +5,6 @@ import {
     Typography,
     TextField,
     CircularProgress,
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableRow,
-    Paper,
     useTheme,
 } from "@mui/material";
 import { IAcknowledegeRequest, IRequestAxiosResponse } from "../interface"
@@ -19,6 +13,7 @@ import { findAssetRequestByIDService } from "./service";
 import { toast } from "react-toastify";
 import ButtonComponent from "../../../components/forms/Button";
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
+import AssetTable from "../../../components/assetTable";
 
 const AcknowledgeRequest = ({
     request,
@@ -120,53 +115,7 @@ const AcknowledgeRequest = ({
                         </Typography>
                     </Stack>
                 ) : requestCommodities.length > 0 ? (
-                    <Paper
-                        elevation={0}
-                        sx={{ bgcolor: "transparent" }}
-                    >
-                        <Table
-                            size="small"
-                            sx={{ borderCollapse: "separate", borderSpacing: 0 }}
-                        >
-                            <TableHead>
-                                <TableRow
-                                    sx={{
-                                        backgroundColor: theme.palette.primary.main,
-                                        "& th": {
-                                            borderBottom: "none",
-                                            color: theme.palette.background.paper
-                                        },
-                                    }}
-                                >
-                                    <TableCell>Commodity</TableCell>
-                                    <TableCell>Unit of Measure</TableCell>
-                                    <TableCell>Asset Type</TableCell>
-                                    <TableCell align="right">Quantity</TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {requestCommodities.map((item, idx) => (
-                                    <TableRow
-                                        key={idx}
-                                        sx={{
-                                            backgroundColor:
-                                                idx % 2 === 0
-                                                    ? theme.palette.action.hover
-                                                    : "transparent",
-                                            "& td": {
-                                                borderBottom: "none",
-                                            },
-                                        }}
-                                    >
-                                        <TableCell>{item.commodity.name}</TableCell>
-                                        <TableCell>{item.commodity.groupName}</TableCell>
-                                        <TableCell>{item.commodity.assetType?.name}</TableCell>
-                                        <TableCell align="right">{item.quantity}</TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </Paper>
+                    <AssetTable commodities={requestCommodities} />
                 ) : (
                     <Typography variant="body2" color="text.secondary">
                         No commodities found for this request.
