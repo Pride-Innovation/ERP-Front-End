@@ -10,9 +10,6 @@ import {
     useEffect,
     useState
 } from 'react';
-import InfoIcon from '@mui/icons-material/Info';
-import ModeEditIcon from '@mui/icons-material/ModeEdit';
-import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import { ITableHeader } from '../../../components/tables/interface';
 import { IRequest, IRequestsAxiosResponse, IRequestTableData } from '../interface';
 import { requestMock } from '../../../mocks/request';
@@ -28,12 +25,6 @@ import { useNavigate } from 'react-router';
 import { ROUTES } from '../../../core/routes/routes';
 import { RequestContext } from '../../../context/request/RequestContext';
 import moment from 'moment';
-import AddTaskIcon from '@mui/icons-material/AddTask';
-import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
-import ExitToAppIcon from '@mui/icons-material/ExitToApp';
-import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
-import ToggleOffOutlinedIcon from '@mui/icons-material/ToggleOffOutlined';
-import { set } from 'react-hook-form';
 
 const RequestUtills = () => {
     const endPoint = 'requests';
@@ -44,7 +35,7 @@ const RequestUtills = () => {
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
     const [pendingRequests, setPendingRequests] = useState<Array<IRequest>>([] as IRequest[])
     const [rejectedRequests, setRejectedRequests] = useState<Array<IRequest>>([] as IRequest[])
-    const { setRequestTableData, setCount, count } = useContext(RequestContext);
+    const { setRequestTableData, setCount, count, options } = useContext(RequestContext);
     const [open, setOpen] = useState<boolean>(false);
     const dispatch = useDispatch<AppDispatch>();
     const { requests } = useSelector((state: RootState) => state.AssetsRequestsStore)
@@ -115,16 +106,7 @@ const RequestUtills = () => {
         status: requestMock[0]?.status?.status,
         action: {
             label: "options",
-            options: [
-                { value: crudStates.delete, label: "Delete", icon: <InfoIcon fontSize='small' color='error' /> },
-                { value: crudStates.update, label: "Update", icon: <ModeEditIcon fontSize='small' color='info' /> },
-                { value: crudStates.read, label: "View Details", icon: <RemoveRedEyeIcon fontSize='small' color='inherit' /> },
-                { value: crudStates.approve, label: "Approve Request", icon: <AddTaskIcon fontSize='small' color='primary' /> },
-                { value: crudStates.reject, label: "Reject Request", icon: <RemoveCircleOutlineIcon fontSize='small' color='error' /> },
-                { value: crudStates.issue, label: "Issue Items", icon: <ExitToAppIcon fontSize='small' color='primary' /> },
-                { value: crudStates.acknowledgeRequest, label: "Acknowledge Request", icon: <ThumbUpOffAltIcon fontSize='small' color='inherit' /> },
-                { value: crudStates.acknowledgeReceipt, label: "Acknowledge Receipt", icon: <ToggleOffOutlinedIcon fontSize='small' color='info' /> },
-            ]
+            options: options
         },
     };
 
@@ -240,7 +222,7 @@ const RequestUtills = () => {
     }
     useEffect(() => {
         setColumnHeaders(getTableHeaders(rowData))
-    }, []);
+    }, [options]);
 
     return (
         {

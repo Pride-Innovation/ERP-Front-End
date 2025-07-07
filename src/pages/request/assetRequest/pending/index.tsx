@@ -15,10 +15,13 @@ import { RequestContext } from "../../../../context/request/RequestContext";
 import { crudStates } from "../../../../utils/constants";
 import ModalComponent from "../../../../components/modal";
 import AcknowledgeRequest from "../AcknowledgeRequest";
+import ExitToAppIcon from '@mui/icons-material/ExitToApp';
+import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
+import ToggleOffOutlinedIcon from '@mui/icons-material/ToggleOffOutlined';
 
 const PendingRequest = () => {
     const { requests } = useSelector((state: RootState) => state.AssetsRequestsStore)
-    const { requestTableData } = useContext(RequestContext);
+    const { requestTableData, setOptions } = useContext(RequestContext);
 
     const {
         handleOptionClicked,
@@ -48,6 +51,15 @@ const PendingRequest = () => {
 
 
     useEffect(() => { handleRequest(requests) }, [requests]);
+
+    useEffect(() => {
+        setOptions([
+            { value: crudStates.issue, label: "Issue Items", icon: <ExitToAppIcon fontSize='small' color='primary' /> },
+            { value: crudStates.acknowledgeRequest, label: "Acknowledge Request", icon: <ThumbUpOffAltIcon fontSize='small' color='inherit' /> },
+            { value: crudStates.acknowledgeReceipt, label: "Acknowledge Receipt", icon: <ToggleOffOutlinedIcon fontSize='small' color='info' /> },
+        ])
+    }, []);
+
 
     return (
         <Grid xs={12} container>

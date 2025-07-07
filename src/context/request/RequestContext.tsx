@@ -30,7 +30,9 @@ interface IRequestContext {
     count: number;
     setCount: Dispatch<SetStateAction<number>>;
     monthlyStockingReport: IMonthlyAssetReport[];
-    setMonthlyStockingReport: Dispatch<SetStateAction<IMonthlyAssetReport[]>>
+    setMonthlyStockingReport: Dispatch<SetStateAction<IMonthlyAssetReport[]>>;
+    options: Array<{ value: string | number, label: string, icon: JSX.Element }>,
+    setOptions: Dispatch<SetStateAction<Array<{ value: string | number, label: string, icon: JSX.Element }>>>
 }
 
 export const RequestContext = createContext<IRequestContext>({} as IRequestContext);
@@ -44,6 +46,8 @@ const RequestContextProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const [assetType, setAssetType] = useState<IAssetType>({} as IAssetType);
     const [assetsEngravedInStore, setAssetsEngravedInStore] = useState<IAsset[]>([] as IAsset[]);
     const [monthlyStockingReport, setMonthlyStockingReport] = useState<IMonthlyAssetReport[]>([] as IMonthlyAssetReport[])
+    const [options, setOptions] = useState<Array<{ value: string | number, label: string, icon: JSX.Element }>>([]);
+
 
     const [count, setCount] = useState<number>(0)
 
@@ -66,8 +70,10 @@ const RequestContextProvider: React.FC<{ children: React.ReactNode }> = ({ child
             count,
             setCount,
             monthlyStockingReport,
-            setMonthlyStockingReport
-        }}>
+            setMonthlyStockingReport,
+            setOptions,
+            options
+            }}>
             {children}
         </RequestContext.Provider>
     )

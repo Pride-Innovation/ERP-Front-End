@@ -23,9 +23,14 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../../../store";
 import RejectRequest from "../RejectRequest";
 import ApproveRequest from "../ApprovedRequest";
+import AddTaskIcon from '@mui/icons-material/AddTask';
+import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
+import InfoIcon from '@mui/icons-material/Info';
+import ModeEditIcon from '@mui/icons-material/ModeEdit';
+import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 
 const Request = () => {
-    const { requestTableData } = useContext(RequestContext);
+    const { requestTableData, setOptions } = useContext(RequestContext);
     const { fileData } = useContext(FileContext);
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
     const { requests } = useSelector((state: RootState) => state.AssetsRequestsStore)
@@ -45,7 +50,7 @@ const Request = () => {
         count,
         handleRequest,
         loading,
-        currentRequest
+        currentRequest,
     } = RequestUtills();
 
     useEffect(() => { fetchAllRequests() }, []);
@@ -56,6 +61,17 @@ const Request = () => {
             console.log(fileData, "form data!!");
         }
     }, [fileData]);
+
+    useEffect(() => {
+        setOptions([
+            { value: crudStates.delete, label: "Delete", icon: <InfoIcon fontSize='small' color='error' /> },
+            { value: crudStates.update, label: "Update", icon: <ModeEditIcon fontSize='small' color='info' /> },
+            { value: crudStates.read, label: "View Details", icon: <RemoveRedEyeIcon fontSize='small' color='inherit' /> },
+            { value: crudStates.approve, label: "Approve Request", icon: <AddTaskIcon fontSize='small' color='primary' /> },
+            { value: crudStates.reject, label: "Reject Request", icon: <RemoveCircleOutlineIcon fontSize='small' color='error' /> },
+        ])
+    }, []);
+
 
     return (
         <React.Fragment>

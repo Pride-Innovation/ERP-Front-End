@@ -12,11 +12,13 @@ import { useContext, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../store";
 import { RequestContext } from "../../../../context/request/RequestContext";
+import ModeEditIcon from '@mui/icons-material/ModeEdit';
+import InfoIcon from '@mui/icons-material/Info';
+import { crudStates } from "../../../../utils/constants";
 
 const RejectedRequest = () => {
-    // const { setFileData, fileData } = useContext(FileContext)
     const { requests } = useSelector((state: RootState) => state.AssetsRequestsStore)
-    const { requestTableData } = useContext(RequestContext);
+    const { requestTableData, setOptions } = useContext(RequestContext);
 
     const {
         handleOptionClicked,
@@ -39,6 +41,13 @@ const RejectedRequest = () => {
     }, []);
 
     useEffect(() => { handleRequest(requests) }, [requests]);
+
+    useEffect(() => {
+        setOptions([
+            { value: crudStates.delete, label: "Delete", icon: <InfoIcon fontSize='small' color='error' /> },
+            { value: crudStates.update, label: "Update", icon: <ModeEditIcon fontSize='small' color='info' /> },
+        ])
+    }, []);
 
     return (
         <Grid xs={12} container>
