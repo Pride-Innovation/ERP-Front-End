@@ -7,7 +7,6 @@ Managing Director
 
 import { ITimeLineDot } from './interface'
 import DoDisturbAltIcon from '@mui/icons-material/DoDisturbAlt';
-import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import AddTaskIcon from '@mui/icons-material/AddTask';
@@ -17,6 +16,8 @@ import PublishedWithChangesOutlinedIcon from '@mui/icons-material/PublishedWithC
 import PlaylistAddCheckCircleOutlinedIcon from '@mui/icons-material/PlaylistAddCheckCircleOutlined';
 import ThumbUpOffAltOutlinedIcon from '@mui/icons-material/ThumbUpOffAltOutlined';
 import EditCalendarOutlinedIcon from '@mui/icons-material/EditCalendarOutlined';
+import DoNotDisturbAltIcon from '@mui/icons-material/DoNotDisturbAlt';
+
 /**
  * 
  * @param status 
@@ -31,7 +32,7 @@ const TimeLineDot = ({ status }: ITimeLineDot) => {
     return status === "requestCreated" ? (
         <AddTaskIcon fontSize='small' color="success" sx={{ mr: "5px" }} />
     ) : status === "requestRejected" ? (
-        <HighlightOffIcon fontSize='small' color="warning" sx={{ mr: "5px" }} />
+        <DoNotDisturbAltIcon fontSize='small' color="error" sx={{ mr: "5px" }} />
     ) : status === "requestApproved" ? (
         <RecommendOutlinedIcon fontSize='small' color="primary" sx={{ mr: "5px" }} />
     ) : status === "requestAcknowledged" ? (

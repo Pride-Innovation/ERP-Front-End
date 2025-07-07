@@ -32,7 +32,7 @@ const PendingRequest = () => {
         /**
          * This should contain the Status ID for Pending Requests
          */
-        const params = { statusId: 1 }
+        const params = { statusIds: `${1},${2}` }
         fetchAllRequests(params);
 
         // setFileData({ file: "", module: "", jsonData: [] });
@@ -71,7 +71,7 @@ const PendingRequest = () => {
                     rows={requestTableData}
                     columnHeaders={columnHeaders}
                     handleOptionClicked={handleOptionClicked}
-                    params={{ statusId: 1 }}
+                    params={{ statusIds: `${1},${2}` }}
                 />
             }
         </Grid>
