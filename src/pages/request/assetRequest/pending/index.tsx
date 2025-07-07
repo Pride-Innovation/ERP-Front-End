@@ -18,6 +18,7 @@ import AcknowledgeRequest from "../AcknowledgeRequest";
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import ToggleOffOutlinedIcon from '@mui/icons-material/ToggleOffOutlined';
+import AcknowledgeReceipt from "../AcknowledgeReceipt";
 
 const PendingRequest = () => {
     const { requests } = useSelector((state: RootState) => state.AssetsRequestsStore)
@@ -67,6 +68,16 @@ const PendingRequest = () => {
             {crudStates.acknowledgeRequest === modalState &&
                 <ModalComponent width={"40%"} title='Acknowledge Request' open={open} handleClose={handleClose}>
                     <AcknowledgeRequest
+                        setSendingRequest={setSendingRequest}
+                        handleClose={handleClose}
+                        request={currentRequest}
+                        sendingRequest={sendingRequest}
+                        buttonText="Acknowledge" />
+                </ModalComponent>
+            }
+            {crudStates.acknowledgeReceipt === modalState &&
+                <ModalComponent width={"40%"} title='Acknowledge Receipt' open={open} handleClose={handleClose}>
+                    <AcknowledgeReceipt
                         setSendingRequest={setSendingRequest}
                         handleClose={handleClose}
                         request={currentRequest}

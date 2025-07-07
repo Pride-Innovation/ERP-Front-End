@@ -222,6 +222,14 @@ export interface IAcknowledegeRequest {
     setSendingRequest: Dispatch<SetStateAction<boolean>>
 }
 
+export interface IAcknowledegeReceipt {
+    handleClose: () => void;
+    sendingRequest: boolean;
+    buttonText: string;
+    request: IRequest;
+    setSendingRequest: Dispatch<SetStateAction<boolean>>
+}
+
 export interface IIssueRequest {
     handleClose: () => void;
     sendingRequest: boolean;
