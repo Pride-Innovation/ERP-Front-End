@@ -79,6 +79,7 @@ const AcknowledgeRequest = ({
                 statusId: 4, // Acknowledge Request Status ID
                 comment
             }
+
             const response = await acknowledgeRequestService(data) as IAcknowledgeRequesttAxiosResponse;
             if (response.status === 201) {
                 toast.success("Request acknowledged successfully.");
