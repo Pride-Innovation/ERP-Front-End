@@ -12,9 +12,11 @@ import { useContext, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../store";
 import { RequestContext } from "../../../../context/request/RequestContext";
+import { crudStates } from "../../../../utils/constants";
+import ModalComponent from "../../../../components/modal";
+import AcknowledgeRequest from "../AcknowledgeRequest";
 
 const PendingRequest = () => {
-    // const { setFileData, fileData } = useContext(FileContext)
     const { requests } = useSelector((state: RootState) => state.AssetsRequestsStore)
     const { requestTableData } = useContext(RequestContext);
 
@@ -25,7 +27,13 @@ const PendingRequest = () => {
         loading,
         fetchAllRequests,
         handleRequest,
-        count
+        count,
+        modalState,
+        open,
+        handleClose,
+        currentRequest,
+        sendingRequest,
+        setSendingRequest
     } = RequestUtills()
 
     useEffect(() => {
@@ -44,22 +52,16 @@ const PendingRequest = () => {
     return (
         <Grid xs={12} container>
 
-            {/* {crudStates.delete === modalState &&
-                <ModalComponent width={"40%"} title='Delete Request' open={open} handleClose={handleClose}>
-                    <DeleteRequest
-                        setSendingRequest={setLoading}
-                        sendingRequest={loading}
+            {crudStates.acknowledgeRequest === modalState &&
+                <ModalComponent width={"40%"} title='Acknowledge Request' open={open} handleClose={handleClose}>
+                    <AcknowledgeRequest
+                        setSendingRequest={setSendingRequest}
                         handleClose={handleClose}
-                        buttonText='Confirm'
                         request={currentRequest}
-                    />
+                        sendingRequest={sendingRequest}
+                        buttonText="Acknowledge" />
                 </ModalComponent>
             }
-            {crudStates.read === modalState &&
-                <ModalComponent width={"60%"} title='Request Details' open={open} handleClose={handleClose}>
-                    <RequestDetails sendingRequest={loading} setSendingRequest={setLoading} open={open} handleClose={handleClose} data={currentRequest} />
-                </ModalComponent>
-            } */}
             {columnHeaders.length > 0 &&
                 <TableComponent
                     endPoint={endPoint}

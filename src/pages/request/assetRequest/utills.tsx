@@ -33,6 +33,7 @@ import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import ToggleOffOutlinedIcon from '@mui/icons-material/ToggleOffOutlined';
+import { set } from 'react-hook-form';
 
 const RequestUtills = () => {
     const endPoint = 'requests';
@@ -48,6 +49,7 @@ const RequestUtills = () => {
     const dispatch = useDispatch<AppDispatch>();
     const { requests } = useSelector((state: RootState) => state.AssetsRequestsStore)
     const [loading, setLoading] = useState<boolean>(false);
+    const [sendingRequest, setSendingRequest] = useState<boolean>(false);
     const navigate = useNavigate();
 
 
@@ -153,6 +155,16 @@ const RequestUtills = () => {
             case crudStates.issue:
                 navigate(`${ROUTES.ISSUE_REQUEST}/${moduleID}`)
                 break;
+            case crudStates.acknowledgeRequest:
+                setModalState(crudStates.acknowledgeRequest)
+                setCurrentRequest(determineCurrentRequest(moduleID as number, requests as IRequest[]))
+                handleOpen();
+                break;
+            case crudStates.acknowledgeReceipt:
+                setModalState(crudStates.acknowledgeReceipt)
+                setCurrentRequest(determineCurrentRequest(moduleID as number, requests as IRequest[]))
+                handleOpen();
+                break;
             default:
                 break;
         }
@@ -254,7 +266,9 @@ const RequestUtills = () => {
             handleOptionClicked,
             count,
             currentRequest,
-            loading
+            loading,
+            sendingRequest,
+            setSendingRequest,
         }
     )
 }
