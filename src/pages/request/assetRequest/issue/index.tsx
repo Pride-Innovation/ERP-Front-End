@@ -12,11 +12,15 @@ import { useContext, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../store";
 import { RequestContext } from "../../../../context/request/RequestContext";
+import ToggleOffOutlined from '@mui/icons-material/ToggleOffOutlined';
+import { crudStates } from "../../../../utils/constants";
+import ModalComponent from "../../../../components/modal";
+import AcknowledgeReceipt from "../AcknowledgeReceipt";
+import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 
 const IssuedRequest = () => {
-    // const { setFileData, fileData } = useContext(FileContext)
     const { requests } = useSelector((state: RootState) => state.AssetsRequestsStore)
-    const { requestTableData } = useContext(RequestContext);
+    const { requestTableData, setOptions } = useContext(RequestContext);
 
     const {
         handleOptionClicked,
@@ -25,7 +29,13 @@ const IssuedRequest = () => {
         loading,
         fetchAllRequests,
         handleRequest,
-        count
+        count,
+        modalState,
+        open,
+        handleClose,
+        sendingRequest,
+        currentRequest,
+        setSendingRequest
     } = RequestUtills()
 
     useEffect(() => {
@@ -41,25 +51,26 @@ const IssuedRequest = () => {
 
     useEffect(() => { handleRequest(requests) }, [requests]);
 
+    useEffect(() => {
+        setOptions([
+            { value: crudStates.approve, label: "Approve Issuance", icon: <ThumbUpOffAltIcon fontSize='small' color='secondary' /> },
+            { value: crudStates.acknowledgeReceipt, label: "Acknowledge Receipt", icon: <ToggleOffOutlined fontSize='small' color='info' /> },
+        ])
+    }, []);
+
     return (
         <Grid xs={12} container>
 
-            {/* {crudStates.delete === modalState &&
-                <ModalComponent width={"40%"} title='Delete Request' open={open} handleClose={handleClose}>
-                    <DeleteRequest
-                        setSendingRequest={setLoading}
-                        sendingRequest={loading}
+            {crudStates.acknowledgeReceipt === modalState &&
+                <ModalComponent width={"40%"} title='Acknowledge Receipt' open={open} handleClose={handleClose}>
+                    <AcknowledgeReceipt
+                        setSendingRequest={setSendingRequest}
                         handleClose={handleClose}
-                        buttonText='Confirm'
                         request={currentRequest}
-                    />
+                        sendingRequest={sendingRequest}
+                        buttonText="Acknowledge" />
                 </ModalComponent>
             }
-            {crudStates.read === modalState &&
-                <ModalComponent width={"60%"} title='Request Details' open={open} handleClose={handleClose}>
-                    <RequestDetails sendingRequest={loading} setSendingRequest={setLoading} open={open} handleClose={handleClose} data={currentRequest} />
-                </ModalComponent>
-            } */}
             {columnHeaders.length > 0 &&
                 <TableComponent
                     endPoint={endPoint}

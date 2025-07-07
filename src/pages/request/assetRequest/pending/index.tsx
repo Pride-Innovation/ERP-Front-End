@@ -17,7 +17,6 @@ import ModalComponent from "../../../../components/modal";
 import AcknowledgeRequest from "../AcknowledgeRequest";
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
-import ToggleOffOutlinedIcon from '@mui/icons-material/ToggleOffOutlined';
 import AcknowledgeReceipt from "../AcknowledgeReceipt";
 
 const PendingRequest = () => {
@@ -44,7 +43,7 @@ const PendingRequest = () => {
         /**
          * This should contain the Status ID for Pending Requests
          */
-        const params = { statusIds: `${1},${4}` }
+        const params = { statusIds: `${3},${4}` }
         fetchAllRequests(params);
 
         // setFileData({ file: "", module: "", jsonData: [] });
@@ -55,9 +54,8 @@ const PendingRequest = () => {
 
     useEffect(() => {
         setOptions([
+            { value: crudStates.acknowledgeRequest, label: "Acknowledge Request", icon: <ThumbUpOffAltIcon fontSize='small' color='secondary' /> },
             { value: crudStates.issue, label: "Issue Items", icon: <ExitToAppIcon fontSize='small' color='primary' /> },
-            { value: crudStates.acknowledgeRequest, label: "Acknowledge Request", icon: <ThumbUpOffAltIcon fontSize='small' color='inherit' /> },
-            { value: crudStates.acknowledgeReceipt, label: "Acknowledge Receipt", icon: <ToggleOffOutlinedIcon fontSize='small' color='info' /> },
         ])
     }, []);
 
@@ -68,16 +66,6 @@ const PendingRequest = () => {
             {crudStates.acknowledgeRequest === modalState &&
                 <ModalComponent width={"40%"} title='Acknowledge Request' open={open} handleClose={handleClose}>
                     <AcknowledgeRequest
-                        setSendingRequest={setSendingRequest}
-                        handleClose={handleClose}
-                        request={currentRequest}
-                        sendingRequest={sendingRequest}
-                        buttonText="Acknowledge" />
-                </ModalComponent>
-            }
-            {crudStates.acknowledgeReceipt === modalState &&
-                <ModalComponent width={"40%"} title='Acknowledge Receipt' open={open} handleClose={handleClose}>
-                    <AcknowledgeReceipt
                         setSendingRequest={setSendingRequest}
                         handleClose={handleClose}
                         request={currentRequest}
@@ -96,7 +84,7 @@ const PendingRequest = () => {
                     rows={requestTableData}
                     columnHeaders={columnHeaders}
                     handleOptionClicked={handleOptionClicked}
-                    params={{ statusIds: `${1},${4}` }}
+                    params={{ statusIds: `${3},${4}` }}
                 />
             }
         </Grid>
