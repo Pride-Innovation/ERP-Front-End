@@ -70,11 +70,22 @@ const issueCommodities = async (body: Object) => {
     }
 }
 
+const acknowledgeRequestService = async (body: Object) => {
+    try {
+        const response = await axiosInstance.post("acknowledge-request", body);
+        return response;
+    }
+    catch (error) {
+        return error;
+    }
+}
+
 export {
     createAssetRequestService,
     updateAssetRequestService,
     deleteAssetRequestService,
     findAssetRequestByIDService,
     assetRequestApprovalRejectionService,
-    issueCommodities
+    issueCommodities,
+    acknowledgeRequestService
 }

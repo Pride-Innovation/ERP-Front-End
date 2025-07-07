@@ -7,9 +7,13 @@ import {
     CircularProgress,
     useTheme,
 } from "@mui/material";
-import { IAcknowledegeRequest, IRequestAxiosResponse } from "../interface"
+import {
+    IAcknowledegeRequest,
+    IAcknowledgeRequesttAxiosResponse,
+    IRequestAxiosResponse
+} from "../interface"
 import { ICommodity } from "../../settings/commodity/interface";
-import { findAssetRequestByIDService } from "./service";
+import { acknowledgeRequestService, findAssetRequestByIDService } from "./service";
 import { toast } from "react-toastify";
 import ButtonComponent from "../../../components/forms/Button";
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
@@ -67,17 +71,18 @@ const AcknowledgeRequest = ({
         try {
 
             /**
-             * NB: Please note that the status ID must match the Approved Status ID in the Database.
+             * NB: Please note that the status ID must match the Acknowledege Request Status ID in the Database.
              */
 
             const data = {
                 requestId: request.id,
-                approverId: request.currentApprover?.id,
-                statusId: 3, //  ID 3 must match the Approved Status ID in the Database
+                statusId: 4, // Acknowledge Request Status ID
                 comment
             }
-            // const response = await assetRequestApprovalRejectionService(data) as IRequestAxiosResponse;
-            // console.log(response, "Response!!")
+            const response = await acknowledgeRequestService(data) as IAcknowledgeRequesttAxiosResponse;
+            if (response.status === 201) {
+                toast.success("Request acknowledged successfully.");
+            }
 
         } catch (error) {
             console.error(error);

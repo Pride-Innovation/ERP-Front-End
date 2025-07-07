@@ -255,3 +255,18 @@ export interface IRequestReportTableData {
     comment: string;
     createDate: string;
 }
+
+export interface IAcknowledgeRequestResponse {
+    id: number | string;
+    request: IRequest;
+    comment: string;
+    createDate: string;
+    lastModified: string;
+    createdBy: IUser | null;
+    lastModifiedBy: IUser | null;
+}
+
+
+export interface IAcknowledgeRequesttAxiosResponse extends IAxiosResponse {
+    data: IAcknowledgeRequestResponse
+}
