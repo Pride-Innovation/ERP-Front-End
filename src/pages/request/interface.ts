@@ -270,3 +270,11 @@ export interface IAcknowledgeRequestResponse {
 export interface IAcknowledgeRequesttAxiosResponse extends IAxiosResponse {
     data: IAcknowledgeRequestResponse
 }
+
+export interface IApproveIssuance {
+    handleClose: () => void;
+    sendingRequest: boolean;
+    buttonText: string;
+    request: IRequest;
+    setSendingRequest: Dispatch<SetStateAction<boolean>>
+}

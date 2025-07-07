@@ -147,6 +147,11 @@ const RequestUtills = () => {
                 setCurrentRequest(determineCurrentRequest(moduleID as number, requests as IRequest[]))
                 handleOpen();
                 break;
+            case crudStates.approveIssuance:
+                setModalState(crudStates.approveIssuance)
+                setCurrentRequest(determineCurrentRequest(moduleID as number, requests as IRequest[]))
+                handleOpen();
+                break;
             default:
                 break;
         }

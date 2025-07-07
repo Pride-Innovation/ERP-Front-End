@@ -5,29 +5,31 @@ import {
     Typography,
     TextField,
     CircularProgress,
-    useTheme,
 } from "@mui/material";
-import { IAcknowledegeReceipt, IRequestAxiosResponse } from "../interface"
-import { ICommodity } from "../../settings/commodity/interface";
-import { findAssetRequestByIDService } from "./service";
-import { toast } from "react-toastify";
+import { useTheme } from "@mui/material/styles";
 import ButtonComponent from "../../../components/forms/Button";
-import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
+import { toast } from "react-toastify";
+import { findAssetRequestByIDService } from "./service";
+import { ICommodity } from "../../settings/commodity/interface";
+import { IApproveIssuance, IRequestAxiosResponse } from "../interface";
 import AssetTable from "../../../components/assetTable";
+import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 
-const AcknowledgeReceipt = ({
-    request,
-    sendingRequest,
+const ApproveIssuance = ({
     setSendingRequest,
     handleClose,
-    buttonText
-}: IAcknowledegeReceipt) => {
+    request,
+    sendingRequest,
+    buttonText,
+}: IApproveIssuance) => {
+
+    const theme = useTheme();
+
     const [comment, setComment] = useState("");
     const [loading, setLoading] = useState(true);
     const [requestCommodities, setRequestCommodities] = useState<
         Array<{ commodity: ICommodity; quantity: number }>
     >([]);
-    const theme = useTheme();
 
     const fetchRequestCommodities = async () => {
         setLoading(true);
@@ -57,7 +59,7 @@ const AcknowledgeReceipt = ({
         fetchRequestCommodities();
     }, []);
 
-    const handleRequestAcknowledgement = async () => {
+    const handleIssuanceApproval = async () => {
         if (!comment.trim()) {
             toast.error("Please provide a comment before approving.");
             return;
@@ -90,7 +92,7 @@ const AcknowledgeReceipt = ({
         <Grid container spacing={4}>
             <Grid item xs={12}>
                 <Typography variant="body1" sx={{ mb: 1 }}>
-                    Are you sure you want to Acknowledge Receipt?
+                    Are you sure you want to approve this Issuance?
                 </Typography>
                 <Stack direction="row" spacing={1} alignItems="center">
                     <ThumbUpOffAltIcon color="primary" />
@@ -147,7 +149,7 @@ const AcknowledgeReceipt = ({
                         buttonText="Close"
                     />
                     <ButtonComponent
-                        handleClick={handleRequestAcknowledgement}
+                        handleClick={handleIssuanceApproval}
                         buttonColor="primary"
                         type="submit"
                         sendingRequest={sendingRequest}
@@ -159,4 +161,4 @@ const AcknowledgeReceipt = ({
     )
 }
 
-export default AcknowledgeReceipt
+export default ApproveIssuance

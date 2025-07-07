@@ -17,6 +17,7 @@ import { crudStates } from "../../../../utils/constants";
 import ModalComponent from "../../../../components/modal";
 import AcknowledgeReceipt from "../AcknowledgeReceipt";
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
+import ApproveIssuance from "../ApproveIssuance";
 
 const IssuedRequest = () => {
     const { requests } = useSelector((state: RootState) => state.AssetsRequestsStore)
@@ -53,7 +54,7 @@ const IssuedRequest = () => {
 
     useEffect(() => {
         setOptions([
-            { value: crudStates.approve, label: "Approve Issuance", icon: <ThumbUpOffAltIcon fontSize='small' color='secondary' /> },
+            { value: crudStates.approveIssuance, label: "Approve Issuance", icon: <ThumbUpOffAltIcon fontSize='small' color='secondary' /> },
             { value: crudStates.acknowledgeReceipt, label: "Acknowledge Receipt", icon: <ToggleOffOutlined fontSize='small' color='info' /> },
         ])
     }, []);
@@ -69,6 +70,17 @@ const IssuedRequest = () => {
                         request={currentRequest}
                         sendingRequest={sendingRequest}
                         buttonText="Acknowledge" />
+                </ModalComponent>
+            }
+
+            {crudStates.approveIssuance === modalState &&
+                <ModalComponent width={"40%"} title='Approve Issuance' open={open} handleClose={handleClose}>
+                    <ApproveIssuance
+                        setSendingRequest={setSendingRequest}
+                        handleClose={handleClose}
+                        request={currentRequest}
+                        sendingRequest={sendingRequest}
+                        buttonText="Approve" />
                 </ModalComponent>
             }
             {columnHeaders.length > 0 &&

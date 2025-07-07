@@ -12,12 +12,6 @@ import {
     Typography,
     TextField,
     CircularProgress,
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableRow,
-    Paper,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import ButtonComponent from "../../../components/forms/Button";
