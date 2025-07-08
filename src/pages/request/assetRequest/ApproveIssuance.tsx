@@ -9,7 +9,7 @@ import {
 import { useTheme } from "@mui/material/styles";
 import ButtonComponent from "../../../components/forms/Button";
 import { toast } from "react-toastify";
-import { findAssetRequestByIDService } from "./service";
+import { approveIssueRequestService, findAssetRequestByIDService } from "./service";
 import { ICommodity } from "../../settings/commodity/interface";
 import { IApproveIssuance, IRequestAxiosResponse } from "../interface";
 import AssetTable from "../../../components/assetTable";
@@ -69,16 +69,16 @@ const ApproveIssuance = ({
         try {
 
             /**
-             * NB: Please note that the status ID must match the Approved Status ID in the Database.
+             * NB: Please note that the status ID must match the Issuance Approved in the Database.
              */
 
             const data = {
                 requestId: request.id,
-                approverId: request.currentApprover?.id,
-                statusId: 3, //  ID 3 must match the Approved Status ID in the Database
+                statusId: 6, // ID 3 must match the Issuance Approved Status ID in the Database
                 comment
             }
-            // const response = await assetRequestApprovalRejectionService(data) as IRequestAxiosResponse;
+
+            // const response = await approveIssueRequestService(data) as IRequestAxiosResponse;
             // console.log(response, "Response!!")
 
         } catch (error) {

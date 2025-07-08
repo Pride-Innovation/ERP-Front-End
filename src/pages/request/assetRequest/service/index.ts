@@ -80,6 +80,16 @@ const acknowledgeRequestService = async (body: Object) => {
     }
 }
 
+const approveIssueRequestService = async (body: Object) => {
+    try {
+        const response = await axiosInstance.post("approve-issuance", body);
+        return response;
+    }
+    catch (error) {
+        return error;
+    }
+}
+
 export {
     createAssetRequestService,
     updateAssetRequestService,
@@ -87,5 +97,6 @@ export {
     findAssetRequestByIDService,
     assetRequestApprovalRejectionService,
     issueCommodities,
-    acknowledgeRequestService
+    acknowledgeRequestService,
+    approveIssueRequestService
 }
