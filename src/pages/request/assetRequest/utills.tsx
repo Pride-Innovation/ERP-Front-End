@@ -25,6 +25,8 @@ import { useNavigate } from 'react-router';
 import { ROUTES } from '../../../core/routes/routes';
 import { RequestContext } from '../../../context/request/RequestContext';
 import moment from 'moment';
+import { IIssueAxiosResponse } from './issue/interface';
+import { fetchIssuanceByRequestIdService } from './service';
 
 const RequestUtills = () => {
     const endPoint = 'requests';
@@ -35,7 +37,7 @@ const RequestUtills = () => {
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
     const [pendingRequests, setPendingRequests] = useState<Array<IRequest>>([] as IRequest[])
     const [rejectedRequests, setRejectedRequests] = useState<Array<IRequest>>([] as IRequest[])
-    const { setRequestTableData, setCount, count, options } = useContext(RequestContext);
+    const { setRequestTableData, setCount, count, options, setCurrentIssuance } = useContext(RequestContext);
     const [open, setOpen] = useState<boolean>(false);
     const dispatch = useDispatch<AppDispatch>();
     const { requests } = useSelector((state: RootState) => state.AssetsRequestsStore)
@@ -75,6 +77,21 @@ const RequestUtills = () => {
     const removeAssetRequestFromStore = (request: IRequest) => {
         dispatch(removeAssetRequest(request))
     }
+
+    const fetchIssuanceByRequestId = async (id: number) => {
+        setLoading(true);
+        try {
+            const response = await fetchIssuanceByRequestIdService(id) as IIssueAxiosResponse;
+            if (response.status === 200) {
+                setCurrentIssuance(response.data);
+            }
+        } catch (error) {
+            console.error("Error fetching issuance by request ID:", error);
+        } finally {
+            setLoading(false);
+        }
+    }
+
 
     const {
         id,
@@ -256,6 +273,7 @@ const RequestUtills = () => {
             loading,
             sendingRequest,
             setSendingRequest,
+            fetchIssuanceByRequestId
         }
     )
 }

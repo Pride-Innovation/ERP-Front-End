@@ -90,6 +90,15 @@ const approveIssueRequestService = async (body: Object) => {
     }
 }
 
+const fetchIssuanceByRequestIdService = async (requestId: string | number) => {
+    try {
+        const response = await axiosInstance.get(`/issuance/${requestId}`);
+        return response;
+    } catch (error) {
+        return error;
+    }
+}
+
 export {
     createAssetRequestService,
     updateAssetRequestService,
@@ -98,5 +107,6 @@ export {
     assetRequestApprovalRejectionService,
     issueCommodities,
     acknowledgeRequestService,
-    approveIssueRequestService
+    approveIssueRequestService,
+    fetchIssuanceByRequestIdService
 }

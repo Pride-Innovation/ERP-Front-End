@@ -40,7 +40,7 @@ const TimeLineDot = ({ status }: ITimeLineDot) => {
     ) : status === "requestIssued" ? (
         <PublishedWithChangesOutlinedIcon fontSize='small' color="info" sx={{ mr: "5px" }} />
     ) : status === "issuanceApproved" ? (
-        <PlaylistAddCheckCircleOutlinedIcon fontSize='small' color="primary" sx={{ mr: "5px" }} />
+        <PlaylistAddCheckCircleOutlinedIcon fontSize='small' color="warning" sx={{ mr: "5px" }} />
     ) : status === "receiptAcknowledged" ? (
         <ThumbUpOffAltOutlinedIcon fontSize='small' color="primary" sx={{ mr: "5px" }} />
     ) : status === "issuanceAvailable" ? (

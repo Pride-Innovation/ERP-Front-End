@@ -41,9 +41,9 @@ const IssuedRequest = () => {
 
     useEffect(() => {
         /**
-         * This should contain the Status ID for Issued Requests
+         * This should contain the Status ID for Request Issued for Approval and Issuance Approved.
          */
-        const params = { statusId: 5 }
+        const params = { statusIds: `${5},${6}` }
         fetchAllRequests(params);
 
         // setFileData({ file: "", module: "", jsonData: [] });
@@ -94,7 +94,7 @@ const IssuedRequest = () => {
                     rows={requestTableData}
                     columnHeaders={columnHeaders}
                     handleOptionClicked={handleOptionClicked}
-                    params={{ statusId: 5 }}
+                    params={{ statusIds: `${5},${6}` }}
                 />
             }
         </Grid>

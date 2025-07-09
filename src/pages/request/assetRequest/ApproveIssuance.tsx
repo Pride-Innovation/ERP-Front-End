@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
     Grid,
     Stack,
@@ -14,6 +14,11 @@ import { ICommodity } from "../../settings/commodity/interface";
 import { IApproveIssuance, IRequestAxiosResponse } from "../interface";
 import AssetTable from "../../../components/assetTable";
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
+import RequestUtills from "./utills";
+import { RequestContext } from "../../../context/request/RequestContext";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "../../../store";
+import { updateRequest } from "./slice";
 
 const ApproveIssuance = ({
     setSendingRequest,
@@ -24,7 +29,9 @@ const ApproveIssuance = ({
 }: IApproveIssuance) => {
 
     const theme = useTheme();
-
+    const { fetchIssuanceByRequestId } = RequestUtills()
+    const { currentIssuance } = useContext(RequestContext);
+    const dispatch = useDispatch<AppDispatch>();
     const [comment, setComment] = useState("");
     const [loading, setLoading] = useState(true);
     const [requestCommodities, setRequestCommodities] = useState<
@@ -75,11 +82,15 @@ const ApproveIssuance = ({
             const data = {
                 requestId: request.id,
                 statusId: 6, // ID 3 must match the Issuance Approved Status ID in the Database
-                comment
+                comment,
+                issuanceId: currentIssuance.id,
             }
 
-            // const response = await approveIssueRequestService(data) as IRequestAxiosResponse;
-            // console.log(response, "Response!!")
+            const response = await approveIssueRequestService(data) as IRequestAxiosResponse;
+            if (response.status === 201) {
+                toast.success("Issuance approved successfully.");
+                dispatch(updateRequest(response.data));
+            }
 
         } catch (error) {
             console.error(error);
@@ -88,6 +99,13 @@ const ApproveIssuance = ({
             handleClose();
         }
     };
+
+    useEffect(() => {
+        if (request?.id) {
+            fetchIssuanceByRequestId(request.id as number)
+        }
+    }, [request]);
+
     return (
         <Grid container spacing={4}>
             <Grid item xs={12}>

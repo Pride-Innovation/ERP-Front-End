@@ -25,10 +25,16 @@ export const requestSlice = createSlice({
         },
         removeAssetRequest: (state, action) => {
             state.requests = state.requests.filter(asset => asset?.id !== action?.payload?.id)
+        },
+        updateRequest: (state, action) => {
+            state.requests = state.requests.map(request =>
+                request.id === action.payload.id ? { ...request, ...action.payload } : request
+            );
         }
+
     }
 });
 
 const { actions, reducer } = requestSlice;
-export const { loadAllRequests, removeAssetRequest } = actions;
+export const { loadAllRequests, removeAssetRequest, updateRequest } = actions;
 export default reducer;

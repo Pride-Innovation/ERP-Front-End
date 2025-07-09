@@ -37,7 +37,7 @@ const FilterEngravedNumbers = ({ row }: { row: RowData }) => {
         if (row.groupName.length > 0 && assetType.name.length > 0) {
             const params = {
                 assetTypeId: row.assetTypeId,
-                assetStatusId: 7, // This should contain the actual IDs for asset status when it is just registered and not assigned to users. 
+                assetStatusId: 8, // This should contain Status ID for Available for Issuance 
                 commodityId: row.commodityId
             }
             fetchAllAssets(params)
