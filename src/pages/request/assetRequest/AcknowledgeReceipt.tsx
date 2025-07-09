@@ -9,11 +9,14 @@ import {
 } from "@mui/material";
 import { IAcknowledegeReceipt, IRequestAxiosResponse } from "../interface"
 import { ICommodity } from "../../settings/commodity/interface";
-import { findAssetRequestByIDService } from "./service";
+import { acknowledgeIssuanceService, findAssetRequestByIDService } from "./service";
 import { toast } from "react-toastify";
 import ButtonComponent from "../../../components/forms/Button";
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import AssetTable from "../../../components/assetTable";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "../../../store";
+import { updateRequest } from "./slice";
 
 const AcknowledgeReceipt = ({
     request,
@@ -28,6 +31,7 @@ const AcknowledgeReceipt = ({
         Array<{ commodity: ICommodity; quantity: number }>
     >([]);
     const theme = useTheme();
+    const dispatch = useDispatch<AppDispatch>();
 
     const fetchRequestCommodities = async () => {
         setLoading(true);
@@ -67,17 +71,20 @@ const AcknowledgeReceipt = ({
         try {
 
             /**
-             * NB: Please note that the status ID must match the Approved Status ID in the Database.
+             * NB: Please note that the status ID must match the Receipt Acknowledged in the Database.
              */
 
             const data = {
                 requestId: request.id,
-                approverId: request.currentApprover?.id,
-                statusId: 3, //  ID 3 must match the Approved Status ID in the Database
+                statusId: 7, // Receipt Acknowledged Status ID
                 comment
             }
-            // const response = await assetRequestApprovalRejectionService(data) as IRequestAxiosResponse;
-            // console.log(response, "Response!!")
+
+            const response = await acknowledgeIssuanceService(data) as IRequestAxiosResponse;
+            if (response.status === 201) {
+                toast.success("Item Receipt Acknowledge.");
+                dispatch(updateRequest(response.data));
+            }
 
         } catch (error) {
             console.error(error);

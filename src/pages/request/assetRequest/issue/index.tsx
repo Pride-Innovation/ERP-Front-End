@@ -43,7 +43,7 @@ const IssuedRequest = () => {
         /**
          * This should contain the Status ID for Request Issued for Approval and Issuance Approved.
          */
-        const params = { statusIds: `${5},${6}` }
+        const params = { statusIds: `${5},${6},${7}` }
         fetchAllRequests(params);
 
         // setFileData({ file: "", module: "", jsonData: [] });
@@ -94,7 +94,7 @@ const IssuedRequest = () => {
                     rows={requestTableData}
                     columnHeaders={columnHeaders}
                     handleOptionClicked={handleOptionClicked}
-                    params={{ statusIds: `${5},${6}` }}
+                    params={{ statusIds: `${5},${6},${7}` }}
                 />
             }
         </Grid>

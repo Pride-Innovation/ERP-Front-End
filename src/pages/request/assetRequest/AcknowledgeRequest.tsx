@@ -96,7 +96,7 @@ const AcknowledgeRequest = ({
         <Grid container spacing={4}>
             <Grid item xs={12}>
                 <Typography variant="body1" sx={{ mb: 1 }}>
-                    Are you sure you want to approve this request?
+                    Are you sure you want to Acknowledge Request Receipt?
                 </Typography>
                 <Stack direction="row" spacing={1} alignItems="center">
                     <ThumbUpOffAltIcon color="primary" />

@@ -90,6 +90,17 @@ const approveIssueRequestService = async (body: Object) => {
     }
 }
 
+
+const acknowledgeIssuanceService = async (body: Object) => {
+    try {
+        const response = await axiosInstance.post("acknowledge-issuance", body);
+        return response;
+    }
+    catch (error) {
+        return error;
+    }
+}
+
 const fetchIssuanceByRequestIdService = async (requestId: string | number) => {
     try {
         const response = await axiosInstance.get(`/issuance/${requestId}`);
@@ -108,5 +119,6 @@ export {
     issueCommodities,
     acknowledgeRequestService,
     approveIssueRequestService,
-    fetchIssuanceByRequestIdService
+    fetchIssuanceByRequestIdService,
+    acknowledgeIssuanceService
 }
