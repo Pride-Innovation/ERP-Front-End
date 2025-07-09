@@ -53,7 +53,10 @@ const Request = () => {
         currentRequest,
     } = RequestUtills();
 
-    useEffect(() => { fetchAllRequests() }, []);
+    useEffect(() => {
+        const params = { statusIds: 1 } // Fetching requests with status Asset Request Created ID
+        fetchAllRequests(params)
+    }, []);
     useEffect(() => { handleRequest(requests) }, [requests]);
 
     useEffect(() => {
@@ -112,6 +115,7 @@ const Request = () => {
                         handleOptionClicked={handleOptionClicked}
                         paginationMode='server'
                         searchAction
+                        params={{ statusIds: 1 }}
                     />
                 }
             </Grid>
