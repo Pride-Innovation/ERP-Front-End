@@ -45,14 +45,16 @@ const RequestDetails = () => {
     const {
         acknowledgeIssuance,
         acknowledgeRequest,
-        issuanceApproval
+        issuanceApproval,
+        currentIssuance
     } = useContext(RequestContext);
 
     const navigate = useNavigate();
     const {
         findAcknowledgeIssuanceReceiptByRequestId,
         findAcknowledgeRequestReceiptByRequestId,
-        findIssuanceApprovalRecordByRequestId
+        findIssuanceApprovalRecordByRequestId,
+        fetchIssuanceByRequestId
     } = RequestUtills();
 
     const fetchRequestDetails = async () => {
@@ -75,6 +77,7 @@ const RequestDetails = () => {
             findAcknowledgeIssuanceReceiptByRequestId(request.id as number);
             findAcknowledgeRequestReceiptByRequestId(request.id as number);
             findIssuanceApprovalRecordByRequestId(request.id as number);
+            fetchIssuanceByRequestId(request.id as number);
         }
     }, [request]);
 
@@ -146,6 +149,7 @@ const RequestDetails = () => {
                                             acknowledgeIssuance={acknowledgeIssuance}
                                             acknowledgeRequest={acknowledgeRequest}
                                             issuanceApproval={issuanceApproval}
+                                            issuance={currentIssuance}
                                             request={request} />
                                     },
                                     {

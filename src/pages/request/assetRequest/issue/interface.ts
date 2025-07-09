@@ -9,6 +9,7 @@ export interface IIssue {
     lastModified: string;
     createdBy: IUser;
     lastModifiedBy: IUser;
+    issuer?: IUser | null;
 }
 
 export interface IIssueResponse extends IFetchDataRequest {

@@ -298,6 +298,11 @@ const RequestUtills = () => {
         }
     }
 
+    /**
+     * 
+     * @param id Request ID to find the issuance approval record.
+     * This function fetches the issuance approval record by request ID and updates the state with the response data.
+     */
 
     const findIssuanceApprovalRecordByRequestId = async (id: number) => {
         setLoading(true);
@@ -310,6 +315,8 @@ const RequestUtills = () => {
             console.error("Error fetching issuance by request ID:", error);
         }
     }
+
+    
     return (
         {
             endPoint,
