@@ -17,7 +17,7 @@ import ModalComponent from "../../../../components/modal";
 import AcknowledgeRequest from "../AcknowledgeRequest";
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
-import AcknowledgeReceipt from "../AcknowledgeReceipt";
+import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 
 const PendingRequest = () => {
     const { requests } = useSelector((state: RootState) => state.AssetsRequestsStore)
@@ -56,6 +56,7 @@ const PendingRequest = () => {
         setOptions([
             { value: crudStates.acknowledgeRequest, label: "Acknowledge Request", icon: <ThumbUpOffAltIcon fontSize='small' color='secondary' /> },
             { value: crudStates.issue, label: "Issue Items", icon: <ExitToAppIcon fontSize='small' color='primary' /> },
+            { value: crudStates.read, label: "View Details", icon: <RemoveRedEyeIcon fontSize='small' color='inherit' /> },
         ])
     }, []);
 

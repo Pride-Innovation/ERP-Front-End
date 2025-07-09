@@ -4,9 +4,19 @@ import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined
 import SupervisedUserCircleOutlinedIcon from '@mui/icons-material/SupervisedUserCircleOutlined';
 import TodayOutlinedIcon from '@mui/icons-material/TodayOutlined';
 import moment from "moment";
+import { IAcknowledgeIssuanceReceipt } from "../issue/interface";
+import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 
-const OtherDetails = ({ request }: { request: IRequest }) => {
-    console.log(request, "request details!!")
+const OtherDetails = ({
+    request,
+    acknowledgeIssuance,
+    acknowledgeRequest
+}:
+    { request: IRequest }
+    & {
+        acknowledgeIssuance?: IAcknowledgeIssuanceReceipt,
+        acknowledgeRequest?: IAcknowledgeIssuanceReceipt
+    }) => {
     return (
         <>
             {request.requester && <DetailSection
@@ -23,6 +33,16 @@ const OtherDetails = ({ request }: { request: IRequest }) => {
             {request.lastModified && <DetailSection text={
                 moment(request.lastModified).format('Do MMMM YYYY, h:mm')
             } label="Last Updated Date" icon={<TodayOutlinedIcon />} />}
+            {acknowledgeRequest?.user?.firstName && <DetailSection
+                label="Request Acknowledged By"
+                icon={<ThumbUpOffAltIcon color="secondary" />}
+                text={`${acknowledgeRequest.user.firstName} ${acknowledgeRequest.user.lastName}`} />
+            }
+            {acknowledgeIssuance?.user?.firstName && <DetailSection
+                label="Issuance Acknowledged By"
+                icon={<ThumbUpOffAltIcon color="secondary" />}
+                text={`${acknowledgeIssuance.user.firstName} ${acknowledgeIssuance.user.lastName}`} />
+            }
         </>
     )
 };

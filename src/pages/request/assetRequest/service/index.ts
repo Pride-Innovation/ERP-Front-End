@@ -110,6 +110,26 @@ const fetchIssuanceByRequestIdService = async (requestId: string | number) => {
     }
 }
 
+const findAcknowledgeIssuanceReceiptByRequestIdService = async (requestId: string | number) => {
+    try {   
+        const response = await axiosInstance.get(`/acknowledge-issuance/${requestId}`);
+        return response;
+    }
+    catch (error) { 
+        return error;
+    }
+}
+
+const findAcknowledgeRequestReceiptByRequestIdService = async (requestId: string | number) => {
+    try {   
+        const response = await axiosInstance.get(`/acknowledge-request/${requestId}`);
+        return response;
+    }
+    catch (error) { 
+        return error;
+    }
+}
+
 export {
     createAssetRequestService,
     updateAssetRequestService,
@@ -120,5 +140,7 @@ export {
     acknowledgeRequestService,
     approveIssueRequestService,
     fetchIssuanceByRequestIdService,
-    acknowledgeIssuanceService
+    acknowledgeIssuanceService,
+    findAcknowledgeIssuanceReceiptByRequestIdService,
+    findAcknowledgeRequestReceiptByRequestIdService
 }

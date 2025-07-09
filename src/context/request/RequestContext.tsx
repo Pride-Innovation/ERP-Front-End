@@ -11,7 +11,7 @@ import { RowData, StockRowData } from '../../components/forms/interface';
 import { IAssetType } from '../../pages/settings/assetTypes/interface';
 import { IAsset } from '../../pages/assets/interface';
 import { IMonthlyAssetReport } from '../../pages/dashboard/interface';
-import { IIssue } from '../../pages/request/assetRequest/issue/interface';
+import { IAcknowledgeIssuanceReceipt, IIssue } from '../../pages/request/assetRequest/issue/interface';
 
 interface IRequestContext {
     requestTableData: Array<IRequestTableData>;
@@ -36,6 +36,10 @@ interface IRequestContext {
     setOptions: Dispatch<SetStateAction<Array<{ value: string | number, label: string, icon: JSX.Element }>>>
     currentIssuance: IIssue;
     setCurrentIssuance: Dispatch<SetStateAction<IIssue>>;
+    acknowledgeIssuance: IAcknowledgeIssuanceReceipt;
+    setAcknowledgeIssuance: Dispatch<SetStateAction<IAcknowledgeIssuanceReceipt>>;
+    acknowledgeRequest: IAcknowledgeIssuanceReceipt;
+    setAcknowledgeRequest: Dispatch<SetStateAction<IAcknowledgeIssuanceReceipt>>;
 }
 
 export const RequestContext = createContext<IRequestContext>({} as IRequestContext);
@@ -51,6 +55,8 @@ const RequestContextProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const [monthlyStockingReport, setMonthlyStockingReport] = useState<IMonthlyAssetReport[]>([] as IMonthlyAssetReport[])
     const [options, setOptions] = useState<Array<{ value: string | number, label: string, icon: JSX.Element }>>([]);
     const [currentIssuance, setCurrentIssuance] = useState<IIssue>({} as IIssue);
+    const [acknowledgeIssuance, setAcknowledgeIssuance] = useState<IAcknowledgeIssuanceReceipt>({} as IAcknowledgeIssuanceReceipt);
+    const [acknowledgeRequest, setAcknowledgeRequest] = useState<IAcknowledgeIssuanceReceipt>({} as IAcknowledgeIssuanceReceipt);
 
     const [count, setCount] = useState<number>(0)
 
@@ -77,7 +83,11 @@ const RequestContextProvider: React.FC<{ children: React.ReactNode }> = ({ child
             setOptions,
             options,
             currentIssuance,
-            setCurrentIssuance
+            setCurrentIssuance,
+            acknowledgeIssuance,
+            setAcknowledgeIssuance,
+            acknowledgeRequest,
+            setAcknowledgeRequest
         }}>
             {children}
         </RequestContext.Provider>

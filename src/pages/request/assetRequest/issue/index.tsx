@@ -18,6 +18,7 @@ import ModalComponent from "../../../../components/modal";
 import AcknowledgeReceipt from "../AcknowledgeReceipt";
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import ApproveIssuance from "../ApproveIssuance";
+import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 
 const IssuedRequest = () => {
     const { requests } = useSelector((state: RootState) => state.AssetsRequestsStore)
@@ -56,6 +57,7 @@ const IssuedRequest = () => {
         setOptions([
             { value: crudStates.approveIssuance, label: "Approve Issuance", icon: <ThumbUpOffAltIcon fontSize='small' color='secondary' /> },
             { value: crudStates.acknowledgeReceipt, label: "Acknowledge Receipt", icon: <ToggleOffOutlined fontSize='small' color='info' /> },
+            { value: crudStates.read, label: "View Details", icon: <RemoveRedEyeIcon fontSize='small' color='inherit' /> },
         ])
     }, []);
 

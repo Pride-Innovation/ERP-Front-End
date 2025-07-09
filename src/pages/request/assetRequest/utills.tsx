@@ -25,8 +25,8 @@ import { useNavigate } from 'react-router';
 import { ROUTES } from '../../../core/routes/routes';
 import { RequestContext } from '../../../context/request/RequestContext';
 import moment from 'moment';
-import { IIssueAxiosResponse } from './issue/interface';
-import { fetchIssuanceByRequestIdService } from './service';
+import { IAcknowledgeIssuanceReceiptAxiosResponse, IIssueAxiosResponse } from './issue/interface';
+import { fetchIssuanceByRequestIdService, findAcknowledgeIssuanceReceiptByRequestIdService, findAcknowledgeRequestReceiptByRequestIdService } from './service';
 
 const RequestUtills = () => {
     const endPoint = 'requests';
@@ -37,13 +37,22 @@ const RequestUtills = () => {
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
     const [pendingRequests, setPendingRequests] = useState<Array<IRequest>>([] as IRequest[])
     const [rejectedRequests, setRejectedRequests] = useState<Array<IRequest>>([] as IRequest[])
-    const { setRequestTableData, setCount, count, options, setCurrentIssuance } = useContext(RequestContext);
     const [open, setOpen] = useState<boolean>(false);
     const dispatch = useDispatch<AppDispatch>();
     const { requests } = useSelector((state: RootState) => state.AssetsRequestsStore)
     const [loading, setLoading] = useState<boolean>(false);
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
     const navigate = useNavigate();
+    const {
+        setRequestTableData,
+        setCount,
+        count,
+        options,
+        setCurrentIssuance,
+        setAcknowledgeIssuance,
+        setAcknowledgeRequest
+    } = useContext(RequestContext);
+
 
 
     const handleOpen = () => setOpen(true);
@@ -246,6 +255,43 @@ const RequestUtills = () => {
         setColumnHeaders(getTableHeaders(rowData))
     }, [options]);
 
+    /**
+     * 
+     * @param id Request ID to find the acknowledge issuance receipt.
+     * @returns Acknowledge issuance receipt for the given request ID.
+     * This function fetches the acknowledge issuance receipt by request ID and updates the state with the response data.
+     */
+    const findAcknowledgeIssuanceReceiptByRequestId = async (id: number) => {
+        try {
+            const response = await findAcknowledgeIssuanceReceiptByRequestIdService(id) as IAcknowledgeIssuanceReceiptAxiosResponse;
+            if (response.status === 200) {
+                setAcknowledgeIssuance(response.data);
+            }
+        } catch (error) {
+            console.error("Error fetching acknowledge issuance receipt by request ID:", error);
+            return null;
+        }
+    }
+
+    /**
+     * 
+     * @param id Request ID to find the acknowledge request receipt.
+     * This function fetches the acknowledge request receipt by request ID and updates the state with the response data.
+     * @returns Acknowledge request receipt for the given request ID.
+     */
+
+    const findAcknowledgeRequestReceiptByRequestId = async (id: number) => {
+        try {
+            const response = await findAcknowledgeRequestReceiptByRequestIdService(id) as IAcknowledgeIssuanceReceiptAxiosResponse;
+            if (response.status === 200) {
+                setAcknowledgeRequest(response.data);
+            }
+        } catch (error) {
+            console.error("Error fetching acknowledge issuance receipt by request ID:", error);
+            return null;
+        }
+    }
+
     return (
         {
             endPoint,
@@ -273,7 +319,9 @@ const RequestUtills = () => {
             loading,
             sendingRequest,
             setSendingRequest,
-            fetchIssuanceByRequestId
+            fetchIssuanceByRequestId,
+            findAcknowledgeIssuanceReceiptByRequestId,
+            findAcknowledgeRequestReceiptByRequestId
         }
     )
 }

@@ -15,6 +15,7 @@ import { RequestContext } from "../../../../context/request/RequestContext";
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import InfoIcon from '@mui/icons-material/Info';
 import { crudStates } from "../../../../utils/constants";
+import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 
 const RejectedRequest = () => {
     const { requests } = useSelector((state: RootState) => state.AssetsRequestsStore)
@@ -46,6 +47,7 @@ const RejectedRequest = () => {
         setOptions([
             { value: crudStates.delete, label: "Delete", icon: <InfoIcon fontSize='small' color='error' /> },
             { value: crudStates.update, label: "Update", icon: <ModeEditIcon fontSize='small' color='info' /> },
+            { value: crudStates.read, label: "View Details", icon: <RemoveRedEyeIcon fontSize='small' color='inherit' /> },
         ])
     }, []);
 

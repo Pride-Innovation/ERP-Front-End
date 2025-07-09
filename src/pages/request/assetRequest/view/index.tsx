@@ -20,8 +20,8 @@ import {
 import { grey } from "@mui/material/colors";
 import ButtonComponent from "../../../../components/forms/Button";
 import PlaceHolder from "../../../../statics/images/Placeholder.png"
-import { useParams } from "react-router";
-import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router";
+import { useContext, useEffect, useState } from "react";
 import { IRequest, IRequestAxiosResponse, IRequestReport } from "../../interface";
 import { findAssetRequestByIDService } from "../service";
 import DetailSection from "../../../assets/trails/DetailSection";
@@ -34,12 +34,24 @@ import OtherDetails from "./OtherDetails";
 import RequestCommodties from "./RequestCommodties";
 import { ICommodity } from "../../../settings/commodity/interface";
 import RequestReports from "./RequestReports";
+import RequestUtills from "../utills";
+import { RequestContext } from "../../../../context/request/RequestContext";
 
 
 const RequestDetails = () => {
     const [request, setRequest] = useState<IRequest>({} as IRequest);
     const { id } = useParams<{ id: string }>();
     const theme = useTheme();
+    const {
+        acknowledgeIssuance,
+        acknowledgeRequest
+    } = useContext(RequestContext);
+
+    const navigate = useNavigate();
+    const {
+        findAcknowledgeIssuanceReceiptByRequestId,
+        findAcknowledgeRequestReceiptByRequestId
+    } = RequestUtills();
 
     const fetchRequestDetails = async () => {
         try {
@@ -55,6 +67,13 @@ const RequestDetails = () => {
     useEffect(() => {
         if (id) { fetchRequestDetails() }
     }, [id]);
+
+    useEffect(() => {
+        if (request.id) {
+            findAcknowledgeIssuanceReceiptByRequestId(request.id as number);
+            findAcknowledgeRequestReceiptByRequestId(request.id as number);
+        }
+    }, [request]);
 
     const determinePriority = (
         request?.priority === "high" ?
@@ -106,7 +125,7 @@ const RequestDetails = () => {
                             <Divider />
                             <DetailSection label='Requested By' text={`${request?.requester?.firstName} ${request.requester?.lastName}` as string} />
                             {request.priority && <DetailSection label="Priority" text={request?.priority as string} chip={determinePriority} />}
-                            {request?.status && <DetailSection label="Status" text={request?.status.name as string} />}
+                            {request?.status && <DetailSection label="Status" text={request?.status.status as string} />}
                             {request?.description && <DetailSection label="Description" text={request?.description} />}
                         </CardContent>
                     </Card>
@@ -120,7 +139,10 @@ const RequestDetails = () => {
                                     {
                                         label: "Other Details",
                                         position: 0,
-                                        content: <OtherDetails request={request} />
+                                        content: <OtherDetails
+                                            acknowledgeIssuance={acknowledgeIssuance}
+                                            acknowledgeRequest={acknowledgeRequest}
+                                            request={request} />
                                     },
                                     {
                                         label: "Request Commodities",
@@ -142,20 +164,15 @@ const RequestDetails = () => {
                     </Card>
                 </Grid>
             </Grid>
-            <Box sx={{ width: "100%", display: "flex", justifyContent: "end" }}>
-                <Stack direction="row" spacing={3} sx={{ width: "30%", mt: 3 }}>
-                    <ButtonComponent
-                        handleClick={() => console.log("information!!")}
-                        buttonColor='error'
-                        type='button'
-                        sendingRequest={false}
-                        buttonText="Back"
-                    />
+            <Box sx={{ width: "30%", display: "flex", justifyContent: "end", ml: "auto" }}>
+                <Stack direction="row" spacing={3} sx={{ width: "30%" }}>
                     <ButtonComponent
                         buttonColor='info'
                         type='submit'
+                        variant="outlined"
                         sendingRequest={false}
-                        buttonText="Update" />
+                        handleClick={() => navigate(-1)}
+                        buttonText="Back" />
                 </Stack>
             </Box>
         </Card>

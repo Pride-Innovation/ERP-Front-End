@@ -6,15 +6,14 @@ Managing Director
 */
 
 import { Box, IconButton, Typography } from "@mui/material";
-import TableUtills from "../../../components/tables/utills";
 import TimeLineDot from "../../../components/timeLineDots";
 import ContentPasteIcon from '@mui/icons-material/ContentPaste';
+import { camelCaseToWords } from "../../../utils/helpers";
 
 
 const DetailSection = ({
     text, label, icon, chip
 }: { text: string; label: string; icon?: JSX.Element, chip?: JSX.Element }) => {
-    const { determineTimeLineDotColor } = TableUtills();
 
     return (
         <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
@@ -37,10 +36,10 @@ const DetailSection = ({
                             <span style={{ display: "flex", alignItems: "center" }}>
                                 {
                                     label === "Status" &&
-                                    <TimeLineDot status={determineTimeLineDotColor(text.toLocaleLowerCase())} />
+                                    <TimeLineDot status={text} />
 
                                 }
-                                {text}
+                                {text && camelCaseToWords(text)}
                                 {
                                     label === "Engraved Number" &&
                                     <ContentPasteIcon fontSize='small' color='info' sx={{ ml: "5px" }} />
