@@ -10,12 +10,14 @@ import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 const OtherDetails = ({
     request,
     acknowledgeIssuance,
-    acknowledgeRequest
+    acknowledgeRequest,
+    issuanceApproval
 }:
     { request: IRequest }
     & {
         acknowledgeIssuance?: IAcknowledgeIssuanceReceipt,
-        acknowledgeRequest?: IAcknowledgeIssuanceReceipt
+        acknowledgeRequest?: IAcknowledgeIssuanceReceipt,
+        issuanceApproval?: IAcknowledgeIssuanceReceipt
     }) => {
     return (
         <>
@@ -34,13 +36,18 @@ const OtherDetails = ({
                 moment(request.lastModified).format('Do MMMM YYYY, h:mm')
             } label="Last Updated Date" icon={<TodayOutlinedIcon />} />}
             {acknowledgeRequest?.user?.firstName && <DetailSection
-                label="Request Acknowledged By"
+                label="Request Acknowledged By (Admin)"
                 icon={<ThumbUpOffAltIcon color="secondary" />}
                 text={`${acknowledgeRequest.user.firstName} ${acknowledgeRequest.user.lastName}`} />
             }
+            {issuanceApproval?.user?.firstName && <DetailSection
+                label="Issuance Approved By (Admin)"
+                icon={<ThumbUpOffAltIcon color="secondary" />}
+                text={`${issuanceApproval.user.firstName} ${issuanceApproval.user.lastName}`} />
+            }
             {acknowledgeIssuance?.user?.firstName && <DetailSection
                 label="Issuance Acknowledged By"
-                icon={<ThumbUpOffAltIcon color="secondary" />}
+                icon={<ThumbUpOffAltIcon color="primary" />}
                 text={`${acknowledgeIssuance.user.firstName} ${acknowledgeIssuance.user.lastName}`} />
             }
         </>

@@ -26,7 +26,12 @@ import { ROUTES } from '../../../core/routes/routes';
 import { RequestContext } from '../../../context/request/RequestContext';
 import moment from 'moment';
 import { IAcknowledgeIssuanceReceiptAxiosResponse, IIssueAxiosResponse } from './issue/interface';
-import { fetchIssuanceByRequestIdService, findAcknowledgeIssuanceReceiptByRequestIdService, findAcknowledgeRequestReceiptByRequestIdService } from './service';
+import {
+    fetchIssuanceByRequestIdService,
+    findAcknowledgeIssuanceReceiptByRequestIdService,
+    findAcknowledgeRequestReceiptByRequestIdService,
+    findIssuanceApprovalRecordByRequestIdService
+} from './service';
 
 const RequestUtills = () => {
     const endPoint = 'requests';
@@ -50,7 +55,8 @@ const RequestUtills = () => {
         options,
         setCurrentIssuance,
         setAcknowledgeIssuance,
-        setAcknowledgeRequest
+        setAcknowledgeRequest,
+        setIssuanceApproval
     } = useContext(RequestContext);
 
 
@@ -292,6 +298,18 @@ const RequestUtills = () => {
         }
     }
 
+
+    const findIssuanceApprovalRecordByRequestId = async (id: number) => {
+        setLoading(true);
+        try {
+            const response = await findIssuanceApprovalRecordByRequestIdService(id) as IAcknowledgeIssuanceReceiptAxiosResponse;
+            if (response.status === 200) {
+                setIssuanceApproval(response.data);
+            }
+        } catch (error) {
+            console.error("Error fetching issuance by request ID:", error);
+        }
+    }
     return (
         {
             endPoint,
@@ -321,7 +339,8 @@ const RequestUtills = () => {
             setSendingRequest,
             fetchIssuanceByRequestId,
             findAcknowledgeIssuanceReceiptByRequestId,
-            findAcknowledgeRequestReceiptByRequestId
+            findAcknowledgeRequestReceiptByRequestId,
+            findIssuanceApprovalRecordByRequestId
         }
     )
 }
