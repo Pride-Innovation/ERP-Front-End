@@ -13,32 +13,16 @@ import Dashboard from '../../pages/dashboard'
 import ApplicationDrawer from '../../components/appBar'
 import Settings from '../../pages/settings'
 import Profile from '../../pages/profile'
-import Users from '../../pages/users'
 import AuditTrails from '../../pages/trails'
-import TestComponent from '../../pages/test'
-import AssetsManagement from '../../pages/assets'
-import CreateRequest from '../../pages/request/assetRequest/CreateRequest'
-import UpdateRequest from '../../pages/request/assetRequest/UpdateRequest'
-import ITEquipmentRoutes from './subroutes/ITEquipmentRoutes'
-import FleetRoutes from './subroutes/FleetRoutes'
-import OfficeEquipmentRoutes from './subroutes/OfficeEquipmentRoutes'
 import { PrivateRoute } from './PrivateRoutes'
 import ErrorsPage from '../../pages/errors'
-import RequestsManagement from '../../pages/request/assetRequest'
-import TransportRequestsManagement from '../../pages/request/transportRequest'
-import TransportPendingRequest from '../../pages/request/transportRequest/pending'
-import TransportRejectedRequest from '../../pages/request/transportRequest/rejected'
-import TransportRequest from '../../pages/request/transportRequest/allRequests'
-import CreateTranportRequest from '../../pages/request/transportRequest/CreateTranportRequest'
-import UpdateTransportRequest from '../../pages/request/transportRequest/UpdateTransportRequest'
 import SettingsSubRoutes from './subroutes/SettingsSub'
-import RequestSubroutes from './subroutes/Request'
-import RequestDetails from '../../pages/request/assetRequest/view'
-import CreateInventory from '../../pages/inventory/CreateInventory'
-import UpdateInventory from '../../pages/inventory/UpdateInventory'
 import Store from '../../pages/store'
-import IssueRequestDetails from '../../pages/request/assetRequest/issue/IssueRequestDetails'
 import InventoryRoutes from './subroutes/Inventory'
+import AssetRoutes from './subroutes/assets'
+import RequestRoutes from './subroutes/requests'
+import UserRoutes from './subroutes/UserRoutes'
+import TransportRoutes from './subroutes/TransportRoutes'
 
 const AppRoutes = () => {
 
@@ -56,38 +40,21 @@ const AppRoutes = () => {
           {/* Inventory Routes */}
           {InventoryRoutes()}
 
+          {/* Asset Routes */}
+          {AssetRoutes()}
+
+          {/* Request Routes */}
+          {RequestRoutes()}
+
+          {/* User Routes */}
+          {UserRoutes()}
+
+          {/* Transport Routes */}
+          {TransportRoutes()}
+
           <Route path={`${ROUTES.PROFILE}/:id`} element={<Profile />} />
-          <Route element={<PrivateRoute />}>
-            <Route path={ROUTES.USERS} element={<Users />} />
-          </Route>
           <Route path={ROUTES.AUDIT_TRAILS} element={<AuditTrails />} />
-          <Route path={ROUTES.TEST} element={<TestComponent />} />
-
-          <Route path={ROUTES.LIST_ASSETS} element={<AssetsManagement />} >
-            {ITEquipmentRoutes()}
-            {FleetRoutes()}
-            {OfficeEquipmentRoutes()}
-          </Route>
-
-          <Route path={ROUTES.REQUEST} element={<RequestsManagement />}>
-            {RequestSubroutes()}
-          </Route>
-          <Route path={`${ROUTES.READ_REQUEST}/:id`} element={<RequestDetails />} />
-          <Route path={`${ROUTES.ISSUE_REQUEST}/:id`} element={<IssueRequestDetails />} />
-
-          <Route path={ROUTES.TRANSPORT_REQUEST} element={<TransportRequestsManagement />}>
-            <Route index element={<TransportRequest />} />
-            <Route path={ROUTES.LIST_TRANSPORT_PENDING} element={<TransportPendingRequest />} />
-            <Route path={ROUTES.LIST_TRANSPORT_REJECTED} element={<TransportRejectedRequest />} />
-          </Route>
-          <Route path={ROUTES.CREATE_REQUEST} element={<CreateRequest />} />
-          <Route path={`${ROUTES.UPDATE_REQUEST}/:id`} element={<UpdateRequest />} />
-          <Route path={ROUTES.CREATE_TRANSPORT_REQUEST} element={<CreateTranportRequest />} />
-          <Route path={`${ROUTES.UPDATE_TRANSPORT_REQUEST}/:id`} element={<UpdateTransportRequest />} />
           <Route path={ROUTES.ERRORS} element={<ErrorsPage />} />
-
-          <Route path={ROUTES.CREATE_INVENTORY} element={<CreateInventory />} />
-          <Route path={`${ROUTES.UPDATE_INVENTORY}/:id`} element={<UpdateInventory />} />
           <Route path={ROUTES.STORE} element={<Store />} />
         </Route>
       </Route>

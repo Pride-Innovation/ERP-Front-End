@@ -25,13 +25,15 @@ const SideBarElements = () => {
     const { getCurrentUser } = RoutesUtills();
     const userPermissions = getCurrentUser()?.title?.role?.permissions as Array<IPermission>;
 
+    /**
+     * 
+     * @param permission - The permission to check against the user's permissions
+     * @returns 
+     */
     const rightsToViewRow = (permission: IPermission): boolean => {
-        // The goal is to check if a user has permission to view a route or not
         if (!userPermissions) return false;
         // Check if the user has the specific permission
         return userPermissions.some((userPermission: IPermission) => userPermission.id === permission.id);
-
-        // return ROUTES.LIST_ASSETS;
     }
 
     const sideBarList: Array<ISideBarItem> = [
