@@ -17,9 +17,30 @@ const RoutesUtills = () => {
         return JSON.parse(sessionStorage.getItem(currentUser) || '{}');
     }
 
+    /**
+     * 
+     * @param permission - The permission to check against the current user's permissions.
+     * Determines if the current user has the specified permission.
+     * @returns 
+     */
+
     const determinePermission = (permission: IPermission): boolean => {
-        const permissionDetails = getCurrentUser()?.role?.permissions.find(
-            (perm: IPermission) => perm.id === permission.id);
+        const currentUser = getCurrentUser();
+        if (!currentUser ||
+            !currentUser.title ||
+            !currentUser.title.role ||
+            !currentUser.title.role.permissions
+        ) {
+            return false;
+        }
+        if (currentUser.title.role.permissions.length === 0) return false;
+        if (!permission || !permission.id) return false;
+
+        const permissionDetails = getCurrentUser()?.
+            title?.
+            role?.
+            permissions.find(
+                (perm: IPermission) => perm.id === permission.id);
         if (permissionDetails) return true;
         return false;
     }

@@ -79,7 +79,7 @@ const RoleRow = ({ role, module }: IRoleRow) => {
                 || module.name === "Request"
                 || module.name === "Store"
                 || module.name === "Audit"
-                ? "grey.100" : "white"}
+                ? "grey.50" : "white"}
         >
             <Typography variant="body2">{module.name}</Typography>
             <CheckboxComponent name={crudStates.create} handleChangeEvent={handleChange} checked={mainCheckedState.create} />

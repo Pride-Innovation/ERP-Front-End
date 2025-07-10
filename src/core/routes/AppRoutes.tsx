@@ -32,17 +32,15 @@ import TransportRequest from '../../pages/request/transportRequest/allRequests'
 import CreateTranportRequest from '../../pages/request/transportRequest/CreateTranportRequest'
 import UpdateTransportRequest from '../../pages/request/transportRequest/UpdateTransportRequest'
 import SettingsSubRoutes from './subroutes/SettingsSub'
-import Inventory from '../../pages/inventory'
-import InventoryDetails from '../../pages/inventory/view/InventoryDetails'
 import RequestSubroutes from './subroutes/Request'
 import RequestDetails from '../../pages/request/assetRequest/view'
 import CreateInventory from '../../pages/inventory/CreateInventory'
 import UpdateInventory from '../../pages/inventory/UpdateInventory'
 import Store from '../../pages/store'
 import IssueRequestDetails from '../../pages/request/assetRequest/issue/IssueRequestDetails'
+import InventoryRoutes from './subroutes/Inventory'
 
 const AppRoutes = () => {
-  // const { routePermission } = RoutesUtills();
 
   return (
     <Routes>
@@ -54,13 +52,12 @@ const AppRoutes = () => {
           <Route path={ROUTES.SETTINGS} element={<Settings />} >
             {SettingsSubRoutes()}
           </Route>
-          <Route path={ROUTES.INVENTORY} index element={<Inventory />} />
-          <Route path={`${ROUTES.INVENTORY}/:id`} element={<InventoryDetails />} />
+
+          {/* Inventory Routes */}
+          {InventoryRoutes()}
 
           <Route path={`${ROUTES.PROFILE}/:id`} element={<Profile />} />
-          <Route element={<PrivateRoute
-          // permission={routePermission(1)}
-          />}>
+          <Route element={<PrivateRoute />}>
             <Route path={ROUTES.USERS} element={<Users />} />
           </Route>
           <Route path={ROUTES.AUDIT_TRAILS} element={<AuditTrails />} />
@@ -91,7 +88,6 @@ const AppRoutes = () => {
 
           <Route path={ROUTES.CREATE_INVENTORY} element={<CreateInventory />} />
           <Route path={`${ROUTES.UPDATE_INVENTORY}/:id`} element={<UpdateInventory />} />
-          <Route path={`${ROUTES.READ_INVENTORY}/:id`} element={<InventoryDetails />} />
           <Route path={ROUTES.STORE} element={<Store />} />
         </Route>
       </Route>

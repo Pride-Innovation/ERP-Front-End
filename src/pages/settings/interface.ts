@@ -11,6 +11,7 @@ import { IAxiosResponse, IFetchDataRequest } from "../../core/apis/interface";
 export interface IPermission {
     id?: number | string;
     name: string;
+    index?: number;
 }
 
 
