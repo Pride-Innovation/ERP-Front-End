@@ -172,7 +172,7 @@ const RequestDetails = () => {
                     </Card>
                 </Grid>
             </Grid>
-            <Box sx={{ width: "30%", display: "flex", justifyContent: "end", ml: "auto" }}>
+            <Box sx={{ width: "30%", display: "flex", justifyContent: "end", ml: "auto", mt: 3 }}>
                 <Stack direction="row" spacing={3} sx={{ width: "30%" }}>
                     <ButtonComponent
                         buttonColor='info'

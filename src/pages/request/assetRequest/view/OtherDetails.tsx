@@ -6,6 +6,10 @@ import TodayOutlinedIcon from '@mui/icons-material/TodayOutlined';
 import moment from "moment";
 import { IAcknowledgeIssuanceReceipt, IIssue } from "../issue/interface";
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
+import AddchartIcon from '@mui/icons-material/Addchart';
+import InputOutlinedIcon from '@mui/icons-material/InputOutlined';
+import HdrAutoOutlinedIcon from '@mui/icons-material/HdrAutoOutlined';
+import EventAvailableOutlinedIcon from '@mui/icons-material/EventAvailableOutlined';
 
 const OtherDetails = ({
     request,
@@ -33,12 +37,12 @@ const OtherDetails = ({
                 icon={<SupervisedUserCircleOutlinedIcon />} />}
             {acknowledgeRequest?.user?.firstName && <DetailSection
                 label="Request Acknowledged By (Admin)"
-                icon={<ThumbUpOffAltIcon color="secondary" />}
+                icon={<AddchartIcon color="secondary" />}
                 text={`${acknowledgeRequest.user.firstName} ${acknowledgeRequest.user.lastName}`} />
             }
             {issuance?.issuer?.firstName && <DetailSection
                 label="Issued By (Admin)"
-                icon={<ThumbUpOffAltIcon color="secondary" />}
+                icon={<InputOutlinedIcon color="warning" />}
                 text={`${issuance.issuer.firstName} ${issuance.issuer.lastName}`} />
             }
             {issuanceApproval?.user?.firstName && <DetailSection
@@ -48,7 +52,7 @@ const OtherDetails = ({
             }
             {acknowledgeIssuance?.user?.firstName && <DetailSection
                 label="Issuance Acknowledged By"
-                icon={<ThumbUpOffAltIcon color="primary" />}
+                icon={<HdrAutoOutlinedIcon color="primary" />}
                 text={`${acknowledgeIssuance.user.firstName} ${acknowledgeIssuance.user.lastName}`} />
             }
 
@@ -57,7 +61,7 @@ const OtherDetails = ({
             } label="Request Date" icon={<TodayOutlinedIcon />} />}
             {request.lastModified && <DetailSection text={
                 moment(request.lastModified).format('Do MMMM YYYY, h:mm')
-            } label="Last Updated Date" icon={<TodayOutlinedIcon />} />}
+            } label="Last Updated Date" icon={<EventAvailableOutlinedIcon color="warning" />} />}
         </>
     )
 };
