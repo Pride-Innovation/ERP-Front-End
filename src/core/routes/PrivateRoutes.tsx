@@ -21,7 +21,7 @@ export const PrivateRoute = ({ permission }: { permission?: IPermission }) => {
     if (permission && !determinePermission(permission)) {
         return <Navigate to={ROUTES.ERRORS} />;
     }
-    
+
     if (permission && determinePermission(permission)) {
         return <Outlet />;
     }

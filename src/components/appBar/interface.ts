@@ -10,6 +10,7 @@ export interface ISideBarItem {
     name: string;
     route: string;
     icon: JSX.Element;
+    access?: boolean;
     subroutes: Array<{
         id: number;
         name: string;

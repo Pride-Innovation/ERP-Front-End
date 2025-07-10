@@ -18,22 +18,20 @@ import { IPermission } from '../../pages/settings/interface';
 import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
 import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 import { Store } from '@mui/icons-material'
+import { permissionsMock } from '../../mocks/settings';
 
 
 const SideBarElements = () => {
     const { getCurrentUser } = RoutesUtills();
-    const userPermissions = getCurrentUser()?.role?.permissions as Array<IPermission>;
+    const userPermissions = getCurrentUser()?.title?.role?.permissions as Array<IPermission>;
 
-    const determinAssetRoute = (): string => {
-        const path = userPermissions ? (
-            userPermissions.find(perm => perm.id === 8) ? ROUTES.LIST_ASSETS :
-                userPermissions.find(perm => perm.id === 12) ? ROUTES.LIST_OFFICE_EQUIPMENT :
-                    userPermissions.find(perm => perm.id === 16) ? ROUTES.LIST_FLEET :
-                        ROUTES.ERRORS
-        ) : ROUTES.ERRORS;
-        console.log(path, "path")
-        // return path;
-        return ROUTES.LIST_ASSETS;
+    const rightsToViewRow = (permission: IPermission): boolean => {
+        // The goal is to check if a user has permission to view a route or not
+        if (!userPermissions) return false;
+        // Check if the user has the specific permission
+        return userPermissions.some((userPermission: IPermission) => userPermission.id === permission.id);
+
+        // return ROUTES.LIST_ASSETS;
     }
 
     const sideBarList: Array<ISideBarItem> = [
@@ -42,63 +40,72 @@ const SideBarElements = () => {
             name: "Dashboard",
             route: ROUTES.ASSETS_MANAGEMENT,
             icon: <DashboardIcon />,
-            subroutes: []
+            subroutes: [],
+            access: true
         },
         {
             id: 2,
             name: "Assets",
-            route: determinAssetRoute(),
+            route: ROUTES.LIST_ASSETS,
             icon: <TuneIcon />,
-            subroutes: []
+            subroutes: [],
+            access: rightsToViewRow(permissionsMock[39]) // Assuming this is the permission for asset read access
         },
         {
             id: 3,
             name: "Users",
             route: ROUTES.USERS,
             icon: <GroupIcon />,
-            subroutes: []
+            subroutes: [],
+            access: rightsToViewRow(permissionsMock[9]) // Assuming this is the permission for user read access
         },
         {
             id: 4,
             name: "Requests",
             route: ROUTES.REQUEST,
             icon: <RecentActorsIcon />,
-            subroutes: []
+            subroutes: [],
+            access: rightsToViewRow(permissionsMock[12]) // Assuming this is the permission for request read access
         },
         {
             id: 5,
             name: "Transport",
             route: ROUTES.TRANSPORT_REQUEST,
             icon: <DirectionsCarIcon />,
-            subroutes: []
+            subroutes: [],
+            access: rightsToViewRow(permissionsMock[19]) // Assuming this is the permission for transport read access
         },
         {
             id: 6,
             name: "Inventory",
             route: ROUTES.INVENTORY,
             icon: <Inventory2OutlinedIcon />,
-            subroutes: []
+            subroutes: [],
+            access: rightsToViewRow(permissionsMock[23]) // Assuming this is the permission for inventory read access
         },
         {
             id: 7,
             name: "Settings",
             route: ROUTES.SETTINGS,
             icon: <SettingsIcon />,
-            subroutes: []
+            subroutes: [],
+            access: rightsToViewRow(permissionsMock[27]) // Assuming this is the permission for settings access
         },
         {
             id: 8,
             name: "Audit Trails",
             route: ROUTES.AUDIT_TRAILS,
             icon: <ReceiptLongIcon />,
-            subroutes: []
+            subroutes: [],
+            access: rightsToViewRow(permissionsMock[31]) // Assuming this is the permission for audit trails access
         },
         {
             id: 9,
             name: "Store",
             route: ROUTES.STORE,
             icon: <Store />,
-            subroutes: []
+            subroutes: [],
+            access: rightsToViewRow(permissionsMock[35]) // Assuming this is the permission for store access
         },
     ]
     return ({ sideBarList })

@@ -44,53 +44,57 @@ const SideBar = ({ drawerOpen }: SideBarProps) => {
             >
                 {sideBarList.map(item => (
                     <React.Fragment key={item.id}>
-                        <ListItemButton
-                            sx={{
-                                bgcolor: activeRoute === item.id ? '#08796C' : 'transparent',
-                                color: activeRoute === item.id ? 'white' : 'inherit',
-                                borderRadius: 1,
-                                mx: 1,
-                                my: 0.5,
-                                px: drawerOpen ? 2 : 1,
-                                justifyContent: drawerOpen ? 'flex-start' : 'center',
-                                '&:hover': {
-                                    bgcolor: activeRoute === item.id ? '#06675A' : 'rgba(8, 121, 108, 0.08)',
-                                    color: activeRoute === item.id ? 'white' : '#08796C',
-                                },
-                                transition: 'all 0.3s ease', // Smooth transition
-                            }}
-                            onClick={() => handleClick(item)}
-                        >
-                            <ListItemIcon
+                        {item.access &&
+
+                            <ListItemButton
                                 sx={{
-                                    color: activeRoute === item.id ? 'white' : '#08796C',
-                                    minWidth: 0,
-                                    mr: drawerOpen ? 2 : 0,
-                                    justifyContent: 'center',
-                                    transition: 'margin 0.3s ease',
+                                    bgcolor: activeRoute === item.id ? '#08796C' : 'transparent',
+                                    color: activeRoute === item.id ? 'white' : 'inherit',
+                                    borderRadius: 1,
+                                    mx: 1,
+                                    my: 0.5,
+                                    px: drawerOpen ? 2 : 1,
+                                    justifyContent: drawerOpen ? 'flex-start' : 'center',
+                                    '&:hover': {
+                                        bgcolor: activeRoute === item.id ? '#06675A' : 'rgba(8, 121, 108, 0.08)',
+                                        color: activeRoute === item.id ? 'white' : '#08796C',
+                                    },
+                                    transition: 'all 0.3s ease', // Smooth transition
                                 }}
+                                onClick={() => handleClick(item)}
                             >
-                                {React.cloneElement(item.icon, { fontSize: 'small' })}
-                            </ListItemIcon>
+                                <ListItemIcon
+                                    sx={{
+                                        color: activeRoute === item.id ? 'white' : '#08796C',
+                                        minWidth: 0,
+                                        mr: drawerOpen ? 2 : 0,
+                                        justifyContent: 'center',
+                                        transition: 'margin 0.3s ease',
+                                    }}
+                                >
+                                    {React.cloneElement(item.icon, { fontSize: 'small' })}
+                                </ListItemIcon>
 
-                            <ListItemText
-                                primary={item.name}
-                                sx={{
-                                    opacity: drawerOpen ? 1 : 0,
-                                    transition: 'opacity 0.3s ease-in-out, margin 0.3s ease-in-out, max-width 0.3s ease-in-out',
-                                    whiteSpace: 'nowrap',
-                                    ml: drawerOpen ? 1 : 0,
-                                    overflow: 'hidden',
-                                    maxWidth: drawerOpen ? 200 : 0,
-                                  }}
-                            />
+                                <ListItemText
+                                    primary={item.name}
+                                    sx={{
+                                        opacity: drawerOpen ? 1 : 0,
+                                        transition: 'opacity 0.3s ease-in-out, margin 0.3s ease-in-out, max-width 0.3s ease-in-out',
+                                        whiteSpace: 'nowrap',
+                                        ml: drawerOpen ? 1 : 0,
+                                        overflow: 'hidden',
+                                        maxWidth: drawerOpen ? 200 : 0,
+                                    }}
+                                />
 
-                            {item.subroutes.length > 0 && drawerOpen && (
-                                expandedItemId === item.id
-                                    ? <ExpandLess sx={{ color: activeRoute === item.id ? "white" : blue[700] }} fontSize="small" />
-                                    : <ExpandMore sx={{ color: activeRoute === item.id ? "white" : blue[700] }} fontSize="small" />
-                            )}
-                        </ListItemButton>
+                                {item.subroutes.length > 0 && drawerOpen && (
+                                    expandedItemId === item.id
+                                        ? <ExpandLess sx={{ color: activeRoute === item.id ? "white" : blue[700] }} fontSize="small" />
+                                        : <ExpandMore sx={{ color: activeRoute === item.id ? "white" : blue[700] }} fontSize="small" />
+                                )}
+                            </ListItemButton>
+                        }
+
                     </React.Fragment>
                 ))}
             </List>
