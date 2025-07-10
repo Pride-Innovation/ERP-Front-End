@@ -43,26 +43,48 @@ const RoleUtills = () => {
         {
             id: 1,
             icon: <SettingsBrightnessIcon fontSize='large' color='info' />,
-            name: "IT Equipment"
+            name: "Asset"
         },
         {
             id: 2,
             icon: <BalanceIcon fontSize='large' color='info' />,
-            name: "Office Equipment"
+            name: "Request"
         },
         {
             id: 3,
             icon: <DirectionsCarFilledIcon fontSize='large' color='info' />,
-            name: "Fleet"
+            name: "Transport"
         },
         {
             id: 4,
             icon: <GroupIcon fontSize='large' color='info' />,
             name: "User"
+        },
+        {
+            id: 5,
+            icon: <GroupIcon fontSize='large' color='info' />,
+            name: "Inventory"
+        },
+        {
+            id: 6,
+            icon: <GroupIcon fontSize='large' color='info' />,
+            name: "Store"
+        },
+        {
+            id: 7,
+            icon: <GroupIcon fontSize='large' color='info' />,
+            name: "Setting"
+        },
+        {
+            id: 8,
+            icon: <GroupIcon fontSize='large' color='info' />,
+            name: "Audit"
         }
     ]
 
     const filterPermissions = (verb: string, permissions: Array<IPermission>, module: string): Array<IPermission> => {
+        console.log(permissions, "permissions in utills");
+        console.log(module, "module in utills");
         return permissions?.filter(perm => perm.name.indexOf(verb.toUpperCase()) !== -1 && perm.name.indexOf(module.toUpperCase()) !== -1);
     }
 

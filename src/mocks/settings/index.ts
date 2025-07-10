@@ -30,83 +30,51 @@ export const suppliersMock: Array<ISupplier> = [
 ]
 
 export const permissionsMock: IPermission[] = [
-    {
-        "id": 2,
-        "name": "CREATE_PERMISSION"
-    },
-    {
-        "id": 6,
-        "name": "CREATE_ROLE"
-    },
-    {
-        "id": 17,
-        "name": "CREATE_STATUS"
-    },
-    {
-        "id": 10,
-        "name": "READ_USER"
-    },
-    {
-        "id": 4,
-        "name": "DELETE_PERMISSION"
-    },
-    {
-        "id": 12,
-        "name": "DELETE_USER"
-    },
-    {
-        "id": 13,
-        "name": "READ_REQUEST"
-    },
-    {
-        "id": 8,
-        "name": "DELETE_ROLE"
-    },
-    {
-        "id": 16,
-        "name": "UPDATE_REQUEST"
-    },
-    {
-        "id": 11,
-        "name": "UPDATE_USER"
-    },
-    {
-        "id": 5,
-        "name": "READ_ROLE"
-    },
-    {
-        "id": 1,
-        "name": "READ_PERMISSION"
-    },
-    {
-        "id": 15,
-        "name": "DELETE_REQUEST"
-    },
-    {
-        "id": 19,
-        "name": "UPDATE_STATUS"
-    },
-    {
-        "id": 7,
-        "name": "UPDATE_ROLE"
-    },
-    {
-        "id": 9,
-        "name": "CREATE_USER"
-    },
-    {
-        "id": 3,
-        "name": "UPDATE_PERMISSION"
-    },
-    {
-        "id": 14,
-        "name": "CREATE_REQUEST"
-    },
-    {
-        "id": 18,
-        "name": "DELETE_STATUS"
-    }
-]
+    { "id": 1, "name": "READ_PERMISSION" },
+    { "id": 2, "name": "CREATE_PERMISSION" },
+    { "id": 3, "name": "UPDATE_PERMISSION" },
+    { "id": 4, "name": "DELETE_PERMISSION" },
+    { "id": 5, "name": "READ_ROLE" },
+    { "id": 6, "name": "CREATE_ROLE" },
+    { "id": 7, "name": "UPDATE_ROLE" },
+    { "id": 8, "name": "DELETE_ROLE" },
+    { "id": 9, "name": "CREATE_USER" },
+    { "id": 10, "name": "READ_USER" },
+    { "id": 11, "name": "UPDATE_USER" },
+    { "id": 12, "name": "DELETE_USER" },
+    { "id": 13, "name": "READ_REQUEST" },
+    { "id": 14, "name": "CREATE_REQUEST" },
+    { "id": 15, "name": "DELETE_REQUEST" },
+    { "id": 16, "name": "UPDATE_REQUEST" },
+    { "id": 17, "name": "CREATE_STATUS" },
+    { "id": 18, "name": "DELETE_STATUS" },
+    { "id": 19, "name": "UPDATE_STATUS" },
+    { "id": 52, "name": "READ_TRANSPORT" },
+    { "id": 53, "name": "CREATE_TRANSPORT" },
+    { "id": 54, "name": "DELETE_TRANSPORT" },
+    { "id": 55, "name": "UPDATE_TRANSPORT" },
+    { "id": 56, "name": "READ_INVENTORY" },
+    { "id": 57, "name": "CREATE_INVENTORY" },
+    { "id": 58, "name": "DELETE_INVENTORY" },
+    { "id": 59, "name": "UPDATE_INVENTORY" },
+    { "id": 60, "name": "READ_SETTING" },
+    { "id": 61, "name": "CREATE_SETTING" },
+    { "id": 62, "name": "DELETE_SETTING" },
+    { "id": 63, "name": "UPDATE_SETTING" },
+    { "id": 64, "name": "READ_AUDIT" },
+    { "id": 65, "name": "CREATE_AUDIT" },
+    { "id": 66, "name": "DELETE_AUDIT" },
+    { "id": 67, "name": "UPDATE_AUDIT" },
+    { "id": 68, "name": "READ_STORE" },
+    { "id": 69, "name": "CREATE_STORE" },
+    { "id": 70, "name": "DELETE_STORE" },
+    { "id": 71, "name": "UPDATE_STORE" },
+    { "id": 72, "name": "READ_ASSET" },
+    { "id": 73, "name": "CREATE_ASSET" },
+    { "id": 74, "name": "DELETE_ASSET" },
+    { "id": 75, "name": "UPDATE_ASSET" }
+];
+
 
 export const rolesMock: IRole[] = [
     {

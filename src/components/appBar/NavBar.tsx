@@ -70,7 +70,7 @@ const NavBar = () => {
                             <NotificationsNoneIcon color="inherit" />
                         </Badge>
                         <TypographyComponent size='16px' weight={400} sx={{ color: grey[100] }}>
-                            {getCurrentUser()?.name}
+                            {getCurrentUser()?.firstName} {getCurrentUser()?.lastName}
                         </TypographyComponent>
                         <IconButton
                             onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
