@@ -6,17 +6,16 @@ Managing Director
 */
 
 import { Route } from "react-router"
-import { ROUTES } from "../routes"
-import Branches from "../../../pages/settings/branch"
-import Roles from "../../../pages/settings/roles"
-import Suppliers from "../../../pages/settings/suppliers"
-import Departments from "../../../pages/settings/departments"
-import Commodities from "../../../pages/settings/commodity"
-import Titles from "../../../pages/settings/titles"
-import Regions from "../../../pages/settings/regions"
+import { ROUTES } from "../../routes"
+import Branches from "../../../../pages/settings/branch"
+import Roles from "../../../../pages/settings/roles"
+import Suppliers from "../../../../pages/settings/suppliers"
+import Departments from "../../../../pages/settings/departments"
+import Commodities from "../../../../pages/settings/commodity"
+import Titles from "../../../../pages/settings/titles"
+import Regions from "../../../../pages/settings/regions"
 
 const SettingsSubRoutes = () => {
-
     return (
         <Route>
             <Route index element={<Roles />} />

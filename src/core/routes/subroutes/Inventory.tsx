@@ -1,3 +1,10 @@
+/*
+13.9 Pride's Standard Copyright Notice:
+Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
+and distribute this software and its documentation for any purpose is prohibited unless authorized in writing by the
+Managing Director
+*/
+
 import { Route } from 'react-router'
 import { ROUTES } from '../routes'
 import Inventory from '../../../pages/inventory'
@@ -13,10 +20,18 @@ const InventoryRoutes = () => {
             <Route element={<PrivateRoute permission={permissionsMock[23]} />}>
                 <Route path={ROUTES.INVENTORY} index element={<Inventory />} />
             </Route>
-            <Route path={`${ROUTES.INVENTORY}/:id`} element={<InventoryDetails />} />
-            <Route path={`${ROUTES.READ_INVENTORY}/:id`} element={<InventoryDetails />} />
-            <Route path={ROUTES.CREATE_INVENTORY} element={<CreateInventory />} />
-            <Route path={`${ROUTES.UPDATE_INVENTORY}/:id`} element={<UpdateInventory />} />
+            <Route element={<PrivateRoute permission={permissionsMock[23]} />}>
+                <Route path={`${ROUTES.INVENTORY}/:id`} element={<InventoryDetails />} />
+            </Route>
+            <Route element={<PrivateRoute permission={permissionsMock[23]} />}>
+                <Route path={`${ROUTES.READ_INVENTORY}/:id`} element={<InventoryDetails />} />
+            </Route>
+            <Route element={<PrivateRoute permission={permissionsMock[24]} />}>
+                <Route path={ROUTES.CREATE_INVENTORY} element={<CreateInventory />} />
+            </Route>
+            <Route element={<PrivateRoute permission={permissionsMock[26]} />}>
+                <Route path={`${ROUTES.UPDATE_INVENTORY}/:id`} element={<UpdateInventory />} />
+            </Route>
         </Route>
     )
 }

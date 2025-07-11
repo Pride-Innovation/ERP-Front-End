@@ -16,13 +16,14 @@ import Profile from '../../pages/profile'
 import AuditTrails from '../../pages/trails'
 import { PrivateRoute } from './PrivateRoutes'
 import ErrorsPage from '../../pages/errors'
-import SettingsSubRoutes from './subroutes/SettingsSub'
+import SettingsSubRoutes from './subroutes/settings/SettingsSub'
 import Store from '../../pages/store'
 import InventoryRoutes from './subroutes/Inventory'
 import AssetRoutes from './subroutes/assets'
 import RequestRoutes from './subroutes/requests'
 import UserRoutes from './subroutes/UserRoutes'
 import TransportRoutes from './subroutes/TransportRoutes'
+import { permissionsMock } from '../../mocks/settings'
 
 const AppRoutes = () => {
 
@@ -33,8 +34,12 @@ const AppRoutes = () => {
       <Route element={<PrivateRoute />}>
         <Route path={ROUTES.ASSETS_MANAGEMENT} element={<ApplicationDrawer />} >
           <Route index element={<Dashboard />} />
-          <Route path={ROUTES.SETTINGS} element={<Settings />} >
-            {SettingsSubRoutes()}
+
+          {/* Setting Routes */}
+          <Route element={<PrivateRoute permission={permissionsMock[27]} />}>
+            <Route path={ROUTES.SETTINGS} element={<Settings />} >
+              {SettingsSubRoutes()}
+            </Route>
           </Route>
 
           {/* Inventory Routes */}
@@ -53,9 +58,19 @@ const AppRoutes = () => {
           {TransportRoutes()}
 
           <Route path={`${ROUTES.PROFILE}/:id`} element={<Profile />} />
-          <Route path={ROUTES.AUDIT_TRAILS} element={<AuditTrails />} />
+
+          {/* Audit Trails Routes */}
+          <Route element={<PrivateRoute permission={permissionsMock[31]} />}>
+            <Route path={ROUTES.AUDIT_TRAILS} element={<AuditTrails />} />
+          </Route>
+
           <Route path={ROUTES.ERRORS} element={<ErrorsPage />} />
-          <Route path={ROUTES.STORE} element={<Store />} />
+
+          {/* Store Routes */}
+          <Route element={<PrivateRoute permission={permissionsMock[35]} />}>
+            <Route path={ROUTES.STORE} element={<Store />} />
+          </Route>
+
         </Route>
       </Route>
     </Routes>

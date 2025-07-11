@@ -75,7 +75,8 @@ const SideBarElements = () => {
             route: ROUTES.TRANSPORT_REQUEST,
             icon: <DirectionsCarIcon />,
             subroutes: [],
-            access: rightsToViewRow(permissionsMock[19]) // Assuming this is the permission for transport read access
+            // access: rightsToViewRow(permissionsMock[19]) // Assuming this is the permission for transport read access
+            access: false // Temporarily set to false for testing purposes
         },
         {
             id: 6,
