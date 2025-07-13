@@ -44,7 +44,7 @@ const IssuedRequest = () => {
         /**
          * This should contain the Status ID for Request Issued for Approval and Issuance Approved.
          */
-        const params = { statusIds: `${5},${6},${7}` }
+        const params = { statusIds: `${5},${6},${7}`, status: "ISSUED" }
         fetchAllRequests(params);
 
         // setFileData({ file: "", module: "", jsonData: [] });

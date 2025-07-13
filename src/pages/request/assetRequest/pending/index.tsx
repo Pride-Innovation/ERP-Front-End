@@ -43,7 +43,7 @@ const PendingRequest = () => {
         /**
          * This should contain the Status ID for Pending Requests
          */
-        const params = { statusIds: `${3},${4}` }
+        const params = { statusIds: `${3},${4}`, status: "PENDING" }
         fetchAllRequests(params);
 
         // setFileData({ file: "", module: "", jsonData: [] });

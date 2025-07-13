@@ -54,7 +54,7 @@ const Request = () => {
     } = RequestUtills();
 
     useEffect(() => {
-        const params = { statusIds: 1 } // Fetching requests with status Asset Request Created ID
+        const params = { statusIds: 1, status: "CREATED" } // Fetching requests with status Asset Request Created ID
         fetchAllRequests(params)
     }, []);
     useEffect(() => { handleRequest(requests) }, [requests]);

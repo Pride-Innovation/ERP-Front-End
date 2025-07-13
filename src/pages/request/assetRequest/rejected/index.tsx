@@ -35,7 +35,7 @@ const RejectedRequest = () => {
         /**
          * This should contain the Status ID for Rejected Requests
          */
-        const params = { statusIds: 2 }
+        const params = { statusIds: 2, status: "REJECTED" }
         fetchAllRequests(params);
 
         // setFileData({ file: "", module: "", jsonData: [] });
@@ -53,17 +53,6 @@ const RejectedRequest = () => {
 
     return (
         <Grid xs={12} container>
-            {/* {crudStates.delete === modalState &&
-                <ModalComponent width={"40%"} title='Delete Request' open={open} handleClose={handleClose}>
-                    <DeleteRequest
-                        setSendingRequest={setLoading}
-                        sendingRequest={loading}
-                        handleClose={handleClose}
-                        buttonText='Confirm'
-                        request={currentRequest}
-                    />
-                </ModalComponent>
-            } */}
             {columnHeaders.length > 0 &&
                 <TableComponent
                     endPoint={endPoint}
