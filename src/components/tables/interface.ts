@@ -44,6 +44,7 @@ export interface ITableComponent {
     loading?: boolean;
     endPoint?: string;
     paginationMode?: 'server' | 'client',
+    filterMode?: 'server' | 'client',
     searchAction?: boolean;
     params?: Record<string, any>
 }
@@ -79,9 +80,10 @@ export interface ITableFilter {
 }
 
 export interface ICustomTableFilterOperator {
-    rows: GridRowsProp;
-    setFilteredRows: React.Dispatch<React.SetStateAction<GridRowsProp>>;
+    // rows: GridRowsProp;
+    // setFilteredRows: React.Dispatch<React.SetStateAction<GridRowsProp>>;
     endPoint: string;
+    params?: Record<string, any>
 }
 
 export interface ICustomTablePagination {

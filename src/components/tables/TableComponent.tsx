@@ -6,9 +6,19 @@ Managing Director
 */
 
 import { DataGridStyled, StyledBox } from '../../components/tables/Table';
-import { GridColDef, GridRowsProp } from '@mui/x-data-grid';
-import { Avatar, Box, Card, useTheme } from '@mui/material';
-import { camelCaseToWords, determineImage, formatToUGXMoney, isCamelCase } from '../../utils/helpers';
+import { GridColDef } from '@mui/x-data-grid';
+import {
+    Avatar,
+    Box,
+    Card,
+    useTheme
+} from '@mui/material';
+import {
+    camelCaseToWords,
+    determineImage,
+    formatToUGXMoney,
+    isCamelCase
+} from '../../utils/helpers';
 import { ITableComponent } from './interface';
 import { TypographyComponent } from '../headers/TypographyComponent';
 import ChipComponent from '../forms/Chip';
@@ -18,7 +28,7 @@ import AccessAlarmsIcon from '@mui/icons-material/AccessAlarms';
 import PopoverComponent from '../forms/Popover';
 import CustomToolbarWrapper from './TableToolBar';
 import CustomTextFilterOperator from './TableFilters';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import CustomTablePagination from './TablePagination';
 import ButtonComponent from '../forms/Button';
 import TimeLineDot from '../timeLineDots';
@@ -41,9 +51,9 @@ const TableComponent = ({
     searchAction = false,
     endPoint = "users",
     paginationMode = 'server',
+    filterMode = 'client',
     params
 }: ITableComponent) => {
-    const [filteredRows, setFilteredRows] = useState<GridRowsProp>(rows);
     const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
     const [currentID, setCurrentId] = useState<string | number>("")
     const theme = useTheme()
@@ -52,9 +62,7 @@ const TableComponent = ({
         setAnchorEl(event.currentTarget);
     };
 
-    useEffect(() => setFilteredRows(rows), [rows]);
-
-    const { handleTableFilter } = CustomTextFilterOperator({ rows: filteredRows, setFilteredRows, endPoint });
+    const { handleTableFilter } = CustomTextFilterOperator({ endPoint, params });
     const { handleTablePagination } = CustomTablePagination({ endPoint, params });
 
     const columns: GridColDef[] = columnHeaders.map((column) => ({
@@ -147,13 +155,14 @@ const TableComponent = ({
             <Box>
                 <DataGridStyled
                     loading={loading}
-                    {...filteredRows}
-                    rows={filteredRows || []}
+                    {...rows}
+                    rows={rows || []}
                     columns={columns}
                     onFilterModelChange={handleTableFilter}
                     onPaginationModelChange={handleTablePagination}
                     rowCount={count}
                     paginationMode={paginationMode}
+                    filterMode={filterMode}
                     slots={{
                         toolbar: () => (
                             <CustomToolbarWrapper
