@@ -8,7 +8,7 @@ Managing Director
 import { GridFilterModel } from "@mui/x-data-grid";
 import { ICustomTableFilterOperator, IhandleTablePagination } from "./interface";
 import { useDebounce } from "../../hooks/useDebounce";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { fetchRowsService } from "../../core/apis/globalService";
 import { assetTypesStatusConstants, ErrorMessage } from "../../utils/constants";
 import { useDispatch } from "react-redux";
@@ -20,6 +20,7 @@ import AssetUtills from "../../pages/assets/Utills";
 import { loadAllFleet } from "../../pages/assets/fleet/slice";
 import { loadAllITAssets } from "../../pages/assets/ITEquipment/slice";
 import { loadAllOfficeAssets } from "../../pages/assets/officeEquipment/slice";
+import { RequestContext } from "../../context/request/RequestContext";
 
 
 const CustomTableFilterOperator = ({ endPoint, params }: ICustomTableFilterOperator) => {
@@ -28,8 +29,7 @@ const CustomTableFilterOperator = ({ endPoint, params }: ICustomTableFilterOpera
     const debouncedInput = useDebounce(localInput, 500);
     const dispatch = useDispatch<AppDispatch>();
     const { determineAssetTypeState } = AssetUtills()
-    const [model, setModel] = useState<GridFilterModel>({} as GridFilterModel);
-
+    const { setCount } = useContext(RequestContext);
 
     const handleReduxStoreUpdate = (
         url: string,
@@ -39,6 +39,7 @@ const CustomTableFilterOperator = ({ endPoint, params }: ICustomTableFilterOpera
         switch (url) {
             case "requests":
                 dispatch(loadAllRequests(content));
+                setCount(content.length);
                 break;
             case "users":
                 dispatch(loadUsers(content))
@@ -66,24 +67,20 @@ const CustomTableFilterOperator = ({ endPoint, params }: ICustomTableFilterOpera
     }
 
     const handleTableFilter = (model: GridFilterModel) => {
-        console.log(model, "model in handleTableFilter")
-
         const { items } = model;
-        console.log(model, "model in handleTableFilter")
 
         if (items.length > 0) {
             const { field, value } = items[0];
             setLocalInput(value?.toString() || '');
             setFieldName(field);
-            setModel(model);
         }
     };
 
     const fetchFilteredData = async () => {
         try {
             const response = await fetchRowsService({
-                // pageNumber: model.page,
-                // pageSize: model.pageSize,
+                pageNumber: 0,
+                pageSize: 10,
                 endPoint,
                 params: {
                     ...params,
@@ -104,10 +101,7 @@ const CustomTableFilterOperator = ({ endPoint, params }: ICustomTableFilterOpera
     }
 
     useEffect(() => {
-        if (debouncedInput.length > 0) {
-            console.log(`Fetching data for: ${debouncedInput} ${endPoint} with field: ${fieldName}`);
-            fetchFilteredData();
-        }
+        if (debouncedInput.length > 0) { fetchFilteredData(); }
     }, [debouncedInput]);
 
     return {

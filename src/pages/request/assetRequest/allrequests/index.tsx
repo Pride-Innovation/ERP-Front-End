@@ -114,6 +114,7 @@ const Request = () => {
                         onCreationHandler={() => navigate(ROUTES.CREATE_REQUEST)}
                         handleOptionClicked={handleOptionClicked}
                         paginationMode='server'
+                        filterMode="server"
                         searchAction
                         params={{ statusIds: 1 }}
                     />
