@@ -115,8 +115,8 @@ const Request = () => {
                         handleOptionClicked={handleOptionClicked}
                         paginationMode='server'
                         filterMode="server"
-                        searchAction
                         params={{ statusIds: 1 }}
+                        refresh
                     />
                 }
             </Grid>

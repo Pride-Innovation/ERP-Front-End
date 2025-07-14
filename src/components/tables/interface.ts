@@ -47,6 +47,7 @@ export interface ITableComponent {
     filterMode?: 'server' | 'client',
     searchAction?: boolean;
     params?: Record<string, any>
+    refresh?: boolean;
 }
 
 export interface ITableToolBar {
@@ -61,6 +62,7 @@ export interface ITableToolBar {
     importData: boolean;
     exportData: boolean;
     searchAction: boolean;
+    refresh?: boolean;
 }
 
 export interface CustomToolbarWrapperProps extends GridToolbarProps {
@@ -72,6 +74,7 @@ export interface CustomToolbarWrapperProps extends GridToolbarProps {
     importData: boolean;
     exportData: boolean;
     searchAction: boolean;
+    refresh?: boolean;
 }
 
 export interface ITableFilter {
@@ -80,8 +83,6 @@ export interface ITableFilter {
 }
 
 export interface ICustomTableFilterOperator {
-    // rows: GridRowsProp;
-    // setFilteredRows: React.Dispatch<React.SetStateAction<GridRowsProp>>;
     endPoint: string;
     params?: Record<string, any>
 }

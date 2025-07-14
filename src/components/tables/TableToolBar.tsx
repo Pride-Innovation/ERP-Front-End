@@ -24,7 +24,8 @@ const TableToolBar = ({
     importData,
     exportData,
     createAction,
-    searchAction
+    searchAction,
+    refresh
 }: ITableToolBar) => {
     const { setFileName } = useContext(FileContext);
     useEffect(() => { setFileName(module) }, [module]);
@@ -35,8 +36,19 @@ const TableToolBar = ({
             sx={{ width: '100%', display: 'flex', p: '20px' }}>
             <TypographyComponent size='17px' color="#BC892C" weight={600} sx={{ textTransform: "uppercase" }}>{header.plural}</TypographyComponent>
             <Stack direction="row" spacing={2} sx={{ ml: "auto" }}>
-                {/* TO DO implement api search using debounce */}
                 {searchAction && <TextField size='small' placeholder="Search" variant='outlined' sx={{ color: theme.palette.success.main }} />}
+                {refresh &&
+                    <Box>
+                        <ButtonComponent
+                            handleClick={() => window.location.reload()}
+                            sendingRequest={false}
+                            buttonText="Refresh"
+                            variant='outlined'
+                            buttonColor='primary'
+                            type='button'
+                        />
+                    </Box>
+                }
                 {createAction && <Box>
                     <ButtonComponent
                         handleClick={() => onCreationHandler()}
@@ -63,6 +75,7 @@ const CustomToolbarWrapper: React.FC<CustomToolbarWrapperProps> = ({
     header,
     onCreationHandler,
     module,
+    refresh,
     ...props
 }) => {
     return (
@@ -75,6 +88,7 @@ const CustomToolbarWrapper: React.FC<CustomToolbarWrapperProps> = ({
             onCreationHandler={onCreationHandler}
             module={module}
             {...props}
+            refresh={refresh}
         />
     );
 };

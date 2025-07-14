@@ -52,7 +52,8 @@ const TableComponent = ({
     endPoint = "users",
     paginationMode = 'server',
     filterMode = 'client',
-    params
+    params,
+    refresh = false
 }: ITableComponent) => {
     const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
     const [currentID, setCurrentId] = useState<string | number>("")
@@ -173,6 +174,7 @@ const TableComponent = ({
                                 header={header}
                                 onCreationHandler={() => onCreationHandler?.()}
                                 module={module as string}
+                                refresh={refresh}
                             />)
                     }}
                     autoHeight
