@@ -19,11 +19,14 @@ import { assetTypesStatusConstants } from "../../utils/constants";
 import { loadAllFleet } from "../../pages/assets/fleet/slice";
 import { loadAllITAssets } from "../../pages/assets/ITEquipment/slice";
 import { loadAllOfficeAssets } from "../../pages/assets/officeEquipment/slice";
+import { useContext } from "react";
+import { AssetContext } from "../../context/asset";
 
 
 const CustomTablePagination = ({ endPoint, params }: ICustomTablePagination) => {
     const dispatch = useDispatch<AppDispatch>();
     const { determineAssetTypeState } = AssetUtills()
+    const { fieldName, fieldText } = useContext(AssetContext);
 
     const handleReduxStoreUpdate = (
         url: string,
@@ -62,11 +65,15 @@ const CustomTablePagination = ({ endPoint, params }: ICustomTablePagination) => 
 
     const handleTablePagination = async (model: GridPaginationModel) => {
         try {
+            const requestParams = fieldName.length > 0 ? ({
+                ...params, [fieldName]: fieldText
+            }) : params;
+
             const response = await fetchRowsService({
                 pageNumber: model.page,
                 pageSize: model.pageSize,
                 endPoint,
-                params
+                params: requestParams
             }) as IhandleTablePagination;
             const { content } = response.data
 

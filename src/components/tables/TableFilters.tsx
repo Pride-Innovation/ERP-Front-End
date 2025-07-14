@@ -21,25 +21,32 @@ import { loadAllFleet } from "../../pages/assets/fleet/slice";
 import { loadAllITAssets } from "../../pages/assets/ITEquipment/slice";
 import { loadAllOfficeAssets } from "../../pages/assets/officeEquipment/slice";
 import { RequestContext } from "../../context/request/RequestContext";
+import { AssetContext } from "../../context/asset";
 
 
 const CustomTableFilterOperator = ({ endPoint, params }: ICustomTableFilterOperator) => {
     const [localInput, setLocalInput] = useState<string>('');
-    const [fieldName, setFieldName] = useState<string>('');
     const debouncedInput = useDebounce(localInput, 500);
     const dispatch = useDispatch<AppDispatch>();
     const { determineAssetTypeState } = AssetUtills()
     const { setCount } = useContext(RequestContext);
+    const {
+        setItEquipmentCount,
+        fieldName,
+        setFieldName,
+        setFieldText
+    } = useContext(AssetContext);
 
     const handleReduxStoreUpdate = (
         url: string,
         content: Array<Record<string, any>>,
-        params?: Record<string, any>
+        params?: Record<string, any>,
+        totalElements?: number
     ) => {
         switch (url) {
             case "requests":
                 dispatch(loadAllRequests(content));
-                setCount(content.length);
+                setCount(totalElements as number);
                 break;
             case "users":
                 dispatch(loadUsers(content))
@@ -55,6 +62,7 @@ const CustomTableFilterOperator = ({ endPoint, params }: ICustomTableFilterOpera
                 }
                 if (assetType.name === assetTypesStatusConstants.itEquipment) {
                     dispatch(loadAllITAssets(content))
+                    setItEquipmentCount(totalElements as number)
                 }
                 if (assetType.name === assetTypesStatusConstants.officeEquipment) {
                     dispatch(loadAllOfficeAssets(content))
@@ -91,7 +99,12 @@ const CustomTableFilterOperator = ({ endPoint, params }: ICustomTableFilterOpera
             const { content } = response.data
 
             if (content.length > 0) {
-                handleReduxStoreUpdate(endPoint, content, params)
+                handleReduxStoreUpdate(
+                    endPoint,
+                    content,
+                    params,
+                    response.data.totalElements
+                )
             }
 
         } catch (error) {
@@ -101,7 +114,10 @@ const CustomTableFilterOperator = ({ endPoint, params }: ICustomTableFilterOpera
     }
 
     useEffect(() => {
-        if (debouncedInput.length > 0) { fetchFilteredData(); }
+        if (debouncedInput.length > 0) {
+            fetchFilteredData();
+            setFieldText(debouncedInput);
+        }
     }, [debouncedInput]);
 
     return {

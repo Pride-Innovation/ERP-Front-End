@@ -22,6 +22,7 @@ import { ThemeProvider, CssBaseline } from '@mui/material';
 import customThemes from './utils/customThemes';
 import AutocompleteContextProvider from './context/autocomplete';
 import StoreContextProvider from './context/store';
+import AssetContextProvider from './context/asset';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -40,7 +41,9 @@ root.render(
                     <FileContextProvider>
                       <TestContextProvider>
                         <StoreContextProvider>
-                          <App />
+                          <AssetContextProvider>
+                            <App />
+                          </AssetContextProvider>
                         </StoreContextProvider>
                       </TestContextProvider>
                     </FileContextProvider>

@@ -11,7 +11,7 @@ import Dispose from "../Dispose"
 import TableComponent from "../../../components/tables/TableComponent"
 import ITEquipmentUtills from "./utills"
 import { useNavigate } from "react-router"
-import { useEffect, useState } from "react"
+import { useContext, useEffect, useState } from "react"
 import { ROUTES } from "../../../core/routes/routes"
 import { ErrorMessage } from "../../../core/apis/axiosInstance"
 import { fetchRowsService } from "../../../core/apis/globalService"
@@ -21,6 +21,7 @@ import { AppDispatch, RootState } from "../../../store"
 import { loadAllITAssets } from "./slice"
 import { useSelector } from "react-redux"
 import AssetUtills from "../Utills"
+import { AssetContext } from "../../../context/asset"
 
 const ITEquipment = () => {
     const [loading, setLoading] = useState<boolean>(false);
@@ -28,7 +29,7 @@ const ITEquipment = () => {
     const navigate = useNavigate();
     const { itAssets } = useSelector((state: RootState) => state.ITAssetStore)
     const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore);
-    const [count, setCount] = useState<number>(0)
+    const { setItEquipmentCount, itEquipmentCount } = useContext(AssetContext);
     const { currentAssetType, setCurrentAssetType } = AssetUtills()
     const {
         open,
@@ -57,7 +58,7 @@ const ITEquipment = () => {
             }) as IITEquipmentsAxiosResponse;
             if (response.status === 200) {
                 dispatch(loadAllITAssets(response.data.content));
-                setCount(response.data.totalElements)
+                setItEquipmentCount(response.data.totalElements)
             }
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : ErrorMessage;
@@ -104,7 +105,7 @@ const ITEquipment = () => {
                 <TableComponent
                     endPoint={endPoint}
                     loading={loading}
-                    count={count}
+                    count={itEquipmentCount}
                     exportData
                     createAction
                     importData
@@ -115,6 +116,8 @@ const ITEquipment = () => {
                     onCreationHandler={() => navigate(ROUTES.CREATE_ITEQUIPMENT)}
                     handleOptionClicked={handleOptionClicked}
                     params={{ assetTypeId: currentAssetType.id }}
+                    refresh
+                    filterMode="server"
                 />
             </Grid>
         </>
