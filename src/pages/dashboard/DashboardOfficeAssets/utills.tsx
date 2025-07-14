@@ -11,11 +11,16 @@ import { itEquipmentMock } from '../../../mocks/itEquipment';
 import { getTableHeaders } from '../../../components/tables/getTableHeaders';
 import InfoIcon from '@mui/icons-material/Info';
 import DoNotDisturbAltIcon from '@mui/icons-material/DoNotDisturbAlt';
+import { IAssetTableData } from '../interface';
+import { IOfficeEquipment } from '../../assets/officeEquipment/interface';
+import moment from 'moment';
 
 const DashboardOfficeAssetsUtills = () => {
-    const endPoint = 'posts';
-    const header = { plural: 'Office Assets', singular: 'Request' };
+    const endPoint = 'assets';
+    const header = { plural: 'Office Assets', singular: 'Asset' };
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
+    const [officeEquipmentTableData, setOfficeEquipmentTableData] = useState<IAssetTableData[]>([] as IAssetTableData[])
+
     const {
         id,
         model,
@@ -47,7 +52,6 @@ const DashboardOfficeAssetsUtills = () => {
     } = itEquipmentMock[0];
 
     const rowData = {
-        image: itEquipmentMock[0].image,
         ...data,
         action: {
             label: "options",
@@ -63,11 +67,49 @@ const DashboardOfficeAssetsUtills = () => {
         setColumnHeaders(getTableHeaders(rowData))
     }, []);
 
+    const handleOfficeEquipmentTableData = (list: Array<IOfficeEquipment>) => {
+        const data: Array<IAssetTableData> = list.map((item, index) => {
+            const {
+                branch,
+                assignedTo,
+                assetType,
+                assetStatus,
+                supplier,
+                description,
+                assetDepreciationRate,
+                detailNetBookValue,
+                netValueB,
+                unitOfMeasure,
+                lpoNumber,
+                stock,
+                commodity,
+                dateReceipt,
+                image,
+                ...fielsdata
+            } = list[index];
+
+            return (
+                {
+                    ...fielsdata,
+                    assetName: item.assetName,
+                    engravedNumber: item.engravedNumber,
+                    dateReceived: moment(item.dateReceipt).format('Do MMMM YYYY'),
+                    assignedTo: item.assignedTo?.firstName ? `${item.assignedTo?.lastName} ${item.assignedTo?.firstName}` : "",
+                    location: item.branch?.name as string
+                }
+            )
+        })
+        setOfficeEquipmentTableData(data);
+
+    }
+
     return (
         {
             endPoint,
             header,
             columnHeaders,
+            officeEquipmentTableData,
+            handleOfficeEquipmentTableData
         }
     )
 }

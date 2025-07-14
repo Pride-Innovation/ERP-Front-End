@@ -6,6 +6,7 @@ Managing Director
 */
 
 import React, {
+    useContext,
     useEffect,
     useState
 } from "react";
@@ -23,13 +24,14 @@ import { AppDispatch, RootState } from "../../../store";
 import { IOfficeEquipmentsAxiosResponse } from "./interface";
 import { loadAllOfficeAssets } from "./slice";
 import { useSelector } from "react-redux";
+import { AssetContext } from "../../../context/asset";
 
 const OfficeEquipment = () => {
     const [loading, setLoading] = useState<boolean>(false);
     const navigate = useNavigate();
     const { currentAssetType, setCurrentAssetType } = AssetUtills();
     const dispatch = useDispatch<AppDispatch>();
-    const [count, setCount] = useState<number>(0)
+    const { officeEquipmentCount, setOfficeEquipmentCount } = useContext(AssetContext);
     const { officeAsset } = useSelector((state: RootState) => state.OfficeAssetStore)
     const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore);
 
@@ -61,7 +63,7 @@ const OfficeEquipment = () => {
             }) as IOfficeEquipmentsAxiosResponse;
             if (response.status === 200) {
                 dispatch(loadAllOfficeAssets(response.data.content));
-                setCount(response.data.totalElements)
+                setOfficeEquipmentCount(response.data.totalElements)
             }
         } catch (error) {
             console.log(error)
@@ -107,7 +109,7 @@ const OfficeEquipment = () => {
                     <TableComponent
                         endPoint={endPoint}
                         loading={loading}
-                        count={count}
+                        count={officeEquipmentCount}
                         exportData
                         createAction
                         importData

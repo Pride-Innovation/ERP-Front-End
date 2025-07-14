@@ -13,12 +13,15 @@ interface IAssetContext {
     setFieldName: Dispatch<SetStateAction<string>>;
     fieldText: string;
     setFieldText: Dispatch<SetStateAction<string>>;
+    officeEquipmentCount: number;
+    setOfficeEquipmentCount: Dispatch<SetStateAction<number>>;
 }
 
 export const AssetContext = createContext<IAssetContext>({} as IAssetContext);
 
 const AssetContextProvider: FC<{ children: React.ReactNode }> = ({ children }) => {
     const [itEquipmentCount, setItEquipmentCount] = useState<number>(0);
+    const [officeEquipmentCount, setOfficeEquipmentCount] = useState<number>(0);
     const [fieldName, setFieldName] = useState<string>('');
     const [fieldText, setFieldText] = useState<string>('');
 
@@ -29,7 +32,9 @@ const AssetContextProvider: FC<{ children: React.ReactNode }> = ({ children }) =
             fieldName,
             setFieldName,
             fieldText,
-            setFieldText
+            setFieldText,
+            officeEquipmentCount,
+            setOfficeEquipmentCount
         }}>
             {children}
         </AssetContext.Provider>
