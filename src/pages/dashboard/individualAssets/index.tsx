@@ -23,7 +23,6 @@ import RoutesUtills from '../../../core/routes/utills';
 
 const PersonalAssets = () => {
     const [loading, setLoading] = useState<boolean>(false)
-    const { endPoint, columnHeaders, header } = IndividualRequestUtill();
     const dispatch = useDispatch<AppDispatch>();
     const { setItEquipmentCount, itEquipmentCount } = useContext(AssetContext);
     const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore);
@@ -31,6 +30,16 @@ const PersonalAssets = () => {
     const { currentAssetType, setCurrentAssetType } = AssetUtills()
     const { fetchAllAssetTypes } = AssetTypeUtills();
     const { getCurrentUser } = RoutesUtills();
+    const { itAssets } = useSelector((state: RootState) => state.ITAssetStore)
+
+    const {
+        endPoint,
+        columnHeaders,
+        header,
+        handleITEquipmentTableData,
+        iTEquipmentTableData
+    } = IndividualRequestUtill();
+
 
     const fetchResources = async () => {
         setLoading(true)
@@ -70,15 +79,26 @@ const PersonalAssets = () => {
 
     useEffect(() => { fetchAllAssetTypes() }, [])
 
+    useEffect(() => {
+        if (itAssets.length > 0) {
+            handleITEquipmentTableData(itAssets)
+        }
+    }, [itAssets])
+
     return (
         <TableComponent
             endPoint={endPoint}
             loading={loading}
             count={itEquipmentCount}
             header={header}
-            rows={[]}
+            rows={iTEquipmentTableData || []}
             columnHeaders={columnHeaders}
             paginationMode='server'
+            params={{
+                assetTypeId: currentAssetType.id,
+                assignedToId: getCurrentUser().id
+            }}
+
         />
     )
 }

@@ -9,11 +9,16 @@ import { useEffect, useState } from 'react'
 import { ITableHeader } from '../../../components/tables/interface';
 import { getTableHeaders } from '../../../components/tables/getTableHeaders';
 import { itEquipmentMock } from '../../../mocks/itEquipment';
+import { IITEquipment } from '../../assets/ITEquipment/interface';
+import { IAssetTableData } from '../interface';
+import moment from 'moment';
 
 const IndividualRequestUtill = () => {
     const endPoint = 'assets';
     const header = { plural: 'IT Assets', singular: 'Asset' };
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
+    const [iTEquipmentTableData, setITEquipmentTableData] = useState<IAssetTableData[]>([] as IAssetTableData[])
+
     const {
         id,
         model,
@@ -44,7 +49,6 @@ const IndividualRequestUtill = () => {
     } = itEquipmentMock[0];
 
     const rowData = {
-        image: itEquipmentMock[0].image,
         ...data,
     };
 
@@ -53,11 +57,57 @@ const IndividualRequestUtill = () => {
         setColumnHeaders(getTableHeaders(rowData))
     }, []);
 
+
+    const handleITEquipmentTableData = (list: Array<IITEquipment>) => {
+        const data: Array<IAssetTableData> = list.map((item, index) => {
+            const {
+                branch,
+                assignedTo,
+                assetType,
+                assetStatus,
+                supplier,
+                description,
+                assetDepreciationRate,
+                interfaceType,
+                ipAddress,
+                macAddress,
+                hardDiskSize,
+                hostname,
+                cpuSpeed,
+                ram,
+                detailNetBookValue,
+                netValueB,
+                unitOfMeasure,
+                lpoNumber,
+                stock,
+                commodity,
+                dateReceipt,
+                image,
+                ...fielsdata
+            } = list[index];
+
+            return (
+                {
+                    ...fielsdata,
+                    assetName: item.assetName,
+                    engravedNumber: item.engravedNumber,
+                    dateReceived: moment(item.dateReceipt).format('Do MMMM YYYY'),
+                    assignedTo: item.assignedTo?.firstName ? `${item.assignedTo?.lastName} ${item.assignedTo?.firstName}` : "",
+                    location: item.branch?.name as string
+                }
+            )
+        })
+        setITEquipmentTableData(data);
+
+    }
+
     return (
         {
             endPoint,
             header,
             columnHeaders,
+            handleITEquipmentTableData,
+            iTEquipmentTableData
         }
     )
 }

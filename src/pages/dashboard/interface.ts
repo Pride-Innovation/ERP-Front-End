@@ -65,3 +65,11 @@ export type BarChartData = {
 export interface IMonthlyAssetReportAxiosResponse extends IAxiosResponse {
     data: IMonthlyAssetReport[]
 }
+
+export interface IAssetTableData {
+    assetName: string;
+    engravedNumber?: string | null;
+    dateReceived: string;
+    assignedTo: string;
+    location: string;
+}
