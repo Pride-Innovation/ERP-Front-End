@@ -43,6 +43,7 @@ const IndividualRequestUtill = () => {
         assignedTo,
         branch,
         lpoNumber,
+        serialNumber,
         stock,
         commodity,
         ...data
@@ -50,6 +51,8 @@ const IndividualRequestUtill = () => {
 
     const rowData = {
         ...data,
+        location: "",
+        assignedTo: ""
     };
 
 

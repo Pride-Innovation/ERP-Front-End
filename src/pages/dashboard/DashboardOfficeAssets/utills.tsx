@@ -46,6 +46,7 @@ const DashboardOfficeAssetsUtills = () => {
         stock,
         assignedTo,
         commodity,
+        serialNumber,
         make,
         lpoNumber,
         ...data
@@ -53,13 +54,8 @@ const DashboardOfficeAssetsUtills = () => {
 
     const rowData = {
         ...data,
-        action: {
-            label: "options",
-            options: [
-                { value: "dispose", label: "Approve", icon: <InfoIcon fontSize='small' color='error' /> },
-                { value: "update", label: "Revert", icon: <DoNotDisturbAltIcon fontSize='small' color='info' /> },
-            ]
-        },
+        location: "",
+        assignedTo: ""
     };
 
 
