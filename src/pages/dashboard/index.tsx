@@ -11,7 +11,7 @@ import DashboardRequests from './DashboardRequests';
 import DoughnutChart from '../../components/charts/DoughnutChart';
 import DashboardBarChart from './DashboardBarChart';
 import PersonalAssets from './individualAssets';
-import DisposalAssets from './disposableAssets';
+import DashboardOfficeAssets from './DashboardOfficeAssets';
 import DashBoardUtills from './utills';
 import Loading from '../../components/loading';
 
@@ -98,7 +98,7 @@ const Dashboard = () => {
           </Grid>
           <Grid item xs={12} md={6}>
             <Card sx={{ boxShadow: "none", borderRadius: 3, p: 3, backgroundColor: '#F5F9F8' }}>
-              <DisposalAssets />
+              <DashboardOfficeAssets />
             </Card>
           </Grid>
         </Grid>

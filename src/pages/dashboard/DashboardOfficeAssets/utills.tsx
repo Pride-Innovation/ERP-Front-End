@@ -12,9 +12,9 @@ import { getTableHeaders } from '../../../components/tables/getTableHeaders';
 import InfoIcon from '@mui/icons-material/Info';
 import DoNotDisturbAltIcon from '@mui/icons-material/DoNotDisturbAlt';
 
-const DisposalAssetsUtills = () => {
+const DashboardOfficeAssetsUtills = () => {
     const endPoint = 'posts';
-    const header = { plural: 'Disposable Assets', singular: 'Request' };
+    const header = { plural: 'Office Assets', singular: 'Request' };
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
     const {
         id,
@@ -72,4 +72,4 @@ const DisposalAssetsUtills = () => {
     )
 }
 
-export default DisposalAssetsUtills
+export default DashboardOfficeAssetsUtills

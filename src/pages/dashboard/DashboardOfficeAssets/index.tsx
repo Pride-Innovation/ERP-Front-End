@@ -6,19 +6,19 @@ Managing Director
 */
 
 import { useEffect, useState } from "react";
-import DisposalAssetsUtills from "./utills";
+import DashboardOfficeAssetsUtills from "./utills";
 import TableComponent from "../../../components/tables/TableComponent";
 
-const DisposalAssets = () => {
+const DashboardOfficeAssets = () => {
     const [loading, setLoading] = useState<boolean>(false)
-    const { endPoint, columnHeaders, header } = DisposalAssetsUtills();
+    const { endPoint, columnHeaders, header } = DashboardOfficeAssetsUtills();
 
     const fetchResources = async () => {
         setLoading(true)
         try {
 
         } catch (error) {
-      
+
         }
         setLoading(false)
     }
@@ -38,4 +38,4 @@ const DisposalAssets = () => {
     )
 }
 
-export default DisposalAssets
+export default DashboardOfficeAssets

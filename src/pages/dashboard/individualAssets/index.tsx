@@ -15,7 +15,11 @@ const PersonalAssets = () => {
 
     const fetchResources = async () => {
         setLoading(true)
-
+        try {
+            
+        } catch (error) {
+            console.error("Error fetching resources:", error);
+        }
         setLoading(false)
     }
 

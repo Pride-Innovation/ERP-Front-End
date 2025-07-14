@@ -12,7 +12,7 @@ import { itEquipmentMock } from '../../../mocks/itEquipment';
 
 const IndividualRequestUtill = () => {
     const endPoint = 'posts';
-    const header = { plural: 'Personal Assets', singular: 'Request' };
+    const header = { plural: 'IT Assets', singular: 'Request' };
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
     const {
         id,
