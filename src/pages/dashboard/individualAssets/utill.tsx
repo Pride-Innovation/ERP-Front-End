@@ -11,8 +11,8 @@ import { getTableHeaders } from '../../../components/tables/getTableHeaders';
 import { itEquipmentMock } from '../../../mocks/itEquipment';
 
 const IndividualRequestUtill = () => {
-    const endPoint = 'posts';
-    const header = { plural: 'IT Assets', singular: 'Request' };
+    const endPoint = 'assets';
+    const header = { plural: 'IT Assets', singular: 'Asset' };
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
     const {
         id,
