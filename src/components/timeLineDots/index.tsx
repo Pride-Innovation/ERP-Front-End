@@ -17,11 +17,12 @@ import PlaylistAddCheckCircleOutlinedIcon from '@mui/icons-material/PlaylistAddC
 import ThumbUpOffAltOutlinedIcon from '@mui/icons-material/ThumbUpOffAltOutlined';
 import EditCalendarOutlinedIcon from '@mui/icons-material/EditCalendarOutlined';
 import DoNotDisturbAltIcon from '@mui/icons-material/DoNotDisturbAlt';
+import AutorenewIcon from '@mui/icons-material/Autorenew';
 
 /**
  * 
  * @param status 
- * @returns Icon based on the statuses, Active, Inactive, Disabled or Blocked
+ * @returns Icon based on the statuses, Active, Inactive, Disabled, Blocked, etc.
  */
 
 /*
@@ -49,6 +50,10 @@ const TimeLineDot = ({ status }: ITimeLineDot) => {
         <EditCalendarOutlinedIcon fontSize='small' color="error" sx={{ mr: "5px" }} />
     ) : status === "in stock" ? (
         <CheckCircleOutlineOutlinedIcon fontSize='small' color="primary" sx={{ mr: "5px" }} />
+    ) : status === "stockCompleted" ? (
+        <CheckCircleOutlineOutlinedIcon fontSize='small' color="primary" sx={{ mr: "5px" }} />
+    ) : status === "stockPending" ? (
+        <AutorenewIcon fontSize='small' color="warning" sx={{ mr: "5px" }} />
     )
         : <DoDisturbAltIcon fontSize='small' color="secondary" sx={{ mr: "5px" }} />
 }

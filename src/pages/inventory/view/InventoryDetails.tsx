@@ -5,7 +5,7 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { useParams } from "react-router"
+import { useNavigate, useParams } from "react-router"
 import { useContext, useEffect, useState } from "react";
 import { InventoryContext } from "../../../context/inventory";
 import {
@@ -38,6 +38,7 @@ const InventoryDetails = () => {
     const { id } = useParams<{ id: string }>();
     const { fetchInventoryByID } = ViewInventoryutills()
     const [fileURL, setFileURL] = useState<string>("");
+    const navigate = useNavigate();
 
     const {
         handleClose,
@@ -124,7 +125,7 @@ const InventoryDetails = () => {
                             <DetailSection label='Supplier Contact' icon={<LocalPhoneOutlinedIcon />} text={currentInventory?.supplier?.telephone as string} />
                             {currentInventory?.supplier?.email && <DetailSection label='Supplier Email' icon={<EmailOutlinedIcon style={{ color: "#BC892C" }} />} text={currentInventory?.supplier?.email as string} />}
                             {currentInventory?.lpoNumber && <DetailSection label="LPO Number" text={currentInventory?.lpoNumber} />}
-                            {currentInventory?.status && <DetailSection label="Status" text={currentInventory?.status?.name} />}
+                            {currentInventory?.status && <DetailSection label="Status" text={currentInventory?.status?.status as string} />}
                             {currentInventory?.createDate && <DetailSection label="Delivery Date" text={moment(currentInventory?.createDate).format('Do MMMM YYYY, h:mm')} />}
                         </CardContent>
                     </Card>
@@ -151,20 +152,15 @@ const InventoryDetails = () => {
                     </Card>
                 </Grid>
             </Grid>
-            <Box sx={{ width: "100%", display: "flex", justifyContent: "end" }}>
+            <Box sx={{ width: "30%", display: "flex", justifyContent: "end", ml: "auto" }}>
                 <Stack direction="row" spacing={3} sx={{ width: "30%", mt: 3 }}>
-                    <ButtonComponent
-                        handleClick={() => console.log("information!!")}
-                        buttonColor='error'
-                        type='button'
-                        sendingRequest={false}
-                        buttonText="Back"
-                    />
                     <ButtonComponent
                         buttonColor='info'
                         type='submit'
+                        variant="outlined"
                         sendingRequest={false}
-                        buttonText="Update" />
+                        handleClick={() => navigate(-1)}
+                        buttonText="Back" />
                 </Stack>
             </Box>
         </Card>

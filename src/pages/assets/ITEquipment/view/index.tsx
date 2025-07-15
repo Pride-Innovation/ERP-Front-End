@@ -24,7 +24,7 @@ import OtherDetails from './OtherDetails';
 import AssignmentHistory from '../../trails/AssignmentHistory';
 import RepairHistory from '../../trails/RepairHistory';
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router';
+import { useNavigate, useParams } from 'react-router';
 import { IITEquipment, IITEquipmentAxiosResponse } from '../interface';
 import { getITEquipmentByIDService } from '../service';
 import Loading from '../../../../components/loading';
@@ -34,7 +34,7 @@ const ITEquipmentDetails = () => {
     const [equipment, setEquipment] = useState<IITEquipment>({} as IITEquipment)
     const { id } = useParams<{ id: string }>();
     const [loading, setLoading] = useState<boolean>(false)
-
+    const navigate = useNavigate();
 
     const getITEquipment = async () => {
         setLoading(true)
@@ -77,7 +77,7 @@ const ITEquipmentDetails = () => {
                                     <DetailSection label="Purchase Cost" text={equipment.purchaseCost} />
                                     <DetailSection label="Date of Receipt" text={moment(equipment.dateReceipt).format('Do MMMM YYYY')} />
                                     {equipment.branch && <DetailSection label="Location" text={equipment.branch.name} />}
-                                    {equipment.assetStatus && <DetailSection label="Status" text={equipment.assetStatus.name} />}
+                                    {equipment.assetStatus && <DetailSection label="Status" text={equipment.assetStatus.status as string} />}
                                     {equipment.description && <DetailSection label="Description" text={equipment.description} />}
                                 </CardContent>
                             </Card>
@@ -109,20 +109,15 @@ const ITEquipmentDetails = () => {
                             </Card>
                         </Grid>
                     </Grid>
-                    <Box sx={{ width: "100%", display: "flex", justifyContent: "end" }}>
+                    <Box sx={{ width: "30%", display: "flex", justifyContent: "end", ml: "auto" }}>
                         <Stack direction="row" spacing={3} sx={{ width: "30%", mt: 3 }}>
-                            <ButtonComponent
-                                handleClick={() => console.log("information!!")}
-                                buttonColor='error'
-                                type='button'
-                                sendingRequest={false}
-                                buttonText="Back"
-                            />
                             <ButtonComponent
                                 buttonColor='info'
                                 type='submit'
+                                variant='outlined'
                                 sendingRequest={false}
-                                buttonText="Update" />
+                                handleClick={() => navigate(-1)}
+                                buttonText="back" />
                         </Stack>
                     </Box>
                 </>
