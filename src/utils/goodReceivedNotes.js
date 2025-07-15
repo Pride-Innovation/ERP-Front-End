@@ -41,7 +41,7 @@ export function generateGoodsReceivedNote(data, logoBase64 = null, username = 'P
     doc.setFontSize(10);
     doc.text(`GRN Ref No: ${data.reports[0].grnReport.name}`, 14, (cursorY += 10));
     doc.text(`LPO No: ${data.lpoNumber}`, 14, (cursorY += 6));
-    doc.text(`Date: ${new Date(data.createDate).toLocaleDateString()}`, 14, (cursorY += 6));
+    doc.text(`Date: ${moment(data.createDate).format('Do MMMM YYYY')}`, 14, (cursorY += 6));
     doc.text(`Branch: ${data.branch.name}`, 14, (cursorY += 6));
 
     doc.setTextColor(primaryColor);
@@ -59,7 +59,7 @@ export function generateGoodsReceivedNote(data, logoBase64 = null, username = 'P
     // 📦 Commodities Table
     const tableData = data.reports.map((item, index) => {
         const variance = item.orderedQuantity - item.totalDeliveredQuantity;
-;
+        ;
         return [
             index + 1,
             item.commodity.name,
@@ -104,12 +104,12 @@ export function generateGoodsReceivedNote(data, logoBase64 = null, username = 'P
     // doc.text(`Status: ${data.status.name}`, 14, afterTableY + 12);
 
     // 🎯 Status Color Logic
-    const status = data.status.name?.toLowerCase();
+    const status = data.status.status?.toLowerCase();
     let statusColor = '#000000'; // default black
 
-    if (status === 'pending') {
+    if (status === 'stockpending') {
         statusColor = '#e67e22'; // orange
-    } else if (status === 'completed') {
+    } else if (status === 'stockcompleted') {
         statusColor = '#2ecc71'; // green
     }
 
