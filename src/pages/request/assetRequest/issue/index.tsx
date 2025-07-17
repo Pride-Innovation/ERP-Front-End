@@ -71,16 +71,17 @@ const IssuedRequest = () => {
             (perm) => perm.name === permissionsMock.find(p => p.name === "APPROVE_ISSUANCE")?.name
         );
 
-        const hasAcknowledgeReceiptPermission = permissions.some(
-            (perm) => perm.name === permissionsMock.find(p => p.name === "ACKNOWLEDGE_REQUEST")?.name
-        );
-
         const newOptions = [
             {
                 value: crudStates.read,
                 label: "View Details",
                 icon: <RemoveRedEyeIcon fontSize='small'
                     color='inherit' />
+            },
+            {
+                value: crudStates.acknowledgeReceipt,
+                label: "Acknowledge Receipt",
+                icon: <ToggleOffOutlined fontSize='small' color='info' />
             }
         ];
 
@@ -92,13 +93,6 @@ const IssuedRequest = () => {
             });
         }
 
-        if (hasAcknowledgeReceiptPermission) {
-            newOptions.push({
-                value: crudStates.acknowledgeReceipt,
-                label: "Acknowledge Receipt",
-                icon: <ToggleOffOutlined fontSize='small' color='info' />
-            });
-        }
 
         setOptions(newOptions);
     }, [permissions]);
