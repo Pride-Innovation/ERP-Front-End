@@ -8,7 +8,7 @@ Managing Director
 import TableComponent from "../../../../components/tables/TableComponent";
 import { Grid } from "@mui/material";
 import RequestUtills from "../utills";
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../store";
 import { RequestContext } from "../../../../context/request/RequestContext";
@@ -19,10 +19,15 @@ import AcknowledgeReceipt from "../AcknowledgeReceipt";
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import ApproveIssuance from "../ApproveIssuance";
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
+import { IPermission } from "../../../settings/interface";
+import { permissionsMock } from "../../../../mocks/settings";
+import RoutesUtills from "../../../../core/routes/utills";
 
 const IssuedRequest = () => {
     const { requests } = useSelector((state: RootState) => state.AssetsRequestsStore)
     const { requestTableData, setOptions } = useContext(RequestContext);
+    const [permissions, setPermissions] = useState<IPermission[]>([] as IPermission[]);
+    const { getCurrentUser } = RoutesUtills();
 
     const {
         handleOptionClicked,
@@ -53,12 +58,56 @@ const IssuedRequest = () => {
 
     useEffect(() => { handleRequest(requests) }, [requests]);
 
+
+    /**
+     * * Effect to set options based on permissions
+     * @returns {void}
+     * This effect checks the permissions of the current user and sets the options for the request actions accordingly.
+     */
     useEffect(() => {
-        setOptions([
-            { value: crudStates.approveIssuance, label: "Approve Issuance", icon: <ThumbUpOffAltIcon fontSize='small' color='secondary' /> },
-            { value: crudStates.acknowledgeReceipt, label: "Acknowledge Receipt", icon: <ToggleOffOutlined fontSize='small' color='info' /> },
-            { value: crudStates.read, label: "View Details", icon: <RemoveRedEyeIcon fontSize='small' color='inherit' /> },
-        ])
+        if (!permissions || permissions.length === 0) return;
+
+        const hasApproveIssuancePermission = permissions.some(
+            (perm) => perm.name === permissionsMock.find(p => p.name === "APPROVE_ISSUANCE")?.name
+        );
+
+        const hasAcknowledgeReceiptPermission = permissions.some(
+            (perm) => perm.name === permissionsMock.find(p => p.name === "ACKNOWLEDGE_REQUEST")?.name
+        );
+
+        const newOptions = [
+            {
+                value: crudStates.read,
+                label: "View Details",
+                icon: <RemoveRedEyeIcon fontSize='small'
+                    color='inherit' />
+            }
+        ];
+
+        if (hasApproveIssuancePermission) {
+            newOptions.push({
+                value: crudStates.approveIssuance,
+                label: "Approve Issuance",
+                icon: <ThumbUpOffAltIcon fontSize='small' color='secondary' />
+            });
+        }
+
+        if (hasAcknowledgeReceiptPermission) {
+            newOptions.push({
+                value: crudStates.acknowledgeReceipt,
+                label: "Acknowledge Receipt",
+                icon: <ToggleOffOutlined fontSize='small' color='info' />
+            });
+        }
+
+        setOptions(newOptions);
+    }, [permissions]);
+
+
+    useEffect(() => {
+        if (getCurrentUser()?.title?.role?.permissions) {
+            setPermissions(getCurrentUser()?.title?.role?.permissions || []);
+        }
     }, []);
 
     return (
