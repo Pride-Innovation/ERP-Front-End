@@ -32,10 +32,7 @@ const RequestsManagement = () => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const { routePermission,
-    // determinePermission
-  } = RoutesUtills();
-
+  const { routePermission } = RoutesUtills();
 
   useEffect(() => { setPath(pathname) }, [pathname])
 
@@ -65,7 +62,7 @@ const RequestsManagement = () => {
       id: 4,
       text: "Issued Requests",
       path: ROUTES.LIST_ISSUED,
-      icon: <ShareOutlinedIcon sx={{ color: "blue"}} />,
+      icon: <ShareOutlinedIcon sx={{ color: "blue" }} />,
       permission: routePermission(16) as IPermission
     }
   ]
