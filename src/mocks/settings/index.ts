@@ -72,10 +72,13 @@ export const permissionsMock: IPermission[] = [
     { index: 39, id: 72, name: "READ_ASSET" },
     { index: 40, id: 73, name: "CREATE_ASSET" },
     { index: 41, id: 74, name: "DELETE_ASSET" },
-    { index: 42, id: 75, name: "UPDATE_ASSET" }
+    { index: 42, id: 75, name: "UPDATE_ASSET" },
+    { index: 43, id: 102, name: "APPROVE_REQUEST" },
+    { index: 44, id: 103, name: "REJECT_REQUEST" },
+    { index: 45, id: 104, name: "ISSUE_ITEMS" },
+    { index: 46, id: 105, name: "ACKNOWLEDGE_REQUEST" },
+    { index: 47, id: 106, name: "APPROVE_ISSUANCE" }
 ];
-
-
 
 export const rolesMock: IRole[] = [
     {

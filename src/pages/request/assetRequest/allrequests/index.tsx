@@ -28,12 +28,17 @@ import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import InfoIcon from '@mui/icons-material/Info';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
+import RoutesUtills from "../../../../core/routes/utills";
+import { IPermission } from "../../../settings/interface";
+import { permissionsMock } from "../../../../mocks/settings";
 
 const Request = () => {
     const { requestTableData, setOptions } = useContext(RequestContext);
     const { fileData } = useContext(FileContext);
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
     const { requests } = useSelector((state: RootState) => state.AssetsRequestsStore)
+    const { getCurrentUser } = RoutesUtills();
+    const [permissions, setPermissions] = useState<IPermission[]>([] as IPermission[]);
 
     const navigate = useNavigate()
 
@@ -66,15 +71,58 @@ const Request = () => {
     }, [fileData]);
 
     useEffect(() => {
-        setOptions([
-            { value: crudStates.delete, label: "Delete", icon: <InfoIcon fontSize='small' color='error' /> },
-            { value: crudStates.update, label: "Update", icon: <ModeEditIcon fontSize='small' color='info' /> },
-            { value: crudStates.read, label: "View Details", icon: <RemoveRedEyeIcon fontSize='small' color='inherit' /> },
-            { value: crudStates.approve, label: "Approve Request", icon: <AddTaskIcon fontSize='small' color='primary' /> },
-            { value: crudStates.reject, label: "Reject Request", icon: <RemoveCircleOutlineIcon fontSize='small' color='error' /> },
-        ])
-    }, []);
+        if (!permissions || permissions.length === 0) return;
 
+        const hasApproveRequestPermission = permissions.some(
+            (perm) => perm.name === permissionsMock.find(p => p.name === "APPROVE_REQUEST")?.name
+        );
+
+        const hasRejectRequestPermission = permissions.some(
+            (perm) => perm.name === permissionsMock.find(p => p.name === "REJECT_REQUEST")?.name
+        );
+
+        const newOptions = [
+            {
+                value: crudStates.delete,
+                label: "Delete",
+                icon: <InfoIcon fontSize="small" color="error" />
+            },
+            {
+                value: crudStates.update,
+                label: "Update",
+                icon: <ModeEditIcon fontSize="small" color="info" />
+            },
+            {
+                value: crudStates.read,
+                label: "View Details",
+                icon: <RemoveRedEyeIcon fontSize="small" color="inherit" />
+            }
+        ];
+
+        if (hasApproveRequestPermission) {
+            newOptions.push({
+                value: crudStates.approve,
+                label: "Approve Request",
+                icon: <AddTaskIcon fontSize="small" color="primary" />
+            });
+        }
+
+        if (hasRejectRequestPermission) {
+            newOptions.push({
+                value: crudStates.reject,
+                label: "Reject Request",
+                icon: <RemoveCircleOutlineIcon fontSize="small" color="error" />
+            });
+        }
+
+        setOptions(newOptions);
+    }, [permissions]);
+
+    useEffect(() => {
+        if (getCurrentUser()?.title?.role?.permissions) {
+            setPermissions(getCurrentUser()?.title?.role?.permissions || []);
+        }
+    }, []);
 
     return (
         <React.Fragment>
