@@ -70,6 +70,12 @@ const Request = () => {
         }
     }, [fileData]);
 
+
+    /**
+     * * Effect to set options based on permissions
+     * @returns {void}
+     * This effect checks the permissions of the current user and sets the options for the request actions accordingly.
+     */
     useEffect(() => {
         if (!permissions || permissions.length === 0) return;
 
