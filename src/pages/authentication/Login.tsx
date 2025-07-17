@@ -10,6 +10,7 @@ import {
     Grid,
     useTheme,
     useMediaQuery,
+    Paper,
 } from '@mui/material';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -25,20 +26,18 @@ import AuthenticationContainerComponent from '../../components/Container';
 import AuthenticationUtils from './utills';
 import { toast } from 'react-toastify';
 import { loginService } from './service';
+import Logo from '../../statics/images/whitelogo.png'
 
 const Login = () => {
-    const [loggingIn, setLoggingIn] = useState(false);
-    const [showPassword, setShowPassword] = useState(false);
-    const defaultUser: IAuthentication = { email: "", password: "" };
-    const navigate = useNavigate();
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+    const [loggingIn, setLoggingIn] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+
+    const navigate = useNavigate();
     const { handleSessionStorage } = AuthenticationUtils();
 
-    const handleClickShowPassword = () => setShowPassword((show) => !show);
-    const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
-        event.preventDefault();
-    };
+    const defaultUser: IAuthentication = { email: "", password: "" };
 
     const {
         control,
@@ -52,7 +51,7 @@ const Login = () => {
     });
 
     useEffect(() => {
-        reset({ ...defaultUser });
+        reset(defaultUser);
     }, []);
 
     const onSubmit = async (formData: IAuthentication) => {
@@ -62,96 +61,103 @@ const Login = () => {
             if (response?.status === 200) {
                 const { accessToken, refreshToken } = response.data;
                 handleSessionStorage(response.data, accessToken, refreshToken);
-                toast.success(`Welcome ${response.data.firstName} !!`);
+                toast.success(`Welcome ${response.data.firstName} 👋`);
                 navigate(ROUTES.ASSETS_MANAGEMENT);
             }
         } catch (error) {
-            console.log(error);
+            console.error(error);
             toast.error("Login failed. Please check your credentials.");
         } finally {
             setLoggingIn(false);
         }
     };
 
+    const handleClickShowPassword = () => setShowPassword((show) => !show);
+    const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
+        event.preventDefault();
+    };
+
     return (
         <AuthenticationContainerComponent>
-            <Grid
-                container
-                spacing={0}
-                sx={{
-                    width: '100%',
-                    backgroundColor: '#ffffff',
-                    boxShadow: '0px 4px 15px rgba(0, 0, 0, 0.05)',
-                    borderRadius: 2,
-                    overflow: 'hidden',
-                }}
-            >
-                {!isMobile && (
-                    <Grid item xs={12} md={6}>
-                        <Box
-                            component="img"
-                            src={AuthenticationImage}
-                            alt="Login"
-                            sx={{
-                                height: '100%',
-                                width: '100%',
-                                objectFit: 'cover',
-                                backgroundColor: '#f4f4f4',
-                            }}
-                        />
-                    </Grid>
-                )}
-                <Grid
-                    item
-                    xs={12}
-                    md={6}
-                    sx={{
-                        p: { xs: 4, sm: 6 },
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'center',
-                        bgcolor: '#fff',
-                    }}
-                >
-                    <Box mb={4}>
-                        <TypographyComponent
-                            size="24px"
-                            weight={700}
-                            sx={{ color: '#BC892C', mb: 1 }}
-                        >
-                            Assets Management
-                        </TypographyComponent>
-                        <TypographyComponent
-                            size="16px"
-                            weight={500}
-                            sx={{ color: '#000' }}
-                        >
-                            Sign In to your account
-                        </TypographyComponent>
-                    </Box>
-                    <Box>
-                        <form
-                            style={{ width: '100%' }}
-                            autoComplete="off"
-                            onSubmit={handleSubmit(onSubmit)}
-                        >
+            <Paper elevation={3} sx={{
+                width: '100%',
+                borderRadius: 2,
+                overflow: 'hidden',
+            }}>
+                <Grid container sx={{ minHeight: '90vh' }}>
+                    {!isMobile && (
+                        <Grid item md={6} sx={{
+                            backgroundImage: `url(${AuthenticationImage})`,
+                            backgroundSize: 'cover',
+                            backgroundPosition: 'center',
+                        }} />
+                    )}
+                    <Grid
+                        item
+                        xs={12}
+                        md={6}
+                        sx={{
+                            p: { xs: 4, sm: 6 },
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'center',
+                            backgroundColor: '#fff',
+                        }}
+                    >
+                        {/* Logo & Header */}
+                        <Box mb={4} textAlign="center">
+                            <Box
+                                component="img"
+                                src={Logo}
+                                alt="Pride Bank Logo"
+                                width={isMobile ? 60 : 90}
+                                sx={{ mb: 2 }}
+                            />
+                            <TypographyComponent
+                                size="24px"
+                                weight={700}
+                                sx={{ color: '#BC892C' }}
+                            >
+                                Pride Bank ERP
+                            </TypographyComponent>
+                            <TypographyComponent
+                                size="16px"
+                                weight={500}
+                                sx={{ color: '#666', mt: 1 }}
+                            >
+                                Sign in to continue
+                            </TypographyComponent>
+                        </Box>
+
+                        {/* Login Form */}
+                        <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
                             <AuthenticationForm
+                                register={register}
+                                control={control}
+                                formState={formState}
+                                linkText="Forgot Password?"
                                 linkPath={ROUTES.FORGOT_PASSWORD}
                                 buttonText="Login"
-                                register={register}
-                                formState={formState}
-                                control={control}
                                 showPassword={showPassword}
                                 loggingIn={loggingIn}
                                 handleClickShowPassword={handleClickShowPassword}
                                 handleMouseDownPassword={handleMouseDownPassword}
-                                linkText='Forgot Password?'
                                 password
                             />
-                        </form>
-                    </Box>
+                        </Box>
+
+                        {/* Footer */}
+                        <Box mt={6}>
+                            <TypographyComponent
+                                size="12px"
+                                sx={{ color: '#999', textAlign: 'center' }}
+                            >
+                                &copy; 2025 Pride Bank Limited. All Rights Reserved.
+                            </TypographyComponent>
+                        </Box>
+                    </Grid>
                 </Grid>
-            </Grid>
+            </Paper>
         </AuthenticationContainerComponent>
     );
 };
