@@ -18,9 +18,12 @@ import { exportPDF } from "../../utils/pdf";
 import { camelCaseToWords } from "../../utils/helpers";
 import { useContext } from "react";
 import { FileContext } from "../../context/file/FileContext";
+import RoutesUtills from "../../core/routes/utills";
 
 const TableUtills = () => {
     const { fileName } = useContext(FileContext);
+    const { getCurrentUser } = RoutesUtills();
+
     const determineTimeLineDotColor = (value: string) => {
         switch (value) {
             case requestStatus.approved:
@@ -108,9 +111,40 @@ const TableUtills = () => {
         );
     }
 
+
+    const handleOptionsFilter = (
+        column: any,
+        filter?: boolean,
+        row?: any,
+        module?: string
+    ) => {
+
+        /**
+         * Ensure that the options in the select dropdown are filtered based on the current row.
+         * For this purpose we need to ensure that each request owner has to be tracked and not able to approve or reject their own request.
+         * This is to ensure that the request is approved by a different person than the one who created it.
+         */
+        const options = column?.actionData?.options || [];
+
+        const currentUserId = getCurrentUser()?.id || 0;
+
+        const isRequestModule = module === 'request';
+        const isFilterEnabled = !!filter;
+        const isRequester = row?.requesterID === currentUserId;
+
+        if (isRequestModule && isFilterEnabled && isRequester) {
+            return options.filter(
+                (option: any) => option.value !== 'approve' && option.value !== 'reject'
+            );
+        }
+
+        return options;
+    }
+
     return {
         determineTimeLineDotColor,
-        JsonExportMenuItem
+        JsonExportMenuItem,
+        handleOptionsFilter
     };
 };
 

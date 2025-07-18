@@ -35,6 +35,7 @@ import TimeLineDot from '../timeLineDots';
 import MailOutlineIcon from '@mui/icons-material/MailOutline';
 import NoAccountsIcon from '@mui/icons-material/NoAccounts';
 import HowToRegOutlinedIcon from '@mui/icons-material/HowToRegOutlined';
+import TableUtills from './utills';
 
 const TableComponent = ({
     columnHeaders,
@@ -53,14 +54,25 @@ const TableComponent = ({
     paginationMode = 'server',
     filterMode = 'client',
     params,
-    refresh = false
+    refresh = false,
+    filterOptions = false
 }: ITableComponent) => {
     const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
+    const [currentOptions, setCurrentOptions] = useState<any[]>([]);
     const [currentID, setCurrentId] = useState<string | number>("")
     const theme = useTheme()
+    const { handleOptionsFilter } = TableUtills();
 
-    const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    const handleClick = (event: React.MouseEvent<HTMLButtonElement>, row: any, column: any) => {
         setAnchorEl(event.currentTarget);
+        const filteredOptions = handleOptionsFilter(
+            column,
+            filterOptions,
+            row,
+            module as string
+        );
+
+        setCurrentOptions(filteredOptions);
     };
 
     const { handleTableFilter } = CustomTextFilterOperator({ endPoint, params });
@@ -131,7 +143,7 @@ const TableComponent = ({
                                         <StyledBox >
                                             <ButtonComponent
                                                 handleClick={(event: React.MouseEvent<HTMLButtonElement>) => {
-                                                    handleClick?.(event)
+                                                    handleClick?.(event, param.row, column)
                                                     setCurrentId(param.row?.id)
                                                 }}
                                                 sendingRequest={false}
@@ -142,7 +154,7 @@ const TableComponent = ({
                                             <PopoverComponent
                                                 moduleID={currentID}
                                                 handleOptionClicked={handleOptionClicked}
-                                                options={(column.actionData?.options) as Array<{ value: string, label: string }>}
+                                                options={(currentOptions) as Array<{ value: string, label: string }>}
                                                 anchorEl={anchorEl}
                                                 setAnchorEl={setAnchorEl}
                                             />

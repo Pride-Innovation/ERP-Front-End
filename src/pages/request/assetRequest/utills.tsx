@@ -237,6 +237,7 @@ const RequestUtills = () => {
                     approver: `${request.currentApprover?.firstName} ${request.currentApprover?.lastName}`,
                     requestedFrom: request.requester?.branch?.name,
                     status: request.status?.status,
+                    requesterID: request.requester?.id as number,
                 }
             )
         })

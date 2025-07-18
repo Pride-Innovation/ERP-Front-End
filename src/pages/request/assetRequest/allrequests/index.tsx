@@ -171,6 +171,7 @@ const Request = () => {
                         filterMode="server"
                         params={{ statusIds: 1 }}
                         refresh
+                        filterOptions
                     />
                 }
             </Grid>

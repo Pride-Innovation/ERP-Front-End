@@ -67,6 +67,7 @@ export interface IRequestTableData {
     requester?: string;
     currentApprover?: string;
     requestedFrom?: string;
+    requesterID?: number | null;
 }
 
 
