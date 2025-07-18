@@ -41,7 +41,8 @@ const PendingRequest = () => {
         handleClose,
         currentRequest,
         sendingRequest,
-        setSendingRequest
+        setSendingRequest,
+        module
     } = RequestUtills()
 
     useEffect(() => {
@@ -128,12 +129,18 @@ const PendingRequest = () => {
                     loading={loading}
                     count={count}
                     exportData
-                    module="assets"
+                    module={module}
                     header={{ plural: "Pending Requests", singular: "Pending Requests" }}
                     rows={requestTableData}
                     columnHeaders={columnHeaders}
                     handleOptionClicked={handleOptionClicked}
                     params={{ statusIds: `${3},${4}` }}
+                    filterOptions
+                    optionsfilterParams={
+                        {
+                            status: "PENDING"
+                        }
+                    }
                 />
             }
         </Grid>

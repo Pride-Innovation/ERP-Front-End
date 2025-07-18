@@ -48,7 +48,8 @@ export interface ITableComponent {
     searchAction?: boolean;
     params?: Record<string, any>
     refresh?: boolean;
-    filterOptions?: boolean
+    filterOptions?: boolean;
+    optionsfilterParams?: Record<string, any>
 }
 
 export interface ITableToolBar {

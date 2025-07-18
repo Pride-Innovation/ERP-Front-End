@@ -111,37 +111,50 @@ const TableUtills = () => {
         );
     }
 
-
+    /**
+     * Ensure that the options in the select dropdown are filtered based on the current row.
+     * For this purpose we need to ensure that each request owner has to be tracked and not able to approve or reject their own request.
+     * This is to ensure that the request is approved by a different person than the one who created it.
+     */
     const handleOptionsFilter = (
         column: any,
         filter?: boolean,
         row?: any,
-        module?: string
+        module?: string,
+        optionsfilterParams?: Record<string, any>
     ) => {
-
-        /**
-         * Ensure that the options in the select dropdown are filtered based on the current row.
-         * For this purpose we need to ensure that each request owner has to be tracked and not able to approve or reject their own request.
-         * This is to ensure that the request is approved by a different person than the one who created it.
-         */
         const options = column?.actionData?.options || [];
-
         const currentUserId = getCurrentUser()?.id || 0;
 
         const isRequestModule = module === 'request';
-        const isFilterEnabled = !!filter;
+        const isFilterEnabled = Boolean(filter);
         const isRequester = row?.requesterID === currentUserId;
+        const status = optionsfilterParams?.status?.toUpperCase() || "";
 
         if (isRequestModule && isFilterEnabled) {
             if (isRequester) {
-                return options.filter(
-                    (option: any) => option.value !== 'approve' && option.value !== 'reject'
-                );
-            } else {
-                return options.filter(
-                    (option: any) => option.value !== 'delete' && option.value !== 'update'
-                );
+                if (status === "CREATED") {
+                    return options.filter(
+                        (option: any) =>
+                            option.value !== 'approve' &&
+                            option.value !== 'reject'
+                    );
+                }
+
+                if (status === "PENDING") {
+                    return options.filter(
+                        (option: any) =>
+                            option.value !== 'issue' &&
+                            option.value !== 'acknowledgeRequest'
+                    );
+                }
             }
+
+            return options.filter(
+                (option: any) =>
+                    option.value !== 'delete' &&
+                    option.value !== 'update'
+            );
         }
 
         return options;

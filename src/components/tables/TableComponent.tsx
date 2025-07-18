@@ -55,7 +55,8 @@ const TableComponent = ({
     filterMode = 'client',
     params,
     refresh = false,
-    filterOptions = false
+    filterOptions = false,
+    optionsfilterParams
 }: ITableComponent) => {
     const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
     const [currentOptions, setCurrentOptions] = useState<any[]>([]);
@@ -73,7 +74,8 @@ const TableComponent = ({
             column,
             filterOptions,
             row,
-            module as string
+            module as string,
+            optionsfilterParams || {}
         );
 
         setCurrentOptions(filteredOptions);

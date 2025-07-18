@@ -172,6 +172,11 @@ const Request = () => {
                         params={{ statusIds: 1 }}
                         refresh
                         filterOptions
+                        optionsfilterParams={
+                            {
+                                status: "CREATED"
+                            }
+                        }
                     />
                 }
             </Grid>
