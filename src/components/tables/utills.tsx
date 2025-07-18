@@ -132,10 +132,16 @@ const TableUtills = () => {
         const isFilterEnabled = !!filter;
         const isRequester = row?.requesterID === currentUserId;
 
-        if (isRequestModule && isFilterEnabled && isRequester) {
-            return options.filter(
-                (option: any) => option.value !== 'approve' && option.value !== 'reject'
-            );
+        if (isRequestModule && isFilterEnabled) {
+            if (isRequester) {
+                return options.filter(
+                    (option: any) => option.value !== 'approve' && option.value !== 'reject'
+                );
+            } else {
+                return options.filter(
+                    (option: any) => option.value !== 'delete' && option.value !== 'update'
+                );
+            }
         }
 
         return options;

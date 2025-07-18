@@ -63,7 +63,11 @@ const TableComponent = ({
     const theme = useTheme()
     const { handleOptionsFilter } = TableUtills();
 
-    const handleClick = (event: React.MouseEvent<HTMLButtonElement>, row: any, column: any) => {
+    const handleClick = (
+        event: React.MouseEvent<HTMLButtonElement>,
+        row: any,
+        column: any
+    ) => {
         setAnchorEl(event.currentTarget);
         const filteredOptions = handleOptionsFilter(
             column,
