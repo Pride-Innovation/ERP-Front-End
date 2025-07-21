@@ -7,9 +7,27 @@ import {
 } from '@mui/material';
 import { Star, StarBorder } from '@mui/icons-material';
 import { Line } from 'react-chartjs-2';
+import { useEffect } from 'react';
+import { requestRatingStatsService } from './service';
+import { IRequestRatingStatsAxiosResponse } from './interface';
 
 
 const RequestRating = () => {
+
+    const requestRatingStats = async () => {
+        try {
+            const response = await requestRatingStatsService() as IRequestRatingStatsAxiosResponse;
+            if (response.status === 200) {
+                // Handle the response data if needed
+                console.log("Request Rating Stats:", response.data);
+            }
+        } catch (error) {
+            console.error("Error fetching request rating stats:", error);
+        }
+    }
+
+    useEffect(() => { requestRatingStats() }, [])
+
     return (<>
         <Grid item xs={12} md={3}>
             <Card>
