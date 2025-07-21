@@ -1,26 +1,26 @@
-import { Box, Card, CardContent, Grid, Typography } from "@mui/material"
+import {
+    Box,
+    Card,
+    CardContent,
+    Grid,
+    Typography
+} from "@mui/material"
 import { Bar } from "react-chartjs-2"
+import AssessmentOutlinedIcon from '@mui/icons-material/AssessmentOutlined';
+import SectionUtills from "./utills";
+import { useContext, useEffect } from "react";
+import { DashboardContext } from "../../../context/dashboard";
 
-
-const monthlyAssetStationeryData = {
-    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-    datasets: [
-        {
-            label: 'Assets',
-            data: [20, 30, 25, 40, 35, 45, 70, 100, 110, 150, 180, 220],
-            backgroundColor: '#4caf50',
-            stack: 'combined',
-        },
-        {
-            label: 'Stationery',
-            data: [30, 30, 45, 15, 40, 40, 80, 100, 110, 150, 170, 180],
-            backgroundColor: '#E0E0E0',
-            stack: 'combined',
-        },
-    ],
-};
 
 const AssetStockReview = () => {
+    const {
+        monthlyItStats,
+        monthlyOfficeStats,
+        monthlyItAndOfficeStatslabels
+    } = useContext(DashboardContext);
+    const { getMonthlyItAndOfficeStatsFxn } = SectionUtills();
+    useEffect(() => { getMonthlyItAndOfficeStatsFxn(); }, []);
+
     return (
         <>
             <Grid item xs={12} md={6}>
@@ -35,34 +35,43 @@ const AssetStockReview = () => {
                             </Typography>
                         </Box>
 
-                        {/* Review Count */}
                         <Box display="flex" justifyContent="space-between" gap={4} mb={2}>
                             <Box>
-                                <Typography variant="caption" color="text.secondary">Total Reviews</Typography>
+                                <Typography variant="caption" color="text.secondary">IT Assets Total</Typography>
                                 <Typography variant="h4" fontWeight="bold">3,431</Typography>
                             </Box>
                             <Box bgcolor={"success.main"} p={2} borderRadius={1} textAlign="center">
-                                <Typography variant="caption" color="warning.main">Since PatientPop</Typography>
+                                <Typography variant="caption" color="warning.main">Office Assets Total</Typography>
                                 <Typography variant="h6" fontWeight="bold" color="white">+1,725</Typography>
                             </Box>
                         </Box>
 
-                        {/* Tab Legend (static UI mimic) */}
                         <Box display="flex" alignItems="center" gap={2} mb={1}>
                             <Box display="flex" alignItems="center" gap={1}>
-                                <Box width={12} height={12} borderRadius={0.5} bgcolor="#4caf50" />
-                                <Typography variant="caption">Since PatientPop</Typography>
-                            </Box>
-                            <Box display="flex" alignItems="center" gap={1}>
-                                <Box width={12} height={12} borderRadius={0.5} bgcolor="#E0E0E0" />
-                                <Typography variant="caption">Reviews</Typography>
+                                <AssessmentOutlinedIcon sx={{ color: '#1976D2' }} />
+                                <Typography variant="caption" color="secondary.main">Yearly Asset Stock Report</Typography>
                             </Box>
                         </Box>
 
-                        {/* Bar Chart */}
                         <Box height={"100%"} sx={{ bgcolor: "#f5f8fc" }}>
                             <Bar
-                                data={monthlyAssetStationeryData}
+                                data={{
+                                    labels: monthlyItAndOfficeStatslabels,
+                                    datasets: [
+                                        {
+                                            label: 'Office Assets',
+                                            data: monthlyOfficeStats,
+                                            backgroundColor: '#4caf50',
+                                            stack: 'combined',
+                                        },
+                                        {
+                                            label: 'IT Assets',
+                                            data: monthlyItStats,
+                                            backgroundColor: '#E0E0E0',
+                                            stack: 'combined',
+                                        },
+                                    ],
+                                }}
                                 options={{
                                     responsive: true,
                                     maintainAspectRatio: false,
@@ -84,7 +93,7 @@ const AssetStockReview = () => {
                                             ticks: { color: '#999' },
                                             grid: { color: '#eee' },
                                             min: 0,
-                                            max: 500, // Adjust based on your needs
+                                            max: 100,
                                         },
                                     },
                                 }}

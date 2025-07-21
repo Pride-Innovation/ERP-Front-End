@@ -14,6 +14,12 @@ interface DashboardContextProps {
     setRequestRatingStatsLabels: Dispatch<React.SetStateAction<Array<string>>>;
     requestVariationStats: IRequestRatingStats;
     setRequestVariationStats: Dispatch<React.SetStateAction<IRequestRatingStats>>;
+    monthlyItStats: Array<number>;
+    setMonthlyItStats: Dispatch<React.SetStateAction<Array<number>>>;
+    monthlyOfficeStats: Array<number>;
+    setMonthlyOfficeStats: Dispatch<React.SetStateAction<Array<number>>>;
+    monthlyItAndOfficeStatslabels: Array<string>;
+    setMonthlyItAndOfficeStatslabels: Dispatch<React.SetStateAction<Array<string>>>;
 }
 
 export const DashboardContext = createContext({} as DashboardContextProps);
@@ -26,6 +32,10 @@ const DashboardProvider: FC<{ children: React.ReactNode }> = ({ children }) => {
         previousMonth: 3.5,
         currentMonth: 4.0
     });
+    const [monthlyItStats, setMonthlyItStats] = useState<Array<number>>([0]);
+    const [monthlyOfficeStats, setMonthlyOfficeStats] = useState<Array<number>>([0]);
+    const [monthlyItAndOfficeStatslabels, setMonthlyItAndOfficeStatslabels] = useState<Array<string>>(
+        ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']);
 
     return (
         <DashboardContext.Provider value={{
@@ -34,7 +44,13 @@ const DashboardProvider: FC<{ children: React.ReactNode }> = ({ children }) => {
             requestRatingStatsLabels,
             setRequestRatingStatsLabels,
             requestVariationStats,
-            setRequestVariationStats
+            setRequestVariationStats,
+            monthlyItStats,
+            setMonthlyItStats,
+            monthlyOfficeStats,
+            setMonthlyOfficeStats,
+            monthlyItAndOfficeStatslabels,
+            setMonthlyItAndOfficeStatslabels
         }}>
             {children}
         </DashboardContext.Provider>

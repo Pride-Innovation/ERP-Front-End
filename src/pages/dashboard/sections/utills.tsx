@@ -1,17 +1,25 @@
 import { useContext } from "react";
 import {
+    IMonthlyItAndOfficeStats,
+    IMonthlyItAndOfficeStatsAxiosResponse,
     IRequestMonthlyStats,
     IRequestMonthlyStatsAxiosResponse,
     IRequestRatingStatsAxiosResponse
 } from "./interface";
-import { requestRatingVariationService, resquestStatsOneYearService } from "./service";
+import {
+    getMonthlyItAndOfficeStatsService,
+    requestRatingVariationService,
+    resquestStatsOneYearService
+} from "./service";
 import { DashboardContext } from "../../../context/dashboard";
 
 const SectionUtills = () => {
     const {
         setRequestRatings,
         setRequestRatingStatsLabels,
-        setRequestVariationStats
+        setRequestVariationStats,
+        setMonthlyItStats,
+        setMonthlyOfficeStats,
     } = useContext(DashboardContext);
 
     /**
@@ -38,6 +46,16 @@ const SectionUtills = () => {
         }
     }
 
+    /**
+     * Sets the asset stock review for IT and Office equipment.
+     * @param stats - Array of monthly stats containing IT and Office equipment quantities.
+     */
+    const setAssetStockReview = (stats: Array<IMonthlyItAndOfficeStats>) => {
+        setMonthlyItStats(() => stats.map((stat) => stat.itEquipment));
+        setMonthlyOfficeStats(() => stats.map((stat) => stat.officeEquipment));
+        setRequestRatingStatsLabels(() => stats.map((stat) => stat.month.slice(0, 3)));
+    }
+
     const requestRatingVariationFxn = async () => {
         try {
             const response = await requestRatingVariationService() as IRequestRatingStatsAxiosResponse;
@@ -50,10 +68,23 @@ const SectionUtills = () => {
         }
     }
 
+    const getMonthlyItAndOfficeStatsFxn = async () => {
+        try {
+            const response = await getMonthlyItAndOfficeStatsService() as IMonthlyItAndOfficeStatsAxiosResponse;
+            if (response.status === 200) {
+                setAssetStockReview(response.data);
+            }
+        }
+        catch (error) {
+            console.error("Error fetching request rating variation:", error);
+        }
+    }
+
 
     return ({
         requestRatingStatsFxn,
-        requestRatingVariationFxn
+        requestRatingVariationFxn,
+        getMonthlyItAndOfficeStatsFxn
     });
 }
 

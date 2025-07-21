@@ -18,3 +18,12 @@ export const resquestStatsOneYearService = async () => {
         return error;
     }
 }
+
+export const getMonthlyItAndOfficeStatsService = async () => {
+    try {
+        const response = await axiosInstance.get('/monthly-itAndOffice-stats');
+        return response;
+    } catch (error) {
+        return error;
+    }
+}
