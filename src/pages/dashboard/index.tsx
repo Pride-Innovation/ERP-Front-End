@@ -9,10 +9,14 @@ import {
   Badge,
   Tooltip as TooltipComponent,
 } from '@mui/material';
-import { Star, StarBorder, ArrowUpward } from '@mui/icons-material';
+import { Star, StarBorder } from '@mui/icons-material';
 import { Line, Bar, Doughnut } from 'react-chartjs-2';
-import { NotificationsNone, RequestQuote } from '@mui/icons-material';
 import RequestImage from "../../statics/images/requestDesktop.png"
+import ComputerOutlinedIcon from '@mui/icons-material/ComputerOutlined';
+import TableRestaurantOutlinedIcon from '@mui/icons-material/TableRestaurantOutlined';
+import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined';
+import furnitureImage from "../../statics/images/furnitureDesktop.png";
+import stationeryImage from "../../statics/images/stationeryDesktop.png";
 
 import {
   Chart as ChartJS,
@@ -100,10 +104,9 @@ const stationeryOptions = {
 };
 
 const iconSet = [
-  { icon: <NotificationsNone />, color: 'primary' },
-  { icon: <RequestQuote />, color: 'success' },
-  { icon: <Star />, color: 'warning' },
-  { icon: <ArrowUpward />, color: 'error' },
+  { icon: <ComputerOutlinedIcon color='primary' />, color: 'primary' },
+  { icon: <TableRestaurantOutlinedIcon sx={{ color: "#1976D2" }} />, color: 'success' },
+  { icon: <MenuBookOutlinedIcon color='warning' />, color: 'primary' },
 ] as const;
 
 const Dashboard = () => {
@@ -361,14 +364,14 @@ const Dashboard = () => {
                 </Box>
               </Box>
               <Box display="flex" justifyContent="space-between" px={1}>
-                <Typography variant="body2" color="primary">New: 5.9k</Typography>
-                <Typography variant="body2" color="text.secondary">Returning: 3.1k</Typography>
+                <Typography variant="body2" color="primary">Completed: 5.9k</Typography>
+                <Typography variant="body2" color="text.secondary">Pending: 3.1k</Typography>
               </Box>
             </CardContent>
           </Card>
           <Card sx={{ mt: 2 }}>
             <CardContent>
-              <Typography variant="subtitle2" color="text.secondary">IT Asset Requests</Typography>
+              <Typography variant="subtitle2" color="text.secondary">Office Asset Requests</Typography>
               <Box display="flex" justifyContent="center" alignItems="center" mt={2} mb={2}>
                 <Box position="relative" display="inline-flex">
                   {/* Background Circle */}
@@ -390,7 +393,7 @@ const Dashboard = () => {
                     size={140}
                     thickness={2}
                     sx={{
-                      color: '#1976d2'
+                      color: '#ab47bc'
                     }}
                   />
 
@@ -406,21 +409,21 @@ const Dashboard = () => {
                     justifyContent="center"
                     flexDirection="column"
                   >
-                    <Box component={"img"} src={RequestImage} alt="Request Quote" width={40} height={40} mb={0.5} />
+                    <Box component={"img"} src={furnitureImage} alt="Request Quote" width={60} height={60} mb={0.5} />
                     <Typography variant="subtitle1" fontWeight="bold">9,245</Typography>
                     <Typography variant="caption" color="text.secondary">Requests</Typography>
                   </Box>
                 </Box>
               </Box>
               <Box display="flex" justifyContent="space-between" px={1}>
-                <Typography variant="body2" color="primary">New: 5.9k</Typography>
-                <Typography variant="body2" color="text.secondary">Returning: 3.1k</Typography>
+                <Typography variant="body2" color="primary">Completed: 5.9k</Typography>
+                <Typography variant="body2" color="text.secondary">Pending: 3.1k</Typography>
               </Box>
             </CardContent>
           </Card>
           <Card sx={{ mt: 2 }}>
             <CardContent>
-              <Typography variant="subtitle2" color="text.secondary">IT Asset Requests</Typography>
+              <Typography variant="subtitle2" color="text.secondary">Stationery Requests</Typography>
               <Box display="flex" justifyContent="center" alignItems="center" mt={2} mb={2}>
                 <Box position="relative" display="inline-flex">
                   {/* Background Circle */}
@@ -442,7 +445,7 @@ const Dashboard = () => {
                     size={140}
                     thickness={2}
                     sx={{
-                      color: '#1976d2'
+                      color: 'secondary.main'
                     }}
                   />
 
@@ -458,15 +461,15 @@ const Dashboard = () => {
                     justifyContent="center"
                     flexDirection="column"
                   >
-                    <Box component={"img"} src={RequestImage} alt="Request Quote" width={40} height={40} mb={0.5} />
+                    <Box component={"img"} src={stationeryImage} alt="Request Quote" width={40} height={40} mb={0.5} />
                     <Typography variant="subtitle1" fontWeight="bold">9,245</Typography>
                     <Typography variant="caption" color="text.secondary">Requests</Typography>
                   </Box>
                 </Box>
               </Box>
               <Box display="flex" justifyContent="space-between" px={1}>
-                <Typography variant="body2" color="primary">New: 5.9k</Typography>
-                <Typography variant="body2" color="text.secondary">Returning: 3.1k</Typography>
+                <Typography variant="body2" color="primary">Completed: 5.9k</Typography>
+                <Typography variant="body2" color="text.secondary">Pending: 3.1k</Typography>
               </Box>
             </CardContent>
           </Card>
@@ -567,7 +570,7 @@ const Dashboard = () => {
                                 width: 40,
                                 height: 40,
                                 borderRadius: 2,
-                                backgroundColor: '#f5f5f5',
+                                backgroundColor: '#F5F8FC',
                                 color: '#555',
                               }}
                             >
