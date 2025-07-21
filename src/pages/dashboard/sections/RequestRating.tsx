@@ -7,26 +7,25 @@ import {
 } from '@mui/material';
 import { Star, StarBorder } from '@mui/icons-material';
 import { Line } from 'react-chartjs-2';
-import { useEffect } from 'react';
-import { requestRatingStatsService } from './service';
-import { IRequestRatingStatsAxiosResponse } from './interface';
-
+import { useContext, useEffect } from 'react';
+import SectionUtills from './utills';
+import { DashboardContext } from '../../../context/dashboard';
 
 const RequestRating = () => {
+    const {
+        requestRatingStatsLabels,
+        requestRatingStats,
+        requestVariationStats
+    } = useContext(DashboardContext);
+    const {
+        requestRatingStatsFxn,
+        requestRatingVariationFxn
+    } = SectionUtills();
 
-    const requestRatingStats = async () => {
-        try {
-            const response = await requestRatingStatsService() as IRequestRatingStatsAxiosResponse;
-            if (response.status === 200) {
-                // Handle the response data if needed
-                console.log("Request Rating Stats:", response.data);
-            }
-        } catch (error) {
-            console.error("Error fetching request rating stats:", error);
-        }
-    }
-
-    useEffect(() => { requestRatingStats() }, [])
+    useEffect(() => {
+        requestRatingStatsFxn()
+        requestRatingVariationFxn();
+    }, [])
 
     return (<>
         <Grid item xs={12} md={3}>
@@ -34,21 +33,32 @@ const RequestRating = () => {
                 <CardContent>
                     <Typography variant="subtitle2" color="text.secondary">Request Rating</Typography>
                     <Box display="flex" alignItems="center" mt={1}>
-                        <Typography variant="h3" fontWeight="bold" mr={1}>4.0</Typography>
+                        <Typography variant="h3" fontWeight="bold" mr={1}>{
+                            requestVariationStats.currentMonth < 25 ? "3.0" :
+                                requestVariationStats.currentMonth < 50 ? "4.0" : "5.0"
+                        }</Typography>
                         <Box display="flex" alignItems="center">
-                            {[...Array(4)].map((_, i) => <Star key={i} sx={{ color: '#FFA534', fontSize: 20 }} />)}
+                            {[...Array(
+                                requestVariationStats.currentMonth < 25 ? 3 :
+                                    requestVariationStats.currentMonth < 50 ? 4 : 5
+                            )].map((_, i) =>
+                                <Star key={i} sx={{ color: '#FFA534', fontSize: 20 }} />)}
                             <StarBorder sx={{ color: '#CCC', fontSize: 20 }} />
                         </Box>
                     </Box>
-                    <Typography variant="caption" sx={{ color: '#4caf50' }}>+0.5 points from last month</Typography>
+                    <Typography variant="caption" sx={{ color: '#4caf50' }}>{
+                        requestVariationStats.currentMonth > requestVariationStats.previousMonth
+                            ? `+${((requestVariationStats.currentMonth - requestVariationStats.previousMonth) / 100).toFixed(2)} % increase from last month`
+                            : `-${((requestVariationStats.previousMonth - requestVariationStats.currentMonth) / 100).toFixed(2)} % decrease from last month`
+                    } </Typography>
                     <Box mt={2}>
                         <Line
                             data={{
-                                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                                labels: requestRatingStatsLabels,
                                 datasets: [
                                     {
-                                        label: 'Rating',
-                                        data: [3.2, 3.4, 3.3, 3.6, 3.7, 3.5, 3.6, 3.8, 3.9, 4.0, 4.0, 4.0],
+                                        label: 'Total',
+                                        data: requestRatingStats,
                                         borderColor: '#3f51b5',
                                         backgroundColor: 'rgba(63, 81, 181, 0.1)',
                                         tension: 0.4,

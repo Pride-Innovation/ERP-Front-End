@@ -23,6 +23,7 @@ import customThemes from './utils/customThemes';
 import AutocompleteContextProvider from './context/autocomplete';
 import StoreContextProvider from './context/store';
 import AssetContextProvider from './context/asset';
+import DashboardProvider from './context/dashboard';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -42,7 +43,9 @@ root.render(
                       <TestContextProvider>
                         <StoreContextProvider>
                           <AssetContextProvider>
-                            <App />
+                            <DashboardProvider>
+                              <App />
+                            </DashboardProvider>
                           </AssetContextProvider>
                         </StoreContextProvider>
                       </TestContextProvider>

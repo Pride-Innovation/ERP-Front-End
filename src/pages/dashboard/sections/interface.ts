@@ -5,10 +5,23 @@ interface IRequestRatingStats {
     currentMonth: number
 }
 
+interface IRequestMonthlyStats {
+    month: string;
+    quantity: number
+}
+
+
 interface IRequestRatingStatsAxiosResponse extends IAxiosResponse {
     data: IRequestRatingStats
 }
 
+interface IRequestMonthlyStatsAxiosResponse extends IAxiosResponse {
+    data: Array<IRequestMonthlyStats>
+}
+
 export type {
-    IRequestRatingStatsAxiosResponse
+    IRequestRatingStatsAxiosResponse,
+    IRequestMonthlyStatsAxiosResponse,
+    IRequestMonthlyStats,
+    IRequestRatingStats
 }
