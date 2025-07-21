@@ -38,11 +38,14 @@ const AssetStockReview = () => {
                         <Box display="flex" justifyContent="space-between" gap={4} mb={2}>
                             <Box>
                                 <Typography variant="caption" color="text.secondary">IT Assets Total</Typography>
-                                <Typography variant="h4" fontWeight="bold">3,431</Typography>
+                                <Typography variant="h4" fontWeight="bold">
+                                    + {monthlyItStats.reduce((acc, curr) => acc + curr, 0)}
+                                </Typography>
                             </Box>
                             <Box bgcolor={"success.main"} p={2} borderRadius={1} textAlign="center">
                                 <Typography variant="caption" color="warning.main">Office Assets Total</Typography>
-                                <Typography variant="h6" fontWeight="bold" color="white">+1,725</Typography>
+                                <Typography variant="h6" fontWeight="bold" color="white">+ {monthlyOfficeStats.reduce((acc, curr) => acc + curr, 0)
+                                }</Typography>
                             </Box>
                         </Box>
 
