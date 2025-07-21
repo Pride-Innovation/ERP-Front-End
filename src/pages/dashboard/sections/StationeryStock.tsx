@@ -1,5 +1,7 @@
 import { Box, Card, CardContent, Grid, Typography } from "@mui/material"
 import { Doughnut } from "react-chartjs-2";
+import SectionUtills from "./utills";
+import { useEffect } from "react";
 
 
 const stationeryData = {
@@ -29,6 +31,9 @@ const stationeryOptions = {
 };
 
 const StationeryStock = () => {
+    const { getMonthlyStationeryTotals } = SectionUtills();
+
+    useEffect(() => { getMonthlyStationeryTotals() }, []);
     return (
         <>
             <Grid item xs={12} md={3}>

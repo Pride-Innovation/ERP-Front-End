@@ -8,6 +8,7 @@ import {
 } from "./interface";
 import {
     getMonthlyItAndOfficeStatsService,
+    getMonthlyStationeryTotalsService,
     requestRatingVariationService,
     resquestStatsOneYearService
 } from "./service";
@@ -80,11 +81,25 @@ const SectionUtills = () => {
         }
     }
 
+        const getMonthlyStationeryTotals = async () => {
+        try {
+            const response = await getMonthlyStationeryTotalsService() as IMonthlyItAndOfficeStatsAxiosResponse;
+            if (response.status === 200) {
+                console.log(response.data);
+                // setAssetStockReview(response.data);
+            }
+        }
+        catch (error) {
+            console.error("Error fetching request rating variation:", error);
+        }
+    }
+
 
     return ({
         requestRatingStatsFxn,
         requestRatingVariationFxn,
-        getMonthlyItAndOfficeStatsFxn
+        getMonthlyItAndOfficeStatsFxn,
+        getMonthlyStationeryTotals
     });
 }
 

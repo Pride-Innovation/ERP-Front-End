@@ -27,3 +27,13 @@ export const getMonthlyItAndOfficeStatsService = async () => {
         return error;
     }
 }
+
+
+export const getMonthlyStationeryTotalsService = async () => {
+    try {
+        const response = await axiosInstance.get('/stationery/monthly');
+        return response;
+    } catch (error) {
+        return error;
+    }
+}
