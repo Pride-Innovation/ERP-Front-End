@@ -2,6 +2,7 @@ import {
     Box,
     Card,
     CardContent,
+    Divider,
     Grid,
     Typography
 } from '@mui/material';
@@ -82,22 +83,49 @@ const RequestRating = () => {
             </Card>
             <Card sx={{ mt: 2, p: 2, bgcolor: "primary.main" }}>
                 <Grid container spacing={2}>
-                    {/* Top Stocked Item */}
+                    <Grid item xs={12} container>
+                        <Grid item xs={12}>
+                            <Typography variant="subtitle2" color="background.paper">
+                                Top Stocked – {new Date().toLocaleDateString('en-US', { month: 'long' })}
+                            </Typography>
+                        </Grid>
+                        <Grid item xs={6}>
+                            <Box display="flex" flexDirection="column">
+                                <Typography variant="h6" fontWeight="bold" color="warning.main">Laptops</Typography>
+                                <Typography variant="caption" color="background.paper">Total: 150 units</Typography>
+                            </Box>
+                        </Grid>
+                        <Grid item xs={6} display="flex" justifyContent="flex-end">
+                            <Box display="flex" flexDirection="column">
+                                <Typography variant="h6" fontWeight="bold" color="warning.main">Chairs</Typography>
+                                <Typography variant="caption" color="background.paper">Total: 1,230 units</Typography>
+                            </Box>
+                        </Grid>
+                    </Grid>
                     <Grid item xs={12}>
-                        <Box display="flex" flexDirection="column">
-                            <Typography variant="subtitle2" color="background.paper">Top Stocked Item</Typography>
-                            <Typography variant="h6" fontWeight="bold" color="warning.main">Pens</Typography>
-                            <Typography variant="caption" color="background.paper">Total: 1,230 units</Typography>
-                        </Box>
+                        <Divider sx={{ bgcolor: 'background.paper' }} />
                     </Grid>
 
-                    {/* Least Stocked Item */}
-                    <Grid item xs={12}>
-                        <Box display="flex" flexDirection="column">
-                            <Typography variant="subtitle2" color="background.paper">Least Stocked Item</Typography>
-                            <Typography variant="h6" fontWeight="bold" color="error.main">Scanners</Typography>
-                            <Typography variant="caption" color="background.paper">Remaining: 3 units</Typography>
-                        </Box>
+                    <Grid item xs={12} container>
+                        <Grid item xs={12} container>
+                            <Grid item xs={12}>
+                                <Typography variant="subtitle2" color="background.paper">
+                                    Least Stocked – {new Date().toLocaleDateString('en-US', { month: 'long' })}
+                                </Typography>
+                            </Grid>
+                            <Grid item xs={6}>
+                                <Box display="flex" flexDirection="column">
+                                    <Typography variant="h6" fontWeight="bold" color="error.main">Scanners</Typography>
+                                    <Typography variant="caption" color="background.paper">Remaining: 3 units</Typography>
+                                </Box>
+                            </Grid>
+                            <Grid item xs={6} display="flex" justifyContent="flex-end">
+                                <Box display="flex" flexDirection="column">
+                                    <Typography variant="h6" fontWeight="bold" color="error.main">Scanners</Typography>
+                                    <Typography variant="caption" color="background.paper">Remaining: 3 units</Typography>
+                                </Box>
+                            </Grid>
+                        </Grid>
                     </Grid>
                 </Grid>
             </Card>
