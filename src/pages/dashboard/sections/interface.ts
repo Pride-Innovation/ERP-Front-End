@@ -40,6 +40,18 @@ interface IMonthlyStationeryTotalsAxiosResponse extends IAxiosResponse {
     data: IMonthlyStationeryTotals
 }
 
+interface IMonthlyItAndOfficeSummaryStats {
+    assetType: string;
+    mostStockedItem: string;
+    mostStockedQuantity: number;
+    leastStockedItem: string;
+    leastStockedQuantity: number;
+}
+
+interface IMonthlyItAndOfficeSummaryStatsAxiosResponse extends IAxiosResponse {
+    data: Array<IMonthlyItAndOfficeSummaryStats>
+}
+
 export type {
     IRequestRatingStatsAxiosResponse,
     IRequestMonthlyStatsAxiosResponse,
@@ -48,5 +60,7 @@ export type {
     IMonthlyItAndOfficeStatsAxiosResponse,
     IMonthlyItAndOfficeStats,
     IMonthlyStationeryTotalsAxiosResponse,
-    IMonthlyStationeryTotals
+    IMonthlyStationeryTotals,
+    IMonthlyItAndOfficeSummaryStatsAxiosResponse,
+    IMonthlyItAndOfficeSummaryStats
 }

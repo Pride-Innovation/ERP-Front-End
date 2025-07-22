@@ -16,16 +16,19 @@ const RequestRating = () => {
     const {
         requestRatingStatsLabels,
         requestRatingStats,
-        requestVariationStats
+        requestVariationStats,
+        monthlyITandOfficeSummaryStats
     } = useContext(DashboardContext);
     const {
         requestRatingStatsFxn,
-        requestRatingVariationFxn
+        requestRatingVariationFxn,
+        getItAndOfficeMonthlyStockSummaryFxn
     } = SectionUtills();
 
     useEffect(() => {
         requestRatingStatsFxn()
         requestRatingVariationFxn();
+        getItAndOfficeMonthlyStockSummaryFxn();
     }, [])
 
     return (<>
@@ -91,14 +94,22 @@ const RequestRating = () => {
                         </Grid>
                         <Grid item xs={6}>
                             <Box display="flex" flexDirection="column">
-                                <Typography variant="h6" fontWeight="bold" color="warning.main">Laptops</Typography>
-                                <Typography variant="caption" color="background.paper">Total: 150 units</Typography>
+                                <Typography variant="h6" fontWeight="bold" color="warning.main">
+                                    {monthlyITandOfficeSummaryStats[0]?.mostStockedItem}
+                                </Typography>
+                                <Typography variant="caption" color="background.paper">Total:
+                                    {monthlyITandOfficeSummaryStats[0]?.mostStockedQuantity} units
+                                </Typography>
                             </Box>
                         </Grid>
                         <Grid item xs={6} display="flex" justifyContent="flex-end">
                             <Box display="flex" flexDirection="column">
-                                <Typography variant="h6" fontWeight="bold" color="warning.main">Chairs</Typography>
-                                <Typography variant="caption" color="background.paper">Total: 1,230 units</Typography>
+                                <Typography variant="h6" fontWeight="bold" color="warning.main">
+                                    {monthlyITandOfficeSummaryStats[1]?.mostStockedItem}
+                                </Typography>
+                                <Typography variant="caption" color="background.paper">Total:
+                                    {monthlyITandOfficeSummaryStats[1]?.mostStockedQuantity} units
+                                </Typography>
                             </Box>
                         </Grid>
                     </Grid>
@@ -115,14 +126,22 @@ const RequestRating = () => {
                             </Grid>
                             <Grid item xs={6}>
                                 <Box display="flex" flexDirection="column">
-                                    <Typography variant="h6" fontWeight="bold" color="error.main">Scanners</Typography>
-                                    <Typography variant="caption" color="background.paper">Remaining: 3 units</Typography>
+                                    <Typography variant="h6" fontWeight="bold" color="error.main">
+                                        {monthlyITandOfficeSummaryStats[0]?.leastStockedItem}
+                                    </Typography>
+                                    <Typography variant="caption" color="background.paper">Remaining:
+                                        {monthlyITandOfficeSummaryStats[0]?.leastStockedQuantity} units
+                                    </Typography>
                                 </Box>
                             </Grid>
                             <Grid item xs={6} display="flex" justifyContent="flex-end">
                                 <Box display="flex" flexDirection="column">
-                                    <Typography variant="h6" fontWeight="bold" color="error.main">Scanners</Typography>
-                                    <Typography variant="caption" color="background.paper">Remaining: 3 units</Typography>
+                                    <Typography variant="h6" fontWeight="bold" color="error.main">
+                                        {monthlyITandOfficeSummaryStats[1]?.leastStockedItem}
+                                    </Typography>
+                                    <Typography variant="caption" color="background.paper">Remaining:
+                                        {monthlyITandOfficeSummaryStats[1]?.leastStockedQuantity} units
+                                    </Typography>
                                 </Box>
                             </Grid>
                         </Grid>

@@ -2,6 +2,7 @@ import { useContext } from "react";
 import {
     IMonthlyItAndOfficeStats,
     IMonthlyItAndOfficeStatsAxiosResponse,
+    IMonthlyItAndOfficeSummaryStatsAxiosResponse,
     IMonthlyStationeryTotals,
     IMonthlyStationeryTotalsAxiosResponse,
     IRequestMonthlyStats,
@@ -9,6 +10,7 @@ import {
     IRequestRatingStatsAxiosResponse
 } from "./interface";
 import {
+    getItAndOfficeMonthlyStockSummaryService,
     getMonthlyItAndOfficeStatsService,
     getMonthlyStationeryTotalsService,
     requestRatingVariationService,
@@ -24,7 +26,8 @@ const SectionUtills = () => {
         setMonthlyItStats,
         setMonthlyOfficeStats,
         setMonthlyStationeryStats,
-        setMonthlyStationeryStatslabels
+        setMonthlyStationeryStatslabels,
+        setMonthlyITandOfficeSummaryStats
     } = useContext(DashboardContext);
 
     /**
@@ -78,6 +81,20 @@ const SectionUtills = () => {
             const response = await getMonthlyItAndOfficeStatsService() as IMonthlyItAndOfficeStatsAxiosResponse;
             if (response.status === 200) {
                 setAssetStockReview(response.data);
+            }
+        }
+        catch (error) {
+            console.error("Error fetching request rating variation:", error);
+        }
+    }
+
+
+    const getItAndOfficeMonthlyStockSummaryFxn = async () => {
+        try {
+            const response = await getItAndOfficeMonthlyStockSummaryService() as IMonthlyItAndOfficeSummaryStatsAxiosResponse;
+            if (response.status === 200) {
+                console.log(response.data);
+                setMonthlyITandOfficeSummaryStats(response.data);
             }
         }
         catch (error) {
@@ -140,7 +157,8 @@ const SectionUtills = () => {
         requestRatingStatsFxn,
         requestRatingVariationFxn,
         getMonthlyItAndOfficeStatsFxn,
-        getMonthlyStationeryTotals
+        getMonthlyStationeryTotals,
+        getItAndOfficeMonthlyStockSummaryFxn
     });
 }
 
