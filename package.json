@@ -24,6 +24,7 @@
     "axios": "^1.7.7",
     "chart.js": "^4.4.6",
     "chartjs-plugin-datalabels": "^2.2.0",
+    "date-fns": "^4.1.0",
     "dayjs": "^1.11.13",
     "dotenv": "^16.4.5",
     "jspdf": "^2.5.2",
