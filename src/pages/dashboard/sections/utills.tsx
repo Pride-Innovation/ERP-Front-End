@@ -7,9 +7,13 @@ import {
     IMonthlyStationeryTotalsAxiosResponse,
     IRequestMonthlyStats,
     IRequestMonthlyStatsAxiosResponse,
-    IRequestRatingStatsAxiosResponse
+    IRequestRatingStatsAxiosResponse,
+    IYearlyRequestSummaryStats,
+    IYearlyRequestSummaryStatsAxiosResponse,
+    RequestCardProps
 } from "./interface";
 import {
+    getCurrentYearRequestSummaryService,
     getItAndOfficeMonthlyStockSummaryService,
     getMonthlyItAndOfficeStatsService,
     getMonthlyStationeryTotalsService,
@@ -17,6 +21,10 @@ import {
     resquestStatsOneYearService
 } from "./service";
 import { DashboardContext } from "../../../context/dashboard";
+import { formatNumber } from "../../../utils/helpers";
+import furnitureImage from "../../../statics/images/furnitureDesktop.png";
+import stationeryImage from "../../../statics/images/stationeryDesktop.png";
+import RequestImage from "../../../statics/images/requestDesktop.png"
 
 const SectionUtills = () => {
     const {
@@ -27,7 +35,8 @@ const SectionUtills = () => {
         setMonthlyOfficeStats,
         setMonthlyStationeryStats,
         setMonthlyStationeryStatslabels,
-        setMonthlyITandOfficeSummaryStats
+        setMonthlyITandOfficeSummaryStats,
+        setYearlyRequestSummaryStats
     } = useContext(DashboardContext);
 
     /**
@@ -93,7 +102,6 @@ const SectionUtills = () => {
         try {
             const response = await getItAndOfficeMonthlyStockSummaryService() as IMonthlyItAndOfficeSummaryStatsAxiosResponse;
             if (response.status === 200) {
-                console.log(response.data);
                 setMonthlyITandOfficeSummaryStats(response.data);
             }
         }
@@ -143,7 +151,6 @@ const SectionUtills = () => {
         try {
             const response = await getMonthlyStationeryTotalsService() as IMonthlyStationeryTotalsAxiosResponse;
             if (response.status === 200) {
-                console.log("Response data:", response.data);
                 setDoughnutChartData(response.data);
             }
         }
@@ -153,12 +160,79 @@ const SectionUtills = () => {
     }
 
 
+    /**
+     * 
+     * @param apiData - Array of IYearlyRequestSummaryStats from the API response.
+     * * Maps the API data to an array of RequestCardProps for rendering in the UI.
+     * * Each card represents a different asset type (IT Equipment, Office Equipment, Stationery).
+     * 
+     * @returns 
+     */
+    const mapApiDataToCardData = (apiData: Array<IYearlyRequestSummaryStats>): RequestCardProps[] => {
+
+        const dataMap = apiData.reduce((acc, cur) => {
+            acc[cur.assetType.toLowerCase()] = cur;
+            return acc;
+        }, {} as Record<string, { totalRequested: number; totalDelivered: number }>);
+
+        return [
+            {
+                title: "IT Asset Requests",
+                image: RequestImage,
+                imageSize: 40,
+                value: formatNumber(dataMap['it equipment']?.totalRequested ?? 0),
+                completed: formatNumber(dataMap['it equipment']?.totalDelivered ?? 0),
+                pending: formatNumber((dataMap['it equipment']?.totalRequested ?? 0) - (dataMap['it equipment']?.totalDelivered ?? 0)),
+                progressColor: "#1976d2",
+                totalRequested: dataMap['it equipment']?.totalRequested ?? 0,
+                totalDelivered: dataMap['it equipment']?.totalDelivered ?? 0
+            },
+            {
+                title: "Office Asset Requests",
+                image: furnitureImage,
+                imageSize: 60,
+                value: formatNumber(dataMap['office equipment']?.totalRequested ?? 0),
+                completed: formatNumber(dataMap['office equipment']?.totalDelivered ?? 0),
+                pending: formatNumber((dataMap['office equipment']?.totalRequested ?? 0) - (dataMap['office equipment']?.totalDelivered ?? 0)),
+                progressColor: "#ab47bc",
+                totalRequested: dataMap['office equipment']?.totalRequested ?? 0,
+                totalDelivered: dataMap['office equipment']?.totalDelivered ?? 0
+            },
+            {
+                title: "Stationery Requests",
+                image: stationeryImage,
+                imageSize: 40,
+                value: formatNumber(dataMap['stationery']?.totalRequested ?? 0),
+                completed: formatNumber(dataMap['stationery']?.totalDelivered ?? 0),
+                pending: formatNumber((dataMap['stationery']?.totalRequested ?? 0) - (dataMap['stationery']?.totalDelivered ?? 0)),
+                progressColor: "secondary.main",
+                totalRequested: dataMap['stationery']?.totalRequested ?? 0,
+                totalDelivered: dataMap['stationery']?.totalDelivered ?? 0
+            },
+        ];
+    };
+
+    const getCurrentYearRequestSummary = async () => {
+        try {
+            const response = await getCurrentYearRequestSummaryService() as IYearlyRequestSummaryStatsAxiosResponse;
+            if (response.status === 200) {
+                console.log(mapApiDataToCardData(response.data), "filtered data")
+                setYearlyRequestSummaryStats(mapApiDataToCardData(response.data));
+            }
+        }
+        catch (error) {
+            console.error("Error fetching current year request summary:", error);
+        }
+    }
+
+
     return ({
         requestRatingStatsFxn,
         requestRatingVariationFxn,
         getMonthlyItAndOfficeStatsFxn,
         getMonthlyStationeryTotals,
-        getItAndOfficeMonthlyStockSummaryFxn
+        getItAndOfficeMonthlyStockSummaryFxn,
+        getCurrentYearRequestSummary
     });
 }
 

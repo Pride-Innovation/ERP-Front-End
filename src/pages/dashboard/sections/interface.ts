@@ -52,6 +52,28 @@ interface IMonthlyItAndOfficeSummaryStatsAxiosResponse extends IAxiosResponse {
     data: Array<IMonthlyItAndOfficeSummaryStats>
 }
 
+interface IYearlyRequestSummaryStats {
+    assetType: string;
+    totalDelivered: number;
+    totalRequested: number;
+}
+
+interface IYearlyRequestSummaryStatsAxiosResponse extends IAxiosResponse {
+    data: Array<IYearlyRequestSummaryStats>
+}
+
+interface RequestCardProps {
+    title: string;
+    value: string;
+    completed: string;
+    pending: string;
+    image: string;
+    imageSize: number;
+    progressColor: string;
+    totalRequested: number;
+    totalDelivered: number;
+}
+
 export type {
     IRequestRatingStatsAxiosResponse,
     IRequestMonthlyStatsAxiosResponse,
@@ -62,5 +84,8 @@ export type {
     IMonthlyStationeryTotalsAxiosResponse,
     IMonthlyStationeryTotals,
     IMonthlyItAndOfficeSummaryStatsAxiosResponse,
-    IMonthlyItAndOfficeSummaryStats
+    IMonthlyItAndOfficeSummaryStats,
+    IYearlyRequestSummaryStatsAxiosResponse,
+    IYearlyRequestSummaryStats,
+    RequestCardProps
 }

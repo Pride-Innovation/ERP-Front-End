@@ -4,7 +4,7 @@ import {
     FC,
     useState
 } from "react";
-import { IMonthlyItAndOfficeSummaryStats, IRequestRatingStats } from "../../pages/dashboard/sections/interface";
+import { IMonthlyItAndOfficeSummaryStats, IRequestRatingStats, RequestCardProps } from "../../pages/dashboard/sections/interface";
 
 
 interface DashboardContextProps {
@@ -27,6 +27,8 @@ interface DashboardContextProps {
     setMonthlyStationeryStatslabels: Dispatch<React.SetStateAction<Array<string>>>;
     monthlyITandOfficeSummaryStats: Array<IMonthlyItAndOfficeSummaryStats>;
     setMonthlyITandOfficeSummaryStats: Dispatch<React.SetStateAction<Array<IMonthlyItAndOfficeSummaryStats>>>;
+    yearlyRequestSummaryStats: Array<RequestCardProps>;
+    setYearlyRequestSummaryStats: Dispatch<React.SetStateAction<Array<RequestCardProps>>>;
 }
 
 export const DashboardContext = createContext({} as DashboardContextProps);
@@ -48,6 +50,7 @@ const DashboardProvider: FC<{ children: React.ReactNode }> = ({ children }) => {
     const [monthlyStationeryStatslabels, setMonthlyStationeryStatslabels] = useState<Array<string>>(
         ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']);
     const [monthlyITandOfficeSummaryStats, setMonthlyITandOfficeSummaryStats] = useState<Array<IMonthlyItAndOfficeSummaryStats>>([]);
+    const [yearlyRequestSummaryStats, setYearlyRequestSummaryStats] = useState<Array<RequestCardProps>>([]);
 
     return (
         <DashboardContext.Provider value={{
@@ -68,7 +71,9 @@ const DashboardProvider: FC<{ children: React.ReactNode }> = ({ children }) => {
             monthlyStationeryStatslabels,
             setMonthlyStationeryStatslabels,
             monthlyITandOfficeSummaryStats,
-            setMonthlyITandOfficeSummaryStats
+            setMonthlyITandOfficeSummaryStats,
+            yearlyRequestSummaryStats,
+            setYearlyRequestSummaryStats
         }}>
             {children}
         </DashboardContext.Provider>

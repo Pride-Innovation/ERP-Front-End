@@ -46,3 +46,12 @@ export const getItAndOfficeMonthlyStockSummaryService = async () => {
         return error;
     }
 }
+
+export const getCurrentYearRequestSummaryService = async () => {
+    try {
+        const response = await axiosInstance.get('/current-year-summary');
+        return response;
+    } catch (error) {
+        return error;
+    }
+}
