@@ -1,3 +1,4 @@
+import { string } from "yup";
 import { IAxiosResponse } from "../../../core/apis/interface";
 
 interface IRequestRatingStats {
@@ -30,11 +31,22 @@ interface IMonthlyItAndOfficeStatsAxiosResponse extends IAxiosResponse {
     data: Array<IMonthlyItAndOfficeStats>
 }
 
+interface IMonthlyStationeryTotals {
+    commodities: Record<string, number>;
+    month: string;
+}
+
+interface IMonthlyStationeryTotalsAxiosResponse extends IAxiosResponse {
+    data: IMonthlyStationeryTotals
+}
+
 export type {
     IRequestRatingStatsAxiosResponse,
     IRequestMonthlyStatsAxiosResponse,
     IRequestMonthlyStats,
     IRequestRatingStats,
     IMonthlyItAndOfficeStatsAxiosResponse,
-    IMonthlyItAndOfficeStats
+    IMonthlyItAndOfficeStats,
+    IMonthlyStationeryTotalsAxiosResponse,
+    IMonthlyStationeryTotals
 }

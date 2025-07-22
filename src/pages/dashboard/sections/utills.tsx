@@ -2,6 +2,8 @@ import { useContext } from "react";
 import {
     IMonthlyItAndOfficeStats,
     IMonthlyItAndOfficeStatsAxiosResponse,
+    IMonthlyStationeryTotals,
+    IMonthlyStationeryTotalsAxiosResponse,
     IRequestMonthlyStats,
     IRequestMonthlyStatsAxiosResponse,
     IRequestRatingStatsAxiosResponse
@@ -21,6 +23,8 @@ const SectionUtills = () => {
         setRequestVariationStats,
         setMonthlyItStats,
         setMonthlyOfficeStats,
+        setMonthlyStationeryStats,
+        setMonthlyStationeryStatslabels
     } = useContext(DashboardContext);
 
     /**
@@ -81,12 +85,49 @@ const SectionUtills = () => {
         }
     }
 
-        const getMonthlyStationeryTotals = async () => {
+    /**
+     * Processes the API response to return two arrays:
+     * 1. Specific commodities: ['Book', 'Pens', 'Loan Forms']
+     * 2. An "Others" category that sums all remaining commodities
+     */
+    const setDoughnutChartData = (data: IMonthlyStationeryTotals) => {
+        const keysOfInterest = ['Books', 'Pens', 'Loan Forms'];
+
+        const names: string[] = [];
+        const values: number[] = [];
+
+        let othersSum = 0;
+
+        for (const [key, value] of Object.entries(data.commodities)) {
+            if (keysOfInterest.includes(key)) {
+                names.push(key);
+                values.push(value);
+            } else {
+                othersSum += value;
+            }
+        }
+
+        if (othersSum > 0) {
+            names.push('Others');
+            values.push(othersSum);
+        }
+
+        const map = new Map(names.map((n, i) => [n, values[i]]));
+        const orderedNames = [...keysOfInterest, 'Others'].filter(name => map.has(name));
+        const orderedValues = orderedNames.map(name => map.get(name)!);
+
+        setMonthlyStationeryStats(orderedValues);
+        setMonthlyStationeryStatslabels(orderedNames);
+
+    }
+
+
+    const getMonthlyStationeryTotals = async () => {
         try {
-            const response = await getMonthlyStationeryTotalsService() as IMonthlyItAndOfficeStatsAxiosResponse;
+            const response = await getMonthlyStationeryTotalsService() as IMonthlyStationeryTotalsAxiosResponse;
             if (response.status === 200) {
-                console.log(response.data);
-                // setAssetStockReview(response.data);
+                console.log("Response data:", response.data);
+                setDoughnutChartData(response.data);
             }
         }
         catch (error) {
