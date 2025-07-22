@@ -97,7 +97,7 @@ const RequestRating = () => {
                                 <Typography variant="h6" fontWeight="bold" color="warning.main">
                                     {monthlyITandOfficeSummaryStats[0]?.mostStockedItem}
                                 </Typography>
-                                <Typography variant="caption" color="background.paper">Total:
+                                <Typography variant="caption" color="background.paper">Total: {" "}
                                     {monthlyITandOfficeSummaryStats[0]?.mostStockedQuantity} units
                                 </Typography>
                             </Box>
@@ -107,7 +107,7 @@ const RequestRating = () => {
                                 <Typography variant="h6" fontWeight="bold" color="warning.main">
                                     {monthlyITandOfficeSummaryStats[1]?.mostStockedItem}
                                 </Typography>
-                                <Typography variant="caption" color="background.paper">Total:
+                                <Typography variant="caption" color="background.paper">Total: {" "}
                                     {monthlyITandOfficeSummaryStats[1]?.mostStockedQuantity} units
                                 </Typography>
                             </Box>
@@ -129,7 +129,7 @@ const RequestRating = () => {
                                     <Typography variant="h6" fontWeight="bold" color="error.main">
                                         {monthlyITandOfficeSummaryStats[0]?.leastStockedItem}
                                     </Typography>
-                                    <Typography variant="caption" color="background.paper">Remaining:
+                                    <Typography variant="caption" color="background.paper">Total: {" "}
                                         {monthlyITandOfficeSummaryStats[0]?.leastStockedQuantity} units
                                     </Typography>
                                 </Box>
@@ -139,7 +139,7 @@ const RequestRating = () => {
                                     <Typography variant="h6" fontWeight="bold" color="error.main">
                                         {monthlyITandOfficeSummaryStats[1]?.leastStockedItem}
                                     </Typography>
-                                    <Typography variant="caption" color="background.paper">Remaining:
+                                    <Typography variant="caption" color="background.paper">Total: {" "}
                                         {monthlyITandOfficeSummaryStats[1]?.leastStockedQuantity} units
                                     </Typography>
                                 </Box>

@@ -32,9 +32,14 @@ const RequestCard: React.FC<RequestCardProps> = ({
 }) => (
     <Card sx={{ mb: 2 }}>
         <CardContent>
-            <Typography variant="subtitle2" color="text.secondary">
-                {title}
-            </Typography>
+            <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
+                <Box>
+                    <Typography variant="subtitle2" color="text.secondary">{title}</Typography>
+                </Box>
+                <Typography variant="caption" color="text.secondary" sx={{ border: '1px solid #ddd', px: 1.5, py: 0.5, borderRadius: 2 }}>
+                    1 year
+                </Typography>
+            </Box>
             <Box display="flex" justifyContent="center" alignItems="center" mt={2} mb={2}>
                 <Box position="relative" display="inline-flex">
                     <CircularProgress
