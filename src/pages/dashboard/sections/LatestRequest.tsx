@@ -6,6 +6,8 @@ import {
     Grid,
     Typography,
     Link as MuiLink,
+    Stack,
+    Chip,
 } from '@mui/material'
 import ComputerOutlinedIcon from '@mui/icons-material/ComputerOutlined';
 import TableRestaurantOutlinedIcon from '@mui/icons-material/TableRestaurantOutlined';
@@ -21,6 +23,7 @@ import { formatDistanceToNow } from 'date-fns';
 import Rating from '@mui/material/Rating';
 import SectionUtills from './utills';
 import { DashboardContext } from '../../../context/dashboard';
+import { ICommodity } from '../../settings/commodity/interface';
 
 const iconSet = [
     { icon: <ComputerOutlinedIcon color='primary' />, color: 'primary' },
@@ -115,40 +118,23 @@ const LatestRequest = () => {
                                 </Box>
 
                                 <DescriptionText description={request.description as string} />
-                                {/* 
-                                {review.images.length > 0 && (
-                                    <Box mt={2} display="flex" gap={2} flexWrap="wrap">
-                                        {iconSet.map((item, idx) => (
-                                            <Badge
-                                                key={idx}
-                                                badgeContent={(idx + 1) * 3}
-                                                color={item.color}
-                                                overlap="circular"
-                                                anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-                                            >
-                                                <TooltipComponent title={`Image ${idx + 1}`} key={idx}>
-                                                    <Box
-                                                        display="flex"
-                                                        alignItems="center"
-                                                        justifyContent="center"
-                                                        sx={{
-                                                            width: 40,
-                                                            height: 40,
-                                                            borderRadius: 2,
-                                                            backgroundColor: '#F5F8FC',
-                                                            color: '#555',
-                                                        }}
-                                                    >
-                                                        {item.icon}
-                                                    </Box>
-                                                </TooltipComponent>
 
-                                            </Badge>
+                                {(request.commodities?.length as number) > 0 && (
+                                    <Stack direction="row" spacing={1} mt={1} flexWrap="wrap">
+                                        {(request.commodities as Array<{
+                                            commodity: ICommodity,
+                                            quantity: number
+                                        }>).map((commodity, index) => (
+                                            <Chip
+                                                key={commodity.commodity.id}
+                                                avatar={<Avatar sx={{ bgcolor: "teal" }}>
+                                                    <span style={{ color: "white" }}>{commodity.quantity}</span></Avatar>}
+                                                label={commodity.commodity.name}
+                                                variant={index % 2 === 0 ? "filled" : "outlined"}
+                                            />
                                         ))}
-                                    </Box>
-                                )} */}
-
-                                {/* Actions: Like + View Details */}
+                                    </Stack>
+                                )}
                                 <Box mt={2} display="flex" gap={2} alignItems="center">
                                     <Typography variant="body2" sx={{ cursor: 'pointer', color: '#42a5f5', fontWeight: 500 }}>
                                         <Link to={`/dashboard/review/${request.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
