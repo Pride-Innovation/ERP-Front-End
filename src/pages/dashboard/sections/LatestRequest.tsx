@@ -137,7 +137,7 @@ const LatestRequest = () => {
                                 )}
                                 <Box mt={2} display="flex" gap={2} alignItems="center">
                                     <Typography variant="body2" sx={{ cursor: 'pointer', color: '#42a5f5', fontWeight: 500 }}>
-                                        <Link to={`/dashboard/review/${request.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                                        <Link to={`/assets-mgt/asset-request/view/${request.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                                             View Details
                                         </Link>
                                     </Typography>
