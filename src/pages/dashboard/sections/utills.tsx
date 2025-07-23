@@ -13,6 +13,7 @@ import {
     RequestCardProps
 } from "./interface";
 import {
+    findLatestPendingRequestsWithDetailsService,
     getCurrentYearRequestSummaryService,
     getItAndOfficeMonthlyStockSummaryService,
     getMonthlyItAndOfficeStatsService,
@@ -25,6 +26,7 @@ import { formatNumber } from "../../../utils/helpers";
 import furnitureImage from "../../../statics/images/furnitureDesktop.png";
 import stationeryImage from "../../../statics/images/stationeryDesktop.png";
 import RequestImage from "../../../statics/images/requestDesktop.png"
+import { IRequestsAxiosResponse } from "../../request/interface";
 
 const SectionUtills = () => {
     const {
@@ -36,7 +38,8 @@ const SectionUtills = () => {
         setMonthlyStationeryStats,
         setMonthlyStationeryStatslabels,
         setMonthlyITandOfficeSummaryStats,
-        setYearlyRequestSummaryStats
+        setYearlyRequestSummaryStats,
+        setLatestPendingRequests
     } = useContext(DashboardContext);
 
     /**
@@ -225,6 +228,17 @@ const SectionUtills = () => {
         }
     }
 
+    const findLatestPendingRequestsWithDetails = async () => {  
+        try {
+            const response = await findLatestPendingRequestsWithDetailsService() as IRequestsAxiosResponse;
+            if (response.status === 200) {
+                setLatestPendingRequests(response.data.content);
+            }
+        } catch (error) {
+            console.error("Error fetching latest pending requests:", error);
+        }
+    }
+
 
     return ({
         requestRatingStatsFxn,
@@ -232,7 +246,8 @@ const SectionUtills = () => {
         getMonthlyItAndOfficeStatsFxn,
         getMonthlyStationeryTotals,
         getItAndOfficeMonthlyStockSummaryFxn,
-        getCurrentYearRequestSummary
+        getCurrentYearRequestSummary,
+        findLatestPendingRequestsWithDetails
     });
 }
 

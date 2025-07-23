@@ -55,3 +55,12 @@ export const getCurrentYearRequestSummaryService = async () => {
         return error;
     }
 }
+
+export const findLatestPendingRequestsWithDetailsService = async () => {
+    try {
+        const response = await axiosInstance.get('/latest-pending-request');
+        return response;
+    } catch (error) {
+        return error;
+    }
+}

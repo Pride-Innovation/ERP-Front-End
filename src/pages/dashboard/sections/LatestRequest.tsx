@@ -1,4 +1,3 @@
-import { Star, StarBorder } from '@mui/icons-material'
 import {
     Avatar,
     Box,
@@ -6,18 +5,22 @@ import {
     CardContent,
     Grid,
     Typography,
+    Link as MuiLink,
 } from '@mui/material'
 import ComputerOutlinedIcon from '@mui/icons-material/ComputerOutlined';
 import TableRestaurantOutlinedIcon from '@mui/icons-material/TableRestaurantOutlined';
 import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined';
 import { Link } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import RequestUtills from '../../request/assetRequest/utills';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../store';
 import MaleLogo from '../../../statics/images/male.jpg'
 import FemaleLogo from '../../../statics/images/Female.jpg'
 import { formatDistanceToNow } from 'date-fns';
+import Rating from '@mui/material/Rating';
+import SectionUtills from './utills';
+import { DashboardContext } from '../../../context/dashboard';
 
 const iconSet = [
     { icon: <ComputerOutlinedIcon color='primary' />, color: 'primary' },
@@ -25,28 +28,48 @@ const iconSet = [
     { icon: <MenuBookOutlinedIcon color='warning' />, color: 'primary' },
 ] as const;
 
+
+
+const DescriptionText: React.FC<{ description: string }> = ({ description }) => {
+    const MAX_LENGTH = 190;
+    const [expanded, setExpanded] = useState(false);
+
+    const isLongText = description.length > MAX_LENGTH;
+    const displayText = expanded || !isLongText
+        ? description
+        : `${description.slice(0, MAX_LENGTH)}...`;
+
+    const toggleExpanded = () => setExpanded(prev => !prev);
+
+    return (
+        <Typography mt={1.5} fontSize={14} color="text.secondary">
+            {displayText}
+            {isLongText && (
+                <>
+                    &nbsp;
+                    <MuiLink
+                        component="button"
+                        variant="body2"
+                        onClick={toggleExpanded}
+                        sx={{ color: 'primary.main', textDecoration: 'none', cursor: 'pointer' }}
+                    >
+                        {expanded ? 'View less' : 'View more'}
+                    </MuiLink>
+                </>
+            )}
+        </Typography>
+    );
+};
+
 const LatestRequest = () => {
-    const { fetchAllRequests } = RequestUtills();
-    const { requests } = useSelector((state: RootState) => state.AssetsRequestsStore)
-
-    useEffect(() => {
-        /**
-         * This should contain the Status ID for Request Approved by Managers
-         */
-        const params = {
-            statusIds: 3,
-            status: "PENDING",
-            pageSize: 3
-        }
-
-        fetchAllRequests(params);
-
-    }, []);
-
+    const { findLatestPendingRequestsWithDetails } = SectionUtills()
+    const { latestPendingRequests } = useContext(DashboardContext);
     const getTimeAgo = (date?: string | null) => {
         if (!date) return "Unknown";
         return formatDistanceToNow(new Date(date), { addSuffix: true });
     };
+
+    useEffect(() => { findLatestPendingRequestsWithDetails() }, [])
 
     return (
         <>
@@ -55,7 +78,7 @@ const LatestRequest = () => {
                     <CardContent sx={{ px: 3, py: 4 }}>
                         <Typography variant="h6" color="#888" mb={3}>Latest Requests</Typography>
 
-                        {requests.length > 0 && requests.map((request, index) => (
+                        {latestPendingRequests.length > 0 && latestPendingRequests.map((request, index) => (
                             <Box key={index} mb={index < 2 ? 4 : 0} pb={index < 2 ? 4 : 0} borderBottom={index < 2 ? '1px solid #eee' : 'none'}>
                                 <Box display="flex" alignItems="center" justifyContent="space-between">
                                     <Box display="flex" alignItems="center">
@@ -81,24 +104,17 @@ const LatestRequest = () => {
                                 </Box>
 
                                 <Box mt={1} display="flex" alignItems="center">
-                                    {[...Array(
-                                        request.priority === "low" ? 3 :
-                                            request.priority === "medium" ? 4 : 5
-                                    )].map((_, i) =>
-                                        i < (
-                                            request.priority === "low" ? 3 :
-                                                request.priority === "medium" ? 4 : 5
-                                        ) ? (
-                                            <Star key={i} sx={{ color: '#FFA534', fontSize: 20 }} />
-                                        ) : (
-                                            <StarBorder key={i} sx={{ color: '#CCC', fontSize: 20 }} />
-                                        )
-                                    )}
+                                    <Rating
+                                        name="read-only"
+                                        value={request.priority === "low" ? 3 :
+                                            request.priority === "medium" ? 4 : 5}
+                                        readOnly
+                                        size="small"
+                                        sx={{ ml: 1 }}
+                                    />
                                 </Box>
 
-                                <Typography mt={1.5} fontSize={14} color="text.secondary">
-                                    {request.description}
-                                </Typography>
+                                <DescriptionText description={request.description as string} />
                                 {/* 
                                 {review.images.length > 0 && (
                                     <Box mt={2} display="flex" gap={2} flexWrap="wrap">
