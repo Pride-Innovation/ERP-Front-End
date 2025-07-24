@@ -15,7 +15,7 @@ import { CSSObject, Divider, IconButton, styled, Theme } from '@mui/material';
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar';
 import MuiDrawer from '@mui/material/Drawer';
 import MenuIcon from '@mui/icons-material/Menu';
-import Logo from "../../statics/images/whitelogo.png";
+import Logo from "../../statics/images/NavLogo-removebg-preview.png";
 import SideBar from './SideBar';
 import NavBar from './NavBar';
 
@@ -119,7 +119,7 @@ export default function ApplicationDrawer({ window }: Props) {
                     </IconButton>
                     <Box
                         src={Logo}
-                        sx={{ height: '40px', width: "45px", mr: '20px', display: { xs: 'none', md: 'block' }, borderRadius: "4px" }}
+                        sx={{ height: '55px', width: "45px", mr: '20px', display: { xs: 'none', md: 'block' }, borderRadius: "4px" }}
                         component='img'
                     />
                     <Typography
@@ -131,7 +131,7 @@ export default function ApplicationDrawer({ window }: Props) {
                             letterSpacing: 0.5,
                         }}
                     >
-                        Asset Management System
+                        <span style={{ color: "#E69100" }}>ASSETS</span> MANAGEMENT
                     </Typography>
                     <NavBar />
                 </Toolbar>

@@ -27,6 +27,7 @@ import ModalComponent from '../modal';
 import ChangePassword from '../../pages/profile/ChangePassword';
 import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
 import RoutesUtills from '../../core/routes/utills';
+import FilterByTagName from './FilterByTagName';
 
 const NavBar = () => {
     const { getCurrentUser } = RoutesUtills();
@@ -55,6 +56,7 @@ const NavBar = () => {
             <Toolbar disableGutters>
                 {getCurrentUser() &&
                     <Stack direction="row" spacing={4} sx={{ ml: "auto", display: "flex", alignItems: "center" }}>
+                        <FilterByTagName />
                         <Box>
                             <ButtonComponent
                                 handleClick={(event: React.MouseEvent<HTMLButtonElement>) => {
