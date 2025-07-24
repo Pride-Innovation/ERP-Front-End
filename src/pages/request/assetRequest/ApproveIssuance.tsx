@@ -19,6 +19,7 @@ import { RequestContext } from "../../../context/request/RequestContext";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../../../store";
 import { updateRequest } from "./slice";
+import DescriptionText from "../../dashboard/sections/DescriptionText";
 
 const ApproveIssuance = ({
     setSendingRequest,
@@ -118,9 +119,7 @@ const ApproveIssuance = ({
                         {request.name}
                     </Typography>
                 </Stack>
-                <Typography variant="subtitle1" color="textSecondary" sx={{ mt: 1 }}>
-                    {request.description}
-                </Typography>
+                <DescriptionText description={request.description as string} MAX_LENGTH={90} />
             </Grid>
 
             <Grid item xs={12}>

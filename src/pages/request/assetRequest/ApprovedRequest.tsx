@@ -21,6 +21,7 @@ import { ICommodity } from "../../settings/commodity/interface";
 import { IApproveRequest, IRequestAxiosResponse } from "../interface";
 import InventoryOutlinedIcon from '@mui/icons-material/InventoryOutlined';
 import AssetTable from "../../../components/assetTable";
+import DescriptionText from "../../dashboard/sections/DescriptionText";
 
 const ApproveRequest = ({
     setSendingRequest,
@@ -107,9 +108,7 @@ const ApproveRequest = ({
                         {request.name}
                     </Typography>
                 </Stack>
-                <Typography variant="subtitle1" color="textSecondary" sx={{ mt: 1 }}>
-                    {request.description}
-                </Typography>
+                <DescriptionText description={request.description as string} MAX_LENGTH={90} />
             </Grid>
 
             <Grid item xs={12}>

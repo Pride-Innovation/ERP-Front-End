@@ -18,6 +18,7 @@ import { toast } from "react-toastify";
 import ButtonComponent from "../../../components/forms/Button";
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import AssetTable from "../../../components/assetTable";
+import DescriptionText from "../../dashboard/sections/DescriptionText";
 
 const AcknowledgeRequest = ({
     request,
@@ -104,9 +105,7 @@ const AcknowledgeRequest = ({
                         {request.name}
                     </Typography>
                 </Stack>
-                <Typography variant="subtitle1" color="textSecondary" sx={{ mt: 1 }}>
-                    {request.description}
-                </Typography>
+                <DescriptionText description={request.description as string} MAX_LENGTH={90} />
             </Grid>
 
             <Grid item xs={12}>

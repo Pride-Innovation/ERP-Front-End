@@ -8,15 +8,9 @@ import {
     Link as MuiLink,
     Stack,
     Chip,
-} from '@mui/material'
-import ComputerOutlinedIcon from '@mui/icons-material/ComputerOutlined';
-import TableRestaurantOutlinedIcon from '@mui/icons-material/TableRestaurantOutlined';
-import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined';
+} from '@mui/material';
 import { Link } from 'react-router-dom';
 import { useContext, useEffect, useState } from 'react';
-import RequestUtills from '../../request/assetRequest/utills';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../../store';
 import MaleLogo from '../../../statics/images/male.jpg'
 import FemaleLogo from '../../../statics/images/Female.jpg'
 import { formatDistanceToNow } from 'date-fns';
@@ -24,45 +18,10 @@ import Rating from '@mui/material/Rating';
 import SectionUtills from './utills';
 import { DashboardContext } from '../../../context/dashboard';
 import { ICommodity } from '../../settings/commodity/interface';
-
-const iconSet = [
-    { icon: <ComputerOutlinedIcon color='primary' />, color: 'primary' },
-    { icon: <TableRestaurantOutlinedIcon sx={{ color: "#1976D2" }} />, color: 'success' },
-    { icon: <MenuBookOutlinedIcon color='warning' />, color: 'primary' },
-] as const;
+import DescriptionText from './DescriptionText';
 
 
 
-const DescriptionText: React.FC<{ description: string }> = ({ description }) => {
-    const MAX_LENGTH = 190;
-    const [expanded, setExpanded] = useState(false);
-
-    const isLongText = description.length > MAX_LENGTH;
-    const displayText = expanded || !isLongText
-        ? description
-        : `${description.slice(0, MAX_LENGTH)}...`;
-
-    const toggleExpanded = () => setExpanded(prev => !prev);
-
-    return (
-        <Typography mt={1.5} fontSize={14} color="text.secondary">
-            {displayText}
-            {isLongText && (
-                <>
-                    &nbsp;
-                    <MuiLink
-                        component="button"
-                        variant="body2"
-                        onClick={toggleExpanded}
-                        sx={{ color: 'primary.main', textDecoration: 'none', cursor: 'pointer' }}
-                    >
-                        {expanded ? 'View less' : 'View more'}
-                    </MuiLink>
-                </>
-            )}
-        </Typography>
-    );
-};
 
 const LatestRequest = () => {
     const { findLatestPendingRequestsWithDetails } = SectionUtills()
@@ -117,7 +76,7 @@ const LatestRequest = () => {
                                     />
                                 </Box>
 
-                                <DescriptionText description={request.description as string} />
+                                <DescriptionText description={request.description as string} MAX_LENGTH={190} />
 
                                 {(request.commodities?.length as number) > 0 && (
                                     <Stack direction="row" spacing={1} mt={1} flexWrap="wrap">
