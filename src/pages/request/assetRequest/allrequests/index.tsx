@@ -62,7 +62,11 @@ const Request = () => {
         const params = { statusIds: 1, status: "CREATED" } // Fetching requests with status Asset Request Created ID
         fetchAllRequests(params)
     }, []);
-    useEffect(() => { handleRequest(requests) }, [requests]);
+
+    useEffect(() => { 
+        console.log(requests, "requests in all requests page!!")
+        handleRequest(requests) 
+    }, [requests]);
 
     useEffect(() => {
         if (fileData.module === module) {

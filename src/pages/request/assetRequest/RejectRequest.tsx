@@ -22,6 +22,9 @@ import { IRejectRequest, IRequestAxiosResponse } from "../interface";
 import InventoryOutlinedIcon from '@mui/icons-material/InventoryOutlined';
 import AssetTable from "../../../components/assetTable";
 import DescriptionText from "../../dashboard/sections/DescriptionText";
+import { AppDispatch } from "../../../store";
+import { useDispatch } from "react-redux";
+import { removeRequest } from "./slice";
 
 const RejectRequest = ({
     setSendingRequest,
@@ -31,7 +34,7 @@ const RejectRequest = ({
     buttonText,
 }: IRejectRequest) => {
     const theme = useTheme();
-
+    const dispatch = useDispatch<AppDispatch>();
     const [comment, setComment] = useState("");
     const [loading, setLoading] = useState(true);
     const [requestCommodities, setRequestCommodities] = useState<
@@ -86,7 +89,10 @@ const RejectRequest = ({
                 comment
             }
             const response = await assetRequestApprovalRejectionService(data) as IRequestAxiosResponse;
-            console.log(response, "Response!!")
+            if (response.status === 201) {
+                toast.success("Request has been rejected.");
+                dispatch(removeRequest(response.data)); // Filter out the rejected request from the store
+            }
 
         } catch (error) {
             console.error(error);

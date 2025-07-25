@@ -22,6 +22,9 @@ import { IApproveRequest, IRequestAxiosResponse } from "../interface";
 import InventoryOutlinedIcon from '@mui/icons-material/InventoryOutlined';
 import AssetTable from "../../../components/assetTable";
 import DescriptionText from "../../dashboard/sections/DescriptionText";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "../../../store";
+import { removeRequest } from "./slice";
 
 const ApproveRequest = ({
     setSendingRequest,
@@ -31,7 +34,7 @@ const ApproveRequest = ({
     buttonText,
 }: IApproveRequest) => {
     const theme = useTheme();
-
+    const dispatch = useDispatch<AppDispatch>();
     const [comment, setComment] = useState("");
     const [loading, setLoading] = useState(true);
     const [requestCommodities, setRequestCommodities] = useState<
@@ -86,7 +89,10 @@ const ApproveRequest = ({
                 comment
             }
             const response = await assetRequestApprovalRejectionService(data) as IRequestAxiosResponse;
-            console.log(response, "Response!!")
+            if (response.status === 201) {
+                toast.success("Request has been Approved.");
+                dispatch(removeRequest(response.data)); // Filter out the approved request from the store
+            }
 
         } catch (error) {
             console.error(error);
