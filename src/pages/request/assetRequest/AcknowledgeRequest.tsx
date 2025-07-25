@@ -9,16 +9,21 @@ import {
 } from "@mui/material";
 import {
     IAcknowledegeRequest,
-    IAcknowledgeRequesttAxiosResponse,
     IRequestAxiosResponse
 } from "../interface"
 import { ICommodity } from "../../settings/commodity/interface";
-import { acknowledgeRequestService, findAssetRequestByIDService } from "./service";
+import {
+    acknowledgeRequestService,
+    findAssetRequestByIDService
+} from "./service";
 import { toast } from "react-toastify";
 import ButtonComponent from "../../../components/forms/Button";
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import AssetTable from "../../../components/assetTable";
 import DescriptionText from "../../dashboard/sections/DescriptionText";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "../../../store";
+import { updateRequest } from "./slice";
 
 const AcknowledgeRequest = ({
     request,
@@ -33,7 +38,7 @@ const AcknowledgeRequest = ({
         Array<{ commodity: ICommodity; quantity: number }>
     >([]);
     const theme = useTheme();
-
+    const dispatch = useDispatch<AppDispatch>();
     const fetchRequestCommodities = async () => {
         setLoading(true);
         try {
@@ -81,9 +86,11 @@ const AcknowledgeRequest = ({
                 comment
             }
 
-            const response = await acknowledgeRequestService(data) as IAcknowledgeRequesttAxiosResponse;
+            const response = await acknowledgeRequestService(data) as IRequestAxiosResponse;
+
             if (response.status === 201) {
                 toast.success("Request acknowledged successfully.");
+                dispatch(updateRequest(response.data));
             }
 
         } catch (error) {
