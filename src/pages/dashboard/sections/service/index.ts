@@ -31,7 +31,7 @@ export const getMonthlyItAndOfficeStatsService = async () => {
 
 export const getMonthlyStationeryTotalsService = async () => {
     try {
-        const response = await axiosInstance.get('/stationery/monthly-stock');
+        const response = await axiosInstance.get('/stationery-report/branch');
         return response;
     } catch (error) {
         return error;
