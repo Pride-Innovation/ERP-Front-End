@@ -88,11 +88,28 @@ const SectionUtills = () => {
         }
     }
 
+    function fillMissingMonths(data: IMonthlyItAndOfficeStats[]): IMonthlyItAndOfficeStats[] {
+        const allMonths = [
+            "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+        ];
+
+        const dataMap = new Map(data.map(item => [item.month, item]));
+
+        return allMonths.map(month => {
+            return dataMap.get(month) || {
+                month,
+                itEquipment: 0,
+                officeEquipment: 0
+            };
+        });
+    }
+
     const getMonthlyItAndOfficeStatsFxn = async () => {
         try {
             const response = await getMonthlyItAndOfficeStatsService() as IMonthlyItAndOfficeStatsAxiosResponse;
             if (response.status === 200) {
-                setAssetStockReview(response.data);
+                setAssetStockReview(fillMissingMonths(response.data));
             }
         }
         catch (error) {
@@ -219,7 +236,6 @@ const SectionUtills = () => {
         try {
             const response = await getCurrentYearRequestSummaryService() as IYearlyRequestSummaryStatsAxiosResponse;
             if (response.status === 200) {
-                console.log(mapApiDataToCardData(response.data), "filtered data")
                 setYearlyRequestSummaryStats(mapApiDataToCardData(response.data));
             }
         }
@@ -228,7 +244,7 @@ const SectionUtills = () => {
         }
     }
 
-    const findLatestPendingRequestsWithDetails = async () => {  
+    const findLatestPendingRequestsWithDetails = async () => {
         try {
             const response = await findLatestPendingRequestsWithDetailsService() as IRequestsAxiosResponse;
             if (response.status === 200) {
