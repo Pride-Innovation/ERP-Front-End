@@ -20,8 +20,11 @@ const StationeryStock = () => {
             <Grid item xs={12} md={3}>
                 <Card sx={{ height: '100%' }}>
                     <CardContent>
-                        <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                            Stationery Stock – {new Date().toLocaleDateString('en-US', { month: 'long' })}
+                        <Typography variant="subtitle2"
+                            color="text.secondary"
+                            gutterBottom>
+                            Stationery Stock
+                            {/* – {new Date().toLocaleDateString('en-US', { month: 'long' })} */}
                         </Typography>
 
                         <Box display="flex" justifyContent="center" mt={2} mb={1}>

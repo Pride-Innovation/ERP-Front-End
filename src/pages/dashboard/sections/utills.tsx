@@ -171,6 +171,7 @@ const SectionUtills = () => {
         try {
             const response = await getMonthlyStationeryTotalsService() as IMonthlyStationeryTotalsAxiosResponse;
             if (response.status === 200) {
+                console.log("Monthly Stationery Totals:", response.data);
                 setDoughnutChartData(response.data);
             }
         }
