@@ -137,34 +137,33 @@ const SectionUtills = () => {
      */
     const setDoughnutChartData = (data: IMonthlyStationeryTotals) => {
         const keysOfInterest = ['Books', 'Pens', 'Loan Forms'];
-
         const names: string[] = [];
         const values: number[] = [];
-
         let othersSum = 0;
+
+        const seenKeys = new Set<string>();
 
         for (const [key, value] of Object.entries(data.commodities)) {
             if (keysOfInterest.includes(key)) {
-                names.push(key);
-                values.push(value);
+                seenKeys.add(key);
             } else {
                 othersSum += value;
             }
         }
 
-        if (othersSum > 0) {
-            names.push('Others');
-            values.push(othersSum);
+        for (const key of keysOfInterest) {
+            const value = data.commodities[key] ?? 0;
+            names.push(key);
+            values.push(value);
         }
 
-        const map = new Map(names.map((n, i) => [n, values[i]]));
-        const orderedNames = [...keysOfInterest, 'Others'].filter(name => map.has(name));
-        const orderedValues = orderedNames.map(name => map.get(name)!);
+        names.push('Others');
+        values.push(othersSum);
 
-        setMonthlyStationeryStats(orderedValues);
-        setMonthlyStationeryStatslabels(orderedNames);
+        setMonthlyStationeryStats(values);
+        setMonthlyStationeryStatslabels(names);
+    };
 
-    }
 
 
     const getMonthlyStationeryTotals = async () => {
