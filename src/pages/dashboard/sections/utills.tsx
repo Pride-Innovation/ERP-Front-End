@@ -47,6 +47,9 @@ const SectionUtills = () => {
      * @param ratings - Array of monthly stats containing month and quantity.
      */
     const setRatings = (ratings: Array<IRequestMonthlyStats>) => {
+        if (!ratings || ratings.length === 0) {
+            return;
+        }
         setRequestRatings(() => ratings.map((rating) => rating.quantity));
         setRequestRatingStatsLabels(() => ratings.map((rating) => rating.month.slice(0, 3)));
     }
@@ -170,7 +173,6 @@ const SectionUtills = () => {
         try {
             const response = await getMonthlyStationeryTotalsService() as IMonthlyStationeryTotalsAxiosResponse;
             if (response.status === 200) {
-                console.log("Monthly Stationery Totals:", response.data);
                 setDoughnutChartData(response.data);
             }
         }
