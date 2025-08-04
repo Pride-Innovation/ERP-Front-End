@@ -37,10 +37,8 @@ interface DashboardContextProps {
 export const DashboardContext = createContext({} as DashboardContextProps);
 
 const DashboardProvider: FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [requestRatingStats, setRequestRatings] = useState<Array<number>>([
-        3.2, 3.4, 3.3, 3.6, 3.7, 3.5, 3.6, 3.8, 3.9, 4.0, 4.0, 4.0]);
-    const [requestRatingStatsLabels, setRequestRatingStatsLabels] = useState<Array<string>>([
-        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']);
+    const [requestRatingStats, setRequestRatings] = useState<Array<number>>([]);
+    const [requestRatingStatsLabels, setRequestRatingStatsLabels] = useState<Array<string>>([]);
     const [requestVariationStats, setRequestVariationStats] = useState<IRequestRatingStats>({
         previousMonth: 3.5,
         currentMonth: 4.0
