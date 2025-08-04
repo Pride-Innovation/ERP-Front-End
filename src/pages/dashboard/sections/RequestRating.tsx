@@ -89,7 +89,7 @@ const RequestRating = () => {
                     <Grid item xs={12} container>
                         <Grid item xs={12}>
                             <Typography variant="subtitle2" color="background.paper">
-                                Top Stocked – {new Date().toLocaleDateString('en-US', { month: 'long' })}
+                                Top Issued – {new Date().toLocaleDateString('en-US', { month: 'long' })}
                             </Typography>
                         </Grid>
                         <Grid item xs={6}>
@@ -121,7 +121,7 @@ const RequestRating = () => {
                         <Grid item xs={12} container>
                             <Grid item xs={12}>
                                 <Typography variant="subtitle2" color="background.paper">
-                                    Least Stocked – {new Date().toLocaleDateString('en-US', { month: 'long' })}
+                                    Least Issued – {new Date().toLocaleDateString('en-US', { month: 'long' })}
                                 </Typography>
                             </Grid>
                             <Grid item xs={6}>

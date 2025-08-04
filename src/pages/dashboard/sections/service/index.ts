@@ -40,7 +40,7 @@ export const getMonthlyStationeryTotalsService = async () => {
 
 export const getItAndOfficeMonthlyStockSummaryService = async () => {
     try {
-        const response = await axiosInstance.get('/it-and-office/monthly-stock');
+        const response = await axiosInstance.get('/it-and-office/monthly-stock/summary');
         return response;
     } catch (error) {
         return error;
