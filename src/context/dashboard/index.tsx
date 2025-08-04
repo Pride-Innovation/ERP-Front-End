@@ -4,13 +4,17 @@ import {
     FC,
     useState
 } from "react";
-import { IMonthlyItAndOfficeSummaryStats, IRequestRatingStats, RequestCardProps } from "../../pages/dashboard/sections/interface";
+import {
+    IMonthlyItAndOfficeSummaryStats,
+    IRequestRatingStats,
+    RequestCardProps
+} from "../../pages/dashboard/sections/interface";
 import { IRequest } from "../../pages/request/interface";
 
 
 interface DashboardContextProps {
-    requestRatingStats: Array<number>;
-    setRequestRatings: Dispatch<React.SetStateAction<Array<number>>>;
+    requestRatingStats: Array<number | null>;
+    setRequestRatings: Dispatch<React.SetStateAction<Array<number | null>>>;
     requestRatingStatsLabels: Array<string>;
     setRequestRatingStatsLabels: Dispatch<React.SetStateAction<Array<string>>>;
     requestVariationStats: IRequestRatingStats;
@@ -37,8 +41,10 @@ interface DashboardContextProps {
 export const DashboardContext = createContext({} as DashboardContextProps);
 
 const DashboardProvider: FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [requestRatingStats, setRequestRatings] = useState<Array<number>>([]);
-    const [requestRatingStatsLabels, setRequestRatingStatsLabels] = useState<Array<string>>([]);
+    const [requestRatingStats, setRequestRatings] = useState<Array<number | null>>([
+        3.2, 3.4, 3.3, 3.6, 3.7, 3.5, 3.6, 3.8, 3.9, 4.0, 4.0, 4.0]);
+    const [requestRatingStatsLabels, setRequestRatingStatsLabels] = useState<Array<string>>([
+        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']);
     const [requestVariationStats, setRequestVariationStats] = useState<IRequestRatingStats>({
         previousMonth: 3.5,
         currentMonth: 4.0

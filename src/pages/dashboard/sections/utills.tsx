@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext } from "react";
 import {
     IMonthlyItAndOfficeStats,
     IMonthlyItAndOfficeStatsAxiosResponse,
@@ -29,7 +29,6 @@ import RequestImage from "../../../statics/images/requestDesktop.png"
 import { IRequestsAxiosResponse } from "../../request/interface";
 
 const SectionUtills = () => {
-    const [loading, setLoading] = useState<boolean>(false);
     const {
         setRequestRatings,
         setRequestRatingStatsLabels,
@@ -65,14 +64,12 @@ const SectionUtills = () => {
 
         const dataMap = new Map(data.map(item => [item.month, item.quantity]));
 
-        const result: IRequestMonthlyStats[] = allMonths
-            .slice(0, currentMonthIndex + 1)
-            .map(month => ({
-                month,
-                quantity: dataMap.get(month) ?? 0
-            }));
-
-        return result;
+        return allMonths.map((month, index) => ({
+            month,
+            quantity: index <= currentMonthIndex
+                ? dataMap.get(month) ?? 0
+                : null
+        }));
     }
 
     /**
@@ -80,7 +77,6 @@ const SectionUtills = () => {
      * Updates the context with the new ratings.
      */
     const requestRatingStatsFxn = async () => {
-        setLoading(true);
         try {
             const response = await resquestStatsOneYearService() as IRequestMonthlyStatsAxiosResponse;
             if (response.status === 200) {
@@ -88,8 +84,6 @@ const SectionUtills = () => {
             }
         } catch (error) {
             console.error("Error fetching request rating stats:", error);
-        } finally {
-            setLoading(false);
         }
     }
 
@@ -289,8 +283,7 @@ const SectionUtills = () => {
         getMonthlyStationeryTotals,
         getItAndOfficeMonthlyStockSummaryFxn,
         getCurrentYearRequestSummary,
-        findLatestPendingRequestsWithDetails,
-        loading
+        findLatestPendingRequestsWithDetails
     });
 }
 

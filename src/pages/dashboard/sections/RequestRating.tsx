@@ -11,20 +11,18 @@ import { Line } from 'react-chartjs-2';
 import { useContext, useEffect } from 'react';
 import SectionUtills from './utills';
 import { DashboardContext } from '../../../context/dashboard';
-import Loading from '../../../components/loading';
 
 const RequestRating = () => {
     const {
         requestRatingStatsLabels,
         requestRatingStats,
         requestVariationStats,
-        monthlyITandOfficeSummaryStats,
+        monthlyITandOfficeSummaryStats
     } = useContext(DashboardContext);
     const {
         requestRatingStatsFxn,
         requestRatingVariationFxn,
-        getItAndOfficeMonthlyStockSummaryFxn,
-        loading
+        getItAndOfficeMonthlyStockSummaryFxn
     } = SectionUtills();
 
     useEffect(() => {
@@ -58,34 +56,31 @@ const RequestRating = () => {
                             : `-${((requestVariationStats.previousMonth - requestVariationStats.currentMonth) / 100).toFixed(2)} % decrease from last month`
                     } </Typography>
                     <Box mt={2}>
-                        {loading ? (
-                            <Loading items="request ratings" />
-                        ) : (
-                            <Line
-                                data={{
-                                    labels: requestRatingStatsLabels,
-                                    datasets: [
-                                        {
-                                            label: 'Total',
-                                            data: requestRatingStats,
-                                            borderColor: '#3f51b5',
-                                            backgroundColor: 'rgba(63, 81, 181, 0.1)',
-                                            tension: 0.4,
-                                            fill: true,
-                                            pointRadius: 3,
-                                            pointHoverRadius: 4,
-                                        },
-                                    ],
-                                }}
-                                options={{
-                                    responsive: false,
-                                    plugins: { legend: { display: false } },
-                                    scales: {
-                                        y: { display: false },
-                                        x: { ticks: { color: '#999' } },
+                        <Line
+                            data={{
+                                labels: requestRatingStatsLabels,
+                                datasets: [
+                                    {
+                                        label: 'Total',
+                                        data: requestRatingStats,
+                                        borderColor: '#3f51b5',
+                                        backgroundColor: 'rgba(63, 81, 181, 0.1)',
+                                        tension: 0.4,
+                                        fill: true,
+                                        pointRadius: 3,
+                                        pointHoverRadius: 4,
                                     },
-                                }}
-                            />)}
+                                ],
+                            }}
+                            options={{
+                                responsive: false,
+                                plugins: { legend: { display: false } },
+                                scales: {
+                                    y: { display: false },
+                                    x: { ticks: { color: '#999' } },
+                                },
+                            }}
+                        />
                     </Box>
                 </CardContent>
             </Card>

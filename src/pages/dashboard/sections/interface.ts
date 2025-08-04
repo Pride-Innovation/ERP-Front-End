@@ -8,7 +8,7 @@ interface IRequestRatingStats {
 
 interface IRequestMonthlyStats {
     month: string;
-    quantity: number
+    quantity: number | null
 }
 
 interface IMonthlyItAndOfficeStats {
