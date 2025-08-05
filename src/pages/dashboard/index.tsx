@@ -20,6 +20,7 @@ import AssetStockReview from './sections/AssetStockReview';
 import StationeryStock from './sections/StationeryStock';
 import RequestReport from './sections/RequestReport';
 import LatestRequest from './sections/LatestRequest';
+import ExpandableTable from './sections/PersonalAssetsReport';
 
 ChartJS.register(
   LineElement,

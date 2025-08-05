@@ -21,9 +21,12 @@ import {
     TextField,
     Button,
     Typography,
-    InputAdornment,
     alpha,
     Divider,
+    Tooltip,
+    Stack,
+    Zoom,
+    useTheme,
 } from '@mui/material';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import AddIcon from '@mui/icons-material/Add';
@@ -43,9 +46,17 @@ import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
 import PriceTotals from './priceTotals';
 import { formatNumberWithCommas } from './helper';
 import AppRegistrationOutlinedIcon from '@mui/icons-material/AppRegistrationOutlined';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+
+const PRIMARY_COLOR = '#08796C';
+const SECONDARY_COLOR = '#BC892C';
+const TABLE_HEADER_BG = alpha(PRIMARY_COLOR, 0.08);
+const TABLE_HEADER_COLOR = PRIMARY_COLOR;
+const TABLE_BORDER_COLOR = alpha('#000', 0.08);
 
 const StockItems = () => {
-    const { fetchAllCommodities } = CommodityUtills()
+    const theme = useTheme();
+    const { fetchAllCommodities } = CommodityUtills();
     const [itemOptions, setItemOptions] = useState<{ name: string; groupName: string, assetTypeId: number | string }[]>([]);
     const { stockRows, setStockRows, setAssetType } = useContext(RequestContext);
     const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore);
@@ -58,7 +69,6 @@ const StockItems = () => {
         setStockRows(updatedRows);
     };
 
-
     const handleAssetTypeNameChange = (id: number, value: string) => {
         const updatedRows = stockRows.map((row) =>
             row.id === id ? { ...row, assetTypeId: value } : row
@@ -67,7 +77,7 @@ const StockItems = () => {
 
         const selectedType = assetTypes.find((asstyp) => asstyp.id === value);
         if (selectedType) {
-            setAssetType(selectedType)
+            setAssetType(selectedType);
             fetchAllCommodities({ assetTypeId: selectedType.id });
         }
     };
@@ -126,142 +136,202 @@ const StockItems = () => {
         }
     }, [commodities]);
 
+    const tableHeaders = [
+        {
+            name: 'Asset Type',
+            icon: <AppRegistrationOutlinedIcon sx={{ fontSize: 16 }} />
+        },
+        {
+            name: 'Name',
+            icon: <FeedOutlinedIcon sx={{ fontSize: 16 }} />
+        },
+        {
+            name: "Unit Measure",
+            icon: <ScaleOutlinedIcon sx={{ fontSize: 16 }} />
+        },
+        {
+            name: "Ordered Qty",
+            icon: <EighteenMpOutlinedIcon sx={{ fontSize: 16 }} />
+        },
+        {
+            name: "Delivered Qty",
+            icon: <ShoppingCartOutlinedIcon sx={{ fontSize: 16 }} />
+        },
+        {
+            name: "Cost Price",
+            icon: <AttachMoneyIcon sx={{ fontSize: 16 }} />
+        },
+        {
+            name: "Purchase Price",
+            icon: <MonetizationOnOutlinedIcon sx={{ fontSize: 16 }} />
+        },
+        {
+            name: "Actions",
+            icon: <RemoveCircleOutlineOutlinedIcon sx={{ fontSize: 16 }} />
+        }
+    ];
 
     return (
-        <Paper elevation={4} sx={{
-            borderRadius: 2, boxShadow: "none",
-        }}>
+        <Paper
+            elevation={0}
+            sx={{
+                borderRadius: 3,
+                border: `1px solid ${TABLE_BORDER_COLOR}`,
+                overflow: 'hidden',
+                boxShadow: '0 2px 12px rgba(0,0,0,0.03)'
+            }}
+        >
             <Box
                 display="flex"
                 justifyContent="space-between"
                 alignItems="center"
-                mb={3}
                 sx={{
-                    bgcolor: alpha("#007C7C", 0.1),
-                    p: 2,
-                    borderRadius: 2,
-                    border: `1px solid ${alpha("#007C7C", 0.3)}`,
+                    p: 3,
+                    background: `linear-gradient(to right, ${alpha(PRIMARY_COLOR, 0.9)}, ${alpha(PRIMARY_COLOR, 0.7)})`,
+                    color: 'white',
                 }}
             >
-                <Typography
-                    sx={{
-                        fontWeight: 600,
-                        fontSize: "15px",
-                        textTransform: "capitalize",
-                        color: "#007C7C",
-                    }}
-                >
-                    Stock Items
-                </Typography>
-                <Button
-                    variant="contained"
-                    startIcon={<AddIcon />}
-                    onClick={handleAddRow}
-                    color="secondary"
-                    sx={{
-                        textTransform: 'none',
-                        fontWeight: 500,
-                    }}
-                >
-                    Add Item
-                </Button>
-            </Box>
-
-            <TableContainer component={Box} sx={{ borderRadius: 2, border: 'none' }}>
-                <Table size="small">
-                    <TableHead>
-                        <TableRow
+                <Stack direction="row" spacing={2} alignItems="center">
+                    <Box
+                        sx={{
+                            bgcolor: 'white',
+                            color: PRIMARY_COLOR,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            borderRadius: '50%',
+                            width: 40,
+                            height: 40,
+                        }}
+                    >
+                        <ShoppingCartIcon />
+                    </Box>
+                    <Box>
+                        <Typography
+                            variant="h6"
                             sx={{
-                                backgroundColor: '#CACACA',
+                                fontWeight: 600,
+                                fontSize: "18px",
+                                letterSpacing: 0.5,
                             }}
                         >
-                            {[
-                                {
-                                    name: 'Asset Type',
-                                    icon: <AppRegistrationOutlinedIcon sx={{ fontSize: "12px", mr: "5px" }} />
-                                },
-                                {
-                                    name: 'Name',
-                                    icon: <FeedOutlinedIcon sx={{ fontSize: "12px", mr: "5px" }} />
-                                },
-                                {
-                                    name: "Unit Measure",
-                                    icon: <ScaleOutlinedIcon sx={{ fontSize: "12px", mr: "5px" }} />
-                                },
-                                {
-                                    name: "Ordered Qty",
-                                    icon: <EighteenMpOutlinedIcon sx={{ fontSize: "12px", mr: "5px" }} />
-                                },
-                                {
-                                    name: "Delivered Qty",
-                                    icon: <ShoppingCartOutlinedIcon sx={{ fontSize: "12px", mr: "5px" }} />
-                                },
-                                {
-                                    name: "Cost Price",
-                                    icon: <AttachMoneyIcon sx={{ fontSize: "12px", mr: "5px" }} />
-                                },
-                                {
-                                    name: "Purchase Price",
-                                    icon: <MonetizationOnOutlinedIcon sx={{ fontSize: "12px", mr: "5px" }} />
-                                },
-                                {
-                                    name: "Remove",
-                                    icon: <RemoveCircleOutlineOutlinedIcon sx={{ fontSize: "12px", mr: "5px" }} />
-                                }
-                            ].map((header, idx) => (
+                            Stock Items
+                        </Typography>
+                        <Typography variant="caption" sx={{ opacity: 0.8 }}>
+                            Add and manage stock items for this order
+                        </Typography>
+                    </Box>
+                </Stack>
+                <Tooltip title="Add new item" arrow placement="left">
+                    <Button
+                        variant="contained"
+                        startIcon={<AddIcon />}
+                        onClick={handleAddRow}
+                        sx={{
+                            textTransform: 'none',
+                            fontWeight: 500,
+                            bgcolor: 'white',
+                            color: PRIMARY_COLOR,
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                            '&:hover': {
+                                bgcolor: "white",
+                            },
+                            py: 1,
+                        }}
+                    >
+                        Add Item
+                    </Button>
+                </Tooltip>
+            </Box>
+
+            <TableContainer
+                component={Box}
+                sx={{
+                    maxHeight: 500,
+                    overflowY: 'auto',
+                    scrollbarWidth: 'thin',
+                    '&::-webkit-scrollbar': {
+                        width: '6px',
+                        height: '6px',
+                    },
+                    '&::-webkit-scrollbar-thumb': {
+                        backgroundColor: alpha('#000', 0.2),
+                        borderRadius: 3,
+                    },
+                }}
+            >
+                <Table size="medium" stickyHeader>
+                    <TableHead>
+                        <TableRow>
+                            {tableHeaders.map((header, idx) => (
                                 <TableCell
                                     key={header?.name}
-                                    align={idx === 3 ? 'center' : 'left'}
+                                    align={idx === 3 || idx === 4 ? 'center' : idx === 7 ? 'center' : 'left'}
                                     sx={{
-                                        color: 'teal',
-                                        fontWeight: 'bold',
-                                        textTransform: 'capitalize',
+                                        bgcolor: TABLE_HEADER_BG,
+                                        color: TABLE_HEADER_COLOR,
+                                        fontWeight: 600,
                                         fontSize: 14,
-                                        borderBottom: 'none',
-                                        borderRight: idx !== 8 ? '1px solid rgba(224, 224, 224, 1)' : 'none',
-                                        px: 2,
-                                        py: 1.5,
+                                        borderBottom: `1px solid ${TABLE_BORDER_COLOR}`,
+                                        py: 1.75,
+                                        whiteSpace: 'nowrap',
                                     }}
                                 >
-                                    <Typography sx={{ display: "flex", alignItems: "center" }}>
+                                    <Stack direction="row" spacing={1} alignItems="center" justifyContent={idx === 7 ? 'center' : 'flex-start'}>
                                         {header?.icon}
-                                        {header?.name}
-                                    </Typography>
+                                        <Typography variant="subtitle2">
+                                            {header?.name}
+                                        </Typography>
+                                    </Stack>
                                 </TableCell>
                             ))}
                         </TableRow>
                     </TableHead>
+
                     <TableBody>
                         {stockRows.map((row, index) => (
                             <TableRow
                                 key={row.id}
                                 sx={{
-                                    backgroundColor: index % 2 === 0 ? '#fafafa' : '#ffffff',
+                                    backgroundColor: index % 2 === 0 ? alpha(PRIMARY_COLOR, 0.01) : 'white',
+                                    transition: 'all 0.2s',
                                     '&:hover': {
-                                        backgroundColor: '#F1F1F1',
+                                        backgroundColor: alpha(PRIMARY_COLOR, 0.04),
                                     },
-                                    '&:last-child td, &:last-child th': { border: 0 },
                                 }}
                             >
-                                <TableCell sx={{ borderBottom: 'none', px: 2, py: 1 }}>
+                                <TableCell sx={{ borderBottom: `1px solid ${alpha('#000', 0.05)}`, py: 1.5 }}>
                                     <Select
                                         fullWidth
                                         value={row.assetTypeId || ""}
                                         onChange={(e) => handleAssetTypeNameChange(row.id, e.target.value as string)}
                                         displayEmpty
                                         size="small"
-                                        variant="standard"
-                                        disableUnderline
+                                        MenuProps={{
+                                            PaperProps: {
+                                                sx: {
+                                                    maxHeight: 300,
+                                                    boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+                                                }
+                                            }
+                                        }}
                                         sx={{
                                             fontSize: 14,
                                             fontWeight: 400,
                                             color: row.assetTypeId ? 'text.primary' : 'text.secondary',
+                                            backgroundColor: 'white',
+                                            '& .MuiOutlinedInput-notchedOutline': {
+                                                borderColor: alpha('#000', 0.1),
+                                            },
+                                            '&:hover .MuiOutlinedInput-notchedOutline': {
+                                                borderColor: alpha(PRIMARY_COLOR, 0.5),
+                                            },
+                                            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                                borderColor: PRIMARY_COLOR,
+                                            },
                                             '& .MuiSelect-select': {
-                                                padding: '8px 12px',
-                                            },
-                                            '& .MuiSvgIcon-root': {
-                                                color: '#999',
-                                            },
+                                                py: 1,
+                                            }
                                         }}
                                     >
                                         <MenuItem value="" disabled>
@@ -274,25 +344,40 @@ const StockItems = () => {
                                         ))}
                                     </Select>
                                 </TableCell>
-                                <TableCell sx={{ borderBottom: 'none', px: 2, py: 1 }}>
+
+                                <TableCell sx={{ borderBottom: `1px solid ${alpha('#000', 0.05)}`, py: 1.5 }}>
                                     <Select
                                         fullWidth
                                         value={row.name}
                                         onChange={(e) => handleNameChange(row.id, e.target.value)}
                                         displayEmpty
                                         size="small"
-                                        variant="standard"
-                                        disableUnderline
+                                        disabled={!row.assetTypeId}
+                                        MenuProps={{
+                                            PaperProps: {
+                                                sx: {
+                                                    maxHeight: 300,
+                                                    boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+                                                }
+                                            }
+                                        }}
                                         sx={{
                                             fontSize: 14,
                                             fontWeight: 400,
                                             color: row.name ? 'text.primary' : 'text.secondary',
+                                            backgroundColor: 'white',
+                                            '& .MuiOutlinedInput-notchedOutline': {
+                                                borderColor: alpha('#000', 0.1),
+                                            },
+                                            '&:hover .MuiOutlinedInput-notchedOutline': {
+                                                borderColor: alpha(PRIMARY_COLOR, 0.5),
+                                            },
+                                            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                                borderColor: PRIMARY_COLOR,
+                                            },
                                             '& .MuiSelect-select': {
-                                                padding: '8px 12px',
-                                            },
-                                            '& .MuiSvgIcon-root': {
-                                                color: '#999',
-                                            },
+                                                py: 1,
+                                            }
                                         }}
                                     >
                                         <MenuItem value="" disabled>
@@ -307,153 +392,170 @@ const StockItems = () => {
                                             ))}
                                     </Select>
                                 </TableCell>
-                                <TableCell sx={{ borderBottom: 'none', px: 2, py: 1 }}>
+
+                                <TableCell sx={{ borderBottom: `1px solid ${alpha('#000', 0.05)}`, py: 1.5 }}>
                                     <TextField
                                         fullWidth
                                         size="small"
-                                        value={row.groupName}
+                                        value={row.groupName || ''}
                                         InputProps={{
                                             readOnly: true,
-                                            disableUnderline: true,
                                             sx: {
                                                 fontSize: 14,
-                                                borderRadius: 2,
-                                                px: 1.5,
-                                            },
+                                                backgroundColor: alpha('#f5f5f5', 0.5),
+                                                color: theme.palette.text.secondary,
+                                                '& .MuiOutlinedInput-notchedOutline': {
+                                                    borderColor: alpha('#000', 0.08),
+                                                },
+                                            }
                                         }}
-                                        variant="standard"
+                                        placeholder="Auto-filled"
                                     />
                                 </TableCell>
-                                <TableCell sx={{ borderBottom: 'none', px: 2, py: 1 }}>
+
+                                <TableCell align="center" sx={{ borderBottom: `1px solid ${alpha('#000', 0.05)}`, py: 1.5 }}>
+                                    <Box sx={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        bgcolor: 'white',
+                                        border: `1px solid ${alpha('#000', 0.1)}`,
+                                        borderRadius: 1,
+                                        maxWidth: 160,
+                                        mx: 'auto'
+                                    }}>
+                                        <IconButton
+                                            size="small"
+                                            onClick={() => handleInputChange(
+                                                row.id,
+                                                'orderedQuantity',
+                                                Math.max(0, (row.orderedQuantity || 0) - 1)
+                                            )}
+                                            sx={{
+                                                color: SECONDARY_COLOR,
+                                                '&:hover': { bgcolor: alpha(SECONDARY_COLOR, 0.1) }
+                                            }}
+                                        >
+                                            <RemoveCircleOutlineIcon fontSize="small" />
+                                        </IconButton>
+
+                                        <TextField
+                                            size="small"
+                                            type="number"
+                                            value={row.orderedQuantity}
+                                            onChange={(e) => handleInputChange(
+                                                row.id,
+                                                'orderedQuantity',
+                                                parseInt(e.target.value) || 0
+                                            )}
+                                            variant="standard"
+                                            InputProps={{
+                                                disableUnderline: true,
+                                                sx: {
+                                                    width: 40,
+                                                    textAlign: 'center',
+                                                    fontSize: 14,
+                                                    fontWeight: 500,
+                                                    input: { textAlign: 'center' },
+                                                    '& input[type=number]::-webkit-inner-spin-button': { display: 'none' },
+                                                    '& input[type=number]::-webkit-outer-spin-button': { display: 'none' },
+                                                    '& input[type=number]': { MozAppearance: 'textfield' },
+                                                }
+                                            }}
+                                        />
+
+                                        <IconButton
+                                            size="small"
+                                            onClick={() => handleInputChange(
+                                                row.id,
+                                                'orderedQuantity',
+                                                (row.orderedQuantity || 0) + 1
+                                            )}
+                                            sx={{
+                                                color: PRIMARY_COLOR,
+                                                '&:hover': { bgcolor: alpha(PRIMARY_COLOR, 0.1) }
+                                            }}
+                                        >
+                                            <AddCircleOutlineOutlinedIcon fontSize="small" />
+                                        </IconButton>
+                                    </Box>
+                                </TableCell>
+
+                                <TableCell align="center" sx={{ borderBottom: `1px solid ${alpha('#000', 0.05)}`, py: 1.5 }}>
+                                    <Box sx={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        bgcolor: 'white',
+                                        border: `1px solid ${alpha('#000', 0.1)}`,
+                                        borderRadius: 1,
+                                        maxWidth: 160,
+                                        mx: 'auto'
+                                    }}>
+                                        <IconButton
+                                            size="small"
+                                            onClick={() => handleInputChange(
+                                                row.id,
+                                                'deliveredQuantity',
+                                                Math.max(0, (row.deliveredQuantity || 0) - 1)
+                                            )}
+                                            sx={{
+                                                color: SECONDARY_COLOR,
+                                                '&:hover': { bgcolor: alpha(SECONDARY_COLOR, 0.1) }
+                                            }}
+                                        >
+                                            <RemoveCircleOutlineIcon fontSize="small" />
+                                        </IconButton>
+
+                                        <TextField
+                                            size="small"
+                                            type="number"
+                                            value={row.deliveredQuantity}
+                                            onChange={(e) => handleInputChange(
+                                                row.id,
+                                                'deliveredQuantity',
+                                                parseInt(e.target.value) || 0
+                                            )}
+                                            variant="standard"
+                                            InputProps={{
+                                                disableUnderline: true,
+                                                sx: {
+                                                    width: 40,
+                                                    textAlign: 'center',
+                                                    fontSize: 14,
+                                                    fontWeight: 500,
+                                                    input: { textAlign: 'center' },
+                                                    '& input[type=number]::-webkit-inner-spin-button': { display: 'none' },
+                                                    '& input[type=number]::-webkit-outer-spin-button': { display: 'none' },
+                                                    '& input[type=number]': { MozAppearance: 'textfield' },
+                                                }
+                                            }}
+                                        />
+
+                                        <IconButton
+                                            size="small"
+                                            onClick={() => handleInputChange(
+                                                row.id,
+                                                'deliveredQuantity',
+                                                (row.deliveredQuantity || 0) + 1
+                                            )}
+                                            sx={{
+                                                color: PRIMARY_COLOR,
+                                                '&:hover': { bgcolor: alpha(PRIMARY_COLOR, 0.1) }
+                                            }}
+                                        >
+                                            <AddCircleOutlineOutlinedIcon fontSize="small" />
+                                        </IconButton>
+                                    </Box>
+                                </TableCell>
+
+                                <TableCell sx={{ borderBottom: `1px solid ${alpha('#000', 0.05)}`, py: 1.5 }}>
                                     <TextField
-                                        size="small"
-                                        type="number"
                                         fullWidth
-                                        value={row.orderedQuantity}
-                                        variant="standard"
-                                        onChange={(e) =>
-                                            handleInputChange(row.id, 'orderedQuantity', parseInt(e.target.value) || 0)
-                                        }
-                                        InputProps={{
-                                            disableUnderline: true,
-                                            sx: {
-                                                fontSize: 14,
-                                                borderRadius: 2,
-                                                px: 1.5,
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                '& input[type=number]::-webkit-inner-spin-button': {
-                                                    display: 'none',
-                                                    WebkitAppearance: 'none',
-                                                    margin: 0,
-                                                },
-                                                '& input[type=number]::-webkit-outer-spin-button': {
-                                                    display: 'none',
-                                                    WebkitAppearance: 'none',
-                                                    margin: 0,
-                                                },
-                                                '& input[type=number]': {
-                                                    MozAppearance: 'textfield',
-                                                },
-                                            },
-                                            startAdornment: (
-                                                <InputAdornment position="start">
-                                                    <IconButton
-                                                        size="small"
-                                                        onClick={() =>
-                                                            handleInputChange(row.id, 'orderedQuantity', row.orderedQuantity - 1)
-                                                        }
-                                                        sx={{ p: 0.5, mr: 3 }}
-                                                    >
-                                                        <RemoveCircleOutlineIcon fontSize="small" color='secondary' />
-                                                    </IconButton>
-                                                </InputAdornment>
-                                            ),
-                                            endAdornment: (
-                                                <InputAdornment position="end">
-                                                    <IconButton
-                                                        size="small"
-                                                        onClick={() =>
-                                                            handleInputChange(row.id, 'orderedQuantity', row.orderedQuantity + 1)
-                                                        }
-                                                        sx={{ p: 0.5 }}
-                                                    >
-                                                        <AddCircleOutlineOutlinedIcon fontSize="small" color='primary' />
-                                                    </IconButton>
-                                                </InputAdornment>
-                                            ),
-                                        }}
-                                    />
-                                </TableCell>
-                                <TableCell sx={{ borderBottom: 'none', px: 2, py: 1 }}>
-                                    <TextField
-                                        size="small"
-                                        type="number"
-                                        fullWidth
-                                        value={row.deliveredQuantity}
-                                        variant="standard"
-                                        onChange={(e) =>
-                                            handleInputChange(row.id, 'deliveredQuantity', parseInt(e.target.value) || 0)
-                                        }
-                                        InputProps={{
-                                            disableUnderline: true,
-                                            sx: {
-                                                fontSize: 14,
-                                                borderRadius: 2,
-                                                px: 1.5,
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                '& input[type=number]::-webkit-inner-spin-button': {
-                                                    display: 'none',
-                                                    WebkitAppearance: 'none',
-                                                    margin: 0,
-                                                },
-                                                '& input[type=number]::-webkit-outer-spin-button': {
-                                                    display: 'none',
-                                                    WebkitAppearance: 'none',
-                                                    margin: 0,
-                                                },
-                                                '& input[type=number]': {
-                                                    MozAppearance: 'textfield',
-                                                },
-                                            },
-                                            startAdornment: (
-                                                <InputAdornment position="start">
-                                                    <IconButton
-                                                        size="small"
-                                                        onClick={() =>
-                                                            handleInputChange(row.id, 'deliveredQuantity', row.deliveredQuantity - 1)
-                                                        }
-                                                        sx={{ p: 0.5, mr: 3 }}
-                                                    >
-                                                        <RemoveCircleOutlineIcon fontSize="small" color='secondary' />
-                                                    </IconButton>
-                                                </InputAdornment>
-                                            ),
-                                            endAdornment: (
-                                                <InputAdornment position="end">
-                                                    <IconButton
-                                                        size="small"
-                                                        onClick={() =>
-                                                            handleInputChange(row.id, 'deliveredQuantity', row.deliveredQuantity + 1)
-                                                        }
-                                                        sx={{ p: 0.5 }}
-                                                    >
-                                                        <AddCircleOutlineOutlinedIcon fontSize="small" color='primary' />
-                                                    </IconButton>
-                                                </InputAdornment>
-                                            ),
-                                        }}
-                                    />
-                                </TableCell>
-                                <TableCell sx={{ borderBottom: 'none', px: 2, py: 1 }}>
-                                    <TextField
                                         size="small"
                                         type="text"
-                                        fullWidth
                                         value={formatNumberWithCommas(row.costPrice)}
-                                        placeholder="Type here ..."
-                                        variant="standard"
+                                        placeholder="Enter cost price"
                                         onChange={(e) => {
                                             const raw = e.target.value.replace(/,/g, '');
                                             const numeric = parseFloat(raw);
@@ -464,24 +566,30 @@ const StockItems = () => {
                                             }
                                         }}
                                         InputProps={{
-                                            disableUnderline: true,
                                             sx: {
                                                 fontSize: 14,
-                                                borderRadius: 2,
-                                                px: 1.5,
-                                            },
+                                                backgroundColor: 'white',
+                                                '& .MuiOutlinedInput-notchedOutline': {
+                                                    borderColor: alpha('#000', 0.1),
+                                                },
+                                                '&:hover .MuiOutlinedInput-notchedOutline': {
+                                                    borderColor: alpha(PRIMARY_COLOR, 0.5),
+                                                },
+                                                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                                    borderColor: PRIMARY_COLOR,
+                                                },
+                                            }
                                         }}
                                     />
                                 </TableCell>
 
-                                <TableCell sx={{ borderBottom: 'none', px: 2, py: 1 }}>
+                                <TableCell sx={{ borderBottom: `1px solid ${alpha('#000', 0.05)}`, py: 1.5 }}>
                                     <TextField
+                                        fullWidth
                                         size="small"
                                         type="text"
-                                        fullWidth
                                         value={formatNumberWithCommas(row.purchasePrice)}
-                                        placeholder="Type here ..."
-                                        variant="standard"
+                                        placeholder="Enter purchase price"
                                         onChange={(e) => {
                                             const raw = e.target.value.replace(/,/g, '');
                                             const numeric = parseFloat(raw);
@@ -492,34 +600,57 @@ const StockItems = () => {
                                             }
                                         }}
                                         InputProps={{
-                                            disableUnderline: true,
                                             sx: {
                                                 fontSize: 14,
-                                                borderRadius: 2,
-                                                px: 1.5,
-                                            },
+                                                backgroundColor: 'white',
+                                                '& .MuiOutlinedInput-notchedOutline': {
+                                                    borderColor: alpha('#000', 0.1),
+                                                },
+                                                '&:hover .MuiOutlinedInput-notchedOutline': {
+                                                    borderColor: alpha(PRIMARY_COLOR, 0.5),
+                                                },
+                                                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                                    borderColor: PRIMARY_COLOR,
+                                                },
+                                            }
                                         }}
                                     />
-
                                 </TableCell>
 
-                                <TableCell align="center" sx={{ borderBottom: 'none', px: 2, py: 1 }}>
-                                    <IconButton
-                                        color="error"
-                                        onClick={() => handleRemoveRow(row.id)}
-                                        disabled={stockRows.length === 1}
-                                        sx={{ '&:disabled': { opacity: 0.3 } }}
+                                <TableCell align="center" sx={{ borderBottom: `1px solid ${alpha('#000', 0.05)}`, py: 1.5 }}>
+                                    <Tooltip
+                                        title={stockRows.length === 1 ? "Cannot remove the last item" : "Remove item"}
+                                        arrow
+                                        TransitionComponent={Zoom}
                                     >
-                                        <RemoveCircleOutlineIcon />
-                                    </IconButton>
+                                        <span>
+                                            <IconButton
+                                                color="error"
+                                                onClick={() => handleRemoveRow(row.id)}
+                                                disabled={stockRows.length === 1}
+                                                size="small"
+                                                sx={{
+                                                    '&:disabled': { opacity: 0.3 },
+                                                    bgcolor: alpha('#f44336', 0.05),
+                                                    '&:hover': { bgcolor: alpha('#f44336', 0.1) }
+                                                }}
+                                            >
+                                                <RemoveCircleOutlineIcon fontSize="small" />
+                                            </IconButton>
+                                        </span>
+                                    </Tooltip>
                                 </TableCell>
                             </TableRow>
                         ))}
                     </TableBody>
                 </Table>
             </TableContainer>
-            <Divider sx={{ my: 2 }} />
-            <PriceTotals />
+
+            <Divider sx={{ mt: 0, mb: 0 }} />
+
+            <Box sx={{ p: 3, bgcolor: alpha(PRIMARY_COLOR, 0.02) }}>
+                <PriceTotals />
+            </Box>
         </Paper>
     );
 };

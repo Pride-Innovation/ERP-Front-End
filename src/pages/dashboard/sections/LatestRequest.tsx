@@ -19,6 +19,7 @@ import SectionUtills from './utills';
 import { DashboardContext } from '../../../context/dashboard';
 import { ICommodity } from '../../settings/commodity/interface';
 import DescriptionText from './DescriptionText';
+import ExpandableTable from './PersonalAssetsReport';
 
 
 
@@ -105,6 +106,7 @@ const LatestRequest = () => {
                         ))}
                     </CardContent>
                 </Card>
+                <ExpandableTable />
             </Grid>
         </>
     )
