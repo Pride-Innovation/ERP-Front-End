@@ -10,7 +10,6 @@ import { ROUTES } from '../../routes';
 import Fleet from '../../../../pages/assets/fleet';
 import CreateFleet from '../../../../pages/assets/fleet/CreateFleet';
 import UpdateFleet from '../../../../pages/assets/fleet/UpdateFleet';
-import FleetDetails from '../../../../pages/assets/fleet/view';
 import { PrivateRoute } from '../../PrivateRoutes';
 import { permissionsMock } from '../../../../mocks/settings';
 
@@ -27,9 +26,6 @@ const FleetRoutes = () => {
             </Route>
             <Route element={<PrivateRoute permission={permissionsMock[42]} />}>
                 <Route path={`${ROUTES.UPDATE_FLEET}/:id`} element={<UpdateFleet />} />
-            </Route>
-            <Route element={<PrivateRoute permission={permissionsMock[39]} />}>
-                <Route path={`${ROUTES.LIST_FLEET}/:id`} element={<FleetDetails />} />
             </Route>
         </Route>
     )
