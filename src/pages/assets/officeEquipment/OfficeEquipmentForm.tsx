@@ -5,28 +5,20 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { useNavigate } from "react-router";
+import { useEffect, useState } from "react";
 import OfficeEquipmentUtills from "./utills";
-import { Box, Divider, Grid, Stack } from "@mui/material";
-import {
-    UseFormAutocompleteComponent,
-    UseFormDatePicker,
-    UseFormInput,
-    UseFormSelect
-} from "../../../components/forms";
 import { IOfficeEquipmentForm } from "./interface";
-import ButtonComponent from "../../../components/forms/Button";
-import { ROUTES } from "../../../core/routes/routes";
 import BranchUtills from "../../settings/branch/utills";
 import StatusUtills from "../../settings/statuses/Utills";
 import UserUtils from "../../users/utils";
 import AssetTypeUtills from "../../settings/assetTypes/utills";
 import SupplierUtills from "../../settings/suppliers/Utills";
-import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../store";
 import CommodityUtills from "../../settings/commodity/utills";
 import InventoryUtills from "../../inventory/Utills";
+import SteppedOfficeEquipmentForm from "./SteppedOfficeEquipmentForm";
+import { useNavigate } from "react-router";
 
 const OfficeEquipmentForm = ({
     formState,
@@ -37,98 +29,80 @@ const OfficeEquipmentForm = ({
     lpoParams,
     userParams,
     supplierParams,
-    branchParams
-}:
-    IOfficeEquipmentForm
-) => {
+    branchParams,
+    trigger
+}: IOfficeEquipmentForm) => {
     const navigate = useNavigate();
-    const [assetTypeId, setAssetTypeId] = useState<number | null>()
+    const [assetTypeId, setAssetTypeId] = useState<number | null>();
+    const [loading, setLoading] = useState<boolean>(true);
     const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore);
-
 
     const { formFields, determineOfficeAssetType } = OfficeEquipmentUtills();
     const { fetchAllBranches } = BranchUtills();
     const { fetchAllStatuses } = StatusUtills();
     const { fetchAllUsers } = UserUtils();
-    const { fetchAllAssetTypes } = AssetTypeUtills()
+    const { fetchAllAssetTypes } = AssetTypeUtills();
     const { fetchAllSuppliers } = SupplierUtills();
-    const { fetchAllCommodities } = CommodityUtills()
-    const { fetchInventory } = InventoryUtills()
+    const { fetchAllCommodities } = CommodityUtills();
+    const { fetchInventory } = InventoryUtills();
 
+    // Fetch required data
+    useEffect(() => {
+        const fetchData = async () => {
+            setLoading(true);
+            try {
+                await Promise.all([
+                    fetchAllBranches(branchParams),
+                    fetchAllStatuses(),
+                    fetchAllUsers(userParams),
+                    fetchAllAssetTypes(),
+                    fetchAllSuppliers(supplierParams),
+                    fetchInventory(lpoParams)
+                ]);
+            } catch (error) {
+                console.error("Error fetching form data:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
 
-    useEffect(() => { fetchAllBranches(branchParams) }, []);
-    useEffect(() => { fetchAllStatuses() }, []);
-    useEffect(() => { fetchAllUsers(userParams) }, []);
-    useEffect(() => { fetchAllAssetTypes() }, []);
-    useEffect(() => { fetchAllSuppliers(supplierParams) }, []);
-    useEffect(() => { fetchInventory(lpoParams) }, []);
+        fetchData();
+    }, []);
 
+    // Determine asset type
     useEffect(() => {
         if (assetTypes.length > 0) {
             const assetType = determineOfficeAssetType();
             if (assetType !== null) {
-                setAssetTypeId(assetType.id as number)
+                setAssetTypeId(assetType.id as number);
             }
         }
     }, [assetTypes]);
 
+    // Fetch commodities when asset type is determined
     useEffect(() => {
         if (assetTypeId) {
-            fetchAllCommodities({ assetTypeId })
+            fetchAllCommodities({ assetTypeId });
         }
     }, [assetTypeId]);
 
     return (
-        <Box sx={{ width: "100%" }}>
-            <Grid container spacing={3}>
-                {formFields.map((field) => {
-                    const commonProps = {
-                        register,
-                        control,
-                        formState,
-                        value: field.value,
-                        label: field.label,
-                        required: field.required === false ? field.required : true,
-                        disabled: field.disabled ? true : false
-                    };
+        <SteppedOfficeEquipmentForm
+            formState={formState}
+            control={control}
+            register={register}
+            buttonText={buttonText}
+            sendingRequest={sendingRequest}
+            formFields={formFields}
+            isUpdate={!!lpoParams}
+            loading={loading}
+            trigger={trigger}
+            lpoParams={lpoParams}
+            userParams={userParams}
+            supplierParams={supplierParams}
+            branchParams={branchParams}
+        />
+    );
+};
 
-                    const gridSize = field.type === "textarea" ? 12 : 3;
-
-                    return (
-                        <Grid item xs={12} md={gridSize} key={field.value}>
-                            {field.type === "input" && <UseFormInput {...commonProps} />}
-                            {field.type === "textarea" && <UseFormInput {...commonProps} multiline row={4} />}
-                            {field.type === "number" && <UseFormInput {...commonProps} type="number" />}
-                            {field.type === "select" && (
-                                <UseFormSelect {...commonProps} options={field.options} />
-                            )}
-                            {field.type === "date" && <UseFormDatePicker {...commonProps} />}
-                            {field.type === "autocomplete" && (
-                                <UseFormAutocompleteComponent {...commonProps} options={field.options} />
-                            )}
-                        </Grid>
-                    );
-                })}
-
-                <Grid item xs={12}>
-                    <Divider sx={{ my: 2 }} />
-                    <Stack
-                        direction={{ xs: "column", sm: "row" }}
-                        spacing={2}
-                        justifyContent="space-between"
-                        alignItems={{ xs: "stretch", sm: "center" }}
-                    >
-                        <Stack direction="row" spacing={2}>
-                            < ButtonComponent handleClick={() => navigate(ROUTES.LIST_OFFICE_EQUIPMENT)} buttonColor='error' type='button' sendingRequest={false} buttonText="Back" />
-                            <ButtonComponent buttonColor='success' type='submit' sendingRequest={sendingRequest} buttonText={buttonText} />
-                        </Stack>
-                    </Stack>
-                </Grid>
-            </Grid>
-        </Box>
-    )
-}
-
-export default OfficeEquipmentForm
-
-
+export default OfficeEquipmentForm;

@@ -5,7 +5,7 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { Control, FieldError, FormState, UseFormRegister } from "react-hook-form";
+import { Control, FieldError, FormState, UseFormRegister, UseFormTrigger } from "react-hook-form";
 import { ISupplier } from "../../settings/suppliers/interface";
 import { IUser } from "../../users/interface";
 import { IBranch } from "../../settings/branch/interface";
@@ -69,6 +69,16 @@ export interface IOfficeEquipmentForm {
     userParams?: Record<string, any>
     supplierParams?: Record<string, any>
     branchParams?: Record<string, any>
+
+    // New properties for stepped form
+    formFields?: any;
+    computerFields?: any;
+    categories?: Record<string, string>;
+    selectedCategory?: string;
+    stateFormFields?: any;
+    isUpdate?: boolean;
+    loading?: boolean;
+    trigger?: UseFormTrigger<IOfficeEquipment>;
 }
 
 
