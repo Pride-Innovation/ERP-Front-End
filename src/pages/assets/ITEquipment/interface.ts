@@ -6,7 +6,7 @@ Managing Director
 */
 
 import { SelectChangeEvent } from "@mui/material";
-import { Control, FieldError, FormState, UseFormRegister } from "react-hook-form";
+import { Control, FieldError, FormState, UseFormRegister, UseFormTrigger } from "react-hook-form";
 import { IAssetType } from "../../settings/assetTypes/interface";
 import { IBranch } from "../../settings/branch/interface";
 import { IUser } from "../../users/interface";
@@ -15,7 +15,12 @@ import { IStatus } from "../../settings/statuses/interface";
 import { IAxiosResponse, IFetchDataRequest } from "../../../core/apis/interface";
 import { ICommodity } from "../../settings/commodity/interface";
 import { IInventory } from "../../inventory/interface";
+import { IOptions } from "../../../components/tables/interface";
+import { ReactNode } from "react";
 
+/**
+ * Interface for IT Equipment data model
+ */
 export interface IITEquipment {
     id?: string | number;
     assetName: string;
@@ -50,6 +55,23 @@ export interface IITEquipment {
     stock?: IInventory | null
 }
 
+/**
+ * Interface for form field definition
+ */
+export interface IFormData<T> {
+    value: keyof T | string;
+    label: string;
+    type: 'input' | 'select' | 'date' | 'number' | 'textarea' | 'autocomplete';
+    options?: Array<IOptions> | any;
+    required?: boolean;
+    disabled?: boolean;
+    icon?: ReactNode;
+    section?: 'basic' | 'technical';
+}
+
+/**
+ * Interface for IT Equipment form component props
+ */
 export interface IITEquipmentForm {
     formState: FormState<IITEquipment> & {
         errors: {
@@ -82,33 +104,59 @@ export interface IITEquipmentForm {
     sendingRequest: boolean;
     option?: string | undefined;
     handleChange?: (event: SelectChangeEvent) => void;
-    lpoParams?: Record<string, any>
-    userParams?: Record<string, any>
-    supplierParams?: Record<string, any>
-    branchParams?: Record<string, any>
+    lpoParams?: Record<string, any>;
+    userParams?: Record<string, any>;
+    supplierParams?: Record<string, any>;
+    branchParams?: Record<string, any>;
+
+    // New properties for stepped form
+    formFields?: any;
+    computerFields?: any;
+    categories?: Record<string, string>;
+    selectedCategory?: string;
+    stateFormFields?: any;
+    isUpdate?: boolean;
+    loading?: boolean;
+    trigger?: UseFormTrigger<IITEquipment>;
+
 }
 
+/**
+ * Interface for asset category
+ */
 export interface IAsssetCategory {
-    id: number,
-    name: string,
-    status: string,
-    desc: string,
-    image: any,
-    user_id: number
+    id: number;
+    name: string;
+    status: string;
+    desc: string;
+    image: any;
+    user_id: number;
 }
 
+/**
+ * Interface for paginated IT Equipment response
+ */
 export interface IITEquipmentResponse extends IFetchDataRequest {
-    content: Array<IITEquipment>
+    content: Array<IITEquipment>;
 }
 
+/**
+ * Interface for API responses containing multiple IT equipment items
+ */
 export interface IITEquipmentsAxiosResponse extends IAxiosResponse {
-    data: IITEquipmentResponse
+    data: IITEquipmentResponse;
 }
 
+/**
+ * Interface for API responses containing a single IT equipment item
+ */
 export interface IITEquipmentAxiosResponse extends IAxiosResponse {
-    data: IITEquipment
+    data: IITEquipment;
 }
 
+/**
+ * Interface for table data representation of IT Equipment
+ */
 export interface IITEquipmentTableData {
     assetName: string;
     engravedNumber?: string | null;
@@ -121,4 +169,13 @@ export interface IITEquipmentTableData {
     status: string;
     assignedTo: string;
     location: string;
+}
+
+/**
+ * Interface for form sections in the stepped form
+ */
+export interface IFormSection {
+    title: string;
+    icon: ReactNode;
+    fields: Array<IFormData<IITEquipment>>;
 }

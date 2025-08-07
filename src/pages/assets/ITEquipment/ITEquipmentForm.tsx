@@ -1,35 +1,7 @@
-/*
-13.9 Pride's Standard Copyright Notice:
-Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
-and distribute this software and its documentation for any purpose is prohibited unless authorized in writing by the
-Managing Director
-*/
-
-import { useNavigate } from "react-router";
 import ITEquipmentUtills from "./utills";
 import { useEffect, useState } from "react";
 import { IFormData } from "../interface";
 import { IITEquipment, IITEquipmentForm } from "./interface";
-import {
-    Box,
-    Divider,
-    FormControl,
-    Grid,
-    InputLabel,
-    MenuItem,
-    Select,
-    Stack
-} from "@mui/material";
-import { Controller } from "react-hook-form";
-import { IOptions } from "../../../components/tables/interface";
-import {
-    UseFormAutocompleteComponent,
-    UseFormDatePicker,
-    UseFormInput,
-    UseFormSelect
-} from "../../../components/forms";
-import ButtonComponent from "../../../components/forms/Button";
-import { ROUTES } from "../../../core/routes/routes";
 import BranchUtills from "../../settings/branch/utills";
 import StatusUtills from "../../settings/statuses/Utills";
 import UserUtils from "../../users/utils";
@@ -39,6 +11,7 @@ import CommodityUtills from "../../settings/commodity/utills";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../store";
 import InventoryUtills from "../../inventory/Utills";
+import SteppedITEquipmentForm from "./SteppedITEquipmentForm";
 
 const ITEquipmentForm = ({
     formState,
@@ -51,30 +24,31 @@ const ITEquipmentForm = ({
     lpoParams,
     userParams,
     supplierParams,
-    branchParams
+    branchParams,
+    trigger
 }: IITEquipmentForm) => {
-    const navigate = useNavigate();
     const { formFields, categories, computerFields, determineITAssetType } = ITEquipmentUtills();
     const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore);
     const { commodities } = useSelector((state: RootState) => state.CommodityStore);
 
     const [assetTypeId, setAssetTypeId] = useState<number | null>();
     const [selectedCategory, setSelectedCategory] = useState<string>('');
+    const [loading, setLoading] = useState<boolean>(true);
 
     const { fetchAllBranches } = BranchUtills();
     const { fetchAllStatuses } = StatusUtills();
     const { fetchAllUsers } = UserUtils();
     const { fetchAllAssetTypes } = AssetTypeUtills();
     const { fetchAllSuppliers } = SupplierUtills();
-    const { fetchAllCommodities } = CommodityUtills();
+    // const { fetchAllCommodities } = CommodityUtills();
     const { fetchInventory } = InventoryUtills();
 
-    useEffect(() => { fetchAllBranches(branchParams) }, []);
+    useEffect(() => { fetchAllBranches(branchParams) }, [branchParams]);
     useEffect(() => { fetchAllStatuses() }, []);
-    useEffect(() => { fetchAllUsers(userParams) }, []);
-    useEffect(() => { fetchAllSuppliers(supplierParams) }, []);
+    useEffect(() => { fetchAllUsers(userParams) }, [userParams]);
+    useEffect(() => { fetchAllSuppliers(supplierParams) }, [supplierParams]);
     useEffect(() => { fetchAllAssetTypes() }, []);
-    useEffect(() => { fetchInventory(lpoParams) }, []);
+    useEffect(() => { fetchInventory(lpoParams) }, [lpoParams]);
 
     useEffect(() => {
         if (assetTypes.length > 0) {
@@ -83,130 +57,81 @@ const ITEquipmentForm = ({
                 setAssetTypeId(assetType.id as number)
             }
         }
-    }, [assetTypes]);
+    }, [assetTypes, determineITAssetType]);
+
+    // useEffect(() => {
+    //     if (assetTypeId) {
+    //         fetchAllCommodities({ assetTypeId })
+    //     }
+    // }, [assetTypeId, fetchAllCommodities]);
+
+    // Initialize state form fields
+    const [stateFormFields, setStateFormFields] = useState<Array<IFormData<IITEquipment>>>([]);
 
     useEffect(() => {
-        if (assetTypeId) {
-            fetchAllCommodities({ assetTypeId })
+        // Initialize with basic form fields, skipping the category field (which is at index 0)
+        if (formFields && formFields.length > 0) {
+            setStateFormFields(formFields.slice(1));
         }
-    }, [assetTypeId]);
-
-    const [stateFormFields, setStateFormFields] = useState<Array<IFormData<IITEquipment>>>(formFields.slice(1));
+    }, [formFields]);
 
     const determineCommodityName = (id: number): string => {
         return commodities.find(commodity => commodity.id === id)?.name.split(" ").join("").toLocaleLowerCase() as string;
     }
 
     useEffect(() => {
+
         if (option && commodities.length > 0) {
-            const val = parseInt(option);
-            setSelectedCategory(val.toLocaleString());
+            try {
+                const val = parseInt(option);
+                setSelectedCategory(val.toLocaleString());
 
-            const commodityName = determineCommodityName(val);
-            if ([categories.laptop.toLowerCase(), categories.desktopComputer.toLowerCase()].includes(commodityName)) {
-                setStateFormFields([...formFields.slice(1), ...computerFields]);
-            } else {
-                setStateFormFields([...formFields.slice(1)]);
+                const commodityName = determineCommodityName(val);
+                console.log("Commodity name:", commodityName);
+
+                if (categories && [
+                    categories.laptop?.toLowerCase(),
+                    categories.desktopComputer?.toLowerCase()
+                ].includes(commodityName)) {
+                    console.log("Setting computer fields");
+                    setStateFormFields([...formFields.slice(1), ...computerFields]);
+                } else {
+                    console.log("Setting standard fields");
+                    setStateFormFields([...formFields.slice(1)]);
+                }
+            } catch (err) {
+                console.error("Error processing option:", err);
+            } finally {
+                // Always turn off loading
+                setLoading(false);
             }
+        } else if (formFields && formFields.length > 0) {
+            // Default behavior if no option is selected
+            console.log("Setting default fields");
+            setStateFormFields(formFields.slice(1));
+            setLoading(false);
         }
-    }, [option, commodities]);
+    }, [option, commodities, categories, formFields, computerFields]);
 
-    useEffect(() => {
-        if (!option) { setStateFormFields(formFields.slice(1)) }
-    }, [formFields]);
-
+    // Display the stepped form component with our fields
     return (
-        <Box sx={{ width: "100%" }}>
-            <Grid container spacing={3}>
-                <Grid item xs={12} md={3}>
-                    <FormControl size='small' fullWidth>
-                        <InputLabel id={"category"}>Select Category</InputLabel>
-                        <Controller
-                            control={control}
-                            name="category"
-                            rules={{ required: true }}
-                            render={({ field: { onChange, onBlur, value } }) => (
-                                <Select
-                                    required
-                                    labelId="category"
-                                    id="category"
-                                    value={value ?? selectedCategory}
-                                    label="Select Category"
-                                    onBlur={onBlur}
-                                    onChange={(e) => {
-                                        const selectedValue = e.target.value;
-                                        setSelectedCategory(selectedValue);
-                                        onChange(selectedValue);
-                                        handleChange?.(e);
-                                    }}
-                                >
-                                    {(formFields[0].options as Array<IOptions>).map((option) => (
-                                        <MenuItem key={option.value} value={option.value}>
-                                            {option.label}
-                                        </MenuItem>
-                                    ))}
-                                </Select>
-                            )}
-                        />
-                    </FormControl>
-                </Grid>
-
-                {stateFormFields.map((field) => {
-                    const commonProps = {
-                        register,
-                        control,
-                        formState,
-                        value: field.value,
-                        label: field.label,
-                        required: field.required === false ? field.required : true,
-                        disabled: field.disabled ? true : false
-                    };
-
-                    const gridSize = field.type === "textarea" ? 12 : 3;
-
-                    return (
-                        <Grid item xs={12} md={gridSize} key={field.value}>
-                            {field.type === "input" && <UseFormInput {...commonProps} />}
-                            {field.type === "textarea" && <UseFormInput {...commonProps} multiline row={4} />}
-                            {field.type === "number" && <UseFormInput {...commonProps} type="number" />}
-                            {field.type === "select" && (
-                                <UseFormSelect {...commonProps} options={field.options} />
-                            )}
-                            {field.type === "date" && <UseFormDatePicker {...commonProps} />}
-                            {field.type === "autocomplete" && (
-                                <UseFormAutocompleteComponent {...commonProps} options={field.options} />
-                            )}
-                        </Grid>
-                    );
-                })}
-
-                <Grid item xs={12}>
-                    <Divider sx={{ my: 2 }} />
-                    <Stack
-                        direction={{ xs: "column", sm: "row" }}
-                        spacing={2}
-                        justifyContent="space-between"
-                        alignItems={{ xs: "stretch", sm: "center" }}
-                    >
-                        <Stack direction="row" spacing={2}>
-                            <ButtonComponent
-                                handleClick={() => navigate(ROUTES.LIST_ASSETS)}
-                                buttonColor="error"
-                                type="button"
-                                sendingRequest={false}
-                                buttonText="Cancel"
-                            />
-                            <ButtonComponent
-                                buttonColor="success"
-                                type="submit"
-                                sendingRequest={sendingRequest}
-                                buttonText={buttonText}
-                            />
-                        </Stack>
-                    </Stack>
-                </Grid>
-            </Grid>
-        </Box>
+        <SteppedITEquipmentForm
+            formState={formState}
+            control={control}
+            register={register}
+            buttonText={buttonText}
+            sendingRequest={sendingRequest}
+            option={option}
+            handleChange={handleChange}
+            formFields={formFields}
+            computerFields={computerFields}
+            categories={categories}
+            selectedCategory={selectedCategory}
+            stateFormFields={stateFormFields}
+            isUpdate={!!lpoParams}
+            loading={loading}
+            trigger={trigger}
+        />
     );
 };
 

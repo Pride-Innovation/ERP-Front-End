@@ -9,7 +9,7 @@ import {
     GridToolbarContainer,
 } from '@mui/x-data-grid';
 import ButtonComponent from '../forms/Button';
-import { Box, Stack, TextField, useTheme } from '@mui/material';
+import { alpha, Box, Stack, TextField, useTheme } from '@mui/material';
 import { TypographyComponent } from '../headers/TypographyComponent';
 import { CustomToolbarWrapperProps, ITableToolBar } from './interface';
 import FileUploadButton from '../forms/FileUploadButton';
@@ -33,7 +33,7 @@ const TableToolBar = ({
 
     return (
         <GridToolbarContainer
-            sx={{ width: '100%', display: 'flex', p: '20px' }}>
+            sx={{ width: '100%', display: 'flex', p: '20px', bgcolor: alpha(theme.palette.primary.main, 0.1) }}>
             <TypographyComponent size='17px' color="#BC892C" weight={600} sx={{ textTransform: "uppercase" }}>{header.plural}</TypographyComponent>
             <Stack direction="row" spacing={2} sx={{ ml: "auto" }}>
                 {searchAction && <TextField size='small' placeholder="Search" variant='outlined' sx={{ color: theme.palette.success.main }} />}

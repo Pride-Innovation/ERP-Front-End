@@ -22,7 +22,6 @@ import {
 } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 import TabComponent from '../../../../components/tabs';
-import OtherDetails from './OtherDetails';
 import AssignmentHistory from '../../trails/AssignmentHistory';
 import RepairHistory from '../../trails/RepairHistory';
 import { useEffect, useState } from 'react';
@@ -33,7 +32,6 @@ import moment from 'moment';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import DevicesOtherIcon from '@mui/icons-material/DevicesOther';
 import { camelCaseToWords } from '../../../../utils/helpers';
-import NotesIcon from '@mui/icons-material/Notes';
 import InfoIcon from '@mui/icons-material/Info';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import PaidIcon from '@mui/icons-material/Paid';
@@ -205,13 +203,6 @@ const ITEquipmentDetails = () => {
 
     useEffect(() => { getITEquipment(); }, []);
 
-    // Determine if we have any technical specifications to show
-    const hasTechnicalDetails = equipment.ram ||
-        equipment.cpuSpeed ||
-        equipment.hardDiskSize ||
-        equipment.macAddress ||
-        equipment.ipAddress;
-
 
     // Add these new functions for handling image updates
     const handleImageUpdate = async (file: File) => {
@@ -263,7 +254,7 @@ const ITEquipmentDetails = () => {
     };
 
     return (
-        <Container maxWidth="xl" sx={{ pt: 3, pb: 3, bgcolor: '#F3F7FB', borderRadius: 2, border: `1px solid ${alpha('#000', 0.08)}`    }}> 
+        <Container maxWidth="xl" sx={{ pt: 3, pb: 3, bgcolor: '#F3F7FB', borderRadius: 2, border: `1px solid ${alpha('#000', 0.08)}` }}>
             {loading ? (
                 <Loading items='IT Asset' />
             ) : (
@@ -375,49 +366,19 @@ const ITEquipmentDetails = () => {
                                     <TabComponent
                                         headers={[
                                             {
-                                                label: hasTechnicalDetails ? "Technical Specifications" : "Other Details",
+                                                label: "Assignment History",
                                                 position: 0,
                                                 content: (
-                                                    <Box sx={{ pt: 3, pb: 2, px: 1 }}>
-                                                        <OtherDetails equipment={equipment} />
-
-                                                        {!hasTechnicalDetails && (
-                                                            <Box
-                                                                sx={{
-                                                                    textAlign: 'center',
-                                                                    py: 8,
-                                                                    color: 'text.secondary'
-                                                                }}
-                                                            >
-                                                                <NotesIcon
-                                                                    sx={{
-                                                                        fontSize: 48,
-                                                                        opacity: 0.2,
-                                                                        mb: 1
-                                                                    }}
-                                                                />
-                                                                <Typography>
-                                                                    No additional details available for this item
-                                                                </Typography>
-                                                            </Box>
-                                                        )}
-                                                    </Box>
-                                                )
-                                            },
-                                            {
-                                                label: "Assignment History",
-                                                position: 1,
-                                                content: (
-                                                    <Box sx={{ pt: 3, pb: 2, px: 1 }}>
+                                                    <Box>
                                                         <AssignmentHistory id={equipment?.id?.toString() || ""} />
                                                     </Box>
                                                 )
                                             },
                                             {
                                                 label: "Repair History",
-                                                position: 2,
+                                                position: 1,
                                                 content: (
-                                                    <Box sx={{ pt: 3, pb: 2, px: 1 }}>
+                                                    <Box>
                                                         <RepairHistory id={equipment?.id?.toString() || ""} />
                                                     </Box>
                                                 )

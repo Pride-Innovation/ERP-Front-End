@@ -11,13 +11,29 @@ import { ROUTES } from '../../routes'
 import ITEquipmentRoutes from './ITEquipmentRoutes'
 import FleetRoutes from './FleetRoutes'
 import OfficeEquipmentRoutes from './OfficeEquipmentRoutes'
+import { PrivateRoute } from '../../PrivateRoutes'
+import { permissionsMock } from '../../../../mocks/settings'
+import ITEquipmentDetails from '../../../../pages/assets/ITEquipment/view'
+import CreateITEquipment from '../../../../pages/assets/ITEquipment/CreateITEquipment'
+import UpdateITEquipment from '../../../../pages/assets/ITEquipment/UpdateITEquipment'
 
 const AssetRoutes = () => {
     return (
-        <Route path={ROUTES.LIST_ASSETS} element={<AssetsManagement />} >
-            {ITEquipmentRoutes()}
-            {FleetRoutes()}
-            {OfficeEquipmentRoutes()}
+        <Route>
+            <Route path={ROUTES.LIST_ASSETS} element={<AssetsManagement />} >
+                {ITEquipmentRoutes()}
+                {FleetRoutes()}
+                {OfficeEquipmentRoutes()}
+            </Route>
+            <Route element={<PrivateRoute permission={permissionsMock[39]} />}>
+                <Route path={`${ROUTES.LIST_ASSETS}/:id`} element={<ITEquipmentDetails />} />
+            </Route>
+            <Route element={<PrivateRoute permission={permissionsMock[40]} />}>
+                <Route path={ROUTES.CREATE_ITEQUIPMENT} element={<CreateITEquipment />} />
+            </Route>
+            <Route element={<PrivateRoute permission={permissionsMock[42]} />}>
+                <Route path={`${ROUTES.UPDATE_ITEQUIPMENT}/:id`} element={<UpdateITEquipment />} />
+            </Route>
         </Route>
     )
 }

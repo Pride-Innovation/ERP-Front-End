@@ -6,13 +6,12 @@ Managing Director
 */
 
 import { useEffect, useState } from "react";
-import { useParams } from "react-router";
+import { useParams } from "react-router-dom";
 import { IITEquipment, IITEquipmentAxiosResponse } from "./interface";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { ITEquipmentSchema } from "./schema";
-import { Card, Grid, SelectChangeEvent } from "@mui/material";
-import { FormHeader } from "../../../components/headers/TypographyComponent";
+import { Avatar, Box, Card, Container, SelectChangeEvent, Typography, alpha, useMediaQuery, useTheme } from "@mui/material";
 import ITEquipmentForm from "./ITEquipmentForm";
 import { itEquipmentMock } from "../../../mocks/itEquipment";
 import { getITEquipmentByIDService, updateITEquipmentService } from "./service";
@@ -21,6 +20,10 @@ import { toast } from "react-toastify";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../../../store";
 import { updateITAsset } from "./slice";
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+
+const PRIMARY_COLOR = '#08796C'; // Teal green
+
 
 const UpdateITEquipment = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
@@ -28,75 +31,90 @@ const UpdateITEquipment = () => {
     const [defaultAsset, setDefaultAsset] = useState<any>(itEquipmentMock[0]);
     const [option, setOption] = useState<string | undefined>('');
     const [loading, setLoading] = useState<boolean>(false);
-    const [params, setParams] = useState<Record<string, any>>();
+    const [params, setParams] = useState<Record<string, any>>({});
+    const [assetName, setAssetName] = useState<string>("IT Equipment");
     const dispatch = useDispatch<AppDispatch>();
+    const theme = useTheme();
 
-    const findITEquipmentByID = async () => {
-        setLoading(true);
-        const response = await getITEquipmentByIDService(id as string) as IITEquipmentAxiosResponse;
-
-        if (response.status === 200) {
-
-            setParams({
-                branchName: response.data.branch?.name,
-                assignedToFirstName: response.data.assignedTo?.firstName,
-                lpoNumber: response.data.stock?.lpoNumber,
-                supplierName: response.data.supplier?.name
-            })
-
-            setDefaultAsset({
-                ...response.data,
-                supplier: response.data.supplier?.id,
-                assignedTo: response.data.assignedTo?.id,
-                branch: response.data.branch?.id,
-                assetStatus: response.data.assetStatus?.id,
-                assetType: response.data.assetType?.id,
-                category: response.data.commodity?.id,
-                engravedNumber: response.data.engravedNumber ? response.data.engravedNumber : "",
-                unitOfMeasure: response.data.unitOfMeasure ? response.data.unitOfMeasure : "",
-                netValueB: response.data.netValueB ? response.data.netValueB : "",
-                assetDepreciationRate: response.data.assetDepreciationRate ? response.data.assetDepreciationRate : "",
-                hostname: response.data.hostname ? response.data.hostname : "",
-                detailNetBookValue: response.data.detailNetBookValue ? response.data.detailNetBookValue : "",
-                make: response.data.make ? response.data.make : "",
-                model: response.data.model ? response.data.model : "",
-                serialNumber: response.data.serialNumber ? response.data.serialNumber : "",
-                lpoNumber: response.data.stock?.lpoNumber
-            })
-        }
-        setLoading(false)
-    }
-
-    useEffect(() => { findITEquipmentByID(); }, [id]);
-
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const {
         control,
         handleSubmit,
         formState,
         register,
-        reset
+        reset,
+        trigger
     } = useForm<IITEquipment>({
         mode: 'onChange',
         resolver: yupResolver(ITEquipmentSchema),
     });
 
+    const findITEquipmentByID = async () => {
+        setLoading(true);
+        try {
+            const response = await getITEquipmentByIDService(id as string) as IITEquipmentAxiosResponse;
+
+            if (response.status === 200) {
+                setAssetName(response.data.assetName || "IT Equipment");
+
+                setParams({
+                    branchName: response.data.branch?.name,
+                    assignedToFirstName: response.data.assignedTo?.firstName,
+                    lpoNumber: response.data.stock?.lpoNumber,
+                    supplierName: response.data.supplier?.name
+                });
+
+                setDefaultAsset({
+                    ...response.data,
+                    supplier: response.data.supplier?.id,
+                    assignedTo: response.data.assignedTo?.id,
+                    branch: response.data.branch?.id,
+                    assetStatus: response.data.assetStatus?.id,
+                    assetType: response.data.assetType?.id,
+                    category: response.data.commodity?.id,
+                    engravedNumber: response.data.engravedNumber ? response.data.engravedNumber : "",
+                    unitOfMeasure: response.data.unitOfMeasure ? response.data.unitOfMeasure : "",
+                    netValueB: response.data.netValueB ? response.data.netValueB : "",
+                    assetDepreciationRate: response.data.assetDepreciationRate ? response.data.assetDepreciationRate : "",
+                    hostname: response.data.hostname ? response.data.hostname : "",
+                    detailNetBookValue: response.data.detailNetBookValue ? response.data.detailNetBookValue : "",
+                    make: response.data.make ? response.data.make : "",
+                    model: response.data.model ? response.data.model : "",
+                    serialNumber: response.data.serialNumber ? response.data.serialNumber : "",
+                    lpoNumber: response.data.stock?.lpoNumber
+                });
+            } else {
+                toast.error("Failed to load asset details");
+            }
+        } catch (error) {
+            console.error("Error fetching IT equipment:", error);
+            toast.error("Failed to load asset details");
+        }
+        setLoading(false);
+    };
+
+    useEffect(() => { findITEquipmentByID(); }, [id]);
+
     useEffect(() => {
         reset({ ...defaultAsset });
-        setOption(defaultAsset.category as string)
-    }, [defaultAsset]);
+        setOption(defaultAsset.category as string);
+    }, [defaultAsset, reset]);
 
     const onSubmit = async (formData: IITEquipment) => {
         setSendingRequest(true);
         try {
-            const response = await updateITEquipmentService(formData, id as string) as IITEquipmentAxiosResponse
+            const response = await updateITEquipmentService(formData, id as string) as IITEquipmentAxiosResponse;
             if (response.status === 201) {
-                toast.success("Asset Updated Successfully");
-                dispatch(updateITAsset(response.data))
+                toast.success("Asset updated successfully");
+                dispatch(updateITAsset(response.data));
+            } else {
+                toast.error("Failed to update asset");
             }
         } catch (error) {
-            console.log(error)
+            console.error("Error updating asset:", error);
+            toast.error("Failed to update asset. Please try again.");
         }
-        setSendingRequest(false)
+        setSendingRequest(false);
     };
 
     const handleChange = (event: SelectChangeEvent) => {
@@ -104,12 +122,58 @@ const UpdateITEquipment = () => {
     };
 
     return (
-        <Card sx={{ p: 4 }}>
-            <Grid container xs={12}>
-                <Grid item xs={12}>
-                    <FormHeader header="Update Asset" />
-                    {loading ? <Loading items='IT Equipment' /> :
-                        (<form
+        <Container maxWidth="xl" sx={{
+            py: 3,
+            bgcolor: '#F3F7FB',
+            borderRadius: 2,
+            border: `1px solid ${alpha('#000', 0.08)}`
+        }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                <Avatar
+                    sx={{
+                        bgcolor: alpha(PRIMARY_COLOR, 0.12),
+                        color: PRIMARY_COLOR,
+                        mr: 2,
+                        width: { xs: 40, sm: 48 },
+                        height: { xs: 40, sm: 48 }
+                    }}
+                >
+                    <AddCircleOutlineIcon />
+                </Avatar>
+                <Box>
+                    <Typography
+                        variant={isMobile ? "h6" : "h5"}
+                        sx={{
+                            fontWeight: 600,
+                            color: PRIMARY_COLOR,
+                            mb: 0.5
+                        }}
+                    >
+                        Update Asset Details
+                    </Typography>
+                    <Typography
+                        variant="body2"
+                        sx={{ color: alpha('#000', 0.6) }}
+                    >
+                        Fill in the details below to submit the updated Asset Details
+                    </Typography>
+                </Box>
+            </Box>
+            <Card
+                elevation={0}
+                sx={{
+                    borderRadius: 2,
+                    border: `1px solid ${alpha('#000', 0.08)}`,
+                    overflow: 'visible'
+                }}
+            >
+                <Box sx={{ p: { xs: 2, md: 3 } }}>
+                    {loading ? (
+                        <Box sx={{ py: 8 }}>
+                            <Loading items='IT Equipment' />
+                        </Box>
+                    ) : (
+                        <form
                             style={{ width: "100%" }}
                             autoComplete="off"
                             onSubmit={handleSubmit(onSubmit)}
@@ -117,7 +181,7 @@ const UpdateITEquipment = () => {
                             <ITEquipmentForm
                                 option={option}
                                 handleChange={handleChange}
-                                buttonText="Submit"
+                                buttonText="Update Equipment"
                                 formState={formState}
                                 control={control}
                                 sendingRequest={sendingRequest}
@@ -126,12 +190,14 @@ const UpdateITEquipment = () => {
                                 userParams={{ firstName: params?.assignedToFirstName }}
                                 supplierParams={{ name: params?.supplierName }}
                                 branchParams={{ name: params?.branchName }}
+                                trigger={trigger}
                             />
-                        </form>)}
-                </Grid>
-            </Grid>
-        </Card>
-    )
-}
+                        </form>
+                    )}
+                </Box>
+            </Card>
+        </Container>
+    );
+};
 
 export default UpdateITEquipment;

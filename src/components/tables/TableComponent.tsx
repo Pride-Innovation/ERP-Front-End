@@ -8,6 +8,7 @@ Managing Director
 import { DataGridStyled, StyledBox } from '../../components/tables/Table';
 import { GridColDef } from '@mui/x-data-grid';
 import {
+    alpha,
     Avatar,
     Box,
     Card,
@@ -170,7 +171,13 @@ const TableComponent = ({
     }));
 
     return (
-        <Card sx={{ width: "100%", boxShadow: "none" }} >
+        <Card sx={{
+            width: "100%",
+            boxShadow: "none",
+            border: `1px solid ${alpha('#000', 0.07)}`,
+            borderRadius: 2,
+            backgroundColor: alpha('#f8f9fa', 0.8),
+        }} >
             <Box>
                 <DataGridStyled
                     loading={loading}
