@@ -10,7 +10,6 @@ import { ROUTES } from '../../routes';
 import OfficeEquipment from '../../../../pages/assets/officeEquipment';
 import CreateOfficeEquipment from '../../../../pages/assets/officeEquipment/CreateOfficeEquipment';
 import UpdateOfficeEquipment from '../../../../pages/assets/officeEquipment/UpdateOfficeEquipment';
-import OfficeEquipmentDetails from '../../../../pages/assets/officeEquipment/view';
 import { PrivateRoute } from '../../PrivateRoutes';
 import { permissionsMock } from '../../../../mocks/settings';
 
@@ -26,9 +25,6 @@ const OfficeEquipmentRoutes = () => {
       </Route>
       <Route element={<PrivateRoute permission={permissionsMock[42]} />}>
         <Route path={`${ROUTES.UPDATE_OFFICE_EQUIPMENT}/:id`} element={<UpdateOfficeEquipment />} />
-      </Route>
-      <Route element={<PrivateRoute permission={permissionsMock[39]} />}>
-        <Route path={`${ROUTES.LIST_OFFICE_EQUIPMENT}/:id`} element={<OfficeEquipmentDetails />} />
       </Route>
     </Route>
   )

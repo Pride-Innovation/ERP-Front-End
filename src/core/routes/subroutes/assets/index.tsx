@@ -16,6 +16,7 @@ import { permissionsMock } from '../../../../mocks/settings'
 import ITEquipmentDetails from '../../../../pages/assets/ITEquipment/view'
 import CreateITEquipment from '../../../../pages/assets/ITEquipment/CreateITEquipment'
 import UpdateITEquipment from '../../../../pages/assets/ITEquipment/UpdateITEquipment'
+import OfficeEquipmentDetails from '../../../../pages/assets/officeEquipment/view'
 
 const AssetRoutes = () => {
     return (
@@ -33,6 +34,9 @@ const AssetRoutes = () => {
             </Route>
             <Route element={<PrivateRoute permission={permissionsMock[42]} />}>
                 <Route path={`${ROUTES.UPDATE_ITEQUIPMENT}/:id`} element={<UpdateITEquipment />} />
+            </Route>
+            <Route element={<PrivateRoute permission={permissionsMock[39]} />}>
+                <Route path={`${ROUTES.LIST_OFFICE_EQUIPMENT}/:id`} element={<OfficeEquipmentDetails />} />
             </Route>
         </Route>
     )
