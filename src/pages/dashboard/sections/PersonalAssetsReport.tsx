@@ -14,11 +14,13 @@ import {
     TableRow,
     TableCell,
     TableBody,
-    Divider
+    Divider,
+    Tooltip
 } from '@mui/material';
 import { ExpandMore, ExpandLess } from '@mui/icons-material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import LaptopIcon from '@mui/icons-material/Laptop';
+import ChairIcon from '@mui/icons-material/Chair';
 
 // Define TypeScript interfaces
 interface SubDomain {
@@ -87,9 +89,10 @@ const mockData: AssetDomain[] = [
     },
 ];
 
+// Enhanced color functions to match the app's color scheme
 const getChipColor = (type: string): ChipColorConfig => {
     switch (type) {
-        case 'Primary': return { bg: '#D3D3FC', color: '#5151D3' };
+        case 'Primary': return { bg: '#E8F4FF', color: '#3F5FFF' };
         case 'Staging': return { bg: '#FBD1F8', color: '#D44BC9' };
         case 'Add-on': return { bg: '#FFE6C6', color: '#E89C3A' };
         default: return { bg: '#e0e0e0', color: '#757575' };
@@ -98,31 +101,45 @@ const getChipColor = (type: string): ChipColorConfig => {
 
 const getStatusColor = (status: string): StatusColorConfig => {
     switch (status) {
-        case 'Active': return { bg: '#E6F9F4', color: '#00C48C', icon: <CheckCircleIcon sx={{ fontSize: 16 }} /> };
-        default: return { bg: '#F5F6FA', color: '#8E9BAE', icon: null };
+        case 'Active': return { bg: '#E6F9F4', color: '#4caf50', icon: <CheckCircleIcon sx={{ fontSize: 16 }} /> };
+        default: return { bg: '#F5F6FA', color: '#9e9e9e', icon: null };
+    }
+};
+
+const getCategoryIcon = (domain: string) => {
+    switch (domain) {
+        case 'IT Equipment': return <LaptopIcon sx={{ color: '#3F5FFF', fontSize: 20 }} />;
+        case 'Office Furniture': return <ChairIcon sx={{ color: '#4caf50', fontSize: 20 }} />;
+        default: return <LaptopIcon sx={{ color: '#3F5FFF', fontSize: 20 }} />;
     }
 };
 
 const TableHeader: React.FC = () => (
-    <Box sx={{ borderBottom: '1px solid #e1e7ef', py: 2, px: 3, backgroundColor: '#F8FAFC' }}>
+    <Box sx={{
+        borderBottom: '1px solid #e0e0e0',
+        py: 2,
+        px: 3,
+        backgroundColor: '#F8FAFC',
+        borderRadius: '4px 4px 0 0'
+    }}>
         <Grid container alignItems="center">
-            <Grid item xs={3}>
+            <Grid item xs={12} sm={3}>
                 <Typography fontWeight={600} fontSize={13} color="#64748B">CATEGORY</Typography>
             </Grid>
-            <Grid item xs={2}>
+            <Grid item xs={6} sm={2}>
                 <Typography fontWeight={600} fontSize={13} color="#64748B">TOTAL ITEMS</Typography>
             </Grid>
-            <Grid item xs={2}>
+            <Grid item xs={6} sm={3}>
                 <Typography fontWeight={600} fontSize={13} color="#64748B">USAGE</Typography>
             </Grid>
-            <Grid item xs={2}>
+            <Grid item xs={6} sm={2}>
                 <Typography fontWeight={600} fontSize={13} color="#64748B">AVAILABILITY</Typography>
             </Grid>
-            <Grid item xs={2}>
+            <Grid item xs={4} sm={1}>
                 <Typography fontWeight={600} fontSize={13} color="#64748B">STATUS</Typography>
             </Grid>
-            <Grid item xs={1}>
-                <Typography fontWeight={600} fontSize={13} color="#64748B">ACTIONS</Typography>
+            <Grid item xs={2} sm={1} textAlign="right">
+                <Typography fontWeight={600} fontSize={13} color="#64748B">VIEW</Typography>
             </Grid>
         </Grid>
     </Box>
@@ -136,14 +153,27 @@ const DomainRow: React.FC<DomainRowProps> = ({ row }) => {
     const [expanded, setExpanded] = useState<boolean>(false);
     const statusConfig = getStatusColor(row.status);
     const usagePercentage = (row.inUse / row.totalItems) * 100;
+    const categoryIcon = getCategoryIcon(row.domain);
 
     return (
-        <Box sx={{ borderBottom: '1px solid #e1e7ef' }}>
+        <Box sx={{
+            borderBottom: '1px solid #e0e0e0',
+            transition: 'background-color 0.2s',
+            '&:hover': {
+                backgroundColor: '#f5f8fc'
+            }
+        }}>
             <Grid container alignItems="center" py={2} px={3}>
-                <Grid item xs={3}>
+                <Grid item xs={12} sm={3}>
                     <Box display="flex" alignItems="center">
-                        <Avatar sx={{ bgcolor: '#EBF0FF', width: 40, height: 40, mr: 1.5 }}>
-                            <LaptopIcon sx={{ color: '#3F5FFF', fontSize: 20 }} />
+                        <Avatar sx={{
+                            bgcolor: '#EBF0FF',
+                            width: 40,
+                            height: 40,
+                            mr: 1.5,
+                            boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.05)'
+                        }}>
+                            {categoryIcon}
                         </Avatar>
                         <Box>
                             <Typography fontWeight={600} fontSize={14}>{row.domain}</Typography>
@@ -151,66 +181,94 @@ const DomainRow: React.FC<DomainRowProps> = ({ row }) => {
                         </Box>
                     </Box>
                 </Grid>
-                <Grid item xs={2}>
+                <Grid item xs={6} sm={2}>
                     <Box display="flex" alignItems="center">
                         <Typography fontWeight={600} fontSize={14}>{row.totalItems}</Typography>
                     </Box>
                 </Grid>
-                <Grid item xs={2}>
+                <Grid item xs={6} sm={3}>
                     <Box>
-                        <Typography fontWeight={600} fontSize={14}>{row.inUse} / {row.totalItems}</Typography>
+                        <Box display="flex" alignItems="center" justifyContent="space-between" mb={0.5}>
+                            <Typography fontWeight={600} fontSize={14}>{row.inUse} / {row.totalItems}</Typography>
+                            <Typography variant="caption" color={usagePercentage > 80 ? '#FF4D4D' : '#4caf50'}>
+                                {usagePercentage.toFixed(0)}%
+                            </Typography>
+                        </Box>
                         <LinearProgress
                             variant="determinate"
                             value={usagePercentage}
                             sx={{
                                 height: 6,
                                 borderRadius: 5,
-                                mt: 0.5,
-                                backgroundColor: '#D8E3F0',
+                                backgroundColor: '#E0E0E0',
                                 '& .MuiLinearProgress-bar': {
-                                    backgroundColor: usagePercentage > 80 ? '#FF4D4D' : '#00C48C'
+                                    backgroundColor: usagePercentage > 80 ? '#FF4D4D' : '#4caf50'
                                 }
                             }}
                         />
                     </Box>
                 </Grid>
-                <Grid item xs={2}>
-                    <Typography fontWeight={600} fontSize={14}>{row.available} units</Typography>
+                <Grid item xs={6} sm={2}>
+                    <Typography fontWeight={600} fontSize={14} color={row.available < 5 ? '#FF4D4D' : 'inherit'}>
+                        {row.available} units
+                    </Typography>
                 </Grid>
-                <Grid item xs={2}>
+                <Grid item xs={4} sm={1}>
                     <Chip
                         label={row.status}
-                        // icon={statusConfig.icon}
+                        size="small"
                         sx={{
                             backgroundColor: statusConfig.bg,
                             color: statusConfig.color,
                             fontWeight: 600,
-                            px: 1.5
+                            fontSize: '0.7rem',
+                            height: '24px'
                         }}
                     />
                 </Grid>
-                <Grid item xs={1} display="flex" justifyContent="flex-end">
-                    <IconButton
-                        onClick={() => setExpanded(!expanded)}
-                        sx={{
-                            backgroundColor: expanded ? '#F1F5F9' : 'transparent',
-                            '&:hover': { backgroundColor: '#F1F5F9' }
-                        }}
-                    >
-                        {expanded ? <ExpandLess /> : <ExpandMore />}
-                    </IconButton>
+                <Grid item xs={2} sm={1} display="flex" justifyContent="flex-end">
+                    <Tooltip title={expanded ? "Hide details" : "Show details"}>
+                        <IconButton
+                            onClick={() => setExpanded(!expanded)}
+                            size="small"
+                            sx={{
+                                backgroundColor: expanded ? '#F1F5F9' : 'transparent',
+                                '&:hover': { backgroundColor: '#F1F5F9' },
+                                transition: 'all 0.2s'
+                            }}
+                        >
+                            {expanded ? <ExpandLess /> : <ExpandMore />}
+                        </IconButton>
+                    </Tooltip>
                 </Grid>
             </Grid>
-            <Collapse in={expanded}>
-                <Box pb={2} px={3} sx={{ backgroundColor: '#FAFBFC' }}>
+            <Collapse in={expanded} timeout="auto">
+                <Box
+                    pb={2}
+                    px={3}
+                    sx={{
+                        backgroundColor: '#FAFBFC',
+                        borderTop: '1px dashed #e0e0e0'
+                    }}
+                >
                     <Table size="small" sx={{ minWidth: 650 }}>
                         <TableHead>
                             <TableRow>
-                                <TableCell sx={{ pl: 6, fontWeight: 600, color: '#64748B', fontSize: 12 }}>NAME</TableCell>
-                                <TableCell sx={{ fontWeight: 600, color: '#64748B', fontSize: 12 }}>ENGRAVED NUMBER</TableCell>
-                                <TableCell sx={{ fontWeight: 600, color: '#64748B', fontSize: 12 }}>QUANTITY</TableCell>
-                                <TableCell sx={{ fontWeight: 600, color: '#64748B', fontSize: 12 }}>TYPE</TableCell>
-                                <TableCell sx={{ fontWeight: 600, color: '#64748B', fontSize: 12 }}>STATUS</TableCell>
+                                <TableCell sx={{ pl: 6, fontWeight: 600, color: '#64748B', fontSize: 12, borderBottom: '1px solid #e0e0e0' }}>
+                                    NAME
+                                </TableCell>
+                                <TableCell sx={{ fontWeight: 600, color: '#64748B', fontSize: 12, borderBottom: '1px solid #e0e0e0' }}>
+                                    ENGRAVED NUMBER
+                                </TableCell>
+                                <TableCell sx={{ fontWeight: 600, color: '#64748B', fontSize: 12, borderBottom: '1px solid #e0e0e0' }}>
+                                    QUANTITY
+                                </TableCell>
+                                <TableCell sx={{ fontWeight: 600, color: '#64748B', fontSize: 12, borderBottom: '1px solid #e0e0e0' }}>
+                                    TYPE
+                                </TableCell>
+                                <TableCell sx={{ fontWeight: 600, color: '#64748B', fontSize: 12, borderBottom: '1px solid #e0e0e0' }}>
+                                    STATUS
+                                </TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -219,36 +277,61 @@ const DomainRow: React.FC<DomainRowProps> = ({ row }) => {
                                 const subStatusConfig = getStatusColor(sub.status);
 
                                 return (
-                                    <TableRow key={sub.id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                                        <TableCell sx={{ pl: 6 }}>
+                                    <TableRow
+                                        key={sub.id}
+                                        sx={{
+                                            '&:last-child td, &:last-child th': { border: 0 },
+                                            '&:hover': { backgroundColor: '#f8fafc' }
+                                        }}
+                                    >
+                                        <TableCell sx={{ pl: 6, py: 1.5 }}>
                                             <Typography fontSize={13} fontWeight={500}>{sub.name}</Typography>
                                         </TableCell>
-                                        <TableCell>
-                                            <Typography fontSize={13} sx={{ fontFamily: 'monospace', fontWeight: 500 }}>{sub.engravingNumber}</Typography>
+                                        <TableCell sx={{ py: 1.5 }}>
+                                            <Typography
+                                                fontSize={13}
+                                                sx={{
+                                                    fontFamily: 'monospace',
+                                                    fontWeight: 500,
+                                                    backgroundColor: '#f5f5f5',
+                                                    padding: '2px 6px',
+                                                    borderRadius: '4px',
+                                                    display: 'inline-block'
+                                                }}
+                                            >
+                                                {sub.engravingNumber}
+                                            </Typography>
                                         </TableCell>
-                                        <TableCell>
+                                        <TableCell sx={{ py: 1.5 }}>
                                             <Typography fontSize={13} fontWeight={500}>{sub.quantity}</Typography>
                                         </TableCell>
-                                        <TableCell>
+                                        <TableCell sx={{ py: 1.5 }}>
                                             <Chip
                                                 label={sub.type}
                                                 size="small"
                                                 sx={{
                                                     backgroundColor: typeColors.bg,
                                                     color: typeColors.color,
-                                                    fontWeight: 600
+                                                    fontWeight: 600,
+                                                    fontSize: '0.7rem',
+                                                    height: '22px'
                                                 }}
                                             />
                                         </TableCell>
-                                        <TableCell>
+                                        <TableCell sx={{ py: 1.5 }}>
                                             <Chip
                                                 label={sub.status}
                                                 size="small"
-                                                // icon={subStatusConfig.icon}
                                                 sx={{
                                                     backgroundColor: subStatusConfig.bg,
                                                     color: subStatusConfig.color,
-                                                    fontWeight: 600
+                                                    fontWeight: 600,
+                                                    fontSize: '0.7rem',
+                                                    height: '22px',
+                                                    '& .MuiChip-icon': {
+                                                        fontSize: '14px',
+                                                        marginLeft: '4px'
+                                                    }
                                                 }}
                                             />
                                         </TableCell>
@@ -265,11 +348,33 @@ const DomainRow: React.FC<DomainRowProps> = ({ row }) => {
 
 const ExpandableTable: React.FC = () => {
     return (
-        <Grid item xs={12} md={12} mt={2}>
-            <Card sx={{ padding: 2 }}>
-                <Box p={2}>
-                    <Typography variant="h6" color="#888" mb={3}>Asset Categories</Typography>
-                    <Divider />
+        <Grid item xs={12} mt={2} >
+            <Card
+                elevation={3}
+                sx={{
+                    borderRadius: 2,
+                    overflow: 'hidden'
+                }}
+            >
+                <Box
+                    p={2.5}
+                    sx={{
+                        borderBottom: '1px solid #e0e0e0',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center'
+                    }}
+                >
+                    <Typography variant="h6" color="#888" >
+                        Personal Assets Report
+                    </Typography>
+
+                    <Chip
+                        label={`${mockData.reduce((acc, item) => acc + item.totalItems, 0)} Items`}
+                        size="small"
+                        color="primary"
+                        variant="outlined"
+                    />
                 </Box>
                 <TableHeader />
                 {mockData.map((row) => (

@@ -33,7 +33,7 @@ const statusColors = {
 const LatestRequest = () => {
     const { findLatestPendingRequestsWithDetails } = SectionUtills();
     const { latestPendingRequests } = useContext(DashboardContext);
-    
+
     const getTimeAgo = (date?: string | null) => {
         if (!date) return "Unknown";
         return formatDistanceToNow(new Date(date), { addSuffix: true });
@@ -47,13 +47,11 @@ const LatestRequest = () => {
                 <Card elevation={3}>
                     <CardContent sx={{ px: 3, py: 4 }}>
                         <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-                            <Typography variant="h6" fontWeight="600" color="#555">
-                                Latest Requests
-                            </Typography>
-                            <Chip 
-                                label={`${latestPendingRequests.length} Requests`} 
-                                size="small" 
-                                color="primary" 
+                            <Typography variant="h6" color="#888" >Latest Requests</Typography>
+                            <Chip
+                                label={`${latestPendingRequests.length} Requests`}
+                                size="small"
+                                color="primary"
                                 variant="outlined"
                             />
                         </Box>
@@ -67,11 +65,11 @@ const LatestRequest = () => {
                             </Box>
                         ) : (
                             latestPendingRequests.map((request, index) => (
-                                <Paper 
-                                    key={request.id || index} 
-                                    elevation={1} 
-                                    
-                                    sx={{ 
+                                <Paper
+                                    key={request.id || index}
+                                    elevation={1}
+
+                                    sx={{
                                         mb: index < latestPendingRequests.length - 1 ? 3 : 0,
                                         boxShadow: "none",
                                         border: '1px solid #e0e0e0',
@@ -94,8 +92,8 @@ const LatestRequest = () => {
                                     <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={2}>
                                         {/* Requester Info */}
                                         <Box display="flex" alignItems="center">
-                                            <Avatar 
-                                                src={request.requester?.profileImage || 
+                                            <Avatar
+                                                src={request.requester?.profileImage ||
                                                     (request.requester?.gender?.toLowerCase() === 'male' ? MaleLogo : FemaleLogo)
                                                 }
                                                 sx={{ width: 45, height: 45 }}
@@ -106,11 +104,11 @@ const LatestRequest = () => {
                                                 </Typography>
                                                 <Box display="flex" alignItems="center" gap={1}>
                                                     <Typography variant="caption" color="text.secondary">
-                                                        {getTimeAgo(request.createDate)} • 
-                                                        <Typography 
-                                                            component="span" 
-                                                            variant="caption" 
-                                                            color="primary" 
+                                                        {getTimeAgo(request.createDate)} •
+                                                        <Typography
+                                                            component="span"
+                                                            variant="caption"
+                                                            color="primary"
                                                             fontWeight="500"
                                                             sx={{ ml: 0.5 }}
                                                         >
@@ -120,7 +118,7 @@ const LatestRequest = () => {
                                                 </Box>
                                             </Box>
                                         </Box>
-                                        
+
                                         {/* Status Badge */}
                                         <Chip
                                             label={request.status?.name || "Unknown Status"}
@@ -133,7 +131,7 @@ const LatestRequest = () => {
                                             }}
                                         />
                                     </Box>
-                                    
+
                                     <Box mb={1.5}>
                                         <Box display="flex" alignItems="center" justifyContent="space-between">
                                             <Typography variant="body1" fontWeight="500">
@@ -156,7 +154,7 @@ const LatestRequest = () => {
 
                                     {/* Description */}
                                     <DescriptionText description={request.description as string} MAX_LENGTH={150} />
-                                    
+
                                     {/* Commodities */}
                                     {(request.commodities?.length as number) > 0 && (
                                         <Box mt={2}>
@@ -178,17 +176,17 @@ const LatestRequest = () => {
                                                         label={commodity.commodity.name}
                                                         variant={idx % 2 === 0 ? "filled" : "outlined"}
                                                         size="small"
-                                                        sx={{ 
-                                                            '& .MuiChip-label': { 
-                                                                fontWeight: 500 
-                                                            } 
+                                                        sx={{
+                                                            '& .MuiChip-label': {
+                                                                fontWeight: 500
+                                                            }
                                                         }}
                                                     />
                                                 ))}
                                             </Stack>
                                         </Box>
                                     )}
-                                    
+
                                     {/* Current Approver & Actions */}
                                     <Box mt={2} pt={1.5} display="flex" justifyContent="space-between" alignItems="center" borderTop="1px solid #f0f0f0">
                                         <Box display="flex" alignItems="center">
@@ -203,20 +201,20 @@ const LatestRequest = () => {
                                                 </>
                                             )}
                                         </Box>
-                                        
-                                        <Link 
-                                            to={`/assets-mgt/asset-request/view/${request.id}`} 
+
+                                        <Link
+                                            to={`/assets-mgt/asset-request/view/${request.id}`}
                                             style={{ textDecoration: 'none' }}
                                         >
-                                            <Typography 
-                                                variant="body2" 
-                                                color="primary" 
+                                            <Typography
+                                                variant="body2"
+                                                color="primary"
                                                 fontWeight="600"
-                                                sx={{ 
+                                                sx={{
                                                     cursor: 'pointer',
-                                                    '&:hover': { 
-                                                        textDecoration: 'underline' 
-                                                    } 
+                                                    '&:hover': {
+                                                        textDecoration: 'underline'
+                                                    }
                                                 }}
                                             >
                                                 View Details →
