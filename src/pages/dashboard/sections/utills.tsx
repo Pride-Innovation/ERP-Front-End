@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import {
     IMonthlyItAndOfficeStats,
     IMonthlyItAndOfficeStatsAxiosResponse,
@@ -13,6 +13,7 @@ import {
     RequestCardProps
 } from "./interface";
 import {
+    fetchBranchAssetStaticsService,
     findLatestPendingRequestsWithDetailsService,
     getCurrentYearRequestSummaryService,
     getItAndOfficeMonthlyStockSummaryService,
@@ -26,7 +27,7 @@ import { formatNumber } from "../../../utils/helpers";
 import furnitureImage from "../../../statics/images/furnitureDesktop.png";
 import stationeryImage from "../../../statics/images/stationeryDesktop.png";
 import RequestImage from "../../../statics/images/requestDesktop.png"
-import { IRequestsAxiosResponse } from "../../request/interface";
+import { BranchAssetStats, IBranchAssetStatics, IBranchAssetStaticsAxiosResponse, IRequestsAxiosResponse } from "../../request/interface";
 
 const SectionUtills = () => {
     const {
@@ -39,7 +40,8 @@ const SectionUtills = () => {
         setMonthlyStationeryStatslabels,
         setMonthlyITandOfficeSummaryStats,
         setYearlyRequestSummaryStats,
-        setLatestPendingRequests
+        setLatestPendingRequests,
+        setAssetStats
     } = useContext(DashboardContext);
 
     /**
@@ -275,6 +277,30 @@ const SectionUtills = () => {
         }
     }
 
+    // Formats the branch asset statistics data for easier access
+    const formatBranchAssetStatistics = (data: IBranchAssetStatics[]) => {
+        const res = data.reduce((acc: Record<string, Omit<IBranchAssetStatics, 'assetType'>>, item) => {
+            const { assetType, ...stats } = item;
+            acc[(assetType.split(' ').join('').toLowerCase())] = stats;
+            return acc;
+        }, {} as Record<string, Omit<IBranchAssetStatics, 'assetType'>>);
+
+
+        return res;
+
+    };
+
+    const fetchBranchAssetStatics = async () => {
+        try {
+            const response = await fetchBranchAssetStaticsService() as IBranchAssetStaticsAxiosResponse;
+            if (response.status === 200) {
+                setAssetStats(formatBranchAssetStatistics(response.data) as unknown as BranchAssetStats);
+            }
+        } catch (error) {
+            console.error("Error fetching branch asset statistics:", error);
+        }
+    }
+
 
     return ({
         requestRatingStatsFxn,
@@ -283,7 +309,8 @@ const SectionUtills = () => {
         getMonthlyStationeryTotals,
         getItAndOfficeMonthlyStockSummaryFxn,
         getCurrentYearRequestSummary,
-        findLatestPendingRequestsWithDetails
+        findLatestPendingRequestsWithDetails,
+        fetchBranchAssetStatics
     });
 }
 

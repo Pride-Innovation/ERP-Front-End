@@ -9,7 +9,7 @@ import {
     IRequestRatingStats,
     RequestCardProps
 } from "../../pages/dashboard/sections/interface";
-import { IRequest } from "../../pages/request/interface";
+import { BranchAssetStats, IRequest } from "../../pages/request/interface";
 
 
 interface DashboardContextProps {
@@ -36,6 +36,8 @@ interface DashboardContextProps {
     setYearlyRequestSummaryStats: Dispatch<React.SetStateAction<Array<RequestCardProps>>>;
     latestPendingRequests: Array<IRequest>;
     setLatestPendingRequests: Dispatch<React.SetStateAction<Array<IRequest>>>;
+    assetStats: BranchAssetStats;
+    setAssetStats: Dispatch<React.SetStateAction<BranchAssetStats>>;
 }
 
 export const DashboardContext = createContext({} as DashboardContextProps);
@@ -59,6 +61,7 @@ const DashboardProvider: FC<{ children: React.ReactNode }> = ({ children }) => {
     const [monthlyITandOfficeSummaryStats, setMonthlyITandOfficeSummaryStats] = useState<Array<IMonthlyItAndOfficeSummaryStats>>([]);
     const [yearlyRequestSummaryStats, setYearlyRequestSummaryStats] = useState<Array<RequestCardProps>>([]);
     const [latestPendingRequests, setLatestPendingRequests] = useState<Array<IRequest>>([]);
+    const [assetStats, setAssetStats] = useState<BranchAssetStats>({} as BranchAssetStats);
 
     return (
         <DashboardContext.Provider value={{
@@ -83,7 +86,9 @@ const DashboardProvider: FC<{ children: React.ReactNode }> = ({ children }) => {
             yearlyRequestSummaryStats,
             setYearlyRequestSummaryStats,
             latestPendingRequests,
-            setLatestPendingRequests
+            setLatestPendingRequests,
+            assetStats,
+            setAssetStats
         }}>
             {children}
         </DashboardContext.Provider>

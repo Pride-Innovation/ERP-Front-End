@@ -279,3 +279,28 @@ export interface IApproveIssuance {
     request: IRequest;
     setSendingRequest: Dispatch<SetStateAction<boolean>>
 }
+
+export interface IBranchAssetStatics {
+    assigned: number;
+    unassigned: number;
+    inMaintenance: number;
+    total: number;
+    assetType: string;
+}
+
+export interface IBranchAssetStaticsAxiosResponse extends IAxiosResponse {
+    data: Array<IBranchAssetStatics>
+}
+
+export interface AssetStats {
+    total: number;
+    active: number;
+    inMaintenance: number;
+    unassigned: number;
+}
+
+export interface BranchAssetStats {
+    itequipment: AssetStats;
+    officeequipment: AssetStats;
+    fleet: AssetStats;
+}

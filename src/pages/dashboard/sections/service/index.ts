@@ -64,3 +64,12 @@ export const findLatestPendingRequestsWithDetailsService = async () => {
         return error;
     }
 }
+
+export const fetchBranchAssetStaticsService = async () => {
+    try {
+        const response = await axiosInstance.get('/assets/statistics');
+        return response;
+    } catch (error) {
+        return error;
+    }
+}

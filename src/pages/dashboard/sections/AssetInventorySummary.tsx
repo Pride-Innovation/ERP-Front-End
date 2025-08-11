@@ -1,4 +1,4 @@
-import { useState, useEffect, ReactElement } from 'react';
+import { useEffect, ReactElement, useContext } from 'react';
 import {
     Box,
     Card,
@@ -18,6 +18,9 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import BusinessCenterIcon from '@mui/icons-material/BusinessCenter';
 import BuildIcon from '@mui/icons-material/Build';
 import PersonOffIcon from '@mui/icons-material/PersonOff';
+import SectionUtills from './utills';
+import CarbonBG from '../../../statics/images/carbon-fibre.png';
+import { DashboardContext } from '../../../context/dashboard';
 
 // Primary brand colors
 const PRIMARY_COLOR = '#08796C'; // Teal
@@ -35,29 +38,6 @@ const ACCENT_COLORS = [
     SECONDARY_COLOR,   // Gold for Office Equipment
     TEAL_DARK,         // Dark teal for Fleet
 ];
-
-// Mock data - replace with API calls in production
-const MOCK_DATA = {
-    itEquipment: {
-        total: 137,
-        active: 121,
-        maintenance: 8,
-        unassigned: 8,
-    },
-    officeEquipment: {
-        total: 215,
-        active: 196,
-        maintenance: 5,
-        unassigned: 14,
-    },
-    fleet: {
-        total: 42,
-        active: 36,
-        maintenance: 3,
-        unassigned: 3,
-    }
-};
-
 
 interface AssetCategoryCardProps {
     title: string;
@@ -233,30 +213,23 @@ const AssetCategoryCard = ({
 };
 
 const AssetInventorySummary = () => {
-    // In a real implementation, you'd fetch this data from an API
-    const [assetData, setAssetData] = useState(MOCK_DATA);
-
-    // Simulate API loading for demo
-    const [loading, setLoading] = useState(true);
+    const { fetchBranchAssetStatics } = SectionUtills();
+    const { assetStats } = useContext(DashboardContext);
 
     useEffect(() => {
-        const timer = setTimeout(() => {
-            setLoading(false);
-        }, 800);
-
-        return () => clearTimeout(timer);
+        fetchBranchAssetStatics();
     }, []);
 
-    // Calculate total assets
-    const totalAssets = assetData.itEquipment.total +
-        assetData.officeEquipment.total +
-        assetData.fleet.total;
+    const totalAssets = assetStats != null && assetStats?.itequipment?.total +
+        assetStats?.officeequipment?.total +
+        assetStats?.fleet?.total;
+
+    console.log(assetStats, "Asset Stats");
 
     return (
         <Grid item xs={12}>
             <Card
                 sx={{
-                    // Rich gradient background with multiple color stops
                     background: `linear-gradient(135deg, 
                         ${PRIMARY_COLOR} 0%, 
                         ${alpha(TEAL_DARK, 0.95)} 60%,
@@ -265,11 +238,9 @@ const AssetInventorySummary = () => {
                     borderRadius: 2.5,
                     overflow: 'hidden',
                     position: 'relative',
-                    boxShadow: `0 8px 32px ${alpha(PRIMARY_COLOR, 0.35)}`,
                     border: `1px solid ${alpha(PRIMARY_COLOR, 0.2)}`,
                 }}
             >
-                {/* Gold accent with more vibrant gradient */}
                 <Box
                     sx={{
                         position: 'absolute',
@@ -285,7 +256,6 @@ const AssetInventorySummary = () => {
                     }}
                 />
 
-                {/* More visible pattern overlay */}
                 <Box
                     sx={{
                         position: 'absolute',
@@ -294,21 +264,8 @@ const AssetInventorySummary = () => {
                         width: '100%',
                         height: '100%',
                         opacity: 0.07,
-                        background: 'url(https://www.transparenttextures.com/patterns/carbon-fibre.png)',
+                        background: `url(${CarbonBG})`,
                         zIndex: 0
-                    }}
-                />
-
-                {/* Decorative accent line */}
-                <Box
-                    sx={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        width: '4px',
-                        height: '100%',
-                        background: `linear-gradient(to bottom, ${SECONDARY_COLOR}, transparent)`,
-                        zIndex: 1
                     }}
                 />
 
@@ -318,7 +275,6 @@ const AssetInventorySummary = () => {
                             sx={{
                                 p: 1,
                                 borderRadius: 2,
-                                // Gradient for the icon background
                                 background: `linear-gradient(135deg, ${alpha(SECONDARY_COLOR, 0.8)} 0%, ${alpha(GOLD_DARK, 0.9)} 100%)`,
                                 mr: 2,
                                 display: 'flex',
@@ -354,7 +310,6 @@ const AssetInventorySummary = () => {
                     <Divider sx={{
                         my: 2.2,
                         borderColor: alpha('#fff', 0.2),
-                        // Gradient divider
                         '&::before': {
                             width: '100%',
                             borderTop: `thin solid ${alpha(SECONDARY_COLOR, 0.3)}`
@@ -366,10 +321,10 @@ const AssetInventorySummary = () => {
                             <AssetCategoryCard
                                 title="IT Equipment"
                                 icon={<ComputerIcon fontSize="medium" />}
-                                total={assetData.itEquipment.total}
-                                active={assetData.itEquipment.active}
-                                maintenance={assetData.itEquipment.maintenance}
-                                unassigned={assetData.itEquipment.unassigned}
+                                total={assetStats?.itequipment?.total}
+                                active={assetStats?.itequipment?.total - assetStats?.itequipment?.inMaintenance - assetStats?.itequipment?.unassigned}
+                                maintenance={assetStats?.itequipment?.inMaintenance}
+                                unassigned={assetStats?.itequipment?.unassigned}
                                 color={ACCENT_COLORS[0]}
                             />
                         </Grid>
@@ -378,10 +333,10 @@ const AssetInventorySummary = () => {
                             <AssetCategoryCard
                                 title="Office Equipment"
                                 icon={<ChairIcon fontSize="medium" />}
-                                total={assetData.officeEquipment.total}
-                                active={assetData.officeEquipment.active}
-                                maintenance={assetData.officeEquipment.maintenance}
-                                unassigned={assetData.officeEquipment.unassigned}
+                                total={assetStats?.officeequipment?.total}
+                                active={assetStats?.officeequipment?.total - assetStats?.officeequipment?.inMaintenance - assetStats?.officeequipment?.unassigned}
+                                maintenance={assetStats?.officeequipment?.inMaintenance}
+                                unassigned={assetStats?.officeequipment?.unassigned}
                                 color={ACCENT_COLORS[1]}
                             />
                         </Grid>
@@ -390,10 +345,10 @@ const AssetInventorySummary = () => {
                             <AssetCategoryCard
                                 title="Fleet Vehicles"
                                 icon={<DirectionsCarIcon fontSize="medium" />}
-                                total={assetData.fleet.total}
-                                active={assetData.fleet.active}
-                                maintenance={assetData.fleet.maintenance}
-                                unassigned={assetData.fleet.unassigned}
+                                total={assetStats?.fleet?.total}
+                                active={assetStats?.fleet?.total - assetStats?.fleet?.inMaintenance - assetStats?.fleet?.unassigned}
+                                maintenance={assetStats?.fleet?.inMaintenance}
+                                unassigned={assetStats?.fleet?.unassigned}
                                 color={ACCENT_COLORS[2]}
                             />
                         </Grid>
@@ -407,7 +362,6 @@ const AssetInventorySummary = () => {
                             mt: 3,
                             p: 1.8,
                             borderRadius: 2,
-                            // Glassy background effect
                             background: `linear-gradient(to right, ${alpha('#fff', 0.12)}, ${alpha('#fff', 0.06)})`,
                             backdropFilter: 'blur(8px)',
                             border: `1px solid ${alpha('#fff', 0.1)}`,
@@ -424,7 +378,7 @@ const AssetInventorySummary = () => {
                                 fontSize: '1.1rem',
                                 color: GOLD_LIGHT
                             }}>
-                                {totalAssets.toLocaleString()}
+                                {totalAssets?.toLocaleString()}
                             </Box>
                         </Typography>
                         <Typography variant="caption" color={alpha('#fff', 0.8)}>
