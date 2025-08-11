@@ -20,7 +20,6 @@ import AssetStockReview from './sections/AssetStockReview';
 import StationeryStock from './sections/StationeryStock';
 import RequestReport from './sections/RequestReport';
 import LatestRequest from './sections/LatestRequest';
-import ExpandableTable from './sections/PersonalAssetsReport';
 
 ChartJS.register(
   LineElement,
@@ -39,20 +38,29 @@ const Dashboard = () => {
 
   return (
     <Box p={3} bgcolor="#f5f8fc" minHeight="100vh">
-      <Grid container spacing={2} alignItems="stretch">
-        {/* Request Rating */}
-        <RequestRating />
-        {/* AssetStockReview */}
-        <AssetStockReview />
-        {/* StationeryStock */}
-        <StationeryStock />
+      <Grid container spacing={2} alignItems="stretch" mb={3}>
+        <Grid item xs={9} container spacing={2} alignItems="stretch">
+          {/* Request Rating */}
+          <RequestRating />
+          {/* AssetStockReview */}
+          <AssetStockReview />
+          {/* StationeryStock */}
+          {/* <StationeryStock /> */}
 
-        {/* Requests Reports */}
-        <RequestReport />
+          {/* Requests Reports */}
+          <RequestReport />
 
-        {/* Latest Requests */}
-        <LatestRequest />
+          {/* Latest Requests */}
+          <LatestRequest />
+        </Grid>
+        <Grid item xs={3} container spacing={2} alignItems="stretch">
+
+          {/* StationeryStock */}
+          <StationeryStock />
+
+        </Grid>
       </Grid>
+
     </Box>
   );
 };

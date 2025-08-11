@@ -30,7 +30,6 @@ import { getOfficeEquipmentByIDService } from "../service";
 import Loading from '../../../../components/loading';
 import moment from 'moment';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import DevicesOtherIcon from '@mui/icons-material/DevicesOther';
 import { camelCaseToWords } from '../../../../utils/helpers';
 import InfoIcon from '@mui/icons-material/Info';
 import LocationOnIcon from '@mui/icons-material/LocationOn';

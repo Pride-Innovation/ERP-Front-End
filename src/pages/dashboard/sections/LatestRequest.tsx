@@ -43,7 +43,7 @@ const LatestRequest = () => {
 
     return (
         <>
-            <Grid item xs={12} md={9}>
+            <Grid item xs={12} md={8}>
                 <Card elevation={3}>
                     <CardContent sx={{ px: 3, py: 4 }}>
                         <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>

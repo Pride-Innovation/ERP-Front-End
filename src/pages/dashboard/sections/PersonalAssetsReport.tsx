@@ -14,7 +14,6 @@ import {
     TableRow,
     TableCell,
     TableBody,
-    Divider,
     Tooltip
 } from '@mui/material';
 import { ExpandMore, ExpandLess } from '@mui/icons-material';

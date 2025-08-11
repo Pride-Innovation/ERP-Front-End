@@ -115,7 +115,7 @@ const RequestReport: React.FC = () => {
     useEffect(() => { getCurrentYearRequestSummary() }, []);
 
     return (
-        <Grid item xs={12} md={3}>
+        <Grid item xs={12} md={4}>
             {yearlyRequestSummaryStats.length > 0 &&
                 yearlyRequestSummaryStats.map((card, index) => (
                     <RequestCard key={index} {...card} />

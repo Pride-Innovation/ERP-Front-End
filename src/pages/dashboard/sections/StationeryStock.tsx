@@ -17,7 +17,7 @@ const StationeryStock = () => {
     useEffect(() => { getMonthlyStationeryTotals() }, []);
     return (
         <>
-            <Grid item xs={12} md={3}>
+            <Grid item xs={12} md={12}>
                 <Card sx={{ height: '100%' }}>
                     <CardContent>
                         <Typography variant="subtitle2"

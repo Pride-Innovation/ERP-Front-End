@@ -23,7 +23,7 @@ const AssetStockReview = () => {
 
     return (
         <>
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12} md={8}>
                 <Card sx={{ height: '100%' }}>
                     <CardContent sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
                         <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
