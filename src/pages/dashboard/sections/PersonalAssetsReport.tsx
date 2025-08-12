@@ -37,7 +37,7 @@ const getStatusColor = (status: string): StatusColorConfig => {
 const getCategoryIcon = (domain: string) => {
     switch (domain) {
         case 'IT Equipment': return <LaptopIcon sx={{ color: '#3F5FFF', fontSize: 20 }} />;
-        case 'Office Furniture': return <ChairIcon sx={{ color: '#4caf50', fontSize: 20 }} />;
+        case 'Office Equipment': return <ChairIcon sx={{ color: '#4caf50', fontSize: 20 }} />;
         default: return <LaptopIcon sx={{ color: '#3F5FFF', fontSize: 20 }} />;
     }
 };
