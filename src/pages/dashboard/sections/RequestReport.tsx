@@ -4,12 +4,24 @@ import {
     CardContent,
     CircularProgress,
     Grid,
-    Typography
-} from "@mui/material"
+    Typography,
+    alpha,
+    Divider
+} from "@mui/material";
 import SectionUtills from "./utills";
 import { useContext, useEffect } from "react";
 import { DashboardContext } from "../../../context/dashboard";
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 
+// Primary brand colors
+const PRIMARY_COLOR = '#08796C'; // Teal
+const SECONDARY_COLOR = '#BC892C'; // Gold
+
+// Complementary colors for better visual hierarchy
+const SUCCESS_COLOR = '#2e7d32'; // Green
+const NEUTRAL_COLOR = '#5f6368'; // Gray
 
 interface RequestCardProps {
     title: string;
@@ -34,40 +46,133 @@ const RequestCard: React.FC<RequestCardProps> = ({
     totalRequested,
     totalDelivered
 }) => {
+    // Calculate percentage with safety check
+    const safeRequested = totalRequested || 1; // Prevent division by zero
+    const percentage = Math.round((totalDelivered / safeRequested) * 100);
+
+    // Color safety check - ensure we have a valid color
+    const safeColor = (() => {
+        // If it's a valid hex color or starts with rgb/hsl, use it
+        if (/^#([A-Fa-f0-9]{3,6})|rgb|hsl|rgba|hsla/.test(progressColor)) {
+            return progressColor;
+        }
+
+        // Check if it's one of our predefined colors
+        if (progressColor === 'primary') return PRIMARY_COLOR;
+        if (progressColor === 'secondary') return SECONDARY_COLOR;
+        if (progressColor === 'success') return SUCCESS_COLOR;
+        if (progressColor === 'neutral') return NEUTRAL_COLOR;
+
+        // Default fallback color
+        return PRIMARY_COLOR;
+    })();
+
     return (
-        <Card sx={{ mb: 2 }}>
-            <CardContent>
-                <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
-                    <Box>
-                        <Typography variant="subtitle2" color="text.secondary">{title}</Typography>
-                    </Box>
-                    <Typography variant="caption" color="text.secondary" sx={{ border: '1px solid #ddd', px: 1.5, py: 0.5, borderRadius: 2 }}>
+        <Card
+            elevation={0}
+            sx={{
+                mb: 2.5,
+                borderRadius: 1,
+                border: `1px solid ${alpha('#000', 0.08)}`,
+                boxShadow: `0 1px 3px ${alpha('#000', 0.1)}, 0 1px 2px ${alpha('#000', 0.06)}`,
+                transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
+                '&:hover': {
+                    boxShadow: `0 4px 12px ${alpha('#000', 0.08)}`,
+                    transform: 'translateY(-2px)'
+                }
+            }}
+        >
+            {/* Card Header with title and time period */}
+            <Box
+                sx={{
+                    px: 2.5,
+                    py: 2,
+                    borderBottom: `1px solid ${alpha('#000', 0.06)}`,
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    bgcolor: alpha(safeColor, 0.03)
+                }}
+            >
+                <Box>
+                    <Typography
+                        variant="subtitle1"
+                        fontWeight={600}
+                        color="text.primary"
+                    >
+                        {title}
+                    </Typography>
+                </Box>
+                <Box
+                    sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        px: 1.5,
+                        py: 0.5,
+                        borderRadius: 1,
+                        bgcolor: alpha('#000', 0.04),
+                        border: `1px solid ${alpha('#000', 0.08)}`
+                    }}
+                >
+                    <CalendarTodayIcon sx={{ fontSize: '0.875rem', mr: 0.7, color: NEUTRAL_COLOR }} />
+                    <Typography
+                        variant="caption"
+                        fontWeight={500}
+                        color="text.secondary"
+                    >
                         1 year
                     </Typography>
                 </Box>
-                <Box display="flex" justifyContent="center" alignItems="center" mt={2} mb={2}>
+            </Box>
+
+            <CardContent sx={{ p: 2.5 }}>
+                {/* Progress Circle */}
+                <Box
+                    display="flex"
+                    justifyContent="center"
+                    alignItems="center"
+                    my={2}
+                    position="relative"
+                >
+                    {/* Background light ring */}
+                    <Box
+                        sx={{
+                            position: 'absolute',
+                            width: 156,
+                            height: 156,
+                            borderRadius: '50%',
+                            bgcolor: alpha(safeColor, 0.04),
+                            border: `1px solid ${alpha(safeColor, 0.1)}`
+                        }}
+                    />
+
                     <Box position="relative" display="inline-flex">
+                        {/* Background circle */}
                         <CircularProgress
                             variant="determinate"
                             value={100}
                             size={140}
-                            thickness={2}
+                            thickness={4}
                             sx={{
                                 position: "absolute",
-                                color: "#e0e0e0",
+                                color: alpha(safeColor, 0.15),
                             }}
                         />
 
+                        {/* Progress circle */}
                         <CircularProgress
                             variant="determinate"
-                            value={(totalDelivered / totalRequested) * 100}
+                            value={percentage}
                             size={140}
-                            thickness={2}
+                            thickness={4}
                             sx={{
-                                color: progressColor,
+                                color: safeColor,
+                                boxShadow: `0 0 10px ${alpha(safeColor, 0.2)}`,
+                                borderRadius: '50%'
                             }}
                         />
 
+                        {/* Center content */}
                         <Box
                             top={0}
                             left={0}
@@ -80,30 +185,127 @@ const RequestCard: React.FC<RequestCardProps> = ({
                             flexDirection="column"
                         >
                             <Box
-                                component="img"
-                                src={image}
-                                alt="Request Icon"
-                                width={imageSize}
-                                height={imageSize}
-                                mb={0.5}
-                            />
-                            <Typography variant="subtitle1" fontWeight="bold">
+                                sx={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    width: 60,
+                                    height: 60,
+                                    borderRadius: '50%',
+                                    bgcolor: alpha(safeColor, 0.1),
+                                    mb: 1.5,
+                                    p: 1.5
+                                }}
+                            >
+                                <Box
+                                    component="img"
+                                    src={image}
+                                    alt="Request Icon"
+                                    sx={{
+                                        width: imageSize,
+                                        height: imageSize,
+                                        objectFit: "contain",
+                                        filter: `drop-shadow(0 2px 3px ${alpha(safeColor, 0.3)})`
+                                    }}
+                                />
+                            </Box>
+                            <Typography
+                                variant="h5"
+                                fontWeight="bold"
+                                sx={{
+                                    color: safeColor
+                                }}
+                            >
                                 {value}
-                            </Typography>
-                            <Typography variant="caption" color="text.secondary">
-                                Requests
                             </Typography>
                         </Box>
                     </Box>
                 </Box>
-                <Box display="flex" justifyContent="space-between" px={1}>
-                    <Typography variant="body2" color="primary">
-                        Completed: {completed}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                        Pending: {pending}
-                    </Typography>
-                </Box>
+
+                <Divider sx={{ my: 2, borderColor: alpha('#000', 0.06) }} />
+
+                {/* Stats Footer - Completed and Pending counts */}
+                <Grid container spacing={1}>
+                    {/* Completed Stats */}
+                    <Grid item xs={6}>
+                        <Box
+                            sx={{
+                                p: 1.5,
+                                borderRadius: 1,
+                                bgcolor: alpha(SUCCESS_COLOR, 0.08),
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                height: '100%'
+                            }}
+                        >
+                            <Box
+                                display="flex"
+                                alignItems="center"
+                                sx={{ mb: 1 }}
+                            >
+                                <CheckCircleOutlineIcon sx={{ fontSize: '1rem', color: SUCCESS_COLOR, mr: 0.7 }} />
+                                <Typography
+                                    variant="body2"
+                                    sx={{
+                                        fontWeight: 500,
+                                        color: SUCCESS_COLOR
+                                    }}
+                                >
+                                    Completed
+                                </Typography>
+                            </Box>
+                            <Typography
+                                variant="h6"
+                                fontWeight="bold"
+                                sx={{
+                                    color: SUCCESS_COLOR
+                                }}
+                            >
+                                {completed}
+                            </Typography>
+                        </Box>
+                    </Grid>
+
+                    {/* Pending Stats */}
+                    <Grid item xs={6}>
+                        <Box
+                            sx={{
+                                p: 1.5,
+                                borderRadius: 1,
+                                bgcolor: alpha(NEUTRAL_COLOR, 0.08),
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                height: '100%'
+                            }}
+                        >
+                            <Box
+                                display="flex"
+                                alignItems="center"
+                                sx={{ mb: 1 }}
+                            >
+                                <HourglassEmptyIcon sx={{ fontSize: '1rem', color: NEUTRAL_COLOR, mr: 0.7 }} />
+                                <Typography
+                                    variant="body2"
+                                    sx={{
+                                        fontWeight: 500,
+                                        color: NEUTRAL_COLOR
+                                    }}
+                                >
+                                    Pending
+                                </Typography>
+                            </Box>
+                            <Typography
+                                variant="h6"
+                                fontWeight="bold"
+                                color={NEUTRAL_COLOR}
+                            >
+                                {pending}
+                            </Typography>
+                        </Box>
+                    </Grid>
+                </Grid>
             </CardContent>
         </Card>
     );
@@ -112,14 +314,31 @@ const RequestCard: React.FC<RequestCardProps> = ({
 const RequestReport: React.FC = () => {
     const { getCurrentYearRequestSummary } = SectionUtills()
     const { yearlyRequestSummaryStats } = useContext(DashboardContext);
+
     useEffect(() => { getCurrentYearRequestSummary() }, []);
 
     return (
         <Grid item xs={12} md={4}>
-            {yearlyRequestSummaryStats.length > 0 &&
+            {yearlyRequestSummaryStats.length > 0 ?
                 yearlyRequestSummaryStats.map((card, index) => (
                     <RequestCard key={index} {...card} />
-                ))}
+                )) : (
+                    // Loading or empty state
+                    <Card
+                        elevation={0}
+                        sx={{
+                            height: 300,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            borderRadius: 1,
+                            border: `1px solid ${alpha('#000', 0.08)}`
+                        }}
+                    >
+                        <CircularProgress size={24} sx={{ color: PRIMARY_COLOR }} />
+                    </Card>
+                )
+            }
         </Grid>
     );
 };

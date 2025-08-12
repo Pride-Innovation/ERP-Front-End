@@ -38,7 +38,6 @@ const CATEGORY_ICONS = [
     <MoreHorizIcon fontSize="small" />
 ];
 
-// Units for each category
 const CATEGORY_UNITS = ["dozen", "boxes", "dozen", "items"];
 
 const StationeryStock = () => {
@@ -48,12 +47,10 @@ const StationeryStock = () => {
 
     useEffect(() => { getMonthlyStationeryTotals() }, []);
 
-    // Calculate total items
     const totalItems = Array.isArray(monthlyStationeryStats)
         ? monthlyStationeryStats.reduce((sum, value) => sum + value, 0)
         : 0;
 
-    // Chart options with improved styling
     const chartOptions = {
         cutout: '75%',
         responsive: true,
@@ -67,13 +64,11 @@ const StationeryStock = () => {
                 padding: 12,
                 titleFont: {
                     size: 14,
-                    // Fix: use numeric weight instead of string
                     weight: 600, // Changed from '600' string to numeric 600
                     family: "'Roboto', 'Helvetica', 'Arial', sans-serif" // Added font family for completeness
                 },
                 bodyFont: {
                     size: 13,
-                    // Add weight to ensure consistency
                     weight: 400,
                     family: "'Roboto', 'Helvetica', 'Arial', sans-serif"
                 },
@@ -90,7 +85,6 @@ const StationeryStock = () => {
         },
     } as const;
 
-    // Chart data
     const chartData = {
         labels: monthlyStationeryStatslabels,
         datasets: [
@@ -116,7 +110,6 @@ const StationeryStock = () => {
                     overflow: 'hidden'
                 }}
             >
-                {/* Card Header */}
                 <Box
                     sx={{
                         px: 2.5,
@@ -177,13 +170,11 @@ const StationeryStock = () => {
                 </Box>
 
                 <CardContent sx={{ p: 2.5, pt: 2 }}>
-                    {/* Chart Section */}
                     <Box sx={{ position: 'relative', height: 200, my: 1 }}>
                         <Doughnut
                             data={chartData}
                             options={chartOptions}
                         />
-                        {/* Center total display */}
                         <Box
                             sx={{
                                 position: 'absolute',
@@ -209,43 +200,46 @@ const StationeryStock = () => {
                         </Box>
                     </Box>
 
-                    {/* Legend */}
                     <Box mt={2} mb={1} display="flex" justifyContent="center">
                         <Stack direction="row" spacing={2} flexWrap="wrap" justifyContent="center">
-                            {(monthlyStationeryStatslabels || []).map((label, index) => (
-                                <Box
-                                    key={`legend-${index}`}
-                                    sx={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        px: 1.2,
-                                        py: 0.5,
-                                        borderRadius: 1,
-                                        bgcolor: alpha(CHART_COLORS[index], 0.1),
-                                        mr: { xs: 0.5, sm: 0 },
-                                        mb: { xs: 0.5, sm: 0 }
-                                    }}
-                                >
+                            {(monthlyStationeryStatslabels || [])?.map((label, index) => {
+                                // Get color with fallback to prevent undefined
+                                const color = CHART_COLORS[index % CHART_COLORS.length] || PRIMARY_COLOR;
+
+                                return (
                                     <Box
+                                        key={`legend-${index}`}
                                         sx={{
-                                            width: 10,
-                                            height: 10,
-                                            borderRadius: '50%',
-                                            bgcolor: CHART_COLORS[index],
-                                            mr: 1
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            px: 1.2,
+                                            py: 0.5,
+                                            borderRadius: 1,
+                                            bgcolor: alpha(color, 0.1),
+                                            mr: { xs: 0.5, sm: 0 },
+                                            mb: { xs: 0.5, sm: 0 }
                                         }}
-                                    />
-                                    <Typography variant="caption" fontWeight={500} color={CHART_COLORS[index]}>
-                                        {label || 'Unknown'}
-                                    </Typography>
-                                </Box>
-                            ))}
+                                    >
+                                        <Box
+                                            sx={{
+                                                width: 10,
+                                                height: 10,
+                                                borderRadius: '50%',
+                                                bgcolor: color,
+                                                mr: 1
+                                            }}
+                                        />
+                                        <Typography variant="caption" fontWeight={500} color={color}>
+                                            {label || 'Unknown'}
+                                        </Typography>
+                                    </Box>
+                                );
+                            })}
                         </Stack>
                     </Box>
 
                     <Divider sx={{ my: 2, borderColor: alpha('#000', 0.06) }} />
 
-                    {/* Detailed List */}
                     <Box>
                         <Typography
                             variant="body2"
@@ -272,59 +266,68 @@ const StationeryStock = () => {
                         </Typography>
 
                         <Stack spacing={1.2}>
-                            {(monthlyStationeryStatslabels || []).map((label, index) => (
-                                <Box
-                                    key={`item-${index}`}
-                                    sx={{
-                                        display: 'flex',
-                                        justifyContent: 'space-between',
-                                        alignItems: 'center',
-                                        p: 1,
-                                        borderRadius: 1,
-                                        bgcolor: alpha(CHART_COLORS[index], 0.05),
-                                        border: `1px solid ${alpha(CHART_COLORS[index], 0.1)}`,
-                                    }}
-                                >
-                                    <Box display="flex" alignItems="center">
-                                        <Box
-                                            sx={{
-                                                width: 28,
-                                                height: 28,
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center',
-                                                borderRadius: '50%',
-                                                bgcolor: alpha(CHART_COLORS[index], 0.15),
-                                                color: CHART_COLORS[index],
-                                                mr: 1.5
-                                            }}
-                                        >
-                                            {CATEGORY_ICONS[index]}
-                                        </Box>
-                                        <Box>
-                                            <Typography variant="body2" fontWeight={600} color="text.primary">
-                                                {label || 'Unknown'}
-                                            </Typography>
-                                            <Typography variant="caption" color="text.secondary">
-                                                {CATEGORY_UNITS[index]}
-                                            </Typography>
-                                        </Box>
-                                    </Box>
-                                    <Typography
-                                        variant="subtitle2"
-                                        fontWeight="700"
+                            {(monthlyStationeryStatslabels || []).map((label, index) => {
+                                // Get color with fallback to prevent undefined
+                                const color = CHART_COLORS[index % CHART_COLORS.length] || PRIMARY_COLOR;
+                                // Get icon with fallback
+                                const icon = CATEGORY_ICONS[index % CATEGORY_ICONS.length] || <MoreHorizIcon fontSize="small" />;
+                                // Get unit with fallback
+                                const unit = CATEGORY_UNITS[index % CATEGORY_UNITS.length] || "items";
+
+                                return (
+                                    <Box
+                                        key={`item-${index}`}
                                         sx={{
-                                            color: CHART_COLORS[index],
-                                            bgcolor: alpha(CHART_COLORS[index], 0.15),
+                                            display: 'flex',
+                                            justifyContent: 'space-between',
+                                            alignItems: 'center',
+                                            p: 1,
                                             borderRadius: 1,
-                                            px: 1.2,
-                                            py: 0.3
+                                            bgcolor: alpha(color, 0.05),
+                                            border: `1px solid ${alpha(color, 0.1)}`,
                                         }}
                                     >
-                                        {monthlyStationeryStats?.[index] || 0}
-                                    </Typography>
-                                </Box>
-                            ))}
+                                        <Box display="flex" alignItems="center">
+                                            <Box
+                                                sx={{
+                                                    width: 28,
+                                                    height: 28,
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    borderRadius: '50%',
+                                                    bgcolor: alpha(color, 0.15),
+                                                    color: color,
+                                                    mr: 1.5
+                                                }}
+                                            >
+                                                {icon}
+                                            </Box>
+                                            <Box>
+                                                <Typography variant="body2" fontWeight={600} color="text.primary">
+                                                    {label || 'Unknown'}
+                                                </Typography>
+                                                <Typography variant="caption" color="text.secondary">
+                                                    {unit}
+                                                </Typography>
+                                            </Box>
+                                        </Box>
+                                        <Typography
+                                            variant="subtitle2"
+                                            fontWeight="700"
+                                            sx={{
+                                                color: color,
+                                                bgcolor: alpha(color, 0.15),
+                                                borderRadius: 1,
+                                                px: 1.2,
+                                                py: 0.3
+                                            }}
+                                        >
+                                            {monthlyStationeryStats?.[index] || 0}
+                                        </Typography>
+                                    </Box>
+                                );
+                            })}
                         </Stack>
                     </Box>
                 </CardContent>
