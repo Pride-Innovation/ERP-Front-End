@@ -187,10 +187,11 @@ const AssetInventorySummary = () => {
             <Card
                 elevation={0}
                 sx={{
-                    borderRadius: 1,
+                    borderRadius: 2,
                     overflow: 'hidden',
                     position: 'relative',
-                    border: `1px solid ${alpha(PRIMARY_COLOR, 0.12)}`,
+                    border: `1px solid ${alpha(PRIMARY_COLOR, 0.15)}`,
+                    boxShadow: `0 2px 10px ${alpha('#000', 0.08)}`,
                 }}
             >
                 <Box
