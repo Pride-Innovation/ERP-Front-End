@@ -73,3 +73,12 @@ export const fetchBranchAssetStaticsService = async () => {
         return error;
     }
 }
+
+export const fetchPersonalAssetReportService = async () => {
+    try {
+        const response = await axiosInstance.get('/assets/my-assets');
+        return response;
+    } catch (error) {
+        return error;
+    }
+}

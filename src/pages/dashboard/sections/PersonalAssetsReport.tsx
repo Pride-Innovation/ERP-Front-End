@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import {
     Box,
     Typography,
@@ -6,7 +6,6 @@ import {
     Collapse,
     Avatar,
     Chip,
-    LinearProgress,
     IconButton,
     Card,
     Table,
@@ -20,87 +19,17 @@ import { ExpandMore, ExpandLess } from '@mui/icons-material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import LaptopIcon from '@mui/icons-material/Laptop';
 import ChairIcon from '@mui/icons-material/Chair';
-
-// Define TypeScript interfaces
-interface SubDomain {
-    id: number;
-    name: string;
-    type: 'Primary' | 'Staging' | 'Add-on';
-    quantity: number;
-    engravingNumber: string;
-    status: 'Active' | string;
-}
-
-interface AssetDomain {
-    id: number;
-    domain: string;
-    plan: string;
-    totalItems: number;
-    inUse: number;
-    available: number;
-    domains: number;
-    domainLimit: number;
-    status: 'Active' | string;
-    subDomains: SubDomain[];
-}
-
-interface ChipColorConfig {
-    bg: string;
-    color: string;
-}
-
-interface StatusColorConfig extends ChipColorConfig {
-    icon?: React.ReactNode;
-}
-
-const mockData: AssetDomain[] = [
-    {
-        id: 1,
-        domain: 'IT Equipment',
-        plan: 'Hardware Assets',
-        totalItems: 24,
-        inUse: 20,
-        available: 4,
-        domains: 5,
-        domainLimit: 10,
-        status: 'Active',
-        subDomains: [
-            { id: 101, name: 'Laptops', type: 'Primary', quantity: 12, engravingNumber: 'ENG-LP-2025', status: 'Active' },
-            { id: 102, name: 'Monitors', type: 'Staging', quantity: 8, engravingNumber: 'ENG-MN-2025', status: 'Active' },
-            { id: 103, name: 'Mouse', type: 'Add-on', quantity: 2, engravingNumber: 'ENG-MS-2025', status: 'Active' },
-            { id: 104, name: 'Keyboard', type: 'Add-on', quantity: 2, engravingNumber: 'ENG-KB-2025', status: 'Active' },
-        ],
-    },
-    {
-        id: 2,
-        domain: 'Office Furniture',
-        plan: 'Workspace Assets',
-        totalItems: 35,
-        inUse: 30,
-        available: 5,
-        domains: 3,
-        domainLimit: 5,
-        status: 'Active',
-        subDomains: [
-            { id: 201, name: 'Desks', type: 'Primary', quantity: 15, engravingNumber: 'ENG-DK-2025', status: 'Active' },
-            { id: 202, name: 'Chairs', type: 'Primary', quantity: 20, engravingNumber: 'ENG-CH-2025', status: 'Active' },
-        ],
-    },
-];
-
-// Enhanced color functions to match the app's color scheme
-const getChipColor = (type: string): ChipColorConfig => {
-    switch (type) {
-        case 'Primary': return { bg: '#E8F4FF', color: '#3F5FFF' };
-        case 'Staging': return { bg: '#FBD1F8', color: '#D44BC9' };
-        case 'Add-on': return { bg: '#FFE6C6', color: '#E89C3A' };
-        default: return { bg: '#e0e0e0', color: '#757575' };
-    }
-};
+import {
+    AssetDomain,
+    StatusColorConfig
+} from '../../request/interface';
+import SectionUtills from './utills';
+import { DashboardContext } from '../../../context/dashboard';
 
 const getStatusColor = (status: string): StatusColorConfig => {
     switch (status) {
         case 'Active': return { bg: '#E6F9F4', color: '#4caf50', icon: <CheckCircleIcon sx={{ fontSize: 16 }} /> };
+        case 'Available': return { bg: '#E6F9F4', color: '#4caf50', icon: <CheckCircleIcon sx={{ fontSize: 16 }} /> };
         default: return { bg: '#F5F6FA', color: '#9e9e9e', icon: null };
     }
 };
@@ -122,19 +51,16 @@ const TableHeader: React.FC = () => (
         borderRadius: '4px 4px 0 0'
     }}>
         <Grid container alignItems="center">
-            <Grid item xs={12} sm={3}>
+            <Grid item xs={12} sm={4}>
                 <Typography fontWeight={600} fontSize={13} color="#64748B">CATEGORY</Typography>
             </Grid>
-            <Grid item xs={6} sm={2}>
-                <Typography fontWeight={600} fontSize={13} color="#64748B">TOTAL ITEMS</Typography>
-            </Grid>
             <Grid item xs={6} sm={3}>
-                <Typography fontWeight={600} fontSize={13} color="#64748B">USAGE</Typography>
+                <Typography fontWeight={600} fontSize={13} color="#64748B">TOTAL ITEMS</Typography>
             </Grid>
             <Grid item xs={6} sm={2}>
                 <Typography fontWeight={600} fontSize={13} color="#64748B">AVAILABILITY</Typography>
             </Grid>
-            <Grid item xs={4} sm={1}>
+            <Grid item xs={4} sm={2}>
                 <Typography fontWeight={600} fontSize={13} color="#64748B">STATUS</Typography>
             </Grid>
             <Grid item xs={2} sm={1} textAlign="right">
@@ -151,7 +77,6 @@ interface DomainRowProps {
 const DomainRow: React.FC<DomainRowProps> = ({ row }) => {
     const [expanded, setExpanded] = useState<boolean>(false);
     const statusConfig = getStatusColor(row.status);
-    const usagePercentage = (row.inUse / row.totalItems) * 100;
     const categoryIcon = getCategoryIcon(row.domain);
 
     return (
@@ -163,7 +88,7 @@ const DomainRow: React.FC<DomainRowProps> = ({ row }) => {
             }
         }}>
             <Grid container alignItems="center" py={2} px={3}>
-                <Grid item xs={12} sm={3}>
+                <Grid item xs={12} sm={4}>
                     <Box display="flex" alignItems="center">
                         <Avatar sx={{
                             bgcolor: '#EBF0FF',
@@ -180,31 +105,9 @@ const DomainRow: React.FC<DomainRowProps> = ({ row }) => {
                         </Box>
                     </Box>
                 </Grid>
-                <Grid item xs={6} sm={2}>
+                <Grid item xs={6} sm={3}>
                     <Box display="flex" alignItems="center">
                         <Typography fontWeight={600} fontSize={14}>{row.totalItems}</Typography>
-                    </Box>
-                </Grid>
-                <Grid item xs={6} sm={3}>
-                    <Box>
-                        <Box display="flex" alignItems="center" justifyContent="space-between" mb={0.5}>
-                            <Typography fontWeight={600} fontSize={14}>{row.inUse} / {row.totalItems}</Typography>
-                            <Typography variant="caption" color={usagePercentage > 80 ? '#FF4D4D' : '#4caf50'}>
-                                {usagePercentage.toFixed(0)}%
-                            </Typography>
-                        </Box>
-                        <LinearProgress
-                            variant="determinate"
-                            value={usagePercentage}
-                            sx={{
-                                height: 6,
-                                borderRadius: 5,
-                                backgroundColor: '#E0E0E0',
-                                '& .MuiLinearProgress-bar': {
-                                    backgroundColor: usagePercentage > 80 ? '#FF4D4D' : '#4caf50'
-                                }
-                            }}
-                        />
                     </Box>
                 </Grid>
                 <Grid item xs={6} sm={2}>
@@ -212,7 +115,7 @@ const DomainRow: React.FC<DomainRowProps> = ({ row }) => {
                         {row.available} units
                     </Typography>
                 </Grid>
-                <Grid item xs={4} sm={1}>
+                <Grid item xs={4} sm={2}>
                     <Chip
                         label={row.status}
                         size="small"
@@ -260,10 +163,7 @@ const DomainRow: React.FC<DomainRowProps> = ({ row }) => {
                                     ENGRAVED NUMBER
                                 </TableCell>
                                 <TableCell sx={{ fontWeight: 600, color: '#64748B', fontSize: 12, borderBottom: '1px solid #e0e0e0' }}>
-                                    QUANTITY
-                                </TableCell>
-                                <TableCell sx={{ fontWeight: 600, color: '#64748B', fontSize: 12, borderBottom: '1px solid #e0e0e0' }}>
-                                    TYPE
+                                    SERIAL
                                 </TableCell>
                                 <TableCell sx={{ fontWeight: 600, color: '#64748B', fontSize: 12, borderBottom: '1px solid #e0e0e0' }}>
                                     STATUS
@@ -272,7 +172,6 @@ const DomainRow: React.FC<DomainRowProps> = ({ row }) => {
                         </TableHead>
                         <TableBody>
                             {row.subDomains.map((sub) => {
-                                const typeColors = getChipColor(sub.type);
                                 const subStatusConfig = getStatusColor(sub.status);
 
                                 return (
@@ -302,20 +201,10 @@ const DomainRow: React.FC<DomainRowProps> = ({ row }) => {
                                             </Typography>
                                         </TableCell>
                                         <TableCell sx={{ py: 1.5 }}>
-                                            <Typography fontSize={13} fontWeight={500}>{sub.quantity}</Typography>
-                                        </TableCell>
-                                        <TableCell sx={{ py: 1.5 }}>
-                                            <Chip
-                                                label={sub.type}
-                                                size="small"
-                                                sx={{
-                                                    backgroundColor: typeColors.bg,
-                                                    color: typeColors.color,
-                                                    fontWeight: 600,
-                                                    fontSize: '0.7rem',
-                                                    height: '22px'
-                                                }}
-                                            />
+                                            {sub.serial ? <Typography fontSize={12} fontWeight={500}>{sub.serial}</Typography>
+                                                : <Typography variant="body2" fontStyle="italic" color="text.disabled">
+                                                    Not Specified
+                                                </Typography>}
                                         </TableCell>
                                         <TableCell sx={{ py: 1.5 }}>
                                             <Chip
@@ -346,6 +235,13 @@ const DomainRow: React.FC<DomainRowProps> = ({ row }) => {
 };
 
 const ExpandableTable: React.FC = () => {
+    const { assetDomain } = useContext(DashboardContext);
+    const {
+        fetchPersonalAssetReport
+    } = SectionUtills();
+
+    useEffect(() => { fetchPersonalAssetReport() }, [])
+
     return (
         <Grid item xs={12} mt={2} >
             <Card
@@ -368,15 +264,15 @@ const ExpandableTable: React.FC = () => {
                         Personal Assets Report
                     </Typography>
 
-                    <Chip
-                        label={`${mockData.reduce((acc, item) => acc + item.totalItems, 0)} Items`}
+                    {assetDomain.length > 0 && <Chip
+                        label={`${assetDomain?.reduce((acc, item) => acc + item.totalItems, 0)} Items`}
                         size="small"
                         color="primary"
                         variant="outlined"
-                    />
+                    />}
                 </Box>
                 <TableHeader />
-                {mockData.map((row) => (
+                {assetDomain.length > 0 && assetDomain?.map((row) => (
                     <DomainRow key={row.id} row={row} />
                 ))}
             </Card>

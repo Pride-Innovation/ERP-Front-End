@@ -14,6 +14,7 @@ import {
 } from "./interface";
 import {
     fetchBranchAssetStaticsService,
+    fetchPersonalAssetReportService,
     findLatestPendingRequestsWithDetailsService,
     getCurrentYearRequestSummaryService,
     getItAndOfficeMonthlyStockSummaryService,
@@ -27,7 +28,15 @@ import { formatNumber } from "../../../utils/helpers";
 import furnitureImage from "../../../statics/images/furnitureDesktop.png";
 import stationeryImage from "../../../statics/images/stationeryDesktop.png";
 import RequestImage from "../../../statics/images/requestDesktop.png"
-import { BranchAssetStats, IBranchAssetStatics, IBranchAssetStaticsAxiosResponse, IRequestsAxiosResponse } from "../../request/interface";
+import {
+    AssetDomain,
+    BranchAssetStats,
+    IBranchAssetStatics,
+    IBranchAssetStaticsAxiosResponse,
+    IPersonalAssetReport,
+    IPersonalAssetReportAxiosResponse,
+    IRequestsAxiosResponse
+} from "../../request/interface";
 
 const SectionUtills = () => {
     const {
@@ -41,7 +50,8 @@ const SectionUtills = () => {
         setMonthlyITandOfficeSummaryStats,
         setYearlyRequestSummaryStats,
         setLatestPendingRequests,
-        setAssetStats
+        setAssetStats,
+        setAssetDomain
     } = useContext(DashboardContext);
 
     /**
@@ -302,6 +312,51 @@ const SectionUtills = () => {
     }
 
 
+    function transformApiData(data: IPersonalAssetReport[]): AssetDomain[] {
+        const planMap: Record<string, string> = {
+            "IT Equipment": "Hardware Assets",
+            "Office Equipment": "Workspace Assets",
+        };
+
+        return data.map((group, index) => {
+            const availableCount = group.assets.filter(
+                asset => asset.status.toLowerCase() !== "maintenance"
+            ).length;
+
+            const subDomains = group.assets.map(asset => ({
+                id: asset.id,
+                name: asset.name,
+                type: asset.status,
+                serial: asset.serialNumber,
+                engravingNumber: asset.engravingNumber,
+                status: asset.status.toLowerCase() !== "maintenance" ? "Active" : "Inactive",
+            }));
+
+            return {
+                id: index + 1,
+                domain: group.type,
+                plan: planMap[group.type] || "Other Assets",
+                totalItems: group.totalItems,
+                available: availableCount,
+                domains: group.assets.length,
+                status: "Available",
+                subDomains
+            };
+        });
+    }
+
+    const fetchPersonalAssetReport = async () => {
+        try {
+            const response = await fetchPersonalAssetReportService() as IPersonalAssetReportAxiosResponse;
+            if (response.status === 200) {
+                const data = transformApiData(response.data);
+                setAssetDomain(data);
+            }
+        } catch (error) {
+            console.error("Error fetching personal asset report:", error);
+        }
+    }
+
     return ({
         requestRatingStatsFxn,
         requestRatingVariationFxn,
@@ -310,7 +365,8 @@ const SectionUtills = () => {
         getItAndOfficeMonthlyStockSummaryFxn,
         getCurrentYearRequestSummary,
         findLatestPendingRequestsWithDetails,
-        fetchBranchAssetStatics
+        fetchBranchAssetStatics,
+        fetchPersonalAssetReport
     });
 }
 

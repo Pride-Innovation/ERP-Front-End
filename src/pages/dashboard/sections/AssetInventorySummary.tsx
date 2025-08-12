@@ -224,8 +224,6 @@ const AssetInventorySummary = () => {
         assetStats?.officeequipment?.total +
         assetStats?.fleet?.total;
 
-    console.log(assetStats, "Asset Stats");
-
     return (
         <Grid item xs={12}>
             <Card

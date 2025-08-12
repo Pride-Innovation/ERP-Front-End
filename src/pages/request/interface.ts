@@ -304,3 +304,48 @@ export interface BranchAssetStats {
     officeequipment: AssetStats;
     fleet: AssetStats;
 }
+
+export interface SubDomain {
+    id: number;
+    name: string;
+    type: string;
+    serial: string;
+    engravingNumber: string;
+    status: 'Active' | string;
+}
+
+export interface AssetDomain {
+    id: number;
+    domain: string;
+    plan: string;
+    totalItems: number;
+    available: number;
+    domains: number;
+    status: 'Active' | string;
+    subDomains: SubDomain[];
+}
+
+export interface ChipColorConfig {
+    bg: string;
+    color: string;
+}
+
+export interface StatusColorConfig extends ChipColorConfig {
+    icon?: React.ReactNode;
+}
+
+export interface IPersonalAssetReport {
+    type: string;
+    totalItems: number;
+    assets: {
+        id: number;
+        name: string;
+        engravingNumber: string;
+        status: string;
+        serialNumber: string;
+    }[];
+}
+
+export interface IPersonalAssetReportAxiosResponse extends IAxiosResponse {
+    data: Array<IPersonalAssetReport>
+}
