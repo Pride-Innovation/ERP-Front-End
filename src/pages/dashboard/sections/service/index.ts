@@ -21,7 +21,7 @@ export const resquestStatsOneYearService = async () => {
 
 export const getMonthlyItAndOfficeStatsService = async () => {
     try {
-        const response = await axiosInstance.get('/monthly-itAndOffice-stats');
+        const response = await axiosInstance.get('/it-and-office/annual-stock');
         return response;
     } catch (error) {
         return error;

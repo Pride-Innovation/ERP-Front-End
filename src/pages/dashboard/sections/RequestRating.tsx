@@ -8,7 +8,6 @@ import {
     Tooltip,
     Typography,
     alpha,
-    useTheme
 } from '@mui/material';
 import {
     Star,
@@ -45,7 +44,6 @@ const RequestRating = () => {
         requestRatingVariationFxn,
         getItAndOfficeMonthlyStockSummaryFxn
     } = SectionUtills();
-    const theme = useTheme();
 
     useEffect(() => {
         requestRatingStatsFxn();
