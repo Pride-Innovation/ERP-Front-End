@@ -6,8 +6,7 @@ import {
     Typography,
     alpha,
     Divider,
-    Stack,
-    useTheme
+    Stack
 } from "@mui/material";
 import { Doughnut } from "react-chartjs-2";
 import SectionUtills from "./utills";
@@ -43,7 +42,6 @@ const CATEGORY_UNITS = ["dozen", "boxes", "dozen", "items"];
 const StationeryStock = () => {
     const { getMonthlyStationeryTotals } = SectionUtills();
     const { monthlyStationeryStats, monthlyStationeryStatslabels } = useContext(DashboardContext);
-    const theme = useTheme();
 
     useEffect(() => { getMonthlyStationeryTotals() }, []);
 

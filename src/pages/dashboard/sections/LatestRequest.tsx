@@ -10,7 +10,6 @@ import {
     Paper,
     CircularProgress,
     alpha,
-    Divider
 } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { useContext, useEffect } from 'react';
@@ -67,7 +66,6 @@ const LatestRequest = () => {
 
     useEffect(() => { findLatestPendingRequestsWithDetails() }, []);
 
-    // Get status colors based on request status
     const getStatusColor = (status?: string) => {
         const statusKey = status as keyof typeof statusColors || 'default';
         return statusColors[statusKey] || statusColors.default;
@@ -76,7 +74,6 @@ const LatestRequest = () => {
     return (
         <>
             <Grid item xs={12} md={8}>
-                {/* Main Card */}
                 <Card
                     elevation={0}
                     sx={{
@@ -86,7 +83,6 @@ const LatestRequest = () => {
                         mb: 2.5
                     }}
                 >
-                    {/* Card Header */}
                     <Box
                         sx={{
                             px: 3,
@@ -147,7 +143,6 @@ const LatestRequest = () => {
                         ) : (
                             <Stack spacing={2.5}>
                                 {latestPendingRequests.map((request, index) => {
-                                    // Get status colors
                                     const statusColor = getStatusColor(request.status?.status as string);
 
                                     return (
@@ -156,7 +151,6 @@ const LatestRequest = () => {
                                             elevation={0}
                                             sx={{
                                                 border: `1px solid ${alpha('#000', 0.08)}`,
-                                                borderLeft: `4px solid ${statusColor.main}`,
                                                 borderRadius: 1,
                                                 p: 0,
                                                 overflow: 'hidden',

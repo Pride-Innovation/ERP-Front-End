@@ -323,7 +323,6 @@ const RequestReport: React.FC = () => {
                 yearlyRequestSummaryStats.map((card, index) => (
                     <RequestCard key={index} {...card} />
                 )) : (
-                    // Loading or empty state
                     <Card
                         elevation={0}
                         sx={{
