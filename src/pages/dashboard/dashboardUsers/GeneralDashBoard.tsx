@@ -15,10 +15,7 @@ import {
     Tooltip,
     Legend,
 } from 'chart.js';
-import StationeryStock from '../sections/StationeryStock';
-import AssetInventorySummary from '../sections/AssetInventorySummary';
 import LatestRequest from '../sections/LatestRequest';
-import RequestReport from '../sections/RequestReport';
 
 ChartJS.register(
     LineElement,
