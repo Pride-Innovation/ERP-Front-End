@@ -311,14 +311,16 @@ const RequestCard: React.FC<RequestCardProps> = ({
     );
 }
 
-const RequestReport: React.FC = () => {
+const RequestReport: React.FC<{ size?: number }> = (
+    { size = 4 }
+) => {
     const { getCurrentYearRequestSummary } = SectionUtills()
     const { yearlyRequestSummaryStats } = useContext(DashboardContext);
 
     useEffect(() => { getCurrentYearRequestSummary() }, []);
 
     return (
-        <Grid item xs={12} md={4}>
+        <Grid item xs={12} md={size}>
             {yearlyRequestSummaryStats.length > 0 ?
                 yearlyRequestSummaryStats.map((card, index) => (
                     <RequestCard key={index} {...card} />

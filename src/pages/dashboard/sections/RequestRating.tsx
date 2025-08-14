@@ -32,7 +32,7 @@ const POSITIVE_COLOR = '#4CAF50'; // Green for positive trends
 const NEGATIVE_COLOR = '#F44336'; // Red for negative trends
 const CHART_COLOR = '#3f51b5'; // Indigo for chart
 
-const RequestRating = () => {
+const RequestRating = ({ size = 4 }: { size?: number }) => {
     const {
         requestRatingStatsLabels,
         requestRatingStats,
@@ -122,7 +122,11 @@ const RequestRating = () => {
     };
 
     return (
-        <Grid item xs={12} md={4}>
+        <Grid
+            item
+            xs={12}
+            md={size}
+        >
             <Card
                 elevation={0}
                 sx={{

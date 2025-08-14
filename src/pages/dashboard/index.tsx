@@ -1,75 +1,37 @@
-import {
-  Box,
-  Grid,
-} from '@mui/material';
+import { useEffect, useState } from 'react';
+import RoutesUtills from '../../core/routes/utills';
+import AdminDashboard from './dashboardUsers/AdminDashBoard';
+import { ITitle } from '../settings/titles/interface';
+import BranchOperationsManager from './dashboardUsers/BranchOperationsManager';
+import GeneralDashBoard from './dashboardUsers/GeneralDashBoard';
 
-import {
-  Chart as ChartJS,
-  LineElement,
-  BarElement,
-  PointElement,
-  ArcElement,
-  CategoryScale,
-  LinearScale,
-  Title,
-  Tooltip,
-  Legend,
-} from 'chart.js';
-import RequestRating from './sections/RequestRating';
-import AssetStockReview from './sections/AssetStockReview';
-import StationeryStock from './sections/StationeryStock';
-import RequestReport from './sections/RequestReport';
-import LatestRequest from './sections/LatestRequest';
-import AssetInventorySummary from './sections/AssetInventorySummary';
+const SUPER_ADMIN = "SUPER_ADMIN";
+const ADMIN_OFFICER = "Admin Officer";
+const ADMIN_MANAGER = "Admin Manager";
+const BRANCH_MANAGER = "Branch Manager";
+const BRANCH_OPERATIONS_MANAGER = "Branch Operations Manager";
 
-ChartJS.register(
-  LineElement,
-  BarElement,
-  PointElement,
-  ArcElement,
-  CategoryScale,
-  LinearScale,
-  Title,
-  Tooltip,
-  Legend
-);
+// const OFFICER = "Officer";
+// const MANAGER = "Manager";
 
 const Dashboard = () => {
-  return (
-    <Box p={3} bgcolor="#f5f8fc" minHeight="100vh">
-      {/* Added alignItems="flex-start" to prevent equal height stretching */}
-      <Grid container spacing={2} mb={3} alignItems="flex-start">
-        {/* Left side - main content */}
-        <Grid item xs={9} container spacing={2}>
-          <RequestRating />
-          <AssetStockReview />
-          <RequestReport />
-          <LatestRequest />
-        </Grid>
+  const { getCurrentUser } = RoutesUtills();
+  const [role, setRole] = useState<string>("");
 
-        {/* Right side - sidebar content */}
-        <Grid item xs={3}>
-          {/* Create a sidebar container with independent scrolling if needed */}
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 2,
-              // Optional: add max-height and overflow if you want scrolling for very tall content
-              // maxHeight: 'calc(100vh - 48px)', // Adjust based on your layout
-              // overflowY: 'auto'
-            }}
-          >
-            {/* Stationery section */}
-            <StationeryStock />
+  useEffect(() => {
+    const title = getCurrentUser()?.title as unknown as ITitle;
+    const role = title.role?.name;
+    setRole(role || "");
+  }, []);
 
-            {/* Asset Inventory Summary section */}
-            <AssetInventorySummary />
-          </Box>
-        </Grid>
-      </Grid>
-    </Box>
-  );
+  return role === SUPER_ADMIN
+    || role === ADMIN_MANAGER
+    || role === ADMIN_OFFICER ? (
+    <AdminDashboard />
+  ) : role === BRANCH_OPERATIONS_MANAGER
+    || role === BRANCH_MANAGER ? (
+    <BranchOperationsManager />
+  ) : <GeneralDashBoard />;
 };
 
 export default Dashboard;
