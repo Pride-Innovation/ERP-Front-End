@@ -17,6 +17,8 @@ import {
 } from 'chart.js';
 import StationeryStock from '../sections/StationeryStock';
 import AssetInventorySummary from '../sections/AssetInventorySummary';
+import LatestRequest from '../sections/LatestRequest';
+import RequestReport from '../sections/RequestReport';
 
 ChartJS.register(
     LineElement,
@@ -35,21 +37,13 @@ const GeneralDashBoard = () => {
     return (
         <Box p={3} bgcolor="#f5f8fc" minHeight="100vh">
             <Grid container spacing={2} mb={3} alignItems="flex-start">
-                <Grid item xs={3}>
-                    <Box
-                        sx={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: 2,
-                        }}
-                    >
-                        <StationeryStock />
-                        <AssetInventorySummary />
-                    </Box>
+                <Grid item xs={12} container
+                    sx={{ display: 'flex', justifyContent: "center" }}>
+                    <LatestRequest size={9} />
                 </Grid>
             </Grid>
         </Box>
     )
 }
 
-export default GeneralDashBoard
+export default GeneralDashBoard;

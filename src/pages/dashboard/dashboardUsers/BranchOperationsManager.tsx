@@ -40,13 +40,13 @@ const BranchOperationsManager = () => {
                 <Grid item xs={6} container spacing={2} >
                     <RequestRating size={6} />
                     <RequestReport size={6} />
-                    <LatestRequest />
+                    <LatestRequest size={12} />
                 </Grid>
                 <Grid item xs={6}>
                     <Box
                         sx={{
                             display: 'flex',
-                            flexDirection: 'row',
+                            flexDirection: 'column',
                             gap: 2,
                         }}
                     >

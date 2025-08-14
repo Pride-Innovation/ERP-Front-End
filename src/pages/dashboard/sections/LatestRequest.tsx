@@ -55,7 +55,7 @@ const statusColors = {
     }
 };
 
-const LatestRequest = () => {
+const LatestRequest = ({ size = 8 }: { size?: number }) => {
     const { findLatestPendingRequestsWithDetails } = SectionUtills();
     const { latestPendingRequests } = useContext(DashboardContext);
     const [loading, setLoading] = useState<boolean>(true);
@@ -78,7 +78,7 @@ const LatestRequest = () => {
 
     return (
         <>
-            <Grid item xs={12} md={8}>
+            <Grid item xs={12} md={size}>
                 <Card
                     elevation={0}
                     sx={{
