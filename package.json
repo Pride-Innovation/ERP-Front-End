@@ -11,7 +11,7 @@
     "@mui/material": "^5.16.7",
     "@mui/styled-engine-sc": "^6.0.0-alpha.18",
     "@mui/x-data-grid": "^7.16.0",
-    "@mui/x-date-pickers": "^7.18.0",
+    "@mui/x-date-pickers": "^7.29.4",
     "@reduxjs/toolkit": "^2.5.0",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
