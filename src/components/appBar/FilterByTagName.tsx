@@ -8,18 +8,27 @@ import SearchIcon from '@mui/icons-material/Search';
 import DirectionsIcon from '@mui/icons-material/Directions';
 import React from "react";
 import { toast } from "react-toastify";
+import { findAssetByTagNameService } from "./service";
+import { useNavigate } from "react-router-dom";
+import { ROUTES } from "../../core/routes/routes";
+import { IAsset } from "../../pages/assets/interface";
 
 const FilterByTagName = () => {
     const [searchText, setSearchText] = React.useState<string>("");
+    const navigate = useNavigate();
 
-    const handleSeacrh = (event: React.MouseEvent<HTMLButtonElement>) => {
+    const handleSearch = async (event: React.MouseEvent<HTMLButtonElement>) => {
         event.preventDefault();
         if (!searchText.trim()) {
             toast.error("Please enter a tag name to search.");
             return;
         }
-        // Implement search functionality here
-        console.log("Searching for tag:", searchText);
+        try {
+            const result = await findAssetByTagNameService(searchText) as IAsset;
+            navigate(`${ROUTES.LIST_ASSETS}/${result.id}`);
+        } catch (error) {
+            console.error("Error searching for tag:", error);
+        }
 
     }
     return (
@@ -37,11 +46,11 @@ const FilterByTagName = () => {
                     inputProps={{ 'aria-label': 'search google maps' }}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchText(e.target.value)}
                 />
-                <IconButton onClick={(e: React.MouseEvent<HTMLButtonElement>) => handleSeacrh(e)} type="button" sx={{ p: '10px' }} aria-label="search">
+                <IconButton onClick={(e: React.MouseEvent<HTMLButtonElement>) => handleSearch(e)} type="button" sx={{ p: '10px' }} aria-label="search">
                     <SearchIcon />
                 </IconButton>
                 <Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />
-                <IconButton onClick={(e: React.MouseEvent<HTMLButtonElement>) => handleSeacrh(e)} color="primary" sx={{ p: '10px' }} aria-label="directions">
+                <IconButton onClick={(e: React.MouseEvent<HTMLButtonElement>) => handleSearch(e)} color="primary" sx={{ p: '10px' }} aria-label="directions">
                     <DirectionsIcon />
                 </IconButton>
             </Paper>
