@@ -1,0 +1,62 @@
+/*
+13.9 Pride's Standard Copyright Notice:
+Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
+and distribute this software and its documentation for any purpose is prohibited unless authorized in writing by the
+Managing Director
+*/
+
+import { Grid, Stack, Typography } from "@mui/material";
+import ButtonComponent from "../../components/forms/Button";
+import { IReassign } from "./interface";
+import { Assignment as AssetIcon } from '@mui/icons-material';
+import { crudStates } from "../../utils/constants";
+
+const Reassign = ({
+    handleClose,
+    sendingRequest,
+    handleClickAction,
+    buttonText,
+    asset
+}: IReassign) => {
+    return (
+        <Grid item container spacing={4} xs={12}>
+            <Grid item xs={12}>
+                <Typography variant="body1" sx={{ mb: 1 }}>
+                    Are you sure you want to reassign this Asset?
+                </Typography>
+                <Stack direction="row" spacing={1} alignItems="center">
+                    <AssetIcon color="primary" />
+                    <Typography variant="h6" color="primary">
+                        {asset.assetName}
+                    </Typography>
+                </Stack>
+                <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 1 }}>
+                    <Typography variant="subtitle1" color="textSecondary">
+                        Engraved Number: {asset.engravedNumber}
+                    </Typography>
+                </Stack>
+            </Grid>
+            <Grid item xs={12} sx={{ display: "flex", justifyContent: "end" }}>
+                <Stack direction="row" spacing={3} sx={{ width: "50%" }}>
+                    <ButtonComponent
+                        handleClick={handleClose}
+                        buttonColor='info'
+                        type='button'
+                        variant="outlined"
+                        sendingRequest={false}
+                        buttonText="Close"
+                    />
+                    <ButtonComponent
+                        buttonColor='primary'
+                        type='submit'
+                        sendingRequest={sendingRequest}
+                        handleClick={() => handleClickAction?.(crudStates.delete, asset?.id as string)}
+                        buttonText={buttonText}
+                    />
+                </Stack>
+            </Grid>
+        </Grid>
+    );
+}
+
+export default Reassign;

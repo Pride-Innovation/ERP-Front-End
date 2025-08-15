@@ -22,6 +22,9 @@ import { loadAllITAssets } from "./slice"
 import { useSelector } from "react-redux"
 import AssetUtills from "../Utills"
 import { AssetContext } from "../../../context/asset"
+import { crudStates } from "../../../utils/constants"
+import Repair from "../Repair"
+import Reassign from "../Reassign"
 
 const ITEquipment = () => {
     const [loading, setLoading] = useState<boolean>(false);
@@ -42,7 +45,8 @@ const ITEquipment = () => {
         currentAsset,
         handleRequest,
         iTEquipmentTableData,
-        determineITAssetType
+        determineITAssetType,
+        currentState
     } = ITEquipmentUtills();
 
     const fetchResources = async () => {
@@ -91,8 +95,34 @@ const ITEquipment = () => {
     return (
         <>
             {
-                <ModalComponent width={"40%"} title='Dispose IT Equipment' open={open} handleClose={handleClose}>
+                crudStates.dispose === currentState
+                && <ModalComponent width={"40%"} title='Dispose IT Equipment' open={open} handleClose={handleClose}>
                     <Dispose
+                        handleClickAction={handleOptionClicked}
+                        sendingRequest={loading}
+                        handleClose={handleClose}
+                        buttonText='Confirm'
+                        asset={currentAsset}
+                    />
+                </ModalComponent>
+            }
+            {
+                crudStates.reassign === currentState
+                && <ModalComponent width={"40%"} title='Reassign IT Equipment' open={open} handleClose={handleClose}>
+                    <Reassign
+                        handleClickAction={handleOptionClicked}
+                        sendingRequest={loading}
+                        handleClose={handleClose}
+                        buttonText='Confirm'
+                        asset={currentAsset}
+                    />
+                </ModalComponent>
+            }
+
+            {
+                crudStates.repair === currentState
+                && <ModalComponent width={"40%"} title='Repair IT Equipment' open={open} handleClose={handleClose}>
+                    <Repair
                         handleClickAction={handleOptionClicked}
                         sendingRequest={loading}
                         handleClose={handleClose}

@@ -28,13 +28,18 @@ export interface IFormData<T> {
     disabled?: boolean;
 }
 
-export interface IDispose {
+export interface IAssetAction {
     handleClose: () => void;
     handleClickAction?: (option: string | number, moduleID: string | number) => void;
     sendingRequest: boolean;
     buttonText: string;
     asset: IITEquipment | IOfficeEquipment;
 }
+
+// Specific action interfaces that extend the base
+export type IDispose = IAssetAction;
+export type IRepair = IAssetAction;
+export type IReassign = IAssetAction;
 
 export interface INavigation {
     id: number;

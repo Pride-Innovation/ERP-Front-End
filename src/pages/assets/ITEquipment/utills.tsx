@@ -23,6 +23,10 @@ import moment from "moment";
 import { IAssetType } from "../../settings/assetTypes/interface";
 import { AutocompleteContext } from "../../../context/autocomplete";
 import AssetUtills from "../Utills";
+import AssignmentIndOutlinedIcon from '@mui/icons-material/AssignmentIndOutlined';
+import BuildOutlinedIcon from '@mui/icons-material/BuildOutlined';
+import StorefrontOutlinedIcon from '@mui/icons-material/StorefrontOutlined';
+
 
 const ITEquipmentUtills = () => {
     const endPoint = 'assets';
@@ -33,6 +37,8 @@ const ITEquipmentUtills = () => {
     const [currentAsset, setCurrentAsset] = useState<IITEquipment>({} as IITEquipment);
     const [iTEquipmentTableData, setITEquipmentTableData] = useState<IITEquipmentTableData[]>([] as IITEquipmentTableData[])
     const { selectedItemDetails, value, inputValue, label } = useContext(AutocompleteContext)
+    const [currentState, setCurrentState] = useState<string>("");
+
     const {
         searchStockByLPONumber,
         searchUserByName,
@@ -65,6 +71,8 @@ const ITEquipmentUtills = () => {
     const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore)
     const { commodities } = useSelector((state: RootState) => state.CommodityStore)
     const { inventory } = useSelector((state: RootState) => state.InventoryStore)
+    const { itAssets } = useSelector((state: RootState) => state.ITAssetStore)
+
 
     const navigate = useNavigate()
 
@@ -122,6 +130,9 @@ const ITEquipmentUtills = () => {
         dateReceipt,
         commodity,
         image,
+        purchaseCost,
+        costOfTheAsset,
+        serialNumber,
         ...data
     } = itEquipmentMock[0];
 
@@ -134,9 +145,12 @@ const ITEquipmentUtills = () => {
         action: {
             label: "options",
             options: [
-                { value: "dispose", label: "Dispose", icon: <InfoIcon fontSize='small' color='error' /> },
-                { value: "update", label: "Update", icon: <ModeEditIcon fontSize='small' color='info' /> },
-                { value: "read", label: "View Details", icon: <RemoveRedEyeIcon fontSize='small' color='inherit' /> }
+                { value: crudStates.dispose, label: "Dispose", icon: <InfoIcon fontSize='small' color='error' /> },
+                { value: crudStates.update, label: "Update", icon: <ModeEditIcon fontSize='small' color='info' /> },
+                { value: crudStates.read, label: "View Details", icon: <RemoveRedEyeIcon fontSize='small' color='inherit' /> },
+                { value: crudStates.reassign, label: "Reassign", icon: <AssignmentIndOutlinedIcon fontSize='small' color='secondary' /> },
+                { value: crudStates.repair, label: "Repair", icon: <BuildOutlinedIcon fontSize='small' color='primary' /> },
+                { value: crudStates.inStore, label: "Send to Store", icon: <StorefrontOutlinedIcon fontSize='small' color='action' /> },
             ]
         },
     };
@@ -171,6 +185,7 @@ const ITEquipmentUtills = () => {
                 stock,
                 commodity,
                 dateReceipt,
+                serialNumber,
                 image,
                 ...fielsdata
             } = list[index];
@@ -182,10 +197,10 @@ const ITEquipmentUtills = () => {
                     engravedNumber: item.engravedNumber,
                     dateReceived: moment(item.dateReceipt).format('Do MMMM YYYY'),
                     make: item.make,
-                    purchaseCost: item.purchaseCost,
-                    costOfAsset: item.costOfTheAsset,
+                    // purchaseCost: item.purchaseCost,
+                    // costOfAsset: item.costOfTheAsset,
                     model: item.model as string,
-                    serialNumber: item.serialNumber as string,
+                    // serialNumber: item.serialNumber as string,
                     status: item?.assetStatus?.status as string,
                     assignedTo: item.assignedTo?.firstName ? `${item.assignedTo?.lastName} ${item.assignedTo?.firstName}` : "",
                     location: item.branch?.name as string
@@ -201,16 +216,23 @@ const ITEquipmentUtills = () => {
             case crudStates.update:
                 navigate(`${ROUTES.UPDATE_ITEQUIPMENT}/${moduleID}`);
                 break;
-            case crudStates.dispose:
-                // setCurrentAsset(determineCurrentAsset(moduleID as number, rows as IITEquipment[]))
-                handleOpen();
-                break;
             case crudStates.read:
                 navigate(`${ROUTES.LIST_ASSETS}/${moduleID}`);
                 break;
-            case crudStates.delete:
-                // const response = await deleteITEquipmentService(moduleID as number);
-                // console.log(response, "response information")
+            case crudStates.dispose:
+                setCurrentAsset(determineCurrentAsset(moduleID as number, itAssets as IITEquipment[]))
+                setCurrentState(crudStates.dispose);
+                handleOpen();
+                break;
+            case crudStates.reassign:
+                setCurrentAsset(determineCurrentAsset(moduleID as number, itAssets as IITEquipment[]))
+                setCurrentState(crudStates.reassign);
+                handleOpen();
+                break;
+            case crudStates.repair:
+                setCurrentAsset(determineCurrentAsset(moduleID as number, itAssets as IITEquipment[]))
+                setCurrentState(crudStates.repair);
+                handleOpen();
                 break;
             default:
                 break;
@@ -328,7 +350,7 @@ const ITEquipmentUtills = () => {
             type: "autocomplete",
             options: optionsObject.usersOptions,
             required: false
-            
+
         },
         {
             value: "branch",
@@ -443,7 +465,8 @@ const ITEquipmentUtills = () => {
             currentAsset,
             handleRequest: handleITEquipmentTableData,
             iTEquipmentTableData,
-            determineITAssetType
+            determineITAssetType,
+            currentState,
         }
     )
 }
