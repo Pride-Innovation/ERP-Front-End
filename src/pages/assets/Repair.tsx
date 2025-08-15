@@ -35,7 +35,7 @@ import { useState } from "react";
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import dayjs, { Dayjs } from 'dayjs';
+import { Dayjs } from 'dayjs';
 
 
 const Repair = ({
@@ -213,7 +213,7 @@ const Repair = ({
                                 <TextField
                                     label="Reason for Repair / Description of Issue"
                                     multiline
-                                    rows={4}
+                                    rows={2}
                                     value={repairReason}
                                     onChange={(e) => setRepairReason(e.target.value)}
                                     fullWidth
