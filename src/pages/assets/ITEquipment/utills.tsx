@@ -25,8 +25,7 @@ import { AutocompleteContext } from "../../../context/autocomplete";
 import AssetUtills from "../Utills";
 import AssignmentIndOutlinedIcon from '@mui/icons-material/AssignmentIndOutlined';
 import BuildOutlinedIcon from '@mui/icons-material/BuildOutlined';
-import StorefrontOutlinedIcon from '@mui/icons-material/StorefrontOutlined';
-
+import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
 
 const ITEquipmentUtills = () => {
     const endPoint = 'assets';
@@ -150,7 +149,7 @@ const ITEquipmentUtills = () => {
                 { value: crudStates.read, label: "View Details", icon: <RemoveRedEyeIcon fontSize='small' color='inherit' /> },
                 { value: crudStates.reassign, label: "Reassign", icon: <AssignmentIndOutlinedIcon fontSize='small' color='secondary' /> },
                 { value: crudStates.repair, label: "Repair", icon: <BuildOutlinedIcon fontSize='small' color='primary' /> },
-                { value: crudStates.inStore, label: "Send to Store", icon: <StorefrontOutlinedIcon fontSize='small' color='action' /> },
+                { value: crudStates.inStore, label: "Send to Store", icon: <HomeOutlinedIcon fontSize='small' color='action' /> },
             ]
         },
     };
@@ -232,6 +231,11 @@ const ITEquipmentUtills = () => {
             case crudStates.repair:
                 setCurrentAsset(determineCurrentAsset(moduleID as number, itAssets as IITEquipment[]))
                 setCurrentState(crudStates.repair);
+                handleOpen();
+                break;
+            case crudStates.inStore:
+                setCurrentAsset(determineCurrentAsset(moduleID as number, itAssets as IITEquipment[]))
+                setCurrentState(crudStates.inStore);
                 handleOpen();
                 break;
             default:

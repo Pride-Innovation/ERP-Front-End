@@ -31,9 +31,15 @@ const Repair = ({
                     </Typography>
                 </Stack>
                 <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 1 }}>
-                    <Typography variant="subtitle1" color="textSecondary">
-                        Engraved Number: {asset.engravedNumber}
+                    <Typography sx={{ display: "flex", alignItems: "center" }} variant="subtitle1" color="textSecondary">
+                        Engraved Number: {asset.engravedNumber ? asset.engravedNumber :
+                            (
+                                <Typography sx={{ ml: 1 }} variant="body2" fontStyle="italic" color="text.disabled">
+                                    Not specified
+                                </Typography>
+                            )}
                     </Typography>
+
                 </Stack>
             </Grid>
             <Grid item xs={12} sx={{ display: "flex", justifyContent: "end" }}>

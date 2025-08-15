@@ -25,6 +25,7 @@ import { AssetContext } from "../../../context/asset"
 import { crudStates } from "../../../utils/constants"
 import Repair from "../Repair"
 import Reassign from "../Reassign"
+import ToStore from "../ToStore"
 
 const ITEquipment = () => {
     const [loading, setLoading] = useState<boolean>(false);
@@ -123,6 +124,19 @@ const ITEquipment = () => {
                 crudStates.repair === currentState
                 && <ModalComponent width={"40%"} title='Repair IT Equipment' open={open} handleClose={handleClose}>
                     <Repair
+                        handleClickAction={handleOptionClicked}
+                        sendingRequest={loading}
+                        handleClose={handleClose}
+                        buttonText='Confirm'
+                        asset={currentAsset}
+                    />
+                </ModalComponent>
+            }
+
+                        {
+                crudStates.inStore === currentState
+                && <ModalComponent width={"40%"} title='Send IT Equipment to Store' open={open} handleClose={handleClose}>
+                    <ToStore
                         handleClickAction={handleOptionClicked}
                         sendingRequest={loading}
                         handleClose={handleClose}

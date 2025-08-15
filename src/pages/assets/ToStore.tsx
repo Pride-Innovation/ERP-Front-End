@@ -7,22 +7,22 @@ Managing Director
 
 import { Grid, Stack, Typography } from "@mui/material";
 import ButtonComponent from "../../components/forms/Button";
-import { IDispose } from "./interface";
+import { IToStore } from "./interface";
 import { Assignment as AssetIcon } from '@mui/icons-material';
 import { crudStates } from "../../utils/constants";
 
-const Dispose = ({
+const ToStore = ({
     handleClose,
     sendingRequest,
     handleClickAction,
     buttonText,
     asset
-}: IDispose) => {
+}: IToStore) => {
     return (
         <Grid item container spacing={4} xs={12}>
             <Grid item xs={12}>
                 <Typography variant="body1" sx={{ mb: 1 }}>
-                    Are you sure you want to dispose of this Asset?
+                    Are you sure you want to send this Asset to <strong>Store</strong>?
                 </Typography>
                 <Stack direction="row" spacing={1} alignItems="center">
                     <AssetIcon color="primary" />
@@ -53,7 +53,7 @@ const Dispose = ({
                         buttonText="Close"
                     />
                     <ButtonComponent
-                        buttonColor='error'
+                        buttonColor='primary'
                         type='submit'
                         sendingRequest={sendingRequest}
                         handleClick={() => handleClickAction?.(crudStates.delete, asset?.id as string)}
@@ -65,4 +65,4 @@ const Dispose = ({
     );
 }
 
-export default Dispose;
+export default ToStore;

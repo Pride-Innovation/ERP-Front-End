@@ -40,6 +40,7 @@ export interface IAssetAction {
 export type IDispose = IAssetAction;
 export type IRepair = IAssetAction;
 export type IReassign = IAssetAction;
+export type IToStore = IAssetAction;
 
 export interface INavigation {
     id: number;
