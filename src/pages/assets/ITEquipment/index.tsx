@@ -99,7 +99,6 @@ const ITEquipment = () => {
                 crudStates.dispose === currentState
                 && <ModalComponent width={"40%"} title='Dispose IT Equipment' open={open} handleClose={handleClose}>
                     <Dispose
-                        handleClickAction={handleOptionClicked}
                         sendingRequest={loading}
                         handleClose={handleClose}
                         buttonText='Confirm'
@@ -133,7 +132,7 @@ const ITEquipment = () => {
                 </ModalComponent>
             }
 
-                        {
+            {
                 crudStates.inStore === currentState
                 && <ModalComponent width={"40%"} title='Send IT Equipment to Store' open={open} handleClose={handleClose}>
                     <ToStore

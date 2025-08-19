@@ -19,23 +19,39 @@ import {
     Alert
 } from "@mui/material";
 import ButtonComponent from "../../components/forms/Button";
-import { IDispose } from "./interface";
+import { IAssetAxiosResponse, IDispose } from "./interface";
 import {
     Assignment as AssetIcon,
     DeleteForever as DeleteIcon,
     Fingerprint as FingerprintIcon,
     Warning as WarningIcon
 } from '@mui/icons-material';
-import { crudStates } from "../../utils/constants";
+import { disposeITEquipmentService } from "./ITEquipment/service";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "../../store";
+import { disposeAsset } from "./ITEquipment/slice";
 
 const Dispose = ({
     handleClose,
     sendingRequest,
-    handleClickAction,
     buttonText,
     asset
 }: IDispose) => {
     const theme = useTheme();
+    const dispatch = useDispatch<AppDispatch>()
+
+    const handleDisposal = async () => {
+        try {
+            const response = await disposeITEquipmentService(asset?.id as string) as IAssetAxiosResponse;
+            if (response.status === 201) {
+                dispatch(disposeAsset(response.data))
+            }
+        } catch (error) {
+            console.log(error, "Error Message")
+        } finally {
+            handleClose()
+        }
+    }
 
     return (
         <Card
@@ -199,9 +215,9 @@ const Dispose = ({
                             buttonColor='error'
                             type='submit'
                             sendingRequest={sendingRequest}
-                            handleClick={() => handleClickAction?.(crudStates.delete, asset?.id as string)}
+                            handleClick={handleDisposal}
                             buttonText={buttonText}
-                            // startIcon={<DeleteIcon />}
+                        // startIcon={<DeleteIcon />}
                         />
                     </Stack>
                 </Box>

@@ -19,10 +19,13 @@ const itAssetsSlice = createSlice({
         },
         updateITAsset: (state, action) => {
             state.itAssets = state.itAssets.map((asset) => asset.id === action.payload.id ? action.payload : asset)
+        },
+        disposeAsset: (state, action) => {
+            state.itAssets = state.itAssets.filter((asset) => asset.id !== action.payload.id)
         }
     }
 })
 
 const { actions, reducer } = itAssetsSlice;
-export const { loadAllITAssets, updateITAsset } = actions;
+export const { loadAllITAssets, updateITAsset, disposeAsset } = actions;
 export default reducer;
