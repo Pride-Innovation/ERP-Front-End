@@ -25,6 +25,9 @@ import { useEffect, useState } from "react";
 import { IOptions } from "../../components/tables/interface";
 import CircularProgress from '@mui/material/CircularProgress';
 import { useDebounce } from "../../hooks/useDebounce";
+import { RootState } from "../../store";
+import { useSelector } from "react-redux";
+import UserUtils from "../users/utils";
 
 const Reassign = ({
     handleClose,
@@ -41,10 +44,20 @@ const Reassign = ({
         usersOptions: []
     });
     const [selectedUser, setSelectedUser] = useState<IOptions | null>(null);
+    const { users } = useSelector((state: RootState) => state.UserStore);
+    const { fetchAllUsers } = UserUtils();
 
     // Input tracking states
     const [localInput, setLocalInput] = useState<string>('');
     const debouncedInput = useDebounce(localInput, 500);
+
+    useEffect(() => {
+        if (users.length > 0)
+            setOptionsObject({
+                usersOptions: users?.map(user => ({ label: `${user.firstName} ${user.lastName}` as string, value: user.id as number })) || [],
+            })
+
+    }, [users])
 
     // Initial load - fetch first 10 users when dropdown opens
     const handleOpen = async () => {
@@ -53,24 +66,7 @@ const Reassign = ({
         if (optionsObject.usersOptions.length === 0) {
             try {
                 setLoading(true);
-                // Make API call to fetch initial users
-                // For example: const response = await fetchInitialUsers();
-
-                // Mock data - replace with actual API call
-                const mockUsers = [
-                    { label: 'John Doe', value: '1' },
-                    { label: 'Jane Smith', value: '2' },
-                    { label: 'Robert Johnson', value: '3' },
-                    { label: 'Emily Davis', value: '4' },
-                    { label: 'Michael Wilson', value: '5' },
-                    { label: 'Sarah Brown', value: '6' },
-                    { label: 'David Lee', value: '7' },
-                    { label: 'Lisa Taylor', value: '8' },
-                    { label: 'Thomas Anderson', value: '9' },
-                    { label: 'Jessica White', value: '10' }
-                ];
-
-                setOptionsObject({ usersOptions: mockUsers });
+                await fetchAllUsers();
             } catch (error) {
                 console.error("Error fetching initial users:", error);
             } finally {
@@ -79,7 +75,6 @@ const Reassign = ({
         }
     };
 
-    // Search functionality with 5-second delay
     useEffect(() => {
 
         // Only proceed if there's input to search
