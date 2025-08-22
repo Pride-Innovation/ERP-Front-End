@@ -1,36 +1,30 @@
-/*
-13.9 Pride's Standard Copyright Notice:
-Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
-and distribute this software and its documentation for any purpose is prohibited unless authorized in writing by the
-Managing Director
-*/
-
-import { 
-  Box, 
-  Card, 
-  CardContent, 
-  Divider, 
-  Grid, 
-  Stack, 
-  Typography,
-  Autocomplete, 
-  TextField,
-  alpha,
-  Paper,
-  useTheme
+import {
+    Box,
+    Card,
+    CardContent,
+    Divider,
+    Grid,
+    Stack,
+    Typography,
+    Autocomplete,
+    TextField,
+    alpha,
+    Paper,
+    useTheme
 } from "@mui/material";
 import ButtonComponent from "../../components/forms/Button";
 import { IReassign } from "./interface";
-import { 
-  Assignment as AssetIcon, 
-  Person as PersonIcon,
-  Fingerprint as FingerprintIcon,
-  SwapHoriz as SwapIcon
+import {
+    Assignment as AssetIcon,
+    Person as PersonIcon,
+    Fingerprint as FingerprintIcon,
+    SwapHoriz as SwapIcon
 } from '@mui/icons-material';
 import { crudStates } from "../../utils/constants";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { IOptions } from "../../components/tables/interface";
 import CircularProgress from '@mui/material/CircularProgress';
+import { useDebounce } from "../../hooks/useDebounce";
 
 const Reassign = ({
     handleClose,
@@ -42,25 +36,88 @@ const Reassign = ({
     const theme = useTheme();
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [optionsObject, setOptionsObject] = useState<{
-        usersOptions: Array<IOptions>;
-    }>({ usersOptions: [] });
+    const [searchLoading, setSearchLoading] = useState(false);
+    const [optionsObject, setOptionsObject] = useState<{ usersOptions: Array<IOptions> }>({
+        usersOptions: []
+    });
     const [selectedUser, setSelectedUser] = useState<IOptions | null>(null);
 
-    const handleOpen = () => {
+    // Input tracking states
+    const [localInput, setLocalInput] = useState<string>('');
+    const debouncedInput = useDebounce(localInput, 500);
+
+    // Initial load - fetch first 10 users when dropdown opens
+    const handleOpen = async () => {
         setOpen(true);
-        (async () => {
-            setLoading(true);
-            // await fetchAllUsers();
-            console.log("Fetching Users...");
-            setLoading(false);
-        })();
+
+        if (optionsObject.usersOptions.length === 0) {
+            try {
+                setLoading(true);
+                // Make API call to fetch initial users
+                // For example: const response = await fetchInitialUsers();
+
+                // Mock data - replace with actual API call
+                const mockUsers = [
+                    { label: 'John Doe', value: '1' },
+                    { label: 'Jane Smith', value: '2' },
+                    { label: 'Robert Johnson', value: '3' },
+                    { label: 'Emily Davis', value: '4' },
+                    { label: 'Michael Wilson', value: '5' },
+                    { label: 'Sarah Brown', value: '6' },
+                    { label: 'David Lee', value: '7' },
+                    { label: 'Lisa Taylor', value: '8' },
+                    { label: 'Thomas Anderson', value: '9' },
+                    { label: 'Jessica White', value: '10' }
+                ];
+
+                setOptionsObject({ usersOptions: mockUsers });
+            } catch (error) {
+                console.error("Error fetching initial users:", error);
+            } finally {
+                setLoading(false);
+            }
+        }
+    };
+
+    // Search functionality with 5-second delay
+    useEffect(() => {
+
+        // Only proceed if there's input to search
+        if (debouncedInput.trim()) {
+
+            try {
+                setSearchLoading(true);
+
+                // Make API call to search users based on input
+                // For example: const response = await searchUsers(debouncedInput);
+
+                // Mock search results - replace with actual API call
+                console.log("Searching users for:", debouncedInput);
+
+                const searchResults = [
+                    { label: `${debouncedInput} - Result 1`, value: '101' },
+                    { label: `${debouncedInput} - Result 2`, value: '102' },
+                    { label: `${debouncedInput} - Result 3`, value: '103' },
+                ];
+
+                setOptionsObject({ usersOptions: searchResults });
+            } catch (error) {
+                console.error("Error searching users:", error);
+            } finally {
+                setSearchLoading(false);
+            }
+        }
+
+    }, [debouncedInput]);
+
+    const handleCancel = () => {
+        handleClose();
     };
 
     return (
-        <Card 
-            elevation={0} 
-            sx={{ 
+        <Card
+            elevation={0}
+            sx={{
                 borderRadius: 2,
                 overflow: 'hidden',
                 border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
@@ -81,10 +138,9 @@ const Reassign = ({
                     Asset Reassignment
                 </Typography>
             </Box>
-            
+
             <CardContent sx={{ p: 3 }}>
                 <Grid container spacing={3}>
-                    {/* Asset Information Section */}
                     <Grid item xs={12}>
                         <Paper
                             elevation={0}
@@ -99,7 +155,7 @@ const Reassign = ({
                             <Typography variant="body2" color="text.secondary" fontWeight={500} sx={{ mb: 2 }}>
                                 You're about to reassign the following asset to another user:
                             </Typography>
-                            
+
                             <Stack spacing={2}>
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                                     <Box
@@ -125,7 +181,7 @@ const Reassign = ({
                                         </Typography>
                                     </Box>
                                 </Box>
-                                
+
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                                     <Box
                                         sx={{
@@ -155,7 +211,7 @@ const Reassign = ({
                                         )}
                                     </Box>
                                 </Box>
-                                
+
                                 {asset.assignedTo && (
                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                                         <Box
@@ -184,26 +240,28 @@ const Reassign = ({
                             </Stack>
                         </Paper>
                     </Grid>
-                    
-                    {/* User Selection Section */}
+
                     <Grid item xs={12}>
                         <Typography variant="subtitle2" color="text.primary" fontWeight={600} sx={{ mb: 1.5 }}>
                             Select New User
                         </Typography>
-                        
+
                         <Autocomplete
                             open={open}
                             onOpen={handleOpen}
-                            onClose={() => setOpen(false)} // Fixed to not close the whole modal
+                            onClose={() => setOpen(false)}
                             isOptionEqualToValue={(option, value) => option.value === value.value}
                             getOptionLabel={(option) => option.label as string}
                             options={optionsObject.usersOptions}
                             value={selectedUser}
+                            onInputChange={(_, newInputValue) => setLocalInput(newInputValue)}
                             onChange={(_, value) => {
                                 setSelectedUser(value);
                             }}
-                            loading={loading}
+                            loading={loading || searchLoading}
                             fullWidth
+                            noOptionsText="No users found"
+                            loadingText="Searching users..."
                             sx={{
                                 '& .MuiOutlinedInput-root': {
                                     borderRadius: 1.5,
@@ -226,24 +284,24 @@ const Reassign = ({
                                         ),
                                         endAdornment: (
                                             <>
-                                                {loading ? <CircularProgress color="primary" size={20} /> : null}
+                                                {(loading || searchLoading) ? <CircularProgress color="primary" size={20} /> : null}
                                                 {params.InputProps.endAdornment}
                                             </>
                                         ),
                                     }}
+                                    helperText={localInput ? "Searching after 5 seconds of typing..." : null}
                                 />
                             )}
                         />
                     </Grid>
                 </Grid>
-                
-                {/* Action Buttons */}
+
                 <Divider sx={{ my: 3 }} />
-                
+
                 <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
                     <Stack direction="row" spacing={2}>
                         <ButtonComponent
-                            handleClick={handleClose}
+                            handleClick={handleCancel}
                             buttonColor='info'
                             type='button'
                             variant="outlined"
@@ -256,7 +314,6 @@ const Reassign = ({
                             sendingRequest={sendingRequest}
                             handleClick={() => handleClickAction?.(crudStates.delete, asset?.id as string)}
                             buttonText={buttonText}
-                            // disabled={!selectedUser}
                         />
                     </Stack>
                 </Box>
