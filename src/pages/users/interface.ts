@@ -115,6 +115,10 @@ export interface IUsersAxiosResponse extends IAxiosResponse {
     data: IUserResponse
 }
 
+export interface ISearchUsersAxiosResponse extends IAxiosResponse {
+    data: Array<IUser>
+}
+
 interface IUserCreationResponse {
     user: IUser;
     response: {

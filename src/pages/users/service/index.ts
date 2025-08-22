@@ -61,10 +61,20 @@ const fetchRolesService = async () => {
   }
 }
 
+const searchUserService = async (query: string) => {
+  try {
+    const response = await axiosInstance.get(`users/search`, { params: { text: query } });
+    return response;
+  } catch (error) {
+    return error;
+  }
+};
+
 export {
   createUSerService,
   fetchSingleUserService,
   deleteUserService,
+  searchUserService,
   updateUSerService,
   fetchRolesService,
   unBlockUserService

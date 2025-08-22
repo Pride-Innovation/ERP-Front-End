@@ -28,6 +28,8 @@ import { useDebounce } from "../../hooks/useDebounce";
 import { RootState } from "../../store";
 import { useSelector } from "react-redux";
 import UserUtils from "../users/utils";
+import { searchUserService } from "../users/service";
+import { ISearchUsersAxiosResponse, IUser } from "../users/interface";
 
 const Reassign = ({
     handleClose,
@@ -75,27 +77,30 @@ const Reassign = ({
         }
     };
 
+    const searchUserServiceFunction = async (query: string) => {
+        try {
+            const response = await searchUserService(query) as ISearchUsersAxiosResponse;
+            if (response.status === 200 && response.data) {
+                const searchResults = response.data.map((user: IUser) => ({
+                    label: `${user.firstName} ${user.lastName}` as string,
+                    value: user.id as number
+                }));
+                setOptionsObject({ usersOptions: searchResults });
+            }
+
+        } catch (error) {
+            console.error("Error searching users:", error);
+        } finally {
+            setSearchLoading(false);
+        }
+    };
+
     useEffect(() => {
 
-        // Only proceed if there's input to search
         if (debouncedInput.trim()) {
-
             try {
                 setSearchLoading(true);
-
-                // Make API call to search users based on input
-                // For example: const response = await searchUsers(debouncedInput);
-
-                // Mock search results - replace with actual API call
-                console.log("Searching users for:", debouncedInput);
-
-                const searchResults = [
-                    { label: `${debouncedInput} - Result 1`, value: '101' },
-                    { label: `${debouncedInput} - Result 2`, value: '102' },
-                    { label: `${debouncedInput} - Result 3`, value: '103' },
-                ];
-
-                setOptionsObject({ usersOptions: searchResults });
+                searchUserServiceFunction(debouncedInput);
             } catch (error) {
                 console.error("Error searching users:", error);
             } finally {
