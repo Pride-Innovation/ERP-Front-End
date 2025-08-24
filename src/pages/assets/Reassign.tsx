@@ -25,11 +25,13 @@ import { useEffect, useState } from "react";
 import { IOptions } from "../../components/tables/interface";
 import CircularProgress from '@mui/material/CircularProgress';
 import { useDebounce } from "../../hooks/useDebounce";
-import { RootState } from "../../store";
+import { AppDispatch, RootState } from "../../store";
 import { useSelector } from "react-redux";
 import UserUtils from "../users/utils";
 import { searchUserService } from "../users/service";
-import { ISearchUsersAxiosResponse, IUser } from "../users/interface";
+import { IUser, IUsersAxiosResponse } from "../users/interface";
+import { useDispatch } from "react-redux";
+import { loadUsers } from "../users/slice";
 
 const Reassign = ({
     handleClose,
@@ -48,6 +50,7 @@ const Reassign = ({
     const [selectedUser, setSelectedUser] = useState<IOptions | null>(null);
     const { users } = useSelector((state: RootState) => state.UserStore);
     const { fetchAllUsers } = UserUtils();
+    const dispatch = useDispatch<AppDispatch>();
 
     // Input tracking states
     const [localInput, setLocalInput] = useState<string>('');
@@ -79,13 +82,9 @@ const Reassign = ({
 
     const searchUserServiceFunction = async (query: string) => {
         try {
-            const response = await searchUserService(query) as ISearchUsersAxiosResponse;
+            const response = await searchUserService(query) as IUsersAxiosResponse;
             if (response.status === 200 && response.data) {
-                const searchResults = response.data.map((user: IUser) => ({
-                    label: `${user.firstName} ${user.lastName}` as string,
-                    value: user.id as number
-                }));
-                setOptionsObject({ usersOptions: searchResults });
+                dispatch(loadUsers(response.data.content));
             }
 
         } catch (error) {
@@ -289,7 +288,7 @@ const Reassign = ({
                                             </>
                                         ),
                                     }}
-                                    helperText={localInput ? "Searching after 5 seconds of typing..." : null}
+                                // helperText={localInput ? "Searching after 5 seconds of typing..." : null}
                                 />
                             )}
                         />
