@@ -1,8 +1,14 @@
+/*
+13.9 Pride's Standard Copyright Notice:
+Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
+and distribute this software and its documentation for any purpose is prohibited unless authorized in writing by the
+Managing Director
+*/
+
 import {
     Box,
     Card,
     CardContent,
-    Divider,
     Grid,
     Stack,
     Typography,
@@ -18,7 +24,8 @@ import {
     List,
     ListItem,
     ListItemText,
-    Button
+    Button,
+    Chip
 } from "@mui/material";
 import ButtonComponent from "../../components/forms/Button";
 import { IRepair } from "./interface";
@@ -40,6 +47,9 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { Dayjs } from 'dayjs';
+import LaptopIcon from '@mui/icons-material/Laptop';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+import SettingsIcon from '@mui/icons-material/Settings';
 
 const Repair = ({
     handleClose,
@@ -53,12 +63,10 @@ const Repair = ({
     const [repairReason, setRepairReason] = useState("");
     const [technician, setTechnician] = useState("");
 
-    // File upload states
     const [files, setFiles] = useState<File[]>([]);
     const [isDragging, setIsDragging] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    // Handle file selection
     const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files) {
             const newFiles = Array.from(e.target.files);
@@ -66,7 +74,6 @@ const Repair = ({
         }
     };
 
-    // Handle file drag events
     const handleDragOver = (e: React.DragEvent) => {
         e.preventDefault();
         e.stopPropagation();
@@ -90,12 +97,10 @@ const Repair = ({
         }
     };
 
-    // Remove file
     const removeFile = (indexToRemove: number) => {
         setFiles(files.filter((_, index) => index !== indexToRemove));
     };
 
-    // Get appropriate icon based on file type
     const getFileIcon = (fileName: string) => {
         const extension = fileName.split('.').pop()?.toLowerCase() || '';
 
@@ -108,7 +113,6 @@ const Repair = ({
         }
     };
 
-    // Format file size
     const formatFileSize = (bytes: number): string => {
         if (bytes < 1024) return bytes + ' bytes';
         else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
@@ -122,17 +126,17 @@ const Repair = ({
                 borderRadius: 2,
                 overflow: 'hidden',
                 border: `1px solid ${alpha(theme.palette.info.main, 0.15)}`,
-                maxHeight: '90vh',
+                height: '100%',
+                maxHeight: '100vh',
                 display: 'flex',
                 flexDirection: 'column'
             }}
         >
-            {/* Header */}
             <Box
                 sx={{
                     bgcolor: alpha(theme.palette.info.main, 0.08),
-                    py: 1.5,
-                    px: 3,
+                    py: 1.25,
+                    px: 2.5,
                     display: 'flex',
                     alignItems: 'center',
                     gap: 1
@@ -144,206 +148,257 @@ const Repair = ({
                 </Typography>
             </Box>
 
-            {/* Main Content - Scrollable if needed */}
-            <CardContent
-                sx={{
-                    p: 3,
-                    overflow: 'auto',
-                    flex: 1,
-                    "&:last-child": { pb: 3 } // Override MUI's default padding bottom
-                }}
-            >
-                {/* Asset Information - Top Section */}
-                <Paper
-                    elevation={0}
-                    sx={{
-                        p: 2.5,
-                        borderRadius: 1.5,
-                        bgcolor: alpha(theme.palette.background.default, 0.7),
-                        border: `1px solid ${alpha('#000', 0.08)}`,
-                        mb: 3
-                    }}
-                >
-                    <Typography variant="body2" color="text.secondary" fontWeight={500} sx={{ mb: 2 }}>
-                        You're requesting repair for the following asset:
-                    </Typography>
-
-                    <Grid container spacing={2}>
-                        <Grid item xs={12} md={6}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                                <Box
-                                    sx={{
-                                        bgcolor: theme.palette.primary.main,
-                                        color: 'white',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        p: 0.8,
-                                        borderRadius: 1,
-                                        boxShadow: `0 3px 6px ${alpha(theme.palette.primary.main, 0.25)}`
-                                    }}
-                                >
-                                    <AssetIcon fontSize="small" />
-                                </Box>
-                                <Box>
-                                    <Typography variant="caption" color="text.secondary" fontWeight={500}>
-                                        Asset Name
-                                    </Typography>
-                                    <Typography variant="subtitle1" fontWeight={600} color="text.primary">
-                                        {asset.assetName}
-                                    </Typography>
-                                </Box>
+            <CardContent sx={{ p: 2, flexGrow: 1, overflow: 'auto' }}>
+                <Grid container spacing={2}>
+                    <Grid item xs={12} md={4}>
+                        <Paper
+                            elevation={0}
+                            sx={{
+                                p: 2,
+                                height: '100%',
+                                borderRadius: 1.5,
+                                bgcolor: alpha(theme.palette.background.default, 0.7),
+                                border: `1px solid ${alpha('#000', 0.08)}`,
+                                display: 'flex',
+                                flexDirection: 'column'
+                            }}
+                        >
+                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
+                                <AssetIcon color="primary" sx={{ mr: 1 }} />
+                                <Typography variant="subtitle2" fontWeight={600} color="text.primary">
+                                    Asset Information
+                                </Typography>
                             </Box>
-                        </Grid>
-                        <Grid item xs={12} md={6}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                                <Box
-                                    sx={{
-                                        bgcolor: alpha(theme.palette.grey[500], 0.1),
-                                        color: theme.palette.grey[600],
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        p: 0.8,
-                                        borderRadius: 1
-                                    }}
-                                >
-                                    <FingerprintIcon fontSize="small" />
-                                </Box>
-                                <Box>
-                                    <Typography variant="caption" color="text.secondary" fontWeight={500}>
-                                        Engraved Number
-                                    </Typography>
-                                    {asset.engravedNumber ? (
-                                        <Typography variant="subtitle1" fontWeight={500} color="text.primary">
-                                            {asset.engravedNumber}
-                                        </Typography>
-                                    ) : (
-                                        <Typography variant="body2" fontStyle="italic" color="text.disabled">
-                                            Not specified
-                                        </Typography>
-                                    )}
-                                </Box>
-                            </Box>
-                        </Grid>
-                    </Grid>
-                </Paper>
 
-                {/* Two Column Layout for Form and Attachments */}
-                <Grid container spacing={3}>
-                    {/* Repair Details - Left Column */}
-                    <Grid item xs={12} md={6}>
-                        <Box sx={{
-                            bgcolor: 'white',
-                            borderRadius: 2,
-                            height: '100%'
-                        }}>
-                            <Typography variant="subtitle2" color="text.primary" fontWeight={600} sx={{ mb: 2 }}>
-                                Repair Details
-                            </Typography>
-
-                            <Grid container spacing={2.5}>
-                                <Grid item xs={12} sm={12}>
-                                    <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                        <DatePicker
-                                            label="Repair Date"
-                                            value={repairDate}
-                                            onChange={(newValue) => setRepairDate(newValue)}
-                                            slotProps={{
-                                                textField: {
-                                                    fullWidth: true,
-                                                    variant: 'outlined',
-                                                    sx: {
-                                                        '& .MuiOutlinedInput-root': {
-                                                            borderRadius: 1.5
-                                                        }
-                                                    }
-                                                }
-                                            }}
-                                        />
-                                    </LocalizationProvider>
-                                </Grid>
-
-                                <Grid item xs={12} sm={12}>
-                                    <FormControl fullWidth>
-                                        <InputLabel id="technician-select-label">Technician</InputLabel>
-                                        <Select
-                                            labelId="technician-select-label"
-                                            id="technician-select"
-                                            value={technician}
-                                            label="Technician"
-                                            onChange={(e) => setTechnician(e.target.value)}
-                                            startAdornment={
-                                                <TechnicianIcon color="action" sx={{ ml: 1, mr: 0.5 }} />
-                                            }
+                            <Box sx={{ overflow: 'auto', flexGrow: 1 }}>
+                                <Stack spacing={1.5}>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                                        <Box
                                             sx={{
-                                                borderRadius: 1.5,
-                                                '& .MuiOutlinedInput-notchedOutline': {
-                                                    borderColor: alpha('#000', 0.23),
-                                                },
-                                                '&:hover .MuiOutlinedInput-notchedOutline': {
-                                                    borderColor: theme.palette.primary.main,
-                                                }
+                                                bgcolor: theme.palette.primary.main,
+                                                color: 'white',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                p: 0.7,
+                                                borderRadius: 1,
+                                                border: `1px solid ${alpha(theme.palette.primary.main, 0.3)}`
                                             }}
                                         >
-                                            <MenuItem value="internal">Internal IT Staff</MenuItem>
-                                            <MenuItem value="vendor">Vendor Technician</MenuItem>
-                                            <MenuItem value="contractor">External Contractor</MenuItem>
-                                        </Select>
-                                    </FormControl>
-                                </Grid>
+                                            <LaptopIcon fontSize="small" />
+                                        </Box>
+                                        <Box>
+                                            <Typography variant="caption" color="text.secondary" fontWeight={500}>
+                                                Asset Name
+                                            </Typography>
+                                            <Typography variant="body2" fontWeight={600} color="text.primary">
+                                                {asset.assetName}
+                                            </Typography>
+                                        </Box>
+                                    </Box>
 
-                                <Grid item xs={12}>
-                                    <TextField
-                                        label="Reason for Repair / Description of Issue"
-                                        multiline
-                                        rows={4}
-                                        value={repairReason}
-                                        onChange={(e) => setRepairReason(e.target.value)}
-                                        fullWidth
-                                        placeholder="Please describe the issue with this asset that needs repair..."
-                                        sx={{
-                                            '& .MuiOutlinedInput-root': {
-                                                borderRadius: 1.5
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                                        <Box
+                                            sx={{
+                                                bgcolor: alpha(theme.palette.grey[500], 0.1),
+                                                color: theme.palette.grey[600],
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                p: 0.7,
+                                                borderRadius: 1
+                                            }}
+                                        >
+                                            <FingerprintIcon fontSize="small" />
+                                        </Box>
+                                        <Box>
+                                            <Typography variant="caption" color="text.secondary" fontWeight={500}>
+                                                Engraved Number
+                                            </Typography>
+                                            {asset.engravedNumber ? (
+                                                <Typography variant="body2" fontWeight={500} color="text.primary">
+                                                    {asset.engravedNumber}
+                                                </Typography>
+                                            ) : (
+                                                <Typography variant="caption" fontStyle="italic" color="text.disabled">
+                                                    Not specified
+                                                </Typography>
+                                            )}
+                                        </Box>
+                                    </Box>
+
+                                    {asset.branch && (
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                                            <Box
+                                                sx={{
+                                                    bgcolor: alpha(theme.palette.info.main, 0.1),
+                                                    color: theme.palette.info.main,
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    p: 0.7,
+                                                    borderRadius: 1
+                                                }}
+                                            >
+                                                <LocationOnIcon fontSize="small" />
+                                            </Box>
+                                            <Box>
+                                                <Typography variant="caption" color="text.secondary" fontWeight={500}>
+                                                    Current Location
+                                                </Typography>
+                                                <Typography variant="body2" fontWeight={500} color="text.primary">
+                                                    {asset.branch.name}
+                                                </Typography>
+                                            </Box>
+                                        </Box>
+                                    )}
+
+                                    {asset.make && (
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                                            <Box
+                                                sx={{
+                                                    bgcolor: alpha(theme.palette.success.main, 0.1),
+                                                    color: theme.palette.success.main,
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    p: 0.7,
+                                                    borderRadius: 1
+                                                }}
+                                            >
+                                                <SettingsIcon fontSize="small" />
+                                            </Box>
+                                            <Box>
+                                                <Typography variant="caption" color="text.secondary" fontWeight={500}>
+                                                    Make/Model
+                                                </Typography>
+                                                <Typography variant="body2" fontWeight={500} color="text.primary">
+                                                    {asset.make}
+                                                </Typography>
+                                            </Box>
+                                        </Box>
+                                    )}
+                                </Stack>
+                            </Box>
+                        </Paper>
+                    </Grid>
+
+                    <Grid item xs={12} md={4}>
+                        <Paper
+                            elevation={0}
+                            sx={{
+                                p: 2,
+                                height: '100%',
+                                borderRadius: 1.5,
+                                bgcolor: alpha(theme.palette.background.default, 0.7),
+                                border: `1px solid ${alpha('#000', 0.08)}`,
+                                display: 'flex',
+                                flexDirection: 'column'
+                            }}
+                        >
+                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
+                                <RepairIcon color="info" sx={{ mr: 1 }} />
+                                <Typography variant="subtitle2" fontWeight={600} color="text.primary">
+                                    Repair Information
+                                </Typography>
+                            </Box>
+
+                            <Stack spacing={2} sx={{ flexGrow: 1 }}>
+                                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                    <DatePicker
+                                        label="Repair Date"
+                                        value={repairDate}
+                                        onChange={(newValue) => setRepairDate(newValue)}
+                                        slotProps={{
+                                            textField: {
+                                                fullWidth: true,
+                                                size: "small",
+                                                variant: 'outlined',
+                                                sx: {
+                                                    '& .MuiOutlinedInput-root': {
+                                                        borderRadius: 1.5
+                                                    }
+                                                }
                                             }
                                         }}
                                     />
-                                </Grid>
-                            </Grid>
-                        </Box>
+                                </LocalizationProvider>
+
+                                <FormControl fullWidth size="small">
+                                    <InputLabel id="technician-select-label">Technician</InputLabel>
+                                    <Select
+                                        labelId="technician-select-label"
+                                        id="technician-select"
+                                        value={technician}
+                                        label="Technician"
+                                        onChange={(e) => setTechnician(e.target.value)}
+                                        startAdornment={
+                                            <TechnicianIcon color="action" sx={{ ml: 1, mr: 0.5 }} fontSize="small" />
+                                        }
+                                        sx={{
+                                            borderRadius: 1.5,
+                                            '&:hover .MuiOutlinedInput-notchedOutline': {
+                                                borderColor: theme.palette.primary.main,
+                                            }
+                                        }}
+                                    >
+                                        <MenuItem value="internal">Internal IT Staff</MenuItem>
+                                        <MenuItem value="vendor">Vendor Technician</MenuItem>
+                                        <MenuItem value="contractor">External Contractor</MenuItem>
+                                    </Select>
+                                </FormControl>
+
+                                <TextField
+                                    label="Reason for Repair"
+                                    multiline
+                                    rows={6}
+                                    value={repairReason}
+                                    onChange={(e) => setRepairReason(e.target.value)}
+                                    fullWidth
+                                    size="small"
+                                    placeholder="Please describe the issue with this asset that needs repair..."
+                                    sx={{
+                                        '& .MuiOutlinedInput-root': {
+                                            borderRadius: 1.5
+                                        },
+                                        flexGrow: 1
+                                    }}
+                                />
+                            </Stack>
+                        </Paper>
                     </Grid>
 
-                    {/* Supporting Documents - Right Column */}
-                    <Grid item xs={12} md={6}>
-                        <Box sx={{
-                            bgcolor: 'white',
-                            borderRadius: 2,
-                            height: '100%',
-                            display: 'flex',
-                            flexDirection: 'column'
-                        }}>
-                            <Typography variant="subtitle2" color="text.primary" fontWeight={600} sx={{
-                                mb: 2,
+                    <Grid item xs={12} md={4}>
+                        <Paper
+                            elevation={0}
+                            sx={{
+                                p: 2,
+                                height: '100%',
+                                borderRadius: 1.5,
+                                bgcolor: alpha(theme.palette.info.main, 0.05),
+                                border: `1px solid ${alpha('#000', 0.08)}`,
                                 display: 'flex',
-                                alignItems: 'center'
-                            }}>
-                                <AttachFileIcon fontSize="small" sx={{ mr: 0.75, color: theme.palette.info.main }} />
-                                Supporting Documents
-                            </Typography>
+                                flexDirection: 'column'
+                            }}
+                        >
+                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
+                                <AttachFileIcon color="info" sx={{ mr: 1 }} />
+                                <Typography variant="subtitle2" fontWeight={600} color="text.primary">
+                                    Supporting Documents
+                                </Typography>
+                            </Box>
 
-                            <Paper
-                                elevation={0}
-                                sx={{
-                                    borderRadius: 1.5,
-                                    border: `1px dashed ${isDragging ? theme.palette.info.main : alpha('#000', 0.15)}`,
-                                    bgcolor: isDragging ? alpha(theme.palette.info.main, 0.05) : 'transparent',
-                                    transition: 'all 0.2s ease',
-                                    cursor: 'pointer',
-                                    p: 0,
-                                    flex: 1,
-                                    display: 'flex',
-                                    flexDirection: 'column'
-                                }}
+                            <Box sx={{
+                                flexGrow: 1,
+                                display: 'flex',
+                                flexDirection: 'column',
+                                borderRadius: 1.5,
+                                border: `1px dashed ${isDragging ? theme.palette.info.main : alpha('#000', 0.15)}`,
+                                bgcolor: isDragging ? alpha(theme.palette.info.main, 0.05) : 'transparent',
+                                transition: 'all 0.2s ease',
+                                cursor: 'pointer',
+                                overflow: 'hidden'
+                            }}
                                 onDragOver={handleDragOver}
                                 onDragLeave={handleDragLeave}
                                 onDrop={handleDrop}
@@ -365,22 +420,21 @@ const Repair = ({
                                             flexDirection: 'column',
                                             alignItems: 'center',
                                             justifyContent: 'center',
-                                            py: 4,
-                                            px: 2,
-                                            flex: 1
+                                            p: 2,
+                                            flexGrow: 1
                                         }}
                                     >
                                         <UploadIcon
                                             sx={{
-                                                fontSize: 48,
+                                                fontSize: 32,
                                                 color: isDragging ? theme.palette.info.main : alpha('#000', 0.3),
-                                                mb: 2
+                                                mb: 1.5
                                             }}
                                         />
-                                        <Typography variant="body1" fontWeight={500} color="text.primary" align="center">
+                                        <Typography variant="body2" fontWeight={500} color="text.primary" align="center">
                                             {isDragging ? 'Drop files here' : 'Drag & drop files here'}
                                         </Typography>
-                                        <Typography variant="body2" color="text.secondary" align="center" sx={{ mt: 0.5, mb: 2 }}>
+                                        <Typography variant="caption" color="text.secondary" align="center" sx={{ mt: 0.5, mb: 1.5 }}>
                                             or click to browse
                                         </Typography>
                                         <Button
@@ -389,44 +443,34 @@ const Repair = ({
                                             size="small"
                                             startIcon={<AttachFileIcon />}
                                             sx={{ borderRadius: 1.5 }}
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                fileInputRef.current?.click();
-                                            }}
                                         >
                                             Select Files
                                         </Button>
                                     </Box>
                                 ) : (
                                     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-                                        <List dense sx={{ py: 0, flex: 1, overflowY: 'auto' }}>
+                                        <List dense sx={{ py: 0, flexGrow: 1, overflow: 'auto' }}>
                                             {files.map((file, index) => (
                                                 <ListItem
                                                     key={index}
                                                     sx={{
-                                                        py: 1,
-                                                        px: 2,
+                                                        py: 0.5,
+                                                        px: 1.5,
                                                         '&:not(:last-child)': {
-                                                            borderBottom: `1px solid ${alpha('#000', 0.08)}`
+                                                            borderBottom: `1px solid ${alpha('#000', 0.06)}`
                                                         }
                                                     }}
                                                 >
                                                     <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                                                         {getFileIcon(file.name)}
                                                         <ListItemText
-                                                            primary={file.name}
+                                                            primary={file.name.length > 20 ? `${file.name.substring(0, 20)}...` : file.name}
                                                             secondary={formatFileSize(file.size)}
                                                             primaryTypographyProps={{
                                                                 variant: 'body2',
                                                                 fontWeight: 500,
                                                                 color: 'text.primary',
-                                                                sx: {
-                                                                    ml: 1.5,
-                                                                    textOverflow: 'ellipsis',
-                                                                    overflow: 'hidden',
-                                                                    whiteSpace: 'nowrap',
-                                                                    maxWidth: '80%'
-                                                                }
+                                                                sx: { ml: 1.5 }
                                                             }}
                                                             secondaryTypographyProps={{
                                                                 variant: 'caption',
@@ -456,16 +500,14 @@ const Repair = ({
                                                 </ListItem>
                                             ))}
                                         </List>
-
-                                        <Divider sx={{ my: 0.5 }} />
-
                                         <Box sx={{
                                             display: 'flex',
                                             justifyContent: 'space-between',
                                             alignItems: 'center',
-                                            px: 2,
-                                            py: 1.5,
-                                            bgcolor: alpha(theme.palette.background.default, 0.4)
+                                            px: 1.5,
+                                            py: 0.75,
+                                            borderTop: `1px solid ${alpha('#000', 0.06)}`,
+                                            bgcolor: alpha(theme.palette.background.paper, 0.5)
                                         }}>
                                             <Typography variant="caption" color="text.secondary">
                                                 {files.length} {files.length === 1 ? 'file' : 'files'} selected
@@ -485,22 +527,17 @@ const Repair = ({
                                         </Box>
                                     </Box>
                                 )}
-                            </Paper>
+                            </Box>
 
-                            {files.length > 0 && (
-                                <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-                                    Supported file types: Images (JPG, PNG), Documents (PDF, DOC)
-                                </Typography>
-                            )}
-                        </Box>
+                            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+                                Supported: Images (JPG, PNG), Documents (PDF, DOC)
+                            </Typography>
+                        </Paper>
                     </Grid>
                 </Grid>
 
-                {/* Action Buttons */}
-                <Divider sx={{ my: 3 }} />
-
-                <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-                    <Stack direction="row" spacing={2}>
+                <Box sx={{ mt: 2, display: "flex", justifyContent: "flex-end" }}>
+                    <Stack direction="row" spacing={1.5}>
                         <ButtonComponent
                             handleClick={handleClose}
                             buttonColor='info'
