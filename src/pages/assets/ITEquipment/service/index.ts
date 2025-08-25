@@ -53,10 +53,20 @@ const disposeITEquipmentService = async (id: string | number) => {
     }
 }
 
+const reassignITEquipmentService = async (id: string | number, body: object) => {
+    try {
+        const response = await axiosInstance.post(`assets/reassign/${id}`, body);
+        return response;
+    } catch (error) {
+        return error;
+    }
+}
+
 export {
     createITEquipmentService,
     deleteITEquipmentService,
     getITEquipmentByIDService,
     updateITEquipmentService,
-    disposeITEquipmentService
+    disposeITEquipmentService,
+    reassignITEquipmentService
 }

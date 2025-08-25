@@ -13,14 +13,13 @@ import {
     useTheme
 } from "@mui/material";
 import ButtonComponent from "../../components/forms/Button";
-import { IReassign } from "./interface";
+import { IAssetAxiosResponse, IReassign } from "./interface";
 import {
     Assignment as AssetIcon,
     Person as PersonIcon,
     Fingerprint as FingerprintIcon,
     SwapHoriz as SwapIcon
 } from '@mui/icons-material';
-import { crudStates } from "../../utils/constants";
 import { useEffect, useState } from "react";
 import { IOptions } from "../../components/tables/interface";
 import CircularProgress from '@mui/material/CircularProgress';
@@ -32,11 +31,13 @@ import { searchUserService } from "../users/service";
 import { IUsersAxiosResponse } from "../users/interface";
 import { useDispatch } from "react-redux";
 import { loadUsers } from "../users/slice";
+import { reassignITEquipmentService } from "./ITEquipment/service";
+import { updateITAsset } from "./ITEquipment/slice";
+import { toast } from "react-toastify";
 
 const Reassign = ({
     handleClose,
     sendingRequest,
-    handleClickAction,
     buttonText,
     asset
 }: IReassign) => {
@@ -109,6 +110,24 @@ const Reassign = ({
 
     const handleCancel = () => {
         handleClose();
+    };
+
+
+    const reassignAsset = async () => {
+        try {
+            const response = await reassignITEquipmentService(
+                asset?.id as number,
+                { assignedTo: selectedUser?.value }
+            ) as IAssetAxiosResponse;
+            if (response.status === 201) {
+                toast.success("Asset reassigned successfully");
+                dispatch(updateITAsset(response.data));
+            }
+        } catch (error) {
+            console.error("Error reassigning asset:", error);
+        } finally {
+            handleClose();
+        }
     };
 
     return (
@@ -309,7 +328,7 @@ const Reassign = ({
                             buttonColor='primary'
                             type='submit'
                             sendingRequest={sendingRequest}
-                            handleClick={() => handleClickAction?.(crudStates.delete, asset?.id as string)}
+                            handleClick={reassignAsset}
                             buttonText={buttonText}
                         />
                     </Stack>
