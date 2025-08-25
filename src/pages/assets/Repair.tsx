@@ -27,7 +27,7 @@ import {
     Button
 } from "@mui/material";
 import ButtonComponent from "../../components/forms/Button";
-import { IRepair } from "./interface";
+import { IAssetAxiosResponse, IRepair } from "./interface";
 import {
     Assignment as AssetIcon,
     BuildCircle as RepairIcon,
@@ -40,7 +40,6 @@ import {
     Image as ImageIcon,
     Close as CloseIcon
 } from '@mui/icons-material';
-import { crudStates } from "../../utils/constants";
 import { useState, useRef } from "react";
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -49,11 +48,15 @@ import { Dayjs } from 'dayjs';
 import LaptopIcon from '@mui/icons-material/Laptop';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import SettingsIcon from '@mui/icons-material/Settings';
+import { updateITAsset } from "./ITEquipment/slice";
+import { toast } from "react-toastify";
+import { AppDispatch } from "../../store";
+import { useDispatch } from "react-redux";
+import { repairAssetService } from "./ITEquipment/service";
 
 const Repair = ({
     handleClose,
     sendingRequest,
-    handleClickAction,
     buttonText,
     asset
 }: IRepair) => {
@@ -61,6 +64,7 @@ const Repair = ({
     const [repairDate, setRepairDate] = useState<Dayjs | null>(null);
     const [repairReason, setRepairReason] = useState("");
     const [technician, setTechnician] = useState("");
+    const dispatch = useDispatch<AppDispatch>();
 
     const [files, setFiles] = useState<File[]>([]);
     const [isDragging, setIsDragging] = useState(false);
@@ -117,6 +121,37 @@ const Repair = ({
         else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
         else return (bytes / 1048576).toFixed(1) + ' MB';
     };
+
+    const handleAssetRepair = async () => {
+        const request = {
+            repairDate,
+            repairReason,
+            technician,
+            files
+        }
+
+        console.log(
+            request
+        )
+
+        const payload = new FormData();
+        // try {
+        //     const response = await repairAssetService(asset?.id as number, {
+        //         repairDate,
+        //         repairReason,
+        //         technician,
+        //         files
+        //     }) as IAssetAxiosResponse;
+        //     if (response.status === 201) {
+        //         toast.success("Asset repaired successfully");
+        //         dispatch(updateITAsset(response.data));
+        //     }
+        // } catch (error) {
+        //     console.error("Error repairing asset:", error);
+        // } finally {
+        //     handleClose();
+        // }
+    }
 
     return (
         <Card
@@ -305,7 +340,7 @@ const Repair = ({
                             <Stack spacing={2} sx={{ flexGrow: 1 }}>
                                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                                     <DatePicker
-                                        label="Repair Date"
+                                        label="Repair Start Date"
                                         value={repairDate}
                                         onChange={(newValue) => setRepairDate(newValue)}
                                         slotProps={{
@@ -549,7 +584,7 @@ const Repair = ({
                             buttonColor='primary'
                             type='submit'
                             sendingRequest={sendingRequest}
-                            handleClick={() => handleClickAction?.(crudStates.delete, asset?.id as string)}
+                            handleClick={handleAssetRepair}
                             buttonText={buttonText}
                         />
                     </Stack>
