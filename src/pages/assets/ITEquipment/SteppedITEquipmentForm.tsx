@@ -71,20 +71,12 @@ const SteppedITEquipmentForm = ({
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const [noFieldsError, setNoFieldsError] = useState(false);
 
-    // Define form steps
     const steps = ['Basic Information', 'Technical Details'];
 
-    // Check if form fields are properly loaded
     useEffect(() => {
         const hasFormFields = formFields && formFields.length > 0;
         const hasStateFormFields = stateFormFields && stateFormFields.length > 0;
 
-        console.log("Form fields status:", {
-            hasFormFields,
-            hasStateFormFields,
-            formFieldsLength: formFields?.length || 0,
-            stateFormFieldsLength: stateFormFields?.length || 0
-        });
 
         setNoFieldsError(!hasFormFields || !hasStateFormFields);
     }, [stateFormFields, formFields]);
@@ -132,7 +124,6 @@ const SteppedITEquipmentForm = ({
 
     // Divide fields into steps
     const getFieldsForStep = (step: number) => {
-        console.log("Getting fields for step:", step);
 
         // Check if we have form fields before proceeding
         if (!formFields || formFields.length === 0) {
@@ -161,7 +152,6 @@ const SteppedITEquipmentForm = ({
                 basicFieldNames.includes(field.value as string)
             );
 
-            console.log("Basic Fields:", basicFields.length, "fields found");
             return [categoryField, ...basicFields];
         }
         // Second step (technical details)
@@ -176,7 +166,6 @@ const SteppedITEquipmentForm = ({
                 !basicFieldNames.includes(field.value as string)
             );
 
-            console.log("Technical Fields:", technicalFields.length, "fields found");
             return technicalFields;
         }
     };
@@ -185,7 +174,6 @@ const SteppedITEquipmentForm = ({
     const currentStepFields = getFieldsForStep(activeStep);
 
     useEffect(() => {
-        console.log("Current step fields:", currentStepFields?.length || 0);
     }, [currentStepFields]);
 
     // Group form fields into sections
@@ -203,7 +191,6 @@ const SteppedITEquipmentForm = ({
     };
 
     const fieldGroups = groupFields(currentStepFields);
-    console.log("Field Groups:", fieldGroups?.[0]?.fields?.length || 0);
 
     return (
         <Box sx={{ width: "100%" }}>
@@ -277,7 +264,6 @@ const SteppedITEquipmentForm = ({
 
             {/* Form fields section */}
             {!loading && fieldGroups.map((group, groupIndex) => {
-                console.log("Rendering group:", group.title, "with", group.fields?.length || 0, "fields");
 
                 // Skip empty groups
                 if (!group.fields || group.fields.length === 0) {
@@ -447,7 +433,7 @@ const SteppedITEquipmentForm = ({
                                 }
                             }}
                         >
-                            Cancel
+                            Back
                         </MuiButton>
                     </Box>
 

@@ -15,7 +15,7 @@ import { getTableHeaders } from "../../../components/tables/getTableHeaders";
 import { IFormData } from "../interface";
 import { IITEquipment, IITEquipmentTableData } from "./interface";
 import { itEquipmentMock } from "../../../mocks/itEquipment";
-import { assetTypesStatusConstants, crudStates } from "../../../utils/constants";
+import { assetTypesStatusConstants, crudStates, unitsOfMeasure } from "../../../utils/constants";
 import { useNavigate } from "react-router";
 import { ROUTES } from "../../../core/routes/routes";
 import { RootState } from "../../../store";
@@ -324,19 +324,8 @@ const ITEquipmentUtills = () => {
         {
             value: "unitOfMeasure",
             label: 'Unit of Measure',
-            type: "input"
-        },
-        {
-            value: "assetStatus",
-            label: 'Status',
             type: "select",
-            options: optionsObject.assetsStatusesOptions
-        },
-        {
-            value: "assetType",
-            label: 'Asset Type',
-            type: "select",
-            options: optionsObject.assetTypesOptions
+            options: unitsOfMeasure
         },
         {
             value: "netValueB",
@@ -347,14 +336,6 @@ const ITEquipmentUtills = () => {
             value: "assetDepreciationRate",
             label: 'Depreciation Rate',
             type: "input"
-        },
-        {
-            value: "assignedTo",
-            label: 'Assigned To',
-            type: "autocomplete",
-            options: optionsObject.usersOptions,
-            required: false
-
         },
         {
             value: "branch",

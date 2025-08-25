@@ -30,6 +30,7 @@ const ITEquipmentForm = ({
     const { formFields, categories, computerFields, determineITAssetType } = ITEquipmentUtills();
     const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore);
     const { commodities } = useSelector((state: RootState) => state.CommodityStore);
+    
 
     const [assetTypeId, setAssetTypeId] = useState<number | null>();
     const [selectedCategory, setSelectedCategory] = useState<string>('');
@@ -40,7 +41,7 @@ const ITEquipmentForm = ({
     const { fetchAllUsers } = UserUtils();
     const { fetchAllAssetTypes } = AssetTypeUtills();
     const { fetchAllSuppliers } = SupplierUtills();
-    // const { fetchAllCommodities } = CommodityUtills();
+    const { fetchAllCommodities } = CommodityUtills();
     const { fetchInventory } = InventoryUtills();
 
     useEffect(() => { fetchAllBranches(branchParams) }, [branchParams]);
@@ -59,11 +60,11 @@ const ITEquipmentForm = ({
         }
     }, [assetTypes, determineITAssetType]);
 
-    // useEffect(() => {
-    //     if (assetTypeId) {
-    //         fetchAllCommodities({ assetTypeId })
-    //     }
-    // }, [assetTypeId, fetchAllCommodities]);
+    useEffect(() => {
+        if (assetTypeId) {
+            fetchAllCommodities({ assetTypeId })
+        }
+    }, [assetTypeId]);
 
     // Initialize state form fields
     const [stateFormFields, setStateFormFields] = useState<Array<IFormData<IITEquipment>>>([]);
@@ -76,7 +77,8 @@ const ITEquipmentForm = ({
     }, [formFields]);
 
     const determineCommodityName = (id: number): string => {
-        return commodities.find(commodity => commodity.id === id)?.name.split(" ").join("").toLocaleLowerCase() as string;
+        return commodities.find(commodity => commodity.id === id)?.name.
+            split(" ").join("").toLocaleLowerCase() as string;
     }
 
     useEffect(() => {
@@ -87,27 +89,21 @@ const ITEquipmentForm = ({
                 setSelectedCategory(val.toLocaleString());
 
                 const commodityName = determineCommodityName(val);
-                console.log("Commodity name:", commodityName);
 
                 if (categories && [
                     categories.laptop?.toLowerCase(),
                     categories.desktopComputer?.toLowerCase()
                 ].includes(commodityName)) {
-                    console.log("Setting computer fields");
                     setStateFormFields([...formFields.slice(1), ...computerFields]);
                 } else {
-                    console.log("Setting standard fields");
                     setStateFormFields([...formFields.slice(1)]);
                 }
             } catch (err) {
                 console.error("Error processing option:", err);
             } finally {
-                // Always turn off loading
                 setLoading(false);
             }
         } else if (formFields && formFields.length > 0) {
-            // Default behavior if no option is selected
-            console.log("Setting default fields");
             setStateFormFields(formFields.slice(1));
             setLoading(false);
         }

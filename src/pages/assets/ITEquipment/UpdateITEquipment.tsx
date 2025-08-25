@@ -102,8 +102,13 @@ const UpdateITEquipment = () => {
 
     const onSubmit = async (formData: IITEquipment) => {
         setSendingRequest(true);
+        const request = {
+            ...formData,
+            assetStatus: 8, // This is the asset status for IT Equipment ie Issuance Available
+            assetType: 2 // This is the IT Equipment asset type
+        }
         try {
-            const response = await updateITEquipmentService(formData, id as string) as IITEquipmentAxiosResponse;
+            const response = await updateITEquipmentService(request, id as string) as IITEquipmentAxiosResponse;
             if (response.status === 201) {
                 toast.success("Asset updated successfully");
                 dispatch(updateITAsset(response.data));

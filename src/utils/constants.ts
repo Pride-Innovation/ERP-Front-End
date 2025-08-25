@@ -5,6 +5,8 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
+import { IOptions } from "../components/tables/interface";
+
 export const availability = {
     available: "available",
     on_leave: "on leave"
@@ -92,3 +94,10 @@ export const assetTypesStatusConstants: {
     fleet: "Fleet",
     stationery: "Stationery"
 }
+
+export const unitsOfMeasure: IOptions[] = [
+    { label: "Pieces", value: "pieces" },
+    { label: "Dozens", value: "dozens" },
+    { label: "Boxes", value: "boxes" },
+    { label: "Reams", value: "reams" }
+];
