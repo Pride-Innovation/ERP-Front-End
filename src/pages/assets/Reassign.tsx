@@ -29,7 +29,7 @@ import { AppDispatch, RootState } from "../../store";
 import { useSelector } from "react-redux";
 import UserUtils from "../users/utils";
 import { searchUserService } from "../users/service";
-import { IUser, IUsersAxiosResponse } from "../users/interface";
+import { IUsersAxiosResponse } from "../users/interface";
 import { useDispatch } from "react-redux";
 import { loadUsers } from "../users/slice";
 
@@ -52,7 +52,6 @@ const Reassign = ({
     const { fetchAllUsers } = UserUtils();
     const dispatch = useDispatch<AppDispatch>();
 
-    // Input tracking states
     const [localInput, setLocalInput] = useState<string>('');
     const debouncedInput = useDebounce(localInput, 500);
 
@@ -64,7 +63,6 @@ const Reassign = ({
 
     }, [users])
 
-    // Initial load - fetch first 10 users when dropdown opens
     const handleOpen = async () => {
         setOpen(true);
 

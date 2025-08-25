@@ -30,6 +30,7 @@ import { disposeITEquipmentService } from "./ITEquipment/service";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../../store";
 import { disposeAsset } from "./ITEquipment/slice";
+import { toast } from "react-toastify";
 
 const Dispose = ({
     handleClose,
@@ -44,6 +45,7 @@ const Dispose = ({
         try {
             const response = await disposeITEquipmentService(asset?.id as string) as IAssetAxiosResponse;
             if (response.status === 201) {
+                toast.success("Asset disposed successfully");
                 dispatch(disposeAsset(response.data))
             }
         } catch (error) {

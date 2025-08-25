@@ -46,7 +46,7 @@ const updateITEquipmentService = async (body: object, id: string | number) => {
 
 const disposeITEquipmentService = async (id: string | number) => {
     try {
-        const response = await axiosInstance.delete(`assets/${id}`);
+        const response = await axiosInstance.post(`assets/${id}`);
         return response;
     } catch (error) {
         return error;

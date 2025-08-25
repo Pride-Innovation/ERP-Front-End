@@ -24,8 +24,7 @@ import {
     List,
     ListItem,
     ListItemText,
-    Button,
-    Chip
+    Button
 } from "@mui/material";
 import ButtonComponent from "../../components/forms/Button";
 import { IRepair } from "./interface";
