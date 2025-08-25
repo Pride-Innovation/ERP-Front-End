@@ -121,7 +121,7 @@ const ITEquipment = () => {
 
             {
                 crudStates.repair === currentState
-                && <ModalComponent width={"80%"} title='Repair IT Equipment' open={open} handleClose={handleClose}>
+                && <ModalComponent width={"90%"} title='Repair IT Equipment' open={open} handleClose={handleClose}>
                     <Repair
                         handleClickAction={handleOptionClicked}
                         sendingRequest={loading}
