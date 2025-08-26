@@ -38,6 +38,7 @@ const Description = ({ repair, handleClose }: DescriptionProps) => {
     const status = isCompleted ? 'Completed' : 'Pending';
     const statusColor = isCompleted ? theme.palette.success.main : theme.palette.warning.main;
 
+
     return (
         <Box sx={{ 
             p: 1,
