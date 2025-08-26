@@ -10,11 +10,14 @@ import { ITableHeader } from "../../../components/tables/interface";
 import { getTableHeaders } from "../../../components/tables/getTableHeaders";
 import { crudStates } from "../../../utils/constants";
 import { repairHistoryMock } from "../../../mocks/repairHistory";
-import { useDispatch } from "react-redux";
-import { AppDispatch } from "../../../store";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../../../store";
 import { listRepairDetailService } from "../officeEquipment/service";
-import { IRepairDetailsAxiosResponse } from "../interface";
+import { IRepairDetails, IRepairDetailsAxiosResponse, IRepairsTableData } from "../interface";
 import { loadAssetRepairHistory } from "./slice";
+import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
+import HandymanOutlinedIcon from '@mui/icons-material/HandymanOutlined';
+import AttachmentOutlinedIcon from '@mui/icons-material/AttachmentOutlined';
 
 const RepairHistoryUtills = () => {
     const endPoint = 'posts';
@@ -24,6 +27,9 @@ const RepairHistoryUtills = () => {
     const [open, setOpen] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false);
     const dispatch = useDispatch<AppDispatch>();
+    const [repairsTableData, setRepairsTableData] = useState<Array<IRepairsTableData>>([] as Array<IRepairsTableData>);
+    const { assetRepairHistory } = useSelector((state: RootState) => state.AssetAssignmentHistoryStore);
+
 
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
@@ -35,15 +41,47 @@ const RepairHistoryUtills = () => {
 
     const {
         id,
-        serialNumber,
+        asset,
+        documents,
         ...data
     } = repairHistoryMock[0];
 
     const rowData = {
-        serialNumber: repairHistoryMock[0].serialNumber,
+        serialNumber: repairHistoryMock[0].asset?.engravedNumber,
         ...data,
+        action: {
+            label: "options",
+            options: [
+                { value: crudStates.read, label: "Description", icon: <DescriptionOutlinedIcon fontSize='small' color='error' /> },
+                { value: crudStates.update, label: "Complete Repair", icon: <HandymanOutlinedIcon fontSize='small' color='info' /> },
+                { value: crudStates.upload, label: "Attachments", icon: <AttachmentOutlinedIcon fontSize='small' color='error' /> },
+            ]
+        },
     };
 
+
+    const handleRepairTableData = (repairs: Array<IRepairDetails>) => {
+        const data: Array<IRepairsTableData> = repairs.map((repair, index) => {
+            const {
+                asset,
+                documents,
+                ...fieldsData
+            } = repairs[index];
+
+            return (
+                {
+                    ...fieldsData,
+                    serialNumber: repair?.asset?.engravedNumber ? repair?.asset?.engravedNumber : '',
+                    repairStartDate: repair?.repairStartDate ? repair?.repairStartDate : '',
+                    repairEndDate: repair?.repairEndDate ? repair?.repairEndDate : '',
+                    technician: repair?.technician ? repair?.technician : '',
+                    repairReason: repair?.repairReason ? repair?.repairReason : '',
+                }
+            )
+        })
+
+        setRepairsTableData(data);
+    }
 
     const fetchResources = async (id: string | number) => {
         setLoading(true)
@@ -59,8 +97,14 @@ const RepairHistoryUtills = () => {
     }
 
     useEffect(() => {
+        if (assetRepairHistory.length > 0) {
+            handleRepairTableData(assetRepairHistory);
+        }
+    }, [assetRepairHistory])
+
+    useEffect(() => {
         setColumnHeaders(getTableHeaders(rowData))
-    }, [id]);
+    }, []);
 
     return ({
         endPoint,
@@ -72,7 +116,8 @@ const RepairHistoryUtills = () => {
         handleClose,
         handleCreation,
         fetchResources,
-        loading
+        loading,
+        repairsTableData
     }
     )
 }

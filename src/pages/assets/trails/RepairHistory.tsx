@@ -11,12 +11,8 @@ import { Grid } from "@mui/material";
 import ModalComponent from "../../../components/modal";
 import TableComponent from "../../../components/tables/TableComponent";
 import RepairHistoryUtills from "./RepairHistoryUtills";
-import { useSelector } from "react-redux";
-import { RootState } from "../../../store";
 
 const RepairHistory = ({ id }: { id: string | number }) => {
-
-    const { assetRepairHistory } = useSelector((state: RootState) => state.AssetAssignmentHistoryStore);
 
     const {
         endPoint,
@@ -27,7 +23,8 @@ const RepairHistory = ({ id }: { id: string | number }) => {
         handleClose,
         handleCreation,
         fetchResources,
-        loading
+        loading,
+        repairsTableData
     } = RepairHistoryUtills()
 
 
@@ -40,7 +37,12 @@ const RepairHistory = ({ id }: { id: string | number }) => {
         <>
             <Grid xs={12} container>
                 {modalState === crudStates.create &&
-                    <ModalComponent title='Create Repair History' open={open} handleClose={handleClose} width="60%">
+                    <ModalComponent
+                        title='Create Repair History'
+                        open={open}
+                        handleClose={handleClose}
+                        width="60%"
+                    >
                         <p>Modal Information!!</p>
                     </ModalComponent>
                 }
@@ -52,7 +54,7 @@ const RepairHistory = ({ id }: { id: string | number }) => {
                         exportData
                         createAction
                         header={header}
-                        rows={[]}
+                        rows={repairsTableData}
                         columnHeaders={columnHeaders}
                         paginationMode='client'
                         onCreationHandler={handleCreation}
