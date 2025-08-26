@@ -11,6 +11,8 @@ import { Grid } from "@mui/material";
 import ModalComponent from "../../../components/modal";
 import TableComponent from "../../../components/tables/TableComponent";
 import RepairHistoryUtills from "./RepairHistoryUtills";
+import Description from "./repairs/Description";
+import Attachment from "./repairs/Attachment";
 
 const RepairHistory = ({ id }: { id: string | number }) => {
 
@@ -25,7 +27,8 @@ const RepairHistory = ({ id }: { id: string | number }) => {
         fetchResources,
         loading,
         repairsTableData,
-        handleOptionClicked
+        handleOptionClicked,
+        repairDetails
     } = RepairHistoryUtills()
 
 
@@ -38,8 +41,7 @@ const RepairHistory = ({ id }: { id: string | number }) => {
         <>
             {modalState === crudStates.read &&
                 <ModalComponent title='View Repair History' open={open} handleClose={handleClose} width="60%">
-                    {/* <CreateRepairHistory handleClose={handleClose} /> */}
-                    <p>Modal Information!!</p>
+                    <Description repair={repairDetails as any} />
                 </ModalComponent>
             }
             {modalState === crudStates.update &&
@@ -49,9 +51,8 @@ const RepairHistory = ({ id }: { id: string | number }) => {
                 </ModalComponent>
             }
             {modalState === crudStates.upload &&
-                <ModalComponent title='Uploaded Repair Documents' open={open} handleClose={handleClose} width="40%">
-                    {/* <DisableUser setSendingRequest={setSendingRequest} user={user} handleClose={handleClose} buttonText='Disable' sendingRequest={false} /> */}
-                    <p>Modal Information!!</p>
+                <ModalComponent title='Uploaded Repair Documents' open={open} handleClose={handleClose} width="75%">
+                    <Attachment repair={repairDetails as any} />
                 </ModalComponent>
             }
 
