@@ -44,6 +44,7 @@ const RepairHistoryUtills = () => {
         id,
         asset,
         documents,
+        status,
         ...data
     } = repairHistoryMock[0];
 
@@ -65,6 +66,7 @@ const RepairHistoryUtills = () => {
             const {
                 asset,
                 documents,
+                status,
                 ...fieldsData
             } = repairs[index];
 

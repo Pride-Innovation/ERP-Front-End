@@ -13,6 +13,7 @@ import TableComponent from "../../../components/tables/TableComponent";
 import RepairHistoryUtills from "./RepairHistoryUtills";
 import Description from "./repairs/Description";
 import Attachment from "./repairs/Attachment";
+import CompleteRepair from "./repairs/CompleteRepair";
 
 const RepairHistory = ({ id }: { id: string | number }) => {
 
@@ -46,8 +47,7 @@ const RepairHistory = ({ id }: { id: string | number }) => {
             }
             {modalState === crudStates.update &&
                 <ModalComponent title='Complete Repair' open={open} handleClose={handleClose} width="60%">
-                    {/* <UpdateRepairHistory repairDetails={repairDetails} handleClose={handleClose} /> */}
-                    <p>Modal Information!!</p>
+                    <CompleteRepair repair={repairDetails as any} handleClose={handleClose} />
                 </ModalComponent>
             }
             {modalState === crudStates.upload &&

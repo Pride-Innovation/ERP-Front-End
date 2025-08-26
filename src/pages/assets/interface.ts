@@ -108,6 +108,7 @@ export interface IRepairDetails {
     repairReason: string;
     documents: string[];
     asset: IAsset;
+    status: string;
 }
 
 export interface IRepairDetailsResponse extends IFetchDataRequest {

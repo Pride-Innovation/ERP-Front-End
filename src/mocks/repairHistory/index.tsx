@@ -15,6 +15,7 @@ export const repairHistoryMock: Array<IRepairDetails> = [
         technician: "alice smith",
         repairReason: "Battery replacement",
         documents: [],
+        status: "Completed",
         asset: {
             id: 1,
             assetName: "Laptop",

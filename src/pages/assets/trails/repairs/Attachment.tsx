@@ -24,11 +24,9 @@ import {
     PictureAsPdf as PdfIcon,
     Image as ImageIcon,
     Download as DownloadIcon,
-    Visibility as ViewIcon,
     Description as DocumentIcon,
     Info as InfoIcon,
     Close as CloseIcon,
-    ExpandLess as ExpandLessIcon,
     FullscreenOutlined as FullscreenIcon,
     FileDownload as FileDownloadIcon
 } from '@mui/icons-material';
