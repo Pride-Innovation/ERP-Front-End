@@ -64,7 +64,11 @@ const reassignITEquipmentService = async (id: string | number, body: object) => 
 
 const repairAssetService = async (id: string | number, body: object) => {
     try {
-        const response = await axiosInstance.post(`assets/repair/${id}`, body);
+        const response = await axiosInstance.post(`assets/repairs/${id}`, body, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            }
+        });
         return response;
     } catch (error) {
         return error;

@@ -123,34 +123,36 @@ const Repair = ({
     };
 
     const handleAssetRepair = async () => {
-        const request = {
+
+        console.log(
             repairDate,
             repairReason,
             technician,
             files
+        )
+        const payload = new FormData();
+        payload.append('repairStartDate', repairDate ? repairDate.format('YYYY-MM-DDTHH:mm:ss') : '');
+        payload.append('repairEndDate', repairDate ? repairDate.format('YYYY-MM-DDTHH:mm:ss') : '');
+        payload.append('repairReason', repairReason);
+        payload.append('technician', technician);
+
+        if (files.length > 0) {
+            files.forEach(file => {
+                payload.append('documents', file);
+            });
         }
 
-        console.log(
-            request
-        )
-
-        const payload = new FormData();
-        // try {
-        //     const response = await repairAssetService(asset?.id as number, {
-        //         repairDate,
-        //         repairReason,
-        //         technician,
-        //         files
-        //     }) as IAssetAxiosResponse;
-        //     if (response.status === 201) {
-        //         toast.success("Asset repaired successfully");
-        //         dispatch(updateITAsset(response.data));
-        //     }
-        // } catch (error) {
-        //     console.error("Error repairing asset:", error);
-        // } finally {
-        //     handleClose();
-        // }
+        try {
+            const response = await repairAssetService(asset?.id as number, payload) as IAssetAxiosResponse;
+            if (response.status === 201) {
+                toast.success("Asset repaired successfully");
+                dispatch(updateITAsset(response.data));
+            }
+        } catch (error) {
+            console.error("Error repairing asset:", error);
+        } finally {
+            handleClose();
+        }
     }
 
     return (
