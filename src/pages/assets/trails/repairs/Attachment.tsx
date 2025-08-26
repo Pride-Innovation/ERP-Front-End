@@ -96,7 +96,7 @@ const getFilePath = (documentPath: string): string => {
 };
 
 interface AttachmentProps {
-    repair: IRepairDetails;
+    repair: IRepairDetails | undefined;
     handleClose?: () => void;
 }
 
@@ -107,16 +107,17 @@ const Attachment = ({ repair, handleClose }: AttachmentProps) => {
     const [selectedFile, setSelectedFile] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
-    const hasDocuments = repair.documents && repair.documents.length > 0;
+    // Fixed: Safely check if documents exist with optional chaining
+    const hasDocuments = repair?.documents && Array.isArray(repair.documents) && repair.documents.length > 0;
 
-    // Auto-select first document when component loads
+    // Auto-select first document when component loads - with proper null checks
     useEffect(() => {
-        if (hasDocuments && repair.documents?.length > 0 && !selectedFile) {
+        if (hasDocuments && repair?.documents && repair.documents[0]) {
             setSelectedFile(repair.documents[0]);
             setIsLoading(true);
-            setTimeout(() => setIsLoading(false), 800); // Simulate loading
+            setTimeout(() => setIsLoading(false), 800);
         }
-    }, [repair.documents, hasDocuments]);
+    }, [repair?.documents, hasDocuments]);
 
     const handleFilePreview = (documentPath: string) => {
         if (selectedFile === documentPath) return;
@@ -124,14 +125,12 @@ const Attachment = ({ repair, handleClose }: AttachmentProps) => {
         setIsLoading(true);
         setSelectedFile(documentPath);
 
-        // Simulate loading delay
         setTimeout(() => {
             setIsLoading(false);
         }, 800);
     };
 
     const handleFileDownload = (documentPath: string) => {
-        // Get the file path and open it in a new tab/window to allow download
         const filePath = getFilePath(documentPath);
         window.open(filePath, '_blank');
     };
@@ -181,7 +180,7 @@ const Attachment = ({ repair, handleClose }: AttachmentProps) => {
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
                                 {hasDocuments
-                                    ? `${repair.documents?.length} document${repair.documents?.length === 1 ? '' : 's'} attached`
+                                    ? `${repair?.documents?.length} document${repair?.documents?.length === 1 ? '' : 's'} attached`
                                     : 'No documents attached'}
                             </Typography>
                         </Box>
@@ -220,7 +219,7 @@ const Attachment = ({ repair, handleClose }: AttachmentProps) => {
                 }}>
                     {hasDocuments && (
                         <Chip
-                            label={`${repair.documents?.length} file${repair.documents?.length === 1 ? '' : 's'}`}
+                            label={`${repair?.documents?.length} file${repair?.documents?.length === 1 ? '' : 's'}`}
                             size="small"
                             color="primary"
                             variant="outlined"
@@ -323,7 +322,7 @@ const Attachment = ({ repair, handleClose }: AttachmentProps) => {
                                     }
                                 }}
                             >
-                                {repair.documents.map((document, index) => {
+                                {repair?.documents?.map((document, index) => {
                                     const fileName = document.split('/').pop() || document;
                                     const fileType = getFileType(fileName);
                                     const isSelected = selectedFile === document;
@@ -334,7 +333,7 @@ const Attachment = ({ repair, handleClose }: AttachmentProps) => {
                                             sx={{
                                                 py: 1.5,
                                                 px: { xs: 1.5, sm: 2 },
-                                                borderBottom: index < repair.documents.length - 1 ? `1px solid ${alpha('#000', 0.08)}` : 'none',
+                                                borderBottom: index < (repair?.documents?.length || 0) - 1 ? `1px solid ${alpha('#000', 0.08)}` : 'none',
                                                 bgcolor: isSelected ? alpha(theme.palette.primary.main, 0.08) : 'transparent',
                                                 '&:hover': {
                                                     bgcolor: isSelected
