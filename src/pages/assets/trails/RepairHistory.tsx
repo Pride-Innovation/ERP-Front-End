@@ -42,7 +42,7 @@ const RepairHistory = ({ id }: { id: string | number }) => {
         <>
             {modalState === crudStates.read &&
                 <ModalComponent title='View Repair History' open={open} handleClose={handleClose} width="60%">
-                    <Description repair={repairDetails as any} />
+                    <Description repair={repairDetails as any} handleClose={handleClose} />
                 </ModalComponent>
             }
             {modalState === crudStates.update &&
@@ -52,7 +52,7 @@ const RepairHistory = ({ id }: { id: string | number }) => {
             }
             {modalState === crudStates.upload &&
                 <ModalComponent title='Uploaded Repair Documents' open={open} handleClose={handleClose} width="75%">
-                    <Attachment repair={repairDetails as any} />
+                    <Attachment repair={repairDetails as any} handleClose={handleClose} />
                 </ModalComponent>
             }
 
