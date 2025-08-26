@@ -61,14 +61,6 @@ export interface IAssignmentHistory {
     serialNumber: string;
 }
 
-// export interface IRepairHistory {
-//     id?: string | number;
-//     repairDate: string;
-//     repairedPart: string;
-//     technician: string;
-//     serialNumber: string;
-// }
-
 export interface IAsset {
     id?: string | number;
     assetName: string;
@@ -128,7 +120,6 @@ export interface IRepairDetailsAxiosResponse extends IAxiosResponse {
 
 export interface IRepairsTableData {
     id: number | string;
-    serialNumber: string;
     repairStartDate: string;
     repairEndDate: string;
     technician: string;

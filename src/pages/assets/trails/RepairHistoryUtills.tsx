@@ -18,6 +18,7 @@ import { loadAssetRepairHistory } from "./slice";
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 import HandymanOutlinedIcon from '@mui/icons-material/HandymanOutlined';
 import AttachmentOutlinedIcon from '@mui/icons-material/AttachmentOutlined';
+import moment from "moment";
 
 const RepairHistoryUtills = () => {
     const endPoint = 'posts';
@@ -29,7 +30,7 @@ const RepairHistoryUtills = () => {
     const dispatch = useDispatch<AppDispatch>();
     const [repairsTableData, setRepairsTableData] = useState<Array<IRepairsTableData>>([] as Array<IRepairsTableData>);
     const { assetRepairHistory } = useSelector((state: RootState) => state.AssetAssignmentHistoryStore);
-
+    const [repairDetails, setRepairDetails] = useState<IRepairDetails | null>(null);
 
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
@@ -47,14 +48,13 @@ const RepairHistoryUtills = () => {
     } = repairHistoryMock[0];
 
     const rowData = {
-        serialNumber: repairHistoryMock[0].asset?.engravedNumber,
         ...data,
         action: {
             label: "options",
             options: [
-                { value: crudStates.read, label: "Description", icon: <DescriptionOutlinedIcon fontSize='small' color='error' /> },
+                { value: crudStates.read, label: "Description", icon: <DescriptionOutlinedIcon fontSize='small' color='secondary' /> },
                 { value: crudStates.update, label: "Complete Repair", icon: <HandymanOutlinedIcon fontSize='small' color='info' /> },
-                { value: crudStates.upload, label: "Attachments", icon: <AttachmentOutlinedIcon fontSize='small' color='error' /> },
+                { value: crudStates.upload, label: "Attachments", icon: <AttachmentOutlinedIcon fontSize='small' color='inherit' /> },
             ]
         },
     };
@@ -71,11 +71,11 @@ const RepairHistoryUtills = () => {
             return (
                 {
                     ...fieldsData,
-                    serialNumber: repair?.asset?.engravedNumber ? repair?.asset?.engravedNumber : '',
-                    repairStartDate: repair?.repairStartDate ? repair?.repairStartDate : '',
-                    repairEndDate: repair?.repairEndDate ? repair?.repairEndDate : '',
+                    repairStartDate: repair?.repairStartDate ? moment(repair?.repairStartDate as string).format("Do MMM YYYY") : '',
+                    repairEndDate: repair?.repairEndDate ? moment(repair?.repairEndDate as string).format("Do MMM YYYY") : 'Pending',
                     technician: repair?.technician ? repair?.technician : '',
-                    repairReason: repair?.repairReason ? repair?.repairReason : '',
+                    repairReason: repair?.repairReason ? repair?.repairReason.length > 20
+                        ? repair?.repairReason.substring(0, 20) + "..." : repair?.repairReason : '',
                 }
             )
         })
@@ -106,6 +106,35 @@ const RepairHistoryUtills = () => {
         setColumnHeaders(getTableHeaders(rowData))
     }, []);
 
+
+    const findRepair = (id: number): IRepairDetails => {
+        return assetRepairHistory.find(repair => repair.id === id) as IRepairDetails;
+    }
+
+
+    const handleOptionClicked = async (option: string | number, moduleID?: string | number) => {
+        switch (option) {
+            case crudStates.read:
+                setModalState(option as string)
+                setRepairDetails(findRepair(moduleID as number))
+                handleOpen();
+                break;
+            case crudStates.update:
+                setModalState(option as string)
+                setRepairDetails(findRepair(moduleID as number))
+                handleOpen();
+                break;
+            case crudStates.upload:
+                setModalState(option as string)
+                setRepairDetails(findRepair(moduleID as number))
+                handleOpen();
+                break;
+            default:
+                break
+        }
+    }
+
+
     return ({
         endPoint,
         header,
@@ -117,9 +146,10 @@ const RepairHistoryUtills = () => {
         handleCreation,
         fetchResources,
         loading,
-        repairsTableData
-    }
-    )
+        repairsTableData,
+        handleOptionClicked,
+        repairDetails
+    })
 }
 
-export default RepairHistoryUtills
+export default RepairHistoryUtills  

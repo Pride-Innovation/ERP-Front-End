@@ -24,7 +24,8 @@ const RepairHistory = ({ id }: { id: string | number }) => {
         handleCreation,
         fetchResources,
         loading,
-        repairsTableData
+        repairsTableData,
+        handleOptionClicked
     } = RepairHistoryUtills()
 
 
@@ -35,6 +36,25 @@ const RepairHistory = ({ id }: { id: string | number }) => {
 
     return (
         <>
+            {modalState === crudStates.read &&
+                <ModalComponent title='View Repair History' open={open} handleClose={handleClose} width="60%">
+                    {/* <CreateRepairHistory handleClose={handleClose} /> */}
+                    <p>Modal Information!!</p>
+                </ModalComponent>
+            }
+            {modalState === crudStates.update &&
+                <ModalComponent title='Complete Repair' open={open} handleClose={handleClose} width="60%">
+                    {/* <UpdateRepairHistory repairDetails={repairDetails} handleClose={handleClose} /> */}
+                    <p>Modal Information!!</p>
+                </ModalComponent>
+            }
+            {modalState === crudStates.upload &&
+                <ModalComponent title='Uploaded Repair Documents' open={open} handleClose={handleClose} width="40%">
+                    {/* <DisableUser setSendingRequest={setSendingRequest} user={user} handleClose={handleClose} buttonText='Disable' sendingRequest={false} /> */}
+                    <p>Modal Information!!</p>
+                </ModalComponent>
+            }
+
             <Grid xs={12} container>
                 {modalState === crudStates.create &&
                     <ModalComponent
@@ -58,6 +78,7 @@ const RepairHistory = ({ id }: { id: string | number }) => {
                         columnHeaders={columnHeaders}
                         paginationMode='client'
                         onCreationHandler={handleCreation}
+                        handleOptionClicked={handleOptionClicked}
                     />
                 }
             </Grid>
