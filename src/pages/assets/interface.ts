@@ -107,3 +107,21 @@ export interface IAssetsAxiosResponse extends IAxiosResponse {
 export interface IAssetAxiosResponse extends IAxiosResponse {
     data: IAsset
 }
+
+export interface IRepairDetails {
+    id: number | string;
+    repairStartDate: string;
+    repairEndDate: string;
+    technician: string;
+    repairReason: string;
+    documents: string[];
+    asset: IAsset;
+}
+
+export interface IRepairDetailsResponse extends IFetchDataRequest {
+    content: Array<IRepairDetails>
+}
+
+export interface IRepairDetailsAxiosResponse extends IAxiosResponse {
+    data: IRepairDetailsResponse
+}

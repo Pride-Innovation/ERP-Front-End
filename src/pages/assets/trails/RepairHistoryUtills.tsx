@@ -10,6 +10,11 @@ import { ITableHeader } from "../../../components/tables/interface";
 import { getTableHeaders } from "../../../components/tables/getTableHeaders";
 import { crudStates } from "../../../utils/constants";
 import { repairHistoryMock } from "../../../mocks/repairHistory";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "../../../store";
+import { listRepairDetailService } from "../officeEquipment/service";
+import { IRepairDetailsAxiosResponse } from "../interface";
+import { loadAssetRepairHistory } from "./slice";
 
 const RepairHistoryUtills = () => {
     const endPoint = 'posts';
@@ -17,6 +22,8 @@ const RepairHistoryUtills = () => {
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
     const [modalState, setModalState] = useState<string>("");
     const [open, setOpen] = useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(false);
+    const dispatch = useDispatch<AppDispatch>();
 
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
@@ -37,6 +44,20 @@ const RepairHistoryUtills = () => {
         ...data,
     };
 
+
+    const fetchResources = async (id: string | number) => {
+        setLoading(true)
+        try {
+            const response = await listRepairDetailService(id) as IRepairDetailsAxiosResponse;
+            if (response.status === 200) {
+                dispatch(loadAssetRepairHistory(response.data.content));
+            }
+        } catch (error) {
+
+        }
+        setLoading(false)
+    }
+
     useEffect(() => {
         setColumnHeaders(getTableHeaders(rowData))
     }, [id]);
@@ -49,7 +70,9 @@ const RepairHistoryUtills = () => {
         setModalState,
         open,
         handleClose,
-        handleCreation
+        handleCreation,
+        fetchResources,
+        loading
     }
     )
 }

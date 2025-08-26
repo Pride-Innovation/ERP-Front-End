@@ -5,15 +5,19 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { crudStates } from "../../../utils/constants";
 import { Grid } from "@mui/material";
 import ModalComponent from "../../../components/modal";
 import TableComponent from "../../../components/tables/TableComponent";
 import RepairHistoryUtills from "./RepairHistoryUtills";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../store";
 
 const RepairHistory = ({ id }: { id: string | number }) => {
-    const [loading, setLoading] = useState<boolean>(false);
+
+    const { assetRepairHistory } = useSelector((state: RootState) => state.AssetAssignmentHistoryStore);
+
     const {
         endPoint,
         columnHeaders,
@@ -21,22 +25,16 @@ const RepairHistory = ({ id }: { id: string | number }) => {
         modalState,
         open,
         handleClose,
-        handleCreation
+        handleCreation,
+        fetchResources,
+        loading
     } = RepairHistoryUtills()
 
-    const fetchResources = async () => {
-        setLoading(true)
-        try {
-
-        } catch (error) {
-
-        }
-        setLoading(false)
-    }
 
     useEffect(() => {
-        fetchResources();
+        fetchResources(id as number);
     }, []);
+
 
     return (
         <>

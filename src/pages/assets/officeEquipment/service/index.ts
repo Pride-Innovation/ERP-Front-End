@@ -44,9 +44,19 @@ const updateOfficeEquipmentService = async (body: object, id: string | number) =
     }
 }
 
+const listRepairDetailService = async (id: string | number) => {
+    try {
+        const response = await axiosInstance.get(`assets/repairs/${id}`);
+        return response
+    } catch (error) {
+        return error
+    }
+}
+
 export {
     createOfficeEquipmentService,
     deleteOfficeEquipmentService,
     getOfficeEquipmentByIDService,
-    updateOfficeEquipmentService
+    updateOfficeEquipmentService,
+    listRepairDetailService
 }
