@@ -49,6 +49,7 @@ import TimeLineDot from "../../../../components/timeLineDots";
 import ContentPasteIcon from '@mui/icons-material/ContentPaste';
 import { toast } from 'react-toastify';
 import AssetImageUpload from './AssetImageUpload';
+import { IAssetAxiosResponse } from '../../interface';
 
 // Brand colors
 const PRIMARY_COLOR = '#08796C';
@@ -213,20 +214,23 @@ const ITEquipmentDetails = () => {
             formData.append('file', file);
 
             // You'll need to create this service function
-            const response = await updateITEquipmentImageService(id as string, formData);
-            console.log(response, "response information");
+            const response = await updateITEquipmentImageService(id as string, formData) as IAssetAxiosResponse;
+            if (response.status !== 201) {
+                toast.error('Failed to update image');
+            }
 
-            // For now, we'll mock a successful update
-            // In a real implementation, you would update from the API response
-            setTimeout(() => {
-                // Create an object URL for preview (temporary)
-                const imageUrl = URL.createObjectURL(file);
+            if (response.data && response.data.image) {
+                const serverPath = response.data.image;
+                const filename = serverPath.split(/[\/\\]/).pop(); // Handle both forward and backward slashes
+
+                // Update the equipment state with the image path
                 setEquipment({
                     ...equipment,
-                    image: imageUrl
+                    image: `/statics/${filename}`
                 });
+
                 toast.success('Image updated successfully');
-            }, 1500);
+            }
 
         } catch (error) {
             console.error('Error updating image:', error);
