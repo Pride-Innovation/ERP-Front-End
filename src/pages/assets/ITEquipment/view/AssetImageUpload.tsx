@@ -180,6 +180,12 @@ const AssetImageUpload = ({
                         variant="contained"
                         startIcon={readOnly ? <ImageNotSupportedIcon /> : <AddPhotoAlternateIcon />}
                         disableElevation
+                        onClick={(e) => {
+                            e.preventDefault();
+                            if (!readOnly && fileInputRef.current) {
+                                fileInputRef.current.click();
+                            }
+                        }}
                         sx={{
                             mb: 2,
                             px: 2,
@@ -201,7 +207,7 @@ const AssetImageUpload = ({
                             pointerEvents: readOnly ? 'none' : 'auto'
                         }}
                     >
-                        {readOnly ? 'No Image Available' : 'Add an Image'}
+                        {readOnly ? 'No Image Available' : 'Add Image'}
                     </Button>
                     {!readOnly && (
                         <>
