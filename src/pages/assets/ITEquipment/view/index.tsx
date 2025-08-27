@@ -27,7 +27,7 @@ import AssignmentHistory from '../../trails/AssignmentHistory';
 import RepairHistory from '../../trails/RepairHistory';
 import { useEffect, useState } from 'react';
 import { IITEquipment, IITEquipmentAxiosResponse } from '../interface';
-import { getITEquipmentByIDService, updateITEquipmentImageService } from '../service';
+import { getITEquipmentByIDService, removeITEquipmentImageService, updateITEquipmentImageService } from '../service';
 import Loading from '../../../../components/loading';
 import moment from 'moment';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -221,9 +221,8 @@ const ITEquipmentDetails = () => {
 
             if (response.data && response.data.image) {
                 const serverPath = response.data.image;
-                const filename = serverPath.split(/[\/\\]/).pop(); // Handle both forward and backward slashes
+                const filename = serverPath.split(/[\/\\]/).pop();
 
-                // Update the equipment state with the image path
                 setEquipment({
                     ...equipment,
                     image: `/statics/${filename}`
@@ -240,17 +239,19 @@ const ITEquipmentDetails = () => {
 
     const handleImageRemove = async () => {
         try {
-            // In a real implementation, call an API to remove the image
-            // const response = await removeITEquipmentImageService(id as string);
+            const response = await removeITEquipmentImageService(id as string) as IAssetAxiosResponse;
+            if (response.status !== 201) {
+                toast.error('Failed to update image');
+            }
 
-            // For now, we'll mock a successful removal
-            setTimeout(() => {
+            if (response.data) {
                 setEquipment({
                     ...equipment,
                     image: null
                 });
+
                 toast.success('Image removed successfully');
-            }, 1000);
+            }
 
         } catch (error) {
             console.error('Error removing image:', error);

@@ -102,6 +102,21 @@ const updateITEquipmentImageService = async (id: string | number, body: object) 
     }
 }
 
+const removeITEquipmentImageService = async (id: string | number) => {
+    try {
+        const response = await axiosInstance.put(`assets/remove/image/${id}`, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            }
+        });
+        return response;
+    } catch (error) {
+        return error;
+    }
+}
+
+
+
 
 
 export {
@@ -113,5 +128,6 @@ export {
     reassignITEquipmentService,
     completeRepairAssetService,
     repairAssetService,
-    updateITEquipmentImageService
+    updateITEquipmentImageService,
+    removeITEquipmentImageService
 }
