@@ -73,11 +73,11 @@ const RepairHistory = ({ id }: { id: string | number }) => {
                         loading={loading}
                         count={100}
                         exportData
-                        createAction
+                        // createAction
                         header={header}
                         rows={repairsTableData}
                         columnHeaders={columnHeaders}
-                        paginationMode='client'
+                        paginationMode='server'
                         onCreationHandler={handleCreation}
                         handleOptionClicked={handleOptionClicked}
                     />

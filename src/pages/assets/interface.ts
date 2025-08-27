@@ -119,6 +119,10 @@ export interface IRepairDetailsAxiosResponse extends IAxiosResponse {
     data: IRepairDetailsResponse
 }
 
+export interface IRepairDetailAxiosResponse extends IAxiosResponse {
+    data: IRepairDetails
+}
+
 export interface IRepairsTableData {
     id: number | string;
     repairStartDate: string;

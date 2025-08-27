@@ -34,13 +34,13 @@ const Description = ({ repair, handleClose }: DescriptionProps) => {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-    const isCompleted = repair.repairEndDate && repair.repairEndDate !== '';
+    const isCompleted = repair?.repairEndDate && repair?.repairEndDate !== '';
     const status = isCompleted ? 'Completed' : 'Pending';
     const statusColor = isCompleted ? theme.palette.success.main : theme.palette.warning.main;
 
 
     return (
-        <Box sx={{ 
+        <Box sx={{
             p: 1,
             display: 'flex',
             flexDirection: 'column',
@@ -58,7 +58,7 @@ const Description = ({ repair, handleClose }: DescriptionProps) => {
                         sx={{ mr: 1.5, fontSize: 28 }}
                     />
                     <Typography variant="h6" fontWeight={500} color="text.primary">
-                        Repair #{repair.id}
+                        Repair #{repair?.id}
                     </Typography>
                 </Box>
                 <Chip

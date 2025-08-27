@@ -25,7 +25,7 @@ import {
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { IRepairDetails } from '../../interface';
+import { IRepairDetailAxiosResponse, IRepairDetails } from '../../interface';
 import CloseIcon from '@mui/icons-material/Close';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
@@ -35,11 +35,10 @@ import AttachFileIcon from '@mui/icons-material/AttachFile';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import TextFieldsIcon from '@mui/icons-material/TextFields';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import InfoIcon from '@mui/icons-material/Info';
 import { toast } from 'react-toastify';
-import moment from 'moment';
 import dayjs, { Dayjs } from 'dayjs';
+import { completeRepairAssetService } from '../../ITEquipment/service';
 
 // Get file icon based on file type
 const getFileTypeInfo = (fileName: string) => {
@@ -165,29 +164,23 @@ const CompleteRepair = ({ repair, handleClose }: CompleteRepairProps) => {
         try {
             // Create form data for upload
             const formData = new FormData();
-            formData.append('repairId', repair.id?.toString() || '');
-            formData.append('completionDate', completionDate?.toISOString() || '');
+            formData.append('repairEndDate', completionDate ? completionDate.format('YYYY-MM-DDTHH:mm:ss') : '');
             formData.append('completionNotes', completionNotes);
 
             // Append files
             files.forEach(file => {
-                formData.append('files', file);
+                formData.append('completionDocuments', file);
             });
 
-            // Mock API call with timeout
-            // Replace this with your actual API call
-            await new Promise(resolve => setTimeout(resolve, 1500));
+            const response = await completeRepairAssetService(repair.id, formData) as IRepairDetailAxiosResponse;
+            if (response.status === 201) {
+                toast.success("Repair completed successfully!");
+                setSubmissionSuccess(true);
 
-            console.log('Form data to submit:', {
-                repairId: repair.id,
-                completionDate,
-                completionNotes,
-                files: files.map(f => f.name)
-            });
-
+                // dispatch(updateITAsset(response.data));
+            }
             // Show success feedback
-            setSubmissionSuccess(true);
-            toast.success('Repair marked as completed successfully!');
+            // toast.success('Repair marked as completed successfully!');
 
             // Reset form after submission
             setTimeout(() => {
@@ -220,7 +213,7 @@ const CompleteRepair = ({ repair, handleClose }: CompleteRepairProps) => {
             display: 'flex',
             flexDirection: 'column',
             height: '100%',
-            p: { xs: 2, md: 3 },
+            p: { xs: 2, md: 1.5 },
             maxWidth: '100%',
             overflow: 'hidden'
         }}>
@@ -252,7 +245,7 @@ const CompleteRepair = ({ repair, handleClose }: CompleteRepairProps) => {
                     }
                     title={
                         <Typography variant="h6" fontWeight={600} color="primary.main">
-                            Complete Repair #{repair.id}
+                            Complete Repair #{repair?.id}
                         </Typography>
                     }
                     sx={{

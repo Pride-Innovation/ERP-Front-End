@@ -75,6 +75,21 @@ const repairAssetService = async (id: string | number, body: object) => {
     }
 }
 
+
+const completeRepairAssetService = async (id: string | number, body: object) => {
+    try {
+        const response = await axiosInstance.put(`assets/repairs/${id}`, body, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            }
+        });
+        return response;
+    } catch (error) {
+        return error;
+    }
+}
+
+
 export {
     createITEquipmentService,
     deleteITEquipmentService,
@@ -82,5 +97,6 @@ export {
     updateITEquipmentService,
     disposeITEquipmentService,
     reassignITEquipmentService,
+    completeRepairAssetService,
     repairAssetService
 }

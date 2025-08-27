@@ -47,7 +47,7 @@ const AssignmentHistory = ({ id }: { id: string | number }) => {
                         loading={loading}
                         count={100}
                         exportData
-                        createAction
+                        // createAction
                         header={header}
                         module="assignment history"
                         rows={assetAssignmentHistoryTableData || []}
