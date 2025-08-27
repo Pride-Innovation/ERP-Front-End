@@ -83,9 +83,9 @@ const Description = ({ repair, handleClose, handleViewAttachments }: Description
             </Box>
 
             {/* Main content area */}
-            <Box sx={{ 
-                flexGrow: 1, 
-                display: 'flex', 
+            <Box sx={{
+                flexGrow: 1,
+                display: 'flex',
                 flexDirection: 'column'
             }}>
                 <Grid container spacing={1.5}> {/* Reduced spacing */}
@@ -461,7 +461,7 @@ const Description = ({ repair, handleClose, handleViewAttachments }: Description
                             color="primary"
                             onClick={handleClose}
                             startIcon={<CloseIcon />}
-                            size="medium" // Medium button
+                            // size="medium" // Medium button
                             sx={{
                                 borderRadius: 1.5,
                                 minWidth: '120px',
