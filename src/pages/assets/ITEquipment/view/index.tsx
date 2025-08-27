@@ -27,7 +27,7 @@ import AssignmentHistory from '../../trails/AssignmentHistory';
 import RepairHistory from '../../trails/RepairHistory';
 import { useEffect, useState } from 'react';
 import { IITEquipment, IITEquipmentAxiosResponse } from '../interface';
-import { getITEquipmentByIDService } from '../service';
+import { getITEquipmentByIDService, updateITEquipmentImageService } from '../service';
 import Loading from '../../../../components/loading';
 import moment from 'moment';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -210,11 +210,11 @@ const ITEquipmentDetails = () => {
         try {
             // Create FormData for API
             const formData = new FormData();
-            formData.append('image', file);
-            formData.append('id', id as string);
+            formData.append('file', file);
 
             // You'll need to create this service function
-            // const response = await updateITEquipmentImageService(formData);
+            const response = await updateITEquipmentImageService(id as string, formData);
+            console.log(response, "response information");
 
             // For now, we'll mock a successful update
             // In a real implementation, you would update from the API response

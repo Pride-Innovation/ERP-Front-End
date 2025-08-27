@@ -52,7 +52,17 @@ const AssetImageUpload = ({
     const [previewImage, setPreviewImage] = useState<string | null>(currentImage);
 
     useEffect(() => {
-        setPreviewImage(currentImage);
+        if (currentImage) {
+            if (currentImage.startsWith('http') || currentImage.startsWith('data:')) {
+                setPreviewImage(currentImage);
+            } else {
+                const filename = currentImage.split('/').pop();
+                const publicPath = `/statics/${filename}`;
+                setPreviewImage(publicPath);
+            }
+        } else {
+            setPreviewImage(null);
+        }
     }, [currentImage]);
 
     const handleDragEnter = (e: React.DragEvent) => {
@@ -287,18 +297,46 @@ const AssetImageUpload = ({
                         borderColor: PRIMARY_COLOR,
                         boxShadow: `0 0 0 2px ${alpha(PRIMARY_COLOR, 0.3)}`
                     }),
-                    ...(previewImage && {
-                        backgroundImage: `url(${previewImage})`,
-                        backgroundSize: 'contain',
-                        backgroundPosition: 'center',
-                        backgroundRepeat: 'no-repeat',
-                    })
+                    // Keep the styling without the background image
+                    backgroundColor: '#ffffff', // Light background for better visibility
                 }}
                 onDragEnter={handleDragEnter}
                 onDragLeave={handleDragLeave}
                 onDragOver={handleDragOver}
                 onDrop={handleDrop}
             >
+                {/* Add actual image element when we have a preview image */}
+                {previewImage && (
+                    <Box
+                        sx={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            width: '100%',
+                            height: '100%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            zIndex: 0
+                        }}
+                    >
+                        <img
+                            src={previewImage}
+                            alt="Asset Preview"
+                            style={{
+                                maxWidth: '100%',
+                                maxHeight: '100%',
+                                objectFit: 'contain',
+                                display: 'block'
+                            }}
+                            onError={(e) => {
+                                console.error('Image failed to load:', previewImage);
+                                // Add a fallback if needed or log the error
+                            }}
+                        />
+                    </Box>
+                )}
+
                 {!readOnly && (
                     <input
                         ref={fileInputRef}
