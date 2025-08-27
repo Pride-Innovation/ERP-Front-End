@@ -16,7 +16,11 @@ import {
     useMediaQuery,
     Fade,
     CircularProgress,
-    Grid
+    Grid,
+    ToggleButtonGroup,
+    ToggleButton,
+    Tab,
+    Tabs
 } from '@mui/material';
 import {
     Attachment as AttachmentIcon,
@@ -28,10 +32,12 @@ import {
     Info as InfoIcon,
     Close as CloseIcon,
     FullscreenOutlined as FullscreenIcon,
-    FileDownload as FileDownloadIcon
+    FileDownload as FileDownloadIcon,
+    CheckCircleOutline as CompletedIcon,
+    BuildOutlined as RepairIcon
 } from '@mui/icons-material';
 import { IRepairDetails } from '../../interface';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, SyntheticEvent } from 'react';
 
 // Helper functions remain the same...
 const getFileIcon = (fileName: string) => {
@@ -104,18 +110,38 @@ const Attachment = ({ repair, handleClose }: AttachmentProps) => {
     const isSmall = useMediaQuery(theme.breakpoints.down('sm'));
     const [selectedFile, setSelectedFile] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [activeTab, setActiveTab] = useState<number>(0); // 0 = initial documents, 1 = completion documents
 
-    // Fixed: Safely check if documents exist with optional chaining
-    const hasDocuments = repair?.documents && Array.isArray(repair.documents) && repair.documents.length > 0;
+    // Handle document type tabs
+    const handleTabChange = (event: SyntheticEvent, newValue: number) => {
+        setActiveTab(newValue);
+        setSelectedFile(null);
+    };
 
-    // Auto-select first document when component loads - with proper null checks
+    // Safely check if documents exist with optional chaining
+    const hasInitialDocuments = repair?.documents && Array.isArray(repair.documents) && repair.documents.length > 0;
+    const hasCompletionDocuments = repair?.completionDocuments && Array.isArray(repair.completionDocuments) && repair.completionDocuments.length > 0;
+    const isCompleted = repair?.repairEndDate && repair.repairEndDate !== '';
+
+    // Get current documents based on active tab
+    const currentDocuments = activeTab === 0 ? repair?.documents || [] : repair?.completionDocuments || [];
+    const hasCurrentDocuments = activeTab === 0 ? hasInitialDocuments : hasCompletionDocuments;
+
+    // Auto-select first document when tab changes or component loads
     useEffect(() => {
-        if (hasDocuments && repair?.documents && repair.documents[0]) {
-            setSelectedFile(repair.documents[0]);
+        if (hasCurrentDocuments && currentDocuments.length > 0) {
+            setSelectedFile(currentDocuments[0]);
             setIsLoading(true);
             setTimeout(() => setIsLoading(false), 800);
         }
-    }, [repair?.documents, hasDocuments]);
+    }, [activeTab, repair?.documents, repair?.completionDocuments, hasCurrentDocuments, currentDocuments]);
+
+    // Auto-select completion documents tab if no initial documents but completion docs exist
+    useEffect(() => {
+        if (!hasInitialDocuments && hasCompletionDocuments && activeTab === 0) {
+            setActiveTab(1);
+        }
+    }, [hasInitialDocuments, hasCompletionDocuments, activeTab]);
 
     const handleFilePreview = (documentPath: string) => {
         if (selectedFile === documentPath) return;
@@ -140,7 +166,8 @@ const Attachment = ({ repair, handleClose }: AttachmentProps) => {
 
     return (
         <Box sx={{
-            height: 'calc(100vh - 150px)',
+            height: '90vh',
+            maxHeight: '90vh',
             display: 'flex',
             flexDirection: 'column',
             p: { xs: 1, sm: 1.5 },
@@ -151,7 +178,7 @@ const Attachment = ({ repair, handleClose }: AttachmentProps) => {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                mb: 2,
+                mb: 1.5,
                 flexWrap: isSmall ? 'wrap' : 'nowrap',
                 gap: isSmall ? 1 : 0
             }}>
@@ -177,8 +204,8 @@ const Attachment = ({ repair, handleClose }: AttachmentProps) => {
                                 Repair Documents
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
-                                {hasDocuments
-                                    ? `${repair?.documents?.length} document${repair?.documents?.length === 1 ? '' : 's'} attached`
+                                {(hasInitialDocuments || hasCompletionDocuments)
+                                    ? `${(repair?.documents?.length || 0) + (repair?.completionDocuments?.length || 0)} document${(repair?.documents?.length || 0) + (repair?.completionDocuments?.length || 0) === 1 ? '' : 's'} total`
                                     : 'No documents attached'}
                             </Typography>
                         </Box>
@@ -215,11 +242,11 @@ const Attachment = ({ repair, handleClose }: AttachmentProps) => {
                     gap: 1.5,
                     ml: 'auto'
                 }}>
-                    {hasDocuments && (
+                    {(hasInitialDocuments || hasCompletionDocuments) && (
                         <Chip
-                            label={`${repair?.documents?.length} file${repair?.documents?.length === 1 ? '' : 's'}`}
+                            label={`${activeTab === 0 ? 'Initial' : 'Completion'} Documents (${currentDocuments.length})`}
                             size="small"
-                            color="primary"
+                            color={activeTab === 0 ? "primary" : "success"}
                             variant="outlined"
                             sx={{
                                 fontWeight: 500,
@@ -252,11 +279,59 @@ const Attachment = ({ repair, handleClose }: AttachmentProps) => {
                 </Box>
             </Box>
 
-            <Divider sx={{ mb: 2 }} />
+            {/* Document Type Tabs */}
+            {(hasInitialDocuments || hasCompletionDocuments) && (
+                <Tabs
+                    value={activeTab}
+                    onChange={handleTabChange}
+                    aria-label="document-type-tabs"
+                    variant="fullWidth"
+                    indicatorColor={activeTab === 0 ? "primary" : "secondary"}
+                    textColor={activeTab === 0 ? "primary" : "secondary"}
+                    sx={{
+                        mb: 2,
+                        '& .MuiTabs-indicator': {
+                            backgroundColor: activeTab === 0 ? theme.palette.primary.main : theme.palette.success.main,
+                        }
+                    }}
+                >
+                    <Tab
+                        icon={<RepairIcon fontSize="small" sx={{ mr: 0.8 }} />}
+                        label="Initial Documents"
+                        iconPosition="start"
+                        disabled={!hasInitialDocuments}
+                        sx={{
+                            fontWeight: 500,
+                            textTransform: 'none',
+                            color: hasInitialDocuments ? 'text.primary' : 'text.disabled'
+                        }}
+                    />
+                    <Tab
+                        icon={<CompletedIcon fontSize="small" sx={{ mr: 0.8 }} />}
+                        label="Completion Documents"
+                        iconPosition="start"
+                        disabled={!hasCompletionDocuments || !isCompleted}
+                        sx={{
+                            fontWeight: 500,
+                            textTransform: 'none',
+                            color: hasCompletionDocuments && isCompleted ? 'text.primary' : 'text.disabled',
+                            '&.Mui-selected': {
+                                color: theme.palette.success.main,
+                            }
+                        }}
+                    />
+                </Tabs>
+            )}
 
             {/* Side-by-side document list and viewer layout */}
-            <Box sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-                {!hasDocuments ? (
+            <Box sx={{
+                flexGrow: 1,
+                display: 'flex',
+                flexDirection: 'column',
+                overflow: 'hidden',
+                maxHeight: 'calc(90vh - 140px)'
+            }}>
+                {!hasCurrentDocuments ? (
                     <Paper
                         elevation={0}
                         sx={{
@@ -282,14 +357,49 @@ const Attachment = ({ repair, handleClose }: AttachmentProps) => {
                             <InfoIcon sx={{ fontSize: 28 }} />
                         </Box>
                         <Typography variant="subtitle1" fontWeight={600} color="text.primary" gutterBottom>
-                            No Documents Available
+                            No {activeTab === 0 ? 'Initial' : 'Completion'} Documents Available
                         </Typography>
                         <Typography variant="body2" color="text.secondary" align="center" sx={{ maxWidth: '80%' }}>
-                            There are no documents attached to this repair record.
+                            {activeTab === 0
+                                ? 'There are no initial documents attached to this repair record.'
+                                : 'No documents were attached when this repair was completed.'}
                         </Typography>
+
+                        {activeTab === 1 && !isCompleted && (
+                            <Chip
+                                label="Repair Not Yet Completed"
+                                color="warning"
+                                size="small"
+                                sx={{ mt: 2 }}
+                            />
+                        )}
+
+                        {activeTab === 0 && hasCompletionDocuments && (
+                            <Button
+                                variant="outlined"
+                                color="primary"
+                                size="small"
+                                onClick={() => setActiveTab(1)}
+                                sx={{ mt: 2.5, borderRadius: 1.5 }}
+                            >
+                                View Completion Documents
+                            </Button>
+                        )}
+
+                        {activeTab === 1 && hasInitialDocuments && (
+                            <Button
+                                variant="outlined"
+                                color="primary"
+                                size="small"
+                                onClick={() => setActiveTab(0)}
+                                sx={{ mt: 2.5, borderRadius: 1.5 }}
+                            >
+                                View Initial Documents
+                            </Button>
+                        )}
                     </Paper>
                 ) : (
-                    <Grid container spacing={2} sx={{ flexGrow: 1, height: 'calc(100% - 60px)' }}>
+                    <Grid container spacing={2} sx={{ flexGrow: 1, height: 'calc(100% - 10px)' }}>
                         {/* Document list - takes 40% width on desktop, full width on mobile with smaller height */}
                         <Grid item xs={12} md={5} lg={4}
                             sx={{
@@ -306,22 +416,40 @@ const Attachment = ({ repair, handleClose }: AttachmentProps) => {
                                     overflow: 'hidden',
                                     height: '100%',
                                     display: 'flex',
-                                    flexDirection: 'column'
+                                    flexDirection: 'column',
+                                    bgcolor: 'background.paper'
                                 }}
                             >
+                                {/* Document type header for mobile */}
+                                <Box sx={{
+                                    display: { xs: 'flex', sm: 'none' },
+                                    p: 1.5,
+                                    borderBottom: `1px solid ${alpha('#000', 0.08)}`,
+                                    bgcolor: alpha(activeTab === 0 ? theme.palette.primary.main : theme.palette.success.main, 0.05)
+                                }}>
+                                    <Chip
+                                        icon={activeTab === 0 ? <RepairIcon fontSize="small" /> : <CompletedIcon fontSize="small" />}
+                                        label={`${activeTab === 0 ? 'Initial' : 'Completion'} Documents (${currentDocuments.length})`}
+                                        size="small"
+                                        color={activeTab === 0 ? "primary" : "success"}
+                                        variant="outlined"
+                                        sx={{ fontWeight: 500 }}
+                                    />
+                                </Box>
+
                                 <List
                                     sx={{
                                         width: '100%',
                                         bgcolor: 'background.paper',
                                         overflow: 'auto',
                                         p: 0,
-                                        height: '100%',
+                                        flexGrow: 1,
                                         '& .MuiListItem-root': {
                                             transition: 'all 0.15s ease'
                                         }
                                     }}
                                 >
-                                    {repair?.documents?.map((document, index) => {
+                                    {currentDocuments.map((document, index) => {
                                         const fileName = document.split('/').pop() || document;
                                         const fileType = getFileType(fileName);
                                         const isSelected = selectedFile === document;
@@ -332,12 +460,14 @@ const Attachment = ({ repair, handleClose }: AttachmentProps) => {
                                                 sx={{
                                                     py: 1.5,
                                                     px: { xs: 1.5, sm: 2 },
-                                                    borderBottom: index < (repair?.documents?.length || 0) - 1 ? `1px solid ${alpha('#000', 0.08)}` : 'none',
-                                                    bgcolor: isSelected ? alpha(theme.palette.primary.main, 0.08) : 'transparent',
+                                                    borderBottom: index < currentDocuments.length - 1 ? `1px solid ${alpha('#000', 0.08)}` : 'none',
+                                                    bgcolor: isSelected
+                                                        ? alpha(activeTab === 0 ? theme.palette.primary.main : theme.palette.success.main, 0.08)
+                                                        : 'transparent',
                                                     '&:hover': {
                                                         bgcolor: isSelected
-                                                            ? alpha(theme.palette.primary.main, 0.12)
-                                                            : alpha(theme.palette.primary.main, 0.04)
+                                                            ? alpha(activeTab === 0 ? theme.palette.primary.main : theme.palette.success.main, 0.12)
+                                                            : alpha(activeTab === 0 ? theme.palette.primary.main : theme.palette.success.main, 0.04)
                                                     },
                                                     cursor: 'pointer'
                                                 }}
@@ -397,7 +527,7 @@ const Attachment = ({ repair, handleClose }: AttachmentProps) => {
                                                             <Typography
                                                                 variant="body2"
                                                                 fontWeight={isSelected ? 600 : 500}
-                                                                color={isSelected ? 'primary.main' : 'text.primary'}
+                                                                color={isSelected ? (activeTab === 0 ? 'primary.main' : 'success.main') : 'text.primary'}
                                                                 noWrap
                                                                 sx={{
                                                                     maxWidth: '70%',
@@ -504,15 +634,20 @@ const Attachment = ({ repair, handleClose }: AttachmentProps) => {
                                                 }}>
                                                     {getFileIcon(selectedFile)}
                                                 </Box>
-                                                <Typography
-                                                    variant="subtitle2"
-                                                    fontWeight={600}
-                                                    color="text.primary"
-                                                    sx={{ maxWidth: '80%' }}
-                                                    noWrap
-                                                >
-                                                    {selectedFile.split('/').pop()}
-                                                </Typography>
+                                                <Box>
+                                                    <Typography
+                                                        variant="subtitle2"
+                                                        fontWeight={600}
+                                                        color="text.primary"
+                                                        sx={{ maxWidth: '80%' }}
+                                                        noWrap
+                                                    >
+                                                        {selectedFile.split('/').pop()}
+                                                    </Typography>
+                                                    <Typography variant="caption" color="text.secondary">
+                                                        {activeTab === 0 ? 'Initial Document' : 'Completion Document'}
+                                                    </Typography>
+                                                </Box>
                                             </>
                                         )}
                                         {!selectedFile && (
@@ -578,7 +713,7 @@ const Attachment = ({ repair, handleClose }: AttachmentProps) => {
                                             zIndex: 2,
                                             bgcolor: 'rgba(255,255,255,0.8)'
                                         }}>
-                                            <CircularProgress size={40} color="primary" />
+                                            <CircularProgress size={40} color={activeTab === 0 ? "primary" : "success"} />
                                         </Box>
                                     )}
 
@@ -604,7 +739,7 @@ const Attachment = ({ repair, handleClose }: AttachmentProps) => {
                                                 No Document Selected
                                             </Typography>
                                             <Typography variant="body2" color="text.secondary" align="center">
-                                                Select a document from the list to preview it here
+                                                Select a {activeTab === 0 ? 'repair' : 'completion'} document from the list to preview it here
                                             </Typography>
                                         </Box>
                                     )}
@@ -690,6 +825,7 @@ const Attachment = ({ repair, handleClose }: AttachmentProps) => {
                                                     onClick={() => handleFileDownload(selectedFile)}
                                                     size="small"
                                                     sx={{ borderRadius: 1.5 }}
+                                                    color={activeTab === 0 ? "primary" : "success"}
                                                 >
                                                     Download to View
                                                 </Button>
@@ -744,7 +880,8 @@ const Attachment = ({ repair, handleClose }: AttachmentProps) => {
                     </Grid>
                 )}
             </Box>
-            {/* Action buttons - newly added section */}
+
+            {/* Action buttons */}
             <Divider sx={{ mt: 'auto', my: 1.5 }} />
             <Box
                 sx={{

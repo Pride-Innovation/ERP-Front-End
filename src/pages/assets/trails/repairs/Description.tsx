@@ -461,7 +461,7 @@ const Description = ({ repair, handleClose, handleViewAttachments }: Description
                             color="primary"
                             onClick={handleClose}
                             startIcon={<CloseIcon />}
-                            size="medium" // Smaller button
+                            size="medium" // Medium button
                             sx={{
                                 borderRadius: 1.5,
                                 minWidth: '120px',
