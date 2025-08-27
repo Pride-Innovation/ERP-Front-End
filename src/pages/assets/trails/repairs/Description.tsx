@@ -131,13 +131,13 @@ const Description = ({ repair, handleClose, handleViewAttachments }: Description
                                         </Typography>
                                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
                                             <Typography variant="body2" fontWeight={500} color="text.primary">
-                                                {repair.repairStartDate ? moment(repair.repairStartDate).format('MMM DD, YYYY') : 'Not specified'}
+                                                {repair?.repairStartDate ? moment(repair?.repairStartDate).format('MMM DD, YYYY') : 'Not specified'}
                                             </Typography>
                                             <Typography variant="body2" sx={{ mx: 1 }} color="text.secondary">
                                                 to
                                             </Typography>
                                             <Typography variant="body2" fontWeight={500} color={isCompleted ? "text.primary" : "text.secondary"} fontStyle={isCompleted ? "normal" : "italic"}>
-                                                {isCompleted ? moment(repair.repairEndDate).format('MMM DD, YYYY') : 'In Progress'}
+                                                {isCompleted ? moment(repair?.repairEndDate).format('MMM DD, YYYY') : 'In Progress'}
                                             </Typography>
                                         </Box>
                                     </Box>
