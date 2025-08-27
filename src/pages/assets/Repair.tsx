@@ -27,7 +27,7 @@ import {
     Button
 } from "@mui/material";
 import ButtonComponent from "../../components/forms/Button";
-import { IAssetAxiosResponse, IRepair, IRepairDetailAxiosResponse } from "./interface";
+import { IRepair, IRepairDetailAxiosResponse } from "./interface";
 import {
     Assignment as AssetIcon,
     BuildCircle as RepairIcon,

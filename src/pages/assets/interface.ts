@@ -109,6 +109,8 @@ export interface IRepairDetails {
     documents: string[];
     asset: IAsset;
     status: string;
+    completionNotes: string;
+    completionDocuments: string[];
 }
 
 export interface IRepairDetailsResponse extends IFetchDataRequest {
