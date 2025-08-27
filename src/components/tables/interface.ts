@@ -50,6 +50,7 @@ export interface ITableComponent {
     refresh?: boolean;
     filterOptions?: boolean;
     optionsfilterParams?: Record<string, any>
+    status?: boolean;
 }
 
 export interface ITableToolBar {
@@ -65,6 +66,8 @@ export interface ITableToolBar {
     exportData: boolean;
     searchAction: boolean;
     refresh?: boolean;
+    status?: boolean;
+    onStatusChange?: (status: string) => void;
 }
 
 export interface CustomToolbarWrapperProps extends GridToolbarProps {
@@ -77,6 +80,8 @@ export interface CustomToolbarWrapperProps extends GridToolbarProps {
     exportData: boolean;
     searchAction: boolean;
     refresh?: boolean;
+    status?: boolean;
+    onStatusChange?: (status: string) => void;
 }
 
 export interface ITableFilter {

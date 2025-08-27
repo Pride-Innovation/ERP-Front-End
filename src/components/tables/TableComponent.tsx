@@ -57,7 +57,8 @@ const TableComponent = ({
     params,
     refresh = false,
     filterOptions = false,
-    optionsfilterParams
+    optionsfilterParams,
+    status = false
 }: ITableComponent) => {
     const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
     const [currentOptions, setCurrentOptions] = useState<any[]>([]);
@@ -200,6 +201,12 @@ const TableComponent = ({
                                 onCreationHandler={() => onCreationHandler?.()}
                                 module={module as string}
                                 refresh={refresh}
+                                status={true} // Enable status filter
+                                onStatusChange={(status) => {
+                                    // Handle status change here, e.g., update your filter params
+                                    console.log("Status changed to:", status);
+                                    // You might want to trigger a refresh of your data with the new status filter
+                                }}
                             />)
                     }}
                     autoHeight

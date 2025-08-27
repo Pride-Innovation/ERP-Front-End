@@ -9,13 +9,47 @@ import {
     GridToolbarContainer,
 } from '@mui/x-data-grid';
 import ButtonComponent from '../forms/Button';
-import { alpha, Box, Stack, TextField, useTheme } from '@mui/material';
+import {
+    alpha,
+    Box,
+    Stack,
+    TextField,
+    useTheme,
+    FormControl,
+    InputLabel,
+    Select,
+    MenuItem,
+    SelectChangeEvent,
+    styled
+} from '@mui/material';
 import { TypographyComponent } from '../headers/TypographyComponent';
 import { CustomToolbarWrapperProps, ITableToolBar } from './interface';
 import FileUploadButton from '../forms/FileUploadButton';
 import CustomGridToolbarExport from './CustomGridToolbarExport';
-import { useContext, useEffect } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { FileContext } from '../../context/file/FileContext';
+import FilterAltIcon from '@mui/icons-material/FilterAlt';
+
+// Styled Select component to match design system
+const StyledFormControl = styled(FormControl)(({ theme }) => ({
+    minWidth: 160,
+    '& .MuiInputBase-root': {
+        borderRadius: 4,
+        backgroundColor: alpha('#fff', 0.9),
+        transition: 'all 0.2s ease',
+        '&:hover': {
+            backgroundColor: '#fff',
+            boxShadow: `0 1px 4px ${alpha('#000', 0.07)}`
+        }
+    },
+    '& .MuiOutlinedInput-notchedOutline': {
+        borderColor: alpha('#000', 0.12),
+    },
+    '& .MuiSelect-select': {
+        paddingTop: 8,
+        paddingBottom: 8,
+    }
+}));
 
 const TableToolBar = ({
     header,
@@ -25,18 +59,138 @@ const TableToolBar = ({
     exportData,
     createAction,
     searchAction,
-    refresh
+    refresh,
+    status = false,
+    onStatusChange
 }: ITableToolBar) => {
     const { setFileName } = useContext(FileContext);
+    const [statusFilter, setStatusFilter] = useState<string>('all');
     useEffect(() => { setFileName(module) }, [module]);
     const theme = useTheme();
 
+    const handleStatusChange = (event: SelectChangeEvent) => {
+        const newStatus = event.target.value;
+        setStatusFilter(newStatus);
+        if (onStatusChange) {
+            onStatusChange(newStatus);
+        }
+    };
+
     return (
         <GridToolbarContainer
-            sx={{ width: '100%', display: 'flex', p: '20px', bgcolor: alpha(theme.palette.primary.main, 0.1) }}>
-            <TypographyComponent size='17px' color="#BC892C" weight={600} sx={{ textTransform: "uppercase" }}>{header.plural}</TypographyComponent>
-            <Stack direction="row" spacing={2} sx={{ ml: "auto" }}>
-                {searchAction && <TextField size='small' placeholder="Search" variant='outlined' sx={{ color: theme.palette.success.main }} />}
+            sx={{
+                width: '100%',
+                display: 'flex',
+                p: '20px',
+                bgcolor: alpha(theme.palette.primary.main, 0.1),
+                flexDirection: { xs: 'column', sm: 'row' },
+                gap: { xs: 2, sm: 0 }
+            }}>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <TypographyComponent
+                    size='17px'
+                    color="#BC892C"
+                    weight={600}
+                    sx={{
+                        textTransform: "uppercase",
+                        mr: 2
+                    }}
+                >
+                    {header.plural}
+                </TypographyComponent>
+
+                {status && (
+                    <StyledFormControl size="small">
+
+                        <Select
+                            labelId="status-filter-label"
+                            value={statusFilter}
+                            onChange={handleStatusChange}
+                            sx={{
+                                minHeight: 36,
+                                '& .MuiSelect-select': {
+                                    display: 'flex',
+                                    alignItems: 'center'
+                                }
+                            }}
+                        >
+                            <MenuItem value="all">All Status</MenuItem>
+                            <MenuItem value="pending">
+                                <Box
+                                    component="span"
+                                    sx={{
+                                        display: 'flex',
+                                        alignItems: 'center'
+                                    }}
+                                >
+                                    <Box
+                                        component="span"
+                                        sx={{
+                                            display: 'inline-block',
+                                            width: 8,
+                                            height: 8,
+                                            borderRadius: '50%',
+                                            bgcolor: theme.palette.warning.main,
+                                            mr: 1
+                                        }}
+                                    />
+                                    Pending
+                                </Box>
+                            </MenuItem>
+                            <MenuItem value="completed">
+                                <Box
+                                    component="span"
+                                    sx={{
+                                        display: 'flex',
+                                        alignItems: 'center'
+                                    }}
+                                >
+                                    <Box
+                                        component="span"
+                                        sx={{
+                                            display: 'inline-block',
+                                            width: 8,
+                                            height: 8,
+                                            borderRadius: '50%',
+                                            bgcolor: theme.palette.success.main,
+                                            mr: 1
+                                        }}
+                                    />
+                                    Completed
+                                </Box>
+                            </MenuItem>
+                        </Select>
+                    </StyledFormControl>
+                )}
+            </Box>
+
+            <Stack
+                direction={{ xs: 'column', sm: 'row' }}
+                spacing={2}
+                sx={{
+                    ml: { xs: 0, sm: 'auto' },
+                    width: { xs: '100%', sm: 'auto' }
+                }}
+            >
+                {searchAction &&
+                    <TextField
+                        size='small'
+                        placeholder="Search"
+                        variant='outlined'
+                        InputProps={{
+                            sx: {
+                                borderRadius: 1,
+                                backgroundColor: alpha('#fff', 0.9),
+                                '&:hover': {
+                                    backgroundColor: '#fff',
+                                    boxShadow: `0 1px 4px ${alpha('#000', 0.07)}`
+                                },
+                                minHeight: 36
+                            }
+                        }}
+                    />
+                }
+
                 {refresh &&
                     <Box>
                         <ButtonComponent
@@ -49,18 +203,26 @@ const TableToolBar = ({
                         />
                     </Box>
                 }
-                {createAction && <Box>
-                    <ButtonComponent
-                        handleClick={() => onCreationHandler()}
-                        sendingRequest={false}
-                        buttonText={`Create ${header.singular} `}
-                        variant='contained'
-                        buttonColor='success'
-                        type='button' />
-                </Box>}
-                {importData && <Box>
-                    <FileUploadButton title={header.plural} module={module} />
-                </Box>}
+
+                {createAction &&
+                    <Box sx={{ width: { xs: '100%', sm: 'auto' } }}>
+                        <ButtonComponent
+                            handleClick={() => onCreationHandler()}
+                            sendingRequest={false}
+                            buttonText={`Create ${header.singular} `}
+                            variant='contained'
+                            buttonColor='success'
+                            type='button'
+                        />
+                    </Box>
+                }
+
+                {importData &&
+                    <Box>
+                        <FileUploadButton title={header.plural} module={module} />
+                    </Box>
+                }
+
                 {exportData && <CustomGridToolbarExport />}
             </Stack>
         </GridToolbarContainer>
@@ -76,6 +238,8 @@ const CustomToolbarWrapper: React.FC<CustomToolbarWrapperProps> = ({
     onCreationHandler,
     module,
     refresh,
+    status = false,
+    onStatusChange,
     ...props
 }) => {
     return (
@@ -87,6 +251,8 @@ const CustomToolbarWrapper: React.FC<CustomToolbarWrapperProps> = ({
             searchAction={searchAction}
             onCreationHandler={onCreationHandler}
             module={module}
+            status={status}
+            onStatusChange={onStatusChange}
             {...props}
             refresh={refresh}
         />
