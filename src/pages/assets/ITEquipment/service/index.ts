@@ -115,7 +115,14 @@ const removeITEquipmentImageService = async (id: string | number) => {
     }
 }
 
-
+const sendAssetToStoreService = async (id: number) => {
+    try {
+        const response = await axiosInstance.put(`assets/store/${id}`);
+        return response;
+    } catch (error) {
+        return error;
+    }
+}
 
 
 
@@ -129,5 +136,6 @@ export {
     completeRepairAssetService,
     repairAssetService,
     updateITEquipmentImageService,
-    removeITEquipmentImageService
+    removeITEquipmentImageService,
+    sendAssetToStoreService
 }

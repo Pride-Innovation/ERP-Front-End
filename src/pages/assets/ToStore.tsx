@@ -18,23 +18,41 @@ import {
     alpha
 } from "@mui/material";
 import ButtonComponent from "../../components/forms/Button";
-import { IToStore } from "./interface";
+import { IAssetAxiosResponse, IToStore } from "./interface";
 import {
     Assignment as AssetIcon,
     Store as StoreIcon,
     Fingerprint as FingerprintIcon,
     LocalShipping as ShippingIcon
 } from '@mui/icons-material';
-import { crudStates } from "../../utils/constants";
+import { toast } from "react-toastify";
+import { sendAssetToStoreService } from "./ITEquipment/service";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "../../store";
+import { updateITAsset } from "./ITEquipment/slice";
 
 const ToStore = ({
     handleClose,
     sendingRequest,
-    handleClickAction,
     buttonText,
     asset
 }: IToStore) => {
     const theme = useTheme();
+    const dispatch = useDispatch<AppDispatch>();
+
+    const handleSendingAssetToStore = async () => {
+        try {
+            const response = await sendAssetToStoreService(asset?.id as number) as IAssetAxiosResponse;
+            if (response.status === 201) {
+                dispatch(updateITAsset(response.data));
+                toast.success("Asset sent to store successfully");
+            }
+        } catch (error) {
+            console.error("Error sending asset to store:", error);
+        } finally {
+            handleClose();
+        }
+    };
 
     return (
         <Card
@@ -63,7 +81,6 @@ const ToStore = ({
 
             <CardContent sx={{ p: 3 }}>
                 <Grid container spacing={3}>
-                    {/* Asset Information Section */}
                     <Grid item xs={12}>
                         <Paper
                             elevation={0}
@@ -175,7 +192,6 @@ const ToStore = ({
                     </Grid>
                 </Grid>
 
-                {/* Action Buttons */}
                 <Divider sx={{ my: 3 }} />
 
                 <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
@@ -192,9 +208,8 @@ const ToStore = ({
                             buttonColor='success'
                             type='submit'
                             sendingRequest={sendingRequest}
-                            handleClick={() => handleClickAction?.(crudStates.delete, asset?.id as string)}
+                            handleClick={handleSendingAssetToStore}
                             buttonText={buttonText}
-                            // startIcon={<StoreIcon />}
                         />
                     </Stack>
                 </Box>

@@ -48,10 +48,7 @@ import { Dayjs } from 'dayjs';
 import LaptopIcon from '@mui/icons-material/Laptop';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import SettingsIcon from '@mui/icons-material/Settings';
-// import { updateITAsset } from "./ITEquipment/slice";
 import { toast } from "react-toastify";
-// import { AppDispatch } from "../../store";
-// import { useDispatch } from "react-redux";
 import { repairAssetService } from "./ITEquipment/service";
 
 const Repair = ({
@@ -64,7 +61,6 @@ const Repair = ({
     const [repairDate, setRepairDate] = useState<Dayjs | null>(null);
     const [repairReason, setRepairReason] = useState("");
     const [technician, setTechnician] = useState("");
-    // const dispatch = useDispatch<AppDispatch>();
 
     const [files, setFiles] = useState<File[]>([]);
     const [isDragging, setIsDragging] = useState(false);
@@ -124,12 +120,6 @@ const Repair = ({
 
     const handleAssetRepair = async () => {
 
-        console.log(
-            repairDate,
-            repairReason,
-            technician,
-            files
-        )
         const payload = new FormData();
         payload.append('repairStartDate', repairDate ? repairDate.format('YYYY-MM-DDTHH:mm:ss') : '');
         payload.append('repairEndDate', repairDate ? repairDate.format('YYYY-MM-DDTHH:mm:ss') : '');
@@ -146,7 +136,6 @@ const Repair = ({
             const response = await repairAssetService(asset?.id as number, payload) as IRepairDetailAxiosResponse;
             if (response.status === 201) {
                 toast.success("Asset repaired successfully");
-                // dispatch(updateITAsset(response.data));
             }
         } catch (error) {
             console.error("Error repairing asset:", error);
