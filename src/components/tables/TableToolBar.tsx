@@ -16,7 +16,6 @@ import {
     TextField,
     useTheme,
     FormControl,
-    InputLabel,
     Select,
     MenuItem,
     SelectChangeEvent,
@@ -28,7 +27,6 @@ import FileUploadButton from '../forms/FileUploadButton';
 import CustomGridToolbarExport from './CustomGridToolbarExport';
 import { useContext, useEffect, useState } from 'react';
 import { FileContext } from '../../context/file/FileContext';
-import FilterAltIcon from '@mui/icons-material/FilterAlt';
 
 // Styled Select component to match design system
 const StyledFormControl = styled(FormControl)(({ theme }) => ({
@@ -115,7 +113,7 @@ const TableToolBar = ({
                             }}
                         >
                             <MenuItem value="all">All Status</MenuItem>
-                            <MenuItem value="pending">
+                            <MenuItem value="requireUpdate">
                                 <Box
                                     component="span"
                                     sx={{
@@ -134,7 +132,7 @@ const TableToolBar = ({
                                             mr: 1
                                         }}
                                     />
-                                    Pending
+                                    Require Update
                                 </Box>
                             </MenuItem>
                             <MenuItem value="completed">

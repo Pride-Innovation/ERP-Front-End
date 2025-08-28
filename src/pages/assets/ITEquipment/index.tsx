@@ -50,9 +50,12 @@ const ITEquipment = () => {
         currentState
     } = ITEquipmentUtills();
 
-    const fetchResources = async () => {
+    const fetchResources = async (status?: number) => {
         setLoading(true)
-        const params = { assetTypeId: currentAssetType.id }
+        const params = {
+            assetTypeId: currentAssetType.id,
+            assetStatusId: status
+        }
 
         try {
             const response = await fetchRowsService({
@@ -91,6 +94,14 @@ const ITEquipment = () => {
             handleRequest(itAssets)
         }
     }, [itAssets])
+
+    const handleStatusChange = (status: string) => {
+        if (status === 'requireUpdate') {
+            fetchResources(9);
+        } else {
+            fetchResources();
+        }
+    }
 
 
     return (
@@ -161,6 +172,8 @@ const ITEquipment = () => {
                     params={{ assetTypeId: currentAssetType.id }}
                     refresh
                     filterMode="server"
+                    status={true}
+                    onStatusChange={handleStatusChange}
                 />
             </Grid>
         </>

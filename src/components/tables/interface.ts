@@ -51,6 +51,7 @@ export interface ITableComponent {
     filterOptions?: boolean;
     optionsfilterParams?: Record<string, any>
     status?: boolean;
+    onStatusChange?: (status: string) => void;
 }
 
 export interface ITableToolBar {

@@ -37,6 +37,7 @@ import MailOutlineIcon from '@mui/icons-material/MailOutline';
 import NoAccountsIcon from '@mui/icons-material/NoAccounts';
 import HowToRegOutlinedIcon from '@mui/icons-material/HowToRegOutlined';
 import TableUtills from './utills';
+import { on } from 'events';
 
 const TableComponent = ({
     columnHeaders,
@@ -58,7 +59,8 @@ const TableComponent = ({
     refresh = false,
     filterOptions = false,
     optionsfilterParams,
-    status = false
+    status = false,
+    onStatusChange
 }: ITableComponent) => {
     const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
     const [currentOptions, setCurrentOptions] = useState<any[]>([]);
@@ -201,11 +203,9 @@ const TableComponent = ({
                                 onCreationHandler={() => onCreationHandler?.()}
                                 module={module as string}
                                 refresh={refresh}
-                                status={true} // Enable status filter
+                                status={status}
                                 onStatusChange={(status) => {
-                                    // Handle status change here, e.g., update your filter params
-                                    console.log("Status changed to:", status);
-                                    // You might want to trigger a refresh of your data with the new status filter
+                                    onStatusChange?.(status);
                                 }}
                             />)
                     }}
