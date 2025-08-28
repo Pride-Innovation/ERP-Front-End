@@ -59,7 +59,7 @@ const TableToolBar = ({
     refresh,
     status = false,
     onStatusChange,
-    selectedStatus = 'all'
+    selectedStatus = 'all',
 }: ITableToolBar) => {
     const { setFileName } = useContext(FileContext);
     const [statusFilter, setStatusFilter] = useState<string>(selectedStatus);

@@ -13,7 +13,7 @@ import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import { IOptions, ITableHeader } from "../../../components/tables/interface";
 import { getTableHeaders } from "../../../components/tables/getTableHeaders";
 import { IFormData } from "../interface";
-import { IITEquipment, IITEquipmentTableData } from "./interface";
+import { IBulkAssetData, IITEquipment, IITEquipmentTableData } from "./interface";
 import { itEquipmentMock } from "../../../mocks/itEquipment";
 import { assetTypesStatusConstants, crudStates, unitsOfMeasure } from "../../../utils/constants";
 import { useNavigate } from "react-router";
@@ -26,6 +26,9 @@ import AssetUtills from "../Utills";
 import AssignmentIndOutlinedIcon from '@mui/icons-material/AssignmentIndOutlined';
 import BuildOutlinedIcon from '@mui/icons-material/BuildOutlined';
 import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
+import { Form } from "react-router-dom";
+import { bulkInsertITAssetsService } from "./service";
+import { toast } from "react-toastify";
 
 const ITEquipmentUtills = () => {
     const endPoint = 'assets';

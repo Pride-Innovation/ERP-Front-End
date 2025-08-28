@@ -33,7 +33,6 @@ export interface ITableComponent {
     columnHeaders: Array<ITableHeader>;
     rows: GridRowsProp;
     onCreationHandler?: () => void;
-    // onImportHandler?: () => void;
     module?: string;
     header: { plural: string; singular: string };
     handleOptionClicked?: (option: number | string, moduleID?: string | number) => void;
@@ -61,7 +60,6 @@ export interface ITableToolBar {
         singular: string
     },
     onCreationHandler: () => void;
-    // onImportHandler: (file: string) => void;
     module: string;
     createAction: boolean;
     importData: boolean;
@@ -76,7 +74,6 @@ export interface ITableToolBar {
 export interface CustomToolbarWrapperProps extends GridToolbarProps {
     header: { plural: string; singular: string };
     onCreationHandler: () => void;
-    // onImportHandler: (file: string) => void;
     module: string;
     createAction: boolean;
     importData: boolean;

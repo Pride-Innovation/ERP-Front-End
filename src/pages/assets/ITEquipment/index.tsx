@@ -15,7 +15,7 @@ import { useContext, useEffect, useState } from "react"
 import { ROUTES } from "../../../core/routes/routes"
 import { ErrorMessage } from "../../../core/apis/axiosInstance"
 import { fetchRowsService } from "../../../core/apis/globalService"
-import { IITEquipmentsAxiosResponse } from "./interface"
+import { IBulkAssetData, IITEquipmentsAxiosResponse } from "./interface"
 import { useDispatch } from "react-redux"
 import { AppDispatch, RootState } from "../../../store"
 import { loadAllITAssets } from "./slice"
@@ -26,6 +26,9 @@ import { crudStates } from "../../../utils/constants"
 import Repair from "../Repair"
 import Reassign from "../Reassign"
 import ToStore from "../ToStore"
+import { FileContext } from "../../../context/file/FileContext"
+import { toast } from "react-toastify"
+import { bulkInsertITAssetsService } from "./service"
 
 const ITEquipment = () => {
     const [loading, setLoading] = useState<boolean>(false);
@@ -36,6 +39,7 @@ const ITEquipment = () => {
     const { setItEquipmentCount, itEquipmentCount } = useContext(AssetContext);
     const { currentAssetType, setCurrentAssetType } = AssetUtills()
     const [selectedStatus, setSelectedStatus] = useState<string>('all');
+    const { fileData } = useContext(FileContext);
 
     const {
         open,
@@ -49,7 +53,7 @@ const ITEquipment = () => {
         handleRequest,
         iTEquipmentTableData,
         determineITAssetType,
-        currentState
+        currentState,
     } = ITEquipmentUtills();
 
     const fetchResources = async (status?: string) => {
@@ -108,6 +112,29 @@ const ITEquipment = () => {
         }
     }
 
+    const bulkInsertITAssets = async (assets: Array<IBulkAssetData>) => {
+        try {
+            const data = new FormData();
+            data.append("assets", JSON.stringify(assets));
+            data.append("assetTypeID", String(2));
+
+            const response = await bulkInsertITAssetsService(data);
+
+            if (response.success === true) {
+                toast.success("Bulk Insert Successful")
+                fetchResources('all');
+            }
+
+        } catch (error) {
+            console.log("Bulk Insert Error", error);
+        }
+    }
+
+    useEffect(() => {
+        if (fileData?.jsonData?.length > 0 && fileData?.module === module) {
+            bulkInsertITAssets(fileData.jsonData as unknown as Array<IBulkAssetData>);
+        }
+    }, [fileData]);
 
     return (
         <>
@@ -177,7 +204,7 @@ const ITEquipment = () => {
                     params={{ assetTypeId: currentAssetType.id }}
                     refresh
                     filterMode="server"
-                    status={true}
+                    status
                     onStatusChange={handleStatusChange}
                     selectedStatus={selectedStatus}
                 />

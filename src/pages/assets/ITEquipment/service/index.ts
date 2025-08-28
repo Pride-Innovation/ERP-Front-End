@@ -104,11 +104,7 @@ const updateITEquipmentImageService = async (id: string | number, body: object) 
 
 const removeITEquipmentImageService = async (id: string | number) => {
     try {
-        const response = await axiosInstance.put(`assets/remove/image/${id}`, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-            }
-        });
+        const response = await axiosInstance.put(`assets/remove/image/${id}`);
         return response;
     } catch (error) {
         return error;
@@ -125,6 +121,19 @@ const sendAssetToStoreService = async (id: number) => {
 }
 
 
+const bulkInsertITAssetsService = async (data: object) => {
+    try {
+        const response = await axiosInstance.post(`assets/bulk-insert`, data, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            }
+        });
+        return response.data;
+    } catch (error) {
+        return error;
+    }
+}
+
 
 export {
     createITEquipmentService,
@@ -137,5 +146,6 @@ export {
     repairAssetService,
     updateITEquipmentImageService,
     removeITEquipmentImageService,
-    sendAssetToStoreService
+    sendAssetToStoreService,
+    bulkInsertITAssetsService
 }

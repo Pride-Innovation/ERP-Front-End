@@ -179,3 +179,14 @@ export interface IFormSection {
     icon: ReactNode;
     fields: Array<IFormData<IITEquipment>>;
 }
+
+export interface IBulkAssetData {
+    "No.": number;
+    "Product Name": string;
+    "Asset Tag": string;
+    "Asset Serial No.": string;
+    "Model": string;
+    "USER": string;
+    "LOCATION": string;
+    "DATE OF PM/Verification": number;
+}

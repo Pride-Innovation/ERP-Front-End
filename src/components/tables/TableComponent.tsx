@@ -61,7 +61,7 @@ const TableComponent = ({
     optionsfilterParams,
     status = false,
     onStatusChange,
-    selectedStatus = 'all'
+    selectedStatus = 'all',
 }: ITableComponent) => {
     const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
     const [currentOptions, setCurrentOptions] = useState<any[]>([]);
