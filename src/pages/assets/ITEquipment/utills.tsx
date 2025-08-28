@@ -134,7 +134,8 @@ const ITEquipmentUtills = () => {
         image,
         purchaseCost,
         costOfTheAsset,
-        serialNumber,
+        // serialNumber,
+        make,
         ...data
     } = itEquipmentMock[0];
 
@@ -187,7 +188,8 @@ const ITEquipmentUtills = () => {
                 stock,
                 commodity,
                 dateReceipt,
-                serialNumber,
+                // serialNumber,
+                make,
                 image,
                 ...fielsdata
             } = list[index];
@@ -198,11 +200,11 @@ const ITEquipmentUtills = () => {
                     assetName: item.assetName,
                     engravedNumber: item.engravedNumber,
                     dateReceived: moment(item.dateReceipt).format('Do MMMM YYYY'),
-                    make: item.make,
+                    // make: item.make,
                     // purchaseCost: item.purchaseCost,
                     // costOfAsset: item.costOfTheAsset,
+                    serialNumber: item.serialNumber as string,
                     model: item.model as string,
-                    // serialNumber: item.serialNumber as string,
                     status: item?.assetStatus?.status as string,
                     assignedTo: item.assignedTo?.firstName ? `${item.assignedTo?.lastName} ${item.assignedTo?.firstName}` : "",
                     location: item.branch?.name as string
@@ -387,7 +389,8 @@ const ITEquipmentUtills = () => {
             label: 'LPO Number',
             type: "autocomplete",
             options: optionsObject.inventoryOptions,
-            disabled: true
+            disabled: true,
+            required: false,
         }
     ]
 

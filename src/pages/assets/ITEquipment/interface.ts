@@ -161,7 +161,7 @@ export interface IITEquipmentTableData {
     assetName: string;
     engravedNumber?: string | null;
     dateReceived: string;
-    make: string | null;
+    make?: string | null;
     purchaseCost?: string;
     costOfAsset?: string;
     model?: string;
