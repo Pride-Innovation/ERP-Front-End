@@ -28,7 +28,6 @@ import CustomGridToolbarExport from './CustomGridToolbarExport';
 import { useContext, useEffect, useState } from 'react';
 import { FileContext } from '../../context/file/FileContext';
 
-// Styled Select component to match design system
 const StyledFormControl = styled(FormControl)(({ theme }) => ({
     minWidth: 160,
     '& .MuiInputBase-root': {
@@ -59,19 +58,18 @@ const TableToolBar = ({
     searchAction,
     refresh,
     status = false,
-    onStatusChange
+    onStatusChange,
+    selectedStatus = 'all'
 }: ITableToolBar) => {
     const { setFileName } = useContext(FileContext);
-    const [statusFilter, setStatusFilter] = useState<string>('all');
+    const [statusFilter, setStatusFilter] = useState<string>(selectedStatus);
     useEffect(() => { setFileName(module) }, [module]);
     const theme = useTheme();
 
     const handleStatusChange = (event: SelectChangeEvent) => {
         const newStatus = event.target.value;
         setStatusFilter(newStatus);
-        if (onStatusChange) {
-            onStatusChange(newStatus);
-        }
+        onStatusChange?.(newStatus);
     };
 
     return (
@@ -135,7 +133,7 @@ const TableToolBar = ({
                                     Require Update
                                 </Box>
                             </MenuItem>
-                            <MenuItem value="completed">
+                            <MenuItem value="issuanceAvailable">
                                 <Box
                                     component="span"
                                     sx={{
@@ -154,7 +152,7 @@ const TableToolBar = ({
                                             mr: 1
                                         }}
                                     />
-                                    Completed
+                                    Issuance Available
                                 </Box>
                             </MenuItem>
                         </Select>
@@ -238,6 +236,7 @@ const CustomToolbarWrapper: React.FC<CustomToolbarWrapperProps> = ({
     refresh,
     status = false,
     onStatusChange,
+    selectedStatus,
     ...props
 }) => {
     return (
@@ -253,6 +252,7 @@ const CustomToolbarWrapper: React.FC<CustomToolbarWrapperProps> = ({
             onStatusChange={onStatusChange}
             {...props}
             refresh={refresh}
+            selectedStatus={selectedStatus}
         />
     );
 };

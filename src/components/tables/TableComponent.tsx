@@ -37,7 +37,7 @@ import MailOutlineIcon from '@mui/icons-material/MailOutline';
 import NoAccountsIcon from '@mui/icons-material/NoAccounts';
 import HowToRegOutlinedIcon from '@mui/icons-material/HowToRegOutlined';
 import TableUtills from './utills';
-import { on } from 'events';
+
 
 const TableComponent = ({
     columnHeaders,
@@ -60,7 +60,8 @@ const TableComponent = ({
     filterOptions = false,
     optionsfilterParams,
     status = false,
-    onStatusChange
+    onStatusChange,
+    selectedStatus = 'all'
 }: ITableComponent) => {
     const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
     const [currentOptions, setCurrentOptions] = useState<any[]>([]);
@@ -204,6 +205,7 @@ const TableComponent = ({
                                 module={module as string}
                                 refresh={refresh}
                                 status={status}
+                                selectedStatus={selectedStatus}
                                 onStatusChange={(status) => {
                                     onStatusChange?.(status);
                                 }}

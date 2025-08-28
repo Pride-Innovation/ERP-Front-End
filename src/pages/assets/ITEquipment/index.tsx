@@ -35,6 +35,8 @@ const ITEquipment = () => {
     const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore);
     const { setItEquipmentCount, itEquipmentCount } = useContext(AssetContext);
     const { currentAssetType, setCurrentAssetType } = AssetUtills()
+    const [selectedStatus, setSelectedStatus] = useState<string>('all');
+
     const {
         open,
         handleClose,
@@ -50,11 +52,12 @@ const ITEquipment = () => {
         currentState
     } = ITEquipmentUtills();
 
-    const fetchResources = async (status?: number) => {
-        setLoading(true)
+    const fetchResources = async (status?: string) => {
+        setLoading(true);
         const params = {
             assetTypeId: currentAssetType.id,
-            assetStatusId: status
+            assetStatusId: status === 'requireUpdate' ? 9 :
+                status === 'issuanceAvailable' ? 8 : null
         }
 
         try {
@@ -91,15 +94,17 @@ const ITEquipment = () => {
 
     useEffect(() => {
         if (itAssets.length > 0) {
-            handleRequest(itAssets)
+            handleRequest(itAssets);
         }
     }, [itAssets])
 
     const handleStatusChange = (status: string) => {
-        if (status === 'requireUpdate') {
-            fetchResources(9);
+        if (status === 'requireUpdate' || status === 'issuanceAvailable') {
+            fetchResources(status);
+            setSelectedStatus(status);
         } else {
-            fetchResources();
+            fetchResources('all');
+            setSelectedStatus('all');
         }
     }
 
@@ -174,6 +179,7 @@ const ITEquipment = () => {
                     filterMode="server"
                     status={true}
                     onStatusChange={handleStatusChange}
+                    selectedStatus={selectedStatus}
                 />
             </Grid>
         </>
