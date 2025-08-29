@@ -84,6 +84,15 @@ const removeOfficeEquipmentImageService = async (id: string | number) => {
     }
 }
 
+const reassignOfficeEquipmentService = async (id: string | number, body: object) => {
+    try {
+        const response = await axiosInstance.post(`assets/reassign/${id}`, body);
+        return response;
+    } catch (error) {
+        return error;
+    }
+}
+
 export {
     createOfficeEquipmentService,
     deleteOfficeEquipmentService,
@@ -92,5 +101,6 @@ export {
     listRepairDetailService,
     disposeOfficeEquipmentService,
     updateOfficeEquipmentImageService,
-    removeOfficeEquipmentImageService
+    removeOfficeEquipmentImageService,
+    reassignOfficeEquipmentService
 }

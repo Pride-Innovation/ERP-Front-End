@@ -34,12 +34,16 @@ import { loadUsers } from "../users/slice";
 import { reassignITEquipmentService } from "./ITEquipment/service";
 import { updateITAsset } from "./ITEquipment/slice";
 import { toast } from "react-toastify";
+import { assetTypesStatusConstants } from "../../utils/constants";
+import { reassignOfficeEquipmentService } from "./officeEquipment/service";
+import { updateOfficeAsset } from "./officeEquipment/slice";
 
 const Reassign = ({
     handleClose,
     sendingRequest,
     buttonText,
-    asset
+    asset,
+    module
 }: IReassign) => {
     const theme = useTheme();
     const [open, setOpen] = useState(false);
@@ -115,13 +119,21 @@ const Reassign = ({
 
     const reassignAsset = async () => {
         try {
-            const response = await reassignITEquipmentService(
-                asset?.id as number,
-                { assignedTo: selectedUser?.value }
-            ) as IAssetAxiosResponse;
+            const response = module === assetTypesStatusConstants.itEquipment
+                ? await reassignITEquipmentService(
+                    asset?.id as number,
+                    { assignedTo: selectedUser?.value }
+                ) as IAssetAxiosResponse
+                : await reassignOfficeEquipmentService(
+                    asset?.id as number,
+                    { assignedTo: selectedUser?.value }
+                ) as IAssetAxiosResponse;
+
             if (response.status === 201) {
                 toast.success("Asset reassigned successfully");
-                dispatch(updateITAsset(response.data));
+                module === assetTypesStatusConstants.itEquipment
+                    ? dispatch(updateITAsset(response.data))
+                    : dispatch(updateOfficeAsset(response.data));
             }
         } catch (error) {
             console.error("Error reassigning asset:", error);

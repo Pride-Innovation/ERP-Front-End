@@ -168,6 +168,7 @@ const ITEquipment = () => {
                         handleClose={handleClose}
                         buttonText='Confirm'
                         asset={currentAsset}
+                        module={assetTypesStatusConstants.itEquipment}
                     />
                 </ModalComponent>
             }

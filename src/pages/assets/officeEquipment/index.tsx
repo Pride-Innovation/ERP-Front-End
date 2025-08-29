@@ -25,7 +25,7 @@ import { IOfficeEquipmentsAxiosResponse } from "./interface";
 import { loadAllOfficeAssets } from "./slice";
 import { useSelector } from "react-redux";
 import { AssetContext } from "../../../context/asset";
-import { crudStates } from "../../../utils/constants";
+import { assetTypesStatusConstants, crudStates } from "../../../utils/constants";
 import Reassign from "../Reassign";
 import Repair from "../Repair";
 import ToStore from "../ToStore";
@@ -107,6 +107,7 @@ const OfficeEquipment = () => {
                         handleClose={handleClose}
                         buttonText='Confirm'
                         asset={currentAsset}
+                        module={assetTypesStatusConstants.officeEquipment}
                     />
                 </ModalComponent>
             }
@@ -119,6 +120,7 @@ const OfficeEquipment = () => {
                         handleClose={handleClose}
                         buttonText='Confirm'
                         asset={currentAsset}
+                        module={assetTypesStatusConstants.officeEquipment}
                     />
                 </ModalComponent>
             }
