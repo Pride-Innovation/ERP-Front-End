@@ -156,6 +156,24 @@ const AssetUtills = () => {
         setLoading(false)
     }
 
+
+    const determineStatusId = (status: string) => {
+        switch (status) {
+            case 'requireUpdate':
+                return 9;
+            case 'issuanceAvailable':
+                return 8;
+            case 'receiptAcknowledged':
+                return 7;
+            case 'inStore':
+                return 12;
+            case 'inMaintenance':
+                return 13;
+            default:
+                return null;
+        }
+    }
+
     return ({
         determineAssetTypeByAssetName,
         currentAssetType,
@@ -165,7 +183,8 @@ const AssetUtills = () => {
         searchUserByName,
         searchBranchByName,
         searchSupplierByName,
-        fetchAllAssets
+        fetchAllAssets,
+        determineStatusId
     })
 }
 

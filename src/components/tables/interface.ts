@@ -98,6 +98,7 @@ export interface ICustomTableFilterOperator {
 export interface ICustomTablePagination {
     endPoint: string;
     params?: Record<string, any>
+    selectedStatus?: string;
 }
 
 export type IhandleTablePagination = IUsersAxiosResponse | IRequestsAxiosResponse;

@@ -87,7 +87,7 @@ const TableComponent = ({
     };
 
     const { handleTableFilter } = CustomTextFilterOperator({ endPoint, params });
-    const { handleTablePagination } = CustomTablePagination({ endPoint, params });
+    const { handleTablePagination } = CustomTablePagination({ endPoint, params, selectedStatus });
 
     const columns: GridColDef[] = columnHeaders.map((column) => ({
         field: `${column.label}`,

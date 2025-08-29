@@ -23,9 +23,9 @@ import { useContext } from "react";
 import { AssetContext } from "../../context/asset";
 
 
-const CustomTablePagination = ({ endPoint, params }: ICustomTablePagination) => {
+const CustomTablePagination = ({ endPoint, params, selectedStatus }: ICustomTablePagination) => {
     const dispatch = useDispatch<AppDispatch>();
-    const { determineAssetTypeState } = AssetUtills()
+    const { determineAssetTypeState, determineStatusId } = AssetUtills()
     const { fieldName, fieldText } = useContext(AssetContext);
 
     const handleReduxStoreUpdate = (
@@ -73,7 +73,10 @@ const CustomTablePagination = ({ endPoint, params }: ICustomTablePagination) => 
                 pageNumber: model.page,
                 pageSize: model.pageSize,
                 endPoint,
-                params: requestParams
+                params: selectedStatus ? {
+                    ...requestParams,
+                    assetStatusId: determineStatusId(selectedStatus) // Determine the status ID based on the selected status
+                } : requestParams
             }) as IhandleTablePagination;
             const { content } = response.data
 

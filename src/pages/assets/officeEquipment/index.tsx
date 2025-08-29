@@ -37,14 +37,13 @@ import { bulkInsertOfficeAssetsService } from "./service";
 const OfficeEquipment = () => {
     const [loading, setLoading] = useState<boolean>(false);
     const navigate = useNavigate();
-    const { currentAssetType, setCurrentAssetType } = AssetUtills();
+    const { currentAssetType, setCurrentAssetType, determineStatusId } = AssetUtills();
     const dispatch = useDispatch<AppDispatch>();
     const { officeEquipmentCount, setOfficeEquipmentCount } = useContext(AssetContext);
     const { officeAsset } = useSelector((state: RootState) => state.OfficeAssetStore)
     const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore);
     const [selectedStatus, setSelectedStatus] = useState<string>('all');
     const { fileData } = useContext(FileContext);
-
 
     const {
         columnHeaders,
@@ -58,7 +57,7 @@ const OfficeEquipment = () => {
         handleOfficeEquipmentTableData,
         officeEquipmentTableData,
         determineOfficeAssetType,
-        currentState,
+        currentState
     } = OfficeEquipmentUtills();
 
     const fetchResources = async (status?: string) => {
@@ -66,14 +65,8 @@ const OfficeEquipment = () => {
 
         const params = {
             assetTypeId: currentAssetType.id,
-            assetStatusId: status === 'requireUpdate' ? 9 :
-                status === 'issuanceAvailable' ? 8 :
-                    status === 'receiptAcknowledged' ? 7 :
-                        status === 'inStore' ? 12 :
-                            status === 'inMaintenance' ? 13 :
-                                null
+            assetStatusId: determineStatusId(status || 'all')
         }
-
 
         try {
             const response = await fetchRowsService({
@@ -223,7 +216,9 @@ const OfficeEquipment = () => {
                         onCreationHandler={() => navigate(ROUTES.CREATE_OFFICE_EQUIPMENT)}
                         handleOptionClicked={handleOptionClicked}
                         paginationMode='server'
-                        params={{ assetTypeId: currentAssetType.id }}
+                        params={{
+                            assetTypeId: currentAssetType.id
+                        }}
                         refresh
                         filterMode="server"
                         status
