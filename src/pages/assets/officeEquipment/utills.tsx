@@ -109,6 +109,7 @@ const OfficeEquipmentUtills = () => {
         dateReceipt,
         purchaseCost,
         costOfTheAsset,
+        hostname,
         image,
         ...data
     } = officeEquipmentMock[0];
@@ -155,6 +156,7 @@ const OfficeEquipmentUtills = () => {
                 dateReceipt,
                 purchaseCost,
                 costOfTheAsset,
+                hostname,
                 image,
                 ...fielsdata
             } = list[index];
