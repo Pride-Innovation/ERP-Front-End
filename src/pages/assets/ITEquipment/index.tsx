@@ -37,7 +37,7 @@ const ITEquipment = () => {
     const { itAssets } = useSelector((state: RootState) => state.ITAssetStore)
     const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore);
     const { setItEquipmentCount, itEquipmentCount } = useContext(AssetContext);
-    const { currentAssetType, setCurrentAssetType } = AssetUtills()
+    const { currentAssetType, setCurrentAssetType, determineStatusId } = AssetUtills()
     const [selectedStatus, setSelectedStatus] = useState<string>('all');
     const { fileData } = useContext(FileContext);
 
@@ -60,12 +60,7 @@ const ITEquipment = () => {
         setLoading(true);
         const params = {
             assetTypeId: currentAssetType.id,
-            assetStatusId: status === 'requireUpdate' ? 9 :
-                status === 'issuanceAvailable' ? 8 :
-                    status === 'receiptAcknowledged' ? 7 :
-                        status === 'inStore' ? 12 :
-                            status === 'inMaintenance' ? 13 :
-                                null
+            assetStatusId: determineStatusId(status || 'all')
         }
 
         try {
