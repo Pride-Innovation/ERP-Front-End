@@ -134,6 +134,7 @@ const OfficeEquipment = () => {
                         handleClose={handleClose}
                         buttonText='Confirm'
                         asset={currentAsset}
+                        module={assetTypesStatusConstants.officeEquipment}
                     />
                 </ModalComponent>
             }

@@ -27,7 +27,7 @@ import {
     Button
 } from "@mui/material";
 import ButtonComponent from "../../components/forms/Button";
-import { IRepair, IRepairDetailAxiosResponse } from "./interface";
+import { IAssetAxiosResponse, IRepair, IRepairDetailAxiosResponse } from "./interface";
 import {
     Assignment as AssetIcon,
     BuildCircle as RepairIcon,
@@ -50,21 +50,27 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { toast } from "react-toastify";
 import { repairAssetService } from "./ITEquipment/service";
+import { assetTypesStatusConstants } from "../../utils/constants";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "../../store";
+import { updateITAsset } from "./ITEquipment/slice";
+import { updateOfficeAsset } from "./officeEquipment/slice";
 
 const Repair = ({
     handleClose,
     sendingRequest,
     buttonText,
-    asset
+    asset,
+    module
 }: IRepair) => {
     const theme = useTheme();
     const [repairDate, setRepairDate] = useState<Dayjs | null>(null);
     const [repairReason, setRepairReason] = useState("");
     const [technician, setTechnician] = useState("");
-
     const [files, setFiles] = useState<File[]>([]);
     const [isDragging, setIsDragging] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const dispatch = useDispatch<AppDispatch>();
 
     const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files) {
@@ -133,9 +139,15 @@ const Repair = ({
         }
 
         try {
-            const response = await repairAssetService(asset?.id as number, payload) as IRepairDetailAxiosResponse;
+            const response = module === assetTypesStatusConstants.itEquipment
+                ? await repairAssetService(asset?.id as number, payload) as IAssetAxiosResponse
+                : await repairAssetService(asset?.id as number, payload) as IAssetAxiosResponse;
+
             if (response.status === 201) {
-                toast.success("Asset repaired successfully");
+                toast.success("Asset repair request submitted successfully");
+                module === assetTypesStatusConstants.itEquipment
+                    ? dispatch(updateITAsset(response.data))
+                    : dispatch(updateOfficeAsset(response.data));
             }
         } catch (error) {
             console.error("Error repairing asset:", error);
