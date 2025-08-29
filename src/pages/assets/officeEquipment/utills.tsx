@@ -14,7 +14,7 @@ import InfoIcon from '@mui/icons-material/Info';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import { getTableHeaders } from "../../../components/tables/getTableHeaders";
-import { assetTypesStatusConstants, crudStates } from "../../../utils/constants";
+import { assetTypesStatusConstants, crudStates, unitsOfMeasure } from "../../../utils/constants";
 import { ROUTES } from "../../../core/routes/routes";
 import { useNavigate } from "react-router";
 import moment from "moment";
@@ -243,20 +243,21 @@ const OfficeEquipmentUtills = () => {
         {
             value: "unitOfMeasure",
             label: 'Unit of Measure',
-            type: "input"
-        },
-        {
-            value: "assetStatus",
-            label: 'Status',
             type: "select",
-            options: optionsObject.assetsStatusesOptions
+            options: unitsOfMeasure
         },
-        {
-            value: "assetType",
-            label: 'Asset Type',
-            type: "select",
-            options: optionsObject.assetTypesOptions
-        },
+        // {
+        //     value: "assetStatus",
+        //     label: 'Status',
+        //     type: "select",
+        //     options: optionsObject.assetsStatusesOptions
+        // },
+        // {
+        //     value: "assetType",
+        //     label: 'Asset Type',
+        //     type: "select",
+        //     options: optionsObject.assetTypesOptions
+        // },
         {
             value: "netValueB",
             label: 'Net Value',
@@ -266,13 +267,6 @@ const OfficeEquipmentUtills = () => {
             value: "assetDepreciationRate",
             label: 'Depreciation Rate',
             type: "input"
-        },
-        {
-            value: "assignedTo",
-            label: 'Assigned To',
-            type: "autocomplete",
-            options: optionsObject.usersOptions,
-            required: false
         },
         {
             value: "branch",

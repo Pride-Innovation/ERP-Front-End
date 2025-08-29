@@ -106,8 +106,13 @@ const UpdateOfficeEquipment = () => {
 
     const onSubmit = async (formData: IOfficeEquipment) => {
         setSendingRequest(true);
+        const request = {
+            ...formData,
+            assetStatus: 8, // This is the asset status for Office Equipment ie Issuance Available
+            assetType: 1 // This is the Office Equipment asset type
+        }
         try {
-            const response = await updateOfficeEquipmentService(formData, id as string) as IOfficeEquipmentAxiosResponse;
+            const response = await updateOfficeEquipmentService(request, id as string) as IOfficeEquipmentAxiosResponse;
             if (response.status === 201) {
                 toast.success("Asset updated successfully");
                 dispatch(updateOfficeAsset(response.data));

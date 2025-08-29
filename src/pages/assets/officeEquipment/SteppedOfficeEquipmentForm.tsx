@@ -301,7 +301,7 @@ const SteppedOfficeEquipmentForm = ({
                                 }
                             }}
                         >
-                            Cancel
+                            Back
                         </MuiButton>
                     </Box>
 
