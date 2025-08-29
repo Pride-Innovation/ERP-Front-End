@@ -335,17 +335,28 @@ const OfficeEquipmentUtills = () => {
             case crudStates.update:
                 navigate(`${ROUTES.UPDATE_OFFICE_EQUIPMENT}/${moduleID}`)
                 break;
+            case crudStates.read:
+                navigate(`${ROUTES.LIST_OFFICE_EQUIPMENT}/${moduleID}`);
+                break;
             case crudStates.dispose:
                 setCurrentAsset(determineCurrentAsset(moduleID as number, officeAsset as IOfficeEquipment[]))
                 setCurrentState(crudStates.dispose);
                 handleOpen()
                 break;
-            case crudStates.read:
-                navigate(`${ROUTES.LIST_OFFICE_EQUIPMENT}/${moduleID}`);
+            case crudStates.reassign:
+                setCurrentAsset(determineCurrentAsset(moduleID as number, officeAsset as IOfficeEquipment[]))
+                setCurrentState(crudStates.reassign);
+                handleOpen();
                 break;
-            case crudStates.delete:
-                // const response = await deleteOfficeEquipmentService(moduleID as number);
-                // console.log(response, "Item deleted successfully!!")
+            case crudStates.repair:
+                setCurrentAsset(determineCurrentAsset(moduleID as number, officeAsset as IOfficeEquipment[]))
+                setCurrentState(crudStates.repair);
+                handleOpen();
+                break;
+            case crudStates.inStore:
+                setCurrentAsset(determineCurrentAsset(moduleID as number, officeAsset as IOfficeEquipment[]))
+                setCurrentState(crudStates.inStore);
+                handleOpen();
                 break;
             default:
                 break;
@@ -367,7 +378,8 @@ const OfficeEquipmentUtills = () => {
             currentAsset,
             officeEquipmentTableData,
             handleOfficeEquipmentTableData,
-            determineOfficeAssetType
+            determineOfficeAssetType,
+            currentState
         }
     )
 }
