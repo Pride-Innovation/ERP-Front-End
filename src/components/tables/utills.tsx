@@ -23,6 +23,8 @@ import RoutesUtills from "../../core/routes/utills";
 const TableUtills = () => {
     const { fileName } = useContext(FileContext);
     const { getCurrentUser } = RoutesUtills();
+    const theme = useTheme();
+
 
     const determineTimeLineDotColor = (value: string) => {
         switch (value) {
@@ -160,10 +162,39 @@ const TableUtills = () => {
         return options;
     }
 
+    const filterStatuses: { label: string, value: string, color: string }[] = [
+        {
+            label: "Require Update",
+            value: "requireUpdate",
+            color: theme.palette.warning.main
+        },
+        {
+            label: "In Repair",
+            value: "inMaintenance",
+            color: theme.palette.secondary.main
+        },
+        {
+            label: "Issuance Available",
+            value: "issuanceAvailable",
+            color: theme.palette.success.main
+        },
+        {
+            label: "In Store",
+            value: "inStore",
+            color: theme.palette.error.main
+        },
+        {
+            label: "In Use",
+            value: "receiptAcknowledged",
+            color: theme.palette.info.main
+        }
+    ]
+
     return {
         determineTimeLineDotColor,
         JsonExportMenuItem,
-        handleOptionsFilter
+        handleOptionsFilter,
+        filterStatuses
     };
 };
 

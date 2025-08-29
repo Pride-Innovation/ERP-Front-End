@@ -61,7 +61,11 @@ const ITEquipment = () => {
         const params = {
             assetTypeId: currentAssetType.id,
             assetStatusId: status === 'requireUpdate' ? 9 :
-                status === 'issuanceAvailable' ? 8 : null
+                status === 'issuanceAvailable' ? 8 :
+                    status === 'receiptAcknowledged' ? 7 :
+                        status === 'inStore' ? 12 :
+                            status === 'inMaintenance' ? 13 :
+                                null
         }
 
         try {
@@ -103,7 +107,12 @@ const ITEquipment = () => {
     }, [itAssets])
 
     const handleStatusChange = (status: string) => {
-        if (status === 'requireUpdate' || status === 'issuanceAvailable') {
+        if (status === 'requireUpdate'
+            || status === 'issuanceAvailable'
+            || status === 'receiptAcknowledged'
+            || status === 'inStore'
+            || status === 'inMaintenance'
+        ) {
             fetchResources(status);
             setSelectedStatus(status);
         } else {

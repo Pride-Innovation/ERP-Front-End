@@ -27,6 +27,7 @@ import FileUploadButton from '../forms/FileUploadButton';
 import CustomGridToolbarExport from './CustomGridToolbarExport';
 import { useContext, useEffect, useState } from 'react';
 import { FileContext } from '../../context/file/FileContext';
+import TableUtills from './utills';
 
 const StyledFormControl = styled(FormControl)(({ theme }) => ({
     minWidth: 160,
@@ -65,6 +66,7 @@ const TableToolBar = ({
     const [statusFilter, setStatusFilter] = useState<string>(selectedStatus);
     useEffect(() => { setFileName(module) }, [module]);
     const theme = useTheme();
+    const { filterStatuses } = TableUtills();
 
     const handleStatusChange = (event: SelectChangeEvent) => {
         const newStatus = event.target.value;
@@ -111,7 +113,7 @@ const TableToolBar = ({
                             }}
                         >
                             <MenuItem value="all">All Status</MenuItem>
-                            <MenuItem value="requireUpdate">
+                            {filterStatuses.map(status => (<MenuItem value={status.value}>
                                 <Box
                                     component="span"
                                     sx={{
@@ -126,35 +128,13 @@ const TableToolBar = ({
                                             width: 8,
                                             height: 8,
                                             borderRadius: '50%',
-                                            bgcolor: theme.palette.warning.main,
+                                            bgcolor: status.color,
                                             mr: 1
                                         }}
                                     />
-                                    Require Update
+                                    {status.label}
                                 </Box>
-                            </MenuItem>
-                            <MenuItem value="issuanceAvailable">
-                                <Box
-                                    component="span"
-                                    sx={{
-                                        display: 'flex',
-                                        alignItems: 'center'
-                                    }}
-                                >
-                                    <Box
-                                        component="span"
-                                        sx={{
-                                            display: 'inline-block',
-                                            width: 8,
-                                            height: 8,
-                                            borderRadius: '50%',
-                                            bgcolor: theme.palette.success.main,
-                                            mr: 1
-                                        }}
-                                    />
-                                    Issuance Available
-                                </Box>
-                            </MenuItem>
+                            </MenuItem>))}
                         </Select>
                     </StyledFormControl>
                 )}
