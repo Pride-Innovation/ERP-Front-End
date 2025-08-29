@@ -8,8 +8,6 @@ Managing Director
 import { Route } from 'react-router';
 import { ROUTES } from '../../routes';
 import OfficeEquipment from '../../../../pages/assets/officeEquipment';
-import CreateOfficeEquipment from '../../../../pages/assets/officeEquipment/CreateOfficeEquipment';
-import UpdateOfficeEquipment from '../../../../pages/assets/officeEquipment/UpdateOfficeEquipment';
 import { PrivateRoute } from '../../PrivateRoutes';
 import { permissionsMock } from '../../../../mocks/settings';
 
@@ -19,12 +17,6 @@ const OfficeEquipmentRoutes = () => {
     <Route>
       <Route element={<PrivateRoute permission={permissionsMock[39]} />}>
         <Route path={ROUTES.LIST_OFFICE_EQUIPMENT} element={<OfficeEquipment />} />
-      </Route>
-      <Route element={<PrivateRoute permission={permissionsMock[40]} />}>
-        <Route path={ROUTES.CREATE_OFFICE_EQUIPMENT} element={<CreateOfficeEquipment />} />
-      </Route>
-      <Route element={<PrivateRoute permission={permissionsMock[42]} />}>
-        <Route path={`${ROUTES.UPDATE_OFFICE_EQUIPMENT}/:id`} element={<UpdateOfficeEquipment />} />
       </Route>
     </Route>
   )

@@ -18,6 +18,8 @@ import CreateITEquipment from '../../../../pages/assets/ITEquipment/CreateITEqui
 import UpdateITEquipment from '../../../../pages/assets/ITEquipment/UpdateITEquipment'
 import OfficeEquipmentDetails from '../../../../pages/assets/officeEquipment/view'
 import FleetDetails from '../../../../pages/assets/fleet/view'
+import CreateOfficeEquipment from '../../../../pages/assets/officeEquipment/CreateOfficeEquipment'
+import UpdateOfficeEquipment from '../../../../pages/assets/officeEquipment/UpdateOfficeEquipment'
 
 const AssetRoutes = () => {
     return (
@@ -30,6 +32,8 @@ const AssetRoutes = () => {
             <Route element={<PrivateRoute permission={permissionsMock[39]} />}>
                 <Route path={`${ROUTES.LIST_ASSETS}/:id`} element={<ITEquipmentDetails />} />
             </Route>
+
+            {/* IT Equipment Routes */}
             <Route element={<PrivateRoute permission={permissionsMock[40]} />}>
                 <Route path={ROUTES.CREATE_ITEQUIPMENT} element={<CreateITEquipment />} />
             </Route>
@@ -39,8 +43,18 @@ const AssetRoutes = () => {
             <Route element={<PrivateRoute permission={permissionsMock[39]} />}>
                 <Route path={`${ROUTES.LIST_OFFICE_EQUIPMENT}/:id`} element={<OfficeEquipmentDetails />} />
             </Route>
+
+            {/* Fleet Routes */}
             <Route element={<PrivateRoute permission={permissionsMock[39]} />}>
                 <Route path={`${ROUTES.LIST_FLEET}/:id`} element={<FleetDetails />} />
+            </Route>
+
+            {/* Office Equipment Routes */}
+            <Route element={<PrivateRoute permission={permissionsMock[40]} />}>
+                <Route path={ROUTES.CREATE_OFFICE_EQUIPMENT} element={<CreateOfficeEquipment />} />
+            </Route>
+            <Route element={<PrivateRoute permission={permissionsMock[42]} />}>
+                <Route path={`${ROUTES.UPDATE_OFFICE_EQUIPMENT}/:id`} element={<UpdateOfficeEquipment />} />
             </Route>
         </Route>
     )
