@@ -62,11 +62,35 @@ const disposeOfficeEquipmentService = async (id: string | number) => {
     }
 }
 
+const updateOfficeEquipmentImageService = async (id: string | number, body: object) => {
+    try {
+        const response = await axiosInstance.put(`assets/image/${id}`, body, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            }
+        });
+        return response;
+    } catch (error) {
+        return error;
+    }
+}
+
+const removeOfficeEquipmentImageService = async (id: string | number) => {
+    try {
+        const response = await axiosInstance.put(`assets/remove/image/${id}`);
+        return response;
+    } catch (error) {
+        return error;
+    }
+}
+
 export {
     createOfficeEquipmentService,
     deleteOfficeEquipmentService,
     getOfficeEquipmentByIDService,
     updateOfficeEquipmentService,
     listRepairDetailService,
-    disposeOfficeEquipmentService
+    disposeOfficeEquipmentService,
+    updateOfficeEquipmentImageService,
+    removeOfficeEquipmentImageService
 }

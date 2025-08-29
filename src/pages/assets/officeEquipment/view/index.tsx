@@ -27,7 +27,7 @@ import AssignmentHistory from '../../trails/AssignmentHistory';
 import RepairHistory from '../../trails/RepairHistory';
 import { useEffect, useState } from 'react';
 import { IOfficeEquipment, IOfficeEquipmentAxiosResponse } from "../interface";
-import { getOfficeEquipmentByIDService } from "../service";
+import { getOfficeEquipmentByIDService, removeOfficeEquipmentImageService, updateOfficeEquipmentImageService } from "../service";
 import Loading from '../../../../components/loading';
 import moment from 'moment';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -49,6 +49,7 @@ import { toast } from 'react-toastify';
 // Ensure we import the TimeLineDot component
 import TimeLineDot from "../../../../components/timeLineDots";
 import AssetImageUpload from '../../../assets/ITEquipment/view/AssetImageUpload';
+import { IAssetAxiosResponse } from '../../interface';
 
 // Brand colors
 const PRIMARY_COLOR = '#08796C';
@@ -209,23 +210,25 @@ const OfficeEquipmentDetails = () => {
         try {
             // Create FormData for API
             const formData = new FormData();
-            formData.append('image', file);
-            formData.append('id', id as string);
+            formData.append('file', file);
 
             // You'll need to create this service function
-            // const response = await updateOfficeEquipmentImageService(formData);
+            const response = await updateOfficeEquipmentImageService(id as string, formData) as IAssetAxiosResponse;
+            if (response.status !== 201) {
+                toast.error('Failed to update image');
+            }
 
-            // For now, we'll mock a successful update
-            setTimeout(() => {
-                // Create an object URL for preview (temporary)
-                const imageUrl = URL.createObjectURL(file);
+            if (response.data && response.data.image) {
+                const serverPath = response.data.image;
+                const filename = serverPath.split(/[\/\\]/).pop();
+
                 setEquipment({
                     ...equipment,
-                    image: imageUrl
+                    image: `/statics/${filename}`
                 });
-                toast.success('Image updated successfully');
-            }, 1500);
 
+                toast.success('Image updated successfully');
+            }
         } catch (error) {
             console.error('Error updating image:', error);
             toast.error('Failed to update image');
@@ -234,17 +237,19 @@ const OfficeEquipmentDetails = () => {
 
     const handleImageRemove = async () => {
         try {
-            // In a real implementation, call an API to remove the image
-            // const response = await removeOfficeEquipmentImageService(id as string);
+            const response = await removeOfficeEquipmentImageService(id as string) as IAssetAxiosResponse;
+            if (response.status !== 201) {
+                toast.error('Failed to update image');
+            }
 
-            // For now, we'll mock a successful removal
-            setTimeout(() => {
+            if (response.data) {
                 setEquipment({
                     ...equipment,
                     image: null
                 });
+
                 toast.success('Image removed successfully');
-            }, 1000);
+            }
 
         } catch (error) {
             console.error('Error removing image:', error);
