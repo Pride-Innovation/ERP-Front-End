@@ -30,21 +30,29 @@ import { sendAssetToStoreService } from "./ITEquipment/service";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../../store";
 import { updateITAsset } from "./ITEquipment/slice";
+import { assetTypesStatusConstants } from "../../utils/constants";
+import { updateOfficeAsset } from "./officeEquipment/slice";
 
 const ToStore = ({
     handleClose,
     sendingRequest,
     buttonText,
-    asset
+    asset,
+    module
 }: IToStore) => {
     const theme = useTheme();
     const dispatch = useDispatch<AppDispatch>();
 
     const handleSendingAssetToStore = async () => {
         try {
-            const response = await sendAssetToStoreService(asset?.id as number) as IAssetAxiosResponse;
+            const response = module === assetTypesStatusConstants.itEquipment
+                ? await sendAssetToStoreService(asset?.id as number) as IAssetAxiosResponse
+                : await sendAssetToStoreService(asset?.id as number) as IAssetAxiosResponse;
+
             if (response.status === 201) {
-                dispatch(updateITAsset(response.data));
+                module === assetTypesStatusConstants.itEquipment
+                    ? dispatch(updateITAsset(response.data))
+                    : dispatch(updateOfficeAsset(response.data));
                 toast.success("Asset sent to store successfully");
             }
         } catch (error) {
