@@ -38,6 +38,8 @@ const OfficeEquipment = () => {
     const { officeEquipmentCount, setOfficeEquipmentCount } = useContext(AssetContext);
     const { officeAsset } = useSelector((state: RootState) => state.OfficeAssetStore)
     const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore);
+    const [selectedStatus, setSelectedStatus] = useState<string>('all');
+
 
     const {
         columnHeaders,
@@ -54,10 +56,19 @@ const OfficeEquipment = () => {
         currentState,
     } = OfficeEquipmentUtills();
 
-    const fetchResources = async () => {
-        setLoading(true)
+    const fetchResources = async (status?: string) => {
+        setLoading(true);
 
-        const params = { assetTypeId: currentAssetType.id }
+        const params = {
+            assetTypeId: currentAssetType.id,
+            assetStatusId: status === 'requireUpdate' ? 9 :
+                status === 'issuanceAvailable' ? 8 :
+                    status === 'receiptAcknowledged' ? 7 :
+                        status === 'inStore' ? 12 :
+                            status === 'inMaintenance' ? 13 :
+                                null
+        }
+
 
         try {
             const response = await fetchRowsService({
@@ -95,6 +106,21 @@ const OfficeEquipment = () => {
             handleOfficeEquipmentTableData(officeAsset)
         }
     }, [officeAsset])
+
+    const handleStatusChange = (status: string) => {
+        if (status === 'requireUpdate'
+            || status === 'issuanceAvailable'
+            || status === 'receiptAcknowledged'
+            || status === 'inStore'
+            || status === 'inMaintenance'
+        ) {
+            fetchResources(status);
+            setSelectedStatus(status);
+        } else {
+            fetchResources('all');
+            setSelectedStatus('all');
+        }
+    }
 
     return (
         <React.Fragment>
@@ -169,6 +195,11 @@ const OfficeEquipment = () => {
                         handleOptionClicked={handleOptionClicked}
                         paginationMode='server'
                         params={{ assetTypeId: currentAssetType.id }}
+                        refresh
+                        filterMode="server"
+                        status
+                        onStatusChange={handleStatusChange}
+                        selectedStatus={selectedStatus}
                     />
                 }
             </Grid>

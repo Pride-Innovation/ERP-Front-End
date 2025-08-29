@@ -107,6 +107,8 @@ const OfficeEquipmentUtills = () => {
         stock,
         commodity,
         dateReceipt,
+        purchaseCost,
+        costOfTheAsset,
         image,
         ...data
     } = officeEquipmentMock[0];
@@ -151,6 +153,8 @@ const OfficeEquipmentUtills = () => {
                 stock,
                 commodity,
                 dateReceipt,
+                purchaseCost,
+                costOfTheAsset,
                 image,
                 ...fielsdata
             } = list[index];
@@ -162,8 +166,8 @@ const OfficeEquipmentUtills = () => {
                     engravedNumber: item.engravedNumber,
                     dateReceived: moment(item.dateReceipt).format('Do MMMM YYYY'),
                     make: item.make,
-                    purchaseCost: item.purchaseCost,
-                    costOfAsset: item.costOfTheAsset,
+                    // purchaseCost: item.purchaseCost,
+                    // costOfAsset: item.costOfTheAsset,
                     status: item?.assetStatus?.status as string,
                     assignedTo: item.assignedTo?.firstName ? `${item.assignedTo?.lastName} ${item.assignedTo?.firstName}` : "",
                     location: item.branch?.name as string
@@ -246,18 +250,6 @@ const OfficeEquipmentUtills = () => {
             type: "select",
             options: unitsOfMeasure
         },
-        // {
-        //     value: "assetStatus",
-        //     label: 'Status',
-        //     type: "select",
-        //     options: optionsObject.assetsStatusesOptions
-        // },
-        // {
-        //     value: "assetType",
-        //     label: 'Asset Type',
-        //     type: "select",
-        //     options: optionsObject.assetTypesOptions
-        // },
         {
             value: "netValueB",
             label: 'Net Value',
