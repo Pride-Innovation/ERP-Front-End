@@ -22,7 +22,7 @@ import { loadAllITAssets } from "./slice"
 import { useSelector } from "react-redux"
 import AssetUtills from "../Utills"
 import { AssetContext } from "../../../context/asset"
-import { crudStates } from "../../../utils/constants"
+import { assetTypesStatusConstants, crudStates } from "../../../utils/constants"
 import Repair from "../Repair"
 import Reassign from "../Reassign"
 import ToStore from "../ToStore"
@@ -146,6 +146,7 @@ const ITEquipment = () => {
                         handleClose={handleClose}
                         buttonText='Confirm'
                         asset={currentAsset}
+                        module={assetTypesStatusConstants.itEquipment}
                     />
                 </ModalComponent>
             }

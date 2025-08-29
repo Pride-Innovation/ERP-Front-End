@@ -34,6 +34,7 @@ export interface IAssetAction {
     sendingRequest: boolean;
     buttonText: string;
     asset: IITEquipment | IOfficeEquipment;
+    module?: string;
 }
 
 // Specific action interfaces that extend the base

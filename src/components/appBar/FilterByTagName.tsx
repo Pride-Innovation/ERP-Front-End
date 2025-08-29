@@ -25,7 +25,10 @@ const FilterByTagName = () => {
         }
         try {
             const result = await findAssetByTagNameService(searchText) as IAsset;
-            navigate(`${ROUTES.LIST_ASSETS}/${result.id}`);
+
+            if (result && result.id) {
+                navigate(`${ROUTES.LIST_ASSETS}/${result.id}`);
+            }
         } catch (error) {
             console.error("Error searching for tag:", error);
         }

@@ -23,6 +23,9 @@ import { RootState } from "../../../store";
 import { IAssetType } from "../../settings/assetTypes/interface";
 import { AutocompleteContext } from "../../../context/autocomplete";
 import AssetUtills from "../Utills";
+import AssignmentIndOutlinedIcon from '@mui/icons-material/AssignmentIndOutlined';
+import BuildOutlinedIcon from '@mui/icons-material/BuildOutlined';
+import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
 
 const OfficeEquipmentUtills = () => {
     const endPoint = 'assets';
@@ -33,6 +36,8 @@ const OfficeEquipmentUtills = () => {
     const [currentAsset, setCurrentAsset] = useState<IOfficeEquipment>({} as IOfficeEquipment);
     const [officeEquipmentTableData, setOfficeEquipmentTableData] = useState<IOfficeEquipmentTableData[]>([] as IOfficeEquipmentTableData[])
     const { selectedItemDetails, value, inputValue, label } = useContext(AutocompleteContext)
+    const [currentState, setCurrentState] = useState<string>("");
+
     const {
         searchStockByLPONumber,
         searchUserByName,
@@ -68,6 +73,8 @@ const OfficeEquipmentUtills = () => {
     const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore)
     const { commodities } = useSelector((state: RootState) => state.CommodityStore)
     const { inventory } = useSelector((state: RootState) => state.InventoryStore)
+    const { officeAsset } = useSelector((state: RootState) => state.OfficeAssetStore)
+
     const navigate = useNavigate()
 
     useEffect(() => {
@@ -115,7 +122,10 @@ const OfficeEquipmentUtills = () => {
             options: [
                 { value: "dispose", label: "Dispose", icon: <InfoIcon fontSize='small' color='error' /> },
                 { value: "update", label: "Update", icon: <ModeEditIcon fontSize='small' color='info' /> },
-                { value: "read", label: "View Details", icon: <RemoveRedEyeIcon fontSize='small' color='inherit' /> }
+                { value: "read", label: "View Details", icon: <RemoveRedEyeIcon fontSize='small' color='inherit' /> },
+                { value: crudStates.reassign, label: "Reassign", icon: <AssignmentIndOutlinedIcon fontSize='small' color='secondary' /> },
+                { value: crudStates.repair, label: "Repair", icon: <BuildOutlinedIcon fontSize='small' color='primary' /> },
+                { value: crudStates.inStore, label: "Send to Store", icon: <HomeOutlinedIcon fontSize='small' color='action' /> },
             ]
         },
     };
@@ -332,7 +342,8 @@ const OfficeEquipmentUtills = () => {
                 navigate(`${ROUTES.UPDATE_OFFICE_EQUIPMENT}/${moduleID}`)
                 break;
             case crudStates.dispose:
-                // setCurrentAsset(determineCurrentAsset(moduleID as number, rows as IOfficeEquipment[]))
+                setCurrentAsset(determineCurrentAsset(moduleID as number, officeAsset as IOfficeEquipment[]))
+                setCurrentState(crudStates.dispose);
                 handleOpen()
                 break;
             case crudStates.read:

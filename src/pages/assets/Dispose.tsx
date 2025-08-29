@@ -31,22 +31,30 @@ import { useDispatch } from "react-redux";
 import { AppDispatch } from "../../store";
 import { disposeAsset } from "./ITEquipment/slice";
 import { toast } from "react-toastify";
+import { assetTypesStatusConstants } from "../../utils/constants";
+import { disposeOfficeEquipmentService } from "./officeEquipment/service";
+import { disposeOfficeAsset } from "./officeEquipment/slice";
 
 const Dispose = ({
     handleClose,
     sendingRequest,
     buttonText,
-    asset
+    asset,
+    module
 }: IDispose) => {
     const theme = useTheme();
     const dispatch = useDispatch<AppDispatch>()
 
     const handleDisposal = async () => {
         try {
-            const response = await disposeITEquipmentService(asset?.id as string) as IAssetAxiosResponse;
+            const response = module === assetTypesStatusConstants.itEquipment
+                ? await disposeITEquipmentService(asset?.id as string) as IAssetAxiosResponse
+                : await disposeOfficeEquipmentService(asset?.id as string) as IAssetAxiosResponse;
+
             if (response.status === 201) {
                 toast.success("Asset disposed successfully");
-                dispatch(disposeAsset(response.data))
+                module === assetTypesStatusConstants.itEquipment ? dispatch(disposeAsset(response.data))
+                    : dispatch(disposeOfficeAsset(response.data));
             }
         } catch (error) {
             console.log(error, "Error Message")

@@ -25,10 +25,13 @@ const officeEquipmentSlice = createSlice({
         },
         updateOfficeAsset: (state, action) => {
             state.officeAsset = state.officeAsset.map((asset) => asset.id === action.payload?.id ? action.payload : asset)
+        },
+        disposeOfficeAsset: (state, action) => {
+            state.officeAsset = state.officeAsset.filter((asset) => asset.id !== action.payload.id)
         }
     }
 })
 
 const { reducer, actions } = officeEquipmentSlice;
-export const { loadAllOfficeAssets, updateOfficeAsset } = actions;
+export const { loadAllOfficeAssets, updateOfficeAsset, disposeOfficeAsset } = actions;
 export default reducer;

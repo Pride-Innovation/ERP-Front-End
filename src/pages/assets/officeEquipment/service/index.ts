@@ -53,10 +53,20 @@ const listRepairDetailService = async (id: string | number) => {
     }
 }
 
+const disposeOfficeEquipmentService = async (id: string | number) => {
+    try {
+        const response = await axiosInstance.post(`assets/${id}`);
+        return response;
+    } catch (error) {
+        return error;
+    }
+}
+
 export {
     createOfficeEquipmentService,
     deleteOfficeEquipmentService,
     getOfficeEquipmentByIDService,
     updateOfficeEquipmentService,
-    listRepairDetailService
+    listRepairDetailService,
+    disposeOfficeEquipmentService
 }
