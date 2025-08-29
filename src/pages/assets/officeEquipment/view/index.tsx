@@ -19,6 +19,7 @@ import {
     Tooltip,
     Container,
     Button as MuiButton,
+    Chip,
 } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 import TabComponent from '../../../../components/tabs';
@@ -138,13 +139,13 @@ const EnhancedDetailSection = ({
                                 camelCaseToWords(text || '')
                             )}
 
-                            {label === "Serial Number" && !isEmpty && (
+                            {label === "Engraved Number" && !isEmpty && (
                                 <Tooltip title="Copy to clipboard">
                                     <IconButton
                                         size="small"
                                         onClick={() => {
                                             navigator.clipboard.writeText(text || '');
-                                            toast.info('Serial number copied to clipboard');
+                                            toast.success('Asset # copied to clipboard');
                                         }}
                                         sx={{
                                             ml: 1,
@@ -257,6 +258,206 @@ const OfficeEquipmentDetails = () => {
                 <Loading items='Office Asset' />
             ) : (
                 <>
+                    {/* Header section - Matching IT Equipment header */}
+                    <Box
+                        sx={{
+                            mb: 3,
+                            borderRadius: 2,
+                            overflow: 'hidden',
+                            boxShadow: `0 1px 3px ${alpha('#000', 0.08)}`,
+                            border: `1px solid ${alpha('#000', 0.08)}`,
+                            bgcolor: '#ffffff'
+                        }}
+                    >
+                        {/* Accent color bar at top */}
+                        <Box sx={{ height: 4, bgcolor: PRIMARY_COLOR }} />
+
+                        <Box sx={{ p: 2.5 }}>
+                            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
+                                {/* Left side - Asset Identity */}
+                                <Box sx={{ display: 'flex', alignItems: 'flex-start', flex: 1 }}>
+                                    <Box
+                                        sx={{
+                                            mr: 2,
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            borderRadius: 1.5,
+                                            background: `linear-gradient(135deg, ${alpha(PRIMARY_COLOR, 0.12)} 0%, ${alpha(PRIMARY_COLOR, 0.22)} 100%)`,
+                                            color: PRIMARY_COLOR,
+                                            width: 48,
+                                            height: 48,
+                                            flexShrink: 0,
+                                            boxShadow: `0 2px 6px ${alpha(PRIMARY_COLOR, 0.15)}`
+                                        }}
+                                    >
+                                        <TableRestaurantIcon fontSize="medium" />
+                                    </Box>
+
+                                    <Box>
+                                        <Typography
+                                            variant="h5"
+                                            fontWeight={600}
+                                            color="text.primary"
+                                            sx={{ lineHeight: 1.2, mb: 1 }}
+                                        >
+                                            {equipment.assetName || "Office Equipment"}
+                                        </Typography>
+
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                                            <Chip
+                                                size="small"
+                                                label={equipment.assetType?.name || "Office Equipment"}
+                                                sx={{
+                                                    bgcolor: alpha(PRIMARY_COLOR, 0.08),
+                                                    color: PRIMARY_COLOR,
+                                                    fontWeight: 500,
+                                                    borderRadius: 1
+                                                }}
+                                            />
+
+                                            {equipment.assetStatus?.status && (
+                                                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                                    <TimeLineDot status={equipment.assetStatus.status} />
+                                                    <Typography
+                                                        variant="body2"
+                                                        fontWeight={500}
+                                                        color="text.secondary"
+                                                        sx={{ ml: 0.5 }}
+                                                    >
+                                                        {equipment.assetStatus.status}
+                                                    </Typography>
+                                                </Box>
+                                            )}
+                                        </Box>
+                                    </Box>
+                                </Box>
+
+                                {/* Right side - Asset Details */}
+                                <Box
+                                    sx={{
+                                        display: 'flex',
+                                        gap: 2,
+                                        flexWrap: 'wrap',
+                                        justifyContent: { xs: 'flex-start', md: 'flex-end' },
+                                        alignItems: 'center'
+                                    }}
+                                >
+                                    {/* Engraved Number */}
+                                    <Box
+                                        sx={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            py: 0.75,
+                                            px: 1.5,
+                                            borderRadius: 1.5,
+                                            bgcolor: alpha(SECONDARY_COLOR, 0.05),
+                                            border: `1px solid ${alpha(SECONDARY_COLOR, 0.15)}`,
+                                            minWidth: 'fit-content'
+                                        }}
+                                    >
+                                        <InfoIcon
+                                            fontSize="small"
+                                            sx={{
+                                                color: alpha(SECONDARY_COLOR, 0.7),
+                                                mr: 0.75
+                                            }}
+                                        />
+
+                                        <Box>
+                                            <Typography
+                                                variant="caption"
+                                                color="text.secondary"
+                                                sx={{ fontWeight: 500, display: 'block', mb: 0.2 }}
+                                            >
+                                                Engraved No #
+                                            </Typography>
+
+                                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                                <Typography
+                                                    variant="body2"
+                                                    fontWeight={equipment.engravedNumber ? 600 : 400}
+                                                    color={equipment.engravedNumber ? SECONDARY_COLOR : 'text.secondary'}
+                                                    sx={{
+                                                        fontStyle: equipment.engravedNumber ? 'normal' : 'italic'
+                                                    }}
+                                                >
+                                                    {equipment.engravedNumber || "Not specified"}
+                                                </Typography>
+
+                                                {equipment.engravedNumber && (
+                                                    <Tooltip title="Copy to clipboard">
+                                                        <IconButton
+                                                            size="small"
+                                                            onClick={() => {
+                                                                navigator.clipboard.writeText(equipment.engravedNumber || '');
+                                                                toast.success('Asset # copied to clipboard');
+                                                            }}
+                                                            sx={{
+                                                                ml: 0.5,
+                                                                p: 0.3,
+                                                                color: alpha(SECONDARY_COLOR, 0.7),
+                                                                '&:hover': {
+                                                                    bgcolor: alpha(SECONDARY_COLOR, 0.1),
+                                                                    color: SECONDARY_COLOR
+                                                                }
+                                                            }}
+                                                        >
+                                                            <ContentPasteIcon sx={{ fontSize: 14 }} />
+                                                        </IconButton>
+                                                    </Tooltip>
+                                                )}
+                                            </Box>
+                                        </Box>
+                                    </Box>
+
+                                    {/* Location */}
+                                    <Box
+                                        sx={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            py: 0.75,
+                                            px: 1.5,
+                                            borderRadius: 1.5,
+                                            bgcolor: alpha(PRIMARY_COLOR, 0.05),
+                                            border: `1px solid ${alpha(PRIMARY_COLOR, 0.15)}`,
+                                            minWidth: 'fit-content'
+                                        }}
+                                    >
+                                        <LocationOnIcon
+                                            fontSize="small"
+                                            sx={{
+                                                color: alpha(PRIMARY_COLOR, 0.7),
+                                                mr: 0.75
+                                            }}
+                                        />
+
+                                        <Box>
+                                            <Typography
+                                                variant="caption"
+                                                color="text.secondary"
+                                                sx={{ fontWeight: 500, display: 'block', mb: 0.2 }}
+                                            >
+                                                Location
+                                            </Typography>
+
+                                            <Typography
+                                                variant="body2"
+                                                fontWeight={equipment.branch?.name ? 600 : 400}
+                                                color={equipment.branch?.name ? PRIMARY_COLOR : 'text.secondary'}
+                                                sx={{
+                                                    fontStyle: equipment.branch?.name ? 'normal' : 'italic'
+                                                }}
+                                            >
+                                                {equipment.branch?.name || "Not specified"}
+                                            </Typography>
+                                        </Box>
+                                    </Box>
+                                </Box>
+                            </Box>
+                        </Box>
+                    </Box>
+
                     <Grid container spacing={3}>
                         <Grid item xs={12} md={4}>
                             <Card
@@ -395,21 +596,37 @@ const OfficeEquipmentDetails = () => {
                         </Grid>
                     </Grid>
 
+                    {/* Updated button section to match IT Equipment component */}
                     <Box
                         sx={{
+                            mb: 3,
                             display: 'flex',
                             flexDirection: { xs: 'column', md: 'row' },
+                            justifyContent: 'end',
                             alignItems: { xs: 'flex-start', md: 'center' },
                             gap: 2,
                             mt: 3,
                         }}
                     >
-                        <Stack
-                            direction="row"
-                            sx={{
-                                width: '100%',
-                                display: 'flex'
-                            }}>
+                        <Stack direction="row" spacing={1.5}>
+                            <MuiButton
+                                color='primary'
+                                type='button'
+                                onClick={() => navigate(`/assets/office-equipment/edit/${equipment.id}`)}
+                                variant='outlined'
+                                startIcon={<EditIcon />}
+                            >Edit</MuiButton>
+
+                            {equipment.assignedTo === null && (
+                                <MuiButton
+                                    color='success'
+                                    type='button'
+                                    variant='contained'
+                                    onClick={() => navigate(`/assets/office-equipment/assign/${equipment.id}`)}
+                                    startIcon={<AssignmentIndIcon />}
+                                >Assign</MuiButton>
+                            )}
+
                             <MuiButton
                                 color='inherit'
                                 type='button'
@@ -424,38 +641,7 @@ const OfficeEquipmentDetails = () => {
                                         backgroundColor: alpha('#000', 0.05)
                                     }
                                 }}
-                            >
-                                Back
-                            </MuiButton>
-                            <Stack direction="row"
-                                sx={{
-                                    ml: 'auto',
-                                }}
-                                spacing={1.5}>
-                                <MuiButton
-                                    color='primary'
-                                    type='button'
-                                    onClick={() => navigate(`/assets/office-equipment/edit/${equipment.id}`)}
-                                    variant='outlined'
-
-                                    startIcon={<EditIcon />}
-                                >
-                                    Edit
-                                </MuiButton>
-
-                                {equipment.assignedTo === null && (
-                                    <MuiButton
-                                        color='success'
-                                        type='button'
-                                        variant='contained'
-                                        onClick={() => navigate(`/assets/office-equipment/assign/${equipment.id}`)}
-                                        startIcon={<AssignmentIndIcon />}
-                                    >
-                                        Assign
-                                    </MuiButton>
-                                )}
-
-                            </Stack>
+                            >Back</MuiButton>
                         </Stack>
                     </Box>
                 </>
