@@ -29,6 +29,10 @@ import { assetTypesStatusConstants, crudStates } from "../../../utils/constants"
 import Reassign from "../Reassign";
 import Repair from "../Repair";
 import ToStore from "../ToStore";
+import { IBulkAssetData } from "../ITEquipment/interface";
+import { toast } from "react-toastify";
+import { FileContext } from "../../../context/file/FileContext";
+import { bulkInsertOfficeAssetsService } from "./service";
 
 const OfficeEquipment = () => {
     const [loading, setLoading] = useState<boolean>(false);
@@ -39,6 +43,7 @@ const OfficeEquipment = () => {
     const { officeAsset } = useSelector((state: RootState) => state.OfficeAssetStore)
     const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore);
     const [selectedStatus, setSelectedStatus] = useState<string>('all');
+    const { fileData } = useContext(FileContext);
 
 
     const {
@@ -121,6 +126,30 @@ const OfficeEquipment = () => {
             setSelectedStatus('all');
         }
     }
+
+    const bulkInsertITAssets = async (assets: Array<IBulkAssetData>) => {
+        try {
+            const data = new FormData();
+            data.append("assets", JSON.stringify(assets));
+            data.append("assetTypeID", String(1)); // Office Equipment asset Type ID
+
+            const response = await bulkInsertOfficeAssetsService(data);
+
+            if (response.success === true) {
+                toast.success("Bulk Insert Successful")
+                fetchResources('all');
+            }
+
+        } catch (error) {
+            console.log("Bulk Insert Error", error);
+        }
+    }
+
+    useEffect(() => {
+        if (fileData?.jsonData?.length > 0 && fileData?.module === module) {
+            bulkInsertITAssets(fileData.jsonData as unknown as Array<IBulkAssetData>);
+        }
+    }, [fileData]);
 
     return (
         <React.Fragment>

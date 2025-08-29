@@ -93,6 +93,19 @@ const reassignOfficeEquipmentService = async (id: string | number, body: object)
     }
 }
 
+const bulkInsertOfficeAssetsService = async (data: object) => {
+    try {
+        const response = await axiosInstance.post(`assets/bulk-insert`, data, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            }
+        });
+        return response.data;
+    } catch (error) {
+        return error;
+    }
+}
+
 export {
     createOfficeEquipmentService,
     deleteOfficeEquipmentService,
@@ -102,5 +115,6 @@ export {
     disposeOfficeEquipmentService,
     updateOfficeEquipmentImageService,
     removeOfficeEquipmentImageService,
-    reassignOfficeEquipmentService
+    reassignOfficeEquipmentService,
+    bulkInsertOfficeAssetsService
 }

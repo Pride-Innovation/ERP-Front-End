@@ -125,7 +125,7 @@ const ITEquipment = () => {
         try {
             const data = new FormData();
             data.append("assets", JSON.stringify(assets));
-            data.append("assetTypeID", String(2));
+            data.append("assetTypeID", String(2)); // IT Equipment asset Type ID
 
             const response = await bulkInsertITAssetsService(data);
 
