@@ -34,6 +34,8 @@ import { toast } from "react-toastify";
 import { assetTypesStatusConstants } from "../../utils/constants";
 import { disposeOfficeEquipmentService } from "./officeEquipment/service";
 import { disposeOfficeAsset } from "./officeEquipment/slice";
+import { disposeFleetService } from "./fleet/service";
+import { disposeFleetAsset } from "./fleet/slice";
 
 const Dispose = ({
     handleClose,
@@ -49,12 +51,17 @@ const Dispose = ({
         try {
             const response = module === assetTypesStatusConstants.itEquipment
                 ? await disposeITEquipmentService(asset?.id as string) as IAssetAxiosResponse
-                : await disposeOfficeEquipmentService(asset?.id as string) as IAssetAxiosResponse;
+                : module === assetTypesStatusConstants.officeEquipment
+                    ? await disposeOfficeEquipmentService(asset?.id as string) as IAssetAxiosResponse
+                    : await disposeFleetService(asset?.id as string) as IAssetAxiosResponse;
 
             if (response.status === 201) {
                 toast.success("Asset disposed successfully");
-                module === assetTypesStatusConstants.itEquipment ? dispatch(disposeAsset(response.data))
-                    : dispatch(disposeOfficeAsset(response.data));
+                module === assetTypesStatusConstants.itEquipment
+                    ? dispatch(disposeAsset(response.data))
+                    : module === assetTypesStatusConstants.officeEquipment
+                        ? dispatch(disposeOfficeAsset(response.data))
+                        : dispatch(disposeFleetAsset(response.data));
             }
         } catch (error) {
             console.log(error, "Error Message")

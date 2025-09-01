@@ -37,6 +37,8 @@ import { toast } from "react-toastify";
 import { assetTypesStatusConstants } from "../../utils/constants";
 import { reassignOfficeEquipmentService } from "./officeEquipment/service";
 import { updateOfficeAsset } from "./officeEquipment/slice";
+import { updateFleetAsset } from "./fleet/slice";
+import { reassignFleetService } from "./fleet/service";
 
 const Reassign = ({
     handleClose,
@@ -124,16 +126,23 @@ const Reassign = ({
                     asset?.id as number,
                     { assignedTo: selectedUser?.value }
                 ) as IAssetAxiosResponse
-                : await reassignOfficeEquipmentService(
-                    asset?.id as number,
-                    { assignedTo: selectedUser?.value }
-                ) as IAssetAxiosResponse;
+                : module === assetTypesStatusConstants.officeEquipment
+                    ? await reassignOfficeEquipmentService(
+                        asset?.id as number,
+                        { assignedTo: selectedUser?.value }
+                    ) as IAssetAxiosResponse
+                    : await reassignFleetService(
+                        asset?.id as number,
+                        { assignedTo: selectedUser?.value }
+                    ) as IAssetAxiosResponse;
 
             if (response.status === 201) {
                 toast.success("Asset reassigned successfully");
                 module === assetTypesStatusConstants.itEquipment
                     ? dispatch(updateITAsset(response.data))
-                    : dispatch(updateOfficeAsset(response.data));
+                    : module === assetTypesStatusConstants.officeEquipment
+                        ? dispatch(updateOfficeAsset(response.data))
+                        : dispatch(updateFleetAsset(response.data));
             }
         } catch (error) {
             console.error("Error reassigning asset:", error);

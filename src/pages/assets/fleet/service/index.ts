@@ -46,3 +46,21 @@ export const bulkInsertFleetService = async (data: object) => {
         return error;
     }
 }
+
+export const disposeFleetService = async (id: string | number) => {
+    try {
+        const response = await axiosInstance.post(`assets/${id}`);
+        return response;
+    } catch (error) {
+        return error;
+    }
+}
+
+export const reassignFleetService = async (id: string | number, body: object) => {
+    try {
+        const response = await axiosInstance.post(`assets/reassign/${id}`, body);
+        return response;
+    } catch (error) {
+        return error;
+    }
+}

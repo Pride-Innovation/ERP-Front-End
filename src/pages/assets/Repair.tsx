@@ -55,6 +55,7 @@ import { useDispatch } from "react-redux";
 import { AppDispatch } from "../../store";
 import { updateITAsset } from "./ITEquipment/slice";
 import { updateOfficeAsset } from "./officeEquipment/slice";
+import { updateFleetAsset } from "./fleet/slice";
 
 const Repair = ({
     handleClose,
@@ -141,13 +142,17 @@ const Repair = ({
         try {
             const response = module === assetTypesStatusConstants.itEquipment
                 ? await repairAssetService(asset?.id as number, payload) as IAssetAxiosResponse
-                : await repairAssetService(asset?.id as number, payload) as IAssetAxiosResponse;
+                : module === assetTypesStatusConstants.officeEquipment
+                    ? await repairAssetService(asset?.id as number, payload) as IAssetAxiosResponse
+                    : await repairAssetService(asset?.id as number, payload) as IAssetAxiosResponse;
 
             if (response.status === 201) {
                 toast.success("Asset repair request submitted successfully");
                 module === assetTypesStatusConstants.itEquipment
                     ? dispatch(updateITAsset(response.data))
-                    : dispatch(updateOfficeAsset(response.data));
+                    : module === assetTypesStatusConstants.officeEquipment
+                        ? dispatch(updateOfficeAsset(response.data))
+                        : dispatch(updateFleetAsset(response.data));
             }
         } catch (error) {
             console.error("Error repairing asset:", error);

@@ -32,6 +32,7 @@ import { AppDispatch } from "../../store";
 import { updateITAsset } from "./ITEquipment/slice";
 import { assetTypesStatusConstants } from "../../utils/constants";
 import { updateOfficeAsset } from "./officeEquipment/slice";
+import { updateFleetAsset } from "./fleet/slice";
 
 const ToStore = ({
     handleClose,
@@ -52,7 +53,9 @@ const ToStore = ({
             if (response.status === 201) {
                 module === assetTypesStatusConstants.itEquipment
                     ? dispatch(updateITAsset(response.data))
-                    : dispatch(updateOfficeAsset(response.data));
+                    : module === assetTypesStatusConstants.officeEquipment
+                        ? dispatch(updateOfficeAsset(response.data))
+                        : dispatch(updateFleetAsset(response.data));
                 toast.success("Asset sent to store successfully");
             }
         } catch (error) {
