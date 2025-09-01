@@ -23,6 +23,11 @@ import { IBulkAssetData } from "../ITEquipment/interface";
 import { toast } from "react-toastify";
 import { bulkInsertFleetService } from "./service";
 import { FileContext } from "../../../context/file/FileContext";
+import { assetTypesStatusConstants, crudStates } from "../../../utils/constants";
+import Dispose from "../Dispose";
+import Reassign from "../Reassign";
+import Repair from "../Repair";
+import ToStore from "../ToStore";
 
 const Fleet = () => {
     const [loading, setLoading] = useState<boolean>(false);
@@ -46,7 +51,9 @@ const Fleet = () => {
         handleFleetTableData,
         fleetTableData,
         module,
-        determineFleetAssetType
+        determineFleetAssetType,
+        currentState,
+        currentAsset
     } = FleetUtills();
 
     const fetchResources = async (status?: string) => {
@@ -137,14 +144,56 @@ const Fleet = () => {
     return (
         <React.Fragment>
             {
-                <ModalComponent width={"40%"} title='Dispose Fleet' open={open} handleClose={handleClose}>
-                    {/* <Dispose
+                crudStates.dispose === currentState
+                && <ModalComponent width={"40%"} title='Dispose Fleet' open={open} handleClose={handleClose}>
+                    <Dispose
                         sendingRequest={loading}
                         handleClose={handleClose}
                         buttonText='Confirm'
                         asset={currentAsset}
-                    /> */}
-                    <p>Dispose off asset</p>
+                        module={assetTypesStatusConstants.fleet}
+                    />
+                </ModalComponent>
+            }
+            {
+                crudStates.reassign === currentState
+                && <ModalComponent width={"40%"} title='Reassign Fleet' open={open} handleClose={handleClose}>
+                    <Reassign
+                        handleClickAction={handleOptionClicked}
+                        sendingRequest={loading}
+                        handleClose={handleClose}
+                        buttonText='Confirm'
+                        asset={currentAsset}
+                        module={assetTypesStatusConstants.fleet}
+                    />
+                </ModalComponent>
+            }
+
+            {
+                crudStates.repair === currentState
+                && <ModalComponent width={"90%"} title='Repair Fleet' open={open} handleClose={handleClose}>
+                    <Repair
+                        handleClickAction={handleOptionClicked}
+                        sendingRequest={loading}
+                        handleClose={handleClose}
+                        buttonText='Confirm'
+                        asset={currentAsset}
+                        module={assetTypesStatusConstants.fleet}
+                    />
+                </ModalComponent>
+            }
+
+            {
+                crudStates.inStore === currentState
+                && <ModalComponent width={"40%"} title='Send Fleet to Store' open={open} handleClose={handleClose}>
+                    <ToStore
+                        handleClickAction={handleOptionClicked}
+                        sendingRequest={loading}
+                        handleClose={handleClose}
+                        buttonText='Confirm'
+                        asset={currentAsset}
+                        module={assetTypesStatusConstants.fleet}
+                    />
                 </ModalComponent>
             }
             <Grid xs={12} container>

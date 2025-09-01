@@ -24,6 +24,9 @@ import { IAssetType } from "../../settings/assetTypes/interface";
 import { AutocompleteContext } from "../../../context/autocomplete";
 import AssetUtills from "../Utills";
 import { determineBranchName } from "../../../utils/helpers";
+import AssignmentIndOutlinedIcon from '@mui/icons-material/AssignmentIndOutlined';
+import BuildOutlinedIcon from '@mui/icons-material/BuildOutlined';
+import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
 
 const FleetUtills = () => {
     const endPoint = 'assets';
@@ -33,6 +36,9 @@ const FleetUtills = () => {
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
     const [fleetTableData, setFleetTableData] = useState<IFleetTableData[]>([] as IFleetTableData[])
     const { selectedItemDetails, value, inputValue, label } = useContext(AutocompleteContext)
+    const [currentAsset, setCurrentAsset] = useState<IFleet>({} as IFleet);
+    const [currentState, setCurrentState] = useState<string>("");
+
     const {
         searchStockByLPONumber,
         searchUserByName,
@@ -69,6 +75,8 @@ const FleetUtills = () => {
     const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore)
     const { commodities } = useSelector((state: RootState) => state.CommodityStore)
     const { inventory } = useSelector((state: RootState) => state.InventoryStore)
+    const { fleetAssets } = useSelector((state: RootState) => state.FleetStore)
+
     const navigate = useNavigate()
 
 
@@ -120,7 +128,10 @@ const FleetUtills = () => {
             options: [
                 { value: "dispose", label: "Dispose", icon: <InfoIcon fontSize='small' color='error' /> },
                 { value: "update", label: "Update", icon: <ModeEditIcon fontSize='small' color='info' /> },
-                { value: "read", label: "View Details", icon: <RemoveRedEyeIcon fontSize='small' color='inherit' /> }
+                { value: "read", label: "View Details", icon: <RemoveRedEyeIcon fontSize='small' color='inherit' /> },
+                { value: crudStates.reassign, label: "Reassign", icon: <AssignmentIndOutlinedIcon fontSize='small' color='secondary' /> },
+                { value: crudStates.repair, label: "Repair", icon: <BuildOutlinedIcon fontSize='small' color='primary' /> },
+                { value: crudStates.inStore, label: "Send to Store", icon: <HomeOutlinedIcon fontSize='small' color='action' /> },
             ]
         },
     };
@@ -347,12 +358,28 @@ const FleetUtills = () => {
             case crudStates.update:
                 navigate(`${ROUTES.UPDATE_FLEET}/${moduleID}`)
                 break;
+            case crudStates.read:
+                navigate(`${ROUTES.LIST_FLEET}/${moduleID}`);
+                break;
             case crudStates.dispose:
-                // setCurrentAsset(determineCurrentAsset(moduleID as number, rows as IFleet[]))
+                setCurrentAsset(determineCurrentAsset(moduleID as number, fleetAssets as IFleet[]))
+                setCurrentState(crudStates.dispose);
                 handleOpen();
                 break;
-            case crudStates.read:
-                navigate(`${ROUTES.LIST_FLEET}/${moduleID}`)
+            case crudStates.reassign:
+                setCurrentAsset(determineCurrentAsset(moduleID as number, fleetAssets as IFleet[]))
+                setCurrentState(crudStates.reassign);
+                handleOpen();
+                break;
+            case crudStates.repair:
+                setCurrentAsset(determineCurrentAsset(moduleID as number, fleetAssets as IFleet[]))
+                setCurrentState(crudStates.repair);
+                handleOpen();
+                break;
+            case crudStates.inStore:
+                setCurrentAsset(determineCurrentAsset(moduleID as number, fleetAssets as IFleet[]))
+                setCurrentState(crudStates.inStore);
+                handleOpen();
                 break;
             default:
                 break;
@@ -373,7 +400,9 @@ const FleetUtills = () => {
             handleOptionClicked,
             fleetTableData,
             handleFleetTableData,
-            determineFleetAssetType
+            determineFleetAssetType,
+            currentAsset,
+            currentState
         }
     )
 }
