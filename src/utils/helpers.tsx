@@ -13,6 +13,7 @@ import { ICommodity } from "../pages/settings/commodity/interface";
 import { IAssetType } from "../pages/settings/assetTypes/interface";
 import { assetTypesStatusConstants } from "./constants";
 import { IStockCommodities } from "../pages/inventory/interface";
+import { IITEquipment } from "../pages/assets/ITEquipment/interface";
 
 export const camelCaseToWords = (camelCaseString: string) => {
     return camelCaseString
@@ -435,6 +436,24 @@ export function cleanNewDeliveries(
 
 
 export const formatNumber = (num: number): string => {
-  if (num >= 1000) return (num / 1000).toFixed(1) + 'k';
-  return num.toString();
+    if (num >= 1000) return (num / 1000).toFixed(1) + 'k';
+    return num.toString();
+};
+
+/**
+ * Helper function to determine the branch name for a given equipment item.
+ * @param item - The equipment item to check.
+ * @returns The branch name if it exists, otherwise an empty string.
+ */
+export const determineBranchName = (item: IITEquipment) => {
+
+    if (item?.assignedTo) {
+        if (item.assignedTo.branch?.name === "Head Office") {
+            return item.assignedTo.department?.name || "";
+        } else {
+            return item.assignedTo.branch?.name || "";
+        }
+    }
+
+    return item.branch?.name || "";
 };

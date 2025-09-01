@@ -26,6 +26,7 @@ import AssetUtills from "../Utills";
 import AssignmentIndOutlinedIcon from '@mui/icons-material/AssignmentIndOutlined';
 import BuildOutlinedIcon from '@mui/icons-material/BuildOutlined';
 import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
+import { determineBranchName } from "../../../utils/helpers";
 
 const OfficeEquipmentUtills = () => {
     const endPoint = 'assets';
@@ -172,7 +173,7 @@ const OfficeEquipmentUtills = () => {
                     // costOfAsset: item.costOfTheAsset,
                     status: item?.assetStatus?.status as string,
                     assignedTo: item.assignedTo?.firstName ? `${item.assignedTo?.lastName} ${item.assignedTo?.firstName}` : "",
-                    location: item.branch?.name as string
+                    location: determineBranchName(item),
                 }
             )
         })
