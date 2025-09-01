@@ -6,7 +6,7 @@ Managing Director
 */
 
 import { Grid } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import TableComponent from "../../../components/tables/TableComponent";
 import { useNavigate } from "react-router";
 import FleetUtills from "./utills";
@@ -19,15 +19,22 @@ import { useDispatch } from "react-redux";
 import { AppDispatch, RootState } from "../../../store";
 import { loadAllFleet } from "./slice";
 import { useSelector } from "react-redux";
+import { IBulkAssetData } from "../ITEquipment/interface";
+import { toast } from "react-toastify";
+import { bulkInsertFleetService } from "./service";
+import { FileContext } from "../../../context/file/FileContext";
 
 const Fleet = () => {
     const [loading, setLoading] = useState<boolean>(false);
     const [count, setCount] = useState<number>(0)
     const navigate = useNavigate();
-    const { currentAssetType, setCurrentAssetType } = AssetUtills();
+    const { currentAssetType, setCurrentAssetType, determineStatusId } = AssetUtills();
     const dispatch = useDispatch<AppDispatch>()
     const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore);
-    const { fleetAssets } = useSelector((state: RootState) => state.FleetStore)
+    const { fleetAssets } = useSelector((state: RootState) => state.FleetStore);
+    const [selectedStatus, setSelectedStatus] = useState<string>('all');
+    const { fileData } = useContext(FileContext);
+
 
     const {
         columnHeaders,
@@ -42,10 +49,12 @@ const Fleet = () => {
         determineFleetAssetType
     } = FleetUtills();
 
-    const fetchResources = async () => {
-        setLoading(true)
-
-        const params = { assetTypeId: currentAssetType.id }
+    const fetchResources = async (status?: string) => {
+        setLoading(true);
+        const params = {
+            assetTypeId: currentAssetType.id,
+            assetStatusId: determineStatusId(status || 'all')
+        }
 
         try {
             const response = await fetchRowsService({
@@ -84,6 +93,45 @@ const Fleet = () => {
         }
     }, [fleetAssets])
 
+    const handleStatusChange = (status: string) => {
+        if (status === 'requireUpdate'
+            || status === 'issuanceAvailable'
+            || status === 'receiptAcknowledged'
+            || status === 'inStore'
+            || status === 'inMaintenance'
+        ) {
+            fetchResources(status);
+            setSelectedStatus(status);
+        } else {
+            fetchResources('all');
+            setSelectedStatus('all');
+        }
+    }
+
+    const bulkInsertITAssets = async (assets: Array<IBulkAssetData>) => {
+        try {
+            const data = new FormData();
+            data.append("assets", JSON.stringify(assets));
+            data.append("assetTypeID", String(2)); // IT Equipment asset Type ID
+
+            const response = await bulkInsertFleetService(data);
+
+            if (response.success === true) {
+                toast.success("Bulk Insert Successful")
+                fetchResources('all');
+            }
+
+        } catch (error) {
+            console.log("Bulk Insert Error", error);
+        }
+    }
+
+    useEffect(() => {
+        if (fileData?.jsonData?.length > 0 && fileData?.module === module) {
+            bulkInsertITAssets(fileData.jsonData as unknown as Array<IBulkAssetData>);
+        }
+    }, [fileData]);
+
 
 
     return (
@@ -116,6 +164,11 @@ const Fleet = () => {
                         handleOptionClicked={handleOptionClicked}
                         paginationMode='server'
                         params={{ assetTypeId: currentAssetType.id }}
+                        refresh
+                        filterMode="server"
+                        status
+                        onStatusChange={handleStatusChange}
+                        selectedStatus={selectedStatus}
                     />
                 }
             </Grid>

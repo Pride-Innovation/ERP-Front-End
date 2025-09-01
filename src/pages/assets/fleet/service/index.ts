@@ -33,3 +33,16 @@ export const updateFleetEquipmentService = async (body: object, id: string | num
         return error
     }
 }
+
+export const bulkInsertFleetService = async (data: object) => {
+    try {
+        const response = await axiosInstance.post(`assets/bulk-insert`, data, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            }
+        });
+        return response.data;
+    } catch (error) {
+        return error;
+    }
+}

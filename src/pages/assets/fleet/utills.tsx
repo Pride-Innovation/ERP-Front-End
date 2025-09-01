@@ -23,6 +23,7 @@ import { RootState } from "../../../store";
 import { IAssetType } from "../../settings/assetTypes/interface";
 import { AutocompleteContext } from "../../../context/autocomplete";
 import AssetUtills from "../Utills";
+import { determineBranchName } from "../../../utils/helpers";
 
 const FleetUtills = () => {
     const endPoint = 'assets';
@@ -101,6 +102,10 @@ const FleetUtills = () => {
         image,
         stock,
         commodity,
+        purchaseCost,
+        costOfTheAsset,
+        hostname,
+        lpoNumber,
         ...data
     } = fleetsMock[0];
 
@@ -142,6 +147,10 @@ const FleetUtills = () => {
                 image,
                 stock,
                 commodity,
+                purchaseCost,
+                costOfTheAsset,
+                hostname,
+                lpoNumber,
                 ...fielsdata
             } = list[index];
 
@@ -157,7 +166,7 @@ const FleetUtills = () => {
                     costOfAsset: item.costOfTheAsset,
                     status: item?.assetStatus?.status as string,
                     assignedTo: item.assignedTo?.firstName ? `${item.assignedTo?.lastName} ${item.assignedTo?.firstName}` : "",
-                    location: item.branch?.name as string
+                    location: determineBranchName(item),
                 }
             )
         })
