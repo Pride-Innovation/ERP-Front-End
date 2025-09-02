@@ -86,14 +86,14 @@ const CreateFleet = () => {
                             mb: 0.5
                         }}
                     >
-                        Create Office Equipment
+                        Create Fleet Item
                     </Typography>
 
                     <Typography
                         variant="body2"
                         sx={{ color: alpha('#000', 0.6) }}
                     >
-                        Fill in the details below to submit a new office equipment
+                        Fill in the details below to submit a new Fleet Item
                     </Typography>
                 </Box>
             </Box>
