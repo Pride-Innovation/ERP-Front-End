@@ -26,7 +26,6 @@ import TabComponent from '../../../../components/tabs';
 import AssignmentHistory from '../../trails/AssignmentHistory';
 import RepairHistory from '../../trails/RepairHistory';
 import { useEffect, useState } from 'react';
-import { fleetsMock } from "../../../../mocks/fleet";
 import Loading from '../../../../components/loading';
 import moment from 'moment';
 import { camelCaseToWords } from '../../../../utils/helpers';
@@ -48,12 +47,11 @@ import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import DescriptionIcon from '@mui/icons-material/Description';
 import CommuteIcon from '@mui/icons-material/Commute';
 import SpeedIcon from '@mui/icons-material/Speed';
-import LocalGasStationIcon from '@mui/icons-material/LocalGasStation';
 import ContentPasteIcon from '@mui/icons-material/ContentPaste';
 import StyleIcon from '@mui/icons-material/Style';
-import ColorLensIcon from '@mui/icons-material/ColorLens';
 import { IFleet, IFleetAxiosResponse } from '../interface';
-import { getFleetByIDService } from '../service';
+import { getFleetByIDService, removeFleetImageService, updateFleetImageService } from '../service';
+import { IAssetAxiosResponse } from '../../interface';
 
 // Brand colors
 const PRIMARY_COLOR = '#08796C';
@@ -198,7 +196,6 @@ const FleetDetails = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
 
-    // Simulated data fetch (would be replaced with an actual API call)
     const getFleet = async () => {
         setLoading(true);
         try {
@@ -214,57 +211,52 @@ const FleetDetails = () => {
 
     useEffect(() => { getFleet(); }, []);
 
-    // Image handling functions
     const handleImageUpdate = async (file: File) => {
         try {
-            // Show loading state
-            setUploadLoading(true);
-
-            // Create FormData for API (for future implementation)
             const formData = new FormData();
-            formData.append('image', file);
-            formData.append('id', id as string);
+            formData.append('file', file);
 
-            // In a real implementation, you would call an API here
-            // const response = await updateVehicleImageService(formData);
+            const response = await updateFleetImageService(id as string, formData) as IAssetAxiosResponse;
+            if (response.status !== 201) {
+                toast.error('Failed to update image');
+            }
 
-            // Simulate API call delay
-            setTimeout(() => {
-                const imageUrl = URL.createObjectURL(file);
-                setFleet((prev: IFleet) => ({
-                    ...prev,
-                    image: imageUrl
-                }));
-                toast.success('Vehicle image updated successfully');
-                setUploadLoading(false);
-            }, 1500);
+            if (response.data && response.data.image) {
+                const serverPath = response.data.image;
+                const filename = serverPath.split(/[\/\\]/).pop();
+
+                setFleet({
+                    ...fleet,
+                    image: `/statics/${filename}`
+                });
+
+                toast.success('Image updated successfully');
+            }
         } catch (error) {
             console.error('Error updating image:', error);
-            toast.error('Failed to update vehicle image');
-            setUploadLoading(false);
+            toast.error('Failed to update image');
         }
     };
 
     const handleImageRemove = async () => {
         try {
-            setUploadLoading(true);
+            const response = await removeFleetImageService(id as string) as IAssetAxiosResponse;
+            if (response.status !== 201) {
+                toast.error('Failed to update image');
+            }
 
-            // In a real implementation, call an API to remove the image
-            // const response = await removeVehicleImageService(id as string);
-
-            // Simulate API call
-            setTimeout(() => {
-                setFleet((prev: IFleet) => ({
-                    ...prev,
+            if (response.data) {
+                setFleet({
+                    ...fleet,
                     image: null
-                }));
-                toast.success('Vehicle image removed successfully');
-                setUploadLoading(false);
-            }, 1000);
+                });
+
+                toast.success('Image removed successfully');
+            }
+
         } catch (error) {
             console.error('Error removing image:', error);
-            toast.error('Failed to remove vehicle image');
-            setUploadLoading(false);
+            toast.error('Failed to remove image');
         }
     };
 
@@ -274,7 +266,6 @@ const FleetDetails = () => {
                 <Loading items='Fleet Vehicle' />
             ) : (
                 <>
-                    {/* Header section - Matching Office Equipment header */}
                     <Box
                         sx={{
                             mb: 3,
@@ -285,12 +276,10 @@ const FleetDetails = () => {
                             bgcolor: '#ffffff'
                         }}
                     >
-                        {/* Accent color bar at top */}
                         <Box sx={{ height: 4, bgcolor: PRIMARY_COLOR }} />
 
                         <Box sx={{ p: 2.5 }}>
                             <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
-                                {/* Left side - Asset Identity */}
                                 <Box sx={{ display: 'flex', alignItems: 'flex-start', flex: 1 }}>
                                     <Box
                                         sx={{
@@ -349,7 +338,6 @@ const FleetDetails = () => {
                                     </Box>
                                 </Box>
 
-                                {/* Right side - Asset Details */}
                                 <Box
                                     sx={{
                                         display: 'flex',
@@ -359,7 +347,6 @@ const FleetDetails = () => {
                                         alignItems: 'center'
                                     }}
                                 >
-                                    {/* Registration Number */}
                                     <Box
                                         sx={{
                                             display: 'flex',
@@ -427,7 +414,6 @@ const FleetDetails = () => {
                                         </Box>
                                     </Box>
 
-                                    {/* Location */}
                                     <Box
                                         sx={{
                                             display: 'flex',

@@ -73,3 +73,25 @@ export const getFleetByIDService = async (id: string | number) => {
         return error;
     }
 }
+
+export const updateFleetImageService = async (id: string | number, body: object) => {
+    try {
+        const response = await axiosInstance.put(`assets/image/${id}`, body, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            }
+        });
+        return response;
+    } catch (error) {
+        return error;
+    }
+}
+
+export const removeFleetImageService = async (id: string | number) => {
+    try {
+        const response = await axiosInstance.put(`assets/remove/image/${id}`);
+        return response;
+    } catch (error) {
+        return error;
+    }
+}
