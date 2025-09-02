@@ -6,32 +6,33 @@ Managing Director
 */
 
 import {
-    Box,
+    Typography,
+    Grid,
     Card,
     CardContent,
+    Box,
     Divider,
-    Grid,
     Stack,
-    Typography,
-    Paper,
     alpha,
+    Paper,
+    IconButton,
+    Tooltip,
     Container,
     Button as MuiButton,
-    Tooltip,
-    IconButton
-} from "@mui/material";
+    Chip,
+} from '@mui/material';
+import { useNavigate, useParams } from 'react-router-dom';
+import TabComponent from '../../../../components/tabs';
+import AssignmentHistory from '../../trails/AssignmentHistory';
+import RepairHistory from '../../trails/RepairHistory';
+import { useEffect, useState } from 'react';
 import { fleetsMock } from "../../../../mocks/fleet";
-import { useState, useEffect } from "react";
-import TabComponent from "../../../../components/tabs";
-import AssignmentHistory from "../../trails/AssignmentHistory";
-import RepairHistory from "../../trails/RepairHistory";
+import Loading from '../../../../components/loading';
 import moment from 'moment';
-import { useNavigate, useParams } from "react-router-dom";
-import Loading from "../../../../components/loading";
-import { camelCaseToWords } from "../../../../utils/helpers";
-import { toast } from "react-toastify";
-import TimeLineDot from "../../../../components/timeLineDots";
-import AssetImageUpload from "../../../assets/ITEquipment/view/AssetImageUpload";
+import { camelCaseToWords } from '../../../../utils/helpers';
+import { toast } from 'react-toastify';
+import TimeLineDot from '../../../../components/timeLineDots';
+import AssetImageUpload from '../../../assets/ITEquipment/view/AssetImageUpload';
 
 // Icons
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -51,12 +52,14 @@ import LocalGasStationIcon from '@mui/icons-material/LocalGasStation';
 import ContentPasteIcon from '@mui/icons-material/ContentPaste';
 import StyleIcon from '@mui/icons-material/Style';
 import ColorLensIcon from '@mui/icons-material/ColorLens';
+import { IFleet, IFleetAxiosResponse } from '../interface';
+import { getFleetByIDService } from '../service';
 
 // Brand colors
 const PRIMARY_COLOR = '#08796C';
 const SECONDARY_COLOR = '#BC892C';
 
-// Enhanced DetailSection component with icons and better styling
+// Custom styled DetailSection with improved appearance
 const EnhancedDetailSection = ({
     label,
     text,
@@ -131,9 +134,7 @@ const EnhancedDetailSection = ({
                         chip
                     ) : (
                         <Box sx={{ display: "flex", alignItems: "center" }}>
-                            {label.toLowerCase().includes('status') && text &&
-                                <Box sx={{ mr: 1 }}><TimeLineDot status={text} /></Box>
-                            }
+                            {label === "Status" && text && <Box sx={{ mr: 1 }}><TimeLineDot status={text} /></Box>}
 
                             {isEmpty ? (
                                 <Typography variant="body2" fontStyle="italic" color="text.disabled">
@@ -152,7 +153,7 @@ const EnhancedDetailSection = ({
                                             size="small"
                                             onClick={() => {
                                                 navigator.clipboard.writeText(text?.toString() || '');
-                                                toast.info(`${label} copied to clipboard`);
+                                                toast.success(`${label} copied to clipboard`);
                                             }}
                                             sx={{
                                                 ml: 1,
@@ -165,7 +166,7 @@ const EnhancedDetailSection = ({
                                     </Tooltip>
                                 )}
 
-                            {label.toLowerCase().includes('cost') && !isEmpty && (
+                            {label === "Purchase Cost" && !isEmpty && (
                                 <Typography
                                     component="span"
                                     variant="caption"
@@ -191,25 +192,27 @@ const EnhancedDetailSection = ({
 };
 
 const FleetDetails = () => {
-    const [vehicle, setVehicle] = useState<any>(null);
+    const [fleet, setFleet] = useState<IFleet>({} as IFleet);
     const [loading, setLoading] = useState<boolean>(true);
     const [uploadLoading, setUploadLoading] = useState<boolean>(false);
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
 
     // Simulated data fetch (would be replaced with an actual API call)
-    useEffect(() => {
+    const getFleet = async () => {
         setLoading(true);
-        // Simulate API delay
-        setTimeout(() => {
-            // Find the vehicle by ID or use the first mock vehicle
-            const foundVehicle = id ?
-                fleetsMock.find(v => (v.id as number).toString() === id) : fleetsMock[0];
+        try {
+            const response = await getFleetByIDService(id as string) as IFleetAxiosResponse;
+            if (response.status === 200) {
+                setFleet(response.data);
+            }
+        } catch (error) {
+            console.log(error);
+        }
+        setLoading(false);
+    }
 
-            setVehicle(foundVehicle);
-            setLoading(false);
-        }, 800);
-    }, [id]);
+    useEffect(() => { getFleet(); }, []);
 
     // Image handling functions
     const handleImageUpdate = async (file: File) => {
@@ -228,7 +231,7 @@ const FleetDetails = () => {
             // Simulate API call delay
             setTimeout(() => {
                 const imageUrl = URL.createObjectURL(file);
-                setVehicle((prev: any) => ({
+                setFleet((prev: IFleet) => ({
                     ...prev,
                     image: imageUrl
                 }));
@@ -251,7 +254,7 @@ const FleetDetails = () => {
 
             // Simulate API call
             setTimeout(() => {
-                setVehicle((prev: any) => ({
+                setFleet((prev: IFleet) => ({
                     ...prev,
                     image: null
                 }));
@@ -271,6 +274,206 @@ const FleetDetails = () => {
                 <Loading items='Fleet Vehicle' />
             ) : (
                 <>
+                    {/* Header section - Matching Office Equipment header */}
+                    <Box
+                        sx={{
+                            mb: 3,
+                            borderRadius: 2,
+                            overflow: 'hidden',
+                            boxShadow: `0 1px 3px ${alpha('#000', 0.08)}`,
+                            border: `1px solid ${alpha('#000', 0.08)}`,
+                            bgcolor: '#ffffff'
+                        }}
+                    >
+                        {/* Accent color bar at top */}
+                        <Box sx={{ height: 4, bgcolor: PRIMARY_COLOR }} />
+
+                        <Box sx={{ p: 2.5 }}>
+                            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
+                                {/* Left side - Asset Identity */}
+                                <Box sx={{ display: 'flex', alignItems: 'flex-start', flex: 1 }}>
+                                    <Box
+                                        sx={{
+                                            mr: 2,
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            borderRadius: 1.5,
+                                            background: `linear-gradient(135deg, ${alpha(PRIMARY_COLOR, 0.12)} 0%, ${alpha(PRIMARY_COLOR, 0.22)} 100%)`,
+                                            color: PRIMARY_COLOR,
+                                            width: 48,
+                                            height: 48,
+                                            flexShrink: 0,
+                                            boxShadow: `0 2px 6px ${alpha(PRIMARY_COLOR, 0.15)}`
+                                        }}
+                                    >
+                                        <DirectionsCarIcon fontSize="medium" />
+                                    </Box>
+
+                                    <Box>
+                                        <Typography
+                                            variant="h5"
+                                            fontWeight={600}
+                                            color="text.primary"
+                                            sx={{ lineHeight: 1.2, mb: 1 }}
+                                        >
+                                            {fleet?.assetName || "Fleet Vehicle"}
+                                        </Typography>
+
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                                            <Chip
+                                                size="small"
+                                                label={fleet?.assetType?.name || "Fleet"}
+                                                sx={{
+                                                    bgcolor: alpha(PRIMARY_COLOR, 0.08),
+                                                    color: PRIMARY_COLOR,
+                                                    fontWeight: 500,
+                                                    borderRadius: 1
+                                                }}
+                                            />
+
+                                            {fleet?.assetStatus?.status && (
+                                                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                                    <TimeLineDot status={fleet?.assetStatus.status} />
+                                                    <Typography
+                                                        variant="body2"
+                                                        fontWeight={500}
+                                                        color="text.secondary"
+                                                        sx={{ ml: 0.5 }}
+                                                    >
+                                                        {fleet?.assetStatus?.status}
+                                                    </Typography>
+                                                </Box>
+                                            )}
+                                        </Box>
+                                    </Box>
+                                </Box>
+
+                                {/* Right side - Asset Details */}
+                                <Box
+                                    sx={{
+                                        display: 'flex',
+                                        gap: 2,
+                                        flexWrap: 'wrap',
+                                        justifyContent: { xs: 'flex-start', md: 'flex-end' },
+                                        alignItems: 'center'
+                                    }}
+                                >
+                                    {/* Registration Number */}
+                                    <Box
+                                        sx={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            py: 0.75,
+                                            px: 1.5,
+                                            borderRadius: 1.5,
+                                            bgcolor: alpha(SECONDARY_COLOR, 0.05),
+                                            border: `1px solid ${alpha(SECONDARY_COLOR, 0.15)}`,
+                                            minWidth: 'fit-content'
+                                        }}
+                                    >
+                                        <InfoIcon
+                                            fontSize="small"
+                                            sx={{
+                                                color: alpha(SECONDARY_COLOR, 0.7),
+                                                mr: 0.75
+                                            }}
+                                        />
+
+                                        <Box>
+                                            <Typography
+                                                variant="caption"
+                                                color="text.secondary"
+                                                sx={{ fontWeight: 500, display: 'block', mb: 0.2 }}
+                                            >
+                                                Registration No #
+                                            </Typography>
+
+                                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                                <Typography
+                                                    variant="body2"
+                                                    fontWeight={fleet?.engravedNumber ? 600 : 400}
+                                                    color={fleet?.engravedNumber ? SECONDARY_COLOR : 'text.secondary'}
+                                                    sx={{
+                                                        fontStyle: fleet?.engravedNumber ? 'normal' : 'italic'
+                                                    }}
+                                                >
+                                                    {fleet?.engravedNumber || "Not specified"}
+                                                </Typography>
+
+                                                {fleet?.engravedNumber && (
+                                                    <Tooltip title="Copy to clipboard">
+                                                        <IconButton
+                                                            size="small"
+                                                            onClick={() => {
+                                                                navigator.clipboard.writeText(fleet?.engravedNumber || '');
+                                                                toast.success('Registration # copied to clipboard');
+                                                            }}
+                                                            sx={{
+                                                                ml: 0.5,
+                                                                p: 0.3,
+                                                                color: alpha(SECONDARY_COLOR, 0.7),
+                                                                '&:hover': {
+                                                                    bgcolor: alpha(SECONDARY_COLOR, 0.1),
+                                                                    color: SECONDARY_COLOR
+                                                                }
+                                                            }}
+                                                        >
+                                                            <ContentPasteIcon sx={{ fontSize: 14 }} />
+                                                        </IconButton>
+                                                    </Tooltip>
+                                                )}
+                                            </Box>
+                                        </Box>
+                                    </Box>
+
+                                    {/* Location */}
+                                    <Box
+                                        sx={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            py: 0.75,
+                                            px: 1.5,
+                                            borderRadius: 1.5,
+                                            bgcolor: alpha(PRIMARY_COLOR, 0.05),
+                                            border: `1px solid ${alpha(PRIMARY_COLOR, 0.15)}`,
+                                            minWidth: 'fit-content'
+                                        }}
+                                    >
+                                        <LocationOnIcon
+                                            fontSize="small"
+                                            sx={{
+                                                color: alpha(PRIMARY_COLOR, 0.7),
+                                                mr: 0.75
+                                            }}
+                                        />
+
+                                        <Box>
+                                            <Typography
+                                                variant="caption"
+                                                color="text.secondary"
+                                                sx={{ fontWeight: 500, display: 'block', mb: 0.2 }}
+                                            >
+                                                Location
+                                            </Typography>
+
+                                            <Typography
+                                                variant="body2"
+                                                fontWeight={fleet?.branch?.name ? 600 : 400}
+                                                color={fleet?.branch?.name ? PRIMARY_COLOR : 'text.secondary'}
+                                                sx={{
+                                                    fontStyle: fleet?.branch?.name ? 'normal' : 'italic'
+                                                }}
+                                            >
+                                                {fleet?.branch?.name || "Not specified"}
+                                            </Typography>
+                                        </Box>
+                                    </Box>
+                                </Box>
+                            </Box>
+                        </Box>
+                    </Box>
+
                     <Grid container spacing={3}>
                         <Grid item xs={12} md={4}>
                             <Card
@@ -282,19 +485,17 @@ const FleetDetails = () => {
                                     height: '100%'
                                 }}
                             >
-                                {/* Improved AssetImageUpload implementation */}
                                 <AssetImageUpload
-                                    currentImage={vehicle?.image || null}
-                                    assetName={vehicle?.assetName || "Vehicle"}
-                                    assetType="Fleet"
+                                    currentImage={fleet?.image as string}
+                                    assetName={fleet?.assetName || "Fleet Vehicle"}
+                                    assetType={fleet?.assetType?.name || "Fleet"}
                                     onImageUpdate={handleImageUpdate}
                                     onImageRemove={handleImageRemove}
-                                    readOnly={!vehicle?.id}
+                                    readOnly={!fleet?.id}
                                     height={220}
                                 />
 
                                 <CardContent>
-                                    {/* Basic Information Section */}
                                     <Box sx={{ mb: 2 }}>
                                         <Typography
                                             variant="subtitle1"
@@ -308,112 +509,88 @@ const FleetDetails = () => {
 
                                     <EnhancedDetailSection
                                         label="Vehicle Name"
-                                        text={vehicle?.assetName}
+                                        text={fleet?.assetName}
                                         icon={<DirectionsCarIcon fontSize="small" />}
                                     />
 
                                     <EnhancedDetailSection
                                         label="Make/Model"
-                                        text={vehicle?.make || vehicle?.model ? `${vehicle?.make || ''} ${vehicle?.model || ''}`.trim() : null}
+                                        text={fleet?.make || fleet?.model ? `${fleet?.make || ''} ${fleet?.model || ''}`.trim() : null}
                                         icon={<CommuteIcon fontSize="small" />}
                                     />
 
                                     <EnhancedDetailSection
                                         label="Registration Number"
-                                        text={vehicle?.serialNumber || vehicle?.engravedNumber}
+                                        text={fleet?.engravedNumber || fleet?.engravedNumber}
                                         icon={<StyleIcon fontSize="small" />}
                                     />
 
-                                    <EnhancedDetailSection
+                                    {/* <EnhancedDetailSection
                                         label="Color"
-                                        text={vehicle?.color || null}
+                                        text={fleet?.color || null}
                                         icon={<ColorLensIcon fontSize="small" />}
-                                    />
+                                    /> */}
 
                                     <EnhancedDetailSection
                                         label="Chassis Number"
-                                        text={vehicle?.chassisNumber || null}
+                                        text={fleet?.engravedNumber || null}
                                         icon={<InfoIcon fontSize="small" />}
                                     />
 
-                                    {/* Supplier & Financial Section */}
-                                    <Box sx={{ mb: 2, mt: 3 }}>
-                                        <Typography
-                                            variant="subtitle1"
-                                            fontWeight={600}
-                                            color="text.secondary"
-                                        >
-                                            Purchase & Assignment
-                                        </Typography>
-                                        <Divider sx={{ mt: 1, mb: 2 }} />
-                                    </Box>
-
                                     <EnhancedDetailSection
                                         label="Supplier"
-                                        text={vehicle?.supplier?.name || null}
+                                        text={fleet?.supplier?.name || null}
                                         icon={<AccountBalanceIcon fontSize="small" />}
                                     />
 
                                     <EnhancedDetailSection
                                         label="Purchase Cost"
-                                        text={vehicle?.purchaseCost}
+                                        text={fleet?.purchaseCost}
                                         icon={<PaidIcon fontSize="small" />}
                                     />
 
                                     <EnhancedDetailSection
                                         label="Date of Receipt"
-                                        text={vehicle?.dateReceipt ? moment(vehicle.dateReceipt).format('Do MMMM YYYY') : null}
+                                        text={fleet?.dateReceipt ? moment(fleet.dateReceipt).format('Do MMMM YYYY') : null}
                                         icon={<CalendarTodayIcon fontSize="small" />}
                                     />
 
                                     <EnhancedDetailSection
+                                        label="Engine Capacity"
+                                        text={fleet?.category || null}
+                                        icon={<SpeedIcon fontSize="small" />}
+                                    />
+
+                                    {/* <EnhancedDetailSection
+                                        label="Fuel Type"
+                                        text={fleet?.fuelType || null}
+                                        icon={<LocalGasStationIcon fontSize="small" />}
+                                    /> */}
+
+                                    <EnhancedDetailSection
                                         label="Location"
-                                        text={vehicle?.branch?.name || null}
+                                        text={fleet?.branch?.name || null}
                                         icon={<LocationOnIcon fontSize="small" />}
                                     />
 
                                     <EnhancedDetailSection
                                         label="Status"
-                                        text={vehicle?.assetStatus?.status || vehicle?.assetStatus?.name || null}
+                                        text={fleet?.assetStatus?.status || fleet?.assetStatus?.name || null}
                                         icon={<InventoryIcon fontSize="small" />}
                                     />
 
-                                    {/* Technical Details Section */}
-                                    <Box sx={{ mb: 2, mt: 3 }}>
-                                        <Typography
-                                            variant="subtitle1"
-                                            fontWeight={600}
-                                            color="text.secondary"
-                                        >
-                                            Technical Specifications
-                                        </Typography>
-                                        <Divider sx={{ mt: 1, mb: 2 }} />
-                                    </Box>
-
-                                    <EnhancedDetailSection
-                                        label="Engine Capacity"
-                                        text={vehicle?.engineCapacity || null}
-                                        icon={<SpeedIcon fontSize="small" />}
-                                    />
-
-                                    <EnhancedDetailSection
-                                        label="Fuel Type"
-                                        text={vehicle?.fuelType || null}
-                                        icon={<LocalGasStationIcon fontSize="small" />}
-                                    />
-
-                                    {vehicle?.description && (
+                                    {fleet?.description && (
                                         <EnhancedDetailSection
                                             label="Description"
-                                            text={vehicle.description}
+                                            text={fleet?.description}
                                             icon={<DescriptionIcon fontSize="small" />}
                                         />
                                     )}
 
-                                    {vehicle?.assignedTo && (
+                                    {fleet?.assignedTo && (
                                         <EnhancedDetailSection
                                             label="Assigned To"
-                                            text={`${vehicle.assignedTo.firstName} ${vehicle.assignedTo.lastName}`}
+                                            text={`${fleet?.assignedTo.firstName} ${fleet?.assignedTo.lastName}`}
                                             icon={<AssignmentIndIcon fontSize="small" />}
                                         />
                                     )}
@@ -439,7 +616,7 @@ const FleetDetails = () => {
                                                 position: 0,
                                                 content: (
                                                     <Box>
-                                                        <AssignmentHistory id={vehicle?.id?.toString() || ""} />
+                                                        <AssignmentHistory id={fleet?.id?.toString() || ""} />
                                                     </Box>
                                                 )
                                             },
@@ -448,7 +625,7 @@ const FleetDetails = () => {
                                                 position: 1,
                                                 content: (
                                                     <Box>
-                                                        <RepairHistory id={vehicle?.id?.toString() || ""} />
+                                                        <RepairHistory id={fleet?.id?.toString() || ""} />
                                                     </Box>
                                                 )
                                             },
@@ -459,21 +636,37 @@ const FleetDetails = () => {
                         </Grid>
                     </Grid>
 
+                    {/* Updated button section to match Office Equipment component */}
                     <Box
                         sx={{
+                            mb: 3,
                             display: 'flex',
                             flexDirection: { xs: 'column', md: 'row' },
+                            justifyContent: 'end',
                             alignItems: { xs: 'flex-start', md: 'center' },
                             gap: 2,
                             mt: 3,
                         }}
                     >
-                        <Stack
-                            direction="row"
-                            sx={{
-                                width: '100%',
-                                display: 'flex'
-                            }}>
+                        <Stack direction="row" spacing={1.5}>
+                            <MuiButton
+                                color='primary'
+                                type='button'
+                                onClick={() => navigate(`/assets/fleet/edit/${fleet?.id}`)}
+                                variant='outlined'
+                                startIcon={<EditIcon />}
+                            >Edit</MuiButton>
+
+                            {fleet?.assignedTo === null && (
+                                <MuiButton
+                                    color='success'
+                                    type='button'
+                                    variant='contained'
+                                    onClick={() => navigate(`/assets/fleet/assign/${fleet?.id}`)}
+                                    startIcon={<AssignmentIndIcon />}
+                                >Assign</MuiButton>
+                            )}
+
                             <MuiButton
                                 color='inherit'
                                 type='button'
@@ -488,36 +681,7 @@ const FleetDetails = () => {
                                         backgroundColor: alpha('#000', 0.05)
                                     }
                                 }}
-                            >
-                                Back
-                            </MuiButton>
-                            <Stack direction="row"
-                                sx={{
-                                    ml: 'auto',
-                                }}
-                                spacing={1.5}>
-                                <MuiButton
-                                    color='primary'
-                                    type='button'
-                                    onClick={() => navigate(`/assets/fleet/edit/${vehicle.id}`)}
-                                    variant='outlined'
-                                    startIcon={<EditIcon />}
-                                >
-                                    Edit
-                                </MuiButton>
-
-                                {!vehicle?.assignedTo && (
-                                    <MuiButton
-                                        color='success'
-                                        type='button'
-                                        variant='contained'
-                                        onClick={() => navigate(`/assets/fleet/assign/${vehicle.id}`)}
-                                        startIcon={<AssignmentIndIcon />}
-                                    >
-                                        Assign
-                                    </MuiButton>
-                                )}
-                            </Stack>
+                            >Back</MuiButton>
                         </Stack>
                     </Box>
                 </>

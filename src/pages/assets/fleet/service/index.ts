@@ -64,3 +64,12 @@ export const reassignFleetService = async (id: string | number, body: object) =>
         return error;
     }
 }
+
+export const getFleetByIDService = async (id: string | number) => {
+    try {
+        const response = await axiosInstance.get(`assets/${id}`);
+        return response
+    } catch (error) {
+        return error;
+    }
+}
