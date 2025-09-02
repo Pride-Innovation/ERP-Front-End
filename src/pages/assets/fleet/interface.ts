@@ -9,7 +9,8 @@ import {
     Control,
     FieldError,
     FormState,
-    UseFormRegister
+    UseFormRegister,
+    UseFormTrigger
 } from "react-hook-form";
 import { ISupplier } from "../../settings/suppliers/interface";
 import { IUser } from "../../users/interface";
@@ -76,6 +77,17 @@ export interface IFleetForm {
     userParams?: Record<string, any>
     supplierParams?: Record<string, any>
     branchParams?: Record<string, any>
+    
+
+    // New properties for stepped form
+    formFields?: any;
+    computerFields?: any;
+    categories?: Record<string, string>;
+    selectedCategory?: string;
+    stateFormFields?: any;
+    isUpdate?: boolean;
+    loading?: boolean;
+    trigger?: UseFormTrigger<IFleet>;
 }
 
 export interface IFleetTableData {

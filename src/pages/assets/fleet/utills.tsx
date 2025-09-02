@@ -14,7 +14,7 @@ import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import { getTableHeaders } from "../../../components/tables/getTableHeaders";
 import { IFormData } from "../interface";
 import { IFleet, IFleetTableData } from "./interface";
-import { assetTypesStatusConstants, crudStates } from "../../../utils/constants";
+import { assetTypesStatusConstants, crudStates, unitsOfMeasure } from "../../../utils/constants";
 import { useNavigate } from "react-router";
 import { ROUTES } from "../../../core/routes/routes";
 import moment from "moment";
@@ -255,19 +255,8 @@ const FleetUtills = () => {
         {
             value: "unitOfMeasure",
             label: 'Unit of Measure',
-            type: "input"
-        },
-        {
-            value: "assetStatus",
-            label: 'Status',
             type: "select",
-            options: optionsObject.assetsStatusesOptions
-        },
-        {
-            value: "assetType",
-            label: 'Asset Type',
-            type: "select",
-            options: optionsObject.assetTypesOptions
+            options: unitsOfMeasure
         },
         {
             value: "netValueB",
@@ -278,13 +267,6 @@ const FleetUtills = () => {
             value: "assetDepreciationRate",
             label: 'Depreciation Rate',
             type: "input"
-        },
-        {
-            value: "assignedTo",
-            label: 'Assigned To',
-            type: "autocomplete",
-            options: optionsObject.usersOptions,
-            required: false
         },
         {
             value: "branch",
@@ -320,11 +302,6 @@ const FleetUtills = () => {
         {
             value: "make",
             label: 'Make',
-            type: "input",
-        },
-        {
-            value: "model",
-            label: 'Model',
             type: "input",
         },
         {

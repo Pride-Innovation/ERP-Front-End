@@ -18,7 +18,6 @@ import { RootState } from "../../../store";
 import CommodityUtills from "../../settings/commodity/utills";
 import InventoryUtills from "../../inventory/Utills";
 import SteppedOfficeEquipmentForm from "./SteppedOfficeEquipmentForm";
-import { useNavigate } from "react-router";
 
 const OfficeEquipmentForm = ({
     formState,
@@ -32,7 +31,6 @@ const OfficeEquipmentForm = ({
     branchParams,
     trigger
 }: IOfficeEquipmentForm) => {
-    const navigate = useNavigate();
     const [assetTypeId, setAssetTypeId] = useState<number | null>();
     const [loading, setLoading] = useState<boolean>(true);
     const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore);
