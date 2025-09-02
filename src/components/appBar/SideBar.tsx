@@ -33,7 +33,17 @@ const SideBar = ({ drawerOpen }: SideBarProps) => {
     }, [pathname]);
 
     return (
-        <Card sx={{ height: "100%", bgcolor: 'transparent' }}>
+        <Card
+            elevation={0}
+            sx={{
+                height: "100%",
+                bgcolor: 'transparent',
+                position: 'relative',
+                borderRadius: 0,
+                boxShadow: 'none',
+                display: 'flex',
+                flexDirection: 'column',
+            }}>
             <List
                 sx={{
                     width: "100%",
