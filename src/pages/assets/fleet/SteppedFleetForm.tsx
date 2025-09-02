@@ -20,7 +20,6 @@ import {
     useTheme,
     Button as MuiButton,
     useMediaQuery,
-    Alert
 } from "@mui/material";
 import {
     UseFormAutocompleteComponent,
@@ -286,7 +285,7 @@ const SteppedFleetForm = ({
                 >
                     <Box>
                         <MuiButton
-                            onClick={() => navigate(ROUTES.LIST_OFFICE_EQUIPMENT)}
+                            onClick={() => navigate(ROUTES.LIST_FLEET)}
                             color="inherit"
                             type="button"
                             variant="outlined"
