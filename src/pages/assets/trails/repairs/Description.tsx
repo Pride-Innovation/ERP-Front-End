@@ -41,9 +41,10 @@ const Description = ({ repair, handleClose, handleViewAttachments }: Description
     const isMediumScreen = useMediaQuery(theme.breakpoints.down('md'));
 
     const isCompleted = repair?.repairEndDate && repair?.repairEndDate !== '';
-    const status = isCompleted ? 'Completed' : 'Pending';
-    const statusColor = isCompleted ? theme.palette.success.main : theme.palette.warning.main;
+    const status = repair.status === "Completed" ? 'Completed' : 'Pending';
+    const statusColor = repair.status === "Completed" ? theme.palette.success.main : theme.palette.warning.main;
     const hasCompletionDocuments = repair?.completionDocuments && repair.completionDocuments.length > 0;
+
 
     return (
         <Box sx={{
@@ -52,18 +53,17 @@ const Description = ({ repair, handleClose, handleViewAttachments }: Description
             flexDirection: 'column',
             maxHeight: '90vh'
         }}>
-            {/* Header - Made more compact */}
             <Box sx={{
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                mb: 1.5, // Reduced margin
+                mb: 1.5,
                 py: 0.5
             }}>
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
                     <BuildIcon
                         color="primary"
-                        sx={{ mr: 1, fontSize: 24 }} // Smaller icon
+                        sx={{ mr: 1, fontSize: 24 }}
                     />
                     <Typography variant="h6" fontWeight={500} color="text.primary">
                         Repair #{repair?.id}
@@ -71,7 +71,7 @@ const Description = ({ repair, handleClose, handleViewAttachments }: Description
                 </Box>
                 <Chip
                     label={status}
-                    size="small" // Smaller chip
+                    size="small"
                     sx={{
                         bgcolor: alpha(statusColor, 0.1),
                         color: statusColor,
@@ -82,25 +82,22 @@ const Description = ({ repair, handleClose, handleViewAttachments }: Description
                 />
             </Box>
 
-            {/* Main content area */}
             <Box sx={{
                 flexGrow: 1,
                 display: 'flex',
                 flexDirection: 'column'
             }}>
-                <Grid container spacing={1.5}> {/* Reduced spacing */}
-                    {/* Repair Information section - More compact */}
+                <Grid container spacing={1.5}>
                     <Grid item xs={12} md={6}>
                         <Paper
                             elevation={0}
                             sx={{
-                                p: { xs: 1.5, sm: 2 }, // Reduced padding
+                                p: { xs: 1.5, sm: 2 },
                                 height: '100%',
                                 borderRadius: 1.5,
                                 border: `1px solid ${alpha('#000', 0.08)}`
                             }}
                         >
-                            {/* More compact header */}
                             <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                                 <Box sx={{
                                     bgcolor: alpha(theme.palette.primary.main, 0.08),
@@ -117,10 +114,9 @@ const Description = ({ repair, handleClose, handleViewAttachments }: Description
                                 </Typography>
                             </Box>
 
-                            <Divider sx={{ mb: 1.5 }} /> {/* Reduced margin */}
+                            <Divider sx={{ mb: 1.5 }} />
 
-                            <Stack spacing={1.5}> {/* Reduced spacing */}
-                                {/* Timeline section */}
+                            <Stack spacing={1.5}>
                                 <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
                                     <CalendarIcon
                                         sx={{ mt: 0.3, mr: 1, fontSize: 18, color: alpha(theme.palette.text.secondary, 0.7) }}
@@ -143,7 +139,6 @@ const Description = ({ repair, handleClose, handleViewAttachments }: Description
                                     </Box>
                                 </Box>
 
-                                {/* Technician section */}
                                 <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
                                     <TechnicianIcon
                                         sx={{ mt: 0.3, mr: 1, fontSize: 18, color: alpha(theme.palette.text.secondary, 0.7) }}
@@ -158,7 +153,6 @@ const Description = ({ repair, handleClose, handleViewAttachments }: Description
                                     </Box>
                                 </Box>
 
-                                {/* Repair reason section */}
                                 <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
                                     <DescriptionIcon
                                         sx={{ mt: 0.3, mr: 1, fontSize: 18, color: alpha(theme.palette.text.secondary, 0.7) }}
@@ -175,7 +169,7 @@ const Description = ({ repair, handleClose, handleViewAttachments }: Description
                                                 borderRadius: 1,
                                                 border: `1px solid ${alpha('#000', 0.05)}`,
                                                 whiteSpace: 'pre-wrap',
-                                                maxHeight: '80px', // Limit height
+                                                maxHeight: '80px',
                                                 lineHeight: 1.4
                                             }}
                                         >
@@ -187,18 +181,16 @@ const Description = ({ repair, handleClose, handleViewAttachments }: Description
                         </Paper>
                     </Grid>
 
-                    {/* Asset Information section - More compact */}
                     <Grid item xs={12} md={6}>
                         <Paper
                             elevation={0}
                             sx={{
-                                p: { xs: 1.5, sm: 2 }, // Reduced padding
+                                p: { xs: 1.5, sm: 2 },
                                 height: '100%',
                                 borderRadius: 1.5,
                                 border: `1px solid ${alpha('#000', 0.08)}`
                             }}
                         >
-                            {/* More compact header */}
                             <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                                 <Box sx={{
                                     bgcolor: alpha(theme.palette.secondary.main, 0.08),
@@ -215,10 +207,9 @@ const Description = ({ repair, handleClose, handleViewAttachments }: Description
                                 </Typography>
                             </Box>
 
-                            <Divider sx={{ mb: 1.5 }} /> {/* Reduced margin */}
+                            <Divider sx={{ mb: 1.5 }} />
 
-                            <Stack spacing={1.5}> {/* Reduced spacing */}
-                                {/* More compact asset info layout */}
+                            <Stack spacing={1.5}>
                                 <Box>
                                     <Typography variant="body2" color="text.secondary" fontWeight={500}>
                                         Asset Name
@@ -295,19 +286,17 @@ const Description = ({ repair, handleClose, handleViewAttachments }: Description
                         </Paper>
                     </Grid>
 
-                    {/* Completion Information - More compact */}
                     {isCompleted && (
                         <Grid item xs={12}>
                             <Paper
                                 elevation={0}
                                 sx={{
-                                    p: { xs: 1.5, sm: 2 }, // Reduced padding
+                                    p: { xs: 1.5, sm: 2 },
                                     borderRadius: 1.5,
                                     border: `1px solid ${alpha(theme.palette.success.main, 0.2)}`,
                                     bgcolor: alpha(theme.palette.success.main, 0.02)
                                 }}
                             >
-                                {/* Completion information header - More compact */}
                                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 1, flexWrap: 'wrap' }}>
                                     <Box sx={{
                                         bgcolor: alpha(theme.palette.success.main, 0.1),
@@ -341,7 +330,6 @@ const Description = ({ repair, handleClose, handleViewAttachments }: Description
                                 <Divider sx={{ mb: 1.5, borderColor: alpha(theme.palette.success.main, 0.1) }} />
 
                                 <Grid container spacing={2}>
-                                    {/* Completion Notes - More compact */}
                                     <Grid item xs={12} md={hasCompletionDocuments ? 7 : 12}>
                                         <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
                                             <NoteIcon
@@ -359,12 +347,12 @@ const Description = ({ repair, handleClose, handleViewAttachments }: Description
                                                 <Typography
                                                     variant="body2"
                                                     sx={{
-                                                        p: 1, // Reduced padding
+                                                        p: 1,
                                                         bgcolor: alpha(theme.palette.success.main, 0.05),
                                                         borderRadius: 1,
                                                         border: `1px solid ${alpha(theme.palette.success.main, 0.15)}`,
                                                         whiteSpace: 'pre-wrap',
-                                                        maxHeight: '70px', // Limit height
+                                                        maxHeight: '70px',
                                                         lineHeight: 1.4
                                                     }}
                                                 >
@@ -374,7 +362,6 @@ const Description = ({ repair, handleClose, handleViewAttachments }: Description
                                         </Box>
                                     </Grid>
 
-                                    {/* Completion Attachments - More compact */}
                                     {hasCompletionDocuments && (
                                         <Grid item xs={12} md={5}>
                                             <Box sx={{
@@ -382,7 +369,7 @@ const Description = ({ repair, handleClose, handleViewAttachments }: Description
                                                 flexDirection: 'column',
                                                 height: '100%',
                                                 borderLeft: isMediumScreen ? 'none' : `1px solid ${alpha(theme.palette.success.main, 0.15)}`,
-                                                pl: isMediumScreen ? 0 : 1.5, // Reduced padding
+                                                pl: isMediumScreen ? 0 : 1.5,
                                                 pt: isMediumScreen ? 0 : 0
                                             }}>
                                                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
@@ -404,7 +391,7 @@ const Description = ({ repair, handleClose, handleViewAttachments }: Description
                                                 </Box>
 
                                                 <Box sx={{
-                                                    p: 1, // Reduced padding
+                                                    p: 1,
                                                     bgcolor: alpha(theme.palette.background.default, 0.7),
                                                     borderRadius: 1,
                                                     border: `1px solid ${alpha('#000', 0.08)}`,
@@ -421,11 +408,11 @@ const Description = ({ repair, handleClose, handleViewAttachments }: Description
                                                     <Button
                                                         variant="outlined"
                                                         color="primary"
-                                                        size="small" // Smaller button
+                                                        size="small"
                                                         onClick={handleViewAttachments}
                                                         startIcon={<AttachmentIcon fontSize="small" />}
                                                         sx={{
-                                                            mt: 1, // Reduced margin
+                                                            mt: 1,
                                                             borderRadius: 1,
                                                             textTransform: 'none',
                                                             fontWeight: 500
@@ -444,16 +431,15 @@ const Description = ({ repair, handleClose, handleViewAttachments }: Description
                 </Grid>
             </Box>
 
-            {/* Action buttons */}
             {handleClose && (
                 <>
-                    <Divider sx={{ mt: 'auto', my: 1 }} /> {/* Reduced margin */}
+                    <Divider sx={{ mt: 'auto', my: 1 }} />
                     <Box
                         sx={{
                             display: 'flex',
                             justifyContent: 'flex-end',
                             gap: 2,
-                            py: 0.5 // Added padding
+                            py: 0.5
                         }}
                     >
                         <Button
@@ -461,7 +447,6 @@ const Description = ({ repair, handleClose, handleViewAttachments }: Description
                             color="primary"
                             onClick={handleClose}
                             startIcon={<CloseIcon />}
-                            // size="medium" // Medium button
                             sx={{
                                 borderRadius: 1.5,
                                 minWidth: '120px',
