@@ -41,7 +41,7 @@ const Users = () => {
   return (
     <Grid xs={12} container>
       {modalState === crudStates.create &&
-        <ModalComponent title='Create User' open={open} handleClose={handleClose} width="60%">
+        <ModalComponent title='Create User' open={open} handleClose={handleClose} width="70%">
           <CreateUser handleClose={handleClose} />
         </ModalComponent>
       }
