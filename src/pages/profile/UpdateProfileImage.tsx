@@ -19,7 +19,8 @@ import {
     Divider,
     Tooltip,
     CircularProgress,
-    Button as MuiButton
+    Alert,
+    Fade
 } from "@mui/material";
 import InputFileUpload from "../../components/forms/FileUpload";
 import { useRef, useState } from "react";
@@ -27,19 +28,28 @@ import { IUpdateProfileImage } from "./interface";
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 import RotateLeftIcon from '@mui/icons-material/RotateLeft';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import InfoIcon from '@mui/icons-material/Info';
+import { toast } from 'react-toastify';
 
 // Brand colors
 const PRIMARY_COLOR = '#08796C'; // Teal
 const SECONDARY_COLOR = '#BC892C'; // Gold
 
-const UpdateProfileImage = ({ setImage, userImage }: IUpdateProfileImage) => {
+const UpdateProfileImage = ({
+    setImage,
+    userImage,
+    userId,
+    onImageUpdate,
+    onImageRemove
+}: IUpdateProfileImage) => {
     const inputRef = useRef<HTMLInputElement>(null);
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const [uploading, setUploading] = useState(false);
     const [hasChanges, setHasChanges] = useState(false);
     const [originalImage, setOriginalImage] = useState(userImage);
+    const [error, setError] = useState<string | null>(null);
 
     const handleButtonClick = () => {
         if (inputRef.current) {
@@ -48,37 +58,76 @@ const UpdateProfileImage = ({ setImage, userImage }: IUpdateProfileImage) => {
         }
     };
 
-    const handleFileUpload = (files: FileList | null) => {
+    const handleFileUpload = async (files: FileList | null) => {
         if (!files) return;
 
         const file = files[0];
         if (!file.type.startsWith('image/')) {
-            // Handle non-image file
+            setError('Please select an image file (JPEG, PNG, GIF)');
+            return;
+        }
+
+        if (file.size > 5 * 1024 * 1024) {
+            setError('Image must be less than 5MB');
             return;
         }
 
         setUploading(true);
+        setError(null);
 
-        // Simulate upload processing
-        setTimeout(() => {
-            setImage(URL.createObjectURL(file));
-            setHasChanges(true);
+        try {
+            // Create a local preview immediately
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                if (e.target?.result) {
+                    setImage(e.target.result as string);
+                    setHasChanges(true);
+                }
+            };
+            reader.readAsDataURL(file);
+
+            // If we have an onImageUpdate handler, call it with the file
+            if (onImageUpdate) {
+                await onImageUpdate(file);
+            }
+        } catch (error) {
+            console.error('Error uploading image:', error);
+            setError('Failed to upload image. Please try again.');
+        } finally {
             setUploading(false);
-        }, 800);
+        }
     };
 
-    const handleResetImage = () => {
+    const handleResetImage = async () => {
         setImage(originalImage);
         setHasChanges(false);
     };
 
-    const handleSubmit = () => {
-        // Add actual submission logic here
+    const handleRemoveImage = async () => {
+        if (!onImageRemove) return;
+
+        setUploading(true);
+        try {
+            await onImageRemove();
+            setHasChanges(false);
+            toast.success('Profile image removed successfully');
+        } catch (error) {
+            console.error('Error removing image:', error);
+            setError('Failed to remove profile image');
+        } finally {
+            setUploading(false);
+        }
+    };
+
+    const handleSubmit = async () => {
+        // This function is only called when Save Changes is clicked
+        // The actual upload happens in handleFileUpload
         console.log("Submit photo");
 
         // Update original image reference after successful upload
         setOriginalImage(userImage);
         setHasChanges(false);
+        toast.success('Profile image updated successfully');
     };
 
     return (
@@ -92,6 +141,18 @@ const UpdateProfileImage = ({ setImage, userImage }: IUpdateProfileImage) => {
                 bgcolor: 'white',
             }}
         >
+            {error && (
+                <Fade in={!!error}>
+                    <Alert
+                        severity="error"
+                        sx={{ mb: 2 }}
+                        onClose={() => setError(null)}
+                    >
+                        {error}
+                    </Alert>
+                </Fade>
+            )}
+
             {/* Header Section */}
             <Box
                 sx={{
@@ -196,6 +257,23 @@ const UpdateProfileImage = ({ setImage, userImage }: IUpdateProfileImage) => {
                             </IconButton>
                         </Tooltip>
                     )}
+
+                    {userImage && onImageRemove && (
+                        <Tooltip title="Remove profile image">
+                            <IconButton
+                                onClick={handleRemoveImage}
+                                sx={{
+                                    color: alpha('#f44336', 0.7),
+                                    '&:hover': {
+                                        bgcolor: alpha('#f44336', 0.08),
+                                        color: '#f44336'
+                                    }
+                                }}
+                            >
+                                <DeleteOutlineIcon />
+                            </IconButton>
+                        </Tooltip>
+                    )}
                 </Stack>
             </Box>
 
@@ -271,7 +349,7 @@ const UpdateProfileImage = ({ setImage, userImage }: IUpdateProfileImage) => {
                     justifyContent: 'flex-end'
                 }}
             >
-                <MuiButton
+                <Button
                     onClick={() => console.log("Close modal")}
                     color="inherit"
                     type="button"
@@ -283,13 +361,13 @@ const UpdateProfileImage = ({ setImage, userImage }: IUpdateProfileImage) => {
                     }}
                 >
                     Cancel
-                </MuiButton>
-                <MuiButton
+                </Button>
+                <Button
                     onClick={handleSubmit}
                     variant="contained"
                     color="primary"
                     type="button"
-                    disabled={!hasChanges}
+                    disabled={!hasChanges || uploading}
                     sx={{
                         bgcolor: PRIMARY_COLOR,
                         minWidth: { xs: '100%', sm: '140px' },
@@ -304,7 +382,7 @@ const UpdateProfileImage = ({ setImage, userImage }: IUpdateProfileImage) => {
                     }}
                 >
                     Save Changes
-                </MuiButton>
+                </Button>
             </Stack>
         </Paper>
     );

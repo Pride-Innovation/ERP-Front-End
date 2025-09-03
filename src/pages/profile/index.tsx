@@ -32,6 +32,8 @@ import WorkInfoCard from "./WorkInfoCard";
 import AccountInfoCard from "./AccountInfoCard";
 import { fetchSingleUserService } from "../users/service";
 import { IUserAxiosResponse } from "../users/interface";
+import { toast } from "react-toastify";
+import { removeUserProfileImageService, updateUserProfileImageService } from "./service";
 
 
 const Profile = () => {
@@ -68,6 +70,58 @@ const Profile = () => {
     const userImage = image || (user?.profileImage || (user?.gender === 'male' ? MaleProfile : FemaleProfile));
     const isCurrentUser = getCurrentUser()?.id === parseInt(id as string, 10);
 
+
+    const handleProfileImageUpdate = async (file: File) => {
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const response = await updateUserProfileImageService(id as string, formData);
+            if (response.status !== 201) {
+                toast.error('Failed to update profile image');
+            }
+
+            if (response.data && response.data.profileImage) {
+                const serverPath = response.data.profileImage;
+                const filename = serverPath.split(/[\/\\]/).pop();
+
+                setUser({
+                    ...user,
+                    profileImage: `/statics/${filename}`
+                });
+
+                toast.success('Profile image updated successfully');
+            } else {
+                toast.error('Failed to update profile image');
+            }
+        } catch (error) {
+            console.error('Error updating profile image:', error);
+            toast.error('Failed to update profile image');
+            throw error;
+        }
+    };
+
+    const handleProfileImageRemove = async () => {
+        try {
+            const response = await removeUserProfileImageService(id as string);
+            if (response.status === 200 || response.status === 204) {
+                setUser({
+                    ...user,
+                    profileImage: null
+                });
+
+                setImage('');
+                toast.success('Profile image removed successfully');
+            } else {
+                toast.error('Failed to remove profile image');
+            }
+        } catch (error) {
+            console.error('Error removing profile image:', error);
+            toast.error('Failed to remove profile image');
+            throw error;
+        }
+    };
+
     return (
         <Container maxWidth="xl" sx={{ py: 3, bgcolor: '#F3F7FB', borderRadius: 2, border: `1px solid ${alpha('#000', 0.08)}` }}>
             {modalState === modalStates.password && (
@@ -84,7 +138,13 @@ const Profile = () => {
 
             {modalState === modalStates.image && (
                 <ModalComponent title='Update Profile Picture' open={open} handleClose={handleClose} width="40%">
-                    <UpdateProfileImage setImage={setImage} userImage={userImage} />
+                    <UpdateProfileImage
+                        setImage={setImage}
+                        userImage={userImage}
+                        userId={id}
+                        onImageUpdate={handleProfileImageUpdate}
+                        onImageRemove={handleProfileImageRemove}
+                    />
                 </ModalComponent>
             )}
 

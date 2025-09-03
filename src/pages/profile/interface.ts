@@ -45,6 +45,9 @@ export interface IChangePasswordComponent {
 export interface IUpdateProfileImage {
     setImage: Dispatch<SetStateAction<string>>
     userImage: string;
+    userId?: string;
+    onImageUpdate?: (file: File) => Promise<void>;
+    onImageRemove?: () => Promise<void>;
 }
 
 export interface RequirementItemProps {
