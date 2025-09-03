@@ -26,10 +26,8 @@ import { useRef, useState } from "react";
 import { IUpdateProfileImage } from "./interface";
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
-import DeleteIcon from '@mui/icons-material/Delete';
 import RotateLeftIcon from '@mui/icons-material/RotateLeft';
 import InfoIcon from '@mui/icons-material/Info';
-import ButtonComponent from "../../components/forms/Button";
 
 // Brand colors
 const PRIMARY_COLOR = '#08796C'; // Teal
@@ -174,7 +172,6 @@ const UpdateProfileImage = ({ setImage, userImage }: IUpdateProfileImage) => {
                     )}
                 </Box>
 
-                {/* Image Controls */}
                 <Stack
                     direction="row"
                     spacing={1}
@@ -278,8 +275,6 @@ const UpdateProfileImage = ({ setImage, userImage }: IUpdateProfileImage) => {
                     onClick={() => console.log("Close modal")}
                     color="inherit"
                     type="button"
-                    // sendingRequest={false}
-                    // buttonText="Cancel"
                     sx={{
                         bgcolor: alpha('#000', 0.05),
                         color: 'text.secondary',
@@ -291,8 +286,6 @@ const UpdateProfileImage = ({ setImage, userImage }: IUpdateProfileImage) => {
                 </MuiButton>
                 <MuiButton
                     onClick={handleSubmit}
-                    // sendingRequest={false}
-                    // buttonText="Save Changes"
                     variant="contained"
                     color="primary"
                     type="button"
