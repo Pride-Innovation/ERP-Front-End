@@ -49,7 +49,7 @@ const NavBar = () => {
     return (
         <Container maxWidth="xl">
             {modalState === modalStates.password &&
-                <ModalComponent title='Change Password' open={open} handleClose={handleClose} width="40%">
+                <ModalComponent title='Change Password' open={open} handleClose={handleClose} width="70%">
                     <ChangePassword handleClose={handleClose} />
                 </ModalComponent>
             }

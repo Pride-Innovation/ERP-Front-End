@@ -6,7 +6,7 @@ Managing Director
 */
 
 import { Dispatch, SetStateAction } from "react";
-import { Control, FieldError, FormState, UseFormRegister } from "react-hook-form";
+import { Control, FieldError, FormState, UseFormGetValues, UseFormRegister, UseFormWatch } from "react-hook-form";
 
 export interface IChangePassword {
     oldPassword: string;
@@ -33,7 +33,9 @@ export interface IIChangePasswordForm {
     handleClickShowOldPassword: () => void;
     handleClickShowNewPassword: () => void;
     handleClickShowConfirmPassword: () => void;
-    handleClose: () => void
+    handleClose: () => void;
+    getValues: UseFormGetValues<IChangePassword>;
+    watch: UseFormWatch<IChangePassword>; // Add this
 }
 
 export interface IChangePasswordComponent {
@@ -43,4 +45,10 @@ export interface IChangePasswordComponent {
 export interface IUpdateProfileImage {
     setImage: Dispatch<SetStateAction<string>>
     userImage: string;
+}
+
+export interface RequirementItemProps {
+    text: string;
+    fulfilled: boolean;
+    active?: boolean;
 }

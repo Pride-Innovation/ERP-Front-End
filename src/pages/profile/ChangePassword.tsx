@@ -30,10 +30,17 @@ const ChangePassword = ({ handleClose }: IChangePasswordComponent) => {
         handleSubmit,
         formState,
         register,
-        reset
+        reset,
+        getValues,
+        watch
     } = useForm<IChangePassword>({
         mode: 'onChange',
-        resolver: yupResolver(changePasswordSchema)
+        resolver: yupResolver(changePasswordSchema),
+        defaultValues: {
+            oldPassword: '',
+            newPassword: '',
+            confirmPassword: ''
+        }
     });
 
     useEffect(() => { reset({ ...defaultUser }) }, []);
@@ -64,6 +71,8 @@ const ChangePassword = ({ handleClose }: IChangePasswordComponent) => {
                     handleClickShowNewPassword={handleClickShowNewPassword}
                     handleClickShowConfirmPassword={handleClickShowConfirmPassword}
                     handleMouseDownPassword={handleMouseDownPassword}
+                    getValues={getValues}
+                    watch={watch}
                 />
             </form>
         </Box>
