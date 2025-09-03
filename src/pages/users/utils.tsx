@@ -191,6 +191,14 @@ const UserUtils = () => {
         return "";
     }
 
+    const determineDutyStation = (user: IUser) => {
+        if (user.branch?.name === "Head Office") {
+            return user.department?.name || "";
+        } else {
+            return user.branch?.name || "";
+        }
+    }
+
 
     const handleUsersTableData = (users: Array<IUser>) => {
         const data: Array<IUserTableData> = users.map((user, index) => {
@@ -201,18 +209,18 @@ const UserUtils = () => {
                 title,
                 createdBy,
                 profileImage,
-                ...fielsdata
+                ...fieldsData
             } = users[index];
 
             return (
                 {
-                    ...fielsdata,
+                    ...fieldsData,
                     image: user?.profileImage,
                     name: `${user.firstName} ${user.lastName} ${(user.otherName !== null ? user.otherName : "")}`,
                     staffNumber: user.staffNumber,
                     email: user.email,
                     title: user.title?.name as string,
-                    dutyStation: (user.branch?.name) as string,
+                    dutyStation: determineDutyStation(user),
                     availability: user.availability,
                     status: determineUserStatus(user)
                 }

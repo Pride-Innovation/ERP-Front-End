@@ -7,7 +7,7 @@ Managing Director
 
 import { useContext, useEffect, useState } from 'react';
 import { IUpdateUser, IUser, IUserAxiosResponse } from './interface';
-import { Grid, Paper } from '@mui/material';
+import { Box, Paper } from '@mui/material';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { userSchema } from './schema';
@@ -68,22 +68,30 @@ const UpdateUsers = ({ handleClose, sendingRequest, setSendingRequest, user }: I
     };
 
     return (
-        <Paper elevation={3} sx={{ borderRadius: 3, boxShadow: "none", maxWidth: "1200px", mx: "auto" }}>
-            <form autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
-                <Grid container spacing={2}>
-                    <Grid item xs={12}>
-                        <UserForm
-                            handleClose={handleClose}
-                            buttonText="Submit"
-                            formState={formState}
-                            control={control}
-                            sendingRequest={sendingRequest}
-                            register={register}
-                        />
-                    </Grid>
-                </Grid>
-            </form>
-        </Paper>
+        <Box sx={{ overflowY: 'auto', pb: 1 }}>
+            <Paper
+                elevation={0}
+                sx={{
+                    borderRadius: 2,
+                    boxShadow: "none",
+                    maxWidth: "1200px",
+                    mx: "auto",
+                    overflow: 'hidden',
+                    border: '1px solid rgba(0,0,0,0.08)'
+                }}
+            >
+                <form autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
+                    <UserForm
+                        handleClose={handleClose}
+                        buttonText="Submit"
+                        formState={formState}
+                        control={control}
+                        sendingRequest={sendingRequest}
+                        register={register}
+                    />
+                </form>
+            </Paper>
+        </Box>
     )
 }
 

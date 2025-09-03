@@ -15,7 +15,6 @@ import {
     Button as MuiButton,
     useMediaQuery,
     Paper,
-    Divider
 } from '@mui/material';
 
 import UserUtils from './utils';
@@ -36,10 +35,10 @@ import DepartmentUtills from '../settings/departments/utills';
 import PersonIcon from '@mui/icons-material/Person';
 import ContactMailIcon from '@mui/icons-material/ContactMail';
 import BusinessIcon from '@mui/icons-material/Business';
+import CancelIcon from '@mui/icons-material/Cancel';
 
 // Brand colors
 const PRIMARY_COLOR = '#08796C';
-const SECONDARY_COLOR = '#BC892C';
 
 const UserForm = ({
     formState,
@@ -240,20 +239,20 @@ const UserForm = ({
                     justifyContent="flex-end"
                     alignItems={{ xs: "stretch", sm: "center" }}
                 >
+
                     <MuiButton
                         onClick={handleClose}
                         color="inherit"
                         type="button"
-                        fullWidth={isSmallScreen}
+                        variant="outlined"
+                        startIcon={<CancelIcon />}
                         sx={{
-                            bgcolor: alpha('#000', 0.05),
-                            color: 'text.secondary',
                             borderColor: alpha('#000', 0.2),
+                            color: 'text.secondary',
                             '&:hover': {
-                                bgcolor: alpha('#000', 0.08),
                                 borderColor: alpha('#000', 0.3),
-                            },
-                            maxWidth: { sm: '120px' }
+                                backgroundColor: alpha('#000', 0.05)
+                            }
                         }}
                     >
                         Cancel
