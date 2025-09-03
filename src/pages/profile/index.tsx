@@ -7,7 +7,6 @@ Managing Director
 
 import { useContext, useEffect, useState } from "react";
 import {
-    Box,
     Container,
     Grid,
     useMediaQuery,
@@ -31,10 +30,9 @@ import UserHeader from "./UserHeader";
 import UserInfoCard from "./UserInfoCard";
 import WorkInfoCard from "./WorkInfoCard";
 import AccountInfoCard from "./AccountInfoCard";
+import { fetchSingleUserService } from "../users/service";
+import { IUserAxiosResponse } from "../users/interface";
 
-// Brand colors
-const PRIMARY_COLOR = '#08796C'; // Teal
-const SECONDARY_COLOR = '#BC892C'; // Gold
 
 const Profile = () => {
     const { user, setUser } = useContext(UserContext);
@@ -44,24 +42,34 @@ const Profile = () => {
     const { handleClose, modalState, open, handleOptionClicked } = AppBarUtills();
     const { getCurrentUser } = RoutesUtills();
     const [image, setImage] = useState<string>('');
-    const { open: formOpen, handleClose: formHandleClose, modalState: formModalState, setModalState: formSetModalState, handleOpen: formHandleOpen } = UserUtils();
+    const {
+        open: formOpen,
+        handleClose: formHandleClose,
+        modalState: formModalState,
+        setModalState: formSetModalState,
+        handleOpen: formHandleOpen
+    } = UserUtils();
 
     const getUserDetails = async () => {
-        // Implement user fetching logic here
-        // For now, we'll use the user context
+        try {
+            const response = await fetchSingleUserService(id as string) as IUserAxiosResponse;
+            if (response.status === 200) {
+                setUser(response.data);
+            }
+        } catch (error) {
+            console.log(error);
+        }
     };
 
     useEffect(() => {
         getUserDetails();
     }, [id]);
 
-    // For now, determine profile image based on gender
     const userImage = image || (user?.profileImage || (user?.gender === 'male' ? MaleProfile : FemaleProfile));
     const isCurrentUser = getCurrentUser()?.id === parseInt(id as string, 10);
 
     return (
         <Container maxWidth="xl" sx={{ py: 3, bgcolor: '#F3F7FB', borderRadius: 2, border: `1px solid ${alpha('#000', 0.08)}` }}>
-            {/* Modals */}
             {modalState === modalStates.password && (
                 <ModalComponent title='Change Password' open={open} handleClose={handleClose} width="70%">
                     <ChangePassword handleClose={handleClose} />
