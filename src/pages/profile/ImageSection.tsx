@@ -51,7 +51,7 @@ const ImageSection = () => {
                 </ModalComponent>
             }
             {modalState === modalStates.leave &&
-                <ModalComponent title='Request for Leave' open={open} handleClose={handleClose} width="40%">
+                <ModalComponent title='Request for Leave' open={open} handleClose={handleClose} width="60%">
                     <LeaveComponent />
                 </ModalComponent>
             }
