@@ -163,7 +163,7 @@ const ChangePasswordForm = ({
             <Box sx={{ p: 3 }}>
                 <Grid container spacing={3}>
                     {/* Left Column - Form Fields */}
-                    <Grid item xs={12} md={7}>
+                    <Grid item xs={12} md={6}>
                         <Grid container spacing={3}>
                             {/* Old Password */}
                             <Grid item xs={12}>
@@ -395,7 +395,7 @@ const ChangePasswordForm = ({
                     </Grid>
 
                     {/* Right Column - Password Requirements */}
-                    <Grid item xs={12} md={5}>
+                    <Grid item xs={12} md={6}>
                         <Box
                             sx={{
                                 p: 2.5,

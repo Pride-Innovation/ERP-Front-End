@@ -41,7 +41,8 @@ const UpdateProfileImage = ({
     userImage,
     userId,
     onImageUpdate,
-    onImageRemove
+    onImageRemove,
+    handleClose
 }: IUpdateProfileImage) => {
     const inputRef = useRef<HTMLInputElement>(null);
     const theme = useTheme();
@@ -120,14 +121,10 @@ const UpdateProfileImage = ({
     };
 
     const handleSubmit = async () => {
-        // This function is only called when Save Changes is clicked
-        // The actual upload happens in handleFileUpload
-        console.log("Submit photo");
-
-        // Update original image reference after successful upload
         setOriginalImage(userImage);
         setHasChanges(false);
-        toast.success('Profile image updated successfully');
+        handleClose();
+        // toast.success('Profile image updated successfully');
     };
 
     return (
@@ -350,8 +347,9 @@ const UpdateProfileImage = ({
                 }}
             >
                 <Button
-                    onClick={() => console.log("Close modal")}
+                    onClick={handleClose}
                     color="inherit"
+                    variant="outlined"
                     type="button"
                     sx={{
                         bgcolor: alpha('#000', 0.05),

@@ -134,7 +134,7 @@ const Profile = () => {
     return (
         <Container maxWidth="xl" sx={{ py: 3, bgcolor: '#F3F7FB', borderRadius: 2, border: `1px solid ${alpha('#000', 0.08)}` }}>
             {modalState === modalStates.password && (
-                <ModalComponent title='Change Password' open={open} handleClose={handleClose} width="70%">
+                <ModalComponent title='Change Password' open={open} handleClose={handleClose} width="60%">
                     <ChangePassword handleClose={handleClose} />
                 </ModalComponent>
             )}
@@ -153,6 +153,7 @@ const Profile = () => {
                         userId={id}
                         onImageUpdate={handleProfileImageUpdate}
                         onImageRemove={handleProfileImageRemove}
+                        handleClose={handleClose}
                     />
                 </ModalComponent>
             )}

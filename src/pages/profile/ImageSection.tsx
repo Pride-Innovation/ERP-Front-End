@@ -46,7 +46,7 @@ const ImageSection = () => {
     return (
         <Grid container direction="column" alignItems="center" justifyContent="center">
             {modalState === modalStates.password &&
-                <ModalComponent title='Change Password' open={open} handleClose={handleClose} width="70%">
+                <ModalComponent title='Change Password' open={open} handleClose={handleClose} width="60%">
                     <ChangePassword handleClose={handleClose} />
                 </ModalComponent>
             }

@@ -28,3 +28,18 @@ export const removeUserProfileImageService = async (
 ): Promise<IUserAxiosResponse> => {
     return await axiosInstance.put(`users/remove/image/${userId}`);
 };
+
+
+
+
+/**
+ * Change user password service
+ * @param body - The request body containing password details
+ * @returns Promise with the response
+ *
+ */
+export const changeUserPasswordService = async (
+    body: object
+): Promise<IUserAxiosResponse> => {
+    return await axiosInstance.post('users/change-password', body);
+};

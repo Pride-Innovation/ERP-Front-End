@@ -48,6 +48,8 @@ export interface IUpdateProfileImage {
     userId?: string;
     onImageUpdate?: (file: File) => Promise<void>;
     onImageRemove?: () => Promise<void>;
+    handleClose: () => void;
+
 }
 
 export interface RequirementItemProps {

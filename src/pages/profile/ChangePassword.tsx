@@ -12,6 +12,8 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { changePasswordSchema } from "./schema";
 import ChangePasswordForm from "./ChangePasswordForm";
+import { changeUserPasswordService } from "./service";
+import { toast } from "react-toastify";
 
 const ChangePassword = ({ handleClose }: IChangePasswordComponent) => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
@@ -45,9 +47,21 @@ const ChangePassword = ({ handleClose }: IChangePasswordComponent) => {
 
     useEffect(() => { reset({ ...defaultUser }) }, []);
 
-    const onSubmit = (formData: IChangePassword) => {
+    const onSubmit = async (formData: IChangePassword) => {
         setSendingRequest(true);
-        console.log(formData, "form data!!!!!")
+        try {
+            const response = await changeUserPasswordService(formData);
+            if (response.status === 201) {
+                handleClose();
+                reset({ ...defaultUser });
+                toast.success("Password changed successfully");
+            }
+        } catch (error) {
+            console.log(error);
+        } finally {
+            setSendingRequest(false);
+            handleClose();
+        }
     };
 
     return (
