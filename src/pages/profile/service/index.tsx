@@ -43,3 +43,15 @@ export const changeUserPasswordService = async (
 ): Promise<IUserAxiosResponse> => {
     return await axiosInstance.post('users/change-password', body);
 };
+
+/**
+ * Submit leave application service
+ * @param body - The request body containing leave application details
+ * @returns Promise with the response
+ */
+export const submitLeaveApplicationService = async (
+    body: object,
+    userId: string
+): Promise<IUserAxiosResponse> => {
+    return await axiosInstance.post(`leaves/${userId}`, body);
+};

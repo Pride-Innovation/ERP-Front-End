@@ -44,6 +44,8 @@ import { useSelector } from 'react-redux';
 import { IUser } from '../users/interface';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { leaveSchema } from './schema';
+import { submitLeaveApplicationService } from './service';
+import { toast } from 'react-toastify';
 
 // Brand colors
 const PRIMARY_COLOR = '#08796C';
@@ -69,7 +71,7 @@ interface LeaveFormData {
   reason?: string;
 }
 
-const LeaveComponent = () => {
+const LeaveComponent = ({ handleClose, id }: { handleClose: () => void, id: string }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isMediumScreen = useMediaQuery(theme.breakpoints.down('md'));
@@ -120,13 +122,32 @@ const LeaveComponent = () => {
 
   const leaveDays = calculateLeaveDays();
 
-  const onSubmit = (data: LeaveFormData) => {
+  const onSubmit = async (data: LeaveFormData) => {
     setIsSubmitting(true);
-    console.log(data, "Leave form data");
+    const leaveData = {
+      ...data,
+      startDate: startDate?.format('YYYY-MM-DDTHH:mm:ss'),
+      endDate: endDate?.format('YYYY-MM-DDTHH:mm:ss') || null,
+      actingUser: data.actingPerson
+    };
+
+    try {
+      const response = await submitLeaveApplicationService(leaveData, id);
+      if (response && response.status === 201) {
+        reset();
+        toast.success('Leave application submitted successfully');
+      }
+    } catch (error) {
+      console.error('Error submitting leave application:', error);
+    } finally {
+      setIsSubmitting(false);
+      handleClose();
+    }
   };
 
   const handleCancel = () => {
     reset();
+    handleClose();
   };
 
   useEffect(() => {
@@ -138,9 +159,10 @@ const LeaveComponent = () => {
       id: user.id,
       name: `${user.firstName} ${user.lastName}`,
       role: user.title?.name || 'Employee'
-    }));
+    })).filter((user: IColleague) => user.id !== parseInt(id, 10)); // Exclude current user
+    
     SetColleagues(data);
-  }
+  };
 
   useEffect(() => {
     if (users.length > 0) {
@@ -210,6 +232,7 @@ const LeaveComponent = () => {
         {/* Form Content - Scrollable if needed */}
         <Box
           component="form"
+          id="leaveForm"
           onSubmit={handleSubmit(onSubmit)}
           sx={{
             p: { xs: 2, sm: 2.5 },
@@ -502,6 +525,7 @@ const LeaveComponent = () => {
 
             <Button
               type="submit"
+              form="leaveForm"
               variant="contained"
               disabled={isSubmitting}
               startIcon={isSubmitting ? <CircularProgress size={16} color="inherit" /> : undefined}

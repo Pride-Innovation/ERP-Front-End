@@ -141,7 +141,7 @@ const Profile = () => {
 
             {modalState === modalStates.leave && (
                 <ModalComponent title='Update Availability' open={open} handleClose={handleClose} width="60%">
-                    <LeaveComponent />
+                    <LeaveComponent handleClose={handleClose} id={id as string} />
                 </ModalComponent>
             )}
 

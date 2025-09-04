@@ -20,7 +20,7 @@ export const leaveSchema = yup.object({
     leaveType: yup.string().required('Please select leave type'),
     actingPerson: yup.number().required('Please select someone to act in your absence'),
     reason: yup.string()
-        .min(10, 'Please provide more details (minimum 10 characters)')
+        // .min(10, 'Please provide more details (minimum 10 characters)')
         .nullable()
         .optional(),
     // Transform mixed values to Dayjs before validation
