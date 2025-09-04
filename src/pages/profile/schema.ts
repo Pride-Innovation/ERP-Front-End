@@ -16,26 +16,20 @@ export const changePasswordSchema = yup.object().shape({
 });
 
 
-// Convert Dayjs to Date for Yup validation
-const dayjsToDate = (value: any, originalValue: any) => {
-    if (dayjs.isDayjs(originalValue)) {
-        return originalValue.toDate();
-    }
-    return originalValue;
-};
-
-export const leaveSchema = yup.object().shape({
+export const leaveSchema = yup.object({
     leaveType: yup.string().required('Please select leave type'),
-    startDate: yup.date().transform(dayjsToDate)
-        .required('Start date is required')
-        .min(new Date(), 'Start date must be in the future'),
-    endDate: yup.date().transform(dayjsToDate)
-        .required('End date is required')
-        .min(
-            yup.ref('startDate'),
-            'End date must be after start date'
-        ),
-    actingPerson: yup.string().required('Please select someone to act in your absence'),
-    reason: yup.string().required('Please provide a reason for your leave')
+    actingPerson: yup.number().required('Please select someone to act in your absence'),
+    reason: yup.string()
         .min(10, 'Please provide more details (minimum 10 characters)')
+        .nullable()
+        .optional(),
+    // Transform mixed values to Dayjs before validation
+    startDate: yup.mixed()
+        .transform((value) => (value ? dayjs(value) : null))
+        .nullable()
+        .optional(),
+    endDate: yup.mixed()
+        .transform((value) => (value ? dayjs(value) : null))
+        .nullable()
+        .optional()
 });

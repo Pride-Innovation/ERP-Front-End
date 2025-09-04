@@ -5,7 +5,7 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Box,
   Paper,
@@ -29,8 +29,7 @@ import {
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { useForm, Controller } from 'react-hook-form';
-
+import { useForm, Controller, Resolver } from 'react-hook-form';
 
 // Icons
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
@@ -39,6 +38,12 @@ import PersonIcon from '@mui/icons-material/Person';
 import NoteAddIcon from '@mui/icons-material/NoteAdd';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import dayjs, { Dayjs } from 'dayjs';
+import UserUtils from '../users/utils';
+import { IColleague } from './interface';
+import { useSelector } from 'react-redux';
+import { IUser } from '../users/interface';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { leaveSchema } from './schema';
 
 // Brand colors
 const PRIMARY_COLOR = '#08796C';
@@ -58,32 +63,20 @@ const leaveTypes = [
 // Updated interface to use Dayjs instead of Date
 interface LeaveFormData {
   leaveType: string;
-  startDate: Dayjs | null;
-  endDate: Dayjs | null;
-  actingPerson: string;
+  startDate?: Dayjs | null;
+  endDate?: Dayjs | null;
+  actingPerson: number;
   reason?: string;
 }
-
-// Mock data for acting people (colleagues)
-const colleagues = [
-  { id: '1', name: 'Sarah Johnson', department: 'Finance' },
-  { id: '2', name: 'Michael Chen', department: 'Operations' },
-  { id: '3', name: 'Jessica Patel', department: 'IT' },
-  { id: '4', name: 'Robert Kim', department: 'HR' },
-  { id: '5', name: 'Amanda Lewis', department: 'Legal' },
-];
-
-// Create a modified schema where reason is optional
-// Note: In a real application, you would modify schema.ts directly
-// const modifiedLeaveSchema = leaveSchema.shape({
-//   reason: leaveSchema.fields.reason.optional()
-// });
 
 const LeaveComponent = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isMediumScreen = useMediaQuery(theme.breakpoints.down('md'));
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { fetchAllUsers } = UserUtils();
+  const [colleagues, SetColleagues] = useState<IColleague[]>([] as Array<IColleague>); // Replace with fetched users
+  const { users } = useSelector((state: any) => state.UserStore);
 
   const {
     control,
@@ -92,32 +85,28 @@ const LeaveComponent = () => {
     watch,
     reset
   } = useForm<LeaveFormData>({
-    // resolver: yupResolver(modifiedLeaveSchema),
-    // defaultValues: {
-    //   leaveType: '',
-    //   startDate: null,
-    //   endDate: null,
-    //   actingPerson: '',
-    //   reason: ''
-    // }
+    resolver: yupResolver(leaveSchema) as Resolver<LeaveFormData>,
+    defaultValues: {
+      leaveType: '',
+      startDate: null,
+      endDate: null,
+      actingPerson: 1,
+      reason: ''
+    }
   });
 
   const startDate = watch('startDate');
   const endDate = watch('endDate');
 
-  // Calculate the number of leave days with Dayjs
   const calculateLeaveDays = () => {
     if (!startDate || !endDate) return 0;
 
-    // Exclude weekends from the count
     let count = 0;
     const current = dayjs(startDate);
     const end = dayjs(endDate);
 
-    // Create a loop-safe copy of current date
     let currentDay = current.clone();
 
-    // Loop through days until we reach the end date
     while (currentDay.isBefore(end) || currentDay.isSame(end, 'day')) {
       const dayOfWeek = currentDay.day();
       if (dayOfWeek !== 0 && dayOfWeek !== 6) {
@@ -133,18 +122,32 @@ const LeaveComponent = () => {
 
   const onSubmit = (data: LeaveFormData) => {
     setIsSubmitting(true);
-
-    // Simulate API call
-    setTimeout(() => {
-      console.log('Leave request submitted:', data);
-      setIsSubmitting(false);
-      // Here you would typically show a success message or redirect
-    }, 1500);
+    console.log(data, "Leave form data");
   };
 
   const handleCancel = () => {
     reset();
   };
+
+  useEffect(() => {
+    fetchAllUsers();
+  }, []);
+
+  const handleColleagues = async () => {
+    const data: Array<IColleague> = users.map((user: IUser) => ({
+      id: user.id,
+      name: `${user.firstName} ${user.lastName}`,
+      role: user.title?.name || 'Employee'
+    }));
+    SetColleagues(data);
+  }
+
+  useEffect(() => {
+    if (users.length > 0) {
+      handleColleagues();
+    }
+  }, [users]);
+
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -226,7 +229,7 @@ const LeaveComponent = () => {
                     color: 'text.primary'
                   }}
                 >
-                  Leave Details
+                  Leave
                 </Typography>
               </Box>
 
@@ -389,7 +392,7 @@ const LeaveComponent = () => {
                           <Stack>
                             <Typography variant="body2">{colleague.name}</Typography>
                             <Typography variant="caption" color="text.secondary">
-                              {colleague.department}
+                              {colleague.role}
                             </Typography>
                           </Stack>
                         </MenuItem>

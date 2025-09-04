@@ -57,3 +57,9 @@ export interface RequirementItemProps {
     fulfilled: boolean;
     active?: boolean;
 }
+
+export interface IColleague {
+    id: number;
+    name: string;
+    role: string;
+}
