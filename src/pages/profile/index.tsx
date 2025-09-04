@@ -56,7 +56,16 @@ const Profile = () => {
         try {
             const response = await fetchSingleUserService(id as string) as IUserAxiosResponse;
             if (response.status === 200) {
-                setUser(response.data);
+                // Process the profile image path before setting user data
+                const userData = response.data;
+                if (userData.profileImage) {
+                    // Extract just the filename from the absolute path
+                    const filename = userData.profileImage.split(/[\/\\]/).pop();
+                    if (filename) {
+                        userData.profileImage = `/statics/${filename}`;
+                    }
+                }
+                setUser(userData);
             }
         } catch (error) {
             console.log(error);
@@ -104,7 +113,7 @@ const Profile = () => {
     const handleProfileImageRemove = async () => {
         try {
             const response = await removeUserProfileImageService(id as string);
-            if (response.status === 200 || response.status === 204) {
+            if (response.status === 201) {
                 setUser({
                     ...user,
                     profileImage: null
