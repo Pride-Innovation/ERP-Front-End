@@ -20,7 +20,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     const title = getCurrentUser()?.title as unknown as ITitle;
-    const role = title.role?.name;
+    const role = title?.role?.name;
     setRole(role || "");
   }, []);
 

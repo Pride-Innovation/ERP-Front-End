@@ -37,7 +37,7 @@ const deleteUserService = async (id: string | number) => {
 
 const unBlockUserService = async (id: string | number) => {
   try {
-    const response = await axiosInstance.delete(`users/${id}`);
+    const response = await axiosInstance.delete(`users/${id}/unblock`);
     return response;
   } catch (error) {
     return error;

@@ -18,6 +18,10 @@ import ThumbUpOffAltOutlinedIcon from '@mui/icons-material/ThumbUpOffAltOutlined
 import EditCalendarOutlinedIcon from '@mui/icons-material/EditCalendarOutlined';
 import DoNotDisturbAltIcon from '@mui/icons-material/DoNotDisturbAlt';
 import AutorenewIcon from '@mui/icons-material/Autorenew';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import PauseCircleOutlineIcon from '@mui/icons-material/PauseCircleOutline';
+import BlockIcon from '@mui/icons-material/Block';
+import NotInterestedIcon from '@mui/icons-material/NotInterested';
 
 /**
  * 
@@ -25,37 +29,58 @@ import AutorenewIcon from '@mui/icons-material/Autorenew';
  * @returns Icon based on the statuses, Active, Inactive, Disabled, Blocked, etc.
  */
 
-/*
-*/
-
 const TimeLineDot = ({ status }: ITimeLineDot) => {
 
-    return status === "requestCreated" ? (
-        <AddTaskIcon fontSize='small' color="success" sx={{ mr: "5px" }} />
-    ) : status === "requestRejected" ? (
-        <DoNotDisturbAltIcon fontSize='small' color="error" sx={{ mr: "5px" }} />
-    ) : status === "requestApproved" ? (
-        <RecommendOutlinedIcon fontSize='small' color="primary" sx={{ mr: "5px" }} />
-    ) : status === "requestAcknowleged" ? (
-        <HdrAutoOutlinedIcon fontSize='small' color="warning" sx={{ mr: "5px" }} />
-    ) : status === "requestIssued" ? (
-        <PublishedWithChangesOutlinedIcon fontSize='small' color="info" sx={{ mr: "5px" }} />
-    ) : status === "issuanceApproved" ? (
-        <PlaylistAddCheckCircleOutlinedIcon fontSize='small' color="warning" sx={{ mr: "5px" }} />
-    ) : status === "receiptAcknowledged" ? (
-        <ThumbUpOffAltOutlinedIcon fontSize='small' color="primary" sx={{ mr: "5px" }} />
-    ) : status === "issuanceAvailable" ? (
-        <ErrorOutlineIcon fontSize='small' color="warning" sx={{ mr: "5px" }} />
-    ) : status === "requireUpdate" ? (
-        <EditCalendarOutlinedIcon fontSize='small' color="error" sx={{ mr: "5px" }} />
-    ) : status === "in stock" ? (
-        <CheckCircleOutlineOutlinedIcon fontSize='small' color="primary" sx={{ mr: "5px" }} />
-    ) : status === "stockCompleted" ? (
-        <CheckCircleOutlineOutlinedIcon fontSize='small' color="primary" sx={{ mr: "5px" }} />
-    ) : status === "stockPending" ? (
-        <AutorenewIcon fontSize='small' color="warning" sx={{ mr: "5px" }} />
-    )
-        : <DoDisturbAltIcon fontSize='small' color="secondary" sx={{ mr: "5px" }} />
-}
+    // Convert status to lowercase for case-insensitive comparison
+    const normalizedStatus = typeof status === 'string' ? status.toLowerCase() : '';
 
-export default TimeLineDot
+    // Status checks
+    switch (normalizedStatus) {
+        // Request statuses
+        case "requestcreated":
+            return <AddTaskIcon fontSize='small' color="success" sx={{ mr: "5px" }} />;
+        case "requestrejected":
+            return <DoNotDisturbAltIcon fontSize='small' color="error" sx={{ mr: "5px" }} />;
+        case "requestapproved":
+            return <RecommendOutlinedIcon fontSize='small' color="primary" sx={{ mr: "5px" }} />;
+        case "requestacknowleged":
+            return <HdrAutoOutlinedIcon fontSize='small' color="warning" sx={{ mr: "5px" }} />;
+        case "requestissued":
+            return <PublishedWithChangesOutlinedIcon fontSize='small' color="info" sx={{ mr: "5px" }} />;
+        case "issuanceapproved":
+            return <PlaylistAddCheckCircleOutlinedIcon fontSize='small' color="warning" sx={{ mr: "5px" }} />;
+        case "receiptacknowledged":
+            return <ThumbUpOffAltOutlinedIcon fontSize='small' color="primary" sx={{ mr: "5px" }} />;
+        case "issuanceavailable":
+            return <ErrorOutlineIcon fontSize='small' color="warning" sx={{ mr: "5px" }} />;
+        case "requireupdate":
+            return <EditCalendarOutlinedIcon fontSize='small' color="error" sx={{ mr: "5px" }} />;
+
+        // Stock statuses
+        case "in stock":
+        case "stockcompleted":
+            return <CheckCircleOutlineOutlinedIcon fontSize='small' color="primary" sx={{ mr: "5px" }} />;
+        case "stockpending":
+            return <AutorenewIcon fontSize='small' color="warning" sx={{ mr: "5px" }} />;
+
+        // User account statuses
+        case "active":
+        case "active status":
+            return <CheckCircleIcon fontSize='small' color="success" sx={{ mr: "5px" }} />;
+        case "inactive":
+        case "inactive status":
+            return <PauseCircleOutlineIcon fontSize='small' color="warning" sx={{ mr: "5px" }} />;
+        case "blocked":
+        case "blocked status":
+            return <BlockIcon fontSize='small' color="error" sx={{ mr: "5px" }} />;
+        case "disabled":
+        case "disabled status":
+            return <NotInterestedIcon fontSize='small' color="error" sx={{ mr: "5px" }} />;
+
+        // Default fallback
+        default:
+            return <DoDisturbAltIcon fontSize='small' color="secondary" sx={{ mr: "5px" }} />;
+    }
+};
+
+export default TimeLineDot;
