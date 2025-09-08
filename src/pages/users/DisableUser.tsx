@@ -49,9 +49,10 @@ const DisableUserAccount = ({
         } catch (error) {
             console.error("Error disabling user account:", error);
             toast.error("Failed to disable user account. Please try again.");
+        } finally {
+            setSendingRequest(false);
+            handleClose();
         }
-        setSendingRequest(false);
-        handleClose();
     };
 
     // Get user's initials for avatar fallback
@@ -207,6 +208,7 @@ const DisableUserAccount = ({
                         type='button'
                         // sendingRequest={sendingRequest}
                         // buttonText={buttonText}
+                        variant='outlined'
                         startIcon={<BlockIcon />}
                         sx={{
                             order: { xs: 1, sm: 2 },

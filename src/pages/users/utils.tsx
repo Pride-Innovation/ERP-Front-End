@@ -25,6 +25,7 @@ import { ROUTES } from '../../core/routes/routes';
 import { AutocompleteContext } from '../../context/autocomplete';
 import { UserContext } from '../../context/user/UserContext';
 import LockPersonOutlinedIcon from '@mui/icons-material/LockPersonOutlined';
+import VpnKeyOutlinedIcon from '@mui/icons-material/VpnKeyOutlined';
 
 const UserUtils = () => {
     const endPoint: string = "users";
@@ -140,6 +141,7 @@ const UserUtils = () => {
                 { value: crudStates.update, label: "Update", icon: <ModeEditIcon fontSize='small' color='info' /> },
                 { value: crudStates.read, label: "View Details", icon: <RemoveRedEyeIcon fontSize='small' color='inherit' /> },
                 { value: crudStates.unblock, label: "Unblock", icon: <LockPersonOutlinedIcon fontSize='small' color='warning' /> },
+                { value: crudStates.enable, label: "Enable", icon: <VpnKeyOutlinedIcon fontSize='small' color='success' /> },
             ]
         },
     };
@@ -160,6 +162,11 @@ const UserUtils = () => {
                 navigate(`${ROUTES.PROFILE}/${moduleID}`)
                 break;
             case crudStates.unblock:
+                setModalState(option as string)
+                setUser(findUser(moduleID as number))
+                handleOpen();
+                break;
+            case crudStates.enable:
                 setModalState(option as string)
                 setUser(findUser(moduleID as number))
                 handleOpen();
@@ -327,4 +334,4 @@ const UserUtils = () => {
     })
 }
 
-export default UserUtils
+export default UserUtils;

@@ -34,6 +34,7 @@ export const crudStates: {
     reassign: string;
     repair: string;
     inStore: string;
+    enable: string;
 } = {
     create: "create",
     update: "update",
@@ -53,7 +54,8 @@ export const crudStates: {
     approveIssuance: "approveIssuance",
     reassign: "reassign",
     repair: "repair",
-    inStore: "inStore"
+    inStore: "inStore",
+    enable: "enable"
 }
 
 export const requestStatus: {

@@ -16,6 +16,7 @@ import CreateUser from './CreateUser';
 import UpdateUsers from './UpdateUsers';
 import DisableUser from './DisableUser';
 import UnblockUser from './UnblockUser';
+import EnableUser from './EnableUser';
 
 const Users = () => {
   const header = { plural: 'Users', singular: 'User' };
@@ -59,6 +60,12 @@ const Users = () => {
         modalState === crudStates.unblock &&
         <ModalComponent title='Unblock User Account' open={open} handleClose={handleClose} width="40%">
           <UnblockUser sendingRequest={sendingRequest} user={user} handleClose={handleClose} setSendingRequest={setSendingRequest} buttonText='Unblock' />
+        </ModalComponent>
+      }
+      {
+        modalState === crudStates.enable &&
+        <ModalComponent title='Enable User Account' open={open} handleClose={handleClose} width="60%">
+          <EnableUser sendingRequest={sendingRequest} user={user} handleClose={handleClose} setSendingRequest={setSendingRequest} buttonText='Enable' />
         </ModalComponent>
       }
       {columnHeaders.length > 0 &&

@@ -6,6 +6,7 @@ Managing Director
 */
 
 import axiosInstance from "../../../core/apis/axiosInstance";
+import { IUserAxiosResponse } from "../interface";
 
 const createUSerService = async (body: object) => {
   try {
@@ -70,6 +71,10 @@ const searchUserService = async (query: string) => {
   }
 };
 
+const enableUserService = async (userId: number): Promise<IUserAxiosResponse> => {
+  return await axiosInstance.post(`/users/${userId}/enable`);
+};
+
 export {
   createUSerService,
   fetchSingleUserService,
@@ -77,5 +82,6 @@ export {
   searchUserService,
   updateUSerService,
   fetchRolesService,
-  unBlockUserService
+  unBlockUserService,
+  enableUserService
 }

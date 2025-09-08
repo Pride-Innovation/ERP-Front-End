@@ -79,6 +79,14 @@ export interface IUnBolock {
     setSendingRequest: Dispatch<SetStateAction<boolean>>
 }
 
+export interface IEnable {
+    user: IUser;
+    handleClose: () => void;
+    sendingRequest: boolean;
+    setSendingRequest: React.Dispatch<SetStateAction<boolean>>;
+    buttonText?: string;
+}
+
 export interface IResponseData {
 
     status: "success" | "failed",
