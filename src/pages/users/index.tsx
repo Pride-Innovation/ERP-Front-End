@@ -83,6 +83,7 @@ const Users = () => {
           onCreationHandler={handleCreation}
           handleOptionClicked={handleOptionClicked}
           paginationMode='server'
+          refresh
         />
       }
     </Grid>

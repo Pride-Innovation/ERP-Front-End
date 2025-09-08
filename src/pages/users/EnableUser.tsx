@@ -19,7 +19,6 @@ import {
     Button as MuiButton
 } from '@mui/material';
 import PersonAddAltIcon from '@mui/icons-material/PersonAddAlt';
-import WorkOutlineIcon from '@mui/icons-material/WorkOutline';
 import BadgeOutlinedIcon from '@mui/icons-material/BadgeOutlined';
 import { IEnable, IUserAxiosResponse } from './interface';
 import { enableUserService } from './service';
@@ -44,7 +43,7 @@ const EnableUser = ({
         setSendingRequest(true);
         try {
             const response = await enableUserService(user.id as number) as IUserAxiosResponse;
-            if (response.status === 200 || response.status === 204) {
+            if (response.status === 201) {
                 toast.success("User account successfully enabled!");
                 dispatch(updateUser(response.data));
             }
