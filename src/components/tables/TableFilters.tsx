@@ -1,10 +1,3 @@
-/*
-13.9 Pride's Standard Copyright Notice:
-Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
-and distribute this software and its documentation for any purpose is prohibited unless authorized in writing by the
-Managing Director
-*/
-
 import { GridFilterModel } from "@mui/x-data-grid";
 import { ICustomTableFilterOperator, IhandleTablePagination } from "./interface";
 import { useDebounce } from "../../hooks/useDebounce";
@@ -23,13 +16,27 @@ import { loadAllOfficeAssets } from "../../pages/assets/officeEquipment/slice";
 import { RequestContext } from "../../context/request/RequestContext";
 import { AssetContext } from "../../context/asset";
 
+// Define interface for a filter item
+interface FilterItem {
+    field: string;
+    value: any;
+}
 
 const CustomTableFilterOperator = ({ endPoint, params }: ICustomTableFilterOperator) => {
     const [localInput, setLocalInput] = useState<string>('');
     const debouncedInput = useDebounce(localInput, 500);
     const dispatch = useDispatch<AppDispatch>();
-    const { determineAssetTypeState } = AssetUtills()
+    const { determineAssetTypeState } = AssetUtills();
     const { setCount } = useContext(RequestContext);
+
+    // Store all active filters as an array of filter items
+    const [filterParams, setFilterParams] = useState<FilterItem[]>(
+        Array.isArray(params) ? params : []
+    );
+
+    // Track the most recently changed field
+    const [currentFilterField, setCurrentFilterField] = useState<string>('');
+
     const {
         setItEquipmentCount,
         fieldName,
@@ -67,7 +74,6 @@ const CustomTableFilterOperator = ({ endPoint, params }: ICustomTableFilterOpera
                 if (assetType.name === assetTypesStatusConstants.officeEquipment) {
                     dispatch(loadAllOfficeAssets(content))
                 }
-
                 break;
             default:
                 break
@@ -77,22 +83,76 @@ const CustomTableFilterOperator = ({ endPoint, params }: ICustomTableFilterOpera
     const handleTableFilter = (model: GridFilterModel) => {
         const { items } = model;
 
+        if (!items || items.length === 0) {
+            // Clear filters if no items
+            setFilterParams([]);
+            return;
+        }
+
+        // Update the filter params
+        setFilterParams(prev => {
+            // Ensure prev is an array
+            const prevFilters = Array.isArray(prev) ? prev : [];
+
+            // Process each new filter item
+            const updatedFilters = [...prevFilters];
+
+            // Update or add the current filter
+            for (const item of items) {
+                const existingIndex = updatedFilters.findIndex(
+                    filter => filter.field === item.field
+                );
+
+                if (existingIndex >= 0) {
+                    // Update existing filter
+                    if (item.value) {
+                        updatedFilters[existingIndex] = {
+                            field: item.field,
+                            value: item.value
+                        };
+                    } else {
+                        // Remove filter if value is empty
+                        updatedFilters.splice(existingIndex, 1);
+                    }
+                } else if (item.value) {
+                    // Add new filter if it has a value
+                    updatedFilters.push({
+                        field: item.field,
+                        value: item.value
+                    });
+                }
+            }
+
+            return updatedFilters;
+        });
+
+        // Update the local input with the most recent filter value
         if (items.length > 0) {
             const { field, value } = items[0];
             setLocalInput(value?.toString() || '');
             setFieldName(field);
+            setCurrentFilterField(field);
         }
     };
 
     const fetchFilteredData = async () => {
+        // Convert filter array to object for the API call
+        const filterObject = filterParams.reduce((obj, filter) => {
+            obj[filter.field] = filter.value;
+            return obj;
+        }, {} as Record<string, any>);
+
+        console.log('Fetching data with filters:', filterObject);
+        console.log('Filter params array:', filterParams);
+
         try {
             const response = await fetchRowsService({
                 pageNumber: 0,
                 pageSize: 10,
                 endPoint,
                 params: {
-                    ...params,
-                    [fieldName]: debouncedInput
+                    ...params, // Base params
+                    ...filterObject // All active filters
                 }
             }) as IhandleTablePagination;
 
@@ -102,23 +162,65 @@ const CustomTableFilterOperator = ({ endPoint, params }: ICustomTableFilterOpera
                 handleReduxStoreUpdate(
                     endPoint,
                     content,
-                    params,
+                    { ...params, ...filterObject },
                     response.data.totalElements
                 )
             }
-
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : ErrorMessage;
             console.log(errorMessage)
         }
     }
 
+    // Effect to handle input changes - only trigger when debouncedInput changes
     useEffect(() => {
-        if (debouncedInput.length > 0) {
+        if (debouncedInput.length > 0 && currentFilterField) {
+            // Update the filter params with the debounced input
+            setFilterParams(prev => {
+                const prevFilters = Array.isArray(prev) ? prev : [];
+                const existingIndex = prevFilters.findIndex(
+                    filter => filter.field === currentFilterField
+                );
+
+                const updatedFilters = [...prevFilters];
+
+                if (existingIndex >= 0) {
+                    updatedFilters[existingIndex] = {
+                        field: currentFilterField,
+                        value: debouncedInput
+                    };
+                } else {
+                    updatedFilters.push({
+                        field: currentFilterField,
+                        value: debouncedInput
+                    });
+                }
+
+                return updatedFilters;
+            });
+
             fetchFilteredData();
             setFieldText(debouncedInput);
+        } else if (debouncedInput === '' && currentFilterField) {
+            // Remove the filter if input is cleared
+            setFilterParams(prev => {
+                return prev.filter(filter => filter.field !== currentFilterField);
+            });
+
+            // Only fetch if we still have other filters active
+            if (filterParams.some(filter => filter.field !== currentFilterField)) {
+                fetchFilteredData();
+            }
         }
     }, [debouncedInput]);
+
+    // This effect runs when filterParams changes to handle cases like
+    // removing filters or updating multiple filters at once
+    useEffect(() => {
+        if (filterParams.length > 0) {
+            fetchFilteredData();
+        }
+    }, [filterParams.length]); // Only re-run if the number of filters changes
 
     return {
         handleTableFilter
