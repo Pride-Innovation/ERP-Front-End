@@ -53,5 +53,5 @@ export const submitLeaveApplicationService = async (
     body: object,
     userId: string
 ): Promise<IUserAxiosResponse> => {
-    return await axiosInstance.post(`leaves/${userId}`, body);
+    return await axiosInstance.post(`leave/${userId}`, body);
 };

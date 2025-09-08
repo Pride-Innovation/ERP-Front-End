@@ -28,7 +28,7 @@ const updateUSerService = async (body: object, id: string | number) => {
 
 const deleteUserService = async (id: string | number) => {
   try {
-    const response = await axiosInstance.delete(`users/${id}`);
+    const response = await axiosInstance.post(`users/${id}/disable`);
     return response;
   } catch (error) {
     return error;

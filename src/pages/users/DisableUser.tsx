@@ -42,8 +42,9 @@ const DisableUserAccount = ({
         setSendingRequest(true);
         try {
             const response = await deleteUserService(user.id as number) as IUserAxiosResponse;
-            if (response.status === 204) {
+            if (response.status === 201) {
                 toast.success("User account disabled successfully!");
+                console.log(response.data, " response data from disable user");
                 dispatch(updateUser(response.data));
             }
         } catch (error) {
