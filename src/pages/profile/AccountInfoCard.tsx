@@ -11,13 +11,18 @@ import {
     Paper,
     Stack,
     alpha,
-    Chip
+    Chip,
+    Tooltip
 } from "@mui/material";
 import SecurityIcon from '@mui/icons-material/Security';
 import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
 import LockIcon from '@mui/icons-material/Lock';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
+import BlockIcon from '@mui/icons-material/Block';
+import NotInterestedIcon from '@mui/icons-material/NotInterested';
+import LockOpenIcon from '@mui/icons-material/LockOpen';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 import moment from "moment";
 import { IUser } from "../users/interface";
@@ -31,6 +36,57 @@ interface AccountInfoCardProps {
 }
 
 const AccountInfoCard = ({ user }: AccountInfoCardProps) => {
+
+    /**
+     * Returns account status with appropriate visual indicators based on status hierarchy:
+     * 1. Disabled (highest priority) - User has left the organization
+     * 2. Locked - New account needing password change
+     * 3. Blocked - User temporarily away (e.g., on leave)
+     * 4. Active - Normal active account
+     */
+    const getAccountStatus = () => {
+        if (!user) return {
+            status: "Unknown",
+            color: "default",
+            icon: <VerifiedUserIcon fontSize="small" />,
+            tooltip: "Account status unknown"
+        };
+
+        // Disabled status (highest priority) - User has left organization
+        if (user.enabled === false) return {
+            status: "Disabled",
+            color: "error",
+            icon: <NotInterestedIcon fontSize="small" />,
+            tooltip: "User has left the organization"
+        };
+
+        // Locked status - New account or security lockout
+        if (user.accountNonLocked === false) return {
+            status: "Locked",
+            color: "warning",
+            icon: <LockIcon fontSize="small" />,
+            tooltip: "Account needs password change or has been locked for security"
+        };
+
+        // Blocked status - Temporary absence (e.g., on leave)
+        if (user.blocked) return {
+            status: "Blocked",
+            color: "info",
+            icon: <BlockIcon fontSize="small" />,
+            tooltip: "User is temporarily away"
+        };
+
+        // Active status - Normal functioning account
+        return {
+            status: "Active",
+            color: "success",
+            icon: <CheckCircleIcon fontSize="small" />,
+            tooltip: "Account is active and functioning normally"
+        };
+    };
+
+    const accountStatus = getAccountStatus();
+
     return (
         <Paper
             elevation={0}
@@ -81,29 +137,33 @@ const AccountInfoCard = ({ user }: AccountInfoCardProps) => {
             <Box sx={{ p: 2.5 }}>
                 <Stack spacing={2}>
                     <InfoItem
-                        icon={<VerifiedUserIcon fontSize="small" />}
+                        icon={accountStatus.icon}
                         label="Account Status"
                         value={
-                            <Chip
-                                size="small"
-                                label={user?.enabled ? "Active" : "Inactive"}
-                                color={user?.enabled ? "success" : "default"}
-                                sx={{ fontWeight: 500 }}
-                            />
+                            <Tooltip title={accountStatus.tooltip}>
+                                <Chip
+                                    size="small"
+                                    label={accountStatus.status}
+                                    color={accountStatus.color as "default" | "primary" | "secondary" | "error" | "info" | "success" | "warning"}
+                                    sx={{ fontWeight: 500 }}
+                                />
+                            </Tooltip>
                         }
                     />
 
                     <InfoItem
-                        icon={<LockIcon fontSize="small" />}
+                        icon={user?.accountNonLocked ? <LockOpenIcon fontSize="small" /> : <LockIcon fontSize="small" />}
                         label="Account Lock Status"
                         value={
-                            <Chip
-                                size="small"
-                                label={user?.accountNonLocked === false ? "Locked" : "Unlocked"}
-                                color={user?.accountNonLocked === false ? "error" : "success"}
-                                variant={user?.accountNonLocked === false ? "filled" : "outlined"}
-                                sx={{ fontWeight: 500 }}
-                            />
+                            <Tooltip title={user?.accountNonLocked ? "Account is unlocked and accessible" : "Account is locked and requires password reset"}>
+                                <Chip
+                                    size="small"
+                                    label={user?.accountNonLocked === false ? "Locked" : "Unlocked"}
+                                    color={user?.accountNonLocked === false ? "warning" : "success"}
+                                    variant={user?.accountNonLocked === false ? "filled" : "outlined"}
+                                    sx={{ fontWeight: 500 }}
+                                />
+                            </Tooltip>
                         }
                     />
 
