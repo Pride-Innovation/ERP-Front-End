@@ -182,8 +182,11 @@ const UserUtils = () => {
 
     const determineUserStatus = (user: IUser): string => {
         let status: string;
+        if (user.enabled === false) {
+            return status = 'disabled'
+        }
         if (user.accountNonLocked === false) {
-            return status = "disabled";
+            return status = "locked";
         }
         if (user.blocked) {
             return status = 'blocked'
@@ -191,10 +194,6 @@ const UserUtils = () => {
         if (user.enabled) {
             return status = 'active'
         }
-        if (user.enabled === false) {
-            return status = 'inactive'
-        }
-
         return "";
     }
 

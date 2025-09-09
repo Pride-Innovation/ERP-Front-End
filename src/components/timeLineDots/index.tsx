@@ -22,6 +22,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import PauseCircleOutlineIcon from '@mui/icons-material/PauseCircleOutline';
 import BlockIcon from '@mui/icons-material/Block';
 import NotInterestedIcon from '@mui/icons-material/NotInterested';
+import HttpsOutlinedIcon from '@mui/icons-material/HttpsOutlined';
 
 /**
  * 
@@ -76,6 +77,10 @@ const TimeLineDot = ({ status }: ITimeLineDot) => {
         case "disabled":
         case "disabled status":
             return <NotInterestedIcon fontSize='small' color="error" sx={{ mr: "5px" }} />;
+
+        case "locked":
+        case "locked status":
+            return <HttpsOutlinedIcon fontSize='small' color="error" sx={{ mr: "5px" }} />;
 
         // Default fallback
         default:
