@@ -23,7 +23,7 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import AuthenticationImage from "../../statics/images/logo.png";
 import { authentiactionSchema } from './schema';
-import { IAuthentication } from './interface';
+import { IAuthentication, IPasswordResetResponse } from './interface';
 import { useEffect, useState } from 'react';
 import AuthenticationForm from './forms';
 import { ROUTES } from '../../core/routes/routes';
@@ -33,6 +33,7 @@ import KeyboardBackspaceIcon from '@mui/icons-material/KeyboardBackspace';
 import LockResetOutlinedIcon from '@mui/icons-material/LockResetOutlined';
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
 import { Link } from 'react-router-dom';
+import { requestPasswordResetService } from './service';
 
 // Brand colors
 const PRIMARY_COLOR = '#08796C';
@@ -67,15 +68,17 @@ const PasswordReset = () => {
 
     useEffect(() => { reset({ ...defaultUser }) }, []);
 
-    const onSubmit = (formData: IAuthentication) => {
+    const onSubmit = async (formData: IAuthentication) => {
         setLoggingIn(true);
-        console.log(formData, "form data!!!!!");
-
-        // Simulate API call for password reset
-        setTimeout(() => {
+        try {
+            const response = await requestPasswordResetService(formData.email) as IPasswordResetResponse;
+            if (response.status === 201 && response.data.status) {
+                setEmailSent(true);
+            }
+        } catch (error) {
+        } finally {
             setLoggingIn(false);
-            setEmailSent(true);
-        }, 1500);
+        }
     };
 
     const currentYear = new Date().getFullYear();

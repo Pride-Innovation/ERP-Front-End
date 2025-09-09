@@ -43,6 +43,14 @@ export interface ILoginResponse extends IAxiosResponse {
     data: ILoginUserDetailsResponse
 }
 
+export interface IPasswordResetResponse extends IAxiosResponse {
+    data: {
+        email: string,
+        message: string,
+        status: boolean
+    }
+}
+
 export interface IUserProfileResponse {
     status: "success" | "failed",
     data: {

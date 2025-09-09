@@ -24,6 +24,17 @@ export const userProfileService = async (token: string) => {
         })
         return response.data
     } catch (error) {
-        throw error
+        return error
     }
 }
+
+
+export const requestPasswordResetService = async (email: string) => {
+    try {
+        const response = await axiosInstance.post(`request-password-reset?email=${email}`);
+        return response;
+    } catch (error) {
+        return error;
+    }
+}
+
