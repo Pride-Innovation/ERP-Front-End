@@ -18,10 +18,8 @@ import {
     useMediaQuery,
     Button as MuiButton
 } from '@mui/material';
-import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
 import LockOpenOutlinedIcon from '@mui/icons-material/LockOpenOutlined';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import ButtonComponent from '../../components/forms/Button';
 import { IUnBolock, IUserAxiosResponse } from './interface';
 import { unBlockUserService } from './service';
 import { useDispatch } from 'react-redux';
@@ -44,7 +42,7 @@ const UnblockUser = ({
         setSendingRequest(true);
         try {
             const response = await unBlockUserService(user.id as number) as IUserAxiosResponse;
-            if (response.status === 204) {
+            if (response.status === 201) {
                 toast.success("User account unblocked successfully!");
                 dispatch(updateUser(response.data));
             }
