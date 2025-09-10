@@ -43,16 +43,21 @@ const Users = () => {
   useEffect(() => { fetchAllUsers() }, []);
 
   const handleStatusChange = (status: string) => {
-    if (status === 'requireUpdate'
-      || status === 'issuanceAvailable'
-      || status === 'receiptAcknowledged'
-      || status === 'inStore'
-      || status === 'inMaintenance'
-    ) {
-      // fetchResources(status);
+    let params = {};
+    if (status === 'locked') {
+      params = { blocked: true };
+      fetchAllUsers(params);
+      setSelectedStatus(status);
+    } if (status === 'active') {
+      params = { isEnabled: true, blocked: false, isAccountNonLocked: true };
+      fetchAllUsers(params);
+      setSelectedStatus(status);
+    } else if (status === 'disabled') {
+      params = { isEnabled: false };
+      fetchAllUsers(params);
       setSelectedStatus(status);
     } else {
-      // fetchResources('all');
+      fetchAllUsers();
       setSelectedStatus('all');
     }
   }

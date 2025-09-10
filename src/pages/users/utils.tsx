@@ -81,7 +81,8 @@ const UserUtils = () => {
             const response = await fetchRowsService({
                 pageNumber: 0,
                 pageSize: 10,
-                endPoint, params
+                endPoint, 
+                params
             }) as IUsersAxiosResponse;
             if (response.status === 200) {
                 setTotalUsers(response?.data?.totalElements as number)

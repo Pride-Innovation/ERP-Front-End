@@ -12,7 +12,7 @@ import {
     gridVisibleColumnFieldsSelector,
     useGridApiContext
 } from "@mui/x-data-grid";
-import { assetStatus, requestStatus } from "../../utils/constants";
+import { assetStatus, assetTypesStatusConstants, requestStatus } from "../../utils/constants";
 import { MenuItem, useTheme } from "@mui/material";
 import { exportPDF } from "../../utils/pdf";
 import { camelCaseToWords } from "../../utils/helpers";
@@ -211,9 +211,9 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
 
     const determineFilterStatuses = () => {
         switch (moduleName) {
-            case "IT Equipment":
-            case "office equipment":
-            case "fleet":
+            case assetTypesStatusConstants.itEquipment:
+            case assetTypesStatusConstants.officeEquipment:
+            case assetTypesStatusConstants.fleet:
                 return setFilterStatuses(assetFilterStatuses);
             case "user":
                 return setFilterStatuses(userFilterStatuses);
