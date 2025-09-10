@@ -48,7 +48,7 @@ const Users = () => {
       params = { blocked: true };
       fetchAllUsers(params);
       setSelectedStatus(status);
-    } if (status === 'active') {
+    } else if (status === 'active') {
       params = { isEnabled: true, blocked: false, isAccountNonLocked: true };
       fetchAllUsers(params);
       setSelectedStatus(status);

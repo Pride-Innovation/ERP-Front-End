@@ -184,7 +184,7 @@ const AssetUtills = () => {
         searchBranchByName,
         searchSupplierByName,
         fetchAllAssets,
-        determineStatusId
+        determineStatusId,
     })
 }
 

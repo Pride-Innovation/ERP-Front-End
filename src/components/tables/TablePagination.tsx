@@ -28,6 +28,8 @@ const CustomTablePagination = ({ endPoint, params, selectedStatus }: ICustomTabl
     const { determineAssetTypeState, determineStatusId } = AssetUtills()
     const { fieldName, fieldText } = useContext(AssetContext);
 
+    console.log(selectedStatus, 'selectedStatus from custom table pagination');
+
     const handleReduxStoreUpdate = (
         url: string,
         content: Array<Record<string, any>>,
@@ -75,7 +77,10 @@ const CustomTablePagination = ({ endPoint, params, selectedStatus }: ICustomTabl
                 endPoint,
                 params: selectedStatus ? {
                     ...requestParams,
-                    assetStatusId: determineStatusId(selectedStatus) // Determine the status ID based on the selected status
+                    assetStatusId: determineStatusId(selectedStatus), // Determine the status ID based on the selected status
+                    blocked: selectedStatus === 'locked' ? true : selectedStatus === "active" ? false : null, // For user account status blocked
+                    isAccountNonLocked: selectedStatus === 'locked' ? false : selectedStatus === "active" ? true : null, // For user account status non-locked
+                    isEnabled: selectedStatus === 'disabled' ? false : selectedStatus === "active" ? true : null, // For user account status enabled
                 } : requestParams
             }) as IhandleTablePagination;
             const { content } = response.data
