@@ -38,3 +38,17 @@ export const requestPasswordResetService = async (email: string) => {
     }
 }
 
+/**
+ * 
+ * @param token 
+ * @param newPassword 
+ * @returns 
+ */
+export const resetPasswordService = async (token: string, newPassword: string) => {
+    try {
+        const response = await axiosInstance.post(`reset-password?token=${token}&password=${newPassword}`);
+        return response;
+    } catch (error) {
+        return error;
+    }
+}

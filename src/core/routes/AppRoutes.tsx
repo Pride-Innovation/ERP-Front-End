@@ -24,6 +24,7 @@ import RequestRoutes from './subroutes/requests'
 import UserRoutes from './subroutes/UserRoutes'
 import TransportRoutes from './subroutes/TransportRoutes'
 import { permissionsMock } from '../../mocks/settings'
+import ResetPassword from '../../pages/authentication/ResetPassword'
 
 const AppRoutes = () => {
 
@@ -31,6 +32,7 @@ const AppRoutes = () => {
     <Routes>
       <Route path={ROUTES.LOGIN} element={<Login />} />
       <Route path={ROUTES.FORGOT_PASSWORD} element={<PasswordReset />} />
+      <Route path={ROUTES.RESET_PASSWORD} element={<ResetPassword />} />
       <Route element={<PrivateRoute />}>
         <Route path={ROUTES.ASSETS_MANAGEMENT} element={<ApplicationDrawer />} >
           <Route index element={<Dashboard />} />

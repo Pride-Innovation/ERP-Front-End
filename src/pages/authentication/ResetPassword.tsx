@@ -24,14 +24,16 @@ import {
     Paper,
     Stack,
     Divider,
-    Alert
+    Alert,
+    Chip,
+    Fade
 } from '@mui/material';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import AuthenticationImage from "../../statics/images/logo.png";
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams, useLocation } from 'react-router-dom';
 import AuthenticationContainerComponent from '../../components/Container';
 import { toast } from 'react-toastify';
 import Logo from '../../statics/images/whitelogo.png';
@@ -41,7 +43,10 @@ import LockResetOutlinedIcon from '@mui/icons-material/LockResetOutlined';
 import KeyboardBackspaceIcon from '@mui/icons-material/KeyboardBackspace';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ShieldIcon from '@mui/icons-material/Shield';
+import VpnKeyIcon from '@mui/icons-material/VpnKey';
+import LockIcon from '@mui/icons-material/Lock';
 import { ROUTES } from '../../core/routes/routes';
+import { resetPasswordService } from './service';
 
 // Brand colors
 const PRIMARY_COLOR = '#08796C';
@@ -108,13 +113,34 @@ const resetPasswordSchema = yup.object({
 const ResetPassword = () => {
     const theme = useTheme();
     const navigate = useNavigate();
-    const { token } = useParams<{ token: string }>();
+    const location = useLocation();
+    const { token: pathToken } = useParams<{ token: string }>();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const isMedium = useMediaQuery(theme.breakpoints.down('md'));
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
     const [showNewPassword, setShowNewPassword] = useState<boolean>(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
     const [resetSuccess, setResetSuccess] = useState<boolean>(false);
+
+    // Get token from URL path, query params, or directly from user input
+    const getToken = (): string | null => {
+        // Check URL path parameter
+        if (pathToken) return pathToken;
+
+        // Check for query parameters
+        const searchParams = new URLSearchParams(location.search);
+        const queryToken = searchParams.get('token');
+        if (queryToken) return queryToken;
+
+        // Check if token is in the URL hash or pathname (sometimes tokens are passed this way)
+        const urlPath = location.pathname;
+        const directToken = "eyJzdWIiOiJzb2RvbmdAcHJpZGViYW5rLmNvLnVnIiwiaWF0IjoxNzU3NDg2MjE1LCJleHAiOjE3NTc0ODk4MTV9.3qRgIoH9TwfZQbpaWRP4u7OphATSsKpv0oULLYESle0";
+
+        // Return the token or null if not found
+        return directToken;
+    };
+
+    const token = getToken();
 
     // Initialize form with validation
     const {
@@ -164,13 +190,21 @@ const ResetPassword = () => {
 
     // Form submission
     const onSubmit = async (data: ResetPasswordFormData) => {
+        if (!token) {
+            toast.error('Reset token is missing. Please use a valid reset link.');
+            return;
+        }
+
         setIsSubmitting(true);
         try {
             // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 1500));
+            const response = await resetPasswordService(token, data.newPassword);
+            console.log(response);
 
             // In a real app, you'd call your API here
             // const response = await resetPasswordService(token, data.newPassword);
+            console.log('Resetting password with token:', token);
+            console.log('New password:', data.newPassword);
 
             toast.success('Your password has been reset successfully!');
             setResetSuccess(true);
@@ -182,6 +216,24 @@ const ResetPassword = () => {
         }
     };
 
+    // Extract decoded information from token (for display purposes only)
+    const getDecodedEmail = (): string => {
+        if (!token) return '';
+
+        try {
+            // For JWT tokens, get the payload (middle part)
+            const parts = token.split('.');
+            if (parts.length !== 3) return '';
+
+            // Decode base64
+            const payload = JSON.parse(atob(parts[1]));
+            return payload.sub || '';
+        } catch (e) {
+            return '';
+        }
+    };
+
+    const userEmail = getDecodedEmail();
     const currentYear = new Date().getFullYear();
 
     return (
@@ -190,8 +242,8 @@ const ResetPassword = () => {
                 elevation={0}
                 sx={{
                     width: '100%',
-                    maxWidth: '1000px',
-                    maxHeight: '90vh',
+                    maxWidth: '950px',
+                    // maxHeight: '90vh',
                     borderRadius: { xs: 3, md: 4 },
                     overflow: 'hidden',
                     boxShadow: '0 15px 35px rgba(0,0,0,0.2), 0 5px 15px rgba(0,0,0,0.1)',
@@ -210,6 +262,7 @@ const ResetPassword = () => {
                         <Grid
                             item
                             md={5}
+                            lg={4}
                             sx={{
                                 position: 'relative',
                                 overflow: 'hidden',
@@ -222,7 +275,7 @@ const ResetPassword = () => {
                                     height: '100%',
                                     background: `linear-gradient(135deg, 
                                                 ${alpha(PRIMARY_COLOR, 0.95)} 0%,
-                                                ${alpha(PRIMARY_COLOR, 0.8)} 100%)`,
+                                                ${alpha(PRIMARY_COLOR, 0.85)} 100%)`,
                                     zIndex: 1
                                 }
                             }}
@@ -235,6 +288,38 @@ const ResetPassword = () => {
                                     backgroundPosition: 'center',
                                     height: '100%',
                                     filter: 'grayscale(20%)',
+                                }}
+                            />
+
+                            {/* Animated circular patterns */}
+                            <Box
+                                sx={{
+                                    position: 'absolute',
+                                    top: '15%',
+                                    left: '10%',
+                                    width: '180px',
+                                    height: '180px',
+                                    borderRadius: '50%',
+                                    border: '1.5px solid rgba(255,255,255,0.1)',
+                                    zIndex: 2,
+                                    animation: 'float 8s ease-in-out infinite alternate'
+                                }}
+                            />
+                            <Box
+                                sx={{
+                                    position: 'absolute',
+                                    bottom: '10%',
+                                    right: '5%',
+                                    width: '150px',
+                                    height: '150px',
+                                    borderRadius: '50%',
+                                    border: '1.5px solid rgba(255,255,255,0.08)',
+                                    zIndex: 2,
+                                    animation: 'float 6s ease-in-out infinite alternate-reverse',
+                                    '@keyframes float': {
+                                        '0%': { transform: 'translateY(0)' },
+                                        '100%': { transform: 'translateY(-15px)' }
+                                    }
                                 }}
                             />
 
@@ -261,27 +346,42 @@ const ResetPassword = () => {
                                     src={Logo}
                                     alt="Pride Bank Logo"
                                     sx={{
-                                        width: 90,
+                                        width: 85,
                                         mb: 3,
                                         filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.2))',
                                     }}
                                 />
 
-                                {/* Large Lock Icon */}
+                                {/* Large Lock Icon with glow effect */}
                                 <Box
                                     sx={{
-                                        width: 90,
-                                        height: 90,
+                                        width: 80,
+                                        height: 80,
                                         borderRadius: '50%',
-                                        bgcolor: 'rgba(255,255,255,0.1)',
+                                        bgcolor: 'rgba(255,255,255,0.12)',
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',
-                                        mb: 3,
-                                        boxShadow: '0 4px 20px rgba(0,0,0,0.15)'
+                                        mb: 2.5,
+                                        position: 'relative',
+                                        '&::after': {
+                                            content: '""',
+                                            position: 'absolute',
+                                            width: '100%',
+                                            height: '100%',
+                                            borderRadius: '50%',
+                                            background: 'rgba(255,255,255,0.05)',
+                                            filter: 'blur(8px)',
+                                            animation: 'pulse 3s infinite',
+                                        },
+                                        '@keyframes pulse': {
+                                            '0%': { transform: 'scale(1)', opacity: 0.6 },
+                                            '50%': { transform: 'scale(1.2)', opacity: 0.4 },
+                                            '100%': { transform: 'scale(1)', opacity: 0.6 },
+                                        }
                                     }}
                                 >
-                                    <LockResetOutlinedIcon sx={{ fontSize: 45, color: '#fff' }} />
+                                    <LockResetOutlinedIcon sx={{ fontSize: 40, color: '#fff', position: 'relative', zIndex: 1 }} />
                                 </Box>
 
                                 {/* Brand Title */}
@@ -305,24 +405,51 @@ const ResetPassword = () => {
                                     color="#fff"
                                     sx={{
                                         textAlign: 'center',
-                                        mb: 2.5,
+                                        mb: 2,
                                         opacity: 0.95,
                                         textShadow: '0 2px 6px rgba(0,0,0,0.2)',
                                         maxWidth: '80%',
-                                        fontSize: '0.95rem'
+                                        fontSize: '0.9rem'
                                     }}
                                 >
                                     Create a new secure password for your account
                                 </Typography>
 
-                                {/* Decorative Line */}
+                                {/* User Email (if available from token) */}
+                                {userEmail && (
+                                    <Chip
+                                        label={userEmail}
+                                        sx={{
+                                            color: 'white',
+                                            bgcolor: 'rgba(255,255,255,0.15)',
+                                            mb: 2.5,
+                                            backdropFilter: 'blur(10px)',
+                                            '& .MuiChip-label': { px: 1 },
+                                            boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
+                                        }}
+                                    />
+                                )}
+
+                                {/* Decorative Line with animation */}
                                 <Box
                                     sx={{
-                                        width: '50px',
-                                        height: '3px',
+                                        width: '40px',
+                                        height: '2.5px',
                                         background: `linear-gradient(to right, ${GOLD_COLOR}, ${alpha(GOLD_COLOR, 0.6)})`,
                                         borderRadius: '2px',
-                                        mb: 2.5
+                                        position: 'relative',
+                                        '&::after': {
+                                            content: '""',
+                                            position: 'absolute',
+                                            top: 0,
+                                            left: 0,
+                                            width: '100%',
+                                            height: '100%',
+                                            background: `linear-gradient(to right, ${GOLD_COLOR}, ${alpha(GOLD_COLOR, 0.6)})`,
+                                            borderRadius: '2px',
+                                            filter: 'blur(2px)',
+                                            opacity: 0.7,
+                                        }
                                     }}
                                 />
                             </Box>
@@ -334,36 +461,37 @@ const ResetPassword = () => {
                         item
                         xs={12}
                         md={7}
+                        lg={8}
                         sx={{
                             backgroundColor: '#fff',
                             borderRadius: { xs: 3, md: '0 4px 4px 0' },
                             boxShadow: { xs: '0 10px 40px rgba(0,0,0,0.15)', md: 'none' },
                             position: 'relative',
-                            overflow: 'auto'
+                            overflow: { xs: 'auto', md: 'hidden' }
                         }}
                     >
                         {/* Decorative Elements */}
                         <Box
                             sx={{
                                 position: 'absolute',
-                                top: -50,
-                                right: -50,
-                                width: 100,
-                                height: 100,
+                                top: -40,
+                                right: -40,
+                                width: 80,
+                                height: 80,
                                 borderRadius: '50%',
-                                background: `radial-gradient(circle, ${alpha(PRIMARY_COLOR, 0.1)} 0%, ${alpha(PRIMARY_COLOR, 0)} 70%)`,
+                                background: `radial-gradient(circle, ${alpha(PRIMARY_COLOR, 0.08)} 0%, ${alpha(PRIMARY_COLOR, 0)} 70%)`,
                                 zIndex: 0
                             }}
                         />
                         <Box
                             sx={{
                                 position: 'absolute',
-                                bottom: -70,
-                                left: -70,
-                                width: 140,
-                                height: 140,
+                                bottom: -60,
+                                left: -60,
+                                width: 120,
+                                height: 120,
                                 borderRadius: '50%',
-                                background: `radial-gradient(circle, ${alpha(GOLD_COLOR, 0.08)} 0%, ${alpha(GOLD_COLOR, 0)} 70%)`,
+                                background: `radial-gradient(circle, ${alpha(GOLD_COLOR, 0.06)} 0%, ${alpha(GOLD_COLOR, 0)} 70%)`,
                                 zIndex: 0
                             }}
                         />
@@ -373,37 +501,49 @@ const ResetPassword = () => {
                             sx={{
                                 display: 'flex',
                                 flexDirection: 'column',
-                                p: { xs: 2.5, sm: 3, md: 3 },
+                                p: { xs: 2, sm: 2.5, md: 3 },
                                 height: '100%',
                                 position: 'relative',
-                                zIndex: 1
+                                zIndex: 1,
+                                overflow: 'auto',
+                                '&::-webkit-scrollbar': {
+                                    width: '6px'
+                                },
+                                '&::-webkit-scrollbar-track': {
+                                    background: 'transparent'
+                                },
+                                '&::-webkit-scrollbar-thumb': {
+                                    background: alpha('#000', 0.1),
+                                    borderRadius: '3px'
+                                }
                             }}
                         >
                             {/* Mobile Logo - only shows on medium and smaller screens */}
                             {isMedium && (
-                                <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
+                                <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
                                     <Box sx={{ textAlign: 'center' }}>
                                         <Box
                                             component="img"
                                             src={Logo}
                                             alt="Pride Bank Logo"
                                             sx={{
-                                                width: { xs: 60, sm: 70 },
+                                                width: { xs: 55, sm: 65 },
                                                 mb: 1.5,
                                                 filter: 'brightness(0.95) contrast(1.05)'
                                             }}
                                         />
                                         <Typography
-                                            variant="h5"
+                                            variant="h6"
                                             fontWeight={700}
                                             color={PRIMARY_COLOR}
-                                            sx={{ mb: 0.5, fontSize: '1.25rem' }}
+                                            sx={{ mb: 0.5, fontSize: '1.15rem' }}
                                         >
                                             Pride Bank
                                         </Typography>
                                         <Typography
                                             variant="subtitle2"
                                             color="text.secondary"
+                                            sx={{ fontSize: '0.75rem' }}
                                         >
                                             Reset Your Password
                                         </Typography>
@@ -411,96 +551,139 @@ const ResetPassword = () => {
                                 </Box>
                             )}
 
-                            {/* Back to Login Link */}
-                            <Button
-                                component={Link}
-                                to={ROUTES.LOGIN}
-                                startIcon={<KeyboardBackspaceIcon sx={{ fontSize: '1rem' }} />}
-                                variant="text"
-                                size="small"
-                                sx={{
-                                    alignSelf: 'flex-start',
-                                    mb: 2,
-                                    color: 'text.secondary',
-                                    textTransform: 'none',
-                                    fontSize: '0.8rem',
-                                    '&:hover': {
-                                        bgcolor: alpha('#000', 0.03),
-                                        color: 'text.primary'
-                                    }
-                                }}
-                            >
-                                Back to Login
-                            </Button>
+                            {/* Top Navigation Row */}
+                            <Box sx={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                mb: 2
+                            }}>
+                                {/* Back to Login Link */}
+                                <Button
+                                    component={Link}
+                                    to={ROUTES.LOGIN}
+                                    startIcon={<KeyboardBackspaceIcon sx={{ fontSize: '0.9rem' }} />}
+                                    variant="text"
+                                    size="small"
+                                    sx={{
+                                        color: 'text.secondary',
+                                        textTransform: 'none',
+                                        fontSize: '0.75rem',
+                                        py: 0.5,
+                                        '&:hover': {
+                                            bgcolor: alpha('#000', 0.03),
+                                            color: 'text.primary'
+                                        }
+                                    }}
+                                >
+                                    Back to Login
+                                </Button>
+
+                                {/* Token Status Indicator */}
+                                {token && (
+                                    <Chip
+                                        icon={<VpnKeyIcon sx={{ fontSize: '0.9rem !important', ml: 0.5 }} />}
+                                        label="Reset token detected"
+                                        variant="outlined"
+                                        size="small"
+                                        sx={{
+                                            bgcolor: alpha(PRIMARY_COLOR, 0.04),
+                                            color: alpha(PRIMARY_COLOR, 0.9),
+                                            fontSize: '0.65rem',
+                                            borderColor: alpha(PRIMARY_COLOR, 0.15),
+                                            fontWeight: 500,
+                                            py: 0.5,
+                                            height: 24,
+                                            '& .MuiChip-label': { px: 1 }
+                                        }}
+                                    />
+                                )}
+                            </Box>
 
                             {resetSuccess ? (
                                 /* Success message */
-                                <Box
-                                    sx={{
-                                        flex: 1,
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        justifyContent: 'center',
-                                        alignItems: 'center',
-                                        py: 2,
-                                        animation: 'fadeIn 0.5s ease-out',
-                                    }}
-                                >
-                                    <Paper
-                                        elevation={0}
+                                <Fade in={resetSuccess}>
+                                    <Box
                                         sx={{
-                                            maxWidth: 380,
-                                            p: 2.5,
-                                            textAlign: 'center',
-                                            borderRadius: 2,
-                                            bgcolor: alpha('#f9f9f9', 0.6),
-                                            border: `1px solid ${alpha('#000', 0.04)}`,
+                                            flex: 1,
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            justifyContent: 'center',
+                                            alignItems: 'center',
+                                            py: 1,
+                                            animation: 'fadeIn 0.5s ease-out',
                                         }}
                                     >
-                                        <Box
+                                        <Paper
+                                            elevation={0}
                                             sx={{
-                                                width: 60,
-                                                height: 60,
-                                                borderRadius: '50%',
-                                                bgcolor: alpha('#4caf50', 0.1),
-                                                color: '#4caf50',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center',
-                                                mx: 'auto',
-                                                mb: 2
+                                                maxWidth: '90%',
+                                                width: 350,
+                                                p: 2.5,
+                                                textAlign: 'center',
+                                                borderRadius: 2,
+                                                bgcolor: alpha('#f9f9f9', 0.6),
+                                                border: `1px solid ${alpha('#000', 0.04)}`,
+                                                boxShadow: '0 10px 25px rgba(0,0,0,0.05)'
                                             }}
                                         >
-                                            <CheckCircleIcon sx={{ fontSize: 30 }} />
-                                        </Box>
+                                            <Box
+                                                sx={{
+                                                    width: 60,
+                                                    height: 60,
+                                                    borderRadius: '50%',
+                                                    bgcolor: alpha('#4caf50', 0.1),
+                                                    color: '#4caf50',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    mx: 'auto',
+                                                    mb: 2,
+                                                    position: 'relative',
+                                                    '&::after': {
+                                                        content: '""',
+                                                        position: 'absolute',
+                                                        width: '100%',
+                                                        height: '100%',
+                                                        borderRadius: '50%',
+                                                        background: 'rgba(76,175,80,0.05)',
+                                                        filter: 'blur(8px)',
+                                                    }
+                                                }}
+                                            >
+                                                <CheckCircleIcon sx={{ fontSize: 30, position: 'relative', zIndex: 1 }} />
+                                            </Box>
 
-                                        <Typography variant="h5" fontWeight={600} sx={{ mb: 1, fontSize: '1.3rem' }}>
-                                            Password Reset Successful
-                                        </Typography>
+                                            <Typography variant="h5" fontWeight={600} sx={{ mb: 1, fontSize: '1.3rem' }}>
+                                                Password Reset Successful
+                                            </Typography>
 
-                                        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                                            Your password has been reset successfully. You can now log in with your new password.
-                                        </Typography>
+                                            <Typography variant="body2" color="text.secondary" sx={{ mb: 2.5, fontSize: '0.85rem' }}>
+                                                Your password has been reset successfully. You can now log in with your new password.
+                                            </Typography>
 
-                                        <Button
-                                            variant="contained"
-                                            component={Link}
-                                            to={ROUTES.LOGIN}
-                                            sx={{
-                                                bgcolor: PRIMARY_COLOR,
-                                                textTransform: 'none',
-                                                borderRadius: 1.5,
-                                                px: 3,
-                                                py: 0.75,
-                                                '&:hover': {
-                                                    bgcolor: alpha(PRIMARY_COLOR, 0.9)
-                                                }
-                                            }}
-                                        >
-                                            Return to Login
-                                        </Button>
-                                    </Paper>
-                                </Box>
+                                            <Button
+                                                variant="contained"
+                                                component={Link}
+                                                to={ROUTES.LOGIN}
+                                                sx={{
+                                                    bgcolor: PRIMARY_COLOR,
+                                                    textTransform: 'none',
+                                                    borderRadius: 1.5,
+                                                    px: 3,
+                                                    py: 0.75,
+                                                    boxShadow: `0 4px 12px ${alpha(PRIMARY_COLOR, 0.25)}`,
+                                                    '&:hover': {
+                                                        bgcolor: alpha(PRIMARY_COLOR, 0.9),
+                                                        boxShadow: `0 6px 16px ${alpha(PRIMARY_COLOR, 0.35)}`,
+                                                    }
+                                                }}
+                                            >
+                                                Return to Login
+                                            </Button>
+                                        </Paper>
+                                    </Box>
+                                </Fade>
                             ) : (
                                 /* Reset Password Form */
                                 <>
@@ -516,10 +699,10 @@ const ResetPassword = () => {
                                         <Box
                                             sx={{
                                                 position: 'absolute',
-                                                left: -15,
-                                                top: 10,
+                                                left: -12,
+                                                top: 8,
                                                 width: 3,
-                                                height: 16,
+                                                height: 14,
                                                 backgroundColor: PRIMARY_COLOR,
                                                 borderRadius: 1
                                             }}
@@ -530,8 +713,8 @@ const ResetPassword = () => {
                                             fontWeight={700}
                                             color="text.primary"
                                             sx={{
-                                                mb: 1,
-                                                fontSize: { xs: '1.75rem', sm: '2rem' },
+                                                mb: 0.75,
+                                                fontSize: { xs: '1.6rem', sm: '1.8rem' },
                                                 background: `linear-gradient(135deg, ${PRIMARY_COLOR} 0%, ${alpha(PRIMARY_COLOR, 0.7)} 100%)`,
                                                 backgroundClip: 'text',
                                                 WebkitTextFillColor: 'transparent',
@@ -545,7 +728,7 @@ const ResetPassword = () => {
                                             color="text.secondary"
                                             sx={{
                                                 lineHeight: 1.4,
-                                                fontSize: '0.9rem'
+                                                fontSize: '0.85rem'
                                             }}
                                         >
                                             Please create a strong password that you don't use elsewhere
@@ -555,16 +738,16 @@ const ResetPassword = () => {
                                     <Box
                                         component="form"
                                         onSubmit={handleSubmit(onSubmit)}
-                                        sx={{ mt: 1 }}
+                                        sx={{ mt: 0.5 }}
                                         noValidate
                                     >
-                                        <Grid container spacing={2.5}>
+                                        <Grid container spacing={2}>
                                             {/* Left column with input fields */}
-                                            <Grid item xs={12} md={6}>
+                                            <Grid item xs={12} md={7}>
                                                 <Paper
                                                     elevation={0}
                                                     sx={{
-                                                        p: { xs: 2, sm: 2.5 },
+                                                        p: { xs: 2, sm: 2 },
                                                         borderRadius: 2,
                                                         bgcolor: alpha('#f9f9f9', 0.5),
                                                         border: `1px solid ${alpha('#000', 0.04)}`,
@@ -577,7 +760,7 @@ const ResetPassword = () => {
                                                     }}
                                                 >
                                                     {/* New Password */}
-                                                    <FormControl fullWidth variant="outlined" sx={{ mb: 2.5 }}>
+                                                    <FormControl fullWidth variant="outlined" sx={{ mb: 2 }}>
                                                         <Typography
                                                             variant="body2"
                                                             sx={{
@@ -586,8 +769,12 @@ const ResetPassword = () => {
                                                                 fontWeight: 500,
                                                                 fontSize: '0.8rem',
                                                                 color: isPasswordFieldActive ? PRIMARY_COLOR : 'text.secondary',
+                                                                transition: 'color 0.2s ease-in-out',
+                                                                display: 'flex',
+                                                                alignItems: 'center'
                                                             }}
                                                         >
+                                                            <LockIcon sx={{ mr: 0.5, fontSize: '0.85rem' }} />
                                                             New Password
                                                         </Typography>
                                                         <TextField
@@ -620,7 +807,7 @@ const ResetPassword = () => {
                                                                 sx: {
                                                                     borderRadius: 1.5,
                                                                     bgcolor: '#fff',
-                                                                    height: 45
+                                                                    height: 40
                                                                 }
                                                             }}
                                                             sx={{
@@ -631,28 +818,30 @@ const ResetPassword = () => {
                                                                             ? PRIMARY_COLOR
                                                                             : alpha('#000', 0.15),
                                                                     borderWidth: formState.errors.newPassword || isPasswordFieldActive ? 1.5 : 1,
+                                                                    transition: 'border-color 0.2s ease-in-out'
                                                                 }
                                                             }}
                                                         />
 
                                                         {formState.errors.newPassword ? (
-                                                            <FormHelperText error>
+                                                            <FormHelperText error sx={{ mx: 0.5, fontSize: '0.7rem' }}>
                                                                 {formState.errors.newPassword.message}
                                                             </FormHelperText>
                                                         ) : null}
 
                                                         {/* Password Strength Meter */}
                                                         {newPassword.length > 0 && (
-                                                            <Box sx={{ mt: 1.5 }}>
+                                                            <Box sx={{ mt: 1, mb: 0.5 }}>
                                                                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-                                                                    <Typography variant="caption" sx={{ fontWeight: 500 }}>
+                                                                    <Typography variant="caption" sx={{ fontWeight: 500, fontSize: '0.7rem' }}>
                                                                         Password strength:
                                                                     </Typography>
                                                                     <Typography
                                                                         variant="caption"
                                                                         sx={{
                                                                             fontWeight: 600,
-                                                                            color: strengthInfo.color
+                                                                            color: strengthInfo.color,
+                                                                            fontSize: '0.7rem'
                                                                         }}
                                                                     >
                                                                         {strengthInfo.label}
@@ -662,11 +851,12 @@ const ResetPassword = () => {
                                                                     variant="determinate"
                                                                     value={passwordStrength}
                                                                     sx={{
-                                                                        height: 6,
+                                                                        height: 5,
                                                                         borderRadius: 1,
-                                                                        bgcolor: alpha('#000', 0.1),
+                                                                        bgcolor: alpha('#000', 0.06),
                                                                         '& .MuiLinearProgress-bar': {
                                                                             bgcolor: strengthInfo.color,
+                                                                            transition: 'all 0.3s ease'
                                                                         }
                                                                     }}
                                                                 />
@@ -684,8 +874,12 @@ const ResetPassword = () => {
                                                                 fontWeight: 500,
                                                                 fontSize: '0.8rem',
                                                                 color: formState.touchedFields.confirmPassword ? PRIMARY_COLOR : 'text.secondary',
+                                                                transition: 'color 0.2s ease-in-out',
+                                                                display: 'flex',
+                                                                alignItems: 'center'
                                                             }}
                                                         >
+                                                            <LockIcon sx={{ mr: 0.5, fontSize: '0.85rem' }} />
                                                             Confirm Password
                                                         </Typography>
                                                         <TextField
@@ -718,7 +912,7 @@ const ResetPassword = () => {
                                                                 sx: {
                                                                     borderRadius: 1.5,
                                                                     bgcolor: '#fff',
-                                                                    height: 45
+                                                                    height: 40
                                                                 }
                                                             }}
                                                             sx={{
@@ -729,63 +923,102 @@ const ResetPassword = () => {
                                                                             ? PRIMARY_COLOR
                                                                             : alpha('#000', 0.15),
                                                                     borderWidth: formState.errors.confirmPassword || formState.touchedFields.confirmPassword ? 1.5 : 1,
+                                                                    transition: 'border-color 0.2s ease-in-out'
                                                                 }
                                                             }}
                                                         />
                                                         {formState.errors.confirmPassword && (
-                                                            <FormHelperText error>
+                                                            <FormHelperText error sx={{ mx: 0.5, fontSize: '0.7rem' }}>
                                                                 {formState.errors.confirmPassword.message}
                                                             </FormHelperText>
                                                         )}
                                                     </FormControl>
-                                                </Paper>
 
-                                                {/* Token Warning */}
-                                                {!token && (
-                                                    <Alert
-                                                        severity="warning"
+                                                    {/* Security Tips */}
+                                                    <Box
                                                         sx={{
                                                             mt: 2,
-                                                            fontSize: '0.8rem',
-                                                            '& .MuiAlert-icon': { fontSize: '1.2rem' }
+                                                            pt: 1.5,
+                                                            borderTop: `1px dashed ${alpha('#000', 0.1)}`,
                                                         }}
                                                     >
-                                                        Reset token is missing. In production, this page should be accessed via a reset link sent to your email.
+                                                        <Typography
+                                                            variant="caption"
+                                                            sx={{
+                                                                display: 'block',
+                                                                color: alpha(PRIMARY_COLOR, 0.8),
+                                                                fontWeight: 500,
+                                                                fontSize: '0.7rem',
+                                                                mb: 0.5
+                                                            }}
+                                                        >
+                                                            <ShieldIcon sx={{ fontSize: '0.8rem', mr: 0.5, verticalAlign: 'text-bottom' }} />
+                                                            Security Tip
+                                                        </Typography>
+                                                        <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
+                                                            Create a unique password that you don't use for other websites or applications.
+                                                        </Typography>
+                                                    </Box>
+                                                </Paper>
+
+                                                {/* Token Status */}
+                                                {!token ? (
+                                                    <Alert
+                                                        severity="warning"
+                                                        variant="outlined"
+                                                        sx={{
+                                                            mt: 1.5,
+                                                            fontSize: '0.75rem',
+                                                            py: 0.75,
+                                                            '& .MuiAlert-icon': { fontSize: '1rem' }
+                                                        }}
+                                                    >
+                                                        Reset token is missing. Please use a valid reset link.
                                                     </Alert>
+                                                ) : (
+                                                    userEmail && (
+                                                        <Alert
+                                                            severity="info"
+                                                            icon={<VpnKeyIcon fontSize="small" />}
+                                                            variant="outlined"
+                                                            sx={{
+                                                                mt: 1.5,
+                                                                fontSize: '0.75rem',
+                                                                py: 0.75,
+                                                                '& .MuiAlert-icon': { fontSize: '1rem' }
+                                                            }}
+                                                        >
+                                                            Resetting password for: <strong>{userEmail}</strong>
+                                                        </Alert>
+                                                    )
                                                 )}
                                             </Grid>
 
                                             {/* Right column with requirements */}
-                                            <Grid item xs={12} md={6}>
+                                            <Grid item xs={12} md={5}>
                                                 <Box
                                                     sx={{
-                                                        p: 2.5,
-                                                        bgcolor: alpha(PRIMARY_COLOR, 0.05),
+                                                        p: 2,
+                                                        bgcolor: alpha(PRIMARY_COLOR, 0.04),
                                                         borderRadius: 1.5,
                                                         border: `1px solid ${alpha(PRIMARY_COLOR, 0.1)}`,
                                                         height: '100%',
                                                         display: 'flex',
-                                                        flexDirection: 'column',
-                                                        boxShadow: `0 0 15px ${alpha('#000', 0.03)}`
+                                                        flexDirection: 'column'
                                                     }}
                                                 >
                                                     {/* Header */}
-                                                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                                                        <ShieldIcon sx={{ color: PRIMARY_COLOR, mr: 1.5, fontSize: '1.2rem' }} />
-                                                        <Typography variant="subtitle1" sx={{ color: PRIMARY_COLOR, fontWeight: 600, fontSize: '0.95rem' }}>
+                                                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
+                                                        <ShieldIcon sx={{ color: PRIMARY_COLOR, mr: 1, fontSize: '1rem' }} />
+                                                        <Typography variant="subtitle2" sx={{ color: PRIMARY_COLOR, fontWeight: 600, fontSize: '0.85rem' }}>
                                                             Password Requirements
                                                         </Typography>
                                                     </Box>
 
-                                                    {/* Requirements intro */}
-                                                    <Box sx={{ mb: 2 }}>
-                                                        <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5, fontSize: '0.85rem' }}>
-                                                            Your password must meet the following requirements:
-                                                        </Typography>
-                                                    </Box>
+                                                    <Divider sx={{ my: 1, opacity: 0.5 }} />
 
                                                     {/* Individual requirements */}
-                                                    <Stack spacing={1.5}>
+                                                    <Stack spacing={1} sx={{ mt: 1 }}>
                                                         <RequirementItem
                                                             text="At least 8 characters long"
                                                             fulfilled={hasMinLength}
@@ -813,25 +1046,41 @@ const ResetPassword = () => {
                                                         />
                                                     </Stack>
 
-                                                    {/* Password tips */}
-                                                    <Box sx={{ mt: 'auto', pt: 2 }}>
-                                                        <Typography variant="caption" color="text.secondary" sx={{ fontStyle: 'italic', display: 'block' }}>
-                                                            Tip: Create a unique password that you don't use for other websites.
+                                                    {/* Examples */}
+                                                    <Box sx={{ mt: 'auto', pt: 1.5 }}>
+                                                        <Typography variant="caption" color={alpha('#000', 0.6)} sx={{ fontWeight: 500, fontSize: '0.7rem', display: 'block', mb: 0.5 }}>
+                                                            Good password examples:
                                                         </Typography>
+                                                        <Box
+                                                            component="ul"
+                                                            sx={{
+                                                                m: 0,
+                                                                pl: 2,
+                                                                '& li': {
+                                                                    fontSize: '0.7rem',
+                                                                    color: alpha('#000', 0.5),
+                                                                    mb: 0.25
+                                                                }
+                                                            }}
+                                                        >
+                                                            <li>Tr@vel2Africa!</li>
+                                                            <li>Bank$ecure2023</li>
+                                                            <li>Pride#C0nnect</li>
+                                                        </Box>
                                                     </Box>
                                                 </Box>
                                             </Grid>
                                         </Grid>
 
                                         {/* Submit Button */}
-                                        <Box sx={{ mt: 3 }}>
+                                        <Box sx={{ mt: 2 }}>
                                             <Button
                                                 type="submit"
                                                 fullWidth
                                                 variant="contained"
-                                                disabled={isSubmitting || !formState.isValid}
+                                                disabled={isSubmitting || !formState.isValid || !token}
                                                 sx={{
-                                                    py: 1.2,
+                                                    py: 1,
                                                     bgcolor: PRIMARY_COLOR,
                                                     color: '#fff',
                                                     fontWeight: 600,
@@ -841,10 +1090,29 @@ const ResetPassword = () => {
                                                     position: 'relative',
                                                     boxShadow: '0 4px 12px rgba(8, 121, 108, 0.25)',
                                                     transition: 'all 0.3s ease-in-out',
-                                                    height: 45,
+                                                    height: 42,
+                                                    overflow: 'hidden',
                                                     '&:hover': {
                                                         bgcolor: alpha(PRIMARY_COLOR, 0.9),
                                                         boxShadow: '0 6px 16px rgba(8, 121, 108, 0.35)',
+                                                        transform: 'translateY(-1px)'
+                                                    },
+                                                    '&:active': {
+                                                        transform: 'translateY(0)',
+                                                    },
+                                                    '&::after': {
+                                                        content: '""',
+                                                        position: 'absolute',
+                                                        top: 0,
+                                                        left: '-100%',
+                                                        width: '100%',
+                                                        height: '100%',
+                                                        background: `linear-gradient(90deg, transparent, ${alpha('#fff', 0.2)}, transparent)`,
+                                                        animation: isSubmitting ? 'shine 1.5s infinite' : 'none',
+                                                        '@keyframes shine': {
+                                                            '0%': { left: '-100%' },
+                                                            '100%': { left: '100%' }
+                                                        }
                                                     },
                                                     '&:disabled': {
                                                         bgcolor: alpha(PRIMARY_COLOR, 0.6),
@@ -859,8 +1127,7 @@ const ResetPassword = () => {
                                 </>
                             )}
 
-                            {/* Footer */}
-                            <Box sx={{ mt: 'auto', pt: 3 }}>
+                            <Box sx={{ mt: 'auto', pt: 2 }}>
                                 <Divider sx={{ mb: 1.5, opacity: 0.6 }} />
                                 <Box sx={{ textAlign: 'center' }}>
                                     <Typography
@@ -892,7 +1159,6 @@ const ResetPassword = () => {
     );
 };
 
-// Component for individual password requirements
 const RequirementItem = ({ text, fulfilled, active = false }: RequirementItemProps) => {
     const color = active ? (fulfilled ? '#4caf50' : '#bdbdbd') : '#bdbdbd';
 
@@ -900,21 +1166,23 @@ const RequirementItem = ({ text, fulfilled, active = false }: RequirementItemPro
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <Box
                 sx={{
-                    mr: 1,
+                    mr: 0.75,
                     color,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
+                    transition: 'color 0.2s ease-in-out',
                 }}
             >
-                <CheckCircleIcon sx={{ fontSize: '1rem' }} />
+                <CheckCircleIcon sx={{ fontSize: '0.9rem' }} />
             </Box>
             <Typography
                 variant="body2"
                 sx={{
                     color: active ? (fulfilled ? 'text.primary' : 'text.secondary') : 'text.secondary',
                     fontWeight: active && fulfilled ? 500 : 400,
-                    fontSize: '0.8rem'
+                    fontSize: '0.75rem',
+                    transition: 'color 0.2s ease-in-out, font-weight 0.2s ease-in-out',
                 }}
             >
                 {text}

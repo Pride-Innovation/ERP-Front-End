@@ -7,6 +7,7 @@ Managing Director
 
 const LOGIN: string = "/";
 const FORGOT_PASSWORD: string = "/forgot-password";
+const RESET_PASSWORD: string = '/reset-password';
 const ASSETS_MANAGEMENT: string = "/assets-mgt"
 const REFRESH_TOKEN: string = "/auth/refresh"
 const SETTINGS: string = `${ASSETS_MANAGEMENT}/settings`;
@@ -72,6 +73,7 @@ const ERRORS: string = `${ASSETS_MANAGEMENT}/restricted-access`
 export const ROUTES = {
     FORGOT_PASSWORD,
     LOGIN,
+    RESET_PASSWORD,
     SETTINGS,
     ASSETS_MANAGEMENT,
     PROFILE,
