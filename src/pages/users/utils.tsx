@@ -81,7 +81,7 @@ const UserUtils = () => {
             const response = await fetchRowsService({
                 pageNumber: 0,
                 pageSize: 10,
-                endPoint, 
+                endPoint,
                 params
             }) as IUsersAxiosResponse;
             if (response.status === 200) {
@@ -208,6 +208,29 @@ const UserUtils = () => {
     }
 
 
+    /**
+ * Determines if a user is available ('present') in the system
+ * A user is considered 'present' only when ALL of the following conditions are met:
+ * 1. Account is enabled (user.enabled === true)
+ * 2. Account is not blocked (user.blocked === false)
+ * 3. Account is not locked (user.accountNonLocked === true)
+ * 
+ * @param user The user object to evaluate
+ * @returns 'present' if all conditions are met, otherwise 'absent'
+ */
+const determineUserAvailability = (user: IUser): string => {
+    // Handle edge case of null/undefined user
+    if (!user) return 'absent';
+    
+    const isEnabled = Boolean(user.enabled);
+    const isNotBlocked = user.blocked === false || user.blocked === undefined;
+    const isNotLocked = Boolean(user.accountNonLocked);
+    
+    // User is present only when all conditions are met
+    return (isEnabled && isNotBlocked && isNotLocked) ? 'present' : 'absent';
+};
+
+
     const handleUsersTableData = (users: Array<IUser>) => {
         const data: Array<IUserTableData> = users.map((user, index) => {
             const {
@@ -229,7 +252,8 @@ const UserUtils = () => {
                     email: user.email,
                     title: user.title?.name as string,
                     dutyStation: determineDutyStation(user),
-                    availability: user.availability,
+                    availability: determineUserAvailability(user),
+                    // availability: user.availability, Update this value from the backend if user goes on leave, account is blocked or disabled
                     status: determineUserStatus(user)
                 }
             )

@@ -136,7 +136,7 @@ const TableComponent = ({
                                 <StyledBox >
                                     {value === "present" ?
                                         <ChipComponent variant='filled' label='Present' icon={<HowToRegOutlinedIcon fontSize='small' />} size='medium' color='success' /> :
-                                        <ChipComponent variant='filled' label='Leave' icon={<NoAccountsIcon fontSize='small' />} size='medium' color='warning' />
+                                        <ChipComponent variant='filled' label='Absent' icon={<NoAccountsIcon fontSize='small' />} size='medium' color='warning' />
                                     }
                                 </StyledBox>
                             )
