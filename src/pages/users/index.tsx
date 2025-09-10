@@ -17,6 +17,7 @@ import UpdateUsers from './UpdateUsers';
 import DisableUser from './DisableUser';
 import UnblockUser from './UnblockUser';
 import EnableUser from './EnableUser';
+import Container from './Container';
 
 const Users = () => {
   const header = { plural: 'Users', singular: 'User' };
@@ -69,22 +70,24 @@ const Users = () => {
         </ModalComponent>
       }
       {columnHeaders.length > 0 &&
-        <TableComponent
-          endPoint={endPoint}
-          loading={loading}
-          count={count}
-          exportData
-          createAction
-          importData
-          module="user"
-          header={header}
-          rows={usersTableData}
-          columnHeaders={columnHeaders}
-          onCreationHandler={handleCreation}
-          handleOptionClicked={handleOptionClicked}
-          paginationMode='server'
-          refresh
-        />
+        <Container>
+          <TableComponent
+            endPoint={endPoint}
+            loading={loading}
+            count={count}
+            exportData
+            createAction
+            importData
+            module="user"
+            header={header}
+            rows={usersTableData}
+            columnHeaders={columnHeaders}
+            onCreationHandler={handleCreation}
+            handleOptionClicked={handleOptionClicked}
+            paginationMode='server'
+            refresh
+          />
+        </Container>
       }
     </Grid>
   )
