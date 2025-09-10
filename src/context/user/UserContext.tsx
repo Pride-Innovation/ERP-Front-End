@@ -13,6 +13,8 @@ interface IUserContext {
     users: Array<IUser>;
     setUser: Dispatch<SetStateAction<IUser>>
     setUsers: Dispatch<SetStateAction<Array<IUser>>>
+    setTotalUsers: Dispatch<SetStateAction<number>>
+    totalUsers: number
 }
 
 export const UserContext = createContext<IUserContext>({} as IUserContext)
@@ -20,9 +22,17 @@ export const UserContext = createContext<IUserContext>({} as IUserContext)
 export const UserContextProvider = ({ children }: { children: React.ReactNode }) => {
     const [user, setUser] = useState<IUser>({} as IUser);
     const [users, setUsers] = useState<Array<IUser>>([] as IUser[]);
+    const [totalUsers, setTotalUsers] = useState<number>(0);
 
     return (
-        <UserContext.Provider value={{ user, setUser, users, setUsers }} >
+        <UserContext.Provider value={{
+            user,
+            setUser,
+            users,
+            setUsers,
+            totalUsers,
+            setTotalUsers
+        }} >
             {children}
         </UserContext.Provider>
     )

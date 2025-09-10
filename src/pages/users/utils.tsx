@@ -40,7 +40,7 @@ const UserUtils = () => {
     const { branches } = useSelector((state: RootState) => state.BranchStore);
     const { departments } = useSelector((state: RootState) => state.DepartmentStore)
     const { selectedItemDetails, value, setDisplayDepartment, displayDepartment } = useContext(AutocompleteContext)
-    const { setUser } = useContext(UserContext);
+    const { setUser, setTotalUsers } = useContext(UserContext);
 
     const [optionsObject, setOptionsObject] = useState<{
         titlesOptions: Array<IOptions>;
@@ -84,6 +84,7 @@ const UserUtils = () => {
                 endPoint, params
             }) as IUsersAxiosResponse;
             if (response.status === 200) {
+                setTotalUsers(response?.data?.totalElements as number)
                 dispatch(loadUsers(response.data.content));
                 setCount(response.data.totalElements)
             }
