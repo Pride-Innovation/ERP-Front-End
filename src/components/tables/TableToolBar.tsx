@@ -66,7 +66,7 @@ const TableToolBar = ({
     const [statusFilter, setStatusFilter] = useState<string>(selectedStatus);
     useEffect(() => { setFileName(module) }, [module]);
     const theme = useTheme();
-    const { filterStatuses } = TableUtills();
+    const { filterStatuses } = TableUtills({ moduleName: module });
 
     const handleStatusChange = (event: SelectChangeEvent) => {
         const newStatus = event.target.value;
@@ -113,7 +113,7 @@ const TableToolBar = ({
                             }}
                         >
                             <MenuItem value="all">All Status</MenuItem>
-                            {filterStatuses.map(status => (<MenuItem value={status.value}>
+                            {(filterStatuses || [])?.map(status => (<MenuItem value={status.value}>
                                 <Box
                                     component="span"
                                     sx={{

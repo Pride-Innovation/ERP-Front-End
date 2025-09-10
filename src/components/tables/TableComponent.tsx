@@ -29,7 +29,7 @@ import AccessAlarmsIcon from '@mui/icons-material/AccessAlarms';
 import PopoverComponent from '../forms/Popover';
 import CustomToolbarWrapper from './TableToolBar';
 import CustomTextFilterOperator from './TableFilters';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import CustomTablePagination from './TablePagination';
 import ButtonComponent from '../forms/Button';
 import TimeLineDot from '../timeLineDots';
@@ -67,7 +67,7 @@ const TableComponent = ({
     const [currentOptions, setCurrentOptions] = useState<any[]>([]);
     const [currentID, setCurrentId] = useState<string | number>("")
     const theme = useTheme()
-    const { handleOptionsFilter } = TableUtills();
+    const { handleOptionsFilter } = TableUtills({ moduleName: module });
 
     const handleClick = (
         event: React.MouseEvent<HTMLButtonElement>,

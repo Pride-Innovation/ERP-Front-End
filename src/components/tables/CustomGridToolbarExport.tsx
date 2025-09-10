@@ -16,14 +16,14 @@ import TableUtills from "./utills";
 const CustomGridToolbarExport = (props: ButtonProps) => {
 
     const csvOptions: GridCsvExportOptions = {};
-    const { JsonExportMenuItem } = TableUtills();
+    const { JsonExportMenuItem } = TableUtills({ moduleName: "" });
 
     return (
         <GridToolbarExportContainer {...props}>
             <GridCsvExportMenuItem options={csvOptions} />
             <JsonExportMenuItem />
         </GridToolbarExportContainer>
-    )
+    );
 }
 
 export default CustomGridToolbarExport;

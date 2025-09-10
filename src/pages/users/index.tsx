@@ -23,6 +23,8 @@ const Users = () => {
   const header = { plural: 'Users', singular: 'User' };
   const [sendingRequest, setSendingRequest] = useState<boolean>(false);
   const { user } = useContext(UserContext);
+  const [selectedStatus, setSelectedStatus] = useState<string>('all');
+
 
   const {
     columnHeaders,
@@ -39,6 +41,21 @@ const Users = () => {
   } = UserUtils();
 
   useEffect(() => { fetchAllUsers() }, []);
+
+  const handleStatusChange = (status: string) => {
+    if (status === 'requireUpdate'
+      || status === 'issuanceAvailable'
+      || status === 'receiptAcknowledged'
+      || status === 'inStore'
+      || status === 'inMaintenance'
+    ) {
+      // fetchResources(status);
+      setSelectedStatus(status);
+    } else {
+      // fetchResources('all');
+      setSelectedStatus('all');
+    }
+  }
 
   return (
     <Grid xs={12} container>
@@ -86,6 +103,10 @@ const Users = () => {
             handleOptionClicked={handleOptionClicked}
             paginationMode='server'
             refresh
+            filterMode="server"
+            status
+            onStatusChange={handleStatusChange}
+            selectedStatus={selectedStatus}
           />
         </Container>
       }

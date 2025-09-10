@@ -16,15 +16,15 @@ import { assetStatus, requestStatus } from "../../utils/constants";
 import { MenuItem, useTheme } from "@mui/material";
 import { exportPDF } from "../../utils/pdf";
 import { camelCaseToWords } from "../../utils/helpers";
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import { FileContext } from "../../context/file/FileContext";
 import RoutesUtills from "../../core/routes/utills";
 
-const TableUtills = () => {
+const TableUtills = ({ moduleName }: { moduleName?: string }) => {
     const { fileName } = useContext(FileContext);
     const { getCurrentUser } = RoutesUtills();
     const theme = useTheme();
-
+    const [filterStatuses, setFilterStatuses] = useState<Array<{ label: string, value: string, color: string }>>([]);
 
     const determineTimeLineDotColor = (value: string) => {
         switch (value) {
@@ -162,7 +162,8 @@ const TableUtills = () => {
         return options;
     }
 
-    const filterStatuses: { label: string, value: string, color: string }[] = [
+
+    const assetFilterStatuses: { label: string, value: string, color: string }[] = [
         {
             label: "Require Update",
             value: "requireUpdate",
@@ -188,13 +189,46 @@ const TableUtills = () => {
             value: "receiptAcknowledged",
             color: theme.palette.info.main
         }
-    ]
+    ];
+
+    const userFilterStatuses: { label: string, value: string, color: string }[] = [
+        {
+            label: "Active",
+            value: "active",
+            color: theme.palette.success.main
+        },
+        {
+            label: "Locked",
+            value: "locked",
+            color: theme.palette.warning.main
+        },
+        {
+            label: "Disabled",
+            value: "disabled",
+            color: theme.palette.error.main
+        }
+    ];
+
+    const determineFilterStatuses = () => {
+        switch (moduleName) {
+            case "IT Equipment":
+            case "office equipment":
+            case "fleet":
+                return setFilterStatuses(assetFilterStatuses);
+            case "user":
+                return setFilterStatuses(userFilterStatuses);
+            default:
+                return [] as Array<{ label: string, value: string, color: string }>;
+        }
+    };
+
+    useEffect(() => { determineFilterStatuses() }, [moduleName]);
 
     return {
         determineTimeLineDotColor,
         JsonExportMenuItem,
         handleOptionsFilter,
-        filterStatuses
+        filterStatuses,
     };
 };
 
