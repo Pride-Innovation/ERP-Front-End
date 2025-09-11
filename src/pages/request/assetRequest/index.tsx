@@ -9,7 +9,8 @@ import {
   Button,
   Card,
   Grid,
-  Stack
+  Stack,
+  Typography
 } from '@mui/material';
 import {
   Outlet,
@@ -26,6 +27,7 @@ import RoutesUtills from '../../../core/routes/utills';
 import { IPermission } from '../../settings/interface';
 import { INavigation } from '../interface';
 import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
+import InventoryOutlinedIcon from '@mui/icons-material/InventoryOutlined';
 
 const RequestsManagement = () => {
   const [path, setPath] = useState<string>("");
@@ -75,23 +77,33 @@ const RequestsManagement = () => {
   return (
     <>
       <Card sx={{ p: 2, mb: 2 }}>
-        <Grid xs={12} container>
-          <Stack direction="row" spacing={1}>
-            {navigations.map(item => (
-              <>
-                {/* {determinePermission(item.permission) && */}
-                <Button
-                  startIcon={item.icon}
-                  onClick={() => navigate(item.path)}
-                  key={item.id}
-                  variant={determineActivePath(item) ? "contained" : "outlined"}
-                >
-                  {item.text}
-                </Button>
-                {/* } */}
-              </>
-            ))}
-          </Stack>
+        <Grid container alignItems="center" justifyContent="space-between">
+          <Grid item>
+            <Stack direction="row" spacing={1} alignItems="center">
+              <InventoryOutlinedIcon fontSize='small' sx={{ color: 'primary.main' }} />
+              <Typography variant="h6" fontWeight="500" color="primary">
+                {navigations.find(item => item.path === path)?.text || ''}
+              </Typography>
+            </Stack>
+          </Grid>
+          <Grid item>
+            <Stack direction="row" spacing={1}>
+              {navigations.map(item => (
+                <>
+                  {/* {determinePermission(item.permission) && */}
+                  <Button
+                    startIcon={item.icon}
+                    onClick={() => navigate(item.path)}
+                    key={item.id}
+                    variant={determineActivePath(item) ? "contained" : "outlined"}
+                  >
+                    {item.text}
+                  </Button>
+                  {/* } */}
+                </>
+              ))}
+            </Stack>
+          </Grid>
         </Grid>
       </Card>
       <Outlet />
