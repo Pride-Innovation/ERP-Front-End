@@ -18,12 +18,17 @@ import DisableUser from './DisableUser';
 import UnblockUser from './UnblockUser';
 import EnableUser from './EnableUser';
 import Container from './Container';
+import { IBulkUserData } from './interface';
+import { toast } from 'react-toastify';
+import { FileContext } from '../../context/file/FileContext';
+import { bulkInsertUsersService } from './service';
 
 const Users = () => {
   const header = { plural: 'Users', singular: 'User' };
   const [sendingRequest, setSendingRequest] = useState<boolean>(false);
   const { user } = useContext(UserContext);
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
+  const { fileData } = useContext(FileContext);
 
 
   const {
@@ -61,6 +66,29 @@ const Users = () => {
       setSelectedStatus('all');
     }
   }
+
+  const bulkInsertUsers = async (users: Array<IBulkUserData>) => {
+    try {
+      const data = new FormData();
+      data.append("users", JSON.stringify(users));
+
+      const response = await bulkInsertUsersService(data);
+
+      if (response.success === true) {
+        toast.success("Bulk Insert Successful")
+        fetchAllUsers();
+      }
+
+    } catch (error) {
+      console.log("Bulk Insert Error", error);
+    }
+  }
+
+  useEffect(() => {
+    if (fileData?.jsonData?.length > 0) {
+      bulkInsertUsers(fileData.jsonData as unknown as Array<IBulkUserData>);
+    }
+  }, [fileData]);
 
   return (
     <Grid xs={12} container>

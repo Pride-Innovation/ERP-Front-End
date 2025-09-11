@@ -75,6 +75,19 @@ const enableUserService = async (userId: number): Promise<IUserAxiosResponse> =>
   return await axiosInstance.post(`/users/${userId}/enable`);
 };
 
+const bulkInsertUsersService = async (data: object) => {
+  try {
+    const response = await axiosInstance.post(`users/bulk-insert`, data, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      }
+    });
+    return response.data;
+  } catch (error) {
+    return error;
+  }
+}
+
 export {
   createUSerService,
   fetchSingleUserService,
@@ -83,5 +96,6 @@ export {
   updateUSerService,
   fetchRolesService,
   unBlockUserService,
-  enableUserService
+  enableUserService,
+  bulkInsertUsersService
 }

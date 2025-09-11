@@ -138,3 +138,13 @@ export interface IUserAxiosResponse extends IAxiosResponse {
 export interface IUserCreationResponseAxiosResponse extends IAxiosResponse {
     data: IUserCreationResponse
 }
+
+export interface IBulkUserData {
+    "No.": number;
+    "Name": string;
+    "Staff Number": string;
+    "Email": string;
+    "Title": string;
+    "Duty Station": string;
+    "Gender": string;
+}
