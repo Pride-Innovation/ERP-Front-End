@@ -29,6 +29,8 @@ const IssuedRequest = () => {
     const [permissions, setPermissions] = useState<IPermission[]>([] as IPermission[]);
     const { getCurrentUser } = RoutesUtills();
     const [selectedStatus, setSelectedStatus] = useState<string>('all');
+    const [statusIds, setStatusIds] = useState<string>(`${5},${6},${7}`); // Default to '1' for "Request Created"
+
 
     const {
         handleOptionClicked,
@@ -44,13 +46,14 @@ const IssuedRequest = () => {
         sendingRequest,
         currentRequest,
         setSendingRequest
-    } = RequestUtills()
+    } = RequestUtills();
+
+    const params = { statusIds: statusIds, status: "ISSUED" }
 
     useEffect(() => {
         /**
          * This should contain the Status ID for Request Issued for Approval and Issuance Approved.
          */
-        const params = { statusIds: `${5},${6},${7}`, status: "ISSUED" }
         fetchAllRequests(params);
 
         // setFileData({ file: "", module: "", jsonData: [] });
@@ -106,19 +109,43 @@ const IssuedRequest = () => {
     }, []);
 
 
+    /**
+     * Handle changes to the request status filter
+     * Updates the request list based on the selected status filter
+     * @param status - The status filter to apply
+     */
     const handleStatusChange = (status: string) => {
-        if (status === 'requireUpdate'
-            || status === 'issuanceAvailable'
-            || status === 'receiptAcknowledged'
-            || status === 'inStore'
-            || status === 'inMaintenance'
-        ) {
-            // fetchResources(status);
-            setSelectedStatus(status);
-        } else {
-            // fetchAllRequests(params)
-            setSelectedStatus('all');
+        let param;
+        let statusId;
+
+        switch (status) {
+            // ISSUED status group
+            case 'requestIssued':
+                param = { status: "ISSUED", statusIds: '5' };
+                statusId = '5';
+                break;
+
+            case 'issuanceApproved':
+                param = { status: "ISSUED", statusIds: '6' };
+                statusId = '6';
+                break;
+
+            case 'receiptAcknowledged':
+                param = { status: "ISSUED", statusIds: '7' };
+                statusId = '7';
+                break;
+
+            // Default (all) case
+            default:
+                fetchAllRequests(params);
+                setSelectedStatus('all');
+                return; // Exit early for the default case
         }
+
+        // For all non-default cases:
+        fetchAllRequests(param);
+        setSelectedStatus(status);
+        setStatusIds(statusId);
     }
 
     return (
@@ -156,8 +183,14 @@ const IssuedRequest = () => {
                     rows={requestTableData}
                     columnHeaders={columnHeaders}
                     handleOptionClicked={handleOptionClicked}
-                    params={{ statusIds: `${5},${6},${7}` }}
+                    params={{ statusIds: statusIds }}
+                    refresh
                     status
+                    optionsfilterParams={
+                        {
+                            status: "ISSUED"
+                        }
+                    }
                     onStatusChange={handleStatusChange}
                     selectedStatus={selectedStatus}
                 />
@@ -166,4 +199,4 @@ const IssuedRequest = () => {
     )
 }
 
-export default IssuedRequest
+export default IssuedRequest;

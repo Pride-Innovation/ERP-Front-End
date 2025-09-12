@@ -48,7 +48,7 @@ const PendingRequest = () => {
         // module
     } = RequestUtills()
 
-    const params = { statusIds: `${3},${4}`, status: "PENDING" };
+    const params = { statusIds: statusIds, status: "PENDING" };
 
     useEffect(() => {
         /**
@@ -172,6 +172,7 @@ const PendingRequest = () => {
                     handleOptionClicked={handleOptionClicked}
                     params={{ statusIds: statusIds }}
                     filterOptions
+                    refresh
                     optionsfilterParams={
                         {
                             status: "PENDING"
