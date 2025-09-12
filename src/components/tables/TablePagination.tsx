@@ -28,7 +28,7 @@ const CustomTablePagination = ({ endPoint, params, selectedStatus }: ICustomTabl
     const { determineAssetTypeState, determineStatusId } = AssetUtills()
     const { fieldName, fieldText } = useContext(AssetContext);
 
-    console.log(selectedStatus, 'selectedStatus from custom table pagination');
+    // console.log(selectedStatus, 'selectedStatus from custom table pagination');
 
     const handleReduxStoreUpdate = (
         url: string,

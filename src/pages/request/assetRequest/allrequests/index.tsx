@@ -39,6 +39,7 @@ const Request = () => {
     const { requests } = useSelector((state: RootState) => state.AssetsRequestsStore)
     const { getCurrentUser } = RoutesUtills();
     const [permissions, setPermissions] = useState<IPermission[]>([] as IPermission[]);
+    const [selectedStatus, setSelectedStatus] = useState<string>('all');
 
     const navigate = useNavigate()
 
@@ -58,14 +59,15 @@ const Request = () => {
         currentRequest,
     } = RequestUtills();
 
+    const params = { statusIds: 1, status: "CREATED" } // Fetching requests with status Asset Request Created ID
+
     useEffect(() => {
-        const params = { statusIds: 1, status: "CREATED" } // Fetching requests with status Asset Request Created ID
         fetchAllRequests(params)
     }, []);
 
-    useEffect(() => { 
+    useEffect(() => {
         console.log(requests, "requests in all requests page!!")
-        handleRequest(requests) 
+        handleRequest(requests)
     }, [requests]);
 
     useEffect(() => {
@@ -134,6 +136,21 @@ const Request = () => {
         }
     }, []);
 
+    const handleStatusChange = (status: string) => {
+        if (status === 'requireUpdate'
+            || status === 'issuanceAvailable'
+            || status === 'receiptAcknowledged'
+            || status === 'inStore'
+            || status === 'inMaintenance'
+        ) {
+            // fetchResources(status);
+            setSelectedStatus(status);
+        } else {
+            fetchAllRequests(params)
+            setSelectedStatus('all');
+        }
+    }
+
     return (
         <React.Fragment>
             {crudStates.reject === modalState &&
@@ -181,6 +198,9 @@ const Request = () => {
                                 status: "CREATED"
                             }
                         }
+                        status
+                        onStatusChange={handleStatusChange}
+                        selectedStatus={selectedStatus}
                     />
                 }
             </Grid>

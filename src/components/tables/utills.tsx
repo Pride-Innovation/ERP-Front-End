@@ -209,6 +209,58 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
         }
     ];
 
+    const requestsPendingFilterStatuses: { label: string, value: string, color: string }[] = [
+        {
+            label: "Request Approved",
+            value: "requestApproved",
+            color: theme.palette.success.main
+        },
+        {
+            label: "Request Acknowledged",
+            value: "requestAcknowledged",
+            color: theme.palette.warning.main
+        },
+    ]
+
+    const requestsRejectedFilterStatuses: { label: string, value: string, color: string }[] = [
+        {
+            label: "Request Rejected",
+            value: "requestRejected",
+            color: theme.palette.error.main
+        }
+    ]
+
+    const requestIssuedFilterStatuses: { label: string, value: string, color: string }[] = [
+        {
+            label: "Request Issued",
+            value: "requestIssued",
+            color: theme.palette.info.main
+        },
+        {
+            label: "Receipt Acknowledged",
+            value: "receiptAcknowledged",
+            color: theme.palette.info.main
+        },
+        {
+            label: "Issuance Approved",
+            value: "issuanceApproved",
+            color: theme.palette.secondary.main
+        },
+        { label: "Receipt Issued", value: "receiptIssued", color: theme.palette.success.main }
+    ];
+
+    const userRequestFilterStatuses: { label: string, value: string, color: string }[] = [
+
+        {
+            label: "Request Created",
+            value: "requestCreated",
+            color: theme.palette.error.main
+        },
+        ...requestsPendingFilterStatuses,
+        ...requestsRejectedFilterStatuses,
+        ...requestIssuedFilterStatuses
+    ];
+
     const determineFilterStatuses = () => {
         switch (moduleName) {
             case assetTypesStatusConstants.itEquipment:
@@ -217,6 +269,12 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
                 return setFilterStatuses(assetFilterStatuses);
             case "user":
                 return setFilterStatuses(userFilterStatuses);
+            case "request":
+                return setFilterStatuses(userRequestFilterStatuses);
+            case "issued requests":
+                return setFilterStatuses(requestIssuedFilterStatuses);
+            case "pending requests":
+                return setFilterStatuses(requestsPendingFilterStatuses);
             default:
                 return [] as Array<{ label: string, value: string, color: string }>;
         }

@@ -29,7 +29,7 @@ import AccessAlarmsIcon from '@mui/icons-material/AccessAlarms';
 import PopoverComponent from '../forms/Popover';
 import CustomToolbarWrapper from './TableToolBar';
 import CustomTextFilterOperator from './TableFilters';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import CustomTablePagination from './TablePagination';
 import ButtonComponent from '../forms/Button';
 import TimeLineDot from '../timeLineDots';

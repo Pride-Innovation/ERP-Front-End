@@ -27,6 +27,8 @@ const PendingRequest = () => {
     const { requestTableData, setOptions } = useContext(RequestContext);
     const [permissions, setPermissions] = useState<IPermission[]>([] as IPermission[]);
     const { getCurrentUser } = RoutesUtills();
+    const [selectedStatus, setSelectedStatus] = useState<string>('all');
+
 
     const {
         handleOptionClicked,
@@ -109,6 +111,20 @@ const PendingRequest = () => {
         }
     }, []);
 
+    const handleStatusChange = (status: string) => {
+        if (status === 'requireUpdate'
+            || status === 'issuanceAvailable'
+            || status === 'receiptAcknowledged'
+            || status === 'inStore'
+            || status === 'inMaintenance'
+        ) {
+            // fetchResources(status);
+            setSelectedStatus(status);
+        } else {
+            // fetchAllRequests(params)
+            setSelectedStatus('all');
+        }
+    }
 
     return (
         <Grid xs={12} container>
@@ -129,7 +145,7 @@ const PendingRequest = () => {
                     loading={loading}
                     count={count}
                     exportData
-                    module={module}
+                    module={"pending requests"}
                     header={{ plural: "Pending Requests", singular: "Pending Requests" }}
                     rows={requestTableData}
                     columnHeaders={columnHeaders}
@@ -141,6 +157,9 @@ const PendingRequest = () => {
                             status: "PENDING"
                         }
                     }
+                    status
+                    onStatusChange={handleStatusChange}
+                    selectedStatus={selectedStatus}
                 />
             }
         </Grid>

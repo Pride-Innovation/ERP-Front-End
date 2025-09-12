@@ -28,6 +28,7 @@ const IssuedRequest = () => {
     const { requestTableData, setOptions } = useContext(RequestContext);
     const [permissions, setPermissions] = useState<IPermission[]>([] as IPermission[]);
     const { getCurrentUser } = RoutesUtills();
+    const [selectedStatus, setSelectedStatus] = useState<string>('all');
 
     const {
         handleOptionClicked,
@@ -104,6 +105,22 @@ const IssuedRequest = () => {
         }
     }, []);
 
+
+    const handleStatusChange = (status: string) => {
+        if (status === 'requireUpdate'
+            || status === 'issuanceAvailable'
+            || status === 'receiptAcknowledged'
+            || status === 'inStore'
+            || status === 'inMaintenance'
+        ) {
+            // fetchResources(status);
+            setSelectedStatus(status);
+        } else {
+            // fetchAllRequests(params)
+            setSelectedStatus('all');
+        }
+    }
+
     return (
         <Grid xs={12} container>
 
@@ -134,12 +151,15 @@ const IssuedRequest = () => {
                     loading={loading}
                     count={count}
                     exportData
-                    module="assets"
+                    module="issued requests"
                     header={{ plural: "Issue Requests", singular: "Issued Requests" }}
                     rows={requestTableData}
                     columnHeaders={columnHeaders}
                     handleOptionClicked={handleOptionClicked}
                     params={{ statusIds: `${5},${6},${7}` }}
+                    status
+                    onStatusChange={handleStatusChange}
+                    selectedStatus={selectedStatus}
                 />
             }
         </Grid>
