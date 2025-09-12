@@ -28,6 +28,7 @@ const PendingRequest = () => {
     const [permissions, setPermissions] = useState<IPermission[]>([] as IPermission[]);
     const { getCurrentUser } = RoutesUtills();
     const [selectedStatus, setSelectedStatus] = useState<string>('all');
+    const [statusIds, setStatusIds] = useState<string>(`${3},${4}`); // Default to '1' for "Request Created"
 
 
     const {
@@ -44,14 +45,15 @@ const PendingRequest = () => {
         currentRequest,
         sendingRequest,
         setSendingRequest,
-        module
+        // module
     } = RequestUtills()
+
+    const params = { statusIds: `${3},${4}`, status: "PENDING" };
 
     useEffect(() => {
         /**
          * This should contain the Status ID for Pending Requests
          */
-        const params = { statusIds: `${3},${4}`, status: "PENDING" }
         fetchAllRequests(params);
 
         // setFileData({ file: "", module: "", jsonData: [] });
@@ -111,19 +113,37 @@ const PendingRequest = () => {
         }
     }, []);
 
+    /**
+     * Handle changes to the request status filter
+     * Updates the request list based on the selected status filter
+     * @param status - The status filter to apply
+     */
     const handleStatusChange = (status: string) => {
-        if (status === 'requireUpdate'
-            || status === 'issuanceAvailable'
-            || status === 'receiptAcknowledged'
-            || status === 'inStore'
-            || status === 'inMaintenance'
-        ) {
-            // fetchResources(status);
-            setSelectedStatus(status);
-        } else {
-            // fetchAllRequests(params)
-            setSelectedStatus('all');
+        let param;
+        let statusId;
+
+        switch (status) {
+            // PENDING status group
+            case 'requestApproved':
+                param = { status: "PENDING", statusIds: '3' };
+                statusId = '3';
+                break;
+
+            case 'requestAcknowledged':
+                param = { status: "PENDING", statusIds: '4' };
+                statusId = '4';
+                break;
+
+            default:
+                fetchAllRequests(params);
+                setSelectedStatus('all');
+                return; // Exit early for the default case
         }
+
+        // For all non-default cases:
+        fetchAllRequests(param);
+        setSelectedStatus(status);
+        setStatusIds(statusId);
     }
 
     return (
@@ -150,7 +170,7 @@ const PendingRequest = () => {
                     rows={requestTableData}
                     columnHeaders={columnHeaders}
                     handleOptionClicked={handleOptionClicked}
-                    params={{ statusIds: `${3},${4}` }}
+                    params={{ statusIds: statusIds }}
                     filterOptions
                     optionsfilterParams={
                         {

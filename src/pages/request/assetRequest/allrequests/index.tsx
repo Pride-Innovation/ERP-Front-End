@@ -31,6 +31,7 @@ import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import RoutesUtills from "../../../../core/routes/utills";
 import { IPermission } from "../../../settings/interface";
 import { permissionsMock } from "../../../../mocks/settings";
+import { set } from "date-fns";
 
 const Request = () => {
     const { requestTableData, setOptions } = useContext(RequestContext);
@@ -40,6 +41,7 @@ const Request = () => {
     const { getCurrentUser } = RoutesUtills();
     const [permissions, setPermissions] = useState<IPermission[]>([] as IPermission[]);
     const [selectedStatus, setSelectedStatus] = useState<string>('all');
+    const [statusIds, setStatusIds] = useState<string>('1'); // Default to '1' for "Request Created"
 
     const navigate = useNavigate()
 
@@ -136,19 +138,66 @@ const Request = () => {
         }
     }, []);
 
+    /**
+     * Handle changes to the request status filter
+     * Updates the request list based on the selected status filter
+     * @param status - The status filter to apply
+     */
     const handleStatusChange = (status: string) => {
-        if (status === 'requireUpdate'
-            || status === 'issuanceAvailable'
-            || status === 'receiptAcknowledged'
-            || status === 'inStore'
-            || status === 'inMaintenance'
-        ) {
-            // fetchResources(status);
-            setSelectedStatus(status);
-        } else {
-            fetchAllRequests(params)
-            setSelectedStatus('all');
+        let param;
+        let statusId;
+
+        switch (status) {
+            // PENDING status group
+            case 'requestApproved':
+                param = { status: "PENDING", statusIds: '3' };
+                statusId = '3';
+                break;
+
+            case 'requestAcknowledged':
+                param = { status: "PENDING", statusIds: '4' };
+                statusId = '4';
+                break;
+
+            // REJECTED status group
+            case 'requestRejected':
+                param = { status: "REJECTED", statusIds: '2' };
+                statusId = '2';
+                break;
+
+            // CREATED status group
+            case 'requestCreated':
+                param = { status: "CREATED", statusIds: '1' };
+                statusId = '1';
+                break;
+
+            // ISSUED status group
+            case 'requestIssued':
+                param = { status: "ISSUED", statusIds: '5' };
+                statusId = '5';
+                break;
+
+            case 'issuanceApproved':
+                param = { status: "ISSUED", statusIds: '6' };
+                statusId = '6';
+                break;
+
+            case 'receiptAcknowledged':
+                param = { status: "ISSUED", statusIds: '7' };
+                statusId = '7';
+                break;
+
+            // Default (all) case
+            default:
+                fetchAllRequests(params);
+                setSelectedStatus('all');
+                return; // Exit early for the default case
         }
+
+        // For all non-default cases:
+        fetchAllRequests(param);
+        setSelectedStatus(status);
+        setStatusIds(statusId);
     }
 
     return (
@@ -190,7 +239,7 @@ const Request = () => {
                         handleOptionClicked={handleOptionClicked}
                         paginationMode='server'
                         filterMode="server"
-                        params={{ statusIds: 1 }}
+                        params={{ statusIds: statusIds }}
                         refresh
                         filterOptions
                         optionsfilterParams={
@@ -208,4 +257,4 @@ const Request = () => {
     )
 }
 
-export default Request
+export default Request;

@@ -44,7 +44,7 @@ const TimeLineDot = ({ status }: ITimeLineDot) => {
             return <DoNotDisturbAltIcon fontSize='small' color="error" sx={{ mr: "5px" }} />;
         case "requestapproved":
             return <RecommendOutlinedIcon fontSize='small' color="primary" sx={{ mr: "5px" }} />;
-        case "requestacknowleged":
+        case "requestacknowledged":
             return <HdrAutoOutlinedIcon fontSize='small' color="warning" sx={{ mr: "5px" }} />;
         case "requestissued":
             return <PublishedWithChangesOutlinedIcon fontSize='small' color="info" sx={{ mr: "5px" }} />;

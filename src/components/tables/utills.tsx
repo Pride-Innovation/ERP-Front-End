@@ -245,8 +245,7 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
             label: "Issuance Approved",
             value: "issuanceApproved",
             color: theme.palette.secondary.main
-        },
-        { label: "Receipt Issued", value: "receiptIssued", color: theme.palette.success.main }
+        }
     ];
 
     const userRequestFilterStatuses: { label: string, value: string, color: string }[] = [
