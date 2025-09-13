@@ -10,7 +10,6 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import {
     Box,
-    Breadcrumbs,
     Container,
     Divider,
     Grid,
@@ -24,7 +23,6 @@ import {
     useTheme,
     useMediaQuery,
     alpha,
-    Link,
     Chip,
     Avatar
 } from "@mui/material";
@@ -36,10 +34,8 @@ import { validateInventoryItems } from "../../../utils/helpers";
 import { toast } from "react-toastify";
 import { createAssetRequestService } from "./service";
 import { RowData } from "../../../components/forms/interface";
-import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import FactCheckOutlinedIcon from '@mui/icons-material/FactCheckOutlined';
-import { ROUTES } from "../../../core/routes/routes";
 
 const initialData: RowData[] = [
     { id: 1, name: '', groupName: '', quantity: 0 },
