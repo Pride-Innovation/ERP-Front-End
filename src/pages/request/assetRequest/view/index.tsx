@@ -38,7 +38,7 @@ import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import InventoryIcon from '@mui/icons-material/Inventory';
 import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
 import DescriptionIcon from '@mui/icons-material/Description';
-import { 
+import {
     Attachment as AttachmentIcon,
     PictureAsPdf as PdfIcon,
     Image as ImageIcon,
@@ -201,17 +201,17 @@ const StatusBadge = ({ status }: { status: string }) => {
 /**
  * Attachment Item Component
  */
-const AttachmentItem = ({ 
-    fileName, 
-    filePath, 
-    onView 
-}: { 
-    fileName: string, 
-    filePath: string | null, 
-    onView: () => void 
+const AttachmentItem = ({
+    fileName,
+    filePath,
+    onView
+}: {
+    fileName: string,
+    filePath: string | null,
+    onView: () => void
 }) => {
     const extension = fileName.split('.').pop()?.toLowerCase() || '';
-    
+
     const getFileIcon = () => {
         if (['jpg', 'jpeg', 'png', 'gif'].includes(extension)) {
             return <ImageIcon fontSize="small" sx={{ mr: 1.5, color: '#2196f3' }} />;
@@ -272,7 +272,7 @@ const RequestDetails = () => {
     const [request, setRequest] = useState<IRequest>({} as IRequest);
     const [loading, setLoading] = useState<boolean>(true);
     const [isAttachmentViewerOpen, setIsAttachmentViewerOpen] = useState<boolean>(false);
-    
+
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
 
@@ -383,58 +383,111 @@ const RequestDetails = () => {
     return (
         <Container maxWidth="xl" sx={{ mt: 2, mb: 4 }}>
             {/* Page Header */}
-            <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Box>
-                    <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 0.5 }}>
-                        <Typography
-                            variant="h5"
-                            fontWeight={600}
-                            color={PRIMARY_COLOR}
-                        >
-                            {request.name || "Asset Request"}
-                        </Typography>
-                        {getPriorityChip(request.priority)}
-                    </Stack>
+            <Box
+                sx={{
+                    mb: 3,
+                    p: { xs: 2, md: 3 },
+                    bgcolor: 'white',
+                    borderRadius: 2,
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03)',
+                    border: `1px solid ${alpha('#000', 0.06)}`,
+                    backgroundImage: `linear-gradient(to right, ${alpha(PRIMARY_COLOR, 0.02)}, rgba(255,255,255,0.5))`,
+                    position: 'relative',
+                    overflow: 'hidden',
+                }}
+            >
+                {/* Decorative accent element */}
+                <Box
+                    sx={{
+                        position: 'absolute',
+                        left: 0,
+                        top: 0,
+                        bottom: 0,
+                        width: 4,
+                        bgcolor: PRIMARY_COLOR,
+                    }}
+                />
 
-                    <Typography variant="body2" color="text.secondary">
-                        ID: #{request.id} • Created on: {request.createDate ? moment(request.createDate).format('MMM DD, YYYY') : ''}
-                    </Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <Box>
+                        <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 1 }}>
+                            <Typography
+                                variant="h5"
+                                fontWeight={600}
+                                color={PRIMARY_COLOR}
+                            >
+                                {request.name || "Asset Request"}
+                            </Typography>
+                            {getPriorityChip(request.priority)}
+                        </Stack>
+
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                            <Chip
+                                size="small"
+                                label={`ID: #${request.id || ''}`}
+                                sx={{
+                                    bgcolor: alpha(PRIMARY_COLOR, 0.08),
+                                    color: 'text.secondary',
+                                    fontWeight: 500,
+                                    borderRadius: 1,
+                                    '& .MuiChip-label': { px: 1 }
+                                }}
+                            />
+                            <Typography variant="body2" color="text.secondary">
+                                Created on: {request.createDate ? moment(request.createDate).format('MMM DD, YYYY') : 'N/A'}
+                            </Typography>
+                        </Box>
+                    </Box>
+
+                    {/* Optionally add action buttons here if needed */}
                 </Box>
+
+                {/* Attachment Section integrated within the header card when available */}
+                {request.signaturePath && (
+                    <>
+                        <Divider sx={{ my: 2, opacity: 0.6 }} />
+
+                        <Box>
+                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
+                                <Box
+                                    sx={{
+                                        mr: 1.5,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        borderRadius: 1,
+                                        bgcolor: alpha(PRIMARY_COLOR, 0.08),
+                                        color: PRIMARY_COLOR,
+                                        width: 28,
+                                        height: 28,
+                                    }}
+                                >
+                                    <AttachmentIcon fontSize="small" />
+                                </Box>
+                                <Typography variant="subtitle2" fontWeight={600} color="text.secondary">
+                                    Attachments
+                                </Typography>
+                            </Box>
+
+                            <Box sx={{ pl: { xs: 0, sm: 5 } }}>
+                                <AttachmentItem
+                                    fileName={getAttachmentFileName()}
+                                    filePath={request.signaturePath}
+                                    onView={() => setIsAttachmentViewerOpen(true)}
+                                />
+                            </Box>
+                        </Box>
+                    </>
+                )}
             </Box>
-
-            {/* Attachment Section (if available) */}
-            {request.signaturePath && (
-                <Box sx={{ mb: 3 }}>
-                    <Typography
-                        variant="subtitle2"
-                        fontWeight={600}
-                        color="text.secondary"
-                        sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 1,
-                            mb: 1
-                        }}
-                    >
-                        <AttachmentIcon fontSize="small" />
-                        Attachments
-                    </Typography>
-
-                    <AttachmentItem 
-                        fileName={getAttachmentFileName()}
-                        filePath={request.signaturePath}
-                        onView={() => setIsAttachmentViewerOpen(true)}
-                    />
-                </Box>
-            )}
 
             {/* Main Content */}
             <Box
-                sx={{ 
-                    p: { xs: 2, md: 3 }, 
-                    bgcolor: '#F3F7FB', 
-                    borderRadius: 2, 
-                    border: `1px solid ${alpha('#000', 0.08)}` 
+                sx={{
+                    p: { xs: 2, md: 3 },
+                    bgcolor: '#F3F7FB',
+                    borderRadius: 2,
+                    border: `1px solid ${alpha('#000', 0.08)}`
                 }}
             >
                 {loading ? (
