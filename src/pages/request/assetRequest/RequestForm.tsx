@@ -684,6 +684,22 @@ const RequestForm = ({
                                 </CardContent>
                             </Card>
                         </FormSection>
+                        <Card sx={{ mt: 3, borderRadius: 2, bgcolor: blue[50], border: `1px solid ${blue[100]}` }}>
+                            <CardContent>
+                                <Typography variant="subtitle2" sx={{ mb: 1, color: blue[800] }}>
+                                    Tips for Faster Approval
+                                </Typography>
+                                <Typography variant="body2" sx={{ color: blue[900], mb: 0.5 }}>
+                                    • Be specific in your request description
+                                </Typography>
+                                <Typography variant="body2" sx={{ color: blue[900], mb: 0.5 }}>
+                                    • Include accurate quantities needed
+                                </Typography>
+                                <Typography variant="body2" sx={{ color: blue[900] }}>
+                                    • Attach supporting documentation when available
+                                </Typography>
+                            </CardContent>
+                        </Card>
                     </Grid>
                 )}
             </Grid>
