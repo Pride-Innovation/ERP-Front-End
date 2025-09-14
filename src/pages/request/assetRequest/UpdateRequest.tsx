@@ -26,7 +26,7 @@ import CommodityUtills from '../../settings/commodity/utills';
 
 const UpdateRequest = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
-    const [signature, setSignature] = useState<string>("")
+    const [signature, setSignature] = useState<string>("");
     const { id } = useParams<{ id: string }>();
     const [defaultRequest, setDefaultRequest] = useState<any>(requestMock[0]);
     const { setRows, rows } = useContext(RequestContext);
@@ -34,19 +34,66 @@ const UpdateRequest = () => {
     const { commodities } = useSelector((state: RootState) => state.CommodityStore);
     const { fetchAllCommodities } = CommodityUtills();
 
+    // New state to track if file was initially present and file type
+    const [initialFile, setInitialFile] = useState<{
+        fileName: string | null;
+        fileType: 'pdf' | 'word' | 'excel' | 'image' | 'other';
+        filePath: string | null;
+    }>({
+        fileName: null,
+        fileType: 'other',
+        filePath: null
+    });
+
     useEffect(() => { fetchAllCommodities() }, []);
+
+    // Helper function to determine file type from extension
+    const getFileType = (fileName: string): 'pdf' | 'word' | 'excel' | 'image' | 'other' => {
+        const extension = fileName.split('.').pop()?.toLowerCase();
+
+        if (!extension) return 'other';
+
+        if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(extension)) {
+            return 'image';
+        } else if (extension === 'pdf') {
+            return 'pdf';
+        } else if (['doc', 'docx'].includes(extension)) {
+            return 'word';
+        } else if (['xls', 'xlsx', 'csv'].includes(extension)) {
+            return 'excel';
+        }
+
+        return 'other';
+    };
 
     const findAssetRequestById = async () => {
         try {
             const response = await findAssetRequestByIDService(id as string) as IRequestAxiosResponse;
             if (response.status === 200) {
-                const { data } = response
-                setDefaultRequest({ ...data, status: data.status?.id })
+                const { data } = response;
+                setDefaultRequest({ ...data, status: data.status?.id });
+
+                // Process file information from signaturePath
+                if (data.signaturePath) {
+                    const filePath = data.signaturePath;
+                    const fileName = filePath.split(/[\/\\]/).pop() || '';
+
+                    // Set signature preview path for UI display
+                    // Extract the file name and create a path relative to public folder
+                    const filePathForPreview = `/statics/${fileName}`;
+                    setSignature(filePathForPreview);
+
+                    // Store file information for display
+                    setInitialFile({
+                        fileName,
+                        fileType: getFileType(fileName),
+                        filePath: filePath
+                    });
+                }
             }
         } catch (error) {
-            console.log(error)
+            console.log(error);
         }
-
     }
 
     useEffect(() => { findAssetRequestById() }, [id]);
@@ -98,7 +145,14 @@ const UpdateRequest = () => {
             payload.append("name", formData.name);
             payload.append("description", formData.description as string);
 
+            // Only attach file if a new file was selected
             if (file) payload.append("file", file);
+
+            // Send a flag to indicate if we're keeping or removing the file
+            // If no file is selected and there was no initial file or the initial file was cleared,
+            // then we're removing the file
+            const shouldRemoveFile = !file && (initialFile.fileName === null || signature === '');
+            payload.append("removeFile", shouldRemoveFile.toString());
 
             const formattedCommodities = result.validData.map(item => ({
                 commodityId: item.id,
@@ -108,19 +162,34 @@ const UpdateRequest = () => {
             payload.append("requestCommodities", JSON.stringify(formattedCommodities));
 
             try {
-                const response = await updateAssetRequestService(payload, id as string) as IRequestAxiosResponse
+                const response = await updateAssetRequestService(payload, id as string) as IRequestAxiosResponse;
                 if (response.status === 201) {
-                    toast.success("Request updated successfully")
+                    // Update the file information if the request was successful and a new file was uploaded
+                    if (file) {
+                        setInitialFile({
+                            fileName: file.name,
+                            fileType: getFileType(file.name),
+                            filePath: null // We don't know the server path yet
+                        });
+                    }
+                    toast.success("Request updated successfully");
                 }
             } catch (error) {
-                console.log(error)
+                console.log(error);
+                toast.error("Failed to update request");
             }
 
         } else {
-            toast.error(`Requests validation errors: ${result.errors}`)
+            toast.error(`Requests validation errors: ${result.errors}`);
         }
 
-        setSendingRequest(false)
+        setSendingRequest(false);
+    };
+
+    // Function to handle file removal
+    const handleRemoveFile = () => {
+        setFile(null);
+        setSignature('');
     };
 
     return (
@@ -143,6 +212,9 @@ const UpdateRequest = () => {
                             setImage={setSignature}
                             setFile={setFile}
                             image={signature}
+                            file={file}
+                            initialFile={initialFile}
+                            onRemoveFile={handleRemoveFile}
                             formState={formState}
                             control={control}
                             register={register}
@@ -150,7 +222,6 @@ const UpdateRequest = () => {
                             buttonText="Update"
                         />
                     </Grid>
-
                 </Grid>
             </Box>
         </Paper>

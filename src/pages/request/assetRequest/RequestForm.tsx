@@ -98,7 +98,9 @@ const RequestForm = ({
     setFile,
     image,
     file,
-    hideFileUpload = false
+    hideFileUpload = false,
+    initialFile,
+    onRemoveFile
 }: IRequestForm & { hideFileUpload?: boolean }) => {
     const { formFields } = RequestUtills();
     const navigate = useNavigate();
@@ -301,9 +303,12 @@ const RequestForm = ({
                                 onDragLeave={handleDragLeave}
                                 onDrop={handleDrop}
                             >
-                                {file && (
+                                {/* Show file preview if either file is selected OR we have an initial file from the server */}
+                                {(file || (initialFile?.fileName && image)) && (
                                     <Box sx={{ position: 'relative' }}>
-                                        {getFileType(file) === 'image' ? (
+                                        {/* Logic for displaying image type files */}
+                                        {((file && getFileType(file) === 'image') ||
+                                            (!file && initialFile?.fileType === 'image' && image)) ? (
                                             <CardMedia
                                                 component="img"
                                                 image={image || PlaceHolder}
@@ -327,217 +332,221 @@ const RequestForm = ({
                                                     position: 'relative'
                                                 }}
                                             >
-                                                {/* PDF Document Preview */}
-                                                {getFileType(file) === 'pdf' && (
-                                                    <Box
-                                                        component="div"
-                                                        sx={{
-                                                            width: '100%',
-                                                            height: '100%',
-                                                            display: 'flex',
-                                                            flexDirection: 'column',
-                                                            alignItems: 'center',
-                                                            justifyContent: 'center',
-                                                            position: 'relative'
-                                                        }}
-                                                    >
+                                                {/* Logic for displaying PDF documents */}
+                                                {((file && getFileType(file) === 'pdf') ||
+                                                    (!file && initialFile?.fileType === 'pdf' && image)) && (
                                                         <Box
+                                                            component="div"
                                                             sx={{
-                                                                bgcolor: '#F8F2F2',
-                                                                p: 2,
-                                                                borderRadius: 1,
-                                                                boxShadow: '0 4px 8px rgba(0,0,0,0.05)',
+                                                                width: '100%',
+                                                                height: '100%',
                                                                 display: 'flex',
                                                                 flexDirection: 'column',
                                                                 alignItems: 'center',
-                                                                width: '60%',
-                                                                maxWidth: 140,
-                                                                border: '1px solid #E0E0E0'
+                                                                justifyContent: 'center',
+                                                                position: 'relative'
                                                             }}
                                                         >
-                                                            <Box sx={{ color: '#E44D26', mb: 1 }}>
-                                                                <PdfIcon sx={{ color: '#d32f2f', fontSize: 48 }} />
+                                                            <Box
+                                                                sx={{
+                                                                    bgcolor: '#F8F2F2',
+                                                                    p: 2,
+                                                                    borderRadius: 1,
+                                                                    boxShadow: '0 4px 8px rgba(0,0,0,0.05)',
+                                                                    display: 'flex',
+                                                                    flexDirection: 'column',
+                                                                    alignItems: 'center',
+                                                                    width: '60%',
+                                                                    maxWidth: 140,
+                                                                    border: '1px solid #E0E0E0'
+                                                                }}
+                                                            >
+                                                                <Box sx={{ color: '#E44D26', mb: 1 }}>
+                                                                    <PdfIcon sx={{ color: '#d32f2f', fontSize: 48 }} />
+                                                                </Box>
+                                                                <Typography variant="caption" sx={{ fontWeight: 600, color: '#D32F2F' }}>
+                                                                    PDF DOCUMENT
+                                                                </Typography>
                                                             </Box>
-                                                            <Typography variant="caption" sx={{ fontWeight: 600, color: '#D32F2F' }}>
-                                                                PDF DOCUMENT
+                                                            <Typography
+                                                                variant="body2"
+                                                                fontWeight={500}
+                                                                sx={{
+                                                                    mt: 2,
+                                                                    maxWidth: '90%',
+                                                                    overflow: 'hidden',
+                                                                    textOverflow: 'ellipsis',
+                                                                    whiteSpace: 'nowrap',
+                                                                    textAlign: 'center'
+                                                                }}
+                                                            >
+                                                                {file ? file.name : initialFile?.fileName || ""}
                                                             </Typography>
                                                         </Box>
-                                                        <Typography
-                                                            variant="body2"
-                                                            fontWeight={500}
-                                                            sx={{
-                                                                mt: 2,
-                                                                maxWidth: '90%',
-                                                                overflow: 'hidden',
-                                                                textOverflow: 'ellipsis',
-                                                                whiteSpace: 'nowrap',
-                                                                textAlign: 'center'
-                                                            }}
-                                                        >
-                                                            {file.name}
-                                                        </Typography>
-                                                    </Box>
-                                                )}
+                                                    )}
 
-                                                {/* Word Document Preview */}
-                                                {getFileType(file) === 'word' && (
-                                                    <Box
-                                                        component="div"
-                                                        sx={{
-                                                            width: '100%',
-                                                            height: '100%',
-                                                            display: 'flex',
-                                                            flexDirection: 'column',
-                                                            alignItems: 'center',
-                                                            justifyContent: 'center',
-                                                            position: 'relative'
-                                                        }}
-                                                    >
+                                                {/* Logic for displaying Word documents */}
+                                                {((file && getFileType(file) === 'word') ||
+                                                    (!file && initialFile?.fileType === 'word' && image)) && (
                                                         <Box
+                                                            component="div"
                                                             sx={{
-                                                                bgcolor: '#F0F4FA',
-                                                                p: 2,
-                                                                borderRadius: 1,
-                                                                boxShadow: '0 4px 8px rgba(0,0,0,0.05)',
+                                                                width: '100%',
+                                                                height: '100%',
                                                                 display: 'flex',
                                                                 flexDirection: 'column',
                                                                 alignItems: 'center',
-                                                                width: '60%',
-                                                                maxWidth: 140,
-                                                                border: '1px solid #D6E3F3'
+                                                                justifyContent: 'center',
+                                                                position: 'relative'
                                                             }}
                                                         >
-                                                            <Box sx={{ color: '#295396', mb: 1 }}>
-                                                                <WordIcon sx={{ color: '#295396', fontSize: 48 }} />
+                                                            <Box
+                                                                sx={{
+                                                                    bgcolor: '#F0F4FA',
+                                                                    p: 2,
+                                                                    borderRadius: 1,
+                                                                    boxShadow: '0 4px 8px rgba(0,0,0,0.05)',
+                                                                    display: 'flex',
+                                                                    flexDirection: 'column',
+                                                                    alignItems: 'center',
+                                                                    width: '60%',
+                                                                    maxWidth: 140,
+                                                                    border: '1px solid #D6E3F3'
+                                                                }}
+                                                            >
+                                                                <Box sx={{ color: '#295396', mb: 1 }}>
+                                                                    <WordIcon sx={{ color: '#295396', fontSize: 48 }} />
+                                                                </Box>
+                                                                <Typography variant="caption" sx={{ fontWeight: 600, color: '#295396' }}>
+                                                                    WORD DOCUMENT
+                                                                </Typography>
                                                             </Box>
-                                                            <Typography variant="caption" sx={{ fontWeight: 600, color: '#295396' }}>
-                                                                WORD DOCUMENT
+                                                            <Typography
+                                                                variant="body2"
+                                                                fontWeight={500}
+                                                                sx={{
+                                                                    mt: 2,
+                                                                    maxWidth: '90%',
+                                                                    overflow: 'hidden',
+                                                                    textOverflow: 'ellipsis',
+                                                                    whiteSpace: 'nowrap',
+                                                                    textAlign: 'center'
+                                                                }}
+                                                            >
+                                                                {file ? file.name : initialFile?.fileName || ""}
                                                             </Typography>
                                                         </Box>
-                                                        <Typography
-                                                            variant="body2"
-                                                            fontWeight={500}
-                                                            sx={{
-                                                                mt: 2,
-                                                                maxWidth: '90%',
-                                                                overflow: 'hidden',
-                                                                textOverflow: 'ellipsis',
-                                                                whiteSpace: 'nowrap',
-                                                                textAlign: 'center'
-                                                            }}
-                                                        >
-                                                            {file.name}
-                                                        </Typography>
-                                                    </Box>
-                                                )}
+                                                    )}
 
-                                                {/* Excel Document Preview */}
-                                                {getFileType(file) === 'excel' && (
-                                                    <Box
-                                                        component="div"
-                                                        sx={{
-                                                            width: '100%',
-                                                            height: '100%',
-                                                            display: 'flex',
-                                                            flexDirection: 'column',
-                                                            alignItems: 'center',
-                                                            justifyContent: 'center',
-                                                            position: 'relative'
-                                                        }}
-                                                    >
+                                                {/* Logic for displaying Excel documents */}
+                                                {((file && getFileType(file) === 'excel') ||
+                                                    (!file && initialFile?.fileType === 'excel' && image)) && (
                                                         <Box
+                                                            component="div"
                                                             sx={{
-                                                                bgcolor: '#EAF5EC',
-                                                                p: 2,
-                                                                borderRadius: 1,
-                                                                boxShadow: '0 4px 8px rgba(0,0,0,0.05)',
+                                                                width: '100%',
+                                                                height: '100%',
                                                                 display: 'flex',
                                                                 flexDirection: 'column',
                                                                 alignItems: 'center',
-                                                                width: '60%',
-                                                                maxWidth: 140,
-                                                                border: '1px solid #C5E1C8'
+                                                                justifyContent: 'center',
+                                                                position: 'relative'
                                                             }}
                                                         >
-                                                            <Box sx={{ color: '#217346', mb: 1 }}>
-                                                                <ExcelIcon sx={{ color: '#217346', fontSize: 48 }} />
+                                                            <Box
+                                                                sx={{
+                                                                    bgcolor: '#EAF5EC',
+                                                                    p: 2,
+                                                                    borderRadius: 1,
+                                                                    boxShadow: '0 4px 8px rgba(0,0,0,0.05)',
+                                                                    display: 'flex',
+                                                                    flexDirection: 'column',
+                                                                    alignItems: 'center',
+                                                                    width: '60%',
+                                                                    maxWidth: 140,
+                                                                    border: '1px solid #C5E1C8'
+                                                                }}
+                                                            >
+                                                                <Box sx={{ color: '#217346', mb: 1 }}>
+                                                                    <ExcelIcon sx={{ color: '#217346', fontSize: 48 }} />
+                                                                </Box>
+                                                                <Typography variant="caption" sx={{ fontWeight: 600, color: '#217346' }}>
+                                                                    EXCEL DOCUMENT
+                                                                </Typography>
                                                             </Box>
-                                                            <Typography variant="caption" sx={{ fontWeight: 600, color: '#217346' }}>
-                                                                EXCEL DOCUMENT
+                                                            <Typography
+                                                                variant="body2"
+                                                                fontWeight={500}
+                                                                sx={{
+                                                                    mt: 2,
+                                                                    maxWidth: '90%',
+                                                                    overflow: 'hidden',
+                                                                    textOverflow: 'ellipsis',
+                                                                    whiteSpace: 'nowrap',
+                                                                    textAlign: 'center'
+                                                                }}
+                                                            >
+                                                                {file ? file.name : initialFile?.fileName || ""}
                                                             </Typography>
                                                         </Box>
-                                                        <Typography
-                                                            variant="body2"
-                                                            fontWeight={500}
-                                                            sx={{
-                                                                mt: 2,
-                                                                maxWidth: '90%',
-                                                                overflow: 'hidden',
-                                                                textOverflow: 'ellipsis',
-                                                                whiteSpace: 'nowrap',
-                                                                textAlign: 'center'
-                                                            }}
-                                                        >
-                                                            {file.name}
-                                                        </Typography>
-                                                    </Box>
-                                                )}
+                                                    )}
 
-                                                {/* Generic Document Preview */}
-                                                {getFileType(file) === 'other' && (
-                                                    <Box
-                                                        component="div"
-                                                        sx={{
-                                                            width: '100%',
-                                                            height: '100%',
-                                                            display: 'flex',
-                                                            flexDirection: 'column',
-                                                            alignItems: 'center',
-                                                            justifyContent: 'center',
-                                                            position: 'relative'
-                                                        }}
-                                                    >
+                                                {/* Logic for displaying other documents */}
+                                                {((file && getFileType(file) === 'other') ||
+                                                    (!file && initialFile?.fileType === 'other' && image)) && (
                                                         <Box
+                                                            component="div"
                                                             sx={{
-                                                                bgcolor: '#F5F5F5',
-                                                                p: 2,
-                                                                borderRadius: 1,
-                                                                boxShadow: '0 4px 8px rgba(0,0,0,0.05)',
+                                                                width: '100%',
+                                                                height: '100%',
                                                                 display: 'flex',
                                                                 flexDirection: 'column',
                                                                 alignItems: 'center',
-                                                                width: '60%',
-                                                                maxWidth: 140,
-                                                                border: '1px solid #E0E0E0'
+                                                                justifyContent: 'center',
+                                                                position: 'relative'
                                                             }}
                                                         >
-                                                            <Box sx={{ color: '#757575', mb: 1 }}>
-                                                                <GenericFileIcon sx={{ color: '#757575', fontSize: 48 }} />
+                                                            <Box
+                                                                sx={{
+                                                                    bgcolor: '#F5F5F5',
+                                                                    p: 2,
+                                                                    borderRadius: 1,
+                                                                    boxShadow: '0 4px 8px rgba(0,0,0,0.05)',
+                                                                    display: 'flex',
+                                                                    flexDirection: 'column',
+                                                                    alignItems: 'center',
+                                                                    width: '60%',
+                                                                    maxWidth: 140,
+                                                                    border: '1px solid #E0E0E0'
+                                                                }}
+                                                            >
+                                                                <Box sx={{ color: '#757575', mb: 1 }}>
+                                                                    <GenericFileIcon sx={{ color: '#757575', fontSize: 48 }} />
+                                                                </Box>
+                                                                <Typography variant="caption" sx={{ fontWeight: 600, color: '#757575' }}>
+                                                                    DOCUMENT
+                                                                </Typography>
                                                             </Box>
-                                                            <Typography variant="caption" sx={{ fontWeight: 600, color: '#757575' }}>
-                                                                DOCUMENT
+                                                            <Typography
+                                                                variant="body2"
+                                                                fontWeight={500}
+                                                                sx={{
+                                                                    mt: 2,
+                                                                    maxWidth: '90%',
+                                                                    overflow: 'hidden',
+                                                                    textOverflow: 'ellipsis',
+                                                                    whiteSpace: 'nowrap',
+                                                                    textAlign: 'center'
+                                                                }}
+                                                            >
+                                                                {file ? file.name : initialFile?.fileName || ""}
                                                             </Typography>
                                                         </Box>
-                                                        <Typography
-                                                            variant="body2"
-                                                            fontWeight={500}
-                                                            sx={{
-                                                                mt: 2,
-                                                                maxWidth: '90%',
-                                                                overflow: 'hidden',
-                                                                textOverflow: 'ellipsis',
-                                                                whiteSpace: 'nowrap',
-                                                                textAlign: 'center'
-                                                            }}
-                                                        >
-                                                            {file.name}
-                                                        </Typography>
-                                                    </Box>
-                                                )}
+                                                    )}
                                             </Box>
                                         )}
 
-                                        {/* Delete button */}
+                                        {/* Delete button - Use onRemoveFile prop if provided, otherwise use removeFile function */}
                                         <IconButton
                                             sx={{
                                                 position: 'absolute',
@@ -548,7 +557,7 @@ const RequestForm = ({
                                                     bgcolor: 'rgba(255,255,255,0.9)',
                                                 }
                                             }}
-                                            onClick={removeFile}
+                                            onClick={onRemoveFile || removeFile}
                                         >
                                             <DeleteIcon color="error" />
                                         </IconButton>
@@ -556,7 +565,7 @@ const RequestForm = ({
                                 )}
 
                                 <CardContent>
-                                    {file ? (
+                                    {(file || (initialFile?.fileName && image)) ? (
                                         <Box>
                                             <Box sx={{
                                                 display: 'flex',
@@ -567,50 +576,60 @@ const RequestForm = ({
                                                 bgcolor: 'rgba(0,0,0,0.02)',
                                                 border: '1px solid rgba(0,0,0,0.08)'
                                             }}>
-                                                {/* File type icon based on file type */}
-                                                {getFileType(file) === 'image' && (
-                                                    <Box sx={{ color: blue[600], mr: 1.5 }}>
-                                                        <ImageIcon fontSize="small" />
-                                                    </Box>
-                                                )}
-                                                {getFileType(file) === 'pdf' && (
-                                                    <Box sx={{ color: '#E44D26', mr: 1.5 }}>
-                                                        <PdfIcon fontSize="small" />
-                                                    </Box>
-                                                )}
-                                                {getFileType(file) === 'word' && (
-                                                    <Box sx={{ color: '#295396', mr: 1.5 }}>
-                                                        <WordIcon fontSize="small" />
-                                                    </Box>
-                                                )}
-                                                {getFileType(file) === 'excel' && (
-                                                    <Box sx={{ color: '#217346', mr: 1.5 }}>
-                                                        <ExcelIcon fontSize="small" />
-                                                    </Box>
-                                                )}
-                                                {getFileType(file) === 'other' && (
-                                                    <Box sx={{ color: grey[600], mr: 1.5 }}>
-                                                        <GenericFileIcon fontSize="small" />
-                                                    </Box>
-                                                )}
+                                                {/* File type icons based on current file or initial file */}
+                                                {((file && getFileType(file) === 'image') ||
+                                                    (!file && initialFile?.fileType === 'image' && image)) && (
+                                                        <Box sx={{ color: blue[600], mr: 1.5 }}>
+                                                            <ImageIcon fontSize="small" />
+                                                        </Box>
+                                                    )}
+                                                {((file && getFileType(file) === 'pdf') ||
+                                                    (!file && initialFile?.fileType === 'pdf' && image)) && (
+                                                        <Box sx={{ color: '#E44D26', mr: 1.5 }}>
+                                                            <PdfIcon fontSize="small" />
+                                                        </Box>
+                                                    )}
+                                                {((file && getFileType(file) === 'word') ||
+                                                    (!file && initialFile?.fileType === 'word' && image)) && (
+                                                        <Box sx={{ color: '#295396', mr: 1.5 }}>
+                                                            <WordIcon fontSize="small" />
+                                                        </Box>
+                                                    )}
+                                                {((file && getFileType(file) === 'excel') ||
+                                                    (!file && initialFile?.fileType === 'excel' && image)) && (
+                                                        <Box sx={{ color: '#217346', mr: 1.5 }}>
+                                                            <ExcelIcon fontSize="small" />
+                                                        </Box>
+                                                    )}
+                                                {((file && getFileType(file) === 'other') ||
+                                                    (!file && initialFile?.fileType === 'other' && image)) && (
+                                                        <Box sx={{ color: grey[600], mr: 1.5 }}>
+                                                            <GenericFileIcon fontSize="small" />
+                                                        </Box>
+                                                    )}
 
                                                 <Box sx={{ flexGrow: 1 }}>
                                                     <Typography variant="body2" fontWeight={600} noWrap>
-                                                        {file.name.substring(0, 20)}{file.name.length > 20 ? '...' : '' }
+                                                        {file ? file.name :
+                                                            (initialFile?.fileName?.length as number > 20 ? `${initialFile?.fileName?.slice(0, 20)}...` : initialFile?.fileName) || ""}
                                                     </Typography>
                                                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
                                                         <Typography variant="caption" color="text.secondary">
-                                                            {(file.size / 1024).toFixed(1)} KB
+                                                            {file
+                                                                ? `${(file.size / 1024).toFixed(1)} KB`
+                                                                : "Document"}
                                                         </Typography>
                                                         <Typography variant="caption" color="text.secondary" sx={{ mx: 0.5 }}>•</Typography>
                                                         <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase' }}>
-                                                            {file.name.split('.').pop()}
+                                                            {file
+                                                                ? file.name.split('.').pop()
+                                                                : initialFile?.fileName?.split('.').pop() || ""}
                                                         </Typography>
                                                     </Box>
                                                 </Box>
 
                                                 <Chip
-                                                    label="Uploaded"
+                                                    label={file ? "Selected" : "Uploaded"}
                                                     size="small"
                                                     sx={{ bgcolor: '#E6F9F4', color: '#00C48C' }}
                                                 />
@@ -627,6 +646,7 @@ const RequestForm = ({
                                             </Button>
                                         </Box>
                                     ) : (
+                                        // Empty state UI remains unchanged
                                         <Box
                                             sx={{
                                                 py: 3,
@@ -664,23 +684,6 @@ const RequestForm = ({
                                 </CardContent>
                             </Card>
                         </FormSection>
-
-                        <Card sx={{ mt: 3, borderRadius: 2, bgcolor: blue[50], border: `1px solid ${blue[100]}` }}>
-                            <CardContent>
-                                <Typography variant="subtitle2" sx={{ mb: 1, color: blue[800] }}>
-                                    Tips for Faster Approval
-                                </Typography>
-                                <Typography variant="body2" sx={{ color: blue[900], mb: 0.5 }}>
-                                    • Be specific in your request description
-                                </Typography>
-                                <Typography variant="body2" sx={{ color: blue[900], mb: 0.5 }}>
-                                    • Include accurate quantities needed
-                                </Typography>
-                                <Typography variant="body2" sx={{ color: blue[900] }}>
-                                    • Attach supporting documentation when available
-                                </Typography>
-                            </CardContent>
-                        </Card>
                     </Grid>
                 )}
             </Grid>

@@ -91,6 +91,13 @@ export interface IRequestForm {
     image: string;
     setFile?: Dispatch<SetStateAction<File | null>>
     file?: File | null;
+    initialFile?: {
+        fileName: string | null;
+        fileType: 'pdf' | 'word' | 'excel' | 'image' | 'other';
+        filePath: string | null;
+    };
+    onRemoveFile?: () => void;
+    hideFileUpload?: boolean;
 }
 
 export interface IDeleteRequest {
