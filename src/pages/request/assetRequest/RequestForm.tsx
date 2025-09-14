@@ -45,7 +45,14 @@ import ArticleIcon from '@mui/icons-material/Article';
 import InputFileUpload from '../../../components/forms/FileUpload';
 import { useRef, useState } from 'react';
 import InventoryTable from '../../../components/forms/InventoryTable';
-import { PictureAsPdf as PdfIcon, TextSnippet as FileIcon } from '@mui/icons-material';
+// Import MUI icons for file type representation
+import {
+    PictureAsPdf as PdfIcon,
+    TextSnippet as WordIcon,
+    GridOn as ExcelIcon,
+    InsertDriveFile as GenericFileIcon,
+    Image as ImageIcon
+} from '@mui/icons-material';
 
 interface SectionProps {
     title: string;
@@ -111,7 +118,14 @@ const RequestForm = ({
         if (!files) return;
         const file = files[0];
         setFile?.(file);
-        setImage(URL.createObjectURL(file));
+
+        // For images, create object URL
+        if (getFileType(file) === 'image') {
+            setImage(URL.createObjectURL(file));
+        } else {
+            // For non-images, set empty string
+            setImage('');
+        }
     };
 
     const handleDragOver = (e: React.DragEvent) => {
@@ -146,9 +160,9 @@ const RequestForm = ({
     const detailFields = formFields.filter(f => f.type === 'textarea');
     const dateTimeFields = formFields.filter(f => f.type === 'date' || f.type === 'time');
 
-    // File type detection function to add at the top of the component
+    // File type detection function
     const getFileType = (file: File): 'image' | 'pdf' | 'word' | 'excel' | 'other' => {
-        const extension = file.name.split('.').pop()?.toLowerCase();
+        const extension = file?.name?.split('.').pop()?.toLowerCase();
 
         if (!extension) return 'other';
 
@@ -159,7 +173,7 @@ const RequestForm = ({
             return 'pdf';
         } else if (['doc', 'docx'].includes(extension)) {
             return 'word';
-        } else if (['xls', 'xlsx'].includes(extension)) {
+        } else if (['xls', 'xlsx', 'csv'].includes(extension)) {
             return 'excel';
         }
 
@@ -290,7 +304,6 @@ const RequestForm = ({
                                 {file && (
                                     <Box sx={{ position: 'relative' }}>
                                         {getFileType(file) === 'image' ? (
-                                            // Image display remains unchanged
                                             <CardMedia
                                                 component="img"
                                                 image={image || PlaceHolder}
@@ -302,7 +315,6 @@ const RequestForm = ({
                                                 }}
                                             />
                                         ) : (
-                                            // New document preview for non-image files
                                             <Box
                                                 sx={{
                                                     height: 200,
@@ -315,7 +327,7 @@ const RequestForm = ({
                                                     position: 'relative'
                                                 }}
                                             >
-                                                {/* Document type icon */}
+                                                {/* PDF Document Preview */}
                                                 {getFileType(file) === 'pdf' && (
                                                     <Box
                                                         component="div"
@@ -343,16 +355,31 @@ const RequestForm = ({
                                                                 border: '1px solid #E0E0E0'
                                                             }}
                                                         >
-                                                            <Box sx={{ color: '#E44D26', mb: 1, fontSize: 40 }}>
-                                                                <PdfIcon fontSize="large" sx={{ color: '#d32f2f' }} />
+                                                            <Box sx={{ color: '#E44D26', mb: 1 }}>
+                                                                <PdfIcon sx={{ color: '#d32f2f', fontSize: 48 }} />
                                                             </Box>
                                                             <Typography variant="caption" sx={{ fontWeight: 600, color: '#D32F2F' }}>
                                                                 PDF DOCUMENT
                                                             </Typography>
                                                         </Box>
+                                                        <Typography
+                                                            variant="body2"
+                                                            fontWeight={500}
+                                                            sx={{
+                                                                mt: 2,
+                                                                maxWidth: '90%',
+                                                                overflow: 'hidden',
+                                                                textOverflow: 'ellipsis',
+                                                                whiteSpace: 'nowrap',
+                                                                textAlign: 'center'
+                                                            }}
+                                                        >
+                                                            {file.name}
+                                                        </Typography>
                                                     </Box>
                                                 )}
 
+                                                {/* Word Document Preview */}
                                                 {getFileType(file) === 'word' && (
                                                     <Box
                                                         component="div"
@@ -380,16 +407,31 @@ const RequestForm = ({
                                                                 border: '1px solid #D6E3F3'
                                                             }}
                                                         >
-                                                            <Box sx={{ color: '#295396', mb: 1, fontSize: 40 }}>
-                                                                <FileIcon fontSize="large" sx={{ color: theme.palette.info.main }} />
+                                                            <Box sx={{ color: '#295396', mb: 1 }}>
+                                                                <WordIcon sx={{ color: '#295396', fontSize: 48 }} />
                                                             </Box>
                                                             <Typography variant="caption" sx={{ fontWeight: 600, color: '#295396' }}>
                                                                 WORD DOCUMENT
                                                             </Typography>
                                                         </Box>
+                                                        <Typography
+                                                            variant="body2"
+                                                            fontWeight={500}
+                                                            sx={{
+                                                                mt: 2,
+                                                                maxWidth: '90%',
+                                                                overflow: 'hidden',
+                                                                textOverflow: 'ellipsis',
+                                                                whiteSpace: 'nowrap',
+                                                                textAlign: 'center'
+                                                            }}
+                                                        >
+                                                            {file.name}
+                                                        </Typography>
                                                     </Box>
                                                 )}
 
+                                                {/* Excel Document Preview */}
                                                 {getFileType(file) === 'excel' && (
                                                     <Box
                                                         component="div"
@@ -417,10 +459,8 @@ const RequestForm = ({
                                                                 border: '1px solid #C5E1C8'
                                                             }}
                                                         >
-                                                            <Box sx={{ color: '#217346', mb: 1, fontSize: 40 }}>
-                                                                <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 384 512" fill="currentColor">
-                                                                    <path d="M320 464c8.8 0 16-7.2 16-16V160H256c-17.7 0-32-14.3-32-32V48H64c-8.8 0-16 7.2-16 16V448c0 8.8 7.2 16 16 16H320zM0 64C0 28.7 28.7 0 64 0H229.5c17 0 33.3 6.7 45.3 18.7l90.5 90.5c12 12 18.7 28.3 18.7 45.3V448c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V64z" />
-                                                                </svg>
+                                                            <Box sx={{ color: '#217346', mb: 1 }}>
+                                                                <ExcelIcon sx={{ color: '#217346', fontSize: 48 }} />
                                                             </Box>
                                                             <Typography variant="caption" sx={{ fontWeight: 600, color: '#217346' }}>
                                                                 EXCEL DOCUMENT
@@ -443,6 +483,7 @@ const RequestForm = ({
                                                     </Box>
                                                 )}
 
+                                                {/* Generic Document Preview */}
                                                 {getFileType(file) === 'other' && (
                                                     <Box
                                                         component="div"
@@ -470,11 +511,8 @@ const RequestForm = ({
                                                                 border: '1px solid #E0E0E0'
                                                             }}
                                                         >
-                                                            <Box sx={{ color: '#757575', mb: 1, fontSize: 40 }}>
-                                                                {/* <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 384 512" fill="currentColor">
-                                                                    <path d="M320 464c8.8 0 16-7.2 16-16V160H256c-17.7 0-32-14.3-32-32V48H64c-8.8 0-16 7.2-16 16V448c0 8.8 7.2 16 16 16H320zM0 64C0 28.7 28.7 0 64 0H229.5c17 0 33.3 6.7 45.3 18.7l90.5 90.5c12 12 18.7 28.3 18.7 45.3V448c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V64z" />
-                                                                </svg> */}
-                                                                <PdfIcon fontSize="small" sx={{ color: '#d32f2f' }} />
+                                                            <Box sx={{ color: '#757575', mb: 1 }}>
+                                                                <GenericFileIcon sx={{ color: '#757575', fontSize: 48 }} />
                                                             </Box>
                                                             <Typography variant="caption" sx={{ fontWeight: 600, color: '#757575' }}>
                                                                 DOCUMENT
@@ -499,7 +537,7 @@ const RequestForm = ({
                                             </Box>
                                         )}
 
-                                        {/* Delete button - unchanged */}
+                                        {/* Delete button */}
                                         <IconButton
                                             sx={{
                                                 position: 'absolute',
@@ -520,16 +558,57 @@ const RequestForm = ({
                                 <CardContent>
                                     {file ? (
                                         <Box>
-                                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                                                <DescriptionIcon sx={{ color: blue[700], mr: 1 }} />
+                                            <Box sx={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                mb: 2,
+                                                p: 1.5,
+                                                borderRadius: 1,
+                                                bgcolor: 'rgba(0,0,0,0.02)',
+                                                border: '1px solid rgba(0,0,0,0.08)'
+                                            }}>
+                                                {/* File type icon based on file type */}
+                                                {getFileType(file) === 'image' && (
+                                                    <Box sx={{ color: blue[600], mr: 1.5 }}>
+                                                        <ImageIcon fontSize="small" />
+                                                    </Box>
+                                                )}
+                                                {getFileType(file) === 'pdf' && (
+                                                    <Box sx={{ color: '#E44D26', mr: 1.5 }}>
+                                                        <PdfIcon fontSize="small" />
+                                                    </Box>
+                                                )}
+                                                {getFileType(file) === 'word' && (
+                                                    <Box sx={{ color: '#295396', mr: 1.5 }}>
+                                                        <WordIcon fontSize="small" />
+                                                    </Box>
+                                                )}
+                                                {getFileType(file) === 'excel' && (
+                                                    <Box sx={{ color: '#217346', mr: 1.5 }}>
+                                                        <ExcelIcon fontSize="small" />
+                                                    </Box>
+                                                )}
+                                                {getFileType(file) === 'other' && (
+                                                    <Box sx={{ color: grey[600], mr: 1.5 }}>
+                                                        <GenericFileIcon fontSize="small" />
+                                                    </Box>
+                                                )}
+
                                                 <Box sx={{ flexGrow: 1 }}>
-                                                    <Typography variant="body2" fontWeight={500} noWrap>
-                                                        {file.name}
+                                                    <Typography variant="body2" fontWeight={600} noWrap>
+                                                        {file.name.substring(0, 20)}{file.name.length > 20 ? '...' : '' }
                                                     </Typography>
-                                                    <Typography variant="caption" color="text.secondary">
-                                                        {(file.size / 1024).toFixed(1)} KB
-                                                    </Typography>
+                                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                                        <Typography variant="caption" color="text.secondary">
+                                                            {(file.size / 1024).toFixed(1)} KB
+                                                        </Typography>
+                                                        <Typography variant="caption" color="text.secondary" sx={{ mx: 0.5 }}>•</Typography>
+                                                        <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase' }}>
+                                                            {file.name.split('.').pop()}
+                                                        </Typography>
+                                                    </Box>
                                                 </Box>
+
                                                 <Chip
                                                     label="Uploaded"
                                                     size="small"
