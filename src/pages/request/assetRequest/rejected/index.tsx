@@ -5,7 +5,7 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { useContext, useEffect } from "react";
+import React, { useContext, useEffect } from "react";
 import TableComponent from "../../../../components/tables/TableComponent";
 import { Grid } from "@mui/material";
 import RequestUtills from "../utills";
@@ -16,6 +16,8 @@ import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import InfoIcon from '@mui/icons-material/Info';
 import { crudStates } from "../../../../utils/constants";
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
+import ModalComponent from "../../../../components/modal";
+import DeleteRequest from "../../DeleteRequest";
 
 const RejectedRequest = () => {
     const { requests } = useSelector((state: RootState) => state.AssetsRequestsStore)
@@ -28,7 +30,13 @@ const RejectedRequest = () => {
         loading,
         fetchAllRequests,
         handleRequest,
-        count
+        count,
+        modalState,
+        handleClose,
+        open,
+        currentRequest,
+        sendingRequest,
+        setSendingRequest
     } = RequestUtills()
 
     useEffect(() => {
@@ -52,22 +60,35 @@ const RejectedRequest = () => {
     }, []);
 
     return (
-        <Grid xs={12} container>
-            {columnHeaders.length > 0 &&
-                <TableComponent
-                    endPoint={endPoint}
-                    loading={loading}
-                    count={count}
-                    exportData
-                    module="assets"
-                    header={{ plural: "Rejected Requests", singular: "Rejected Requests" }}
-                    rows={requestTableData}
-                    columnHeaders={columnHeaders}
-                    handleOptionClicked={handleOptionClicked}
-                    params={{ statusIds: 2 }}
-                />
+        <React.Fragment>
+            {
+                crudStates.delete === modalState &&
+                <ModalComponent width={"40%"} title='Delete Request' open={open} handleClose={handleClose}>
+                    <DeleteRequest
+                        request={currentRequest}
+                        sendingRequest={sendingRequest}
+                        setSendingRequest={setSendingRequest}
+                        handleClose={handleClose}
+                        buttonText="Delete" />
+                </ModalComponent>
             }
-        </Grid>
+            <Grid xs={12} container>
+                {columnHeaders.length > 0 &&
+                    <TableComponent
+                        endPoint={endPoint}
+                        loading={loading}
+                        count={count}
+                        exportData
+                        module="assets"
+                        header={{ plural: "Rejected Requests", singular: "Rejected Requests" }}
+                        rows={requestTableData}
+                        columnHeaders={columnHeaders}
+                        handleOptionClicked={handleOptionClicked}
+                        params={{ statusIds: 2 }}
+                    />
+                }
+            </Grid>
+        </React.Fragment>
     )
 }
 
