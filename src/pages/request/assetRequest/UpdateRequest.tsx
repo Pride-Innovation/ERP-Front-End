@@ -6,7 +6,7 @@ Managing Director
 */
 
 import { useContext, useEffect, useState } from 'react'
-import { useParams } from 'react-router';
+import { useNavigate, useParams } from 'react-router';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Box, Divider, Grid, Paper, Typography } from '@mui/material';
@@ -23,6 +23,7 @@ import { toast } from 'react-toastify';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../store';
 import CommodityUtills from '../../settings/commodity/utills';
+import { ROUTES } from '../../../core/routes/routes';
 
 const UpdateRequest = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
@@ -33,6 +34,7 @@ const UpdateRequest = () => {
     const [file, setFile] = useState<File | null>(null);
     const { commodities } = useSelector((state: RootState) => state.CommodityStore);
     const { fetchAllCommodities } = CommodityUtills();
+    const navigate = useNavigate();
 
     // New state to track if file was initially present and file type
     const [initialFile, setInitialFile] = useState<{
@@ -173,6 +175,7 @@ const UpdateRequest = () => {
                         });
                     }
                     toast.success("Request updated successfully");
+                    navigate(ROUTES.REQUEST);
                 }
             } catch (error) {
                 console.log(error);

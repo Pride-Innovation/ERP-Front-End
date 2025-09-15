@@ -36,6 +36,8 @@ import { createAssetRequestService } from "./service";
 import { RowData } from "../../../components/forms/interface";
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import FactCheckOutlinedIcon from '@mui/icons-material/FactCheckOutlined';
+import { useNavigate } from "react-router";
+import { ROUTES } from "../../../core/routes/routes";
 
 const initialData: RowData[] = [
     { id: 1, name: '', groupName: '', quantity: 0 },
@@ -71,6 +73,7 @@ const CreateRequest = () => {
     // Watch form values to determine completion percentage
     const formValues = watch();
     const formProgress = calculateFormProgress(formValues, rows);
+    const navigate = useNavigate();
 
     useEffect(() => {
         reset({} as IRequest);
@@ -120,6 +123,7 @@ const CreateRequest = () => {
                     setFile(null);
                     setSignature("");
                     setRows(initialData);
+                    navigate(ROUTES.REQUEST);
                 }
             } catch (error) {
                 console.log(error);
