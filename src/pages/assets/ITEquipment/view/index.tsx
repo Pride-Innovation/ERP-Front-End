@@ -27,7 +27,11 @@ import AssignmentHistory from '../../trails/AssignmentHistory';
 import RepairHistory from '../../trails/RepairHistory';
 import { useEffect, useState } from 'react';
 import { IITEquipment, IITEquipmentAxiosResponse } from '../interface';
-import { getITEquipmentByIDService, removeITEquipmentImageService, updateITEquipmentImageService } from '../service';
+import {
+    getITEquipmentByIDService,
+    removeITEquipmentImageService,
+    updateITEquipmentImageService
+} from '../service';
 import Loading from '../../../../components/loading';
 import moment from 'moment';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';

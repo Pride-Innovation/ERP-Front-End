@@ -150,7 +150,7 @@ const PendingRequest = () => {
         <Grid xs={12} container>
 
             {crudStates.acknowledgeRequest === modalState &&
-                <ModalComponent width={"40%"} title='Acknowledge Request' open={open} handleClose={handleClose}>
+                <ModalComponent width={"70%"} title='Acknowledge Request' open={open} handleClose={handleClose}>
                     <AcknowledgeRequest
                         setSendingRequest={setSendingRequest}
                         handleClose={handleClose}
