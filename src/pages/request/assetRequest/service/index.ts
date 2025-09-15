@@ -38,7 +38,7 @@ const deleteAssetRequestService = async (id: string | number) => {
         const response = await axiosInstance.delete(`/requests/${id}`);
         return response
     } catch (error) {
-        throw (error)
+        return (error)
     }
 }
 

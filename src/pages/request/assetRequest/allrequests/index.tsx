@@ -32,6 +32,7 @@ import RoutesUtills from "../../../../core/routes/utills";
 import { IPermission } from "../../../settings/interface";
 import { permissionsMock } from "../../../../mocks/settings";
 import { set } from "date-fns";
+import DeleteRequest from "../../DeleteRequest";
 
 const Request = () => {
     const { requestTableData, setOptions } = useContext(RequestContext);
@@ -220,6 +221,16 @@ const Request = () => {
                         setSendingRequest={setSendingRequest}
                         handleClose={handleClose}
                         buttonText="Approve" />
+                </ModalComponent>
+            }
+            {crudStates.delete === modalState &&
+                <ModalComponent width={"40%"} title='Delete Request' open={open} handleClose={handleClose}>
+                    <DeleteRequest
+                        request={currentRequest}
+                        sendingRequest={sendingRequest}
+                        setSendingRequest={setSendingRequest}
+                        handleClose={handleClose}
+                        buttonText="Delete" />
                 </ModalComponent>
             }
             <Grid xs={12} container>
