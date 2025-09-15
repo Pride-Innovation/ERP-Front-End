@@ -660,7 +660,7 @@ const RequestDetails = () => {
                                                     position: 2,
                                                     content: (
                                                         <Box>
-                                                            <MovementHistory />
+                                                            <MovementHistory request={request} />
                                                         </Box>
                                                     )
                                                 }

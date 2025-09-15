@@ -141,6 +141,17 @@ const findIssuanceApprovalRecordByRequestIdService = async (requestId: string | 
     }
 }
 
+
+const findRequestReportByRequestService = async (requestId: number) => {
+    try {
+        const response = await axiosInstance.get(`/request-report/${requestId}`);
+        return response;
+    }
+    catch (error) {
+        return error;
+    }
+}
+
 export {
     createAssetRequestService,
     updateAssetRequestService,
@@ -154,5 +165,6 @@ export {
     acknowledgeIssuanceService,
     findAcknowledgeIssuanceReceiptByRequestIdService,
     findAcknowledgeRequestReceiptByRequestIdService,
-    findIssuanceApprovalRecordByRequestIdService
+    findIssuanceApprovalRecordByRequestIdService,
+    findRequestReportByRequestService
 }
