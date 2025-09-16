@@ -138,7 +138,7 @@ const MovementHistory = ({ request }: { request: IRequest }) => {
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const isTablet = useMediaQuery(theme.breakpoints.down('md'));
     const [requestReport, setRequestReport] = React.useState<IRequestReport | null>(null);
-    const { acknowledgeRequest, currentIssuance, issuanceApproval } = useContext(RequestContext);
+    const { acknowledgeRequest, currentIssuance, issuanceApproval, acknowledgeIssuance } = useContext(RequestContext);
 
     const findRequestReportByRequest = async (requestId: number) => {
         try {
@@ -367,6 +367,25 @@ const MovementHistory = ({ request }: { request: IRequest }) => {
                         department: issuanceApproval.user?.department?.name ? issuanceApproval.user?.department?.name : issuanceApproval.user?.branch?.name,
                     },
                     comments: issuanceApproval.comment || '',
+                    isCompleted: true
+                }} />}
+                {acknowledgeIssuance && <MovementStage step={{
+                    status: "Items Received",
+                    date: acknowledgeIssuance.createDate ? new Date(acknowledgeIssuance.createDate).toLocaleDateString('en-GB', {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric'
+                    }) : 'N/A',
+                    time: acknowledgeIssuance.createDate ? new Date(acknowledgeIssuance.createDate).toLocaleTimeString('en-GB', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    }) : '',
+                    user: {
+                        name: acknowledgeIssuance.user?.firstName + ' ' + acknowledgeIssuance.user?.lastName || '',
+                        title: acknowledgeIssuance.user?.title?.name || '',
+                        department: acknowledgeIssuance.user?.department?.name ? acknowledgeIssuance.user?.department?.name : acknowledgeIssuance.user?.branch?.name,
+                    },
+                    comments: acknowledgeIssuance.comment || '',
                     isCompleted: true
                 }} />}
             </Box>
