@@ -39,99 +39,6 @@ export interface MovementStep {
 }
 
 
-// Mock data for demonstration
-const movementHistoryData: MovementStep[] = [
-    {
-        id: 1,
-        status: 'Request Created',
-        date: '14 Sep 2025',
-        time: '09:11 AM',
-        user: {
-            name: 'Super Admin',
-            title: 'Super Admin',
-            department: 'IT Department'
-        },
-        comments: 'Requesting for a chair and computer to settle our interns.',
-        isCompleted: true
-    },
-    {
-        id: 2,
-        status: 'Manager Approval',
-        date: '15 Sep 2025',
-        time: '11:30 AM',
-        user: {
-            name: 'Pride Pride',
-            title: 'Department Manager',
-            department: 'IT Department'
-        },
-        comments: 'Approved. This is a necessary request for the new interns.',
-        isCompleted: true
-    },
-    {
-        id: 3,
-        status: 'Admin Acknowledgment',
-        date: '15 Sep 2025',
-        time: '02:15 PM',
-        user: {
-            name: 'Jane Smith',
-            title: 'Admin Officer',
-            department: 'Administration'
-        },
-        comments: 'Acknowledged. Will proceed with processing this request.',
-        isCompleted: true
-    },
-    {
-        id: 4,
-        status: 'Items Stocked',
-        date: '16 Sep 2025',
-        time: '10:45 AM',
-        user: {
-            name: 'Jane Smith',
-            title: 'Admin Officer',
-            department: 'Administration'
-        },
-        comments: 'Items have been verified in stock and prepared for issuance.',
-        isCompleted: true
-    },
-    {
-        id: 5,
-        status: 'Items Issued',
-        date: '16 Sep 2025',
-        time: '03:20 PM',
-        user: {
-            name: 'Jane Smith',
-            title: 'Admin Officer',
-            department: 'Administration'
-        },
-        comments: 'Items have been issued and are ready for collection.',
-        isCompleted: true,
-        isCurrent: true
-    },
-    {
-        id: 6,
-        status: 'Issuance Approved',
-        date: 'Pending',
-        time: '',
-        user: {
-            name: 'David Johnson',
-            title: 'Admin Manager',
-            department: 'Administration'
-        },
-        isCompleted: false
-    },
-    {
-        id: 7,
-        status: 'Items Received',
-        date: 'Pending',
-        time: '',
-        user: {
-            name: 'Super Admin',
-            title: 'Super Admin',
-            department: 'IT Department'
-        },
-        isCompleted: false
-    }
-];
 
 const MovementHistory = ({ request }: { request: IRequest }) => {
     const theme = useTheme();
@@ -160,9 +67,6 @@ const MovementHistory = ({ request }: { request: IRequest }) => {
         }
     }, [request]);
 
-    // Find the current step
-    const currentStep = movementHistoryData.find(step => step.isCurrent)?.id ||
-        movementHistoryData.filter(step => step.isCompleted).length;
 
     return (
         <Box>
@@ -213,8 +117,11 @@ const MovementHistory = ({ request }: { request: IRequest }) => {
                             </Typography>
                             <Chip
                                 label={
-                                    movementHistoryData.find(step => step.isCurrent)?.status ||
-                                    movementHistoryData[Math.min(currentStep - 1, movementHistoryData.length - 1)].status
+                                    acknowledgeIssuance ? "Items Received" :
+                                        issuanceApproval ? "Issuance Approved" :
+                                            currentIssuance ? "Items Issued" :
+                                                acknowledgeRequest ? "Admin Acknowledgment" :
+                                                    request ? "Request Submitted" : "Initiated"
                                 }
                                 size="small"
                                 sx={{
@@ -233,7 +140,11 @@ const MovementHistory = ({ request }: { request: IRequest }) => {
                                     left: 0,
                                     top: 0,
                                     height: '100%',
-                                    width: `${(currentStep / movementHistoryData.length) * 100}%`,
+                                    width: `${acknowledgeIssuance ? 100 :
+                                        issuanceApproval ? 80 :
+                                            currentIssuance ? 60 :
+                                                acknowledgeRequest ? 40 :
+                                                    request ? 20 : 0}%`,
                                     background: `linear-gradient(90deg, ${PRIMARY_COLOR} 0%, ${ACCENT_COLOR} 100%)`,
                                     borderRadius: 3,
                                     transition: 'width 1s ease-in-out'
@@ -245,7 +156,11 @@ const MovementHistory = ({ request }: { request: IRequest }) => {
                                 Start
                             </Typography>
                             <Typography variant="caption" color="text.secondary">
-                                {Math.round((currentStep / movementHistoryData.length) * 100)}% Complete
+                                {Math.round((acknowledgeIssuance ? 100 :
+                                    issuanceApproval ? 80 :
+                                        currentIssuance ? 60 :
+                                            acknowledgeRequest ? 40 :
+                                                request ? 20 : 0))}% Complete
                             </Typography>
                         </Box>
                     </Grid>
