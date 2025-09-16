@@ -35,6 +35,23 @@ export interface IAcknowledgeIssuanceReceipt {
     lastModifiedBy?: IUser | null;
 }
 
+
+export interface IAcknowledgeRequestReceipt {
+    requestId: string | number;
+    comment: string;
+    user?: IUser | null;
+    request?: IRequest | null;
+    createDate?: string | null;
+    lastModified?: string | null;
+    createdBy?: IUser | null;
+    lastModifiedBy?: IUser | null;
+}
+
+
 export interface IAcknowledgeIssuanceReceiptAxiosResponse extends IAxiosResponse {
     data: IAcknowledgeIssuanceReceipt
+}
+
+export interface IAcknowledgeRequestReceiptAxiosResponse extends IAxiosResponse {
+    data: IAcknowledgeRequestReceipt
 }

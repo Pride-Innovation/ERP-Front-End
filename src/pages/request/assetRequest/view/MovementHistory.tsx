@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useContext, useEffect } from 'react';
 import {
     Box,
     Typography,
@@ -15,6 +15,7 @@ import {
 import { IRequest, IRequestReport, IRequestReportAxiosResponse } from '../../interface';
 import MovementStage from './MovementStage';
 import { findRequestReportByRequestService } from '../service';
+import { RequestContext } from '../../../../context/request/RequestContext';
 
 // Brand colors (consistent with other components)
 const PRIMARY_COLOR = '#08796C';
@@ -138,12 +139,12 @@ const MovementHistory = ({ request }: { request: IRequest }) => {
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const isTablet = useMediaQuery(theme.breakpoints.down('md'));
     const [requestReport, setRequestReport] = React.useState<IRequestReport | null>(null);
+    const { acknowledgeRequest } = useContext(RequestContext);
 
     const findRequestReportByRequest = async (requestId: number) => {
         try {
             const response = await findRequestReportByRequestService(requestId) as IRequestReportAxiosResponse;
             if (response.data && response.data.id && response.status === 200) {
-                console.log(response, "request report response");
                 setRequestReport(response.data);
                 return response;
             }
@@ -164,7 +165,7 @@ const MovementHistory = ({ request }: { request: IRequest }) => {
     const currentStep = movementHistoryData.find(step => step.isCurrent)?.id ||
         movementHistoryData.filter(step => step.isCompleted).length;
 
-    console.log(request, "request in MovementHistory");
+    console.log(acknowledgeRequest, "acknowledgeRequest from context");
 
     return (
         <Box>
@@ -311,6 +312,26 @@ const MovementHistory = ({ request }: { request: IRequest }) => {
                         department: requestReport.approver?.department?.name ? requestReport.approver?.department?.name : requestReport.approver?.branch?.name,
                     },
                     comments: requestReport.comment || '',
+                    isCompleted: true
+                }} />}
+
+                {acknowledgeRequest && <MovementStage step={{
+                    status: "Admin Acknowledgment",
+                    date: acknowledgeRequest.createDate ? new Date(acknowledgeRequest.createDate).toLocaleDateString('en-GB', {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric'
+                    }) : 'N/A',
+                    time: acknowledgeRequest.createDate ? new Date(acknowledgeRequest.createDate).toLocaleTimeString('en-GB', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    }) : '',
+                    user: {
+                        name: acknowledgeRequest.user?.firstName + ' ' + acknowledgeRequest.user?.lastName || '',
+                        title: acknowledgeRequest.user?.title?.name || '',
+                        department: acknowledgeRequest.user?.department?.name ? acknowledgeRequest.user?.department?.name : acknowledgeRequest.user?.branch?.name,
+                    },
+                    comments: acknowledgeRequest.comment || '',
                     isCompleted: true
                 }} />}
             </Box>

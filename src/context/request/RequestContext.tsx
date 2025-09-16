@@ -11,7 +11,7 @@ import { RowData, StockRowData } from '../../components/forms/interface';
 import { IAssetType } from '../../pages/settings/assetTypes/interface';
 import { IAsset } from '../../pages/assets/interface';
 import { IMonthlyAssetReport } from '../../pages/dashboard/interface';
-import { IAcknowledgeIssuanceReceipt, IIssue } from '../../pages/request/assetRequest/issue/interface';
+import { IAcknowledgeIssuanceReceipt, IAcknowledgeRequestReceipt, IIssue } from '../../pages/request/assetRequest/issue/interface';
 
 interface IRequestContext {
     requestTableData: Array<IRequestTableData>;
@@ -38,8 +38,8 @@ interface IRequestContext {
     setCurrentIssuance: Dispatch<SetStateAction<IIssue>>;
     acknowledgeIssuance: IAcknowledgeIssuanceReceipt;
     setAcknowledgeIssuance: Dispatch<SetStateAction<IAcknowledgeIssuanceReceipt>>;
-    acknowledgeRequest: IAcknowledgeIssuanceReceipt;
-    setAcknowledgeRequest: Dispatch<SetStateAction<IAcknowledgeIssuanceReceipt>>;
+    acknowledgeRequest: IAcknowledgeRequestReceipt;
+    setAcknowledgeRequest: Dispatch<SetStateAction<IAcknowledgeRequestReceipt>>;
     issuanceApproval: IAcknowledgeIssuanceReceipt;
     setIssuanceApproval: Dispatch<SetStateAction<IAcknowledgeIssuanceReceipt>>;
 }

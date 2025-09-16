@@ -25,7 +25,11 @@ import { useNavigate } from 'react-router';
 import { ROUTES } from '../../../core/routes/routes';
 import { RequestContext } from '../../../context/request/RequestContext';
 import moment from 'moment';
-import { IAcknowledgeIssuanceReceiptAxiosResponse, IIssueAxiosResponse } from './issue/interface';
+import {
+    IAcknowledgeIssuanceReceiptAxiosResponse,
+    IAcknowledgeRequestReceiptAxiosResponse,
+    IIssueAxiosResponse
+} from './issue/interface';
 import {
     fetchIssuanceByRequestIdService,
     findAcknowledgeIssuanceReceiptByRequestIdService,
@@ -289,7 +293,7 @@ const RequestUtills = () => {
 
     const findAcknowledgeRequestReceiptByRequestId = async (id: number) => {
         try {
-            const response = await findAcknowledgeRequestReceiptByRequestIdService(id) as IAcknowledgeIssuanceReceiptAxiosResponse;
+            const response = await findAcknowledgeRequestReceiptByRequestIdService(id) as IAcknowledgeRequestReceiptAxiosResponse;
             if (response.status === 200) {
                 setAcknowledgeRequest(response.data);
             }
