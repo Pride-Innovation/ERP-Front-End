@@ -138,7 +138,7 @@ const MovementHistory = ({ request }: { request: IRequest }) => {
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const isTablet = useMediaQuery(theme.breakpoints.down('md'));
     const [requestReport, setRequestReport] = React.useState<IRequestReport | null>(null);
-    const { acknowledgeRequest, currentIssuance } = useContext(RequestContext);
+    const { acknowledgeRequest, currentIssuance, issuanceApproval } = useContext(RequestContext);
 
     const findRequestReportByRequest = async (requestId: number) => {
         try {
@@ -348,6 +348,25 @@ const MovementHistory = ({ request }: { request: IRequest }) => {
                         department: currentIssuance.issuer?.department?.name ? currentIssuance.issuer?.department?.name : currentIssuance.issuer?.branch?.name,
                     },
                     comments: currentIssuance.comment || '',
+                    isCompleted: true
+                }} />}
+                {issuanceApproval && <MovementStage step={{
+                    status: "Issuance Approved",
+                    date: issuanceApproval.createDate ? new Date(issuanceApproval.createDate).toLocaleDateString('en-GB', {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric'
+                    }) : 'N/A',
+                    time: issuanceApproval.createDate ? new Date(issuanceApproval.createDate).toLocaleTimeString('en-GB', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    }) : '',
+                    user: {
+                        name: issuanceApproval.user?.firstName + ' ' + issuanceApproval.user?.lastName || '',
+                        title: issuanceApproval.user?.title?.name || '',
+                        department: issuanceApproval.user?.department?.name ? issuanceApproval.user?.department?.name : issuanceApproval.user?.branch?.name,
+                    },
+                    comments: issuanceApproval.comment || '',
                     isCompleted: true
                 }} />}
             </Box>
