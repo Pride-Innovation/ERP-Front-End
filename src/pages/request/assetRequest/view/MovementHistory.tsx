@@ -4,7 +4,6 @@ import {
     Typography,
     Grid,
     Chip,
-    Avatar,
     useTheme,
     useMediaQuery,
     alpha,
@@ -139,7 +138,7 @@ const MovementHistory = ({ request }: { request: IRequest }) => {
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const isTablet = useMediaQuery(theme.breakpoints.down('md'));
     const [requestReport, setRequestReport] = React.useState<IRequestReport | null>(null);
-    const { acknowledgeRequest } = useContext(RequestContext);
+    const { acknowledgeRequest, currentIssuance } = useContext(RequestContext);
 
     const findRequestReportByRequest = async (requestId: number) => {
         try {
@@ -164,8 +163,6 @@ const MovementHistory = ({ request }: { request: IRequest }) => {
     // Find the current step
     const currentStep = movementHistoryData.find(step => step.isCurrent)?.id ||
         movementHistoryData.filter(step => step.isCompleted).length;
-
-    console.log(acknowledgeRequest, "acknowledgeRequest from context");
 
     return (
         <Box>
@@ -332,6 +329,25 @@ const MovementHistory = ({ request }: { request: IRequest }) => {
                         department: acknowledgeRequest.user?.department?.name ? acknowledgeRequest.user?.department?.name : acknowledgeRequest.user?.branch?.name,
                     },
                     comments: acknowledgeRequest.comment || '',
+                    isCompleted: true
+                }} />}
+                {currentIssuance && <MovementStage step={{
+                    status: "Items Issued",
+                    date: currentIssuance.createDate ? new Date(currentIssuance.createDate).toLocaleDateString('en-GB', {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric'
+                    }) : 'N/A',
+                    time: currentIssuance.createDate ? new Date(currentIssuance.createDate).toLocaleTimeString('en-GB', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    }) : '',
+                    user: {
+                        name: currentIssuance.issuer?.firstName + ' ' + currentIssuance.issuer?.lastName || '',
+                        title: currentIssuance.issuer?.title?.name || '',
+                        department: currentIssuance.issuer?.department?.name ? currentIssuance.issuer?.department?.name : currentIssuance.issuer?.branch?.name,
+                    },
+                    comments: currentIssuance.comment || '',
                     isCompleted: true
                 }} />}
             </Box>
