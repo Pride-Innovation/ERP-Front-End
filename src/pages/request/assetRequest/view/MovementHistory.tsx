@@ -12,7 +12,7 @@ import {
 import {
     History as HistoryIcon,
 } from '@mui/icons-material';
-import { IRequest } from '../../interface';
+import { IRequest, IRequestReport, IRequestReportAxiosResponse } from '../../interface';
 import MovementStage from './MovementStage';
 import { findRequestReportByRequestService } from '../service';
 
@@ -137,12 +137,17 @@ const MovementHistory = ({ request }: { request: IRequest }) => {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const isTablet = useMediaQuery(theme.breakpoints.down('md'));
+    const [requestReport, setRequestReport] = React.useState<IRequestReport | null>(null);
 
     const findRequestReportByRequest = async (requestId: number) => {
         try {
-            const response = await findRequestReportByRequestService(requestId);
-            console.log(response, "request report response");
-            return response;
+            const response = await findRequestReportByRequestService(requestId) as IRequestReportAxiosResponse;
+            if (response.data && response.data.id && response.status === 200) {
+                console.log(response, "request report response");
+                setRequestReport(response.data);
+                return response;
+            }
+            return null;
         } catch (error) {
             console.error("Error fetching request report:", error);
             return null;
@@ -289,23 +294,23 @@ const MovementHistory = ({ request }: { request: IRequest }) => {
                     isCompleted: true
                 }} />}
 
-                {request && <MovementStage step={{
+                {requestReport && <MovementStage step={{
                     status: "Manager Approval",
-                    date: request.createDate ? new Date(request.createDate).toLocaleDateString('en-GB', {
+                    date: requestReport.createDate ? new Date(requestReport.createDate).toLocaleDateString('en-GB', {
                         day: '2-digit',
                         month: 'short',
                         year: 'numeric'
                     }) : 'N/A',
-                    time: request.createDate ? new Date(request.createDate).toLocaleTimeString('en-GB', {
+                    time: requestReport.createDate ? new Date(requestReport.createDate).toLocaleTimeString('en-GB', {
                         hour: '2-digit',
                         minute: '2-digit'
                     }) : '',
                     user: {
-                        name: request.requester?.firstName + ' ' + request.requester?.lastName || '',
-                        title: request.requester?.title?.name || '',
-                        department: request.requester?.department?.name ? request.requester?.department?.name : request.requester?.branch?.name,
+                        name: requestReport.approver?.firstName + ' ' + requestReport.approver?.lastName || '',
+                        title: requestReport.approver?.title?.name || '',
+                        department: requestReport.approver?.department?.name ? requestReport.approver?.department?.name : requestReport.approver?.branch?.name,
                     },
-                    comments: request.description || '',
+                    comments: requestReport.comment || '',
                     isCompleted: true
                 }} />}
             </Box>

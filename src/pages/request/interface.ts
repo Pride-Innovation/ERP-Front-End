@@ -204,6 +204,9 @@ export interface IRequestAxiosResponse extends IAxiosResponse {
     data: IRequest
 }
 
+export interface IRequestReportAxiosResponse extends IAxiosResponse {
+    data: IRequestReport
+}
 
 export interface IRejectRequest {
     handleClose: () => void;
