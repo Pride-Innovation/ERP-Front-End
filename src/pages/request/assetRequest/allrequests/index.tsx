@@ -204,7 +204,7 @@ const Request = () => {
     return (
         <React.Fragment>
             {crudStates.reject === modalState &&
-                <ModalComponent width={"40%"} title='Reject Request' open={open} handleClose={handleClose}>
+                <ModalComponent width={"60%"} title='Reject Request' open={open} handleClose={handleClose}>
                     <RejectRequest
                         request={currentRequest}
                         sendingRequest={sendingRequest}
@@ -214,7 +214,7 @@ const Request = () => {
                 </ModalComponent>
             }
             {crudStates.approve === modalState &&
-                <ModalComponent width={"40%"} title='Approve Request' open={open} handleClose={handleClose}>
+                <ModalComponent width={"60%"} title='Approve Request' open={open} handleClose={handleClose}>
                     <ApproveRequest
                         request={currentRequest}
                         sendingRequest={sendingRequest}
