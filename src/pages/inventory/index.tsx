@@ -13,6 +13,7 @@ import { crudStates } from "../../utils/constants";
 import ModalComponent from "../../components/modal";
 import DeleteInventory from "./DeleteInventory";
 import UploadGRN from "./UploadGRN";
+import Container from "./Container";
 
 const Inventory = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
@@ -50,7 +51,7 @@ const Inventory = () => {
                 </ModalComponent>
             }
             {columnHeaders.length > 0 &&
-                <Card sx={{ width: "100%" }}>
+                <Container>
                     <TableComponent
                         createAction
                         loading={loading}
@@ -60,14 +61,14 @@ const Inventory = () => {
                         onCreationHandler={handleCreation}
                         module='user'
                         header={header}
-                        searchAction
+                        // searchAction
                         count={count}
                         rows={stocksTableData}
                         columnHeaders={columnHeaders}
                         paginationMode="server"
                         endPoint={endPoint}
                     />
-                </Card>
+                </Container>
             }
 
         </Grid>

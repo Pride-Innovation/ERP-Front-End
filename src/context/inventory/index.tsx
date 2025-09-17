@@ -17,14 +17,22 @@ import { IInventory } from "../../pages/inventory/interface";
 interface IInventoryContext {
     currentInventory: IInventory;
     setCurrentInventory: Dispatch<SetStateAction<IInventory>>
+    inventoryCount: number;
+    setInventoryCount: Dispatch<SetStateAction<number>>
 }
 
 export const InventoryContext = createContext<IInventoryContext>({} as IInventoryContext);
 
 export const InventoryContextProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-    const [currentInventory, setCurrentInventory] = useState<IInventory>({} as IInventory)
+    const [currentInventory, setCurrentInventory] = useState<IInventory>({} as IInventory);
+    const [inventoryCount, setInventoryCount] = useState<number>(0);
     return (
-        <InventoryContext.Provider value={{ currentInventory, setCurrentInventory }}>
+        <InventoryContext.Provider value={{
+            currentInventory,
+            setCurrentInventory,
+            inventoryCount,
+            setInventoryCount
+        }}>
             {children}
         </InventoryContext.Provider>
     )
