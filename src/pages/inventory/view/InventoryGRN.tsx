@@ -1,15 +1,39 @@
-import { useEffect, useState } from "react"
-import { IGRNReport } from "../interface"
-import GrnReportUtills from "./grnReportUtills"
-import { Box, Grid } from "@mui/material";
+import { useEffect, useState } from "react";
+import { IGRNReport } from "../interface";
+import GrnReportUtills from "./grnReportUtills";
+import {
+    Box,
+    Grid,
+    Typography,
+    alpha,
+    Divider,
+    useTheme,
+    Card,
+    Alert,
+    Fade,
+    CircularProgress,
+    Chip,
+    Stack
+} from "@mui/material";
 import TableComponent from "../../../components/tables/TableComponent";
 import { crudStates } from "../../../utils/constants";
 import ModalComponent from "../../../components/modal";
 import UploadGRN from "../UploadGRN";
 import ButtonComponent from "../../../components/forms/Button";
+import ReceiptOutlinedIcon from '@mui/icons-material/ReceiptOutlined';
+import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
+import AssignmentOutlinedIcon from '@mui/icons-material/AssignmentOutlined';
+import CalendarTodayOutlinedIcon from '@mui/icons-material/CalendarTodayOutlined';
+import moment from "moment";
+
+// Brand colors
+const PRIMARY_COLOR = '#08796C';
+const SECONDARY_COLOR = '#BC892C';
 
 const InventoryGRN = ({ grnList }: { grnList: IGRNReport[] }) => {
     const [fileURL, setFileURL] = useState<string>("");
+    const theme = useTheme();
+    const [loading, setLoading] = useState(true);
 
     const {
         columnHeaders,
@@ -25,7 +49,9 @@ const InventoryGRN = ({ grnList }: { grnList: IGRNReport[] }) => {
     } = GrnReportUtills();
 
     useEffect(() => {
-        handleInventoryTableData(grnList as Array<IGRNReport>)
+        setLoading(true);
+        handleInventoryTableData(grnList as Array<IGRNReport>);
+        setTimeout(() => setLoading(false), 500);
     }, [grnList]);
 
     useEffect(() => {
@@ -36,52 +62,212 @@ const InventoryGRN = ({ grnList }: { grnList: IGRNReport[] }) => {
         } else {
             setFileURL("");
         }
-    }, [currentGRN])
+    }, [currentGRN]);
 
     return (
-        <>
-            {modalState === crudStates.upload &&
-                <ModalComponent title='Upload Signed GRN' open={open} handleClose={handleClose} width="40%">
-                    <UploadGRN id={currentGRN?.id} />
-                </ModalComponent>
-            }
-            {modalState === crudStates.read && <ModalComponent title='View Signed Inventory'
-                open={open}
-                handleClose={handleClose}
-                width="80%">
-                <iframe
-                    src={fileURL}
-                    title="PDF Preview"
-                    width="100%"
-                    style={{ border: 'none', minHeight: '500px', overflow: 'hidden' }}
-                />
-                <Box sx={{ width: "100px", ml: "auto", mt: 2 }}>
-                    <ButtonComponent
-                        sendingRequest={false}
-                        buttonText="Close"
-                        variant="contained"
-                        buttonColor="secondary"
-                        handleClick={handleClose} />
-                </Box>
-            </ModalComponent>}
-            <Grid xs={12} container>
-                {columnHeaders.length > 0 &&
-                    <TableComponent
-                        endPoint={endPoint}
-                        loading={false}
-                        count={100}
-                        exportData
-                        header={header}
-                        module="assignment history"
-                        rows={stocksTableData || []}
-                        columnHeaders={columnHeaders}
-                        paginationMode='server'
-                        handleOptionClicked={handleOptionClicked}
-                    />
-                }
-            </Grid>
-        </>
-    )
-}
+        <Fade in={!loading}>
+            <Box sx={{ p: { xs: 2, md: 2.5 } }}>
+                {/* Upload GRN Modal */}
+                {modalState === crudStates.upload && (
+                    <ModalComponent
+                        title='Upload Signed GRN'
+                        open={open}
+                        handleClose={handleClose}
+                        width="40%"
+                    >
+                        <UploadGRN id={currentGRN?.id} />
+                    </ModalComponent>
+                )}
 
-export default InventoryGRN
+                {/* View GRN Modal */}
+                {modalState === crudStates.read && (
+                    <ModalComponent
+                        title='View Goods Received Note'
+                        open={open}
+                        handleClose={handleClose}
+                        width="80%"
+                    >
+                        {fileURL ? (
+                            <>
+                                <Card
+                                    elevation={0}
+                                    sx={{
+                                        mb: 2,
+                                        p: 2,
+                                        bgcolor: alpha(PRIMARY_COLOR, 0.04),
+                                        borderRadius: 2,
+                                        border: `1px solid ${alpha(PRIMARY_COLOR, 0.1)}`
+                                    }}
+                                >
+                                    <Grid container spacing={2}>
+                                        <Grid item xs={12} sm={6}>
+                                            <Stack direction="row" spacing={1} alignItems="center">
+                                                <AssignmentOutlinedIcon sx={{ color: PRIMARY_COLOR, fontSize: '1.1rem' }} />
+                                                <Typography variant="subtitle2" color="text.secondary">
+                                                    GRN Number
+                                                </Typography>
+                                                <Chip
+                                                    label={currentGRN?.name || 'N/A'}
+                                                    size="small"
+                                                    sx={{
+                                                        fontWeight: 600,
+                                                        bgcolor: alpha(PRIMARY_COLOR, 0.1),
+                                                        color: PRIMARY_COLOR
+                                                    }}
+                                                />
+                                            </Stack>
+                                        </Grid>
+                                        <Grid item xs={12} sm={6}>
+                                            <Stack direction="row" spacing={1} alignItems="center" justifyContent={{ xs: 'flex-start', sm: 'flex-end' }}>
+                                                <CalendarTodayOutlinedIcon sx={{ color: SECONDARY_COLOR, fontSize: '1rem' }} />
+                                                <Typography variant="body2" color="text.secondary">
+                                                    Created: {currentGRN?.createDate ? moment(currentGRN.createDate).format('DD MMM YYYY') : 'N/A'}
+                                                </Typography>
+                                            </Stack>
+                                        </Grid>
+                                    </Grid>
+                                </Card>
+
+                                <Card
+                                    elevation={0}
+                                    sx={{
+                                        border: `1px solid ${alpha('#000', 0.1)}`,
+                                        borderRadius: 2,
+                                        overflow: 'hidden'
+                                    }}
+                                >
+                                    <iframe
+                                        src={fileURL}
+                                        title="PDF Preview"
+                                        width="100%"
+                                        style={{
+                                            border: 'none',
+                                            height: '600px',
+                                            overflow: 'hidden'
+                                        }}
+                                    />
+                                </Card>
+
+                                <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
+                                    <ButtonComponent
+                                        sendingRequest={false}
+                                        buttonText="Close"
+                                        variant="contained"
+                                        buttonColor="secondary"
+                                        handleClick={handleClose}
+                                    />
+                                </Box>
+                            </>
+                        ) : (
+                            <Alert
+                                severity="warning"
+                                sx={{
+                                    borderRadius: 2,
+                                    bgcolor: alpha(theme.palette.warning.main, 0.08),
+                                    border: `1px solid ${alpha(theme.palette.warning.main, 0.2)}`
+                                }}
+                            >
+                                Document not available for preview.
+                            </Alert>
+                        )}
+                    </ModalComponent>
+                )}
+
+                <Box sx={{ mb: 3 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                        <Box
+                            sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                borderRadius: 1,
+                                bgcolor: alpha(SECONDARY_COLOR, 0.08),
+                                color: SECONDARY_COLOR,
+                                width: 32,
+                                height: 32
+                            }}
+                        >
+                            <ReceiptOutlinedIcon />
+                        </Box>
+                        <Typography
+                            variant="h6"
+                            sx={{
+                                color: theme.palette.text.primary,
+                                fontWeight: 600
+                            }}
+                        >
+                            Goods Received Notes
+                        </Typography>
+                    </Box>
+                    <Typography variant="body2" color="text.secondary" sx={{ ml: 5 }}>
+                        View and manage all GRN documents related to this inventory
+                    </Typography>
+                    <Divider sx={{ mt: 1.5 }} />
+                </Box>
+
+                {loading ? (
+                    <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+                        <CircularProgress size={28} sx={{ color: SECONDARY_COLOR }} />
+                    </Box>
+                ) : (
+                    <Grid container spacing={2}>
+                        <Grid item xs={12}>
+                            {grnList?.length > 0 ? (
+                                <Card
+                                    elevation={0}
+                                    sx={{
+                                        borderRadius: 2,
+                                        border: `1px solid ${alpha('#000', 0.08)}`,
+                                        overflow: 'hidden'
+                                    }}
+                                >
+                                    <Box sx={{ p: 2, bgcolor: alpha(theme.palette.background.default, 0.5) }}>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                            <DescriptionOutlinedIcon fontSize="small" sx={{ color: theme.palette.text.secondary }} />
+                                            <Typography variant="subtitle1" fontWeight={600}>
+                                                GRN Documents
+                                            </Typography>
+                                        </Box>
+                                    </Box>
+                                    <TableComponent
+                                        endPoint={endPoint}
+                                        loading={false}
+                                        count={100}
+                                        exportData
+                                        header={header}
+                                        module="GRN documents"
+                                        rows={stocksTableData || []}
+                                        columnHeaders={columnHeaders}
+                                        paginationMode='server'
+                                        handleOptionClicked={handleOptionClicked}
+                                    // sx={{
+                                    //     '& .MuiDataGrid-root': {
+                                    //         border: 'none',
+                                    //         '& .MuiDataGrid-cell': {
+                                    //             borderColor: alpha(theme.palette.divider, 0.5)
+                                    //         }
+                                    //     }
+                                    // }}
+                                    />
+                                </Card>
+                            ) : (
+                                <Alert
+                                    severity="info"
+                                    sx={{
+                                        borderRadius: 2,
+                                        bgcolor: alpha(theme.palette.info.main, 0.08),
+                                        border: `1px solid ${alpha(theme.palette.info.main, 0.2)}`
+                                    }}
+                                >
+                                    No GRN documents available for this inventory.
+                                </Alert>
+                            )}
+                        </Grid>
+                    </Grid>
+                )}
+            </Box>
+        </Fade>
+    );
+};
+
+export default InventoryGRN;
