@@ -260,6 +260,20 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
         ...requestIssuedFilterStatuses
     ];
 
+
+    const inventoryFilterStatuses: { label: string, value: string, color: string }[] = [
+        {
+            label: "Stock Completed",
+            value: "stockCompleted",
+            color: theme.palette.success.main
+        },
+        {
+            label: "Stock Pending",
+            value: "stockPending",
+            color: theme.palette.warning.main
+        },
+    ]
+
     const determineFilterStatuses = () => {
         switch (moduleName) {
             case assetTypesStatusConstants.itEquipment:
@@ -274,6 +288,8 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
                 return setFilterStatuses(requestIssuedFilterStatuses);
             case "pending requests":
                 return setFilterStatuses(requestsPendingFilterStatuses);
+            case "inventory":
+                return setFilterStatuses(inventoryFilterStatuses);
             default:
                 return [] as Array<{ label: string, value: string, color: string }>;
         }

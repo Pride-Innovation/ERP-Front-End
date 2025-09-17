@@ -6,7 +6,7 @@ Managing Director
 */
 
 import { useEffect, useState } from "react";
-import { Card, Grid } from "@mui/material"
+import { Grid } from "@mui/material"
 import TableComponent from "../../components/tables/TableComponent";
 import InventoryUtills from "./Utills";
 import { crudStates } from "../../utils/constants";
@@ -17,6 +17,8 @@ import Container from "./Container";
 
 const Inventory = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
+    const [selectedStatus, setSelectedStatus] = useState<string>('all');
+
     const {
         columnHeaders,
         stocksTableData,
@@ -30,10 +32,23 @@ const Inventory = () => {
         loading,
         count,
         endPoint
-    } = InventoryUtills()
+    } = InventoryUtills();
 
     useEffect(() => { fetchInventory() }, []);
 
+    const handleStatusChange = (status: string) => {
+        if (status.length > 0) {
+            const param = {
+                stockStatusId: status === "stockPending" ? 10
+                    : status === "stockCompleted" ? 11 : ""
+            }
+            fetchInventory(param);
+            setSelectedStatus(status);
+        } else {
+            fetchInventory();
+            setSelectedStatus('all');
+        }
+    }
     return (
         <Grid xs={12} container>
             {modalState === crudStates.deactivate &&
@@ -59,7 +74,7 @@ const Inventory = () => {
                         exportData
                         handleOptionClicked={handleOptionClicked}
                         onCreationHandler={handleCreation}
-                        module='user'
+                        module='inventory'
                         header={header}
                         // searchAction
                         count={count}
@@ -67,6 +82,10 @@ const Inventory = () => {
                         columnHeaders={columnHeaders}
                         paginationMode="server"
                         endPoint={endPoint}
+                        refresh
+                        status
+                        onStatusChange={handleStatusChange}
+                        selectedStatus={selectedStatus}
                     />
                 </Container>
             }
