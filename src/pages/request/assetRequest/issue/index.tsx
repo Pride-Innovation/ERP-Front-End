@@ -152,7 +152,7 @@ const IssuedRequest = () => {
         <Grid xs={12} container>
 
             {crudStates.acknowledgeReceipt === modalState &&
-                <ModalComponent width={"40%"} title='Acknowledge Receipt' open={open} handleClose={handleClose}>
+                <ModalComponent width={"60%"} title='Acknowledge Receipt' open={open} handleClose={handleClose}>
                     <AcknowledgeReceipt
                         setSendingRequest={setSendingRequest}
                         handleClose={handleClose}
