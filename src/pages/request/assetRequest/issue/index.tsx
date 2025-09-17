@@ -163,7 +163,7 @@ const IssuedRequest = () => {
             }
 
             {crudStates.approveIssuance === modalState &&
-                <ModalComponent width={"40%"} title='Approve Issuance' open={open} handleClose={handleClose}>
+                <ModalComponent width={"60%"} title='Approve Issuance' open={open} handleClose={handleClose}>
                     <ApproveIssuance
                         setSendingRequest={setSendingRequest}
                         handleClose={handleClose}
