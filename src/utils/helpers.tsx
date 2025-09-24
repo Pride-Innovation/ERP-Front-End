@@ -8,7 +8,12 @@ Managing Director
 import { GridRowModel } from "@mui/x-data-grid";
 import MaleAvatar from '../statics/images/male.jpg';
 import FemaleAvatar from '../statics/images/Female.jpg';
-import { RowData, StockRowData, StockValidationResult, ValidationResult } from "../components/forms/interface";
+import {
+    RowData,
+    StockRowData,
+    StockValidationResult,
+    ValidationResult
+} from "../components/forms/interface";
 import { ICommodity } from "../pages/settings/commodity/interface";
 import { IAssetType } from "../pages/settings/assetTypes/interface";
 import { assetTypesStatusConstants } from "./constants";
@@ -16,10 +21,10 @@ import { IStockCommodities } from "../pages/inventory/interface";
 import { IITEquipment } from "../pages/assets/ITEquipment/interface";
 
 export const camelCaseToWords = (camelCaseString: string) => {
-    return camelCaseString
+    return camelCaseString ? camelCaseString
         .replace(/([a-z])([A-Z])/g, '$1 $2')
         .replace(/_/g, ' ')
-        .replace(/^./, (str) => str.toUpperCase());
+        .replace(/^./, (str) => str.toUpperCase()) : '';
 }
 
 
