@@ -112,6 +112,12 @@ interface IGRNCommoditiesAxiosResponse extends IAxiosResponse {
     data: IGRNCommodityResponse
 }
 
+interface IDeleteInventoryResponse extends IAxiosResponse {
+    data: {
+        message: string;
+        success: boolean;
+    }
+}
 
 interface IGRNReport {
     id: string | number;
@@ -157,5 +163,6 @@ export type {
     IGRNReport,
     IGRNReportTableData,
     IGRNCommoditiesAxiosResponse,
-    IGRNCommodity
+    IGRNCommodity,
+    IDeleteInventoryResponse
 }

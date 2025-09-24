@@ -9,7 +9,6 @@ import {
     Grid,
     Typography,
     Divider,
-    useTheme,
     Box,
     Paper,
     alpha,
@@ -24,12 +23,15 @@ import InventoryOutlinedIcon from '@mui/icons-material/InventoryOutlined';
 import BusinessOutlinedIcon from '@mui/icons-material/BusinessOutlined';
 import ReceiptOutlinedIcon from '@mui/icons-material/ReceiptOutlined';
 import CalendarTodayOutlinedIcon from '@mui/icons-material/CalendarTodayOutlined';
-import { IDeleteInventory } from './interface';
+import { IDeleteInventory, IDeleteInventoryResponse } from './interface';
 import { useContext, useEffect } from 'react';
 import { InventoryContext } from '../../context/inventory';
 import moment from 'moment';
 import { toast } from 'react-toastify';
 import { deleteInventoryService } from './service';
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from '../../store';
+import { deleteInventory } from './slice';
 
 // Define brand colors
 const PRIMARY_COLOR = '#08796C';
@@ -43,9 +45,7 @@ const DeleteInventory = ({
     buttonText
 }: IDeleteInventory) => {
     const { currentInventory } = useContext(InventoryContext);
-    const theme = useTheme();
-
-    // Format date helper
+    const dispatch = useDispatch<AppDispatch>();
     const formatDate = (dateString?: string | null) => {
         if (!dateString) return 'N/A';
         return moment(dateString).format('DD MMM YYYY');
@@ -56,17 +56,17 @@ const DeleteInventory = ({
 
         setSendingRequest(true);
         try {
-            const response = await deleteInventoryService(id);
-            console.log("Delete response:", response);
-            toast.success("Inventory deleted successfully");
-            handleClose();
-            // Optionally, you might want to refresh the inventory list here
+            const response = await deleteInventoryService(id) as IDeleteInventoryResponse;
+            if (response.status === 201) {
+                dispatch(deleteInventory(currentInventory));
+                toast.success(response.data.message || "Inventory deleted successfully");
+            }
         } catch (error) {
             console.error("Failed to delete inventory:", error);
             toast.error("Failed to delete inventory");
-            // You might want to add an error toast here
         } finally {
             setSendingRequest(false);
+            handleClose();
         }
     };
 

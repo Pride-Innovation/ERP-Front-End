@@ -22,11 +22,14 @@ export const inventorySlice = createSlice({
     reducers: {
         loadAllInventory: (state, action) => {
             state.inventory = action.payload
+        },
+        deleteInventory: (state, action) => {
+            state.inventory = state.inventory.filter(item => item.id !== action.payload);
         }
     }
 });
 
 const { actions, reducer } = inventorySlice;
 
-export const { loadAllInventory } = actions;
+export const { loadAllInventory, deleteInventory } = actions;
 export default reducer

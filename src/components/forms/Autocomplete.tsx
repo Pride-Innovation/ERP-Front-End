@@ -12,6 +12,7 @@ import { useEffect, useContext, useState } from 'react';
 import { IOptions } from '../tables/interface';
 import { useDebounce } from '../../hooks/useDebounce';
 import { AutocompleteContext } from '../../context/autocomplete';
+import { Popper } from '@mui/material';
 
 /**
  * AutocompleteComponent
@@ -86,11 +87,40 @@ const AutocompleteComponent = ({
         }
     };
 
+    // Custom Popper for proper positioning of dropdown
+    const CustomPopper = (props: any) => {
+        return (
+            <Popper
+                {...props}
+                placement="bottom-start"
+                modifiers={[
+                    {
+                        name: 'preventOverflow',
+                        options: {
+                            altBoundary: true,
+                            rootBoundary: 'document',
+                            padding: 8,
+                        },
+                    },
+                    {
+                        name: 'flip',
+                        options: {
+                            altBoundary: true,
+                            rootBoundary: 'document',
+                            padding: 8,
+                        },
+                    }
+                ]}
+                style={{ zIndex: 1300, ...props.style }}
+            />
+        );
+    };
+
     return (
         <Autocomplete
             value={selectedValue}
             multiple={multiple}
-            disablePortal
+            disablePortal={false} // Keep dropdown within the DOM hierarchy
             onChange={handleChange}
             options={options}
             getOptionLabel={(option: IOptions) => option.label || ''}
@@ -98,6 +128,7 @@ const AutocompleteComponent = ({
             size="small"
             disabled={disabled}
             fullWidth
+            PopperComponent={CustomPopper} // Use custom Popper for better control
             onInputChange={(_, newInputValue) => setLocalInput(newInputValue)}
             renderInput={(params) => (
                 <TextField
