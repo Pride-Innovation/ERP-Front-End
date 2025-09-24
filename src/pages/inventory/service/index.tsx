@@ -49,10 +49,20 @@ const fetchGrnCommoditiesByStockIDService = async (id: string | number) => {
     }
 }
 
+const deleteInventoryService = async (id: number | string) => {
+    try {
+        const response = await axiosInstance.post(`delete-stock/${id}`);
+        return response;
+    } catch (error) {
+        return error;
+    }
+}
+
 export {
     addStockService,
     fetchInventoryByIDService,
     uploadGRNService,
     completeDeliveryService,
-    fetchGrnCommoditiesByStockIDService
+    fetchGrnCommoditiesByStockIDService,
+    deleteInventoryService
 }

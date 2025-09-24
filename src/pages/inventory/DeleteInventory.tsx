@@ -7,7 +7,6 @@ Managing Director
 
 import {
     Grid,
-    Stack,
     Typography,
     Divider,
     useTheme,
@@ -26,9 +25,11 @@ import BusinessOutlinedIcon from '@mui/icons-material/BusinessOutlined';
 import ReceiptOutlinedIcon from '@mui/icons-material/ReceiptOutlined';
 import CalendarTodayOutlinedIcon from '@mui/icons-material/CalendarTodayOutlined';
 import { IDeleteInventory } from './interface';
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 import { InventoryContext } from '../../context/inventory';
 import moment from 'moment';
+import { toast } from 'react-toastify';
+import { deleteInventoryService } from './service';
 
 // Define brand colors
 const PRIMARY_COLOR = '#08796C';
@@ -55,22 +56,23 @@ const DeleteInventory = ({
 
         setSendingRequest(true);
         try {
-            // API call to delete inventory would go here
-            // For example: await deleteInventoryService(id);
-            console.log(`Deleting inventory with ID: ${id}`);
-
-            // Close modal on success
-            setTimeout(() => {
-                setSendingRequest(false);
-                handleClose();
-                // You might want to add a success toast here
-            }, 1000);
+            const response = await deleteInventoryService(id);
+            console.log("Delete response:", response);
+            toast.success("Inventory deleted successfully");
+            handleClose();
+            // Optionally, you might want to refresh the inventory list here
         } catch (error) {
             console.error("Failed to delete inventory:", error);
-            setSendingRequest(false);
+            toast.error("Failed to delete inventory");
             // You might want to add an error toast here
+        } finally {
+            setSendingRequest(false);
         }
     };
+
+    useEffect(() => {
+        console.log("Current Inventory to delete:", currentInventory);
+    }, [currentInventory]);
 
     return (
         <Fade in={true}>

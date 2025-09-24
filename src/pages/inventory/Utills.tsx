@@ -85,7 +85,7 @@ const InventoryUtills = () => {
         action: {
             label: "options",
             options: [
-                { value: crudStates.deactivate, label: "Delete", icon: <InfoIcon fontSize='small' color='error' /> },
+                { value: crudStates.delete, label: "Delete", icon: <InfoIcon fontSize='small' color='error' /> },
                 { value: crudStates.update, label: "Update", icon: <ModeEditIcon fontSize='small' color='info' /> },
                 { value: crudStates.read, label: "View Details", icon: <RemoveRedEyeIcon fontSize='small' color='inherit' /> }
             ]
@@ -157,7 +157,7 @@ const InventoryUtills = () => {
     }
 
     useEffect(() => {
-        if (inventory.length > 0) {
+        if (inventory?.length > 0) {
             handleInventoryTableData(inventory)
         }
     }, [inventory]);
@@ -203,7 +203,9 @@ const InventoryUtills = () => {
 
     const handleOptionClicked = async (option: string | number, moduleID?: string | number) => {
         switch (option) {
-            case crudStates.deactivate:
+            case crudStates.delete:
+                const res = findStockById(moduleID as number) as IInventory;
+                setCurrentInventory(res);
                 setModalState(option as string)
                 handleOpen();
                 break;
