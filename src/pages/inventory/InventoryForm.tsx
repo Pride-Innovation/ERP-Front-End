@@ -7,7 +7,6 @@ Managing Director
 
 import {
     Box,
-    Divider,
     Grid,
     Stack,
     Typography,
@@ -31,9 +30,9 @@ import { useEffect, useMemo } from "react";
 import StockItems from "../../components/stockForm/StockItems";
 import AssetTypeUtills from "../settings/assetTypes/utills";
 import InventoryIcon from "@mui/icons-material/Inventory";
-import DescriptionIcon from "@mui/icons-material/Description";
 import BusinessIcon from "@mui/icons-material/Business";
-import EventNoteIcon from "@mui/icons-material/EventNote";
+import { useNavigate } from "react-router";
+import { ROUTES } from "../../core/routes/routes";
 
 // Brand colors
 const PRIMARY_COLOR = '#08796C';
@@ -43,7 +42,7 @@ const InventoryForm = ({
     register,
     control,
     formState,
-    handleClose,
+    // handleClose,
     sendingRequest,
     buttonText
 }: IInventoryForm) => {
@@ -51,6 +50,7 @@ const InventoryForm = ({
     const { formFields } = InventoryUtills();
     const { fetchAllSuppliers } = SupplierUtills();
     const { fetchAllAssetTypes } = AssetTypeUtills();
+    const navigate = useNavigate();
 
     useEffect(() => { fetchAllSuppliers() }, []);
     useEffect(() => { fetchAllAssetTypes() }, []);
@@ -164,7 +164,7 @@ const InventoryForm = ({
                 <Grid item xs={12}>
                     {renderFormFields(
                         formSections.basicFields,
-                        "Lpo Information",
+                        "LPO Information",
                         <BusinessIcon fontSize="small" />
                     )}
 
@@ -223,7 +223,7 @@ const InventoryForm = ({
                                 }}
                             >
                                 <ButtonComponent
-                                    handleClick={handleClose}
+                                    handleClick={() => navigate(ROUTES.INVENTORY)}
                                     buttonColor="inherit"
                                     type="button"
                                     sendingRequest={false}
