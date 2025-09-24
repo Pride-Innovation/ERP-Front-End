@@ -52,7 +52,7 @@ const Inventory = () => {
     return (
         <Grid xs={12} container>
             {modalState === crudStates.deactivate &&
-                <ModalComponent title='Deactivate Inventory' open={open} handleClose={handleClose} width="40%">
+                <ModalComponent title='Delete Inventory' open={open} handleClose={handleClose} width="40%">
                     <DeleteInventory
                         setSendingRequest={setSendingRequest}
                         handleClose={handleClose}
