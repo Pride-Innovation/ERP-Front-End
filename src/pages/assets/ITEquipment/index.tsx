@@ -5,7 +5,7 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { Grid } from "@mui/material"
+import { Box, Card, Grid } from "@mui/material"
 import ModalComponent from "../../../components/modal"
 import Dispose from "../Dispose"
 import TableComponent from "../../../components/tables/TableComponent"
@@ -140,7 +140,7 @@ const ITEquipment = () => {
         }
     }, [fileData]);
 
-    return (
+    const renderModals = () => (
         <>
             {
                 crudStates.dispose === currentState
@@ -195,29 +195,50 @@ const ITEquipment = () => {
                     />
                 </ModalComponent>
             }
-            <Grid xs={12} container>
-                <TableComponent
-                    endPoint={endPoint}
-                    loading={loading}
-                    count={itEquipmentCount}
-                    exportData
-                    createAction
-                    importData
-                    header={header}
-                    module={module}
-                    rows={iTEquipmentTableData || []}
-                    columnHeaders={columnHeaders}
-                    onCreationHandler={() => navigate(ROUTES.CREATE_ITEQUIPMENT)}
-                    handleOptionClicked={handleOptionClicked}
-                    params={{ assetTypeId: currentAssetType.id }}
-                    refresh
-                    filterMode="server"
-                    status
-                    onStatusChange={handleStatusChange}
-                    selectedStatus={selectedStatus}
-                />
-            </Grid>
-        </>
+        </>)
+
+    return (
+        <Box width={'100%'} sx={{
+            px: 3,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center'
+        }}>
+            {renderModals()}
+            <Card
+                elevation={0}
+                sx={{
+                    borderRadius: 2,
+                    width: '100%',
+                    maxWidth: "1500px",
+                    overflow: 'hidden',
+                    border: "none",
+                    bgcolor: 'white'
+                }}
+            >
+                {columnHeaders.length > 0 && (
+                    <TableComponent
+                        endPoint={endPoint}
+                        loading={loading}
+                        count={itEquipmentCount}
+                        exportData
+                        createAction
+                        importData
+                        header={header}
+                        module={module}
+                        rows={iTEquipmentTableData || []}
+                        columnHeaders={columnHeaders}
+                        onCreationHandler={() => navigate(ROUTES.CREATE_ITEQUIPMENT)}
+                        handleOptionClicked={handleOptionClicked}
+                        params={{ assetTypeId: currentAssetType.id }}
+                        refresh
+                        filterMode="server"
+                        status
+                        onStatusChange={handleStatusChange}
+                        selectedStatus={selectedStatus}
+                    />)}
+            </Card>
+        </Box>
     )
 }
 

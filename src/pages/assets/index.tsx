@@ -67,50 +67,39 @@ const AssetsManagement = () => {
   };
 
   return (
-    <>
-      <Card sx={{ p: 2, mb: 2 }}>
-        <Grid container alignItems="center" justifyContent="space-between">
-          <Grid item>
-            <Stack direction="row" spacing={1} alignItems="center">
-              <ListAltIcon fontSize='small' sx={{ color: 'primary.main' }} />
-              <Typography variant="h6" fontWeight="500" color="primary">
-                {navigations.find(item => item.path === path)?.text || ''}
-              </Typography>
-            </Stack>
-          </Grid>
-
-          <Grid item>
-            <Stack direction="row" spacing={1} sx={{ overflowX: 'auto', pb: 1 }}>
-              {navigations.length > 0 ? (
-                navigations.map((item) => {
-                  const isActive = determineActivePath(item);
-
-                  return (
+    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+      <Box width={'100%'} sx={{ px: 3, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <Card sx={{ p: 3, mb: 2, width: '100%', m: 3, justifyContent: "center", maxWidth: "1500px" }}>
+          <Grid container alignItems="center" justifyContent="space-between">
+            <Grid item>
+              <Stack direction="row" spacing={1} alignItems="center">
+                <ListAltIcon fontSize='small' sx={{ color: 'primary.main' }} />
+                <Typography variant="h6" fontWeight="500" color="primary">
+                  {navigations.find(item => item.path === path)?.text || ''}
+                </Typography>
+              </Stack>
+            </Grid>
+            <Grid item>
+              <Stack direction="row" spacing={1}>
+                {navigations.map(item => (
+                  <>
                     <Button
-                      key={item.id}
                       startIcon={item.icon}
                       onClick={() => navigate(item.path)}
-                      variant={isActive ? "contained" : "outlined"}
-                      size="medium"
+                      key={item.id}
+                      variant={determineActivePath(item) ? "contained" : "outlined"}
                     >
                       {item.text}
                     </Button>
-                  );
-                })
-              ) : (
-                <Typography variant="body2" color="text.secondary">
-                  Loading asset categories...
-                </Typography>
-              )}
-            </Stack>
+                  </>
+                ))}
+              </Stack>
+            </Grid>
           </Grid>
-        </Grid>
-      </Card>
-
-      <Box sx={{ position: 'relative' }}>
-        <Outlet />
+        </Card>
       </Box>
-    </>
+      <Outlet />
+    </Box>
   );
 };
 

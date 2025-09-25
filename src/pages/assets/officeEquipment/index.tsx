@@ -5,13 +5,13 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import React, {
+import {
     useContext,
     useEffect,
     useState
 } from "react";
 import { useNavigate } from "react-router";
-import { Grid } from "@mui/material";
+import { Box, Card } from "@mui/material";
 import OfficeEquipmentUtills from "./utills";
 import TableComponent from "../../../components/tables/TableComponent";
 import { ROUTES } from "../../../core/routes/routes";
@@ -144,8 +144,8 @@ const OfficeEquipment = () => {
         }
     }, [fileData]);
 
-    return (
-        <React.Fragment>
+    const renderModals = () => (
+        <>
             {
                 crudStates.dispose === currentState
                 && <ModalComponent width={"40%"} title='Dispose Office Equipment' open={open} handleClose={handleClose}>
@@ -200,7 +200,27 @@ const OfficeEquipment = () => {
                     />
                 </ModalComponent>
             }
-            <Grid xs={12} container>
+        </>)
+
+    return (
+        <Box width={'100%'} sx={{
+            px: 3,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center'
+        }}>
+            {renderModals()}
+            <Card
+                elevation={0}
+                sx={{
+                    borderRadius: 2,
+                    width: '100%',
+                    maxWidth: "1500px",
+                    overflow: 'hidden',
+                    border: "none",
+                    bgcolor: 'white'
+                }}
+            >
                 {columnHeaders.length > 0 &&
                     <TableComponent
                         endPoint={endPoint}
@@ -226,8 +246,8 @@ const OfficeEquipment = () => {
                         selectedStatus={selectedStatus}
                     />
                 }
-            </Grid>
-        </React.Fragment>
+            </Card>
+        </Box>
     )
 }
 
