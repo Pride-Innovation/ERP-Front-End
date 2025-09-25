@@ -6,6 +6,7 @@ Managing Director
 */
 
 import {
+  Box,
   Button,
   Card,
   Grid,
@@ -75,39 +76,39 @@ const RequestsManagement = () => {
   }
 
   return (
-    <>
-      <Card sx={{ p: 2, mb: 2 }}>
-        <Grid container alignItems="center" justifyContent="space-between">
-          <Grid item>
-            <Stack direction="row" spacing={1} alignItems="center">
-              <InventoryOutlinedIcon fontSize='small' sx={{ color: 'primary.main' }} />
-              <Typography variant="h6" fontWeight="500" color="primary">
-                {navigations.find(item => item.path === path)?.text || ''}
-              </Typography>
-            </Stack>
+    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+      <Box width={'100%'} sx={{ px: 3, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <Card sx={{ p: 3, mb: 2, width: '100%', m: 3, justifyContent: "center", maxWidth: "1500px" }}>
+          <Grid container alignItems="center" justifyContent="space-between">
+            <Grid item>
+              <Stack direction="row" spacing={1} alignItems="center">
+                <InventoryOutlinedIcon fontSize='small' sx={{ color: 'primary.main' }} />
+                <Typography variant="h6" fontWeight="500" color="primary">
+                  {navigations.find(item => item.path === path)?.text || ''}
+                </Typography>
+              </Stack>
+            </Grid>
+            <Grid item>
+              <Stack direction="row" spacing={1}>
+                {navigations.map(item => (
+                  <>
+                    <Button
+                      startIcon={item.icon}
+                      onClick={() => navigate(item.path)}
+                      key={item.id}
+                      variant={determineActivePath(item) ? "contained" : "outlined"}
+                    >
+                      {item.text}
+                    </Button>
+                  </>
+                ))}
+              </Stack>
+            </Grid>
           </Grid>
-          <Grid item>
-            <Stack direction="row" spacing={1}>
-              {navigations.map(item => (
-                <>
-                  {/* {determinePermission(item.permission) && */}
-                  <Button
-                    startIcon={item.icon}
-                    onClick={() => navigate(item.path)}
-                    key={item.id}
-                    variant={determineActivePath(item) ? "contained" : "outlined"}
-                  >
-                    {item.text}
-                  </Button>
-                  {/* } */}
-                </>
-              ))}
-            </Stack>
-          </Grid>
-        </Grid>
-      </Card>
+        </Card>
+      </Box>
       <Outlet />
-    </>
+    </Box>
   )
 }
 

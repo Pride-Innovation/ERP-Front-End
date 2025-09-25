@@ -19,7 +19,7 @@ const Container = ({ children }: { children: React.ReactNode }) => {
 
     return (
         <>
-            <Card sx={{ p: 1.5, mb: 2, width: '100%' }}>
+            <Card sx={{ p: 1.5, mb: 2, width: '100%', maxWidth: "1500px" }}>
                 <Grid container alignItems="center" justifyContent="space-between">
                     <Grid item>
                         <Stack direction="row" spacing={1} alignItems="center">
@@ -64,7 +64,13 @@ const Container = ({ children }: { children: React.ReactNode }) => {
                 </Grid>
             </Card>
 
-            <Box sx={{ position: 'relative', width: '100%' }}>
+            <Box sx={{
+                position: 'relative',
+                width: '100%',
+                display: 'flex',
+                justifyContent: 'center',
+                maxWidth: "1500px"
+            }}>
                 {children}
             </Box>
         </>

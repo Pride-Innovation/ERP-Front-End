@@ -50,7 +50,7 @@ const Inventory = () => {
         }
     }
     return (
-        <Grid xs={12} container>
+        <Grid xs={12} container sx={{ p: 3 }} justifyContent="center">
             {modalState === crudStates.delete &&
                 <ModalComponent title='Delete Inventory' open={open} handleClose={handleClose} width="40%">
                     <DeleteInventory
@@ -70,7 +70,7 @@ const Inventory = () => {
                     <TableComponent
                         createAction
                         loading={loading}
-                        importData
+                        // importData
                         exportData
                         handleOptionClicked={handleOptionClicked}
                         onCreationHandler={handleCreation}

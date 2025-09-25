@@ -5,15 +5,18 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import React, {
+import {
     useContext,
     useEffect,
     useState
 } from "react";
 import { useNavigate } from "react-router";
-import { Grid } from "@mui/material";
+import {
+    Box,
+    Card,
+    alpha,
+} from "@mui/material";
 import { RequestContext } from "../../../../context/request/RequestContext";
-import { FileContext } from "../../../../context/file/FileContext";
 import { crudStates } from "../../../../utils/constants";
 import { ROUTES } from "../../../../core/routes/routes";
 import ModalComponent from "../../../../components/modal";
@@ -35,15 +38,14 @@ import DeleteRequest from "../../DeleteRequest";
 
 const Request = () => {
     const { requestTableData, setOptions } = useContext(RequestContext);
-    const { fileData } = useContext(FileContext);
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
-    const { requests } = useSelector((state: RootState) => state.AssetsRequestsStore)
+    const { requests } = useSelector((state: RootState) => state.AssetsRequestsStore);
     const { getCurrentUser } = RoutesUtills();
     const [permissions, setPermissions] = useState<IPermission[]>([] as IPermission[]);
     const [selectedStatus, setSelectedStatus] = useState<string>('all');
     const [statusIds, setStatusIds] = useState<string>('1'); // Default to '1' for "Request Created"
 
-    const navigate = useNavigate()
+    const navigate = useNavigate();
 
     const {
         columnHeaders,
@@ -61,28 +63,18 @@ const Request = () => {
         currentRequest,
     } = RequestUtills();
 
-    const params = { statusIds: 1, status: "CREATED" } // Fetching requests with status Asset Request Created ID
+    const params = { statusIds: 1, status: "CREATED" }; // Fetching requests with status Asset Request Created ID
 
     useEffect(() => {
-        fetchAllRequests(params)
+        fetchAllRequests(params);
     }, []);
 
     useEffect(() => {
-        console.log(requests, "requests in all requests page!!")
-        handleRequest(requests)
+        handleRequest(requests);
     }, [requests]);
 
-    useEffect(() => {
-        if (fileData.module === module) {
-            console.log(fileData, "form data!!");
-        }
-    }, [fileData]);
-
-
     /**
-     * * Effect to set options based on permissions
-     * @returns {void}
-     * This effect checks the permissions of the current user and sets the options for the request actions accordingly.
+     * Effect to set options based on permissions
      */
     useEffect(() => {
         if (!permissions || permissions.length === 0) return;
@@ -97,9 +89,9 @@ const Request = () => {
 
         const newOptions = [
             {
-                value: crudStates.delete,
-                label: "Delete",
-                icon: <InfoIcon fontSize="small" color="error" />
+                value: crudStates.read,
+                label: "View Details",
+                icon: <RemoveRedEyeIcon fontSize="small" color="inherit" />
             },
             {
                 value: crudStates.update,
@@ -107,14 +99,14 @@ const Request = () => {
                 icon: <ModeEditIcon fontSize="small" color="info" />
             },
             {
-                value: crudStates.read,
-                label: "View Details",
-                icon: <RemoveRedEyeIcon fontSize="small" color="inherit" />
+                value: crudStates.delete,
+                label: "Delete",
+                icon: <InfoIcon fontSize="small" color="error" />
             }
         ];
 
         if (hasApproveRequestPermission) {
-            newOptions.push({
+            newOptions.unshift({
                 value: crudStates.approve,
                 label: "Approve Request",
                 icon: <AddTaskIcon fontSize="small" color="primary" />
@@ -141,7 +133,6 @@ const Request = () => {
     /**
      * Handle changes to the request status filter
      * Updates the request list based on the selected status filter
-     * @param status - The status filter to apply
      */
     const handleStatusChange = (status: string) => {
         let param;
@@ -198,42 +189,87 @@ const Request = () => {
         fetchAllRequests(param);
         setSelectedStatus(status);
         setStatusIds(statusId);
-    }
+    };
 
-    return (
-        <React.Fragment>
-            {crudStates.reject === modalState &&
-                <ModalComponent width={"60%"} title='Reject Request' open={open} handleClose={handleClose}>
+    // Render different modals based on the current state
+    const renderModals = () => (
+        <>
+            {/* Reject Request Modal */}
+            {crudStates.reject === modalState && (
+                <ModalComponent
+                    width="60%"
+                    title="Reject Request"
+                    open={open}
+                    handleClose={handleClose}
+                >
                     <RejectRequest
                         request={currentRequest}
                         sendingRequest={sendingRequest}
                         setSendingRequest={setSendingRequest}
                         handleClose={handleClose}
-                        buttonText="Reject" />
+                        buttonText="Reject"
+                    />
                 </ModalComponent>
-            }
-            {crudStates.approve === modalState &&
-                <ModalComponent width={"60%"} title='Approve Request' open={open} handleClose={handleClose}>
+            )}
+
+            {/* Approve Request Modal */}
+            {crudStates.approve === modalState && (
+                <ModalComponent
+                    width="60%"
+                    title="Approve Request"
+                    open={open}
+                    handleClose={handleClose}
+                >
                     <ApproveRequest
                         request={currentRequest}
                         sendingRequest={sendingRequest}
                         setSendingRequest={setSendingRequest}
                         handleClose={handleClose}
-                        buttonText="Approve" />
+                        buttonText="Approve"
+                    />
                 </ModalComponent>
-            }
-            {crudStates.delete === modalState &&
-                <ModalComponent width={"40%"} title='Delete Request' open={open} handleClose={handleClose}>
+            )}
+
+            {/* Delete Request Modal */}
+            {crudStates.delete === modalState && (
+                <ModalComponent
+                    width="40%"
+                    title="Delete Request"
+                    open={open}
+                    handleClose={handleClose}
+                >
                     <DeleteRequest
                         request={currentRequest}
                         sendingRequest={sendingRequest}
                         setSendingRequest={setSendingRequest}
                         handleClose={handleClose}
-                        buttonText="Delete" />
+                        buttonText="Delete"
+                    />
                 </ModalComponent>
-            }
-            <Grid xs={12} container>
-                {columnHeaders.length > 0 &&
+            )}
+        </>
+    );
+
+    return (
+        <Box width={'100%'} sx={{
+            px: 3,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center'
+        }}>
+            {renderModals()}
+            <Card
+                elevation={0}
+                sx={{
+                    borderRadius: 2,
+                    width: '100%',
+                    maxWidth: "1500px",
+                    overflow: 'hidden',
+                    border: "none",
+                    bgcolor: 'white'
+                }}
+            >
+                {columnHeaders.length > 0 && (
                     <TableComponent
                         endPoint={endPoint}
                         loading={loading}
@@ -247,24 +283,22 @@ const Request = () => {
                         columnHeaders={columnHeaders}
                         onCreationHandler={() => navigate(ROUTES.CREATE_REQUEST)}
                         handleOptionClicked={handleOptionClicked}
-                        paginationMode='server'
+                        paginationMode="server"
                         filterMode="server"
                         params={{ statusIds: statusIds }}
                         refresh
                         filterOptions
-                        optionsfilterParams={
-                            {
-                                status: "CREATED"
-                            }
-                        }
+                        optionsfilterParams={{
+                            status: "CREATED"
+                        }}
                         status
                         onStatusChange={handleStatusChange}
                         selectedStatus={selectedStatus}
                     />
-                }
-            </Grid>
-        </React.Fragment>
-    )
-}
+                )}
+            </Card>
+        </Box>
+    );
+};
 
 export default Request;

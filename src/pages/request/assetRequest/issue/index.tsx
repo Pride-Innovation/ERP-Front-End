@@ -6,7 +6,7 @@ Managing Director
 */
 
 import TableComponent from "../../../../components/tables/TableComponent";
-import { Grid } from "@mui/material";
+import { Box, Card, Grid } from "@mui/material";
 import RequestUtills from "../utills";
 import { useContext, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
@@ -148,9 +148,8 @@ const IssuedRequest = () => {
         setStatusIds(statusId);
     }
 
-    return (
-        <Grid xs={12} container>
-
+    const renderModals = () => (
+        <>
             {crudStates.acknowledgeReceipt === modalState &&
                 <ModalComponent width={"60%"} title='Acknowledge Receipt' open={open} handleClose={handleClose}>
                     <AcknowledgeReceipt
@@ -172,30 +171,54 @@ const IssuedRequest = () => {
                         buttonText="Approve" />
                 </ModalComponent>
             }
-            {columnHeaders.length > 0 &&
-                <TableComponent
-                    endPoint={endPoint}
-                    loading={loading}
-                    count={count}
-                    exportData
-                    module="issued requests"
-                    header={{ plural: "Issue Requests", singular: "Issued Requests" }}
-                    rows={requestTableData}
-                    columnHeaders={columnHeaders}
-                    handleOptionClicked={handleOptionClicked}
-                    params={{ statusIds: statusIds }}
-                    refresh
-                    status
-                    optionsfilterParams={
-                        {
-                            status: "ISSUED"
+        </>
+    )
+
+    return (
+        <Box width={'100%'} sx={{
+            px: 3,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center'
+        }}>
+            {renderModals()}
+            <Card
+                elevation={0}
+                sx={{
+                    borderRadius: 2,
+                    width: '100%',
+                    maxWidth: "1500px",
+                    overflow: 'hidden',
+                    border: "none",
+                    bgcolor: 'white'
+                }}
+            >
+
+                {columnHeaders.length > 0 &&
+                    <TableComponent
+                        endPoint={endPoint}
+                        loading={loading}
+                        count={count}
+                        exportData
+                        module="issued requests"
+                        header={{ plural: "Issue Requests", singular: "Issued Requests" }}
+                        rows={requestTableData}
+                        columnHeaders={columnHeaders}
+                        handleOptionClicked={handleOptionClicked}
+                        params={{ statusIds: statusIds }}
+                        refresh
+                        status
+                        optionsfilterParams={
+                            {
+                                status: "ISSUED"
+                            }
                         }
-                    }
-                    onStatusChange={handleStatusChange}
-                    selectedStatus={selectedStatus}
-                />
-            }
-        </Grid>
+                        onStatusChange={handleStatusChange}
+                        selectedStatus={selectedStatus}
+                    />
+                }
+            </Card>
+        </Box>
     )
 }
 
