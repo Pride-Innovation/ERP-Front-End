@@ -91,7 +91,7 @@ const Users = () => {
   }, [fileData]);
 
   return (
-    <Grid xs={12} container>
+    <Grid xs={12} container sx={{ p: 3 }} justifyContent="center">
       {modalState === crudStates.create &&
         <ModalComponent title='Create User' open={open} handleClose={handleClose} width="70%">
           <CreateUser handleClose={handleClose} />
