@@ -6,7 +6,7 @@ Managing Director
 */
 
 import TableComponent from "../../../../components/tables/TableComponent";
-import { Grid } from "@mui/material";
+import { Box, Card } from "@mui/material";
 import RequestUtills from "../utills";
 import { useContext, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
@@ -146,9 +146,8 @@ const PendingRequest = () => {
         setStatusIds(statusId);
     }
 
-    return (
-        <Grid xs={12} container>
-
+    const renderModals = () => (
+        <>
             {crudStates.acknowledgeRequest === modalState &&
                 <ModalComponent width={"70%"} title='Acknowledge Request' open={open} handleClose={handleClose}>
                     <AcknowledgeRequest
@@ -159,31 +158,54 @@ const PendingRequest = () => {
                         buttonText="Acknowledge" />
                 </ModalComponent>
             }
-            {columnHeaders.length > 0 &&
-                <TableComponent
-                    endPoint={endPoint}
-                    loading={loading}
-                    count={count}
-                    exportData
-                    module={"pending requests"}
-                    header={{ plural: "Pending Requests", singular: "Pending Requests" }}
-                    rows={requestTableData}
-                    columnHeaders={columnHeaders}
-                    handleOptionClicked={handleOptionClicked}
-                    params={{ statusIds: statusIds }}
-                    filterOptions
-                    refresh
-                    optionsfilterParams={
-                        {
-                            status: "PENDING"
+        </>)
+
+    return (
+        <Box width={'100%'} sx={{
+            px: 3,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center'
+        }}>
+            {renderModals()}
+            <Card
+                elevation={0}
+                sx={{
+                    borderRadius: 2,
+                    width: '100%',
+                    maxWidth: "1500px",
+                    overflow: 'hidden',
+                    border: "none",
+                    bgcolor: 'white'
+                }}
+            >
+
+                {columnHeaders.length > 0 &&
+                    <TableComponent
+                        endPoint={endPoint}
+                        loading={loading}
+                        count={count}
+                        exportData
+                        module={"pending requests"}
+                        header={{ plural: "Pending Requests", singular: "Pending Requests" }}
+                        rows={requestTableData}
+                        columnHeaders={columnHeaders}
+                        handleOptionClicked={handleOptionClicked}
+                        params={{ statusIds: statusIds }}
+                        filterOptions
+                        refresh
+                        optionsfilterParams={
+                            {
+                                status: "PENDING"
+                            }
                         }
-                    }
-                    status
-                    onStatusChange={handleStatusChange}
-                    selectedStatus={selectedStatus}
-                />
-            }
-        </Grid>
+                        status
+                        onStatusChange={handleStatusChange}
+                        selectedStatus={selectedStatus}
+                    />
+                }
+            </Card>
+        </Box>
     )
 }
 

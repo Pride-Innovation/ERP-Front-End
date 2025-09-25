@@ -5,9 +5,9 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import React, { useContext, useEffect } from "react";
+import { useContext, useEffect } from "react";
 import TableComponent from "../../../../components/tables/TableComponent";
-import { Grid } from "@mui/material";
+import { Box, Card } from "@mui/material";
 import RequestUtills from "../utills";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../store";
@@ -59,8 +59,9 @@ const RejectedRequest = () => {
         ])
     }, []);
 
-    return (
-        <React.Fragment>
+
+    const renderModals = () => (
+        <>
             {
                 crudStates.delete === modalState &&
                 <ModalComponent width={"40%"} title='Delete Request' open={open} handleClose={handleClose}>
@@ -72,7 +73,26 @@ const RejectedRequest = () => {
                         buttonText="Delete" />
                 </ModalComponent>
             }
-            <Grid xs={12} container>
+        </>)
+    return (
+        <Box width={'100%'} sx={{
+            px: 3,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center'
+        }}>
+            {renderModals()}
+            <Card
+                elevation={0}
+                sx={{
+                    borderRadius: 2,
+                    width: '100%',
+                    maxWidth: "1500px",
+                    overflow: 'hidden',
+                    border: "none",
+                    bgcolor: 'white'
+                }}
+            >
                 {columnHeaders.length > 0 &&
                     <TableComponent
                         endPoint={endPoint}
@@ -87,9 +107,8 @@ const RejectedRequest = () => {
                         params={{ statusIds: 2 }}
                     />
                 }
-            </Grid>
-        </React.Fragment>
+            </Card>
+        </Box>
     )
 }
-
 export default RejectedRequest
