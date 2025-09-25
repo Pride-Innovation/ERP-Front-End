@@ -5,8 +5,8 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { Grid } from "@mui/material";
-import React, { useContext, useEffect, useState } from "react";
+import { Box, Card } from "@mui/material";
+import { useContext, useEffect, useState } from "react";
 import TableComponent from "../../../components/tables/TableComponent";
 import { useNavigate } from "react-router";
 import FleetUtills from "./utills";
@@ -140,9 +140,8 @@ const Fleet = () => {
     }, [fileData]);
 
 
-
-    return (
-        <React.Fragment>
+    const renderModals = () => (
+        <>
             {
                 crudStates.dispose === currentState
                 && <ModalComponent width={"40%"} title='Dispose Fleet' open={open} handleClose={handleClose}>
@@ -196,7 +195,29 @@ const Fleet = () => {
                     />
                 </ModalComponent>
             }
-            <Grid xs={12} container>
+        </>
+    )
+
+
+    return (
+        <Box width={'100%'} sx={{
+            px: 3,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center'
+        }}>
+            {renderModals()}
+            <Card
+                elevation={0}
+                sx={{
+                    borderRadius: 2,
+                    width: '100%',
+                    maxWidth: "1500px",
+                    overflow: 'hidden',
+                    border: "none",
+                    bgcolor: 'white'
+                }}
+            >
                 {columnHeaders.length > 0 &&
                     <TableComponent
                         endPoint={endPoint}
@@ -220,8 +241,8 @@ const Fleet = () => {
                         selectedStatus={selectedStatus}
                     />
                 }
-            </Grid>
-        </React.Fragment>
+            </Card>
+        </Box>
     )
 }
 
