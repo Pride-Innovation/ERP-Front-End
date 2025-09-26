@@ -58,11 +58,22 @@ const deleteInventoryService = async (id: number | string) => {
     }
 }
 
+const downloadGoodsReceivedNote = async (id: string | number) => {
+    try {
+        const response = await axiosInstance.put(`download-grn/${id}`);
+        return response;
+    } catch (error) {
+        return error;
+    }
+}
+
+
 export {
     addStockService,
     fetchInventoryByIDService,
     uploadGRNService,
     completeDeliveryService,
     fetchGrnCommoditiesByStockIDService,
-    deleteInventoryService
+    deleteInventoryService,
+    downloadGoodsReceivedNote
 }

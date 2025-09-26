@@ -20,7 +20,6 @@ import {
     alpha,
     Chip,
     Paper,
-    Fade,
     Container,
     Button as MuiButton,
     Tooltip,
@@ -28,7 +27,6 @@ import {
 } from "@mui/material";
 import TabComponent from "../../../components/tabs";
 import OtherDetails from "./OtherDetails";
-import DetailSection from "../../assets/trails/DetailSection";
 import moment from "moment";
 import ViewInventoryutills from "./utills";
 import ModalComponent from "../../../components/modal";
@@ -47,7 +45,6 @@ import InventoryOutlinedIcon from '@mui/icons-material/InventoryOutlined';
 import BusinessOutlinedIcon from '@mui/icons-material/BusinessOutlined';
 import ReceiptOutlinedIcon from '@mui/icons-material/ReceiptOutlined';
 import CalendarTodayOutlinedIcon from '@mui/icons-material/CalendarTodayOutlined';
-import PlaylistAddCheckOutlinedIcon from '@mui/icons-material/PlaylistAddCheckOutlined';
 import ContentPasteIcon from '@mui/icons-material/ContentPaste';
 
 // Define brand colors
@@ -178,7 +175,7 @@ const InventoryDetails = () => {
         handleOpen
     } = InventoryUtills();
 
-    useEffect(() => { 
+    useEffect(() => {
         setLoading(true);
         fetchInventoryByID(id as string).finally(() => setLoading(false));
     }, []);
@@ -201,11 +198,11 @@ const InventoryDetails = () => {
     const getStatusChip = () => {
         const status = currentInventory?.status?.status;
         if (!status) return null;
-        
+
         let color = 'default';
         let bgcolor = alpha('#757575', 0.08);
         let textColor = '#757575';
-        
+
         switch (status.toLowerCase()) {
             case 'active':
             case 'completed':
@@ -224,12 +221,12 @@ const InventoryDetails = () => {
                 textColor = '#d32f2f';
                 break;
         }
-        
+
         return (
-            <Chip 
+            <Chip
                 label={status}
                 size="small"
-                sx={{ 
+                sx={{
                     fontWeight: 600,
                     bgcolor: bgcolor,
                     color: textColor,
@@ -242,7 +239,7 @@ const InventoryDetails = () => {
     return (
         <Container maxWidth="xl" sx={{ pt: 3, pb: 3, bgcolor: '#F3F7FB', borderRadius: 2, border: `1px solid ${alpha('#000', 0.08)}` }}>
             {/* GRN Document Modal */}
-            <ModalComponent 
+            <ModalComponent
                 title='View Goods Received Note'
                 open={open}
                 handleClose={handleClose}
@@ -469,62 +466,62 @@ const InventoryDetails = () => {
                             >
                                 <CardContent sx={{ p: 0, height: '100%', display: 'flex', flexDirection: 'column' }}>
                                     {/* Supplier header */}
-                                    <Box sx={{ 
+                                    <Box sx={{
                                         p: 2.5,
                                         bgcolor: alpha(theme.palette.primary.light, 0.04),
                                         borderBottom: `1px solid ${alpha('#000', 0.08)}`
                                     }}>
                                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                                             <BusinessOutlinedIcon color="primary" />
-                                            <Typography 
-                                                variant="subtitle1" 
+                                            <Typography
+                                                variant="subtitle1"
                                                 color="primary"
                                                 fontWeight={600}
                                             >
                                                 Supplier Information
                                             </Typography>
                                         </Box>
-                                        
+
                                         <Typography variant="h6" sx={{ mb: 1, fontWeight: 500 }}>
                                             {currentInventory?.supplier?.name || "No supplier information"}
                                         </Typography>
                                     </Box>
-                                    
+
                                     {/* Inventory details */}
                                     <Box sx={{ p: 2.5, flex: 1 }}>
                                         <Stack spacing={2}>
                                             <EnhancedDetailSection
-                                                label='Contact Number' 
-                                                icon={<LocalPhoneOutlinedIcon />} 
-                                                text={currentInventory?.supplier?.telephone as string} 
+                                                label='Contact Number'
+                                                icon={<LocalPhoneOutlinedIcon />}
+                                                text={currentInventory?.supplier?.telephone as string}
                                             />
-                                            
-                                            <EnhancedDetailSection 
-                                                label='Email Address' 
-                                                icon={<EmailOutlinedIcon />} 
-                                                text={currentInventory?.supplier?.email || null} 
+
+                                            <EnhancedDetailSection
+                                                label='Email Address'
+                                                icon={<EmailOutlinedIcon />}
+                                                text={currentInventory?.supplier?.email || null}
                                             />
-                                            
-                                            <EnhancedDetailSection 
-                                                label='Address' 
-                                                icon={<LocationOnOutlinedIcon />} 
-                                                text={currentInventory?.supplier?.address || null} 
+
+                                            <EnhancedDetailSection
+                                                label='Address'
+                                                icon={<LocationOnOutlinedIcon />}
+                                                text={currentInventory?.supplier?.address || null}
                                             />
-                                            
+
                                             <Divider sx={{ my: 0.5 }} />
-                                            
-                                            <EnhancedDetailSection 
-                                                label="LPO Number" 
+
+                                            <EnhancedDetailSection
+                                                label="LPO Number"
                                                 icon={<ReceiptOutlinedIcon />}
-                                                text={currentInventory?.lpoNumber || null} 
+                                                text={currentInventory?.lpoNumber || null}
                                             />
-                                            
-                                            <EnhancedDetailSection 
-                                                label="Delivery Date" 
+
+                                            <EnhancedDetailSection
+                                                label="Delivery Date"
                                                 icon={<CalendarTodayOutlinedIcon />}
-                                                text={currentInventory?.createDate ? moment(currentInventory?.createDate).format('Do MMMM YYYY, h:mm') : null} 
+                                                text={currentInventory?.createDate ? moment(currentInventory?.createDate).format('Do MMMM YYYY, h:mm') : null}
                                             />
-                                            
+
                                             {/* <EnhancedDetailSection 
                                                 label="Current Status" 
                                                 icon={<PlaylistAddCheckOutlinedIcon />}
@@ -532,34 +529,16 @@ const InventoryDetails = () => {
                                             /> */}
                                         </Stack>
                                     </Box>
-                                    
-                                    {/* View GRN Button */}
-                                    {fileURL && (
-                                        <Box sx={{ 
-                                            mt: 'auto', 
-                                            p: 2.5, 
-                                            borderTop: `1px solid ${alpha('#000', 0.08)}`
-                                        }}>
-                                            <MuiButton
-                                                color="secondary"
-                                                variant="contained"
-                                                fullWidth
-                                                onClick={handleOpen}
-                                                startIcon={<ReceiptOutlinedIcon />}
-                                            >
-                                                View Goods Received Note
-                                            </MuiButton>
-                                        </Box>
-                                    )}
+
                                 </CardContent>
                             </Card>
                         </Grid>
 
                         {/* Right Column - Tabs */}
                         <Grid item xs={12} md={8}>
-                            <Card 
-                                elevation={0} 
-                                sx={{ 
+                            <Card
+                                elevation={0}
+                                sx={{
                                     borderRadius: 2,
                                     border: `1px solid ${alpha('#000', 0.08)}`,
                                     height: '100%',

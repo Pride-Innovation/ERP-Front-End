@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { IGRNReport } from "../interface";
 import GrnReportUtills from "./grnReportUtills";
 import {
@@ -25,6 +25,10 @@ import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 import AssignmentOutlinedIcon from '@mui/icons-material/AssignmentOutlined';
 import CalendarTodayOutlinedIcon from '@mui/icons-material/CalendarTodayOutlined';
 import moment from "moment";
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
+import EditCalendarOutlinedIcon from '@mui/icons-material/EditCalendarOutlined';
+import ArrowCircleDownOutlinedIcon from '@mui/icons-material/ArrowCircleDownOutlined';
+import { InventoryContext } from "../../../context/inventory";
 
 // Brand colors
 const PRIMARY_COLOR = '#08796C';
@@ -34,6 +38,7 @@ const InventoryGRN = ({ grnList }: { grnList: IGRNReport[] }) => {
     const [fileURL, setFileURL] = useState<string>("");
     const theme = useTheme();
     const [loading, setLoading] = useState(true);
+    const { setOptions } = useContext(InventoryContext);
 
     const {
         columnHeaders,
@@ -62,6 +67,19 @@ const InventoryGRN = ({ grnList }: { grnList: IGRNReport[] }) => {
         } else {
             setFileURL("");
         }
+    }, [currentGRN]);
+
+    useEffect(() => {
+        const newOptions = grnList.map(grn => {
+            return grn?.documentPath?.length > 0 ? [
+                { value: crudStates.read, label: "View GRN", icon: <VisibilityOutlinedIcon fontSize='small' color='primary' /> }
+            ] : [
+                { value: crudStates.download, label: "Generate GRN", icon: <ArrowCircleDownOutlinedIcon fontSize='small' color='inherit' /> },
+                { value: crudStates.upload, label: "Upload Signed GRN", icon: <EditCalendarOutlinedIcon fontSize='small' color='secondary' /> },
+            ]
+        });
+
+        setOptions(newOptions.flat());
     }, [currentGRN]);
 
     return (
@@ -240,14 +258,6 @@ const InventoryGRN = ({ grnList }: { grnList: IGRNReport[] }) => {
                                         columnHeaders={columnHeaders}
                                         paginationMode='server'
                                         handleOptionClicked={handleOptionClicked}
-                                    // sx={{
-                                    //     '& .MuiDataGrid-root': {
-                                    //         border: 'none',
-                                    //         '& .MuiDataGrid-cell': {
-                                    //             borderColor: alpha(theme.palette.divider, 0.5)
-                                    //         }
-                                    //     }
-                                    // }}
                                     />
                                 </Card>
                             ) : (

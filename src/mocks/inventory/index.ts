@@ -59,5 +59,6 @@ export const grnReportsMock: IGRNReport[] = [
         lastModified: "2025-07-03T14:16:04.854324",
         createdBy: usersMock[0],
         lastModifiedBy: usersMock[0],
+        grnDownloaded: false
     }
 ]

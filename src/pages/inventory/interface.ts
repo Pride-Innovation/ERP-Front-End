@@ -127,6 +127,7 @@ interface IGRNReport {
     lastModified: string | null;
     createdBy: IUser | null;
     lastModifiedBy: IUser | null;
+    grnDownloaded: boolean;
 }
 
 interface IGRNUploadResponse extends IAxiosResponse {

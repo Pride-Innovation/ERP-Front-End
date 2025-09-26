@@ -14,11 +14,8 @@ import { grnReportsMock } from "../../../mocks/inventory";
 import { getTableHeaders } from "../../../components/tables/getTableHeaders";
 import moment from "moment";
 import { crudStates } from "../../../utils/constants";
-import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
-import EditCalendarOutlinedIcon from '@mui/icons-material/EditCalendarOutlined';
-import ArrowCircleDownOutlinedIcon from '@mui/icons-material/ArrowCircleDownOutlined';
 import { InventoryContext } from "../../../context/inventory";
-import { fetchGrnCommoditiesByStockIDService } from "../service";
+import { downloadGoodsReceivedNote, fetchGrnCommoditiesByStockIDService } from "../service";
 import { generateGoodsReceivedNote } from "../../../utils/goodReceivedNotes";
 import Logo from "../../../statics/images/whitelogo.png"
 import RoutesUtills from "../../../core/routes/utills";
@@ -27,7 +24,7 @@ import RoutesUtills from "../../../core/routes/utills";
 const GrnReportUtills = () => {
     const endPoint: string = "grn-reports";
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
-    const { currentInventory } = useContext(InventoryContext);
+    const { currentInventory, options } = useContext(InventoryContext);
     const header = { plural: 'GRN Report', singular: 'GRN Report' }
     const [stocksTableData, setStocksTableData] = useState<Array<IGRNReportTableData>>([] as Array<IGRNReportTableData>);
     const [filteredGRNCommodities, setFilteredGRNCommodities] = useState<Array<IGRNCommodity>>([] as Array<IGRNCommodity>);
@@ -45,6 +42,7 @@ const GrnReportUtills = () => {
         lastModified,
         documentPath,
         id,
+        grnDownloaded,
         name,
         ...data
     } = grnReportsMock[0];
@@ -57,11 +55,7 @@ const GrnReportUtills = () => {
         ...data,
         action: {
             label: "options",
-            options: [
-                { value: crudStates.read, label: "View GRN", icon: <VisibilityOutlinedIcon fontSize='small' color='primary' /> },
-                { value: crudStates.download, label: "Generate GRN", icon: <ArrowCircleDownOutlinedIcon fontSize='small' color='inherit' /> },
-                { value: crudStates.upload, label: "Upload Signed GRN", icon: <EditCalendarOutlinedIcon fontSize='small' color='secondary' /> },
-            ]
+            options: options
         },
     };
 
@@ -74,6 +68,7 @@ const GrnReportUtills = () => {
                 createDate,
                 lastModified,
                 documentPath,
+                grnDownloaded,
                 name,
                 ...fielsdata
             } = inventory[index];
@@ -94,7 +89,7 @@ const GrnReportUtills = () => {
 
     useEffect(() => {
         setColumnHeaders(getTableHeaders(rowData))
-    }, []);
+    }, [options]);
 
     const fetchGrnCommoditiesByStockID = async (id: string | number) => {
         try {
@@ -147,6 +142,8 @@ const GrnReportUtills = () => {
                     Logo,
                     getCurrentUser()?.firstName + " " + getCurrentUser()?.lastName,
                 );
+
+                await downloadGoodsReceivedNote(moduleID as number);
                 break;
             case crudStates.upload:
                 setCurrentGRN(findGRNById(moduleID as number) || null);
