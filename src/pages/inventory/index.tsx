@@ -5,7 +5,7 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Grid } from "@mui/material"
 import TableComponent from "../../components/tables/TableComponent";
 import InventoryUtills from "./Utills";
@@ -14,10 +14,14 @@ import ModalComponent from "../../components/modal";
 import DeleteInventory from "./DeleteInventory";
 import UploadGRN from "./UploadGRN";
 import Container from "./Container";
+import { FormContext } from "../../context/form";
+import dayjs from "dayjs";
 
 const Inventory = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
     const [selectedStatus, setSelectedStatus] = useState<string>('all');
+    const { tableStartDate, tableEndDate } = useContext(FormContext);
+
 
     const {
         columnHeaders,
@@ -49,6 +53,18 @@ const Inventory = () => {
             setSelectedStatus('all');
         }
     }
+
+    useEffect(() => {
+        if (tableStartDate && tableEndDate) {
+            const param = {
+                startDate: tableStartDate ? dayjs(tableStartDate).format('YYYY-MM-DDTHH:mm:ss') : '',
+                endDate: tableEndDate ? dayjs(tableEndDate).format('YYYY-MM-DDTHH:mm:ss') : ''
+            }
+
+            fetchInventory(param);
+        }
+    }, [tableStartDate, tableEndDate]);
+
     return (
         <Grid xs={12} container sx={{ p: 3 }} justifyContent="center">
             {modalState === crudStates.delete &&
