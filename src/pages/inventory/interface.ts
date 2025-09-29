@@ -50,13 +50,15 @@ interface IInventory {
 }
 
 interface IInventoryTableData {
-    name: string
+    // name: string
     totalItemsOrdered: number;
     totalItemsDelivered: number;
     branch: string;
     status: string;
     supplier: string;
     date: string;
+    "LPO Number": string;
+    "Supply": string;
 }
 
 interface IDeleteInventory {

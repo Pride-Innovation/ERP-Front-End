@@ -71,17 +71,21 @@ const InventoryUtills = () => {
         lastModifiedBy,
         referenceNumber,
         grnNumber,
+        lpoNumber,
+        name,
         ...data
     } = inventoryMock[0];
 
     const rowData = {
         ...data,
+        date: "",
+        "LPO Number": inventoryMock[0].lpoNumber,
+        supplier: inventoryMock[0]?.supplier?.name,
+        Supply: "",
         totalItemsOrdered: '',
         totalItemsDelivered: '',
         status: inventoryMock[0]?.status?.status,
-        supplier: inventoryMock[0]?.supplier?.name,
         branch: inventoryMock[0].branch?.name,
-        date: "",
         action: {
             label: "options",
             options: [
@@ -135,7 +139,9 @@ const InventoryUtills = () => {
                 lastModified,
                 lastModifiedBy,
                 referenceNumber,
+                lpoNumber,
                 grnNumber,
+                name,
                 ...fielsdata
             } = inventory[index];
 
@@ -147,8 +153,9 @@ const InventoryUtills = () => {
                     branch: stock.branch?.name as string,
                     status: stock.status?.status as string,
                     supplier: stock.supplier?.name as string,
-                    date: moment(stock.createDate as string).format("Do MMM YYYY")
-
+                    date: moment(stock.createDate as string).format("Do MMM YYYY"),
+                    "LPO Number": stock.lpoNumber,
+                    "Supply": stock?.name as string,
                 }
             )
         })
