@@ -28,6 +28,9 @@ import CustomGridToolbarExport from './CustomGridToolbarExport';
 import { useContext, useEffect, useState } from 'react';
 import { FileContext } from '../../context/file/FileContext';
 import TableUtills from './utills';
+import DateRangePicker from '../forms/DateRangePicker';
+import { Dayjs } from 'dayjs';
+import { FormContext } from '../../context/form';
 
 const StyledFormControl = styled(FormControl)(({ theme }) => ({
     minWidth: 160,
@@ -61,18 +64,32 @@ const TableToolBar = ({
     status = false,
     onStatusChange,
     selectedStatus = 'all',
+    dateRangePicker = false
 }: ITableToolBar) => {
     const { setFileName } = useContext(FileContext);
     const [statusFilter, setStatusFilter] = useState<string>(selectedStatus);
     useEffect(() => { setFileName(module) }, [module]);
     const theme = useTheme();
     const { filterStatuses } = TableUtills({ moduleName: module });
+    const { setTableStartDate, setTableEndDate } = useContext(FormContext);
 
     const handleStatusChange = (event: SelectChangeEvent) => {
         const newStatus = event.target.value;
         setStatusFilter(newStatus);
         onStatusChange?.(newStatus);
     };
+
+    const [startDate, setStartDate] = useState<Dayjs | null>(null);
+    const [endDate, setEndDate] = useState<Dayjs | null>(null);
+
+    useEffect(() => {
+        if (startDate && endDate) {
+            const start = startDate.startOf('day').toDate();
+            const end = endDate.endOf('day').toDate();
+            setTableStartDate(start);
+            setTableEndDate(end);
+        }
+    }, [startDate, endDate]);
 
     return (
         <GridToolbarContainer
@@ -137,6 +154,19 @@ const TableToolBar = ({
                             </MenuItem>))}
                         </Select>
                     </StyledFormControl>
+                )}
+                {dateRangePicker && (
+                    <Box sx={{ ml: 2, flexGrow: 1, maxWidth: 550 }}>
+                        <DateRangePicker
+                            startDate={startDate}
+                            endDate={endDate}
+                            onStartDateChange={setStartDate}
+                            onEndDateChange={setEndDate}
+                            startPlaceholder="From"
+                            endPlaceholder="To"
+                            compact
+                        />
+                    </Box>
                 )}
             </Box>
 
@@ -217,10 +247,12 @@ const CustomToolbarWrapper: React.FC<CustomToolbarWrapperProps> = ({
     status = false,
     onStatusChange,
     selectedStatus,
+    dateRangePicker,
     ...props
 }) => {
     return (
         <TableToolBar
+            dateRangePicker={dateRangePicker}
             createAction={createAction}
             importData={importData}
             exportData={exportData}

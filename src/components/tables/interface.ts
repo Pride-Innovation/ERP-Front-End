@@ -52,6 +52,7 @@ export interface ITableComponent {
     status?: boolean;
     onStatusChange?: (status: string) => void;
     selectedStatus?: string;
+    dateRangePicker?: boolean;
 }
 
 export interface ITableToolBar {
@@ -69,6 +70,7 @@ export interface ITableToolBar {
     status?: boolean;
     onStatusChange?: (status: string) => void;
     selectedStatus?: string;
+    dateRangePicker?: boolean;
 }
 
 export interface CustomToolbarWrapperProps extends GridToolbarProps {
@@ -83,6 +85,7 @@ export interface CustomToolbarWrapperProps extends GridToolbarProps {
     status?: boolean;
     onStatusChange?: (status: string) => void;
     selectedStatus?: string;
+    dateRangePicker?: boolean;
 }
 
 export interface ITableFilter {

@@ -86,6 +86,7 @@ const Inventory = () => {
                         status
                         onStatusChange={handleStatusChange}
                         selectedStatus={selectedStatus}
+                        dateRangePicker
                     />
                 </Container>
             }

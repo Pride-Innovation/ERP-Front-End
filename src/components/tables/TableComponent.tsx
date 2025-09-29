@@ -62,6 +62,7 @@ const TableComponent = ({
     status = false,
     onStatusChange,
     selectedStatus = 'all',
+    dateRangePicker = false,
 }: ITableComponent) => {
     const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
     const [currentOptions, setCurrentOptions] = useState<any[]>([]);
@@ -196,6 +197,7 @@ const TableComponent = ({
                     slots={{
                         toolbar: () => (
                             <CustomToolbarWrapper
+                                dateRangePicker={dateRangePicker}
                                 createAction={createAction}
                                 exportData={exportData}
                                 searchAction={searchAction}

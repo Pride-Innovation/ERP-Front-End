@@ -24,6 +24,7 @@ import AutocompleteContextProvider from './context/autocomplete';
 import StoreContextProvider from './context/store';
 import AssetContextProvider from './context/asset';
 import DashboardProvider from './context/dashboard';
+import FormContextProvider from './context/form';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -44,7 +45,9 @@ root.render(
                         <StoreContextProvider>
                           <AssetContextProvider>
                             <DashboardProvider>
-                              <App />
+                              <FormContextProvider>
+                                <App />
+                              </FormContextProvider>
                             </DashboardProvider>
                           </AssetContextProvider>
                         </StoreContextProvider>
