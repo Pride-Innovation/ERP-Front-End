@@ -29,7 +29,7 @@ import { useContext, useEffect, useState } from 'react';
 import { FileContext } from '../../context/file/FileContext';
 import TableUtills from './utills';
 import DateRangePicker from '../forms/DateRangePicker';
-import { Dayjs } from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 import { FormContext } from '../../context/form';
 
 const StyledFormControl = styled(FormControl)(({ theme }) => ({
@@ -71,7 +71,7 @@ const TableToolBar = ({
     useEffect(() => { setFileName(module) }, [module]);
     const theme = useTheme();
     const { filterStatuses } = TableUtills({ moduleName: module });
-    const { setTableStartDate, setTableEndDate } = useContext(FormContext);
+    const { setTableStartDate, setTableEndDate, tableEndDate, tableStartDate } = useContext(FormContext);
 
     const handleStatusChange = (event: SelectChangeEvent) => {
         const newStatus = event.target.value;
@@ -82,14 +82,33 @@ const TableToolBar = ({
     const [startDate, setStartDate] = useState<Dayjs | null>(null);
     const [endDate, setEndDate] = useState<Dayjs | null>(null);
 
-    useEffect(() => {
-        if (startDate && endDate) {
-            const start = startDate.startOf('day').toDate();
-            const end = endDate.endOf('day').toDate();
-            setTableStartDate(start);
-            setTableEndDate(end);
+    const handleStartDateChange = (date: Dayjs | null) => {
+        setStartDate(date);
+        // Convert Dayjs to Date for context
+        if (date) {
+            setTableStartDate(date.toDate());
+        } else {
+            setTableStartDate(null);
         }
-    }, [startDate, endDate]);
+    };
+
+    const handleEndDateChange = (date: Dayjs | null) => {
+        setEndDate(date);
+        if (date) {
+            setTableEndDate(date.toDate());
+        } else {
+            setTableEndDate(null);
+        }
+    };
+
+    useEffect(() => {
+        if (tableStartDate && !startDate) {
+            setStartDate(dayjs(tableStartDate));
+        }
+        if (tableEndDate && !endDate) {
+            setEndDate(dayjs(tableEndDate));
+        }
+    }, []);
 
     return (
         <GridToolbarContainer
@@ -160,8 +179,8 @@ const TableToolBar = ({
                         <DateRangePicker
                             startDate={startDate}
                             endDate={endDate}
-                            onStartDateChange={setStartDate}
-                            onEndDateChange={setEndDate}
+                            onStartDateChange={handleStartDateChange}
+                            onEndDateChange={handleEndDateChange}
                             startPlaceholder="From"
                             endPlaceholder="To"
                             compact

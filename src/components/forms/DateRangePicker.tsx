@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import {
     Box,
     alpha,
@@ -9,9 +9,10 @@ import {
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { Dayjs } from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import FilterListIcon from '@mui/icons-material/FilterList';
+import { FormContext } from '../../context/form';
 
 // Styled components for a more compact, header-friendly appearance
 const CompactDatePickerWrapper = styled(Box)(({ theme }) => ({
@@ -72,18 +73,44 @@ const DateRangePicker: React.FC<IDateRangePickerProps> = ({
     disableFuture = false,
     compact = true
 }) => {
-    // Handle internal date changes
+    const { tableStartDate, tableEndDate } = useContext(FormContext);
+
+    // Convert Date objects from context to Dayjs objects
+    const [startDateValue, setStartDateValue] = useState<Dayjs | null>(
+        tableStartDate ? dayjs(tableStartDate) : null
+    );
+    const [endDateValue, setEndDateValue] = useState<Dayjs | null>(
+        tableEndDate ? dayjs(tableEndDate) : null
+    );
+
+    // Keep the internal state in sync with context values
+    useEffect(() => {
+        if (tableStartDate) {
+            setStartDateValue(dayjs(tableStartDate));
+        }
+    }, [tableStartDate]);
+
+    useEffect(() => {
+        if (tableEndDate) {
+            setEndDateValue(dayjs(tableEndDate));
+        }
+    }, [tableEndDate]);
+
     const handleDateChange = (isStart: boolean, newDate: Dayjs | null) => {
         if (isStart) {
+            setStartDateValue(newDate);
             onStartDateChange(newDate);
             // If start date is after end date, adjust end date
-            if (newDate && endDate && newDate.isAfter(endDate)) {
+            if (newDate && endDateValue && newDate.isAfter(endDateValue)) {
+                setEndDateValue(newDate);
                 onEndDateChange(newDate);
             }
         } else {
+            setEndDateValue(newDate);
             onEndDateChange(newDate);
             // If end date is before start date, adjust start date
-            if (newDate && startDate && newDate.isBefore(startDate)) {
+            if (newDate && startDateValue && newDate.isBefore(startDateValue)) {
+                setStartDateValue(newDate);
                 onStartDateChange(newDate);
             }
         }
@@ -116,11 +143,11 @@ const DateRangePicker: React.FC<IDateRangePickerProps> = ({
 
                 <CompactDatePickerWrapper>
                     <DatePicker
-                        value={startDate}
+                        value={startDateValue}
                         onChange={(newValue) => handleDateChange(true, newValue)}
                         disabled={disabled}
                         minDate={minDate}
-                        maxDate={endDate || maxDate}
+                        maxDate={endDateValue || maxDate}
                         disablePast={disablePast}
                         disableFuture={disableFuture}
                         format="DD/MM/YYYY"
@@ -162,10 +189,10 @@ const DateRangePicker: React.FC<IDateRangePickerProps> = ({
                     />
 
                     <DatePicker
-                        value={endDate}
+                        value={endDateValue}
                         onChange={(newValue) => handleDateChange(false, newValue)}
                         disabled={disabled}
-                        minDate={startDate || minDate}
+                        minDate={startDateValue || minDate}
                         maxDate={maxDate}
                         disablePast={disablePast}
                         disableFuture={disableFuture}
