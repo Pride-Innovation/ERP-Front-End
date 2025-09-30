@@ -13,10 +13,14 @@ import {
 } from "@mui/x-data-grid";
 import TableUtills from "./utills";
 
-const CustomGridToolbarExport = (props: ButtonProps) => {
+interface CustomGridToolbarExportProps extends ButtonProps {
+    module?: string;
+}
+
+const CustomGridToolbarExport = (props: CustomGridToolbarExportProps) => {
 
     const csvOptions: GridCsvExportOptions = {};
-    const { JsonExportMenuItem } = TableUtills({ moduleName: "" });
+    const { JsonExportMenuItem } = TableUtills({ moduleName: props.module });
 
     return (
         <GridToolbarExportContainer {...props}>

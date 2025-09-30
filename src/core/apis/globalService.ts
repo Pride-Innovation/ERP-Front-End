@@ -42,3 +42,13 @@ export const fetchRowsService = async ({
         return error;
     }
 };
+
+
+export const fetchAllRowsService = async (endPoint: string) => {
+    try {
+        const response = await axiosInstance.get(`export/${endPoint}`);
+        return response.data;
+    } catch (error) {
+        return error;
+    }
+};

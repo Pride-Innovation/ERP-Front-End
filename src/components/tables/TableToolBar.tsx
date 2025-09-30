@@ -248,7 +248,7 @@ const TableToolBar = ({
                     </Box>
                 }
 
-                {exportData && <CustomGridToolbarExport />}
+                {exportData && <CustomGridToolbarExport module={module} />}
             </Stack>
         </GridToolbarContainer>
     )

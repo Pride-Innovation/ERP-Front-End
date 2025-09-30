@@ -5,20 +5,15 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import {
-    GridApi,
-    GridExportMenuItemProps,
-    gridFilteredSortedRowIdsSelector,
-    gridVisibleColumnFieldsSelector,
-    useGridApiContext
-} from "@mui/x-data-grid";
+import { GridExportMenuItemProps } from "@mui/x-data-grid";
 import { assetStatus, assetTypesStatusConstants, requestStatus } from "../../utils/constants";
 import { MenuItem, useTheme } from "@mui/material";
 import { exportPDF } from "../../utils/pdf";
-import { camelCaseToWords } from "../../utils/helpers";
 import { useContext, useEffect, useState } from "react";
 import { FileContext } from "../../context/file/FileContext";
 import RoutesUtills from "../../core/routes/utills";
+import formatExportData, { ModuleTypeMap } from "./formatExportData";
+import { toast } from "react-toastify";
 
 const TableUtills = ({ moduleName }: { moduleName?: string }) => {
     const { fileName } = useContext(FileContext);
@@ -43,57 +38,26 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
         }
     };
 
-    const determineRowsandColumns = (data: Array<{
-        [key: string]: string | number | object | boolean |
-        Array<{ [key: string]: string | number | object }>;
-    }>) => {
-        if (data.length === 0) {
-            return { columns: [], rows: [] };
+
+    const generatePDF = async () => {
+        try {
+            if (!moduleName) return;
+
+            const { data, columns } = await formatExportData(moduleName as keyof ModuleTypeMap);
+
+            if (!data || data.length === 0) {
+                toast.error(`No data available for ${moduleName} export`);
+                return;
+            }
+            exportPDF(columns, data, fileName || moduleName || 'export');
+
+        } catch (error) {
+            console.error('Error generating PDF:', error);
         }
-
-        const columns = Object.keys(data[0])
-            .filter(key => key !== 'image' && key !== 'action')
-            .map(key => (
-                {
-                    title: camelCaseToWords(key.charAt(0).toUpperCase() + key.slice(1)),
-                    dataKey: key,
-                }));
-
-        const rows = data.map(item => {
-            return Object.keys(item).reduce((acc, key) => {
-                if (key !== 'image' && key !== 'action') {
-                    acc[key] = item[key];
-                }
-                return acc;
-            }, {} as { [key: string]: string | number | object | boolean | Array<any> });
-        });
-
-        return {
-            columns,
-            rows
-        };
-    };
-
-
-    const generatePDF = (apiRef: React.MutableRefObject<GridApi>) => {
-        const filteredSortedRowIds = gridFilteredSortedRowIdsSelector(apiRef);
-        const visibleColumnsField = gridVisibleColumnFieldsSelector(apiRef);
-
-        const data = filteredSortedRowIds.map((id) => {
-            const row: Record<string, any> = {};
-            visibleColumnsField.forEach((field) => {
-                row[field] = apiRef.current.getCellParams(id, field).value;
-            });
-            return row;
-        });
-
-        const { columns, rows } = determineRowsandColumns(data);
-        return exportPDF(columns, rows, fileName);
     };
 
 
     const JsonExportMenuItem = (props: GridExportMenuItemProps<{}>) => {
-        const apiRef = useGridApiContext();
         const theme = useTheme();
 
         const { hideMenu } = props;
@@ -104,7 +68,7 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
                     color: theme.palette.secondary.main,
                 }}
                 onClick={() => {
-                    generatePDF(apiRef);
+                    generatePDF();
                     hideMenu?.();
                 }}
             >
@@ -161,7 +125,6 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
 
         return options;
     }
-
 
     const assetFilterStatuses: { label: string, value: string, color: string }[] = [
         {

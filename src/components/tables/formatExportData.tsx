@@ -1,0 +1,159 @@
+import { fetchAllRowsService } from "../../core/apis/globalService";
+import { IInventory } from "../../pages/inventory/interface";
+import { IRequest } from "../../pages/request/interface";
+import { IUser } from "../../pages/users/interface";
+
+// Define API response structure with different possible formats
+interface ApiResponseWithContent<T> {
+    content: T[];
+    totalElements?: number;
+    totalPages?: number;
+}
+
+// Define a type mapping for different modules
+export type ModuleTypeMap = {
+    inventory: IInventory;
+    requests: IRequest;
+    users: IUser;
+    // Add more module mappings as needed
+}
+
+// Generic function that returns correctly typed data based on module name
+async function formatExportData<T extends keyof ModuleTypeMap>(
+    moduleName: T
+): Promise<{
+    data: Array<any>; // Using any for flexibility with different response structures
+    columns: Array<{ title: string; dataKey: string }>;
+}> {
+    try {
+        // Fetch data from API
+        const response = await fetchAllRowsService(moduleName);
+        console.log("Raw API response:", response);
+
+        // Generate column definitions based on module type
+        let columns: Array<{ title: string; dataKey: string }> = [];
+
+        if (moduleName === 'inventory') {
+            // Inventory-specific columns
+            columns = [
+                { title: 'LPO Number', dataKey: 'lpoNumber' },
+                { title: 'Supply', dataKey: 'name' },
+                { title: 'Status', dataKey: 'status' },
+                { title: 'Supplier', dataKey: 'supplier' },
+                { title: 'Branch', dataKey: 'branch' },
+                { title: 'Total Cost', dataKey: 'totalCost' },
+                { title: 'Balance Cost', dataKey: 'balanceCost' },
+                { title: 'Date', dataKey: 'date' }
+            ];
+        } else if (moduleName === 'requests') {
+            // Request-specific columns
+            columns = [
+                { title: 'Request No', dataKey: 'requestNo' },
+                { title: 'Item', dataKey: 'itemName' },
+                { title: 'Status', dataKey: 'status' },
+                { title: 'Requester', dataKey: 'requestor' },
+                { title: 'Branch', dataKey: 'branch' },
+                { title: 'Department', dataKey: 'department' },
+                { title: 'Date', dataKey: 'dateRequested' }
+            ];
+        } else if (moduleName === 'users') {
+            // User-specific columns
+            columns = [
+                { title: 'Name', dataKey: 'fullName' },
+                { title: 'Email', dataKey: 'email' },
+                { title: 'Phone', dataKey: 'phoneNumber' },
+                { title: 'Branch', dataKey: 'branch' },
+                { title: 'Role', dataKey: 'role' },
+                { title: 'Status', dataKey: 'status' }
+            ];
+        }
+
+        // Process the response data based on module type
+        const processedData = processResponseData(response, moduleName);
+
+        return {
+            data: processedData,
+            columns
+        };
+    } catch (error) {
+        console.error(`Error fetching ${moduleName} data:`, error);
+        return {
+            data: [],
+            columns: []
+        };
+    }
+}
+
+// Helper function to process raw API response data
+function processResponseData(data: any, moduleName: string): Array<any> {
+    // Handle different API response structures
+    let items: any[] = [];
+
+    // Check if the response has data property (typical axios response)
+    if (data?.data && Array.isArray(data.data)) {
+        items = data.data;
+    }
+    // Check if the response has content property
+    else if (data?.content && Array.isArray(data.content)) {
+        items = data.content;
+    }
+    // Check if the response is already an array
+    else if (Array.isArray(data)) {
+        items = data;
+    }
+    // Direct response object (non-array, non-content case)
+    else if (data && typeof data === 'object') {
+        items = [data];
+    }
+
+    if (items.length === 0) {
+        return [];
+    }
+
+    // Type-specific processing
+    if (moduleName === 'inventory') {
+        // Process inventory data
+        return items.map(item => {
+            // Create a new object with transformed properties
+            return {
+                id: item.id,
+                lpoNumber: item.lpoNumber || '',
+                name: item.name || '',
+                status: item.status?.status || '',
+                supplier: item.supplier?.name || '',
+                branch: item.branch?.name || '',
+                totalCost: item.totalCost || 0,
+                balanceCost: item.balanceCost || 0,
+                date: item.createDate ? new Date(item.createDate).toLocaleDateString() : ''
+            };
+        });
+    } else if (moduleName === 'requests') {
+        // Process request data
+        return items.map(item => ({
+            id: item.id,
+            requestNo: item.requestNo || '',
+            itemName: item.itemName || '',
+            status: item.status?.status || '',
+            requestor: item.requestor?.name || '',
+            branch: item.branch?.name || '',
+            department: item.department?.name || '',
+            dateRequested: item.dateRequested ? new Date(item.dateRequested).toLocaleDateString() : ''
+        }));
+    } else if (moduleName === 'users') {
+        // Process user data
+        return items.map(item => ({
+            id: item.id,
+            fullName: item.fullName || '',
+            email: item.email || '',
+            phoneNumber: item.phoneNumber || '',
+            branch: item.branch?.name || '',
+            role: item.role?.name || '',
+            status: item.status || ''
+        }));
+    }
+
+    // Default case - return items with minimal processing
+    return items;
+}
+
+export default formatExportData;
