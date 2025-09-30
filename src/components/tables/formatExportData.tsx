@@ -1,14 +1,9 @@
 import { fetchAllRowsService } from "../../core/apis/globalService";
-import { IInventory } from "../../pages/inventory/interface";
+import { IInventory, IStockCommodities } from "../../pages/inventory/interface";
 import { IRequest } from "../../pages/request/interface";
 import { IUser } from "../../pages/users/interface";
+import { camelCaseToWords } from "../../utils/helpers";
 
-// Define API response structure with different possible formats
-interface ApiResponseWithContent<T> {
-    content: T[];
-    totalElements?: number;
-    totalPages?: number;
-}
 
 // Define a type mapping for different modules
 export type ModuleTypeMap = {
@@ -28,7 +23,6 @@ async function formatExportData<T extends keyof ModuleTypeMap>(
     try {
         // Fetch data from API
         const response = await fetchAllRowsService(moduleName);
-        console.log("Raw API response:", response);
 
         // Generate column definitions based on module type
         let columns: Array<{ title: string; dataKey: string }> = [];
@@ -36,14 +30,14 @@ async function formatExportData<T extends keyof ModuleTypeMap>(
         if (moduleName === 'inventory') {
             // Inventory-specific columns
             columns = [
+                { title: 'Date', dataKey: 'date' },
                 { title: 'LPO Number', dataKey: 'lpoNumber' },
-                { title: 'Supply', dataKey: 'name' },
-                { title: 'Status', dataKey: 'status' },
                 { title: 'Supplier', dataKey: 'supplier' },
-                { title: 'Branch', dataKey: 'branch' },
-                { title: 'Total Cost', dataKey: 'totalCost' },
-                { title: 'Balance Cost', dataKey: 'balanceCost' },
-                { title: 'Date', dataKey: 'date' }
+                { title: 'Supply', dataKey: 'name' },
+                { title: 'Ordered', dataKey: 'totalOrdered' },
+                { title: 'Delivered', dataKey: 'totalDelivered' },
+                { title: 'Status', dataKey: 'status' },
+                { title: 'Branch', dataKey: 'branch' }
             ];
         } else if (moduleName === 'requests') {
             // Request-specific columns
@@ -84,6 +78,14 @@ async function formatExportData<T extends keyof ModuleTypeMap>(
     }
 }
 
+const sumTotalOrdered = (commodities: Array<IStockCommodities>): number => {
+    return commodities.reduce((acc, val) => (acc + val.orderedQuantity), 0)
+}
+
+const sumTotalDelivered = (commodities: Array<IStockCommodities>): number => {
+    return commodities.reduce((acc, val) => (acc + val.deliveredQuantity), 0)
+}
+
 // Helper function to process raw API response data
 function processResponseData(data: any, moduleName: string): Array<any> {
     // Handle different API response structures
@@ -119,11 +121,11 @@ function processResponseData(data: any, moduleName: string): Array<any> {
                 id: item.id,
                 lpoNumber: item.lpoNumber || '',
                 name: item.name || '',
-                status: item.status?.status || '',
+                status: camelCaseToWords(item.status?.status || ''),
                 supplier: item.supplier?.name || '',
                 branch: item.branch?.name || '',
-                totalCost: item.totalCost || 0,
-                balanceCost: item.balanceCost || 0,
+                totalOrdered: item.commodities ? sumTotalOrdered(item.commodities as IStockCommodities[]) || 0 : 0,
+                totalDelivered: item.commodities ? sumTotalDelivered(item.commodities as IStockCommodities[]) || 0 : 0,
                 date: item.createDate ? new Date(item.createDate).toLocaleDateString() : ''
             };
         });
