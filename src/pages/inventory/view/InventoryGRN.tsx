@@ -170,7 +170,7 @@ const InventoryGRN = ({ grnList }: { grnList: IGRNReport[] }) => {
                                     }}
                                 >
                                     <iframe
-                                        src={fileURL}
+                                        src={`${fileURL}#toolbar=0&navpanes=0&scrollbar=0`}
                                         title="PDF Preview"
                                         width="100%"
                                         style={{
