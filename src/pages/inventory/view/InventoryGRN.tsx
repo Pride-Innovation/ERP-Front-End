@@ -71,11 +71,27 @@ const InventoryGRN = ({ grnList }: { grnList: IGRNReport[] }) => {
     useEffect(() => {
         const newOptions = grnList.map(grn => {
             return grn?.documentPath?.length > 0 ? [
-                { value: crudStates.read, label: "View GRN", icon: <VisibilityOutlinedIcon fontSize='small' color='primary' /> }
+                {
+                    value: crudStates.read,
+                    label: "View GRN",
+                    icon: <VisibilityOutlinedIcon fontSize='small' color='primary' />
+                }
             ] : grn?.grnDownloaded === true ? [
-                { value: crudStates.download, label: "Generate GRN", icon: <ArrowCircleDownOutlinedIcon fontSize='small' color='inherit' /> },
-                { value: crudStates.upload, label: "Upload Signed GRN", icon: <EditCalendarOutlinedIcon fontSize='small' color='secondary' /> },
-            ] : [{ value: crudStates.download, label: "Generate GRN", icon: <ArrowCircleDownOutlinedIcon fontSize='small' color='inherit' /> }]
+                {
+                    value: crudStates.download,
+                    label: "Generate GRN",
+                    icon: <ArrowCircleDownOutlinedIcon fontSize='small' color='inherit' />
+                },
+                {
+                    value: crudStates.upload,
+                    label: "Upload Signed GRN",
+                    icon: <EditCalendarOutlinedIcon fontSize='small' color='secondary' />
+                },
+            ] : [{
+                value: crudStates.download,
+                label: "Generate GRN",
+                icon: <ArrowCircleDownOutlinedIcon fontSize='small' color='inherit' />
+            }]
         });
 
         setOptions(newOptions.flat());
