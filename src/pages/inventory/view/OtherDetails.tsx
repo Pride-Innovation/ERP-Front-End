@@ -112,19 +112,11 @@ const OtherDetails = ({ inventory }: { inventory: IInventory }) => {
                                         loading={loading}
                                         count={100}
                                         exportData
-                                        header={header}
+                                        header={{ ...header, singular: "Inventory Commodity", plural: "Inventory Commodities" }}
                                         module="inventory commodities"
                                         rows={stocksTableData || []}
                                         columnHeaders={columnHeaders}
                                         paginationMode='server'
-                                        // sx={{
-                                        //     '& .MuiDataGrid-root': {
-                                        //         border: 'none',
-                                        //         borderRadius: 1,
-                                        //         overflow: 'hidden',
-                                        //         boxShadow: `0 0 0 1px ${alpha(theme.palette.divider, 0.1)}`
-                                        //     }
-                                        // }}
                                     />
                                 </Grid>
                             </>

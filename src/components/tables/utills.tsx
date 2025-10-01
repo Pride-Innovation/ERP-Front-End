@@ -5,7 +5,7 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { GridExportMenuItemProps } from "@mui/x-data-grid";
+import { GridApi, GridExportMenuItemProps, gridFilteredSortedRowIdsSelector, gridVisibleColumnFieldsSelector, useGridApiContext } from "@mui/x-data-grid";
 import { assetStatus, assetTypesStatusConstants, requestStatus } from "../../utils/constants";
 import { MenuItem, useTheme } from "@mui/material";
 import { exportPDF } from "../../utils/pdf";
@@ -17,6 +17,7 @@ import { toast } from "react-toastify";
 import { exportExcel } from "../../utils/excel";
 import { FormContext } from "../../context/form";
 import dayjs from "dayjs";
+import { camelCaseToWords } from "../../utils/helpers";
 
 const TableUtills = ({ moduleName }: { moduleName?: string }) => {
     const { fileName } = useContext(FileContext);
@@ -43,57 +44,173 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
     };
 
 
-    const generatePDF = async () => {
-
-        const param = {
-            startDate: tableStartDate ? dayjs(tableStartDate).format('YYYY-MM-DDTHH:mm:ss') : '',
-            endDate: tableEndDate ? dayjs(tableEndDate).format('YYYY-MM-DDTHH:mm:ss') : ''
+    /** * Extracts columns and rows from the provided data array, excluding specific keys.
+ * @param data - An array of objects representing the data to be processed.
+ * @returns An object containing the extracted columns and rows.
+ */
+    const determineRowsandColumns = (data: Array<{
+        [key: string]: string | number | object | boolean |
+        Array<{ [key: string]: string | number | object }>;
+    }>) => {
+        if (data.length === 0) {
+            return { columns: [], rows: [] };
         }
 
+        const columns = Object.keys(data[0])
+            .filter(key => key !== 'image' && key !== 'action')
+            .map(key => (
+                {
+                    title: camelCaseToWords(key.charAt(0).toUpperCase() + key.slice(1)),
+                    dataKey: key,
+                }));
+
+        const rows = data.map(item => {
+            return Object.keys(item).reduce((acc, key) => {
+                if (key !== 'image' && key !== 'action') {
+                    acc[key] = item[key];
+                }
+                return acc;
+            }, {} as { [key: string]: string | number | object | boolean | Array<any> });
+        });
+
+        return {
+            columns,
+            rows
+        };
+    };
+
+
+    /** * Export data from the current view of the DataGrid.
+ * This function retrieves the currently visible and filtered data from the DataGrid
+ * and formats it for export.
+ */
+    const exportFromCurrentData = async (apiRef: React.MutableRefObject<GridApi>) => {
+        const filteredSortedRowIds = gridFilteredSortedRowIdsSelector(apiRef);
+        const visibleColumnsField = gridVisibleColumnFieldsSelector(apiRef);
+
+        const data = filteredSortedRowIds.map((id) => {
+            const row: Record<string, any> = {};
+            visibleColumnsField.forEach((field) => {
+                row[field] = apiRef.current.getCellParams(id, field).value;
+            });
+            return row;
+        });
+
+        const { columns, rows } = determineRowsandColumns(data);
+
+        return { columns, rows };
+
+    };
+
+    /**
+     * Generate PDF from the current data in the DataGrid or from API.
+     * This function smartly decides whether to use the current filtered table data
+     * or fetch fresh data from the API based on the module name.
+     */
+    const generatePDF = async (apiRef: React.MutableRefObject<GridApi>) => {
         try {
-            if (!moduleName) return;
+            if (!moduleName) {
+                toast.error("Module name not specified");
+                return;
+            }
 
-            const { data, columns } = await formatExportData(moduleName as keyof ModuleTypeMap, param);
+            let exportData: { columns: { title: string; dataKey: string; }[]; data: any[] };
 
-            if (!data || data.length === 0) {
+            // Determine if we should use current table data or fetch from API
+            // We use current data for reports and special cases, API data for regular modules
+            const useCurrentTableData = moduleName.toLowerCase().includes('report') ||
+                moduleName === 'inventory commodities' ||
+                moduleName.toLowerCase().includes('commodities');
+
+            if (useCurrentTableData) {
+                // Use the current filtered/visible data from the table
+                const result = await exportFromCurrentData(apiRef);
+                exportData = { columns: result.columns, data: result.rows };
+                console.log("Exporting PDF from current table data");
+            } else {
+                // Use API-fetched data
+                const param = {
+                    startDate: tableStartDate ? dayjs(tableStartDate).format('YYYY-MM-DDTHH:mm:ss') : '',
+                    endDate: tableEndDate ? dayjs(tableEndDate).format('YYYY-MM-DDTHH:mm:ss') : ''
+                };
+
+                const result = await formatExportData(moduleName as keyof ModuleTypeMap, param);
+                exportData = { columns: result.columns, data: result.data };
+                console.log("Exporting PDF from API data");
+            }
+
+            // Validate data before export
+            if (!exportData.data || exportData.data.length === 0) {
                 toast.error(`No data available for ${moduleName} export`);
                 return;
             }
-            exportPDF(columns, data, fileName || moduleName || 'export');
+
+            // Export to PDF
+            exportPDF(exportData.columns, exportData.data, fileName || moduleName || 'export');
 
         } catch (error) {
             console.error('Error generating PDF:', error);
+            toast.error('Failed to generate PDF: ' + (error instanceof Error ? error.message : 'Unknown error'));
         }
     };
 
-
-    const generateExcel = async () => {
-
-        const param = {
-            startDate: tableStartDate ? dayjs(tableStartDate).format('YYYY-MM-DDTHH:mm:ss') : '',
-            endDate: tableEndDate ? dayjs(tableEndDate).format('YYYY-MM-DDTHH:mm:ss') : ''
-        }
-
+    /**
+     * Generate Excel from the current data in the DataGrid or from API.
+     * This function smartly decides whether to use the current filtered table data
+     * or fetch fresh data from the API based on the module name.
+     */
+    const generateExcel = async (apiRef: React.MutableRefObject<GridApi>) => {
         try {
-            if (!moduleName) return;
-
-            const { data, columns } = await formatExportData(moduleName as keyof ModuleTypeMap, param);
-
-            if (!data || data.length === 0) {
-                toast.error(`No data available for ${moduleName} export`);
+            if (!moduleName) {
+                toast.error("Module name not specified");
                 return;
             }
-            exportExcel(columns, data, fileName || moduleName || 'export');
+
+            let exportData: { columns: { title: string; dataKey: string; }[]; data: any[] };
+
+            // Determine if we should use current table data or fetch from API
+            const useCurrentTableData = moduleName.toLowerCase().includes('report') ||
+                moduleName === 'inventory commodities' ||
+                moduleName.toLowerCase().includes('commodities');
+
+            if (useCurrentTableData && apiRef) {
+                // Use the current filtered/visible data from the table
+                const result = await exportFromCurrentData(apiRef);
+                exportData = { columns: result.columns, data: result.rows };
+                console.log("Exporting Excel from current table data");
+            } else {
+                // Use API-fetched data
+                const param = {
+                    startDate: tableStartDate ? dayjs(tableStartDate).format('YYYY-MM-DDTHH:mm:ss') : '',
+                    endDate: tableEndDate ? dayjs(tableEndDate).format('YYYY-MM-DDTHH:mm:ss') : ''
+                };
+
+                const result = await formatExportData(moduleName as keyof ModuleTypeMap, param);
+                exportData = { columns: result.columns, data: result.data };
+                console.log("Exporting Excel from API data");
+            }
+
+            // Validate data before export
+            if (!exportData.data || exportData.data.length === 0) {
+                toast.error(`No data available for ${moduleName} Excel export`);
+                return;
+            }
+
+            // Export to Excel
+            exportExcel(exportData.columns, exportData.data, fileName || moduleName || 'export');
 
         } catch (error) {
             console.error('Error generating Excel:', error);
+            toast.error('Failed to generate Excel: ' + (error instanceof Error ? error.message : 'Unknown error'));
         }
     };
 
 
+    /*     * Create JSON export menu item
+     */
     const JsonExportMenuItem = (props: GridExportMenuItemProps<{}>) => {
         const theme = useTheme();
-
+        const apiRef = useGridApiContext();
         const { hideMenu } = props;
 
         return (
@@ -102,7 +219,7 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
                     color: theme.palette.secondary.main,
                 }}
                 onClick={() => {
-                    generatePDF();
+                    generatePDF(apiRef);
                     hideMenu?.();
                 }}
             >
@@ -114,14 +231,14 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
     // Create Excel export menu item
     const ExcelExportMenuItem = (props: GridExportMenuItemProps<{}>) => {
         const { hideMenu } = props;
-
+        const apiRef = useGridApiContext();
         return (
             <MenuItem
                 sx={{
                     color: theme.palette.primary.main,
                 }}
                 onClick={() => {
-                    generateExcel();
+                    generateExcel(apiRef);
                     hideMenu?.();
                 }}
             >
