@@ -5,8 +5,18 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { GridApi, GridExportMenuItemProps, gridFilteredSortedRowIdsSelector, gridVisibleColumnFieldsSelector, useGridApiContext } from "@mui/x-data-grid";
-import { assetStatus, assetTypesStatusConstants, requestStatus } from "../../utils/constants";
+import {
+    GridApi,
+    GridExportMenuItemProps,
+    gridFilteredSortedRowIdsSelector,
+    gridVisibleColumnFieldsSelector,
+    useGridApiContext
+} from "@mui/x-data-grid";
+import {
+    assetStatus,
+    assetTypesStatusConstants,
+    requestStatus
+} from "../../utils/constants";
 import { MenuItem, useTheme } from "@mui/material";
 import { exportPDF } from "../../utils/pdf";
 import { useContext, useEffect, useState } from "react";
@@ -23,7 +33,11 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
     const { fileName } = useContext(FileContext);
     const { getCurrentUser } = RoutesUtills();
     const theme = useTheme();
-    const [filterStatuses, setFilterStatuses] = useState<Array<{ label: string, value: string, color: string }>>([]);
+    const [filterStatuses, setFilterStatuses] = useState<Array<{
+        label: string,
+        value: string,
+        color: string
+    }>>([]);
     const { tableStartDate, tableEndDate } = useContext(FormContext);
 
     const determineTimeLineDotColor = (value: string) => {
