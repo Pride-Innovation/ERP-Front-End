@@ -115,12 +115,10 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
     const ExcelExportMenuItem = (props: GridExportMenuItemProps<{}>) => {
         const { hideMenu } = props;
 
-        console.log(tableEndDate, tableStartDate, "excel");
-
         return (
             <MenuItem
                 sx={{
-                    color: theme.palette.secondary.main,
+                    color: theme.palette.primary.main,
                 }}
                 onClick={() => {
                     generateExcel();

@@ -25,8 +25,8 @@ const CustomGridToolbarExport = (props: CustomGridToolbarExportProps) => {
     return (
         <GridToolbarExportContainer {...props}>
             {/* <GridCsvExportMenuItem options={csvOptions} /> */}
-            <JsonExportMenuItem />
             <ExcelExportMenuItem />
+            <JsonExportMenuItem />
         </GridToolbarExportContainer>
     );
 }
