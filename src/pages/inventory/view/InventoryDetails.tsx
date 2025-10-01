@@ -245,7 +245,7 @@ const InventoryDetails = () => {
                 title='View Goods Received Note'
                 open={open}
                 handleClose={handleClose}
-                width="80%"
+                width="50%"
             >
                 <iframe
                     src={fileURL}

@@ -118,7 +118,7 @@ const InventoryGRN = ({ grnList }: { grnList: IGRNReport[] }) => {
                         title='View Goods Received Note'
                         open={open}
                         handleClose={handleClose}
-                        width="80%"
+                        width="50%"
                     >
                         {fileURL ? (
                             <>
@@ -129,7 +129,7 @@ const InventoryGRN = ({ grnList }: { grnList: IGRNReport[] }) => {
                                         p: 2,
                                         bgcolor: alpha(PRIMARY_COLOR, 0.04),
                                         borderRadius: 2,
-                                        border: `1px solid ${alpha(PRIMARY_COLOR, 0.1)}`
+                                        border: `1px solid ${alpha(PRIMARY_COLOR, 0.1)}`,
                                     }}
                                 >
                                     <Grid container spacing={2}>
@@ -175,20 +175,22 @@ const InventoryGRN = ({ grnList }: { grnList: IGRNReport[] }) => {
                                         width="100%"
                                         style={{
                                             border: 'none',
-                                            height: '600px',
+                                            height: '350px',
                                             overflow: 'hidden'
                                         }}
                                     />
                                 </Card>
 
                                 <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3 }}>
-                                    <ButtonComponent
-                                        sendingRequest={false}
-                                        buttonText="Close"
-                                        variant="contained"
-                                        buttonColor="secondary"
-                                        handleClick={handleClose}
-                                    />
+                                    <Box sx={{ width: '100px' }}>
+                                        <ButtonComponent
+                                            sendingRequest={false}
+                                            buttonText="Close"
+                                            variant="contained"
+                                            buttonColor="secondary"
+                                            handleClick={handleClose}
+                                        />
+                                    </Box>
                                 </Box>
                             </>
                         ) : (
