@@ -130,10 +130,13 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
 
             let exportData: { columns: { title: string; dataKey: string; }[]; data: any[] };
 
+            console.log(moduleName, "moduleName");
+
             // Determine if we should use current table data or fetch from API
             // We use current data for reports and special cases, API data for regular modules
             const useCurrentTableData = moduleName.toLowerCase().includes('report') ||
                 moduleName === 'inventory commodities' ||
+                moduleName === 'GRN documents' ||
                 moduleName.toLowerCase().includes('commodities');
 
             if (useCurrentTableData) {
@@ -185,6 +188,7 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
             // Determine if we should use current table data or fetch from API
             const useCurrentTableData = moduleName.toLowerCase().includes('report') ||
                 moduleName === 'inventory commodities' ||
+                moduleName === 'GRN documents' ||
                 moduleName.toLowerCase().includes('commodities');
 
             if (useCurrentTableData && apiRef) {

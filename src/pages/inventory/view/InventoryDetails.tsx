@@ -46,6 +46,7 @@ import BusinessOutlinedIcon from '@mui/icons-material/BusinessOutlined';
 import ReceiptOutlinedIcon from '@mui/icons-material/ReceiptOutlined';
 import CalendarTodayOutlinedIcon from '@mui/icons-material/CalendarTodayOutlined';
 import ContentPasteIcon from '@mui/icons-material/ContentPaste';
+import { camelCaseToWords } from "../../../utils/helpers";
 
 // Define brand colors
 const PRIMARY_COLOR = '#08796C';
@@ -205,12 +206,13 @@ const InventoryDetails = () => {
 
         switch (status.toLowerCase()) {
             case 'active':
-            case 'completed':
+            case 'stockcompleted':
                 color = 'success';
                 bgcolor = alpha('#2e7d32', 0.08);
                 textColor = '#2e7d32';
                 break;
-            case 'pending':
+            case 'stockpending':
+                console.log("here");
                 color = 'warning';
                 bgcolor = alpha('#ed6c02', 0.08);
                 textColor = '#ed6c02';
@@ -224,7 +226,7 @@ const InventoryDetails = () => {
 
         return (
             <Chip
-                label={status}
+                label={camelCaseToWords(status)}
                 size="small"
                 sx={{
                     fontWeight: 600,
