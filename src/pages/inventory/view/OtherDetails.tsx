@@ -110,7 +110,7 @@ const OtherDetails = ({ inventory }: { inventory: IInventory }) => {
                                     <TableComponent
                                         endPoint={endPoint}
                                         loading={loading}
-                                        count={100}
+                                        count={stocksTableData.length || 0}
                                         exportData
                                         header={{ ...header, singular: "Inventory Commodity", plural: "Inventory Commodities" }}
                                         module="inventory commodities"

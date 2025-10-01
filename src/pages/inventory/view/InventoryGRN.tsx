@@ -21,7 +21,6 @@ import ModalComponent from "../../../components/modal";
 import UploadGRN from "../UploadGRN";
 import ButtonComponent from "../../../components/forms/Button";
 import ReceiptOutlinedIcon from '@mui/icons-material/ReceiptOutlined';
-import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 import AssignmentOutlinedIcon from '@mui/icons-material/AssignmentOutlined';
 import CalendarTodayOutlinedIcon from '@mui/icons-material/CalendarTodayOutlined';
 import moment from "moment";
@@ -73,10 +72,10 @@ const InventoryGRN = ({ grnList }: { grnList: IGRNReport[] }) => {
         const newOptions = grnList.map(grn => {
             return grn?.documentPath?.length > 0 ? [
                 { value: crudStates.read, label: "View GRN", icon: <VisibilityOutlinedIcon fontSize='small' color='primary' /> }
-            ] : [
+            ] : grn?.grnDownloaded === true ? [
                 { value: crudStates.download, label: "Generate GRN", icon: <ArrowCircleDownOutlinedIcon fontSize='small' color='inherit' /> },
                 { value: crudStates.upload, label: "Upload Signed GRN", icon: <EditCalendarOutlinedIcon fontSize='small' color='secondary' /> },
-            ]
+            ] : [{ value: crudStates.download, label: "Generate GRN", icon: <ArrowCircleDownOutlinedIcon fontSize='small' color='inherit' /> }]
         });
 
         setOptions(newOptions.flat());
@@ -231,35 +230,18 @@ const InventoryGRN = ({ grnList }: { grnList: IGRNReport[] }) => {
                     <Grid container spacing={2}>
                         <Grid item xs={12}>
                             {grnList?.length > 0 ? (
-                                <Card
-                                    elevation={0}
-                                    sx={{
-                                        borderRadius: 2,
-                                        border: `1px solid ${alpha('#000', 0.08)}`,
-                                        overflow: 'hidden'
-                                    }}
-                                >
-                                    <Box sx={{ p: 2, bgcolor: alpha(theme.palette.background.default, 0.5) }}>
-                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                            <DescriptionOutlinedIcon fontSize="small" sx={{ color: theme.palette.text.secondary }} />
-                                            <Typography variant="subtitle1" fontWeight={600}>
-                                                GRN Documents
-                                            </Typography>
-                                        </Box>
-                                    </Box>
-                                    <TableComponent
-                                        endPoint={endPoint}
-                                        loading={false}
-                                        count={100}
-                                        exportData
-                                        header={header}
-                                        module="GRN documents"
-                                        rows={stocksTableData || []}
-                                        columnHeaders={columnHeaders}
-                                        paginationMode='server'
-                                        handleOptionClicked={handleOptionClicked}
-                                    />
-                                </Card>
+                                <TableComponent
+                                    endPoint={endPoint}
+                                    loading={false}
+                                    count={stocksTableData.length}
+                                    exportData
+                                    header={header}
+                                    module="GRN documents"
+                                    rows={stocksTableData || []}
+                                    columnHeaders={columnHeaders}
+                                    paginationMode='server'
+                                    handleOptionClicked={handleOptionClicked}
+                                />
                             ) : (
                                 <Alert
                                     severity="info"
