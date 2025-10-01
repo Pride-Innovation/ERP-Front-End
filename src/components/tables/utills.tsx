@@ -14,6 +14,7 @@ import { FileContext } from "../../context/file/FileContext";
 import RoutesUtills from "../../core/routes/utills";
 import formatExportData, { ModuleTypeMap } from "./formatExportData";
 import { toast } from "react-toastify";
+import { exportExcel } from "../../utils/excel";
 
 const TableUtills = ({ moduleName }: { moduleName?: string }) => {
     const { fileName } = useContext(FileContext);
@@ -57,6 +58,24 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
     };
 
 
+    const generateExcel = async () => {
+        try {
+            if (!moduleName) return;
+
+            const { data, columns } = await formatExportData(moduleName as keyof ModuleTypeMap);
+
+            if (!data || data.length === 0) {
+                toast.error(`No data available for ${moduleName} export`);
+                return;
+            }
+            exportExcel(columns, data, fileName || moduleName || 'export');
+
+        } catch (error) {
+            console.error('Error generating Excel:', error);
+        }
+    };
+
+
     const JsonExportMenuItem = (props: GridExportMenuItemProps<{}>) => {
         const theme = useTheme();
 
@@ -76,6 +95,25 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
             </MenuItem>
         );
     }
+
+    // Create Excel export menu item
+    const ExcelExportMenuItem = (props: GridExportMenuItemProps<{}>) => {
+        const { hideMenu } = props;
+
+        return (
+            <MenuItem
+                sx={{
+                    color: theme.palette.secondary.main,
+                }}
+                onClick={() => {
+                    generateExcel();
+                    hideMenu?.();
+                }}
+            >
+                Download as Excel
+            </MenuItem>
+        );
+    };
 
     /**
      * Ensure that the options in the select dropdown are filtered based on the current row.
@@ -265,6 +303,7 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
         JsonExportMenuItem,
         handleOptionsFilter,
         filterStatuses,
+        ExcelExportMenuItem
     };
 };
 

@@ -20,12 +20,13 @@ interface CustomGridToolbarExportProps extends ButtonProps {
 const CustomGridToolbarExport = (props: CustomGridToolbarExportProps) => {
 
     const csvOptions: GridCsvExportOptions = {};
-    const { JsonExportMenuItem } = TableUtills({ moduleName: props.module });
+    const { JsonExportMenuItem, ExcelExportMenuItem } = TableUtills({ moduleName: props.module });
 
     return (
         <GridToolbarExportContainer {...props}>
-            <GridCsvExportMenuItem options={csvOptions} />
+            {/* <GridCsvExportMenuItem options={csvOptions} /> */}
             <JsonExportMenuItem />
+            <ExcelExportMenuItem />
         </GridToolbarExportContainer>
     );
 }

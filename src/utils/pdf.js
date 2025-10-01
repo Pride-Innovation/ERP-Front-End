@@ -38,7 +38,7 @@ export const exportPDF = (columns, rows, fileName) => {
     // Add the actual logo image (left side)
     try {
         // Logo dimensions and positioning
-        const logoWidth = 60;
+        const logoWidth = 50;
         const logoHeight = 60;
         const logoX = margin;
         const logoY = margin / 2;
