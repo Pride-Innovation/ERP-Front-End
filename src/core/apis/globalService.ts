@@ -44,9 +44,19 @@ export const fetchRowsService = async ({
 };
 
 
-export const fetchAllRowsService = async (endPoint: string) => {
+export const fetchAllRowsService = async ({ endPoint, params = {} }
+    : { endPoint: string } & { params?: Record<string, any> }) => {
+    const searchParams = new URLSearchParams();
+
+    // Append only truthy values
+    Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== "") {
+            searchParams.append(key, value.toString());
+        }
+    });
+
     try {
-        const response = await axiosInstance.get(`export/${endPoint}`);
+        const response = await axiosInstance.get(`export/${endPoint}`, { params: searchParams });
         return response.data;
     } catch (error) {
         return error;

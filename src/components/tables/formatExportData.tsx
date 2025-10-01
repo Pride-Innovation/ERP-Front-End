@@ -15,14 +15,15 @@ export type ModuleTypeMap = {
 
 // Generic function that returns correctly typed data based on module name
 async function formatExportData<T extends keyof ModuleTypeMap>(
-    moduleName: T
+    moduleName: T,
+    param?: Record<string, any>
 ): Promise<{
     data: Array<any>; // Using any for flexibility with different response structures
     columns: Array<{ title: string; dataKey: string }>;
 }> {
     try {
         // Fetch data from API
-        const response = await fetchAllRowsService(moduleName);
+        const response = await fetchAllRowsService({ endPoint: moduleName, params: param });
 
         // Generate column definitions based on module type
         let columns: Array<{ title: string; dataKey: string }> = [];

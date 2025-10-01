@@ -15,12 +15,15 @@ import RoutesUtills from "../../core/routes/utills";
 import formatExportData, { ModuleTypeMap } from "./formatExportData";
 import { toast } from "react-toastify";
 import { exportExcel } from "../../utils/excel";
+import { FormContext } from "../../context/form";
+import dayjs from "dayjs";
 
 const TableUtills = ({ moduleName }: { moduleName?: string }) => {
     const { fileName } = useContext(FileContext);
     const { getCurrentUser } = RoutesUtills();
     const theme = useTheme();
     const [filterStatuses, setFilterStatuses] = useState<Array<{ label: string, value: string, color: string }>>([]);
+    const { tableStartDate, tableEndDate } = useContext(FormContext);
 
     const determineTimeLineDotColor = (value: string) => {
         switch (value) {
@@ -41,10 +44,16 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
 
 
     const generatePDF = async () => {
+
+        const param = {
+            startDate: tableStartDate ? dayjs(tableStartDate).format('YYYY-MM-DDTHH:mm:ss') : '',
+            endDate: tableEndDate ? dayjs(tableEndDate).format('YYYY-MM-DDTHH:mm:ss') : ''
+        }
+
         try {
             if (!moduleName) return;
 
-            const { data, columns } = await formatExportData(moduleName as keyof ModuleTypeMap);
+            const { data, columns } = await formatExportData(moduleName as keyof ModuleTypeMap, param);
 
             if (!data || data.length === 0) {
                 toast.error(`No data available for ${moduleName} export`);
@@ -59,10 +68,16 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
 
 
     const generateExcel = async () => {
+
+        const param = {
+            startDate: tableStartDate ? dayjs(tableStartDate).format('YYYY-MM-DDTHH:mm:ss') : '',
+            endDate: tableEndDate ? dayjs(tableEndDate).format('YYYY-MM-DDTHH:mm:ss') : ''
+        }
+
         try {
             if (!moduleName) return;
 
-            const { data, columns } = await formatExportData(moduleName as keyof ModuleTypeMap);
+            const { data, columns } = await formatExportData(moduleName as keyof ModuleTypeMap, param);
 
             if (!data || data.length === 0) {
                 toast.error(`No data available for ${moduleName} export`);
@@ -99,6 +114,8 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
     // Create Excel export menu item
     const ExcelExportMenuItem = (props: GridExportMenuItemProps<{}>) => {
         const { hideMenu } = props;
+
+        console.log(tableEndDate, tableStartDate, "excel");
 
         return (
             <MenuItem
