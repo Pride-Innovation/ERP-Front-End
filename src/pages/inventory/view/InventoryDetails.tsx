@@ -268,6 +268,50 @@ const InventoryDetails = () => {
                 <Loading items='Inventory' />
             ) : (
                 <>
+                    {/* Navigation Row - Added at the top */}
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            mb: 2
+                        }}
+                    >
+                        <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            sx={{
+                                fontWeight: 500,
+                                display: 'flex',
+                                alignItems: 'center'
+                            }}
+                        >
+                            {/* <ArrowBackIcon
+                                fontSize="small"
+                                sx={{ mr: 0.5, opacity: 0.7 }}
+                            /> */}
+                            Inventory Details
+                        </Typography>
+
+                        <MuiButton
+                            color='inherit'
+                            type='button'
+                            variant='outlined'
+                            onClick={() => navigate(-1)}
+                            startIcon={<ArrowBackIcon />}
+                            size="small"
+                            sx={{
+                                borderColor: alpha('#000', 0.2),
+                                color: 'text.secondary',
+                                '&:hover': {
+                                    borderColor: alpha('#000', 0.3),
+                                    backgroundColor: alpha('#000', 0.05)
+                                }
+                            }}
+                        >
+                            Back
+                        </MuiButton>
+                    </Box>
                     {/* Header Section */}
                     <Box
                         sx={{
@@ -523,12 +567,6 @@ const InventoryDetails = () => {
                                                 icon={<CalendarTodayOutlinedIcon />}
                                                 text={currentInventory?.createDate ? moment(currentInventory?.createDate).format('Do MMMM YYYY, h:mm') : null}
                                             />
-
-                                            {/* <EnhancedDetailSection 
-                                                label="Current Status" 
-                                                icon={<PlaylistAddCheckOutlinedIcon />}
-                                                chip={getStatusChip()}
-                                            /> */}
                                         </Stack>
                                     </Box>
 
@@ -566,31 +604,6 @@ const InventoryDetails = () => {
                             </Card>
                         </Grid>
                     </Grid>
-
-                    {/* Action Buttons */}
-                    <Box
-                        sx={{
-                            display: 'flex',
-                            justifyContent: 'flex-end',
-                            mt: 3
-                        }}
-                    >
-                        <MuiButton
-                            color='inherit'
-                            type='button'
-                            variant='outlined'
-                            onClick={() => navigate(-1)}
-                            startIcon={<ArrowBackIcon />}
-                            sx={{
-                                borderColor: alpha('#000', 0.2),
-                                color: 'text.secondary',
-                                '&:hover': {
-                                    borderColor: alpha('#000', 0.3),
-                                    backgroundColor: alpha('#000', 0.05)
-                                }
-                            }}
-                        >Back</MuiButton>
-                    </Box>
                 </>
             )}
         </Container>
