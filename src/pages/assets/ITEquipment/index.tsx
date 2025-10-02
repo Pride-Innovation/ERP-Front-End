@@ -29,6 +29,8 @@ import ToStore from "../ToStore"
 import { FileContext } from "../../../context/file/FileContext"
 import { toast } from "react-toastify"
 import { bulkInsertITAssetsService } from "./service"
+import { FormContext } from "../../../context/form"
+import dayjs from "dayjs"
 
 const ITEquipment = () => {
     const [loading, setLoading] = useState<boolean>(false);
@@ -40,6 +42,7 @@ const ITEquipment = () => {
     const { currentAssetType, setCurrentAssetType, determineStatusId } = AssetUtills()
     const [selectedStatus, setSelectedStatus] = useState<string>('all');
     const { fileData } = useContext(FileContext);
+    const { tableStartDate, tableEndDate } = useContext(FormContext);
 
     const {
         open,
@@ -60,7 +63,9 @@ const ITEquipment = () => {
         setLoading(true);
         const params = {
             assetTypeId: currentAssetType.id,
-            assetStatusId: determineStatusId(status || 'all')
+            assetStatusId: determineStatusId(status || 'all'),
+            startDate: tableStartDate ? dayjs(tableStartDate).format('YYYY-MM-DDTHH:mm:ss') : '',
+            endDate: tableEndDate ? dayjs(tableEndDate).format('YYYY-MM-DDTHH:mm:ss') : ''
         }
 
         try {
@@ -139,6 +144,12 @@ const ITEquipment = () => {
             bulkInsertITAssets(fileData.jsonData as unknown as Array<IBulkAssetData>);
         }
     }, [fileData]);
+
+    useEffect(() => {
+        if (tableStartDate && tableEndDate) {
+            fetchResources()
+        }
+    }, [tableStartDate, tableEndDate]);
 
     const renderModals = () => (
         <>
@@ -236,6 +247,7 @@ const ITEquipment = () => {
                         status
                         onStatusChange={handleStatusChange}
                         selectedStatus={selectedStatus}
+                        dateRangePicker
                     />)}
             </Card>
         </Box>
