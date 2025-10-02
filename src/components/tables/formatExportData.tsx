@@ -1,4 +1,5 @@
 import { fetchAllRowsService } from "../../core/apis/globalService";
+import { IITEquipment } from "../../pages/assets/ITEquipment/interface";
 import { IInventory, IStockCommodities } from "../../pages/inventory/interface";
 import { IRequest } from "../../pages/request/interface";
 import { IUser } from "../../pages/users/interface";
@@ -10,6 +11,7 @@ export type ModuleTypeMap = {
     inventory: IInventory;
     requests: IRequest;
     users: IUser;
+    assets: IITEquipment;
     // Add more module mappings as needed
 }
 
@@ -60,6 +62,19 @@ async function formatExportData<T extends keyof ModuleTypeMap>(
                 { title: 'Branch', dataKey: 'branch' },
                 { title: 'Role', dataKey: 'role' },
                 { title: 'Status', dataKey: 'status' }
+            ];
+        } else if (moduleName === 'assets') {
+            // Asset-specific columns
+            columns = [
+                { title: 'Asset Name', dataKey: 'assetName' },
+                { title: 'Manufacturer', dataKey: 'make' },
+                { title: 'Engraved Number', dataKey: 'engravedNumber' },
+                { title: 'Model', dataKey: 'model' },
+                { title: 'Serial Number', dataKey: 'serialNumber' },
+                { title: 'Date Received', dataKey: 'dateReceipt' },
+                { title: 'Location', dataKey: 'branch' },
+                { title: 'Assigned To', dataKey: 'assignedTo' },
+                { title: 'Status', dataKey: 'assetStatus' }
             ];
         }
 
@@ -152,6 +167,20 @@ function processResponseData(data: any, moduleName: string): Array<any> {
             branch: item.branch?.name || '',
             role: item.role?.name || '',
             status: item.status || ''
+        }));
+    } else if (moduleName === 'assets') {
+        // Process IT Equipment data
+        return items.map(item => ({
+            id: item.id,
+            assetName: item.assetName || '',
+            make: item.make || '',
+            model: item.model || '',
+            serialNumber: item.serialNumber || '',
+            engravedNumber: item.engravedNumber || '',
+            branch: item.branch?.name || '',
+            assignedTo: item.assignedTo ? item.assignedTo?.firstName + ' ' + item.assignedTo?.lastName || '' : '',
+            assetStatus: item.assetStatus.name || '',
+            dateReceipt: item.dateReceipt ? new Date(item.dateReceipt).toLocaleDateString() : ''
         }));
     }
 

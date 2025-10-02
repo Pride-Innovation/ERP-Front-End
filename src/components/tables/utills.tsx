@@ -116,6 +116,17 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
 
     };
 
+    const determineAPIString = (module: string) => {
+        switch (module) {
+            case assetTypesStatusConstants.itEquipment:
+            case assetTypesStatusConstants.officeEquipment:
+            case assetTypesStatusConstants.fleet:
+                return 'assets';
+            default:
+                return module;
+        }
+    };
+
     /**
      * Generate PDF from the current data in the DataGrid or from API.
      * This function smartly decides whether to use the current filtered table data
@@ -148,10 +159,13 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
                 // Use API-fetched data
                 const param = {
                     startDate: tableStartDate ? dayjs(tableStartDate).format('YYYY-MM-DDTHH:mm:ss') : '',
-                    endDate: tableEndDate ? dayjs(tableEndDate).format('YYYY-MM-DDTHH:mm:ss') : ''
+                    endDate: tableEndDate ? dayjs(tableEndDate).format('YYYY-MM-DDTHH:mm:ss') : '',
+                    assetTypeId: moduleName === assetTypesStatusConstants.itEquipment ? 2 : // Asset Type ID for IT Equipment is 2
+                        moduleName === assetTypesStatusConstants.officeEquipment ? 1 : // Asset Type ID for Office Equipment is 1
+                            moduleName === assetTypesStatusConstants.fleet ? 55 : null // Asset Type ID for Fleet is 55
                 };
 
-                const result = await formatExportData(moduleName as keyof ModuleTypeMap, param);
+                const result = await formatExportData(determineAPIString(moduleName) as keyof ModuleTypeMap, param);
                 exportData = { columns: result.columns, data: result.data };
                 console.log("Exporting PDF from API data");
             }
@@ -200,10 +214,13 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
                 // Use API-fetched data
                 const param = {
                     startDate: tableStartDate ? dayjs(tableStartDate).format('YYYY-MM-DDTHH:mm:ss') : '',
-                    endDate: tableEndDate ? dayjs(tableEndDate).format('YYYY-MM-DDTHH:mm:ss') : ''
+                    endDate: tableEndDate ? dayjs(tableEndDate).format('YYYY-MM-DDTHH:mm:ss') : '',
+                    assetTypeId: moduleName === assetTypesStatusConstants.itEquipment ? 2 : // Asset Type ID for IT Equipment is 2
+                        moduleName === assetTypesStatusConstants.officeEquipment ? 1 : // Asset Type ID for Office Equipment is 1
+                            moduleName === assetTypesStatusConstants.fleet ? 55 : null // Asset Type ID for Fleet is 55
                 };
 
-                const result = await formatExportData(moduleName as keyof ModuleTypeMap, param);
+                const result = await formatExportData(determineAPIString(moduleName) as keyof ModuleTypeMap, param);
                 exportData = { columns: result.columns, data: result.data };
                 console.log("Exporting Excel from API data");
             }
