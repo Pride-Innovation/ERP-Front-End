@@ -24,8 +24,8 @@ import { ReactNode } from "react";
 export interface IITEquipment {
     id?: string | number;
     assetName: string;
-    hostname: string;
-    detailNetBookValue: string;
+    hostname?: string | null;
+    detailNetBookValue?: string | null;
     engravedNumber: string;
     dateReceipt: string;
     make: string;
@@ -33,7 +33,7 @@ export interface IITEquipment {
     unitOfMeasure: string;
     purchaseCost: string;
     costOfTheAsset: string;
-    netValueB: string,
+    netValueB?: string | null;
     model?: string | null;
     serialNumber?: string | null;
     assignedTo?: IUser | null;

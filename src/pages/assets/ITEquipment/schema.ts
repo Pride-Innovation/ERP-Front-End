@@ -14,15 +14,15 @@ import { IBranch } from '../../settings/branch/interface';
 
 export const ITEquipmentSchema = yup.object().shape({
     assetName: yup.string().required('Asset name is required'),
-    hostname: yup.string().required('Host name is required'),
-    detailNetBookValue: yup.string().required('NetBook value is required'),
+    hostname: yup.string().nullable().optional(),
+    detailNetBookValue: yup.string().nullable().optional(),
     engravedNumber: yup.string().required('Engraved number is required'),
     dateReceipt: yup.string().required('Receipt is required'),
     make: yup.string().required('Make is required'),
     unitOfMeasure: yup.string().required('Unit of measure is required'),
     purchaseCost: yup.string().required('Purchase cost is required'),
     costOfTheAsset: yup.string().required('Cost of asset is required'),
-    netValueB: yup.string().required('Net value is required'),
+    netValueB: yup.string().nullable().optional(),
     lpoNumber: yup.string().required('LPO Number is required'),
     model: yup.string().nullable().optional(),
     serialNumber: yup.string().nullable().optional(),

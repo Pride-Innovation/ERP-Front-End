@@ -502,19 +502,19 @@ const ITEquipmentDetails = () => {
 
                                     <EnhancedDetailSection
                                         label="Hostname"
-                                        text={equipment.hostname}
+                                        text={equipment?.hostname as string || null}
                                         icon={<CableIcon fontSize="small" />}
                                     />
 
                                     <EnhancedDetailSection
                                         label="Model"
-                                        text={equipment.model as string}
+                                        text={equipment?.model as string || null}
                                         icon={<DevicesOtherIcon fontSize="small" />}
                                     />
 
                                     <EnhancedDetailSection
                                         label="Engraved Number"
-                                        text={equipment.engravedNumber}
+                                        text={equipment?.engravedNumber as string || null}
                                         icon={<InfoIcon fontSize="small" />}
                                     />
 
