@@ -334,12 +334,14 @@ const ITEquipmentUtills = () => {
         {
             value: "netValueB",
             label: 'Net Value',
-            type: "input"
+            type: "input",
+            required: false,
         },
         {
             value: "assetDepreciationRate",
             label: 'Depreciation Rate',
-            type: "input"
+            type: "input",
+            required: false,
         },
         {
             value: "branch",
@@ -356,11 +358,13 @@ const ITEquipmentUtills = () => {
             value: "hostname",
             label: 'Host Name',
             type: "input",
+            required: false,
         },
         {
             value: "detailNetBookValue",
             label: 'Detail Net Book Value',
             type: "input",
+            required: false,
         },
         {
             value: "dateReceipt",
@@ -397,22 +401,26 @@ const ITEquipmentUtills = () => {
         {
             value: "ram",
             label: 'RAM',
-            type: "input"
+            type: "input",
+            required: false,
         },
         {
             value: "cpuSpeed",
             label: 'CPU Speed',
-            type: "input"
+            type: "input",
+            required: false,
         },
         {
             value: "hardDiskSize",
             label: 'Hard Disk Size',
-            type: "input"
+            type: "input",
+            required: false,
         },
         {
             value: "ipAddress",
             label: 'IP Address',
-            type: "input"
+            type: "input",
+            required: false,
         },
         {
             value: "interfaceType",
@@ -422,7 +430,8 @@ const ITEquipmentUtills = () => {
                 { label: "USB", value: "usb" },
                 { label: "LCD", value: "lcd" },
                 { label: "LED", value: "led" },
-            ]
+            ],
+            required: false,
         },
     ]
 
