@@ -5,22 +5,36 @@ import { IRequest } from "../../pages/request/interface";
 import { IUser } from "../../pages/users/interface";
 import { camelCaseToWords } from "../../utils/helpers";
 
-
-// Define a type mapping for different modules
+/**
+ * Formats and fetches export data for different modules.
+ * @param moduleName - The name of the module (e.g., 'inventory', 'requests', 'users', 'assets').
+ * @param param - Optional parameters for the API request.
+ * @returns An object containing formatted data and column definitions.
+ */
 export type ModuleTypeMap = {
     inventory: IInventory;
     requests: IRequest;
     users: IUser;
     assets: IITEquipment;
-    // Add more module mappings as needed
 }
 
-// Generic function that returns correctly typed data based on module name
+/**
+ * 
+ * @param moduleName 
+ * @param param 
+ * @returns 
+ * @description
+ * This function fetches data from the API based on the module name and optional parameters.
+ * It then processes the data to match the required export format, including defining column headers.
+ * The function handles different data structures returned by the API and ensures that the output is consistent.
+ * It supports modules like 'inventory', 'requests', 'users', and 'assets', each with its own specific data processing logic.
+ */
+
 async function formatExportData<T extends keyof ModuleTypeMap>(
     moduleName: T,
     param?: Record<string, any>
 ): Promise<{
-    data: Array<any>; // Using any for flexibility with different response structures
+    data: Array<any>;
     columns: Array<{ title: string; dataKey: string }>;
 }> {
     try {
