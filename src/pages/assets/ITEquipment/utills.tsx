@@ -133,17 +133,25 @@ const ITEquipmentUtills = () => {
         image,
         purchaseCost,
         costOfTheAsset,
-        // serialNumber,
+        serialNumber,
         make,
+        assetName,
+        engravedNumber,
+        model,
         ...data
     } = itEquipmentMock[0];
 
     const rowData = {
         ...data,
+        assetName,
+        manufacturer: make,
+        engravedNumber,
+        model,
+        serialNumber: serialNumber as string,
         dateReceived: "",
-        status: itEquipmentMock[0].assetStatus?.name,
-        assignedTo: itEquipmentMock[0].assignedTo?.firstName,
         location: "",
+        assignedTo: itEquipmentMock[0].assignedTo?.firstName,
+        status: itEquipmentMock[0].assetStatus?.name,
         action: {
             label: "options",
             options: [
@@ -187,8 +195,11 @@ const ITEquipmentUtills = () => {
                 stock,
                 commodity,
                 dateReceipt,
-                // serialNumber,
+                serialNumber,
                 make,
+                assetName,
+                engravedNumber,
+                model,
                 image,
                 ...fielsdata
             } = list[index];
@@ -207,6 +218,7 @@ const ITEquipmentUtills = () => {
                     status: item?.assetStatus?.status as string,
                     assignedTo: item.assignedTo?.firstName ? `${item.assignedTo?.lastName} ${item.assignedTo?.firstName}` : "",
                     location: determineBranchName(item),
+                    manufacturer: item.make as string,
                 }
             )
         })

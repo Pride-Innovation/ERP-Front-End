@@ -52,7 +52,7 @@ export interface IITEquipment {
     category?: string | null;
     lpoNumber: string;
     commodity?: ICommodity | null;
-    stock?: IInventory | null
+    stock?: IInventory | null;
 }
 
 /**
@@ -169,6 +169,7 @@ export interface IITEquipmentTableData {
     status: string;
     assignedTo: string;
     location: string;
+    manufacturer?: string | null;
 }
 
 /**

@@ -6,12 +6,22 @@ Managing Director
 */
 
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { IITEquipment, IITEquipmentAxiosResponse } from "./interface";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { ITEquipmentSchema } from "./schema";
-import { Avatar, Box, Card, Container, SelectChangeEvent, Typography, alpha, useMediaQuery, useTheme } from "@mui/material";
+import {
+    Avatar,
+    Box,
+    Card,
+    Container,
+    SelectChangeEvent,
+    Typography,
+    alpha,
+    useMediaQuery,
+    useTheme
+} from "@mui/material";
 import ITEquipmentForm from "./ITEquipmentForm";
 import { itEquipmentMock } from "../../../mocks/itEquipment";
 import { getITEquipmentByIDService, updateITEquipmentService } from "./service";
@@ -21,6 +31,7 @@ import { useDispatch } from "react-redux";
 import { AppDispatch } from "../../../store";
 import { updateITAsset } from "./slice";
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import { ROUTES } from "../../../core/routes/routes";
 
 const PRIMARY_COLOR = '#08796C'; // Teal green
 
@@ -35,6 +46,7 @@ const UpdateITEquipment = () => {
     const [assetName, setAssetName] = useState<string>("IT Equipment");
     const dispatch = useDispatch<AppDispatch>();
     const theme = useTheme();
+    const navigate = useNavigate();
 
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const {
@@ -118,8 +130,10 @@ const UpdateITEquipment = () => {
         } catch (error) {
             console.error("Error updating asset:", error);
             toast.error("Failed to update asset. Please try again.");
+        } finally {
+            setSendingRequest(false);
+            navigate(ROUTES.LIST_ASSETS);
         }
-        setSendingRequest(false);
     };
 
     const handleChange = (event: SelectChangeEvent) => {
