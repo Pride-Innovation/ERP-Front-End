@@ -93,6 +93,7 @@ export interface IOfficeEquipmentTableData {
     status: string;
     assignedTo: string;
     location: string;
+    manufacturer?: string;
 }
 
 export interface IOfficeEquipmentResponse extends IFetchDataRequest {

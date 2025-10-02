@@ -30,7 +30,7 @@ import { determineBranchName } from "../../../utils/helpers";
 
 const OfficeEquipmentUtills = () => {
     const endPoint = 'assets';
-    const module = 'office equipment';
+    const module = 'Office Equipment';
     const header = { plural: 'Office Equipment', singular: 'Office Equipment' };
     const [open, setOpen] = useState<boolean>(false);
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
@@ -111,16 +111,22 @@ const OfficeEquipmentUtills = () => {
         purchaseCost,
         costOfTheAsset,
         hostname,
+        make,
+        assetName,
+        engravedNumber,
         image,
         ...data
     } = officeEquipmentMock[0];
 
     const rowData = {
         ...data,
+        assetName: "",
+        manufacturer: "",
+        engravedNumber: "",
         dateReceived: "",
-        status: officeEquipmentMock[0].assetStatus?.name,
-        assignedTo: officeEquipmentMock[0].assignedTo?.firstName,
         location: "",
+        assignedTo: officeEquipmentMock[0].assignedTo?.firstName,
+        status: officeEquipmentMock[0].assetStatus?.name,
         action: {
             label: "options",
             options: [
@@ -158,6 +164,9 @@ const OfficeEquipmentUtills = () => {
                 purchaseCost,
                 costOfTheAsset,
                 hostname,
+                make,
+                assetName,
+                engravedNumber,
                 image,
                 ...fielsdata
             } = list[index];
@@ -169,11 +178,10 @@ const OfficeEquipmentUtills = () => {
                     engravedNumber: item.engravedNumber,
                     dateReceived: moment(item.dateReceipt).format('Do MMMM YYYY'),
                     make: item.make,
-                    // purchaseCost: item.purchaseCost,
-                    // costOfAsset: item.costOfTheAsset,
                     status: item?.assetStatus?.status as string,
                     assignedTo: item.assignedTo?.firstName ? `${item.assignedTo?.lastName} ${item.assignedTo?.firstName}` : "",
                     location: determineBranchName(item),
+                    manufacturer: item.make,
                 }
             )
         })

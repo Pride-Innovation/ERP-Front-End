@@ -85,22 +85,48 @@ async function formatExportData<T extends keyof ModuleTypeMap>(
                 { title: 'Status', dataKey: 'status' }
             ];
         } else if (moduleName === 'assets') {
-            // Asset-specific columns
-            columns = [
-                { title: 'Asset Name', dataKey: 'assetName' },
-                { title: 'Manufacturer', dataKey: 'make' },
-                { title: 'Engraved Number', dataKey: 'engravedNumber' },
-                { title: 'Model', dataKey: 'model' },
-                { title: 'Serial Number', dataKey: 'serialNumber' },
-                { title: 'Date Received', dataKey: 'dateReceipt' },
-                { title: 'Location', dataKey: 'branch' },
-                { title: 'Assigned To', dataKey: 'assignedTo' },
-                { title: 'Status', dataKey: 'assetStatus' }
-            ];
+            // Asset-specific columns based on assetTypeId
+            const assetTypeId = param?.assetTypeId || 2; // Default to IT Equipment if not specified
+
+            if (assetTypeId === 2) { // IT Equipment
+                columns = [
+                    { title: 'Asset Name', dataKey: 'assetName' },
+                    { title: 'Manufacturer', dataKey: 'make' },
+                    { title: 'Engraved Number', dataKey: 'engravedNumber' },
+                    { title: 'Model', dataKey: 'model' },
+                    { title: 'Serial Number', dataKey: 'serialNumber' },
+                    { title: 'Date Received', dataKey: 'dateReceipt' },
+                    { title: 'Location', dataKey: 'branch' },
+                    { title: 'Assigned To', dataKey: 'assignedTo' },
+                    { title: 'Status', dataKey: 'assetStatus' }
+                ];
+            } else if (assetTypeId === 1) { // Office Equipment
+                columns = [
+                    { title: 'Asset Name', dataKey: 'assetName' },
+                    { title: 'Manufacturer', dataKey: 'make' },
+                    { title: 'Engraved Number', dataKey: 'engravedNumber' },
+                    { title: 'Date Received', dataKey: 'dateReceipt' },
+                    { title: 'Location', dataKey: 'branch' },
+                    { title: 'Assigned To', dataKey: 'assignedTo' },
+                    { title: 'Status', dataKey: 'assetStatus' }
+                ];
+            } else if (assetTypeId === 55) { // Fleet
+                columns = [
+                    { title: 'Asset Name', dataKey: 'assetName' },
+                    { title: 'Manufacturer', dataKey: 'make' },
+                    { title: 'Registration No', dataKey: 'engravedNumber' },
+                    { title: 'Model', dataKey: 'model' },
+                    { title: 'Chassis Number', dataKey: 'serialNumber' },
+                    { title: 'Date Acquired', dataKey: 'dateReceipt' },
+                    { title: 'Location', dataKey: 'branch' },
+                    { title: 'Driver', dataKey: 'assignedTo' },
+                    { title: 'Status', dataKey: 'assetStatus' }
+                ];
+            }
         }
 
         // Process the response data based on module type
-        const processedData = processResponseData(response, moduleName);
+        const processedData = processResponseData(response, moduleName, param?.assetTypeId);
 
         return {
             data: processedData,
@@ -124,7 +150,7 @@ const sumTotalDelivered = (commodities: Array<IStockCommodities>): number => {
 }
 
 // Helper function to process raw API response data
-function processResponseData(data: any, moduleName: string): Array<any> {
+function processResponseData(data: any, moduleName: string, assetTypeId?: number): Array<any> {
     // Handle different API response structures
     let items: any[] = [];
 
@@ -190,19 +216,47 @@ function processResponseData(data: any, moduleName: string): Array<any> {
             status: item.status || ''
         }));
     } else if (moduleName === 'assets') {
-        // Process IT Equipment data
-        return items.map(item => ({
-            id: item.id,
-            assetName: item.assetName || '',
-            make: item.make || '',
-            model: item.model || '',
-            serialNumber: item.serialNumber || '',
-            engravedNumber: item.engravedNumber || '',
-            branch: item.branch?.name || '',
-            assignedTo: item.assignedTo ? item.assignedTo?.firstName + ' ' + item.assignedTo?.lastName || '' : '',
-            assetStatus: item.assetStatus.name || '',
-            dateReceipt: item.dateReceipt ? new Date(item.dateReceipt).toLocaleDateString() : ''
-        }));
+        // Process asset data based on asset type
+        const assetType = assetTypeId || 2; // Default to IT Equipment if not specified
+
+        if (assetType === 1) { // Office Equipment
+            return items.map(item => ({
+                id: item.id,
+                assetName: item.assetName || '',
+                make: item.make || '',
+                engravedNumber: item.engravedNumber || '',
+                branch: item.branch?.name || '',
+                assignedTo: item.assignedTo ? item.assignedTo?.firstName + ' ' + item.assignedTo?.lastName || '' : '',
+                assetStatus: item.assetStatus?.name || '',
+                dateReceipt: item.dateReceipt ? new Date(item.dateReceipt).toLocaleDateString() : ''
+            }));
+        } else if (assetType === 55) { // Fleet
+            return items.map(item => ({
+                id: item.id,
+                assetName: item.assetName || '',
+                make: item.make || '',
+                model: item.model || '',
+                serialNumber: item.serialNumber || '', // Used as chassis number for fleet
+                engravedNumber: item.engravedNumber || '', // Used as registration number for fleet
+                branch: item.branch?.name || '',
+                assignedTo: item.assignedTo ? item.assignedTo?.firstName + ' ' + item.assignedTo?.lastName || '' : '',
+                assetStatus: item.assetStatus?.name || '',
+                dateReceipt: item.dateReceipt ? new Date(item.dateReceipt).toLocaleDateString() : ''
+            }));
+        } else { // Default: IT Equipment (assetType === 2)
+            return items.map(item => ({
+                id: item.id,
+                assetName: item.assetName || '',
+                make: item.make || '',
+                model: item.model || '',
+                serialNumber: item.serialNumber || '',
+                engravedNumber: item.engravedNumber || '',
+                branch: item.branch?.name || '',
+                assignedTo: item.assignedTo ? item.assignedTo?.firstName + ' ' + item.assignedTo?.lastName || '' : '',
+                assetStatus: item.assetStatus?.name || '',
+                dateReceipt: item.dateReceipt ? new Date(item.dateReceipt).toLocaleDateString() : ''
+            }));
+        }
     }
 
     // Default case - return items with minimal processing
