@@ -9,12 +9,24 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { alpha, Avatar, Box, Card, Container, Typography, useMediaQuery, useTheme } from "@mui/material";
+import {
+    alpha,
+    Avatar,
+    Box,
+    Card,
+    Container,
+    Typography,
+    useMediaQuery,
+    useTheme
+} from "@mui/material";
 import { IFleet, IFleetAxiosResponse } from "./interface";
 import { fleetsMock } from "../../../mocks/fleet";
 import { fleetSchema } from "./schema";
 import FleetForm from "./FleetForm";
-import { getFleetEquipmentByIDService, updateFleetEquipmentService } from "./service";
+import {
+    getFleetEquipmentByIDService,
+    updateFleetEquipmentService
+} from "./service";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../../../store";
 import Loading from "../../../components/loading";
