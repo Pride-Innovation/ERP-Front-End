@@ -41,7 +41,7 @@ const Description = ({ repair, handleClose, handleViewAttachments }: Description
     const isMediumScreen = useMediaQuery(theme.breakpoints.down('md'));
 
     const isCompleted = repair?.repairEndDate && repair?.repairEndDate !== '';
-    const status = repair.status === "Completed" ? 'Completed' : 'Pending';
+    const status = repair?.status === "Completed" ? 'Completed' : 'Pending';
     const statusColor = repair.status === "Completed" ? theme.palette.success.main : theme.palette.warning.main;
     const hasCompletionDocuments = repair?.completionDocuments && repair.completionDocuments.length > 0;
 
