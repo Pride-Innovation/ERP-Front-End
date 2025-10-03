@@ -28,6 +28,8 @@ import Dispose from "../Dispose";
 import Reassign from "../Reassign";
 import Repair from "../Repair";
 import ToStore from "../ToStore";
+import { FormContext } from "../../../context/form";
+import dayjs from "dayjs";
 
 const Fleet = () => {
     const [loading, setLoading] = useState<boolean>(false);
@@ -39,6 +41,7 @@ const Fleet = () => {
     const { fleetAssets } = useSelector((state: RootState) => state.FleetStore);
     const [selectedStatus, setSelectedStatus] = useState<string>('all');
     const { fileData } = useContext(FileContext);
+    const { tableStartDate, tableEndDate } = useContext(FormContext);
 
 
     const {
@@ -60,7 +63,9 @@ const Fleet = () => {
         setLoading(true);
         const params = {
             assetTypeId: currentAssetType.id,
-            assetStatusId: determineStatusId(status || 'all')
+            assetStatusId: determineStatusId(status || 'all'),
+            startDate: tableStartDate ? dayjs(tableStartDate).format('YYYY-MM-DDTHH:mm:ss') : '',
+            endDate: tableEndDate ? dayjs(tableEndDate).format('YYYY-MM-DDTHH:mm:ss') : ''
         }
 
         try {
@@ -139,6 +144,12 @@ const Fleet = () => {
         }
     }, [fileData]);
 
+
+    useEffect(() => {
+        if (tableStartDate && tableEndDate) {
+            fetchResources()
+        }
+    }, [tableStartDate, tableEndDate]);
 
     const renderModals = () => (
         <>
@@ -239,6 +250,7 @@ const Fleet = () => {
                         status
                         onStatusChange={handleStatusChange}
                         selectedStatus={selectedStatus}
+                        dateRangePicker
                     />
                 }
             </Card>
