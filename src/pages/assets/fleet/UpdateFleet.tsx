@@ -114,7 +114,7 @@ const UpdateFleet = () => {
         const request = {
             ...formData,
             assetStatus: 8, // This is the asset status for Fleet Equipment ie Issuance Available
-            assetType: 3 // This is the Fleet Equipment asset type
+            assetType: 55 // This is the Fleet Equipment asset type
         }
         try {
             const response = await updateFleetEquipmentService(request, id as string) as IFleetAxiosResponse
