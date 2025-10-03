@@ -46,12 +46,16 @@ import InventoryIcon from '@mui/icons-material/Inventory';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import DescriptionIcon from '@mui/icons-material/Description';
 import CommuteIcon from '@mui/icons-material/Commute';
-import SpeedIcon from '@mui/icons-material/Speed';
 import ContentPasteIcon from '@mui/icons-material/ContentPaste';
 import StyleIcon from '@mui/icons-material/Style';
 import { IFleet, IFleetAxiosResponse } from '../interface';
 import { getFleetByIDService, removeFleetImageService, updateFleetImageService } from '../service';
 import { IAssetAxiosResponse } from '../../interface';
+import { ROUTES } from '../../../../core/routes/routes';
+import ModalComponent from '../../../../components/modal';
+import { assetTypesStatusConstants, crudStates } from '../../../../utils/constants';
+import Reassign from '../../Reassign';
+import FleetUtills from '../utills';
 
 // Brand colors
 const PRIMARY_COLOR = '#08796C';
@@ -192,9 +196,14 @@ const EnhancedDetailSection = ({
 const FleetDetails = () => {
     const [fleet, setFleet] = useState<IFleet>({} as IFleet);
     const [loading, setLoading] = useState<boolean>(true);
-    const [uploadLoading, setUploadLoading] = useState<boolean>(false);
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
+    const {
+        currentState,
+        open,
+        handleClose,
+        handleOptionClicked
+    } = FleetUtills();
 
     const getFleet = async () => {
         setLoading(true);
@@ -266,6 +275,19 @@ const FleetDetails = () => {
                 <Loading items='Fleet Vehicle' />
             ) : (
                 <>
+                    {
+                        crudStates.reassign === currentState
+                        && <ModalComponent width={"40%"} title='Reassign Fleet' open={open} handleClose={handleClose}>
+                            <Reassign
+                                handleClickAction={handleOptionClicked}
+                                sendingRequest={loading}
+                                handleClose={handleClose}
+                                buttonText='Confirm'
+                                asset={fleet}
+                                module={assetTypesStatusConstants.fleet}
+                            />
+                        </ModalComponent>
+                    }
                     <Box
                         sx={{
                             display: 'flex',
@@ -291,20 +313,22 @@ const FleetDetails = () => {
                             <MuiButton
                                 color='primary'
                                 type='button'
-                                onClick={() => navigate(`/assets/fleet/edit/${fleet?.id}`)}
+                                onClick={() => navigate(`${ROUTES.UPDATE_FLEET}/${fleet.id}`)}
                                 variant='outlined'
                                 startIcon={<EditIcon />}
                             >Edit</MuiButton>
 
-                            {fleet?.assignedTo === null && (
-                                <MuiButton
-                                    color='success'
-                                    type='button'
-                                    variant='contained'
-                                    onClick={() => navigate(`/assets/fleet/assign/${fleet?.id}`)}
-                                    startIcon={<AssignmentIndIcon />}
-                                >Assign</MuiButton>
-                            )}
+                            {
+                                // fleet?.assignedTo === null && 
+                                fleet?.assetStatus?.status === 'inStore' && (
+                                    <MuiButton
+                                        color='success'
+                                        type='button'
+                                        variant='contained'
+                                        onClick={() => handleOptionClicked(crudStates.reassign)}
+                                        startIcon={<AssignmentIndIcon />}
+                                    >Assign</MuiButton>
+                                )}
 
                             <MuiButton
                                 color='inherit'
@@ -387,7 +411,7 @@ const FleetDetails = () => {
                                                         color="text.secondary"
                                                         sx={{ ml: 0.5 }}
                                                     >
-                                                        {fleet?.assetStatus?.status}
+                                                        {camelCaseToWords(fleet?.assetStatus?.status)}
                                                     </Typography>
                                                 </Box>
                                             )}
@@ -568,15 +592,9 @@ const FleetDetails = () => {
                                         icon={<StyleIcon fontSize="small" />}
                                     />
 
-                                    {/* <EnhancedDetailSection
-                                        label="Color"
-                                        text={fleet?.color || null}
-                                        icon={<ColorLensIcon fontSize="small" />}
-                                    /> */}
-
                                     <EnhancedDetailSection
                                         label="Chassis Number"
-                                        text={fleet?.engravedNumber || null}
+                                        text={fleet?.serialNumber || null}
                                         icon={<InfoIcon fontSize="small" />}
                                     />
 
@@ -597,18 +615,6 @@ const FleetDetails = () => {
                                         text={fleet?.dateReceipt ? moment(fleet.dateReceipt).format('Do MMMM YYYY') : null}
                                         icon={<CalendarTodayIcon fontSize="small" />}
                                     />
-
-                                    <EnhancedDetailSection
-                                        label="Engine Capacity"
-                                        text={fleet?.category || null}
-                                        icon={<SpeedIcon fontSize="small" />}
-                                    />
-
-                                    {/* <EnhancedDetailSection
-                                        label="Fuel Type"
-                                        text={fleet?.fuelType || null}
-                                        icon={<LocalGasStationIcon fontSize="small" />}
-                                    /> */}
 
                                     <EnhancedDetailSection
                                         label="Location"
