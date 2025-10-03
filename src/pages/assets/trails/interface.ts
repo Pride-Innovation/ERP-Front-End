@@ -30,8 +30,9 @@ export interface IAssetAssignmentHistoryAxiosResponse extends IAxiosResponse {
 export interface IAssetAssignmentHistoryTableData {
     user: string;
     engravedNumber: string;
-    statusBefore: string;
-    statusAfter: string;
+    // statusBefore: string;
+    // statusAfter: string;
     startDate: string;
     endDate: string;
+    location: string;
 }

@@ -27,7 +27,11 @@ import AssignmentHistory from '../../trails/AssignmentHistory';
 import RepairHistory from '../../trails/RepairHistory';
 import { useEffect, useState } from 'react';
 import { IOfficeEquipment, IOfficeEquipmentAxiosResponse } from "../interface";
-import { getOfficeEquipmentByIDService, removeOfficeEquipmentImageService, updateOfficeEquipmentImageService } from "../service";
+import {
+    getOfficeEquipmentByIDService,
+    removeOfficeEquipmentImageService,
+    updateOfficeEquipmentImageService
+} from "../service";
 import Loading from '../../../../components/loading';
 import moment from 'moment';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -413,7 +417,7 @@ const OfficeEquipmentDetails = () => {
                                                         color="text.secondary"
                                                         sx={{ ml: 0.5 }}
                                                     >
-                                                        {equipment.assetStatus.status}
+                                                        {camelCaseToWords(equipment.assetStatus.status)}
                                                     </Typography>
                                                 </Box>
                                             )}

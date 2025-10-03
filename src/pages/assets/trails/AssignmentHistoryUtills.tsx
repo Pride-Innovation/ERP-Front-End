@@ -54,8 +54,8 @@ const AssignmentHistoryUtills = () => {
     const rowData = {
         user: assignmentHistoryMock[0].user?.firstName,
         engravedNumber: "",
-        statusBefore: assignmentHistoryMock[0].statusBefore?.name,
-        statusAfter: assignmentHistoryMock[0].statusAfter?.name,
+        location: "",
+        // statusAfter: assignmentHistoryMock[0].statusAfter?.name,
         ...data,
     };
 
@@ -97,10 +97,11 @@ const AssignmentHistoryUtills = () => {
                     ...data,
                     user: item.user?.firstName ? `${item.user.firstName} ${item.user.lastName}` : '',
                     engravedNumber: item.asset?.engravedNumber as string,
-                    statusBefore: item.statusBefore?.name as string,
-                    statusAfter: item.statusAfter?.name as string,
+                    location: item.user ? item.user.branch?.name as string :
+                        item.asset?.branch?.name as string,
                     startDate: item.startDate ? moment(item.startDate).format('Do MMMM YYYY') : '',
-                    endDate: item.endDate ? moment(item.endDate as string).format('Do MMMM YYYY') : ''
+                    endDate: item.endDate ? moment(item.endDate as string).format('Do MMMM YYYY') : '𝘛𝘰 𝘥𝘢𝘵𝘦',
+
                 }
             )
         })
