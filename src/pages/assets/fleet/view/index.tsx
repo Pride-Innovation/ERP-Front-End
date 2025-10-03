@@ -334,7 +334,7 @@ const FleetDetails = () => {
                                 color='inherit'
                                 type='button'
                                 variant='outlined'
-                                onClick={() => navigate(-1)}
+                                onClick={() => navigate(ROUTES.LIST_FLEET)}
                                 startIcon={<ArrowBackIcon />}
                                 sx={{
                                     borderColor: alpha('#000', 0.2),
