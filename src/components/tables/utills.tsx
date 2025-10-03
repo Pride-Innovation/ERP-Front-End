@@ -148,6 +148,7 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
             const useCurrentTableData = moduleName.toLowerCase().includes('report') ||
                 moduleName === 'inventory commodities' ||
                 moduleName === 'GRN documents' ||
+                moduleName === 'assignment history' ||
                 moduleName.toLowerCase().includes('commodities');
 
             if (useCurrentTableData) {
@@ -203,6 +204,7 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
             const useCurrentTableData = moduleName.toLowerCase().includes('report') ||
                 moduleName === 'inventory commodities' ||
                 moduleName === 'GRN documents' ||
+                moduleName === 'assignment history' ||
                 moduleName.toLowerCase().includes('commodities');
 
             if (useCurrentTableData && apiRef) {

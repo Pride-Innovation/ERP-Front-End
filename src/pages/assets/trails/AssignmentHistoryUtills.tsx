@@ -100,7 +100,7 @@ const AssignmentHistoryUtills = () => {
                     location: item.user ? item.user.branch?.name as string :
                         item.asset?.branch?.name as string,
                     startDate: item.startDate ? moment(item.startDate).format('Do MMMM YYYY') : '',
-                    endDate: item.endDate ? moment(item.endDate as string).format('Do MMMM YYYY') : '𝘛𝘰 𝘥𝘢𝘵𝘦',
+                    endDate: item.endDate ? moment(item.endDate as string).format('Do MMMM YYYY') : 'To Date',
 
                 }
             )

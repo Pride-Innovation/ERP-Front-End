@@ -38,7 +38,8 @@ export interface IOfficeEquipment {
     category?: string | null;
     lpoNumber: string;
     commodity?: ICommodity | null;
-    stock?: IInventory | null
+    stock?: IInventory | null;
+    lastRepairedBy?: string | null;
 }
 
 export interface IOfficeEquipmentForm {

@@ -53,6 +53,7 @@ export interface IITEquipment {
     lpoNumber: string;
     commodity?: ICommodity | null;
     stock?: IInventory | null;
+    lastRepairedBy?: string | null;
 }
 
 /**

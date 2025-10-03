@@ -27,7 +27,7 @@ import {
     Button
 } from "@mui/material";
 import ButtonComponent from "../../components/forms/Button";
-import { IAssetAxiosResponse, IRepair, IRepairDetailAxiosResponse } from "./interface";
+import { IAssetAxiosResponse, IRepair } from "./interface";
 import {
     Assignment as AssetIcon,
     BuildCircle as RepairIcon,
@@ -56,6 +56,7 @@ import { AppDispatch } from "../../store";
 import { updateITAsset } from "./ITEquipment/slice";
 import { updateOfficeAsset } from "./officeEquipment/slice";
 import { updateFleetAsset } from "./fleet/slice";
+import HandymanOutlinedIcon from '@mui/icons-material/HandymanOutlined';
 
 const Repair = ({
     handleClose,
@@ -316,6 +317,32 @@ const Repair = ({
                                                 </Typography>
                                                 <Typography variant="body2" fontWeight={500} color="text.primary">
                                                     {asset.make}
+                                                </Typography>
+                                            </Box>
+                                        </Box>
+                                    )}
+
+                                    {asset.lastRepairedBy && (
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                                            <Box
+                                                sx={{
+                                                    bgcolor: alpha(theme.palette.info.main, 0.1),
+                                                    color: theme.palette.info.main,
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    p: 0.7,
+                                                    borderRadius: 1
+                                                }}
+                                            >
+                                                <HandymanOutlinedIcon fontSize="small" />
+                                            </Box>
+                                            <Box>
+                                                <Typography variant="caption" color="text.secondary" fontWeight={500}>
+                                                    Last Repaired By
+                                                </Typography>
+                                                <Typography variant="body2" fontWeight={500} color="text.primary">
+                                                    {asset.lastRepairedBy}
                                                 </Typography>
                                             </Box>
                                         </Box>

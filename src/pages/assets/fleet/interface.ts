@@ -42,11 +42,12 @@ export interface IFleet {
     image?: string | null;
     assetStatus?: IStatus | null;
     assetType?: IAssetType | null;
-    category?: string | null
+    category?: string | null;
     lpoNumber: string;
     commodity?: ICommodity | null;
     stock?: IInventory | null;
     serialNumber?: string | null;
+    lastRepairedBy?: string | null;
 }
 
 
