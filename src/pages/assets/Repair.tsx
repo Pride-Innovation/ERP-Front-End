@@ -4,7 +4,6 @@ Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. P
 and distribute this software and its documentation for any purpose is prohibited unless authorized in writing by the
 Managing Director
 */
-
 import {
     Box,
     Card,
@@ -12,35 +11,38 @@ import {
     Grid,
     Stack,
     Typography,
+    TextField,
+    alpha,
     Paper,
     useTheme,
-    alpha,
-    TextField,
-    FormControl,
-    InputLabel,
-    MenuItem,
-    Select,
-    IconButton,
     List,
     ListItem,
+    ListItemIcon,
     ListItemText,
-    Button
+    IconButton,
+    Button,
+    FormControl,
+    InputLabel,
+    Select,
+    MenuItem,
+    Autocomplete,
+    CircularProgress
 } from "@mui/material";
 import ButtonComponent from "../../components/forms/Button";
 import { IAssetAxiosResponse, IRepair } from "./interface";
 import {
+    Build as RepairIcon,
     Assignment as AssetIcon,
-    BuildCircle as RepairIcon,
     Fingerprint as FingerprintIcon,
-    Engineering as TechnicianIcon,
-    CloudUpload as UploadIcon,
     AttachFile as AttachFileIcon,
-    InsertDriveFile as FileIcon,
-    PictureAsPdf as PdfIcon,
+    CloudUpload as UploadIcon,
     Image as ImageIcon,
-    Close as CloseIcon
+    PictureAsPdf as PdfIcon,
+    InsertDriveFile as FileIcon,
+    Delete as DeleteIcon,
+    Person as PersonIcon
 } from '@mui/icons-material';
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -51,12 +53,20 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import { toast } from "react-toastify";
 import { repairAssetService } from "./ITEquipment/service";
 import { assetTypesStatusConstants } from "../../utils/constants";
-import { useDispatch } from "react-redux";
-import { AppDispatch } from "../../store";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../../store";
 import { updateITAsset } from "./ITEquipment/slice";
 import { updateOfficeAsset } from "./officeEquipment/slice";
 import { updateFleetAsset } from "./fleet/slice";
 import HandymanOutlinedIcon from '@mui/icons-material/HandymanOutlined';
+import { IOptions } from "../../components/tables/interface";
+import { useDebounce } from "../../hooks/useDebounce";
+import UserUtils from "../users/utils";
+import { searchUserService } from "../users/service";
+import { IUsersAxiosResponse } from "../users/interface";
+import { loadUsers } from "../users/slice";
+
+const TechnicianIcon = HandymanOutlinedIcon;
 
 const Repair = ({
     handleClose,
@@ -68,11 +78,72 @@ const Repair = ({
     const theme = useTheme();
     const [repairDate, setRepairDate] = useState<Dayjs | null>(null);
     const [repairReason, setRepairReason] = useState("");
-    const [technician, setTechnician] = useState("");
+    const [technicianType, setTechnicianType] = useState("");
+    const [technicianName, setTechnicianName] = useState("");
+    const [selectedInternalTechnician, setSelectedInternalTechnician] = useState<IOptions | null>(null);
     const [files, setFiles] = useState<File[]>([]);
     const [isDragging, setIsDragging] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const dispatch = useDispatch<AppDispatch>();
+
+    // User search functionality for internal technicians
+    const [open, setOpen] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [searchLoading, setSearchLoading] = useState(false);
+    const [optionsObject, setOptionsObject] = useState<{ usersOptions: Array<IOptions> }>({
+        usersOptions: []
+    });
+    const { users } = useSelector((state: RootState) => state.UserStore);
+    const { fetchAllUsers } = UserUtils();
+    const [localInput, setLocalInput] = useState<string>('');
+    const debouncedInput = useDebounce(localInput, 500);
+
+    useEffect(() => {
+        if (users.length > 0)
+            setOptionsObject({
+                usersOptions: users?.map(user => ({ label: `${user.firstName} ${user.lastName}` as string, value: user.id as number, user: user })) || [],
+            })
+    }, [users])
+
+    const handleOpen = async () => {
+        setOpen(true);
+        if (optionsObject.usersOptions.length === 0) {
+            try {
+                setLoading(true);
+                await fetchAllUsers();
+            } catch (error) {
+                console.error("Error fetching initial users:", error);
+            } finally {
+                setLoading(false);
+            }
+        }
+    };
+
+    const searchUserServiceFunction = async (query: string) => {
+        try {
+            const response = await searchUserService(query) as IUsersAxiosResponse;
+            if (response.status === 200 && response.data) {
+                dispatch(loadUsers(response.data.content));
+            }
+        } catch (error) {
+            console.error("Error searching users:", error);
+        } finally {
+            setSearchLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        if (debouncedInput.trim()) {
+            try {
+                setSearchLoading(true);
+                searchUserServiceFunction(debouncedInput);
+            } catch (error) {
+                console.error("Error searching users:", error);
+            } finally {
+                setSearchLoading(false);
+            }
+        }
+    }, [debouncedInput]);
 
     const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files) {
@@ -127,12 +198,21 @@ const Repair = ({
     };
 
     const handleAssetRepair = async () => {
+        // Determine the final technician value based on type
+        let finalTechnicianValue = "";
+        if (technicianType === "internal") {
+            if (selectedInternalTechnician) {
+                finalTechnicianValue = selectedInternalTechnician.label as string;
+            }
+        } else {
+            finalTechnicianValue = technicianName;
+        }
 
         const payload = new FormData();
         payload.append('repairStartDate', repairDate ? repairDate.format('YYYY-MM-DDTHH:mm:ss') : '');
         payload.append('repairEndDate', repairDate ? repairDate.format('YYYY-MM-DDTHH:mm:ss') : '');
         payload.append('repairReason', repairReason);
-        payload.append('technician', technician);
+        payload.append('technician', finalTechnicianValue);
 
         if (files.length > 0) {
             files.forEach(file => {
@@ -161,6 +241,14 @@ const Repair = ({
             handleClose();
         }
     }
+
+    const handleTechnicianTypeChange = (value: string) => {
+        setTechnicianType(value);
+        // Reset values when changing type
+        setTechnicianName("");
+        setSelectedInternalTechnician(null);
+        setLocalInput("");
+    };
 
     return (
         <Card
@@ -235,7 +323,7 @@ const Repair = ({
                                                 Asset Name
                                             </Typography>
                                             <Typography variant="body2" fontWeight={600} color="text.primary">
-                                                {asset.assetName}
+                                                {asset?.assetName}
                                             </Typography>
                                         </Box>
                                     </Box>
@@ -263,7 +351,7 @@ const Repair = ({
                                                     {asset.engravedNumber}
                                                 </Typography>
                                             ) : (
-                                                <Typography variant="caption" fontStyle="italic" color="text.disabled">
+                                                <Typography variant="body2" fontStyle="italic" color="text.disabled">
                                                     Not specified
                                                 </Typography>
                                             )}
@@ -274,8 +362,8 @@ const Repair = ({
                                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                                             <Box
                                                 sx={{
-                                                    bgcolor: alpha(theme.palette.info.main, 0.1),
-                                                    color: theme.palette.info.main,
+                                                    bgcolor: alpha(theme.palette.success.main, 0.1),
+                                                    color: theme.palette.success.main,
                                                     display: 'flex',
                                                     alignItems: 'center',
                                                     justifyContent: 'center',
@@ -287,10 +375,10 @@ const Repair = ({
                                             </Box>
                                             <Box>
                                                 <Typography variant="caption" color="text.secondary" fontWeight={500}>
-                                                    Current Location
+                                                    Location
                                                 </Typography>
                                                 <Typography variant="body2" fontWeight={500} color="text.primary">
-                                                    {asset.branch.name}
+                                                    {asset.branch?.name}
                                                 </Typography>
                                             </Box>
                                         </Box>
@@ -300,8 +388,8 @@ const Repair = ({
                                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                                             <Box
                                                 sx={{
-                                                    bgcolor: alpha(theme.palette.success.main, 0.1),
-                                                    color: theme.palette.success.main,
+                                                    bgcolor: alpha(theme.palette.warning.main, 0.1),
+                                                    color: theme.palette.warning.main,
                                                     display: 'flex',
                                                     alignItems: 'center',
                                                     justifyContent: 'center',
@@ -335,7 +423,7 @@ const Repair = ({
                                                     borderRadius: 1
                                                 }}
                                             >
-                                                <HandymanOutlinedIcon fontSize="small" />
+                                                <RepairIcon fontSize="small" />
                                             </Box>
                                             <Box>
                                                 <Typography variant="caption" color="text.secondary" fontWeight={500}>
@@ -394,13 +482,13 @@ const Repair = ({
                                 </LocalizationProvider>
 
                                 <FormControl fullWidth size="small">
-                                    <InputLabel id="technician-select-label">Technician</InputLabel>
+                                    <InputLabel id="technician-type-select-label">Technician Type</InputLabel>
                                     <Select
-                                        labelId="technician-select-label"
-                                        id="technician-select"
-                                        value={technician}
-                                        label="Technician"
-                                        onChange={(e) => setTechnician(e.target.value)}
+                                        labelId="technician-type-select-label"
+                                        id="technician-type-select"
+                                        value={technicianType}
+                                        label="Technician Type"
+                                        onChange={(e) => handleTechnicianTypeChange(e.target.value)}
                                         startAdornment={
                                             <TechnicianIcon color="action" sx={{ ml: 1, mr: 0.5 }} fontSize="small" />
                                         }
@@ -416,6 +504,76 @@ const Repair = ({
                                         <MenuItem value="contractor">External Contractor</MenuItem>
                                     </Select>
                                 </FormControl>
+
+                                {/* Conditional Technician Selection */}
+                                {technicianType === "internal" ? (
+                                    <Autocomplete
+                                        open={open}
+                                        onOpen={handleOpen}
+                                        onClose={() => setOpen(false)}
+                                        isOptionEqualToValue={(option, value) => option.value === value.value}
+                                        getOptionLabel={(option) => option.label as string}
+                                        options={optionsObject.usersOptions}
+                                        value={selectedInternalTechnician}
+                                        onInputChange={(_, newInputValue) => setLocalInput(newInputValue)}
+                                        onChange={(_, value) => {
+                                            setSelectedInternalTechnician(value);
+                                        }}
+                                        loading={loading || searchLoading}
+                                        fullWidth
+                                        noOptionsText="No technicians found"
+                                        loadingText="Searching technicians..."
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': {
+                                                borderRadius: 1.5,
+                                                '&:hover .MuiOutlinedInput-notchedOutline': {
+                                                    borderColor: theme.palette.primary.main,
+                                                    borderWidth: '1px',
+                                                },
+                                            }
+                                        }}
+                                        renderInput={(params) => (
+                                            <TextField
+                                                {...params}
+                                                label="Select Internal Technician"
+                                                placeholder="Search by name or employee ID"
+                                                variant="outlined"
+                                                size="small"
+                                                InputProps={{
+                                                    ...params.InputProps,
+                                                    startAdornment: (
+                                                        <PersonIcon color="action" sx={{ ml: 1, mr: 0.5 }} fontSize="small" />
+                                                    ),
+                                                    endAdornment: (
+                                                        <>
+                                                            {(loading || searchLoading) ? <CircularProgress color="primary" size={16} /> : null}
+                                                            {params.InputProps.endAdornment}
+                                                        </>
+                                                    ),
+                                                }}
+                                            />
+                                        )}
+                                    />
+                                ) : (technicianType === "vendor" || technicianType === "contractor") ? (
+                                    <TextField
+                                        label={technicianType === "vendor" ? "Vendor Technician Name" : "External Contractor Name"}
+                                        value={technicianName}
+                                        onChange={(e) => setTechnicianName(e.target.value)}
+                                        fullWidth
+                                        size="small"
+                                        placeholder={technicianType === "vendor" ? "Enter vendor technician name" : "Enter contractor name"}
+                                        sx={{
+                                            '& .MuiOutlinedInput-root': {
+                                                borderRadius: 1.5
+                                            }
+                                        }}
+                                        InputProps={{
+                                            startAdornment: (
+                                                <TechnicianIcon color="action" sx={{ ml: 1, mr: 0.5 }} fontSize="small" />
+                                            ),
+                                        }}
+                                    />
+                                ) : null}
 
                                 <TextField
                                     label="Reason for Repair"
@@ -501,7 +659,7 @@ const Repair = ({
                                             }}
                                         />
                                         <Typography variant="body2" fontWeight={500} color="text.primary" align="center">
-                                            {isDragging ? 'Drop files here' : 'Drag & drop files here'}
+                                            Drag and drop files here
                                         </Typography>
                                         <Typography variant="caption" color="text.secondary" align="center" sx={{ mt: 0.5, mb: 1.5 }}>
                                             or click to browse
@@ -523,30 +681,18 @@ const Repair = ({
                                                 <ListItem
                                                     key={index}
                                                     sx={{
-                                                        py: 0.5,
                                                         px: 1.5,
-                                                        '&:not(:last-child)': {
-                                                            borderBottom: `1px solid ${alpha('#000', 0.06)}`
+                                                        py: 0.75,
+                                                        borderRadius: 1,
+                                                        mb: 0.5,
+                                                        bgcolor: alpha(theme.palette.background.paper, 0.8),
+                                                        border: `1px solid ${alpha('#000', 0.05)}`,
+                                                        '&:hover': {
+                                                            bgcolor: alpha(theme.palette.background.paper, 1),
+                                                            borderColor: alpha(theme.palette.primary.main, 0.2)
                                                         }
                                                     }}
-                                                >
-                                                    <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-                                                        {getFileIcon(file.name)}
-                                                        <ListItemText
-                                                            primary={file.name.length > 20 ? `${file.name.substring(0, 20)}...` : file.name}
-                                                            secondary={formatFileSize(file.size)}
-                                                            primaryTypographyProps={{
-                                                                variant: 'body2',
-                                                                fontWeight: 500,
-                                                                color: 'text.primary',
-                                                                sx: { ml: 1.5 }
-                                                            }}
-                                                            secondaryTypographyProps={{
-                                                                variant: 'caption',
-                                                                color: 'text.secondary',
-                                                                sx: { ml: 1.5 }
-                                                            }}
-                                                        />
+                                                    secondaryAction={
                                                         <IconButton
                                                             edge="end"
                                                             size="small"
@@ -555,17 +701,32 @@ const Repair = ({
                                                                 removeFile(index);
                                                             }}
                                                             sx={{
-                                                                ml: 'auto',
-                                                                color: theme.palette.grey[500],
+                                                                color: alpha(theme.palette.error.main, 0.7),
                                                                 '&:hover': {
-                                                                    backgroundColor: alpha(theme.palette.error.main, 0.1),
+                                                                    bgcolor: alpha(theme.palette.error.main, 0.1),
                                                                     color: theme.palette.error.main
                                                                 }
                                                             }}
                                                         >
-                                                            <CloseIcon fontSize="small" />
+                                                            <DeleteIcon fontSize="small" />
                                                         </IconButton>
-                                                    </Box>
+                                                    }
+                                                >
+                                                    <ListItemIcon sx={{ minWidth: 32 }}>
+                                                        {getFileIcon(file.name)}
+                                                    </ListItemIcon>
+                                                    <ListItemText
+                                                        primary={
+                                                            <Typography variant="body2" fontWeight={500} sx={{ fontSize: '0.8rem' }}>
+                                                                {file.name.length > 25 ? `${file.name.substring(0, 25)}...` : file.name}
+                                                            </Typography>
+                                                        }
+                                                        secondary={
+                                                            <Typography variant="caption" color="text.secondary">
+                                                                {formatFileSize(file.size)}
+                                                            </Typography>
+                                                        }
+                                                    />
                                                 </ListItem>
                                             ))}
                                         </List>
@@ -579,17 +740,16 @@ const Repair = ({
                                             bgcolor: alpha(theme.palette.background.paper, 0.5)
                                         }}>
                                             <Typography variant="caption" color="text.secondary">
-                                                {files.length} {files.length === 1 ? 'file' : 'files'} selected
+                                                {files.length} file{files.length !== 1 ? 's' : ''} selected
                                             </Typography>
                                             <Button
                                                 size="small"
-                                                variant="text"
                                                 color="info"
+                                                sx={{ fontSize: '0.7rem', p: 0.5, minWidth: 'auto' }}
                                                 onClick={(e) => {
                                                     e.stopPropagation();
                                                     fileInputRef.current?.click();
                                                 }}
-                                                startIcon={<AttachFileIcon fontSize="small" />}
                                             >
                                                 Add More
                                             </Button>
