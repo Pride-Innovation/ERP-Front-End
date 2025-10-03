@@ -413,7 +413,7 @@ const ITEquipmentDetails = () => {
                                                         color="text.secondary"
                                                         sx={{ ml: 0.5 }}
                                                     >
-                                                        {equipment.assetStatus.status}
+                                                        {camelCaseToWords(equipment.assetStatus.status)}
                                                     </Typography>
                                                 </Box>
                                             )}
