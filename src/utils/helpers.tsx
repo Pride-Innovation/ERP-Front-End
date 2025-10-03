@@ -19,6 +19,7 @@ import { IAssetType } from "../pages/settings/assetTypes/interface";
 import { assetTypesStatusConstants } from "./constants";
 import { IStockCommodities } from "../pages/inventory/interface";
 import { IITEquipment } from "../pages/assets/ITEquipment/interface";
+import { IFleet } from "../pages/assets/fleet/interface";
 
 export const camelCaseToWords = (camelCaseString: string) => {
     return camelCaseString ? camelCaseString
@@ -450,7 +451,7 @@ export const formatNumber = (num: number): string => {
  * @param item - The equipment item to check.
  * @returns The branch name if it exists, otherwise an empty string.
  */
-export const determineBranchName = (item: IITEquipment) => {
+export const determineBranchName = (item: IITEquipment | IFleet) => {
 
     if (item?.assignedTo) {
         if (item.assignedTo.branch?.name === "Head Office") {

@@ -18,6 +18,7 @@ import { IAssetType } from "../settings/assetTypes/interface";
 import { ICommodity } from "../settings/commodity/interface";
 import { IInventory } from "../inventory/interface";
 import { IAxiosResponse, IFetchDataRequest } from "../../core/apis/interface";
+import { IFleet } from "./fleet/interface";
 
 export interface IFormData<T> {
     value: Path<T>;
@@ -33,7 +34,7 @@ export interface IAssetAction {
     handleClickAction?: (option: string | number, moduleID: string | number) => void;
     sendingRequest: boolean;
     buttonText: string;
-    asset: IITEquipment | IOfficeEquipment;
+    asset: IITEquipment | IOfficeEquipment | IFleet;
     module?: string;
 }
 

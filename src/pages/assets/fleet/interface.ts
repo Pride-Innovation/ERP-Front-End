@@ -24,16 +24,16 @@ import { IInventory } from "../../inventory/interface";
 export interface IFleet {
     id?: string | number;
     assetName: string;
-    hostname: string;
-    detailNetBookValue: string;
+    hostname?: string | null;
+    detailNetBookValue?: string | null;
     engravedNumber: string;
     dateReceipt: string;
-    make: string;
+    make?: string | null;
     supplier?: ISupplier | null;
     unitOfMeasure: string;
     purchaseCost: string;
     costOfTheAsset: string;
-    netValueB: string,
+    netValueB?: string | null;
     assignedTo?: IUser | null;
     branch?: IBranch | null;
     assetDepreciationRate?: string | null;
@@ -45,7 +45,8 @@ export interface IFleet {
     category?: string | null
     lpoNumber: string;
     commodity?: ICommodity | null;
-    stock?: IInventory | null
+    stock?: IInventory | null;
+    serialNumber?: string | null;
 }
 
 
@@ -77,7 +78,7 @@ export interface IFleetForm {
     userParams?: Record<string, any>
     supplierParams?: Record<string, any>
     branchParams?: Record<string, any>
-    
+
 
     // New properties for stepped form
     formFields?: any;

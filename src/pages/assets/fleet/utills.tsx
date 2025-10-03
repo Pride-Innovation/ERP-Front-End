@@ -183,7 +183,7 @@ const FleetUtills = () => {
                     assetName: item.assetName,
                     engravedNumber: item.engravedNumber,
                     dateReceived: moment(item.dateReceipt).format('Do MMMM YYYY'),
-                    make: item.make,
+                    make: item.make as string,
                     model: item.model as string,
                     purchaseCost: item.purchaseCost,
                     costOfAsset: item.costOfTheAsset,
@@ -274,12 +274,14 @@ const FleetUtills = () => {
         {
             value: "netValueB",
             label: 'Net Value',
-            type: "input"
+            type: "input",
+            required: false
         },
         {
             value: "assetDepreciationRate",
             label: 'Depreciation Rate',
-            type: "input"
+            type: "input",
+            required: false
         },
         {
             value: "branch",
@@ -296,11 +298,13 @@ const FleetUtills = () => {
             value: "hostname",
             label: 'Host Name',
             type: "input",
+            required: false
         },
         {
             value: "detailNetBookValue",
             label: 'Detail Net Book Value',
             type: "input",
+            required: false
         },
         {
             value: "dateReceipt",
@@ -316,6 +320,7 @@ const FleetUtills = () => {
             value: "make",
             label: 'Make',
             type: "input",
+            required: false
         },
         {
             value: "supplier",
@@ -329,6 +334,12 @@ const FleetUtills = () => {
             type: "autocomplete",
             options: optionsObject.inventoryOptions,
             disabled: true
+        },
+        {
+            value: "serialNumber",
+            label: 'Chasis Number',
+            type: "input",
+            required: false
         }
     ]
 
