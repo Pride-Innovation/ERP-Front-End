@@ -50,6 +50,11 @@ import { toast } from 'react-toastify';
 import TimeLineDot from "../../../../components/timeLineDots";
 import AssetImageUpload from '../../../assets/ITEquipment/view/AssetImageUpload';
 import { IAssetAxiosResponse } from '../../interface';
+import { ROUTES } from '../../../../core/routes/routes';
+import { assetTypesStatusConstants, crudStates } from '../../../../utils/constants';
+import ModalComponent from '../../../../components/modal';
+import Reassign from '../../Reassign';
+import OfficeEquipmentUtills from '../utills';
 
 // Brand colors
 const PRIMARY_COLOR = '#08796C';
@@ -189,6 +194,12 @@ const OfficeEquipmentDetails = () => {
     const { id } = useParams<{ id: string }>();
     const [loading, setLoading] = useState<boolean>(false);
     const navigate = useNavigate();
+    const {
+        currentState,
+        open,
+        handleClose,
+        handleOptionClicked
+    } = OfficeEquipmentUtills();
 
     const getOfficeEquipment = async () => {
         setLoading(true);
@@ -263,6 +274,78 @@ const OfficeEquipmentDetails = () => {
                 <Loading items='Office Asset' />
             ) : (
                 <>
+                    {
+                        crudStates.reassign === currentState
+                        && <ModalComponent width={"40%"} title='Reassign Office Equipment' open={open} handleClose={handleClose}>
+                            <Reassign
+                                handleClickAction={handleOptionClicked}
+                                sendingRequest={loading}
+                                handleClose={handleClose}
+                                buttonText='Confirm'
+                                asset={equipment}
+                                module={assetTypesStatusConstants.officeEquipment}
+                            />
+                        </ModalComponent>
+                    }
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            flexDirection: { xs: 'column', md: 'row' },
+                            justifyContent: 'space-between',
+                            alignItems: { xs: 'flex-start', md: 'center' },
+                            gap: 2,
+                            mb: 2
+                        }}
+                    >
+                        <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            sx={{
+                                fontWeight: 500,
+                                display: 'flex',
+                                alignItems: 'center'
+                            }}
+                        >
+                            Office Equipment Details
+                        </Typography>
+                        <Stack direction="row" spacing={1.5}>
+                            <MuiButton
+                                color='primary'
+                                type='button'
+                                onClick={() => navigate(`${ROUTES.UPDATE_OFFICE_EQUIPMENT}/${equipment.id}`)}
+                                variant='outlined'
+                                startIcon={<EditIcon />}
+                            >Edit</MuiButton>
+
+                            {
+                                // equipment?.assignedTo === null && 
+                                equipment?.assetStatus?.status === 'inStore' && (
+                                    <MuiButton
+                                        color='success'
+                                        type='button'
+                                        variant='contained'
+                                        onClick={() => handleOptionClicked(crudStates.reassign)}
+                                        startIcon={<AssignmentIndIcon />}
+                                    >Assign</MuiButton>
+                                )}
+
+                            <MuiButton
+                                color='inherit'
+                                type='button'
+                                variant='outlined'
+                                onClick={() => navigate(ROUTES.LIST_OFFICE_EQUIPMENT)}
+                                startIcon={<ArrowBackIcon />}
+                                sx={{
+                                    borderColor: alpha('#000', 0.2),
+                                    color: 'text.secondary',
+                                    '&:hover': {
+                                        borderColor: alpha('#000', 0.3),
+                                        backgroundColor: alpha('#000', 0.05)
+                                    }
+                                }}
+                            >Back</MuiButton>
+                        </Stack>
+                    </Box>
                     {/* Header section - Matching IT Equipment header */}
                     <Box
                         sx={{
@@ -600,55 +683,6 @@ const OfficeEquipmentDetails = () => {
                             </Card>
                         </Grid>
                     </Grid>
-
-                    {/* Updated button section to match IT Equipment component */}
-                    <Box
-                        sx={{
-                            mb: 3,
-                            display: 'flex',
-                            flexDirection: { xs: 'column', md: 'row' },
-                            justifyContent: 'end',
-                            alignItems: { xs: 'flex-start', md: 'center' },
-                            gap: 2,
-                            mt: 3,
-                        }}
-                    >
-                        <Stack direction="row" spacing={1.5}>
-                            <MuiButton
-                                color='primary'
-                                type='button'
-                                onClick={() => navigate(`/assets/office-equipment/edit/${equipment.id}`)}
-                                variant='outlined'
-                                startIcon={<EditIcon />}
-                            >Edit</MuiButton>
-
-                            {equipment.assignedTo === null && (
-                                <MuiButton
-                                    color='success'
-                                    type='button'
-                                    variant='contained'
-                                    onClick={() => navigate(`/assets/office-equipment/assign/${equipment.id}`)}
-                                    startIcon={<AssignmentIndIcon />}
-                                >Assign</MuiButton>
-                            )}
-
-                            <MuiButton
-                                color='inherit'
-                                type='button'
-                                variant='outlined'
-                                onClick={() => navigate(-1)}
-                                startIcon={<ArrowBackIcon />}
-                                sx={{
-                                    borderColor: alpha('#000', 0.2),
-                                    color: 'text.secondary',
-                                    '&:hover': {
-                                        borderColor: alpha('#000', 0.3),
-                                        backgroundColor: alpha('#000', 0.05)
-                                    }
-                                }}
-                            >Back</MuiButton>
-                        </Stack>
-                    </Box>
                 </>
             )}
         </Container>
