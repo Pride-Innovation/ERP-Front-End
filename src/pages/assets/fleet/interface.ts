@@ -101,6 +101,7 @@ export interface IFleetTableData {
     status: string;
     assignedTo: string;
     location: string;
+    manufacturer?: string;
 }
 
 export interface IFleetResponse extends IFetchDataRequest {

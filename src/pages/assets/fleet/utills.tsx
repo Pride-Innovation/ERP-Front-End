@@ -30,7 +30,7 @@ import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
 
 const FleetUtills = () => {
     const endPoint = 'assets';
-    const module = "fleet";
+    const module = "Fleet";
     const header = { plural: 'Fleet', singular: 'Fleet' };
     const [open, setOpen] = useState<boolean>(false);
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
@@ -114,15 +114,23 @@ const FleetUtills = () => {
         costOfTheAsset,
         hostname,
         lpoNumber,
+        make,
+        model,
+        assetName,
+        engravedNumber,
         ...data
     } = fleetsMock[0];
 
     const rowData = {
         ...data,
+        assetName,
+        manufacturer: make,
+        engravedNumber,
+        model,
         dateReceived: "",
-        status: fleetsMock[0].assetStatus?.name,
-        assignedTo: fleetsMock[0].assignedTo?.firstName,
         location: "",
+        assignedTo: fleetsMock[0].assignedTo?.firstName,
+        status: fleetsMock[0].assetStatus?.name,
         action: {
             label: "options",
             options: [
@@ -162,6 +170,10 @@ const FleetUtills = () => {
                 costOfTheAsset,
                 hostname,
                 lpoNumber,
+                make,
+                model,
+                assetName,
+                engravedNumber,
                 ...fielsdata
             } = list[index];
 
@@ -178,6 +190,7 @@ const FleetUtills = () => {
                     status: item?.assetStatus?.status as string,
                     assignedTo: item.assignedTo?.firstName ? `${item.assignedTo?.lastName} ${item.assignedTo?.firstName}` : "",
                     location: determineBranchName(item),
+                    manufacturer: item.make as string,
                 }
             )
         })
