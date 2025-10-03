@@ -33,6 +33,8 @@ import { IBulkAssetData } from "../ITEquipment/interface";
 import { toast } from "react-toastify";
 import { FileContext } from "../../../context/file/FileContext";
 import { bulkInsertOfficeAssetsService } from "./service";
+import { FormContext } from "../../../context/form";
+import dayjs from "dayjs";
 
 const OfficeEquipment = () => {
     const [loading, setLoading] = useState<boolean>(false);
@@ -44,6 +46,7 @@ const OfficeEquipment = () => {
     const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore);
     const [selectedStatus, setSelectedStatus] = useState<string>('all');
     const { fileData } = useContext(FileContext);
+    const { tableStartDate, tableEndDate } = useContext(FormContext);
 
     const {
         columnHeaders,
@@ -65,7 +68,9 @@ const OfficeEquipment = () => {
 
         const params = {
             assetTypeId: currentAssetType.id,
-            assetStatusId: determineStatusId(status || 'all')
+            assetStatusId: determineStatusId(status || 'all'),
+            startDate: tableStartDate ? dayjs(tableStartDate).format('YYYY-MM-DDTHH:mm:ss') : '',
+            endDate: tableEndDate ? dayjs(tableEndDate).format('YYYY-MM-DDTHH:mm:ss') : ''
         }
 
         try {
@@ -77,12 +82,12 @@ const OfficeEquipment = () => {
             }) as IOfficeEquipmentsAxiosResponse;
             if (response.status === 200) {
                 dispatch(loadAllOfficeAssets(response.data.content));
-                setOfficeEquipmentCount(response.data.totalElements)
+                setOfficeEquipmentCount(response.data.totalElements);
             }
         } catch (error) {
-            console.log(error)
+            console.log(error);
         }
-        setLoading(false)
+        setLoading(false);
     }
 
     useEffect(() => {
@@ -143,6 +148,12 @@ const OfficeEquipment = () => {
             bulkInsertITAssets(fileData.jsonData as unknown as Array<IBulkAssetData>);
         }
     }, [fileData]);
+
+    useEffect(() => {
+        if (tableStartDate && tableEndDate) {
+            fetchResources()
+        }
+    }, [tableStartDate, tableEndDate]);
 
     const renderModals = () => (
         <>
@@ -244,6 +255,7 @@ const OfficeEquipment = () => {
                         status
                         onStatusChange={handleStatusChange}
                         selectedStatus={selectedStatus}
+                        dateRangePicker
                     />
                 }
             </Card>
