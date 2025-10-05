@@ -121,7 +121,7 @@ const TableToolBar = ({
                 gap: { xs: 2, sm: 0 }
             }}>
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <TypographyComponent
+                {/* <TypographyComponent
                     size='17px'
                     color="#BC892C"
                     weight={600}
@@ -131,7 +131,7 @@ const TableToolBar = ({
                     }}
                 >
                     {header.plural}
-                </TypographyComponent>
+                </TypographyComponent> */}
 
                 {status && (
                     <StyledFormControl size="small">

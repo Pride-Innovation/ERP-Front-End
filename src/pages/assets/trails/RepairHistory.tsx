@@ -5,7 +5,7 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { useEffect } from "react";
+import { useContext, useEffect } from "react";
 import { crudStates } from "../../../utils/constants";
 import { Grid } from "@mui/material";
 import ModalComponent from "../../../components/modal";
@@ -14,8 +14,14 @@ import RepairHistoryUtills from "./RepairHistoryUtills";
 import Description from "./repairs/Description";
 import Attachment from "./repairs/Attachment";
 import CompleteRepair from "./repairs/CompleteRepair";
+import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
+import HandymanOutlinedIcon from '@mui/icons-material/HandymanOutlined';
+import AttachmentOutlinedIcon from '@mui/icons-material/AttachmentOutlined';
+import { AssetContext } from "../../../context/asset";
 
 const RepairHistory = ({ id }: { id: string | number }) => {
+    const { setOptions } = useContext(AssetContext);
+
 
     const {
         endPoint,
@@ -37,6 +43,22 @@ const RepairHistory = ({ id }: { id: string | number }) => {
         fetchResources(id as number);
     }, []);
 
+
+    useEffect(() => {
+        const newOptions = repairsTableData?.map((item) => {
+            return item.repairEndDate === "Pending" ? [
+                { value: crudStates.read, label: "Description", icon: <DescriptionOutlinedIcon fontSize='small' color='secondary' /> },
+                { value: crudStates.update, label: "Complete Repair", icon: <HandymanOutlinedIcon fontSize='small' color='info' /> },
+                { value: crudStates.upload, label: "Attachments", icon: <AttachmentOutlinedIcon fontSize='small' color='inherit' /> },
+            ] : [
+                { value: crudStates.read, label: "Description", icon: <DescriptionOutlinedIcon fontSize='small' color='secondary' /> },
+                { value: crudStates.upload, label: "Attachments", icon: <AttachmentOutlinedIcon fontSize='small' color='inherit' /> },
+            ]
+        });
+
+        setOptions(newOptions.flat());
+
+    }, [repairsTableData]);
 
     return (
         <>

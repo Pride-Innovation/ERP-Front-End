@@ -15,6 +15,8 @@ interface IAssetContext {
     setFieldText: Dispatch<SetStateAction<string>>;
     officeEquipmentCount: number;
     setOfficeEquipmentCount: Dispatch<SetStateAction<number>>;
+    options: Array<{ value: string | number, label: string, icon: JSX.Element }>,
+    setOptions: Dispatch<SetStateAction<Array<{ value: string | number, label: string, icon: JSX.Element }>>>
 }
 
 export const AssetContext = createContext<IAssetContext>({} as IAssetContext);
@@ -24,6 +26,7 @@ const AssetContextProvider: FC<{ children: React.ReactNode }> = ({ children }) =
     const [officeEquipmentCount, setOfficeEquipmentCount] = useState<number>(0);
     const [fieldName, setFieldName] = useState<string>('');
     const [fieldText, setFieldText] = useState<string>('');
+    const [options, setOptions] = useState<Array<{ value: string | number, label: string, icon: JSX.Element }>>([] as Array<{ value: string | number, label: string, icon: JSX.Element }>);
 
     return (
         <AssetContext.Provider value={{
@@ -34,7 +37,9 @@ const AssetContextProvider: FC<{ children: React.ReactNode }> = ({ children }) =
             fieldText,
             setFieldText,
             officeEquipmentCount,
-            setOfficeEquipmentCount
+            setOfficeEquipmentCount,
+            options,
+            setOptions
         }}>
             {children}
         </AssetContext.Provider>

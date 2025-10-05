@@ -5,7 +5,7 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { ITableHeader } from "../../../components/tables/interface";
 import { getTableHeaders } from "../../../components/tables/getTableHeaders";
 import { crudStates } from "../../../utils/constants";
@@ -15,10 +15,8 @@ import { AppDispatch, RootState } from "../../../store";
 import { listRepairDetailService } from "../officeEquipment/service";
 import { IRepairDetails, IRepairDetailsAxiosResponse, IRepairsTableData } from "../interface";
 import { loadAssetRepairHistory } from "./slice";
-import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
-import HandymanOutlinedIcon from '@mui/icons-material/HandymanOutlined';
-import AttachmentOutlinedIcon from '@mui/icons-material/AttachmentOutlined';
 import moment from "moment";
+import { AssetContext } from "../../../context/asset";
 
 const RepairHistoryUtills = () => {
     const endPoint = 'posts';
@@ -31,7 +29,7 @@ const RepairHistoryUtills = () => {
     const [repairsTableData, setRepairsTableData] = useState<Array<IRepairsTableData>>([] as Array<IRepairsTableData>);
     const { assetRepairHistory } = useSelector((state: RootState) => state.AssetAssignmentHistoryStore);
     const [repairDetails, setRepairDetails] = useState<IRepairDetails | null>(null);
-
+    const { options } = useContext(AssetContext);
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
 
@@ -54,11 +52,7 @@ const RepairHistoryUtills = () => {
         ...data,
         action: {
             label: "options",
-            options: [
-                { value: crudStates.read, label: "Description", icon: <DescriptionOutlinedIcon fontSize='small' color='secondary' /> },
-                { value: crudStates.update, label: "Complete Repair", icon: <HandymanOutlinedIcon fontSize='small' color='info' /> },
-                { value: crudStates.upload, label: "Attachments", icon: <AttachmentOutlinedIcon fontSize='small' color='inherit' /> },
-            ]
+            options: options
         },
     };
 
