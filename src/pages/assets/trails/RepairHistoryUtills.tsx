@@ -104,7 +104,7 @@ const RepairHistoryUtills = () => {
 
     useEffect(() => {
         setColumnHeaders(getTableHeaders(rowData))
-    }, []);
+    }, [options]);
 
 
     const findRepair = (id: number): IRepairDetails => {
