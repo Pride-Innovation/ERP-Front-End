@@ -7,9 +7,6 @@ Managing Director
 
 import { useContext, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import InfoIcon from '@mui/icons-material/Info';
-import ModeEditIcon from '@mui/icons-material/ModeEdit';
-import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import { IOptions, ITableHeader } from "../../../components/tables/interface";
 import { getTableHeaders } from "../../../components/tables/getTableHeaders";
 import { IFormData } from "../interface";
@@ -23,9 +20,6 @@ import moment from "moment";
 import { IAssetType } from "../../settings/assetTypes/interface";
 import { AutocompleteContext } from "../../../context/autocomplete";
 import AssetUtills from "../Utills";
-import AssignmentIndOutlinedIcon from '@mui/icons-material/AssignmentIndOutlined';
-import BuildOutlinedIcon from '@mui/icons-material/BuildOutlined';
-import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
 import { determineBranchName } from "../../../utils/helpers";
 import { AssetContext } from "../../../context/asset";
 

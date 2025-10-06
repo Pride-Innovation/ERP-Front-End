@@ -10,9 +10,6 @@ import { IOptions, ITableHeader } from "../../../components/tables/interface";
 import { IFormData } from "../interface";
 import { IOfficeEquipment, IOfficeEquipmentTableData } from "./interface";
 import { officeEquipmentMock } from "../../../mocks/officeEquipment";
-import InfoIcon from '@mui/icons-material/Info';
-import ModeEditIcon from '@mui/icons-material/ModeEdit';
-import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import { getTableHeaders } from "../../../components/tables/getTableHeaders";
 import { assetTypesStatusConstants, crudStates, unitsOfMeasure } from "../../../utils/constants";
 import { ROUTES } from "../../../core/routes/routes";
@@ -23,10 +20,8 @@ import { RootState } from "../../../store";
 import { IAssetType } from "../../settings/assetTypes/interface";
 import { AutocompleteContext } from "../../../context/autocomplete";
 import AssetUtills from "../Utills";
-import AssignmentIndOutlinedIcon from '@mui/icons-material/AssignmentIndOutlined';
-import BuildOutlinedIcon from '@mui/icons-material/BuildOutlined';
-import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
 import { determineBranchName } from "../../../utils/helpers";
+import { AssetContext } from "../../../context/asset";
 
 const OfficeEquipmentUtills = () => {
     const endPoint = 'assets';
@@ -38,6 +33,7 @@ const OfficeEquipmentUtills = () => {
     const [officeEquipmentTableData, setOfficeEquipmentTableData] = useState<IOfficeEquipmentTableData[]>([] as IOfficeEquipmentTableData[])
     const { selectedItemDetails, value, inputValue, label } = useContext(AutocompleteContext)
     const [currentState, setCurrentState] = useState<string>("");
+    const { options } = useContext(AssetContext);
 
     const {
         searchStockByLPONumber,
@@ -129,20 +125,13 @@ const OfficeEquipmentUtills = () => {
         status: officeEquipmentMock[0].assetStatus?.name,
         action: {
             label: "options",
-            options: [
-                { value: "dispose", label: "Dispose", icon: <InfoIcon fontSize='small' color='error' /> },
-                { value: "update", label: "Update", icon: <ModeEditIcon fontSize='small' color='info' /> },
-                { value: "read", label: "View Details", icon: <RemoveRedEyeIcon fontSize='small' color='inherit' /> },
-                { value: crudStates.reassign, label: "Reassign", icon: <AssignmentIndOutlinedIcon fontSize='small' color='secondary' /> },
-                { value: crudStates.repair, label: "Repair", icon: <BuildOutlinedIcon fontSize='small' color='primary' /> },
-                { value: crudStates.inStore, label: "Send to Store", icon: <HomeOutlinedIcon fontSize='small' color='action' /> },
-            ]
+            options: options
         },
     };
 
     useEffect(() => {
         setColumnHeaders(getTableHeaders(rowData))
-    }, []);
+    }, [options]);
 
     const handleOfficeEquipmentTableData = (list: Array<IOfficeEquipment>) => {
         const data: Array<IOfficeEquipmentTableData> = list.map((item, index) => {

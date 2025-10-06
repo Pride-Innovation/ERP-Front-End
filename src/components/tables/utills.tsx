@@ -337,7 +337,7 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
         if (isITEquipmentModule && isFilterEnabled) {
             const status = row?.status?.toLowerCase() || "";
             const assignedTo = row?.assignedTo || "";
-            const hasAssignment = assignedTo && assignedTo.trim() !== "";
+            // const hasAssignment = assignedTo && assignedTo.trim() !== "";
 
             console.log(status, "Status in Option Filter");
 
@@ -380,6 +380,8 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
             });
         }
 
+        // For all other modules, return default options without filtering
+        return options;
     }
 
     const assetFilterStatuses: { label: string, value: string, color: string }[] = [

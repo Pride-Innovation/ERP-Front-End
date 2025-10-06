@@ -21,7 +21,7 @@ import { fetchRowsService } from "../../../core/apis/globalService";
 import AssetUtills from "../Utills";
 import { useDispatch } from "react-redux";
 import { AppDispatch, RootState } from "../../../store";
-import { IOfficeEquipmentsAxiosResponse } from "./interface";
+import { IOfficeEquipmentsAxiosResponse, IOfficeEquipmentTableData } from "./interface";
 import { loadAllOfficeAssets } from "./slice";
 import { useSelector } from "react-redux";
 import { AssetContext } from "../../../context/asset";
@@ -35,6 +35,13 @@ import { FileContext } from "../../../context/file/FileContext";
 import { bulkInsertOfficeAssetsService } from "./service";
 import { FormContext } from "../../../context/form";
 import dayjs from "dayjs";
+import InfoIcon from '@mui/icons-material/Info';
+import ModeEditIcon from '@mui/icons-material/ModeEdit';
+import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
+
+import AssignmentIndOutlinedIcon from '@mui/icons-material/AssignmentIndOutlined';
+import BuildOutlinedIcon from '@mui/icons-material/BuildOutlined';
+import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
 
 const OfficeEquipment = () => {
     const [loading, setLoading] = useState<boolean>(false);
@@ -47,6 +54,7 @@ const OfficeEquipment = () => {
     const [selectedStatus, setSelectedStatus] = useState<string>('all');
     const { fileData } = useContext(FileContext);
     const { tableStartDate, tableEndDate } = useContext(FormContext);
+    const { setOptions } = useContext(AssetContext);
 
     const {
         columnHeaders,
@@ -155,6 +163,26 @@ const OfficeEquipment = () => {
         }
     }, [tableStartDate, tableEndDate]);
 
+    const handleOptionChanged = (data: IOfficeEquipmentTableData[]) => {
+        // This function can be used to handle any additional logic when options change
+        const options = [
+            { value: crudStates.dispose, label: "Dispose", icon: <InfoIcon fontSize='small' color='error' /> },
+            { value: crudStates.update, label: "Update", icon: <ModeEditIcon fontSize='small' color='info' /> },
+            { value: crudStates.read, label: "View Details", icon: <RemoveRedEyeIcon fontSize='small' color='inherit' /> },
+            { value: crudStates.reassign, label: "Reassign", icon: <AssignmentIndOutlinedIcon fontSize='small' color='secondary' /> },
+            { value: crudStates.repair, label: "Repair", icon: <BuildOutlinedIcon fontSize='small' color='primary' /> },
+            { value: crudStates.inStore, label: "Send to Store", icon: <HomeOutlinedIcon fontSize='small' color='action' /> },
+        ]
+
+        setOptions(options);
+    }
+
+
+    useEffect(() => {
+        if (officeEquipmentTableData?.length > 0) {
+            handleOptionChanged(officeEquipmentTableData || [])
+        }
+    }, [officeEquipmentTableData]);
     const renderModals = () => (
         <>
             {
@@ -256,6 +284,7 @@ const OfficeEquipment = () => {
                         onStatusChange={handleStatusChange}
                         selectedStatus={selectedStatus}
                         dateRangePicker
+                        filterOptions
                     />
                 }
             </Card>

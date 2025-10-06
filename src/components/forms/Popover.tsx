@@ -40,7 +40,7 @@ const PopoverComponent = ({
                     horizontal: 'left',
                 }}
             >
-                {options.map((option: IOptions) => (
+                {options?.map((option: IOptions) => (
                     <MenuItem
                         sx={{ bgcolor: `${option?.header ? teal[50] : ''}` }}
                         onClick={() => {
