@@ -15,7 +15,7 @@ import { useContext, useEffect, useState } from "react"
 import { ROUTES } from "../../../core/routes/routes"
 import { ErrorMessage } from "../../../core/apis/axiosInstance"
 import { fetchRowsService } from "../../../core/apis/globalService"
-import { IBulkAssetData, IITEquipmentsAxiosResponse } from "./interface"
+import { IBulkAssetData, IITEquipmentsAxiosResponse, IITEquipmentTableData } from "./interface"
 import { useDispatch } from "react-redux"
 import { AppDispatch, RootState } from "../../../store"
 import { loadAllITAssets } from "./slice"
@@ -31,6 +31,13 @@ import { toast } from "react-toastify"
 import { bulkInsertITAssetsService } from "./service"
 import { FormContext } from "../../../context/form"
 import dayjs from "dayjs"
+import InfoIcon from '@mui/icons-material/Info';
+import ModeEditIcon from '@mui/icons-material/ModeEdit';
+import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
+
+import AssignmentIndOutlinedIcon from '@mui/icons-material/AssignmentIndOutlined';
+import BuildOutlinedIcon from '@mui/icons-material/BuildOutlined';
+import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
 
 const ITEquipment = () => {
     const [loading, setLoading] = useState<boolean>(false);
@@ -43,6 +50,8 @@ const ITEquipment = () => {
     const [selectedStatus, setSelectedStatus] = useState<string>('all');
     const { fileData } = useContext(FileContext);
     const { tableStartDate, tableEndDate } = useContext(FormContext);
+    const { setOptions } = useContext(AssetContext);
+
 
     const {
         open,
@@ -208,6 +217,27 @@ const ITEquipment = () => {
             }
         </>)
 
+    const handleOptionChanged = (data: IITEquipmentTableData[]) => {
+        // This function can be used to handle any additional logic when options change
+        const options = [
+            { value: crudStates.dispose, label: "Dispose", icon: <InfoIcon fontSize='small' color='error' /> },
+            { value: crudStates.update, label: "Update", icon: <ModeEditIcon fontSize='small' color='info' /> },
+            { value: crudStates.read, label: "View Details", icon: <RemoveRedEyeIcon fontSize='small' color='inherit' /> },
+            { value: crudStates.reassign, label: "Reassign", icon: <AssignmentIndOutlinedIcon fontSize='small' color='secondary' /> },
+            { value: crudStates.repair, label: "Repair", icon: <BuildOutlinedIcon fontSize='small' color='primary' /> },
+            { value: crudStates.inStore, label: "Send to Store", icon: <HomeOutlinedIcon fontSize='small' color='action' /> },
+        ]
+
+        setOptions(options);
+    }
+
+    useEffect(() => {
+        if (iTEquipmentTableData?.length > 0) {
+            // Perform any necessary actions with the updated table data
+            handleOptionChanged(iTEquipmentTableData);
+        }
+    }, [iTEquipmentTableData]);
+
     return (
         <Box width={'100%'} sx={{
             px: 3,
@@ -248,6 +278,7 @@ const ITEquipment = () => {
                         onStatusChange={handleStatusChange}
                         selectedStatus={selectedStatus}
                         dateRangePicker
+                        filterOptions
                     />)}
             </Card>
         </Box>

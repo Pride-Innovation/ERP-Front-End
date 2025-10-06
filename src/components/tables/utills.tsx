@@ -300,11 +300,14 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
         const currentUserId = getCurrentUser()?.id || 0;
 
         const isRequestModule = module === 'request';
+        const isITEquipmentModule = module === 'IT Equipment';
         const isFilterEnabled = Boolean(filter);
-        const isRequester = row?.requesterID === currentUserId;
-        const status = optionsfilterParams?.status?.toUpperCase() || "";
 
+        // Handle Request module filtering (existing logic)
         if (isRequestModule && isFilterEnabled) {
+            const isRequester = row?.requesterID === currentUserId;
+            const status = optionsfilterParams?.status?.toUpperCase() || "";
+
             if (isRequester) {
                 if (status === "CREATED") {
                     return options.filter(
@@ -330,7 +333,53 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
             );
         }
 
-        return options;
+        // Handle IT Equipment module filtering (new logic)
+        if (isITEquipmentModule && isFilterEnabled) {
+            const status = row?.status?.toLowerCase() || "";
+            const assignedTo = row?.assignedTo || "";
+            const hasAssignment = assignedTo && assignedTo.trim() !== "";
+
+            console.log(status, "Status in Option Filter");
+
+            return options.filter((option: any) => {
+                switch (option.value) {
+                    case 'read':
+                    case 'update':
+                        // Always show read and update
+                        return true;
+
+                    case 'dispose':
+                        // Always show dispose for all statuses
+                        if (status === 'requireupdate') return false;
+                        if (status === 'issuanceavailable') return false;
+                        return true;
+
+                    case 'reassign':
+                        // Show reassign only if asset is assigned or status allows assignment
+                        return status === 'instore'
+                    // hasAssignment && status !== "inmaintenance"
+                    // || status !== 'requireupdate';
+
+                    case 'repair':
+                        // Don't show repair for assets in store (they should be taken out first)
+                        // Don't show repair for assets requiring update (they need to be updated first)
+                        return status === 'instore' || status === 'requestacknowledged';
+
+                    case 'inStore':
+                        // Don't show "Send to Store" for assets already in store
+                        // Don't show for assigned assets in certain statuses
+                        if (status === 'instore') return false;
+                        if (status === 'requireupdate') return false;
+                        if (status === 'inmaintenance') return true;
+                        if (status === 'issuanceavailable') return false;
+                        return true;
+
+                    default:
+                        return true;
+                }
+            });
+        }
+
     }
 
     const assetFilterStatuses: { label: string, value: string, color: string }[] = [
