@@ -309,6 +309,7 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
         const isOfficeEquipmentModule = module === 'Office Equipment';
         const isFleetEquipmentModule = module === 'Fleet';
         const isRepairsModule = module === 'Repairs & Maintenance';
+        const isGRNDocumentsModule = module === 'GRN documents';
 
         const isFilterEnabled = Boolean(filter);
 
@@ -411,6 +412,27 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
             });
         }
 
+        // Handle Good Received Notes module filtering
+        if (isGRNDocumentsModule && isFilterEnabled) {
+            const status = row?.grnUploaded?.toLowerCase() || "";
+
+            return options.filter((option: any) => {
+                switch (option.value) {
+                    case 'read':
+                        // Always show read
+                        // if (status === "not uploaded") return false;
+                        return status === "uploaded";
+                    case 'download':
+                        // Show download only if status is not uploaded
+                        return status !== "uploaded";
+                    case 'upload':
+                        // Show upload only if status is not uploaded
+                        return status !== "uploaded";
+                    default:
+                        return true;
+                }
+            });
+        }
         // For all other modules, return default options without filtering
         return options;
     }
