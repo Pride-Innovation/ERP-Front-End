@@ -299,10 +299,14 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
         const options = column?.actionData?.options || [];
         const currentUserId = getCurrentUser()?.id || 0;
 
+        console.log(module, "Module in Option Filter");
+        console.log(options, "Options in Option Filter");
+
         const isRequestModule = module === 'request';
         const isITEquipmentModule = module === 'IT Equipment';
         const isOfficeEquipmentModule = module === 'Office Equipment';
         const isFleetEquipmentModule = module === 'Fleet';
+        const isRepairsModule = module === 'Repairs & Maintenance';
 
         const isFilterEnabled = Boolean(filter);
 
@@ -377,6 +381,28 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
                         if (status === 'issuanceavailable') return false;
                         return true;
 
+                    default:
+                        return true;
+                }
+            });
+        }
+
+        // Handle Repairs & Maintenance module filtering
+        if (isRepairsModule && isFilterEnabled) {
+            const status = row?.repairEndDate
+                && row?.repairEndDate === "Pending" ? "pending" : "completed";
+
+            return options.filter((option: any) => {
+                switch (option.value) {
+                    case 'read':
+                        // Always show read
+                        return true;
+                    case 'upload':
+                        // Always show upload
+                        return true;
+                    case 'update':
+                        // Show update only if status is pending
+                        return status === "pending";
                     default:
                         return true;
                 }

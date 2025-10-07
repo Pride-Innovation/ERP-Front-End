@@ -46,16 +46,22 @@ const RepairHistory = ({ id }: { id: string | number }) => {
 
     useEffect(() => {
         if (repairsTableData.length > 0) {
-            const newOptions = repairsTableData.map((item) => {
-                return item.repairEndDate === "Pending" ? [
-                    { value: crudStates.read, label: "Description", icon: <DescriptionOutlinedIcon fontSize='small' color='secondary' /> },
-                    { value: crudStates.update, label: "Complete Repair", icon: <HandymanOutlinedIcon fontSize='small' color='info' /> },
-                    { value: crudStates.upload, label: "Attachments", icon: <AttachmentOutlinedIcon fontSize='small' color='inherit' /> },
-                ] : [
-                    { value: crudStates.read, label: "Description", icon: <DescriptionOutlinedIcon fontSize='small' color='secondary' /> },
-                    { value: crudStates.upload, label: "Attachments", icon: <AttachmentOutlinedIcon fontSize='small' color='inherit' /> },
-                ]
-            });
+            const newOptions = [
+                { value: crudStates.read, label: "Description", icon: <DescriptionOutlinedIcon fontSize='small' color='secondary' /> },
+                { value: crudStates.update, label: "Complete Repair", icon: <HandymanOutlinedIcon fontSize='small' color='info' /> },
+                { value: crudStates.upload, label: "Attachments", icon: <AttachmentOutlinedIcon fontSize='small' color='inherit' /> },
+            ]
+
+            // repairsTableData.map((item) => {
+            //     return item.repairEndDate === "Pending" ? [
+            //         { value: crudStates.read, label: "Description", icon: <DescriptionOutlinedIcon fontSize='small' color='secondary' /> },
+            //         { value: crudStates.update, label: "Complete Repair", icon: <HandymanOutlinedIcon fontSize='small' color='info' /> },
+            //         { value: crudStates.upload, label: "Attachments", icon: <AttachmentOutlinedIcon fontSize='small' color='inherit' /> },
+            //     ] : [
+            //         { value: crudStates.read, label: "Description", icon: <DescriptionOutlinedIcon fontSize='small' color='secondary' /> },
+            //         { value: crudStates.upload, label: "Attachments", icon: <AttachmentOutlinedIcon fontSize='small' color='inherit' /> },
+            //     ]
+            // });
 
             setOptions(newOptions.flat());
         }
@@ -100,10 +106,12 @@ const RepairHistory = ({ id }: { id: string | number }) => {
                         // createAction
                         header={header}
                         rows={repairsTableData}
+                        module="Repairs & Maintenance"
                         columnHeaders={columnHeaders}
                         paginationMode='server'
                         onCreationHandler={handleCreation}
                         handleOptionClicked={handleOptionClicked}
+                        filterOptions
                     />
                 }
             </Grid>
