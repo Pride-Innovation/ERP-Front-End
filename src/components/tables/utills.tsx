@@ -302,6 +302,7 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
         const isRequestModule = module === 'request';
         const isITEquipmentModule = module === 'IT Equipment';
         const isOfficeEquipmentModule = module === 'Office Equipment';
+        const isFleetEquipmentModule = module === 'Fleet';
 
         const isFilterEnabled = Boolean(filter);
 
@@ -335,8 +336,8 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
             );
         }
 
-        // Handle IT Equipment and Office Equipment module filtering (same logic for both)
-        if ((isITEquipmentModule || isOfficeEquipmentModule) && isFilterEnabled) {
+        // Handle IT Equipment, Fleet Equipment and Office Equipment module filtering (same logic for both)
+        if ((isITEquipmentModule || isOfficeEquipmentModule || isFleetEquipmentModule) && isFilterEnabled) {
             const status = row?.status?.toLowerCase() || "";
             // const assignedTo = row?.assignedTo || "";
             // const hasAssignment = assignedTo && assignedTo.trim() !== "";

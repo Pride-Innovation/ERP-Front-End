@@ -251,6 +251,7 @@ const Fleet = () => {
                         onStatusChange={handleStatusChange}
                         selectedStatus={selectedStatus}
                         dateRangePicker
+                        filterOptions
                     />
                 }
             </Card>
