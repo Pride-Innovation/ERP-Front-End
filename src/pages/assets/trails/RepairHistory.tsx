@@ -52,17 +52,6 @@ const RepairHistory = ({ id }: { id: string | number }) => {
                 { value: crudStates.upload, label: "Attachments", icon: <AttachmentOutlinedIcon fontSize='small' color='inherit' /> },
             ]
 
-            // repairsTableData.map((item) => {
-            //     return item.repairEndDate === "Pending" ? [
-            //         { value: crudStates.read, label: "Description", icon: <DescriptionOutlinedIcon fontSize='small' color='secondary' /> },
-            //         { value: crudStates.update, label: "Complete Repair", icon: <HandymanOutlinedIcon fontSize='small' color='info' /> },
-            //         { value: crudStates.upload, label: "Attachments", icon: <AttachmentOutlinedIcon fontSize='small' color='inherit' /> },
-            //     ] : [
-            //         { value: crudStates.read, label: "Description", icon: <DescriptionOutlinedIcon fontSize='small' color='secondary' /> },
-            //         { value: crudStates.upload, label: "Attachments", icon: <AttachmentOutlinedIcon fontSize='small' color='inherit' /> },
-            //     ]
-            // });
-
             setOptions(newOptions.flat());
         }
 
