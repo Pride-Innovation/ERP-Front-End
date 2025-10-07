@@ -301,6 +301,8 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
 
         const isRequestModule = module === 'request';
         const isITEquipmentModule = module === 'IT Equipment';
+        const isOfficeEquipmentModule = module === 'Office Equipment';
+
         const isFilterEnabled = Boolean(filter);
 
         // Handle Request module filtering (existing logic)
@@ -333,13 +335,13 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
             );
         }
 
-        // Handle IT Equipment module filtering (new logic)
-        if (isITEquipmentModule && isFilterEnabled) {
+        // Handle IT Equipment and Office Equipment module filtering (same logic for both)
+        if ((isITEquipmentModule || isOfficeEquipmentModule) && isFilterEnabled) {
             const status = row?.status?.toLowerCase() || "";
-            const assignedTo = row?.assignedTo || "";
+            // const assignedTo = row?.assignedTo || "";
             // const hasAssignment = assignedTo && assignedTo.trim() !== "";
 
-            console.log(status, "Status in Option Filter");
+            // console.log(status, "Status in Option Filter");
 
             return options.filter((option: any) => {
                 switch (option.value) {
