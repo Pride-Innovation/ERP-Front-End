@@ -149,6 +149,7 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
                 moduleName === 'inventory commodities' ||
                 moduleName === 'GRN documents' ||
                 moduleName === 'assignment history' ||
+                moduleName === 'Repairs & Maintenance' ||
                 moduleName.toLowerCase().includes('commodities');
 
             if (useCurrentTableData) {
@@ -205,6 +206,7 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
                 moduleName === 'inventory commodities' ||
                 moduleName === 'GRN documents' ||
                 moduleName === 'assignment history' ||
+                moduleName === 'Repairs & Maintenance' ||
                 moduleName.toLowerCase().includes('commodities');
 
             if (useCurrentTableData && apiRef) {
