@@ -13,13 +13,17 @@ import {
     IconButton,
     Stack,
     Typography,
-    useTheme
+    useTheme,
+    alpha,
+    Tooltip,
+    Divider,
+    Chip
 } from "@mui/material";
-import { grey } from "@mui/material/colors";
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
-import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
-import SettingsSuggestIcon from '@mui/icons-material/SettingsSuggest';
+import ShieldOutlinedIcon from '@mui/icons-material/ShieldOutlined';
+import SecurityOutlinedIcon from '@mui/icons-material/SecurityOutlined';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 
 import { IRoleDetails } from "../interface";
 import RoleUtills from "./utills";
@@ -30,98 +34,159 @@ const RoleDetails = ({ role, deleteRole, updateRole }: IRoleDetails) => {
     const theme = useTheme();
 
     return (
-        <Grid container spacing={3}>
-            <Grid item xs={12} md={4}>
-                <Card
-                    sx={{
-                        boxShadow: 3,
-                        borderRadius: 2,
-                        p: 3,
-                        border: `1px solid ${theme.palette.primary.light}`,
-                        bgcolor: "white"
-                    }}
-                >
-                    <Typography variant="subtitle2" color={theme.palette.primary.main} mb={2}>
-                        Manage Role
-                    </Typography>
-                    <Stack spacing={2} alignItems="center">
-                        <AccountCircleOutlinedIcon fontSize="large" sx={{ fontSize: 60, color: theme.palette.info.main }} />
-                        <Typography variant="h6" sx={{ fontWeight: 600, textAlign: "center" }}>
+        <Card
+            elevation={0}
+            sx={{
+                borderRadius: 2,
+                overflow: 'hidden',
+                border: `1px solid ${alpha(theme.palette.divider, 0.15)}`,
+                transition: 'box-shadow 0.2s ease-in-out, transform 0.2s ease',
+                '&:hover': {
+                    boxShadow: `0 8px 24px ${alpha(theme.palette.common.black, 0.08)}`,
+                    transform: 'translateY(-2px)'
+                }
+            }}
+        >
+            <Grid container>
+                {/* Role Info Section */}
+                <Grid item xs={12} md={3} sx={{
+                    borderRight: { md: `1px solid ${alpha(theme.palette.divider, 0.1)}` },
+                    borderBottom: { xs: `1px solid ${alpha(theme.palette.divider, 0.1)}`, md: 'none' },
+                    bgcolor: alpha(theme.palette.background.paper, 0.4),
+                    p: 3
+                }}>
+                    <Stack spacing={2} alignItems="center" justifyContent="center" sx={{ height: '100%' }}>
+                        <Box
+                            sx={{
+                                width: 80,
+                                height: 80,
+                                borderRadius: '50%',
+                                bgcolor: alpha(theme.palette.primary.main, 0.1),
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                            }}
+                        >
+                            <ShieldOutlinedIcon
+                                sx={{
+                                    fontSize: 40,
+                                    color: theme.palette.primary.main
+                                }}
+                            />
+                        </Box>
+
+                        <Typography variant="h6" fontWeight={600} align="center">
                             {role.name}
                         </Typography>
-                        <Button
-                            onClick={() => updateRole(role)}
-                            variant="contained"
-                            color="primary"
-                            startIcon={<EditOutlinedIcon />}
-                            sx={{ textTransform: "none", width: '100%' }}
-                        >
-                            Update
-                        </Button>
-                        <Button
-                            onClick={() => deleteRole(role)}
-                            variant="outlined"
-                            color="error"
-                            startIcon={<DeleteOutlineOutlinedIcon />}
-                            sx={{ textTransform: "none", width: '100%' }}
-                        >
-                            Delete
-                        </Button>
+
+                        <Chip
+                            size="small"
+                            icon={<SecurityOutlinedIcon />}
+                            label={`${(role.permissions as any[])?.length || 0} permissions`}
+                            sx={{
+                                bgcolor: alpha(theme.palette.primary.main, 0.1),
+                                color: theme.palette.primary.main,
+                                fontWeight: 500,
+                                borderRadius: 1.5
+                            }}
+                        />
+
+                        <Stack direction="row" spacing={1.5} sx={{ width: '100%', mt: 2 }}>
+                            <Tooltip title="Edit role">
+                                <Button
+                                    onClick={() => updateRole(role)}
+                                    variant="outlined"
+                                    size="small"
+                                    fullWidth
+                                    startIcon={<EditOutlinedIcon />}
+                                    sx={{
+                                        textTransform: "none",
+                                        borderRadius: 1.5,
+                                        borderColor: alpha(theme.palette.primary.main, 0.3)
+                                    }}
+                                >
+                                    Edit
+                                </Button>
+                            </Tooltip>
+                            <Tooltip title="Delete role">
+                                <Button
+                                    onClick={() => deleteRole(role)}
+                                    variant="outlined"
+                                    color="error"
+                                    size="small"
+                                    fullWidth
+                                    startIcon={<DeleteOutlineOutlinedIcon />}
+                                    sx={{
+                                        textTransform: "none",
+                                        borderRadius: 1.5,
+                                        borderColor: alpha(theme.palette.error.main, 0.3)
+                                    }}
+                                >
+                                    Delete
+                                </Button>
+                            </Tooltip>
+                        </Stack>
                     </Stack>
-                </Card>
-            </Grid>
+                </Grid>
 
-            <Grid item xs={12} md={8}>
-                <Card
-                    sx={{
-                        boxShadow: 3,
-                        borderRadius: 2,
-                        border: `1px solid ${theme.palette.primary.light}`,
-                        bgcolor: "white"
-                    }}
-                >
+                {/* Permissions Section */}
+                <Grid item xs={12} md={9}>
+                    {/* Header */}
                     <Box
-                        px={3}
-                        py={2}
-                        display="grid"
-                        gridTemplateColumns="6fr 1fr 1fr 1fr 1fr"
-                        alignItems="center"
-                        bgcolor={grey[100]}
-                        borderBottom={`1px solid ${grey[300]}`}
+                        sx={{
+                            px: 3,
+                            py: 2,
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            bgcolor: alpha(theme.palette.primary.main, 0.03),
+                            borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}`
+                        }}
                     >
-                        <Typography variant="body1" sx={{ fontWeight: 600, color: theme.palette.primary.main }}>
-                            Action
+                        <Typography
+                            variant="subtitle1"
+                            fontWeight={600}
+                            color="primary"
+                        >
+                            Permissions
                         </Typography>
-                        <Typography variant="body2" color="text.secondary">Create</Typography>
-                        <Typography variant="body2" color="text.secondary">Read</Typography>
-                        <Typography variant="body2" color="text.secondary">Update</Typography>
-                        <Typography variant="body2" color="text.secondary">Delete</Typography>
+                        <Tooltip title="More options">
+                            <IconButton size="small">
+                                <MoreVertIcon fontSize="small" />
+                            </IconButton>
+                        </Tooltip>
                     </Box>
 
+                    {/* Table header */}
                     <Box
-                        px={2.5}
-                        py={1}
-                        display="flex"
-                        alignItems="center"
-                        bgcolor={grey[50]}
-                        borderBottom={`1px solid ${grey[200]}`}
+                        sx={{
+                            display: "grid",
+                            gridTemplateColumns: "6fr 1fr 1fr 1fr 1fr",
+                            gap: 2,
+                            px: 3,
+                            py: 1.5,
+                            bgcolor: alpha(theme.palette.background.default, 0.5),
+                            borderBottom: `1px solid ${alpha(theme.palette.divider, 0.08)}`
+                        }}
                     >
-                        <IconButton disabled>
-                            <SettingsSuggestIcon fontSize="medium" color="info" />
-                        </IconButton>
-                        <Typography variant="subtitle2" color={theme.palette.secondary.main} sx={{ fontWeight: 600 }}>
-                            {role.name} Permissions
+                        <Typography variant="body2" fontWeight={600} color="text.secondary">
+                            Module
                         </Typography>
+                        <Typography variant="body2" color="text.secondary" align="center">Create</Typography>
+                        <Typography variant="body2" color="text.secondary" align="center">Read</Typography>
+                        <Typography variant="body2" color="text.secondary" align="center">Update</Typography>
+                        <Typography variant="body2" color="text.secondary" align="center">Delete</Typography>
                     </Box>
 
-                    <Box px={2.5} py={1.5}>
+                    {/* Permission rows */}
+                    <Box sx={{ maxHeight: '400px', overflow: 'auto', py: 1 }}>
                         {modulesList.map((module, index) => (
                             <RoleRow key={index} role={role} module={module} />
                         ))}
                     </Box>
-                </Card>
+                </Grid>
             </Grid>
-        </Grid>
+        </Card>
     );
 };
 

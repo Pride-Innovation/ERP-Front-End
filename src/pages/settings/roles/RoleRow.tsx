@@ -5,7 +5,7 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, alpha, useTheme, Tooltip } from "@mui/material";
 import { IModule, IPermission, IRoleAxiosResponse, IRoleRow } from "../interface";
 import CheckboxComponent from "../../../components/forms/CheckBox";
 import RoleUtills from "./utills";
@@ -21,44 +21,56 @@ import { updateRole } from "./slice";
 const RoleRow = ({ role, module }: IRoleRow) => {
     const { determineCrudStates, mainCheckedState, filterPermissions, updatePermissionsOnClick } = RoleUtills();
     const [selectedPermissions, setSelectedPermissions] = useState<IPermission[]>([] as Array<IPermission>);
-    const [updatedPermissions, setUpdatedPermissions] = useState<IPermission[]>([] as Array<IPermission>)
+    const [updatedPermissions, setUpdatedPermissions] = useState<IPermission[]>([] as Array<IPermission>);
     const moduleNameFxn = (module: IModule) => module.name.toLocaleLowerCase().split(" ").join("_");
     const dispatch = useDispatch<AppDispatch>();
+    const theme = useTheme();
 
     useEffect(() => {
         if (((role.permissions as Array<IPermission>)?.length) > 0)
             setUpdatedPermissions(role.permissions as Array<IPermission>)
-    }, [])
+    }, [role.permissions]);
 
     useEffect(() => {
         if (updatedPermissions.length > 0) {
             determineCrudStates(updatedPermissions, moduleNameFxn(module))
         }
-    }, [updatedPermissions]);
+    }, [updatedPermissions, module]);
 
     const handleChange = async (event: ChangeEvent<HTMLInputElement>) => {
         const verb = event.target.name;
         const val = event.target.checked;
         const permission = filterPermissions(verb, permissionsMock, moduleNameFxn(module));
-        let response = {} as IRoleAxiosResponse;
-        if (val) {
-            response = await assignPermissionToRoleService(role?.id as number, permission[0].id as number) as IRoleAxiosResponse;
-        } else {
-            response = await removePermissionFromRoleService(role?.id as number, permission[0].id as number) as IRoleAxiosResponse;
+
+        try {
+            let response = {} as IRoleAxiosResponse;
+
+            if (val) {
+                response = await assignPermissionToRoleService(role?.id as number, permission[0].id as number) as IRoleAxiosResponse;
+                toast.success(
+                    `Permission '${(permission[0].name).split("_").join(" ").toLowerCase()}' added to ${response.data.name}`,
+                    { position: 'bottom-right' }
+                );
+            } else {
+                response = await removePermissionFromRoleService(role?.id as number, permission[0].id as number) as IRoleAxiosResponse;
+                toast.info(
+                    `Permission '${(permission[0].name).split("_").join(" ").toLowerCase()}' removed from ${response.data.name}`,
+                    { position: 'bottom-right' }
+                );
+            }
+
+            if (response?.status === 201) {
+                dispatch(updateRole(response.data));
+            }
+
+            const result = updatePermissionsOnClick(updatedPermissions as Array<IPermission>, permission[0], val);
+            setSelectedPermissions([...result]);
+            setUpdatedPermissions([...result]);
+
+        } catch (error) {
+            console.error("Error updating permission:", error);
+            toast.error("Failed to update permission. Please try again.", { position: 'bottom-right' });
         }
-
-        if (response?.status === 201) {
-            toast.success(
-                `Permission ${(permission[0].name).split("_").join(" ").toLowerCase()} 
-                has been ${(val ? "Added To" : "Removed From")} ${response.data.name}`
-            )
-            dispatch(updateRole(response.data))
-        }
-
-        const result = updatePermissionsOnClick(updatedPermissions as Array<IPermission>, permission[0], val);
-
-        setSelectedPermissions([...result]);
-        setUpdatedPermissions([...result])
     }
 
     useEffect(() => {
@@ -67,25 +79,68 @@ const RoleRow = ({ role, module }: IRoleRow) => {
         }
     }, [selectedPermissions]);
 
+    // Determine if this is a special module
+    const isSpecialModule = module.name === "User" || module.name === "Request" || module.name === "Store" || module.name === "Audit";
+
     return (
         <Box
-            display="grid"
-            sx={{ width: "100%", alignItems: "center" }}
-            gridTemplateColumns="6fr 1fr 1fr 1fr 1fr"
-            gap={4}
-            px={3}
-            py={0.5}
-            bgcolor={module.name === "User"
-                || module.name === "Request"
-                || module.name === "Store"
-                || module.name === "Audit"
-                ? "grey.50" : "white"}
+            sx={{
+                display: "grid",
+                gridTemplateColumns: "6fr 1fr 1fr 1fr 1fr",
+                gap: 2,
+                px: 3,
+                py: 1.5,
+                alignItems: "center",
+                bgcolor: isSpecialModule ? alpha(theme.palette.background.default, 0.5) : 'transparent',
+                borderBottom: `1px solid ${alpha(theme.palette.divider, 0.05)}`,
+                '&:hover': {
+                    bgcolor: alpha(theme.palette.primary.main, 0.02)
+                },
+                transition: 'background-color 0.15s ease'
+            }}
         >
-            <Typography variant="body2">{module.name}</Typography>
-            <CheckboxComponent name={crudStates.create} handleChangeEvent={handleChange} checked={mainCheckedState.create} />
-            <CheckboxComponent name={crudStates.read} handleChangeEvent={handleChange} checked={mainCheckedState.read} />
-            <CheckboxComponent name={crudStates.update} handleChangeEvent={handleChange} checked={mainCheckedState.update} />
-            <CheckboxComponent name={crudStates.delete} handleChangeEvent={handleChange} checked={mainCheckedState.delete} />
+            <Tooltip title={`Manage ${module.name} module permissions`} placement="top-start">
+                <Typography
+                    variant="body2"
+                    fontWeight={isSpecialModule ? 500 : 400}
+                    color={isSpecialModule ? 'primary' : 'text.primary'}
+                >
+                    {module.name}
+                </Typography>
+            </Tooltip>
+
+            {/* Checkboxes with centered alignment */}
+            <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                <CheckboxComponent
+                    name={crudStates.create}
+                    handleChangeEvent={handleChange}
+                    checked={mainCheckedState.create}
+                />
+            </Box>
+
+            <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                <CheckboxComponent
+                    name={crudStates.read}
+                    handleChangeEvent={handleChange}
+                    checked={mainCheckedState.read}
+                />
+            </Box>
+
+            <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                <CheckboxComponent
+                    name={crudStates.update}
+                    handleChangeEvent={handleChange}
+                    checked={mainCheckedState.update}
+                />
+            </Box>
+
+            <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                <CheckboxComponent
+                    name={crudStates.delete}
+                    handleChangeEvent={handleChange}
+                    checked={mainCheckedState.delete}
+                />
+            </Box>
         </Box>
     )
 }
