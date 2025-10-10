@@ -42,7 +42,7 @@ import {
 } from "../../../../utils/helpers";
 import InventoryTable from "../../../../components/forms/InventoryTable";
 import ButtonComponent from "../../../../components/forms/Button";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../store";
 import { IIssueAxiosResponse } from "./interface";
@@ -59,6 +59,7 @@ const IssueRequestDetails = () => {
     const [request, setRequest] = useState<IRequest>({} as IRequest)
     const { id } = useParams<{ id: string }>();
     const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore)
+    const navigate = useNavigate();
 
     const [requestCommodities, setRequestCommodities] = useState<
         Array<{ commodity: ICommodity; quantity: number }>
@@ -175,7 +176,7 @@ const IssueRequestDetails = () => {
                     <Grid xs={12} item container>
                         <Grid item xs={6}>
                             <Typography variant="h6" sx={{ mb: 1, color: theme.palette.secondary.main }}>
-                                Requested Details:
+                                Request Details:
                             </Typography>
                             <Typography variant="body1" sx={{ mb: 1 }}>
                                 Are you sure you want to Issue this request items?
@@ -292,7 +293,7 @@ const IssueRequestDetails = () => {
                 <Grid item xs={12} sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
                     <Stack direction="row" spacing={3} sx={{ width: "30%" }}>
                         <ButtonComponent
-                            handleClick={() => { console.log("Go back!!") }}
+                            handleClick={() => { navigate(-1); }}
                             buttonColor="info"
                             type="button"
                             variant="outlined"
