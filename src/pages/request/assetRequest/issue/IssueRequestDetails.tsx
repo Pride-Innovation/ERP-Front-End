@@ -197,7 +197,7 @@ const IssueRequestDetails = () => {
                                 </Typography>
                             </Stack>
                             <Typography variant="subtitle1" color="textSecondary" sx={{ mt: 1 }}>
-                                From: {request.requester?.title?.branch?.name}
+                                From: {request.requester?.branch?.name}
                             </Typography>
                         </Grid>
 

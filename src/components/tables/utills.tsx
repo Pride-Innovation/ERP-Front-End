@@ -301,9 +301,6 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
         const options = column?.actionData?.options || [];
         const currentUserId = getCurrentUser()?.id || 0;
 
-        console.log(module, "Module in Option Filter");
-        console.log(options, "Options in Option Filter");
-
         const isRequestModule = module === 'request';
         const isITEquipmentModule = module === 'IT Equipment';
         const isOfficeEquipmentModule = module === 'Office Equipment';
