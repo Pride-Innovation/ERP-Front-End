@@ -235,7 +235,7 @@ const RequestUtills = () => {
                 {
                     ...fielsdata,
                     name: request.name,
-                    requestDate: moment(request.createDate).format('Do MMMM YYYY, h:mm a'),
+                    requestDate: moment(request.createDate).format('Do MMMM YYYY'),
                     priority: request.priority,
                     requestedBy: `${request.requester?.firstName} ${request.requester?.lastName}`,
                     approver: `${request.currentApprover?.firstName} ${request.currentApprover?.lastName}`,

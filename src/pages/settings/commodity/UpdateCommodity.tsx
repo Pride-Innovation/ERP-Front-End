@@ -1,3 +1,4 @@
+// UpdateCommodity.tsx
 /*
 13.9 Pride's Standard Copyright Notice:
 Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
@@ -5,7 +6,6 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { Grid, Paper } from "@mui/material"
 import { useEffect, useState } from "react";
 import { ICommodity, ICommodityAxiosResponse, IUpdateCommodity } from "./interface";
 import CommodityUtills from "./utills";
@@ -14,6 +14,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { commoditySchema } from "./schema";
 import { updateCommodityService } from "./service";
 import { toast } from "react-toastify";
+import { Box } from "@mui/material";
 import CommodityForm from "./CommodityForm";
 
 const UpdateCommodity = ({ handleClose, sendingRequest, setSendingRequest, commodity }: IUpdateCommodity) => {
@@ -24,7 +25,7 @@ const UpdateCommodity = ({ handleClose, sendingRequest, setSendingRequest, commo
         setDefaultCommodity({
             ...commodity,
             assetType: commodity.assetType?.id
-        })
+        });
     }, [commodity]);
 
     const {
@@ -47,35 +48,32 @@ const UpdateCommodity = ({ handleClose, sendingRequest, setSendingRequest, commo
         try {
             const response = await updateCommodityService(formData, commodity?.id as number) as ICommodityAxiosResponse;
             if (response.status === 201) {
-                console.log(response.data, "Response data!!!")
-                updateCommodityInStore(response.data)
-                toast.success("Commodity updated successfully")
+                updateCommodityInStore(response.data);
+                toast.success("Commodity updated successfully", { position: 'bottom-right' });
             }
         } catch (error) {
-            console.log(error)
+            console.error("Error updating commodity:", error);
+            toast.error("Failed to update commodity. Please try again.", { position: 'bottom-right' });
         }
         setSendingRequest(false);
-        handleClose()
+        handleClose();
     };
 
     return (
-        <Paper elevation={3} sx={{ borderRadius: 3, boxShadow: "none", maxWidth: "1200px", mx: "auto" }}>
+        <Box sx={{ width: "100%" }}>
             <form autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
-                <Grid container spacing={2}>
-                    <Grid item xs={12}>
-                        <CommodityForm
-                            handleClose={handleClose}
-                            buttonText="Update"
-                            formState={formState}
-                            control={control}
-                            sendingRequest={sendingRequest}
-                            register={register}
-                        />
-                    </Grid>
-                </Grid>
+                <CommodityForm
+                    handleClose={handleClose}
+                    buttonText="Update Commodity"
+                    formState={formState}
+                    control={control}
+                    sendingRequest={sendingRequest}
+                    register={register}
+                    update={true}
+                />
             </form>
-        </Paper>
-    )
-}
+        </Box>
+    );
+};
 
-export default UpdateCommodity
+export default UpdateCommodity;

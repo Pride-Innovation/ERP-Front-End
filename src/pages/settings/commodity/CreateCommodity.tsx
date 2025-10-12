@@ -1,3 +1,4 @@
+// CreateCommodity.tsx
 /*
 13.9 Pride's Standard Copyright Notice:
 Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
@@ -12,7 +13,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { commoditySchema } from "./schema";
 import { useEffect } from "react";
 import { toast } from "react-toastify";
-import { Grid, Paper } from "@mui/material";
+import { Box } from "@mui/material";
 import CommodityForm from "./CommodityForm";
 import { createCommodityService } from "./service";
 
@@ -45,33 +46,30 @@ const CreateCommodity = ({
             const response = await createCommodityService(formData) as ICommodityAxiosResponse;
             if (response.status === 201) {
                 addCommodityToStore(response.data);
-                toast.success("Commodity created successfully")
+                toast.success("Commodity created successfully", { position: 'bottom-right' });
             }
         } catch (error) {
-            console.log(error);
+            console.error("Error creating commodity:", error);
+            toast.error("Failed to create commodity. Please try again.", { position: 'bottom-right' });
         }
         setSendingRequest(false);
-        handleClose()
+        handleClose();
     };
 
     return (
-        <Paper elevation={3} sx={{ borderRadius: 3, boxShadow: "none", maxWidth: "1200px", mx: "auto" }}>
+        <Box sx={{ width: "100%" }}>
             <form autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
-                <Grid container spacing={2}>
-                    <Grid item xs={12}>
-                        <CommodityForm
-                            handleClose={handleClose}
-                            buttonText="Submit"
-                            formState={formState}
-                            control={control}
-                            sendingRequest={sendingRequest}
-                            register={register}
-                        />
-                    </Grid>
-                </Grid>
+                <CommodityForm
+                    handleClose={handleClose}
+                    buttonText="Create Commodity"
+                    formState={formState}
+                    control={control}
+                    sendingRequest={sendingRequest}
+                    register={register}
+                />
             </form>
-        </Paper>
+        </Box>
     );
-}
+};
 
-export default CreateCommodity
+export default CreateCommodity;

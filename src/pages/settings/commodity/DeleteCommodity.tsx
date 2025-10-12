@@ -5,73 +5,161 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import CommodityUtills from './utills';
-import { ICommodityAxiosResponse, IDeleteCommodity } from './interface';
-import { toast } from 'react-toastify';
-import { deleteCommodityService } from './service';
-import { Grid, Stack, Typography } from '@mui/material';
-import ButtonComponent from '../../../components/forms/Button';
+import { Grid, Stack, Typography, Box, alpha, useTheme, Alert, Divider } from '@mui/material';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import CategoryOutlinedIcon from '@mui/icons-material/CategoryOutlined';
-
+import ButtonComponent from '../../../components/forms/Button';
+import { toast } from 'react-toastify';
+import { IDeleteCommodity, ICommodityAxiosResponse } from './interface';
+import { deleteCommodityService } from './service';
+import CommodityUtills from './utills';
 
 const DeleteCommodity = ({
     sendingRequest,
     setSendingRequest,
-    commodity,
     handleClose,
-    buttonText
+    buttonText,
+    commodity
 }: IDeleteCommodity) => {
     const { removeCommodityFromStore } = CommodityUtills();
+    const theme = useTheme();
 
-    const deleteBranch = async () => {
-        setSendingRequest(true)
+    const deleteCommodity = async () => {
+        setSendingRequest(true);
         try {
             const response = await deleteCommodityService(commodity?.id as string) as ICommodityAxiosResponse;
             if (response.status === 204) {
-                toast.success("Commodity deleted successfully")
-                removeCommodityFromStore(commodity)
+                toast.success("Commodity deleted successfully", { position: 'bottom-right' });
+                removeCommodityFromStore(commodity);
             }
         } catch (error) {
-            console.log(error)
+            console.error("Error deleting commodity:", error);
+            toast.error("Failed to delete commodity. Please try again.", { position: 'bottom-right' });
         }
-        setSendingRequest(false)
-        handleClose()
-    }
+        setSendingRequest(false);
+        handleClose();
+    };
 
     return (
-        <Grid item container spacing={4} xs={12}>
+        <Grid item container spacing={3} xs={12} sx={{ mt: 0 }}>
+            {/* Header */}
             <Grid item xs={12}>
-                <Typography variant="body1" sx={{ mb: 1 }}>
-                    Are you sure you want to delete this Commodity?
-                </Typography>
-                <Stack direction="row" spacing={1} alignItems="center">
-                    <CategoryOutlinedIcon color="primary" />
-                    <Typography variant="h6" color="primary">
-                        {commodity.name}
+                <Box
+                    sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1.5,
+                        mb: 2
+                    }}
+                >
+                    <Box
+                        sx={{
+                            width: 40,
+                            height: 40,
+                            borderRadius: '50%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            bgcolor: alpha(theme.palette.error.main, 0.1)
+                        }}
+                    >
+                        <WarningAmberIcon color="error" />
+                    </Box>
+                    <Typography variant="h6" fontWeight={500} color="error">
+                        Confirm Deletion
                     </Typography>
-                </Stack>
+                </Box>
+                <Typography variant="body2" color="text.secondary">
+                    This action cannot be undone. The commodity and its associations will be permanently removed.
+                </Typography>
+                <Divider sx={{ my: 2, opacity: 0.6 }} />
             </Grid>
-            <Grid item xs={12} sx={{ display: "flex", justifyContent: "end" }}>
-                <Stack direction="row" spacing={3} sx={{ width: "50%" }}>
+
+            {/* Warning alert */}
+            <Grid item xs={12}>
+                <Alert
+                    severity="warning"
+                    icon={<WarningAmberIcon />}
+                    sx={{
+                        mb: 3,
+                        borderRadius: 1.5,
+                        '& .MuiAlert-icon': {
+                            alignItems: 'center'
+                        }
+                    }}
+                >
+                    <Typography variant="body2">
+                        Deleting this commodity may affect inventory and asset management systems.
+                    </Typography>
+                </Alert>
+
+                {/* Commodity details */}
+                <Box
+                    sx={{
+                        p: 2.5,
+                        borderRadius: 1.5,
+                        bgcolor: alpha(theme.palette.background.default, 0.6),
+                        border: `1px solid ${alpha(theme.palette.divider, 0.15)}`,
+                        mb: 3
+                    }}
+                >
+                    <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 1.5 }}>
+                        <CategoryOutlinedIcon color="primary" />
+                        <Box>
+                            <Typography variant="subtitle1" fontWeight={600}>
+                                {commodity.name}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                                ID: {commodity.id}
+                            </Typography>
+                        </Box>
+                    </Stack>
+
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                        <strong>Unit of Measure:</strong> {commodity.groupName || 'Not specified'}
+                    </Typography>
+
+                    {commodity.assetType && (
+                        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                            <strong>Asset Type:</strong> {commodity.assetType.name}
+                        </Typography>
+                    )}
+                </Box>
+            </Grid>
+
+            {/* Action buttons */}
+            <Grid item xs={12} sx={{ display: "flex", justifyContent: "space-between" }}>
+                <Typography
+                    variant="body2"
+                    color="error"
+                    fontWeight={500}
+                    sx={{ alignSelf: 'center' }}
+                >
+                    Are you sure you want to delete this commodity?
+                </Typography>
+
+                <Stack direction="row" spacing={2}>
                     <ButtonComponent
                         handleClick={handleClose}
-                        buttonColor='info'
-                        type='button'
+                        buttonColor="inherit"
+                        type="button"
                         variant="outlined"
                         sendingRequest={false}
-                        buttonText="Close"
+                        buttonText="Cancel"
+                        // sx={{ px: 3 }}
                     />
                     <ButtonComponent
-                        handleClick={deleteBranch}
-                        buttonColor='error'
-                        type='submit'
+                        buttonColor="error"
+                        type="button"
+                        handleClick={deleteCommodity}
                         sendingRequest={sendingRequest}
                         buttonText={buttonText}
+                        // sx={{ px: 3 }}
                     />
                 </Stack>
             </Grid>
         </Grid>
-    )
-}
+    );
+};
 
-export default DeleteCommodity
+export default DeleteCommodity;
