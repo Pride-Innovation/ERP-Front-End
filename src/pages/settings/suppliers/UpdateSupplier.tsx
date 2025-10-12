@@ -1,3 +1,4 @@
+// UpdateSupplier.tsx
 /*
 13.9 Pride's Standard Copyright Notice:
 Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
@@ -8,7 +9,7 @@ Managing Director
 import { useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
 import { ISupplier, ISupplierAxiosResponse, IUpdateSupplier } from "./interface";
-import { Grid } from "@mui/material";
+import { Box } from "@mui/material";
 import SupplierForm from "./SupplierForm";
 import SupplierUtills from "./Utills";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -24,7 +25,7 @@ const UpdateSupplier = ({ handleClose, sendingRequest, supplier, setSendingReque
         setDefaultSupplier({
             ...supplier,
             commodity: supplier.commodity?.id
-        })
+        });
     }, [supplier]);
 
     const {
@@ -45,38 +46,34 @@ const UpdateSupplier = ({ handleClose, sendingRequest, supplier, setSendingReque
     const onSubmit = async (formData: ISupplier) => {
         setSendingRequest(true);
         try {
-            const response = await updateSupplierService(formData, supplier.id as number) as ISupplierAxiosResponse
+            const response = await updateSupplierService(formData, supplier.id as number) as ISupplierAxiosResponse;
             if (response.status === 201) {
-                toast.success("Supplier updated successfully")
-                updateSupplierInStore(response.data)
+                toast.success("Supplier updated successfully", { position: 'bottom-right' });
+                updateSupplierInStore(response.data);
             }
         } catch (error) {
-            console.log(error)
+            console.error("Error updating supplier:", error);
+            toast.error("Failed to update supplier. Please try again.", { position: 'bottom-right' });
         }
         setSendingRequest(false);
-        handleClose()
+        handleClose();
     };
 
     return (
-        <Grid container xs={12}>
-            <Grid item xs={12}>
-                <form
-                    style={{ width: "100%" }}
-                    autoComplete="off"
-                    onSubmit={handleSubmit(onSubmit)}
-                >
-                    <SupplierForm
-                        handleClose={handleClose}
-                        buttonText="Submit"
-                        formState={formState}
-                        control={control}
-                        sendingRequest={sendingRequest}
-                        register={register}
-                    />
-                </form>
-            </Grid>
-        </Grid>
-    )
-}
+        <Box sx={{ width: "100%" }}>
+            <form autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
+                <SupplierForm
+                    handleClose={handleClose}
+                    buttonText="Update Supplier"
+                    formState={formState}
+                    control={control}
+                    sendingRequest={sendingRequest}
+                    register={register}
+                    update={true}
+                />
+            </form>
+        </Box>
+    );
+};
 
-export default UpdateSupplier
+export default UpdateSupplier;

@@ -1,3 +1,4 @@
+// CreateSupplier.tsx
 /*
 13.9 Pride's Standard Copyright Notice:
 Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
@@ -7,7 +8,7 @@ Managing Director
 
 import { useForm } from "react-hook-form";
 import { useEffect } from "react";
-import { Grid, Paper } from "@mui/material";
+import { Box } from "@mui/material";
 import SupplierForm from "./SupplierForm";
 import { ICreateSupplier, ISupplier, ISupplierAxiosResponse } from "./interface";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -18,7 +19,8 @@ import { toast } from "react-toastify";
 
 const CreateSupplier = ({ handleClose, sendingRequest, setSendingRequest }: ICreateSupplier) => {
   const defaultSupplier: ISupplier = {} as ISupplier;
-  const { addSupplierToStore } = SupplierUtills()
+  const { addSupplierToStore } = SupplierUtills();
+
   const {
     control,
     handleSubmit,
@@ -35,42 +37,35 @@ const CreateSupplier = ({ handleClose, sendingRequest, setSendingRequest }: ICre
   }, [reset]);
 
   const onSubmit = async (formData: ISupplier) => {
-    setSendingRequest(true)
+    setSendingRequest(true);
     try {
       const response = await createSupplierService(formData) as ISupplierAxiosResponse;
       if (response.status === 201) {
-        toast.success("Supplier created successfully");
-        addSupplierToStore(response.data)
+        toast.success("Supplier created successfully", { position: 'bottom-right' });
+        addSupplierToStore(response.data);
       }
     } catch (error) {
-      console.log(error)
+      console.error("Error creating supplier:", error);
+      toast.error("Failed to create supplier. Please try again.", { position: 'bottom-right' });
     }
     setSendingRequest(false);
-    handleClose()
+    handleClose();
   };
 
   return (
-    <Paper elevation={3} sx={{ borderRadius: 3, boxShadow: "none", maxWidth: "1200px", mx: "auto" }}>
-      <form
-        style={{ width: "100%" }}
-        autoComplete="off"
-        onSubmit={handleSubmit(onSubmit)}
-      >
-        <Grid container spacing={2}>
-          <Grid item xs={12}>
-            <SupplierForm
-              handleClose={handleClose}
-              buttonText="Submit"
-              formState={formState}
-              control={control}
-              sendingRequest={sendingRequest}
-              register={register}
-            />
-          </Grid>
-        </Grid>
+    <Box sx={{ width: "100%" }}>
+      <form autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
+        <SupplierForm
+          handleClose={handleClose}
+          buttonText="Create Supplier"
+          formState={formState}
+          control={control}
+          sendingRequest={sendingRequest}
+          register={register}
+        />
       </form>
-    </Paper >
-  )
-}
+    </Box>
+  );
+};
 
-export default CreateSupplier
+export default CreateSupplier;

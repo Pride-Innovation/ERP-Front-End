@@ -5,72 +5,165 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { IDeleteSupplier, ISupplierAxiosResponse } from './interface'
-import { Grid, Stack, Typography } from '@mui/material'
-import ButtonComponent from '../../../components/forms/Button';
-import SupplierUtills from './Utills';
-import { toast } from 'react-toastify';
-import { deleteSupplierService } from './service';
+import { Grid, Stack, Typography, Box, alpha, useTheme, Alert, Divider } from '@mui/material';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
-
+import ButtonComponent from '../../../components/forms/Button';
+import { toast } from 'react-toastify';
+import { IDeleteSupplier, ISupplierAxiosResponse } from './interface';
+import { deleteSupplierService } from './service';
+import SupplierUtills from './Utills';
 
 const DeleteSupplier = ({
     sendingRequest,
-    supplier,
+    setSendingRequest,
     handleClose,
     buttonText,
-    setSendingRequest
+    supplier
 }: IDeleteSupplier) => {
     const { removeSupplierToStore } = SupplierUtills();
+    const theme = useTheme();
 
     const deleteSupplier = async () => {
-        setSendingRequest(true)
+        setSendingRequest(true);
         try {
-            const response = await deleteSupplierService(supplier.id as number) as ISupplierAxiosResponse;
-            if(response.status === 204){
-                toast.success("Supplier deleted successfully");
-                removeSupplierToStore(supplier)
+            const response = await deleteSupplierService(supplier?.id as number) as ISupplierAxiosResponse;
+            if (response.status === 204) {
+                toast.success("Supplier deleted successfully", { position: 'bottom-right' });
+                removeSupplierToStore(supplier);
             }
         } catch (error) {
-            console.log(error)
+            console.error("Error deleting supplier:", error);
+            toast.error("Failed to delete supplier. Please try again.", { position: 'bottom-right' });
         }
-        setSendingRequest(false)
-        handleClose()
-    }
+        setSendingRequest(false);
+        handleClose();
+    };
+
     return (
-        <Grid item container spacing={4} xs={12}>
+        <Grid item container spacing={3} xs={12} sx={{ mt: 0 }}>
+            {/* Header */}
             <Grid item xs={12}>
-                <Typography variant="body1" sx={{ mb: 1 }}>
-                    Are you sure you want to delete this Supplier?
-                </Typography>
-                <Stack direction="row" spacing={1} alignItems="center">
-                    <LocalShippingOutlinedIcon color="primary" />
-                    <Typography variant="h6" color="primary">
-                        {supplier.name}
+                <Box
+                    sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1.5,
+                        mb: 2
+                    }}
+                >
+                    <Box
+                        sx={{
+                            width: 40,
+                            height: 40,
+                            borderRadius: '50%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            bgcolor: alpha(theme.palette.error.main, 0.1)
+                        }}
+                    >
+                        <WarningAmberIcon color="error" />
+                    </Box>
+                    <Typography variant="h6" fontWeight={500} color="error">
+                        Confirm Deletion
                     </Typography>
-                </Stack>
+                </Box>
+                <Typography variant="body2" color="text.secondary">
+                    This action cannot be undone. The supplier and all associated data will be permanently removed.
+                </Typography>
+                <Divider sx={{ my: 2, opacity: 0.6 }} />
             </Grid>
-            <Grid item xs={12} sx={{ display: "flex", justifyContent: "end" }}>
-                <Stack direction="row" spacing={3} sx={{ width: "50%" }}>
+
+            {/* Warning alert */}
+            <Grid item xs={12}>
+                <Alert
+                    severity="warning"
+                    icon={<WarningAmberIcon />}
+                    sx={{
+                        mb: 3,
+                        borderRadius: 1.5,
+                        '& .MuiAlert-icon': {
+                            alignItems: 'center'
+                        }
+                    }}
+                >
+                    <Typography variant="body2">
+                        Deleting this supplier may affect procurement and supply chain operations.
+                    </Typography>
+                </Alert>
+
+                {/* Supplier details */}
+                <Box
+                    sx={{
+                        p: 2.5,
+                        borderRadius: 1.5,
+                        bgcolor: alpha(theme.palette.background.default, 0.6),
+                        border: `1px solid ${alpha(theme.palette.divider, 0.15)}`,
+                        mb: 3
+                    }}
+                >
+                    <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 1.5 }}>
+                        <LocalShippingOutlinedIcon color="primary" />
+                        <Box>
+                            <Typography variant="subtitle1" fontWeight={600}>
+                                {supplier.name}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                                ID: {supplier.id}
+                            </Typography>
+                        </Box>
+                    </Stack>
+
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                        <strong>Email:</strong> {supplier.email}
+                    </Typography>
+
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                        <strong>Phone:</strong> {supplier.telephone}
+                    </Typography>
+
+                    {supplier.commodity && (
+                        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                            <strong>Commodity:</strong> {supplier.commodity.name}
+                        </Typography>
+                    )}
+                </Box>
+            </Grid>
+
+            {/* Action buttons */}
+            <Grid item xs={12} sx={{ display: "flex", justifyContent: "space-between" }}>
+                <Typography
+                    variant="body2"
+                    color="error"
+                    fontWeight={500}
+                    sx={{ alignSelf: 'center' }}
+                >
+                    Are you sure you want to delete this supplier?
+                </Typography>
+
+                <Stack direction="row" spacing={2}>
                     <ButtonComponent
                         handleClick={handleClose}
-                        buttonColor='info'
-                        type='button'
+                        buttonColor="inherit"
+                        type="button"
                         variant="outlined"
                         sendingRequest={false}
-                        buttonText="Close"
+                        buttonText="Cancel"
+                    // sx={{ px: 3 }}
                     />
                     <ButtonComponent
+                        buttonColor="error"
+                        type="button"
                         handleClick={deleteSupplier}
-                        buttonColor='error'
-                        type='submit'
                         sendingRequest={sendingRequest}
                         buttonText={buttonText}
+                    // sx={{ px: 3 }}
                     />
                 </Stack>
             </Grid>
         </Grid>
-    )
-}
+    );
+};
 
-export default DeleteSupplier
+export default DeleteSupplier;
