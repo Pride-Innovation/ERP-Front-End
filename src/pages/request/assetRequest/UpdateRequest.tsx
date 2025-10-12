@@ -165,7 +165,7 @@ const UpdateRequest = () => {
 
             try {
                 const response = await updateAssetRequestService(payload, id as string) as IRequestAxiosResponse;
-                if (response.status === 201) {
+                if (response.status === 200) {
                     // Update the file information if the request was successful and a new file was uploaded
                     if (file) {
                         setInitialFile({
