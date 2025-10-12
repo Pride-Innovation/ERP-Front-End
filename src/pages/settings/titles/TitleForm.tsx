@@ -5,13 +5,29 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { Box, Divider, Grid, Stack } from '@mui/material';
-import { UseFormAutocompleteComponent, UseFormDatePicker, UseFormInput, UseFormSelect } from '../../../components/forms';
-import ButtonComponent from '../../../components/forms/Button';
+import {
+    Box,
+    Grid,
+    Stack,
+    Typography,
+    alpha,
+    useTheme,
+    Paper,
+    Button as MuiButton,
+    CircularProgress
+} from '@mui/material';
+import {
+    UseFormAutocompleteComponent,
+    UseFormInput,
+} from '../../../components/forms';
 import TitleUtills from './utills';
 import { ITitleForm } from './interface';
 import RoleUtills from '../roles/utills';
 import { useEffect } from 'react';
+import WorkOutlineOutlinedIcon from '@mui/icons-material/WorkOutlineOutlined';
+import InfoIcon from '@mui/icons-material/Info';
+import SecurityIcon from '@mui/icons-material/Security';
+import SupervisorAccountIcon from '@mui/icons-material/SupervisorAccount';
 
 const TitleForm = ({
     register,
@@ -24,77 +40,209 @@ const TitleForm = ({
 }: ITitleForm) => {
     const { formFields } = TitleUtills();
     const { fetchAllRoles } = RoleUtills();
-    useEffect(() => { fetchAllRoles() }, []);
-    
-    return (
-        <Box sx={{ width: "100%" }}>
-            <Grid container spacing={3}>
-                {formFields.map((field) => {
-                    const commonProps = {
-                        register,
-                        control,
-                        formState,
-                        value: field.value,
-                        label: field.label,
-                    };
+    const theme = useTheme();
 
-                    const gridSize = field.type === "textarea" ? 12 : 6;
+    useEffect(() => {
+        fetchAllRoles();
+    }, []);
 
-                    return (
-                        <Grid item xs={12} md={gridSize} key={field.value}>
-                            {field.type === "input" && <UseFormInput {...commonProps} />}
-                            {field.type === "textarea" && <UseFormInput {...commonProps} multiline row={4} />}
-                            {field.type === "number" && <UseFormInput {...commonProps} type="number" />}
-                            {field.type === "select" && (
-                                <UseFormSelect {...commonProps} options={field.options} />
-                            )}
-                            {field.type === "date" && <UseFormDatePicker {...commonProps} />}
-                            {field.type === "autocomplete" && (
-                                <UseFormAutocompleteComponent {...commonProps} options={field.options} />
-                            )}
-                        </Grid>
-                    );
-                })}
-
-                <Grid item xs={12}>
-                    <Divider sx={{ my: 2 }} />
-                    <Stack
-                        direction={{ xs: "column", sm: "row" }}
-                        spacing={2}
-                        justifyContent="space-between"
-                        alignItems={{ xs: "stretch", sm: "center" }}
-                    >
-                        {update && (
-                            <ButtonComponent
-                                variant="outlined"
-                                handleClick={handleClose}
-                                buttonColor="info"
-                                type="button"
-                                sendingRequest={false}
-                                buttonText="Update Permissions"
-                            />
-                        )}
-
-                        <Stack direction="row" spacing={2}>
-                            <ButtonComponent
-                                handleClick={handleClose}
-                                buttonColor="error"
-                                type="button"
-                                sendingRequest={false}
-                                buttonText="Cancel"
-                            />
-                            <ButtonComponent
-                                buttonColor="success"
-                                type="submit"
-                                sendingRequest={sendingRequest}
-                                buttonText={buttonText}
-                            />
-                        </Stack>
-                    </Stack>
+    // Section component for better organization
+    const FormSection = ({
+        title,
+        icon,
+        children
+    }: {
+        title: string;
+        icon: React.ReactNode;
+        children: React.ReactNode;
+    }) => (
+        <Paper
+            elevation={0}
+            sx={{
+                mb: 3,
+                borderRadius: 2,
+                overflow: 'hidden',
+                border: `1px solid ${alpha(theme.palette.divider, 0.1)}`
+            }}
+        >
+            <Box
+                sx={{
+                    p: 2,
+                    bgcolor: alpha(theme.palette.background.default, 0.5),
+                    borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1.5
+                }}
+            >
+                <Box
+                    sx={{
+                        width: 32,
+                        height: 32,
+                        borderRadius: 1,
+                        bgcolor: alpha(theme.palette.primary.main, 0.1),
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                    }}
+                >
+                    {icon}
+                </Box>
+                <Typography variant="subtitle1" fontWeight={600} color="primary">
+                    {title}
+                </Typography>
+            </Box>
+            <Box sx={{ p: 3 }}>
+                <Grid container spacing={3}>
+                    {children}
                 </Grid>
-            </Grid>
-        </Box>
-    )
-}
+            </Box>
+        </Paper>
+    );
 
-export default TitleForm
+    // Group fields by type
+    const basicFields = formFields.filter(field => field.value === 'name');
+    const hierarchyFields = formFields.filter(field => field.value === 'reportsTo');
+    const roleFields = formFields.filter(field => field.value === 'role');
+
+    return (
+        <Box
+            sx={{
+                width: "100%",
+                maxHeight: '80vh',
+                overflow: 'hidden',
+                display: 'flex',
+                flexDirection: 'column'
+            }}
+        >
+            {/* Form Header */}
+            <Box sx={{ mb: 3 }}>
+                <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 1 }}>
+                    <WorkOutlineOutlinedIcon color="primary" />
+                    <Typography variant="h6" fontWeight={600} color="primary">
+                        {update ? 'Update Title' : 'Create New Title'}
+                    </Typography>
+                </Stack>
+
+                <Typography variant="body2" color="text.secondary">
+                    {update
+                        ? 'Update the title details and organizational structure'
+                        : 'Define a new organizational title and its reporting hierarchy'
+                    }
+                </Typography>
+            </Box>
+
+            {/* Scrollable form content */}
+            <Box
+                sx={{
+                    overflow: 'auto',
+                    flex: 1,
+                    pr: 1,
+                    '&::-webkit-scrollbar': {
+                        width: '6px',
+                    },
+                    '&::-webkit-scrollbar-thumb': {
+                        backgroundColor: alpha(theme.palette.primary.main, 0.2),
+                        borderRadius: '3px',
+                    },
+                    '&::-webkit-scrollbar-track': {
+                        backgroundColor: alpha(theme.palette.background.default, 0.5),
+                    }
+                }}
+            >
+                {/* Basic Information */}
+                <FormSection title="Basic Information" icon={<InfoIcon fontSize="small" color="primary" />}>
+                    {basicFields.map((field) => (
+                        <Grid item xs={12} key={field.value}>
+                            <UseFormInput
+                                register={register}
+                                control={control}
+                                formState={formState}
+                                value={field.value}
+                                label={field.label}
+                            />
+                        </Grid>
+                    ))}
+                </FormSection>
+
+                {/* Hierarchy Structure */}
+                <FormSection title="Reporting Structure" icon={<SupervisorAccountIcon fontSize="small" color="primary" />}>
+                    {hierarchyFields.map((field) => (
+                        <Grid item xs={12} key={field.value}>
+                            <UseFormAutocompleteComponent
+                                register={register}
+                                control={control}
+                                formState={formState}
+                                value={field.value}
+                                label={field.label}
+                                options={field.options || []}
+                            />
+                        </Grid>
+                    ))}
+                </FormSection>
+
+                {/* Role Assignment */}
+                <FormSection title="Role Assignment" icon={<SecurityIcon fontSize="small" color="primary" />}>
+                    {roleFields.map((field) => (
+                        <Grid item xs={12} key={field.value}>
+                            <UseFormAutocompleteComponent
+                                register={register}
+                                control={control}
+                                formState={formState}
+                                value={field.value}
+                                label={field.label}
+                                options={field.options || []}
+                            />
+                        </Grid>
+                    ))}
+                </FormSection>
+            </Box>
+
+            {/* Form Actions */}
+            <Box
+                sx={{
+                    pt: 2,
+                    mt: 1,
+                    display: 'flex',
+                    justifyContent: 'flex-end',
+                    borderTop: `1px solid ${alpha(theme.palette.divider, 0.1)}`
+                }}
+            >
+                <Stack
+                    direction="row"
+                    spacing={2}
+                    justifyContent="flex-end"
+                >
+                    <MuiButton
+                        onClick={handleClose}
+                        color="inherit"
+                        type="button"
+                        variant="outlined"
+                        sx={{
+                            minWidth: '100px',
+                            borderRadius: 1.5,
+                            textTransform: 'none'
+                        }}
+                    >
+                        Cancel
+                    </MuiButton>
+                    <MuiButton
+                        color="primary"
+                        type="submit"
+                        variant="contained"
+                        sx={{
+                            minWidth: '100px',
+                            borderRadius: 1.5,
+                            textTransform: 'none',
+                            boxShadow: `0 2px 8px ${alpha(theme.palette.primary.main, 0.2)}`
+                        }}
+                    >
+                        {sendingRequest ? <CircularProgress size={24} color="inherit" /> : buttonText}
+                    </MuiButton>
+                </Stack>
+            </Box>
+        </Box>
+    );
+};
+
+export default TitleForm;

@@ -1,3 +1,4 @@
+// CreateTitle.tsx
 /*
 13.9 Pride's Standard Copyright Notice:
 Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
@@ -13,11 +14,11 @@ import TitleUtills from './utills';
 import { titleSchema } from './schema';
 import { toast } from 'react-toastify';
 import { createTitleService } from './service';
-import { Grid, Paper } from '@mui/material';
+import { Box } from '@mui/material';
 import TitleForm from './TitleForm';
 
 const CreateTitle = ({ sendingRequest, setSendingRequest, handleClose }: ICreateTitle) => {
-    const defaultCommodity: ITitle = {} as ITitle;
+    const defaultTitle: ITitle = {} as ITitle;
     const { addTitleToStore } = TitleUtills();
 
     const {
@@ -32,7 +33,7 @@ const CreateTitle = ({ sendingRequest, setSendingRequest, handleClose }: ICreate
     });
 
     useEffect(() => {
-        reset({ ...defaultCommodity });
+        reset({ ...defaultTitle });
     }, [reset]);
 
     const onSubmit = async (formData: ITitle) => {
@@ -41,33 +42,30 @@ const CreateTitle = ({ sendingRequest, setSendingRequest, handleClose }: ICreate
             const response = await createTitleService(formData) as ITitleAxiosResponse;
             if (response.status === 201) {
                 addTitleToStore(response.data);
-                toast.success("Title created successfully")
+                toast.success("Title created successfully", { position: 'bottom-right' });
             }
         } catch (error) {
-            console.log(error);
+            console.error("Error creating title:", error);
+            toast.error("Failed to create title. Please try again.", { position: 'bottom-right' });
         }
         setSendingRequest(false);
-        handleClose()
+        handleClose();
     };
 
     return (
-        <Paper elevation={3} sx={{ borderRadius: 3, boxShadow: "none", maxWidth: "1200px", mx: "auto" }}>
+        <Box sx={{ width: "100%" }}>
             <form autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
-                <Grid container spacing={2}>
-                    <Grid item xs={12}>
-                        <TitleForm
-                            handleClose={handleClose}
-                            buttonText="Submit"
-                            formState={formState}
-                            control={control}
-                            sendingRequest={sendingRequest}
-                            register={register}
-                        />
-                    </Grid>
-                </Grid>
+                <TitleForm
+                    handleClose={handleClose}
+                    buttonText="Create Title"
+                    formState={formState}
+                    control={control}
+                    sendingRequest={sendingRequest}
+                    register={register}
+                />
             </form>
-        </Paper>
+        </Box>
     );
-}
+};
 
-export default CreateTitle
+export default CreateTitle;

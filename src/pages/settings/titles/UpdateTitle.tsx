@@ -1,3 +1,4 @@
+// UpdateTitle.tsx
 /*
 13.9 Pride's Standard Copyright Notice:
 Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
@@ -10,7 +11,7 @@ import { ITitle, ITitleAxiosResponse, IUpdateTitle } from "./interface";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { titleSchema } from "./schema";
-import { Grid, Paper } from "@mui/material";
+import { Box } from "@mui/material";
 import TitleForm from "./TitleForm";
 import { updateTitleService } from "./service";
 import { toast } from "react-toastify";
@@ -18,13 +19,13 @@ import TitleUtills from "./utills";
 
 const UpdateTitle = ({ handleClose, sendingRequest, setSendingRequest, title }: IUpdateTitle) => {
     const [defaultTitle, setDefaultTitle] = useState<any>(title);
-    const { updateTitleInStore } = TitleUtills()
+    const { updateTitleInStore } = TitleUtills();
 
     useEffect(() => {
         setDefaultTitle({
             ...title,
             reportsTo: title.reportsTo?.id
-        })
+        });
     }, [title]);
 
     const {
@@ -47,34 +48,32 @@ const UpdateTitle = ({ handleClose, sendingRequest, setSendingRequest, title }: 
         try {
             const response = await updateTitleService(formData, title.id as number) as ITitleAxiosResponse;
             if (response.status === 201) {
-                toast.success("Title updated successfully")
-                updateTitleInStore(response.data)
+                toast.success("Title updated successfully", { position: 'bottom-right' });
+                updateTitleInStore(response.data);
             }
         } catch (error) {
-            console.log(error);
+            console.error("Error updating title:", error);
+            toast.error("Failed to update title. Please try again.", { position: 'bottom-right' });
         }
         setSendingRequest(false);
-        handleClose()
+        handleClose();
     };
 
     return (
-        <Paper elevation={3} sx={{ borderRadius: 3, boxShadow: "none", maxWidth: "1200px", mx: "auto" }}>
+        <Box sx={{ width: "100%" }}>
             <form autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
-                <Grid container spacing={2}>
-                    <Grid item xs={12}>
-                        <TitleForm
-                            handleClose={handleClose}
-                            buttonText="Update"
-                            formState={formState}
-                            control={control}
-                            sendingRequest={sendingRequest}
-                            register={register}
-                        />
-                    </Grid>
-                </Grid>
+                <TitleForm
+                    handleClose={handleClose}
+                    buttonText="Update Title"
+                    formState={formState}
+                    control={control}
+                    sendingRequest={sendingRequest}
+                    register={register}
+                    update={true}
+                />
             </form>
-        </Paper>
+        </Box>
     );
-}
+};
 
-export default UpdateTitle
+export default UpdateTitle;

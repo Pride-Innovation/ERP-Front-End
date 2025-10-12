@@ -9,16 +9,21 @@ import {
     Box,
     Button,
     Card,
-    Divider,
     Stack,
     Typography,
-    useTheme
+    useTheme,
+    alpha,
+    Chip,
+    Divider,
+    IconButton,
+    Tooltip
 } from '@mui/material';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
 import WorkOutlineOutlinedIcon from '@mui/icons-material/WorkOutlineOutlined';
 import SupervisorAccountOutlinedIcon from '@mui/icons-material/SupervisorAccountOutlined';
 import SecurityOutlinedIcon from '@mui/icons-material/SecurityOutlined';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { ITitleDetails } from './interface';
 
 const TitleCard = ({ title, updateTitle, deleteTitle }: ITitleDetails) => {
@@ -26,50 +31,135 @@ const TitleCard = ({ title, updateTitle, deleteTitle }: ITitleDetails) => {
 
     return (
         <Card
+            elevation={0}
             sx={{
-                boxShadow: 3,
                 borderRadius: 2,
-                p: 3,
-                bgcolor: 'white',
-                color: 'black',
-                border: `1px solid ${theme.palette.primary.main}`,
-                minWidth: 300,
-                maxWidth: 400,
+                overflow: 'hidden',
+                border: `1px solid ${alpha(theme.palette.divider, 0.15)}`,
+                transition: 'all 0.25s ease-in-out',
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                '&:hover': {
+                    boxShadow: `0 8px 24px ${alpha(theme.palette.common.black, 0.08)}`,
+                    transform: 'translateY(-4px)',
+                    borderColor: alpha(theme.palette.primary.main, 0.3)
+                }
             }}
         >
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2 }}>
-                <WorkOutlineOutlinedIcon sx={{ color: theme.palette.secondary.main, mr: 1 }} />
-                <Typography variant="h6" sx={{ fontWeight: 700, color: theme.palette.primary.main }}>
-                    {title.name}
-                </Typography>
+            {/* Header with title name */}
+            <Box
+                sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    p: 2.5,
+                    bgcolor: alpha(theme.palette.primary.main, 0.04),
+                    borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}`
+                }}
+            >
+                <Stack direction="row" alignItems="center" spacing={1.5}>
+                    <Box
+                        sx={{
+                            width: 42,
+                            height: 42,
+                            borderRadius: '12px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            bgcolor: alpha(theme.palette.primary.main, 0.12)
+                        }}
+                    >
+                        <WorkOutlineOutlinedIcon sx={{ color: theme.palette.primary.main }} />
+                    </Box>
+                    <Box>
+                        <Typography variant="h6" sx={{ fontWeight: 600, color: theme.palette.text.primary }}>
+                            {title.name}
+                        </Typography>
+                        <Chip
+                            size="small"
+                            label="Position"
+                            sx={{
+                                mt: 0.5,
+                                fontSize: '0.7rem',
+                                height: 20,
+                                bgcolor: alpha(theme.palette.secondary.main, 0.1),
+                                color: theme.palette.secondary.main,
+                                fontWeight: 500
+                            }}
+                        />
+                    </Box>
+                </Stack>
+
+                <Tooltip title="More options">
+                    <IconButton size="small">
+                        <MoreVertIcon fontSize="small" />
+                    </IconButton>
+                </Tooltip>
             </Box>
 
-            <Stack spacing={1.2} divider={<Divider flexItem />}>
-                <Box display="flex" alignItems="center">
-                    <SupervisorAccountOutlinedIcon fontSize="small" sx={{ mr: 1, color: theme.palette.secondary.main }} />
-                    <Typography variant="body2">
-                        <strong>Reports To:</strong>{' '}
-                        {title.reportsTo ? title.reportsTo.name : 'None'}
-                    </Typography>
-                </Box>
-
-                {title.role && (
-                    <Box display="flex" alignItems="center">
-                        <SecurityOutlinedIcon fontSize="small" sx={{ mr: 1, color: theme.palette.secondary.main }} />
-                        <Box>
-                            <Typography variant="body2">
-                                <strong>Role:</strong> {title.role.name}
+            {/* Content */}
+            <Box sx={{ p: 2.5, flex: 1 }}>
+                <Stack spacing={2}>
+                    {/* Reports To */}
+                    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
+                        <SupervisorAccountOutlinedIcon
+                            fontSize="small"
+                            sx={{ color: alpha(theme.palette.secondary.main, 0.8), mt: 0.25 }}
+                        />
+                        <Stack>
+                            <Typography variant="caption" color="text.secondary">Reports To</Typography>
+                            <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                                {title.reportsTo ? title.reportsTo.name : 'None'}
                             </Typography>
-                        </Box>
+                        </Stack>
                     </Box>
-                )}
-            </Stack>
 
-            <Stack direction="row" spacing={2} mt={3} justifyContent="center">
+                    {/* Role */}
+                    {title.role && (
+                        <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
+                            <SecurityOutlinedIcon
+                                fontSize="small"
+                                sx={{ color: alpha(theme.palette.secondary.main, 0.8), mt: 0.25 }}
+                            />
+                            <Stack>
+                                <Typography variant="caption" color="text.secondary">Role</Typography>
+                                <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                                    {title.role.name}
+                                </Typography>
+                            </Stack>
+                        </Box>
+                    )}
+                </Stack>
+            </Box>
+
+            {/* Actions */}
+            <Box
+                sx={{
+                    mt: 'auto',
+                    p: 2,
+                    pt: 0,
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    gap: 1
+                }}
+            >
                 <Button
                     onClick={() => updateTitle(title)}
-                    variant="contained"
-                    sx={{ textTransform: 'none', bgcolor: theme.palette.primary.main, '&:hover': { bgcolor: '#06685d' } }}
+                    variant="outlined"
+                    fullWidth
+                    size="small"
+                    sx={{
+                        textTransform: 'none',
+                        color: theme.palette.primary.main,
+                        borderColor: alpha(theme.palette.primary.main, 0.3),
+                        '&:hover': {
+                            borderColor: theme.palette.primary.main,
+                            bgcolor: alpha(theme.palette.primary.main, 0.04)
+                        },
+                        fontWeight: 500,
+                        borderRadius: 1.5
+                    }}
                     startIcon={<EditOutlinedIcon />}
                 >
                     Update
@@ -77,13 +167,24 @@ const TitleCard = ({ title, updateTitle, deleteTitle }: ITitleDetails) => {
                 <Button
                     onClick={() => deleteTitle(title)}
                     variant="outlined"
+                    fullWidth
+                    size="small"
                     color="error"
-                    sx={{ textTransform: 'none' }}
+                    sx={{
+                        textTransform: 'none',
+                        borderColor: alpha(theme.palette.error.main, 0.3),
+                        '&:hover': {
+                            borderColor: theme.palette.error.main,
+                            bgcolor: alpha(theme.palette.error.main, 0.04)
+                        },
+                        fontWeight: 500,
+                        borderRadius: 1.5
+                    }}
                     startIcon={<DeleteOutlineOutlinedIcon />}
                 >
                     Delete
                 </Button>
-            </Stack>
+            </Box>
         </Card>
     );
 };
