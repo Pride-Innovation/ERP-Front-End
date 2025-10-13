@@ -42,7 +42,7 @@ const Request = () => {
     const { getCurrentUser } = RoutesUtills();
     const [permissions, setPermissions] = useState<IPermission[]>([] as IPermission[]);
     const [selectedStatus, setSelectedStatus] = useState<string>('all');
-    const [statusIds, setStatusIds] = useState<string>('1'); // Default to '1' for "Request Created"
+    const [statusIds, setStatusIds] = useState<string>(`${1},${2},${3},${4},${5},${6},${7}`); // Default to '1' for "Request Created"
 
     const navigate = useNavigate();
 
@@ -62,7 +62,7 @@ const Request = () => {
         currentRequest,
     } = RequestUtills();
 
-    const params = { statusIds: 1, status: "CREATED" }; // Fetching requests with status Asset Request Created ID
+    const params = { statusIds, status: "CREATED" }; // Fetching requests with status Asset Request Created ID
 
     useEffect(() => {
         fetchAllRequests(params);
