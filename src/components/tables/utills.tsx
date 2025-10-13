@@ -28,10 +28,12 @@ import { exportExcel } from "../../utils/excel";
 import { FormContext } from "../../context/form";
 import dayjs from "dayjs";
 import { camelCaseToWords } from "../../utils/helpers";
+import { RequestContext } from "../../context/request/RequestContext";
 
 const TableUtills = ({ moduleName }: { moduleName?: string }) => {
     const { fileName } = useContext(FileContext);
     const { getCurrentUser } = RoutesUtills();
+    const { requestStatusIds } = useContext(RequestContext);
     const theme = useTheme();
     const [filterStatuses, setFilterStatuses] = useState<Array<{
         label: string,
@@ -164,7 +166,8 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
                     endDate: tableEndDate ? dayjs(tableEndDate).format('YYYY-MM-DDTHH:mm:ss') : '',
                     assetTypeId: moduleName === assetTypesStatusConstants.itEquipment ? 2 : // Asset Type ID for IT Equipment is 2
                         moduleName === assetTypesStatusConstants.officeEquipment ? 1 : // Asset Type ID for Office Equipment is 1
-                            moduleName === assetTypesStatusConstants.fleet ? 55 : null // Asset Type ID for Fleet is 55
+                            moduleName === assetTypesStatusConstants.fleet ? 55 : null, // Asset Type ID for Fleet is 55
+                    statusIds: requestStatusIds
                 };
 
                 const result = await formatExportData(determineAPIString(moduleName) as keyof ModuleTypeMap, param);
@@ -221,7 +224,8 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
                     endDate: tableEndDate ? dayjs(tableEndDate).format('YYYY-MM-DDTHH:mm:ss') : '',
                     assetTypeId: moduleName === assetTypesStatusConstants.itEquipment ? 2 : // Asset Type ID for IT Equipment is 2
                         moduleName === assetTypesStatusConstants.officeEquipment ? 1 : // Asset Type ID for Office Equipment is 1
-                            moduleName === assetTypesStatusConstants.fleet ? 55 : null // Asset Type ID for Fleet is 55
+                            moduleName === assetTypesStatusConstants.fleet ? 55 : null, // Asset Type ID for Fleet is 55
+                    statusIds: requestStatusIds
                 };
 
                 const result = await formatExportData(determineAPIString(moduleName) as keyof ModuleTypeMap, param);

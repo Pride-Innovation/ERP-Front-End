@@ -43,8 +43,14 @@ const Request = () => {
     const [permissions, setPermissions] = useState<IPermission[]>([] as IPermission[]);
     const [selectedStatus, setSelectedStatus] = useState<string>('all');
     const [statusIds, setStatusIds] = useState<string>(`${1},${2},${3},${4},${5},${6},${7}`); // Default to '1' for "Request Created"
+    const { setRequestStatusIds } = useContext(RequestContext);
 
     const navigate = useNavigate();
+
+
+    useEffect(() => {
+        setRequestStatusIds(statusIds.split(',').map(id => parseInt(id, 10)));
+    }, [statusIds]);
 
     const {
         columnHeaders,
@@ -275,7 +281,7 @@ const Request = () => {
                         count={count}
                         exportData
                         createAction
-                        importData
+                        // importData
                         module={module}
                         header={header}
                         rows={requestTableData}

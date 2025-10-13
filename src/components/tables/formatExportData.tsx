@@ -20,7 +20,7 @@ import { camelCaseToWords } from "../../utils/helpers";
  */
 export type ModuleTypeMap = {
     inventory: IInventory;
-    requests: IRequest;
+    request: IRequest;
     users: IUser;
     assets: IITEquipment;
 }
@@ -63,16 +63,16 @@ async function formatExportData<T extends keyof ModuleTypeMap>(
                 { title: 'Status', dataKey: 'status' },
                 { title: 'Branch', dataKey: 'branch' }
             ];
-        } else if (moduleName === 'requests') {
+        } else if (moduleName === 'request') {
             // Request-specific columns
             columns = [
-                { title: 'Request No', dataKey: 'requestNo' },
-                { title: 'Item', dataKey: 'itemName' },
-                { title: 'Status', dataKey: 'status' },
-                { title: 'Requester', dataKey: 'requestor' },
-                { title: 'Branch', dataKey: 'branch' },
-                { title: 'Department', dataKey: 'department' },
-                { title: 'Date', dataKey: 'dateRequested' }
+                { title: 'Name', dataKey: 'name' },
+                { title: 'Request Date', dataKey: 'createDate' },
+                { title: 'Priority', dataKey: 'priority' },
+                { title: 'Requested By', dataKey: 'requester' },
+                { title: 'Approver', dataKey: 'currentApprover' },
+                { title: 'Requested From', dataKey: 'requestedFrom' },
+                { title: 'Status', dataKey: 'status' }
             ];
         } else if (moduleName === 'users') {
             // User-specific columns
@@ -192,17 +192,17 @@ function processResponseData(data: any, moduleName: string, assetTypeId?: number
                 date: item.createDate ? new Date(item.createDate).toLocaleDateString() : ''
             };
         });
-    } else if (moduleName === 'requests') {
+    } else if (moduleName === 'request') {
         // Process request data
         return items.map(item => ({
             id: item.id,
-            requestNo: item.requestNo || '',
-            itemName: item.itemName || '',
-            status: item.status?.status || '',
-            requestor: item.requestor?.name || '',
-            branch: item.branch?.name || '',
-            department: item.department?.name || '',
-            dateRequested: item.dateRequested ? new Date(item.dateRequested).toLocaleDateString() : ''
+            name: item.name || '',
+            createDate: item.createDate ? new Date(item.createDate).toLocaleDateString() : '',
+            priority: item.priority || '',
+            requester: item.requester ? item.requester.firstName + ' ' + item.requester.lastName || '' : '',
+            currentApprover: item.currentApprover ? item.currentApprover.firstName + ' ' + item.currentApprover.lastName || '' : '',
+            requestedFrom: item.requester.branch.name || '',
+            status: item.status?.name || ''
         }));
     } else if (moduleName === 'users') {
         // Process user data

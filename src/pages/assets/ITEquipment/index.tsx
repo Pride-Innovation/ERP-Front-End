@@ -5,7 +5,7 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { Box, Card, Grid } from "@mui/material"
+import { Box, Card } from "@mui/material"
 import ModalComponent from "../../../components/modal"
 import Dispose from "../Dispose"
 import TableComponent from "../../../components/tables/TableComponent"

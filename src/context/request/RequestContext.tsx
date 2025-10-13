@@ -42,6 +42,8 @@ interface IRequestContext {
     setAcknowledgeRequest: Dispatch<SetStateAction<IAcknowledgeRequestReceipt>>;
     issuanceApproval: IAcknowledgeIssuanceReceipt;
     setIssuanceApproval: Dispatch<SetStateAction<IAcknowledgeIssuanceReceipt>>;
+    requestStatusIds: number[];
+    setRequestStatusIds: Dispatch<SetStateAction<number[]>>;
 }
 
 export const RequestContext = createContext<IRequestContext>({} as IRequestContext);
@@ -60,6 +62,7 @@ const RequestContextProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const [acknowledgeIssuance, setAcknowledgeIssuance] = useState<IAcknowledgeIssuanceReceipt>({} as IAcknowledgeIssuanceReceipt);
     const [acknowledgeRequest, setAcknowledgeRequest] = useState<IAcknowledgeIssuanceReceipt>({} as IAcknowledgeIssuanceReceipt);
     const [issuanceApproval, setIssuanceApproval] = useState<IAcknowledgeIssuanceReceipt>({} as IAcknowledgeIssuanceReceipt);
+    const [requestStatusIds, setRequestStatusIds] = useState<number[]>([] as number[]);
 
     const [count, setCount] = useState<number>(0)
 
@@ -92,7 +95,9 @@ const RequestContextProvider: React.FC<{ children: React.ReactNode }> = ({ child
             acknowledgeRequest,
             setAcknowledgeRequest,
             issuanceApproval,
-            setIssuanceApproval
+            setIssuanceApproval,
+            requestStatusIds,
+            setRequestStatusIds
         }}>
             {children}
         </RequestContext.Provider>
