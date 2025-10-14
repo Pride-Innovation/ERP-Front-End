@@ -34,6 +34,8 @@ import RoutesUtills from "../../../../core/routes/utills";
 import { IPermission } from "../../../settings/interface";
 import { permissionsMock } from "../../../../mocks/settings";
 import DeleteRequest from "../../DeleteRequest";
+import { FormContext } from "../../../../context/form";
+import dayjs from "dayjs";
 
 const Request = () => {
     const { requestTableData, setOptions } = useContext(RequestContext);
@@ -44,6 +46,7 @@ const Request = () => {
     const [selectedStatus, setSelectedStatus] = useState<string>('all');
     const [statusIds, setStatusIds] = useState<string>(`${1},${2},${3},${4},${5},${6},${7}`); // Default to '1' for "Request Created"
     const { setRequestStatusIds } = useContext(RequestContext);
+    const { tableStartDate, tableEndDate } = useContext(FormContext);
 
     const navigate = useNavigate();
 
@@ -68,11 +71,31 @@ const Request = () => {
         currentRequest,
     } = RequestUtills();
 
-    const params = { statusIds, status: "CREATED" }; // Fetching requests with status Asset Request Created ID
 
     useEffect(() => {
+        const params = {
+            statusIds,
+            status: "CREATED",
+            startDate: tableStartDate ? dayjs(tableStartDate).format('YYYY-MM-DDTHH:mm:ss') : '',
+            endDate: tableEndDate ? dayjs(tableEndDate).format('YYYY-MM-DDTHH:mm:ss') : ''
+        }; // Fetching requests with status Asset Request Created ID
+
         fetchAllRequests(params);
     }, []);
+
+
+    useEffect(() => {
+        if (tableStartDate && tableEndDate) {
+            const params = {
+                statusIds,
+                status: "CREATED",
+                startDate: tableStartDate ? dayjs(tableStartDate).format('YYYY-MM-DDTHH:mm:ss') : '',
+                endDate: tableEndDate ? dayjs(tableEndDate).format('YYYY-MM-DDTHH:mm:ss') : ''
+            }; // Fetching requests with status Asset Request Created ID
+
+            fetchAllRequests(params);
+        }
+    }, [tableStartDate, tableEndDate]);
 
     useEffect(() => {
         handleRequest(requests);
@@ -185,7 +208,7 @@ const Request = () => {
 
             // Default (all) case
             default:
-                fetchAllRequests(params);
+                fetchAllRequests({ statusIds, status: "CREATED" });
                 setSelectedStatus('all');
                 return; // Exit early for the default case
         }
@@ -299,6 +322,7 @@ const Request = () => {
                         status
                         onStatusChange={handleStatusChange}
                         selectedStatus={selectedStatus}
+                        dateRangePicker
                     />
                 )}
             </Card>
