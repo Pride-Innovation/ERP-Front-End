@@ -320,8 +320,11 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
             const isRequester = row?.requesterID === currentUserId;
             const status = optionsfilterParams?.status?.toUpperCase() || "";
 
+
+            console.log(row, "Row Details")
             if (isRequester) {
-                if (status === "CREATED") {
+
+                if (status === "CREATED" && row?.status === "requestCreated") {
                     return options.filter(
                         (option: any) =>
                             option.value !== crudStates.approve &&
@@ -329,8 +332,78 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
                             option.value !== crudStates.acknowledgeReceipt &&
                             option.value !== crudStates.approveIssuance &&
                             option.value !== crudStates.issue &&
-                            option.value !== crudStates.acknowledgeRequest
+                            option.value !== crudStates.acknowledgeRequest &&
+                            option.value !== crudStates.delete &&
+                            option.value !== crudStates.update
                     );
+                }
+
+                if (status === "CREATED" && row?.status === "requestIssued") {
+                    return options.filter(
+                        (option: any) =>
+                            option.value !== crudStates.approve &&
+                            option.value !== crudStates.reject &&
+                            option.value !== crudStates.update &&
+                            option.value !== crudStates.delete &&
+                            option.value !== crudStates.approveIssuance &&
+                            option.value !== crudStates.issue &&
+                            option.value !== crudStates.acknowledgeRequest &&
+                            option.value !== crudStates.acknowledgeReceipt
+                    )
+                }
+
+                if (status === "CREATED" && row?.status === "requestAcknowledged") {
+                    return options.filter(
+                        (option: any) =>
+                            option.value !== crudStates.approve &&
+                            option.value !== crudStates.reject &&
+                            option.value !== crudStates.update &&
+                            option.value !== crudStates.delete &&
+                            option.value !== crudStates.approveIssuance &&
+                            option.value !== crudStates.issue &&
+                            option.value !== crudStates.acknowledgeRequest &&
+                            option.value !== crudStates.acknowledgeReceipt
+                    )
+                }
+
+                if (status === "CREATED" && row?.status === "requestRejected") {
+                    return options.filter(
+                        (option: any) =>
+                            option.value !== crudStates.approve &&
+                            option.value !== crudStates.reject &&
+                            option.value !== crudStates.approveIssuance &&
+                            option.value !== crudStates.issue &&
+                            option.value !== crudStates.acknowledgeRequest &&
+                            option.value !== crudStates.acknowledgeReceipt
+                    )
+                }
+
+                if (status === "CREATED" && row?.status === "requestApproved") {
+                    return options.filter(
+                        (option: any) =>
+                            option.value !== crudStates.approve &&
+                            option.value !== crudStates.reject &&
+                            option.value !== crudStates.update &&
+                            option.value !== crudStates.delete &&
+                            option.value !== crudStates.approveIssuance &&
+                            option.value !== crudStates.issue &&
+                            option.value !== crudStates.acknowledgeRequest &&
+                            option.value !== crudStates.acknowledgeReceipt
+                    )
+                }
+
+                if (status === "CREATED" && row?.status === "receiptAcknowledged") {
+                    return options.filter(
+                        (option: any) =>
+                            option.value !== crudStates.approve &&
+                            option.value !== crudStates.reject &&
+                            option.value !== crudStates.update &&
+                            option.value !== crudStates.delete &&
+                            option.value !== crudStates.approveIssuance &&
+                            option.value !== crudStates.issue &&
+                            option.value !== crudStates.acknowledgeRequest &&
+                            option.value !== crudStates.acknowledgeReceipt
+                    )
                 }
 
                 if (status === "PENDING") {
@@ -362,7 +435,7 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
                             option.value !== crudStates.delete &&
                             option.value !== crudStates.approveIssuance &&
                             option.value !== crudStates.issue &&
-                            option.value !== crudStates.acknowledgeRequest
+                            option.value !== crudStates.acknowledgeReceipt
                     )
                 }
 
@@ -401,7 +474,9 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
                             option.value !== crudStates.approveIssuance &&
                             option.value !== crudStates.issue &&
                             option.value !== crudStates.acknowledgeRequest &&
-                            option.value !== crudStates.acknowledgeReceipt
+                            option.value !== crudStates.acknowledgeReceipt &&
+                            option.value !== crudStates.update &&
+                            option.value !== crudStates.delete
                     )
                 }
 

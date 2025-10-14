@@ -39,6 +39,7 @@ import dayjs from "dayjs";
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import ToggleOffOutlined from '@mui/icons-material/ToggleOffOutlined';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
+import AcknowledgeRequest from "../AcknowledgeRequest";
 
 
 const Request = () => {
@@ -320,6 +321,17 @@ const Request = () => {
                     />
                 </ModalComponent>
             )}
+            {/* Acknowledge Request Modal */}
+            {crudStates.acknowledgeRequest === modalState &&
+                <ModalComponent width={"70%"} title='Acknowledge Request' open={open} handleClose={handleClose}>
+                    <AcknowledgeRequest
+                        setSendingRequest={setSendingRequest}
+                        handleClose={handleClose}
+                        request={currentRequest}
+                        sendingRequest={sendingRequest}
+                        buttonText="Acknowledge" />
+                </ModalComponent>
+            }
         </>
     );
 
