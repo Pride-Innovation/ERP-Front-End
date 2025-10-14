@@ -40,6 +40,8 @@ import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import ToggleOffOutlined from '@mui/icons-material/ToggleOffOutlined';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import AcknowledgeRequest from "../AcknowledgeRequest";
+import AcknowledgeReceipt from "../AcknowledgeReceipt";
+import ApproveIssuance from "../ApproveIssuance";
 
 
 const Request = () => {
@@ -330,6 +332,28 @@ const Request = () => {
                         request={currentRequest}
                         sendingRequest={sendingRequest}
                         buttonText="Acknowledge" />
+                </ModalComponent>
+            }
+            {/* Acknowledge Receipt Modal */}
+            {crudStates.acknowledgeReceipt === modalState &&
+                <ModalComponent width={"60%"} title='Acknowledge Receipt' open={open} handleClose={handleClose}>
+                    <AcknowledgeReceipt
+                        setSendingRequest={setSendingRequest}
+                        handleClose={handleClose}
+                        request={currentRequest}
+                        sendingRequest={sendingRequest}
+                        buttonText="Acknowledge" />
+                </ModalComponent>
+            }
+            {/* Approve Issuance Modal */}
+            {crudStates.approveIssuance === modalState &&
+                <ModalComponent width={"60%"} title='Approve Issuance' open={open} handleClose={handleClose}>
+                    <ApproveIssuance
+                        setSendingRequest={setSendingRequest}
+                        handleClose={handleClose}
+                        request={currentRequest}
+                        sendingRequest={sendingRequest}
+                        buttonText="Approve" />
                 </ModalComponent>
             }
         </>
