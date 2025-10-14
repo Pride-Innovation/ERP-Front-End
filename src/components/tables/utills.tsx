@@ -15,6 +15,7 @@ import {
 import {
     assetStatus,
     assetTypesStatusConstants,
+    crudStates,
     requestStatus
 } from "../../utils/constants";
 import { MenuItem, useTheme } from "@mui/material";
@@ -323,9 +324,91 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
                 if (status === "CREATED") {
                     return options.filter(
                         (option: any) =>
-                            option.value !== 'approve' &&
-                            option.value !== 'reject'
+                            option.value !== crudStates.approve &&
+                            option.value !== crudStates.reject &&
+                            option.value !== crudStates.acknowledgeReceipt &&
+                            option.value !== crudStates.approveIssuance &&
+                            option.value !== crudStates.issue &&
+                            option.value !== crudStates.acknowledgeRequest
                     );
+                }
+
+                if (status === "PENDING") {
+                    return options.filter(
+                        (option: any) =>
+                            option.value !== crudStates.issue &&
+                            option.value !== crudStates.acknowledgeRequest
+                    );
+                }
+            } else if (!isRequester) {
+                if (status === "CREATED" && row?.status === "requestCreated") {
+                    return options.filter(
+                        (option: any) =>
+                            // option.value !== crudStates.approve &&
+                            // option.value !== crudStates.reject &&
+                            option.value !== crudStates.update &&
+                            option.value !== crudStates.delete &&
+                            option.value !== crudStates.acknowledgeReceipt &&
+                            option.value !== crudStates.approveIssuance &&
+                            option.value !== crudStates.issue &&
+                            option.value !== crudStates.acknowledgeRequest
+                    );
+                }
+
+                if (status === "CREATED" && row?.status === "requestApproved") {
+                    return options.filter(
+                        (option: any) =>
+                            option.value !== crudStates.approve &&
+                            option.value !== crudStates.reject &&
+                            option.value !== crudStates.update &&
+                            option.value !== crudStates.delete &&
+                            option.value !== crudStates.approveIssuance &&
+                            option.value !== crudStates.issue &&
+                            option.value !== crudStates.acknowledgeRequest
+                    )
+                }
+
+                if (status === "CREATED" && row?.status === "requestAcknowledged") {
+                    return options.filter(
+                        (option: any) =>
+                            option.value !== crudStates.approve &&
+                            option.value !== crudStates.reject &&
+                            option.value !== crudStates.update &&
+                            option.value !== crudStates.delete &&
+                            option.value !== crudStates.approveIssuance &&
+                            // option.value !== crudStates.issue &&
+                            option.value !== crudStates.acknowledgeRequest &&
+                            option.value !== crudStates.acknowledgeReceipt
+                    )
+                }
+
+                if (status === "CREATED" && row?.status === "requestIssued") {
+                    return options.filter(
+                        (option: any) =>
+                            option.value !== crudStates.approve &&
+                            option.value !== crudStates.reject &&
+                            option.value !== crudStates.update &&
+                            option.value !== crudStates.delete &&
+                            option.value !== crudStates.acknowledgeReceipt &&
+                            // option.value !== crudStates.approveIssuance &&
+                            option.value !== crudStates.acknowledgeRequest &&
+                            option.value !== crudStates.issue
+
+                    )
+                }
+
+                if (status === "CREATED" && row?.status === "requestRejected") {
+                    return options.filter(
+                        (option: any) =>
+                            option.value !== crudStates.approve &&
+                            option.value !== crudStates.reject &&
+                            option.value !== crudStates.update &&
+                            // option.value !== crudStates.delete &&
+                            option.value !== crudStates.approveIssuance &&
+                            option.value !== crudStates.issue &&
+                            option.value !== crudStates.acknowledgeRequest &&
+                            option.value !== crudStates.acknowledgeReceipt
+                    )
                 }
 
                 if (status === "PENDING") {

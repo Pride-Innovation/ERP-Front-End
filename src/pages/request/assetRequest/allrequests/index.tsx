@@ -36,6 +36,10 @@ import { permissionsMock } from "../../../../mocks/settings";
 import DeleteRequest from "../../DeleteRequest";
 import { FormContext } from "../../../../context/form";
 import dayjs from "dayjs";
+import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
+import ToggleOffOutlined from '@mui/icons-material/ToggleOffOutlined';
+import ExitToAppIcon from '@mui/icons-material/ExitToApp';
+
 
 const Request = () => {
     const { requestTableData, setOptions } = useContext(RequestContext);
@@ -115,6 +119,10 @@ const Request = () => {
             (perm) => perm.name === permissionsMock.find(p => p.name === "REJECT_REQUEST")?.name
         );
 
+        // const hasApproveIssuancePermission = permissions.some(
+        //     (perm) => perm.name === permissionsMock.find(p => p.name === "APPROVE_ISSUANCE")?.name
+        // );
+
         const newOptions = [
             {
                 value: crudStates.read,
@@ -130,6 +138,29 @@ const Request = () => {
                 value: crudStates.delete,
                 label: "Delete",
                 icon: <InfoIcon fontSize="small" color="error" />
+            },
+            {
+                value: crudStates.acknowledgeReceipt,
+                label: "Acknowledge Receipt",
+                icon: <ToggleOffOutlined fontSize='small' color='info' />
+            },
+            // To be rendered based on permission of APPROVE_ISSUANCE
+            {
+                value: crudStates.approveIssuance,
+                label: "Approve Issuance",
+                icon: <ThumbUpOffAltIcon fontSize='small' color='secondary' />
+            },
+            // To be rendered based on permission of ACKNOWLEDGE_REQUEST
+            {
+                value: crudStates.acknowledgeRequest,
+                label: "Acknowledge Request",
+                icon: <ThumbUpOffAltIcon fontSize='small' color='secondary' />
+            },
+            // To be rendered based on permission of ISSUE_ITEMS
+            {
+                value: crudStates.issue,
+                label: "Issue Items",
+                icon: <ExitToAppIcon fontSize='small' color='primary' />
             }
         ];
 
@@ -148,6 +179,14 @@ const Request = () => {
                 icon: <RemoveCircleOutlineIcon fontSize="small" color="error" />
             });
         }
+
+        // if (hasApproveIssuancePermission) {
+        //     newOptions.push({
+        //         value: crudStates.approveIssuance,
+        //         label: "Approve Issuance",
+        //         icon: <ThumbUpOffAltIcon fontSize='small' color='secondary' />
+        //     });
+        // }
 
         setOptions(newOptions);
     }, [permissions]);
