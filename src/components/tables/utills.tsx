@@ -344,8 +344,6 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
                 if (status === "CREATED" && row?.status === "requestCreated") {
                     return options.filter(
                         (option: any) =>
-                            // option.value !== crudStates.approve &&
-                            // option.value !== crudStates.reject &&
                             option.value !== crudStates.update &&
                             option.value !== crudStates.delete &&
                             option.value !== crudStates.acknowledgeReceipt &&
@@ -376,7 +374,6 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
                             option.value !== crudStates.update &&
                             option.value !== crudStates.delete &&
                             option.value !== crudStates.approveIssuance &&
-                            // option.value !== crudStates.issue &&
                             option.value !== crudStates.acknowledgeRequest &&
                             option.value !== crudStates.acknowledgeReceipt
                     )
@@ -390,7 +387,6 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
                             option.value !== crudStates.update &&
                             option.value !== crudStates.delete &&
                             option.value !== crudStates.acknowledgeReceipt &&
-                            // option.value !== crudStates.approveIssuance &&
                             option.value !== crudStates.acknowledgeRequest &&
                             option.value !== crudStates.issue
 
@@ -402,8 +398,6 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
                         (option: any) =>
                             option.value !== crudStates.approve &&
                             option.value !== crudStates.reject &&
-                            option.value !== crudStates.update &&
-                            // option.value !== crudStates.delete &&
                             option.value !== crudStates.approveIssuance &&
                             option.value !== crudStates.issue &&
                             option.value !== crudStates.acknowledgeRequest &&

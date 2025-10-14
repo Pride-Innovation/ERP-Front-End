@@ -119,9 +119,17 @@ const Request = () => {
             (perm) => perm.name === permissionsMock.find(p => p.name === "REJECT_REQUEST")?.name
         );
 
-        // const hasApproveIssuancePermission = permissions.some(
-        //     (perm) => perm.name === permissionsMock.find(p => p.name === "APPROVE_ISSUANCE")?.name
-        // );
+        const hasApproveIssuancePermission = permissions.some(
+            (perm) => perm.name === permissionsMock.find(p => p.name === "APPROVE_ISSUANCE")?.name
+        );
+
+        const hasAcknowledgeRequestPermission = permissions.some(
+            (perm) => perm.name === permissionsMock.find(p => p.name === "ACKNOWLEDGE_REQUEST")?.name
+        );
+
+        const hasIssueItemsPermission = permissions.some(
+            (perm) => perm.name === permissionsMock.find(p => p.name === "ISSUE_ITEMS")?.name
+        );
 
         const newOptions = [
             {
@@ -143,24 +151,6 @@ const Request = () => {
                 value: crudStates.acknowledgeReceipt,
                 label: "Acknowledge Receipt",
                 icon: <ToggleOffOutlined fontSize='small' color='info' />
-            },
-            // To be rendered based on permission of APPROVE_ISSUANCE
-            {
-                value: crudStates.approveIssuance,
-                label: "Approve Issuance",
-                icon: <ThumbUpOffAltIcon fontSize='small' color='secondary' />
-            },
-            // To be rendered based on permission of ACKNOWLEDGE_REQUEST
-            {
-                value: crudStates.acknowledgeRequest,
-                label: "Acknowledge Request",
-                icon: <ThumbUpOffAltIcon fontSize='small' color='secondary' />
-            },
-            // To be rendered based on permission of ISSUE_ITEMS
-            {
-                value: crudStates.issue,
-                label: "Issue Items",
-                icon: <ExitToAppIcon fontSize='small' color='primary' />
             }
         ];
 
@@ -180,13 +170,29 @@ const Request = () => {
             });
         }
 
-        // if (hasApproveIssuancePermission) {
-        //     newOptions.push({
-        //         value: crudStates.approveIssuance,
-        //         label: "Approve Issuance",
-        //         icon: <ThumbUpOffAltIcon fontSize='small' color='secondary' />
-        //     });
-        // }
+        if (hasApproveIssuancePermission) {
+            newOptions.push({
+                value: crudStates.approveIssuance,
+                label: "Approve Issuance",
+                icon: <ThumbUpOffAltIcon fontSize='small' color='secondary' />
+            });
+        }
+
+        if (hasAcknowledgeRequestPermission) {
+            newOptions.push({
+                value: crudStates.acknowledgeRequest,
+                label: "Acknowledge Request",
+                icon: <ThumbUpOffAltIcon fontSize='small' color='secondary' />
+            });
+        }
+
+        if (hasIssueItemsPermission) {
+            newOptions.push({
+                value: crudStates.issue,
+                label: "Issue Items",
+                icon: <ExitToAppIcon fontSize='small' color='primary' />
+            });
+        }
 
         setOptions(newOptions);
     }, [permissions]);
