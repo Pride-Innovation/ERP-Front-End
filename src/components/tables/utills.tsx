@@ -308,6 +308,7 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
 
         const isRequestModule = module === 'request';
         const isPendingRequestModule = module === 'pending requests';
+        const isIssuedRequestModule = module === 'issued requests';
         const isITEquipmentModule = module === 'IT Equipment';
         const isOfficeEquipmentModule = module === 'Office Equipment';
         const isFleetEquipmentModule = module === 'Fleet';
@@ -317,10 +318,9 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
         const isFilterEnabled = Boolean(filter);
 
         // Handle Request module filtering (existing logic)
-        if ((isRequestModule || isPendingRequestModule) && isFilterEnabled) {
+        if ((isRequestModule || isPendingRequestModule || isIssuedRequestModule) && isFilterEnabled) {
             const isRequester = row?.requesterID === currentUserId;
             const status = optionsfilterParams?.status?.toUpperCase() || "";
-
 
             if (isRequester) {
 
@@ -413,6 +413,31 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
                             option.value !== crudStates.acknowledgeRequest
                     );
                 }
+
+                if (status === "ISSUED" && row?.status === "requestIssued") {
+                    return options.filter(
+                        (option: any) =>
+                            option.value !== crudStates.acknowledgeReceipt &&
+                            option.value !== crudStates.approveIssuance
+                    )
+                }
+
+                if (status === "ISSUED" && row?.status === "receiptAcknowledged") {
+                    return options.filter(
+                        (option: any) =>
+                            option.value !== crudStates.approveIssuance &&
+                            option.value !== crudStates.acknowledgeReceipt
+                    )
+                }
+
+                if (status === "ISSUED" && row?.status === "issuanceApproved") {
+                    return options.filter(
+                        (option: any) =>
+                            option.value !== crudStates.approveIssuance &&
+                            option.value !== crudStates.acknowledgeReceipt
+                    )
+                }
+
             } else if (!isRequester) {
 
                 if (status === "CREATED" && row?.status === "requestCreated") {
@@ -492,6 +517,27 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
                     return options.filter(
                         (option: any) => option.value !== 'issue'
                     );
+                }
+
+                if (status === "ISSUED" && row?.status === "requestIssued") {
+                    return options.filter(
+                        (option: any) => option.value !== crudStates.acknowledgeReceipt
+                    )
+                }
+
+                if (status === "ISSUED" && row?.status === "receiptAcknowledged") {
+                    return options.filter(
+                        (option: any) =>
+                            option.value !== crudStates.approveIssuance &&
+                            option.value !== crudStates.acknowledgeReceipt
+                    )
+                }
+
+                if (status === "ISSUED" && row?.status === "issuanceApproved") {
+                    return options.filter(
+                        (option: any) =>
+                            option.value !== crudStates.approveIssuance
+                    )
                 }
             }
 

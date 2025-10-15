@@ -215,6 +215,7 @@ const IssuedRequest = () => {
                         }
                         onStatusChange={handleStatusChange}
                         selectedStatus={selectedStatus}
+                        filterOptions
                     />
                 }
             </Card>
