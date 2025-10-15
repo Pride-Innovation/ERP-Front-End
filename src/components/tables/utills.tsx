@@ -307,6 +307,7 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
         const currentUserId = getCurrentUser()?.id || 0;
 
         const isRequestModule = module === 'request';
+        const isPendingRequestModule = module === 'pending requests';
         const isITEquipmentModule = module === 'IT Equipment';
         const isOfficeEquipmentModule = module === 'Office Equipment';
         const isFleetEquipmentModule = module === 'Fleet';
@@ -316,12 +317,11 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
         const isFilterEnabled = Boolean(filter);
 
         // Handle Request module filtering (existing logic)
-        if (isRequestModule && isFilterEnabled) {
+        if ((isRequestModule || isPendingRequestModule) && isFilterEnabled) {
             const isRequester = row?.requesterID === currentUserId;
             const status = optionsfilterParams?.status?.toUpperCase() || "";
 
 
-            console.log(row, "Row Details")
             if (isRequester) {
 
                 if (status === "CREATED" && row?.status === "requestCreated") {
@@ -414,6 +414,7 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
                     );
                 }
             } else if (!isRequester) {
+
                 if (status === "CREATED" && row?.status === "requestCreated") {
                     return options.filter(
                         (option: any) =>
@@ -480,11 +481,16 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
                     )
                 }
 
-                if (status === "PENDING") {
+
+                if (status === "PENDING" && row?.status === "requestAcknowledged") {
                     return options.filter(
-                        (option: any) =>
-                            option.value !== 'issue' &&
-                            option.value !== 'acknowledgeRequest'
+                        (option: any) => option.value !== 'acknowledgeRequest'
+                    );
+                }
+
+                if (status === "PENDING" && row?.status === "requestApproved") {
+                    return options.filter(
+                        (option: any) => option.value !== 'issue'
                     );
                 }
             }
