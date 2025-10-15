@@ -5,7 +5,7 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import TableComponent from "../../../../components/tables/TableComponent";
 import { Box, Card } from "@mui/material";
 import RequestUtills from "../utills";
@@ -21,7 +21,12 @@ import DeleteRequest from "../../DeleteRequest";
 
 const RejectedRequest = () => {
     const { requests } = useSelector((state: RootState) => state.AssetsRequestsStore)
-    const { requestTableData, setOptions } = useContext(RequestContext);
+    const { requestTableData, setOptions, setRequestStatusIds } = useContext(RequestContext);
+    const statusIds = "2";
+
+    useEffect(() => {
+        setRequestStatusIds(statusIds.split(',').map(id => parseInt(id, 10)));
+    }, []);
 
     const {
         handleOptionClicked,
@@ -99,7 +104,7 @@ const RejectedRequest = () => {
                         loading={loading}
                         count={count}
                         exportData
-                        module="assets"
+                        module={"rejected requests"}
                         header={{ plural: "Rejected Requests", singular: "Rejected Requests" }}
                         rows={requestTableData}
                         columnHeaders={columnHeaders}

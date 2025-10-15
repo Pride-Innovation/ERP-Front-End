@@ -125,6 +125,11 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
             case assetTypesStatusConstants.officeEquipment:
             case assetTypesStatusConstants.fleet:
                 return 'assets';
+            case 'request':
+            case 'pending requests':
+            case 'issued requests':
+            case 'rejected requests':
+                return 'request';
             default:
                 return module;
         }

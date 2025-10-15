@@ -24,12 +24,15 @@ import { permissionsMock } from "../../../../mocks/settings";
 
 const PendingRequest = () => {
     const { requests } = useSelector((state: RootState) => state.AssetsRequestsStore)
-    const { requestTableData, setOptions } = useContext(RequestContext);
+    const { requestTableData, setOptions, setRequestStatusIds } = useContext(RequestContext);
     const [permissions, setPermissions] = useState<IPermission[]>([] as IPermission[]);
     const { getCurrentUser } = RoutesUtills();
     const [selectedStatus, setSelectedStatus] = useState<string>('all');
     const [statusIds, setStatusIds] = useState<string>(`${3},${4}`); // Default to '1' for "Request Created"
 
+    useEffect(() => {
+        setRequestStatusIds(statusIds.split(',').map(id => parseInt(id, 10)));
+    }, [statusIds]);
 
     const {
         handleOptionClicked,
