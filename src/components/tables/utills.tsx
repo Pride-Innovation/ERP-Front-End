@@ -458,6 +458,7 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
 
             } else if (!isRequester) {
 
+                console.log(status, "Status in Option Filter", row?.status, "Row Status in Option Filter");
                 if (status === "CREATED" && row?.status === "requestCreated") {
                     return options.filter(
                         (option: any) =>
@@ -497,6 +498,7 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
                 }
 
                 if (status === "CREATED" && row?.status === "requestIssued") {
+                    console.log("Information detected")
                     return options.filter(
                         (option: any) =>
                             option.value !== crudStates.approve &&
