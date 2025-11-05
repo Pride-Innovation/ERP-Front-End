@@ -22,6 +22,7 @@ import HdrAutoOutlinedIcon from '@mui/icons-material/HdrAutoOutlined';
 import EventAvailableOutlinedIcon from '@mui/icons-material/EventAvailableOutlined';
 import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
 import HistoryIcon from '@mui/icons-material/History';
+import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
 
 // Brand colors
 const PRIMARY_COLOR = '#08796C';
@@ -33,13 +34,15 @@ const EnhancedDetailSection = ({
     text,
     icon,
     timestamp,
-    status = "completed"
+    status = "completed",
+    islocation = false
 }: {
     label: string;
     text: string;
     icon: JSX.Element;
     timestamp?: string;
     status?: "pending" | "completed" | "active";
+    islocation?: boolean;
 }) => {
 
     // Define colors based on status
@@ -127,7 +130,7 @@ const EnhancedDetailSection = ({
 
                     {timestamp && (
                         <Typography variant="caption" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                            <HistoryIcon fontSize="inherit" />
+                            {islocation ? <LocationOnOutlinedIcon fontSize="inherit" /> : <HistoryIcon fontSize="inherit" />}
                             {timestamp}
                         </Typography>
                     )}
@@ -207,6 +210,12 @@ const OtherDetails = ({
                     icon={<SupervisedUserCircleOutlinedIcon />}
                     text={`${request.currentApprover.firstName} ${request.currentApprover.lastName}`}
                     status={acknowledgeRequest?.user ? "active" : "pending"}
+                    islocation
+                    timestamp={`${request.currentApprover.title?.name
+                        ? request.currentApprover.title.name : ''} 
+                        • ${request.currentApprover.department?.name ?
+                            `${request?.currentApprover?.department?.name} •` : ''} 
+                         ${request?.currentApprover?.branch?.name}`}
                 />
             )}
 
