@@ -207,14 +207,14 @@ const CreateInventory = () => {
                                             {getSupplierName()}
                                         </TableCell>
                                     </TableRow>
-                                    <TableRow>
+                                    {/* <TableRow>
                                         <TableCell sx={{ width: '35%', fontWeight: 600 }}>
                                             PO Number
                                         </TableCell>
                                         <TableCell>
                                             {formDataToSubmit?.lpoNumber || 'Not specified'}
                                         </TableCell>
-                                    </TableRow>
+                                    </TableRow> */}
                                 </TableBody>
                             </Table>
                         </TableContainer>
