@@ -16,6 +16,7 @@ interface IDepartment {
     name: string;
     headOfDepartment?: IUser | null;
     branch?: IBranch | null;
+    managersGroupEmail?: string | null;
 }
 
 interface IDepartmentDetails {

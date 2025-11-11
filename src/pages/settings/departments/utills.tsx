@@ -24,9 +24,12 @@ const DepartmentUtills = () => {
     const handleClose = () => setOpen(false);
     const dispatch = useDispatch<AppDispatch>();
     const { users } = useSelector((state: RootState) => state.UserStore);
+    const { branches } = useSelector((state: RootState) => state.BranchStore);
     const [optionsObject, setOptionsObject] = useState<{
-        usersOptions: Array<IOptions>
-    }>({ usersOptions: [] });
+        usersOptions: Array<IOptions>,
+        branchesOptions: Array<IOptions>
+
+    }>({ usersOptions: [], branchesOptions: [] });
 
     const fetchAllDepartments = async () => {
         setLoading(true)
@@ -56,11 +59,12 @@ const DepartmentUtills = () => {
     useEffect(() => {
         if (users?.length > 0) {
             setOptionsObject({
-                usersOptions: users?.map(user => ({ label: `${user.firstName} ${user.lastName}`, value: user.id as number })) || []
+                usersOptions: users?.map(user => ({ label: `${user.firstName} ${user.lastName}`, value: user.id as number })) || [],
+                branchesOptions: branches?.map(branch => ({ label: branch.name, value: branch.id as number })) || []
             });
         }
 
-    }, [users])
+    }, [users, branches]);
 
 
     const formFields: Array<IFormData<IDepartment>> = [
@@ -74,7 +78,18 @@ const DepartmentUtills = () => {
             label: "Head of Department",
             type: "autocomplete",
             options: optionsObject.usersOptions
-        }
+        },
+        {
+            value: "branch",
+            label: "Branch",
+            type: "autocomplete",
+            options: optionsObject.branchesOptions
+        },
+        {
+            value: "managersGroupEmail",
+            label: "Managers Group Email",
+            type: "input"
+        },
     ]
 
     return ({

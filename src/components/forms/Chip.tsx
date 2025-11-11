@@ -15,6 +15,7 @@ const ChipComponent = ({
     variant = 'outlined',
     size = 'medium',
     color = 'success',
+    sx,
     ...rest
 }: IChip) => {
     const theme = useTheme()
@@ -31,7 +32,9 @@ const ChipComponent = ({
             sx={{
                 backgroundColor: variant === 'filled' ? alpha(mainColor, 0.1) : undefined,
                 color: variant === 'filled' ? mainColor : undefined,
-                fontWeight: 500
+                fontWeight: 500,
+                // Custom sx spreads at the end to override defaults
+                ...sx,
             }}
             {...rest}
         />

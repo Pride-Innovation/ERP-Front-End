@@ -8,7 +8,7 @@ Managing Director
 import { useForm } from "react-hook-form";
 import { ICreateDepartment, IDepartment, IDepartmentAxiosResponse } from "./interface";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useEffect } from "react";
+import { useMemo } from "react";
 import DepartmentUtills from "./utills";
 import { toast } from "react-toastify";
 import { Grid, Paper } from "@mui/material";
@@ -21,36 +21,42 @@ const CreateDepartment = ({
     sendingRequest,
     setSendingRequest
 }: ICreateDepartment) => {
-    const defaultSupplier: IDepartment = {} as IDepartment;
-    const { addDepartmentToStore } = DepartmentUtills()
+    // Memoize default values to prevent recreation
+    const defaultDepartment = useMemo<IDepartment>(() => ({
+        name: '',
+        headOfDepartment: null,
+        branch: null,
+        managersGroupEmail: null,
+    } as IDepartment), []);
+
+    const { addDepartmentToStore } = DepartmentUtills();
+
     const {
         control,
         handleSubmit,
         formState,
         register,
-        reset
     } = useForm<IDepartment>({
         mode: 'onChange',
-        resolver: yupResolver(departmentSchema),
+        resolver: yupResolver(departmentSchema) as any,
+        defaultValues: defaultDepartment, // Use defaultValues instead of reset in useEffect
     });
 
-    useEffect(() => {
-        reset({ ...defaultSupplier });
-    }, [reset]);
-
     const onSubmit = async (formData: IDepartment) => {
-        setSendingRequest(true)
+        setSendingRequest(true);
         try {
             const response = await createDepartmentService(formData) as IDepartmentAxiosResponse;
             if (response.status === 201) {
-                toast.success("Department created successfully")
-                addDepartmentToStore(response.data)
+                toast.success("Department created successfully");
+                addDepartmentToStore(response.data);
+                handleClose();
             }
         } catch (error) {
-            console.log(error)
+            console.error('Error creating department:', error);
+            toast.error("Failed to create department");
+        } finally {
+            setSendingRequest(false);
         }
-        setSendingRequest(false)
-        handleClose()
     };
 
     return (
@@ -70,7 +76,7 @@ const CreateDepartment = ({
                 </Grid>
             </form>
         </Paper>
-    )
-}
+    );
+};
 
-export default CreateDepartment
+export default CreateDepartment;

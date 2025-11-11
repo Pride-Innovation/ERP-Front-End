@@ -6,10 +6,18 @@ Managing Director
 */
 
 import * as yup from 'yup';
+import { IUser } from '../../users/interface';
+import { IBranch } from '../branch/interface';
 
 export const departmentSchema = yup.object().shape({
-    name: yup.string().required('Name is required'),
-    desc: yup.string().nullable().optional(),
-    status: yup.number().nullable().optional(),
-    image: yup.mixed().nullable().optional(),
+    name: yup.string().required('Department name is required'),
+    headOfDepartment: yup.mixed<IUser>().nullable().optional(),
+    branch: yup.mixed<IBranch>().nullable().optional(),
+    managersGroupEmail: yup
+        .string()
+        .email('Please enter a valid email address')
+        .nullable()
+        .optional(),
 });
+
+export type DepartmentSchemaType = yup.InferType<typeof departmentSchema>;

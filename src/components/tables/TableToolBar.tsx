@@ -16,7 +16,6 @@ import {
     InputAdornment,
     Chip
 } from '@mui/material';
-import { TypographyComponent } from '../headers/TypographyComponent';
 import { CustomToolbarWrapperProps, ITableToolBar } from './interface';
 import FileUploadButton from '../forms/FileUploadButton';
 import CustomGridToolbarExport from './CustomGridToolbarExport';

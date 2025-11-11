@@ -87,11 +87,11 @@ const TableComponent = ({
     const columns: GridColDef[] = columnHeaders.map((column) => ({
         field: `${column.label}`,
         headerName: camelCaseToWords(column.label),
-        flex: column.label === "image" ? 0.5 : 
-              column.label === "email" ? 1.5 : 
-              column.label === "name" ? 1.5 : 1,
-        minWidth: column.label === "image" ? 80 : 
-                 column.label === "action" ? 120 : 150,
+        flex: column.label === "image" ? 0.5 :
+            column.label === "email" ? 1.5 :
+                column.label === "name" ? 1.5 : 1,
+        minWidth: column.label === "image" ? 80 :
+            column.label === "action" ? 120 : 150,
         renderCell: (param) => {
             const value = param.row[column.label];
 
@@ -99,15 +99,15 @@ const TableComponent = ({
             if (column.isImage) {
                 return (
                     <StyledBox sx={{ p: 0 }}>
-                        <Avatar 
-                            src={determineImage(param.row)} 
-                            alt='profile' 
-                            sx={{ 
-                                height: 48, 
+                        <Avatar
+                            src={determineImage(param.row)}
+                            alt='profile'
+                            sx={{
+                                height: 48,
                                 width: 48,
                                 border: `2px solid ${alpha(theme.palette.primary.main, 0.1)}`,
                                 boxShadow: `0 2px 4px ${alpha('#000', 0.08)}`
-                            }} 
+                            }}
                         />
                     </StyledBox>
                 );
@@ -119,12 +119,12 @@ const TableComponent = ({
                 if (column.label === "name" || column.label === "assignedTo") {
                     return (
                         <StyledBox>
-                            <PersonOutlineIcon 
-                                fontSize='small' 
-                                sx={{ 
+                            <PersonOutlineIcon
+                                fontSize='small'
+                                sx={{
                                     color: theme.palette.primary.main,
-                                    flexShrink: 0 
-                                }} 
+                                    flexShrink: 0
+                                }}
                             />
                             <MultiLineCell>
                                 <CellPrimaryText>{value}</CellPrimaryText>
@@ -139,12 +139,12 @@ const TableComponent = ({
                 if (column.label === "dutyStation") {
                     return (
                         <StyledBox>
-                            <BusinessIcon 
-                                fontSize='small' 
-                                sx={{ 
+                            <BusinessIcon
+                                fontSize='small'
+                                sx={{
                                     color: theme.palette.secondary.main,
-                                    flexShrink: 0 
-                                }} 
+                                    flexShrink: 0
+                                }}
                             />
                             <MultiLineCell>
                                 <CellPrimaryText>{value}</CellPrimaryText>
@@ -161,15 +161,15 @@ const TableComponent = ({
                     return (
                         <Tooltip title={value} arrow>
                             <StyledBox>
-                                <MailOutlineIcon 
-                                    fontSize='small' 
-                                    sx={{ 
+                                <MailOutlineIcon
+                                    fontSize='small'
+                                    sx={{
                                         color: theme.palette.secondary.main,
-                                        flexShrink: 0 
-                                    }} 
+                                        flexShrink: 0
+                                    }}
                                 />
-                                <TypographyComponent 
-                                    weight={400} 
+                                <TypographyComponent
+                                    weight={400}
                                     size='0.875rem'
                                     sx={{
                                         overflow: 'hidden',
@@ -187,12 +187,12 @@ const TableComponent = ({
                 // Default text rendering
                 return (
                     <StyledBox>
-                        <TypographyComponent 
-                            weight={400} 
+                        <TypographyComponent
+                            weight={400}
                             size='0.875rem'
                             sx={{ color: '#1F2937' }}
                         >
-                            {(isCamelCase(value as string) && value) ? 
+                            {(isCamelCase(value as string) && value) ?
                                 camelCaseToWords(value) : value}
                         </TypographyComponent>
                     </StyledBox>
@@ -203,10 +203,10 @@ const TableComponent = ({
             if (column.isMoney) {
                 return (
                     <StyledBox>
-                        <TypographyComponent 
-                            weight={500} 
+                        <TypographyComponent
+                            weight={500}
                             size='0.875rem'
-                            sx={{ 
+                            sx={{
                                 color: theme.palette.success.main,
                                 fontFamily: 'monospace'
                             }}
@@ -222,10 +222,10 @@ const TableComponent = ({
                 return (
                     <StyledBox>
                         <TimeLineDot status={value} />
-                        <TypographyComponent 
-                            weight={500} 
+                        <TypographyComponent
+                            weight={500}
                             size='0.875rem'
-                            sx={{ 
+                            sx={{
                                 textTransform: 'capitalize',
                                 color: '#1F2937'
                             }}
@@ -241,29 +241,29 @@ const TableComponent = ({
                 return (
                     <StyledBox>
                         {value === "present" ?
-                            <ChipComponent 
-                                variant='filled' 
-                                label='Present' 
-                                icon={<HowToRegOutlinedIcon fontSize='small' />} 
-                                size='medium' 
+                            <ChipComponent
+                                variant='filled'
+                                label='Present'
+                                icon={<HowToRegOutlinedIcon fontSize='small' />}
+                                size='medium'
                                 color='success'
-                                // sx={{
-                                //     fontWeight: 500,
-                                //     fontSize: '0.75rem',
-                                //     height: 28
-                                // }}
+                                sx={{
+                                    fontWeight: 500,
+                                    fontSize: '0.75rem',
+                                    height: 28
+                                }}
                             /> :
-                            <ChipComponent 
-                                variant='filled' 
-                                label='Absent' 
-                                icon={<NoAccountsIcon fontSize='small' />} 
-                                size='medium' 
+                            <ChipComponent
+                                variant='filled'
+                                label='Absent'
+                                icon={<NoAccountsIcon fontSize='small' />}
+                                size='medium'
                                 color='warning'
-                                // sx={{
-                                //     fontWeight: 500,
-                                //     fontSize: '0.75rem',
-                                //     height: 28
-                                // }}
+                                sx={{
+                                    fontWeight: 500,
+                                    fontSize: '0.75rem',
+                                    height: 28
+                                }}
                             />
                         }
                     </StyledBox>
@@ -275,30 +275,30 @@ const TableComponent = ({
                 return (
                     <StyledBox>
                         {value === "high" ?
-                            <ChipComponent 
-                                variant='filled' 
-                                label='High' 
-                                icon={<AccessAlarmsIcon fontSize='small' />} 
-                                size='medium' 
+                            <ChipComponent
+                                variant='filled'
+                                label='High'
+                                icon={<AccessAlarmsIcon fontSize='small' />}
+                                size='medium'
                                 color='error'
-                                // sx={{ fontWeight: 500, fontSize: '0.75rem', height: 28 }}
+                                sx={{ fontWeight: 500, fontSize: '0.75rem', height: 28 }}
                             /> :
                             value === "medium" ?
-                                <ChipComponent 
-                                    variant='filled' 
-                                    label='Medium' 
-                                    icon={<DoNotDisturbAltIcon fontSize='small' />} 
-                                    size='medium' 
+                                <ChipComponent
+                                    variant='filled'
+                                    label='Medium'
+                                    icon={<DoNotDisturbAltIcon fontSize='small' />}
+                                    size='medium'
                                     color='secondary'
-                                    // sx={{ fontWeight: 500, fontSize: '0.75rem', height: 28 }}
+                                    sx={{ fontWeight: 500, fontSize: '0.75rem', height: 28 }}
                                 /> :
-                                <ChipComponent 
-                                    variant='filled' 
-                                    label='Low' 
-                                    icon={<SpeedIcon fontSize='small' />} 
-                                    size='medium' 
+                                <ChipComponent
+                                    variant='filled'
+                                    label='Low'
+                                    icon={<SpeedIcon fontSize='small' />}
+                                    size='medium'
                                     color='success'
-                                    // sx={{ fontWeight: 500, fontSize: '0.75rem', height: 28 }}
+                                    sx={{ fontWeight: 500, fontSize: '0.75rem', height: 28 }}
                                 />
                         }
                     </StyledBox>

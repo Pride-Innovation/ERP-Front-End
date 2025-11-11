@@ -9,6 +9,7 @@ import { Control, FieldError, FieldValues, FormState, Path, UseFormRegister } fr
 import { IOptions } from '../tables/interface';
 import { ChangeEvent, Dispatch, SetStateAction } from 'react';
 import { IAsset } from '../../pages/assets/interface';
+import { SxProps, Theme } from "@mui/material";
 
 export interface IButton {
     sendingRequest: boolean;
@@ -46,7 +47,8 @@ export interface IChip {
     icon: JSX.Element;
     variant?: "filled" | "outlined";
     size: "small" | "medium"
-    color: "primary" | "secondary" | "error" | "info" | "success" | "warning"
+    color: "primary" | "secondary" | "error" | "info" | "success" | "warning";
+    sx?: SxProps<Theme>;
 }
 
 export interface IPopover {
