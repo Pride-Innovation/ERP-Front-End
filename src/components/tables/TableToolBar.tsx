@@ -1,10 +1,3 @@
-/*
-13.9 Pride's Standard Copyright Notice:
-Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
-and distribute this software and its documentation for any purpose is prohibited unless authorized in writing by the
-Managing Director
-*/
-
 import {
     GridToolbarContainer,
 } from '@mui/x-data-grid';
@@ -19,7 +12,9 @@ import {
     Select,
     MenuItem,
     SelectChangeEvent,
-    styled
+    styled,
+    InputAdornment,
+    Chip
 } from '@mui/material';
 import { TypographyComponent } from '../headers/TypographyComponent';
 import { CustomToolbarWrapperProps, ITableToolBar } from './interface';
@@ -31,24 +26,51 @@ import TableUtills from './utills';
 import DateRangePicker from '../forms/DateRangePicker';
 import dayjs, { Dayjs } from 'dayjs';
 import { FormContext } from '../../context/form';
+import FilterListIcon from '@mui/icons-material/FilterList';
 
 const StyledFormControl = styled(FormControl)(({ theme }) => ({
-    minWidth: 160,
+    minWidth: 180,
     '& .MuiInputBase-root': {
-        borderRadius: 4,
-        backgroundColor: alpha('#fff', 0.9),
+        borderRadius: 8,
+        backgroundColor: '#FFFFFF',
         transition: 'all 0.2s ease',
+        border: `1px solid ${alpha('#000', 0.12)}`,
         '&:hover': {
-            backgroundColor: '#fff',
-            boxShadow: `0 1px 4px ${alpha('#000', 0.07)}`
+            backgroundColor: '#FFFFFF',
+            borderColor: theme.palette.primary.main,
+            boxShadow: `0 0 0 2px ${alpha(theme.palette.primary.main, 0.1)}`
+        },
+        '&.Mui-focused': {
+            borderColor: theme.palette.primary.main,
+            boxShadow: `0 0 0 3px ${alpha(theme.palette.primary.main, 0.15)}`
         }
     },
     '& .MuiOutlinedInput-notchedOutline': {
-        borderColor: alpha('#000', 0.12),
+        border: 'none',
     },
     '& .MuiSelect-select': {
-        paddingTop: 8,
-        paddingBottom: 8,
+        paddingTop: 10,
+        paddingBottom: 10,
+        fontSize: '0.875rem',
+        fontWeight: 500,
+    }
+}));
+
+const StyledToolbarContainer = styled(GridToolbarContainer)(({ theme }) => ({
+    width: '100%',
+    display: 'flex',
+    padding: '20px 24px',
+    backgroundColor: '#F8FAFB',
+    borderBottom: `1px solid ${alpha('#000', 0.08)}`,
+    flexDirection: 'row',
+    gap: 16,
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    [theme.breakpoints.down('sm')]: {
+        flexDirection: 'column',
+        alignItems: 'stretch',
+        gap: 12,
     }
 }));
 
@@ -84,7 +106,6 @@ const TableToolBar = ({
 
     const handleStartDateChange = (date: Dayjs | null) => {
         setStartDate(date);
-        // Convert Dayjs to Date for context
         if (date) {
             setTableStartDate(date.toDate());
         } else {
@@ -111,71 +132,81 @@ const TableToolBar = ({
     }, []);
 
     return (
-        <GridToolbarContainer
-            sx={{
-                width: '100%',
+        <StyledToolbarContainer>
+            <Box sx={{
                 display: 'flex',
-                p: '20px',
-                bgcolor: alpha(theme.palette.primary.main, 0.1),
-                flexDirection: { xs: 'column', sm: 'row' },
-                gap: { xs: 2, sm: 0 }
+                alignItems: 'center',
+                gap: 2,
+                flexWrap: 'wrap',
+                flex: 1
             }}>
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                {/* <TypographyComponent
-                    size='17px'
-                    color="#BC892C"
-                    weight={600}
-                    sx={{
-                        textTransform: "uppercase",
-                        mr: 2
-                    }}
-                >
-                    {header.plural}
-                </TypographyComponent> */}
-
                 {status && (
                     <StyledFormControl size="small">
-
                         <Select
                             labelId="status-filter-label"
                             value={statusFilter}
                             onChange={handleStatusChange}
+                            startAdornment={
+                                <InputAdornment position="start">
+                                    <FilterListIcon sx={{ fontSize: 18, color: theme.palette.primary.main }} />
+                                </InputAdornment>
+                            }
                             sx={{
-                                minHeight: 36,
+                                minHeight: 40,
                                 '& .MuiSelect-select': {
                                     display: 'flex',
-                                    alignItems: 'center'
+                                    alignItems: 'center',
+                                    gap: 1
                                 }
                             }}
                         >
-                            <MenuItem value="all">All Status</MenuItem>
-                            {(filterStatuses || [])?.map(status => (<MenuItem value={status.value}>
-                                <Box
-                                    component="span"
-                                    sx={{
-                                        display: 'flex',
-                                        alignItems: 'center'
-                                    }}
-                                >
-                                    <Box
-                                        component="span"
+                            <MenuItem value="all">
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    <Chip
+                                        label="All Status"
+                                        size="small"
                                         sx={{
-                                            display: 'inline-block',
-                                            width: 8,
-                                            height: 8,
-                                            borderRadius: '50%',
-                                            bgcolor: status.color,
-                                            mr: 1
+                                            height: 24,
+                                            fontSize: '0.75rem',
+                                            bgcolor: alpha(theme.palette.primary.main, 0.1),
+                                            color: theme.palette.primary.main
                                         }}
                                     />
-                                    {status.label}
                                 </Box>
-                            </MenuItem>))}
+                            </MenuItem>
+                            {(filterStatuses || [])?.map(status => (
+                                <MenuItem key={status.value} value={status.value}>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                        <Box
+                                            component="span"
+                                            sx={{
+                                                width: 8,
+                                                height: 8,
+                                                borderRadius: '50%',
+                                                bgcolor: status.color,
+                                                flexShrink: 0
+                                            }}
+                                        />
+                                        <Chip
+                                            label={status.label}
+                                            size="small"
+                                            sx={{
+                                                height: 24,
+                                                fontSize: '0.75rem',
+                                                bgcolor: alpha(status.color, 0.1),
+                                                color: status.color,
+                                                fontWeight: 500
+                                            }}
+                                        />
+                                    </Box>
+                                </MenuItem>
+                            ))}
                         </Select>
                     </StyledFormControl>
                 )}
+
                 {dateRangePicker && (
-                    <Box sx={{ ml: 2, flexGrow: 1, maxWidth: 550 }}>
+                    <Box sx={{ flexGrow: 1, maxWidth: 550 }}>
                         <DateRangePicker
                             startDate={startDate}
                             endDate={endDate}
@@ -190,102 +221,68 @@ const TableToolBar = ({
             </Box>
 
             <Stack
-                direction={{ xs: 'column', sm: 'row' }}
-                spacing={2}
-                sx={{
-                    ml: { xs: 0, sm: 'auto' },
-                    width: { xs: '100%', sm: 'auto' }
-                }}
+                direction="row"
+                spacing={1.5}
+                sx={{ flexShrink: 0 }}
             >
-                {searchAction &&
+                {searchAction && (
                     <TextField
                         size='small'
-                        placeholder="Search"
+                        placeholder="Search..."
                         variant='outlined'
                         InputProps={{
                             sx: {
-                                borderRadius: 1,
-                                backgroundColor: alpha('#fff', 0.9),
+                                borderRadius: 2,
+                                backgroundColor: '#FFFFFF',
+                                border: `1px solid ${alpha('#000', 0.12)}`,
                                 '&:hover': {
-                                    backgroundColor: '#fff',
-                                    boxShadow: `0 1px 4px ${alpha('#000', 0.07)}`
+                                    borderColor: theme.palette.primary.main,
+                                    boxShadow: `0 0 0 2px ${alpha(theme.palette.primary.main, 0.1)}`
                                 },
-                                minHeight: 36
+                                '& .MuiOutlinedInput-notchedOutline': {
+                                    border: 'none'
+                                },
+                                minHeight: 40,
+                                fontSize: '0.875rem'
                             }
                         }}
                     />
-                }
+                )}
 
-                {refresh &&
-                    <Box>
-                        <ButtonComponent
-                            handleClick={() => window.location.reload()}
-                            sendingRequest={false}
-                            buttonText="Refresh"
-                            variant='outlined'
-                            buttonColor='primary'
-                            type='button'
-                        />
-                    </Box>
-                }
+                {refresh && (
+                    <ButtonComponent
+                        handleClick={() => window.location.reload()}
+                        sendingRequest={false}
+                        buttonText="Refresh"
+                        variant='outlined'
+                        buttonColor='primary'
+                        type='button'
+                    />
+                )}
 
-                {createAction &&
-                    <Box sx={{ width: { xs: '100%', sm: 'auto' } }}>
-                        <ButtonComponent
-                            handleClick={() => onCreationHandler()}
-                            sendingRequest={false}
-                            buttonText={`Create ${header.singular} `}
-                            variant='contained'
-                            buttonColor='success'
-                            type='button'
-                        />
-                    </Box>
-                }
+                {createAction && (
+                    <ButtonComponent
+                        handleClick={() => onCreationHandler()}
+                        sendingRequest={false}
+                        buttonText={`Create ${header.singular}`}
+                        variant='contained'
+                        buttonColor='success'
+                        type='button'
+                    />
+                )}
 
-                {importData &&
-                    <Box>
-                        <FileUploadButton title={header.plural} module={module} />
-                    </Box>
-                }
+                {importData && (
+                    <FileUploadButton title={header.plural} module={module} />
+                )}
 
                 {exportData && <CustomGridToolbarExport module={module} />}
             </Stack>
-        </GridToolbarContainer>
-    )
-}
-
-const CustomToolbarWrapper: React.FC<CustomToolbarWrapperProps> = ({
-    createAction,
-    importData,
-    exportData,
-    searchAction,
-    header,
-    onCreationHandler,
-    module,
-    refresh,
-    status = false,
-    onStatusChange,
-    selectedStatus,
-    dateRangePicker,
-    ...props
-}) => {
-    return (
-        <TableToolBar
-            dateRangePicker={dateRangePicker}
-            createAction={createAction}
-            importData={importData}
-            exportData={exportData}
-            header={header}
-            searchAction={searchAction}
-            onCreationHandler={onCreationHandler}
-            module={module}
-            status={status}
-            onStatusChange={onStatusChange}
-            {...props}
-            refresh={refresh}
-            selectedStatus={selectedStatus}
-        />
+        </StyledToolbarContainer>
     );
+};
+
+const CustomToolbarWrapper: React.FC<CustomToolbarWrapperProps> = (props) => {
+    return <TableToolBar {...props} />;
 };
 
 export default CustomToolbarWrapper;
