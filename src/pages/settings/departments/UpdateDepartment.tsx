@@ -1,5 +1,12 @@
-import { useEffect, useMemo } from 'react';
-import { IDepartment, IUpdateDepartment } from './interface';
+/*
+13.9 Pride's Standard Copyright Notice:
+Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
+and distribute this software and its documentation for any purpose is prohibited unless authorized in writing by the
+Managing Director
+*/
+
+import { useEffect, useMemo, useState } from 'react';
+import { IDepartment, IDepartmentAxiosResponse, IUpdateDepartment } from './interface';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { departmentSchema } from './schema';
@@ -19,14 +26,17 @@ const UpdateDepartment = ({
 }: IUpdateDepartment) => {
     const { updateDepartmentInStore } = DepartmentUtills();
     const theme = useTheme();
+    const [defaultDepartment, setDefaultDepartment] = useState<any>(department);
 
-    // Memoize default values to prevent unnecessary re-renders
-    const defaultValues = useMemo(() => ({
-        name: department.name || '',
-        headOfDepartment: department.headOfDepartment || null,
-        branch: department.branch || null,
-        managersGroupEmail: department.managersGroupEmail || null,
-    }), [department]);
+    // Convert objects to IDs for form default values
+    useEffect(() => {
+        setDefaultDepartment({
+            name: department.name || '',
+            headOfDepartment: department.headOfDepartment?.id || null, // Convert to ID
+            branch: department.branch?.id || null, // Convert to ID
+            managersGroupEmail: department.managersGroupEmail || null,
+        });
+    }, [department]);
 
     const {
         control,
@@ -34,32 +44,20 @@ const UpdateDepartment = ({
         formState,
         register,
         reset,
-        watch
     } = useForm<IDepartment>({
         mode: 'onChange',
         resolver: yupResolver(departmentSchema) as any,
-        defaultValues: defaultValues,
     });
 
-    // Watch for changes to show dirty fields
-    const formValues = watch();
+    // Reset form when defaultDepartment changes
+    useEffect(() => {
+        reset({ ...defaultDepartment });
+    }, [defaultDepartment, reset]);
 
     // Check if form has changes
     const hasChanges = useMemo(() => {
         return formState.isDirty;
     }, [formState.isDirty]);
-
-    // Reset form when department changes
-    useEffect(() => {
-        if (department) {
-            reset({
-                name: department.name || '',
-                headOfDepartment: department.headOfDepartment || null,
-                branch: department.branch || null,
-                managersGroupEmail: department.managersGroupEmail || null,
-            });
-        }
-    }, [department, reset]);
 
     const onSubmit = async (formData: IDepartment) => {
         setSendingRequest(true);
@@ -75,13 +73,13 @@ const UpdateDepartment = ({
             const response = await updateDepartmentService(
                 updateData,
                 department?.id as string
-            ) as IResponseData;
+            ) as IDepartmentAxiosResponse;
 
-            if (response.status === 'success') {
-                const updatedDepartment = response.data[0] as unknown as IDepartment;
+            if (response.status === 201) {
+                const updatedDepartment = response.data as unknown as IDepartment;
                 updateDepartmentInStore(updatedDepartment);
 
-                toast.success(response.data.message || 'Department updated successfully');
+                toast.success('Department updated successfully');
                 handleClose();
             } else {
                 toast.error('Failed to update department');

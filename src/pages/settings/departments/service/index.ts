@@ -10,7 +10,7 @@ import axiosInstance from "../../../../core/apis/axiosInstance";
 const createDepartmentService = async (body: Object) => {
     try {
         const response = await axiosInstance.post('departments', body);
-        return response
+        return response;
     } catch (error) {
         return error;
     }
@@ -19,7 +19,7 @@ const createDepartmentService = async (body: Object) => {
 const updateDepartmentService = async (body: Object, id: string | number) => {
     try {
         const response = await axiosInstance.put(`departments/${id}`, body);
-        return response.data
+        return response;
     } catch (error) {
         return error;
     }
