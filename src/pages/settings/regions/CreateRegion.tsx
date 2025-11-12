@@ -6,68 +6,61 @@ Managing Director
 */
 
 import { useForm } from "react-hook-form";
-import { ICreateDepartment, IDepartment, IDepartmentAxiosResponse } from "./interface";
+import { ICreateRegion, IRegion, IRegionAxiosResponse } from "./interface";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMemo } from "react";
-import DepartmentUtills from "./utills";
+import RegionUtills from "./utills";
 import { toast } from "react-toastify";
 import { Grid, Paper } from "@mui/material";
-import DepartmentForm from "./DepartmentForm";
-import { departmentSchema } from "./schema";
-import { createDepartmentService } from "./service";
+import RegionForm from "./RegionForm";
+import { regionSchema } from "./schema";
+import { createRegionService } from "./service";
 
-const CreateDepartment = ({
+const CreateRegion = ({
     handleClose,
     sendingRequest,
     setSendingRequest
-}: ICreateDepartment) => {
-    // Memoize default values to prevent recreation
-    const defaultDepartment = useMemo<IDepartment>(() => ({
+}: ICreateRegion) => {
+    const defaultRegion = useMemo<IRegion>(() => ({
         name: '',
-        headOfDepartment: null,
-        branch: null,
-        managersGroupEmail: null,
-    } as IDepartment), []);
+    } as IRegion), []);
 
-    const { addDepartmentToStore } = DepartmentUtills();
+    const { addRegionToStore } = RegionUtills();
 
     const {
         control,
         handleSubmit,
         formState,
         register,
-    } = useForm<IDepartment>({
+    } = useForm<IRegion>({
         mode: 'onChange',
-        resolver: yupResolver(departmentSchema) as any,
-        defaultValues: defaultDepartment, // Use defaultValues instead of reset in useEffect
+        resolver: yupResolver(regionSchema) as any,
+        defaultValues: defaultRegion,
     });
 
-    const onSubmit = async (formData: IDepartment) => {
+    const onSubmit = async (formData: IRegion) => {
         setSendingRequest(true);
-        console.log(formData, "Form Data!!");
-        /*
         try {
-            const response = await createDepartmentService(formData) as IDepartmentAxiosResponse;
+            const response = await createRegionService(formData) as IRegionAxiosResponse;
             if (response.status === 201) {
-                toast.success("Department created successfully");
-                addDepartmentToStore(response.data);
+                toast.success("Region created successfully");
+                addRegionToStore(response.data);
                 handleClose();
             }
         } catch (error) {
-            console.error('Error creating department:', error);
-            toast.error("Failed to create department");
+            console.error('Error creating region:', error);
+            toast.error("Failed to create region");
         } finally {
             setSendingRequest(false);
         }
-        */
     };
 
     return (
-        <Paper elevation={3} sx={{ borderRadius: 3, boxShadow: "none", maxWidth: "1200px", mx: "auto" }}>
+        <Paper elevation={3} sx={{ borderRadius: 3, boxShadow: "none", maxWidth: "800px", mx: "auto" }}>
             <form autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
                 <Grid container spacing={2}>
                     <Grid item xs={12}>
-                        <DepartmentForm
+                        <RegionForm
                             handleClose={handleClose}
                             buttonText="Submit"
                             formState={formState}
@@ -82,4 +75,4 @@ const CreateDepartment = ({
     );
 };
 
-export default CreateDepartment;
+export default CreateRegion;
