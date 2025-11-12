@@ -24,7 +24,7 @@ export const departmentSlice = createSlice({
             state.departments = action.payload;
         },
         addDepartment: (state, action) => {
-            state.departments = [action.payload, ...state.departments]
+            state.departments = [...state.departments, action.payload];
         },
         removeDepartment: (state, action) => {
             state.departments = state.departments.filter(department => department.id !== action.payload?.id);

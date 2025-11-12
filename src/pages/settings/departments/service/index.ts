@@ -18,7 +18,7 @@ const createDepartmentService = async (body: Object) => {
 
 const updateDepartmentService = async (body: Object, id: string | number) => {
     try {
-        const response = await axiosInstance.post(`departments/update/${id}`, body);
+        const response = await axiosInstance.put(`departments/${id}`, body);
         return response.data
     } catch (error) {
         return error;
@@ -27,7 +27,7 @@ const updateDepartmentService = async (body: Object, id: string | number) => {
 
 const deleteDepartmentService = async (id: string | number) => {
     try {
-        const response = await axiosInstance.get(`departments/delete/${id}`);
+        const response = await axiosInstance.delete(`departments/${id}`);
         return response.data
     } catch (error) {
         return error;

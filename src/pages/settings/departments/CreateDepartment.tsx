@@ -44,8 +44,6 @@ const CreateDepartment = ({
 
     const onSubmit = async (formData: IDepartment) => {
         setSendingRequest(true);
-        console.log(formData, "Form Data!!");
-        /*
         try {
             const response = await createDepartmentService(formData) as IDepartmentAxiosResponse;
             if (response.status === 201) {
@@ -59,7 +57,6 @@ const CreateDepartment = ({
         } finally {
             setSendingRequest(false);
         }
-        */
     };
 
     return (
