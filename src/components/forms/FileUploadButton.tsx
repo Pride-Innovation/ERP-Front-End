@@ -119,7 +119,8 @@ const FileUploadButton = ({ title, module }: IFileUploadButton) => {
             tabIndex={-1}
             startIcon={<CloudUploadIcon fontSize="small" sx={{ color: "#BC892C" }} />}
         >
-            Import {title}
+            Import 
+            {/* {title} */}
             <InputFileUpload inputRef={inputRef} handleFileUpload={handleFileUpload} />
         </Button>
     );

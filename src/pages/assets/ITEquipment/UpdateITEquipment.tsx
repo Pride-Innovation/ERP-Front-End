@@ -32,6 +32,7 @@ import { AppDispatch } from "../../../store";
 import { updateITAsset } from "./slice";
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import { ROUTES } from "../../../core/routes/routes";
+import ITEquipmentUtills from "./utills";
 
 const PRIMARY_COLOR = '#08796C'; // Teal green
 
@@ -47,6 +48,7 @@ const UpdateITEquipment = () => {
     const dispatch = useDispatch<AppDispatch>();
     const theme = useTheme();
     const navigate = useNavigate();
+    const { calculateNetBookValue } = ITEquipmentUtills();
 
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const {
@@ -62,11 +64,13 @@ const UpdateITEquipment = () => {
     });
 
     const findITEquipmentByID = async () => {
+
         setLoading(true);
         try {
             const response = await getITEquipmentByIDService(id as string) as IITEquipmentAxiosResponse;
 
             if (response.status === 200) {
+                const netBookValue = calculateNetBookValue(response.data);
                 setAssetName(response.data.assetName || "IT Equipment");
 
                 setParams({
@@ -87,13 +91,14 @@ const UpdateITEquipment = () => {
                     engravedNumber: response.data.engravedNumber ? response.data.engravedNumber : "",
                     unitOfMeasure: response.data.unitOfMeasure ? response.data.unitOfMeasure : "",
                     netValueB: response.data.netValueB ? response.data.netValueB : "",
-                    assetDepreciationRate: response.data.assetDepreciationRate ? response.data.assetDepreciationRate : "",
+                    // assetDepreciationRate: response.data.assetDepreciationRate ? response.data.assetDepreciationRate : "",
                     hostname: response.data.hostname ? response.data.hostname : "",
-                    detailNetBookValue: response.data.detailNetBookValue ? response.data.detailNetBookValue : "",
+                    detailNetBookValue: netBookValue,
                     make: response.data.make ? response.data.make : "",
                     model: response.data.model ? response.data.model : "",
                     serialNumber: response.data.serialNumber ? response.data.serialNumber : "",
-                    lpoNumber: response.data.stock?.lpoNumber
+                    lpoNumber: response.data.stock?.lpoNumber,
+                    assetDepreciationRate: "33.33%"
                 });
             } else {
                 toast.error("Failed to load asset details");

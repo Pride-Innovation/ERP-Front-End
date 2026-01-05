@@ -54,7 +54,7 @@ const UserForm = ({
     const { fetchAllDepartments } = DepartmentUtills();
     const { displayDepartment } = useContext(AutocompleteContext);
     const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+    // const isMobile = useMediaQuery(theme.breakpoints.down('md'));
     const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
     useEffect(() => { fetchAllTitles() }, []);

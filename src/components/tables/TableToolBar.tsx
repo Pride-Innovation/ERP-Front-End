@@ -263,7 +263,9 @@ const TableToolBar = ({
                     <ButtonComponent
                         handleClick={() => onCreationHandler()}
                         sendingRequest={false}
-                        buttonText={`Create ${header.singular}`}
+                        buttonText={"Create"
+                            // ${header.singular}
+                        }
                         variant='contained'
                         buttonColor='success'
                         type='button'

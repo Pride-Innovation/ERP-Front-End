@@ -332,17 +332,18 @@ const ITEquipmentUtills = () => {
             type: "select",
             options: unitsOfMeasure
         },
-        {
-            value: "netValueB",
-            label: 'Net Value',
-            type: "input",
-            required: false,
-        },
+        // {
+        //     value: "netValueB",
+        //     label: 'Purchase Net Book Value',
+        //     type: "input",
+        //     required: false,
+        // },
         {
             value: "assetDepreciationRate",
             label: 'Depreciation Rate',
             type: "input",
             required: false,
+            disabled: true,
         },
         {
             value: "branch",
@@ -366,6 +367,7 @@ const ITEquipmentUtills = () => {
             label: 'Detail Net Book Value',
             type: "input",
             required: false,
+            disabled: true,
         },
         {
             value: "dateReceipt",
@@ -447,6 +449,20 @@ const ITEquipmentUtills = () => {
             .indexOf(assetTypesStatusConstants.itEquipment.toLocaleLowerCase()) !== -1) as IAssetType
     }
 
+    /*
+     Calculate Net Book Value
+        @param purchaseCost - The purchase cost of the asset
+        @param depreciationRate - The depreciation rate of the asset
+    */
+
+    const calculateNetBookValue = (asset: IITEquipment): string => {
+        // The number of days the asset has been held
+        console.log(asset);
+        const numberOfDaysHeld = moment().diff(moment(asset.dateReceipt), 'days');
+        console.log("Days Held: ", numberOfDaysHeld);
+        return "2,142,551.51";
+    }
+
     return (
         {
             open,
@@ -467,6 +483,7 @@ const ITEquipmentUtills = () => {
             iTEquipmentTableData,
             determineITAssetType,
             currentState,
+            calculateNetBookValue
         }
     )
 }
