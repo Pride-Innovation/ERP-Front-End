@@ -21,7 +21,6 @@ import {
     TableHead,
     TableRow,
     Paper,
-    Card,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { toast } from "react-toastify";
@@ -171,7 +170,7 @@ const IssueRequestDetails = () => {
 
     return (
         <>
-            <Card sx={{ p: 4, boxShadow: "none" }}>
+            <Paper elevation={0} sx={{ p: 4, borderRadius: 2, border: '1px solid rgba(0,0,0,0.07)' }}>
                 <Grid container spacing={4}>
                     <Grid xs={12} item container>
                         <Grid item xs={6}>
@@ -202,7 +201,7 @@ const IssueRequestDetails = () => {
                         </Grid>
 
                         <Grid item xs={6}>
-                            <Card sx={{ p: 3, boxShadow: 0, border: `1px solid #E5F2F2`, }}>
+                                <Paper elevation={0} sx={{ p: 3, border: `1px solid #E5F2F2`, borderRadius: 1.5 }}>
                                 <Typography variant="subtitle1" sx={{ mb: 1, color: theme.palette.secondary.main }}>
                                     Requested Commodities
                                 </Typography>
@@ -266,20 +265,20 @@ const IssueRequestDetails = () => {
                                         No commodities found for this request.
                                     </Typography>
                                 )}
-                            </Card>
+                            </Paper>
                         </Grid>
                     </Grid>
                 </Grid >
-            </Card>
-            <Card sx={{ boxShadow: "none", mt: 3, borderRadius: 2, p: 4 }}>
+            </Paper>
+            <Paper elevation={0} sx={{ mt: 3, borderRadius: 2, p: 4, border: '1px solid rgba(0,0,0,0.07)' }}>
                 <Grid xs={12} item container>
-                    <Card
+                    <Paper
+                        elevation={0}
                         sx={{
                             width: '100%',
                             bgcolor: 'white',
                             p: 3,
                             borderRadius: 2,
-                            boxShadow: 0,
                             border: `1px solid #E5F2F2`,
                         }}
                     >
@@ -288,7 +287,7 @@ const IssueRequestDetails = () => {
                                 <InventoryTable issue title="Issue Items" />
                             </Grid>
                         </Grid>
-                    </Card>
+                    </Paper>
                 </Grid>
                 <Grid item xs={12} sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
                     <Stack direction="row" spacing={3} sx={{ width: "30%" }}>
@@ -309,7 +308,7 @@ const IssueRequestDetails = () => {
                         />
                     </Stack>
                 </Grid>
-            </Card>
+            </Paper>
         </>
     );
 }

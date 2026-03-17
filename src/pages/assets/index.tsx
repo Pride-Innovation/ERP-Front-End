@@ -7,11 +7,11 @@ Managing Director
 
 import {
   Box,
-  Card,
   Button,
   Typography,
   Stack,
-  Grid
+  alpha,
+  useTheme,
 } from '@mui/material';
 import {
   Outlet,
@@ -25,7 +25,6 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import AssetTypeUtills from '../settings/assetTypes/utills';
 import AssetUtills from './Utills';
-import ListAltIcon from '@mui/icons-material/ListAlt';
 
 const AssetsManagement = () => {
   const [path, setPath] = useState<string>("");
@@ -34,6 +33,7 @@ const AssetsManagement = () => {
   const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore);
   const { pathname } = useLocation();
   const { determineAssetTypeByAssetName } = AssetUtills();
+  const theme = useTheme();
 
   const navigate = useNavigate();
   const { fetchAllAssetTypes } = AssetTypeUtills();
@@ -67,37 +67,70 @@ const AssetsManagement = () => {
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
-      <Box width={'100%'} sx={{ px: 3, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        <Card sx={{ p: 3, mb: 2, width: '100%', m: 3, justifyContent: "center", maxWidth: "1500px" }}>
-          <Grid container alignItems="center" justifyContent="space-between">
-            <Grid item>
-              <Stack direction="row" spacing={1} alignItems="center">
-                <ListAltIcon fontSize='small' sx={{ color: 'primary.main' }} />
-                <Typography variant="h6" fontWeight="500" color="primary">
-                  {navigations.find(item => item.path === path)?.text || ''}
-                </Typography>
-              </Stack>
-            </Grid>
-            <Grid item>
-              <Stack direction="row" spacing={1}>
-                {navigations.map(item => (
-                  <>
-                    <Button
-                      startIcon={item.icon}
-                      onClick={() => navigate(item.path)}
-                      key={item.id}
-                      variant={determineActivePath(item) ? "contained" : "outlined"}
-                    >
-                      {item.text}
-                    </Button>
-                  </>
-                ))}
-              </Stack>
-            </Grid>
-          </Grid>
-        </Card>
+    <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+      {/* Navigation Header */}
+      <Box
+        sx={{
+          mb: 2.5,
+          px: 0.5,
+          py: 0.5,
+          bgcolor: '#fff',
+          borderRadius: 2,
+          border: `1px solid ${alpha('#000', 0.07)}`,
+          boxShadow: '0 1px 4px rgba(0,0,0,0.05)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: 1,
+        }}
+      >
+        <Stack direction="row" spacing={0.5} sx={{ flexWrap: 'wrap', gap: 0.5, p: 0.5 }}>
+          {navigations.map(item => {
+            const isActive = determineActivePath(item);
+            return (
+              <Button
+                startIcon={item.icon}
+                onClick={() => navigate(item.path)}
+                key={item.id}
+                variant={isActive ? "contained" : "text"}
+                sx={{
+                  borderRadius: 1.5,
+                  px: 2,
+                  py: 0.8,
+                  fontSize: '0.8125rem',
+                  fontWeight: isActive ? 700 : 500,
+                  textTransform: 'none',
+                  transition: 'all 0.2s ease',
+                  boxShadow: isActive ? `0 2px 8px ${alpha(theme.palette.primary.main, 0.35)}` : 'none',
+                  '&:hover': {
+                    boxShadow: isActive ? `0 4px 12px ${alpha(theme.palette.primary.main, 0.4)}` : 'none',
+                    transform: isActive ? 'translateY(-1px)' : 'none',
+                  },
+                }}
+              >
+                {item.text}
+              </Button>
+            );
+          })}
+        </Stack>
+
+        {navigations.length > 0 && (
+          <Typography
+            variant="caption"
+            sx={{
+              color: 'text.secondary',
+              fontWeight: 500,
+              px: 2,
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+            }}
+          >
+            {navigations.find(item => determineActivePath(item))?.text || 'Assets'}
+          </Typography>
+        )}
       </Box>
+
       <Outlet />
     </Box>
   );

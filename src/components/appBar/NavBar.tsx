@@ -55,7 +55,7 @@ const NavBar = () => {
             }
             <Toolbar disableGutters>
                 {getCurrentUser() &&
-                    <Stack direction="row" spacing={4} sx={{ ml: "auto", display: "flex", alignItems: "center" }}>
+                    <Stack direction="row" spacing={2} sx={{ ml: "auto", display: "flex", alignItems: "center" }}>
                         <FilterByTagName />
                         <Box>
                             <ButtonComponent
@@ -64,24 +64,70 @@ const NavBar = () => {
                                     handleAnchorClick?.(event);
                                 }}
                                 sendingRequest={false}
-                                buttonText="Create New"
+                                buttonText="+ New"
                                 buttonColor='secondary'
                                 type='button' />
                         </Box>
-                        <Badge badgeContent={4} color="warning">
-                            <NotificationsNoneIcon color="inherit" />
+                        <Badge
+                            badgeContent={4}
+                            color="warning"
+                            sx={{
+                                '& .MuiBadge-badge': {
+                                    fontWeight: 700,
+                                    fontSize: '0.6rem',
+                                    minWidth: 18,
+                                    height: 18,
+                                }
+                            }}
+                        >
+                            <Box
+                                sx={{
+                                    width: 36,
+                                    height: 36,
+                                    borderRadius: '50%',
+                                    bgcolor: 'rgba(255,255,255,0.12)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    cursor: 'pointer',
+                                    border: '1px solid rgba(255,255,255,0.2)',
+                                    transition: 'all 0.2s ease',
+                                    '&:hover': { bgcolor: 'rgba(255,255,255,0.2)' },
+                                }}
+                            >
+                                <NotificationsNoneIcon sx={{ color: 'rgba(255,255,255,0.9)', fontSize: '1.2rem' }} />
+                            </Box>
                         </Badge>
-                        <TypographyComponent size='16px' weight={400} sx={{ color: grey[100] }}>
+                        <TypographyComponent
+                            size='0.875rem'
+                            weight={600}
+                            sx={{
+                                color: 'rgba(255,255,255,0.92)',
+                                display: { xs: 'none', lg: 'block' },
+                                letterSpacing: 0.2,
+                            }}
+                        >
                             {getCurrentUser()?.firstName} {getCurrentUser()?.lastName}
                         </TypographyComponent>
                         <IconButton
                             onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
                                 setAction("")
                                 handleAnchorClick?.(event)
-                            }}>
+                            }}
+                            sx={{
+                                p: 0.5,
+                                border: '2px solid rgba(255,255,255,0.3)',
+                                borderRadius: '50%',
+                                transition: 'all 0.2s ease',
+                                '&:hover': {
+                                    border: '2px solid rgba(255,255,255,0.6)',
+                                    boxShadow: '0 0 0 3px rgba(255,255,255,0.1)',
+                                },
+                            }}
+                        >
                             <Avatar
                                 src={getCurrentUser()?.image || (getCurrentUser()?.gender === 'male' ? MaleLogo : FemaleLogo)}
-                                sx={{ height: 45, width: 45, cursor: "pointer" }} />
+                                sx={{ height: 36, width: 36, cursor: "pointer" }} />
                         </IconButton>
                     </Stack>}
                 <PopoverComponent

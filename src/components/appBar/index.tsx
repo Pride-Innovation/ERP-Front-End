@@ -106,32 +106,54 @@ export default function ApplicationDrawer({ window }: Props) {
     return (
         <Box sx={{ display: 'flex' }}>
             <CssBaseline />
-            <AppBar position="fixed" open={drawerOpen} sx={{ backgroundColor: '#08796C', borderBottom: '1px solid #e0e0e0' }}>
-                <Toolbar>
+            <AppBar
+                position="fixed"
+                open={drawerOpen}
+                sx={{
+                    background: 'linear-gradient(135deg, #08796C 0%, #065E54 100%)',
+                    borderBottom: 'none',
+                    boxShadow: '0 2px 12px rgba(8, 121, 108, 0.25)',
+                }}
+            >
+                <Toolbar sx={{ minHeight: { xs: 60, sm: 64 } }}>
                     <IconButton
-                        color="primary"
+                        color="inherit"
                         aria-label="open drawer"
                         edge="start"
                         onClick={handleDrawerToggle}
-                        sx={{ mr: 2, display: { sm: 'none' } }}
+                        sx={{
+                            mr: 2,
+                            display: { sm: 'none' },
+                            bgcolor: 'rgba(255,255,255,0.1)',
+                            '&:hover': { bgcolor: 'rgba(255,255,255,0.2)' },
+                        }}
                     >
                         <MenuIcon />
                     </IconButton>
                     <Box
                         src={Logo}
-                        sx={{ height: '55px', width: "45px", mr: '20px', display: { xs: 'none', md: 'block' }, borderRadius: "4px" }}
+                        sx={{
+                            height: '44px',
+                            width: "44px",
+                            mr: '14px',
+                            display: { xs: 'none', md: 'flex' },
+                            borderRadius: "8px",
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                        }}
                         component='img'
                     />
                     <Typography
                         sx={{
                             display: { xs: 'none', md: 'block' },
-                            fontSize: '16px',
+                            fontSize: '15px',
                             fontWeight: 700,
                             color: 'white',
-                            letterSpacing: 0.5,
+                            letterSpacing: 0.8,
+                            textTransform: 'uppercase',
                         }}
                     >
-                        <span style={{ color: "#E69100" }}>ASSETS</span> MANAGEMENT
+                        <span style={{ color: "#F0B429", fontWeight: 800 }}>ASSETS</span>
+                        {' '}MANAGEMENT
                     </Typography>
                     <NavBar />
                 </Toolbar>
@@ -144,12 +166,18 @@ export default function ApplicationDrawer({ window }: Props) {
                 ModalProps={{ keepMounted: true }}
                 sx={{
                     display: { xs: 'block', md: 'none' },
-                    '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth, bgcolor: '#08796C', color: 'white' },
+                    '& .MuiDrawer-paper': {
+                        boxSizing: 'border-box',
+                        width: drawerWidth,
+                        background: 'linear-gradient(180deg, #08796C 0%, #065E54 100%)',
+                        color: 'white',
+                        borderRight: 'none',
+                        boxShadow: '4px 0 20px rgba(0,0,0,0.15)',
+                    },
                 }}
             >
-                <DrawerHeader />
-                <Divider />
-                <Box p={1} sx={(theme) => ({ height: '100%', bgcolor: theme.palette.grey[50] })}>
+                <DrawerHeader sx={{ bgcolor: 'transparent', borderBottom: '1px solid rgba(255,255,255,0.1)' }} />
+                <Box p={1} sx={{ height: '100%', bgcolor: 'transparent' }}>
                     <SideBar drawerOpen={true} />
                 </Box>
             </MuiDrawer>
@@ -160,20 +188,31 @@ export default function ApplicationDrawer({ window }: Props) {
                 open={drawerOpen}
                 sx={{
                     display: { xs: 'none', sm: 'block' },
-                    '& .MuiDrawer-paper': { border: 'none', bgcolor: '#08796C', color: 'white' },
+                    '& .MuiDrawer-paper': {
+                        border: 'none',
+                        background: 'linear-gradient(180deg, #08796C 0%, #065E54 100%)',
+                        color: 'white',
+                        boxShadow: '4px 0 16px rgba(0,0,0,0.1)',
+                    },
                 }}
             >
-                <DrawerHeader />
-                <Divider />
-                <Box p={1} sx={(theme) => ({ height: '100%', bgcolor: theme.palette.grey[50] })}>
+                <DrawerHeader sx={{ bgcolor: 'transparent', borderBottom: '1px solid rgba(255,255,255,0.1)' }} />
+                <Box p={1} sx={{ height: '100%', bgcolor: 'transparent' }}>
                     <SideBar drawerOpen={drawerOpen} />
                 </Box>
             </Drawer>
             <Box
                 component="main"
-                sx={() => ({ flexGrow: 1, height: '100vh', bgcolor: "#DFF2FE", overflowX: 'auto' })}>
+                sx={() => ({
+                    flexGrow: 1,
+                    height: '100vh',
+                    bgcolor: "#F1F5FB",
+                    overflowX: 'auto',
+                    overflowY: 'auto',
+                })}
+            >
                 <DrawerHeader />
-                <Box sx={{ px: 3, my: 2 }}>
+                <Box sx={{ px: { xs: 2, sm: 3 }, py: 2, minHeight: 'calc(100vh - 64px)' }}>
                     <Outlet />
                 </Box>
             </Box>

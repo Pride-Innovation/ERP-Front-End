@@ -58,28 +58,44 @@ const SideBar = ({ drawerOpen }: SideBarProps) => {
 
                             <ListItemButton
                                 sx={{
-                                    bgcolor: activeRoute === item.id ? '#08796C' : 'transparent',
-                                    color: activeRoute === item.id ? 'white' : 'inherit',
-                                    borderRadius: 1,
-                                    mx: 1,
-                                    my: 0.5,
-                                    px: drawerOpen ? 2 : 1,
+                                    bgcolor: activeRoute === item.id
+                                        ? 'rgba(255,255,255,0.18)'
+                                        : 'transparent',
+                                    color: 'white',
+                                    borderRadius: 2,
+                                    mx: 0.5,
+                                    my: 0.3,
+                                    px: drawerOpen ? 2 : 1.5,
                                     justifyContent: drawerOpen ? 'flex-start' : 'center',
+                                    backdropFilter: activeRoute === item.id ? 'blur(6px)' : 'none',
+                                    boxShadow: activeRoute === item.id
+                                        ? '0 2px 8px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.1)'
+                                        : 'none',
+                                    border: activeRoute === item.id
+                                        ? '1px solid rgba(255,255,255,0.2)'
+                                        : '1px solid transparent',
                                     '&:hover': {
-                                        bgcolor: activeRoute === item.id ? '#06675A' : 'rgba(8, 121, 108, 0.08)',
-                                        color: activeRoute === item.id ? 'white' : '#08796C',
+                                        bgcolor: activeRoute === item.id
+                                            ? 'rgba(255,255,255,0.22)'
+                                            : 'rgba(255,255,255,0.1)',
+                                        color: 'white',
+                                        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
                                     },
-                                    transition: 'all 0.3s ease', // Smooth transition
+                                    transition: 'all 0.2s ease',
+                                    minHeight: 44,
                                 }}
                                 onClick={() => handleClick(item)}
                             >
                                 <ListItemIcon
                                     sx={{
-                                        color: activeRoute === item.id ? 'white' : '#08796C',
+                                        color: 'rgba(255,255,255,0.9)',
                                         minWidth: 0,
-                                        mr: drawerOpen ? 2 : 0,
+                                        mr: drawerOpen ? 1.5 : 0,
                                         justifyContent: 'center',
-                                        transition: 'margin 0.3s ease',
+                                        transition: 'margin 0.2s ease',
+                                        filter: activeRoute === item.id
+                                            ? 'drop-shadow(0 0 4px rgba(255,255,255,0.5))'
+                                            : 'none',
                                     }}
                                 >
                                     {React.cloneElement(item.icon, { fontSize: 'small' })}
@@ -87,20 +103,25 @@ const SideBar = ({ drawerOpen }: SideBarProps) => {
 
                                 <ListItemText
                                     primary={item.name}
+                                    primaryTypographyProps={{
+                                        fontSize: '0.875rem',
+                                        fontWeight: activeRoute === item.id ? 600 : 400,
+                                        letterSpacing: 0.2,
+                                    }}
                                     sx={{
                                         opacity: drawerOpen ? 1 : 0,
-                                        transition: 'opacity 0.3s ease-in-out, margin 0.3s ease-in-out, max-width 0.3s ease-in-out',
+                                        transition: 'opacity 0.2s ease, max-width 0.2s ease',
                                         whiteSpace: 'nowrap',
-                                        ml: drawerOpen ? 1 : 0,
                                         overflow: 'hidden',
-                                        maxWidth: drawerOpen ? 200 : 0,
+                                        maxWidth: drawerOpen ? 180 : 0,
+                                        color: 'white',
                                     }}
                                 />
 
                                 {item.subroutes.length > 0 && drawerOpen && (
                                     expandedItemId === item.id
-                                        ? <ExpandLess sx={{ color: activeRoute === item.id ? "white" : blue[700] }} fontSize="small" />
-                                        : <ExpandMore sx={{ color: activeRoute === item.id ? "white" : blue[700] }} fontSize="small" />
+                                        ? <ExpandLess sx={{ color: 'rgba(255,255,255,0.8)' }} fontSize="small" />
+                                        : <ExpandMore sx={{ color: 'rgba(255,255,255,0.8)' }} fontSize="small" />
                                 )}
                             </ListItemButton>
                         }

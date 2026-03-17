@@ -6,7 +6,8 @@ Managing Director
 */
 
 import {
-    Card,
+    alpha,
+    Box,
     TextField,
     InputAdornment,
     useTheme,
@@ -43,37 +44,49 @@ const SettingsHeader = ({
     const theme = useTheme();
     const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
     return (
-        <Card
-            elevation={2}
+        <Box
             sx={{
-                p: 3,
-                mb: 4,
+                p: { xs: 2, sm: 2.5 },
+                mb: 3,
                 display: "flex",
                 flexDirection: isSmallScreen ? "column" : "row",
                 alignItems: isSmallScreen ? "stretch" : "center",
                 justifyContent: "space-between",
                 gap: 2,
+                bgcolor: '#fff',
+                borderRadius: 2,
+                border: `1px solid ${alpha('#000', 0.07)}`,
+                boxShadow: '0 1px 4px rgba(0,0,0,0.05)',
             }}
         >
             {/* Search */}
             <TextField
-                placeholder="Filter by name"
+                placeholder={`Filter ${title.toLowerCase()}s by name...`}
                 size="small"
                 onChange={(e: ChangeEvent<HTMLInputElement>) => handleSearchChange?.(e.target.value)}
                 InputProps={{
                     startAdornment: (
                         <InputAdornment position="start">
-                            <SearchOutlinedIcon color="info" />
+                            <SearchOutlinedIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
                         </InputAdornment>
                     ),
                 }}
-                sx={{ width: isSmallScreen ? "100%" : "300px" }}
+                sx={{
+                    width: isSmallScreen ? "100%" : "280px",
+                    '& .MuiOutlinedInput-root': {
+                        borderRadius: 2,
+                        bgcolor: alpha('#000', 0.02),
+                        '& fieldset': { borderColor: alpha('#000', 0.1) },
+                        '&:hover fieldset': { borderColor: theme.palette.primary.main },
+                        '&.Mui-focused fieldset': { borderColor: theme.palette.primary.main },
+                    }
+                }}
             />
 
             {/* Action + Pagination */}
             <Stack
                 direction={isSmallScreen ? "column" : "row"}
-                spacing={2}
+                spacing={1.5}
                 alignItems="center"
                 justifyContent="flex-end"
                 width={isSmallScreen ? "100%" : "auto"}
@@ -81,33 +94,57 @@ const SettingsHeader = ({
                 <ButtonComponent
                     handleClick={handleCreationClicked}
                     sendingRequest={false}
-                    buttonText={`Create ${title}`}
+                    buttonText={`+ Create ${title}`}
                     variant="contained"
-                    buttonColor="info"
+                    buttonColor="primary"
                     type="button"
                 />
 
-                <Stack direction="row" spacing={1} alignItems="center">
+                <Stack
+                    direction="row"
+                    spacing={0.5}
+                    alignItems="center"
+                    sx={{
+                        bgcolor: alpha('#000', 0.03),
+                        borderRadius: 2,
+                        px: 1,
+                        py: 0.5,
+                        border: `1px solid ${alpha('#000', 0.07)}`,
+                    }}
+                >
                     <IconButton
                         onClick={handlePrevPage}
                         disabled={currentPage === 1}
                         color="primary"
+                        size="small"
+                        sx={{ borderRadius: 1.5 }}
                     >
-                        <ArrowBackIosNewIcon fontSize="small" />
+                        <ArrowBackIosNewIcon sx={{ fontSize: 14 }} />
                     </IconButton>
-                    <Typography variant="body2" sx={{ fontWeight: 500, minWidth: 60, textAlign: 'center' }}>
-                        Page {currentPage} of {totalPages}
+                    <Typography
+                        variant="body2"
+                        sx={{
+                            fontWeight: 600,
+                            minWidth: 70,
+                            textAlign: 'center',
+                            fontSize: '0.8rem',
+                            color: 'text.secondary',
+                        }}
+                    >
+                        {currentPage} / {totalPages}
                     </Typography>
                     <IconButton
                         onClick={handleNextPage}
                         disabled={currentPage === totalPages}
                         color="primary"
+                        size="small"
+                        sx={{ borderRadius: 1.5 }}
                     >
-                        <ArrowForwardIosIcon fontSize="small" />
+                        <ArrowForwardIosIcon sx={{ fontSize: 14 }} />
                     </IconButton>
                 </Stack>
             </Stack>
-        </Card>
+        </Box>
     );
 };
 

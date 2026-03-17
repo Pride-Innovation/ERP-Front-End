@@ -59,11 +59,22 @@ export const FormHeader = ({ header }: { header: string }) => {
   const theme = useTheme()
   return (
     <Typography sx={{
-      mb: 4,
-      fontWeight: 600,
+      mb: 3,
+      fontWeight: 700,
       textTransform: "uppercase",
-      fontSize: '17px',
-      color: theme.palette.secondary.main
+      fontSize: '0.75rem',
+      color: theme.palette.primary.main,
+      letterSpacing: '0.1em',
+      display: 'flex',
+      alignItems: 'center',
+      '&::after': {
+        content: '""',
+        flex: 1,
+        height: '1px',
+        bgcolor: theme.palette.divider,
+        ml: 2,
+        display: 'inline-block',
+      }
     }}>{header}</Typography>
   )
 }

@@ -35,7 +35,7 @@ ChartJS.register(
 
 const BranchOperationsManager = () => {
     return (
-        <Box p={3} bgcolor="#f5f8fc" minHeight="100vh">
+        <Box p={3} minHeight="100vh">
             <Grid container spacing={2} mb={3} alignItems="flex-start">
                 <Grid item xs={6} container spacing={2} >
                     <RequestRating size={6} />

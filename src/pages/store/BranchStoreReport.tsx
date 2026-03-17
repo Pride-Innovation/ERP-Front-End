@@ -5,9 +5,8 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { Box, Card, CardContent, Grid } from '@mui/material';
+import { Box, Paper } from '@mui/material';
 import TabComponent from '../../components/tabs';
-import { grey } from '@mui/material/colors';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import { useContext, useEffect } from 'react';
@@ -45,17 +44,23 @@ const BranchStoreReport = () => {
 
     return (
         <Box sx={{ p: 2, width: '100%' }}>
-            <Grid item xs={12} >
-                <Card sx={{ boxShadow: 0, bgcolor: grey[100] }}>
-                    <CardContent>
-                        {tableHeaders.length > 0
-                            && <TabComponent
-                                handleTabChange={handleTabChange}
-                                headers={tableHeaders} />
-                        }
-                    </CardContent>
-                </Card>
-            </Grid>
+            <Paper
+                elevation={0}
+                sx={{
+                    borderRadius: 2,
+                    border: '1px solid rgba(0,0,0,0.07)',
+                    bgcolor: '#fff',
+                    overflow: 'hidden',
+                }}
+            >
+                <Box sx={{ p: 2 }}>
+                    {tableHeaders.length > 0
+                        && <TabComponent
+                            handleTabChange={handleTabChange}
+                            headers={tableHeaders} />
+                    }
+                </Box>
+            </Paper>
         </Box>
     );
 };

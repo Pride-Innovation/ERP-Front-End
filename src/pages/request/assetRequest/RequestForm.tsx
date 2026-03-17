@@ -66,7 +66,7 @@ const FormSection = ({ title, subtitle, children, helpText, icon }: SectionProps
     return (
         <Box sx={{ mb: 4 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                {icon && <Box sx={{ mr: 1, color: blue[700] }}>{icon}</Box>}
+                {icon && <Box sx={{ mr: 1, color: '#08796C' }}>{icon}</Box>}
                 <Typography variant="h6" sx={{ fontWeight: 600, color: '#334155' }}>
                     {title}
                 </Typography>
@@ -684,18 +684,18 @@ const RequestForm = ({
                                 </CardContent>
                             </Card>
                         </FormSection>
-                        <Card sx={{ mt: 3, borderRadius: 2, bgcolor: blue[50], border: `1px solid ${blue[100]}` }}>
+                        <Card sx={{ mt: 3, borderRadius: 2, bgcolor: 'rgba(8,121,108,0.04)', border: `1px solid rgba(8,121,108,0.15)` }}>
                             <CardContent>
-                                <Typography variant="subtitle2" sx={{ mb: 1, color: blue[800] }}>
+                                <Typography variant="subtitle2" sx={{ mb: 1, color: '#065E54', fontWeight: 600 }}>
                                     Tips for Faster Approval
                                 </Typography>
-                                <Typography variant="body2" sx={{ color: blue[900], mb: 0.5 }}>
+                                <Typography variant="body2" sx={{ color: '#08796C', mb: 0.5 }}>
                                     • Be specific in your request description
                                 </Typography>
-                                <Typography variant="body2" sx={{ color: blue[900], mb: 0.5 }}>
+                                <Typography variant="body2" sx={{ color: '#08796C', mb: 0.5 }}>
                                     • Include accurate quantities needed
                                 </Typography>
-                                <Typography variant="body2" sx={{ color: blue[900] }}>
+                                <Typography variant="body2" sx={{ color: '#08796C' }}>
                                     • Attach supporting documentation when available
                                 </Typography>
                             </CardContent>

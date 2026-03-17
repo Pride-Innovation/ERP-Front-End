@@ -1,10 +1,9 @@
 import {
     Box,
     Button,
-    Card,
+    Paper,
     Stack
 } from "@mui/material";
-import { grey } from "@mui/material/colors";
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import {
     useRef,
@@ -58,7 +57,7 @@ const UploadGRN = ({ id }: { id?: string | number }) => {
 
 
     return (
-        <Card sx={{ bgcolor: grey[100], borderRadius: 1, boxShadow: "none" }}>
+        <Paper elevation={0} sx={{ bgcolor: '#fafafa', borderRadius: 2, border: '1px solid rgba(0,0,0,0.08)', overflow: 'hidden' }}>
             <Box sx={{ height: 400 }}>
                 <iframe
                     src={fileUrl}
@@ -88,7 +87,7 @@ const UploadGRN = ({ id }: { id?: string | number }) => {
                 </Stack>
                 <InputFileUpload inputRef={inputRef} handleFileUpload={handleFileUpload} />
             </Box>
-        </Card>
+        </Paper>
     );
 };
 

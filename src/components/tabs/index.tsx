@@ -62,17 +62,26 @@ const defaultTabStyles: SxProps<Theme> = {
     '& .MuiTabs-indicator': {
         backgroundColor: PRIMARY_COLOR,
         height: 3,
+        borderRadius: '3px 3px 0 0',
     },
     '& .MuiTab-root': {
         textTransform: 'none',
-        fontWeight: 600,
+        fontWeight: 500,
+        fontSize: '0.875rem',
         color: 'text.secondary',
+        minHeight: 46,
+        transition: 'all 0.2s ease',
         '&.Mui-selected': {
             color: PRIMARY_COLOR,
+            fontWeight: 700,
         },
         '&:hover': {
             color: alpha(PRIMARY_COLOR, 0.8),
+            backgroundColor: alpha(PRIMARY_COLOR, 0.04),
         },
+    },
+    '& .MuiTabScrollButton-root': {
+        color: PRIMARY_COLOR,
     },
     width: '100%',
 };

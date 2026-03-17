@@ -22,15 +22,42 @@ const ButtonComponent = ({
       type={type}
       onClick={handleClick}
       variant={variant}
-      sx={{ width: "100%", minHeight: "40px", textTransform: 'capitalize' }}
+      sx={{
+        width: "100%",
+        minHeight: "40px",
+        textTransform: 'none',
+        fontWeight: 600,
+        fontSize: '0.875rem',
+        borderRadius: '8px',
+        letterSpacing: '0.01em',
+        ...(variant === 'contained' && {
+          boxShadow: 'none',
+          '&:hover': {
+            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+            transform: 'translateY(-1px)',
+          },
+          '&:active': {
+            transform: 'translateY(0)',
+            boxShadow: 'none',
+          },
+        }),
+        ...(variant === 'outlined' && {
+          borderWidth: '1.5px',
+          '&:hover': {
+            borderWidth: '1.5px',
+          },
+        }),
+        transition: 'all 0.2s ease',
+      }}
       startIcon={
         sendingRequest ? (
-          <CircularProgress size="small" />
-        ) : ('')
+          <CircularProgress size={16} color="inherit" />
+        ) : null
       }
       disabled={sendingRequest}
-
-    >{sendingRequest ? "Loading!!" : buttonText}</Button>
+    >
+      {sendingRequest ? "Processing..." : buttonText}
+    </Button>
   )
 }
 

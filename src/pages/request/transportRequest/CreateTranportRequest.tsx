@@ -10,6 +10,7 @@ import { ITransportRequest } from "../interface";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Card, Grid, Typography } from "@mui/material";
+
 import TransportRequestForm from "./TransportRequestForm";
 import { transportRequestSchema } from "./schema";
 import { createTranportRequestService } from "./service";
@@ -55,7 +56,7 @@ const CreateTranportRequest = () => {
     };
 
     return (
-        <Card sx={{ p: 4 }}>
+        <Card elevation={0} sx={{ p: 4, borderRadius: 2, border: '1px solid rgba(0,0,0,0.07)' }}>
             <Grid container xs={12}>
                 <Grid item xs={12}>
                     <Typography sx={{ mb: 4, fontWeight: 600, textTransform: "uppercase", fontSize: '17px' }}>Request for Transport</Typography>

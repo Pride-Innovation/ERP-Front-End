@@ -6,22 +6,55 @@ Managing Director
 */
 
 
-import { Stack, Typography } from "@mui/material";
+import { alpha, Box, Stack, Typography } from "@mui/material";
 import FolderOffOutlinedIcon from '@mui/icons-material/FolderOffOutlined';
 
 
 const NoContent = ({ item, items }: { item: string, items: string }) => {
     return (
-        <Stack alignItems="center" justifyContent="center" sx={{ py: 10 }}>
-            <FolderOffOutlinedIcon sx={{ fontSize: 60, color: "#835F1E" }} />
-            <Typography variant="h6" sx={{ mt: 2, color: "text.secondary" }}>
-                No {items} available
+        <Stack
+            alignItems="center"
+            justifyContent="center"
+            spacing={1.5}
+            sx={{ py: 10, px: 4 }}
+        >
+            <Box
+                sx={{
+                    width: 80,
+                    height: 80,
+                    borderRadius: '50%',
+                    bgcolor: alpha('#BC892C', 0.08),
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    mb: 1,
+                }}
+            >
+                <FolderOffOutlinedIcon sx={{ fontSize: 40, color: '#BC892C', opacity: 0.8 }} />
+            </Box>
+            <Typography
+                variant="h6"
+                sx={{
+                    fontWeight: 600,
+                    color: 'text.primary',
+                    textAlign: 'center',
+                }}
+            >
+                No {items} found
             </Typography>
-            <Typography variant="body2" color="text.disabled">
-                Create your first {item} to get started.
+            <Typography
+                variant="body2"
+                sx={{
+                    color: 'text.secondary',
+                    textAlign: 'center',
+                    maxWidth: 320,
+                    lineHeight: 1.6,
+                }}
+            >
+                Get started by creating your first {item}. It will appear here once added.
             </Typography>
         </Stack>
-    )
-}
+    );
+};
 
-export default NoContent
+export default NoContent;

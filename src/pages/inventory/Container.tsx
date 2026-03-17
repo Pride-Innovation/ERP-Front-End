@@ -1,7 +1,6 @@
 import {
     alpha,
     Box,
-    Card,
     Grid,
     Stack,
     Typography
@@ -19,28 +18,57 @@ const Container = ({ children }: { children: React.ReactNode }) => {
 
     return (
         <>
-            <Card sx={{ p: 1.5, mb: 2, width: '100%', maxWidth: "1500px" }}>
+            <Box
+                sx={{
+                    p: 1.75,
+                    mb: 2,
+                    width: '100%',
+                    maxWidth: '1500px',
+                    bgcolor: '#fff',
+                    borderRadius: 2,
+                    border: '1px solid rgba(0,0,0,0.07)',
+                    boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+                }}
+            >
                 <Grid container alignItems="center" justifyContent="space-between">
                     <Grid item>
-                        <Stack direction="row" spacing={1} alignItems="center">
-                            <Inventory2OutlinedIcon fontSize='small' sx={{ color: 'primary.main' }} />
-                            <Typography variant="h6" fontWeight="500" color="primary">
-                                Stocks
-                            </Typography>
+                        <Stack direction="row" spacing={1.5} alignItems="center">
+                            <Box
+                                sx={{
+                                    width: 36,
+                                    height: 36,
+                                    borderRadius: 1.5,
+                                    bgcolor: alpha(PRIMARY_COLOR, 0.1),
+                                    color: PRIMARY_COLOR,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                }}
+                            >
+                                <Inventory2OutlinedIcon fontSize='small' />
+                            </Box>
+                            <Box>
+                                <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: '0.08em', fontSize: '0.7rem' }}>
+                                    Management
+                                </Typography>
+                                <Typography variant="subtitle1" fontWeight={600} color="text.primary" sx={{ lineHeight: 1.2 }}>
+                                    Stocks
+                                </Typography>
+                            </Box>
                         </Stack>
                     </Grid>
 
                     <Grid item>
                         <Stack
                             direction="row"
-                            spacing={1.5}
+                            spacing={1}
                             alignItems="center"
                             sx={{
                                 px: 2,
                                 py: 0.75,
                                 borderLeft: `3px solid ${SECONDARY_COLOR}`,
-                                bgcolor: alpha(PRIMARY_COLOR, 0.03),
-                                borderRadius: '0 4px 4px 0'
+                                bgcolor: alpha(SECONDARY_COLOR, 0.06),
+                                borderRadius: '0 6px 6px 0',
                             }}
                         >
                             <Typography
@@ -53,8 +81,8 @@ const Container = ({ children }: { children: React.ReactNode }) => {
                                 Total Stocking:
                             </Typography>
                             <Typography
-                                variant="h6"
-                                fontWeight="700"
+                                variant="subtitle1"
+                                fontWeight={700}
                                 color={PRIMARY_COLOR}
                             >
                                 {inventoryCount}
@@ -62,7 +90,7 @@ const Container = ({ children }: { children: React.ReactNode }) => {
                         </Stack>
                     </Grid>
                 </Grid>
-            </Card>
+            </Box>
 
             <Box sx={{
                 position: 'relative',

@@ -56,7 +56,7 @@ const UpdateTransportRequest = () => {
     };
 
     return (
-        <Card sx={{ p: 4 }}>
+        <Card elevation={0} sx={{ p: 4, borderRadius: 2, border: '1px solid rgba(0,0,0,0.07)' }}>
             <Grid container xs={12}>
                 <Grid item xs={12}>
                     <Typography sx={{ mb: 4, fontWeight: 600, textTransform: "uppercase", fontSize: '17px' }}>Update Transport Request</Typography>
