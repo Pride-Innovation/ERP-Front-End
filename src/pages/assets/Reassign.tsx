@@ -40,6 +40,8 @@ import { updateOfficeAsset } from "./officeEquipment/slice";
 import { updateFleetAsset } from "./fleet/slice";
 import { reassignFleetService } from "./fleet/service";
 
+const PRIMARY_COLOR = '#08796C';
+
 const Reassign = ({
     handleClose,
     sendingRequest,
@@ -157,23 +159,38 @@ const Reassign = ({
             sx={{
                 borderRadius: 2,
                 overflow: 'hidden',
-                border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
+                border: `1px solid ${alpha(PRIMARY_COLOR, 0.12)}`,
             }}
         >
+            {/* Top accent bar */}
+            <Box sx={{ height: 3, bgcolor: PRIMARY_COLOR }} />
+
             <Box
                 sx={{
-                    bgcolor: alpha(theme.palette.primary.main, 0.08),
-                    py: 1.5,
+                    bgcolor: alpha(PRIMARY_COLOR, 0.05),
+                    py: 1.75,
                     px: 3,
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 1
+                    gap: 1.5,
+                    borderBottom: `1px solid ${alpha(PRIMARY_COLOR, 0.1)}`
                 }}
             >
-                <SwapIcon color="primary" />
-                <Typography variant="subtitle1" fontWeight={600} color="primary.main">
-                    Asset Reassignment
-                </Typography>
+                <Box sx={{
+                    width: 34, height: 34, borderRadius: 1.5,
+                    bgcolor: alpha(PRIMARY_COLOR, 0.12),
+                    display: 'flex', alignItems: 'center', justifyContent: 'center'
+                }}>
+                    <SwapIcon sx={{ color: PRIMARY_COLOR, fontSize: 18 }} />
+                </Box>
+                <Box>
+                    <Typography variant="subtitle1" fontWeight={700} sx={{ color: PRIMARY_COLOR, lineHeight: 1.2 }}>
+                        Asset Reassignment
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                        Transfer ownership to another staff member
+                    </Typography>
+                </Box>
             </Box>
 
             <CardContent sx={{ p: 3 }}>
@@ -184,8 +201,9 @@ const Reassign = ({
                             sx={{
                                 p: 2.5,
                                 borderRadius: 1.5,
-                                bgcolor: alpha(theme.palette.primary.main, 0.03),
-                                border: `1px solid ${alpha(theme.palette.primary.main, 0.08)}`,
+                                bgcolor: alpha(PRIMARY_COLOR, 0.02),
+                                border: `1px solid ${alpha(PRIMARY_COLOR, 0.08)}`,
+                                borderLeft: `3px solid ${alpha(PRIMARY_COLOR, 0.45)}`,
                                 mb: 3
                             }}
                         >
@@ -279,7 +297,7 @@ const Reassign = ({
                     </Grid>
 
                     <Grid item xs={12}>
-                        <Typography variant="subtitle2" color="text.primary" fontWeight={600} sx={{ mb: 1.5 }}>
+                        <Typography variant="subtitle2" color="text.primary" fontWeight={600} sx={{ mb: 1.5, color: PRIMARY_COLOR }}>
                             Select New User
                         </Typography>
 
