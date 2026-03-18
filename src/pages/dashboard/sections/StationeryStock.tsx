@@ -102,9 +102,9 @@ const StationeryStock = () => {
                 elevation={0}
                 sx={{
                     height: '100%',
-                    borderRadius: 1,
+                    borderRadius: 2,
                     border: `1px solid ${alpha('#000', 0.08)}`,
-                    boxShadow: `0 1px 3px ${alpha('#000', 0.1)}, 0 1px 2px ${alpha('#000', 0.06)}`,
+                    boxShadow: `0 1px 4px ${alpha('#000', 0.06)}, 0 4px 16px ${alpha('#000', 0.04)}`,
                     overflow: 'hidden'
                 }}
             >
