@@ -37,12 +37,12 @@ const BranchOperationsManager = () => {
     return (
         <Box p={3} minHeight="100vh">
             <Grid container spacing={2} mb={3} alignItems="flex-start">
-                <Grid item xs={6} container spacing={2} >
+                <Grid item xs={12} md={6} container spacing={2} >
                     <RequestRating size={6} />
                     <RequestReport size={6} />
                     <LatestRequest size={12} />
                 </Grid>
-                <Grid item xs={6}>
+                <Grid item xs={12} md={6}>
                     <Box
                         sx={{
                             display: 'flex',

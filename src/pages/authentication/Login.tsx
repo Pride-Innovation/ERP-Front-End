@@ -114,7 +114,7 @@ const Login = () => {
                     }
                 }}
             >
-                <Grid container sx={{ minHeight: { xs: 'auto', md: '650px' } }}>
+                <Grid container>
                     {/* Left Panel - Brand Content */}
                     {!isMedium && (
                         <Grid
@@ -170,9 +170,9 @@ const Login = () => {
                                     sx={{
                                         position: 'absolute',
                                         top: '10%',
-                                        left: '20%',
-                                        width: '300px',
-                                        height: '300px',
+                                        left: '10%',
+                                        width: 'min(280px, 70%)',
+                                        height: 'min(280px, 70%)',
                                         borderRadius: '50%',
                                         border: '2px solid rgba(255,255,255,0.1)',
                                         animation: 'rotate 30s linear infinite',
@@ -187,9 +187,9 @@ const Login = () => {
                                     sx={{
                                         position: 'absolute',
                                         bottom: '15%',
-                                        right: '15%',
-                                        width: '200px',
-                                        height: '200px',
+                                        right: '5%',
+                                        width: 'min(180px, 45%)',
+                                        height: 'min(180px, 45%)',
                                         borderRadius: '50%',
                                         border: '2px solid rgba(255,255,255,0.05)',
                                         animation: 'rotate 20s linear infinite reverse',
@@ -391,9 +391,8 @@ const Login = () => {
                                 display: 'flex',
                                 flexDirection: 'column',
                                 justifyContent: 'space-between',
-                                p: { xs: 3, sm: 4, md: 5 },
+                                p: { xs: 2.5, sm: 3.5, md: 4.5 },
                                 height: '100%',
-                                minHeight: { xs: '550px', md: '650px' },
                                 position: 'relative',
                                 zIndex: 1
                             }}
@@ -550,7 +549,7 @@ const Login = () => {
                             </Box>
 
                             {/* Footer */}
-                            <Box sx={{ mt: 'auto', pt: 5 }}>
+                            <Box sx={{ mt: 'auto', pt: { xs: 2, sm: 3 } }}>
                                 <Divider sx={{ mb: 2.5, opacity: 0.6 }} />
                                 <Box sx={{ textAlign: 'center' }}>
                                     <Typography

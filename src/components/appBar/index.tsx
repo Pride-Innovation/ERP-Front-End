@@ -104,7 +104,7 @@ export default function ApplicationDrawer({ window }: Props) {
     const container = window !== undefined ? () => window().document.body : undefined;
 
     return (
-        <Box sx={{ display: 'flex' }}>
+        <Box sx={{ display: 'flex', width: '100%', overflow: 'hidden' }}>
             <CssBaseline />
             <AppBar
                 position="fixed"
@@ -115,7 +115,7 @@ export default function ApplicationDrawer({ window }: Props) {
                     boxShadow: '0 2px 12px rgba(8, 121, 108, 0.25)',
                 }}
             >
-                <Toolbar sx={{ minHeight: { xs: 60, sm: 64 } }}>
+                <Toolbar sx={{ minHeight: { xs: 52, sm: 56 } }}>
                     <IconButton
                         color="inherit"
                         aria-label="open drawer"
@@ -205,14 +205,15 @@ export default function ApplicationDrawer({ window }: Props) {
                 component="main"
                 sx={() => ({
                     flexGrow: 1,
-                    height: '100vh',
+                    width: 0,          /* flex child — prevents overflowing its container */
+                    minHeight: '100vh',
                     bgcolor: "#F1F5FB",
-                    overflowX: 'auto',
+                    overflowX: 'hidden',
                     overflowY: 'auto',
                 })}
             >
                 <DrawerHeader />
-                <Box sx={{ px: { xs: 2, sm: 3 }, py: 2, minHeight: 'calc(100vh - 64px)' }}>
+                <Box sx={{ px: { xs: 1.5, sm: 2, md: 2.5 }, py: { xs: 1.5, sm: 2 }, minHeight: 'calc(100vh - 56px)' }}>
                     <Outlet />
                 </Box>
             </Box>

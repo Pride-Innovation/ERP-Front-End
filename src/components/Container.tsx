@@ -17,7 +17,11 @@ const FullScreenWrapper = styled(Box)(({ theme }) => ({
     justifyContent: "center",
     alignItems: "center",
     position: "relative",
-    padding: theme.spacing(3),
+    overflowY: "auto",
+    padding: theme.spacing(2),
+    [theme.breakpoints.up('sm')]: {
+        padding: theme.spacing(3),
+    },
 
     // Base background
     "&::before": {

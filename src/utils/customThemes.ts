@@ -5,7 +5,7 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { alpha, createTheme } from '@mui/material/styles';
+import { alpha, createTheme, responsiveFontSizes } from '@mui/material/styles';
 
 const PRIMARY = '#08796C';
 const PRIMARY_DARK = '#065E54';
@@ -65,19 +65,22 @@ const customThemes = createTheme({
 
     typography: {
         fontFamily: '"Inter", "Roboto", "Helvetica Neue", Arial, sans-serif',
-        h1: { fontSize: '2.25rem', fontWeight: 700, lineHeight: 1.2, letterSpacing: '-0.02em' },
-        h2: { fontSize: '1.875rem', fontWeight: 700, lineHeight: 1.3, letterSpacing: '-0.01em' },
-        h3: { fontSize: '1.5rem', fontWeight: 600, lineHeight: 1.4, letterSpacing: '-0.01em' },
-        h4: { fontSize: '1.25rem', fontWeight: 600, lineHeight: 1.4 },
-        h5: { fontSize: '1.125rem', fontWeight: 600, lineHeight: 1.5 },
-        h6: { fontSize: '1rem', fontWeight: 600, lineHeight: 1.5 },
-        subtitle1: { fontSize: '0.9375rem', fontWeight: 500, lineHeight: 1.5 },
-        subtitle2: { fontSize: '0.875rem', fontWeight: 500, lineHeight: 1.5, color: '#6B7280' },
-        body1: { fontSize: '0.9375rem', lineHeight: 1.6 },
-        body2: { fontSize: '0.875rem', lineHeight: 1.6 },
-        caption: { fontSize: '0.75rem', lineHeight: 1.5, color: '#6B7280' },
-        overline: { fontSize: '0.6875rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' },
-        button: { textTransform: 'none', fontWeight: 600, fontSize: '0.875rem', letterSpacing: '0.01em' },
+        /* All font sizes reduced ~15% from the original design values to fit
+         * 14" laptop screens (1366×768). The html font-size: 14px base in
+         * index.css gives an additional ~12.5% cascade reduction on top. */
+        h1: { fontSize: '1.9rem', fontWeight: 700, lineHeight: 1.2, letterSpacing: '-0.02em' },
+        h2: { fontSize: '1.6rem', fontWeight: 700, lineHeight: 1.3, letterSpacing: '-0.01em' },
+        h3: { fontSize: '1.3rem', fontWeight: 600, lineHeight: 1.4, letterSpacing: '-0.01em' },
+        h4: { fontSize: '1.1rem', fontWeight: 600, lineHeight: 1.4 },
+        h5: { fontSize: '0.975rem', fontWeight: 600, lineHeight: 1.5 },
+        h6: { fontSize: '0.875rem', fontWeight: 600, lineHeight: 1.5 },
+        subtitle1: { fontSize: '0.825rem', fontWeight: 500, lineHeight: 1.5 },
+        subtitle2: { fontSize: '0.8rem', fontWeight: 500, lineHeight: 1.5, color: '#6B7280' },
+        body1: { fontSize: '0.825rem', lineHeight: 1.6 },
+        body2: { fontSize: '0.8rem', lineHeight: 1.6 },
+        caption: { fontSize: '0.7rem', lineHeight: 1.5, color: '#6B7280' },
+        overline: { fontSize: '0.625rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' },
+        button: { textTransform: 'none', fontWeight: 600, fontSize: '0.8rem', letterSpacing: '0.01em' },
     },
 
     shape: {
@@ -154,11 +157,11 @@ const customThemes = createTheme({
                     borderRadius: 8,
                     textTransform: 'none',
                     fontWeight: 600,
-                    fontSize: '0.875rem',
+                    fontSize: '0.8rem',
                     letterSpacing: '0.01em',
-                    minHeight: 40,
-                    paddingLeft: 20,
-                    paddingRight: 20,
+                    minHeight: 34,
+                    paddingLeft: 16,
+                    paddingRight: 16,
                     transition: 'all 0.2s ease',
                     '&:focus-visible': {
                         outline: `2px solid ${alpha(PRIMARY, 0.5)}`,
@@ -184,16 +187,16 @@ const customThemes = createTheme({
                     },
                 },
                 sizeSmall: {
-                    minHeight: 32,
-                    fontSize: '0.8125rem',
-                    paddingLeft: 14,
-                    paddingRight: 14,
+                    minHeight: 28,
+                    fontSize: '0.75rem',
+                    paddingLeft: 12,
+                    paddingRight: 12,
                 },
                 sizeLarge: {
-                    minHeight: 48,
-                    fontSize: '0.9375rem',
-                    paddingLeft: 28,
-                    paddingRight: 28,
+                    minHeight: 42,
+                    fontSize: '0.875rem',
+                    paddingLeft: 24,
+                    paddingRight: 24,
                 },
             },
         },
@@ -267,9 +270,9 @@ const customThemes = createTheme({
                         },
                     },
                     '& .MuiOutlinedInput-input': {
-                        fontSize: '0.875rem',
+                        fontSize: '0.8rem',
                         fontWeight: 400,
-                        padding: '9px 14px',
+                        padding: '7px 12px',
                     },
                     '& .MuiFormHelperText-root': {
                         marginTop: 4,
@@ -292,16 +295,16 @@ const customThemes = createTheme({
                 root: {
                     borderRadius: 6,
                     fontWeight: 500,
-                    fontSize: '0.75rem',
-                    height: 26,
+                    fontSize: '0.7rem',
+                    height: 22,
                     transition: 'all 0.2s ease',
                 },
                 sizeSmall: {
-                    height: 22,
-                    fontSize: '0.7rem',
+                    height: 18,
+                    fontSize: '0.65rem',
                 },
                 sizeMedium: {
-                    height: 28,
+                    height: 24,
                 },
             },
         },
@@ -356,8 +359,8 @@ const customThemes = createTheme({
                 root: {
                     textTransform: 'none',
                     fontWeight: 500,
-                    fontSize: '0.875rem',
-                    minHeight: 44,
+                    fontSize: '0.8rem',
+                    minHeight: 38,
                     transition: 'all 0.2s ease',
                     '&.Mui-selected': {
                         fontWeight: 700,
@@ -368,6 +371,9 @@ const customThemes = createTheme({
 
         MuiTabs: {
             styleOverrides: {
+                root: {
+                    minHeight: 38,
+                },
                 indicator: {
                     height: 3,
                     borderRadius: '3px 3px 0 0',
@@ -533,4 +539,7 @@ const customThemes = createTheme({
     },
 });
 
-export default customThemes;
+export default responsiveFontSizes(customThemes, {
+    breakpoints: ['xs', 'sm', 'md'],
+    factor: 3,
+});

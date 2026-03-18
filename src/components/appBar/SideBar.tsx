@@ -82,7 +82,7 @@ const SideBar = ({ drawerOpen }: SideBarProps) => {
                                         boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
                                     },
                                     transition: 'all 0.2s ease',
-                                    minHeight: 44,
+                                    minHeight: 40,
                                 }}
                                 onClick={() => handleClick(item)}
                             >

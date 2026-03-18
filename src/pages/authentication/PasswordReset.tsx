@@ -109,7 +109,7 @@ const PasswordReset = () => {
                     }
                 }}
             >
-                <Grid container sx={{ minHeight: { xs: 'auto', md: '550px' } }}>
+                <Grid container>
                     {/* Left panel - only visible on medium screens and up */}
                     {!isMedium && (
                         <Grid
@@ -276,9 +276,8 @@ const PasswordReset = () => {
                             sx={{
                                 display: 'flex',
                                 flexDirection: 'column',
-                                p: { xs: 3, sm: 4, md: 5 },
+                                p: { xs: 2.5, sm: 3.5, md: 4.5 },
                                 height: '100%',
-                                minHeight: { xs: '500px', md: '550px' },
                                 position: 'relative',
                                 zIndex: 1
                             }}
@@ -515,7 +514,7 @@ const PasswordReset = () => {
                             )}
 
                             {/* Footer */}
-                            <Box sx={{ mt: 'auto', pt: 4 }}>
+                            <Box sx={{ mt: 'auto', pt: { xs: 2, sm: 3 } }}>
                                 <Divider sx={{ mb: 2.5, opacity: 0.6 }} />
                                 <Box sx={{ textAlign: 'center' }}>
                                     <Typography
