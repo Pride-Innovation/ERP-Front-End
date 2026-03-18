@@ -292,7 +292,7 @@ const Commodities = () => {
           <Fade in={!loading}>
             <Grid container spacing={3}>
               {filteredCommodities.map((commodity) => (
-                <Grid item xs={12} sm={6} md={4} lg={3} key={commodity.id}>
+                <Grid item xs={12} sm={6} md={6} lg={6} xl={4} key={commodity.id}>
                   <CommodityCard
                     commodity={commodity}
                     deleteCommodity={deleteCommodity}

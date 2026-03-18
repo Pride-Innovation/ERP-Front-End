@@ -186,7 +186,7 @@ const Regions = () => {
                     <Fade in={!loading}>
                         <Grid container spacing={3}>
                             {filteredRegions.map((region) => (
-                                <Grid item xs={12} sm={6} md={4} lg={3} key={region.id}>
+                                <Grid item xs={12} sm={6} md={6} lg={4} xl={4} key={region.id}>
                                     <RegionDetails
                                         region={region}
                                         deleteRegion={deleteRegion}

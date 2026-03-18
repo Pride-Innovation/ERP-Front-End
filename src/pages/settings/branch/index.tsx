@@ -297,7 +297,7 @@ const Branches = () => {
           <Fade in={!loading}>
             <Grid container spacing={3}>
               {filteredBranches.map((branch) => (
-                <Grid item xs={12} sm={6} md={4} key={branch.id}>
+                <Grid item xs={12} sm={6} md={6} lg={6} xl={4} key={branch.id}>
                   <ViewBranch branch={branch} deleteBranch={deleteBranch} updateBranch={updateBranch} />
                 </Grid>
               ))}

@@ -293,7 +293,7 @@ const Titles = () => {
           <Fade in={!loading}>
             <Grid container spacing={3}>
               {filteredTitles.map((title) => (
-                <Grid item xs={12} sm={6} md={4} lg={3} key={title.id}>
+                <Grid item xs={12} sm={6} md={6} lg={4} xl={4} key={title.id}>
                   <TitleCard title={title} deleteTitle={deleteTitle} updateTitle={updateTitle} />
                 </Grid>
               ))}
