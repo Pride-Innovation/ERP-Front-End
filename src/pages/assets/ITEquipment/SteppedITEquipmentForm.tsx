@@ -278,7 +278,9 @@ const SteppedITEquipmentForm = ({
                             p: 3,
                             mb: 3,
                             borderRadius: 2,
-                            border: `1px solid ${alpha('#000', 0.08)}`,
+                            border: `1px solid ${alpha(PRIMARY_COLOR, 0.1)}`,
+                            bgcolor: alpha(PRIMARY_COLOR, 0.015),
+                            boxShadow: `0 1px 3px ${alpha('#000', 0.04)}`
                         }}
                     >
                         <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 1.5 }}>
@@ -296,7 +298,7 @@ const SteppedITEquipmentForm = ({
                             >
                                 {group.icon}
                             </Box>
-                            <Typography variant="h6" fontWeight={600} color="text.primary">
+                            <Typography variant="h6" fontWeight={700} sx={{ color: PRIMARY_COLOR }}>
                                 {group.title}
                             </Typography>
                         </Box>
