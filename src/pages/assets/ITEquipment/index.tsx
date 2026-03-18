@@ -5,7 +5,8 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { Box, Card } from "@mui/material"
+import { Box } from "@mui/material"
+
 import ModalComponent from "../../../components/modal"
 import Dispose from "../Dispose"
 import TableComponent from "../../../components/tables/TableComponent"
@@ -246,41 +247,29 @@ const ITEquipment = () => {
             alignItems: 'center'
         }}>
             {renderModals()}
-            <Card
-                elevation={0}
-                sx={{
-                    borderRadius: 2,
-                    width: '100%',
-                    maxWidth: "1500px",
-                    overflow: 'hidden',
-                    border: "none",
-                    bgcolor: 'white'
-                }}
-            >
-                {columnHeaders.length > 0 && (
-                    <TableComponent
-                        endPoint={endPoint}
-                        loading={loading}
-                        count={itEquipmentCount}
-                        exportData
-                        createAction
-                        importData
-                        header={header}
-                        module={module}
-                        rows={iTEquipmentTableData || []}
-                        columnHeaders={columnHeaders}
-                        onCreationHandler={() => navigate(ROUTES.CREATE_ITEQUIPMENT)}
-                        handleOptionClicked={handleOptionClicked}
-                        params={{ assetTypeId: currentAssetType.id }}
-                        refresh
-                        filterMode="server"
-                        status
-                        onStatusChange={handleStatusChange}
-                        selectedStatus={selectedStatus}
-                        dateRangePicker
-                        filterOptions
-                    />)}
-            </Card>
+            {columnHeaders.length > 0 && (
+                <TableComponent
+                    endPoint={endPoint}
+                    loading={loading}
+                    count={itEquipmentCount}
+                    exportData
+                    createAction
+                    importData
+                    header={header}
+                    module={module}
+                    rows={iTEquipmentTableData || []}
+                    columnHeaders={columnHeaders}
+                    onCreationHandler={() => navigate(ROUTES.CREATE_ITEQUIPMENT)}
+                    handleOptionClicked={handleOptionClicked}
+                    params={{ assetTypeId: currentAssetType.id }}
+                    refresh
+                    filterMode="server"
+                    status
+                    onStatusChange={handleStatusChange}
+                    selectedStatus={selectedStatus}
+                    dateRangePicker
+                    filterOptions
+                />)}
         </Box>
     )
 }
