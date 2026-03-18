@@ -66,6 +66,7 @@ import { searchUserService } from "../users/service";
 import { IUsersAxiosResponse } from "../users/interface";
 import { loadUsers } from "../users/slice";
 
+const PRIMARY_COLOR = '#08796C';
 const TechnicianIcon = HandymanOutlinedIcon;
 
 const Repair = ({
@@ -256,27 +257,42 @@ const Repair = ({
             sx={{
                 borderRadius: 2,
                 overflow: 'hidden',
-                border: `1px solid ${alpha(theme.palette.info.main, 0.15)}`,
+                border: `1px solid ${alpha(PRIMARY_COLOR, 0.15)}`,
                 height: '100%',
                 maxHeight: '100vh',
                 display: 'flex',
                 flexDirection: 'column'
             }}
         >
+            {/* Top accent bar */}
+            <Box sx={{ height: 3, bgcolor: PRIMARY_COLOR }} />
+
             <Box
                 sx={{
-                    bgcolor: alpha(theme.palette.info.main, 0.08),
-                    py: 1.25,
+                    bgcolor: alpha(PRIMARY_COLOR, 0.05),
+                    py: 1.5,
                     px: 2.5,
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 1
+                    gap: 1.5,
+                    borderBottom: `1px solid ${alpha(PRIMARY_COLOR, 0.1)}`
                 }}
             >
-                <RepairIcon color="info" />
-                <Typography variant="subtitle1" fontWeight={600} color="info.main">
-                    Asset Repair Request
-                </Typography>
+                <Box sx={{
+                    width: 34, height: 34, borderRadius: 1.5,
+                    bgcolor: alpha(PRIMARY_COLOR, 0.12),
+                    display: 'flex', alignItems: 'center', justifyContent: 'center'
+                }}>
+                    <RepairIcon sx={{ color: PRIMARY_COLOR, fontSize: 18 }} />
+                </Box>
+                <Box>
+                    <Typography variant="subtitle1" fontWeight={700} sx={{ color: PRIMARY_COLOR, lineHeight: 1.2 }}>
+                        Asset Repair Request
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                        Submit a maintenance and repair ticket
+                    </Typography>
+                </Box>
             </Box>
 
             <CardContent sx={{ p: 2, flexGrow: 1, overflow: 'auto' }}>
@@ -288,15 +304,16 @@ const Repair = ({
                                 p: 2,
                                 height: '100%',
                                 borderRadius: 1.5,
-                                bgcolor: alpha(theme.palette.background.default, 0.7),
-                                border: `1px solid ${alpha('#000', 0.08)}`,
+                                bgcolor: alpha(PRIMARY_COLOR, 0.02),
+                                border: `1px solid ${alpha(PRIMARY_COLOR, 0.08)}`,
+                                borderLeft: `3px solid ${alpha(PRIMARY_COLOR, 0.35)}`,
                                 display: 'flex',
                                 flexDirection: 'column'
                             }}
                         >
                             <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
-                                <AssetIcon color="primary" sx={{ mr: 1 }} />
-                                <Typography variant="subtitle2" fontWeight={600} color="text.primary">
+                                <AssetIcon sx={{ color: PRIMARY_COLOR, mr: 1 }} />
+                                <Typography variant="subtitle2" fontWeight={600} sx={{ color: PRIMARY_COLOR }}>
                                     Asset Information
                                 </Typography>
                             </Box>
@@ -447,15 +464,15 @@ const Repair = ({
                                 p: 2,
                                 height: '100%',
                                 borderRadius: 1.5,
-                                bgcolor: alpha(theme.palette.background.default, 0.7),
-                                border: `1px solid ${alpha('#000', 0.08)}`,
+                                bgcolor: alpha(PRIMARY_COLOR, 0.02),
+                                border: `1px solid ${alpha('#000', 0.06)}`,
                                 display: 'flex',
                                 flexDirection: 'column'
                             }}
                         >
                             <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
-                                <RepairIcon color="info" sx={{ mr: 1 }} />
-                                <Typography variant="subtitle2" fontWeight={600} color="text.primary">
+                                <RepairIcon sx={{ color: PRIMARY_COLOR, mr: 1 }} />
+                                <Typography variant="subtitle2" fontWeight={600} sx={{ color: PRIMARY_COLOR }}>
                                     Repair Information
                                 </Typography>
                             </Box>
@@ -602,15 +619,15 @@ const Repair = ({
                                 p: 2,
                                 height: '100%',
                                 borderRadius: 1.5,
-                                bgcolor: alpha(theme.palette.info.main, 0.05),
-                                border: `1px solid ${alpha('#000', 0.08)}`,
+                                bgcolor: alpha(PRIMARY_COLOR, 0.02),
+                                border: `1px solid ${alpha('#000', 0.06)}`,
                                 display: 'flex',
                                 flexDirection: 'column'
                             }}
                         >
                             <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
-                                <AttachFileIcon color="info" sx={{ mr: 1 }} />
-                                <Typography variant="subtitle2" fontWeight={600} color="text.primary">
+                                <AttachFileIcon sx={{ color: PRIMARY_COLOR, mr: 1 }} />
+                                <Typography variant="subtitle2" fontWeight={600} sx={{ color: PRIMARY_COLOR }}>
                                     Supporting Documents
                                 </Typography>
                             </Box>
