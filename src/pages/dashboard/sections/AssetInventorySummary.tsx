@@ -59,12 +59,12 @@ const AssetCategoryCard = ({
             elevation={0}
             sx={{
                 p: 2.5,
-                borderRadius: 1,
+                borderRadius: 2,
                 bgcolor: '#fff',
                 border: `1px solid ${alpha('#000', 0.06)}`,
                 transition: 'all 0.25s ease',
                 '&:hover': {
-                    boxShadow: `0 4px 12px ${alpha('#000', 0.08)}`,
+                    boxShadow: `0 6px 20px ${alpha('#000', 0.08)}`,
                     transform: 'translateY(-2px)'
                 }
             }}
