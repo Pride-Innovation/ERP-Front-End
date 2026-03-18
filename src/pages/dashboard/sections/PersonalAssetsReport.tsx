@@ -13,18 +13,23 @@ import {
     TableRow,
     TableCell,
     TableBody,
-    Tooltip
+    Tooltip,
+    alpha
 } from '@mui/material';
 import { ExpandMore, ExpandLess } from '@mui/icons-material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import LaptopIcon from '@mui/icons-material/Laptop';
 import ChairIcon from '@mui/icons-material/Chair';
+import FolderSpecialOutlinedIcon from '@mui/icons-material/FolderSpecialOutlined';
 import {
     AssetDomain,
     StatusColorConfig
 } from '../../request/interface';
 import SectionUtills from './utills';
 import { DashboardContext } from '../../../context/dashboard';
+
+const PRIMARY_COLOR = '#08796C';
+const SECONDARY_COLOR = '#BC892C';
 
 const getStatusColor = (status: string): StatusColorConfig => {
     switch (status) {
@@ -36,35 +41,34 @@ const getStatusColor = (status: string): StatusColorConfig => {
 
 const getCategoryIcon = (domain: string) => {
     switch (domain) {
-        case 'IT Equipment': return <LaptopIcon sx={{ color: '#3F5FFF', fontSize: 20 }} />;
-        case 'Office Equipment': return <ChairIcon sx={{ color: '#4caf50', fontSize: 20 }} />;
-        default: return <LaptopIcon sx={{ color: '#3F5FFF', fontSize: 20 }} />;
+        case 'IT Equipment': return <LaptopIcon sx={{ color: PRIMARY_COLOR, fontSize: 20 }} />;
+        case 'Office Equipment': return <ChairIcon sx={{ color: SECONDARY_COLOR, fontSize: 20 }} />;
+        default: return <LaptopIcon sx={{ color: PRIMARY_COLOR, fontSize: 20 }} />;
     }
 };
 
 const TableHeader: React.FC = () => (
     <Box sx={{
-        borderBottom: '1px solid #e0e0e0',
-        py: 2,
+        borderBottom: `1px solid ${alpha('#000', 0.06)}`,
+        py: 1.5,
         px: 3,
-        backgroundColor: '#F8FAFC',
-        borderRadius: '4px 4px 0 0'
+        backgroundColor: alpha(PRIMARY_COLOR, 0.03),
     }}>
         <Grid container alignItems="center">
             <Grid item xs={12} sm={4}>
-                <Typography fontWeight={600} fontSize={13} color="#64748B">CATEGORY</Typography>
+                <Typography fontWeight={600} fontSize={12} color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: 0.5 }}>Category</Typography>
             </Grid>
             <Grid item xs={6} sm={3}>
-                <Typography fontWeight={600} fontSize={13} color="#64748B">TOTAL ITEMS</Typography>
+                <Typography fontWeight={600} fontSize={12} color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: 0.5 }}>Total Items</Typography>
             </Grid>
             <Grid item xs={6} sm={2}>
-                <Typography fontWeight={600} fontSize={13} color="#64748B">AVAILABILITY</Typography>
+                <Typography fontWeight={600} fontSize={12} color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: 0.5 }}>Available</Typography>
             </Grid>
             <Grid item xs={4} sm={2}>
-                <Typography fontWeight={600} fontSize={13} color="#64748B">STATUS</Typography>
+                <Typography fontWeight={600} fontSize={12} color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: 0.5 }}>Status</Typography>
             </Grid>
             <Grid item xs={2} sm={1} textAlign="right">
-                <Typography fontWeight={600} fontSize={13} color="#64748B">VIEW</Typography>
+                <Typography fontWeight={600} fontSize={12} color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: 0.5 }}>View</Typography>
             </Grid>
         </Grid>
     </Box>
@@ -81,17 +85,17 @@ const DomainRow: React.FC<DomainRowProps> = ({ row }) => {
 
     return (
         <Box sx={{
-            borderBottom: '1px solid #e0e0e0',
+            borderBottom: `1px solid ${alpha('#000', 0.06)}`,
             transition: 'background-color 0.2s',
             '&:hover': {
-                backgroundColor: '#f5f8fc'
+                backgroundColor: alpha(PRIMARY_COLOR, 0.02)
             }
         }}>
             <Grid container alignItems="center" py={2} px={3}>
                 <Grid item xs={12} sm={4}>
                     <Box display="flex" alignItems="center">
                         <Avatar sx={{
-                            bgcolor: '#EBF0FF',
+                            bgcolor: alpha(PRIMARY_COLOR, 0.08),
                             width: 40,
                             height: 40,
                             mr: 1.5,
@@ -149,8 +153,8 @@ const DomainRow: React.FC<DomainRowProps> = ({ row }) => {
                     pb={2}
                     px={3}
                     sx={{
-                        backgroundColor: '#FAFBFC',
-                        borderTop: '1px dashed #e0e0e0'
+                        backgroundColor: alpha(PRIMARY_COLOR, 0.01),
+                        borderTop: `1px dashed ${alpha('#000', 0.08)}`
                     }}
                 >
                     <Table size="small" sx={{ minWidth: 650 }}>
@@ -243,33 +247,64 @@ const ExpandableTable: React.FC = () => {
     useEffect(() => { fetchPersonalAssetReport() }, [])
 
     return (
-        <Grid item xs={12} mt={2} >
+        <Grid item xs={12} mt={2}>
             <Card
-                elevation={3}
+                elevation={0}
                 sx={{
                     borderRadius: 2,
-                    overflow: 'hidden'
+                    overflow: 'hidden',
+                    border: `1px solid ${alpha('#000', 0.08)}`,
+                    boxShadow: `0 1px 4px ${alpha('#000', 0.06)}, 0 4px 16px ${alpha('#000', 0.04)}`
                 }}
             >
                 <Box
-                    p={2.5}
                     sx={{
-                        borderBottom: '1px solid #e0e0e0',
+                        px: 2.5,
+                        py: 2,
+                        borderBottom: `1px solid ${alpha('#000', 0.06)}`,
                         display: 'flex',
                         justifyContent: 'space-between',
-                        alignItems: 'center'
+                        alignItems: 'center',
+                        bgcolor: alpha(PRIMARY_COLOR, 0.03)
                     }}
                 >
-                    <Typography variant="h6" color="#888" >
-                        Personal Assets Report
-                    </Typography>
-
-                    {assetDomain.length > 0 && <Chip
-                        label={`${assetDomain?.reduce((acc, item) => acc + item.totalItems, 0)} Items`}
-                        size="small"
-                        color="primary"
-                        variant="outlined"
-                    />}
+                    <Box display="flex" alignItems="center">
+                        <Box
+                            sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                width: 36,
+                                height: 36,
+                                borderRadius: 1.5,
+                                bgcolor: alpha(PRIMARY_COLOR, 0.08),
+                                color: PRIMARY_COLOR,
+                                mr: 2
+                            }}
+                        >
+                            <FolderSpecialOutlinedIcon fontSize="small" />
+                        </Box>
+                        <Box>
+                            <Typography variant="subtitle1" fontWeight={600} color="text.primary">
+                                Personal Assets Report
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                                Assets currently assigned to you
+                            </Typography>
+                        </Box>
+                    </Box>
+                    {assetDomain.length > 0 && (
+                        <Chip
+                            label={`${assetDomain?.reduce((acc, item) => acc + item.totalItems, 0)} Items`}
+                            size="small"
+                            sx={{
+                                bgcolor: alpha(PRIMARY_COLOR, 0.08),
+                                color: PRIMARY_COLOR,
+                                fontWeight: 600,
+                                borderRadius: 1
+                            }}
+                        />
+                    )}
                 </Box>
                 <TableHeader />
                 {assetDomain.length > 0 && assetDomain?.map((row) => (
