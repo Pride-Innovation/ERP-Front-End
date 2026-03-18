@@ -338,8 +338,8 @@ const TableComponent = ({
     return (
         <Card sx={{
             width: "100%",
-            boxShadow: 'none',
-            border: `1px solid ${alpha('#000', 0.08)}`,
+            boxShadow: '0 1px 4px rgba(0,0,0,0.06), 0 4px 20px rgba(0,0,0,0.04)',
+            border: `1px solid ${alpha('#000', 0.06)}`,
             borderRadius: 3,
             backgroundColor: '#FFFFFF',
             overflow: 'hidden'
