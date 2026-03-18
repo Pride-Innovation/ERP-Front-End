@@ -270,7 +270,7 @@ const ITEquipmentDetails = () => {
     };
 
     return (
-        <Container maxWidth="xl" sx={{ pt: 3, pb: 3, bgcolor: '#F3F7FB', borderRadius: 2, border: `1px solid ${alpha('#000', 0.08)}` }}>
+        <Container maxWidth="xl" sx={{ pt: 3, pb: 3, bgcolor: '#F5F8F7', borderRadius: 2, border: `1px solid ${alpha('#000', 0.07)}`, boxShadow: '0 1px 8px rgba(0,0,0,0.04)' }}>
             {loading ? (
                 <Loading items='IT Asset' />
             ) : (
@@ -295,20 +295,30 @@ const ITEquipmentDetails = () => {
                             justifyContent: 'space-between',
                             alignItems: { xs: 'flex-start', md: 'center' },
                             gap: 2,
-                            mb: 2
+                            mb: 2.5,
+                            pb: 2,
+                            borderBottom: `1px solid ${alpha('#000', 0.06)}`
                         }}
                     >
-                        <Typography
-                            variant="body2"
-                            color="text.secondary"
-                            sx={{
-                                fontWeight: 500,
-                                display: 'flex',
-                                alignItems: 'center'
-                            }}
-                        >
-                            IT Equipment Details
-                        </Typography>
+                        <Stack direction="row" spacing={1.5} alignItems="center">
+                            <Box sx={{
+                                width: 38, height: 38,
+                                borderRadius: 1.5,
+                                bgcolor: alpha(PRIMARY_COLOR, 0.1),
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                flexShrink: 0
+                            }}>
+                                <DevicesOtherIcon sx={{ color: PRIMARY_COLOR, fontSize: 20 }} />
+                            </Box>
+                            <Box>
+                                <Typography variant="h6" fontWeight={700} sx={{ color: PRIMARY_COLOR, lineHeight: 1.2 }}>
+                                    IT Equipment Details
+                                </Typography>
+                                <Typography variant="caption" color="text.secondary">
+                                    Asset record and management history
+                                </Typography>
+                            </Box>
+                        </Stack>
                         <Stack direction="row" spacing={1.5}>
                             <MuiButton
                                 color='primary'
@@ -552,7 +562,8 @@ const ITEquipmentDetails = () => {
                                 sx={{
                                     borderRadius: 2,
                                     overflow: 'hidden',
-                                    border: `1px solid ${alpha('#000', 0.08)}`,
+                                    border: `1px solid ${alpha('#000', 0.06)}`,
+                                    boxShadow: '0 1px 4px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.03)',
                                     height: '100%'
                                 }}
                             >
@@ -567,15 +578,24 @@ const ITEquipmentDetails = () => {
                                 />
 
                                 <CardContent>
-                                    <Box sx={{ mb: 2 }}>
-                                        <Typography
-                                            variant="subtitle1"
-                                            fontWeight={600}
-                                            color="text.secondary"
-                                        >
+                                    <Box sx={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        mb: 2, pb: 1.5,
+                                        borderBottom: `2px solid ${alpha(PRIMARY_COLOR, 0.12)}`
+                                    }}>
+                                        <Box sx={{
+                                            width: 30, height: 30,
+                                            borderRadius: 1,
+                                            bgcolor: alpha(PRIMARY_COLOR, 0.1),
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            mr: 1.5, flexShrink: 0
+                                        }}>
+                                            <InfoIcon fontSize="small" sx={{ color: PRIMARY_COLOR }} />
+                                        </Box>
+                                        <Typography variant="subtitle1" fontWeight={700} sx={{ color: PRIMARY_COLOR }}>
                                             Basic Information
                                         </Typography>
-                                        <Divider sx={{ mt: 1, mb: 2 }} />
                                     </Box>
 
                                     <EnhancedDetailSection
@@ -643,10 +663,12 @@ const ITEquipmentDetails = () => {
                                 sx={{
                                     borderRadius: 2,
                                     overflow: 'hidden',
-                                    border: `1px solid ${alpha('#000', 0.08)}`,
+                                    border: `1px solid ${alpha('#000', 0.06)}`,
+                                    boxShadow: '0 1px 4px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.03)',
                                     height: '100%'
                                 }}
                             >
+                                <Box sx={{ height: 3, bgcolor: PRIMARY_COLOR }} />
                                 <CardContent>
                                     <TabComponent
                                         headers={[
