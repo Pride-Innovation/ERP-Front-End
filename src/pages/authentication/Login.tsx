@@ -8,13 +8,14 @@ Managing Director
 import {
     Box,
     Grid,
-    useTheme,
-    useMediaQuery,
     Typography,
-    alpha,
     Card,
     CardContent,
-    Divider
+    alpha,
+    useTheme,
+    useMediaQuery,
+    Paper,
+    Divider,
 } from '@mui/material';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -30,8 +31,8 @@ import AuthenticationUtils from './utills';
 import { toast } from 'react-toastify';
 import { loginService } from './service';
 import Logo from '../../statics/images/whitelogo.png';
-import LockOutlined from '@mui/icons-material/LockOutlined';
-import SecurityOutlined from '@mui/icons-material/SecurityOutlined';
+import HorizontalLogo from '../../statics/images/pride_logo_horizontal.png';
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 
 // Brand colors
 const PRIMARY_COLOR = '#08796C';
@@ -39,30 +40,30 @@ const GOLD_COLOR = '#BC892C';
 
 const Login = () => {
     const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const isMedium = useMediaQuery(theme.breakpoints.down('md'));
-    const [loggingIn, setLoggingIn] = useState(false);
-    const [showPassword, setShowPassword] = useState(false);
-
+    const [loggingIn, setLoggingIn] = useState<boolean>(false);
+    const [showPassword, setShowPassword] = useState<boolean>(false);
     const navigate = useNavigate();
     const { handleSessionStorage } = AuthenticationUtils();
+    const currentYear = new Date().getFullYear();
 
-    const defaultUser: IAuthentication = { email: "", password: "" };
+    const handleClickShowPassword = () => setShowPassword((show) => !show);
+    const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
+        event.preventDefault();
+    };
 
     const {
         control,
         handleSubmit,
         formState,
         register,
-        reset
+        reset,
     } = useForm<IAuthentication>({
         mode: 'onChange',
-        resolver: yupResolver(authentiactionSchema)
+        resolver: yupResolver(authentiactionSchema),
     });
 
-    useEffect(() => {
-        reset(defaultUser);
-    }, []);
+    useEffect(() => { reset({ email: '', password: '' }); }, []);
 
     const onSubmit = async (formData: IAuthentication) => {
         setLoggingIn(true);
@@ -71,23 +72,15 @@ const Login = () => {
             if (response?.status === 200) {
                 const { accessToken, refreshToken } = response.data;
                 handleSessionStorage(response.data, accessToken, refreshToken);
-                toast.success(`Welcome ${response.data.firstName} 👋`);
+                toast.success(`Welcome back, ${response.data.firstName} 👋`);
                 navigate(ROUTES.ASSETS_MANAGEMENT);
             }
-        } catch (error) {
-            console.error(error);
-            toast.error("Login failed. Please check your credentials.");
+        } catch {
+            toast.error('Invalid email or password. Please try again.');
         } finally {
             setLoggingIn(false);
         }
     };
-
-    const handleClickShowPassword = () => setShowPassword((show) => !show);
-    const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
-        event.preventDefault();
-    };
-
-    const currentYear = new Date().getFullYear();
 
     return (
         <AuthenticationContainerComponent>
@@ -95,7 +88,7 @@ const Login = () => {
                 elevation={0}
                 sx={{
                     width: '100%',
-                    maxWidth: '1100px',
+                    maxWidth: '900px',
                     borderRadius: { xs: 3, md: 4 },
                     overflow: 'hidden',
                     boxShadow: '0 15px 35px rgba(0,0,0,0.2), 0 5px 15px rgba(0,0,0,0.1)',
@@ -115,11 +108,11 @@ const Login = () => {
                 }}
             >
                 <Grid container>
-                    {/* Left Panel - Brand Content */}
+                    {/* Left panel - only visible on medium screens and up */}
                     {!isMedium && (
                         <Grid
                             item
-                            md={6}
+                            md={5}
                             sx={{
                                 position: 'relative',
                                 overflow: 'hidden',
@@ -165,60 +158,39 @@ const Login = () => {
                                     color: 'white'
                                 }}
                             >
-                                {/* Animated Circles */}
-                                <Box
-                                    sx={{
-                                        position: 'absolute',
-                                        top: '10%',
-                                        left: '10%',
-                                        width: 'min(280px, 70%)',
-                                        height: 'min(280px, 70%)',
-                                        borderRadius: '50%',
-                                        border: '2px solid rgba(255,255,255,0.1)',
-                                        animation: 'rotate 30s linear infinite',
-                                        '@keyframes rotate': {
-                                            '0%': { transform: 'rotate(0deg)' },
-                                            '100%': { transform: 'rotate(360deg)' }
-                                        },
-                                        zIndex: 0
-                                    }}
-                                />
-                                <Box
-                                    sx={{
-                                        position: 'absolute',
-                                        bottom: '15%',
-                                        right: '5%',
-                                        width: 'min(180px, 45%)',
-                                        height: 'min(180px, 45%)',
-                                        borderRadius: '50%',
-                                        border: '2px solid rgba(255,255,255,0.05)',
-                                        animation: 'rotate 20s linear infinite reverse',
-                                        zIndex: 0
-                                    }}
-                                />
-
                                 {/* Logo */}
                                 <Box
                                     component="img"
                                     src={Logo}
                                     alt="Pride Bank Logo"
                                     sx={{
-                                        width: 120,
+                                        width: 100,
                                         mb: 4,
                                         filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.2))',
-                                        animation: 'pulse 3s infinite ease-in-out',
-                                        '@keyframes pulse': {
-                                            '0%': { opacity: 0.9, transform: 'scale(1)' },
-                                            '50%': { opacity: 1, transform: 'scale(1.05)' },
-                                            '100%': { opacity: 0.9, transform: 'scale(1)' },
-                                        }
                                     }}
                                 />
 
+                                {/* Lock Icon */}
+                                <Box
+                                    sx={{
+                                        width: 120,
+                                        height: 120,
+                                        borderRadius: '50%',
+                                        bgcolor: 'rgba(255,255,255,0.1)',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        mb: 4,
+                                        boxShadow: '0 4px 20px rgba(0,0,0,0.15)'
+                                    }}
+                                >
+                                    <LockOutlinedIcon sx={{ fontSize: 60, color: '#fff' }} />
+                                </Box>
+
                                 {/* Brand Title */}
                                 <Typography
-                                    variant="h3"
-                                    fontWeight={700}
+                                    variant="h5"
+                                    fontWeight={600}
                                     color="#fff"
                                     sx={{
                                         textAlign: 'center',
@@ -226,23 +198,23 @@ const Login = () => {
                                         textShadow: '0 2px 10px rgba(0,0,0,0.3)'
                                     }}
                                 >
-                                    Pride Bank
+                                    Welcome to Pride Bank
                                 </Typography>
 
                                 {/* Brand Subtitle */}
                                 <Typography
-                                    variant="h5"
+                                    variant="body1"
                                     fontWeight={300}
                                     color="#fff"
                                     sx={{
                                         textAlign: 'center',
                                         mb: 4,
-                                        letterSpacing: 1,
                                         opacity: 0.95,
-                                        textShadow: '0 2px 6px rgba(0,0,0,0.2)'
+                                        textShadow: '0 2px 6px rgba(0,0,0,0.2)',
+                                        maxWidth: '80%'
                                     }}
                                 >
-                                    Asset Management Portal
+                                    Your secure gateway to the Asset Management Portal
                                 </Typography>
 
                                 {/* Decorative Line */}
@@ -252,105 +224,17 @@ const Login = () => {
                                         height: '4px',
                                         background: `linear-gradient(to right, ${GOLD_COLOR}, ${alpha(GOLD_COLOR, 0.6)})`,
                                         borderRadius: '2px',
-                                        mb: 4
                                     }}
                                 />
-
-                                {/* Description */}
-                                <Typography
-                                    variant="body1"
-                                    sx={{
-                                        textAlign: 'center',
-                                        maxWidth: '85%',
-                                        fontWeight: 300,
-                                        lineHeight: 1.8,
-                                        letterSpacing: 0.3,
-                                        opacity: 0.9,
-                                        position: 'relative',
-                                        zIndex: 3
-                                    }}
-                                >
-                                    Manage and track your organization's assets efficiently with our comprehensive management system.
-                                </Typography>
-
-                                {/* Features List */}
-                                <Box sx={{ mt: 4, width: '85%', zIndex: 3 }}>
-                                    <Grid container spacing={2}>
-                                        <Grid item xs={6}>
-                                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                                                <Box
-                                                    sx={{
-                                                        width: 6,
-                                                        height: 6,
-                                                        bgcolor: GOLD_COLOR,
-                                                        borderRadius: '50%',
-                                                        mr: 1.5
-                                                    }}
-                                                />
-                                                <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                                                    Asset Tracking
-                                                </Typography>
-                                            </Box>
-                                        </Grid>
-                                        <Grid item xs={6}>
-                                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                                                <Box
-                                                    sx={{
-                                                        width: 6,
-                                                        height: 6,
-                                                        bgcolor: GOLD_COLOR,
-                                                        borderRadius: '50%',
-                                                        mr: 1.5
-                                                    }}
-                                                />
-                                                <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                                                    Maintenance
-                                                </Typography>
-                                            </Box>
-                                        </Grid>
-                                        <Grid item xs={6}>
-                                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                                <Box
-                                                    sx={{
-                                                        width: 6,
-                                                        height: 6,
-                                                        bgcolor: GOLD_COLOR,
-                                                        borderRadius: '50%',
-                                                        mr: 1.5
-                                                    }}
-                                                />
-                                                <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                                                    Reporting
-                                                </Typography>
-                                            </Box>
-                                        </Grid>
-                                        <Grid item xs={6}>
-                                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                                <Box
-                                                    sx={{
-                                                        width: 6,
-                                                        height: 6,
-                                                        bgcolor: GOLD_COLOR,
-                                                        borderRadius: '50%',
-                                                        mr: 1.5
-                                                    }}
-                                                />
-                                                <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                                                    Analytics
-                                                </Typography>
-                                            </Box>
-                                        </Grid>
-                                    </Grid>
-                                </Box>
                             </Box>
                         </Grid>
                     )}
 
-                    {/* Right Panel - Login Form */}
+                    {/* Right panel - Form section */}
                     <Grid
                         item
                         xs={12}
-                        md={6}
+                        md={7}
                         sx={{
                             backgroundColor: '#fff',
                             borderRadius: { xs: 3, md: '0 4px 4px 0' },
@@ -390,7 +274,6 @@ const Login = () => {
                             sx={{
                                 display: 'flex',
                                 flexDirection: 'column',
-                                justifyContent: 'space-between',
                                 p: { xs: 2.5, sm: 3.5, md: 4.5 },
                                 height: '100%',
                                 position: 'relative',
@@ -400,37 +283,19 @@ const Login = () => {
                             {/* Mobile Logo - only shows on medium and smaller screens */}
                             {isMedium && (
                                 <Box sx={{ display: 'flex', justifyContent: 'center', mb: 4 }}>
-                                    <Box sx={{ textAlign: 'center' }}>
-                                        <Box
-                                            component="img"
-                                            src={Logo}
-                                            alt="Pride Bank Logo"
-                                            sx={{
-                                                width: { xs: 70, sm: 90 },
-                                                mb: 2,
-                                                filter: 'brightness(0.95) contrast(1.05)'
-                                            }}
-                                        />
-                                        <Typography
-                                            variant="h5"
-                                            fontWeight={700}
-                                            color={PRIMARY_COLOR}
-                                            sx={{ mb: 0.5 }}
-                                        >
-                                            Pride Bank
-                                        </Typography>
-                                        <Typography
-                                            variant="subtitle1"
-                                            color="text.secondary"
-                                            sx={{ fontWeight: 400 }}
-                                        >
-                                            Asset Management Portal
-                                        </Typography>
-                                    </Box>
+                                    <Box
+                                        component="img"
+                                        src={HorizontalLogo}
+                                        alt="Pride Bank Logo"
+                                        sx={{
+                                            height: { xs: 40, sm: 48 },
+                                            objectFit: 'contain'
+                                        }}
+                                    />
                                 </Box>
                             )}
 
-                            {/* Login Header */}
+                            {/* Form Header */}
                             <Box
                                 sx={{
                                     mb: 4,
@@ -438,7 +303,7 @@ const Login = () => {
                                     pb: 1
                                 }}
                             >
-                                {/* Decorative element */}
+                                {/* Decorative left bar */}
                                 <Box
                                     sx={{
                                         position: 'absolute',
@@ -454,7 +319,6 @@ const Login = () => {
                                 <Typography
                                     variant="h4"
                                     fontWeight={700}
-                                    color="text.primary"
                                     sx={{
                                         mb: 1.5,
                                         background: `linear-gradient(135deg, ${PRIMARY_COLOR} 0%, ${alpha(PRIMARY_COLOR, 0.7)} 100%)`,
@@ -463,33 +327,32 @@ const Login = () => {
                                         WebkitBackgroundClip: 'text'
                                     }}
                                 >
-                                    Welcome Back
+                                    Sign In
                                 </Typography>
                                 <Typography
                                     variant="body1"
                                     color="text.secondary"
-                                    sx={{
-                                        mb: 0,
-                                        lineHeight: 1.5
-                                    }}
+                                    sx={{ lineHeight: 1.6 }}
                                 >
-                                    Sign in to continue to your account
+                                    Enter your credentials to access the Asset Management Portal.
                                 </Typography>
                             </Box>
 
-                            {/* Login Form Wrapper */}
+                            {/* Form */}
                             <Box
                                 component="form"
                                 onSubmit={handleSubmit(onSubmit)}
-                                noValidate
+                                autoComplete="off"
                                 sx={{
                                     mt: 0.5,
                                     position: 'relative',
                                     zIndex: 1,
+                                    flex: 1
                                 }}
                             >
                                 {/* Form Fields Card */}
-                                <Box
+                                <Paper
+                                    elevation={0}
                                     sx={{
                                         p: { xs: 2.5, sm: 3 },
                                         borderRadius: 2,
@@ -507,7 +370,7 @@ const Login = () => {
                                         register={register}
                                         control={control}
                                         formState={formState}
-                                        linkText="Forgot Password?"
+                                        linkText="Forgot password?"
                                         linkPath={ROUTES.FORGOT_PASSWORD}
                                         buttonText="Sign In"
                                         showPassword={showPassword}
@@ -516,36 +379,7 @@ const Login = () => {
                                         handleMouseDownPassword={handleMouseDownPassword}
                                         password
                                     />
-                                </Box>
-
-                                {/* Security Message */}
-                                <Box
-                                    sx={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        gap: 1,
-                                        mt: 2,
-                                        p: 2,
-                                        borderRadius: 1.5,
-                                        bgcolor: alpha(PRIMARY_COLOR, 0.03),
-                                        border: `1px dashed ${alpha(PRIMARY_COLOR, 0.2)}`
-                                    }}
-                                >
-                                    <Box
-                                        component="span"
-                                        sx={{
-                                            color: PRIMARY_COLOR,
-                                            display: 'flex',
-                                            alignItems: 'center'
-                                        }}
-                                    >
-                                        <SecurityOutlined fontSize="small" />
-                                    </Box>
-                                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
-                                        Your login is secured with bank-level encryption
-                                    </Typography>
-                                </Box>
+                                </Paper>
                             </Box>
 
                             {/* Footer */}
