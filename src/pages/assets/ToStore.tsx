@@ -74,20 +74,35 @@ const ToStore = ({
                 border: `1px solid ${alpha(theme.palette.success.main, 0.15)}`,
             }}
         >
+            {/* Top accent bar */}
+            <Box sx={{ height: 3, bgcolor: theme.palette.success.main }} />
+
             <Box
                 sx={{
-                    bgcolor: alpha(theme.palette.success.main, 0.08),
-                    py: 1.5,
+                    bgcolor: alpha(theme.palette.success.main, 0.05),
+                    py: 1.75,
                     px: 3,
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 1
+                    gap: 1.5,
+                    borderBottom: `1px solid ${alpha(theme.palette.success.main, 0.1)}`
                 }}
             >
-                <StoreIcon color="success" />
-                <Typography variant="subtitle1" fontWeight={600} color="success.main">
-                    Send Asset to Store
-                </Typography>
+                <Box sx={{
+                    width: 34, height: 34, borderRadius: 1.5,
+                    bgcolor: alpha(theme.palette.success.main, 0.12),
+                    display: 'flex', alignItems: 'center', justifyContent: 'center'
+                }}>
+                    <StoreIcon sx={{ color: theme.palette.success.main, fontSize: 18 }} />
+                </Box>
+                <Box>
+                    <Typography variant="subtitle1" fontWeight={700} sx={{ color: theme.palette.success.main, lineHeight: 1.2 }}>
+                        Send Asset to Store
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                        Move this asset to the central store inventory
+                    </Typography>
+                </Box>
             </Box>
 
             <CardContent sx={{ p: 3 }}>
@@ -98,8 +113,9 @@ const ToStore = ({
                             sx={{
                                 p: 2.5,
                                 borderRadius: 1.5,
-                                bgcolor: alpha(theme.palette.background.default, 0.7),
-                                border: `1px solid ${alpha('#000', 0.08)}`,
+                                bgcolor: alpha(theme.palette.success.main, 0.02),
+                                border: `1px solid ${alpha(theme.palette.success.main, 0.08)}`,
+                                borderLeft: `3px solid ${alpha(theme.palette.success.main, 0.45)}`,
                                 mb: 1
                             }}
                         >
