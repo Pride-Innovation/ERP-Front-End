@@ -10,19 +10,19 @@ import { IOfficeEquipment, IOfficeEquipmentAxiosResponse } from "./interface";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import {
-    Avatar,
     Box,
     Card,
+    Chip,
     Container,
+    Stack,
     Typography,
     alpha,
-    useMediaQuery,
-    useTheme
 } from "@mui/material";
 import { officeEquipmentSchema } from "./schema";
 import OfficeEquipmentForm from "./OfficeEquipmentForm";
 import { toast } from "react-toastify";
 import { createOfficeEquipmentService } from "./service";
+import BusinessCenterOutlinedIcon from '@mui/icons-material/BusinessCenterOutlined';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 
 // Brand colors
@@ -30,8 +30,6 @@ const PRIMARY_COLOR = '#08796C'; // Teal green
 
 const CreateOfficeEquipment = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
-    const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const defaultUser: IOfficeEquipment = {} as IOfficeEquipment;
 
     const {
@@ -70,49 +68,60 @@ const CreateOfficeEquipment = () => {
     return (
         <Container maxWidth="xl" sx={{
             py: 3,
-            bgcolor: '#F3F7FB',
+            bgcolor: '#F5F8F7',
             borderRadius: 2,
-            border: `1px solid ${alpha('#000', 0.08)}`
+            boxShadow: `0 1px 4px ${alpha('#000', 0.06)}, 0 4px 20px ${alpha('#000', 0.04)}`,
+            border: `1px solid ${alpha(PRIMARY_COLOR, 0.08)}`
         }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                <Avatar
+            <Box sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                mb: 3,
+                pb: 2.5,
+                borderBottom: `1px solid ${alpha('#000', 0.06)}`
+            }}>
+                <Stack direction="row" spacing={1.5} alignItems="center">
+                    <Box sx={{
+                        width: 44, height: 44,
+                        borderRadius: 2,
+                        bgcolor: alpha(PRIMARY_COLOR, 0.1),
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        flexShrink: 0,
+                        boxShadow: `0 2px 8px ${alpha(PRIMARY_COLOR, 0.15)}`
+                    }}>
+                        <BusinessCenterOutlinedIcon sx={{ color: PRIMARY_COLOR, fontSize: 22 }} />
+                    </Box>
+                    <Box>
+                        <Typography variant="h6" fontWeight={700} sx={{ color: PRIMARY_COLOR, lineHeight: 1.2 }}>
+                            Create Office Equipment
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                            Fill in the details below to register a new office asset
+                        </Typography>
+                    </Box>
+                </Stack>
+                <Chip
+                    icon={<AddCircleOutlineIcon sx={{ fontSize: 15 }} />}
+                    label="New Asset"
+                    size="small"
                     sx={{
-                        bgcolor: alpha(PRIMARY_COLOR, 0.12),
+                        bgcolor: alpha(PRIMARY_COLOR, 0.08),
                         color: PRIMARY_COLOR,
-                        mr: 2,
-                        width: { xs: 40, sm: 48 },
-                        height: { xs: 40, sm: 48 }
+                        fontWeight: 600,
+                        border: `1px solid ${alpha(PRIMARY_COLOR, 0.2)}`,
+                        '& .MuiChip-icon': { color: PRIMARY_COLOR }
                     }}
-                >
-                    <AddCircleOutlineIcon />
-                </Avatar>
-                <Box>
-                    <Typography
-                        variant={isMobile ? "h6" : "h5"}
-                        sx={{
-                            fontWeight: 600,
-                            color: PRIMARY_COLOR,
-                            mb: 0.5
-                        }}
-                    >
-                        Create Office Equipment
-                    </Typography>
-
-                    <Typography
-                        variant="body2"
-                        sx={{ color: alpha('#000', 0.6) }}
-                    >
-                        Fill in the details below to submit a new office equipment
-                    </Typography>
-                </Box>
+                />
             </Box>
 
             <Card
                 elevation={0}
                 sx={{
                     borderRadius: 2,
-                    border: `1px solid ${alpha('#000', 0.08)}`,
-                    overflow: 'visible'
+                    border: `1px solid ${alpha(PRIMARY_COLOR, 0.08)}`,
+                    overflow: 'visible',
+                    boxShadow: `0 1px 3px ${alpha('#000', 0.05)}`
                 }}
             >
                 <Box sx={{ p: { xs: 2, md: 3 } }}>
