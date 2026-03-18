@@ -12,6 +12,7 @@ import {
 } from "react";
 import { useNavigate } from "react-router";
 import { Box, Card } from "@mui/material";
+
 import OfficeEquipmentUtills from "./utills";
 import TableComponent from "../../../components/tables/TableComponent";
 import { ROUTES } from "../../../core/routes/routes";
@@ -249,45 +250,34 @@ const OfficeEquipment = () => {
             alignItems: 'center'
         }}>
             {renderModals()}
-            <Card
-                elevation={0}
-                sx={{
-                    borderRadius: 2,
-                    width: '100%',
-                    maxWidth: "1500px",
-                    overflow: 'hidden',
-                    border: "none",
-                    bgcolor: 'white'
-                }}
-            >
-                {columnHeaders.length > 0 &&
-                    <TableComponent
-                        endPoint={endPoint}
-                        loading={loading}
-                        count={officeEquipmentCount}
-                        exportData
-                        createAction
-                        importData
-                        header={header}
-                        module={module}
-                        rows={officeEquipmentTableData || []}
-                        columnHeaders={columnHeaders}
-                        onCreationHandler={() => navigate(ROUTES.CREATE_OFFICE_EQUIPMENT)}
-                        handleOptionClicked={handleOptionClicked}
-                        paginationMode='server'
-                        params={{
-                            assetTypeId: currentAssetType.id
-                        }}
-                        refresh
-                        filterMode="server"
-                        status
-                        onStatusChange={handleStatusChange}
-                        selectedStatus={selectedStatus}
-                        dateRangePicker
-                        filterOptions
-                    />
-                }
-            </Card>
+
+            {columnHeaders.length > 0 &&
+                <TableComponent
+                    endPoint={endPoint}
+                    loading={loading}
+                    count={officeEquipmentCount}
+                    exportData
+                    createAction
+                    importData
+                    header={header}
+                    module={module}
+                    rows={officeEquipmentTableData || []}
+                    columnHeaders={columnHeaders}
+                    onCreationHandler={() => navigate(ROUTES.CREATE_OFFICE_EQUIPMENT)}
+                    handleOptionClicked={handleOptionClicked}
+                    paginationMode='server'
+                    params={{
+                        assetTypeId: currentAssetType.id
+                    }}
+                    refresh
+                    filterMode="server"
+                    status
+                    onStatusChange={handleStatusChange}
+                    selectedStatus={selectedStatus}
+                    dateRangePicker
+                    filterOptions
+                />
+            }
         </Box>
     )
 }
