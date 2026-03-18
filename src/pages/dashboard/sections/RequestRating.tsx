@@ -30,7 +30,7 @@ const SECONDARY_COLOR = '#BC892C'; // Gold
 const STAR_COLOR = '#FFC107'; // Amber for stars
 const POSITIVE_COLOR = '#4CAF50'; // Green for positive trends
 const NEGATIVE_COLOR = '#F44336'; // Red for negative trends
-const CHART_COLOR = '#3f51b5'; // Indigo for chart
+const CHART_COLOR = PRIMARY_COLOR; // Teal for chart
 
 const RequestRating = ({ size = 4 }: { size?: number }) => {
     const {
@@ -130,9 +130,9 @@ const RequestRating = ({ size = 4 }: { size?: number }) => {
             <Card
                 elevation={0}
                 sx={{
-                    borderRadius: 1,
+                    borderRadius: 2,
                     border: `1px solid ${alpha('#000', 0.08)}`,
-                    boxShadow: `0 1px 3px ${alpha('#000', 0.1)}, 0 1px 2px ${alpha('#000', 0.06)}`,
+                    boxShadow: `0 1px 4px ${alpha('#000', 0.06)}, 0 4px 16px ${alpha('#000', 0.04)}`,
                     overflow: 'hidden'
                 }}
             >
@@ -235,9 +235,9 @@ const RequestRating = ({ size = 4 }: { size?: number }) => {
                 elevation={0}
                 sx={{
                     mt: 2.5,
-                    borderRadius: 1,
+                    borderRadius: 2,
                     border: `1px solid ${alpha(PRIMARY_COLOR, 0.12)}`,
-                    boxShadow: `0 1px 3px ${alpha('#000', 0.1)}, 0 1px 2px ${alpha('#000', 0.06)}`,
+                    boxShadow: `0 1px 4px ${alpha('#000', 0.06)}, 0 4px 16px ${alpha('#000', 0.04)}`,
                     overflow: 'hidden',
                 }}
             >
