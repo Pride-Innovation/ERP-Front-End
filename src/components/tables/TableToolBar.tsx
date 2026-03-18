@@ -205,17 +205,15 @@ const TableToolBar = ({
                 )}
 
                 {dateRangePicker && (
-                    <Box sx={{ flexGrow: 1, maxWidth: 550 }}>
-                        <DateRangePicker
-                            startDate={startDate}
-                            endDate={endDate}
-                            onStartDateChange={handleStartDateChange}
-                            onEndDateChange={handleEndDateChange}
-                            startPlaceholder="From"
-                            endPlaceholder="To"
-                            compact
-                        />
-                    </Box>
+                    <DateRangePicker
+                        startDate={startDate}
+                        endDate={endDate}
+                        onStartDateChange={handleStartDateChange}
+                        onEndDateChange={handleEndDateChange}
+                        startPlaceholder="From"
+                        endPlaceholder="To"
+                        compact
+                    />
                 )}
             </Box>
 
