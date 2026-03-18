@@ -2,47 +2,49 @@ import React, { useContext, useEffect, useState } from 'react';
 import {
     Box,
     alpha,
-    styled,
     Tooltip,
     Paper,
+    Typography,
+    Stack,
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs, { Dayjs } from 'dayjs';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import FilterListIcon from '@mui/icons-material/FilterList';
+import ArrowRightAltIcon from '@mui/icons-material/ArrowRightAlt';
 import { FormContext } from '../../context/form';
 
-// Styled components for a more compact, header-friendly appearance
-const CompactDatePickerWrapper = styled(Box)(({ theme }) => ({
-    display: 'flex',
-    alignItems: 'center',
-    gap: theme.spacing(1),
+const PRIMARY_COLOR = '#08796C';
+
+const datePickerSx = {
+    width: 138,
     '& .MuiInputBase-root': {
-        borderRadius: 4,
-        backgroundColor: alpha('#fff', 0.9),
-        height: 36,
-        width: 130,
-        fontSize: '0.825rem',
-        transition: theme.transitions.create([
-            'border-color',
-            'background-color',
-            'box-shadow',
-        ]),
-        '&:hover': {
-            backgroundColor: '#fff',
-            boxShadow: `0 1px 4px ${alpha('#000', 0.07)}`
+        borderRadius: '6px',
+        backgroundColor: alpha(PRIMARY_COLOR, 0.025),
+        fontSize: '0.875rem',
+        transition: 'all 0.2s ease',
+        '&:hover .MuiOutlinedInput-notchedOutline': {
+            borderColor: alpha(PRIMARY_COLOR, 0.5),
         },
-        '&.Mui-focused': {
-            boxShadow: `0 0 0 2px ${alpha('#08796C', 0.25)}`,
-            backgroundColor: '#fff',
-        }
+        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+            borderColor: PRIMARY_COLOR,
+            borderWidth: '1px',
+            boxShadow: `0 0 0 2px ${alpha(PRIMARY_COLOR, 0.1)}`,
+        },
     },
     '& .MuiOutlinedInput-notchedOutline': {
         borderColor: alpha('#000', 0.12),
     },
-}));
+    '& .MuiInputBase-input': {
+        py: '8.5px',
+        fontSize: '0.875rem',
+    },
+    '& .MuiInputAdornment-root .MuiIconButton-root': {
+        color: PRIMARY_COLOR,
+        padding: '4px',
+    },
+};
 
 interface IDateRangePickerProps {
     startDate: Dayjs | null;
@@ -123,25 +125,44 @@ const DateRangePicker: React.FC<IDateRangePickerProps> = ({
                 sx={{
                     display: 'flex',
                     alignItems: 'center',
-                    py: 0.5,
-                    px: 1,
-                    borderRadius: 1,
-                    backgroundColor: alpha('#f5f5f5', 0.5),
-                    border: `1px solid ${alpha('#000', 0.08)}`,
+                    gap: 1.5,
+                    py: 0.625,
+                    px: 1.5,
+                    borderRadius: 2,
+                    backgroundColor: '#FFFFFF',
+                    border: `1px solid ${alpha('#000', 0.12)}`,
+                    transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
+                    '&:hover': {
+                        borderColor: PRIMARY_COLOR,
+                        boxShadow: `0 0 0 2px ${alpha(PRIMARY_COLOR, 0.1)}`,
+                    },
                 }}
             >
-                <Tooltip title="Date filter">
-                    <FilterListIcon
-                        fontSize="small"
-                        sx={{
-                            mr: 1,
-                            color: 'primary.main',
-                            opacity: 0.7
-                        }}
-                    />
+                {/* Icon + Label */}
+                <Tooltip title="Filter by date range">
+                    <Stack direction="row" spacing={0.75} alignItems="center" sx={{ flexShrink: 0 }}>
+                        <Box sx={{
+                            width: 28, height: 28,
+                            borderRadius: 1,
+                            bgcolor: alpha(PRIMARY_COLOR, 0.1),
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        }}>
+                            <CalendarMonthIcon sx={{ fontSize: 15, color: PRIMARY_COLOR }} />
+                        </Box>
+                        <Typography variant="caption" fontWeight={600} sx={{ color: PRIMARY_COLOR }}>
+                            Date Range
+                        </Typography>
+                    </Stack>
                 </Tooltip>
 
-                <CompactDatePickerWrapper>
+                {/* Vertical divider */}
+                <Box sx={{ width: '1px', height: 26, bgcolor: alpha(PRIMARY_COLOR, 0.2), flexShrink: 0 }} />
+
+                {/* Start date */}
+                <Stack direction="row" alignItems="center" spacing={0.75}>
+                    <Typography variant="caption" color="text.secondary" fontWeight={500} sx={{ flexShrink: 0 }}>
+                        From
+                    </Typography>
                     <DatePicker
                         value={startDateValue}
                         onChange={(newValue) => handleDateChange(true, newValue)}
@@ -156,38 +177,20 @@ const DateRangePicker: React.FC<IDateRangePickerProps> = ({
                                 variant: "outlined",
                                 size: "small",
                                 placeholder: startPlaceholder,
-                                InputProps: {
-                                    startAdornment: compact ? undefined : (
-                                        <CalendarMonthIcon
-                                            sx={{
-                                                mr: 0.5,
-                                                ml: 0.5,
-                                                color: 'primary.main',
-                                                fontSize: '0.5rem'
-                                            }}
-                                        />
-                                    ),
-                                },
-                                sx: {
-                                    width: compact ? 130 : 180,
-                                    '& .MuiInputBase-input': {
-                                        py: 0.75,
-                                    }
-                                }
+                                sx: datePickerSx,
                             }
                         }}
                     />
+                </Stack>
 
-                    <Box
-                        component="span"
-                        sx={{
-                            width: 10,
-                            height: 1,
-                            bgcolor: 'text.disabled',
-                            mx: 0.5
-                        }}
-                    />
+                {/* Arrow separator */}
+                <ArrowRightAltIcon sx={{ fontSize: 20, color: alpha(PRIMARY_COLOR, 0.45), flexShrink: 0 }} />
 
+                {/* End date */}
+                <Stack direction="row" alignItems="center" spacing={0.75}>
+                    <Typography variant="caption" color="text.secondary" fontWeight={500} sx={{ flexShrink: 0 }}>
+                        To
+                    </Typography>
                     <DatePicker
                         value={endDateValue}
                         onChange={(newValue) => handleDateChange(false, newValue)}
@@ -202,28 +205,11 @@ const DateRangePicker: React.FC<IDateRangePickerProps> = ({
                                 variant: "outlined",
                                 size: "small",
                                 placeholder: endPlaceholder,
-                                InputProps: {
-                                    startAdornment: compact ? undefined : (
-                                        <CalendarMonthIcon
-                                            sx={{
-                                                mr: 0.5,
-                                                ml: 0.5,
-                                                color: 'primary.main',
-                                                fontSize: '1rem'
-                                            }}
-                                        />
-                                    ),
-                                },
-                                sx: {
-                                    width: compact ? 130 : 180,
-                                    '& .MuiInputBase-input': {
-                                        py: 0.75,
-                                    }
-                                }
+                                sx: datePickerSx,
                             }
                         }}
                     />
-                </CompactDatePickerWrapper>
+                </Stack>
             </Paper>
         </LocalizationProvider>
     );
