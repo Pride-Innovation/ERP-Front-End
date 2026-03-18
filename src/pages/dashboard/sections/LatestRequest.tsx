@@ -82,9 +82,9 @@ const LatestRequest = ({ size = 8 }: { size?: number }) => {
                 <Card
                     elevation={0}
                     sx={{
-                        borderRadius: 1,
+                        borderRadius: 2,
                         border: `1px solid ${alpha('#000', 0.08)}`,
-                        boxShadow: `0 1px 3px ${alpha('#000', 0.1)}, 0 1px 2px ${alpha('#000', 0.06)}`,
+                        boxShadow: `0 1px 4px ${alpha('#000', 0.06)}, 0 4px 16px ${alpha('#000', 0.04)}`,
                         mb: 2.5
                     }}
                 >
@@ -182,12 +182,13 @@ const LatestRequest = ({ size = 8 }: { size?: number }) => {
                                                 elevation={0}
                                                 sx={{
                                                     border: `1px solid ${alpha('#000', 0.08)}`,
-                                                    borderRadius: 1,
+                                                    borderLeft: `3px solid ${statusColor.main}`,
+                                                    borderRadius: 2,
                                                     p: 0,
                                                     overflow: 'hidden',
                                                     transition: 'box-shadow 0.2s ease-in-out',
                                                     '&:hover': {
-                                                        boxShadow: `0 4px 12px ${alpha('#000', 0.05)}`
+                                                        boxShadow: `0 4px 16px ${alpha('#000', 0.07)}`
                                                     }
                                                 }}
                                             >
