@@ -84,12 +84,23 @@ export const DataGridStyled = styled(DataGrid)(({ theme }) => ({
         marginLeft: 'auto',
     },
 
+    // Column separator in header
+    '& .MuiDataGrid-columnSeparator': {
+        color: alpha('#FFFFFF', 0.25),
+        '&:hover': {
+            color: alpha('#FFFFFF', 0.6),
+        },
+    },
+
     // Row Styling
     '& .MuiDataGrid-row': {
         minHeight: '64px !important',
         maxHeight: 'none !important',
         borderBottom: `1px solid ${BORDER_COLOR}`,
         transition: 'background-color 0.15s ease',
+        '&:nth-of-type(even)': {
+            backgroundColor: '#F9FAFB',
+        },
         '&:hover': {
             backgroundColor: HOVER_COLOR,
         },
