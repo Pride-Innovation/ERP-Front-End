@@ -71,7 +71,7 @@ const AssetsManagement = () => {
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', p: 3 }}>
       {/* Branded Asset Management Header + Navigation */}
       <Box
         sx={{

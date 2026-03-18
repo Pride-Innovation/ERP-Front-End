@@ -213,10 +213,8 @@ const Fleet = () => {
 
     return (
         <Box width={'100%'} sx={{
-            px: 3,
             display: 'flex',
             flexDirection: 'column',
-            alignItems: 'center'
         }}>
             {renderModals()}
 
