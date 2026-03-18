@@ -47,8 +47,8 @@ const AssetStockReview = () => {
                     sx={{
                         height: '100%',
                         border: `1px solid ${alpha('#000', 0.08)}`,
-                        borderRadius: 1,
-                        boxShadow: `0 1px 3px ${alpha('#000', 0.1)}, 0 1px 2px ${alpha('#000', 0.06)}`,
+                        borderRadius: 2,
+                        boxShadow: `0 1px 4px ${alpha('#000', 0.06)}, 0 4px 16px ${alpha('#000', 0.04)}`,
                     }}
                 >
                     {/* Card Header */}
