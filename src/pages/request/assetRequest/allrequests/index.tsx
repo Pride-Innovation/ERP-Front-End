@@ -11,10 +11,7 @@ import {
     useState
 } from "react";
 import { useNavigate } from "react-router";
-import {
-    Box,
-    Card,
-} from "@mui/material";
+import { Box } from "@mui/material";
 import { RequestContext } from "../../../../context/request/RequestContext";
 import { crudStates } from "../../../../utils/constants";
 import { ROUTES } from "../../../../core/routes/routes";
@@ -367,46 +364,34 @@ const Request = () => {
             alignItems: 'center'
         }}>
             {renderModals()}
-            <Card
-                elevation={0}
-                sx={{
-                    borderRadius: 2,
-                    width: '100%',
-                    maxWidth: "1500px",
-                    overflow: 'hidden',
-                    border: "none",
-                    bgcolor: 'white'
-                }}
-            >
-                {columnHeaders.length > 0 && (
-                    <TableComponent
-                        endPoint={endPoint}
-                        loading={loading}
-                        count={count}
-                        exportData
-                        createAction
-                        // importData
-                        module={module}
-                        header={header}
-                        rows={requestTableData}
-                        columnHeaders={columnHeaders}
-                        onCreationHandler={() => navigate(ROUTES.CREATE_REQUEST)}
-                        handleOptionClicked={handleOptionClicked}
-                        paginationMode="server"
-                        filterMode="server"
-                        params={{ statusIds: statusIds }}
-                        refresh
-                        filterOptions
-                        optionsfilterParams={{
-                            status: "CREATED"
-                        }}
-                        status
-                        onStatusChange={handleStatusChange}
-                        selectedStatus={selectedStatus}
-                        dateRangePicker
-                    />
-                )}
-            </Card>
+            {columnHeaders.length > 0 && (
+                <TableComponent
+                    endPoint={endPoint}
+                    loading={loading}
+                    count={count}
+                    exportData
+                    createAction
+                    // importData
+                    module={module}
+                    header={header}
+                    rows={requestTableData}
+                    columnHeaders={columnHeaders}
+                    onCreationHandler={() => navigate(ROUTES.CREATE_REQUEST)}
+                    handleOptionClicked={handleOptionClicked}
+                    paginationMode="server"
+                    filterMode="server"
+                    params={{ statusIds: statusIds }}
+                    refresh
+                    filterOptions
+                    optionsfilterParams={{
+                        status: "CREATED"
+                    }}
+                    status
+                    onStatusChange={handleStatusChange}
+                    selectedStatus={selectedStatus}
+                    dateRangePicker
+                />
+            )}
         </Box>
     );
 };
