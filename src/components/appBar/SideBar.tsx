@@ -13,7 +13,6 @@ import {
     ListItemIcon,
     ListItemText,
 } from '@mui/material';
-import { blue } from '@mui/material/colors';
 import { ExpandLess, ExpandMore } from '@mui/icons-material';
 import { useLocation } from 'react-router';
 import HandleRoutes from './HandleRoutes';
@@ -43,6 +42,7 @@ const SideBar = ({ drawerOpen }: SideBarProps) => {
                 boxShadow: 'none',
                 display: 'flex',
                 flexDirection: 'column',
+                border: 'none'
             }}>
             <List
                 sx={{
