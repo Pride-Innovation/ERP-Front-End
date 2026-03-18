@@ -183,16 +183,17 @@ const UserForm = ({
             <Grid container spacing={3}>
                 <Grid item xs={12} md={6} lg={6}>
                     <Paper
-                        elevation={0}
-                        sx={{
-                            p: { xs: 2, sm: 3 },
-                            borderRadius: 2,
-                            height: '100%',
-                            border: `1px solid ${alpha('#000', 0.08)}`,
-                            bgcolor: alpha(PRIMARY_COLOR, 0.02)
-                        }}
-                    >
-                        {renderSectionHeader("Personal Information", <PersonIcon />)}
+                            elevation={0}
+                            sx={{
+                                p: { xs: 2, sm: 3 },
+                                borderRadius: 2,
+                                height: '100%',
+                                border: `1px solid ${alpha('#000', 0.08)}`,
+                                bgcolor: alpha(PRIMARY_COLOR, 0.02),
+                                boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
+                            }}
+                        >
+                            {renderSectionHeader("Personal Information", <PersonIcon />)}
                         {renderFormFields(personalInfoFields, 5)}
                     </Paper>
                 </Grid>
@@ -204,7 +205,9 @@ const UserForm = ({
                             sx={{
                                 p: { xs: 2, sm: 3 },
                                 borderRadius: 2,
-                                border: `1px solid ${alpha('#000', 0.08)}`
+                                border: `1px solid ${alpha('#000', 0.08)}`,
+                                bgcolor: alpha(PRIMARY_COLOR, 0.02),
+                                boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
                             }}
                         >
                             {renderSectionHeader("Work Information", <BusinessIcon />)}
@@ -217,7 +220,9 @@ const UserForm = ({
                                 sx={{
                                     p: { xs: 2, sm: 3 },
                                     borderRadius: 2,
-                                    border: `1px solid ${alpha('#000', 0.08)}`
+                                    border: `1px solid ${alpha('#000', 0.08)}`,
+                                    bgcolor: alpha(PRIMARY_COLOR, 0.02),
+                                    boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
                                 }}
                             >
                                 {renderSectionHeader("Additional Information", <ContactMailIcon />)}
