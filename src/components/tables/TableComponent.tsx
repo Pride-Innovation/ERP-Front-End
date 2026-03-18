@@ -33,6 +33,7 @@ import HowToRegOutlinedIcon from '@mui/icons-material/HowToRegOutlined';
 import TableUtills from './utills';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import BusinessIcon from '@mui/icons-material/Business';
+import NoContent from '../noContent';
 
 const TableComponent = ({
     columnHeaders,
@@ -64,6 +65,10 @@ const TableComponent = ({
     const [currentID, setCurrentId] = useState<string | number>("");
     const theme = useTheme();
     const { handleOptionsFilter } = TableUtills({ moduleName: module });
+
+    const NoRowsOverlay = () => (
+        <NoContent item={header.singular} items={header.plural} />
+    );
 
     const handleClick = (
         event: React.MouseEvent<HTMLButtonElement>,
@@ -357,6 +362,7 @@ const TableComponent = ({
                     filterMode={filterMode}
                     getRowHeight={() => 'auto'}
                     slots={{
+                        noRowsOverlay: NoRowsOverlay,
                         toolbar: () => (
                             <CustomToolbarWrapper
                                 dateRangePicker={dateRangePicker}
