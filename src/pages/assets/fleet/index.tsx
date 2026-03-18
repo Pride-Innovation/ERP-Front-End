@@ -5,7 +5,8 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { Box, Card } from "@mui/material";
+import { Box } from "@mui/material";
+
 import { useContext, useEffect, useState } from "react";
 import TableComponent from "../../../components/tables/TableComponent";
 import { useNavigate } from "react-router";
@@ -218,43 +219,32 @@ const Fleet = () => {
             alignItems: 'center'
         }}>
             {renderModals()}
-            <Card
-                elevation={0}
-                sx={{
-                    borderRadius: 2,
-                    width: '100%',
-                    maxWidth: "1500px",
-                    overflow: 'hidden',
-                    border: "none",
-                    bgcolor: 'white'
-                }}
-            >
-                {columnHeaders.length > 0 &&
-                    <TableComponent
-                        endPoint={endPoint}
-                        loading={loading}
-                        count={count}
-                        exportData
-                        createAction
-                        module={module}
-                        importData
-                        header={header}
-                        rows={fleetTableData || []}
-                        columnHeaders={columnHeaders}
-                        onCreationHandler={() => navigate(ROUTES.CREATE_FLEET)}
-                        handleOptionClicked={handleOptionClicked}
-                        paginationMode='server'
-                        params={{ assetTypeId: currentAssetType.id }}
-                        refresh
-                        filterMode="server"
-                        status
-                        onStatusChange={handleStatusChange}
-                        selectedStatus={selectedStatus}
-                        dateRangePicker
-                        filterOptions
-                    />
-                }
-            </Card>
+
+            {columnHeaders.length > 0 &&
+                <TableComponent
+                    endPoint={endPoint}
+                    loading={loading}
+                    count={count}
+                    exportData
+                    createAction
+                    module={module}
+                    importData
+                    header={header}
+                    rows={fleetTableData || []}
+                    columnHeaders={columnHeaders}
+                    onCreationHandler={() => navigate(ROUTES.CREATE_FLEET)}
+                    handleOptionClicked={handleOptionClicked}
+                    paginationMode='server'
+                    params={{ assetTypeId: currentAssetType.id }}
+                    refresh
+                    filterMode="server"
+                    status
+                    onStatusChange={handleStatusChange}
+                    selectedStatus={selectedStatus}
+                    dateRangePicker
+                    filterOptions
+                />
+            }
         </Box>
     )
 }
