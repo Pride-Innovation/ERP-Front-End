@@ -79,20 +79,35 @@ const Dispose = ({
                 border: `1px solid ${alpha(theme.palette.error.main, 0.15)}`,
             }}
         >
+            {/* Top accent bar */}
+            <Box sx={{ height: 3, bgcolor: theme.palette.error.main }} />
+
             <Box
                 sx={{
-                    bgcolor: alpha(theme.palette.error.main, 0.08),
-                    py: 1.5,
+                    bgcolor: alpha(theme.palette.error.main, 0.05),
+                    py: 1.75,
                     px: 3,
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 1
+                    gap: 1.5,
+                    borderBottom: `1px solid ${alpha(theme.palette.error.main, 0.1)}`
                 }}
             >
-                <DeleteIcon color="error" />
-                <Typography variant="subtitle1" fontWeight={600} color="error.main">
-                    Asset Disposal Confirmation
-                </Typography>
+                <Box sx={{
+                    width: 34, height: 34, borderRadius: 1.5,
+                    bgcolor: alpha(theme.palette.error.main, 0.12),
+                    display: 'flex', alignItems: 'center', justifyContent: 'center'
+                }}>
+                    <DeleteIcon sx={{ color: theme.palette.error.main, fontSize: 18 }} />
+                </Box>
+                <Box>
+                    <Typography variant="subtitle1" fontWeight={700} sx={{ color: theme.palette.error.main, lineHeight: 1.2 }}>
+                        Asset Disposal
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                        This action is permanent and cannot be reversed
+                    </Typography>
+                </Box>
             </Box>
 
             <CardContent sx={{ p: 3 }}>
@@ -120,8 +135,9 @@ const Dispose = ({
                             sx={{
                                 p: 2.5,
                                 borderRadius: 1.5,
-                                bgcolor: alpha(theme.palette.background.default, 0.7),
-                                border: `1px solid ${alpha('#000', 0.08)}`,
+                                bgcolor: alpha(theme.palette.error.main, 0.02),
+                                border: `1px solid ${alpha(theme.palette.error.main, 0.08)}`,
+                                borderLeft: `3px solid ${alpha(theme.palette.error.main, 0.45)}`,
                                 mb: 1
                             }}
                         >
