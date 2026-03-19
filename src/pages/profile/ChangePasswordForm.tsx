@@ -37,6 +37,36 @@ import { useMemo } from 'react';
 const PRIMARY_COLOR = '#08796C';
 const SECONDARY_COLOR = '#BC892C';
 
+const passwordFieldSx = {
+    '& .MuiOutlinedInput-root': {
+        borderRadius: '8px',
+        backgroundColor: '#FAFAFA',
+        transition: 'background-color 0.2s ease, box-shadow 0.2s ease',
+        '&:hover .MuiOutlinedInput-notchedOutline': {
+            borderColor: alpha(PRIMARY_COLOR, 0.5),
+        },
+        '&.Mui-focused': {
+            backgroundColor: '#fff',
+            '& .MuiOutlinedInput-notchedOutline': {
+                borderColor: PRIMARY_COLOR,
+                borderWidth: '1.5px',
+                boxShadow: `0 0 0 3px ${alpha(PRIMARY_COLOR, 0.09)}`,
+            },
+        },
+        '&.Mui-error .MuiOutlinedInput-notchedOutline': {
+            borderColor: '#D32F2F',
+        },
+    },
+    '& .MuiOutlinedInput-notchedOutline': {
+        borderColor: 'rgba(0, 0, 0, 0.18)',
+    },
+    '& .MuiOutlinedInput-input': {
+        padding: '13px 14px',
+        fontSize: '0.875rem',
+        lineHeight: 1.5,
+    },
+};
+
 // Password strength calculation
 const calculatePasswordStrength = (password: string): number => {
     if (!password) return 0;
@@ -205,13 +235,9 @@ const ChangePasswordForm = ({
                                                         </InputAdornment>
                                                     ),
                                                 }}
-                                                size="small"
-                                                sx={{
-                                                    '& .MuiOutlinedInput-root': {
-                                                        borderRadius: 1.5,
-                                                        bgcolor: alpha('#fff', 0.8),
-                                                    }
-                                                }}
+                                                size="medium"
+                                                fullWidth
+                                                sx={passwordFieldSx}
                                             />
                                         )}
                                     />
@@ -291,13 +317,9 @@ const ChangePasswordForm = ({
                                                         </InputAdornment>
                                                     ),
                                                 }}
-                                                size="small"
-                                                sx={{
-                                                    '& .MuiOutlinedInput-root': {
-                                                        borderRadius: 1.5,
-                                                        bgcolor: alpha('#fff', 0.8),
-                                                    }
-                                                }}
+                                                size="medium"
+                                                fullWidth
+                                                sx={passwordFieldSx}
                                             />
                                         )}
                                     />
@@ -376,13 +398,9 @@ const ChangePasswordForm = ({
                                                         </InputAdornment>
                                                     ),
                                                 }}
-                                                size="small"
-                                                sx={{
-                                                    '& .MuiOutlinedInput-root': {
-                                                        borderRadius: 1.5,
-                                                        bgcolor: alpha('#fff', 0.8),
-                                                    }
-                                                }}
+                                                size="medium"
+                                                fullWidth
+                                                sx={passwordFieldSx}
                                             />
                                         )}
                                     />
