@@ -63,7 +63,6 @@ const CreateUser = ({ handleClose }: ICreateUser) => {
                     maxWidth: "1200px",
                     mx: "auto",
                     overflow: 'hidden',
-                    border: '1px solid rgba(0,0,0,0.08)'
                 }}
             >
                 <form autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
