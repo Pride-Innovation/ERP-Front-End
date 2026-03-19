@@ -11,7 +11,7 @@ import { ICreateUser, IUser, IUserCreationResponseAxiosResponse } from './interf
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { userSchema } from './schema';
-import { Box, Paper } from '@mui/material';
+import { Box } from '@mui/material';
 import { createUSerService } from './service';
 import { toast } from 'react-toastify';
 import { useDispatch } from 'react-redux';
@@ -54,28 +54,18 @@ const CreateUser = ({ handleClose }: ICreateUser) => {
     };
 
     return (
-        <Box sx={{ overflowY: 'auto', pb: 1 }}>
-            <Paper
-                elevation={0}
-                sx={{
-                    borderRadius: 2,
-                    boxShadow: "none",
-                    maxWidth: "1200px",
-                    mx: "auto",
-                    overflow: 'hidden',
-                }}
-            >
-                <form autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
-                    <UserForm
-                        handleClose={handleClose}
-                        buttonText="Submit"
-                        formState={formState}
-                        control={control}
-                        sendingRequest={sendingRequest}
-                        register={register}
-                    />
-                </form>
-            </Paper>
+        <Box sx={{ overflowY: 'auto', pb: 1, maxWidth: '1200px', mx: 'auto' }}>
+            <form autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
+                <UserForm
+                    handleClose={handleClose}
+                    buttonText="Create User"
+                    formState={formState}
+                    control={control}
+                    sendingRequest={sendingRequest}
+                    register={register}
+                    mode="create"
+                />
+            </form>
         </Box>
     );
 }
