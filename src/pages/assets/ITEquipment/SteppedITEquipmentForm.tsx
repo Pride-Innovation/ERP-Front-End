@@ -53,14 +53,10 @@ const SteppedITEquipmentForm = ({
     register,
     buttonText,
     sendingRequest,
-    option,
     handleChange,
     formFields,
-    computerFields,
-    categories,
     selectedCategory,
     stateFormFields,
-    isUpdate = false,
     loading = false,
     trigger
 }: IITEquipmentForm) => {
