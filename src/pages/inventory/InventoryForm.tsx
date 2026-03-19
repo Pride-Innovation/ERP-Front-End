@@ -13,7 +13,8 @@ import {
     Paper,
     alpha,
     useTheme,
-    Card
+    Card,
+    Button
 } from "@mui/material";
 import InventoryUtills from "./Utills";
 import {
@@ -24,13 +25,14 @@ import {
     UseFormTimePicker
 } from "../../components/forms";
 import { IInventoryForm } from "./interface";
-import ButtonComponent from "../../components/forms/Button";
 import SupplierUtills from "../settings/suppliers/Utills";
 import { useEffect, useMemo } from "react";
 import StockItems from "../../components/stockForm/StockItems";
 import AssetTypeUtills from "../settings/assetTypes/utills";
 import InventoryIcon from "@mui/icons-material/Inventory";
 import BusinessIcon from "@mui/icons-material/Business";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import SaveIcon from "@mui/icons-material/Save";
 import { useNavigate } from "react-router";
 import { ROUTES } from "../../core/routes/routes";
 
@@ -214,29 +216,52 @@ const InventoryForm = ({
                             <Stack
                                 direction="row"
                                 spacing={2}
-                                sx={{
-                                    '& button': {
-                                        px: 3,
-                                        py: 1.2,
-                                        borderRadius: 1.5,
-                                    }
-                                }}
+                                sx={{ width: { xs: '100%', sm: 'auto' } }}
                             >
-                                <ButtonComponent
-                                    handleClick={() => navigate(ROUTES.INVENTORY)}
-                                    buttonColor="inherit"
+                                <Button
                                     type="button"
-                                    sendingRequest={false}
-                                    buttonText="Cancel"
                                     variant="outlined"
-                                />
-                                <ButtonComponent
-                                    buttonColor="success"
+                                    onClick={() => navigate(ROUTES.INVENTORY)}
+                                    startIcon={<ArrowBackIcon />}
+                                    sx={{
+                                        minWidth: { xs: '100%', sm: 120 },
+                                        borderColor: alpha('#000', 0.2),
+                                        color: 'text.secondary',
+                                        textTransform: 'none',
+                                        fontWeight: 500,
+                                        '&:hover': {
+                                            borderColor: alpha('#000', 0.35),
+                                            bgcolor: alpha('#000', 0.04),
+                                        },
+                                    }}
+                                >
+                                    Cancel
+                                </Button>
+                                <Button
                                     type="submit"
-                                    sendingRequest={sendingRequest}
-                                    buttonText={buttonText}
                                     variant="contained"
-                                />
+                                    disabled={sendingRequest}
+                                    startIcon={<SaveIcon />}
+                                    sx={{
+                                        minWidth: { xs: '100%', sm: 160 },
+                                        bgcolor: PRIMARY_COLOR,
+                                        boxShadow: `0 4px 12px ${alpha(PRIMARY_COLOR, 0.3)}`,
+                                        textTransform: 'none',
+                                        fontWeight: 600,
+                                        '&:hover': {
+                                            bgcolor: '#065f54',
+                                            transform: 'translateY(-1px)',
+                                            boxShadow: `0 6px 16px ${alpha(PRIMARY_COLOR, 0.4)}`,
+                                        },
+                                        transition: 'all 0.2s ease',
+                                        '&.Mui-disabled': {
+                                            bgcolor: alpha(PRIMARY_COLOR, 0.5),
+                                            color: '#fff',
+                                        },
+                                    }}
+                                >
+                                    {sendingRequest ? 'Saving…' : buttonText}
+                                </Button>
                             </Stack>
                         </Stack>
                     </Paper>

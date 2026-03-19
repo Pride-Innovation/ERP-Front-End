@@ -217,7 +217,7 @@ const StockItems = () => {
                         >
                             Stock Items
                         </Typography>
-                        <Typography variant="caption" sx={{ opacity: 0.8 }}>
+                        <Typography variant="caption" sx={{ opacity: 0.9, color: 'white' }}>
                             Add and manage stock items for this order
                         </Typography>
                     </Box>
