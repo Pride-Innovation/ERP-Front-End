@@ -12,18 +12,15 @@ import {
     Box,
     Container,
     Divider,
-    Grid,
     Typography,
-    Paper,
+    LinearProgress,
     Stepper,
     Step,
     StepLabel,
     Card,
-    CardContent,
     useTheme,
     useMediaQuery,
     alpha,
-    Chip,
     Avatar
 } from "@mui/material";
 import RequestForm from "./RequestForm";
@@ -35,7 +32,7 @@ import { toast } from "react-toastify";
 import { createAssetRequestService } from "./service";
 import { RowData } from "../../../components/forms/interface";
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
-import FactCheckOutlinedIcon from '@mui/icons-material/FactCheckOutlined';
+
 import { useNavigate } from "react-router";
 import { ROUTES } from "../../../core/routes/routes";
 
@@ -45,7 +42,7 @@ const initialData: RowData[] = [
 
 // Brand colors
 const PRIMARY_COLOR = '#08796C'; // Teal green
-const SECONDARY_COLOR = '#BC892C'; // Gold/amber
+// 
 
 const CreateRequest = () => {
     const [sendingRequest, setSendingRequest] = useState(false);
@@ -189,14 +186,29 @@ const CreateRequest = () => {
                             </Typography>
                         </Box>
                     </Box>
-                    <Chip
-                        label={`${formProgress}% Complete`}
-                        color={formProgress === 100 ? "success" : "default"}
-                        sx={{
-                            fontWeight: 500,
-                            '& .MuiChip-label': { px: 2 }
-                        }}
-                    />
+                    <Box sx={{ textAlign: { xs: 'left', sm: 'right' }, flexShrink: 0 }}>
+                        <Typography variant="caption" sx={{ color: alpha('#000', 0.5), fontWeight: 500, display: 'block' }}>
+                            Form Completion
+                        </Typography>
+                        <LinearProgress
+                            variant="determinate"
+                            value={formProgress}
+                            sx={{
+                                my: 0.5,
+                                height: 6,
+                                width: { xs: '100%', sm: 120 },
+                                borderRadius: 3,
+                                bgcolor: alpha(PRIMARY_COLOR, 0.12),
+                                '& .MuiLinearProgress-bar': {
+                                    bgcolor: formProgress === 100 ? '#4caf50' : PRIMARY_COLOR,
+                                    borderRadius: 3,
+                                },
+                            }}
+                        />
+                        <Typography variant="caption" sx={{ color: formProgress === 100 ? '#2e7d32' : PRIMARY_COLOR, fontWeight: 600 }}>
+                            {formProgress}% Complete
+                        </Typography>
+                    </Box>
                 </Box>
 
                 {/* Process steps */}
@@ -218,13 +230,16 @@ const CreateRequest = () => {
                 }}>
                     <Stepper
                         activeStep={1}
-                        alternativeLabel={!isTablet}
-                        orientation={isTablet ? 'horizontal' : 'horizontal'}
+                        alternativeLabel
                         sx={{
-                            minWidth: isTablet ? 400 : 'auto',
-                            '& .MuiStepLabel-label': {
-                                fontSize: { xs: 12, sm: 14 }
-                            }
+                            minWidth: isTablet ? 360 : 'auto',
+                            '& .MuiStepIcon-root': { color: alpha(PRIMARY_COLOR, 0.25) },
+                            '& .MuiStepIcon-root.Mui-active': { color: PRIMARY_COLOR },
+                            '& .MuiStepIcon-root.Mui-completed': { color: PRIMARY_COLOR },
+                            '& .MuiStepConnector-line': { borderColor: alpha(PRIMARY_COLOR, 0.2) },
+                            '& .MuiStepLabel-label': { fontSize: { xs: 11, sm: 13 } },
+                            '& .MuiStepLabel-label.Mui-active': { color: PRIMARY_COLOR, fontWeight: 600 },
+                            '& .MuiStepLabel-label.Mui-completed': { color: PRIMARY_COLOR },
                         }}
                     >
                         <Step completed>
@@ -244,67 +259,25 @@ const CreateRequest = () => {
             </Card>
 
             {/* Main Form Section */}
-            <Paper
-                elevation={0}
-                sx={{
-                    p: { xs: 2, sm: 3, md: 4 },
-                    borderRadius: 2,
-                    border: '1px solid',
-                    borderColor: alpha('#000', 0.08),
-                }}
+            <Box
+                component="form"
+                autoComplete="off"
+                onSubmit={handleSubmit(onSubmit)}
             >
-                <Box
-                    component="form"
-                    autoComplete="off"
-                    onSubmit={handleSubmit(onSubmit)}
-                >
-                    <Grid container spacing={4}>
-                        <Grid item xs={12}>
-                            <RequestForm
-                                setFile={setFile}
-                                file={file}
-                                setImage={setSignature}
-                                image={signature}
-                                formState={formState}
-                                control={control}
-                                register={register}
-                                sendingRequest={sendingRequest}
-                                buttonText="Submit"
-                            />
-                        </Grid>
-                    </Grid>
-                </Box>
-            </Paper>
+                <RequestForm
+                    setFile={setFile}
+                    file={file}
+                    setImage={setSignature}
+                    image={signature}
+                    formState={formState}
+                    control={control}
+                    register={register}
+                    sendingRequest={sendingRequest}
+                    buttonText="Submit Request"
+                />
+            </Box>
 
-            <Card
-                elevation={0}
-                sx={{
-                    mt: 3,
-                    borderRadius: 2,
-                    border: `1px solid ${alpha(PRIMARY_COLOR, 0.12)}`,
-                    bgcolor: alpha(PRIMARY_COLOR, 0.02),
-                }}
-            >
-                <CardContent>
-                    <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
-                        <FactCheckOutlinedIcon sx={{ color: PRIMARY_COLOR, mr: 2 }} />
-                        <Box>
-                            <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1, color: PRIMARY_COLOR }}>
-                                Request Tips
-                            </Typography>
-                            <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
-                                • Provide clear descriptions to help the approval process
-                            </Typography>
-                            <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1 }}>
-                                • Add specific quantities for each requested item
-                            </Typography>
-                            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                                • Upload supporting documentation when applicable
-                            </Typography>
-                        </Box>
-                    </Box>
-                </CardContent>
-            </Card>
+
         </Container>
     );
 };

@@ -18,10 +18,9 @@ import {
     Paper,
     Typography,
     Tooltip,
-    useTheme,
-    useMediaQuery,
     LinearProgress,
-    IconButton
+    IconButton,
+    alpha
 } from '@mui/material';
 import { useNavigate } from 'react-router';
 import { IRequestForm } from '../interface';
@@ -32,16 +31,18 @@ import {
     UseFormSelect,
     UseFormTimePicker
 } from '../../../components/forms';
-import ButtonComponent from '../../../components/forms/Button';
+
 import { ROUTES } from '../../../core/routes/routes';
 import RequestUtills from './utills';
 import PlaceHolder from "../../../statics/images/Placeholder.png";
-import { grey, blue } from '@mui/material/colors';
+import { grey } from '@mui/material/colors';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import DeleteIcon from '@mui/icons-material/Delete';
 import DescriptionIcon from '@mui/icons-material/Description';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import ArticleIcon from '@mui/icons-material/Article';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import SendIcon from '@mui/icons-material/Send';
 import InputFileUpload from '../../../components/forms/FileUpload';
 import { useRef, useState } from 'react';
 import InventoryTable from '../../../components/forms/InventoryTable';
@@ -62,24 +63,51 @@ interface SectionProps {
     icon?: React.ReactNode;
 }
 
+const PRIMARY_COLOR = '#08796C';
+
 const FormSection = ({ title, subtitle, children, helpText, icon }: SectionProps) => {
     return (
         <Box sx={{ mb: 4 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                {icon && <Box sx={{ mr: 1, color: '#08796C' }}>{icon}</Box>}
-                <Typography variant="h6" sx={{ fontWeight: 600, color: '#334155' }}>
+            <Box
+                sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    mb: subtitle ? 0.5 : 2,
+                    pb: 1.5,
+                    borderBottom: `2px solid ${alpha(PRIMARY_COLOR, 0.1)}`,
+                }}
+            >
+                {icon && (
+                    <Box
+                        sx={{
+                            mr: 1.5,
+                            color: PRIMARY_COLOR,
+                            bgcolor: alpha(PRIMARY_COLOR, 0.1),
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: 30,
+                            height: 30,
+                            borderRadius: '6px',
+                            flexShrink: 0,
+                        }}
+                    >
+                        {icon}
+                    </Box>
+                )}
+                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: 'text.primary', flexGrow: 1 }}>
                     {title}
                 </Typography>
                 {helpText && (
                     <Tooltip title={helpText} arrow placement="top">
-                        <IconButton size="small" sx={{ ml: 0.5 }}>
+                        <IconButton size="small">
                             <HelpOutlineIcon fontSize="small" color="action" />
                         </IconButton>
                     </Tooltip>
                 )}
             </Box>
             {subtitle && (
-                <Typography variant="body2" sx={{ mb: 2, color: grey[600] }}>
+                <Typography variant="body2" sx={{ mb: 2, mt: 0.5, color: 'text.secondary' }}>
                     {subtitle}
                 </Typography>
             )}
@@ -105,8 +133,6 @@ const RequestForm = ({
     const { formFields } = RequestUtills();
     const navigate = useNavigate();
     const inputRef = useRef<HTMLInputElement>(null);
-    const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
     const [dragActive, setDragActive] = useState(false);
 
     const handleButtonClick = () => {
@@ -296,7 +322,7 @@ const RequestForm = ({
                                     bgcolor: '#FAFBFC',
                                     borderRadius: 2,
                                     boxShadow: "none",
-                                    border: dragActive ? `2px dashed ${blue[500]}` : `1px dashed ${grey[400]}`,
+                                    border: dragActive ? `2px dashed ${PRIMARY_COLOR}` : `1px dashed ${grey[400]}`,
                                     transition: 'all 0.2s ease-in-out'
                                 }}
                                 onDragOver={handleDragOver}
@@ -579,7 +605,7 @@ const RequestForm = ({
                                                 {/* File type icons based on current file or initial file */}
                                                 {((file && getFileType(file) === 'image') ||
                                                     (!file && initialFile?.fileType === 'image' && image)) && (
-                                                        <Box sx={{ color: blue[600], mr: 1.5 }}>
+                                                        <Box sx={{ color: PRIMARY_COLOR, mr: 1.5 }}>
                                                             <ImageIcon fontSize="small" />
                                                         </Box>
                                                     )}
@@ -634,13 +660,30 @@ const RequestForm = ({
                                                     sx={{ bgcolor: '#E6F9F4', color: '#00C48C' }}
                                                 />
                                             </Box>
-                                            <LinearProgress variant="determinate" value={100} sx={{ mb: 2 }} />
+                                            <LinearProgress
+                                                variant="determinate"
+                                                value={100}
+                                                sx={{
+                                                    mb: 2,
+                                                    borderRadius: 1,
+                                                    '& .MuiLinearProgress-bar': { bgcolor: PRIMARY_COLOR },
+                                                }}
+                                            />
                                             <Button
                                                 variant="outlined"
                                                 startIcon={<CloudUploadIcon />}
                                                 fullWidth
                                                 onClick={handleButtonClick}
                                                 size="small"
+                                                sx={{
+                                                    borderColor: alpha(PRIMARY_COLOR, 0.4),
+                                                    color: PRIMARY_COLOR,
+                                                    textTransform: 'none',
+                                                    '&:hover': {
+                                                        borderColor: PRIMARY_COLOR,
+                                                        bgcolor: alpha(PRIMARY_COLOR, 0.04),
+                                                    },
+                                                }}
                                             >
                                                 Change Document
                                             </Button>
@@ -669,8 +712,15 @@ const RequestForm = ({
                                                 onClick={handleButtonClick}
                                                 sx={{
                                                     px: 3,
-                                                    bgcolor: blue[700],
-                                                    '&:hover': { bgcolor: blue[800] }
+                                                    textTransform: 'none',
+                                                    fontWeight: 600,
+                                                    bgcolor: PRIMARY_COLOR,
+                                                    boxShadow: `0 4px 12px ${alpha(PRIMARY_COLOR, 0.3)}`,
+                                                    '&:hover': {
+                                                        bgcolor: '#065f54',
+                                                        transform: 'translateY(-1px)',
+                                                    },
+                                                    transition: 'all 0.2s ease',
                                                 }}
                                             >
                                                 Browse Files
@@ -706,26 +756,55 @@ const RequestForm = ({
 
             <Divider sx={{ mt: 4, mb: 3 }} />
 
-            <Box sx={{ display: 'flex', justifyContent: isMobile ? 'center' : 'flex-end', width: "100%" }}>
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%' }}>
                 <Stack
                     direction={{ xs: 'column', sm: 'row' }}
                     spacing={2}
                     sx={{ width: { xs: '100%', sm: 'auto' } }}
                 >
-                    <ButtonComponent
-                        handleClick={() => navigate(ROUTES.REQUEST)}
-                        buttonColor="error"
+                    <Button
                         type="button"
-                        sendingRequest={false}
-                        buttonText="Back"
-                        variant='outlined'
-                    />
-                    <ButtonComponent
-                        buttonColor="success"
+                        variant="outlined"
+                        onClick={() => navigate(ROUTES.REQUEST)}
+                        startIcon={<ArrowBackIcon />}
+                        sx={{
+                            minWidth: { xs: '100%', sm: 110 },
+                            borderColor: alpha('#000', 0.2),
+                            color: 'text.secondary',
+                            textTransform: 'none',
+                            '&:hover': {
+                                borderColor: alpha('#000', 0.3),
+                                bgcolor: alpha('#000', 0.05),
+                            },
+                        }}
+                    >
+                        Back
+                    </Button>
+                    <Button
                         type="submit"
-                        sendingRequest={sendingRequest}
-                        buttonText={buttonText}
-                    />
+                        variant="contained"
+                        disabled={sendingRequest}
+                        startIcon={<SendIcon />}
+                        sx={{
+                            minWidth: { xs: '100%', sm: 160 },
+                            bgcolor: PRIMARY_COLOR,
+                            boxShadow: `0 4px 12px ${alpha(PRIMARY_COLOR, 0.3)}`,
+                            textTransform: 'none',
+                            fontWeight: 600,
+                            '&:hover': {
+                                bgcolor: '#065f54',
+                                transform: 'translateY(-1px)',
+                                boxShadow: `0 6px 16px ${alpha(PRIMARY_COLOR, 0.4)}`,
+                            },
+                            transition: 'all 0.2s ease',
+                            '&.Mui-disabled': {
+                                bgcolor: alpha(PRIMARY_COLOR, 0.5),
+                                color: '#fff',
+                            },
+                        }}
+                    >
+                        {sendingRequest ? 'Submitting...' : buttonText}
+                    </Button>
                 </Stack>
             </Box>
         </Paper>
