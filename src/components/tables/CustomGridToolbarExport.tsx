@@ -5,7 +5,7 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { ButtonProps } from "@mui/material";
+import { ButtonProps, Box, alpha } from "@mui/material";
 import {
     // GridCsvExportMenuItem,
     // GridCsvExportOptions,
@@ -20,14 +20,37 @@ interface CustomGridToolbarExportProps extends ButtonProps {
 const CustomGridToolbarExport = (props: CustomGridToolbarExportProps) => {
 
     // const csvOptions: GridCsvExportOptions = {};
-    const { JsonExportMenuItem, ExcelExportMenuItem } = TableUtills({ moduleName: props.module });
+    const { module, ...restProps } = props;
+    const { JsonExportMenuItem, ExcelExportMenuItem } = TableUtills({ moduleName: module });
 
     return (
-        <GridToolbarExportContainer {...props}>
-            {/* <GridCsvExportMenuItem options={csvOptions} /> */}
-            <ExcelExportMenuItem />
-            <JsonExportMenuItem />
-        </GridToolbarExportContainer>
+        <Box
+            sx={{
+                '& .MuiButton-root': {
+                    height: 40,
+                    px: 2,
+                    borderRadius: '8px',
+                    border: `1px solid ${alpha('#000', 0.18)}`,
+                    color: 'text.secondary',
+                    textTransform: 'none',
+                    fontWeight: 600,
+                    fontSize: '0.875rem',
+                    boxShadow: 'none',
+                    '&:hover': {
+                        border: `1px solid ${alpha('#000', 0.3)}`,
+                        bgcolor: alpha('#000', 0.04),
+                        boxShadow: 'none',
+                    },
+                    transition: 'all 0.2s ease',
+                },
+            }}
+        >
+            <GridToolbarExportContainer {...restProps}>
+                {/* <GridCsvExportMenuItem options={csvOptions} /> */}
+                <ExcelExportMenuItem />
+                <JsonExportMenuItem />
+            </GridToolbarExportContainer>
+        </Box>
     );
 }
 
