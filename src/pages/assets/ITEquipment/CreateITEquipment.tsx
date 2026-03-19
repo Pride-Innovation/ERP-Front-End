@@ -117,7 +117,9 @@ const CreateITEquipment = () => {
                         color: PRIMARY_COLOR,
                         fontWeight: 600,
                         border: `1px solid ${alpha(PRIMARY_COLOR, 0.2)}`,
-                        '& .MuiChip-icon': { color: PRIMARY_COLOR }
+                        '& .MuiChip-icon': { color: PRIMARY_COLOR },
+                        fontSize: '0.75rem',
+                        height: 28,
                     }}
                 />
             </Box>
