@@ -89,20 +89,22 @@ const CreateFleet = () => {
                             Create Fleet Item
                         </Typography>
                         <Typography variant="caption" color="text.secondary">
-                            Fill in the details below to register a new fleet vehicle
+                            Fill in the details below to register a new fleet item
                         </Typography>
                     </Box>
                 </Stack>
                 <Chip
                     icon={<AddCircleOutlineIcon sx={{ fontSize: 15 }} />}
-                    label="New Vehicle"
+                    label="New Fleet Item"
                     size="small"
                     sx={{
                         bgcolor: alpha(PRIMARY_COLOR, 0.08),
                         color: PRIMARY_COLOR,
                         fontWeight: 600,
                         border: `1px solid ${alpha(PRIMARY_COLOR, 0.2)}`,
-                        '& .MuiChip-icon': { color: PRIMARY_COLOR }
+                        '& .MuiChip-icon': { color: PRIMARY_COLOR },
+                        fontSize: '0.75rem',
+                        height: 28,
                     }}
                 />
             </Box>
