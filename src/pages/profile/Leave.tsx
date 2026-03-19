@@ -51,6 +51,138 @@ import { toast } from 'react-toastify';
 const PRIMARY_COLOR = '#08796C';
 const SECONDARY_COLOR = '#BC892C';
 
+const selectSx = {
+  '& .MuiOutlinedInput-root': {
+    borderRadius: '8px',
+    backgroundColor: '#FAFAFA',
+    transition: 'background-color 0.2s ease, box-shadow 0.2s ease',
+    '&:hover .MuiOutlinedInput-notchedOutline': {
+      borderColor: alpha(PRIMARY_COLOR, 0.5),
+    },
+    '&.Mui-focused': {
+      backgroundColor: '#fff',
+      '& .MuiOutlinedInput-notchedOutline': {
+        borderColor: PRIMARY_COLOR,
+        borderWidth: '1.5px',
+        boxShadow: `0 0 0 3px ${alpha(PRIMARY_COLOR, 0.09)}`,
+      },
+    },
+    '&.Mui-error .MuiOutlinedInput-notchedOutline': {
+      borderColor: '#D32F2F',
+    },
+  },
+  '& .MuiOutlinedInput-notchedOutline': {
+    borderColor: 'rgba(0, 0, 0, 0.18)',
+  },
+  '& .MuiInputLabel-root': {
+    color: 'rgba(0, 0, 0, 0.45)',
+    fontSize: '0.875rem',
+    '&.Mui-focused': { color: PRIMARY_COLOR },
+    '&.Mui-error': { color: '#D32F2F' },
+  },
+  '& .MuiInputLabel-outlined:not(.MuiInputLabel-shrink)': {
+    transform: 'translate(14px, 13px) scale(1)',
+  },
+  '& .MuiSelect-select.MuiInputBase-input': {
+    padding: '13px 32px 13px 14px',
+    fontSize: '0.875rem',
+    lineHeight: 1.5,
+  },
+};
+
+const menuPropsStyled = {
+  PaperProps: {
+    elevation: 3,
+    sx: {
+      mt: 0.5,
+      borderRadius: '8px',
+      boxShadow: `0 4px 20px ${alpha('#000', 0.1)}`,
+      '& .MuiMenuItem-root': {
+        fontSize: '0.875rem',
+        py: 1,
+        '&:hover': { backgroundColor: alpha(PRIMARY_COLOR, 0.06) },
+        '&.Mui-selected': {
+          backgroundColor: alpha(PRIMARY_COLOR, 0.1),
+          color: PRIMARY_COLOR,
+          fontWeight: 500,
+          '&:hover': { backgroundColor: alpha(PRIMARY_COLOR, 0.14) },
+        },
+      },
+    },
+  },
+};
+
+const datePickerSx = {
+  width: '100%',
+  '& .MuiOutlinedInput-root': {
+    borderRadius: '8px',
+    backgroundColor: '#FAFAFA',
+    transition: 'background-color 0.2s ease, box-shadow 0.2s ease',
+    '&:hover .MuiOutlinedInput-notchedOutline': {
+      borderColor: alpha(PRIMARY_COLOR, 0.5),
+    },
+    '&.Mui-focused': {
+      backgroundColor: '#fff',
+      '& .MuiOutlinedInput-notchedOutline': {
+        borderColor: PRIMARY_COLOR,
+        borderWidth: '1.5px',
+        boxShadow: `0 0 0 3px ${alpha(PRIMARY_COLOR, 0.09)}`,
+      },
+    },
+    '&.Mui-error .MuiOutlinedInput-notchedOutline': {
+      borderColor: '#D32F2F',
+    },
+  },
+  '& .MuiOutlinedInput-notchedOutline': {
+    borderColor: 'rgba(0, 0, 0, 0.18)',
+  },
+  '& .MuiOutlinedInput-input': {
+    padding: '13px 14px',
+    fontSize: '0.875rem',
+    lineHeight: 1.5,
+  },
+  '& .MuiInputLabel-root': {
+    color: 'rgba(0, 0, 0, 0.45)',
+    fontSize: '0.875rem',
+    '&.Mui-focused': { color: PRIMARY_COLOR },
+    '&.Mui-error': { color: '#D32F2F' },
+  },
+  '& .MuiInputLabel-outlined:not(.MuiInputLabel-shrink)': {
+    transform: 'translate(14px, 13px) scale(1)',
+  },
+  '& .MuiInputAdornment-root .MuiIconButton-root': {
+    color: 'rgba(0, 0, 0, 0.38)',
+    '&:hover': { color: PRIMARY_COLOR, backgroundColor: alpha(PRIMARY_COLOR, 0.06) },
+  },
+};
+
+const datePickerPopperSx = {
+  '& .MuiPaper-root': {
+    borderRadius: '12px',
+    boxShadow: `0 8px 32px ${alpha('#000', 0.12)}`,
+    mt: 0.5,
+  },
+  '& .MuiPickersDay-root': {
+    borderRadius: '8px',
+    fontSize: '0.8125rem',
+    '&:hover': { backgroundColor: alpha(PRIMARY_COLOR, 0.08) },
+    '&.Mui-selected': {
+      backgroundColor: PRIMARY_COLOR,
+      '&:hover': { backgroundColor: '#065f54' },
+      '&:focus': { backgroundColor: PRIMARY_COLOR },
+    },
+    '&.MuiPickersDay-today': { borderColor: PRIMARY_COLOR },
+  },
+  '& .MuiPickersCalendarHeader-switchViewButton, & .MuiPickersArrowSwitcher-button': {
+    '&:hover': { backgroundColor: alpha(PRIMARY_COLOR, 0.08), color: PRIMARY_COLOR },
+  },
+  '& .MuiDayCalendar-weekDayLabel': {
+    color: alpha(PRIMARY_COLOR, 0.7),
+    fontWeight: 600,
+    fontSize: '0.75rem',
+  },
+};
+
 // Leave types options
 const leaveTypes = [
   { value: 'annual', label: 'Annual Leave' },
@@ -160,7 +292,7 @@ const LeaveComponent = ({ handleClose, id }: { handleClose: () => void, id: stri
       name: `${user.firstName} ${user.lastName}`,
       role: user.title?.name || 'Employee'
     })).filter((user: IColleague) => user.id !== parseInt(id, 10)); // Exclude current user
-    
+
     SetColleagues(data);
   };
 
@@ -261,8 +393,8 @@ const LeaveComponent = ({ handleClose, id }: { handleClose: () => void, id: stri
                 fullWidth
                 error={!!errors.leaveType}
                 variant="outlined"
-                size="small"
-                sx={{ mb: 2 }}
+                size="medium"
+                sx={{ mb: 2, ...selectSx }}
               >
                 <InputLabel id="leave-type-label">Leave Type</InputLabel>
                 <Controller
@@ -273,6 +405,7 @@ const LeaveComponent = ({ handleClose, id }: { handleClose: () => void, id: stri
                       {...field}
                       labelId="leave-type-label"
                       label="Leave Type"
+                      MenuProps={menuPropsStyled}
                     >
                       {leaveTypes.map((type) => (
                         <MenuItem key={type.value} value={type.value}>
@@ -302,11 +435,13 @@ const LeaveComponent = ({ handleClose, id }: { handleClose: () => void, id: stri
                           onChange={(date) => field.onChange(date)}
                           slotProps={{
                             textField: {
-                              size: "small",
+                              size: 'medium',
                               fullWidth: true,
                               error: !!errors.startDate,
                               helperText: errors.startDate?.message,
-                            }
+                              sx: datePickerSx,
+                            },
+                            popper: { sx: datePickerPopperSx },
                           }}
                           disablePast
                         />
@@ -326,11 +461,13 @@ const LeaveComponent = ({ handleClose, id }: { handleClose: () => void, id: stri
                           onChange={(date) => field.onChange(date)}
                           slotProps={{
                             textField: {
-                              size: "small",
+                              size: 'medium',
                               fullWidth: true,
                               error: !!errors.endDate,
                               helperText: errors.endDate?.message,
-                            }
+                              sx: datePickerSx,
+                            },
+                            popper: { sx: datePickerPopperSx },
                           }}
                           disablePast
                           minDate={startDate || undefined}
@@ -397,7 +534,8 @@ const LeaveComponent = ({ handleClose, id }: { handleClose: () => void, id: stri
                 fullWidth
                 error={!!errors.actingPerson}
                 variant="outlined"
-                size="small"
+                size="medium"
+                sx={selectSx}
               >
                 <InputLabel id="acting-person-label">Acting Person</InputLabel>
                 <Controller
@@ -408,7 +546,7 @@ const LeaveComponent = ({ handleClose, id }: { handleClose: () => void, id: stri
                       {...field}
                       labelId="acting-person-label"
                       label="Acting Person"
-                      startAdornment={<PersonIcon sx={{ ml: 0.5, mr: 0.5, color: alpha('#000', 0.4), fontSize: '1.2rem' }} />}
+                      MenuProps={menuPropsStyled}
                     >
                       {colleagues.map((colleague) => (
                         <MenuItem key={colleague.id} value={colleague.id}>
