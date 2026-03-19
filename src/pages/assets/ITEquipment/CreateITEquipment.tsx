@@ -56,13 +56,13 @@ const CreateITEquipment = () => {
         try {
             const response = await createITEquipmentService(formData) as IITEquipmentAxiosResponse
             if (response.status === 201) {
-                toast.success("Asset created successfully!!")
+                toast.success("IT Equipment created successfully!!")
                 reset({ ...defaultUser });
                 setOption('');
             }
         } catch (error) {
-            console.error('Error creating asset:', error);
-            toast.error("Failed to create asset. Please try again.");
+            console.error('Error creating IT Equipment:', error);
+            toast.error("Failed to create IT Equipment. Please try again.");
         }
         setSendingRequest(false);
     };
@@ -110,7 +110,7 @@ const CreateITEquipment = () => {
                 </Stack>
                 <Chip
                     icon={<AddCircleOutlineIcon sx={{ fontSize: 15 }} />}
-                    label="New Asset"
+                    label="New IT Equipment"
                     size="small"
                     sx={{
                         bgcolor: alpha(PRIMARY_COLOR, 0.08),
