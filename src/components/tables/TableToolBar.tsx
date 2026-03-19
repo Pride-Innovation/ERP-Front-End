@@ -1,7 +1,6 @@
 import {
     GridToolbarContainer,
 } from '@mui/x-data-grid';
-import ButtonComponent from '../forms/Button';
 import {
     alpha,
     Box,
@@ -14,7 +13,9 @@ import {
     SelectChangeEvent,
     styled,
     InputAdornment,
-    Chip
+    Chip,
+    Button,
+    Divider
 } from '@mui/material';
 import { CustomToolbarWrapperProps, ITableToolBar } from './interface';
 import FileUploadButton from '../forms/FileUploadButton';
@@ -26,6 +27,11 @@ import DateRangePicker from '../forms/DateRangePicker';
 import dayjs, { Dayjs } from 'dayjs';
 import { FormContext } from '../../context/form';
 import FilterListIcon from '@mui/icons-material/FilterList';
+import SearchIcon from '@mui/icons-material/Search';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import AddIcon from '@mui/icons-material/Add';
+
+const PRIMARY_COLOR = '#08796C';
 
 const StyledFormControl = styled(FormControl)(({ theme }) => ({
     minWidth: 180,
@@ -219,7 +225,8 @@ const TableToolBar = ({
 
             <Stack
                 direction="row"
-                spacing={1.5}
+                spacing={1}
+                alignItems="center"
                 sx={{ flexShrink: 0 }}
             >
                 {searchAction && (
@@ -228,46 +235,93 @@ const TableToolBar = ({
                         placeholder="Search..."
                         variant='outlined'
                         InputProps={{
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    <SearchIcon sx={{ fontSize: 17, color: 'text.disabled' }} />
+                                </InputAdornment>
+                            ),
                             sx: {
-                                borderRadius: 2,
+                                borderRadius: '8px',
                                 backgroundColor: '#FFFFFF',
                                 border: `1px solid ${alpha('#000', 0.12)}`,
+                                height: 40,
+                                fontSize: '0.875rem',
                                 '&:hover': {
-                                    borderColor: theme.palette.primary.main,
-                                    boxShadow: `0 0 0 2px ${alpha(theme.palette.primary.main, 0.1)}`
+                                    borderColor: PRIMARY_COLOR,
+                                    boxShadow: `0 0 0 2px ${alpha(PRIMARY_COLOR, 0.1)}`,
+                                },
+                                '&.Mui-focused': {
+                                    borderColor: PRIMARY_COLOR,
+                                    boxShadow: `0 0 0 3px ${alpha(PRIMARY_COLOR, 0.12)}`,
                                 },
                                 '& .MuiOutlinedInput-notchedOutline': {
-                                    border: 'none'
+                                    border: 'none',
                                 },
-                                minHeight: 40,
-                                fontSize: '0.875rem'
                             }
                         }}
+                        sx={{ width: 220 }}
                     />
+                )}
+
+                {(searchAction && (refresh || createAction || importData || exportData)) && (
+                    <Divider orientation="vertical" flexItem sx={{ height: 24, alignSelf: 'center', mx: 0.5 }} />
                 )}
 
                 {refresh && (
-                    <ButtonComponent
-                        handleClick={() => window.location.reload()}
-                        sendingRequest={false}
-                        buttonText="Refresh"
+                    <Button
+                        onClick={() => window.location.reload()}
                         variant='outlined'
-                        buttonColor='primary'
-                        type='button'
-                    />
+                        startIcon={<RefreshIcon sx={{ fontSize: '17px !important' }} />}
+                        sx={{
+                            height: 40,
+                            px: 2,
+                            borderRadius: '8px',
+                            borderColor: alpha('#000', 0.18),
+                            color: 'text.secondary',
+                            textTransform: 'none',
+                            fontWeight: 500,
+                            fontSize: '0.875rem',
+                            '&:hover': {
+                                borderColor: PRIMARY_COLOR,
+                                color: PRIMARY_COLOR,
+                                backgroundColor: alpha(PRIMARY_COLOR, 0.05),
+                            },
+                            transition: 'all 0.2s ease',
+                        }}
+                    >
+                        Refresh
+                    </Button>
                 )}
 
                 {createAction && (
-                    <ButtonComponent
-                        handleClick={() => onCreationHandler()}
-                        sendingRequest={false}
-                        buttonText={"Create"
-                            // ${header.singular}
-                        }
+                    <Button
+                        onClick={() => onCreationHandler()}
                         variant='contained'
-                        buttonColor='success'
-                        type='button'
-                    />
+                        startIcon={<AddIcon sx={{ fontSize: '17px !important' }} />}
+                        sx={{
+                            height: 40,
+                            px: 2.5,
+                            borderRadius: '8px',
+                            bgcolor: PRIMARY_COLOR,
+                            color: '#fff',
+                            textTransform: 'none',
+                            fontWeight: 600,
+                            fontSize: '0.875rem',
+                            boxShadow: `0 2px 8px ${alpha(PRIMARY_COLOR, 0.35)}`,
+                            '&:hover': {
+                                bgcolor: '#065f54',
+                                boxShadow: `0 4px 14px ${alpha(PRIMARY_COLOR, 0.4)}`,
+                                transform: 'translateY(-1px)',
+                            },
+                            '&:active': {
+                                transform: 'translateY(0)',
+                                boxShadow: `0 2px 8px ${alpha(PRIMARY_COLOR, 0.35)}`,
+                            },
+                            transition: 'all 0.2s ease',
+                        }}
+                    >
+                        Create
+                    </Button>
                 )}
 
                 {importData && (
