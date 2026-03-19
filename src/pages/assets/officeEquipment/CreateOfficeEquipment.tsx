@@ -103,14 +103,16 @@ const CreateOfficeEquipment = () => {
                 </Stack>
                 <Chip
                     icon={<AddCircleOutlineIcon sx={{ fontSize: 15 }} />}
-                    label="New Asset"
+                    label="New Office Equipment"
                     size="small"
                     sx={{
                         bgcolor: alpha(PRIMARY_COLOR, 0.08),
                         color: PRIMARY_COLOR,
                         fontWeight: 600,
                         border: `1px solid ${alpha(PRIMARY_COLOR, 0.2)}`,
-                        '& .MuiChip-icon': { color: PRIMARY_COLOR }
+                        '& .MuiChip-icon': { color: PRIMARY_COLOR },
+                        fontSize: '0.75rem',
+                        height: 28,
                     }}
                 />
             </Box>
