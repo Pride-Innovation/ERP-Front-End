@@ -102,24 +102,30 @@ const FileUploadButton = ({ title, module }: IFileUploadButton) => {
     return (
         <Button
             sx={{
-                textTransform: "capitalize",
-                minHeight: "40px",
-                width: "100%",
-                borderColor: alpha('#BC892C', 0.6),
+                textTransform: 'none',
+                height: 40,
+                px: 2,
+                borderRadius: '8px',
+                borderColor: alpha('#BC892C', 0.5),
+                color: '#BC892C',
+                fontWeight: 600,
+                fontSize: '0.875rem',
+                boxShadow: 'none',
                 '&:hover': {
                     borderColor: '#BC892C',
-                    bgcolor: alpha('#BC892C', 0.04)
-                }
+                    bgcolor: alpha('#BC892C', 0.06),
+                    boxShadow: `0 2px 8px ${alpha('#BC892C', 0.2)}`,
+                },
+                transition: 'all 0.2s ease',
             }}
-            size="medium"
             component="label"
             role={undefined}
             variant="outlined"
             color="secondary"
             tabIndex={-1}
-            startIcon={<CloudUploadIcon fontSize="small" sx={{ color: "#BC892C" }} />}
+            startIcon={<CloudUploadIcon sx={{ fontSize: '17px !important', color: '#BC892C' }} />}
         >
-            Import 
+            Import
             {/* {title} */}
             <InputFileUpload inputRef={inputRef} handleFileUpload={handleFileUpload} />
         </Button>
