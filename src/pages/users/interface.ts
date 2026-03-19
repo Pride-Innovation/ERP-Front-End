@@ -112,6 +112,7 @@ export interface IUserForm {
     buttonText: string;
     sendingRequest: boolean;
     handleClose: () => void;
+    mode?: 'create' | 'update';
 }
 
 
