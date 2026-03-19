@@ -35,7 +35,7 @@ import { useMemo } from 'react';
 
 // Brand colors
 const PRIMARY_COLOR = '#08796C';
-const SECONDARY_COLOR = '#BC892C';
+// const SECONDARY_COLOR = '#BC892C';
 
 const passwordFieldSx = {
     '& .MuiOutlinedInput-root': {
