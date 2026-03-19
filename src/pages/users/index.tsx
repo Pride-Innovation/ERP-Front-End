@@ -98,7 +98,7 @@ const Users = () => {
         </ModalComponent>
       }
       {modalState === crudStates.update &&
-        <ModalComponent title='Update User' open={open} handleClose={handleClose} width="60%">
+        <ModalComponent title='Update User' open={open} handleClose={handleClose} width="70%">
           <UpdateUsers user={user} sendingRequest={sendingRequest} setSendingRequest={setSendingRequest} handleClose={handleClose} />
         </ModalComponent>
       }
