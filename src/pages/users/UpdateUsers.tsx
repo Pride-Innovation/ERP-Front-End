@@ -7,7 +7,7 @@ Managing Director
 
 import { useContext, useEffect, useState } from 'react';
 import { IUpdateUser, IUser, IUserAxiosResponse } from './interface';
-import { Box, Paper } from '@mui/material';
+import { Box } from '@mui/material';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { userSchema } from './schema';
@@ -68,29 +68,18 @@ const UpdateUsers = ({ handleClose, sendingRequest, setSendingRequest, user }: I
     };
 
     return (
-        <Box sx={{ overflowY: 'auto', pb: 1 }}>
-            <Paper
-                elevation={0}
-                sx={{
-                    borderRadius: 2,
-                    boxShadow: "none",
-                    maxWidth: "1200px",
-                    mx: "auto",
-                    overflow: 'hidden',
-                    border: '1px solid rgba(0,0,0,0.08)'
-                }}
-            >
-                <form autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
-                    <UserForm
-                        handleClose={handleClose}
-                        buttonText="Submit"
-                        formState={formState}
-                        control={control}
-                        sendingRequest={sendingRequest}
-                        register={register}
-                    />
-                </form>
-            </Paper>
+        <Box sx={{ overflowY: 'auto', pb: 1, maxWidth: '1200px', mx: 'auto' }}>
+            <form autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
+                <UserForm
+                    handleClose={handleClose}
+                    buttonText="Save Changes"
+                    formState={formState}
+                    control={control}
+                    sendingRequest={sendingRequest}
+                    register={register}
+                    mode="update"
+                />
+            </form>
         </Box>
     )
 }
