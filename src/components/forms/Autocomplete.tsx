@@ -7,12 +7,74 @@ Managing Director
 
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
+import Paper from '@mui/material/Paper';
 import { IAutocompleteComponent } from './interface';
 import { useEffect, useContext, useState } from 'react';
 import { IOptions } from '../tables/interface';
 import { useDebounce } from '../../hooks/useDebounce';
 import { AutocompleteContext } from '../../context/autocomplete';
-import { Popper } from '@mui/material';
+import { alpha, Popper } from '@mui/material';
+
+const PRIMARY_COLOR = '#08796C';
+
+const autocompleteSx = {
+    '& .MuiOutlinedInput-root': {
+        borderRadius: '8px',
+        backgroundColor: '#FAFAFA',
+        // Only zero out vertical padding with !important — do NOT touch horizontal
+        // (MUI sets paddingRight separately for the popup icon area; shorthand would break it)
+        paddingTop: '0px !important',
+        paddingBottom: '0px !important',
+        transition: 'background-color 0.2s ease, box-shadow 0.2s ease',
+        '&:hover .MuiOutlinedInput-notchedOutline': {
+            borderColor: alpha(PRIMARY_COLOR, 0.5),
+        },
+        '&.Mui-focused': {
+            backgroundColor: '#fff',
+            '& .MuiOutlinedInput-notchedOutline': {
+                borderColor: PRIMARY_COLOR,
+                borderWidth: '1.5px',
+                boxShadow: `0 0 0 3px ${alpha(PRIMARY_COLOR, 0.09)}`,
+            },
+        },
+        '&.Mui-disabled': {
+            backgroundColor: '#F3F4F6',
+            opacity: 0.7,
+        },
+        '&.Mui-error .MuiOutlinedInput-notchedOutline': {
+            borderColor: '#D32F2F',
+        },
+        // MUI nested rule has higher specificity — !important is required here too
+        '& .MuiAutocomplete-input': {
+            padding: '13px 4px !important',
+            fontSize: '0.875rem',
+            lineHeight: 1.5,
+        },
+    },
+    '& .MuiOutlinedInput-notchedOutline': {
+        borderColor: 'rgba(0, 0, 0, 0.18)',
+    },
+    '& .MuiInputLabel-root': {
+        color: 'rgba(0, 0, 0, 0.45)',
+        fontSize: '0.875rem',
+        '&.Mui-focused': { color: PRIMARY_COLOR },
+        '&.Mui-error': { color: '#D32F2F' },
+    },
+    // root vertical = 0, inner vertical = 13px → same total as Input/Select (13px per side)
+    '& .MuiInputLabel-outlined:not(.MuiInputLabel-shrink)': {
+        transform: 'translate(14px, 13px) scale(1)',
+    },
+    '& .MuiChip-root': {
+        height: 24,
+        fontSize: '0.8rem',
+        backgroundColor: alpha(PRIMARY_COLOR, 0.08),
+        color: PRIMARY_COLOR,
+        '& .MuiChip-deleteIcon': {
+            color: alpha(PRIMARY_COLOR, 0.5),
+            '&:hover': { color: PRIMARY_COLOR },
+        },
+    },
+};
 
 /**
  * AutocompleteComponent
@@ -87,49 +149,72 @@ const AutocompleteComponent = ({
         }
     };
 
-    // Custom Popper for proper positioning of dropdown
-    const CustomPopper = (props: any) => {
-        return (
-            <Popper
-                {...props}
-                placement="bottom-start"
-                modifiers={[
-                    {
-                        name: 'preventOverflow',
-                        options: {
-                            altBoundary: true,
-                            rootBoundary: 'document',
-                            padding: 8,
+    // Custom Popper: z-index 1500 ensures dropdown appears above Modals (z-index 1300)
+    const CustomPopper = (props: any) => (
+        <Popper
+            {...props}
+            placement="bottom-start"
+            style={{ ...props.style, zIndex: 1500 }}
+            modifiers={[
+                { name: 'preventOverflow', options: { altBoundary: true, rootBoundary: 'document', padding: 8 } },
+                { name: 'flip', options: { altBoundary: true, rootBoundary: 'document', padding: 8 } },
+            ]}
+        />
+    );
+
+    const CustomPaper = ({ children, ...props }: any) => (
+        <Paper
+            {...props}
+            elevation={4}
+            sx={{
+                mt: 0.5,
+                borderRadius: '8px',
+                boxShadow: `0 4px 24px ${alpha('#000', 0.12)}`,
+                '& .MuiAutocomplete-listbox': {
+                    padding: '4px 0',
+                    '& .MuiAutocomplete-option': {
+                        fontSize: '0.875rem',
+                        minHeight: 40,
+                        px: 2,
+                        '&:hover': { backgroundColor: alpha(PRIMARY_COLOR, 0.06) },
+                        '&[aria-selected="true"]': {
+                            backgroundColor: alpha(PRIMARY_COLOR, 0.1),
+                            color: PRIMARY_COLOR,
+                            fontWeight: 500,
+                        },
+                        '&[aria-selected="true"]:hover': {
+                            backgroundColor: alpha(PRIMARY_COLOR, 0.14),
+                        },
+                        '&.Mui-focused': {
+                            backgroundColor: alpha(PRIMARY_COLOR, 0.06),
                         },
                     },
-                    {
-                        name: 'flip',
-                        options: {
-                            altBoundary: true,
-                            rootBoundary: 'document',
-                            padding: 8,
-                        },
-                    }
-                ]}
-                style={{ zIndex: 1300, ...props.style }}
-            />
-        );
-    };
+                },
+            }}
+        >
+            {children}
+        </Paper>
+    );
 
     return (
         <Autocomplete
             value={selectedValue}
             multiple={multiple}
-            disablePortal={false} // Keep dropdown within the DOM hierarchy
+            disablePortal={false}
             onChange={handleChange}
             options={options}
             getOptionLabel={(option: IOptions) => option.label || ''}
             isOptionEqualToValue={(option, value) => option.value === value.value}
-            size="small"
+            size="medium"
             disabled={disabled}
             fullWidth
-            PopperComponent={CustomPopper} // Use custom Popper for better control
+            PopperComponent={CustomPopper}
+            PaperComponent={CustomPaper}
             onInputChange={(_, newInputValue) => setLocalInput(newInputValue)}
+            sx={{
+                '& .MuiAutocomplete-popupIndicator': { color: alpha(PRIMARY_COLOR, 0.6) },
+                '& .MuiAutocomplete-clearIndicator': { color: alpha(PRIMARY_COLOR, 0.5) },
+            }}
             renderInput={(params) => (
                 <TextField
                     {...params}
@@ -137,6 +222,7 @@ const AutocompleteComponent = ({
                     error={Boolean(error)}
                     helperText={error?.message}
                     disabled={disabled}
+                    sx={autocompleteSx}
                 />
             )}
         />
