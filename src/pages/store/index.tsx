@@ -12,9 +12,8 @@ import {
     Divider,
     Grid,
     Paper,
-    Stack,
     Typography,
-    useTheme
+    useTheme,
 } from "@mui/material";
 import RoofingOutlinedIcon from '@mui/icons-material/RoofingOutlined';
 import StorefrontOutlinedIcon from '@mui/icons-material/StorefrontOutlined';
@@ -145,10 +144,7 @@ const Store = () => {
             {/* Main content */}
             <Box
                 sx={{
-                    flex: 1,
-                    p: { xs: 2, sm: 3 },
                     bgcolor: theme.palette.background.paper,
-                    minHeight: 400,
                 }}
             >
                 {sendingRequest ? (
