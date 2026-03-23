@@ -15,9 +15,9 @@ import { useDebounce } from '../../hooks/useDebounce';
 import { AutocompleteContext } from '../../context/autocomplete';
 import { alpha, Popper } from '@mui/material';
 
-const PRIMARY_COLOR = '#08796C';
+export const PRIMARY_COLOR = '#08796C';
 
-const autocompleteSx = {
+export const autocompleteSx = {
     '& .MuiOutlinedInput-root': {
         borderRadius: '8px',
         backgroundColor: '#FAFAFA',
