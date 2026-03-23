@@ -788,6 +788,30 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
         },
     ]
 
+    const storeFilterStatuses: { label: string, value: string, color: string }[] = [
+        {
+            label: "Office Equipment",
+            value: "officeEquipment",
+            color: theme.palette.success.main
+        },
+        {
+            label: "IT Equipment",
+            value: "itEquipment",
+            color: theme.palette.error.main
+        },
+        {
+            label: "Fleet",
+            value: "fleet",
+            color: theme.palette.warning.main
+        },
+        {
+            label: "Stationery",
+            value: "stationery",
+            color: theme.palette.info.main
+        }
+    ];
+
+
     const determineFilterStatuses = () => {
         switch (moduleName) {
             case assetTypesStatusConstants.itEquipment:
@@ -804,6 +828,8 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
                 return setFilterStatuses(requestsPendingFilterStatuses);
             case "inventory":
                 return setFilterStatuses(inventoryFilterStatuses);
+            case "stores":
+                return setFilterStatuses(storeFilterStatuses);
             default:
                 return [] as Array<{ label: string, value: string, color: string }>;
         }
