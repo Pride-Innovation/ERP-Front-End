@@ -19,12 +19,14 @@ import { StoreContext } from '../../context/store';
 import DisplaySettingsOutlinedIcon from '@mui/icons-material/DisplaySettingsOutlined';
 import ModalComponent from '../../components/modal';
 import StoreDetails from './StoreDetails';
+import StoreTabs from './StoreTabs';
+import { Card } from '@mui/material';
 
 
 const TableData = () => {
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
     const { stores } = useSelector((state: RootState) => state.StoreStore)
-    const { count, setStoreReportTableData, storeReportTableData } = useContext(StoreContext);
+    const { count, setStoreReportTableData, storeReportTableData, setSelectedStatus } = useContext(StoreContext);
 
     const {
         sendingRequest,
@@ -89,8 +91,26 @@ const TableData = () => {
         setColumnHeaders(getTableHeaders(rowData))
     }, []);
 
+
+    const handleStatusChange = (status: string) => {
+        if (status === 'officeEquipment') {
+            setSelectedStatus(status);
+        } else if (status === 'itEquipment') {
+            setSelectedStatus(status);
+        } else if (status === 'fleet') {
+            setSelectedStatus(status);
+        } else if (status === 'stationery') {
+            setSelectedStatus(status);
+        } else {
+            setSelectedStatus('officeEquipment');
+        }
+    }
+
     return (
         <>
+            <Card sx={{ mb: 2, p: 2 }}>
+                <StoreTabs />
+            </Card>
             {
                 crudStates.read === currentState &&
                 <ModalComponent width={"40%"} title='Details' open={open} handleClose={handleClose} >
@@ -103,13 +123,15 @@ const TableData = () => {
                 count={count}
                 exportData
                 header={{ plural: 'Store Reports', singular: 'Store' }}
-                module=""
+                module="stores"
                 rows={storeReportTableData || []}
                 createAction={false}
                 columnHeaders={columnHeaders}
                 handleOptionClicked={handleOptionClicked}
                 searchAction={false}
-                paginationMode='client'
+                paginationMode='server'
+                onStatusChange={handleStatusChange}
+                status
             />
         </>
     )
