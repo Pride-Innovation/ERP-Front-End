@@ -11,6 +11,8 @@ import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 import { ITabComponent } from './interface';
 import { SxProps, Theme, alpha } from '@mui/material';
+import { useContext } from 'react';
+import { StoreContext } from '../../context/store';
 
 // Brand colors
 const PRIMARY_COLOR = '#08796C';
@@ -99,15 +101,36 @@ const TabComponent = ({
     scrollButtons = "auto"
 }: ITabComponent) => {
     const [value, setValue] = React.useState(defaultTab);
+    const { selectedStatus } = useContext(StoreContext);
 
     const handleChange = (event: React.SyntheticEvent, newValue: number) => {
         setValue(newValue);
         handleTabChange?.(newValue);
     };
 
+    React.useEffect(() => {
+        if (headers.length > 0) {
+            if (selectedStatus === 'officeEquipment') {
+                handleChange(null as any, 0); // Default to first tab for office equipment
+            }
+            else if (selectedStatus === 'itEquipment') {
+                handleChange(null as any, 1); // Default to second tab for IT equipment
+            }
+            else if (selectedStatus === 'stationery') {
+                handleChange(null as any, 2); // Default to third tab for stationery
+            }
+            else if (selectedStatus === 'fleet') {
+                handleChange(null as any, 3); // Default to fourth tab for fleet
+            }
+            else {
+                // Default case for 'all' or any other status
+                handleChange(null as any, 0); // Default to first tab
+            }
+        }
+    }, [selectedStatus]);
     return (
         <Box sx={{ ...defaultTabStyles, ...(sx || {}) }}>
-            <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+            {/* <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
                 <Tabs
                     value={value}
                     onChange={handleChange}
@@ -127,7 +150,7 @@ const TabComponent = ({
                         />
                     ))}
                 </Tabs>
-            </Box>
+            </Box> */}
 
             {headers.map(header => (
                 <CustomTabPanel
