@@ -43,11 +43,13 @@ const BranchStoreReport = () => {
     }, [currentAssetType])
 
     return (
-        <Box sx={{ p: 2, width: '100%' }}>
+        <Box
+        // sx={{ p: 2, width: '100%' }}
+        >
             <Paper
                 elevation={0}
                 sx={{
-                    borderRadius: 2,
+                    // borderRadius: 2,
                     border: '1px solid rgba(0,0,0,0.07)',
                     bgcolor: '#fff',
                     overflow: 'hidden',
