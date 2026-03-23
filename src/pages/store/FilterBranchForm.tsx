@@ -14,7 +14,8 @@ import { Autocomplete, TextField } from '@mui/material';
 import CircularProgress from '@mui/material/CircularProgress';
 import StoreUtills from './utillls';
 import { StoreContext } from '../../context/store';
-
+import { autocompleteSx, PRIMARY_COLOR } from '../../components/forms/Autocomplete';
+import { alpha } from '@mui/material';
 
 const FilterBranchForm = () => {
     const [optionsObject, setOptionsObject] = useState<{
@@ -63,7 +64,7 @@ const FilterBranchForm = () => {
             fetchStoresCommoditiesPerBranchPerAsset()
         }
     }, [branchId]);
-    
+
 
     return (
         <Autocomplete
@@ -80,6 +81,10 @@ const FilterBranchForm = () => {
             loading={loading}
             size='small'
             color='primary'
+            sx={{
+                '& .MuiAutocomplete-popupIndicator': { color: alpha(PRIMARY_COLOR, 0.6) },
+                '& .MuiAutocomplete-clearIndicator': { color: alpha(PRIMARY_COLOR, 0.5) },
+            }}
             renderInput={(params) => (
                 <TextField
                     {...params}
@@ -93,6 +98,7 @@ const FilterBranchForm = () => {
                             </>
                         ),
                     }}
+                    sx={autocompleteSx}
                 />
             )}
         />
