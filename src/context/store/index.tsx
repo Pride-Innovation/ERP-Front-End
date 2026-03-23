@@ -29,7 +29,9 @@ interface IStoreContext {
     storeReportTableData: IStoreReportTableData[];
     setStoreReportTableData: Dispatch<SetStateAction<IStoreReportTableData[]>>;
     currentBranch: IBranch;
-    setCurrentBranch: Dispatch<SetStateAction<IBranch>>
+    setCurrentBranch: Dispatch<SetStateAction<IBranch>>;
+    selectedStatus: string;
+    setSelectedStatus: Dispatch<SetStateAction<string>>;
 }
 
 export const StoreContext = createContext<IStoreContext>({} as IStoreContext);
@@ -41,6 +43,7 @@ const StoreContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
     const [currentAssetType, setCurrentAssetType] = useState<ITabHeader>({} as ITabHeader)
     const [storeReportTableData, setStoreReportTableData] = useState<Array<IStoreReportTableData>>([]);
     const [currentBranch, setCurrentBranch] = useState<IBranch>({} as IBranch)
+    const [selectedStatus, setSelectedStatus] = useState<string>('officeEquipment');
 
 
     return <StoreContext.Provider value={{
@@ -55,7 +58,9 @@ const StoreContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
         setStoreReportTableData,
         storeReportTableData,
         currentBranch,
-        setCurrentBranch
+        setCurrentBranch,
+        selectedStatus,
+        setSelectedStatus
     }}>
         {children}
     </StoreContext.Provider>
