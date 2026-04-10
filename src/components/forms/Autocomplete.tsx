@@ -95,8 +95,11 @@ const AutocompleteComponent = ({
     error,
     multiple = false,
     name,
-    disabled = false
-}: IAutocompleteComponent) => {
+    disabled = false,
+    onInputChange,
+    renderOption,
+    onChange
+}: IAutocompleteComponent & { onInputChange?: (event: any, value: string) => void, renderOption?: (props: any, option: any) => React.ReactNode, onChange?: (event: any, value: any) => void }) => {
     const [selectedValue, setSelectedValue] = useState<IOptions | IOptions[] | null>(null);
     const [localInput, setLocalInput] = useState('');
     const debouncedInput = useDebounce(localInput, 500);
@@ -127,7 +130,7 @@ const AutocompleteComponent = ({
 
     // Handle selection changes
     const handleChange = (
-        _: React.SyntheticEvent<Element, Event>,
+        event: React.SyntheticEvent<Element, Event>,
         newValue: IOptions | IOptions[] | null
     ) => {
         setSelectedValue(newValue);
@@ -146,6 +149,9 @@ const AutocompleteComponent = ({
                 : (newValue as IOptions).value;
 
             field.onChange(newValueToSet);
+        }
+        if (onChange) {
+            onChange(event, newValue);
         }
     };
 
@@ -210,11 +216,15 @@ const AutocompleteComponent = ({
             fullWidth
             PopperComponent={CustomPopper}
             PaperComponent={CustomPaper}
-            onInputChange={(_, newInputValue) => setLocalInput(newInputValue)}
+            onInputChange={(event, newInputValue) => {
+                setLocalInput(newInputValue);
+                if (onInputChange) onInputChange(event, newInputValue);
+            }}
             sx={{
                 '& .MuiAutocomplete-popupIndicator': { color: alpha(PRIMARY_COLOR, 0.6) },
                 '& .MuiAutocomplete-clearIndicator': { color: alpha(PRIMARY_COLOR, 0.5) },
             }}
+            renderOption={renderOption}
             renderInput={(params) => (
                 <TextField
                     {...params}
