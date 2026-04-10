@@ -25,6 +25,8 @@ import UserRoutes from './subroutes/UserRoutes'
 import TransportRoutes from './subroutes/TransportRoutes'
 import { permissionsMock } from '../../mocks/settings'
 import ResetPassword from '../../pages/authentication/ResetPassword'
+import MovementRoutes from './subroutes/movement'
+import StoreRoutes from './subroutes/StoreRoutes'
 
 const AppRoutes = () => {
 
@@ -59,6 +61,9 @@ const AppRoutes = () => {
           {/* Transport Routes */}
           {TransportRoutes()}
 
+          {/* Movement Routes */}
+          {MovementRoutes()}
+
           <Route path={`${ROUTES.PROFILE}/:id`} element={<Profile />} />
 
           {/* Audit Trails Routes */}
@@ -72,6 +77,9 @@ const AppRoutes = () => {
           <Route element={<PrivateRoute permission={permissionsMock[35]} />}>
             <Route path={ROUTES.STORE} element={<Store />} />
           </Route>
+
+          {/* Store Sub-Routes */}
+          {StoreRoutes()}
 
         </Route>
       </Route>
