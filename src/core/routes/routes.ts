@@ -17,6 +17,11 @@ const AUDIT_TRAILS: string = `${ASSETS_MANAGEMENT}/trails`;
 const TEST: string = `${ASSETS_MANAGEMENT}/test`;
 const STORE: string = `${ASSETS_MANAGEMENT}/store`;
 
+/* Store Sub-Routes */
+const STORE_ADMIN: string = `${STORE}/admin`;
+const STORE_IT: string = `${STORE}/it`;
+const STORE_DISPOSAL: string = `${STORE}/disposal`;
+
 /* Inventory Routes */
 const INVENTORY: string = `${ASSETS_MANAGEMENT}/inventory`;
 const CREATE_INVENTORY: string = `${ASSETS_MANAGEMENT}/inventory/create`
@@ -70,6 +75,13 @@ const DEPARTMENT: string = `${ASSETS_MANAGEMENT}/settings/departments`;
 /* Errors Page */
 const ERRORS: string = `${ASSETS_MANAGEMENT}/restricted-access`
 
+
+/* Movement Routes */
+const MOVEMENT: string = `${ASSETS_MANAGEMENT}/movement`;
+const CREATE_MOVEMENT: string = `${ASSETS_MANAGEMENT}/movement/create`
+const UPDATE_MOVEMENT: string = `${ASSETS_MANAGEMENT}/movement/update`
+const READ_MOVEMENT: string = `${ASSETS_MANAGEMENT}/movement/view`
+
 export const ROUTES = {
     FORGOT_PASSWORD,
     LOGIN,
@@ -114,5 +126,12 @@ export const ROUTES = {
     CREATE_INVENTORY,
     UPDATE_INVENTORY,
     READ_INVENTORY,
-    STORE
+    STORE,
+    STORE_ADMIN,
+    STORE_IT,
+    STORE_DISPOSAL,
+    MOVEMENT,
+    CREATE_MOVEMENT,
+    UPDATE_MOVEMENT,
+    READ_MOVEMENT
 }
