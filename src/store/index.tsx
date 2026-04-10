@@ -30,6 +30,7 @@ import OfficeAssetReducer from "../pages/assets/officeEquipment/slice"
 import FleetReducer from "../pages/assets/fleet/slice"
 import AssetReducer from "../pages/assets/slice"
 import AssetAssignmentHistoryReducer from "../pages/assets/trails/slice"
+import MovementReducer from "../pages/movement/slice"
 
 
 export const store = configureStore({
@@ -54,6 +55,7 @@ export const store = configureStore({
         FleetStore: FleetReducer,
         AssetStore: AssetReducer,
         AssetAssignmentHistoryStore: AssetAssignmentHistoryReducer,
+        MovementStore: MovementReducer,
     },
 });
 
