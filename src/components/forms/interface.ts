@@ -83,7 +83,10 @@ export interface IUseFormInput<T extends FieldValues> {
     multiple?: boolean;
     required?: boolean;
     fetchOptions?: (query: string) => Promise<void>;
-    disabled?: boolean
+    disabled?: boolean;
+    onInputChange?: (event: any, value: string) => void;
+    renderOption?: (props: any, option: any) => React.ReactNode;
+    onChange?: (event: any, value: any) => void;
 }
 
 export interface IDatePickerComponent {
