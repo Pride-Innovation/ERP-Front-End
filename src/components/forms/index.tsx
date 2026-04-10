@@ -127,7 +127,10 @@ export const UseFormAutocompleteComponent = <T extends FieldValues>({
     label,
     options,
     multiple = false,
-    disabled = false
+    disabled = false,
+    onInputChange,
+    renderOption,
+    onChange
     // fetchOptions
 }: IUseFormInput<T>) => {
     return (
@@ -146,6 +149,9 @@ export const UseFormAutocompleteComponent = <T extends FieldValues>({
                             label={label}
                             disabled={disabled}
                             error={formState.errors[value]?.message}
+                            onInputChange={onInputChange}
+                            renderOption={renderOption}
+                            onChange={onChange}
                         // fetchOptions={fetchOptions}
                         />
                     )}
