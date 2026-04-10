@@ -5,8 +5,8 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { useContext, useEffect, useState } from 'react'
-import TableComponent from '../../components/tables/TableComponent'
+import { useContext, useEffect, useState } from 'react';
+import TableComponent from '../../components/tables/TableComponent';
 import { ITableHeader } from '../../components/tables/interface';
 import { StoreMocks } from '../../mocks/store';
 import { crudStates } from '../../utils/constants';
@@ -19,13 +19,12 @@ import { StoreContext } from '../../context/store';
 import DisplaySettingsOutlinedIcon from '@mui/icons-material/DisplaySettingsOutlined';
 import ModalComponent from '../../components/modal';
 import StoreDetails from './StoreDetails';
-import StoreTabs from './StoreTabs';
-import { Card } from '@mui/material';
+import { Box } from '@mui/material';
 
 
 const TableData = () => {
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
-    const { stores } = useSelector((state: RootState) => state.StoreStore)
+    const { stores } = useSelector((state: RootState) => state.StoreStore);
     const { count, setStoreReportTableData, storeReportTableData, setSelectedStatus } = useContext(StoreContext);
 
     const {
@@ -34,7 +33,8 @@ const TableData = () => {
         open,
         handleClose,
         currentState
-    } = StoreUtills()
+    } = StoreUtills();
+
     const {
         commodity,
         branch,
@@ -53,70 +53,49 @@ const TableData = () => {
         action: {
             label: "Options",
             options: [
-                { value: crudStates.read, label: "View Details", icon: <DisplaySettingsOutlinedIcon fontSize='small' color='primary' /> },
+                { value: crudStates.read, label: "View Details", icon: <DisplaySettingsOutlinedIcon fontSize="small" color="primary" /> },
             ]
         },
     };
 
-
     const handleReportsTableData = (storeReports: Array<IStore>) => {
         const data: Array<IStoreReportTableData> = storeReports.map((str, index) => {
-            const {
-                commodity,
-                branch,
-                id,
-                ...fielsdata
-            } = storeReports[index];
-
-            return (
-                {
-                    ...fielsdata,
-                    id: str.id as number,
-                    name: str.commodity.name,
-                    unitOfMeasure: str.commodity.groupName,
-                    quantity: str.quantity,
-                    branch: str.branch.name,
-                    status: str.quantity < 5 ? 'low' :
-                        str.quantity > 5 && str.quantity < 10 ? 'warning' : 'in stock',
-                }
-            )
-        })
-
+            const { commodity, branch, id, ...fielsdata } = storeReports[index];
+            return ({
+                ...fielsdata,
+                id: str.id as number,
+                name: str.commodity.name,
+                unitOfMeasure: str.commodity.groupName,
+                quantity: str.quantity,
+                branch: str.branch.name,
+                status: str.quantity < 5 ? 'low' :
+                    str.quantity > 5 && str.quantity < 10 ? 'warning' : 'in stock',
+            });
+        });
         setStoreReportTableData(data);
-    }
+    };
 
-    useEffect(() => { handleReportsTableData(stores) }, [stores])
-
-    useEffect(() => {
-        setColumnHeaders(getTableHeaders(rowData))
-    }, []);
-
+    useEffect(() => { handleReportsTableData(stores); }, [stores]);
+    useEffect(() => { setColumnHeaders(getTableHeaders(rowData)); }, []);
 
     const handleStatusChange = (status: string) => {
-        if (status === 'officeEquipment') {
-            setSelectedStatus(status);
-        } else if (status === 'itEquipment') {
-            setSelectedStatus(status);
-        } else if (status === 'fleet') {
-            setSelectedStatus(status);
-        } else if (status === 'stationery') {
+        if (['officeEquipment', 'itEquipment', 'fleet', 'stationery'].includes(status)) {
             setSelectedStatus(status);
         } else {
             setSelectedStatus('officeEquipment');
         }
-    }
+    };
 
     return (
-        <>
-            <Card sx={{ mb: 2, p: 2 }}>
-                <StoreTabs />
-            </Card>
-            {
-                crudStates.read === currentState &&
-                <ModalComponent width={"40%"} title='Details' open={open} handleClose={handleClose} >
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            {/* Details modal */}
+            {crudStates.read === currentState && (
+                <ModalComponent width="40%" title="Details" open={open} handleClose={handleClose}>
                     <StoreDetails />
                 </ModalComponent>
-            }
+            )}
+
+            {/* Data table */}
             <TableComponent
                 endPoint="store"
                 loading={sendingRequest}
@@ -129,12 +108,12 @@ const TableData = () => {
                 columnHeaders={columnHeaders}
                 handleOptionClicked={handleOptionClicked}
                 searchAction={false}
-                paginationMode='server'
+                paginationMode="server"
                 onStatusChange={handleStatusChange}
                 status
             />
-        </>
-    )
-}
+        </Box>
+    );
+};
 
-export default TableData
+export default TableData;
