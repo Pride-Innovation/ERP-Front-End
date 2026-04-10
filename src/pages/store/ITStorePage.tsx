@@ -1,0 +1,22 @@
+/*
+13.9 Pride's Standard Copyright Notice:
+Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
+and distribute this software and its documentation for any purpose is prohibited unless authorized in writing by the
+Managing Director
+*/
+
+import LaptopChromebookOutlinedIcon from '@mui/icons-material/LaptopChromebookOutlined';
+import StoreViewPage from './StoreViewPage';
+
+const ITStorePage = () => (
+    <StoreViewPage
+        storeType="it"
+        title="IT Store"
+        subtitle="Technology equipment & digital assets"
+        Icon={LaptopChromebookOutlinedIcon}
+        gradient="linear-gradient(135deg, #0369a1 0%, #38bdf8 100%)"
+        accentColor="#0369a1"
+    />
+);
+
+export default ITStorePage;
