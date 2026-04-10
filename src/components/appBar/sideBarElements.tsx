@@ -16,6 +16,7 @@ import TuneIcon from '@mui/icons-material/Tune';
 import RoutesUtills from '../../core/routes/utills';
 import { IPermission } from '../../pages/settings/interface';
 import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
+import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
 import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 import { Store } from '@mui/icons-material'
 import { permissionsMock } from '../../mocks/settings';
@@ -109,6 +110,14 @@ const SideBarElements = () => {
             icon: <Store />,
             subroutes: [],
             access: rightsToViewRow(permissionsMock[35]) // Assuming this is the permission for store access
+        },
+        {
+            id: 10,
+            name: "Movement",
+            route: ROUTES.MOVEMENT,
+            icon: <LocalShippingOutlinedIcon />,
+            subroutes: [],
+            access: rightsToViewRow(permissionsMock[36]) // Assuming this is the permission for movement access
         },
     ]
     return ({ sideBarList })
