@@ -15,8 +15,8 @@ import { Box, Typography, alpha, Paper } from '@mui/material';
 import InventoryIcon from '@mui/icons-material/Inventory';
 
 // Brand colors
-const PRIMARY_COLOR = '#08796C';
-const SECONDARY_COLOR = '#BC892C';
+// const PRIMARY_COLOR = '#08796C';
+// const SECONDARY_COLOR = '#BC892C';
 
 const defaultCommodities: Array<{
     commodity: ICommodity

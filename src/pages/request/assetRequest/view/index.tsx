@@ -293,6 +293,7 @@ const RequestDetails = () => {
     // Get attachment filename from path
     const getAttachmentFileName = (): string => {
         if (!request.signaturePath) return "";
+        // eslint-disable-next-line no-useless-escape
         return request.signaturePath.split(/[\/\\]/).pop() || "";
     };
 

@@ -11,7 +11,6 @@ import {
     Card,
     CardContent,
     Box,
-    Divider,
     Stack,
     alpha,
     Paper,
@@ -235,6 +234,7 @@ const OfficeEquipmentDetails = () => {
 
             if (response.data && response.data.image) {
                 const serverPath = response.data.image;
+                // eslint-disable-next-line no-useless-escape
                 const filename = serverPath.split(/[\/\\]/).pop();
 
                 setEquipment({

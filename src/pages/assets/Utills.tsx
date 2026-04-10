@@ -27,6 +27,7 @@ import { RequestContext } from "../../context/request/RequestContext";
 const AssetUtills = () => {
     const [currentAssetType, setCurrentAssetType] = useState<IAssetType>({} as IAssetType);
     const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [loading, setLoading] = useState<boolean>(false);
     const endPoint: string = "assets";
     const dispatch = useDispatch<AppDispatch>();

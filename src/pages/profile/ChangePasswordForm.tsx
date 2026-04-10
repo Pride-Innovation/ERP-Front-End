@@ -20,8 +20,6 @@ import {
     InputAdornment,
     TextField,
     Button,
-    useMediaQuery,
-    useTheme
 } from '@mui/material';
 import { Controller } from 'react-hook-form';
 import { IIChangePasswordForm, RequirementItemProps } from './interface';
@@ -113,8 +111,6 @@ const ChangePasswordForm = ({
     getValues,
     watch
 }: IIChangePasswordForm) => {
-    const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
     // Watch the newPassword field for real-time updates
     const newPassword = watch('newPassword') || '';

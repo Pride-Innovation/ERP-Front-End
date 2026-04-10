@@ -25,8 +25,8 @@ export const exportPDF = (columns, rows, fileName) => {
 
     // Brand colors
     const primaryColor = [8, 121, 108]; // RGB
-    const secondaryColor = [50, 50, 50]; // Dark gray
-    const accentColor = [0, 95, 85]; // Darker shade for accents
+    // const secondaryColor = [50, 50, 50]; // Dark gray
+    // const accentColor = [0, 95, 85]; // Darker shade for accents
 
     // Header section with logo
     const headerHeight = 100;

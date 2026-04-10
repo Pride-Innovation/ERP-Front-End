@@ -9,8 +9,6 @@ import { useContext, useEffect, useState } from "react";
 import {
     Container,
     Grid,
-    useMediaQuery,
-    useTheme,
     alpha
 } from "@mui/material";
 import { UserContext } from "../../context/user/UserContext";
@@ -39,8 +37,8 @@ import { removeUserProfileImageService, updateUserProfileImageService } from "./
 const Profile = () => {
     const { user, setUser } = useContext(UserContext);
     const { id } = useParams<{ id: string | undefined }>();
-    const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+    // const theme = useTheme();
+    // const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
     const { handleClose, modalState, open, handleOptionClicked } = AppBarUtills();
     const { getCurrentUser } = RoutesUtills();
     const [image, setImage] = useState<string>('');
@@ -60,6 +58,7 @@ const Profile = () => {
                 const userData = response.data;
                 if (userData.profileImage) {
                     // Extract just the filename from the absolute path
+                    // eslint-disable-next-line no-useless-escape
                     const filename = userData.profileImage.split(/[\/\\]/).pop();
                     if (filename) {
                         userData.profileImage = `/statics/${filename}`;
@@ -92,6 +91,7 @@ const Profile = () => {
 
             if (response.data && response.data.profileImage) {
                 const serverPath = response.data.profileImage;
+                // eslint-disable-next-line no-useless-escape
                 const filename = serverPath.split(/[\/\\]/).pop();
 
                 setUser({

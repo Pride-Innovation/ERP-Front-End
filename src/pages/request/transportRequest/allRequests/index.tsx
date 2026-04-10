@@ -40,7 +40,7 @@ const TransportRequest = () => {
         handleClose,
         handleOpen,
         open,
-        addAllTransportRequestsInStore,
+        // addAllTransportRequestsInStore,
         allTranportRequests
     } = TransportRequestUtills();
 
@@ -49,9 +49,10 @@ const TransportRequest = () => {
         try {
             const response = await fetchRowsService({
                 pageNumber: 1,
-                pageSize: 10, 
+                pageSize: 10,
                 endPoint
             });
+            console.log(response);
             // const data = response?.data as ITransportRequest[]
             // addAllTransportRequestsInStore(data)
         } catch (error) {

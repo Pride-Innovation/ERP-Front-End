@@ -8,7 +8,6 @@ Managing Director
 import {
   Box,
   Grid,
-  useMediaQuery,
   useTheme,
   Typography,
   Button,
@@ -59,7 +58,7 @@ const Branches = () => {
   } = BranchUtills();
 
   const theme = useTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+  // const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
   useEffect(() => {
     fetchAllBranches();

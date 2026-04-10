@@ -33,7 +33,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import AuthenticationImage from "../../statics/images/logo.png";
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate, useParams, useLocation } from 'react-router-dom';
+import { Link, useParams, useLocation } from 'react-router-dom';
 import AuthenticationContainerComponent from '../../components/Container';
 import { toast } from 'react-toastify';
 import Logo from '../../statics/images/whitelogo.png';
@@ -112,10 +112,10 @@ const resetPasswordSchema = yup.object({
 
 const ResetPassword = () => {
     const theme = useTheme();
-    const navigate = useNavigate();
+    // const navigate = useNavigate();
     const location = useLocation();
     const { token: pathToken } = useParams<{ token: string }>();
-    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+    // const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const isMedium = useMediaQuery(theme.breakpoints.down('md'));
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
     const [showNewPassword, setShowNewPassword] = useState<boolean>(false);
@@ -133,7 +133,7 @@ const ResetPassword = () => {
         if (queryToken) return queryToken;
 
         // Check if token is in the URL hash or pathname (sometimes tokens are passed this way)
-        const urlPath = location.pathname;
+        // const urlPath = location.pathname;
         const directToken = "eyJzdWIiOiJzb2RvbmdAcHJpZGViYW5rLmNvLnVnIiwiaWF0IjoxNzU3NDg2MjE1LCJleHAiOjE3NTc0ODk4MTV9.3qRgIoH9TwfZQbpaWRP4u7OphATSsKpv0oULLYESle0";
 
         // Return the token or null if not found
@@ -144,7 +144,7 @@ const ResetPassword = () => {
 
     // Initialize form with validation
     const {
-        control,
+        // control,
         handleSubmit,
         register,
         formState,

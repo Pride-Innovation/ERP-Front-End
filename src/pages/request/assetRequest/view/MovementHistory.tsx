@@ -5,7 +5,7 @@ import {
     Grid,
     Chip,
     useTheme,
-    useMediaQuery,
+    // useMediaQuery,
     alpha,
 } from '@mui/material';
 import {
@@ -42,8 +42,8 @@ export interface MovementStep {
 
 const MovementHistory = ({ request }: { request: IRequest }) => {
     const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-    const isTablet = useMediaQuery(theme.breakpoints.down('md'));
+    // const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+    // const isTablet = useMediaQuery(theme.breakpoints.down('md'));
     const [requestReport, setRequestReport] = React.useState<IRequestReport | null>(null);
     const { acknowledgeRequest, currentIssuance, issuanceApproval, acknowledgeIssuance } = useContext(RequestContext);
 

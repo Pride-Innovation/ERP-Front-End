@@ -28,7 +28,6 @@ const Roles = () => {
         modalState,
         setModalState,
         loading,
-        count,
         fetchAllRoles
     } = RoleUtills();
     const [currentRole, setCurrentRole] = useState<IRole>({} as IRole);

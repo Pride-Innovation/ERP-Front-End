@@ -11,7 +11,7 @@ import {
     useState
 } from "react";
 import { useNavigate } from "react-router";
-import { Box, Card } from "@mui/material";
+import { Box } from "@mui/material";
 
 import OfficeEquipmentUtills from "./utills";
 import TableComponent from "../../../components/tables/TableComponent";

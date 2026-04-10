@@ -40,7 +40,6 @@ import DescriptionText from "../../dashboard/sections/DescriptionText";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../../../store";
 import { removeRequest } from "./slice";
-import ButtonComponent from "../../../components/forms/Button";
 
 // Brand colors
 const PRIMARY_COLOR = '#08796C';

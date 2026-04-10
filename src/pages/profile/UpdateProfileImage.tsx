@@ -14,8 +14,6 @@ import {
     alpha,
     Avatar,
     IconButton,
-    useTheme,
-    useMediaQuery,
     Divider,
     Tooltip,
     CircularProgress,
@@ -34,7 +32,7 @@ import { toast } from 'react-toastify';
 
 // Brand colors
 const PRIMARY_COLOR = '#08796C'; // Teal
-const SECONDARY_COLOR = '#BC892C'; // Gold
+// const SECONDARY_COLOR = '#BC892C'; // Gold
 
 const UpdateProfileImage = ({
     setImage,
@@ -45,8 +43,6 @@ const UpdateProfileImage = ({
     handleClose
 }: IUpdateProfileImage) => {
     const inputRef = useRef<HTMLInputElement>(null);
-    const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const [uploading, setUploading] = useState(false);
     const [hasChanges, setHasChanges] = useState(false);
     const [originalImage, setOriginalImage] = useState(userImage);

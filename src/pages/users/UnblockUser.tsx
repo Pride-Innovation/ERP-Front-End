@@ -15,7 +15,6 @@ import {
     Avatar,
     alpha,
     useTheme,
-    useMediaQuery,
     Button as MuiButton
 } from '@mui/material';
 import LockOpenOutlinedIcon from '@mui/icons-material/LockOpenOutlined';
@@ -35,7 +34,7 @@ const UnblockUser = ({
     buttonText = "Unblock Account",
 }: IUnBolock) => {
     const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+    // const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const dispatch = useDispatch<AppDispatch>();
 
     const handleUnblock = async () => {

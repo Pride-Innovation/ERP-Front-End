@@ -7,8 +7,6 @@ import {
     Typography,
     Box,
     Button,
-    Divider,
-    useTheme,
     alpha,
     CircularProgress,
 } from '@mui/material';
@@ -38,7 +36,7 @@ const AttachmentViewer: React.FC<AttachmentViewerProps> = ({
     filePath,
     fileName,
 }) => {
-    const theme = useTheme();
+    // const theme = useTheme();
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [fileType, setFileType] = useState<'image' | 'pdf' | 'other'>('other');
@@ -48,6 +46,7 @@ const AttachmentViewer: React.FC<AttachmentViewerProps> = ({
         if (fileName) return fileName;
 
         if (!filePath) return 'Unknown File';
+        // eslint-disable-next-line no-useless-escape
         const pathSegments = filePath.split(/[\/\\]/);
         return pathSegments[pathSegments.length - 1];
     };
@@ -86,6 +85,7 @@ const AttachmentViewer: React.FC<AttachmentViewerProps> = ({
         }
 
         // Try to extract the filename and assume it's in /statics/
+        // eslint-disable-next-line no-useless-escape
         const fileName = filePath.split(/[\/\\]/).pop();
         return fileName ? `/statics/${fileName}` : '';
     };

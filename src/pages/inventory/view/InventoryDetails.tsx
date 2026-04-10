@@ -173,7 +173,6 @@ const InventoryDetails = () => {
     const {
         handleClose,
         open,
-        handleOpen
     } = InventoryUtills();
 
     useEffect(() => {
@@ -193,7 +192,7 @@ const InventoryDetails = () => {
     }, [currentInventory?.id]);
 
     // Check if inventory data is available
-    const hasInventoryData = Boolean(currentInventory?.id);
+    // const hasInventoryData = Boolean(currentInventory?.id);
 
     // Format status for display
     const getStatusChip = () => {
@@ -218,6 +217,7 @@ const InventoryDetails = () => {
                 textColor = '#ed6c02';
                 break;
             case 'cancelled':
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 color = 'error';
                 bgcolor = alpha('#d32f2f', 0.08);
                 textColor = '#d32f2f';

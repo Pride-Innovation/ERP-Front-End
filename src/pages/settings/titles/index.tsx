@@ -19,7 +19,6 @@ import {
   TextField,
   Fade,
   FormControl,
-  InputLabel,
   Select,
   MenuItem
 } from "@mui/material";
@@ -33,7 +32,6 @@ import { crudStates } from "../../../utils/constants";
 import TitleUtills from "./utills";
 import { useEffect, useState } from "react";
 import Loading from "../../../components/loading";
-import NoContent from "../../../components/noContent";
 import { ITitle } from "./interface";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../store";

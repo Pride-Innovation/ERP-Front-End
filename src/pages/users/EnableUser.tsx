@@ -35,7 +35,7 @@ const EnableUser = ({
     buttonText = "Enable Account",
 }: IEnable) => {
     const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+    // const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const isLarge = useMediaQuery(theme.breakpoints.up('md'));
     const dispatch = useDispatch<AppDispatch>();
 

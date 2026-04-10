@@ -78,6 +78,7 @@ const UpdateRequest = () => {
                 // Process file information from signaturePath
                 if (data.signaturePath) {
                     const filePath = data.signaturePath;
+                    // eslint-disable-next-line no-useless-escape
                     const fileName = filePath.split(/[\/\\]/).pop() || '';
 
                     // Set signature preview path for UI display

@@ -37,7 +37,7 @@ interface DescriptionProps {
 
 const Description = ({ repair, handleClose, handleViewAttachments }: DescriptionProps) => {
     const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+    // const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const isMediumScreen = useMediaQuery(theme.breakpoints.down('md'));
 
     const isCompleted = repair?.repairEndDate && repair?.repairEndDate !== '';

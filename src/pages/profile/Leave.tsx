@@ -206,7 +206,7 @@ interface LeaveFormData {
 const LeaveComponent = ({ handleClose, id }: { handleClose: () => void, id: string }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const isMediumScreen = useMediaQuery(theme.breakpoints.down('md'));
+  // const isMediumScreen = useMediaQuery(theme.breakpoints.down('md'));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { fetchAllUsers } = UserUtils();
   const [colleagues, SetColleagues] = useState<IColleague[]>([] as Array<IColleague>); // Replace with fetched users

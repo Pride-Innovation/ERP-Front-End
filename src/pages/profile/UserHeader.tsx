@@ -15,8 +15,6 @@ import {
     Avatar,
     alpha,
     Chip,
-    useMediaQuery,
-    useTheme,
     IconButton
 } from "@mui/material";
 import EditIcon from '@mui/icons-material/Edit';
@@ -46,8 +44,8 @@ const UserHeader = ({
     onUpdateAvailability,
     onChangePassword
 }: UserHeaderProps) => {
-    const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+    // const theme = useTheme();
+    // const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
     // Determine availability status
     const isAvailable = user?.availability === 'present';

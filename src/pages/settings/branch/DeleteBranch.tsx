@@ -6,7 +6,6 @@ Managing Director
 */
 
 import { Grid, Stack, Typography, Box, alpha, useTheme, Alert, Divider } from '@mui/material'
-import CameraOutdoorOutlinedIcon from '@mui/icons-material/CameraOutdoorOutlined';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import AccountBalanceOutlinedIcon from '@mui/icons-material/AccountBalanceOutlined';
 import ButtonComponent from '../../../components/forms/Button';

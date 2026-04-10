@@ -16,7 +16,6 @@ import {
     useMediaQuery,
     Paper,
     Button,
-    Stack,
     Divider
 } from '@mui/material';
 import { useForm } from 'react-hook-form';
@@ -41,7 +40,7 @@ const GOLD_COLOR = '#BC892C';
 
 const PasswordReset = () => {
     const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+    // const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const isMedium = useMediaQuery(theme.breakpoints.down('md'));
     const [loggingIn, setLoggingIn] = useState<boolean>(false);
     const [showPassword, setShowPassword] = useState<boolean>(false);

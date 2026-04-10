@@ -12,7 +12,6 @@ import {
     Typography,
     Paper,
     alpha,
-    useTheme,
     Card,
     Button
 } from "@mui/material";
@@ -38,7 +37,7 @@ import { ROUTES } from "../../core/routes/routes";
 
 // Brand colors
 const PRIMARY_COLOR = '#08796C';
-const SECONDARY_COLOR = '#BC892C';
+// const SECONDARY_COLOR = '#BC892C';
 
 const InventoryForm = ({
     register,
@@ -48,7 +47,6 @@ const InventoryForm = ({
     sendingRequest,
     buttonText
 }: IInventoryForm) => {
-    const theme = useTheme();
     const { formFields } = InventoryUtills();
     const { fetchAllSuppliers } = SupplierUtills();
     const { fetchAllAssetTypes } = AssetTypeUtills();

@@ -162,12 +162,14 @@ const TransportRequestUtills = () => {
         },
     ];
 
+    /*
     const determineStatusColor = (id: string) => {
         const statusColor = (statuses.find(status => status.id === parseInt(id, 10)))?.status
         return statusColor === requestStatus.approved ? requestStatus.approved
             : statusColor === requestStatus.pending ? requestStatus.pending
                 : requestStatus.rejected
     }
+    */
 
     const handleRequest = (list: Array<ITransportRequest>) => {
         // const data: Array<ITransportRequestTableData> = list.map((request, index) => {

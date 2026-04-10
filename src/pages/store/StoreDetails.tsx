@@ -12,7 +12,6 @@ import {
     Stack,
     Typography,
     alpha,
-    useTheme,
 } from '@mui/material';
 import CategoryOutlinedIcon from '@mui/icons-material/CategoryOutlined';
 import LayersOutlinedIcon from '@mui/icons-material/LayersOutlined';
@@ -76,7 +75,7 @@ const SectionHeader = ({ title, accent = PRIMARY }: { title: string; accent?: st
 );
 
 const StoreDetails = () => {
-    const theme = useTheme();
+    // const theme = useTheme();
     const { curentStoreData } = useContext(StoreContext);
     const { handleClose, fetchLastIssuedCommodity } = StoreUtills();
 

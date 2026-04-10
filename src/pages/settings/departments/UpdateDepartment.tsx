@@ -11,7 +11,6 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { departmentSchema } from './schema';
 import DepartmentUtills from './utills';
-import { IResponseData } from '../../users/interface';
 import { toast } from 'react-toastify';
 import { Grid, Paper, Box, Typography, Chip, alpha, useTheme } from '@mui/material';
 import DepartmentForm from './DepartmentForm';

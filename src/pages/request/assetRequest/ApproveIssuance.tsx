@@ -12,11 +12,8 @@ import {
     Chip,
     Fade,
     Card,
-    Avatar,
-    Divider,
     Button as MuiButton
 } from "@mui/material";
-import ButtonComponent from "../../../components/forms/Button";
 import { toast } from "react-toastify";
 import { approveIssueRequestService, findAssetRequestByIDService } from "./service";
 import { ICommodity } from "../../settings/commodity/interface";

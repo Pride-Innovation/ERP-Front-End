@@ -12,7 +12,6 @@ import {
     Stack,
     Button,
     alpha,
-    useTheme,
 } from "@mui/material";
 import EditIcon from '@mui/icons-material/Edit';
 import PersonIcon from '@mui/icons-material/Person';
@@ -24,7 +23,7 @@ import InfoItem from "./InfoItem";
 
 // Brand colors
 const PRIMARY_COLOR = '#08796C'; // Teal
-const SECONDARY_COLOR = '#BC892C'; // Gold
+// const SECONDARY_COLOR = '#BC892C'; // Gold
 
 interface UserInfoCardProps {
     user: IUser | null;
@@ -37,7 +36,7 @@ const UserInfoCard = ({
     isCurrentUser,
     onUpdateProfile
 }: UserInfoCardProps) => {
-    const theme = useTheme();
+    // const theme = useTheme();
 
     return (
         <Paper

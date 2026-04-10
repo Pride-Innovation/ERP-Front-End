@@ -15,7 +15,6 @@ import {
     Avatar,
     alpha,
     useTheme,
-    useMediaQuery,
     Button as MuiButton
 } from '@mui/material';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
@@ -35,7 +34,7 @@ const DisableUserAccount = ({
     buttonText = "Disable Account",
 }: IDisable) => {
     const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+    // const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const dispatch = useDispatch<AppDispatch>();
 
     const handleDisable = async () => {

@@ -191,6 +191,7 @@ const UserUtils = () => {
             return status = 'blocked'
         }
         if (user.enabled) {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             return status = 'active'
         }
         return "";

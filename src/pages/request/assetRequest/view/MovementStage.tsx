@@ -17,7 +17,7 @@ import {
 
 // Brand colors (consistent with other components)
 const PRIMARY_COLOR = '#08796C';
-const ACCENT_COLOR = '#BC892C';
+// const ACCENT_COLOR = '#BC892C';
 
 const getStepIcon = (step: MovementStep) => {
     if (step.isRejected) return <CancelIcon />;

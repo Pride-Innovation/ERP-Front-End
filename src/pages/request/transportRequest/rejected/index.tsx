@@ -40,7 +40,7 @@ const TransportRejectedRequest = () => {
         filterRejectedRecords,
         rejectedRequests,
         handleClose,
-        addAllTransportRequestsInStore,
+        // addAllTransportRequestsInStore,
         allTranportRequests
     } = TransportRequestUtills();
 
@@ -48,6 +48,7 @@ const TransportRejectedRequest = () => {
         setLoading(true)
         try {
             const response = await fetchRowsService({ pageNumber: 1, pageSize: 10, endPoint });
+            console.log(response);
             // const data = response?.data as ITransportRequest[]
             // addAllTransportRequestsInStore(data)
         } catch (error) {
