@@ -12,8 +12,6 @@ import { UserContext } from '../../context/user/UserContext';
 import { useContext, useEffect, useState } from 'react';
 import { crudStates } from '../../utils/constants';
 import ModalComponent from '../../components/modal';
-import CreateUser from './CreateUser';
-import UpdateUsers from './UpdateUsers';
 import DisableUser from './DisableUser';
 import UnblockUser from './UnblockUser';
 import EnableUser from './EnableUser';
@@ -92,16 +90,6 @@ const Users = () => {
 
   return (
     <Grid xs={12} container sx={{ p: 3 }} justifyContent="center">
-      {modalState === crudStates.create &&
-        <ModalComponent title='Create User' open={open} handleClose={handleClose} width="70%">
-          <CreateUser handleClose={handleClose} />
-        </ModalComponent>
-      }
-      {modalState === crudStates.update &&
-        <ModalComponent title='Update User' open={open} handleClose={handleClose} width="70%">
-          <UpdateUsers user={user} sendingRequest={sendingRequest} setSendingRequest={setSendingRequest} handleClose={handleClose} />
-        </ModalComponent>
-      }
       {modalState === crudStates.disable &&
         <ModalComponent title='Disable User Account' open={open} handleClose={handleClose} width="40%">
           <DisableUser setSendingRequest={setSendingRequest} user={user} handleClose={handleClose} buttonText='Disable' sendingRequest={false} />

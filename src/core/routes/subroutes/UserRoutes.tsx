@@ -9,6 +9,8 @@ import { Route } from "react-router"
 import { PrivateRoute } from "../PrivateRoutes"
 import { ROUTES } from "../routes"
 import Users from "../../../pages/users"
+import CreateUserPage from "../../../pages/users/CreateUserPage"
+import UpdateUserPage from "../../../pages/users/UpdateUserPage"
 import { permissionsMock } from "../../../mocks/settings"
 
 const UserRoutes = () => {
@@ -16,6 +18,8 @@ const UserRoutes = () => {
         <Route>
             <Route element={<PrivateRoute permission={permissionsMock[9]} />}>
                 <Route path={ROUTES.USERS} element={<Users />} />
+                <Route path={ROUTES.CREATE_USER} element={<CreateUserPage />} />
+                <Route path={`${ROUTES.UPDATE_USER}/:id`} element={<UpdateUserPage />} />
             </Route>
         </Route>
     )

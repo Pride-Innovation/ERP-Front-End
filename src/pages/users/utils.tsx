@@ -102,8 +102,7 @@ const UserUtils = () => {
 
 
     const handleCreation = () => {
-        setModalState(crudStates.create);
-        handleOpen();
+        navigate(ROUTES.CREATE_USER);
     };
 
     const {
@@ -156,9 +155,7 @@ const UserUtils = () => {
                 handleOpen();
                 break;
             case crudStates.update:
-                setModalState(option as string)
-                setUser(findUser(moduleID as number))
-                handleOpen();
+                navigate(`${ROUTES.UPDATE_USER}/${moduleID}`);
                 break;
             case crudStates.read:
                 navigate(`${ROUTES.PROFILE}/${moduleID}`)

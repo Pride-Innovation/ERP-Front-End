@@ -13,6 +13,8 @@ const REFRESH_TOKEN: string = "/auth/refresh"
 const SETTINGS: string = `${ASSETS_MANAGEMENT}/settings`;
 const PROFILE: string = `${ASSETS_MANAGEMENT}/profile`;
 const USERS: string = `${ASSETS_MANAGEMENT}/users`;
+const CREATE_USER: string = `${USERS}/create`;
+const UPDATE_USER: string = `${USERS}/update`;
 const AUDIT_TRAILS: string = `${ASSETS_MANAGEMENT}/trails`;
 const TEST: string = `${ASSETS_MANAGEMENT}/test`;
 const STORE: string = `${ASSETS_MANAGEMENT}/store`;
@@ -126,6 +128,8 @@ export const ROUTES = {
     CREATE_INVENTORY,
     UPDATE_INVENTORY,
     READ_INVENTORY,
+    CREATE_USER,
+    UPDATE_USER,
     STORE,
     STORE_ADMIN,
     STORE_IT,
