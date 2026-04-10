@@ -48,6 +48,7 @@ const SteppedOfficeEquipmentForm = ({
     sendingRequest,
     formFields,
     trigger,
+    isUpdate,
 }: IOfficeEquipmentForm) => {
     const [activeStep, setActiveStep] = useState(0);
     const navigate = useNavigate();
@@ -134,20 +135,102 @@ const SteppedOfficeEquipmentForm = ({
 
     const fieldGroups = groupFields(currentStepFields);
 
-    return (
-        <Box sx={{ width: "100%" }}>
-            {/* Stepper */}
-            <Paper
-                elevation={0}
+    const renderSectionHeader = (title: string, icon: any) => (
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, position: 'relative' }}>
+            <Box
                 sx={{
-                    p: 3,
-                    mb: 3,
-                    borderRadius: 2,
-                    border: `1px solid ${alpha('#000', 0.08)}`,
-                    bgcolor: alpha(PRIMARY_COLOR, 0.03)
+                    bgcolor: alpha(PRIMARY_COLOR, 0.1),
+                    color: PRIMARY_COLOR,
+                    width: 36,
+                    height: 36,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderRadius: 1,
+                    mr: 2,
                 }}
             >
-                <Stepper
+                {icon}
+            </Box>
+            <Typography variant="h6" sx={{ fontWeight: 600, color: 'text.primary', position: 'relative', zIndex: 1 }}>
+                {title}
+            </Typography>
+            <Box
+                sx={{
+                    position: 'absolute',
+                    left: 0,
+                    right: 0,
+                    height: '1px',
+                    bgcolor: alpha('#000', 0.1),
+                    bottom: -8,
+                    zIndex: 0,
+                }}
+            />
+        </Box>
+    );
+
+    return (
+        <Paper
+            elevation={0}
+            sx={{
+                width: '100%',
+                borderRadius: 2,
+                overflow: 'hidden',
+                border: `1px solid ${alpha('#000', 0.08)}`,
+            }}
+        >
+            {/* Header */}
+            <Box
+                sx={{
+                    background: `linear-gradient(135deg, ${alpha(PRIMARY_COLOR, 0.07)} 0%, ${alpha(PRIMARY_COLOR, 0.02)} 100%)`,
+                    borderBottom: `1px solid ${alpha('#000', 0.08)}`,
+                    p: 3,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 2,
+                }}
+            >
+                <Box
+                    sx={{
+                        bgcolor: alpha(PRIMARY_COLOR, 0.12),
+                        color: PRIMARY_COLOR,
+                        width: 44,
+                        height: 44,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        borderRadius: 1.5,
+                        flexShrink: 0,
+                    }}
+                >
+                    <ChairIcon />
+                </Box>
+                <Box>
+                    <Typography variant="h6" sx={{ color: 'text.primary', fontWeight: 600, mb: 0.25 }}>
+                        {isUpdate ? 'Update Office Equipment' : 'Register Office Equipment'}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                        {isUpdate
+                            ? 'Modify the details of this office equipment record'
+                            : 'Fill in the fields below to register a new office equipment asset'}
+                    </Typography>
+                </Box>
+            </Box>
+
+            {/* Form Content */}
+            <Box sx={{ p: { xs: 2, sm: 3 } }}>
+                {/* Stepper */}
+                <Paper
+                    elevation={0}
+                    sx={{
+                        p: { xs: 2, sm: 2.5 },
+                        mb: 3,
+                        borderRadius: 2,
+                        border: `1px solid ${alpha('#000', 0.07)}`,
+                        bgcolor: alpha(PRIMARY_COLOR, 0.02),
+                    }}
+                >
+                    <Stepper
                     activeStep={activeStep}
                     alternativeLabel={isMobile}
                     sx={{
@@ -176,112 +259,88 @@ const SteppedOfficeEquipmentForm = ({
                 </Stepper>
             </Paper>
 
-            {/* Form fields section */}
-            {fieldGroups.map((group, groupIndex) => {
-                // Skip empty groups
-                if (!group.fields || group.fields.length === 0) {
+                {/* Field sections */}
+                {fieldGroups.map((group, groupIndex) => {
+                    if (!group.fields || group.fields.length === 0) {
+                        return (
+                            <Paper
+                                key={`group-${groupIndex}`}
+                                elevation={0}
+                                sx={{
+                                    p: 4,
+                                    mb: 3,
+                                    borderRadius: 2,
+                                    border: `1px dashed ${alpha('#000', 0.15)}`,
+                                    textAlign: 'center'
+                                }}
+                            >
+                                <Typography color="text.secondary">
+                                    No {activeStep === 0 ? 'basic' : 'additional'} fields available for this form.
+                                </Typography>
+                            </Paper>
+                        );
+                    }
+
                     return (
                         <Paper
                             key={`group-${groupIndex}`}
                             elevation={0}
                             sx={{
-                                p: 4,
+                                p: { xs: 2, sm: 3 },
                                 mb: 3,
                                 borderRadius: 2,
-                                border: `1px dashed ${alpha('#000', 0.15)}`,
-                                textAlign: 'center'
+                                border: `1px solid ${alpha('#000', 0.08)}`,
+                                bgcolor: alpha(PRIMARY_COLOR, 0.02),
+                                boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
                             }}
                         >
-                            <Typography color="text.secondary">
-                                No {activeStep === 0 ? 'basic' : 'additional'} fields available for this form.
-                            </Typography>
+                            {renderSectionHeader(group.title, group.icon)}
+                            <Grid container spacing={2} sx={{ mt: 0.5 }}>
+                                {group.fields.map((field, index) => {
+                                    if (!field) return null;
+
+                                    const commonProps = {
+                                        register,
+                                        control,
+                                        formState,
+                                        value: field.value,
+                                        label: field.label,
+                                        required: field.required === false ? field.required : true,
+                                        disabled: field.disabled ? true : false
+                                    };
+
+                                    const gridSize = field.type === "textarea"
+                                        ? { xs: 12 }
+                                        : { xs: 12, sm: 6 };
+
+                                    return (
+                                        <Grid item {...gridSize} key={`${field.value}-${index}`}>
+                                            {field.type === "input" && <UseFormInput {...commonProps} />}
+                                            {field.type === "textarea" && <UseFormInput {...commonProps} multiline row={4} />}
+                                            {field.type === "number" && <UseFormInput {...commonProps} type="number" />}
+                                            {field.type === "select" && (
+                                                <UseFormSelect {...commonProps} options={field.options} />
+                                            )}
+                                            {field.type === "date" && <UseFormDatePicker {...commonProps} />}
+                                            {field.type === "autocomplete" && (
+                                                <UseFormAutocompleteComponent {...commonProps} options={field.options} />
+                                            )}
+                                        </Grid>
+                                    );
+                                })}
+                            </Grid>
                         </Paper>
                     );
-                }
+                })}
+            </Box>
 
-                return (
-                    <Paper
-                        key={`group-${groupIndex}`}
-                        elevation={0}
-                        sx={{
-                            p: 3,
-                            mb: 3,
-                            borderRadius: 2,
-                            border: `1px solid ${alpha(PRIMARY_COLOR, 0.1)}`,
-                            bgcolor: alpha(PRIMARY_COLOR, 0.015),
-                            boxShadow: `0 1px 3px ${alpha('#000', 0.04)}`
-                        }}
-                    >
-                        <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                            <Box
-                                sx={{
-                                    width: 34,
-                                    height: 34,
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    borderRadius: 1,
-                                    bgcolor: alpha(PRIMARY_COLOR, 0.1),
-                                    color: PRIMARY_COLOR
-                                }}
-                            >
-                                {group.icon}
-                            </Box>
-                            <Typography variant="h6" fontWeight={700} sx={{ color: PRIMARY_COLOR }}>
-                                {group.title}
-                            </Typography>
-                        </Box>
-
-                        <Grid container spacing={3}>
-                            {/* Render form fields */}
-                            {group.fields.map((field, index) => {
-                                // Safety check
-                                if (!field) return null;
-
-                                const commonProps = {
-                                    register,
-                                    control,
-                                    formState,
-                                    value: field.value,
-                                    label: field.label,
-                                    required: field.required === false ? field.required : true,
-                                    disabled: field.disabled ? true : false
-                                };
-
-                                const gridSize = field.type === "textarea" ?
-                                    { xs: 12 } : { xs: 12, md: 6, lg: 4 };
-
-                                return (
-                                    <Grid item {...gridSize} key={`${field.value}-${index}`}>
-                                        {field.type === "input" && <UseFormInput {...commonProps} />}
-                                        {field.type === "textarea" && <UseFormInput {...commonProps} multiline row={4} />}
-                                        {field.type === "number" && <UseFormInput {...commonProps} type="number" />}
-                                        {field.type === "select" && (
-                                            <UseFormSelect {...commonProps} options={field.options} />
-                                        )}
-                                        {field.type === "date" && <UseFormDatePicker {...commonProps} />}
-                                        {field.type === "autocomplete" && (
-                                            <UseFormAutocompleteComponent {...commonProps} options={field.options} />
-                                        )}
-                                    </Grid>
-                                );
-                            })}
-                        </Grid>
-                    </Paper>
-                );
-            })}
-
-            {/* Navigation buttons */}
-            <Paper
-                elevation={0}
+            {/* Footer navigation */}
+            <Box
                 sx={{
-                    mt: 3,
-                    borderRadius: 2,
-                    border: `1px solid ${alpha('#000', 0.08)}`,
+                    borderTop: `1px solid ${alpha('#000', 0.08)}`,
                     overflow: 'hidden',
                 }}
             >
-                {/* Step progress bar */}
                 <Box
                     sx={{
                         height: 3,
@@ -289,7 +348,6 @@ const SteppedOfficeEquipmentForm = ({
                         transition: 'all 0.4s ease',
                     }}
                 />
-
                 <Box
                     sx={{
                         px: 3,
@@ -302,7 +360,6 @@ const SteppedOfficeEquipmentForm = ({
                         bgcolor: alpha(PRIMARY_COLOR, 0.015),
                     }}
                 >
-                    {/* Left: step info + cancel */}
                     <Stack direction="row" spacing={2} alignItems="center">
                         <MuiButton
                             onClick={() => navigate(ROUTES.LIST_OFFICE_EQUIPMENT)}
@@ -346,7 +403,6 @@ const SteppedOfficeEquipmentForm = ({
                         </Typography>
                     </Stack>
 
-                    {/* Right: navigation */}
                     <Stack direction="row" spacing={1.5} alignItems="center">
                         {activeStep > 0 && (
                             <MuiButton
@@ -427,8 +483,8 @@ const SteppedOfficeEquipmentForm = ({
                         )}
                     </Stack>
                 </Box>
-            </Paper>
-        </Box>
+            </Box>
+        </Paper>
     );
 };
 
