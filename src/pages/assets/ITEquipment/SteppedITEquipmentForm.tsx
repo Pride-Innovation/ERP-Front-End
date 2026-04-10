@@ -1,6 +1,6 @@
-/*
+﻿/*
 13.9 Pride's Standard Copyright Notice:
-Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
+Copyright Â©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
 and distribute this software and its documentation for any purpose is prohibited unless authorized in writing by the
 Managing Director
 */
@@ -58,7 +58,8 @@ const SteppedITEquipmentForm = ({
     selectedCategory,
     stateFormFields,
     loading = false,
-    trigger
+    trigger,
+    isUpdate,
 }: IITEquipmentForm) => {
     const [activeStep, setActiveStep] = useState(0);
     const navigate = useNavigate();
@@ -187,47 +188,129 @@ const SteppedITEquipmentForm = ({
 
     const fieldGroups = groupFields(currentStepFields);
 
-    return (
-        <Box sx={{ width: "100%" }}>
-            {/* Stepper */}
-            <Paper
-                elevation={0}
+    const renderSectionHeader = (title: string, icon: any) => (
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, position: 'relative' }}>
+            <Box
                 sx={{
-                    p: 3,
-                    mb: 3,
-                    borderRadius: 2,
-                    border: `1px solid ${alpha('#000', 0.08)}`,
-                    bgcolor: alpha(PRIMARY_COLOR, 0.03)
+                    bgcolor: alpha(PRIMARY_COLOR, 0.1),
+                    color: PRIMARY_COLOR,
+                    width: 36,
+                    height: 36,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderRadius: 1,
+                    mr: 2,
                 }}
             >
-                <Stepper
-                    activeStep={activeStep}
-                    alternativeLabel={isMobile}
+                {icon}
+            </Box>
+            <Typography variant="h6" sx={{ fontWeight: 600, color: 'text.primary', position: 'relative', zIndex: 1 }}>
+                {title}
+            </Typography>
+            <Box
+                sx={{
+                    position: 'absolute',
+                    left: 0,
+                    right: 0,
+                    height: '1px',
+                    bgcolor: alpha('#000', 0.1),
+                    bottom: -8,
+                    zIndex: 0,
+                }}
+            />
+        </Box>
+    );
+
+    return (
+        <Paper
+            elevation={0}
+            sx={{
+                width: '100%',
+                borderRadius: 2,
+                overflow: 'hidden',
+                border: `1px solid ${alpha('#000', 0.08)}`,
+            }}
+        >
+            {/* Header */}
+            <Box
+                sx={{
+                    background: `linear-gradient(135deg, ${alpha(PRIMARY_COLOR, 0.07)} 0%, ${alpha(PRIMARY_COLOR, 0.02)} 100%)`,
+                    borderBottom: `1px solid ${alpha('#000', 0.08)}`,
+                    p: 3,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 2,
+                }}
+            >
+                <Box
                     sx={{
-                        '& .MuiStepLabel-root .Mui-completed': {
-                            color: PRIMARY_COLOR,
-                        },
-                        '& .MuiStepLabel-root .Mui-active': {
-                            color: PRIMARY_COLOR,
-                        },
-                        '& .MuiStepConnector-line': {
-                            borderColor: alpha('#000', 0.1)
-                        },
-                        '& .MuiStepConnector-root.Mui-active .MuiStepConnector-line': {
-                            borderColor: PRIMARY_COLOR,
-                        },
-                        '& .MuiStepConnector-root.Mui-completed .MuiStepConnector-line': {
-                            borderColor: PRIMARY_COLOR,
-                        },
+                        bgcolor: alpha(PRIMARY_COLOR, 0.12),
+                        color: PRIMARY_COLOR,
+                        width: 44,
+                        height: 44,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        borderRadius: 1.5,
+                        flexShrink: 0,
                     }}
                 >
-                    {steps.map((label) => (
-                        <Step key={label}>
-                            <StepLabel>{label}</StepLabel>
-                        </Step>
-                    ))}
-                </Stepper>
-            </Paper>
+                    <DevicesOtherIcon />
+                </Box>
+                <Box>
+                    <Typography variant="h6" sx={{ color: 'text.primary', fontWeight: 600, mb: 0.25 }}>
+                        {isUpdate ? 'Update IT Equipment' : 'Register IT Equipment'}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                        {isUpdate
+                            ? 'Modify the details of this IT equipment record'
+                            : 'Fill in the fields below to register a new IT equipment asset'}
+                    </Typography>
+                </Box>
+            </Box>
+
+            {/* Form Content */}
+            <Box sx={{ p: { xs: 2, sm: 3 } }}>
+                {/* Stepper */}
+                <Paper
+                    elevation={0}
+                    sx={{
+                        p: { xs: 2, sm: 2.5 },
+                        mb: 3,
+                        borderRadius: 2,
+                        border: `1px solid ${alpha('#000', 0.07)}`,
+                        bgcolor: alpha(PRIMARY_COLOR, 0.02),
+                    }}
+                >
+                    <Stepper
+                        activeStep={activeStep}
+                        alternativeLabel={isMobile}
+                        sx={{
+                            '& .MuiStepLabel-root .Mui-completed': {
+                                color: PRIMARY_COLOR,
+                            },
+                            '& .MuiStepLabel-root .Mui-active': {
+                                color: PRIMARY_COLOR,
+                            },
+                            '& .MuiStepConnector-line': {
+                                borderColor: alpha('#000', 0.1)
+                            },
+                            '& .MuiStepConnector-root.Mui-active .MuiStepConnector-line': {
+                                borderColor: PRIMARY_COLOR,
+                            },
+                            '& .MuiStepConnector-root.Mui-completed .MuiStepConnector-line': {
+                                borderColor: PRIMARY_COLOR,
+                            },
+                        }}
+                    >
+                        {steps.map((label) => (
+                            <Step key={label}>
+                                <StepLabel>{label}</StepLabel>
+                            </Step>
+                        ))}
+                    </Stepper>
+                </Paper>
 
             {/* Display errors */}
             {noFieldsError && !loading && (
@@ -257,10 +340,8 @@ const SteppedITEquipmentForm = ({
                 </Paper>
             )}
 
-            {/* Form fields section */}
+            {/* Field sections */}
             {!loading && fieldGroups.map((group, groupIndex) => {
-
-                // Skip empty groups
                 if (!group.fields || group.fields.length === 0) {
                     return null;
                 }
@@ -270,38 +351,19 @@ const SteppedITEquipmentForm = ({
                         key={`group-${groupIndex}`}
                         elevation={0}
                         sx={{
-                            p: 3,
+                            p: { xs: 2, sm: 3 },
                             mb: 3,
                             borderRadius: 2,
-                            border: `1px solid ${alpha(PRIMARY_COLOR, 0.1)}`,
-                            bgcolor: alpha(PRIMARY_COLOR, 0.015),
-                            boxShadow: `0 1px 3px ${alpha('#000', 0.04)}`
+                            border: `1px solid ${alpha('#000', 0.08)}`,
+                            bgcolor: alpha(PRIMARY_COLOR, 0.02),
+                            boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
                         }}
                     >
-                        <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                            <Box
-                                sx={{
-                                    width: 34,
-                                    height: 34,
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    borderRadius: 1,
-                                    bgcolor: alpha(PRIMARY_COLOR, 0.1),
-                                    color: PRIMARY_COLOR
-                                }}
-                            >
-                                {group.icon}
-                            </Box>
-                            <Typography variant="h6" fontWeight={700} sx={{ color: PRIMARY_COLOR }}>
-                                {group.title}
-                            </Typography>
-                        </Box>
-
-                        <Grid container spacing={3}>
+                        {renderSectionHeader(group.title, group.icon)}
+                        <Grid container spacing={2} sx={{ mt: 0.5 }}>
                             {/* Category field special handling */}
                             {group.fields.some(field => field?.value === 'category') && (
-                                <Grid item xs={12} md={6} lg={4}>
+                                <Grid item xs={12} sm={6}>
                                     <FormControl size='medium' fullWidth sx={{
                                         '& .MuiOutlinedInput-root': {
                                             borderRadius: '8px',
@@ -402,7 +464,6 @@ const SteppedITEquipmentForm = ({
                             {group.fields
                                 .filter(field => field && field.value !== 'category')
                                 .map((field, index) => {
-                                    // Safety check
                                     if (!field) return null;
 
                                     const commonProps = {
@@ -415,7 +476,7 @@ const SteppedITEquipmentForm = ({
                                         disabled: field.disabled ? true : false
                                     };
 
-                                    const gridSize = field.type === "textarea" ? { xs: 12 } : { xs: 12, md: 6, lg: 4 };
+                                    const gridSize = field.type === "textarea" ? { xs: 12 } : { xs: 12, sm: 6 };
 
                                     return (
                                         <Grid item {...gridSize} key={`${field.value}-${index}`}>
@@ -438,7 +499,7 @@ const SteppedITEquipmentForm = ({
                 );
             })}
 
-            {/* No fields error/empty state */}
+            {/* No fields empty state */}
             {!loading && currentStepFields.length === 0 && !noFieldsError && (
                 <Paper
                     elevation={0}
@@ -455,166 +516,160 @@ const SteppedITEquipmentForm = ({
                     </Typography>
                 </Paper>
             )}
+        </Box>
 
-            {/* Navigation buttons */}
-            <Paper
-                elevation={0}
+        {/* Footer navigation */}
+        <Box
+            sx={{
+                borderTop: `1px solid ${alpha('#000', 0.08)}`,
+                overflow: 'hidden',
+            }}
+        >
+            <Box
                 sx={{
-                    mt: 3,
-                    borderRadius: 2,
-                    border: `1px solid ${alpha('#000', 0.08)}`,
-                    overflow: 'hidden',
+                    height: 3,
+                    background: `linear-gradient(90deg, ${PRIMARY_COLOR} ${((activeStep + 1) / steps.length) * 100}%, ${alpha(PRIMARY_COLOR, 0.12)} ${((activeStep + 1) / steps.length) * 100}%)`,
+                    transition: 'all 0.4s ease',
+                }}
+            />
+            <Box
+                sx={{
+                    px: 3,
+                    py: 2.5,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    flexDirection: { xs: 'column', sm: 'row' },
+                    gap: 2,
+                    bgcolor: alpha(PRIMARY_COLOR, 0.015),
                 }}
             >
-                {/* Step progress bar */}
-                <Box
-                    sx={{
-                        height: 3,
-                        background: `linear-gradient(90deg, ${PRIMARY_COLOR} ${((activeStep + 1) / steps.length) * 100}%, ${alpha(PRIMARY_COLOR, 0.12)} ${((activeStep + 1) / steps.length) * 100}%)`,
-                        transition: 'all 0.4s ease',
-                    }}
-                />
+                <Stack direction="row" spacing={2} alignItems="center">
+                    <MuiButton
+                        onClick={() => navigate(ROUTES.LIST_ASSETS)}
+                        type="button"
+                        variant="text"
+                        startIcon={<CancelIcon fontSize="small" />}
+                        sx={{
+                            color: 'text.secondary',
+                            fontSize: '0.8125rem',
+                            px: 1.5,
+                            py: 1,
+                            borderRadius: '8px',
+                            '&:hover': {
+                                color: '#D32F2F',
+                                backgroundColor: alpha('#D32F2F', 0.06),
+                            },
+                            transition: 'all 0.2s ease',
+                        }}
+                    >
+                        Cancel
+                    </MuiButton>
 
-                <Box
-                    sx={{
-                        px: 3,
-                        py: 2.5,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        flexDirection: { xs: 'column', sm: 'row' },
-                        gap: 2,
-                        bgcolor: alpha(PRIMARY_COLOR, 0.015),
-                    }}
-                >
-                    {/* Left: step info + cancel */}
-                    <Stack direction="row" spacing={2} alignItems="center">
+                    <Box
+                        sx={{
+                            height: 20,
+                            width: '1px',
+                            bgcolor: alpha('#000', 0.12),
+                            display: { xs: 'none', sm: 'block' },
+                        }}
+                    />
+
+                    <Typography
+                        variant="caption"
+                        sx={{
+                            color: 'text.secondary',
+                            fontSize: '0.75rem',
+                            display: { xs: 'none', sm: 'block' },
+                        }}
+                    >
+                        Step {activeStep + 1} of {steps.length} &mdash; <strong style={{ color: PRIMARY_COLOR }}>{steps[activeStep]}</strong>
+                    </Typography>
+                </Stack>
+
+                <Stack direction="row" spacing={1.5} alignItems="center">
+                    {activeStep > 0 && (
                         <MuiButton
-                            onClick={() => navigate(ROUTES.LIST_ASSETS)}
+                            onClick={handleBack}
                             type="button"
-                            variant="text"
-                            startIcon={<CancelIcon fontSize="small" />}
+                            variant="outlined"
+                            startIcon={<ArrowBackIcon fontSize="small" />}
                             sx={{
-                                color: 'text.secondary',
+                                borderColor: alpha(PRIMARY_COLOR, 0.4),
+                                color: PRIMARY_COLOR,
                                 fontSize: '0.8125rem',
-                                px: 1.5,
+                                px: 2.5,
                                 py: 1,
                                 borderRadius: '8px',
                                 '&:hover': {
-                                    color: '#D32F2F',
-                                    backgroundColor: alpha('#D32F2F', 0.06),
+                                    borderColor: PRIMARY_COLOR,
+                                    backgroundColor: alpha(PRIMARY_COLOR, 0.06),
                                 },
                                 transition: 'all 0.2s ease',
                             }}
                         >
-                            Cancel
+                            Previous
                         </MuiButton>
+                    )}
 
-                        <Box
+                    {activeStep < steps.length - 1 && (
+                        <MuiButton
+                            onClick={handleNext}
+                            type="button"
+                            variant="contained"
+                            endIcon={<ArrowForwardIcon fontSize="small" />}
+                            disabled={loading}
                             sx={{
-                                height: 20,
-                                width: '1px',
-                                bgcolor: alpha('#000', 0.12),
-                                display: { xs: 'none', sm: 'block' },
-                            }}
-                        />
-
-                        <Typography
-                            variant="caption"
-                            sx={{
-                                color: 'text.secondary',
-                                fontSize: '0.75rem',
-                                display: { xs: 'none', sm: 'block' },
+                                bgcolor: PRIMARY_COLOR,
+                                fontSize: '0.8125rem',
+                                px: 3,
+                                py: 1,
+                                borderRadius: '8px',
+                                boxShadow: `0 2px 8px ${alpha(PRIMARY_COLOR, 0.35)}`,
+                                '&:hover': {
+                                    bgcolor: '#065f54',
+                                    boxShadow: `0 4px 14px ${alpha(PRIMARY_COLOR, 0.45)}`,
+                                    transform: 'translateY(-1px)',
+                                },
+                                '&:active': { transform: 'translateY(0)' },
+                                '&.Mui-disabled': { bgcolor: alpha('#000', 0.12), boxShadow: 'none' },
+                                transition: 'all 0.2s ease',
                             }}
                         >
-                            Step {activeStep + 1} of {steps.length} &mdash; <strong style={{ color: PRIMARY_COLOR }}>{steps[activeStep]}</strong>
-                        </Typography>
-                    </Stack>
+                            Continue
+                        </MuiButton>
+                    )}
 
-                    {/* Right: navigation */}
-                    <Stack direction="row" spacing={1.5} alignItems="center">
-                        {activeStep > 0 && (
-                            <MuiButton
-                                onClick={handleBack}
-                                type="button"
-                                variant="outlined"
-                                startIcon={<ArrowBackIcon fontSize="small" />}
-                                sx={{
-                                    borderColor: alpha(PRIMARY_COLOR, 0.4),
-                                    color: PRIMARY_COLOR,
-                                    fontSize: '0.8125rem',
-                                    px: 2.5,
-                                    py: 1,
-                                    borderRadius: '8px',
-                                    '&:hover': {
-                                        borderColor: PRIMARY_COLOR,
-                                        backgroundColor: alpha(PRIMARY_COLOR, 0.06),
-                                    },
-                                    transition: 'all 0.2s ease',
-                                }}
-                            >
-                                Previous
-                            </MuiButton>
-                        )}
-
-                        {activeStep < steps.length - 1 && (
-                            <MuiButton
-                                onClick={handleNext}
-                                type="button"
-                                variant="contained"
-                                endIcon={<ArrowForwardIcon fontSize="small" />}
-                                disabled={loading}
-                                sx={{
-                                    bgcolor: PRIMARY_COLOR,
-                                    fontSize: '0.8125rem',
-                                    px: 3,
-                                    py: 1,
-                                    borderRadius: '8px',
-                                    boxShadow: `0 2px 8px ${alpha(PRIMARY_COLOR, 0.35)}`,
-                                    '&:hover': {
-                                        bgcolor: '#065f54',
-                                        boxShadow: `0 4px 14px ${alpha(PRIMARY_COLOR, 0.45)}`,
-                                        transform: 'translateY(-1px)',
-                                    },
-                                    '&:active': { transform: 'translateY(0)' },
-                                    '&.Mui-disabled': { bgcolor: alpha('#000', 0.12), boxShadow: 'none' },
-                                    transition: 'all 0.2s ease',
-                                }}
-                            >
-                                Continue
-                            </MuiButton>
-                        )}
-
-                        {activeStep === steps.length - 1 && (
-                            <MuiButton
-                                type="submit"
-                                variant="contained"
-                                startIcon={<SaveIcon fontSize="small" />}
-                                disabled={sendingRequest || loading}
-                                sx={{
-                                    bgcolor: PRIMARY_COLOR,
-                                    fontSize: '0.8125rem',
-                                    px: 3,
-                                    py: 1,
-                                    borderRadius: '8px',
-                                    boxShadow: `0 2px 8px ${alpha(PRIMARY_COLOR, 0.35)}`,
-                                    '&:hover': {
-                                        bgcolor: '#065f54',
-                                        boxShadow: `0 4px 14px ${alpha(PRIMARY_COLOR, 0.45)}`,
-                                        transform: 'translateY(-1px)',
-                                    },
-                                    '&:active': { transform: 'translateY(0)' },
-                                    '&.Mui-disabled': { bgcolor: alpha('#000', 0.12), boxShadow: 'none' },
-                                    transition: 'all 0.2s ease',
-                                }}
-                            >
-                                {buttonText || 'Save Asset'}
-                            </MuiButton>
-                        )}
-                    </Stack>
-                </Box>
-            </Paper>
+                    {activeStep === steps.length - 1 && (
+                        <MuiButton
+                            type="submit"
+                            variant="contained"
+                            startIcon={<SaveIcon fontSize="small" />}
+                            disabled={sendingRequest || loading}
+                            sx={{
+                                bgcolor: PRIMARY_COLOR,
+                                fontSize: '0.8125rem',
+                                px: 3,
+                                py: 1,
+                                borderRadius: '8px',
+                                boxShadow: `0 2px 8px ${alpha(PRIMARY_COLOR, 0.35)}`,
+                                '&:hover': {
+                                    bgcolor: '#065f54',
+                                    boxShadow: `0 4px 14px ${alpha(PRIMARY_COLOR, 0.45)}`,
+                                    transform: 'translateY(-1px)',
+                                },
+                                '&:active': { transform: 'translateY(0)' },
+                                '&.Mui-disabled': { bgcolor: alpha('#000', 0.12), boxShadow: 'none' },
+                                transition: 'all 0.2s ease',
+                            }}
+                        >
+                            {buttonText || 'Save Asset'}
+                        </MuiButton>
+                    )}
+                </Stack>
+            </Box>
         </Box>
+    </Paper>
     );
 };
 
