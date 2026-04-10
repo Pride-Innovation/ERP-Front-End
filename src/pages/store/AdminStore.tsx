@@ -1,0 +1,22 @@
+/*
+13.9 Pride's Standard Copyright Notice:
+Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
+and distribute this software and its documentation for any purpose is prohibited unless authorized in writing by the
+Managing Director
+*/
+
+import AdminPanelSettingsOutlinedIcon from '@mui/icons-material/AdminPanelSettingsOutlined';
+import StoreViewPage from './StoreViewPage';
+
+const AdminStore = () => (
+    <StoreViewPage
+        storeType="admin"
+        title="Admin Store"
+        subtitle="Administrative supplies & office materials"
+        Icon={AdminPanelSettingsOutlinedIcon}
+        gradient="linear-gradient(135deg, #08796C 0%, #0cb39e 100%)"
+        accentColor="#08796C"
+    />
+);
+
+export default AdminStore;
