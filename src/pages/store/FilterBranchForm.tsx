@@ -6,25 +6,22 @@ Managing Director
 */
 
 import { useContext, useEffect, useState } from 'react';
-import BranchUtills from '../settings/branch/utills'
+import BranchUtills from '../settings/branch/utills';
 import { IOptions } from '../../components/tables/interface';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
-import { Autocomplete, TextField } from '@mui/material';
+import { Autocomplete, TextField, Paper, alpha } from '@mui/material';
 import CircularProgress from '@mui/material/CircularProgress';
 import StoreUtills from './utillls';
 import { StoreContext } from '../../context/store';
 import { autocompleteSx, PRIMARY_COLOR } from '../../components/forms/Autocomplete';
-import { alpha } from '@mui/material';
 
 const FilterBranchForm = () => {
-    const [optionsObject, setOptionsObject] = useState<{
-        branchesOptions: Array<IOptions>;
-    }>({ branchesOptions: [] });
+    const [optionsObject, setOptionsObject] = useState<{ branchesOptions: Array<IOptions> }>({ branchesOptions: [] });
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const [selectedBranch, setSelectedBranch] = useState<IOptions | null>(null);
-    const { setCurrentUserBranch, fetchStoresCommoditiesPerBranchPerAsset } = StoreUtills()
+    const { setCurrentUserBranch, fetchStoresCommoditiesPerBranchPerAsset } = StoreUtills();
     const { branchId } = useContext(StoreContext);
 
     const handleOpen = () => {
@@ -42,29 +39,55 @@ const FilterBranchForm = () => {
     };
 
     const { fetchAllBranches } = BranchUtills();
-    const { branches } = useSelector((state: RootState) => state.BranchStore)
+    const { branches } = useSelector((state: RootState) => state.BranchStore);
 
     useEffect(() => {
         if (branches.length > 0) {
             setOptionsObject({
-                branchesOptions: branches?.map(branch => ({ label: branch.name, value: branch.id as number })) || [],
+                branchesOptions: branches.map(branch => ({ label: branch.name, value: branch.id as number })) || [],
             });
         }
     }, [branches]);
 
     useEffect(() => {
         if (selectedBranch?.label && selectedBranch.value) {
-            setCurrentUserBranch(selectedBranch.value as number)
+            setCurrentUserBranch(selectedBranch.value as number);
         }
-    }, [selectedBranch])
-
+    }, [selectedBranch]);
 
     useEffect(() => {
         if (branchId) {
-            fetchStoresCommoditiesPerBranchPerAsset()
+            fetchStoresCommoditiesPerBranchPerAsset();
         }
     }, [branchId]);
 
+    const CustomPaper = ({ children, ...props }: any) => (
+        <Paper
+            {...props}
+            elevation={4}
+            sx={{
+                mt: 0.5,
+                borderRadius: '10px',
+                boxShadow: `0 4px 24px ${alpha('#000', 0.12)}`,
+                '& .MuiAutocomplete-listbox': {
+                    padding: '4px 0',
+                    '& .MuiAutocomplete-option': {
+                        fontSize: '0.875rem',
+                        minHeight: 38,
+                        px: 2,
+                        '&:hover': { backgroundColor: alpha(PRIMARY_COLOR, 0.06) },
+                        '&[aria-selected="true"]': {
+                            backgroundColor: alpha(PRIMARY_COLOR, 0.1),
+                            color: PRIMARY_COLOR,
+                            fontWeight: 500,
+                        },
+                    },
+                },
+            }}
+        >
+            {children}
+        </Paper>
+    );
 
     return (
         <Autocomplete
@@ -75,12 +98,10 @@ const FilterBranchForm = () => {
             getOptionLabel={(option) => option.label as string}
             options={optionsObject.branchesOptions}
             value={selectedBranch}
-            onChange={(_, value) => {
-                setSelectedBranch(value);
-            }}
+            onChange={(_, value) => setSelectedBranch(value)}
             loading={loading}
-            size='small'
-            color='primary'
+            size="small"
+            PaperComponent={CustomPaper}
             sx={{
                 '& .MuiAutocomplete-popupIndicator': { color: alpha(PRIMARY_COLOR, 0.6) },
                 '& .MuiAutocomplete-clearIndicator': { color: alpha(PRIMARY_COLOR, 0.5) },
@@ -93,7 +114,7 @@ const FilterBranchForm = () => {
                         ...params.InputProps,
                         endAdornment: (
                             <>
-                                {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                                {loading ? <CircularProgress color="inherit" size={18} /> : null}
                                 {params.InputProps.endAdornment}
                             </>
                         ),
@@ -102,7 +123,7 @@ const FilterBranchForm = () => {
                 />
             )}
         />
-    )
-}
+    );
+};
 
 export default FilterBranchForm;
