@@ -8,7 +8,10 @@ Managing Director
 export interface IAuditTrail {
     id: string | number;
     timeStamp: string;
-    event: string;
+    event: 'created' | 'updated' | 'deleted' | 'login' | 'logout' | 'approved' | 'rejected' | 'system';
+    module: 'Assets' | 'Inventory' | 'Users' | 'Store' | 'Requests' | 'Movement' | 'Disposal' | 'Maintenance' | 'System';
     description: string;
     actor: string;
+    ipAddress: string;
+    severity: 'info' | 'warning' | 'critical';
 }
