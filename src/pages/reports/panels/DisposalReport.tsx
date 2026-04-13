@@ -5,7 +5,7 @@ import CategoryOutlinedIcon from '@mui/icons-material/CategoryOutlined';
 import EventAvailableOutlinedIcon from '@mui/icons-material/EventAvailableOutlined';
 import ReportShell, { ReportShellFilters } from '../ReportShell';
 import ReportSummaryCards from '../ReportSummaryCards';
-import ReportDataTable, { ReportColumn, StatusChip } from '../ReportDataTable';
+import ReportDataTable, { ReportColumn } from '../ReportDataTable';
 
 const ACCENT = '#DC2626';
 

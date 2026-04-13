@@ -136,6 +136,40 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
     };
 
     /**
+     * Generate PDF directly from an array of rows (no DataGrid API needed).
+     */
+    const generatePDFFromRows = (rowsData: any[]) => {
+        try {
+            if (!rowsData || rowsData.length === 0) {
+                toast.error(`No data available for export`);
+                return;
+            }
+            const { columns, rows } = determineRowsandColumns(rowsData);
+            exportPDF(columns, rows, fileName || moduleName || 'export');
+        } catch (error) {
+            console.error('Error generating PDF:', error);
+            toast.error('Failed to generate PDF: ' + (error instanceof Error ? error.message : 'Unknown error'));
+        }
+    };
+
+    /**
+     * Generate Excel directly from an array of rows (no DataGrid API needed).
+     */
+    const generateExcelFromRows = (rowsData: any[]) => {
+        try {
+            if (!rowsData || rowsData.length === 0) {
+                toast.error(`No data available for export`);
+                return;
+            }
+            const { columns, rows } = determineRowsandColumns(rowsData);
+            exportExcel(columns, rows, fileName || moduleName || 'export');
+        } catch (error) {
+            console.error('Error generating Excel:', error);
+            toast.error('Failed to generate Excel: ' + (error instanceof Error ? error.message : 'Unknown error'));
+        }
+    };
+
+    /**
      * Generate PDF from the current data in the DataGrid or from API.
      * This function smartly decides whether to use the current filtered table data
      * or fetch fresh data from the API based on the module name.
@@ -842,7 +876,9 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
         JsonExportMenuItem,
         handleOptionsFilter,
         filterStatuses,
-        ExcelExportMenuItem
+        ExcelExportMenuItem,
+        generatePDFFromRows,
+        generateExcelFromRows
     };
 };
 

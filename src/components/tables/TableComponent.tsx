@@ -1,12 +1,21 @@
-import { DataGridStyled, StyledBox, MultiLineCell, CellPrimaryText, CellSecondaryText } from './Table';
-import { GridColDef } from '@mui/x-data-grid';
+import { StyledBox, MultiLineCell, CellPrimaryText, CellSecondaryText } from './Table';
 import {
     alpha,
     Avatar,
     Box,
     Button,
     Card,
-    useTheme,
+    Chip,
+    CircularProgress,
+    Paper,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TablePagination,
+    TableRow,
+    TableSortLabel,
     Tooltip,
     Typography,
 } from '@mui/material';
@@ -25,7 +34,7 @@ import AccessAlarmsIcon from '@mui/icons-material/AccessAlarms';
 import PopoverComponent from '../forms/Popover';
 import CustomToolbarWrapper from './TableToolBar';
 import CustomTextFilterOperator from './TableFilters';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import CustomTablePagination from './TablePagination';
 import TimeLineDot from '../timeLineDots';
 import MailOutlineIcon from '@mui/icons-material/MailOutline';
@@ -36,8 +45,13 @@ import BusinessIcon from '@mui/icons-material/Business';
 import NoContent from '../noContent';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import AccountBalanceWalletOutlinedIcon from '@mui/icons-material/AccountBalanceWalletOutlined';
+import { useDebounce } from '../../hooks/useDebounce';
 
 const PRIMARY_COLOR = '#08796C';
+const HEADER_TO = '#065E53';
+const BORDER_COLOR = '#EEF2F7';
+const HOVER_BG = '#F0FDF9';
+const ROW_EVEN = '#FAFBFC';
 
 // ─── Status colour helper ─────────────────────────────────────────────────────
 const getStatusColor = (value: string): { bg: string; text: string; border: string } => {
@@ -62,6 +76,8 @@ const getInitials = (name: string): string => {
         : String(name)[0].toUpperCase();
 };
 
+type SortDir = 'asc' | 'desc';
+
 const TableComponent = ({
     columnHeaders,
     rows,
@@ -75,7 +91,7 @@ const TableComponent = ({
     count = 10,
     loading = false,
     searchAction = false,
-    endPoint = "users",
+    endPoint = 'users',
     paginationMode = 'server',
     filterMode = 'client',
     params,
@@ -89,15 +105,89 @@ const TableComponent = ({
 }: ITableComponent) => {
     const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
     const [currentOptions, setCurrentOptions] = useState<any[]>([]);
-    const [currentID, setCurrentId] = useState<string | number>("");
-    const theme = useTheme();
+    const [currentID, setCurrentId] = useState<string | number>('');
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
+    const [sortField, setSortField] = useState<string>('');
+    const [sortDir, setSortDir] = useState<SortDir>('asc');
+    const [searchValue, setSearchValue] = useState('');
+    const debouncedSearch = useDebounce(searchValue, 500);
+
     const { handleOptionsFilter } = TableUtills({ moduleName: module });
+    const { handleTableFilter } = CustomTextFilterOperator({ endPoint, params });
+    const { handleTablePagination } = CustomTablePagination({ endPoint, params, selectedStatus });
 
-    const NoRowsOverlay = () => (
-        <NoContent item={header.singular} items={header.plural} />
-    );
+    // ── Server-side: fire pagination when page/rowsPerPage changes ────────────
+    const handlePageChange = (_: unknown, newPage: number) => {
+        setPage(newPage);
+        if (paginationMode === 'server') {
+            handleTablePagination({ page: newPage, pageSize: rowsPerPage } as any);
+        }
+    };
 
-    const handleClick = (
+    const handleRowsPerPageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const size = parseInt(e.target.value, 10);
+        setRowsPerPage(size);
+        setPage(0);
+        if (paginationMode === 'server') {
+            handleTablePagination({ page: 0, pageSize: size } as any);
+        }
+    };
+
+    // ── Server-side: fire filter when search debounces ────────────────────────
+    const handleSearch = (value: string) => {
+        setSearchValue(value);
+        setPage(0);
+        if (filterMode === 'server' && value.trim()) {
+            handleTableFilter({
+                items: [{ field: 'name', operator: 'contains', value: value.trim(), id: 1 }],
+            } as any);
+        }
+    };
+
+    // ── Sort handler ──────────────────────────────────────────────────────────
+    const handleSort = (field: string) => {
+        const isAsc = sortField === field && sortDir === 'asc';
+        setSortDir(isAsc ? 'desc' : 'asc');
+        setSortField(field);
+    };
+
+    // ── Client-side filter + sort + paginate ──────────────────────────────────
+    const processedRows = useMemo(() => {
+        let data = [...(rows ?? [])];
+
+        // client-side search
+        if (filterMode === 'client' && debouncedSearch) {
+            const q = debouncedSearch.toLowerCase();
+            data = data.filter(row =>
+                Object.values(row as object).some(v => String(v ?? '').toLowerCase().includes(q))
+            );
+        }
+
+        // sort
+        if (sortField) {
+            data = [...data].sort((a: any, b: any) => {
+                const av = a[sortField] ?? '';
+                const bv = b[sortField] ?? '';
+                const result = String(av).localeCompare(String(bv), undefined, { numeric: true });
+                return sortDir === 'asc' ? result : -result;
+            });
+        }
+
+        return data;
+    }, [rows, filterMode, debouncedSearch, sortField, sortDir]);
+
+    const pagedRows = useMemo(() => {
+        if (paginationMode === 'client') {
+            return processedRows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+        }
+        return processedRows;
+    }, [processedRows, page, rowsPerPage, paginationMode]);
+
+    const totalRows = paginationMode === 'server' ? count : processedRows.length;
+
+    // ── Action column helper ──────────────────────────────────────────────────
+    const handleActionClick = (
         event: React.MouseEvent<HTMLButtonElement>,
         row: any,
         column: any
@@ -113,355 +203,304 @@ const TableComponent = ({
         setCurrentOptions(filteredOptions);
     };
 
-    const { handleTableFilter } = CustomTextFilterOperator({ endPoint, params });
-    const { handleTablePagination } = CustomTablePagination({ endPoint, params, selectedStatus });
+    // ── Cell renderers (same logic as before, now return ReactNode) ───────────
+    const renderCell = (column: any, row: any) => {
+        const value = row[column.label];
 
-    const columns: GridColDef[] = columnHeaders.map((column) => ({
-        field: `${column.label}`,
-        headerName: camelCaseToWords(column.label),
-        flex: column.label === "image" ? 0.5 :
-            column.label === "email" ? 1.5 :
-                column.label === "name" ? 1.5 : 1,
-        minWidth: column.label === "image" ? 80 :
-            column.label === "action" ? 120 : 150,
-        renderCell: (param) => {
-            const value = param.row[column.label];
-
-            // Image column
-            if (column.isImage) {
-                const imgSrc = determineImage(param.row);
-                const imgInitials = getInitials(param.row.name ?? param.row.firstName ?? '');
-                return (
-                    <StyledBox sx={{ p: 0 }}>
-                        <Avatar
-                            src={imgSrc}
-                            alt='profile'
-                            sx={{
-                                height: 40,
-                                width: 40,
-                                border: `2px solid ${alpha(PRIMARY_COLOR, 0.15)}`,
-                                bgcolor: alpha(PRIMARY_COLOR, 0.1),
-                                color: PRIMARY_COLOR,
-                                fontSize: '0.85rem',
-                                fontWeight: 700,
-                                boxShadow: `0 2px 6px ${alpha('#000', 0.08)}`
-                            }}
-                        >
-                            {!imgSrc && imgInitials}
-                        </Avatar>
-                    </StyledBox>
-                );
-            }
-
-            // Text/Number columns with multi-line support
-            if (column.isText || column.isNumber) {
-                // Special handling for 'name' and 'dutyStation' columns
-                if (column.label === "name" || column.label === "assignedTo") {
-                    const nameInitials = getInitials(value as string);
-                    return (
-                        <StyledBox>
-                            <Avatar sx={{
-                                width: 34,
-                                height: 34,
-                                bgcolor: alpha(PRIMARY_COLOR, 0.1),
-                                color: PRIMARY_COLOR,
-                                fontSize: '0.75rem',
-                                fontWeight: 800,
-                                flexShrink: 0,
-                                border: `1.5px solid ${alpha(PRIMARY_COLOR, 0.15)}`
-                            }}>
-                                {nameInitials}
-                            </Avatar>
-                            <MultiLineCell>
-                                <CellPrimaryText>{value}</CellPrimaryText>
-                                {param.row.title && (
-                                    <CellSecondaryText>{param.row.title}</CellSecondaryText>
-                                )}
-                            </MultiLineCell>
-                        </StyledBox>
-                    );
-                }
-
-                if (column.label === "dutyStation") {
-                    return (
-                        <StyledBox>
-                            <BusinessIcon
-                                fontSize='small'
-                                sx={{
-                                    color: theme.palette.secondary.main,
-                                    flexShrink: 0
-                                }}
-                            />
-                            <MultiLineCell>
-                                <CellPrimaryText>{value}</CellPrimaryText>
-                                {param.row.department && (
-                                    <CellSecondaryText>{param.row.department}</CellSecondaryText>
-                                )}
-                            </MultiLineCell>
-                        </StyledBox>
-                    );
-                }
-
-                // Email column
-                if (column.label === "email") {
-                    return (
-                        <Tooltip title={value} arrow>
-                            <StyledBox>
-                                <MailOutlineIcon
-                                    fontSize='small'
-                                    sx={{
-                                        color: theme.palette.secondary.main,
-                                        flexShrink: 0
-                                    }}
-                                />
-                                <TypographyComponent
-                                    weight={400}
-                                    size='0.875rem'
-                                    sx={{
-                                        overflow: 'hidden',
-                                        textOverflow: 'ellipsis',
-                                        whiteSpace: 'nowrap'
-                                    }}
-                                >
-                                    {value}
-                                </TypographyComponent>
-                            </StyledBox>
-                        </Tooltip>
-                    );
-                }
-
-                // Default text rendering
-                return (
-                    <StyledBox>
-                        <TypographyComponent
-                            weight={400}
-                            size='0.875rem'
-                            sx={{ color: '#1F2937' }}
-                        >
-                            {(isCamelCase(value as string) && value) ?
-                                camelCaseToWords(value) : value}
-                        </TypographyComponent>
-                    </StyledBox>
-                );
-            }
-
-            // Money column
-            if (column.isMoney) {
-                return (
-                    <StyledBox>
-                        <AccountBalanceWalletOutlinedIcon sx={{ fontSize: 15, color: alpha('#16a34a', 0.7), flexShrink: 0 }} />
-                        <Typography sx={{
-                            fontWeight: 600,
-                            fontSize: '0.875rem',
-                            color: '#16a34a',
-                            fontFamily: 'monospace',
-                            letterSpacing: '0.02em'
-                        }}>
-                            {formatToUGXMoney(value)}
-                        </Typography>
-                    </StyledBox>
-                );
-            }
-
-            // Status column
-            if (column.isStatus) {
-                const sc = getStatusColor(value as string);
-                return (
-                    <StyledBox>
-                        <Box sx={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: 0.75,
-                            px: 1.5,
-                            py: 0.55,
-                            borderRadius: '20px',
-                            bgcolor: sc.bg,
-                            border: `1px solid ${sc.border}`
-                        }}>
-                            <TimeLineDot status={value} />
-                            <Typography sx={{
-                                fontSize: '0.75rem',
-                                fontWeight: 600,
-                                color: sc.text,
-                                textTransform: 'capitalize',
-                                lineHeight: 1
-                            }}>
-                                {camelCaseToWords(value)}
-                            </Typography>
-                        </Box>
-                    </StyledBox>
-                );
-            }
-
-            // Boolean column (availability)
-            if (column.isBoolen) {
-                return (
-                    <StyledBox>
-                        {value === "present" ?
-                            <ChipComponent
-                                variant='filled'
-                                label='Present'
-                                icon={<HowToRegOutlinedIcon fontSize='small' />}
-                                size='medium'
-                                color='success'
-                                sx={{
-                                    fontWeight: 500,
-                                    fontSize: '0.75rem',
-                                    height: 28
-                                }}
-                            /> :
-                            <ChipComponent
-                                variant='filled'
-                                label='Absent'
-                                icon={<NoAccountsIcon fontSize='small' />}
-                                size='medium'
-                                color='warning'
-                                sx={{
-                                    fontWeight: 500,
-                                    fontSize: '0.75rem',
-                                    height: 28
-                                }}
-                            />
-                        }
-                    </StyledBox>
-                );
-            }
-
-            // Priority column
-            if (column.isPriority) {
-                return (
-                    <StyledBox>
-                        {value === "high" ?
-                            <ChipComponent
-                                variant='filled'
-                                label='High'
-                                icon={<AccessAlarmsIcon fontSize='small' />}
-                                size='medium'
-                                color='error'
-                                sx={{ fontWeight: 500, fontSize: '0.75rem', height: 28 }}
-                            /> :
-                            value === "medium" ?
-                                <ChipComponent
-                                    variant='filled'
-                                    label='Medium'
-                                    icon={<DoNotDisturbAltIcon fontSize='small' />}
-                                    size='medium'
-                                    color='secondary'
-                                    sx={{ fontWeight: 500, fontSize: '0.75rem', height: 28 }}
-                                /> :
-                                <ChipComponent
-                                    variant='filled'
-                                    label='Low'
-                                    icon={<SpeedIcon fontSize='small' />}
-                                    size='medium'
-                                    color='success'
-                                    sx={{ fontWeight: 500, fontSize: '0.75rem', height: 28 }}
-                                />
-                        }
-                    </StyledBox>
-                );
-            }
-
-            // Action column
-            if (column.isAction) {
-                return (
-                    <StyledBox>
-                        <Button
-                            size="small"
-                            variant="outlined"
-                            onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
-                                handleClick?.(event, param.row, column);
-                                setCurrentId(param.row?.id);
-                            }}
-                            endIcon={<MoreHorizIcon sx={{ fontSize: '14px !important' }} />}
-                            sx={{
-                                height: 32,
-                                px: 1.5,
-                                borderRadius: 1.5,
-                                textTransform: 'none',
-                                fontWeight: 600,
-                                fontSize: '0.78rem',
-                                borderColor: alpha(PRIMARY_COLOR, 0.25),
-                                color: PRIMARY_COLOR,
-                                bgcolor: alpha(PRIMARY_COLOR, 0.03),
-                                '&:hover': {
-                                    borderColor: PRIMARY_COLOR,
-                                    bgcolor: alpha(PRIMARY_COLOR, 0.08)
-                                }
-                            }}
-                        >
-                            {column.actionData?.label ?? 'Actions'}
-                        </Button>
-                        <PopoverComponent
-                            moduleID={currentID}
-                            handleOptionClicked={handleOptionClicked}
-                            options={currentOptions as Array<{ value: string, label: string }>}
-                            anchorEl={anchorEl}
-                            setAnchorEl={setAnchorEl}
-                        />
-                    </StyledBox>
-                );
-            }
-
-            return null;
+        if (column.isImage) {
+            const imgSrc = determineImage(row);
+            const imgInitials = getInitials(row.name ?? row.firstName ?? '');
+            return (
+                <Avatar
+                    src={imgSrc}
+                    alt="profile"
+                    sx={{
+                        height: 38, width: 38,
+                        border: `2px solid ${alpha(PRIMARY_COLOR, 0.15)}`,
+                        bgcolor: alpha(PRIMARY_COLOR, 0.1),
+                        color: PRIMARY_COLOR,
+                        fontSize: '0.8rem', fontWeight: 700,
+                        boxShadow: `0 2px 6px ${alpha('#000', 0.08)}`,
+                    }}
+                >
+                    {!imgSrc && imgInitials}
+                </Avatar>
+            );
         }
-    }));
+
+        if (column.isText || column.isNumber) {
+            if (column.label === 'name' || column.label === 'assignedTo') {
+                return (
+                    <StyledBox>
+                        <Avatar sx={{
+                            width: 32, height: 32,
+                            bgcolor: alpha(PRIMARY_COLOR, 0.1),
+                            color: PRIMARY_COLOR,
+                            fontSize: '0.72rem', fontWeight: 800, flexShrink: 0,
+                            border: `1.5px solid ${alpha(PRIMARY_COLOR, 0.15)}`,
+                        }}>
+                            {getInitials(value as string)}
+                        </Avatar>
+                        <MultiLineCell>
+                            <CellPrimaryText>{value}</CellPrimaryText>
+                            {row.title && <CellSecondaryText>{row.title}</CellSecondaryText>}
+                        </MultiLineCell>
+                    </StyledBox>
+                );
+            }
+
+            if (column.label === 'dutyStation') {
+                return (
+                    <StyledBox>
+                        <BusinessIcon fontSize="small" sx={{ color: '#64748B', flexShrink: 0 }} />
+                        <MultiLineCell>
+                            <CellPrimaryText>{value}</CellPrimaryText>
+                            {row.department && <CellSecondaryText>{row.department}</CellSecondaryText>}
+                        </MultiLineCell>
+                    </StyledBox>
+                );
+            }
+
+            if (column.label === 'email') {
+                return (
+                    <Tooltip title={value} arrow>
+                        <StyledBox>
+                            <MailOutlineIcon fontSize="small" sx={{ color: '#64748B', flexShrink: 0 }} />
+                            <TypographyComponent weight={400} size="0.875rem"
+                                sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                {value}
+                            </TypographyComponent>
+                        </StyledBox>
+                    </Tooltip>
+                );
+            }
+
+            return (
+                <TypographyComponent weight={400} size="0.875rem" sx={{ color: '#1F2937' }}>
+                    {(isCamelCase(value as string) && value) ? camelCaseToWords(value) : value}
+                </TypographyComponent>
+            );
+        }
+
+        if (column.isMoney) {
+            return (
+                <StyledBox>
+                    <AccountBalanceWalletOutlinedIcon sx={{ fontSize: 15, color: alpha('#16a34a', 0.7), flexShrink: 0 }} />
+                    <Typography sx={{ fontWeight: 600, fontSize: '0.875rem', color: '#16a34a', fontFamily: 'monospace' }}>
+                        {formatToUGXMoney(value)}
+                    </Typography>
+                </StyledBox>
+            );
+        }
+
+        if (column.isStatus) {
+            const sc = getStatusColor(value as string);
+            return (
+                <Box sx={{
+                    display: 'inline-flex', alignItems: 'center', gap: 0.75,
+                    px: 1.5, py: 0.55, borderRadius: '20px',
+                    bgcolor: sc.bg, border: `1px solid ${sc.border}`,
+                }}>
+                    <TimeLineDot status={value} />
+                    <Typography sx={{ fontSize: '0.75rem', fontWeight: 600, color: sc.text, textTransform: 'capitalize', lineHeight: 1 }}>
+                        {camelCaseToWords(value)}
+                    </Typography>
+                </Box>
+            );
+        }
+
+        if (column.isBoolen) {
+            return value === 'present'
+                ? <ChipComponent variant="filled" label="Present" icon={<HowToRegOutlinedIcon fontSize="small" />} size="medium" color="success" sx={{ fontWeight: 500, fontSize: '0.75rem', height: 28 }} />
+                : <ChipComponent variant="filled" label="Absent" icon={<NoAccountsIcon fontSize="small" />} size="medium" color="warning" sx={{ fontWeight: 500, fontSize: '0.75rem', height: 28 }} />;
+        }
+
+        if (column.isPriority) {
+            if (value === 'high') return <Chip label="High" icon={<AccessAlarmsIcon fontSize="small" />} size="small" color="error" sx={{ fontWeight: 600 }} />;
+            if (value === 'medium') return <Chip label="Medium" icon={<DoNotDisturbAltIcon fontSize="small" />} size="small" color="default" sx={{ fontWeight: 600 }} />;
+            return <Chip label="Low" icon={<SpeedIcon fontSize="small" />} size="small" color="success" sx={{ fontWeight: 600 }} />;
+        }
+
+        if (column.isAction) {
+            return (
+                <>
+                    <Button
+                        size="small"
+                        variant="outlined"
+                        endIcon={<MoreHorizIcon sx={{ fontSize: '14px !important' }} />}
+                        onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                            handleActionClick(e, row, column);
+                            setCurrentId(row?.id);
+                        }}
+                        sx={{
+                            height: 32, px: 1.5, borderRadius: 1.5,
+                            textTransform: 'none', fontWeight: 600, fontSize: '0.78rem',
+                            borderColor: alpha(PRIMARY_COLOR, 0.25),
+                            color: PRIMARY_COLOR,
+                            bgcolor: alpha(PRIMARY_COLOR, 0.03),
+                            '&:hover': { borderColor: PRIMARY_COLOR, bgcolor: alpha(PRIMARY_COLOR, 0.08) },
+                        }}
+                    >
+                        {column.actionData?.label ?? 'Actions'}
+                    </Button>
+                    <PopoverComponent
+                        moduleID={currentID}
+                        handleOptionClicked={handleOptionClicked}
+                        options={currentOptions as Array<{ value: string; label: string }>}
+                        anchorEl={anchorEl}
+                        setAnchorEl={setAnchorEl}
+                    />
+                </>
+            );
+        }
+
+        return null;
+    };
 
     return (
         <Card sx={{
-            width: "100%",
-            boxShadow: '0 1px 3px rgba(0,0,0,0.07), 0 4px 24px rgba(0,0,0,0.05), 0 0 0 1px rgba(0,0,0,0.04)',
+            width: '100%',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.07), 0 4px 24px rgba(0,0,0,0.05)',
             border: 'none',
             borderRadius: '14px',
-            backgroundColor: '#FFFFFF',
-            overflow: 'hidden'
+            overflow: 'hidden',
         }}>
-            <Box>
-                <DataGridStyled
-                    loading={loading}
-                    {...rows}
-                    rows={rows || []}
-                    columns={columns}
-                    onFilterModelChange={handleTableFilter}
-                    onPaginationModelChange={handleTablePagination}
-                    rowCount={count}
-                    paginationMode={paginationMode}
-                    filterMode={filterMode}
-                    getRowHeight={() => 'auto'}
-                    slots={{
-                        noRowsOverlay: NoRowsOverlay,
-                        toolbar: () => (
-                            <CustomToolbarWrapper
-                                dateRangePicker={dateRangePicker}
-                                createAction={createAction}
-                                exportData={exportData}
-                                searchAction={searchAction}
-                                importData={importData}
-                                header={header}
-                                onCreationHandler={() => onCreationHandler?.()}
-                                module={module as string}
-                                refresh={refresh}
-                                status={status}
-                                selectedStatus={selectedStatus}
-                                onStatusChange={(status) => {
-                                    onStatusChange?.(status);
+            {/* ── Toolbar ─────────────────────────────────────────────── */}
+            <CustomToolbarWrapper
+                header={header}
+                onCreationHandler={() => onCreationHandler?.()}
+                module={module as string}
+                createAction={createAction}
+                exportData={exportData}
+                importData={importData}
+                searchAction={searchAction}
+                onSearch={handleSearch}
+                rows={processedRows}
+                refresh={refresh}
+                status={status}
+                selectedStatus={selectedStatus}
+                onStatusChange={onStatusChange}
+                dateRangePicker={dateRangePicker}
+            />
+
+            {/* ── Table ───────────────────────────────────────────────── */}
+            <TableContainer component={Paper} elevation={0} sx={{ borderRadius: 0 }}>
+                <Table stickyHeader size="small">
+
+                    {/* ── Header ────────────────────────────────────────── */}
+                    <TableHead>
+                        <TableRow>
+                            {columnHeaders.map((col) => (
+                                <TableCell
+                                    key={col.label}
+                                    sortDirection={sortField === col.label ? sortDir : false}
+                                    sx={{
+                                        background: `linear-gradient(120deg, ${PRIMARY_COLOR} 0%, ${HEADER_TO} 100%)`,
+                                        color: 'rgba(255,255,255,0.92)',
+                                        fontWeight: 700,
+                                        fontSize: '0.68rem',
+                                        textTransform: 'uppercase',
+                                        letterSpacing: '0.07em',
+                                        whiteSpace: 'nowrap',
+                                        borderBottom: `2px solid ${alpha('#fff', 0.15)}`,
+                                        py: 1.5,
+                                        px: 2.5,
+                                        '&:first-of-type': { borderRadius: 0 },
+                                    }}
+                                >
+                                    {!col.isAction ? (
+                                        <TableSortLabel
+                                            active={sortField === col.label}
+                                            direction={sortField === col.label ? sortDir : 'asc'}
+                                            onClick={() => handleSort(col.label)}
+                                            sx={{
+                                                color: 'rgba(255,255,255,0.92) !important',
+                                                '& .MuiTableSortLabel-icon': { color: 'rgba(255,255,255,0.7) !important' },
+                                                '&:hover': { color: '#fff !important' },
+                                            }}
+                                        >
+                                            {camelCaseToWords(col.label)}
+                                        </TableSortLabel>
+                                    ) : (
+                                        camelCaseToWords(col.label)
+                                    )}
+                                </TableCell>
+                            ))}
+                        </TableRow>
+                    </TableHead>
+
+                    {/* ── Body ──────────────────────────────────────────── */}
+                    <TableBody>
+                        {loading && (
+                            <TableRow>
+                                <TableCell colSpan={columnHeaders.length} sx={{ textAlign: 'center', py: 5, border: 'none' }}>
+                                    <CircularProgress size={32} sx={{ color: PRIMARY_COLOR }} />
+                                </TableCell>
+                            </TableRow>
+                        )}
+
+                        {!loading && pagedRows.length === 0 && (
+                            <TableRow>
+                                <TableCell colSpan={columnHeaders.length} sx={{ border: 'none', p: 0 }}>
+                                    <NoContent item={header.singular} items={header.plural} />
+                                </TableCell>
+                            </TableRow>
+                        )}
+
+                        {!loading && pagedRows.map((row: any, rowIndex: number) => (
+                            <TableRow
+                                key={row.id ?? rowIndex}
+                                sx={{
+                                    bgcolor: rowIndex % 2 === 1 ? ROW_EVEN : '#fff',
+                                    borderBottom: `1px solid ${BORDER_COLOR}`,
+                                    transition: 'background-color 0.12s, box-shadow 0.12s',
+                                    '&:hover': {
+                                        bgcolor: HOVER_BG,
+                                        boxShadow: `inset 3px 0 0 ${PRIMARY_COLOR}`,
+                                    },
+                                    '&:last-child td': { borderBottom: 'none' },
                                 }}
-                            />
-                        )
-                    }}
-                    autoHeight
-                    initialState={{
-                        pagination: {
-                            paginationModel: {
-                                pageSize: 10,
-                            },
-                        },
-                    }}
-                    pageSizeOptions={[5, 10, 25, 50]}
+                            >
+                                {columnHeaders.map((col) => (
+                                    <TableCell
+                                        key={col.label}
+                                        sx={{
+                                            py: 1.5,
+                                            px: 2.5,
+                                            fontSize: '0.875rem',
+                                            color: '#0F172A',
+                                            borderBottom: 'none',
+                                            maxWidth: col.label === 'email' ? 200 : 'none',
+                                        }}
+                                    >
+                                        {renderCell(col, row)}
+                                    </TableCell>
+                                ))}
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </TableContainer>
+
+            {/* ── Pagination ──────────────────────────────────────────── */}
+            <Box sx={{ borderTop: `1px solid ${BORDER_COLOR}`, bgcolor: ROW_EVEN }}>
+                <TablePagination
+                    component="div"
+                    count={totalRows}
+                    page={page}
+                    onPageChange={handlePageChange}
+                    rowsPerPage={rowsPerPage}
+                    onRowsPerPageChange={handleRowsPerPageChange}
+                    rowsPerPageOptions={[5, 10, 25, 50, 100]}
                     sx={{
-                        '& .MuiDataGrid-cell': {
-                            py: 1.5,
-                        }
+                        '& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows': {
+                            fontSize: '0.8125rem', color: '#64748B', margin: 0,
+                        },
+                        '& .MuiTablePagination-select': { fontSize: '0.8125rem' },
+                        '& .MuiIconButton-root': {
+                            borderRadius: 1.5,
+                            '&:hover': { bgcolor: alpha(PRIMARY_COLOR, 0.06) },
+                        },
                     }}
                 />
             </Box>

@@ -5,7 +5,7 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { GridRowsProp, GridToolbarProps } from "@mui/x-data-grid";
+import { GridRowsProp } from "@mui/x-data-grid";
 import { IUsersAxiosResponse } from "../../pages/users/interface";
 import { IRequestsAxiosResponse } from "../../pages/request/interface";
 
@@ -66,6 +66,8 @@ export interface ITableToolBar {
     importData: boolean;
     exportData: boolean;
     searchAction: boolean;
+    onSearch?: (value: string) => void;
+    rows?: any[];
     refresh?: boolean;
     status?: boolean;
     onStatusChange?: (status: string) => void;
@@ -73,7 +75,7 @@ export interface ITableToolBar {
     dateRangePicker?: boolean;
 }
 
-export interface CustomToolbarWrapperProps extends GridToolbarProps {
+export interface CustomToolbarWrapperProps {
     header: { plural: string; singular: string };
     onCreationHandler: () => void;
     module: string;
@@ -81,6 +83,8 @@ export interface CustomToolbarWrapperProps extends GridToolbarProps {
     importData: boolean;
     exportData: boolean;
     searchAction: boolean;
+    onSearch?: (value: string) => void;
+    rows?: any[];
     refresh?: boolean;
     status?: boolean;
     onStatusChange?: (status: string) => void;

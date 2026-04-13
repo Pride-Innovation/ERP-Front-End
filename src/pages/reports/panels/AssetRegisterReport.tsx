@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { alpha, Typography } from '@mui/material';
+// import { alpha, Typography } from '@mui/material';
 import TuneOutlinedIcon from '@mui/icons-material/TuneOutlined';
 import CheckCircleOutlinedIcon from '@mui/icons-material/CheckCircleOutlined';
 import InventoryOutlinedIcon from '@mui/icons-material/InventoryOutlined';
 import BuildOutlinedIcon from '@mui/icons-material/BuildOutlined';
-import AttachMoneyOutlinedIcon from '@mui/icons-material/AttachMoneyOutlined';
+// import AttachMoneyOutlinedIcon from '@mui/icons-material/AttachMoneyOutlined';
 import ReportShell, { ReportShellFilters } from '../ReportShell';
 import ReportSummaryCards from '../ReportSummaryCards';
 import ReportDataTable, { ReportColumn, StatusChip } from '../ReportDataTable';
@@ -59,7 +59,7 @@ const AssetRegisterReport = () => {
     const activeCount = rows.filter(r => r.status === 'active').length;
     const inRepair = rows.filter(r => r.status === 'inRepair').length;
     const inStore = rows.filter(r => r.status === 'inStore').length;
-    const disposed = rows.filter(r => r.status === 'disposed').length;
+    // const disposed = rows.filter(r => r.status === 'disposed').length;
 
     const summaryCards = (
         <ReportSummaryCards cards={[
