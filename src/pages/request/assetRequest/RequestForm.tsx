@@ -74,20 +74,21 @@ const FormSection = ({ title, subtitle, children, helpText, icon }: SectionProps
                     alignItems: 'center',
                     mb: subtitle ? 0.5 : 2,
                     pb: 1.5,
-                    borderBottom: `2px solid ${alpha(PRIMARY_COLOR, 0.1)}`,
+                    borderBottom: `1px solid ${alpha('#000', 0.07)}`,
                 }}
             >
+                <Box sx={{ width: 3, height: 20, bgcolor: PRIMARY_COLOR, borderRadius: '2px', mr: 1.5, flexShrink: 0 }} />
                 {icon && (
                     <Box
                         sx={{
                             mr: 1.5,
                             color: PRIMARY_COLOR,
-                            bgcolor: alpha(PRIMARY_COLOR, 0.1),
+                            bgcolor: alpha(PRIMARY_COLOR, 0.08),
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            width: 30,
-                            height: 30,
+                            width: 28,
+                            height: 28,
                             borderRadius: '6px',
                             flexShrink: 0,
                         }}
@@ -210,12 +211,12 @@ const RequestForm = ({
 
     return (
         <Paper
-            elevation={1}
+            elevation={0}
             sx={{
                 p: { xs: 2, sm: 3, md: 4 },
-                boxShadow: "none",
                 borderRadius: 2,
-                bgcolor: '#FFFFFF'
+                bgcolor: '#FFFFFF',
+                border: `1px solid ${alpha('#000', 0.08)}`,
             }}
         >
             <Grid container spacing={4}>
@@ -754,9 +755,14 @@ const RequestForm = ({
                 )}
             </Grid>
 
-            <Divider sx={{ mt: 4, mb: 3 }} />
-
-            <Box sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%' }}>
+            <Box sx={{
+                mt: 4,
+                pt: 3,
+                borderTop: `1px solid ${alpha('#000', 0.08)}`,
+                display: 'flex',
+                justifyContent: 'flex-end',
+                width: '100%'
+            }}>
                 <Stack
                     direction={{ xs: 'column', sm: 'row' }}
                     spacing={2}

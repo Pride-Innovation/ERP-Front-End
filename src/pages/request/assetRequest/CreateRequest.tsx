@@ -146,48 +146,74 @@ const CreateRequest = () => {
             >
                 <Box
                     sx={{
-                        p: { xs: 2, sm: 3 },
-                        background: `linear-gradient(to right, ${alpha(PRIMARY_COLOR, 0.02)}, ${alpha(PRIMARY_COLOR, 0.08)})`,
+                        p: { xs: 2.5, sm: 3.5 },
+                        background: 'linear-gradient(135deg, #08796C 0%, #065E53 65%, #044a42 100%)',
                         display: 'flex',
                         flexDirection: { xs: 'column', sm: 'row' },
                         alignItems: { xs: 'flex-start', sm: 'center' },
                         justifyContent: 'space-between',
-                        gap: 2
+                        gap: 2,
+                        position: 'relative',
+                        overflow: 'hidden',
+                        '&::before': {
+                            content: '""',
+                            position: 'absolute',
+                            top: -40,
+                            right: -40,
+                            width: 200,
+                            height: 200,
+                            borderRadius: '50%',
+                            bgcolor: 'rgba(255,255,255,0.05)',
+                            pointerEvents: 'none',
+                        },
+                        '&::after': {
+                            content: '""',
+                            position: 'absolute',
+                            bottom: -60,
+                            right: 80,
+                            width: 160,
+                            height: 160,
+                            borderRadius: '50%',
+                            bgcolor: 'rgba(255,255,255,0.04)',
+                            pointerEvents: 'none',
+                        },
                     }}
                 >
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', zIndex: 1 }}>
                         <Avatar
                             sx={{
-                                bgcolor: alpha(PRIMARY_COLOR, 0.12),
-                                color: PRIMARY_COLOR,
+                                bgcolor: 'rgba(255,255,255,0.18)',
+                                color: '#fff',
                                 mr: 2,
-                                width: { xs: 40, sm: 48 },
-                                height: { xs: 40, sm: 48 }
+                                width: { xs: 44, sm: 52 },
+                                height: { xs: 44, sm: 52 },
+                                boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
                             }}
                         >
-                            <AddCircleOutlineIcon />
+                            <AddCircleOutlineIcon sx={{ fontSize: { xs: 22, sm: 26 } }} />
                         </Avatar>
                         <Box>
                             <Typography
                                 variant={isMobile ? "h6" : "h5"}
                                 sx={{
-                                    fontWeight: 600,
-                                    color: PRIMARY_COLOR,
-                                    mb: 0.5
+                                    fontWeight: 700,
+                                    color: '#fff',
+                                    mb: 0.5,
+                                    letterSpacing: '-0.3px',
                                 }}
                             >
                                 Create New Request
                             </Typography>
                             <Typography
                                 variant="body2"
-                                sx={{ color: alpha('#000', 0.6) }}
+                                sx={{ color: 'rgba(255,255,255,0.72)' }}
                             >
                                 Fill in the details below to submit a new asset request
                             </Typography>
                         </Box>
                     </Box>
-                    <Box sx={{ textAlign: { xs: 'left', sm: 'right' }, flexShrink: 0 }}>
-                        <Typography variant="caption" sx={{ color: alpha('#000', 0.5), fontWeight: 500, display: 'block' }}>
+                    <Box sx={{ textAlign: { xs: 'left', sm: 'right' }, flexShrink: 0, zIndex: 1 }}>
+                        <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)', fontWeight: 500, display: 'block' }}>
                             Form Completion
                         </Typography>
                         <LinearProgress
@@ -196,16 +222,16 @@ const CreateRequest = () => {
                             sx={{
                                 my: 0.5,
                                 height: 6,
-                                width: { xs: '100%', sm: 120 },
+                                width: { xs: '100%', sm: 140 },
                                 borderRadius: 3,
-                                bgcolor: alpha(PRIMARY_COLOR, 0.12),
+                                bgcolor: 'rgba(255,255,255,0.2)',
                                 '& .MuiLinearProgress-bar': {
-                                    bgcolor: formProgress === 100 ? '#4caf50' : PRIMARY_COLOR,
+                                    bgcolor: formProgress === 100 ? '#4caf50' : 'rgba(255,255,255,0.9)',
                                     borderRadius: 3,
                                 },
                             }}
                         />
-                        <Typography variant="caption" sx={{ color: formProgress === 100 ? '#2e7d32' : PRIMARY_COLOR, fontWeight: 600 }}>
+                        <Typography variant="caption" sx={{ color: formProgress === 100 ? '#a5f3c0' : 'rgba(255,255,255,0.9)', fontWeight: 600 }}>
                             {formProgress}% Complete
                         </Typography>
                     </Box>
@@ -216,6 +242,7 @@ const CreateRequest = () => {
                 <Box sx={{
                     px: { xs: 2, sm: 3 },
                     py: 2,
+                    bgcolor: alpha(PRIMARY_COLOR, 0.02),
                     overflowX: 'auto',
                     '&::-webkit-scrollbar': {
                         height: '4px',
