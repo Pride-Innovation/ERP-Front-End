@@ -64,7 +64,7 @@ const DashboardProvider: FC<{ children: React.ReactNode }> = ({ children }) => {
     const [yearlyRequestSummaryStats, setYearlyRequestSummaryStats] = useState<Array<RequestCardProps>>([]);
     const [latestPendingRequests, setLatestPendingRequests] = useState<Array<IRequest>>([]);
     const [assetStats, setAssetStats] = useState<BranchAssetStats>({} as BranchAssetStats);
-    const [assetDomain, setAssetDomain] = useState<AssetDomain[]>({} as AssetDomain[]);
+    const [assetDomain, setAssetDomain] = useState<AssetDomain[]>([]);
 
     return (
         <DashboardContext.Provider value={{
