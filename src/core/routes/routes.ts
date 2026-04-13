@@ -78,6 +78,9 @@ const DEPARTMENT: string = `${ASSETS_MANAGEMENT}/settings/departments`;
 const ERRORS: string = `${ASSETS_MANAGEMENT}/restricted-access`
 
 
+/* Reports Routes */
+const REPORTS: string = `${ASSETS_MANAGEMENT}/reports`;
+
 /* Movement Routes */
 const MOVEMENT: string = `${ASSETS_MANAGEMENT}/movement`;
 const CREATE_MOVEMENT: string = `${ASSETS_MANAGEMENT}/movement/create`
@@ -137,5 +140,6 @@ export const ROUTES = {
     MOVEMENT,
     CREATE_MOVEMENT,
     UPDATE_MOVEMENT,
-    READ_MOVEMENT
+    READ_MOVEMENT,
+    REPORTS
 }
