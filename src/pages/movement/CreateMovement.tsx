@@ -27,7 +27,9 @@ const CreateMovement = () => {
     const [sendingRequest, setSendingRequest] = useState(false);
     const navigate = useNavigate();
 
-    const { register, control, handleSubmit, formState, reset } = useForm<IMovementFormData>({
+    const [movementFiles, setMovementFiles] = useState<File[]>([]);
+
+    const { register, control, handleSubmit, formState, reset, setValue } = useForm<IMovementFormData>({
         mode: 'onChange',
         resolver: yupResolver(movementSchema) as any,
     });
@@ -152,8 +154,10 @@ const CreateMovement = () => {
                     register={register}
                     control={control}
                     formState={formState}
+                    setValue={setValue}
                     sendingRequest={sendingRequest}
                     buttonText="Submit Movement"
+                    onFilesChange={setMovementFiles}
                 />
             </Box>
         </Box>
