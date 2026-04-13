@@ -1,172 +1,175 @@
-import { useEffect, ReactElement, useContext } from 'react';
+import { useEffect, useContext } from 'react';
 import {
     Box,
     Card,
     Typography,
     alpha,
-    Divider,
     Stack,
-    LinearProgress,
     Grid,
-    Tooltip,
-    Paper
 } from '@mui/material';
 import ComputerIcon from '@mui/icons-material/Computer';
 import ChairIcon from '@mui/icons-material/Chair';
 import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
+import InventoryOutlinedIcon from '@mui/icons-material/InventoryOutlined';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import BuildOutlinedIcon from '@mui/icons-material/BuildOutlined';
+import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 import CountUp from 'react-countup';
-import AssessmentIcon from '@mui/icons-material/Assessment';
-import BusinessCenterIcon from '@mui/icons-material/BusinessCenter';
-import BuildIcon from '@mui/icons-material/Build';
-import PersonOffIcon from '@mui/icons-material/PersonOff';
 import SectionUtills from './utills';
 import { DashboardContext } from '../../../context/dashboard';
 
-// Core brand colors
-const PRIMARY_COLOR = '#08796C'; // Teal
-const SECONDARY_COLOR = '#BC892C'; // Gold
+const PRIMARY_COLOR = '#08796C';
 
-const ACCENT_COLORS = [
-    PRIMARY_COLOR,    // Teal for IT Equipment
-    SECONDARY_COLOR,  // Gold for Office Equipment  
-    '#445069',        // Slate blue for Fleet (more corporate)
-];
-
-interface AssetCategoryCardProps {
+interface CategoryData {
     title: string;
-    icon: ReactElement;
+    icon: React.ReactNode;
+    color: string;
     total: number;
     active: number;
     maintenance: number;
     unassigned: number;
-    color: string;
 }
 
-const AssetCategoryCard = ({
-    title,
-    icon,
-    total,
-    active,
-    maintenance,
-    unassigned,
-    color
-}: AssetCategoryCardProps) => {
-    const safeTotal = total || 1;
-    const activePercentage = Math.round((active / safeTotal) * 100);
+const CategoryCard = ({ data }: { data: CategoryData }) => {
+    const { title, icon, color, total, active, maintenance, unassigned } = data;
+
+    const rows = [
+        { label: 'Active / Assigned', value: active, icon: <CheckCircleOutlineIcon sx={{ fontSize: 14 }} />, color: '#2e7d32' },
+        { label: 'In Store', value: unassigned, icon: <Inventory2OutlinedIcon sx={{ fontSize: 14 }} />, color: '#4285F4' },
+        { label: 'In Repair', value: maintenance, icon: <BuildOutlinedIcon sx={{ fontSize: 14 }} />, color: '#f59300' },
+    ];
+
+    const activeRate = total > 0 ? Math.round((active / total) * 100) : 0;
 
     return (
-        <Paper
+        <Card
             elevation={0}
             sx={{
-                p: 2.5,
+                height: '100%',
+                border: `1px solid ${alpha('#000', 0.07)}`,
                 borderRadius: 2,
-                bgcolor: '#fff',
-                border: `1px solid ${alpha('#000', 0.06)}`,
-                transition: 'all 0.25s ease',
+                // borderTop: `3px solid ${color}`,
+                overflow: 'hidden',
+                transition: 'box-shadow 0.2s',
                 '&:hover': {
-                    boxShadow: `0 6px 20px ${alpha('#000', 0.08)}`,
-                    transform: 'translateY(-2px)'
-                }
+                    boxShadow: `0 4px 20px ${alpha(color, 0.12)}`,
+                },
             }}
         >
-            <Box display="flex" alignItems="center" mb={2}>
-                <Box
-                    sx={{
-                        color: '#fff',
-                        p: 1.2,
-                        borderRadius: 1,
-                        bgcolor: color,
-                        display: 'flex',
-                        mr: 2
-                    }}
-                >
-                    {icon}
-                </Box>
-                <Box>
-                    <Typography
-                        variant="subtitle1"
-                        fontWeight={600}
-                        color="text.primary"
-                    >
-                        {title}
-                    </Typography>
-                    <Typography
-                        variant="caption"
-                        color="text.secondary"
-                    >
-                        Total inventory
-                    </Typography>
-                </Box>
-                <Typography
-                    variant="h5"
-                    fontWeight="700"
-                    color={color}
-                    sx={{ ml: 'auto' }}
-                >
-                    <CountUp end={total || 0} duration={1.8} separator="," />
-                </Typography>
-            </Box>
-
-            <Divider sx={{ mb: 2 }} />
-
-            <Stack spacing={2}>
-                <Box>
-                    <Box display="flex" justifyContent="space-between" alignItems="center" mb={0.5}>
-                        <Box display="flex" alignItems="center">
-                            <BusinessCenterIcon sx={{ fontSize: '0.85rem', color: alpha(color, 0.8), mr: 0.7 }} />
-                            <Typography variant="body2" fontWeight={500}>
-                                Active Assets
+            {/* Card header */}
+            <Box
+                px={2.5}
+                pt={2.5}
+                pb={2}
+                sx={{
+                    background: `linear-gradient(135deg, ${alpha(color, 0.04)} 0%, transparent 100%)`,
+                    borderBottom: `1px solid ${alpha('#000', 0.06)}`,
+                }}
+            >
+                <Stack direction="row" alignItems="center" justifyContent="space-between">
+                    <Stack direction="row" alignItems="center" spacing={1.25}>
+                        <Box
+                            sx={{
+                                width: 38,
+                                height: 38,
+                                bgcolor: alpha(color, 0.1),
+                                color,
+                                borderRadius: 1.5,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                flexShrink: 0,
+                            }}
+                        >
+                            {icon}
+                        </Box>
+                        <Box>
+                            <Typography variant="subtitle2" fontWeight={700} lineHeight={1.2}>
+                                {title}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                                {activeRate}% utilisation rate
                             </Typography>
                         </Box>
-                        <Typography variant="body2" fontWeight={600} color={color}>
-                            {active || 0} ({activePercentage}%)
+                    </Stack>
+                    <Box textAlign="right">
+                        <Typography variant="h4" fontWeight={800} color={color} lineHeight={1}>
+                            <CountUp end={total} duration={1.6} separator="," />
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                            total
                         </Typography>
                     </Box>
-                    <Tooltip title={`${active || 0} active assets`} arrow placement="top">
-                        <LinearProgress
-                            variant="determinate"
-                            value={activePercentage}
+                </Stack>
+            </Box>
+
+            {/* Metric rows */}
+            <Box px={2.5} py={2}>
+                <Stack spacing={1.25}>
+                    {rows.map((row) => (
+                        <Stack
+                            key={row.label}
+                            direction="row"
+                            alignItems="center"
+                            justifyContent="space-between"
+                        >
+                            <Stack direction="row" alignItems="center" spacing={0.75}>
+                                <Box sx={{ color: row.color, display: 'flex', flexShrink: 0 }}>
+                                    {row.icon}
+                                </Box>
+                                <Typography variant="body2" color="text.secondary" fontSize="0.82rem">
+                                    {row.label}
+                                </Typography>
+                            </Stack>
+                            <Box
+                                sx={{
+                                    minWidth: 36,
+                                    px: 1.2,
+                                    py: 0.3,
+                                    borderRadius: 1,
+                                    bgcolor: alpha(row.color, 0.08),
+                                    textAlign: 'center',
+                                }}
+                            >
+                                <Typography variant="body2" fontWeight={700} color={row.color} lineHeight={1.4}>
+                                    {row.value}
+                                </Typography>
+                            </Box>
+                        </Stack>
+                    ))}
+                </Stack>
+
+                {/* Mini utilisation bar */}
+                <Box mt={2}>
+                    <Stack direction="row" justifyContent="space-between" mb={0.5}>
+                        <Typography variant="caption" color="text.secondary" fontSize="0.68rem">
+                            Utilisation
+                        </Typography>
+                        <Typography variant="caption" fontWeight={700} color={color} fontSize="0.68rem">
+                            {activeRate}%
+                        </Typography>
+                    </Stack>
+                    <Box
+                        sx={{
+                            height: 5,
+                            borderRadius: 3,
+                            bgcolor: alpha(color, 0.1),
+                            overflow: 'hidden',
+                        }}
+                    >
+                        <Box
                             sx={{
-                                height: 6,
+                                height: '100%',
+                                width: `${activeRate}%`,
+                                bgcolor: color,
                                 borderRadius: 3,
-                                bgcolor: alpha(color, 0.12),
-                                '& .MuiLinearProgress-bar': {
-                                    bgcolor: color
-                                }
+                                transition: 'width 1s ease',
                             }}
                         />
-                    </Tooltip>
-                </Box>
-
-                <Box display="flex" justifyContent="space-between" alignItems="center">
-                    <Box display="flex" alignItems="center">
-                        <BuildIcon sx={{ fontSize: '0.85rem', color: alpha(color, 0.7), mr: 0.7 }} />
-                        <Typography variant="body2" color="text.secondary">
-                            In Maintenance
-                        </Typography>
-                    </Box>
-                    <Box sx={{ bgcolor: alpha(color, 0.08), px: 1, py: 0.3, borderRadius: 1 }}>
-                        <Typography variant="body2" fontWeight={600} color={color}>
-                            {maintenance || 0}
-                        </Typography>
                     </Box>
                 </Box>
-
-                <Box display="flex" justifyContent="space-between" alignItems="center">
-                    <Box display="flex" alignItems="center">
-                        <PersonOffIcon sx={{ fontSize: '0.85rem', color: alpha(color, 0.7), mr: 0.7 }} />
-                        <Typography variant="body2" color="text.secondary">
-                            Unassigned
-                        </Typography>
-                    </Box>
-                    <Box sx={{ bgcolor: alpha(color, 0.08), px: 1, py: 0.3, borderRadius: 1 }}>
-                        <Typography variant="body2" fontWeight={600} color={color}>
-                            {unassigned || 0}
-                        </Typography>
-                    </Box>
-                </Box>
-            </Stack>
-        </Paper>
+            </Box>
+        </Card>
     );
 };
 
@@ -178,145 +181,129 @@ const AssetInventorySummary = () => {
         fetchBranchAssetStatics();
     }, []);
 
-    const totalAssets = (assetStats?.itequipment?.total || 0) +
+    const totalAssets =
+        (assetStats?.itequipment?.total || 0) +
         (assetStats?.officeequipment?.total || 0) +
         (assetStats?.fleet?.total || 0);
 
+    const categories: CategoryData[] = [
+        {
+            title: 'IT Equipment',
+            icon: <ComputerIcon />,
+            color: PRIMARY_COLOR,
+            total: assetStats?.itequipment?.total || 0,
+            active:
+                (assetStats?.itequipment?.total || 0) -
+                (assetStats?.itequipment?.inMaintenance || 0) -
+                (assetStats?.itequipment?.unassigned || 0),
+            maintenance: assetStats?.itequipment?.inMaintenance || 0,
+            unassigned: assetStats?.itequipment?.unassigned || 0,
+        },
+        {
+            title: 'Office Equipment',
+            icon: <ChairIcon />,
+            color: '#BC892C',
+            total: assetStats?.officeequipment?.total || 0,
+            active:
+                (assetStats?.officeequipment?.total || 0) -
+                (assetStats?.officeequipment?.inMaintenance || 0) -
+                (assetStats?.officeequipment?.unassigned || 0),
+            maintenance: assetStats?.officeequipment?.inMaintenance || 0,
+            unassigned: assetStats?.officeequipment?.unassigned || 0,
+        },
+        {
+            title: 'Fleet / Vehicles',
+            icon: <DirectionsCarIcon />,
+            color: '#445069',
+            total: assetStats?.fleet?.total || 0,
+            active:
+                (assetStats?.fleet?.total || 0) -
+                (assetStats?.fleet?.inMaintenance || 0) -
+                (assetStats?.fleet?.unassigned || 0),
+            maintenance: assetStats?.fleet?.inMaintenance || 0,
+            unassigned: assetStats?.fleet?.unassigned || 0,
+        },
+    ];
+
     return (
-        <Grid item xs={12}>
-            <Card
-                elevation={0}
+        <Card
+            elevation={0}
+            sx={{
+                border: `1px solid ${alpha('#000', 0.08)}`,
+                borderRadius: 2,
+                overflow: 'hidden',
+            }}
+        >
+            {/* ── Card Header ── */}
+            <Box
+                px={2.5}
+                py={1.75}
+                display="flex"
+                alignItems="center"
+                gap={1.5}
                 sx={{
-                    borderRadius: 2,
-                    overflow: 'hidden',
-                    position: 'relative',
-                    border: `1px solid ${alpha(PRIMARY_COLOR, 0.15)}`,
-                    boxShadow: `0 2px 10px ${alpha('#000', 0.08)}`,
+                    borderBottom: `1px solid ${alpha('#000', 0.06)}`,
+                    background: `linear-gradient(90deg, ${alpha(PRIMARY_COLOR, 0.04)} 0%, transparent 60%)`,
                 }}
             >
                 <Box
                     sx={{
-                        px: 2.5,
-                        py: 2,
-                        bgcolor: PRIMARY_COLOR,
-                        color: 'white',
-                        position: 'relative',
-                        overflow: 'hidden'
+                        width: 34,
+                        height: 34,
+                        borderRadius: 1.5,
+                        bgcolor: alpha(PRIMARY_COLOR, 0.1),
+                        color: PRIMARY_COLOR,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0,
                     }}
                 >
-                    <Box
-                        sx={{
-                            position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            width: '100%',
-                            height: '2px',
-                            bgcolor: SECONDARY_COLOR,
-                            opacity: 0.5
-                        }}
-                    />
-
-                    <Box
-                        sx={{
-                            position: 'absolute',
-                            top: 0,
-                            right: 0,
-                            width: '100%',
-                            height: '100%',
-                            opacity: 0.04,
-                            background: 'linear-gradient(135deg, transparent 25%, rgba(255,255,255,0.2) 25%, rgba(255,255,255,0.2) 50%, transparent 50%, transparent 75%, rgba(255,255,255,0.2) 75%)',
-                            backgroundSize: '4px 4px',
-                        }}
-                    />
-
-                    <Box display="flex" alignItems="center">
-                        <AssessmentIcon sx={{ mr: 1.5 }} />
-                        <Box>
-                            <Typography
-                                variant="subtitle1"
-                                fontWeight="600"
-                                sx={{ letterSpacing: 0.3 }}
-                            >
-                                Asset Inventory Summary
-                            </Typography>
-                            <Typography
-                                variant="caption"
-                                sx={{ opacity: 0.8 }}
-                            >
-                                Complete overview of all organization assets
-                            </Typography>
-                        </Box>
-                    </Box>
+                    <InventoryOutlinedIcon fontSize="small" />
                 </Box>
-
-                <Box sx={{ p: 2.5, bgcolor: '#f8fafc' }}>
-                    <Grid container spacing={2}>
-                        <Grid item xs={12}>
-                            <AssetCategoryCard
-                                title="IT Equipment"
-                                icon={<ComputerIcon />}
-                                total={assetStats?.itequipment?.total || 0}
-                                active={(assetStats?.itequipment?.total || 0) - (assetStats?.itequipment?.inMaintenance || 0) - (assetStats?.itequipment?.unassigned || 0)}
-                                maintenance={assetStats?.itequipment?.inMaintenance || 0}
-                                unassigned={assetStats?.itequipment?.unassigned || 0}
-                                color={ACCENT_COLORS[0]}
-                            />
-                        </Grid>
-
-                        <Grid item xs={12}>
-                            <AssetCategoryCard
-                                title="Office Equipment"
-                                icon={<ChairIcon />}
-                                total={assetStats?.officeequipment?.total || 0}
-                                active={(assetStats?.officeequipment?.total || 0) - (assetStats?.officeequipment?.inMaintenance || 0) - (assetStats?.officeequipment?.unassigned || 0)}
-                                maintenance={assetStats?.officeequipment?.inMaintenance || 0}
-                                unassigned={assetStats?.officeequipment?.unassigned || 0}
-                                color={ACCENT_COLORS[1]}
-                            />
-                        </Grid>
-
-                        <Grid item xs={12}>
-                            <AssetCategoryCard
-                                title="Fleet Vehicles"
-                                icon={<DirectionsCarIcon />}
-                                total={assetStats?.fleet?.total || 0}
-                                active={(assetStats?.fleet?.total || 0) - (assetStats?.fleet?.inMaintenance || 0) - (assetStats?.fleet?.unassigned || 0)}
-                                maintenance={assetStats?.fleet?.inMaintenance || 0}
-                                unassigned={assetStats?.fleet?.unassigned || 0}
-                                color={ACCENT_COLORS[2]}
-                            />
-                        </Grid>
-                    </Grid>
-
-                    <Box
-                        sx={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            mt: 2.5,
-                            pt: 2,
-                            borderTop: `1px dashed ${alpha('#000', 0.1)}`
-                        }}
-                    >
-                        <Box display="flex" alignItems="center">
-                            <Typography variant="body2" color="text.secondary" mr={1}>
-                                Total Assets:
-                            </Typography>
-                            <Typography
-                                variant="body1"
-                                fontWeight="bold"
-                                color={PRIMARY_COLOR}
-                            >
-                                {totalAssets.toLocaleString()}
-                            </Typography>
-                        </Box>
-                        <Typography variant="caption" color="text.secondary">
-                            Last updated: {new Date().toLocaleDateString()}
-                        </Typography>
-                    </Box>
+                <Box flex={1}>
+                    <Typography variant="subtitle1" fontWeight={700} lineHeight={1.2}>
+                        Asset Inventory Summary
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                        Complete overview of all organisation assets
+                    </Typography>
                 </Box>
-            </Card>
-        </Grid>
+                <Box textAlign="right">
+                    <Typography variant="h6" fontWeight={800} color={PRIMARY_COLOR} lineHeight={1.1}>
+                        <CountUp end={totalAssets} duration={1.5} separator="," />
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                        total assets
+                    </Typography>
+                </Box>
+            </Box>
+
+            {/* ── Category Cards ── */}
+            <Box p={2.5}>
+                <Grid container spacing={2}>
+                    {categories.map((cat) => (
+                        <Grid item xs={12} key={cat.title}>
+                            <CategoryCard data={cat} />
+                        </Grid>
+                    ))}
+                </Grid>
+
+                {/* Footer */}
+                <Box
+                    mt={2}
+                    pt={1.5}
+                    sx={{ borderTop: `1px dashed ${alpha('#000', 0.08)}` }}
+                >
+                    <Typography variant="caption" color="text.secondary">
+                        Last refreshed: {new Date().toLocaleDateString('en-US', {
+                            month: 'short', day: 'numeric', year: 'numeric',
+                            hour: '2-digit', minute: '2-digit',
+                        })}
+                    </Typography>
+                </Box>
+            </Box>
+        </Card>
     );
 };
 
