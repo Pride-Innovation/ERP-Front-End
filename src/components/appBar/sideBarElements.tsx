@@ -20,6 +20,7 @@ import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined
 import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 import { Store } from '@mui/icons-material'
 import { permissionsMock } from '../../mocks/settings';
+import BarChartOutlinedIcon from '@mui/icons-material/BarChartOutlined';
 
 
 const SideBarElements = () => {
@@ -118,6 +119,14 @@ const SideBarElements = () => {
             icon: <LocalShippingOutlinedIcon />,
             subroutes: [],
             access: rightsToViewRow(permissionsMock[36]) // Assuming this is the permission for movement access
+        },
+        {
+            id: 11,
+            name: "Reports",
+            route: ROUTES.REPORTS,
+            icon: <BarChartOutlinedIcon />,
+            subroutes: [],
+            access: rightsToViewRow(permissionsMock[31]) // Reuse READ_AUDIT or adjust to a dedicated report permission
         },
     ]
     return ({ sideBarList })
