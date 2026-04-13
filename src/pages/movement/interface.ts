@@ -6,7 +6,7 @@ Managing Director
 */
 
 import { Dispatch, SetStateAction } from 'react';
-import { Control, FormState, UseFormRegister } from 'react-hook-form';
+import { Control, FormState, UseFormRegister, UseFormSetValue } from 'react-hook-form';
 import { IAxiosResponse, IFetchDataRequest } from '../../core/apis/interface';
 import { IAsset } from '../assets/interface';
 import { IUser } from '../users/interface';
@@ -55,8 +55,11 @@ export interface IMovement {
 /** Form data submitted through react-hook-form */
 export interface IMovementFormData {
     officerId: string | number;
+    approverId?: string | number | null;
     destination: string;
+    destinationId?: string | number | null;
     destinationType: string;
+    assetIds?: (string | number)[];
     reason: string;
     expectedReturnDate: string;
 }
@@ -95,6 +98,9 @@ export interface IMovementForm {
     register: UseFormRegister<any>;
     control: Control<any>;
     formState: FormState<IMovementFormData> & { errors: any };
+    setValue: UseFormSetValue<any>;
     sendingRequest: boolean;
     buttonText: string;
+    onFilesChange?: (files: File[]) => void;
+    initialAssets?: IAsset[];
 }
