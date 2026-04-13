@@ -358,40 +358,36 @@ const Request = () => {
 
     return (
         <Box width={'100%'} sx={{
-            px: 3,
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center'
         }}>
             {renderModals()}
-            {columnHeaders.length > 0 && (
-                <TableComponent
-                    endPoint={endPoint}
-                    loading={loading}
-                    count={count}
-                    exportData
-                    createAction
-                    // importData
-                    module={module}
-                    header={header}
-                    rows={requestTableData}
-                    columnHeaders={columnHeaders}
-                    onCreationHandler={() => navigate(ROUTES.CREATE_REQUEST)}
-                    handleOptionClicked={handleOptionClicked}
-                    paginationMode="server"
-                    filterMode="server"
-                    params={{ statusIds: statusIds }}
-                    refresh
-                    filterOptions
-                    optionsfilterParams={{
-                        status: "CREATED"
-                    }}
-                    status
-                    onStatusChange={handleStatusChange}
-                    selectedStatus={selectedStatus}
-                    dateRangePicker
-                />
-            )}
+            <TableComponent
+                endPoint={endPoint}
+                loading={loading}
+                count={count}
+                exportData
+                createAction
+                module={module}
+                header={header}
+                rows={requestTableData}
+                columnHeaders={columnHeaders.filter(Boolean)}
+                onCreationHandler={() => navigate(ROUTES.CREATE_REQUEST)}
+                handleOptionClicked={handleOptionClicked}
+                paginationMode="server"
+                filterMode="server"
+                params={{ statusIds: statusIds }}
+                refresh
+                filterOptions
+                optionsfilterParams={{
+                    status: "CREATED"
+                }}
+                status
+                onStatusChange={handleStatusChange}
+                selectedStatus={selectedStatus}
+                dateRangePicker
+            />
         </Box>
     );
 };

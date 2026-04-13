@@ -6,153 +6,196 @@ Managing Director
 */
 
 import {
-  Box,
-  Button,
-  Grid,
-  Stack,
-  Typography
+    alpha,
+    Box,
+    Stack,
+    Tab,
+    Tabs,
+    Typography,
 } from '@mui/material';
 import {
-  Outlet,
-  useLocation,
-  useNavigate,
-  useParams
+    Outlet,
+    useLocation,
+    useNavigate,
 } from 'react-router';
 import { ROUTES } from '../../../core/routes/routes';
-import { useEffect, useState } from 'react';
-import CancelIcon from '@mui/icons-material/Cancel';
-import RestartAltIcon from '@mui/icons-material/RestartAlt';
-import ListIcon from '@mui/icons-material/List';
+import { useMemo } from 'react';
 import RoutesUtills from '../../../core/routes/utills';
-import { IPermission } from '../../settings/interface';
-import { INavigation } from '../interface';
-import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
-import InventoryOutlinedIcon from '@mui/icons-material/InventoryOutlined';
+import { permissionsMock } from '../../../mocks/settings';
+import InboxOutlinedIcon from '@mui/icons-material/InboxOutlined';
+import DashboardOutlinedIcon from '@mui/icons-material/DashboardOutlined';
+import ListAltOutlinedIcon from '@mui/icons-material/ListAltOutlined';
+import HourglassEmptyOutlinedIcon from '@mui/icons-material/HourglassEmptyOutlined';
+import BlockOutlinedIcon from '@mui/icons-material/BlockOutlined';
+import MoveToInboxOutlinedIcon from '@mui/icons-material/MoveToInboxOutlined';
 
-const RequestsManagement = () => {
-  const [path, setPath] = useState<string>("");
-  const { pathname } = useLocation();
-  const navigate = useNavigate();
-  const { id } = useParams<{ id: string }>();
-  const { routePermission } = RoutesUtills();
+const PRIMARY = '#08796C';
 
-  useEffect(() => { setPath(pathname) }, [pathname])
-
-  const navigations: Array<INavigation> = [
-    {
-      id: 1,
-      text: "All Requests",
-      path: ROUTES.REQUEST,
-      icon: <ListIcon />,
-      permission: routePermission(8) as IPermission
-    },
-    {
-      id: 2,
-      text: "Pending Requests",
-      path: ROUTES.LIST_PENDING,
-      icon: <RestartAltIcon color='warning' />,
-      permission: routePermission(12) as IPermission
-    },
-    {
-      id: 3,
-      text: "Rejected Requests",
-      path: ROUTES.LIST_REJECTED,
-      icon: <CancelIcon color='error' />,
-      permission: routePermission(16) as IPermission
-    },
-    {
-      id: 4,
-      text: "Issued Requests",
-      path: ROUTES.LIST_ISSUED,
-      icon: <ShareOutlinedIcon sx={{ color: "blue" }} />,
-      permission: routePermission(16) as IPermission
-    }
-  ]
-
-  const determineActivePath = (item: INavigation): boolean => {
-    if (path === `${item.path}/${id}`) return true;
-    return [item.path].includes(path);
-  }
-
-  return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
-      <Box width={'100%'} sx={{ px: 3, pt: 2, pb: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        <Box
-          sx={{
-            width: '100%',
-            maxWidth: '1500px',
-            mb: 2,
-            bgcolor: '#fff',
-            borderRadius: 2,
-            border: '1px solid rgba(0,0,0,0.07)',
-            boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
-            p: 2,
-          }}
-        >
-          <Grid container alignItems="center" justifyContent="space-between" spacing={1}>
-            <Grid item xs={12} sm="auto">
-              <Stack direction="row" spacing={1.5} alignItems="center">
-                <Box
-                  sx={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: 1.5,
-                    bgcolor: 'rgba(8,121,108,0.1)',
-                    color: 'primary.main',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <InventoryOutlinedIcon fontSize='small' />
-                </Box>
-                <Box>
-                  <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: '0.08em', fontSize: '0.7rem' }}>
-                    Requests
-                  </Typography>
-                  <Typography variant="subtitle1" fontWeight={600} color="text.primary" sx={{ lineHeight: 1.2 }}>
-                    {navigations.find(item => determineActivePath(item))?.text || 'All Requests'}
-                  </Typography>
-                </Box>
-              </Stack>
-            </Grid>
-            <Grid item xs={12} sm="auto">
-              <Stack direction="row" spacing={0.75} flexWrap="wrap">
-                {navigations.map(item => (
-                  <Button
-                    key={item.id}
-                    startIcon={item.icon}
-                    onClick={() => navigate(item.path)}
-                    variant={determineActivePath(item) ? "contained" : "text"}
-                    size="small"
-                    sx={{
-                      borderRadius: 1.5,
-                      textTransform: 'none',
-                      fontWeight: determineActivePath(item) ? 600 : 500,
-                      fontSize: '0.8rem',
-                      px: 1.5,
-                      py: 0.75,
-                      boxShadow: determineActivePath(item) ? '0 2px 8px rgba(8,121,108,0.25)' : 'none',
-                      bgcolor: determineActivePath(item) ? 'primary.main' : 'transparent',
-                      color: determineActivePath(item) ? '#fff' : 'text.secondary',
-                      '&:hover': {
-                        bgcolor: determineActivePath(item) ? 'primary.dark' : 'rgba(8,121,108,0.06)',
-                        color: determineActivePath(item) ? '#fff' : 'primary.main',
-                      },
-                      transition: 'all 0.2s ease',
-                    }}
-                  >
-                    {item.text}
-                  </Button>
-                ))}
-              </Stack>
-            </Grid>
-          </Grid>
-        </Box>
-      </Box>
-      <Outlet />
-    </Box>
-  )
+interface INavTab {
+    id: number;
+    label: string;
+    path: string;
+    icon: JSX.Element;
+    /** permissionsMock id — undefined means always visible */
+    permissionId?: number;
 }
 
-export default RequestsManagement
+const ALL_TABS: INavTab[] = [
+    {
+        id: 0,
+        label: 'Overview',
+        path: ROUTES.REQUEST,
+        icon: <DashboardOutlinedIcon fontSize="small" />,
+        // No permissionId → always visible to authenticated users
+    },
+    {
+        id: 1,
+        label: 'All Requests',
+        path: ROUTES.LIST_ALL,
+        icon: <ListAltOutlinedIcon fontSize="small" />,
+        permissionId: 13, // READ_REQUEST
+    },
+    {
+        id: 2,
+        label: 'Pending',
+        path: ROUTES.LIST_PENDING,
+        icon: <HourglassEmptyOutlinedIcon fontSize="small" />,
+        permissionId: 13, // READ_REQUEST
+    },
+    {
+        id: 3,
+        label: 'Rejected',
+        path: ROUTES.LIST_REJECTED,
+        icon: <BlockOutlinedIcon fontSize="small" />,
+        permissionId: 13, // READ_REQUEST
+    },
+    {
+        id: 4,
+        label: 'Issued',
+        path: ROUTES.LIST_ISSUED,
+        icon: <MoveToInboxOutlinedIcon fontSize="small" />,
+        permissionId: 46, // ISSUE_ITEMS — storekeepers / logistics only
+    },
+];
+
+const RequestsManagement = () => {
+    const { pathname } = useLocation();
+    const navigate = useNavigate();
+    const { determinePermission, routePermission } = RoutesUtills();
+
+    /* ── Filter tabs the current user is allowed to see ─────────────── */
+    const visibleTabs = useMemo(
+        () =>
+            ALL_TABS.filter(tab => {
+                if (!tab.permissionId) return true;
+                const perm = routePermission(tab.permissionId);
+                return perm ? determinePermission(perm) : true;
+            }),
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [],
+    );
+
+    /* ── Derive the active tab index from the current URL ──────────── */
+    const activeTabIndex = useMemo(() => {
+        // Exact match for the overview root; prefix match for sub-routes
+        const idx = visibleTabs.findIndex(tab =>
+            tab.path === ROUTES.REQUEST
+                ? pathname === tab.path
+                : pathname.startsWith(tab.path),
+        );
+        return idx >= 0 ? idx : 0;
+    }, [pathname, visibleTabs]);
+
+    const activeLabel = visibleTabs[activeTabIndex]?.label ?? 'Asset Requests';
+
+    /* ── Permissions badge shown in the subtitle ─────────────────────── */
+    const canApprove = determinePermission(permissionsMock[43]); // APPROVE_REQUEST
+    const canIssue = determinePermission(permissionsMock[45]);   // ISSUE_ITEMS
+
+    const roleHint = canIssue
+        ? 'Storekeeper / Logistics'
+        : canApprove
+            ? 'Approver'
+            : 'Requestor';
+
+    return (
+        <Box sx={{ minHeight: '100vh', bgcolor: '#F1F5FB', pb: 4 }}>
+
+            {/* ── Gradient Header ───────────────────────────────────── */}
+            <Box
+                sx={{
+                    background: `linear-gradient(135deg, ${PRIMARY} 0%, #065E53 60%, #044a42 100%)`,
+                    px: { xs: 2, md: 4 },
+                    pt: 3,
+                    pb: 0,
+                    position: 'relative',
+                    overflow: 'hidden',
+                }}
+            >
+                {/* Decorative background circles */}
+                <Box sx={{ position: 'absolute', top: -50, right: -50, width: 200, height: 200, borderRadius: '50%', bgcolor: alpha('#fff', 0.04), pointerEvents: 'none' }} />
+                <Box sx={{ position: 'absolute', bottom: -50, right: 140, width: 120, height: 120, borderRadius: '50%', bgcolor: alpha('#fff', 0.03), pointerEvents: 'none' }} />
+
+                {/* Title row */}
+                <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2.5 }}>
+                    <Stack direction="row" alignItems="center" gap={2}>
+                        <Box sx={{
+                            width: 46, height: 46, borderRadius: 2,
+                            bgcolor: alpha('#fff', 0.15),
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            backdropFilter: 'blur(4px)',
+                        }}>
+                            <InboxOutlinedIcon sx={{ color: '#fff', fontSize: 24 }} />
+                        </Box>
+                        <Box>
+                            <Typography variant="h5" sx={{ color: '#fff', fontWeight: 700, lineHeight: 1.2 }}>
+                                Asset Requests
+                            </Typography>
+                            <Typography variant="body2" sx={{ color: alpha('#fff', 0.70), mt: 0.25 }}>
+                                {activeLabel} · {roleHint}
+                            </Typography>
+                        </Box>
+                    </Stack>
+                </Stack>
+
+                {/* Navigation Tabs */}
+                <Tabs
+                    value={activeTabIndex}
+                    onChange={(_, idx) => navigate(visibleTabs[idx].path)}
+                    TabIndicatorProps={{ style: { backgroundColor: '#fff', height: 3, borderRadius: '2px 2px 0 0' } }}
+                    sx={{
+                        minHeight: 44,
+                        '& .MuiTab-root': {
+                            color: alpha('#fff', 0.62),
+                            fontWeight: 500,
+                            fontSize: '0.82rem',
+                            minHeight: 44,
+                            textTransform: 'none',
+                            px: 1.75,
+                            py: 0,
+                            gap: 0.75,
+                            '&.Mui-selected': { color: '#fff', fontWeight: 700 },
+                            '&:hover': { color: alpha('#fff', 0.9) },
+                        },
+                    }}
+                >
+                    {visibleTabs.map(tab => (
+                        <Tab
+                            key={tab.id}
+                            label={tab.label}
+                            icon={tab.icon}
+                            iconPosition="start"
+                        />
+                    ))}
+                </Tabs>
+            </Box>
+
+            {/* ── Page content (sub-route outlet) ───────────────────── */}
+            <Box sx={{ px: { xs: 1, md: 3 }, pt: 3 }}>
+                <Outlet />
+            </Box>
+        </Box>
+    );
+};
+
+export default RequestsManagement;

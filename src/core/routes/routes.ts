@@ -43,6 +43,7 @@ const CREATE_TRANSPORT_REQUEST: string = `${ASSETS_MANAGEMENT}/transport-request
 const UPDATE_TRANSPORT_REQUEST: string = `${ASSETS_MANAGEMENT}/transport-request/update`
 
 /* Request Subroutes Routes */
+const LIST_ALL: string = `${REQUEST}/all`
 const LIST_PENDING: string = `${REQUEST}/pending`
 const LIST_REJECTED: string = `${REQUEST}/rejected`
 const LIST_ISSUED: string = `${REQUEST}/issued`
@@ -113,6 +114,7 @@ export const ROUTES = {
     CREATE_OFFICE_EQUIPMENT,
     UPDATE_OFFICE_EQUIPMENT,
     ERRORS,
+    LIST_ALL,
     LIST_PENDING,
     LIST_REJECTED,
     LIST_ISSUED,
