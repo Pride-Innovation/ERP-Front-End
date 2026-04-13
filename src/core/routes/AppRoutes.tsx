@@ -27,6 +27,7 @@ import { permissionsMock } from '../../mocks/settings'
 import ResetPassword from '../../pages/authentication/ResetPassword'
 import MovementRoutes from './subroutes/movement'
 import StoreRoutes from './subroutes/StoreRoutes'
+import ReportsPage from '../../pages/reports'
 
 const AppRoutes = () => {
 
@@ -80,6 +81,9 @@ const AppRoutes = () => {
 
           {/* Store Sub-Routes */}
           {StoreRoutes()}
+
+          {/* Reports */}
+          <Route path={ROUTES.REPORTS} element={<ReportsPage />} />
 
         </Route>
       </Route>
