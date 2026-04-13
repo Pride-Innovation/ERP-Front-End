@@ -26,11 +26,14 @@ const PRIMARY = '#08796C';
 
 const UpdateMovement = () => {
     const [sendingRequest, setSendingRequest] = useState(false);
+    const [loadedMovement, setLoadedMovement] = useState<IMovement | null>(null);
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const { updateMovementInStore } = MovementUtills();
 
-    const { register, control, handleSubmit, formState, reset } = useForm<IMovementFormData>({
+    const [movementFiles, setMovementFiles] = useState<File[]>([]);
+
+    const { register, control, handleSubmit, formState, reset, setValue } = useForm<IMovementFormData>({
         mode: 'onChange',
         resolver: yupResolver(movementSchema) as any,
     });
@@ -41,10 +44,14 @@ const UpdateMovement = () => {
             const response = await findMovementByIdService(id) as any;
             if (response?.status === 200) {
                 const m: IMovement = response.data;
+                setLoadedMovement(m);
                 reset({
                     officerId: m.requestingOfficer?.id ?? '',
+                    approverId: (m as any).approvedBy?.id ?? null,
                     destination: m.destination ?? '',
+                    destinationId: (m as any).destinationId ?? null,
                     destinationType: m.destinationType ?? '',
+                    assetIds: m.movementAssets?.map((ma) => ma.asset?.id as string | number) ?? [],
                     reason: m.reason ?? '',
                     expectedReturnDate: m.expectedReturnDate ?? '',
                 } as IMovementFormData);
@@ -177,8 +184,11 @@ const UpdateMovement = () => {
                     register={register}
                     control={control}
                     formState={formState}
+                    setValue={setValue}
                     sendingRequest={sendingRequest}
                     buttonText="Save Changes"
+                    onFilesChange={setMovementFiles}
+                    initialAssets={loadedMovement?.movementAssets?.map((ma) => ma.asset) ?? []}
                 />
             </Box>
         </Box>
