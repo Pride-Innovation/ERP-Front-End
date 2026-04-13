@@ -15,7 +15,9 @@ import {
     InputAdornment,
     Chip,
     Button,
-    Divider
+    Divider,
+    Tooltip,
+    IconButton
 } from '@mui/material';
 import { CustomToolbarWrapperProps, ITableToolBar } from './interface';
 import FileUploadButton from '../forms/FileUploadButton';
@@ -241,7 +243,7 @@ const TableToolBar = ({
                                 </InputAdornment>
                             ),
                             sx: {
-                                borderRadius: '8px',
+                                borderRadius: '20px',
                                 backgroundColor: '#FFFFFF',
                                 border: `1px solid ${alpha('#000', 0.12)}`,
                                 height: 40,
@@ -268,29 +270,26 @@ const TableToolBar = ({
                 )}
 
                 {refresh && (
-                    <Button
-                        onClick={() => window.location.reload()}
-                        variant='outlined'
-                        startIcon={<RefreshIcon sx={{ fontSize: '17px !important' }} />}
-                        sx={{
-                            height: 40,
-                            px: 2,
-                            borderRadius: '8px',
-                            borderColor: alpha('#000', 0.18),
-                            color: 'text.secondary',
-                            textTransform: 'none',
-                            fontWeight: 500,
-                            fontSize: '0.875rem',
-                            '&:hover': {
-                                borderColor: PRIMARY_COLOR,
-                                color: PRIMARY_COLOR,
-                                backgroundColor: alpha(PRIMARY_COLOR, 0.05),
-                            },
-                            transition: 'all 0.2s ease',
-                        }}
-                    >
-                        Refresh
-                    </Button>
+                    <Tooltip title="Refresh" arrow>
+                        <IconButton
+                            onClick={() => window.location.reload()}
+                            sx={{
+                                width: 40,
+                                height: 40,
+                                borderRadius: '8px',
+                                border: `1px solid ${alpha('#000', 0.14)}`,
+                                color: 'text.secondary',
+                                '&:hover': {
+                                    borderColor: PRIMARY_COLOR,
+                                    color: PRIMARY_COLOR,
+                                    backgroundColor: alpha(PRIMARY_COLOR, 0.05),
+                                },
+                                transition: 'all 0.2s ease',
+                            }}
+                        >
+                            <RefreshIcon sx={{ fontSize: 18 }} />
+                        </IconButton>
+                    </Tooltip>
                 )}
 
                 {createAction && (
@@ -320,7 +319,7 @@ const TableToolBar = ({
                             transition: 'all 0.2s ease',
                         }}
                     >
-                        Create
+                        Add {header?.singular ?? 'Record'}
                     </Button>
                 )}
 
