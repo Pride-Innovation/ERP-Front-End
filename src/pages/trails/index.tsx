@@ -5,26 +5,443 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { Grid } from "@mui/material"
-import AuditUtils from "./utils"
-import TableComponent from "../../components/tables/TableComponent";
-import { auditTrailsMock } from "../../mocks/trails";
+import { useState, useMemo } from 'react';
+import {
+    alpha,
+    Box,
+    Button,
+    Chip,
+    FormControl,
+    Grid,
+    InputAdornment,
+    InputLabel,
+    MenuItem,
+    Paper,
+    Select,
+    Stack,
+    TextField,
+    Typography,
+} from '@mui/material';
+import HistoryOutlinedIcon from '@mui/icons-material/HistoryOutlined';
+import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
+import CalendarTodayOutlinedIcon from '@mui/icons-material/CalendarTodayOutlined';
+import ListAltOutlinedIcon from '@mui/icons-material/ListAltOutlined';
+import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined';
+import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined';
+import FilterAltOutlinedIcon from '@mui/icons-material/FilterAltOutlined';
+import RefreshOutlinedIcon from '@mui/icons-material/RefreshOutlined';
+import PictureAsPdfOutlinedIcon from '@mui/icons-material/PictureAsPdfOutlined';
+import TableChartOutlinedIcon from '@mui/icons-material/TableChartOutlined';
+import DataObjectOutlinedIcon from '@mui/icons-material/DataObjectOutlined';
+import TodayOutlinedIcon from '@mui/icons-material/TodayOutlined';
+import { auditTrailsMock } from '../../mocks/trails';
+import { IAuditTrail } from './interface';
+import { SummaryCard } from '../reports/ReportSummaryCards';
+import ReportDataTable, { ReportColumn } from '../reports/ReportDataTable';
 
+const PRIMARY = '#08796C';
+
+// ── Event type config ─────────────────────────────────────────────────────
+const EVENT_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
+    created:  { label: 'Created',  color: '#15803D', bg: '#DCFCE7' },
+    updated:  { label: 'Updated',  color: '#1D4ED8', bg: '#DBEAFE' },
+    deleted:  { label: 'Deleted',  color: '#DC2626', bg: '#FEE2E2' },
+    login:    { label: 'Login',    color: '#065F46', bg: '#D1FAE5' },
+    logout:   { label: 'Logout',   color: '#7C3AED', bg: '#EDE9FE' },
+    approved: { label: 'Approved', color: '#0891B2', bg: '#CFFAFE' },
+    rejected: { label: 'Rejected', color: '#BE123C', bg: '#FFE4E6' },
+    system:   { label: 'System',   color: '#475569', bg: '#F1F5F9' },
+};
+
+const SEVERITY_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
+    info:     { label: 'Info',     color: '#1D4ED8', bg: '#DBEAFE' },
+    warning:  { label: 'Warning',  color: '#D97706', bg: '#FEF3C7' },
+    critical: { label: 'Critical', color: '#DC2626', bg: '#FEE2E2' },
+};
+
+const MODULE_COLORS: Record<string, string> = {
+    Assets: '#059669', Inventory: '#0369A1', Users: '#7C3AED',
+    Store: '#D97706', Requests: '#DB2777', Movement: '#0891B2',
+    Disposal: '#DC2626', Maintenance: '#78350F', System: '#475569',
+};
+
+// ── Cell renderers ────────────────────────────────────────────────────────
+const EventChip = ({ value }: { value: string }) => {
+    const cfg = EVENT_CONFIG[value] ?? { label: value, color: '#475569', bg: '#F1F5F9' };
+    return (
+        <Chip
+            label={cfg.label}
+            size="small"
+            sx={{
+                bgcolor: cfg.bg, color: cfg.color, fontWeight: 700,
+                fontSize: '0.7rem', height: 22,
+                border: `1px solid ${alpha(cfg.color, 0.25)}`,
+            }}
+        />
+    );
+};
+
+const SeverityChip = ({ value }: { value: string }) => {
+    const cfg = SEVERITY_CONFIG[value] ?? { label: value, color: '#475569', bg: '#F1F5F9' };
+    return (
+        <Chip
+            label={cfg.label}
+            size="small"
+            sx={{
+                bgcolor: cfg.bg, color: cfg.color, fontWeight: 700,
+                fontSize: '0.7rem', height: 22,
+                border: `1px solid ${alpha(cfg.color, 0.25)}`,
+            }}
+        />
+    );
+};
+
+const ModuleChip = ({ value }: { value: string }) => {
+    const color = MODULE_COLORS[value] ?? '#475569';
+    return (
+        <Chip
+            label={value}
+            size="small"
+            sx={{
+                bgcolor: alpha(color, 0.1), color,
+                fontWeight: 600, fontSize: '0.7rem', height: 22,
+            }}
+        />
+    );
+};
+
+const ActorCell = ({ name }: { name: string }) => {
+    const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    const hash = name.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
+    const colors = ['#0369A1', '#059669', '#7C3AED', '#D97706', '#DC2626', '#0891B2', '#DB2777'];
+    const color = colors[hash % colors.length];
+    return (
+        <Stack direction="row" alignItems="center" gap={1}>
+            <Box sx={{
+                width: 28, height: 28, borderRadius: '50%',
+                bgcolor: alpha(color, 0.12), color,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: '0.65rem', fontWeight: 700, flexShrink: 0,
+            }}>
+                {initials}
+            </Box>
+            <Typography sx={{ fontSize: '0.8rem', fontWeight: 500, color: '#1E293B', whiteSpace: 'nowrap' }}>
+                {name}
+            </Typography>
+        </Stack>
+    );
+};
+
+// ── Table column definitions ──────────────────────────────────────────────
+const COLUMNS: ReportColumn<IAuditTrail>[] = [
+    { id: 'timeStamp',   label: 'Timestamp',   minWidth: 160 },
+    { id: 'event',       label: 'Event',        minWidth: 110, format: (v) => <EventChip value={v} /> },
+    { id: 'module',      label: 'Module',       minWidth: 120, format: (v) => <ModuleChip value={v} /> },
+    { id: 'actor',       label: 'Actor',        minWidth: 160, format: (v) => <ActorCell name={v} /> },
+    { id: 'description', label: 'Description',  minWidth: 280 },
+    { id: 'ipAddress',   label: 'IP Address',   minWidth: 130 },
+    { id: 'severity',    label: 'Severity',     minWidth: 100, format: (v) => <SeverityChip value={v} /> },
+];
+
+const ALL_EVENTS    = ['All', 'created', 'updated', 'deleted', 'login', 'logout', 'approved', 'rejected', 'system'];
+const ALL_MODULES   = ['All', 'Assets', 'Inventory', 'Users', 'Store', 'Requests', 'Movement', 'Disposal', 'Maintenance', 'System'];
+const ALL_SEVERITIES = ['All', 'info', 'warning', 'critical'];
+
+// ── Main component ────────────────────────────────────────────────────────
 const AuditTrails = () => {
-    const { columnHeaders } = AuditUtils();
-    const header = { plural: 'Audit Trails', singular: 'Audit Trail' };
+    const [search, setSearch]               = useState('');
+    const [dateFrom, setDateFrom]           = useState('');
+    const [dateTo, setDateTo]               = useState('');
+    const [eventType, setEventType]         = useState('All');
+    const [moduleFilter, setModuleFilter]   = useState('All');
+    const [severityFilter, setSeverityFilter] = useState('All');
+
+    const todayLabel = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+    const todayCount    = auditTrailsMock.filter(t => t.timeStamp.startsWith('Apr 13')).length;
+    const uniqueActors  = new Set(auditTrailsMock.map(t => t.actor)).size;
+    const flaggedCount  = auditTrailsMock.filter(t => t.severity !== 'info').length;
+
+    const filtered = useMemo(() => {
+        let data = [...auditTrailsMock];
+        if (search) {
+            const q = search.toLowerCase();
+            data = data.filter(r =>
+                r.description.toLowerCase().includes(q) ||
+                r.actor.toLowerCase().includes(q) ||
+                r.event.toLowerCase().includes(q) ||
+                r.module.toLowerCase().includes(q)
+            );
+        }
+        if (eventType !== 'All')    data = data.filter(r => r.event === eventType);
+        if (moduleFilter !== 'All') data = data.filter(r => r.module === moduleFilter);
+        if (severityFilter !== 'All') data = data.filter(r => r.severity === severityFilter);
+        return data;
+    }, [search, eventType, moduleFilter, severityFilter]);
+
+    const clearFilters = () => {
+        setSearch('');
+        setDateFrom('');
+        setDateTo('');
+        setEventType('All');
+        setModuleFilter('All');
+        setSeverityFilter('All');
+    };
 
     return (
-        <Grid xs={12} container>
-            {columnHeaders.length > 0 &&
-                <TableComponent
-                    exportData
-                    header={header}
-                    rows={auditTrailsMock}
-                    columnHeaders={columnHeaders}
-                />}
-        </Grid>
-    )
-}
+        <Box sx={{ minHeight: '100vh', bgcolor: '#F1F5FB', pb: 4 }}>
 
-export default AuditTrails
+            {/* ── Page Header ──────────────────────────────────────────── */}
+            <Box
+                sx={{
+                    background: `linear-gradient(135deg, ${PRIMARY} 0%, #065E53 60%, #044a42 100%)`,
+                    px: { xs: 2, md: 4 },
+                    pt: 4,
+                    pb: 3,
+                    position: 'relative',
+                    overflow: 'hidden',
+                }}
+            >
+                <Box sx={{ position: 'absolute', top: -40, right: -40, width: 220, height: 220, borderRadius: '50%', bgcolor: alpha('#fff', 0.04), pointerEvents: 'none' }} />
+                <Box sx={{ position: 'absolute', bottom: -30, right: 160, width: 120, height: 120, borderRadius: '50%', bgcolor: alpha('#fff', 0.03), pointerEvents: 'none' }} />
+
+                <Stack direction="row" alignItems="center" justifyContent="space-between" flexWrap="wrap" gap={2}>
+                    <Stack direction="row" alignItems="center" gap={2}>
+                        <Box sx={{
+                            width: 48, height: 48, borderRadius: 2,
+                            bgcolor: alpha('#fff', 0.15),
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            backdropFilter: 'blur(4px)',
+                        }}>
+                            <HistoryOutlinedIcon sx={{ color: '#fff', fontSize: 26 }} />
+                        </Box>
+                        <Box>
+                            <Typography variant="h5" sx={{ color: '#fff', fontWeight: 700, lineHeight: 1.2 }}>
+                                Audit Trails
+                            </Typography>
+                            <Typography variant="body2" sx={{ color: alpha('#fff', 0.72), mt: 0.3 }}>
+                                Full system activity log — track every action, change and access event
+                            </Typography>
+                        </Box>
+                    </Stack>
+
+                    <Stack direction="row" gap={1} alignItems="center">
+                        <Chip
+                            label="Live"
+                            size="small"
+                            sx={{
+                                bgcolor: '#22C55E', color: '#fff', fontWeight: 700, fontSize: '0.72rem',
+                                animation: 'pulse 2s infinite',
+                                '@keyframes pulse': { '0%, 100%': { opacity: 1 }, '50%': { opacity: 0.55 } },
+                            }}
+                        />
+                        <Chip
+                            icon={<CalendarTodayOutlinedIcon sx={{ fontSize: '13px !important' }} />}
+                            label={todayLabel}
+                            size="small"
+                            sx={{
+                                bgcolor: alpha('#fff', 0.14), color: '#fff',
+                                border: `1px solid ${alpha('#fff', 0.2)}`,
+                                fontSize: '0.72rem', fontWeight: 600, backdropFilter: 'blur(4px)',
+                                '& .MuiChip-icon': { color: alpha('#fff', 0.8) },
+                            }}
+                        />
+                    </Stack>
+                </Stack>
+            </Box>
+
+            <Box sx={{ px: { xs: 1, md: 3 }, pt: 3 }}>
+
+                {/* ── KPI Cards ─────────────────────────────────────────── */}
+                <Grid container spacing={2} sx={{ mb: 3 }}>
+                    <Grid item xs={12} sm={6} md={3}>
+                        <SummaryCard
+                            label="Total Events"
+                            value={auditTrailsMock.length}
+                            subLabel="All recorded activities"
+                            icon={<ListAltOutlinedIcon />}
+                            color={PRIMARY}
+                        />
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={3}>
+                        <SummaryCard
+                            label="Events Today"
+                            value={todayCount}
+                            subLabel="Apr 13, 2026"
+                            icon={<TodayOutlinedIcon />}
+                            color="#0369A1"
+                            trend={8}
+                        />
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={3}>
+                        <SummaryCard
+                            label="Active Users"
+                            value={uniqueActors}
+                            subLabel="Distinct actors logged"
+                            icon={<PeopleAltOutlinedIcon />}
+                            color="#7C3AED"
+                        />
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={3}>
+                        <SummaryCard
+                            label="Flagged Events"
+                            value={flaggedCount}
+                            subLabel="Warning & critical"
+                            icon={<WarningAmberOutlinedIcon />}
+                            color="#DC2626"
+                        />
+                    </Grid>
+                </Grid>
+
+                {/* ── Filter Bar ────────────────────────────────────────── */}
+                <Paper elevation={0} sx={{ border: '1px solid #EEF2F7', borderRadius: 2, p: 2.5, mb: 2.5 }}>
+                    <Stack direction="row" alignItems="center" gap={1} sx={{ mb: 2 }}>
+                        <FilterAltOutlinedIcon sx={{ color: PRIMARY, fontSize: 18 }} />
+                        <Typography sx={{ fontWeight: 700, fontSize: '0.85rem', color: '#0F172A' }}>
+                            Filter Logs
+                        </Typography>
+                    </Stack>
+                    <Grid container spacing={2} alignItems="center">
+                        {/* Row 1 */}
+                        <Grid item xs={12} md={8}>
+                            <TextField
+                                fullWidth size="small"
+                                placeholder="Search description, actor, module, event…"
+                                value={search}
+                                onChange={e => setSearch(e.target.value)}
+                                InputProps={{
+                                    startAdornment: (
+                                        <InputAdornment position="start">
+                                            <SearchOutlinedIcon sx={{ fontSize: 18, color: '#94A3B8' }} />
+                                        </InputAdornment>
+                                    ),
+                                }}
+                                sx={{ '& .MuiOutlinedInput-root': { borderRadius: 1.5 } }}
+                            />
+                        </Grid>
+                        <Grid item xs={6} md={2}>
+                            <TextField
+                                fullWidth size="small" type="date" label="Date From"
+                                value={dateFrom} onChange={e => setDateFrom(e.target.value)}
+                                InputLabelProps={{ shrink: true }}
+                                sx={{ '& .MuiOutlinedInput-root': { borderRadius: 1.5 } }}
+                            />
+                        </Grid>
+                        <Grid item xs={6} md={2}>
+                            <TextField
+                                fullWidth size="small" type="date" label="Date To"
+                                value={dateTo} onChange={e => setDateTo(e.target.value)}
+                                InputLabelProps={{ shrink: true }}
+                                sx={{ '& .MuiOutlinedInput-root': { borderRadius: 1.5 } }}
+                            />
+                        </Grid>
+                        {/* Row 2 */}
+                        <Grid item xs={12} sm={6} md={3}>
+                            <FormControl fullWidth size="small">
+                                <InputLabel>Event Type</InputLabel>
+                                <Select
+                                    value={eventType} label="Event Type"
+                                    onChange={e => setEventType(e.target.value)}
+                                    sx={{ borderRadius: 1.5 }}
+                                >
+                                    {ALL_EVENTS.map(e => (
+                                        <MenuItem key={e} value={e}>
+                                            {e === 'All' ? 'All Events' : EVENT_CONFIG[e]?.label ?? e}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                        </Grid>
+                        <Grid item xs={12} sm={6} md={3}>
+                            <FormControl fullWidth size="small">
+                                <InputLabel>Module</InputLabel>
+                                <Select
+                                    value={moduleFilter} label="Module"
+                                    onChange={e => setModuleFilter(e.target.value)}
+                                    sx={{ borderRadius: 1.5 }}
+                                >
+                                    {ALL_MODULES.map(m => (
+                                        <MenuItem key={m} value={m}>
+                                            {m === 'All' ? 'All Modules' : m}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                        </Grid>
+                        <Grid item xs={12} sm={6} md={3}>
+                            <FormControl fullWidth size="small">
+                                <InputLabel>Severity</InputLabel>
+                                <Select
+                                    value={severityFilter} label="Severity"
+                                    onChange={e => setSeverityFilter(e.target.value)}
+                                    sx={{ borderRadius: 1.5 }}
+                                >
+                                    {ALL_SEVERITIES.map(s => (
+                                        <MenuItem key={s} value={s}>
+                                            {s === 'All' ? 'All Severities' : SEVERITY_CONFIG[s]?.label ?? s}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                        </Grid>
+                        <Grid item xs={12} sm={6} md={3}>
+                            <Button
+                                fullWidth size="medium" variant="outlined"
+                                onClick={clearFilters}
+                                startIcon={<RefreshOutlinedIcon />}
+                                sx={{
+                                    borderRadius: 1.5, color: '#64748B', borderColor: '#CBD5E1',
+                                    '&:hover': { borderColor: PRIMARY, color: PRIMARY, bgcolor: alpha(PRIMARY, 0.04) },
+                                }}
+                            >
+                                Clear Filters
+                            </Button>
+                        </Grid>
+                    </Grid>
+                </Paper>
+
+                {/* ── Result count + Export ─────────────────────────────── */}
+                <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1.5 }}>
+                    <Typography sx={{ fontSize: '0.8rem', color: '#64748B' }}>
+                        Showing <Box component="span" sx={{ fontWeight: 700, color: '#0F172A' }}>{filtered.length}</Box> of <Box component="span" sx={{ fontWeight: 700, color: '#0F172A' }}>{auditTrailsMock.length}</Box> records
+                    </Typography>
+                    <Stack direction="row" gap={1}>
+                        <Button
+                            size="small" variant="outlined"
+                            startIcon={<PictureAsPdfOutlinedIcon />}
+                            onClick={() => alert('Export PDF — connect to API')}
+                            sx={{ borderRadius: 1.5, fontSize: '0.75rem', color: '#DC2626', borderColor: '#FCA5A5', '&:hover': { bgcolor: '#FEF2F2', borderColor: '#DC2626' } }}
+                        >
+                            PDF
+                        </Button>
+                        <Button
+                            size="small" variant="outlined"
+                            startIcon={<TableChartOutlinedIcon />}
+                            onClick={() => alert('Export Excel — connect to API')}
+                            sx={{ borderRadius: 1.5, fontSize: '0.75rem', color: '#15803D', borderColor: '#86EFAC', '&:hover': { bgcolor: '#F0FDF4', borderColor: '#15803D' } }}
+                        >
+                            Excel
+                        </Button>
+                        <Button
+                            size="small" variant="outlined"
+                            startIcon={<DataObjectOutlinedIcon />}
+                            onClick={() => alert('Export CSV — connect to API')}
+                            sx={{ borderRadius: 1.5, fontSize: '0.75rem', color: '#1D4ED8', borderColor: '#93C5FD', '&:hover': { bgcolor: '#EFF6FF', borderColor: '#1D4ED8' } }}
+                        >
+                            CSV
+                        </Button>
+                    </Stack>
+                </Stack>
+
+                {/* ── Data Table ───────────────────────────────────────── */}
+                <ReportDataTable
+                    columns={COLUMNS}
+                    rows={filtered}
+                    accentColor={PRIMARY}
+                    rowKey="id"
+                />
+            </Box>
+        </Box>
+    );
+};
+
+export default AuditTrails;
