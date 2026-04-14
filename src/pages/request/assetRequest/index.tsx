@@ -23,7 +23,6 @@ import { useMemo } from 'react';
 import RoutesUtills from '../../../core/routes/utills';
 import { permissionsMock } from '../../../mocks/settings';
 import InboxOutlinedIcon from '@mui/icons-material/InboxOutlined';
-import DashboardOutlinedIcon from '@mui/icons-material/DashboardOutlined';
 import ListAltOutlinedIcon from '@mui/icons-material/ListAltOutlined';
 import HourglassEmptyOutlinedIcon from '@mui/icons-material/HourglassEmptyOutlined';
 import BlockOutlinedIcon from '@mui/icons-material/BlockOutlined';
@@ -43,34 +42,27 @@ interface INavTab {
 const ALL_TABS: INavTab[] = [
     {
         id: 0,
-        label: 'Overview',
-        path: ROUTES.REQUEST,
-        icon: <DashboardOutlinedIcon fontSize="small" />,
-        // No permissionId → always visible to authenticated users
-    },
-    {
-        id: 1,
         label: 'All Requests',
         path: ROUTES.LIST_ALL,
         icon: <ListAltOutlinedIcon fontSize="small" />,
         permissionId: 13, // READ_REQUEST
     },
     {
-        id: 2,
+        id: 1,
         label: 'Pending',
         path: ROUTES.LIST_PENDING,
         icon: <HourglassEmptyOutlinedIcon fontSize="small" />,
         permissionId: 13, // READ_REQUEST
     },
     {
-        id: 3,
+        id: 2,
         label: 'Rejected',
         path: ROUTES.LIST_REJECTED,
         icon: <BlockOutlinedIcon fontSize="small" />,
         permissionId: 13, // READ_REQUEST
     },
     {
-        id: 4,
+        id: 3,
         label: 'Issued',
         path: ROUTES.LIST_ISSUED,
         icon: <MoveToInboxOutlinedIcon fontSize="small" />,
@@ -97,12 +89,7 @@ const RequestsManagement = () => {
 
     /* ── Derive the active tab index from the current URL ──────────── */
     const activeTabIndex = useMemo(() => {
-        // Exact match for the overview root; prefix match for sub-routes
-        const idx = visibleTabs.findIndex(tab =>
-            tab.path === ROUTES.REQUEST
-                ? pathname === tab.path
-                : pathname.startsWith(tab.path),
-        );
+        const idx = visibleTabs.findIndex(tab => pathname.startsWith(tab.path));
         return idx >= 0 ? idx : 0;
     }, [pathname, visibleTabs]);
 
