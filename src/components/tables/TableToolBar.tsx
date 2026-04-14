@@ -141,7 +141,7 @@ const TableToolBar = ({
                             variant="contained"
                             startIcon={<AddOutlinedIcon sx={{ fontSize: '17px !important' }} />}
                             sx={{
-                                height: 38, px: 2.5, borderRadius: 1.5,
+                                height: 38, px: 2.5, borderRadius: "8px",
                                 bgcolor: PRIMARY_COLOR, color: '#fff',
                                 textTransform: 'none', fontWeight: 600, fontSize: '0.85rem',
                                 boxShadow: `0 2px 8px ${alpha(PRIMARY_COLOR, 0.30)}`,
@@ -207,7 +207,7 @@ const TableToolBar = ({
                                         value={statusFilter}
                                         label="Status"
                                         onChange={handleStatusChange}
-                                        sx={{ borderRadius: 1.5 }}
+                                        sx={{ borderRadius: "8px" }}
                                     >
                                         <MenuItem value="all">All Status</MenuItem>
                                         {(filterStatuses || []).map(s => (
@@ -215,7 +215,7 @@ const TableToolBar = ({
                                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                                     <Box
                                                         component="span"
-                                                        sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: s.color, flexShrink: 0 }}
+                                                        sx={{ width: 8, height: 8, borderRadius: "8px", bgcolor: s.color, flexShrink: 0 }}
                                                     />
                                                     {s.label}
                                                 </Box>

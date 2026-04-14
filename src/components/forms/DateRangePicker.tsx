@@ -128,7 +128,7 @@ const DateRangePicker: React.FC<IDateRangePickerProps> = ({
                     gap: 1.5,
                     py: 0.625,
                     px: 1.5,
-                    borderRadius: 2,
+                    borderRadius: "8px",
                     backgroundColor: '#FFFFFF',
                     border: `1px solid ${alpha('#000', 0.12)}`,
                     transition: 'border-color 0.2s ease, box-shadow 0.2s ease',

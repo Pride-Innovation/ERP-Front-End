@@ -5,7 +5,7 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { Grid } from '@mui/material';
+import { Box } from '@mui/material';
 import TableComponent from '../../components/tables/TableComponent';
 import UserUtils from './utils';
 import { UserContext } from '../../context/user/UserContext';
@@ -89,7 +89,7 @@ const Users = () => {
   }, [fileData]);
 
   return (
-    <Grid xs={12} container sx={{ p: 3 }} justifyContent="center">
+    <Box sx={{ width: '100%' }}>
       {modalState === crudStates.disable &&
         <ModalComponent title='Disable User Account' open={open} handleClose={handleClose} width="40%">
           <DisableUser setSendingRequest={setSendingRequest} user={user} handleClose={handleClose} buttonText='Disable' sendingRequest={false} />
@@ -131,7 +131,7 @@ const Users = () => {
           />
         </Container>
       }
-    </Grid>
+    </Box>
   )
 }
 

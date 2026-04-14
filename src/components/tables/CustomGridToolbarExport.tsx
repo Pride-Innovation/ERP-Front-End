@@ -36,7 +36,7 @@ const CustomGridToolbarExport = ({ module, rows = [] }: CustomGridToolbarExportP
                 startIcon={<TableChartOutlinedIcon />}
                 onClick={handleOpen}
                 sx={{
-                    height: 38, px: 2, borderRadius: 1.5,
+                    height: 38, px: 2, borderRadius: "8px",
                     border: `1px solid #86EFAC`, color: '#15803D',
                     textTransform: 'none', fontWeight: 600, fontSize: '0.85rem',
                     '&:hover': { bgcolor: '#F0FDF4', borderColor: '#15803D' },
@@ -53,7 +53,7 @@ const CustomGridToolbarExport = ({ module, rows = [] }: CustomGridToolbarExportP
                 PaperProps={{
                     elevation: 3,
                     sx: {
-                        borderRadius: 2, mt: 0.75,
+                        borderRadius: "8px", mt: 0.75,
                         border: '1px solid #EEF2F7',
                         minWidth: 180,
                         '& .MuiMenuItem-root': { fontSize: '0.85rem', gap: 1.5, py: 1 },
