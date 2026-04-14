@@ -8,7 +8,6 @@ Managing Director
 import {
     Box,
     Button,
-    Divider,
     Stack,
     Typography,
     useTheme,

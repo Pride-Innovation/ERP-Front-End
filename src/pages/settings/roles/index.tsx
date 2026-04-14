@@ -5,7 +5,7 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { Box, Button, Typography, Stack, Divider, alpha, useTheme, Fade, CircularProgress } from '@mui/material';
+import { Box, Button, Typography, Stack, alpha, useTheme, Fade, CircularProgress } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import ShieldOutlinedIcon from '@mui/icons-material/ShieldOutlined';
 import RoleDetails from './RoleDetails';

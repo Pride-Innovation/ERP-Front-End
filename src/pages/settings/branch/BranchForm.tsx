@@ -11,7 +11,6 @@ import {
     Stack,
     Typography,
     alpha,
-    useTheme,
     Paper,
     Skeleton,
     CircularProgress,
@@ -45,7 +44,6 @@ const FormSection = memo(({
     children: React.ReactNode;
     isLoading?: boolean;
 }) => {
-    const theme = useTheme();
 
     return (
         <Paper
@@ -128,7 +126,6 @@ const BranchForm = ({
     const { fetchAllUsers } = UserUtils();
     const { fetchAllRegions } = RegionUtills();
     const { fetchAllDistricts } = DistrictUtills();
-    const theme = useTheme();
     const [loading, setLoading] = useState(true);
     const initialLoadCompleted = useRef(false);
 
