@@ -11,14 +11,12 @@ import PendingRequest from "../../../pages/request/assetRequest/pending"
 import Request from "../../../pages/request/assetRequest/allrequests"
 import RejectedRequest from "../../../pages/request/assetRequest/rejected"
 import IssuedRequest from "../../../pages/request/assetRequest/issue"
-import RequestOverview from "../../../pages/request/assetRequest/overview"
 
 const RequestSubroutes = () => {
     return (
         <Route>
-            {/* Overview dashboard — shown when landing on /asset-request */}
-            <Route index element={<RequestOverview />} />
-            {/* All requests table — requires READ_REQUEST */}
+            {/* All requests — default page when landing on /asset-request */}
+            <Route index element={<Request />} />
             <Route path={ROUTES.LIST_ALL} element={<Request />} />
             {/* Filtered views */}
             <Route path={ROUTES.LIST_PENDING} element={<PendingRequest />} />
