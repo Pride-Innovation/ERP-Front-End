@@ -46,7 +46,7 @@ const AssetUtills = () => {
             return ({
                 id: assetType.id as number,
                 text: assetType.name,
-                path: ROUTES.LIST_ASSETS,
+                path: ROUTES.LIST_IT_EQUIPMENT,
                 otherRoutes: [
                     ROUTES.CREATE_ITEQUIPMENT,
                     ROUTES.UPDATE_ITEQUIPMENT
