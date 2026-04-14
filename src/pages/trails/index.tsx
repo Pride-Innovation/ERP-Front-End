@@ -11,15 +11,16 @@ import {
     Box,
     Button,
     Chip,
+    Collapse,
     FormControl,
     Grid,
+    IconButton,
     InputAdornment,
-    InputLabel,
     MenuItem,
-    Paper,
     Select,
     Stack,
     TextField,
+    Tooltip,
     Typography,
 } from '@mui/material';
 import HistoryOutlinedIcon from '@mui/icons-material/HistoryOutlined';
@@ -30,6 +31,7 @@ import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined';
 import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined';
 import FilterAltOutlinedIcon from '@mui/icons-material/FilterAltOutlined';
 import RefreshOutlinedIcon from '@mui/icons-material/RefreshOutlined';
+import TuneOutlinedIcon from '@mui/icons-material/TuneOutlined';
 import PictureAsPdfOutlinedIcon from '@mui/icons-material/PictureAsPdfOutlined';
 import TableChartOutlinedIcon from '@mui/icons-material/TableChartOutlined';
 import DataObjectOutlinedIcon from '@mui/icons-material/DataObjectOutlined';
@@ -40,6 +42,20 @@ import { SummaryCard } from '../reports/ReportSummaryCards';
 import ReportDataTable, { ReportColumn } from '../reports/ReportDataTable';
 
 const PRIMARY = '#08796C';
+
+const PILL_INPUT_SX = {
+    '& .MuiOutlinedInput-root': {
+        borderRadius: '8px',
+        bgcolor: '#fff',
+        fontSize: '0.8rem',
+        height: 36,
+        '& fieldset': { borderColor: '#E2E8F0' },
+        '&:hover fieldset': { borderColor: PRIMARY },
+        '&.Mui-focused fieldset': { borderColor: PRIMARY },
+    },
+};
+
+const FIELD_LABEL_SX = { fontSize: '0.72rem', fontWeight: 600, color: '#64748B', mb: 0.5, textTransform: 'uppercase' as const, letterSpacing: '0.05em' };
 
 // ── Event type config ─────────────────────────────────────────────────────
 const EVENT_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
@@ -149,6 +165,7 @@ const ALL_SEVERITIES = ['All', 'info', 'warning', 'critical'];
 
 // ── Main component ────────────────────────────────────────────────────────
 const AuditTrails = () => {
+    const [showFilters, setShowFilters]     = useState(true);
     const [search, setSearch]               = useState('');
     const [dateFrom, setDateFrom]           = useState('');
     const [dateTo, setDateTo]               = useState('');
@@ -293,144 +310,229 @@ const AuditTrails = () => {
                 </Grid>
 
                 {/* ── Filter Bar ────────────────────────────────────────── */}
-                <Paper elevation={0} sx={{ border: '1px solid #EEF2F7', borderRadius: 2, p: 2.5, mb: 2.5 }}>
-                    <Stack direction="row" alignItems="center" gap={1} sx={{ mb: 2 }}>
-                        <FilterAltOutlinedIcon sx={{ color: PRIMARY, fontSize: 18 }} />
-                        <Typography sx={{ fontWeight: 700, fontSize: '0.85rem', color: '#0F172A' }}>
-                            Filter Logs
-                        </Typography>
-                    </Stack>
-                    <Grid container spacing={2} alignItems="center">
-                        {/* Row 1 */}
-                        <Grid item xs={12} md={8}>
-                            <TextField
-                                fullWidth size="small"
-                                placeholder="Search description, actor, module, event…"
-                                value={search}
-                                onChange={e => setSearch(e.target.value)}
-                                InputProps={{
-                                    startAdornment: (
-                                        <InputAdornment position="start">
-                                            <SearchOutlinedIcon sx={{ fontSize: 18, color: '#94A3B8' }} />
-                                        </InputAdornment>
-                                    ),
-                                }}
-                                sx={{ '& .MuiOutlinedInput-root': { borderRadius: 1.5 } }}
-                            />
-                        </Grid>
-                        <Grid item xs={6} md={2}>
-                            <TextField
-                                fullWidth size="small" type="date" label="Date From"
-                                value={dateFrom} onChange={e => setDateFrom(e.target.value)}
-                                InputLabelProps={{ shrink: true }}
-                                sx={{ '& .MuiOutlinedInput-root': { borderRadius: 1.5 } }}
-                            />
-                        </Grid>
-                        <Grid item xs={6} md={2}>
-                            <TextField
-                                fullWidth size="small" type="date" label="Date To"
-                                value={dateTo} onChange={e => setDateTo(e.target.value)}
-                                InputLabelProps={{ shrink: true }}
-                                sx={{ '& .MuiOutlinedInput-root': { borderRadius: 1.5 } }}
-                            />
-                        </Grid>
-                        {/* Row 2 */}
-                        <Grid item xs={12} sm={6} md={3}>
-                            <FormControl fullWidth size="small">
-                                <InputLabel>Event Type</InputLabel>
-                                <Select
-                                    value={eventType} label="Event Type"
-                                    onChange={e => setEventType(e.target.value)}
-                                    sx={{ borderRadius: 1.5 }}
-                                >
-                                    {ALL_EVENTS.map(e => (
-                                        <MenuItem key={e} value={e}>
-                                            {e === 'All' ? 'All Events' : EVENT_CONFIG[e]?.label ?? e}
-                                        </MenuItem>
-                                    ))}
-                                </Select>
-                            </FormControl>
-                        </Grid>
-                        <Grid item xs={12} sm={6} md={3}>
-                            <FormControl fullWidth size="small">
-                                <InputLabel>Module</InputLabel>
-                                <Select
-                                    value={moduleFilter} label="Module"
-                                    onChange={e => setModuleFilter(e.target.value)}
-                                    sx={{ borderRadius: 1.5 }}
-                                >
-                                    {ALL_MODULES.map(m => (
-                                        <MenuItem key={m} value={m}>
-                                            {m === 'All' ? 'All Modules' : m}
-                                        </MenuItem>
-                                    ))}
-                                </Select>
-                            </FormControl>
-                        </Grid>
-                        <Grid item xs={12} sm={6} md={3}>
-                            <FormControl fullWidth size="small">
-                                <InputLabel>Severity</InputLabel>
-                                <Select
-                                    value={severityFilter} label="Severity"
-                                    onChange={e => setSeverityFilter(e.target.value)}
-                                    sx={{ borderRadius: 1.5 }}
-                                >
-                                    {ALL_SEVERITIES.map(s => (
-                                        <MenuItem key={s} value={s}>
-                                            {s === 'All' ? 'All Severities' : SEVERITY_CONFIG[s]?.label ?? s}
-                                        </MenuItem>
-                                    ))}
-                                </Select>
-                            </FormControl>
-                        </Grid>
-                        <Grid item xs={12} sm={6} md={3}>
-                            <Button
-                                fullWidth size="medium" variant="outlined"
-                                onClick={clearFilters}
-                                startIcon={<RefreshOutlinedIcon />}
-                                sx={{
-                                    borderRadius: 1.5, color: '#64748B', borderColor: '#CBD5E1',
-                                    '&:hover': { borderColor: PRIMARY, color: PRIMARY, bgcolor: alpha(PRIMARY, 0.04) },
-                                }}
-                            >
-                                Clear Filters
-                            </Button>
-                        </Grid>
-                    </Grid>
-                </Paper>
+                <Box sx={{
+                    bgcolor: '#fff',
+                    border: '1px solid #EEF2F7',
+                    borderRadius: 2,
+                    mb: 2.5,
+                    overflow: 'hidden',
+                }}>
+                    {/* Panel header */}
+                    <Box sx={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                        px: 2.5, py: 1.5,
+                        borderBottom: showFilters ? '1px solid #EEF2F7' : 'none',
+                        bgcolor: alpha(PRIMARY, 0.03),
+                    }}>
+                        <Stack direction="row" alignItems="center" gap={1}>
+                            <TuneOutlinedIcon sx={{ fontSize: 16, color: PRIMARY }} />
+                            <Typography sx={{ fontWeight: 700, fontSize: '0.82rem', color: '#0F172A' }}>
+                                Filters &amp; Options
+                            </Typography>
+                        </Stack>
+                        <Tooltip title={showFilters ? 'Collapse filters' : 'Expand filters'}>
+                            <IconButton size="small" onClick={() => setShowFilters(p => !p)}
+                                sx={{ color: '#64748B' }}>
+                                <FilterAltOutlinedIcon sx={{ fontSize: 16 }} />
+                            </IconButton>
+                        </Tooltip>
+                    </Box>
+
+                    <Collapse in={showFilters}>
+                        <Box sx={{ px: 2.5, py: 2 }}>
+                            <Grid container spacing={1.5} alignItems="flex-end">
+
+                                {/* Search */}
+                                <Grid item xs={12} md={4}>
+                                    <Typography sx={FIELD_LABEL_SX}>Search</Typography>
+                                    <TextField
+                                        fullWidth size="small"
+                                        placeholder="Description, actor, module, event…"
+                                        value={search}
+                                        onChange={e => setSearch(e.target.value)}
+                                        InputProps={{
+                                            startAdornment: (
+                                                <InputAdornment position="start">
+                                                    <SearchOutlinedIcon sx={{ fontSize: 15, color: '#94A3B8' }} />
+                                                </InputAdornment>
+                                            ),
+                                        }}
+                                        sx={PILL_INPUT_SX}
+                                    />
+                                </Grid>
+
+                                {/* Date From */}
+                                <Grid item xs={6} sm={3} md={1.5}>
+                                    <Typography sx={FIELD_LABEL_SX}>From</Typography>
+                                    <TextField
+                                        fullWidth size="small" type="date"
+                                        value={dateFrom} onChange={e => setDateFrom(e.target.value)}
+                                        sx={PILL_INPUT_SX}
+                                    />
+                                </Grid>
+
+                                {/* Date To */}
+                                <Grid item xs={6} sm={3} md={1.5}>
+                                    <Typography sx={FIELD_LABEL_SX}>To</Typography>
+                                    <TextField
+                                        fullWidth size="small" type="date"
+                                        value={dateTo} onChange={e => setDateTo(e.target.value)}
+                                        sx={PILL_INPUT_SX}
+                                    />
+                                </Grid>
+
+                                {/* Event Type */}
+                                <Grid item xs={12} sm={6} md={2}>
+                                    <Typography sx={FIELD_LABEL_SX}>Event Type</Typography>
+                                    <FormControl fullWidth size="small" sx={PILL_INPUT_SX}>
+                                        <Select value={eventType} onChange={e => setEventType(e.target.value)} displayEmpty>
+                                            <MenuItem value="All"><em style={{ fontSize: '0.8rem', fontStyle: 'normal', color: '#94A3B8' }}>All Events</em></MenuItem>
+                                            {ALL_EVENTS.filter(e => e !== 'All').map(e => (
+                                                <MenuItem key={e} value={e} sx={{ fontSize: '0.8rem' }}>
+                                                    {EVENT_CONFIG[e]?.label ?? e}
+                                                </MenuItem>
+                                            ))}
+                                        </Select>
+                                    </FormControl>
+                                </Grid>
+
+                                {/* Module */}
+                                <Grid item xs={12} sm={6} md={2}>
+                                    <Typography sx={FIELD_LABEL_SX}>Module</Typography>
+                                    <FormControl fullWidth size="small" sx={PILL_INPUT_SX}>
+                                        <Select value={moduleFilter} onChange={e => setModuleFilter(e.target.value)} displayEmpty>
+                                            <MenuItem value="All"><em style={{ fontSize: '0.8rem', fontStyle: 'normal', color: '#94A3B8' }}>All Modules</em></MenuItem>
+                                            {ALL_MODULES.filter(m => m !== 'All').map(m => (
+                                                <MenuItem key={m} value={m} sx={{ fontSize: '0.8rem' }}>{m}</MenuItem>
+                                            ))}
+                                        </Select>
+                                    </FormControl>
+                                </Grid>
+
+                                {/* Severity */}
+                                <Grid item xs={12} sm={6} md={2}>
+                                    <Typography sx={FIELD_LABEL_SX}>Severity</Typography>
+                                    <FormControl fullWidth size="small" sx={PILL_INPUT_SX}>
+                                        <Select value={severityFilter} onChange={e => setSeverityFilter(e.target.value)} displayEmpty>
+                                            <MenuItem value="All"><em style={{ fontSize: '0.8rem', fontStyle: 'normal', color: '#94A3B8' }}>All Severities</em></MenuItem>
+                                            {ALL_SEVERITIES.filter(s => s !== 'All').map(s => (
+                                                <MenuItem key={s} value={s} sx={{ fontSize: '0.8rem', textTransform: 'capitalize' }}>
+                                                    {SEVERITY_CONFIG[s]?.label ?? s}
+                                                </MenuItem>
+                                            ))}
+                                        </Select>
+                                    </FormControl>
+                                </Grid>
+
+                                {/* Action buttons */}
+                                <Grid item xs={12} sm="auto">
+                                    <Stack direction="row" gap={1} sx={{ mt: { xs: 0.5, md: 0 } }}>
+                                        <Button
+                                            size="small" variant="contained"
+                                            onClick={() => {}}
+                                            sx={{
+                                                height: 36, px: 2, textTransform: 'none', fontWeight: 600,
+                                                fontSize: '0.8rem', bgcolor: PRIMARY, borderRadius: '8px',
+                                                boxShadow: `0 2px 8px ${alpha(PRIMARY, 0.35)}`,
+                                                '&:hover': { bgcolor: alpha(PRIMARY, 0.85), boxShadow: `0 4px 14px ${alpha(PRIMARY, 0.4)}` },
+                                            }}
+                                        >
+                                            Apply
+                                        </Button>
+                                        <Button
+                                            size="small" variant="outlined"
+                                            onClick={clearFilters}
+                                            sx={{
+                                                height: 36, px: 1.5, textTransform: 'none', fontWeight: 600,
+                                                fontSize: '0.8rem', borderRadius: '8px',
+                                                borderColor: '#CBD5E1', color: '#64748B',
+                                                '&:hover': { borderColor: PRIMARY, color: PRIMARY, bgcolor: alpha(PRIMARY, 0.04) },
+                                            }}
+                                        >
+                                            Clear
+                                        </Button>
+                                    </Stack>
+                                </Grid>
+
+                            </Grid>
+                        </Box>
+                    </Collapse>
+                </Box>
 
                 {/* ── Result count + Export ─────────────────────────────── */}
-                <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1.5 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
                     <Typography sx={{ fontSize: '0.8rem', color: '#64748B' }}>
-                        Showing <Box component="span" sx={{ fontWeight: 700, color: '#0F172A' }}>{filtered.length}</Box> of <Box component="span" sx={{ fontWeight: 700, color: '#0F172A' }}>{auditTrailsMock.length}</Box> records
+                        Showing{' '}
+                        <Box component="span" sx={{ fontWeight: 700, color: '#0F172A' }}>{filtered.length}</Box>
+                        {' '}of{' '}
+                        <Box component="span" sx={{ fontWeight: 700, color: '#0F172A' }}>{auditTrailsMock.length}</Box>
+                        {' '}records
                     </Typography>
-                    <Stack direction="row" gap={1}>
-                        <Button
-                            size="small" variant="outlined"
-                            startIcon={<PictureAsPdfOutlinedIcon />}
-                            onClick={() => alert('Export PDF — connect to API')}
-                            sx={{ borderRadius: 1.5, fontSize: '0.75rem', color: '#DC2626', borderColor: '#FCA5A5', '&:hover': { bgcolor: '#FEF2F2', borderColor: '#DC2626' } }}
-                        >
-                            PDF
-                        </Button>
-                        <Button
-                            size="small" variant="outlined"
-                            startIcon={<TableChartOutlinedIcon />}
-                            onClick={() => alert('Export Excel — connect to API')}
-                            sx={{ borderRadius: 1.5, fontSize: '0.75rem', color: '#15803D', borderColor: '#86EFAC', '&:hover': { bgcolor: '#F0FDF4', borderColor: '#15803D' } }}
-                        >
-                            Excel
-                        </Button>
-                        <Button
-                            size="small" variant="outlined"
-                            startIcon={<DataObjectOutlinedIcon />}
-                            onClick={() => alert('Export CSV — connect to API')}
-                            sx={{ borderRadius: 1.5, fontSize: '0.75rem', color: '#1D4ED8', borderColor: '#93C5FD', '&:hover': { bgcolor: '#EFF6FF', borderColor: '#1D4ED8' } }}
-                        >
-                            CSV
-                        </Button>
+
+                    <Stack direction="row" alignItems="center" gap={1}>
+                        <Typography sx={{ fontSize: '0.75rem', color: '#94A3B8', mr: 0.5 }}>Export as:</Typography>
+
+                        <Tooltip title="Export PDF">
+                            <Button
+                                size="small" variant="outlined"
+                                startIcon={<PictureAsPdfOutlinedIcon sx={{ fontSize: '14px !important' }} />}
+                                onClick={() => alert('Export PDF — connect to API')}
+                                sx={{
+                                    height: 32, px: 1.5, borderRadius: '8px', fontSize: '0.75rem', fontWeight: 600,
+                                    textTransform: 'none', borderColor: '#E2E8F0', color: '#DC2626',
+                                    '&:hover': { borderColor: '#DC2626', bgcolor: alpha('#DC2626', 0.04) },
+                                }}
+                            >
+                                PDF
+                            </Button>
+                        </Tooltip>
+
+                        <Tooltip title="Export Excel">
+                            <Button
+                                size="small" variant="outlined"
+                                startIcon={<TableChartOutlinedIcon sx={{ fontSize: '14px !important' }} />}
+                                onClick={() => alert('Export Excel — connect to API')}
+                                sx={{
+                                    height: 32, px: 1.5, borderRadius: '8px', fontSize: '0.75rem', fontWeight: 600,
+                                    textTransform: 'none', borderColor: '#E2E8F0', color: '#15803D',
+                                    '&:hover': { borderColor: '#15803D', bgcolor: alpha('#15803D', 0.04) },
+                                }}
+                            >
+                                Excel
+                            </Button>
+                        </Tooltip>
+
+                        <Tooltip title="Export CSV">
+                            <Button
+                                size="small" variant="outlined"
+                                startIcon={<DataObjectOutlinedIcon sx={{ fontSize: '14px !important' }} />}
+                                onClick={() => alert('Export CSV — connect to API')}
+                                sx={{
+                                    height: 32, px: 1.5, borderRadius: '8px', fontSize: '0.75rem', fontWeight: 600,
+                                    textTransform: 'none', borderColor: '#E2E8F0', color: '#0369A1',
+                                    '&:hover': { borderColor: '#0369A1', bgcolor: alpha('#0369A1', 0.04) },
+                                }}
+                            >
+                                CSV
+                            </Button>
+                        </Tooltip>
+
+                        <Box sx={{ width: 1, height: 24, bgcolor: '#E2E8F0', mx: 0.5 }} />
+
+                        <Tooltip title="Refresh data">
+                            <IconButton size="small"
+                                sx={{
+                                    width: 32, height: 32, border: '1px solid #E2E8F0', borderRadius: '8px',
+                                    color: '#64748B',
+                                    '&:hover': { borderColor: PRIMARY, color: PRIMARY, bgcolor: alpha(PRIMARY, 0.05) },
+                                }}
+                                onClick={clearFilters}
+                            >
+                                <RefreshOutlinedIcon sx={{ fontSize: 16 }} />
+                            </IconButton>
+                        </Tooltip>
                     </Stack>
-                </Stack>
+                </Box>
 
                 {/* ── Data Table ───────────────────────────────────────── */}
                 <ReportDataTable
