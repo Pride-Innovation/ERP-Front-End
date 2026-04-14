@@ -11,7 +11,6 @@ import {
     Typography,
     Button,
     Stack,
-    Divider,
     alpha,
     useTheme,
     Paper,
@@ -163,7 +162,7 @@ const Departments = () => {
                     <Fade in={!loading}>
                         <Grid container spacing={3}>
                             {filteredDepartments.map((department) => (
-                                <Grid item xs={12} sm={6} md={4} lg={4} key={department.id}>
+                                <Grid item xs={12} sm={6} md={6} lg={6} key={department.id}>
                                     <DepartmentDetails
                                         department={department}
                                         deleteDepartment={deleteDepartment}

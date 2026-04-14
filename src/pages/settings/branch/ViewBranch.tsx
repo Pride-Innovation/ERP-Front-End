@@ -11,6 +11,7 @@ import {
     Chip,
     IconButton
 } from '@mui/material';
+import { useState } from 'react';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
 import CameraOutdoorOutlinedIcon from '@mui/icons-material/CameraOutdoorOutlined';
@@ -20,11 +21,21 @@ import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
 import SupervisorAccountOutlinedIcon from '@mui/icons-material/SupervisorAccountOutlined';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import AccountBalanceOutlinedIcon from '@mui/icons-material/AccountBalanceOutlined';
+// import ContentCopyOutlinedIcon from '@mui/icons-material/ContentCopyOutlined';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import DoneOutlinedIcon from '@mui/icons-material/DoneOutlined';
 
 import { IBranchDetails } from './interface';
 
 const ViewBranch = ({ branch, deleteBranch, updateBranch }: IBranchDetails) => {
     const theme = useTheme();
+    const [copiedField, setCopiedField] = useState<string | null>(null);
+
+    const handleCopy = (value: string, field: string) => {
+        navigator.clipboard.writeText(value);
+        setCopiedField(field);
+        setTimeout(() => setCopiedField(null), 1500);
+    };
 
     // Management team definitions
     const managementTeam = [
@@ -137,10 +148,30 @@ const ViewBranch = ({ branch, deleteBranch, updateBranch }: IBranchDetails) => {
                             fontSize="small"
                             sx={{ color: alpha(theme.palette.secondary.main, 0.8), mt: 0.25 }}
                         />
-                        <Stack>
+                        <Stack sx={{ flex: 1 }}>
                             <Typography variant="caption" color="text.secondary">Email</Typography>
                             <Typography variant="body2">{branch.email || 'Not specified'}</Typography>
                         </Stack>
+                        {branch.email && (
+                            <Tooltip title={copiedField === 'email' ? 'Copied!' : 'Copy email'}>
+                                <IconButton
+                                    size="small"
+                                    onClick={() => handleCopy(branch.email!, 'email')}
+                                    sx={{
+                                        color: copiedField === 'email'
+                                            ? '#08796C'
+                                            : alpha(theme.palette.text.secondary, 0.5),
+                                        '&:hover': { color: '#08796C' },
+                                        transition: 'color 0.2s'
+                                    }}
+                                >
+                                    {copiedField === 'email'
+                                        ? <DoneOutlinedIcon sx={{ fontSize: 16 }} />
+                                        : <ContentCopyIcon sx={{ fontSize: 16 }} />
+                                    }
+                                </IconButton>
+                            </Tooltip>
+                        )}
                     </Box>
 
                     <Box>
@@ -148,10 +179,30 @@ const ViewBranch = ({ branch, deleteBranch, updateBranch }: IBranchDetails) => {
                             fontSize="small"
                             sx={{ color: alpha(theme.palette.secondary.main, 0.8), mt: 0.25 }}
                         />
-                        <Stack>
+                        <Stack sx={{ flex: 1 }}>
                             <Typography variant="caption" color="text.secondary">Phone</Typography>
                             <Typography variant="body2">{branch.telephone || 'Not specified'}</Typography>
                         </Stack>
+                        {branch.telephone && (
+                            <Tooltip title={copiedField === 'phone' ? 'Copied!' : 'Copy phone'}>
+                                <IconButton
+                                    size="small"
+                                    onClick={() => handleCopy(branch.telephone!, 'phone')}
+                                    sx={{
+                                        color: copiedField === 'phone'
+                                            ? '#08796C'
+                                            : alpha(theme.palette.text.secondary, 0.5),
+                                        '&:hover': { color: '#08796C' },
+                                        transition: 'color 0.2s'
+                                    }}
+                                >
+                                    {copiedField === 'phone'
+                                        ? <DoneOutlinedIcon sx={{ fontSize: 16 }} />
+                                        : <ContentCopyIcon sx={{ fontSize: 16 }} />
+                                    }
+                                </IconButton>
+                            </Tooltip>
+                        )}
                     </Box>
 
                     <Box>

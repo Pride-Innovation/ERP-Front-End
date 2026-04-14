@@ -24,6 +24,9 @@ import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import GroupsOutlinedIcon from '@mui/icons-material/GroupsOutlined';
+import ContentCopyOutlinedIcon from '@mui/icons-material/ContentCopyOutlined';
+import DoneOutlinedIcon from '@mui/icons-material/DoneOutlined';
+import { useState } from 'react';
 import { IDepartmentDetails } from './interface';
 
 const DepartmentDetails = ({
@@ -32,6 +35,13 @@ const DepartmentDetails = ({
     updateDepartment
 }: IDepartmentDetails) => {
     const theme = useTheme();
+    const [copied, setCopied] = useState(false);
+
+    const handleCopy = (value: string) => {
+        navigator.clipboard.writeText(value);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1500);
+    };
 
     return (
         <Card
@@ -169,6 +179,24 @@ const DepartmentDetails = ({
                                             {department.managersGroupEmail}
                                         </Typography>
                                     </Box>
+                                    <Tooltip title={copied ? 'Copied!' : 'Copy email'}>
+                                        <IconButton
+                                            size="small"
+                                            onClick={() => handleCopy(department.managersGroupEmail!)}
+                                            sx={{
+                                                color: copied
+                                                    ? '#08796C'
+                                                    : alpha(theme.palette.text.secondary, 0.5),
+                                                '&:hover': { color: '#08796C' },
+                                                transition: 'color 0.2s'
+                                            }}
+                                        >
+                                            {copied
+                                                ? <DoneOutlinedIcon sx={{ fontSize: 16 }} />
+                                                : <ContentCopyOutlinedIcon sx={{ fontSize: 16 }} />
+                                            }
+                                        </IconButton>
+                                    </Tooltip>
                                 </Box>
                             )}
                         </Stack>

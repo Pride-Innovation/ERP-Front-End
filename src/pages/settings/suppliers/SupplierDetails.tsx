@@ -27,6 +27,9 @@ import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined
 import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 import CategoryOutlinedIcon from '@mui/icons-material/CategoryOutlined';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
+import ContentCopyOutlinedIcon from '@mui/icons-material/ContentCopyOutlined';
+import DoneOutlinedIcon from '@mui/icons-material/DoneOutlined';
+import { useState } from 'react';
 import { ISupplierDetails } from './interface';
 
 const SupplierDetails = ({
@@ -35,6 +38,13 @@ const SupplierDetails = ({
     updateSupplier
 }: ISupplierDetails) => {
     const theme = useTheme();
+    const [copiedField, setCopiedField] = useState<string | null>(null);
+
+    const handleCopy = (value: string, field: string) => {
+        navigator.clipboard.writeText(value);
+        setCopiedField(field);
+        setTimeout(() => setCopiedField(null), 1500);
+    };
 
     return (
         <Card
@@ -119,9 +129,29 @@ const SupplierDetails = ({
                                     fontSize="small"
                                     sx={{ color: alpha(theme.palette.secondary.main, 0.8), mt: 0.25 }}
                                 />
-                                <Typography variant="body2" sx={{ fontWeight: 500, wordBreak: 'break-word' }}>
+                                <Typography variant="body2" sx={{ fontWeight: 500, wordBreak: 'break-word', flex: 1 }}>
                                     {supplier.email}
                                 </Typography>
+                                {supplier.email && (
+                                    <Tooltip title={copiedField === 'email' ? 'Copied!' : 'Copy email'}>
+                                        <IconButton
+                                            size="small"
+                                            onClick={() => handleCopy(supplier.email!, 'email')}
+                                            sx={{
+                                                color: copiedField === 'email'
+                                                    ? '#08796C'
+                                                    : alpha(theme.palette.text.secondary, 0.5),
+                                                '&:hover': { color: '#08796C' },
+                                                transition: 'color 0.2s'
+                                            }}
+                                        >
+                                            {copiedField === 'email'
+                                                ? <DoneOutlinedIcon sx={{ fontSize: 16 }} />
+                                                : <ContentCopyOutlinedIcon sx={{ fontSize: 16 }} />
+                                            }
+                                        </IconButton>
+                                    </Tooltip>
+                                )}
                             </Box>
 
                             <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
@@ -129,9 +159,29 @@ const SupplierDetails = ({
                                     fontSize="small"
                                     sx={{ color: alpha(theme.palette.secondary.main, 0.8), mt: 0.25 }}
                                 />
-                                <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                                <Typography variant="body2" sx={{ fontWeight: 500, flex: 1 }}>
                                     {supplier.telephone}
                                 </Typography>
+                                {supplier.telephone && (
+                                    <Tooltip title={copiedField === 'phone' ? 'Copied!' : 'Copy phone'}>
+                                        <IconButton
+                                            size="small"
+                                            onClick={() => handleCopy(supplier.telephone!, 'phone')}
+                                            sx={{
+                                                color: copiedField === 'phone'
+                                                    ? '#08796C'
+                                                    : alpha(theme.palette.text.secondary, 0.5),
+                                                '&:hover': { color: '#08796C' },
+                                                transition: 'color 0.2s'
+                                            }}
+                                        >
+                                            {copiedField === 'phone'
+                                                ? <DoneOutlinedIcon sx={{ fontSize: 16 }} />
+                                                : <ContentCopyOutlinedIcon sx={{ fontSize: 16 }} />
+                                            }
+                                        </IconButton>
+                                    </Tooltip>
+                                )}
                             </Box>
 
                             {supplier.address && (

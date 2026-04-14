@@ -201,7 +201,7 @@ const Suppliers = () => {
                     <Fade in={!loading}>
                         <Grid container spacing={3}>
                             {filteredSuppliers.map((supplier) => (
-                                <Grid item xs={12} sm={6} md={4} lg={4} key={supplier.id}>
+                                <Grid item xs={12} sm={6} md={6} lg={6} key={supplier.id}>
                                     <SupplierDetails
                                         supplier={supplier}
                                         deleteSupplier={deleteSupplier}
