@@ -7,21 +7,19 @@ Managing Director
 
 import {
   Box,
-  Button,
-  Chip,
+  Tab,
+  Tabs,
   Typography,
   Stack,
   alpha,
-  useTheme,
 } from '@mui/material';
 import InventoryOutlinedIcon from '@mui/icons-material/InventoryOutlined';
 import {
   Outlet,
   useLocation,
   useNavigate,
-  useParams
 } from 'react-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { INavigation } from './interface';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
@@ -31,13 +29,10 @@ import AssetUtills from './Utills';
 const PRIMARY_COLOR = '#08796C';
 
 const AssetsManagement = () => {
-  const [path, setPath] = useState<string>("");
   const [navigations, setNavigations] = useState<INavigation[]>([] as INavigation[]);
-  const { id } = useParams<{ id: string }>();
   const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore);
   const { pathname } = useLocation();
   const { determineAssetTypeByAssetName } = AssetUtills();
-  const theme = useTheme();
 
   const navigate = useNavigate();
   const { fetchAllAssetTypes } = AssetTypeUtills();
@@ -45,10 +40,6 @@ const AssetsManagement = () => {
   useEffect(() => {
     fetchAllAssetTypes();
   }, []);
-
-  useEffect(() => {
-    setPath(pathname);
-  }, [pathname]);
 
   const determineNavigation = () => {
     const data = assetTypes
@@ -64,112 +55,90 @@ const AssetsManagement = () => {
     }
   }, [assetTypes]);
 
-  const determineActivePath = (item: INavigation): boolean => {
-    if (path === `${item.otherRoutes[1]}/${id}`) return true;
-    if (path === `${item.path}/${id}`) return true;
-    return [item.path, ...item.otherRoutes].includes(path);
-  };
+  const activeTabIndex = useMemo(() => {
+    const idx = navigations.findIndex(nav => pathname.startsWith(nav.path));
+    return idx >= 0 ? idx : false;
+  }, [pathname, navigations]);
+
+  const activeNavLabel = navigations.find(nav => pathname.startsWith(nav.path))?.text;
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', p: 3 }}>
-      {/* Branded Asset Management Header + Navigation */}
+    <Box sx={{ minHeight: '100vh', bgcolor: '#F1F5FB', pb: 4 }}>
+
+      {/* ── Gradient Header ───────────────────────────────────── */}
       <Box
         sx={{
-          mb: 2.5,
-          bgcolor: '#fff',
-          borderRadius: 2,
-          border: `1px solid ${alpha('#000', 0.07)}`,
-          boxShadow: '0 1px 4px rgba(0,0,0,0.05), 0 4px 16px rgba(0,0,0,0.03)',
+          background: `linear-gradient(135deg, ${PRIMARY_COLOR} 0%, #065E53 60%, #044a42 100%)`,
+          px: { xs: 2, md: 4 },
+          pt: 3,
+          pb: 0,
+          position: 'relative',
           overflow: 'hidden',
         }}
       >
-        {/* Branding row */}
-        <Box
-          sx={{
-            px: 2.5,
-            py: 2,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            borderBottom: `1px solid ${alpha(PRIMARY_COLOR, 0.08)}`,
-          }}
-        >
-          <Stack direction="row" spacing={1.5} alignItems="center">
-            <Box
-              sx={{
-                width: 42,
-                height: 42,
-                borderRadius: 2,
-                bgcolor: alpha(PRIMARY_COLOR, 0.1),
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-              }}
-            >
-              <InventoryOutlinedIcon sx={{ color: PRIMARY_COLOR, fontSize: 22 }} />
-            </Box>
-            <Box>
-              <Typography variant="h6" fontWeight={700} sx={{ color: PRIMARY_COLOR, lineHeight: 1.2 }}>
-                Asset Management
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                Manage and track organizational assets
-              </Typography>
-            </Box>
-          </Stack>
+        {/* Decorative background circles */}
+        <Box sx={{ position: 'absolute', top: -50, right: -50, width: 200, height: 200, borderRadius: '50%', bgcolor: alpha('#fff', 0.04), pointerEvents: 'none' }} />
+        <Box sx={{ position: 'absolute', bottom: -50, right: 140, width: 120, height: 120, borderRadius: '50%', bgcolor: alpha('#fff', 0.03), pointerEvents: 'none' }} />
 
-          {navigations.length > 0 && (
-            <Chip
-              label={navigations.find(item => determineActivePath(item))?.text || 'Assets'}
-              size="small"
-              sx={{
-                bgcolor: alpha(PRIMARY_COLOR, 0.08),
-                color: PRIMARY_COLOR,
-                fontWeight: 600,
-                fontSize: '0.75rem',
-                height: 28,
-                border: `1px solid ${alpha(PRIMARY_COLOR, 0.2)}`,
-              }}
-            />
-          )}
-        </Box>
+        {/* Title row */}
+        <Stack direction="row" alignItems="center" gap={2} sx={{ mb: 2.5 }}>
+          <Box sx={{
+            width: 46, height: 46, borderRadius: 2,
+            bgcolor: alpha('#fff', 0.15),
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            backdropFilter: 'blur(4px)',
+            flexShrink: 0,
+          }}>
+            <InventoryOutlinedIcon sx={{ color: '#fff', fontSize: 24 }} />
+          </Box>
+          <Box>
+            <Typography variant="h5" sx={{ color: '#fff', fontWeight: 700, lineHeight: 1.2 }}>
+              Asset Management
+            </Typography>
+            <Typography variant="body2" sx={{ color: alpha('#fff', 0.70), mt: 0.25 }}>
+              {activeNavLabel ? `${activeNavLabel} · ` : ''}Manage and track organizational assets
+            </Typography>
+          </Box>
+        </Stack>
 
-        {/* Navigation pills row */}
-        <Box sx={{ px: 1.5, py: 1, bgcolor: alpha(PRIMARY_COLOR, 0.015) }}>
-          <Stack direction="row" spacing={0.5} sx={{ flexWrap: 'wrap', gap: 0.5 }}>
-            {navigations.map(item => {
-              const isActive = determineActivePath(item);
-              return (
-                <Button
-                  startIcon={item.icon}
-                  onClick={() => navigate(item.path)}
-                  key={item.id}
-                  variant={isActive ? "contained" : "text"}
-                  sx={{
-                    borderRadius: 1.5,
-                    px: 2,
-                    py: 0.8,
-                    fontSize: '0.8125rem',
-                    fontWeight: isActive ? 700 : 500,
-                    textTransform: 'none',
-                    transition: 'all 0.2s ease',
-                    boxShadow: isActive ? `0 2px 8px ${alpha(theme.palette.primary.main, 0.35)}` : 'none',
-                    '&:hover': {
-                      boxShadow: isActive ? `0 4px 12px ${alpha(theme.palette.primary.main, 0.4)}` : 'none',
-                      transform: isActive ? 'translateY(-1px)' : 'none',
-                    },
-                  }}
-                >
-                  {item.text}
-                </Button>
-              );
-            })}
-          </Stack>
-        </Box>
+        {/* Navigation Tabs */}
+        {navigations.length > 0 && (
+          <Tabs
+            value={activeTabIndex}
+            onChange={(_, idx) => navigate(navigations[idx].path)}
+            TabIndicatorProps={{ style: { backgroundColor: '#fff', height: 3, borderRadius: '2px 2px 0 0' } }}
+            sx={{
+              minHeight: 44,
+              '& .MuiTab-root': {
+                color: alpha('#fff', 0.62),
+                fontWeight: 500,
+                fontSize: '0.82rem',
+                minHeight: 44,
+                textTransform: 'none',
+                px: 1.75,
+                py: 0,
+                gap: 0.75,
+                '&.Mui-selected': { color: '#fff', fontWeight: 700 },
+                '&:hover': { color: alpha('#fff', 0.9) },
+              },
+            }}
+          >
+            {navigations.map(nav => (
+              <Tab
+                key={nav.id}
+                label={nav.text}
+                icon={nav.icon}
+                iconPosition="start"
+              />
+            ))}
+          </Tabs>
+        )}
       </Box>
 
-      <Outlet />
+      {/* ── Page content (sub-route outlet) ───────────────────── */}
+      <Box sx={{ px: { xs: 1, md: 3 }, pt: 3 }}>
+        <Outlet />
+      </Box>
     </Box>
   );
 };
