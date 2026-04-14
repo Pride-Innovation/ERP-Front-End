@@ -8,7 +8,7 @@ Managing Director
 import { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-    alpha, Avatar, Box, Button, Chip, IconButton, InputAdornment,
+    alpha, Avatar, Box, Button, Card, Chip, CircularProgress, IconButton, InputAdornment,
     Paper, Stack, Tab, Table, TableBody, TableCell, TableContainer,
     TableHead, TablePagination, TableRow, Tabs, TextField, Tooltip, Typography,
 } from '@mui/material';
@@ -126,84 +126,131 @@ const AllMovements = () => {
         }
     };
 
-    return (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5, width: '100%' }}>
+    const todayLabel = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 
-            {/* ── Header ──────────────────────────────────────────────────── */}
-            <Paper elevation={0} sx={{ borderRadius: 3, border: `1px solid ${alpha(PRIMARY, 0.14)}`, overflow: 'hidden' }}>
-                <Box sx={{ height: 4, background: `linear-gradient(90deg, ${PRIMARY} 0%, ${SECONDARY} 100%)` }} />
-                <Box sx={{ px: { xs: 2.5, md: 4 }, py: 2.5, display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { sm: 'center' }, justifyContent: 'space-between', gap: 2 }}>
-                    <Stack direction="row" spacing={2} alignItems="center">
-                        <Box sx={{ width: 44, height: 44, borderRadius: 2, background: `linear-gradient(135deg, ${PRIMARY} 0%, #065E54 100%)`, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 3px 10px ${alpha(PRIMARY, 0.35)}` }}>
-                            <SwapHorizOutlinedIcon sx={{ color: '#fff', fontSize: 22 }} />
+    return (
+        <Box sx={{ minHeight: '100vh', width: '100%', bgcolor: '#F1F5FB', pb: 4 }}>
+
+            {/* Gradient Header */}
+            <Box sx={{
+                background: 'linear-gradient(135deg, #08796C 0%, #065E53 60%, #044a42 100%)',
+                px: { xs: 2, md: 4 },
+                pt: 3,
+                pb: 3,
+                position: 'relative',
+                overflow: 'hidden',
+            }}>
+                {/* Decorative circles */}
+                <Box sx={{ position: 'absolute', top: -50, right: -50, width: 200, height: 200, borderRadius: '50%', bgcolor: 'rgba(255,255,255,0.04)', pointerEvents: 'none' }} />
+                <Box sx={{ position: 'absolute', bottom: -50, right: 140, width: 120, height: 120, borderRadius: '50%', bgcolor: 'rgba(255,255,255,0.03)', pointerEvents: 'none' }} />
+
+                <Stack direction="row" alignItems="flex-start" justifyContent="space-between" gap={2}>
+                    <Stack direction="row" alignItems="center" gap={2}>
+                        <Box sx={{ width: 46, height: 46, borderRadius: 2, bgcolor: 'rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(4px)', flexShrink: 0 }}>
+                            <SwapHorizOutlinedIcon sx={{ color: '#fff', fontSize: 24 }} />
                         </Box>
                         <Box>
-                            <Typography variant="h5" sx={{ fontWeight: 800, lineHeight: 1.2 }}>All Movements</Typography>
-                            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                                {count} total movement{count !== 1 ? 's' : ''}
+                            <Typography variant="h5" sx={{ color: '#fff', fontWeight: 700, lineHeight: 1.2 }}>
+                                All Movements
+                            </Typography>
+                            <Typography variant="body2" sx={{ color: alpha('#fff', 0.70), mt: 0.25 }}>
+                                Track and manage asset movement requests
                             </Typography>
                         </Box>
                     </Stack>
-                    <Stack direction="row" spacing={1.25}>
-                        <IconButton size="small" onClick={() => fetchAllMovements({ pageSize: 50 })} sx={{ border: `1px solid ${alpha('#000', 0.12)}`, borderRadius: 1.5 }}>
-                            <RefreshIcon sx={{ fontSize: 18 }} />
-                        </IconButton>
+                    <Box sx={{ bgcolor: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.18)', borderRadius: 2, px: 2.5, py: 1.25, textAlign: 'right', flexShrink: 0, display: { xs: 'none', sm: 'block' } }}>
+                        <Typography variant="h4" sx={{ color: '#fff', fontWeight: 800, lineHeight: 1 }}>
+                            {(count ?? 0).toLocaleString()}
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)', fontWeight: 500, display: 'block', mt: 0.25 }}>
+                            total movements
+                        </Typography>
+                        <Typography sx={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.68rem', display: 'block', mt: 0.5 }}>
+                            {todayLabel}
+                        </Typography>
+                    </Box>
+                </Stack>
+            </Box>
+
+            {/* Page content */}
+            <Box sx={{ px: { xs: 1, md: 3 }, pt: 3, width: '100%', maxWidth: '1500px' }}>
+            <Card sx={{
+                width: '100%',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.07), 0 4px 24px rgba(0,0,0,0.05)',
+                borderRadius: '14px',
+                overflow: 'hidden',
+                border: 'none',
+            }}>
+                {/* Toolbar */}
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 3, pt: 2.5, pb: 1.5, flexWrap: 'wrap', gap: 1.5, bgcolor: '#fff', borderBottom: '1px solid #F1F5F9' }}>
+                    <Stack direction="row" alignItems="center" gap={1.5}>
+                        <Box sx={{ width: 36, height: 36, borderRadius: 1.5, bgcolor: alpha(PRIMARY, 0.08), display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            <SwapHorizOutlinedIcon sx={{ fontSize: 18, color: PRIMARY }} />
+                        </Box>
+                        <Box>
+                            <Typography sx={{ fontWeight: 700, fontSize: '0.9rem', color: '#0F172A', lineHeight: 1.2 }}>All Movements</Typography>
+                            <Typography sx={{ fontSize: '0.72rem', color: '#94A3B8' }}>{count} total movement{count !== 1 ? 's' : ''}</Typography>
+                        </Box>
+                    </Stack>
+                    <Stack direction="row" gap={1} alignItems="center">
+                        <Tooltip title="Refresh" arrow>
+                            <IconButton onClick={() => fetchAllMovements({ pageSize: 50 })} sx={{ width: 38, height: 38, borderRadius: 1.5, border: '1px solid #E2E8F0', color: '#64748B', '&:hover': { borderColor: PRIMARY, color: PRIMARY, bgcolor: alpha(PRIMARY, 0.04) }, transition: 'all 0.2s' }}>
+                                <RefreshIcon sx={{ fontSize: 18 }} />
+                            </IconButton>
+                        </Tooltip>
                         <Button
                             variant="contained"
                             startIcon={<AddIcon />}
                             onClick={() => navigate(`${ROUTES.MOVEMENT}/create`)}
-                            sx={{ borderRadius: 2, fontWeight: 700, bgcolor: PRIMARY, boxShadow: `0 3px 10px ${alpha(PRIMARY, 0.35)}`, '&:hover': { bgcolor: '#065E54' }, fontSize: '0.78rem' }}
+                            sx={{ height: 38, px: 2.5, borderRadius: '8px', bgcolor: PRIMARY, color: '#fff', textTransform: 'none', fontWeight: 600, fontSize: '0.85rem', boxShadow: `0 2px 8px ${alpha(PRIMARY, 0.30)}`, '&:hover': { bgcolor: '#065E54', boxShadow: `0 4px 14px ${alpha(PRIMARY, 0.40)}`, transform: 'translateY(-1px)' }, transition: 'all 0.2s' }}
                         >
                             New Movement
                         </Button>
                     </Stack>
                 </Box>
-            </Paper>
 
-            {/* ── Filters bar ─────────────────────────────────────────────── */}
-            <Paper elevation={0} sx={{ borderRadius: 3, border: `1px solid ${alpha('#000', 0.07)}` }}>
-                {/* Search */}
-                <Box sx={{ px: 2.5, pt: 2, pb: 0 }}>
-                    <TextField
-                        fullWidth
-                        size="small"
-                        placeholder="Search by reference, officer, or destination..."
-                        value={search}
-                        onChange={e => { setSearch(e.target.value); setPage(0); }}
-                        InputProps={{
-                            startAdornment: (
-                                <InputAdornment position="start">
-                                    <SearchIcon sx={{ fontSize: 18, color: 'text.disabled' }} />
-                                </InputAdornment>
-                            ),
-                            sx: { borderRadius: 2 },
+                {/* Filters */}
+                <Box sx={{ bgcolor: '#fff', borderBottom: '1px solid #EEF2F7' }}>
+                    <Box sx={{ px: 3, pt: 2, pb: 0 }}>
+                        <TextField
+                            fullWidth
+                            size="small"
+                            placeholder="Search by reference, officer, or destination..."
+                            value={search}
+                            onChange={e => { setSearch(e.target.value); setPage(0); }}
+                            InputProps={{
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <SearchIcon sx={{ fontSize: 18, color: '#94A3B8' }} />
+                                    </InputAdornment>
+                                ),
+                                sx: { borderRadius: 1.5 },
+                            }}
+                        />
+                    </Box>
+                    <Tabs
+                        value={statusTab}
+                        onChange={(_, v) => { setStatusTab(v); setPage(0); }}
+                        variant="scrollable"
+                        scrollButtons="auto"
+                        sx={{
+                            px: 1.5,
+                            '& .MuiTab-root': { fontSize: '0.75rem', fontWeight: 600, minWidth: 80, textTransform: 'none' },
+                            '& .MuiTabs-indicator': { bgcolor: PRIMARY },
+                            '& .MuiTab-root.Mui-selected': { color: PRIMARY },
                         }}
-                    />
+                    >
+                        {STATUS_TABS.map(t => (
+                            <Tab key={t.value} value={t.value} label={t.label} />
+                        ))}
+                    </Tabs>
                 </Box>
-                {/* Status tabs */}
-                <Tabs
-                    value={statusTab}
-                    onChange={(_, v) => { setStatusTab(v); setPage(0); }}
-                    variant="scrollable"
-                    scrollButtons="auto"
-                    sx={{
-                        px: 1.5,
-                        '& .MuiTab-root': { fontSize: '0.75rem', fontWeight: 600, minWidth: 80, textTransform: 'none' },
-                        '& .MuiTabs-indicator': { bgcolor: PRIMARY },
-                    }}
-                >
-                    {STATUS_TABS.map(t => (
-                        <Tab key={t.value} value={t.value} label={t.label} />
-                    ))}
-                </Tabs>
-            </Paper>
 
-            {/* ── Table ────────────────────────────────────────────────────── */}
-            <Paper elevation={0} sx={{ borderRadius: 3, border: `1px solid ${alpha('#000', 0.07)}`, overflow: 'hidden' }}>
-                <TableContainer>
-                    <Table size="small">
+                {/* Table */}
+                <TableContainer component={Paper} elevation={0} sx={{ borderRadius: 0 }}>
+                    <Table stickyHeader size="small">
                         <TableHead>
-                            <TableRow sx={{ '& .MuiTableCell-head': { bgcolor: alpha('#000', 0.025), fontWeight: 700, fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'text.secondary', py: 1.25, borderBottom: `1px solid ${alpha('#000', 0.07)}` } }}>
+                            <TableRow sx={{ '& .MuiTableCell-head': { background: 'linear-gradient(120deg, #08796C 0%, #065E53 100%)', color: 'rgba(255,255,255,0.92)', fontWeight: 700, fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.07em', whiteSpace: 'nowrap', borderBottom: '2px solid rgba(255,255,255,0.15)', py: 1.5, px: 2.5 } }}>
                                 <TableCell>Reference</TableCell>
                                 <TableCell>Officer</TableCell>
                                 <TableCell>Destination</TableCell>
@@ -216,14 +263,14 @@ const AllMovements = () => {
                         <TableBody>
                             {loading ? (
                                 <TableRow>
-                                    <TableCell colSpan={7} sx={{ textAlign: 'center', py: 5, color: 'text.disabled' }}>
-                                        Loading movements...
+                                    <TableCell colSpan={7} sx={{ textAlign: 'center', py: 5, border: 'none' }}>
+                                        <CircularProgress size={32} sx={{ color: PRIMARY }} />
                                     </TableCell>
                                 </TableRow>
                             ) : paginated.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={7} sx={{ textAlign: 'center', py: 6 }}>
-                                        <SwapHorizOutlinedIcon sx={{ fontSize: 36, color: 'text.disabled', mb: 1 }} />
+                                    <TableCell colSpan={7} sx={{ textAlign: 'center', py: 6, border: 'none' }}>
+                                        <SwapHorizOutlinedIcon sx={{ fontSize: 36, color: 'text.disabled', mb: 1, display: 'block', mx: 'auto' }} />
                                         <Typography variant="body2" color="text.disabled">No movements found.</Typography>
                                     </TableCell>
                                 </TableRow>
@@ -243,12 +290,12 @@ const AllMovements = () => {
                                     <TableRow
                                         key={mov.id}
                                         sx={{
-                                            '&:hover': { bgcolor: alpha(PRIMARY, 0.025) },
-                                            '& .MuiTableCell-root': {
-                                                py: 1.25, fontSize: '0.78rem',
-                                                borderBottom: idx === paginated.length - 1 ? 'none' : `1px solid ${alpha('#000', 0.05)}`,
-                                            },
-                                            bgcolor: mov.status?.name === 'rejected' ? alpha('#DC2626', 0.018) : 'transparent',
+                                            bgcolor: idx % 2 === 1 ? '#FAFBFC' : '#fff',
+                                            borderBottom: '1px solid #EEF2F7',
+                                            transition: 'background-color 0.12s, box-shadow 0.12s',
+                                            '&:hover': { bgcolor: '#F0FDF9', boxShadow: `inset 3px 0 0 ${PRIMARY}` },
+                                            '&:last-child td': { borderBottom: 'none' },
+                                            '& .MuiTableCell-root': { py: 1.5, px: 2.5, fontSize: '0.78rem', color: '#0F172A', borderBottom: 'none' },
                                         }}
                                     >
                                         <TableCell>
@@ -355,24 +402,27 @@ const AllMovements = () => {
                     </Table>
                 </TableContainer>
 
+                {/* Pagination */}
                 {filtered.length > 0 && (
-                    <TablePagination
-                        component="div"
-                        count={filtered.length}
-                        page={page}
-                        onPageChange={(_, newPage) => setPage(newPage)}
-                        rowsPerPage={rowsPerPage}
-                        onRowsPerPageChange={e => { setRowsPerPage(parseInt(e.target.value, 10)); setPage(0); }}
-                        rowsPerPageOptions={[5, 10, 25, 50]}
-                        sx={{ borderTop: `1px solid ${alpha('#000', 0.06)}`, '& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows': { fontSize: '0.75rem' } }}
-                    />
+                    <Box sx={{ borderTop: '1px solid #EEF2F7', bgcolor: '#FAFBFC' }}>
+                        <TablePagination
+                            component="div"
+                            count={filtered.length}
+                            page={page}
+                            onPageChange={(_, newPage) => setPage(newPage)}
+                            rowsPerPage={rowsPerPage}
+                            onRowsPerPageChange={e => { setRowsPerPage(parseInt(e.target.value, 10)); setPage(0); }}
+                            rowsPerPageOptions={[5, 10, 25, 50]}
+                            sx={{ '& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows': { fontSize: '0.8125rem', color: '#64748B', margin: 0 }, '& .MuiTablePagination-select': { fontSize: '0.8125rem' }, '& .MuiIconButton-root': { borderRadius: 1.5, '&:hover': { bgcolor: alpha(PRIMARY, 0.06) } } }}
+                        />
+                    </Box>
                 )}
-            </Paper>
+            </Card>
 
-            {/* ── Action modal ─────────────────────────────────────────────── */}
             <ModalComponent open={open} handleClose={handleClose} title="">
                 {renderModal()}
             </ModalComponent>
+            </Box>
         </Box>
     );
 };
