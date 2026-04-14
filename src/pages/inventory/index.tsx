@@ -6,7 +6,7 @@ Managing Director
 */
 
 import { useContext, useEffect, useState } from "react";
-import { Grid } from "@mui/material"
+import { Box } from "@mui/material"
 import TableComponent from "../../components/tables/TableComponent";
 import InventoryUtills from "./Utills";
 import { crudStates } from "../../utils/constants";
@@ -66,7 +66,7 @@ const Inventory = () => {
     }, [tableStartDate, tableEndDate]);
 
     return (
-        <Grid xs={12} container sx={{ p: 3 }} justifyContent="center">
+        <Box sx={{ width: '100%' }}>
             {modalState === crudStates.delete &&
                 <ModalComponent title='Delete Inventory' open={open} handleClose={handleClose} width="40%">
                     <DeleteInventory
@@ -107,7 +107,7 @@ const Inventory = () => {
                 </Container>
             }
 
-        </Grid>
+        </Box>
     )
 }
 

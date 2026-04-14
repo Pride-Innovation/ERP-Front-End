@@ -1,7 +1,6 @@
 import {
     alpha,
     Box,
-    Grid,
     Stack,
     Typography
 } from '@mui/material';
@@ -9,100 +8,83 @@ import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 import { useContext } from 'react';
 import { InventoryContext } from '../../context/inventory';
 
-// Primary brand colors
-const PRIMARY_COLOR = '#08796C'; // Teal
-const SECONDARY_COLOR = '#BC892C'; // Gold/Amber
-
 const Container = ({ children }: { children: React.ReactNode }) => {
-    const { inventoryCount } = useContext(InventoryContext)
+    const { inventoryCount } = useContext(InventoryContext);
+    const todayLabel = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 
     return (
-        <>
+        <Box sx={{ minHeight: '100vh', width: '100%', bgcolor: '#F1F5FB', pb: 4 }}>
+
+            {/* ── Gradient Header ─────────────────────────────────── */}
             <Box
                 sx={{
-                    p: 1.75,
-                    mb: 2,
-                    width: '100%',
-                    maxWidth: '1500px',
-                    bgcolor: '#fff',
-                    borderRadius: 2,
-                    border: '1px solid rgba(0,0,0,0.07)',
-                    boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+                    background: 'linear-gradient(135deg, #08796C 0%, #065E53 60%, #044a42 100%)',
+                    px: { xs: 2, md: 4 },
+                    pt: 3,
+                    pb: 3,
+                    position: 'relative',
+                    overflow: 'hidden',
                 }}
             >
-                <Grid container alignItems="center" justifyContent="space-between">
-                    <Grid item>
-                        <Stack direction="row" spacing={1.5} alignItems="center">
-                            <Box
-                                sx={{
-                                    width: 36,
-                                    height: 36,
-                                    borderRadius: 1.5,
-                                    bgcolor: alpha(PRIMARY_COLOR, 0.1),
-                                    color: PRIMARY_COLOR,
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                }}
-                            >
-                                <Inventory2OutlinedIcon fontSize='small' />
-                            </Box>
-                            <Box>
-                                <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: '0.08em', fontSize: '0.7rem' }}>
-                                    Management
-                                </Typography>
-                                <Typography variant="subtitle1" fontWeight={600} color="text.primary" sx={{ lineHeight: 1.2 }}>
-                                    Stocks
-                                </Typography>
-                            </Box>
-                        </Stack>
-                    </Grid>
+                {/* Decorative circles */}
+                <Box sx={{ position: 'absolute', top: -50, right: -50, width: 200, height: 200, borderRadius: '50%', bgcolor: 'rgba(255,255,255,0.04)', pointerEvents: 'none' }} />
+                <Box sx={{ position: 'absolute', bottom: -50, right: 140, width: 120, height: 120, borderRadius: '50%', bgcolor: 'rgba(255,255,255,0.03)', pointerEvents: 'none' }} />
 
-                    <Grid item>
-                        <Stack
-                            direction="row"
-                            spacing={1}
-                            alignItems="center"
-                            sx={{
-                                px: 2,
-                                py: 0.75,
-                                borderLeft: `3px solid ${SECONDARY_COLOR}`,
-                                bgcolor: alpha(SECONDARY_COLOR, 0.06),
-                                borderRadius: '0 6px 6px 0',
-                            }}
-                        >
-                            <Typography
-                                variant="body2"
-                                sx={{
-                                    color: 'text.secondary',
-                                    fontWeight: 500,
-                                }}
-                            >
-                                Total Stocking:
+                <Stack direction="row" alignItems="flex-start" justifyContent="space-between" gap={2}>
+                    {/* Left: icon + title */}
+                    <Stack direction="row" alignItems="center" gap={2}>
+                        <Box sx={{
+                            width: 46, height: 46, borderRadius: 2,
+                            bgcolor: 'rgba(255,255,255,0.15)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            backdropFilter: 'blur(4px)',
+                            flexShrink: 0,
+                        }}>
+                            <Inventory2OutlinedIcon sx={{ color: '#fff', fontSize: 24 }} />
+                        </Box>
+                        <Box>
+                            <Typography variant="h5" sx={{ color: '#fff', fontWeight: 700, lineHeight: 1.2 }}>
+                                Inventory Management
                             </Typography>
-                            <Typography
-                                variant="subtitle1"
-                                fontWeight={700}
-                                color={PRIMARY_COLOR}
-                            >
-                                {inventoryCount}
+                            <Typography variant="body2" sx={{ color: alpha('#fff', 0.70), mt: 0.25 }}>
+                                Track and manage stock levels
                             </Typography>
-                        </Stack>
-                    </Grid>
-                </Grid>
+                        </Box>
+                    </Stack>
+
+                    {/* Right: stats badge */}
+                    <Box
+                        sx={{
+                            bgcolor: 'rgba(255,255,255,0.12)',
+                            backdropFilter: 'blur(8px)',
+                            border: '1px solid rgba(255,255,255,0.18)',
+                            borderRadius: 2,
+                            px: 2.5,
+                            py: 1.25,
+                            textAlign: 'right',
+                            flexShrink: 0,
+                            display: { xs: 'none', sm: 'block' },
+                        }}
+                    >
+                        <Typography variant="h4" sx={{ color: '#fff', fontWeight: 800, lineHeight: 1 }}>
+                            {(inventoryCount ?? 0).toLocaleString()}
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)', fontWeight: 500, display: 'block', mt: 0.25 }}>
+                            total stocks
+                        </Typography>
+                        <Typography sx={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.68rem', display: 'block', mt: 0.5 }}>
+                            {todayLabel}
+                        </Typography>
+                    </Box>
+                </Stack>
             </Box>
 
-            <Box sx={{
-                position: 'relative',
-                width: '100%',
-                display: 'flex',
-                justifyContent: 'center',
-                maxWidth: "1500px"
-            }}>
+            {/* ── Page content ─────────────────────────────────────── */}
+            <Box sx={{ px: { xs: 1, md: 3 }, pt: 3, width: '100%', maxWidth: '1500px' }}>
                 {children}
             </Box>
-        </>
-    )
-}
+        </Box>
+    );
+};
 
 export default Container
