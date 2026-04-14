@@ -5,7 +5,7 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { Route } from 'react-router'
+import { Navigate, Route } from 'react-router'
 import AssetsManagement from '../../../../pages/assets'
 import { ROUTES } from '../../routes'
 import ITEquipmentRoutes from './ITEquipmentRoutes'
@@ -27,6 +27,8 @@ const AssetRoutes = () => {
     return (
         <Route>
             <Route path={ROUTES.LIST_ASSETS} element={<AssetsManagement />} >
+                {/* Redirect base /assets path to Office Equipment as default */}
+                <Route index element={<Navigate to={ROUTES.LIST_OFFICE_EQUIPMENT} replace />} />
                 {ITEquipmentRoutes()}
                 {FleetRoutes()}
                 {OfficeEquipmentRoutes()}
