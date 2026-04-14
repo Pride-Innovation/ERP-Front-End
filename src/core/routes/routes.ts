@@ -54,6 +54,7 @@ const LIST_TRANSPORT_REJECTED: string = `${TRANSPORT_REQUEST}/rejected`
 
 /* IT Equipment Routes */
 const LIST_ASSETS: string = `${ASSETS_MANAGEMENT}/assets`
+const LIST_IT_EQUIPMENT: string = `${LIST_ASSETS}/it-equipment`
 const CREATE_ITEQUIPMENT: string = `${LIST_ASSETS}/it-equipment/create`
 const UPDATE_ITEQUIPMENT: string = `${LIST_ASSETS}/it-equipment/update`
 
@@ -100,6 +101,7 @@ export const ROUTES = {
     AUDIT_TRAILS,
     TEST,
     LIST_ASSETS,
+    LIST_IT_EQUIPMENT,
     CREATE_ITEQUIPMENT,
     UPDATE_ITEQUIPMENT,
     REQUEST,
