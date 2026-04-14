@@ -5,10 +5,9 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { Grid, Stack, Typography, Box, alpha, useTheme, Alert, Divider } from '@mui/material';
+import { Stack, Typography, Box, alpha, useTheme, Divider, Paper, Avatar, Button as MuiButton, CircularProgress } from '@mui/material';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined';
-import ButtonComponent from '../../../components/forms/Button';
 import { toast } from 'react-toastify';
 import { IDeleteDepartment } from './interface';
 import { deleteDepartmentService } from './service';
@@ -36,130 +35,115 @@ const DeleteDepartment = ({
     };
 
     return (
-        <Grid item container spacing={3} xs={12} sx={{ mt: 0 }}>
-            {/* Header */}
-            <Grid item xs={12}>
-                <Box
-                    sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 1.5,
-                        mb: 2
-                    }}
-                >
-                    <Box
-                        sx={{
-                            width: 40,
-                            height: 40,
-                            borderRadius: '50%',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            bgcolor: alpha(theme.palette.error.main, 0.1)
-                        }}
-                    >
-                        <WarningAmberIcon color="error" />
-                    </Box>
-                    <Typography variant="h6" fontWeight={500} color="error">
-                        Confirm Deletion
+        <Paper elevation={0} sx={{ borderRadius: 2, overflow: 'hidden' }}>
+            {/* Error Header */}
+            <Box
+                sx={{
+                    p: 2.5,
+                    bgcolor: alpha(theme.palette.error.main, 0.08),
+                    borderBottom: `1px solid ${alpha(theme.palette.error.main, 0.2)}`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 2,
+                }}
+            >
+                <Avatar sx={{ bgcolor: alpha(theme.palette.error.main, 0.12), color: 'error.main', width: 42, height: 42 }}>
+                    <WarningAmberIcon />
+                </Avatar>
+                <Box>
+                    <Typography variant="h6" sx={{ color: 'error.main', fontWeight: 600, lineHeight: 1.3 }}>
+                        Confirm Department Deletion
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                        This action is permanent and cannot be undone
                     </Typography>
                 </Box>
-                <Typography variant="body2" color="text.secondary">
-                    This action cannot be undone. The department and all associated data will be permanently removed.
+            </Box>
+
+            {/* Content */}
+            <Box sx={{ p: 3 }}>
+                <Typography variant="body1" sx={{ mb: 2, fontWeight: 500, color: '#1E293B' }}>
+                    Deleting this department will:
                 </Typography>
-                <Divider sx={{ my: 2, opacity: 0.6 }} />
-            </Grid>
-
-            {/* Warning alert */}
-            <Grid item xs={12}>
-                <Alert
-                    severity="warning"
-                    icon={<WarningAmberIcon />}
-                    sx={{
-                        mb: 3,
-                        borderRadius: 1.5,
-                        '& .MuiAlert-icon': {
-                            alignItems: 'center'
-                        }
-                    }}
-                >
-                    <Typography variant="body2">
-                        Deleting this department may affect organizational structure and employee assignments.
+                <Box sx={{ ml: 2, pl: 2, mb: 3, borderLeft: `3px solid ${alpha(theme.palette.warning.main, 0.5)}` }}>
+                    <Typography variant="body2" sx={{ mb: 1, color: 'text.primary' }}>
+                        • Permanently remove the department and all its associated data
                     </Typography>
-                </Alert>
+                    <Typography variant="body2" sx={{ mb: 1, color: 'text.primary' }}>
+                        • Affect employees and users currently assigned to this department
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: 'text.primary' }}>
+                        • Remove the department from all organizational hierarchy records
+                    </Typography>
+                </Box>
 
-                {/* Department details */}
-                <Box
+                {/* Department Info Card */}
+                <Paper
+                    elevation={0}
                     sx={{
                         p: 2.5,
-                        borderRadius: 1.5,
-                        bgcolor: alpha(theme.palette.background.default, 0.6),
-                        border: `1px solid ${alpha(theme.palette.divider, 0.15)}`,
-                        mb: 3
+                        borderRadius: 2,
+                        bgcolor: alpha('#f5f5f5', 0.6),
+                        border: `1px solid ${alpha('#000', 0.07)}`,
                     }}
                 >
-                    <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 1.5 }}>
-                        <AccountTreeOutlinedIcon color="primary" />
+                    <Stack direction="row" spacing={2} alignItems="center">
+                        <Avatar sx={{ bgcolor: '#08796C', width: 52, height: 52 }}>
+                            <AccountTreeOutlinedIcon />
+                        </Avatar>
                         <Box>
-                            <Typography variant="subtitle1" fontWeight={600}>
+                            <Typography variant="subtitle1" fontWeight={700} color="primary.main">
                                 {department.name}
                             </Typography>
-                            <Typography variant="caption" color="text.secondary">
-                                ID: {department.id}
-                            </Typography>
+                            {department.headOfDepartment && (
+                                <Typography variant="body2" color="text.secondary">
+                                    Head: {department.headOfDepartment.firstName} {department.headOfDepartment.lastName}
+                                </Typography>
+                            )}
+                            {department.branch && (
+                                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.25 }}>
+                                    Branch: {department.branch.name || 'Head Office'}
+                                </Typography>
+                            )}
                         </Box>
                     </Stack>
+                </Paper>
+            </Box>
 
-                    {department.headOfDepartment && (
-                        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                            <strong>Head of Department:</strong> {department.headOfDepartment.firstName} {department.headOfDepartment.lastName}
-                        </Typography>
-                    )}
-
-                    {department.branch && (
-                        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                            <strong>Branch:</strong> {department.branch.name || 'Head Office'}
-                        </Typography>
-                    )}
-
-                    {department.managersGroupEmail && (
-                        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                            <strong>Managers Group:</strong> {department.managersGroupEmail}
-                        </Typography>
-                    )}
-                </Box>
-            </Grid>
-
-            {/* Action buttons */}
-            <Grid item xs={12} sx={{ display: "flex", justifyContent: "space-between" }}>
-                <Typography
-                    variant="body2"
-                    color="error"
-                    fontWeight={500}
-                    sx={{ alignSelf: 'center' }}
-                >
-                    Are you sure you want to delete this department?
-                </Typography>
-
-                <Stack direction="row" spacing={2}>
-                    <ButtonComponent
-                        handleClick={handleClose}
-                        buttonColor="inherit"
+            {/* Footer */}
+            <Divider />
+            <Box sx={{ p: 2.5, display: 'flex', justifyContent: 'flex-end', bgcolor: alpha('#f9f9f9', 0.8) }}>
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                    <MuiButton
+                        onClick={handleClose}
+                        color="inherit"
                         type="button"
                         variant="outlined"
-                        sendingRequest={false}
-                        buttonText="Cancel"
-                    />
-                    <ButtonComponent
-                        buttonColor="error"
-                        type="button"
-                        handleClick={deleteDepartment}
-                        sendingRequest={sendingRequest}
-                        buttonText={buttonText}
-                    />
+                        sx={{
+                            borderRadius: '8px',
+                            borderColor: alpha('#000', 0.2),
+                            color: 'text.secondary',
+                            '&:hover': { borderColor: alpha('#000', 0.3) },
+                        }}
+                    >
+                        Cancel
+                    </MuiButton>
+                    <MuiButton
+                        onClick={deleteDepartment}
+                        color="error"
+                        variant="contained"
+                        disabled={sendingRequest}
+                        sx={{
+                            px: 3,
+                            borderRadius: '8px',
+                            boxShadow: `0 2px 8px ${alpha(theme.palette.error.main, 0.3)}`,
+                        }}
+                    >
+                        {sendingRequest ? <CircularProgress size={20} color="inherit" /> : buttonText}
+                    </MuiButton>
                 </Stack>
-            </Grid>
-        </Grid>
+            </Box>
+        </Paper>
     );
 };
 

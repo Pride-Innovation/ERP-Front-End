@@ -64,14 +64,14 @@ const SupplierForm = ({
                 mb: 3,
                 borderRadius: 2,
                 overflow: 'hidden',
-                border: `1px solid ${alpha(theme.palette.divider, 0.1)}`
+                border: `1px solid ${alpha('#08796C', 0.15)}`
             }}
         >
             <Box
                 sx={{
                     p: 2,
-                    bgcolor: alpha(theme.palette.background.default, 0.5),
-                    borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+                    bgcolor: alpha('#08796C', 0.04),
+                    borderBottom: `1px solid ${alpha('#08796C', 0.1)}`,
                     display: 'flex',
                     alignItems: 'center',
                     gap: 1.5
@@ -81,16 +81,17 @@ const SupplierForm = ({
                     sx={{
                         width: 32,
                         height: 32,
-                        borderRadius: 1,
-                        bgcolor: alpha(theme.palette.primary.main, 0.1),
+                        borderRadius: '7px',
+                        background: 'linear-gradient(135deg, #08796C, #065E53)',
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'center'
+                        justifyContent: 'center',
+                        '& .MuiSvgIcon-root': { color: '#fff', fontSize: '15px' }
                     }}
                 >
                     {icon}
                 </Box>
-                <Typography variant="subtitle1" fontWeight={600} color="primary">
+                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#08796C' }}>
                     {title}
                 </Typography>
             </Box>
@@ -136,25 +137,17 @@ const SupplierForm = ({
     };
 
     return (
-        <Box
-            sx={{
-                width: "100%",
-                maxHeight: '80vh',
-                overflow: 'hidden',
-                display: 'flex',
-                flexDirection: 'column'
-            }}
-        >
+        <Box sx={{ width: '100%' }}>
             {/* Form Header */}
-            <Box sx={{ mb: 3 }}>
+            <Box sx={{ mb: 3, pb: 2, borderBottom: `1px solid ${alpha('#08796C', 0.1)}` }}>
                 <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 1 }}>
-                    <LocalShippingOutlinedIcon color="primary" />
-                    <Typography variant="h6" fontWeight={600} color="primary">
+                    <LocalShippingOutlinedIcon sx={{ color: '#08796C' }} />
+                    <Typography variant="h6" fontWeight={600} sx={{ color: '#1E293B' }}>
                         {update ? 'Update Supplier' : 'Create New Supplier'}
                     </Typography>
                 </Stack>
 
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" sx={{ color: '#64748B' }}>
                     {update
                         ? 'Update supplier details and commodity associations'
                         : 'Add a new supplier to your supply chain management system'
@@ -162,26 +155,8 @@ const SupplierForm = ({
                 </Typography>
             </Box>
 
-            {/* Scrollable form content */}
-            <Box
-                sx={{
-                    overflow: 'auto',
-                    flex: 1,
-                    pr: 1,
-                    '&::-webkit-scrollbar': {
-                        width: '6px',
-                    },
-                    '&::-webkit-scrollbar-thumb': {
-                        backgroundColor: alpha(theme.palette.primary.main, 0.2),
-                        borderRadius: '3px',
-                    },
-                    '&::-webkit-scrollbar-track': {
-                        backgroundColor: alpha(theme.palette.background.default, 0.5),
-                    }
-                }}
-            >
                 {/* Basic Information */}
-                <FormSection title="Basic Information" icon={<InfoIcon fontSize="small" color="primary" />}>
+                <FormSection title="Basic Information" icon={<InfoIcon fontSize="small" />}>
                     {basicFields.map((field) => (
                         <Grid item xs={12} key={field.value}>
                             {renderField(field)}
@@ -190,7 +165,7 @@ const SupplierForm = ({
                 </FormSection>
 
                 {/* Contact Information */}
-                <FormSection title="Contact Information" icon={<ContactsIcon fontSize="small" color="primary" />}>
+                <FormSection title="Contact Information" icon={<ContactsIcon fontSize="small" />}>
                     {contactFields.map((field) => {
                         const gridSize = field.type === "textarea" ? 12 : 6;
                         return (
@@ -202,14 +177,13 @@ const SupplierForm = ({
                 </FormSection>
 
                 {/* Commodity Association */}
-                <FormSection title="Commodity Association" icon={<Inventory2Icon fontSize="small" color="primary" />}>
+                <FormSection title="Commodity Association" icon={<Inventory2Icon fontSize="small" />}>
                     {commodityFields.map((field) => (
                         <Grid item xs={12} key={field.value}>
                             {renderField(field)}
                         </Grid>
                     ))}
                 </FormSection>
-            </Box>
 
             {/* Form Actions */}
             <Box
@@ -232,9 +206,13 @@ const SupplierForm = ({
                         type="button"
                         variant="outlined"
                         sx={{
-                            minWidth: '100px',
-                            borderRadius: 1.5,
-                            textTransform: 'none'
+                            minWidth: '110px',
+                            borderRadius: '8px',
+                            py: 0.85,
+                            textTransform: 'none',
+                            borderColor: alpha('#000', 0.2),
+                            color: 'text.secondary',
+                            '&:hover': { borderColor: alpha('#000', 0.3) },
                         }}
                     >
                         Cancel
@@ -244,13 +222,16 @@ const SupplierForm = ({
                         type="submit"
                         variant="contained"
                         sx={{
-                            minWidth: '100px',
-                            borderRadius: 1.5,
+                            minWidth: '110px',
+                            borderRadius: '8px',
+                            py: 0.85,
                             textTransform: 'none',
-                            boxShadow: `0 2px 8px ${alpha(theme.palette.primary.main, 0.2)}`
+                            bgcolor: '#08796C',
+                            '&:hover': { bgcolor: '#065E53' },
+                            boxShadow: '0 2px 8px rgba(8,121,108,0.3)',
                         }}
                     >
-                        {sendingRequest ? <CircularProgress size={24} color="inherit" /> : buttonText}
+                        {sendingRequest ? <CircularProgress size={20} color="inherit" /> : buttonText}
                     </MuiButton>
                 </Stack>
             </Box>

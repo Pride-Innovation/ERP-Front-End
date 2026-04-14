@@ -94,14 +94,17 @@ const RoleDetails = ({ role, deleteRole, updateRole }: IRoleDetails) => {
                             <Tooltip title="Edit role">
                                 <Button
                                     onClick={() => updateRole(role)}
-                                    variant="outlined"
+                                    variant="contained"
                                     size="small"
                                     fullWidth
                                     startIcon={<EditOutlinedIcon />}
                                     sx={{
                                         textTransform: "none",
-                                        borderRadius: 1.5,
-                                        borderColor: alpha(theme.palette.primary.main, 0.3)
+                                        borderRadius: '8px',
+                                        fontWeight: 600,
+                                        bgcolor: '#08796C',
+                                        '&:hover': { bgcolor: '#065E53' },
+                                        boxShadow: '0 2px 8px rgba(8,121,108,0.25)'
                                     }}
                                 >
                                     Edit
@@ -117,8 +120,13 @@ const RoleDetails = ({ role, deleteRole, updateRole }: IRoleDetails) => {
                                     startIcon={<DeleteOutlineOutlinedIcon />}
                                     sx={{
                                         textTransform: "none",
-                                        borderRadius: 1.5,
-                                        borderColor: alpha(theme.palette.error.main, 0.3)
+                                        borderRadius: '8px',
+                                        fontWeight: 600,
+                                        borderColor: alpha(theme.palette.error.main, 0.4),
+                                        '&:hover': {
+                                            borderColor: theme.palette.error.main,
+                                            bgcolor: alpha(theme.palette.error.main, 0.04)
+                                        }
                                     }}
                                 >
                                     Delete

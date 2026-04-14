@@ -179,29 +179,26 @@ const DepartmentDetails = ({
             {/* Actions */}
             <Box
                 sx={{
-                    mt: 'auto',
                     p: 2,
-                    pt: 0,
                     display: 'flex',
                     justifyContent: 'space-between',
-                    gap: 1
+                    gap: 1,
+                    borderTop: `1px solid ${alpha(theme.palette.divider, 0.12)}`,
+                    bgcolor: alpha('#08796C', 0.02)
                 }}
             >
                 <Button
                     onClick={() => updateDepartment(department)}
-                    variant="outlined"
+                    variant="contained"
                     fullWidth
                     size="small"
                     sx={{
                         textTransform: 'none',
-                        color: theme.palette.primary.main,
-                        borderColor: alpha(theme.palette.primary.main, 0.3),
-                        '&:hover': {
-                            borderColor: theme.palette.primary.main,
-                            bgcolor: alpha(theme.palette.primary.main, 0.04)
-                        },
-                        fontWeight: 500,
-                        borderRadius: 1.5
+                        bgcolor: '#08796C',
+                        '&:hover': { bgcolor: '#065E53' },
+                        boxShadow: '0 2px 8px rgba(8,121,108,0.25)',
+                        fontWeight: 600,
+                        borderRadius: '8px'
                     }}
                     startIcon={<EditOutlinedIcon />}
                 >
@@ -215,13 +212,13 @@ const DepartmentDetails = ({
                     color="error"
                     sx={{
                         textTransform: 'none',
-                        borderColor: alpha(theme.palette.error.main, 0.3),
+                        borderColor: alpha(theme.palette.error.main, 0.4),
                         '&:hover': {
                             borderColor: theme.palette.error.main,
                             bgcolor: alpha(theme.palette.error.main, 0.04)
                         },
-                        fontWeight: 500,
-                        borderRadius: 1.5
+                        fontWeight: 600,
+                        borderRadius: '8px'
                     }}
                     startIcon={<DeleteOutlineOutlinedIcon />}
                 >

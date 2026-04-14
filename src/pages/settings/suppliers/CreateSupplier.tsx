@@ -8,7 +8,6 @@ Managing Director
 
 import { useForm } from "react-hook-form";
 import { useEffect } from "react";
-import { Box } from "@mui/material";
 import SupplierForm from "./SupplierForm";
 import { ICreateSupplier, ISupplier, ISupplierAxiosResponse } from "./interface";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -53,18 +52,16 @@ const CreateSupplier = ({ handleClose, sendingRequest, setSendingRequest }: ICre
   };
 
   return (
-    <Box sx={{ width: "100%" }}>
-      <form autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
-        <SupplierForm
-          handleClose={handleClose}
-          buttonText="Create Supplier"
-          formState={formState}
-          control={control}
-          sendingRequest={sendingRequest}
-          register={register}
-        />
-      </form>
-    </Box>
+    <form autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
+      <SupplierForm
+        handleClose={handleClose}
+        buttonText="Create Supplier"
+        formState={formState}
+        control={control}
+        sendingRequest={sendingRequest}
+        register={register}
+      />
+    </form>
   );
 };
 

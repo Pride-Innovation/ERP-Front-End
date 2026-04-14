@@ -11,7 +11,6 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useMemo } from "react";
 import DepartmentUtills from "./utills";
 import { toast } from "react-toastify";
-import { Grid, Paper } from "@mui/material";
 import DepartmentForm from "./DepartmentForm";
 import { departmentSchema } from "./schema";
 import { createDepartmentService } from "./service";
@@ -60,22 +59,16 @@ const CreateDepartment = ({
     };
 
     return (
-        <Paper elevation={3} sx={{ borderRadius: 3, boxShadow: "none", maxWidth: "1200px", mx: "auto" }}>
-            <form autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
-                <Grid container spacing={2}>
-                    <Grid item xs={12}>
-                        <DepartmentForm
-                            handleClose={handleClose}
-                            buttonText="Submit"
-                            formState={formState}
-                            control={control}
-                            sendingRequest={sendingRequest}
-                            register={register}
-                        />
-                    </Grid>
-                </Grid>
-            </form>
-        </Paper>
+        <form autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
+            <DepartmentForm
+                handleClose={handleClose}
+                buttonText="Submit"
+                formState={formState}
+                control={control}
+                sendingRequest={sendingRequest}
+                register={register}
+            />
+        </form>
     );
 };
 

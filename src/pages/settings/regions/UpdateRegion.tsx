@@ -13,7 +13,6 @@ import { regionSchema } from './schema';
 import RegionUtills from './utills';
 import { IResponseData } from '../../users/interface';
 import { toast } from 'react-toastify';
-import { Grid, Paper } from '@mui/material';
 import RegionForm from './RegionForm';
 import { updateRegionService } from './service';
 
@@ -80,34 +79,20 @@ const UpdateRegion = ({
     };
 
     return (
-        <Paper
-            elevation={3}
-            sx={{
-                borderRadius: 3,
-                boxShadow: "none",
-                maxWidth: "800px",
-                mx: "auto"
-            }}
+        <form
+            style={{ width: "100%" }}
+            autoComplete="off"
+            onSubmit={handleSubmit(onSubmit)}
         >
-            <form
-                style={{ width: "100%" }}
-                autoComplete="off"
-                onSubmit={handleSubmit(onSubmit)}
-            >
-                <Grid container spacing={2}>
-                    <Grid item xs={12}>
-                        <RegionForm
-                            handleClose={handleClose}
-                            buttonText="Update"
-                            formState={formState}
-                            control={control}
-                            sendingRequest={sendingRequest}
-                            register={register}
-                        />
-                    </Grid>
-                </Grid>
-            </form>
-        </Paper>
+            <RegionForm
+                handleClose={handleClose}
+                buttonText="Update"
+                formState={formState}
+                control={control}
+                sendingRequest={sendingRequest}
+                register={register}
+            />
+        </form>
     );
 };
 

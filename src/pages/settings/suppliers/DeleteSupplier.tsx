@@ -5,10 +5,9 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { Grid, Stack, Typography, Box, alpha, useTheme, Alert, Divider } from '@mui/material';
+import { Stack, Typography, Box, alpha, useTheme, Divider, Paper, Avatar, Button as MuiButton, CircularProgress } from '@mui/material';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
-import ButtonComponent from '../../../components/forms/Button';
 import { toast } from 'react-toastify';
 import { IDeleteSupplier, ISupplierAxiosResponse } from './interface';
 import { deleteSupplierService } from './service';
@@ -41,128 +40,115 @@ const DeleteSupplier = ({
     };
 
     return (
-        <Grid item container spacing={3} xs={12} sx={{ mt: 0 }}>
-            {/* Header */}
-            <Grid item xs={12}>
-                <Box
-                    sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 1.5,
-                        mb: 2
-                    }}
-                >
-                    <Box
-                        sx={{
-                            width: 40,
-                            height: 40,
-                            borderRadius: '50%',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            bgcolor: alpha(theme.palette.error.main, 0.1)
-                        }}
-                    >
-                        <WarningAmberIcon color="error" />
-                    </Box>
-                    <Typography variant="h6" fontWeight={500} color="error">
-                        Confirm Deletion
+        <Paper elevation={0} sx={{ borderRadius: 2, overflow: 'hidden' }}>
+            {/* Error Header */}
+            <Box
+                sx={{
+                    p: 2.5,
+                    bgcolor: alpha(theme.palette.error.main, 0.08),
+                    borderBottom: `1px solid ${alpha(theme.palette.error.main, 0.2)}`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 2,
+                }}
+            >
+                <Avatar sx={{ bgcolor: alpha(theme.palette.error.main, 0.12), color: 'error.main', width: 42, height: 42 }}>
+                    <WarningAmberIcon />
+                </Avatar>
+                <Box>
+                    <Typography variant="h6" sx={{ color: 'error.main', fontWeight: 600, lineHeight: 1.3 }}>
+                        Confirm Supplier Deletion
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                        This action is permanent and cannot be undone
                     </Typography>
                 </Box>
-                <Typography variant="body2" color="text.secondary">
-                    This action cannot be undone. The supplier and all associated data will be permanently removed.
+            </Box>
+
+            {/* Content */}
+            <Box sx={{ p: 3 }}>
+                <Typography variant="body1" sx={{ mb: 2, fontWeight: 500, color: '#1E293B' }}>
+                    Deleting this supplier will:
                 </Typography>
-                <Divider sx={{ my: 2, opacity: 0.6 }} />
-            </Grid>
-
-            {/* Warning alert */}
-            <Grid item xs={12}>
-                <Alert
-                    severity="warning"
-                    icon={<WarningAmberIcon />}
-                    sx={{
-                        mb: 3,
-                        borderRadius: 1.5,
-                        '& .MuiAlert-icon': {
-                            alignItems: 'center'
-                        }
-                    }}
-                >
-                    <Typography variant="body2">
-                        Deleting this supplier may affect procurement and supply chain operations.
+                <Box sx={{ ml: 2, pl: 2, mb: 3, borderLeft: `3px solid ${alpha(theme.palette.warning.main, 0.5)}` }}>
+                    <Typography variant="body2" sx={{ mb: 1, color: 'text.primary' }}>
+                        • Permanently remove the supplier and all associated data
                     </Typography>
-                </Alert>
+                    <Typography variant="body2" sx={{ mb: 1, color: 'text.primary' }}>
+                        • Affect procurement records and supply chain operations linked to this supplier
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: 'text.primary' }}>
+                        • Remove the supplier from all commodity and inventory records
+                    </Typography>
+                </Box>
 
-                {/* Supplier details */}
-                <Box
+                {/* Supplier Info Card */}
+                <Paper
+                    elevation={0}
                     sx={{
                         p: 2.5,
-                        borderRadius: 1.5,
-                        bgcolor: alpha(theme.palette.background.default, 0.6),
-                        border: `1px solid ${alpha(theme.palette.divider, 0.15)}`,
-                        mb: 3
+                        borderRadius: 2,
+                        bgcolor: alpha('#f5f5f5', 0.6),
+                        border: `1px solid ${alpha('#000', 0.07)}`,
                     }}
                 >
-                    <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 1.5 }}>
-                        <LocalShippingOutlinedIcon color="primary" />
+                    <Stack direction="row" spacing={2} alignItems="center">
+                        <Avatar sx={{ bgcolor: '#08796C', width: 52, height: 52 }}>
+                            <LocalShippingOutlinedIcon />
+                        </Avatar>
                         <Box>
-                            <Typography variant="subtitle1" fontWeight={600}>
+                            <Typography variant="subtitle1" fontWeight={700} color="primary.main">
                                 {supplier.name}
                             </Typography>
-                            <Typography variant="caption" color="text.secondary">
-                                ID: {supplier.id}
-                            </Typography>
+                            {supplier.email && (
+                                <Typography variant="body2" color="text.secondary">
+                                    {supplier.email}
+                                </Typography>
+                            )}
+                            {supplier.telephone && (
+                                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.25 }}>
+                                    {supplier.telephone}
+                                </Typography>
+                            )}
                         </Box>
                     </Stack>
+                </Paper>
+            </Box>
 
-                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                        <strong>Email:</strong> {supplier.email}
-                    </Typography>
-
-                    <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                        <strong>Phone:</strong> {supplier.telephone}
-                    </Typography>
-
-                    {supplier.commodity && (
-                        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                            <strong>Commodity:</strong> {supplier.commodity.name}
-                        </Typography>
-                    )}
-                </Box>
-            </Grid>
-
-            {/* Action buttons */}
-            <Grid item xs={12} sx={{ display: "flex", justifyContent: "space-between" }}>
-                <Typography
-                    variant="body2"
-                    color="error"
-                    fontWeight={500}
-                    sx={{ alignSelf: 'center' }}
-                >
-                    Are you sure you want to delete this supplier?
-                </Typography>
-
-                <Stack direction="row" spacing={2}>
-                    <ButtonComponent
-                        handleClick={handleClose}
-                        buttonColor="inherit"
+            {/* Footer */}
+            <Divider />
+            <Box sx={{ p: 2.5, display: 'flex', justifyContent: 'flex-end', bgcolor: alpha('#f9f9f9', 0.8) }}>
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+                    <MuiButton
+                        onClick={handleClose}
+                        color="inherit"
                         type="button"
                         variant="outlined"
-                        sendingRequest={false}
-                        buttonText="Cancel"
-                    // sx={{ px: 3 }}
-                    />
-                    <ButtonComponent
-                        buttonColor="error"
-                        type="button"
-                        handleClick={deleteSupplier}
-                        sendingRequest={sendingRequest}
-                        buttonText={buttonText}
-                    // sx={{ px: 3 }}
-                    />
+                        sx={{
+                            borderRadius: '8px',
+                            borderColor: alpha('#000', 0.2),
+                            color: 'text.secondary',
+                            '&:hover': { borderColor: alpha('#000', 0.3) },
+                        }}
+                    >
+                        Cancel
+                    </MuiButton>
+                    <MuiButton
+                        onClick={deleteSupplier}
+                        color="error"
+                        variant="contained"
+                        disabled={sendingRequest}
+                        sx={{
+                            px: 3,
+                            borderRadius: '8px',
+                            boxShadow: `0 2px 8px ${alpha(theme.palette.error.main, 0.3)}`,
+                        }}
+                    >
+                        {sendingRequest ? <CircularProgress size={20} color="inherit" /> : buttonText}
+                    </MuiButton>
                 </Stack>
-            </Grid>
-        </Grid>
+            </Box>
+        </Paper>
     );
 };
 

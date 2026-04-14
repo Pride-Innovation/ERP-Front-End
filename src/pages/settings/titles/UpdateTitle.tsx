@@ -11,7 +11,7 @@ import { ITitle, ITitleAxiosResponse, IUpdateTitle } from "./interface";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { titleSchema } from "./schema";
-import { Box } from "@mui/material";
+
 import TitleForm from "./TitleForm";
 import { updateTitleService } from "./service";
 import { toast } from "react-toastify";
@@ -60,19 +60,17 @@ const UpdateTitle = ({ handleClose, sendingRequest, setSendingRequest, title }: 
     };
 
     return (
-        <Box sx={{ width: "100%" }}>
-            <form autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
-                <TitleForm
-                    handleClose={handleClose}
-                    buttonText="Update Title"
-                    formState={formState}
-                    control={control}
-                    sendingRequest={sendingRequest}
-                    register={register}
-                    update={true}
-                />
-            </form>
-        </Box>
+        <form autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
+            <TitleForm
+                handleClose={handleClose}
+                buttonText="Update Title"
+                formState={formState}
+                control={control}
+                sendingRequest={sendingRequest}
+                register={register}
+                update={true}
+            />
+        </form>
     );
 };
 

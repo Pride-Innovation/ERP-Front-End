@@ -12,7 +12,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { departmentSchema } from './schema';
 import DepartmentUtills from './utills';
 import { toast } from 'react-toastify';
-import { Grid, Paper, Box, Typography, Chip, alpha, useTheme } from '@mui/material';
+import { Box, Typography, Chip, alpha, useTheme } from '@mui/material';
 import DepartmentForm from './DepartmentForm';
 import { updateDepartmentService } from './service';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
@@ -92,22 +92,16 @@ const UpdateDepartment = ({
     };
 
     return (
-        <Paper
-            elevation={3}
-            sx={{
-                borderRadius: 3,
-                boxShadow: "none",
-                maxWidth: "1200px",
-                mx: "auto"
-            }}
-        >
+        <Box sx={{ width: '100%' }}>
             {/* Info Banner */}
             {hasChanges && (
                 <Box
                     sx={{
                         p: 2,
+                        mb: 2,
                         bgcolor: alpha(theme.palette.info.main, 0.1),
-                        borderBottom: `1px solid ${alpha(theme.palette.info.main, 0.2)}`,
+                        border: `1px solid ${alpha(theme.palette.info.main, 0.2)}`,
+                        borderRadius: '8px',
                         display: 'flex',
                         alignItems: 'center',
                         gap: 1.5
@@ -131,20 +125,16 @@ const UpdateDepartment = ({
                 autoComplete="off"
                 onSubmit={handleSubmit(onSubmit)}
             >
-                <Grid container spacing={2}>
-                    <Grid item xs={12}>
-                        <DepartmentForm
-                            handleClose={handleClose}
-                            buttonText="Update"
-                            formState={formState}
-                            control={control}
-                            sendingRequest={sendingRequest}
-                            register={register}
-                        />
-                    </Grid>
-                </Grid>
+                <DepartmentForm
+                    handleClose={handleClose}
+                    buttonText="Update"
+                    formState={formState}
+                    control={control}
+                    sendingRequest={sendingRequest}
+                    register={register}
+                />
             </form>
-        </Paper>
+        </Box>
     );
 };
 

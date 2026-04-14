@@ -62,14 +62,14 @@ const TitleForm = ({
                 mb: 3,
                 borderRadius: 2,
                 overflow: 'hidden',
-                border: `1px solid ${alpha(theme.palette.divider, 0.1)}`
+                border: `1px solid ${alpha('#08796C', 0.15)}`
             }}
         >
             <Box
                 sx={{
                     p: 2,
-                    bgcolor: alpha(theme.palette.background.default, 0.5),
-                    borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+                    bgcolor: alpha('#08796C', 0.04),
+                    borderBottom: `1px solid ${alpha('#08796C', 0.1)}`,
                     display: 'flex',
                     alignItems: 'center',
                     gap: 1.5
@@ -79,16 +79,17 @@ const TitleForm = ({
                     sx={{
                         width: 32,
                         height: 32,
-                        borderRadius: 1,
-                        bgcolor: alpha(theme.palette.primary.main, 0.1),
+                        borderRadius: '7px',
+                        background: 'linear-gradient(135deg, #08796C, #065E53)',
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'center'
+                        justifyContent: 'center',
+                        '& .MuiSvgIcon-root': { color: '#fff', fontSize: '15px' }
                     }}
                 >
                     {icon}
                 </Box>
-                <Typography variant="subtitle1" fontWeight={600} color="primary">
+                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#08796C' }}>
                     {title}
                 </Typography>
             </Box>
@@ -106,25 +107,17 @@ const TitleForm = ({
     const roleFields = formFields.filter(field => field.value === 'role');
 
     return (
-        <Box
-            sx={{
-                width: "100%",
-                maxHeight: '80vh',
-                overflow: 'hidden',
-                display: 'flex',
-                flexDirection: 'column'
-            }}
-        >
+        <Box sx={{ width: '100%' }}>
             {/* Form Header */}
-            <Box sx={{ mb: 3 }}>
+            <Box sx={{ mb: 3, pb: 2, borderBottom: `1px solid ${alpha('#08796C', 0.1)}` }}>
                 <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 1 }}>
-                    <WorkOutlineOutlinedIcon color="primary" />
-                    <Typography variant="h6" fontWeight={600} color="primary">
+                    <WorkOutlineOutlinedIcon sx={{ color: '#08796C' }} />
+                    <Typography variant="h6" fontWeight={600} sx={{ color: '#1E293B' }}>
                         {update ? 'Update Title' : 'Create New Title'}
                     </Typography>
                 </Stack>
 
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" sx={{ color: '#64748B' }}>
                     {update
                         ? 'Update the title details and organizational structure'
                         : 'Define a new organizational title and its reporting hierarchy'
@@ -132,71 +125,52 @@ const TitleForm = ({
                 </Typography>
             </Box>
 
-            {/* Scrollable form content */}
-            <Box
-                sx={{
-                    overflow: 'auto',
-                    flex: 1,
-                    pr: 1,
-                    '&::-webkit-scrollbar': {
-                        width: '6px',
-                    },
-                    '&::-webkit-scrollbar-thumb': {
-                        backgroundColor: alpha(theme.palette.primary.main, 0.2),
-                        borderRadius: '3px',
-                    },
-                    '&::-webkit-scrollbar-track': {
-                        backgroundColor: alpha(theme.palette.background.default, 0.5),
-                    }
-                }}
-            >
-                {/* Basic Information */}
-                <FormSection title="Basic Information" icon={<InfoIcon fontSize="small" color="primary" />}>
-                    {basicFields.map((field) => (
-                        <Grid item xs={12} key={field.value}>
-                            <UseFormInput
-                                register={register}
-                                control={control}
-                                formState={formState}
-                                value={field.value}
-                                label={field.label}
-                            />
-                        </Grid>
-                    ))}
-                </FormSection>
+            {/* Basic Information */}
+            <FormSection title="Basic Information" icon={<InfoIcon fontSize="small" />}>
+                {basicFields.map((field) => (
+                    <Grid item xs={12} key={field.value}>
+                        <UseFormInput
+                            register={register}
+                            control={control}
+                            formState={formState}
+                            value={field.value}
+                            label={field.label}
+                        />
+                    </Grid>
+                ))}
+            </FormSection>
 
-                {/* Hierarchy Structure */}
-                <FormSection title="Reporting Structure" icon={<SupervisorAccountIcon fontSize="small" color="primary" />}>
-                    {hierarchyFields.map((field) => (
-                        <Grid item xs={12} key={field.value}>
-                            <UseFormAutocompleteComponent
-                                register={register}
-                                control={control}
-                                formState={formState}
-                                value={field.value}
-                                label={field.label}
-                                options={field.options || []}
-                            />
-                        </Grid>
-                    ))}
-                </FormSection>
+            {/* Hierarchy Structure */}
+            <FormSection title="Reporting Structure" icon={<SupervisorAccountIcon fontSize="small" />}>
+                {hierarchyFields.map((field) => (
+                    <Grid item xs={12} key={field.value}>
+                        <UseFormAutocompleteComponent
+                            register={register}
+                            control={control}
+                            formState={formState}
+                            value={field.value}
+                            label={field.label}
+                            options={field.options || []}
+                        />
+                    </Grid>
+                ))}
+            </FormSection>
 
-                {/* Role Assignment */}
-                <FormSection title="Role Assignment" icon={<SecurityIcon fontSize="small" color="primary" />}>
-                    {roleFields.map((field) => (
-                        <Grid item xs={12} key={field.value}>
-                            <UseFormAutocompleteComponent
-                                register={register}
-                                control={control}
-                                formState={formState}
-                                value={field.value}
-                                label={field.label}
-                                options={field.options || []}
-                            />
-                        </Grid>
-                    ))}
-                </FormSection>
-            </Box>
+            {/* Role Assignment */}
+            <FormSection title="Role Assignment" icon={<SecurityIcon fontSize="small" />}>
+                {roleFields.map((field) => (
+                    <Grid item xs={12} key={field.value}>
+                        <UseFormAutocompleteComponent
+                            register={register}
+                            control={control}
+                            formState={formState}
+                            value={field.value}
+                            label={field.label}
+                            options={field.options || []}
+                        />
+                    </Grid>
+                ))}
+            </FormSection>
 
             {/* Form Actions */}
             <Box
@@ -219,9 +193,13 @@ const TitleForm = ({
                         type="button"
                         variant="outlined"
                         sx={{
-                            minWidth: '100px',
-                            borderRadius: 1.5,
-                            textTransform: 'none'
+                            minWidth: '110px',
+                            borderRadius: '8px',
+                            py: 0.85,
+                            textTransform: 'none',
+                            borderColor: alpha('#000', 0.2),
+                            color: 'text.secondary',
+                            '&:hover': { borderColor: alpha('#000', 0.3) },
                         }}
                     >
                         Cancel
@@ -231,13 +209,16 @@ const TitleForm = ({
                         type="submit"
                         variant="contained"
                         sx={{
-                            minWidth: '100px',
-                            borderRadius: 1.5,
+                            minWidth: '110px',
+                            borderRadius: '8px',
+                            py: 0.85,
                             textTransform: 'none',
-                            boxShadow: `0 2px 8px ${alpha(theme.palette.primary.main, 0.2)}`
+                            bgcolor: '#08796C',
+                            '&:hover': { bgcolor: '#065E53' },
+                            boxShadow: '0 2px 8px rgba(8,121,108,0.3)',
                         }}
                     >
-                        {sendingRequest ? <CircularProgress size={24} color="inherit" /> : buttonText}
+                        {sendingRequest ? <CircularProgress size={20} color="inherit" /> : buttonText}
                     </MuiButton>
                 </Stack>
             </Box>

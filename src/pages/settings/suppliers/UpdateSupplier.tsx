@@ -9,7 +9,6 @@ Managing Director
 import { useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
 import { ISupplier, ISupplierAxiosResponse, IUpdateSupplier } from "./interface";
-import { Box } from "@mui/material";
 import SupplierForm from "./SupplierForm";
 import SupplierUtills from "./Utills";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -60,19 +59,17 @@ const UpdateSupplier = ({ handleClose, sendingRequest, supplier, setSendingReque
     };
 
     return (
-        <Box sx={{ width: "100%" }}>
-            <form autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
-                <SupplierForm
-                    handleClose={handleClose}
-                    buttonText="Update Supplier"
-                    formState={formState}
-                    control={control}
-                    sendingRequest={sendingRequest}
-                    register={register}
-                    update={true}
-                />
-            </form>
-        </Box>
+        <form autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
+            <SupplierForm
+                handleClose={handleClose}
+                buttonText="Update Supplier"
+                formState={formState}
+                control={control}
+                sendingRequest={sendingRequest}
+                register={register}
+                update={true}
+            />
+        </form>
     );
 };
 

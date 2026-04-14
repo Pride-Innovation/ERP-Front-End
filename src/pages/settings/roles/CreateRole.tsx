@@ -10,7 +10,6 @@ import { ICreateRole, IRole, IRoleAxiosResponse } from '../interface';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { roleSchema } from './schema';
-import { Grid } from '@mui/material';
 import RoleForm from './RoleForm';
 import { createRoleService } from './service';
 import { toast } from 'react-toastify';
@@ -51,24 +50,16 @@ const CreateRole = ({ handleClose, sendingRequest }: ICreateRole) => {
     };
 
     return (
-        <Grid container xs={12}>
-            <Grid item xs={12}>
-                <form
-                    style={{ width: "100%" }}
-                    autoComplete="off"
-                    onSubmit={handleSubmit(onSubmit)}
-                >
-                    <RoleForm
-                        handleClose={handleClose}
-                        buttonText="Submit"
-                        formState={formState}
-                        control={control}
-                        sendingRequest={sendingRequest}
-                        register={register}
-                    />
-                </form>
-            </Grid>
-        </Grid>
+        <form autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
+            <RoleForm
+                handleClose={handleClose}
+                buttonText="Submit"
+                formState={formState}
+                control={control}
+                sendingRequest={sendingRequest}
+                register={register}
+            />
+        </form>
     );
 }
 

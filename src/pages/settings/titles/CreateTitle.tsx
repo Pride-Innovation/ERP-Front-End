@@ -14,7 +14,6 @@ import TitleUtills from './utills';
 import { titleSchema } from './schema';
 import { toast } from 'react-toastify';
 import { createTitleService } from './service';
-import { Box } from '@mui/material';
 import TitleForm from './TitleForm';
 
 const CreateTitle = ({ sendingRequest, setSendingRequest, handleClose }: ICreateTitle) => {
@@ -53,18 +52,16 @@ const CreateTitle = ({ sendingRequest, setSendingRequest, handleClose }: ICreate
     };
 
     return (
-        <Box sx={{ width: "100%" }}>
-            <form autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
-                <TitleForm
-                    handleClose={handleClose}
-                    buttonText="Create Title"
-                    formState={formState}
-                    control={control}
-                    sendingRequest={sendingRequest}
-                    register={register}
-                />
-            </form>
-        </Box>
+        <form autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
+            <TitleForm
+                handleClose={handleClose}
+                buttonText="Create Title"
+                formState={formState}
+                control={control}
+                sendingRequest={sendingRequest}
+                register={register}
+            />
+        </form>
     );
 };
 
