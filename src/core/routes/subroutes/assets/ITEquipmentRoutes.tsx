@@ -7,6 +7,7 @@ Managing Director
 
 import { Route } from 'react-router';
 import ITEquipment from '../../../../pages/assets/ITEquipment';
+import { ROUTES } from '../../routes';
 import { PrivateRoute } from '../../PrivateRoutes';
 import { permissionsMock } from '../../../../mocks/settings';
 
@@ -15,7 +16,7 @@ const ITEquipmentRoutes = () => {
     return (
         <Route>
             <Route element={<PrivateRoute permission={permissionsMock[39]} />}>
-                <Route index element={<ITEquipment />} />
+                <Route path={ROUTES.LIST_IT_EQUIPMENT} element={<ITEquipment />} />
             </Route>
         </Route>
     )
