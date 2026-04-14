@@ -20,6 +20,8 @@ import {
 } from 'react-router';
 import { ROUTES } from '../../../core/routes/routes';
 import { useMemo } from 'react';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../store';
 import RoutesUtills from '../../../core/routes/utills';
 import { permissionsMock } from '../../../mocks/settings';
 import InboxOutlinedIcon from '@mui/icons-material/InboxOutlined';
@@ -74,6 +76,8 @@ const RequestsManagement = () => {
     const { pathname } = useLocation();
     const navigate = useNavigate();
     const { determinePermission, routePermission } = RoutesUtills();
+    const { requests } = useSelector((state: RootState) => state.AssetsRequestsStore);
+    const todayLabel = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 
     /* ── Filter tabs the current user is allowed to see ─────────────── */
     const visibleTabs = useMemo(
@@ -124,7 +128,7 @@ const RequestsManagement = () => {
                 <Box sx={{ position: 'absolute', bottom: -50, right: 140, width: 120, height: 120, borderRadius: '50%', bgcolor: alpha('#fff', 0.03), pointerEvents: 'none' }} />
 
                 {/* Title row */}
-                <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2.5 }}>
+                <Stack direction="row" alignItems="flex-start" justifyContent="space-between" sx={{ mb: 2.5 }}>
                     <Stack direction="row" alignItems="center" gap={2}>
                         <Box sx={{
                             width: 46, height: 46, borderRadius: 2,
@@ -143,6 +147,31 @@ const RequestsManagement = () => {
                             </Typography>
                         </Box>
                     </Stack>
+
+                    {/* Stats badge */}
+                    <Box
+                        sx={{
+                            bgcolor: 'rgba(255,255,255,0.12)',
+                            backdropFilter: 'blur(8px)',
+                            border: '1px solid rgba(255,255,255,0.18)',
+                            borderRadius: 2,
+                            px: 2.5,
+                            py: 1.25,
+                            textAlign: 'right',
+                            flexShrink: 0,
+                            display: { xs: 'none', sm: 'block' },
+                        }}
+                    >
+                        <Typography variant="h4" sx={{ color: '#fff', fontWeight: 800, lineHeight: 1 }}>
+                            {requests.length.toLocaleString()}
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)', fontWeight: 500, display: 'block', mt: 0.25 }}>
+                            records
+                        </Typography>
+                        <Typography sx={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.68rem', display: 'block', mt: 0.5 }}>
+                            {todayLabel}
+                        </Typography>
+                    </Box>
                 </Stack>
 
                 {/* Navigation Tabs */}

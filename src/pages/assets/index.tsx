@@ -25,17 +25,30 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import AssetTypeUtills from '../settings/assetTypes/utills';
 import AssetUtills from './Utills';
+import { ROUTES } from '../../core/routes/routes';
 
 const PRIMARY_COLOR = '#08796C';
 
 const AssetsManagement = () => {
   const [navigations, setNavigations] = useState<INavigation[]>([] as INavigation[]);
   const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore);
+  const { itAssets } = useSelector((state: RootState) => state.ITAssetStore);
+  const { officeAsset } = useSelector((state: RootState) => state.OfficeAssetStore);
+  const { fleetAssets } = useSelector((state: RootState) => state.FleetStore);
   const { pathname } = useLocation();
   const { determineAssetTypeByAssetName } = AssetUtills();
 
   const navigate = useNavigate();
   const { fetchAllAssetTypes } = AssetTypeUtills();
+
+  const activeCount = useMemo(() => {
+    if (pathname.startsWith(ROUTES.LIST_IT_EQUIPMENT)) return itAssets.length;
+    if (pathname.startsWith(ROUTES.LIST_OFFICE_EQUIPMENT)) return officeAsset.length;
+    if (pathname.startsWith(ROUTES.LIST_FLEET)) return fleetAssets.length;
+    return 0;
+  }, [pathname, itAssets.length, officeAsset.length, fleetAssets.length]);
+
+  const todayLabel = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 
   useEffect(() => {
     fetchAllAssetTypes();
@@ -81,22 +94,49 @@ const AssetsManagement = () => {
         <Box sx={{ position: 'absolute', bottom: -50, right: 140, width: 120, height: 120, borderRadius: '50%', bgcolor: alpha('#fff', 0.03), pointerEvents: 'none' }} />
 
         {/* Title row */}
-        <Stack direction="row" alignItems="center" gap={2} sx={{ mb: 2.5 }}>
-          <Box sx={{
-            width: 46, height: 46, borderRadius: 2,
-            bgcolor: alpha('#fff', 0.15),
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            backdropFilter: 'blur(4px)',
-            flexShrink: 0,
-          }}>
-            <InventoryOutlinedIcon sx={{ color: '#fff', fontSize: 24 }} />
-          </Box>
-          <Box>
-            <Typography variant="h5" sx={{ color: '#fff', fontWeight: 700, lineHeight: 1.2 }}>
-              Asset Management
+        <Stack direction="row" alignItems="flex-start" justifyContent="space-between" gap={2} sx={{ mb: 2.5 }}>
+          <Stack direction="row" alignItems="center" gap={2}>
+            <Box sx={{
+              width: 46, height: 46, borderRadius: 2,
+              bgcolor: alpha('#fff', 0.15),
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              backdropFilter: 'blur(4px)',
+              flexShrink: 0,
+            }}>
+              <InventoryOutlinedIcon sx={{ color: '#fff', fontSize: 24 }} />
+            </Box>
+            <Box>
+              <Typography variant="h5" sx={{ color: '#fff', fontWeight: 700, lineHeight: 1.2 }}>
+                Asset Management
+              </Typography>
+              <Typography variant="body2" sx={{ color: alpha('#fff', 0.70), mt: 0.25 }}>
+                {activeNavLabel ? `${activeNavLabel} · ` : ''}Manage and track organizational assets
+              </Typography>
+            </Box>
+          </Stack>
+
+          {/* Stats badge */}
+          <Box
+            sx={{
+              bgcolor: 'rgba(255,255,255,0.12)',
+              backdropFilter: 'blur(8px)',
+              border: '1px solid rgba(255,255,255,0.18)',
+              borderRadius: 2,
+              px: 2.5,
+              py: 1.25,
+              textAlign: 'right',
+              flexShrink: 0,
+              display: { xs: 'none', sm: 'block' },
+            }}
+          >
+            <Typography variant="h4" sx={{ color: '#fff', fontWeight: 800, lineHeight: 1 }}>
+              {activeCount.toLocaleString()}
             </Typography>
-            <Typography variant="body2" sx={{ color: alpha('#fff', 0.70), mt: 0.25 }}>
-              {activeNavLabel ? `${activeNavLabel} · ` : ''}Manage and track organizational assets
+            <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)', fontWeight: 500, display: 'block', mt: 0.25 }}>
+              records
+            </Typography>
+            <Typography sx={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.68rem', display: 'block', mt: 0.5 }}>
+              {todayLabel}
             </Typography>
           </Box>
         </Stack>
