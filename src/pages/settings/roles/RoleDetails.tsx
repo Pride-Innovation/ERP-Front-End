@@ -51,7 +51,7 @@ const RoleDetails = ({ role, deleteRole, updateRole }: IRoleDetails) => {
                 <Grid item xs={12} md={3} sx={{
                     borderRight: { md: `1px solid ${alpha(theme.palette.divider, 0.1)}` },
                     borderBottom: { xs: `1px solid ${alpha(theme.palette.divider, 0.1)}`, md: 'none' },
-                    bgcolor: alpha(theme.palette.background.paper, 0.4),
+                    background: 'linear-gradient(180deg, rgba(8,121,108,0.07) 0%, rgba(8,121,108,0.02) 100%)',
                     p: 3
                 }}>
                     <Stack spacing={2} alignItems="center" justifyContent="center" sx={{ height: '100%' }}>
@@ -138,7 +138,7 @@ const RoleDetails = ({ role, deleteRole, updateRole }: IRoleDetails) => {
                             display: "flex",
                             justifyContent: "space-between",
                             alignItems: "center",
-                            bgcolor: alpha(theme.palette.primary.main, 0.03),
+                            bgcolor: 'rgba(8,121,108,0.07)',
                             borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}`
                         }}
                     >

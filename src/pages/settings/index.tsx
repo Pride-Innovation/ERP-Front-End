@@ -27,6 +27,8 @@ import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
 
+const PRIMARY = '#08796C';
+
 const Settings = () => {
     const [path, setPath] = useState<string>("");
     const [mobileOpen, setMobileOpen] = useState<boolean>(false);
@@ -57,37 +59,44 @@ const Settings = () => {
         <Box sx={{ width: '100%', height: '100%' }}>
             <Box
                 sx={{
+                    background: 'linear-gradient(135deg, #08796C 0%, #065E53 100%)',
+                    p: 2.5,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    p: 2,
-                    bgcolor: alpha(theme.palette.primary.main, 0.03)
                 }}
             >
-                <Typography
-                    variant="subtitle1"
-                    sx={{
-                        fontWeight: 700,
-                        textTransform: "uppercase",
-                        color: theme.palette.primary.main,
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 1
-                    }}
-                >
-                    <SettingsOutlinedIcon fontSize="small" />
-                    System Settings
-                </Typography>
+                <Stack direction="row" alignItems="center" spacing={1.5}>
+                    <Box
+                        sx={{
+                            width: 32, height: 32, borderRadius: '8px',
+                            bgcolor: 'rgba(255,255,255,0.15)',
+                            border: '1px solid rgba(255,255,255,0.2)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        }}
+                    >
+                        <SettingsOutlinedIcon sx={{ color: '#fff', fontSize: 18 }} />
+                    </Box>
+                    <Typography
+                        sx={{
+                            fontWeight: 700,
+                            fontSize: '0.85rem',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.06em',
+                            color: '#fff',
+                        }}
+                    >
+                        System Settings
+                    </Typography>
+                </Stack>
                 {isMobile && (
-                    <IconButton onClick={handleDrawerToggle} size="small">
+                    <IconButton onClick={handleDrawerToggle} size="small" sx={{ color: 'rgba(255,255,255,0.8)' }}>
                         <CloseIcon fontSize="small" />
                     </IconButton>
                 )}
             </Box>
 
-            <Divider sx={{ opacity: 0.6 }} />
-
-            <Box sx={{ p: 2 }}>
+            <Box sx={{ px: 2, pb: 2, pt: 2 }}>
                 <Stack spacing={1}>
                     {navigations.map((item) => (
                         <Button
@@ -99,29 +108,24 @@ const Settings = () => {
                             sx={{
                                 justifyContent: "flex-start",
                                 textTransform: "none",
-                                borderRadius: 1.5,
-                                py: 1.2,
+                                borderRadius: '8px',
+                                py: 1,
                                 px: 2,
                                 fontWeight: isActive(item) ? 600 : 500,
-                                color: isActive(item)
-                                    ? theme.palette.common.white
-                                    : theme.palette.text.primary,
-                                bgcolor: isActive(item)
-                                    ? theme.palette.primary.main
-                                    : "transparent",
+                                fontSize: '0.875rem',
+                                color: isActive(item) ? '#fff' : '#334155',
+                                bgcolor: isActive(item) ? PRIMARY : 'transparent',
                                 boxShadow: isActive(item)
-                                    ? `0 2px 8px ${alpha(theme.palette.primary.main, 0.25)}`
+                                    ? `0 2px 8px ${alpha(PRIMARY, 0.3)}`
                                     : 'none',
                                 "&:hover": {
                                     bgcolor: isActive(item)
-                                        ? theme.palette.primary.dark
-                                        : alpha(theme.palette.primary.main, 0.05),
+                                        ? '#065E53'
+                                        : alpha(PRIMARY, 0.06),
                                 },
-                                transition: 'all 0.2s ease',
+                                transition: 'all 0.18s ease',
                                 "& .MuiButton-startIcon": {
-                                    color: isActive(item)
-                                        ? theme.palette.common.white
-                                        : theme.palette.primary.main,
+                                    color: isActive(item) ? '#fff' : PRIMARY,
                                 }
                             }}
                         >
@@ -134,86 +138,130 @@ const Settings = () => {
     );
 
     return (
-        <Container maxWidth="xl" sx={{ mt: 3, mb: 5 }}>
-            <Paper
-                elevation={0}
+        <Box sx={{ bgcolor: '#F1F5FB', minHeight: '100vh' }}>
+            {/* Page gradient header */}
+            <Box
                 sx={{
-                    width: "100%",
-                    minHeight: "85vh",
-                    display: "flex",
-                    flexDirection: { xs: "column", md: "row" },
-                    borderRadius: 3,
-                    overflow: "hidden",
-                    border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
-                    boxShadow: `0 4px 20px ${alpha(theme.palette.common.black, 0.05)}`,
+                    background: 'linear-gradient(135deg, #08796C 0%, #065E53 60%, #044a42 100%)',
+                    px: { xs: 2, md: 4 },
+                    pt: 4,
+                    pb: 7,
+                    position: 'relative',
+                    overflow: 'hidden',
                 }}
             >
-                {/* Mobile header */}
-                {isMobile && (
+                <Box sx={{
+                    position: 'absolute', top: -50, right: -30,
+                    width: 220, height: 220, borderRadius: '50%',
+                    bgcolor: 'rgba(255,255,255,0.04)',
+                    pointerEvents: 'none',
+                }} />
+                <Stack direction="row" alignItems="center" spacing={2}>
                     <Box
                         sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            p: 2,
-                            borderBottom: `1px solid ${theme.palette.divider}`
+                            width: 54, height: 54, borderRadius: '14px',
+                            bgcolor: 'rgba(255,255,255,0.15)',
+                            backdropFilter: 'blur(8px)',
+                            border: '1px solid rgba(255,255,255,0.2)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            flexShrink: 0,
                         }}
                     >
-                        <Typography variant="h6" fontWeight={600} color="primary">
-                            Settings
+                        <SettingsOutlinedIcon sx={{ color: '#fff', fontSize: 28 }} />
+                    </Box>
+                    <Box>
+                        <Typography variant="h5" sx={{ color: '#fff', fontWeight: 700, mb: 0.25 }}>
+                            System Settings
                         </Typography>
-                        <IconButton onClick={handleDrawerToggle} edge="end">
-                            <MenuIcon />
-                        </IconButton>
+                        <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.72)' }}>
+                            Configure roles, branches, regions, commodities, titles, suppliers & departments
+                        </Typography>
                     </Box>
-                )}
+                </Stack>
+            </Box>
 
-                {/* Sidebar - desktop version is fixed, mobile is in a drawer */}
-                {isMobile ? (
-                    <Drawer
-                        variant="temporary"
-                        open={mobileOpen}
-                        onClose={handleDrawerToggle}
-                        ModalProps={{
-                            keepMounted: true, // Better mobile performance
-                        }}
-                        sx={{
-                            display: { xs: 'block', md: 'none' },
-                            '& .MuiDrawer-paper': {
-                                boxSizing: 'border-box',
-                                width: 280,
-                                borderRadius: '0 8px 8px 0'
-                            },
-                        }}
-                    >
-                        {sidebar}
-                    </Drawer>
-                ) : (
-                    <Box
-                        sx={{
-                            width: { md: "260px" },
-                            bgcolor: theme.palette.background.paper,
-                            borderRight: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
-                            display: { xs: 'none', md: 'block' },
-                        }}
-                    >
-                        {sidebar}
-                    </Box>
-                )}
-
-                <Box
+            {/* Main content pulled up to overlap gradient */}
+            <Container maxWidth="xl" sx={{ mt: -4, mb: 5, position: 'relative', zIndex: 1, px: { xs: 1, md: 3 } }}>
+                <Paper
+                    elevation={0}
                     sx={{
-                        flex: 1,
-                        p: { xs: 2, sm: 3, md: 4 },
-                        bgcolor: alpha(theme.palette.background.paper, 0.5),
-                        position: 'relative',
-                        overflow: 'auto',
+                        width: "100%",
+                        minHeight: "80vh",
+                        display: "flex",
+                        flexDirection: { xs: "column", md: "row" },
+                        borderRadius: 3,
+                        overflow: "hidden",
+                        border: `1px solid ${alpha(PRIMARY, 0.12)}`,
+                        boxShadow: '0 4px 28px rgba(0,0,0,0.09)',
                     }}
                 >
-                    <Outlet />
-                </Box>
-            </Paper>
-        </Container>
+                    {/* Mobile header */}
+                    {isMobile && (
+                        <Box
+                            sx={{
+                                background: 'linear-gradient(135deg, #08796C 0%, #065E53 100%)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                p: 2,
+                            }}
+                        >
+                            <Typography variant="h6" fontWeight={600} sx={{ color: '#fff' }}>
+                                Settings
+                            </Typography>
+                            <IconButton onClick={handleDrawerToggle} edge="end" sx={{ color: '#fff' }}>
+                                <MenuIcon />
+                            </IconButton>
+                        </Box>
+                    )}
+
+                    {/* Sidebar - desktop version is fixed, mobile is in a drawer */}
+                    {isMobile ? (
+                        <Drawer
+                            variant="temporary"
+                            open={mobileOpen}
+                            onClose={handleDrawerToggle}
+                            ModalProps={{
+                                keepMounted: true,
+                            }}
+                            sx={{
+                                display: { xs: 'block', md: 'none' },
+                                '& .MuiDrawer-paper': {
+                                    boxSizing: 'border-box',
+                                    width: 280,
+                                    borderRadius: '0 8px 8px 0'
+                                },
+                            }}
+                        >
+                            {sidebar}
+                        </Drawer>
+                    ) : (
+                        <Box
+                            sx={{
+                                width: { md: "260px" },
+                                bgcolor: '#fff',
+                                borderRight: `1px solid ${alpha(PRIMARY, 0.1)}`,
+                                display: { xs: 'none', md: 'block' },
+                            }}
+                        >
+                            {sidebar}
+                        </Box>
+                    )}
+
+                    <Box
+                        sx={{
+                            flex: 1,
+                            p: { xs: 2, sm: 3, md: 4 },
+                            bgcolor: '#FAFBFE',
+                            position: 'relative',
+                            overflow: 'auto',
+                        }}
+                    >
+                        <Outlet />
+                    </Box>
+                </Paper>
+            </Container>
+        </Box>
     );
 };
 

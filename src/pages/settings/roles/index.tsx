@@ -7,6 +7,7 @@ Managing Director
 
 import { Box, Button, Typography, Stack, Divider, alpha, useTheme, Fade, CircularProgress } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
+import ShieldOutlinedIcon from '@mui/icons-material/ShieldOutlined';
 import RoleDetails from './RoleDetails';
 import { IRole } from '../interface';
 import ModalComponent from '../../../components/modal';
@@ -18,6 +19,8 @@ import CreateRole from './CreateRole';
 import UpdateRole from './UpdateRole';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../store';
+
+const PRIMARY = '#08796C';
 
 const Roles = () => {
     const theme = useTheme();
@@ -96,41 +99,30 @@ const Roles = () => {
             }
 
             <Box sx={{ width: "100%" }}>
-                {/* Page Header */}
-                <Box sx={{ mb: 4 }}>
-                    <Typography
-                        variant="h5"
-                        fontWeight={600}
-                        color="primary"
-                        sx={{ mb: 1 }}
-                    >
-                        Role Management
-                    </Typography>
-                    <Stack
-                        direction="row"
-                        justifyContent="space-between"
-                        alignItems="center"
-                    >
-                        <Typography variant="body2" color="text.secondary">
-                            {roles?.length || 0} roles found
-                        </Typography>
+                {/* Sub-page Header */}
+                <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 3, pb: 2.5, borderBottom: '1px solid #E2E8F0' }}>
+                    <Stack direction="row" alignItems="center" spacing={1.5}>
+                        <Box sx={{ width: 44, height: 44, borderRadius: '12px', background: 'linear-gradient(135deg, #08796C, #065E53)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            <ShieldOutlinedIcon sx={{ color: '#fff', fontSize: 22 }} />
+                        </Box>
+                        <Box>
+                            <Typography variant="h6" sx={{ fontWeight: 700, color: '#1E293B', lineHeight: 1.3 }}>Role Management</Typography>
+                            <Typography variant="body2" sx={{ color: '#64748B' }}>Define access roles and configure module-level permissions</Typography>
+                        </Box>
+                    </Stack>
+                    <Stack direction="row" spacing={1.5} alignItems="center">
+                        <Box sx={{ bgcolor: alpha(PRIMARY, 0.08), color: PRIMARY, fontWeight: 700, borderRadius: '6px', px: 1.5, py: 0.5, fontSize: '0.75rem' }}>
+                            {roles?.length || 0} roles
+                        </Box>
                         <Button
                             onClick={createRole}
                             startIcon={<AddIcon />}
-                            variant='contained'
-                            color='primary'
-                            sx={{
-                                px: 3,
-                                py: 1,
-                                borderRadius: 1.5,
-                                textTransform: 'none',
-                                boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.2)}`
-                            }}
+                            variant="contained"
+                            sx={{ height: 36, px: 2.5, borderRadius: '8px', textTransform: 'none', fontWeight: 600, bgcolor: PRIMARY, '&:hover': { bgcolor: '#065E53' }, boxShadow: `0 2px 8px ${alpha(PRIMARY, 0.3)}` }}
                         >
-                            Create New Role
+                            Create Role
                         </Button>
                     </Stack>
-                    <Divider sx={{ mt: 2, opacity: 0.6 }} />
                 </Box>
 
                 {/* Role list */}

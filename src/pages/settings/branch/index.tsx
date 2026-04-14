@@ -40,6 +40,8 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../../store";
 import Loading from "../../../components/loading";
 
+const PRIMARY = '#08796C';
+
 const Branches = () => {
   const [currentBranch, setCurrentBranch] = useState<IBranch>({} as IBranch);
   const [sendingRequest, setSendingRequest] = useState<boolean>(false);
@@ -132,148 +134,142 @@ const Branches = () => {
         </ModalComponent>
       )}
 
-      {/* Page Header */}
-      <Box sx={{ mb: 4 }}>
-        <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 1 }}>
-          <AccountBalanceOutlinedIcon color="primary" />
-          <Typography variant="h5" fontWeight={600} color="primary">
-            Branch Management
-          </Typography>
-        </Stack>
-
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-          Manage branch offices across regions and districts
-        </Typography>
-
-        <Divider sx={{ mb: 3 }} />
-
-        {/* Toolbar with Search and Actions */}
-        <Stack
-          direction={{ xs: "column", sm: "row" }}
-          spacing={2}
-          alignItems={{ xs: "stretch", sm: "center" }}
-          justifyContent="space-between"
-        >
-          <Stack
-            direction={{ xs: "column", sm: "row" }}
-            spacing={2}
-            alignItems={{ xs: "stretch", sm: "center" }}
-            sx={{ flex: 1 }}
-          >
-            <TextField
-              size="small"
-              placeholder="Search branches..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon fontSize="small" />
-                  </InputAdornment>
-                ),
-              }}
-              sx={{
-                minWidth: 220,
-                flex: { xs: 1, md: "unset" }
-              }}
-            />
-
-            <FormControl
-              size="small"
-              variant="outlined"
-              sx={{
-                minWidth: 180,
-                flex: { xs: 1, md: "unset" }
-              }}
-            >
-              <Select
-                labelId="region-filter-label"
-                id="region-filter"
-                value={filter}
-                onChange={(e) => setFilter(e.target.value)}
-                startAdornment={
-                  <FilterListIcon
-                    fontSize="small"
-                    sx={{
-                      ml: 0.5,
-                      mr: 1,
-                      color: theme.palette.primary.main,
-                      opacity: 0.8
-                    }}
-                  />
-                }
-                displayEmpty
-                renderValue={(value) => (
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      fontWeight: 500,
-                      color: value === "all" ? theme.palette.text.secondary : theme.palette.primary.main
-                    }}
-                  >
-                    {value === "all" ? "All Regions" : value}
-                  </Typography>
-                )}
-                sx={{
-                  '& .MuiOutlinedInput-notchedOutline': {
-                    borderColor: alpha(theme.palette.divider, 0.3),
-                  },
-                  '&:hover .MuiOutlinedInput-notchedOutline': {
-                    borderColor: alpha(theme.palette.primary.main, 0.5),
-                  },
-                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                    borderColor: theme.palette.primary.main,
-                  },
-                  borderRadius: 1.5,
-                  bgcolor: alpha(theme.palette.background.paper, 0.8),
-                }}
-                MenuProps={{
-                  PaperProps: {
-                    elevation: 4,
-                    sx: {
-                      mt: 0.5,
-                      borderRadius: 1.5,
-                      boxShadow: `0 4px 20px ${alpha(theme.palette.common.black, 0.08)}`,
-                      maxHeight: 300
-                    }
-                  }
-                }}
-              >
-                <MenuItem value="all" sx={{ py: 1 }}>
-                  <Typography variant="body2">All Regions</Typography>
-                </MenuItem>
-
-                {regions.length > 0 && <Divider sx={{ my: 0.5 }} />}
-
-                {regions.map(region => (
-                  <MenuItem key={region} value={region} sx={{ py: 1 }}>
-                    <Typography variant="body2">{region}</Typography>
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Stack>
-
-          <Button
-            onClick={createBranch}
-            startIcon={<AddIcon />}
-            variant="contained"
-            color="primary"
+      {/* Sub-page Header */}
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'flex-start',
+          justifyContent: 'space-between',
+          mb: 3,
+          pb: 2.5,
+          borderBottom: '1px solid #E2E8F0',
+        }}
+      >
+        <Stack direction="row" alignItems="center" spacing={1.5}>
+          <Box
             sx={{
-              px: 3,
-              py: 1,
-              borderRadius: 1.5,
-              textTransform: "none",
-              fontWeight: 500,
-              boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.2)}`
+              width: 44, height: 44, borderRadius: '12px',
+              background: 'linear-gradient(135deg, #08796C, #065E53)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              flexShrink: 0,
             }}
           >
-            Add New Branch
-          </Button>
+            <AccountBalanceOutlinedIcon sx={{ color: '#fff', fontSize: 22 }} />
+          </Box>
+          <Box>
+            <Typography variant="h6" sx={{ fontWeight: 700, color: '#1E293B', lineHeight: 1.3 }}>
+              Branch Management
+            </Typography>
+            <Typography variant="body2" sx={{ color: '#64748B' }}>
+              Manage branch offices across regions and districts
+            </Typography>
+          </Box>
         </Stack>
+        <Box
+          sx={{
+            bgcolor: alpha(PRIMARY, 0.08), color: PRIMARY, fontWeight: 700,
+            borderRadius: '6px', px: 1.5, py: 0.5, fontSize: '0.75rem',
+            flexShrink: 0, mt: 0.5,
+          }}
+        >
+          {filteredBranches.length} branches
+        </Box>
       </Box>
+
+      {/* Filter Bar */}
+      <Stack
+        direction={{ xs: "column", sm: "row" }}
+        spacing={1.5}
+        alignItems={{ xs: "stretch", sm: "center" }}
+        justifyContent="space-between"
+        sx={{ mb: 3 }}
+      >
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          spacing={1.5}
+          alignItems={{ xs: "stretch", sm: "center" }}
+          sx={{ flex: 1 }}
+        >
+          <TextField
+            size="small"
+            placeholder="Search branches..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon fontSize="small" sx={{ color: '#94A3B8' }} />
+                </InputAdornment>
+              ),
+            }}
+            sx={{
+              minWidth: 220,
+              flex: { xs: 1, md: "unset" },
+              '& .MuiOutlinedInput-root': {
+                borderRadius: '8px', height: 36, bgcolor: '#fff',
+                '& fieldset': { borderColor: '#E2E8F0' },
+                '&:hover fieldset': { borderColor: PRIMARY },
+                '&.Mui-focused fieldset': { borderColor: PRIMARY, borderWidth: 1.5 },
+              },
+            }}
+          />
+
+          <FormControl
+            size="small"
+            variant="outlined"
+            sx={{
+              minWidth: 180,
+              flex: { xs: 1, md: "unset" },
+              '& .MuiOutlinedInput-root': {
+                borderRadius: '8px', height: 36, bgcolor: '#fff',
+                '& fieldset': { borderColor: '#E2E8F0' },
+                '&:hover fieldset': { borderColor: PRIMARY },
+                '&.Mui-focused fieldset': { borderColor: PRIMARY, borderWidth: 1.5 },
+              },
+            }}
+          >
+            <Select
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+              startAdornment={
+                <FilterListIcon fontSize="small" sx={{ ml: 0.5, mr: 1, color: PRIMARY, opacity: 0.8 }} />
+              }
+              displayEmpty
+              renderValue={(value) => (
+                <Typography variant="body2" sx={{ fontWeight: 500, color: value === "all" ? '#94A3B8' : PRIMARY }}>
+                  {value === "all" ? "All Regions" : value}
+                </Typography>
+              )}
+              MenuProps={{ PaperProps: { elevation: 4, sx: { mt: 0.5, borderRadius: 1.5, maxHeight: 300 } } }}
+            >
+              <MenuItem value="all" sx={{ py: 1 }}>
+                <Typography variant="body2">All Regions</Typography>
+              </MenuItem>
+              {regions.length > 0 && <Divider sx={{ my: 0.5 }} />}
+              {regions.map(region => (
+                <MenuItem key={region} value={region} sx={{ py: 1 }}>
+                  <Typography variant="body2">{region}</Typography>
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Stack>
+
+        <Button
+          onClick={createBranch}
+          startIcon={<AddIcon />}
+          variant="contained"
+          sx={{
+            height: 36, px: 2.5, borderRadius: '8px',
+            textTransform: 'none', fontWeight: 600,
+            bgcolor: PRIMARY, flexShrink: 0,
+            '&:hover': { bgcolor: '#065E53' },
+            boxShadow: `0 2px 8px ${alpha(PRIMARY, 0.3)}`,
+          }}
+        >
+          Add Branch
+        </Button>
+      </Stack>
 
       {/* Branch Cards */}
       <Box sx={{ position: 'relative', minHeight: '200px' }}>

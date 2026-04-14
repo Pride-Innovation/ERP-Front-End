@@ -58,7 +58,7 @@ const DepartmentDetails = ({
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     p: 2.5,
-                    bgcolor: alpha(theme.palette.primary.main, 0.04),
+                    background: 'linear-gradient(135deg, rgba(8,121,108,0.1) 0%, rgba(8,121,108,0.03) 100%)',
                     borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}`
                 }}
             >
@@ -71,7 +71,7 @@ const DepartmentDetails = ({
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            bgcolor: alpha(theme.palette.primary.main, 0.12)
+                            bgcolor: 'rgba(8,121,108,0.18)'
                         }}
                     >
                         <AccountTreeOutlinedIcon sx={{ color: theme.palette.primary.main }} />

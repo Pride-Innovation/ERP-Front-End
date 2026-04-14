@@ -36,6 +36,8 @@ import { RootState } from '../../../store';
 import Loading from '../../../components/loading';
 import DepartmentDetails from './DepartmentDetails';
 
+const PRIMARY = '#08796C';
+
 const Departments = () => {
     const { setModalState, handleClose, handleOpen, modalState, open, fetchAllDepartments, loading } = DepartmentUtills();
     const [currentDepartment, setCurrentDepartment] = useState<IDepartment>({} as IDepartment);
@@ -108,64 +110,37 @@ const Departments = () => {
                 </ModalComponent>
             )}
 
-            {/* Page Header */}
-            <Box sx={{ mb: 4 }}>
-                <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 1 }}>
-                    <AccountTreeOutlinedIcon color="primary" />
-                    <Typography variant="h5" fontWeight={600} color="primary">
-                        Department Management
-                    </Typography>
+            {/* Sub-page Header */}
+            <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 3, pb: 2.5, borderBottom: '1px solid #E2E8F0' }}>
+                <Stack direction="row" alignItems="center" spacing={1.5}>
+                    <Box sx={{ width: 44, height: 44, borderRadius: '12px', background: 'linear-gradient(135deg, #08796C, #065E53)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <AccountTreeOutlinedIcon sx={{ color: '#fff', fontSize: 22 }} />
+                    </Box>
+                    <Box>
+                        <Typography variant="h6" sx={{ fontWeight: 700, color: '#1E293B', lineHeight: 1.3 }}>Department Management</Typography>
+                        <Typography variant="body2" sx={{ color: '#64748B' }}>Manage organizational departments, leadership, and team structures</Typography>
+                    </Box>
                 </Stack>
-
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                    Manage organizational departments, leadership, and team structures
-                </Typography>
-
-                <Divider sx={{ mb: 3 }} />
-
-                {/* Toolbar with Search and Actions */}
-                <Stack
-                    direction={{ xs: "column", sm: "row" }}
-                    spacing={2}
-                    alignItems={{ xs: "stretch", sm: "center" }}
-                    justifyContent="space-between"
-                >
-                    <TextField
-                        size="small"
-                        placeholder="Search departments..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        InputProps={{
-                            startAdornment: (
-                                <InputAdornment position="start">
-                                    <SearchIcon fontSize="small" />
-                                </InputAdornment>
-                            ),
-                        }}
-                        sx={{
-                            minWidth: 220,
-                            flex: { xs: 1, md: "unset" }
-                        }}
-                    />
-
-                    <Button
-                        onClick={createDepartment}
-                        startIcon={<AddIcon />}
-                        variant="contained"
-                        color="primary"
-                        sx={{
-                            px: 3,
-                            py: 1,
-                            borderRadius: 1.5,
-                            textTransform: "none",
-                            fontWeight: 500,
-                            boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.2)}`
-                        }}
-                    >
-                        Add New Department
-                    </Button>
-                </Stack>
+                <Box sx={{ bgcolor: alpha(PRIMARY, 0.08), color: PRIMARY, fontWeight: 700, borderRadius: '6px', px: 1.5, py: 0.5, fontSize: '0.75rem', flexShrink: 0, mt: 0.5 }}>
+                    {filteredDepartments.length} departments
+                </Box>
             </Box>
+
+            {/* Filter Bar */}
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} alignItems={{ xs: "stretch", sm: "center" }} justifyContent="space-between" sx={{ mb: 3 }}>
+                <TextField
+                    size="small"
+                    placeholder="Search departments..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    InputProps={{ startAdornment: (<InputAdornment position="start"><SearchIcon fontSize="small" sx={{ color: '#94A3B8' }} /></InputAdornment>) }}
+                    sx={{ minWidth: 240, '& .MuiOutlinedInput-root': { borderRadius: '8px', height: 36, bgcolor: '#fff', '& fieldset': { borderColor: '#E2E8F0' }, '&:hover fieldset': { borderColor: PRIMARY }, '&.Mui-focused fieldset': { borderColor: PRIMARY, borderWidth: 1.5 } } }}
+                />
+                <Button onClick={createDepartment} startIcon={<AddIcon />} variant="contained"
+                    sx={{ height: 36, px: 2.5, borderRadius: '8px', textTransform: 'none', fontWeight: 600, bgcolor: PRIMARY, flexShrink: 0, '&:hover': { bgcolor: '#065E53' }, boxShadow: `0 2px 8px ${alpha(PRIMARY, 0.3)}` }}>
+                    Add Department
+                </Button>
+            </Stack>
 
             {/* Department Cards */}
             <Box sx={{ position: 'relative', minHeight: '200px' }}>
