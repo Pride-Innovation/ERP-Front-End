@@ -249,33 +249,30 @@ const ViewBranch = ({ branch, deleteBranch, updateBranch }: IBranchDetails) => {
             {/* Actions */}
             <Box
                 sx={{
-                    mt: 'auto',
                     p: 2,
-                    pt: 0,
+                    borderTop: `1px solid ${alpha(theme.palette.divider, 0.12)}`,
                     display: 'flex',
                     justifyContent: 'space-between',
-                    gap: 1
+                    gap: 1,
+                    bgcolor: alpha('#08796C', 0.02),
                 }}
             >
                 <Button
                     onClick={() => updateBranch(branch)}
-                    variant="outlined"
+                    variant="contained"
                     fullWidth
                     size="small"
                     sx={{
                         textTransform: 'none',
-                        color: theme.palette.primary.main,
-                        borderColor: alpha(theme.palette.primary.main, 0.3),
-                        '&:hover': {
-                            borderColor: theme.palette.primary.main,
-                            bgcolor: alpha(theme.palette.primary.main, 0.04)
-                        },
-                        fontWeight: 500,
-                        borderRadius: 1.5
+                        bgcolor: '#08796C',
+                        '&:hover': { bgcolor: '#065E53' },
+                        fontWeight: 600,
+                        borderRadius: '8px',
+                        boxShadow: '0 2px 6px rgba(8,121,108,0.3)',
                     }}
                     startIcon={<EditOutlinedIcon />}
                 >
-                    Update
+                    Edit
                 </Button>
                 <Button
                     onClick={() => deleteBranch(branch)}
@@ -285,13 +282,13 @@ const ViewBranch = ({ branch, deleteBranch, updateBranch }: IBranchDetails) => {
                     color="error"
                     sx={{
                         textTransform: 'none',
-                        borderColor: alpha(theme.palette.error.main, 0.3),
+                        borderColor: alpha(theme.palette.error.main, 0.4),
                         '&:hover': {
                             borderColor: theme.palette.error.main,
                             bgcolor: alpha(theme.palette.error.main, 0.04)
                         },
-                        fontWeight: 500,
-                        borderRadius: 1.5
+                        fontWeight: 600,
+                        borderRadius: '8px',
                     }}
                     startIcon={<DeleteOutlineOutlinedIcon />}
                 >

@@ -56,14 +56,14 @@ const CommodityForm = ({
                 mb: 3,
                 borderRadius: 2,
                 overflow: 'hidden',
-                border: `1px solid ${alpha(theme.palette.divider, 0.1)}`
+                border: `1px solid ${alpha('#08796C', 0.15)}`
             }}
         >
             <Box
                 sx={{
                     p: 2,
-                    bgcolor: alpha(theme.palette.background.default, 0.5),
-                    borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+                    bgcolor: alpha('#08796C', 0.04),
+                    borderBottom: `1px solid ${alpha('#08796C', 0.1)}`,
                     display: 'flex',
                     alignItems: 'center',
                     gap: 1.5
@@ -73,16 +73,17 @@ const CommodityForm = ({
                     sx={{
                         width: 32,
                         height: 32,
-                        borderRadius: 1,
-                        bgcolor: alpha(theme.palette.primary.main, 0.1),
+                        borderRadius: '7px',
+                        background: 'linear-gradient(135deg, #08796C, #065E53)',
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'center'
+                        justifyContent: 'center',
+                        '& .MuiSvgIcon-root': { color: '#fff', fontSize: '15px' }
                     }}
                 >
                     {icon}
                 </Box>
-                <Typography variant="subtitle1" fontWeight={600} color="primary">
+                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#08796C' }}>
                     {title}
                 </Typography>
             </Box>
@@ -126,25 +127,17 @@ const CommodityForm = ({
     };
 
     return (
-        <Box
-            sx={{
-                width: "100%",
-                maxHeight: '80vh',
-                overflow: 'hidden',
-                display: 'flex',
-                flexDirection: 'column'
-            }}
-        >
+        <Box sx={{ width: '100%' }}>
             {/* Form Header */}
-            <Box sx={{ mb: 3 }}>
+            <Box sx={{ mb: 3, pb: 2, borderBottom: `1px solid ${alpha('#08796C', 0.1)}` }}>
                 <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 1 }}>
-                    <CategoryOutlinedIcon color="primary" />
-                    <Typography variant="h6" fontWeight={600} color="primary">
+                    <CategoryOutlinedIcon sx={{ color: '#08796C' }} />
+                    <Typography variant="h6" fontWeight={600} sx={{ color: '#1E293B' }}>
                         {update ? 'Update Commodity' : 'Create New Commodity'}
                     </Typography>
                 </Stack>
 
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" sx={{ color: '#64748B' }}>
                     {update
                         ? 'Update commodity details and asset classification'
                         : 'Define a new commodity type with measurement units and asset classification'
@@ -152,51 +145,32 @@ const CommodityForm = ({
                 </Typography>
             </Box>
 
-            {/* Scrollable form content */}
-            <Box
-                sx={{
-                    overflow: 'auto',
-                    flex: 1,
-                    pr: 1,
-                    '&::-webkit-scrollbar': {
-                        width: '6px',
-                    },
-                    '&::-webkit-scrollbar-thumb': {
-                        backgroundColor: alpha(theme.palette.primary.main, 0.2),
-                        borderRadius: '3px',
-                    },
-                    '&::-webkit-scrollbar-track': {
-                        backgroundColor: alpha(theme.palette.background.default, 0.5),
-                    }
-                }}
-            >
-                {/* Basic Information */}
-                <FormSection title="Basic Information" icon={<InfoIcon fontSize="small" color="primary" />}>
-                    {basicFields.map((field) => (
-                        <Grid item xs={12} key={field.value}>
-                            {renderField(field)}
-                        </Grid>
-                    ))}
-                </FormSection>
+            {/* Basic Information */}
+            <FormSection title="Basic Information" icon={<InfoIcon fontSize="small" />}>
+                {basicFields.map((field) => (
+                    <Grid item xs={12} key={field.value}>
+                        {renderField(field)}
+                    </Grid>
+                ))}
+            </FormSection>
 
-                {/* Measurement Details */}
-                <FormSection title="Measurement" icon={<LayersIcon fontSize="small" color="primary" />}>
-                    {measurementFields.map((field) => (
-                        <Grid item xs={12} key={field.value}>
-                            {renderField(field)}
-                        </Grid>
-                    ))}
-                </FormSection>
+            {/* Measurement Details */}
+            <FormSection title="Measurement" icon={<LayersIcon fontSize="small" />}>
+                {measurementFields.map((field) => (
+                    <Grid item xs={12} key={field.value}>
+                        {renderField(field)}
+                    </Grid>
+                ))}
+            </FormSection>
 
-                {/* Asset Classification */}
-                <FormSection title="Asset Classification" icon={<AssignmentIcon fontSize="small" color="primary" />}>
-                    {classificationFields.map((field) => (
-                        <Grid item xs={12} key={field.value}>
-                            {renderField(field)}
-                        </Grid>
-                    ))}
-                </FormSection>
-            </Box>
+            {/* Asset Classification */}
+            <FormSection title="Asset Classification" icon={<AssignmentIcon fontSize="small" />}>
+                {classificationFields.map((field) => (
+                    <Grid item xs={12} key={field.value}>
+                        {renderField(field)}
+                    </Grid>
+                ))}
+            </FormSection>
 
             {/* Form Actions */}
             <Box
@@ -219,9 +193,13 @@ const CommodityForm = ({
                         type="button"
                         variant="outlined"
                         sx={{
-                            minWidth: '100px',
-                            borderRadius: 1.5,
-                            textTransform: 'none'
+                            minWidth: '110px',
+                            borderRadius: '8px',
+                            py: 0.85,
+                            textTransform: 'none',
+                            borderColor: alpha('#000', 0.2),
+                            color: 'text.secondary',
+                            '&:hover': { borderColor: alpha('#000', 0.3) },
                         }}
                     >
                         Cancel
@@ -231,13 +209,16 @@ const CommodityForm = ({
                         type="submit"
                         variant="contained"
                         sx={{
-                            minWidth: '100px',
-                            borderRadius: 1.5,
+                            minWidth: '110px',
+                            borderRadius: '8px',
+                            py: 0.85,
                             textTransform: 'none',
-                            boxShadow: `0 2px 8px ${alpha(theme.palette.primary.main, 0.2)}`
+                            bgcolor: '#08796C',
+                            '&:hover': { bgcolor: '#065E53' },
+                            boxShadow: '0 2px 8px rgba(8,121,108,0.3)',
                         }}
                     >
-                        {sendingRequest ? <CircularProgress size={24} color="inherit" /> : buttonText}
+                        {sendingRequest ? <CircularProgress size={20} color="inherit" /> : buttonText}
                     </MuiButton>
                 </Stack>
             </Box>

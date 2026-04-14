@@ -13,7 +13,6 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { commoditySchema } from "./schema";
 import { useEffect } from "react";
 import { toast } from "react-toastify";
-import { Box } from "@mui/material";
 import CommodityForm from "./CommodityForm";
 import { createCommodityService } from "./service";
 
@@ -57,18 +56,16 @@ const CreateCommodity = ({
     };
 
     return (
-        <Box sx={{ width: "100%" }}>
-            <form autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
-                <CommodityForm
-                    handleClose={handleClose}
-                    buttonText="Create Commodity"
-                    formState={formState}
-                    control={control}
-                    sendingRequest={sendingRequest}
-                    register={register}
-                />
-            </form>
-        </Box>
+        <form autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
+            <CommodityForm
+                handleClose={handleClose}
+                buttonText="Create Commodity"
+                formState={formState}
+                control={control}
+                sendingRequest={sendingRequest}
+                register={register}
+            />
+        </form>
     );
 };
 

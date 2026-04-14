@@ -14,7 +14,6 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { commoditySchema } from "./schema";
 import { updateCommodityService } from "./service";
 import { toast } from "react-toastify";
-import { Box } from "@mui/material";
 import CommodityForm from "./CommodityForm";
 
 const UpdateCommodity = ({ handleClose, sendingRequest, setSendingRequest, commodity }: IUpdateCommodity) => {
@@ -60,19 +59,17 @@ const UpdateCommodity = ({ handleClose, sendingRequest, setSendingRequest, commo
     };
 
     return (
-        <Box sx={{ width: "100%" }}>
-            <form autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
-                <CommodityForm
-                    handleClose={handleClose}
-                    buttonText="Update Commodity"
-                    formState={formState}
-                    control={control}
-                    sendingRequest={sendingRequest}
-                    register={register}
-                    update={true}
-                />
-            </form>
-        </Box>
+        <form autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
+            <CommodityForm
+                handleClose={handleClose}
+                buttonText="Update Commodity"
+                formState={formState}
+                control={control}
+                sendingRequest={sendingRequest}
+                register={register}
+                update={true}
+            />
+        </form>
     );
 };
 

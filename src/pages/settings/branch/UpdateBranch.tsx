@@ -63,23 +63,17 @@ const UpdateBranch = ({ handleClose, sendingRequest, branch, setSendingRequest }
     };
 
     return (
-        <Paper elevation={3} sx={{ borderRadius: 3, boxShadow: "none", maxWidth: "1200px", mx: "auto" }}>
-            <form autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
-                <Grid container spacing={2}>
-                    <Grid item xs={12}>
-                        <BranchForm
-                            update
-                            handleClose={handleClose}
-                            buttonText="Submit"
-                            formState={formState}
-                            control={control}
-                            sendingRequest={sendingRequest}
-                            register={register}
-                        />
-                    </Grid>
-                </Grid>
-            </form>
-        </Paper>
+        <form autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
+            <BranchForm
+                update
+                handleClose={handleClose}
+                buttonText="Submit"
+                formState={formState}
+                control={control}
+                sendingRequest={sendingRequest}
+                register={register}
+            />
+        </form>
     )
 }
 

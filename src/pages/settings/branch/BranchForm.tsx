@@ -54,40 +54,42 @@ const FormSection = memo(({
                 mb: 2.5,
                 borderRadius: 2,
                 overflow: 'hidden',
-                border: `1px solid ${alpha(theme.palette.divider, 0.1)}`
+                border: `1px solid ${alpha('#08796C', 0.15)}`
             }}
         >
             <Box
                 sx={{
                     p: 1.5,
-                    bgcolor: alpha(theme.palette.background.default, 0.5),
-                    borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+                    bgcolor: alpha('#08796C', 0.04),
+                    borderBottom: `1px solid ${alpha('#08796C', 0.1)}`,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between'
                 }}
             >
-                <Stack direction="row" spacing={1} alignItems="center">
+                <Stack direction="row" spacing={1.25} alignItems="center">
                     <Box
                         sx={{
                             width: 28,
                             height: 28,
-                            borderRadius: 1,
-                            bgcolor: alpha(theme.palette.primary.main, 0.1),
+                            borderRadius: '7px',
+                            background: 'linear-gradient(135deg, #08796C, #065E53)',
                             display: 'flex',
                             alignItems: 'center',
-                            justifyContent: 'center'
+                            justifyContent: 'center',
+                            flexShrink: 0,
+                            '& .MuiSvgIcon-root': { color: '#fff', fontSize: '15px' },
                         }}
                     >
                         {icon}
                     </Box>
-                    <Typography variant="subtitle2" fontWeight={600} color="primary">
+                    <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#08796C' }}>
                         {title}
                     </Typography>
                 </Stack>
 
                 {isLoading && (
-                    <CircularProgress size={16} thickness={4} sx={{ ml: 1 }} />
+                    <CircularProgress size={14} thickness={4} sx={{ ml: 1, color: '#08796C' }} />
                 )}
             </Box>
             <Box sx={{ p: 2.5 }}>
@@ -249,25 +251,16 @@ const BranchForm = ({
     ), [loading, generalFields, locationFields, managementFields, renderField]);
 
     return (
-        <Box
-            sx={{
-                width: "100%",
-                maxHeight: '80vh',
-                overflow: 'hidden',
-                display: 'flex',
-                flexDirection: 'column'
-            }}
-        >
+        <Box sx={{ width: "100%" }}>
             {/* Form Header */}
-            <Box sx={{ mb: 2.5 }}>
-                <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 0.5 }}>
-                    <AccountBalanceOutlinedIcon fontSize="small" color="primary" />
-                    <Typography variant="h6" fontWeight={600} color="primary">
+            <Box sx={{ mb: 3, pb: 2, borderBottom: `1px solid ${alpha('#08796C', 0.1)}` }}>
+                <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 0.75 }}>
+                    <AccountBalanceOutlinedIcon fontSize="small" sx={{ color: '#08796C' }} />
+                    <Typography variant="h6" fontWeight={700} sx={{ color: '#1E293B' }}>
                         {update ? 'Update Branch' : 'Create New Branch'}
                     </Typography>
                 </Stack>
-
-                <Typography variant="body2" color="text.secondary" fontSize="0.875rem">
+                <Typography variant="body2" sx={{ color: '#64748B' }}>
                     {update
                         ? 'Update branch details and management team assignments'
                         : 'Enter details to create a new branch office'
@@ -275,35 +268,16 @@ const BranchForm = ({
                 </Typography>
             </Box>
 
-            {/* Scrollable form content */}
-            <Box
-                sx={{
-                    overflow: 'auto',
-                    flex: 1,
-                    pr: 1,
-                    '&::-webkit-scrollbar': {
-                        width: '6px',
-                    },
-                    '&::-webkit-scrollbar-thumb': {
-                        backgroundColor: alpha(theme.palette.primary.main, 0.2),
-                        borderRadius: '3px',
-                    },
-                    '&::-webkit-scrollbar-track': {
-                        backgroundColor: alpha(theme.palette.background.default, 0.5),
-                    }
-                }}
-            >
-                {formContent}
-            </Box>
+            {formContent}
 
             {/* Form Actions */}
             <Box
                 sx={{
-                    pt: 2,
-                    mt: 1,
+                    pt: 2.5,
+                    mt: 2,
                     display: 'flex',
                     justifyContent: 'flex-end',
-                    borderTop: `1px solid ${alpha(theme.palette.divider, 0.1)}`
+                    borderTop: `1px solid ${alpha('#08796C', 0.12)}`,
                 }}
             >
                 <Stack
@@ -317,9 +291,12 @@ const BranchForm = ({
                         type="button"
                         variant="outlined"
                         sx={{
-                            minWidth: '100px',
-                            borderRadius: 1.5,
-                            py: 0.75
+                            minWidth: '110px',
+                            borderRadius: '8px',
+                            py: 0.85,
+                            borderColor: alpha('#000', 0.2),
+                            color: 'text.secondary',
+                            '&:hover': { borderColor: alpha('#000', 0.3) },
                         }}
                     >
                         Cancel
@@ -329,14 +306,16 @@ const BranchForm = ({
                         type="submit"
                         variant="contained"
                         sx={{
-                            minWidth: '100px',
-                            borderRadius: 1.5,
-                            py: 0.75,
-                            boxShadow: `0 2px 8px ${alpha(theme.palette.primary.main, 0.2)}`
+                            minWidth: '110px',
+                            borderRadius: '8px',
+                            py: 0.85,
+                            bgcolor: '#08796C',
+                            boxShadow: '0 2px 8px rgba(8,121,108,0.3)',
+                            '&:hover': { bgcolor: '#065E53' },
                         }}
                         disabled={loading}
                     >
-                        {sendingRequest ? <CircularProgress size={24} color="inherit" /> : buttonText}
+                        {sendingRequest ? <CircularProgress size={20} color="inherit" /> : buttonText}
                     </MuiButton>
                 </Stack>
             </Box>
