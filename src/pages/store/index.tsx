@@ -16,9 +16,7 @@ import {
     Skeleton,
     Stack,
     Typography,
-    useTheme,
 } from "@mui/material";
-import InventoryOutlinedIcon from '@mui/icons-material/InventoryOutlined';
 import AdminPanelSettingsOutlinedIcon from '@mui/icons-material/AdminPanelSettingsOutlined';
 import LaptopChromebookOutlinedIcon from '@mui/icons-material/LaptopChromebookOutlined';
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
@@ -93,8 +91,9 @@ const STORES = [
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
+const PRIMARY = '#08796C';
+
 const Store = () => {
-    const theme = useTheme();
     const navigate = useNavigate();
     const { fetchAllAssetTypes } = AssetTypeUtills();
     const { getCurrentUser } = RoutesUtills();
@@ -139,128 +138,100 @@ const Store = () => {
         setCountsLoading(false);
     };
 
+    const todayLabel = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
     const totalItems = Object.values(categoryCounts).reduce((sum, n) => sum + n, 0);
 
     return (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, width: '100%' }}>
+        <Box sx={{ minHeight: '100vh', width: '100%', bgcolor: '#F1F5FB', pb: 4 }}>
 
-            {/* ── Page Header ── */}
-            <Paper
-                elevation={0}
+            {/* ── Page Header ─────────────────────────────────────────── */}
+            <Box
                 sx={{
-                    borderRadius: 3,
+                    background: 'linear-gradient(135deg, #08796C 0%, #065E53 60%, #044a42 100%)',
+                    px: { xs: 2, md: 4 },
+                    pt: 3,
+                    pb: 3,
+                    position: 'relative',
                     overflow: 'hidden',
-                    border: `1px solid ${alpha('#000', 0.07)}`,
-                    background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.05)} 0%, ${alpha(theme.palette.secondary.main, 0.03)} 100%)`,
                 }}
             >
-                <Box sx={{ p: { xs: 2.5, md: 3.5 } }}>
-                    <Stack
-                        direction={{ xs: 'column', sm: 'row' }}
-                        alignItems={{ xs: 'flex-start', sm: 'center' }}
-                        justifyContent="space-between"
-                        spacing={2}
-                    >
-                        <Stack direction="row" alignItems="center" spacing={2}>
-                            <Box
-                                sx={{
-                                    width: 52,
-                                    height: 52,
-                                    borderRadius: 2.5,
-                                    background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    boxShadow: `0 4px 14px ${alpha(theme.palette.primary.main, 0.4)}`,
-                                    flexShrink: 0,
-                                }}
-                            >
-                                <InventoryOutlinedIcon sx={{ fontSize: 26, color: '#fff' }} />
-                            </Box>
-                            <Box>
-                                <Typography variant="caption" sx={{ color: 'text.secondary', textTransform: 'uppercase', letterSpacing: '0.08em', fontSize: '0.68rem', display: 'block' }}>
-                                    Module
-                                </Typography>
-                                <Typography variant="h6" sx={{ fontWeight: 800, color: 'text.primary', lineHeight: 1.2 }}>
-                                    Store Management
-                                </Typography>
-                                <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.755rem' }}>
-                                    Overview of all organizational stores and inventory
-                                </Typography>
-                            </Box>
-                        </Stack>
+                <Box sx={{ position: 'absolute', top: -40, right: -40, width: 220, height: 220, borderRadius: '50%', bgcolor: alpha('#fff', 0.04), pointerEvents: 'none' }} />
+                <Box sx={{ position: 'absolute', bottom: -30, right: 160, width: 120, height: 120, borderRadius: '50%', bgcolor: alpha('#fff', 0.03), pointerEvents: 'none' }} />
 
-                        {/* Live totals row */}
-                        <Stack direction="row" spacing={1.5} flexShrink={0} flexWrap="wrap" justifyContent={{ sm: 'flex-end' }}>
-                            {assetTypes.map(type => {
-                                const { color, Icon } = getCategoryStyle(type.name);
-                                return (
-                                    <Box
-                                        key={type.id}
-                                        sx={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: 0.75,
-                                            px: 1.25,
-                                            py: 0.6,
-                                            borderRadius: 1.5,
-                                            bgcolor: alpha(color, 0.07),
-                                            border: `1px solid ${alpha(color, 0.15)}`,
-                                        }}
-                                    >
-                                        <Icon sx={{ fontSize: 13, color }} />
-                                        <Typography variant="caption" sx={{ fontWeight: 700, color, fontSize: '0.75rem' }}>
-                                            {countsLoading
-                                                ? <Skeleton width={22} sx={{ display: 'inline-block' }} />
-                                                : (categoryCounts[type.id] ?? 0)
-                                            }
-                                        </Typography>
-                                        <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.7rem' }}>
-                                            {type.name}
-                                        </Typography>
-                                    </Box>
-                                );
-                            })}
-                        </Stack>
+                <Stack direction="row" alignItems="flex-start" justifyContent="space-between" gap={2}>
+                    {/* Left: icon + title */}
+                    <Stack direction="row" alignItems="center" gap={2}>
+                        <Box sx={{
+                            width: 46, height: 46, borderRadius: 2,
+                            bgcolor: alpha('#fff', 0.15),
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            backdropFilter: 'blur(4px)',
+                        }}>
+                            <StorefrontOutlinedIcon sx={{ color: '#fff', fontSize: 24 }} />
+                        </Box>
+                        <Box>
+                            <Typography variant="h5" sx={{ color: '#fff', fontWeight: 700, lineHeight: 1.2 }}>
+                                Store Management
+                            </Typography>
+                            <Typography variant="body2" sx={{ color: alpha('#fff', 0.72), mt: 0.3 }}>
+                                Overview of all organizational stores and inventory
+                            </Typography>
+                        </Box>
                     </Stack>
-                </Box>
 
-                {/* Summary bar */}
-                <Box
-                    sx={{
-                        px: 3.5,
+                    {/* Right: frosted stats badge */}
+                    <Box sx={{
+                        bgcolor: alpha('#fff', 0.12),
+                        backdropFilter: 'blur(8px)',
+                        border: `1px solid ${alpha('#fff', 0.18)}`,
+                        borderRadius: 2,
+                        px: 2.5,
                         py: 1.5,
-                        borderTop: `1px solid ${alpha('#000', 0.06)}`,
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 2.5,
-                        flexWrap: 'wrap',
-                    }}
-                >
-                    <Stack direction="row" alignItems="center" spacing={0.75}>
-                        <StorefrontOutlinedIcon sx={{ fontSize: 14, color: 'text.disabled' }} />
-                        <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.75rem' }}>
-                            <strong>3</strong> active stores
+                        textAlign: 'right',
+                        flexShrink: 0,
+                    }}>
+                        <Typography variant="h4" sx={{ color: '#fff', fontWeight: 800, lineHeight: 1 }}>
+                            {countsLoading
+                                ? <Skeleton width={50} sx={{ display: 'inline-block', bgcolor: alpha('#fff', 0.2) }} />
+                                : totalItems
+                            }
                         </Typography>
-                    </Stack>
-                    <Divider orientation="vertical" flexItem sx={{ borderColor: alpha('#000', 0.08) }} />
-                    <Stack direction="row" alignItems="center" spacing={0.75}>
-                        <InventoryOutlinedIcon sx={{ fontSize: 14, color: theme.palette.primary.main }} />
-                        <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.75rem' }}>
-                            <strong>
-                                {countsLoading
-                                    ? <Skeleton width={28} sx={{ display: 'inline-block' }} />
-                                    : totalItems
-                                }
-                            </strong>{' '}total items across all categories
+                        <Typography variant="caption" sx={{ color: alpha('#fff', 0.72), display: 'block', mt: 0.3 }}>
+                            total items
                         </Typography>
-                    </Stack>
-                    <Divider orientation="vertical" flexItem sx={{ borderColor: alpha('#000', 0.08) }} />
-                    <Typography variant="caption" sx={{ color: 'text.disabled', fontSize: '0.72rem' }}>
-                        Select a store below to view records &amp; reports
-                    </Typography>
-                </Box>
-            </Paper>
+                        <Typography variant="caption" sx={{ color: alpha('#fff', 0.5), fontSize: '0.68rem' }}>
+                            {todayLabel}
+                        </Typography>
+                    </Box>
+                </Stack>
+
+                {/* Category summary pills */}
+                <Stack direction="row" gap={1} flexWrap="wrap" sx={{ mt: 2.5 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, px: 1.25, py: 0.6, borderRadius: 1.5, bgcolor: alpha('#fff', 0.1), backdropFilter: 'blur(4px)', border: `1px solid ${alpha('#fff', 0.15)}` }}>
+                        <StorefrontOutlinedIcon sx={{ fontSize: 13, color: alpha('#fff', 0.85) }} />
+                        <Typography variant="caption" sx={{ fontWeight: 700, color: '#fff', fontSize: '0.75rem' }}>{STORES.length}</Typography>
+                        <Typography variant="caption" sx={{ color: alpha('#fff', 0.7), fontSize: '0.7rem' }}>active stores</Typography>
+                    </Box>
+                    {assetTypes.map(type => {
+                        const { Icon } = getCategoryStyle(type.name);
+                        return (
+                            <Box key={type.id} sx={{ display: 'flex', alignItems: 'center', gap: 0.75, px: 1.25, py: 0.6, borderRadius: 1.5, bgcolor: alpha('#fff', 0.1), backdropFilter: 'blur(4px)', border: `1px solid ${alpha('#fff', 0.15)}` }}>
+                                <Icon sx={{ fontSize: 13, color: alpha('#fff', 0.85) }} />
+                                <Typography variant="caption" sx={{ fontWeight: 700, color: '#fff', fontSize: '0.75rem' }}>
+                                    {countsLoading
+                                        ? <Skeleton width={20} sx={{ display: 'inline-block', bgcolor: alpha('#fff', 0.2) }} />
+                                        : (categoryCounts[type.id] ?? 0)
+                                    }
+                                </Typography>
+                                <Typography variant="caption" sx={{ color: alpha('#fff', 0.7), fontSize: '0.7rem' }}>{type.name}</Typography>
+                            </Box>
+                        );
+                    })}
+                </Stack>
+            </Box>
+
+            {/* ── Content area ─────────────────────────────────────────── */}
+            <Box sx={{ px: { xs: 1, md: 3 }, pt: 3, width: '100%', maxWidth: '1500px' }}>
 
             {/* ── Store Cards ── */}
             <Grid container spacing={2.5}>
@@ -428,13 +399,13 @@ const Store = () => {
                 sx={{
                     borderRadius: 3,
                     border: `1px solid ${alpha('#000', 0.06)}`,
-                    bgcolor: alpha(theme.palette.primary.main, 0.02),
+                    bgcolor: alpha(PRIMARY, 0.02),
                     p: 2.5,
                 }}
             >
                 <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} alignItems={{ md: 'center' }}>
                     <Box flex={1}>
-                        <Typography variant="caption" sx={{ color: theme.palette.primary.main, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', fontSize: '0.68rem', display: 'block', mb: 0.4 }}>
+                        <Typography variant="caption" sx={{ color: PRIMARY, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', fontSize: '0.68rem', display: 'block', mb: 0.4 }}>
                             How it works
                         </Typography>
                         <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.8rem', lineHeight: 1.6 }}>
@@ -465,7 +436,9 @@ const Store = () => {
                         ))}
                     </Stack>
                 </Stack>
-            </Paper>
+                </Paper>
+
+            </Box>{/* end content area */}
         </Box>
     );
 };

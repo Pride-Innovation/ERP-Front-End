@@ -25,7 +25,6 @@ import {
     TableRow,
     Tooltip,
     Typography,
-    useTheme,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
@@ -45,6 +44,9 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import DraftsOutlinedIcon from '@mui/icons-material/DraftsOutlined';
 import { ROUTES } from '../../core/routes/routes';
 import { mockMovements, statusConfig, MovementStatus } from './mockMovements';
+
+const PRIMARY   = '#08796C';
+const SECONDARY = '#BC892C';
 
 // ── Stat widget ──────────────────────────────────────────────────────────────
 interface StatCardProps {
@@ -170,10 +172,6 @@ const WorkflowStep = ({ step, label, description, color, icon, isLast }: Workflo
 // ── Main page ─────────────────────────────────────────────────────────────────
 const Movement = () => {
     const navigate = useNavigate();
-    const theme = useTheme();
-
-    const PRIMARY = theme.palette.primary.main;       // #08796C
-    const SECONDARY = theme.palette.secondary.main;   // #BC892C
 
     // Calculated stats from mock data
     const total = mockMovements.length;
@@ -183,6 +181,8 @@ const Movement = () => {
     const released = mockMovements.filter(m => m.status === 'released').length;
     const completed = mockMovements.filter(m => m.status === 'completed').length;
     const draft = mockMovements.filter(m => m.status === 'draft').length;
+
+    const todayLabel = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 
     const completionRate = total > 0 ? Math.round((completed / total) * 100) : 0;
 
@@ -200,74 +200,107 @@ const Movement = () => {
     ];
 
     return (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, width: '100%' }}>
+        <Box sx={{ minHeight: '100vh', width: '100%', bgcolor: '#F1F5FB', pb: 4 }}>
 
-            {/* ── Hero header ──────────────────────────────────────────────── */}
-            <Paper
-                elevation={0}
+            {/* ── Gradient Header ──────────────────────────────────────── */}
+            <Box
                 sx={{
-                    borderRadius: 3,
-                    border: `1px solid ${alpha(PRIMARY, 0.14)}`,
-                    overflow: 'hidden',
+                    background: 'linear-gradient(135deg, #08796C 0%, #065E53 60%, #044a42 100%)',
+                    px: { xs: 2, md: 4 },
+                    pt: 3,
+                    pb: 3,
                     position: 'relative',
+                    overflow: 'hidden',
                 }}
             >
-                {/* Gradient accent strip */}
-                <Box sx={{ height: 4, background: `linear-gradient(90deg, ${PRIMARY} 0%, ${SECONDARY} 60%, #3B82F6 100%)` }} />
-                <Box sx={{ px: { xs: 2.5, md: 4 }, py: { xs: 2.5, md: 3 }, display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { sm: 'center' }, justifyContent: 'space-between', gap: 2 }}>
-                    <Stack direction="row" spacing={2} alignItems="center">
-                        <Box
-                            sx={{
-                                width: 52, height: 52, borderRadius: 2.5,
-                                background: `linear-gradient(135deg, ${PRIMARY} 0%, ${theme.palette.primary.dark} 100%)`,
-                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                boxShadow: `0 4px 14px ${alpha(PRIMARY, 0.4)}`,
-                                flexShrink: 0,
-                            }}
-                        >
-                            <SwapHorizOutlinedIcon sx={{ color: '#fff', fontSize: 26 }} />
+                <Box sx={{ position: 'absolute', top: -40, right: -40, width: 220, height: 220, borderRadius: '50%', bgcolor: alpha('#fff', 0.04), pointerEvents: 'none' }} />
+                <Box sx={{ position: 'absolute', bottom: -30, right: 160, width: 120, height: 120, borderRadius: '50%', bgcolor: alpha('#fff', 0.03), pointerEvents: 'none' }} />
+
+                <Stack direction="row" alignItems="flex-start" justifyContent="space-between" gap={2} flexWrap="wrap">
+                    <Stack direction="row" alignItems="center" gap={2}>
+                        <Box sx={{
+                            width: 46, height: 46, borderRadius: 2,
+                            bgcolor: alpha('#fff', 0.15),
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            backdropFilter: 'blur(4px)',
+                        }}>
+                            <SwapHorizOutlinedIcon sx={{ color: '#fff', fontSize: 24 }} />
                         </Box>
                         <Box>
-                            <Typography variant="h4" sx={{ fontWeight: 800, color: 'text.primary', lineHeight: 1.15 }}>
+                            <Typography variant="h5" sx={{ color: '#fff', fontWeight: 700, lineHeight: 1.2 }}>
                                 Asset Movement
                             </Typography>
-                            <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.25 }}>
+                            <Typography variant="body2" sx={{ color: alpha('#fff', 0.72), mt: 0.3 }}>
                                 Initiate, approve, track and complete asset transfers across branches and departments.
                             </Typography>
                         </Box>
                     </Stack>
-                    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.25} flexShrink={0}>
-                        <Button
-                            variant="outlined"
-                            startIcon={<SwapHorizOutlinedIcon />}
-                            sx={{
-                                borderRadius: 2, fontWeight: 600, px: 2.5,
-                                borderColor: alpha(PRIMARY, 0.35), color: PRIMARY,
-                                '&:hover': { borderColor: PRIMARY, bgcolor: alpha(PRIMARY, 0.05) },
-                                fontSize: '0.8rem',
-                            }}
-                            onClick={() => navigate(`${ROUTES.MOVEMENT}/all`)}
-                        >
-                            All Movements
-                        </Button>
-                        <Button
-                            variant="contained"
-                            startIcon={<AddIcon />}
-                            sx={{
-                                borderRadius: 2, fontWeight: 700, px: 3,
-                                bgcolor: PRIMARY,
-                                boxShadow: `0 3px 12px ${alpha(PRIMARY, 0.4)}`,
-                                '&:hover': { bgcolor: theme.palette.primary.dark, boxShadow: `0 6px 20px ${alpha(PRIMARY, 0.45)}`, transform: 'translateY(-1px)' },
-                                transition: 'all 0.2s ease',
-                                fontSize: '0.8rem',
-                            }}
-                            onClick={() => navigate(ROUTES.CREATE_MOVEMENT)}
-                        >
-                            New Movement
-                        </Button>
+
+                    <Stack direction="row" alignItems="center" gap={1.5} flexShrink={0} flexWrap="wrap">
+                        <Box sx={{
+                            bgcolor: alpha('#fff', 0.12),
+                            backdropFilter: 'blur(8px)',
+                            border: `1px solid ${alpha('#fff', 0.18)}`,
+                            borderRadius: 2,
+                            px: 2.5,
+                            py: 1.5,
+                            textAlign: 'right',
+                        }}>
+                            <Typography variant="h4" sx={{ color: '#fff', fontWeight: 800, lineHeight: 1 }}>{total}</Typography>
+                            <Typography variant="caption" sx={{ color: alpha('#fff', 0.72), display: 'block', mt: 0.3 }}>total movements</Typography>
+                            <Typography variant="caption" sx={{ color: alpha('#fff', 0.5), fontSize: '0.68rem' }}>{todayLabel}</Typography>
+                        </Box>
+                        <Stack direction="column" gap={1}>
+                            <Button
+                                variant="outlined"
+                                startIcon={<SwapHorizOutlinedIcon />}
+                                sx={{
+                                    borderRadius: 2, fontWeight: 600, px: 2, height: 36, fontSize: '0.78rem',
+                                    borderColor: alpha('#fff', 0.45), color: '#fff',
+                                    '&:hover': { borderColor: '#fff', bgcolor: alpha('#fff', 0.1) },
+                                }}
+                                onClick={() => navigate(`${ROUTES.MOVEMENT}/all`)}
+                            >
+                                All Movements
+                            </Button>
+                            <Button
+                                variant="contained"
+                                startIcon={<AddIcon />}
+                                sx={{
+                                    borderRadius: 2, fontWeight: 700, px: 2, height: 36, fontSize: '0.78rem',
+                                    bgcolor: alpha('#fff', 0.18), backdropFilter: 'blur(4px)',
+                                    border: `1px solid ${alpha('#fff', 0.3)}`, color: '#fff',
+                                    boxShadow: 'none',
+                                    '&:hover': { bgcolor: alpha('#fff', 0.28), boxShadow: 'none' },
+                                }}
+                                onClick={() => navigate(ROUTES.CREATE_MOVEMENT)}
+                            >
+                                New Movement
+                            </Button>
+                        </Stack>
                     </Stack>
-                </Box>
-            </Paper>
+                </Stack>
+
+                <Stack direction="row" gap={1} flexWrap="wrap" sx={{ mt: 2.5 }}>
+                    {[
+                        { label: 'Drafts',     value: draft,     color: alpha('#fff', 0.55) },
+                        { label: 'Pending',    value: pending,   color: '#FCD34D' },
+                        { label: 'Approved',   value: approved,  color: '#6EE7B7' },
+                        { label: 'Released',   value: released,  color: '#93C5FD' },
+                        { label: 'Rejected',   value: rejected,  color: '#FCA5A5' },
+                        { label: 'Completed',  value: completed, color: '#A7F3D0' },
+                    ].map(pill => (
+                        <Box key={pill.label} sx={{ display: 'flex', alignItems: 'center', gap: 0.6, px: 1.25, py: 0.55, borderRadius: 1.5, bgcolor: alpha('#fff', 0.1), backdropFilter: 'blur(4px)', border: `1px solid ${alpha('#fff', 0.15)}` }}>
+                            <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: pill.color, flexShrink: 0 }} />
+                            <Typography variant="caption" sx={{ fontWeight: 700, color: '#fff', fontSize: '0.73rem' }}>{pill.value}</Typography>
+                            <Typography variant="caption" sx={{ color: alpha('#fff', 0.65), fontSize: '0.7rem' }}>{pill.label}</Typography>
+                        </Box>
+                    ))}
+                </Stack>
+            </Box>
+
+            {/* ── Content area ──────────────────────────────────────── */}
+            <Box sx={{ px: { xs: 1, md: 3 }, pt: 3, display: 'flex', flexDirection: 'column', gap: 3 }}>
 
             {/* ── KPI Stats ────────────────────────────────────────────────── */}
             <Grid container spacing={2}>
@@ -543,6 +576,7 @@ const Movement = () => {
                     </Stack>
                 </Grid>
             </Grid>
+            </Box>
         </Box>
     );
 };

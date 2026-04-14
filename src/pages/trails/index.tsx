@@ -470,7 +470,7 @@ const AuditTrails = () => {
                     </Typography>
 
                     <Stack direction="row" alignItems="center" gap={1}>
-                        <Typography sx={{ fontSize: '0.75rem', color: '#94A3B8', mr: 0.5 }}>Export as:</Typography>
+                        {/* <Typography sx={{ fontSize: '0.75rem', color: '#94A3B8', mr: 0.5 }}>Export as:</Typography> */}
 
                         <Tooltip title="Export PDF">
                             <Button
