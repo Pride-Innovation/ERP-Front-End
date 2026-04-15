@@ -72,14 +72,23 @@ const OfficeEquipment = () => {
         currentState
     } = OfficeEquipmentUtills();
 
-    const fetchResources = async (status?: string) => {
+    const fetchResources = async (status?: string, extraParams?: Record<string, any>) => {
         setLoading(true);
 
+        const dateRange = extraParams?.createdAt;
         const params = {
             assetTypeId: currentAssetType.id,
-            assetStatusId: determineStatusId(status || 'all'),
-            startDate: tableStartDate ? dayjs(tableStartDate).format('YYYY-MM-DDTHH:mm:ss') : '',
-            endDate: tableEndDate ? dayjs(tableEndDate).format('YYYY-MM-DDTHH:mm:ss') : ''
+            assetStatusId: determineStatusId(status || extraParams?.status || 'all'),
+            startDate: dateRange?.from
+                ? dayjs(dateRange.from).format('YYYY-MM-DDTHH:mm:ss')
+                : (tableStartDate ? dayjs(tableStartDate).format('YYYY-MM-DDTHH:mm:ss') : ''),
+            endDate: dateRange?.to
+                ? dayjs(dateRange.to).format('YYYY-MM-DDTHH:mm:ss')
+                : (tableEndDate ? dayjs(tableEndDate).format('YYYY-MM-DDTHH:mm:ss') : ''),
+            ...(extraParams?.assetName && { assetName: extraParams.assetName }),
+            ...(extraParams?.engravedNo && { engravedNo: extraParams.engravedNo }),
+            ...(extraParams?.location && { location: extraParams.location }),
+            ...(extraParams?.assignedTo && { assignedTo: extraParams.assignedTo }),
         }
 
         try {
@@ -274,6 +283,21 @@ const OfficeEquipment = () => {
                     selectedStatus={selectedStatus}
                     dateRangePicker
                     filterOptions
+                    columnFilters={[
+                        { key: 'assetName', label: 'Asset Name', type: 'text' },
+                        { key: 'engravedNo', label: 'Engraved No', type: 'text' },
+                        { key: 'location', label: 'Location', type: 'text' },
+                        { key: 'assignedTo', label: 'Assigned To', type: 'text' },
+                        {
+                            key: 'status', label: 'Status', type: 'select', options: [
+                                { value: 'active', label: 'Active' },
+                                { value: 'disabled', label: 'Disabled' },
+                                { value: 'locked', label: 'Locked' },
+                            ]
+                        },
+                        { key: 'createdAt', label: 'Date Received', type: 'dateRange' },
+                    ]}
+                    onApplyFilters={(filters) => fetchResources(selectedStatus, filters)}
                 />
             }
         </Box>

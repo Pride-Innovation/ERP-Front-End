@@ -110,6 +110,20 @@ const RejectedRequest = () => {
                         columnHeaders={columnHeaders}
                         handleOptionClicked={handleOptionClicked}
                         params={{ statusIds: 2 }}
+                        columnFilters={[
+                            { key: 'assetName', label: 'Asset Name', type: 'text' },
+                            { key: 'requestedBy', label: 'Requested By', type: 'text' },
+                            { key: 'requestedFrom', label: 'Requested From', type: 'text' },
+                            {
+                                key: 'status', label: 'Status', type: 'select', options: [
+                                    { value: 'active', label: 'Active' },
+                                    { value: 'disabled', label: 'Disabled' },
+                                    { value: 'locked', label: 'Locked' },
+                                ]
+                            },
+                            { key: 'createdAt', label: 'Request Created', type: 'dateRange' },
+                        ]}
+                        onApplyFilters={(filters) => fetchAllRequests(filters)}
                     />
                 }
             </Card>

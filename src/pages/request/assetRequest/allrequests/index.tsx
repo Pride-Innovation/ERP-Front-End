@@ -32,7 +32,7 @@ import { IPermission } from "../../../settings/interface";
 import { permissionsMock } from "../../../../mocks/settings";
 import DeleteRequest from "../../DeleteRequest";
 import { FormContext } from "../../../../context/form";
-import dayjs from "dayjs";  
+import dayjs from "dayjs";
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import ToggleOffOutlined from '@mui/icons-material/ToggleOffOutlined';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
@@ -387,6 +387,21 @@ const Request = () => {
                 onStatusChange={handleStatusChange}
                 selectedStatus={selectedStatus}
                 dateRangePicker
+
+                columnFilters={[
+                    { key: 'assetName', label: 'Asset Name', type: 'text' },
+                    { key: 'requestedBy', label: 'Requested By', type: 'text' },
+                    { key: 'requestedFrom', label: 'Requested From', type: 'text' },
+                    {
+                        key: 'status', label: 'Status', type: 'select', options: [
+                            { value: 'active', label: 'Active' },
+                            { value: 'disabled', label: 'Disabled' },
+                            { value: 'locked', label: 'Locked' },
+                        ]
+                    },
+                    { key: 'createdAt', label: 'Request Created', type: 'dateRange' },
+                ]}
+                onApplyFilters={(filters) => fetchAllRequests(filters)}
             />
         </Box>
     );

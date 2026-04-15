@@ -58,7 +58,7 @@ const TableToolBar = ({
     useEffect(() => { setFileName(module) }, [module]);
 
     // ── Column filter panel state ─────────────────────────────────────────────
-    const [showFilterPanel, setShowFilterPanel] = useState(false);
+    const [showFilterPanel, setShowFilterPanel] = useState(true);
     const [filterValues, setFilterValues] = useState<Record<string, any>>({});
     const [appliedFilters, setAppliedFilters] = useState<Record<string, any>>({});
 
