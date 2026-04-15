@@ -103,6 +103,20 @@ const Inventory = () => {
                         onStatusChange={handleStatusChange}
                         selectedStatus={selectedStatus}
                         dateRangePicker
+                        columnFilters={[
+                            { key: 'lpoNumber', label: 'LPO Number', type: 'text' },
+                            { key: 'supplier', label: 'Supplier', type: 'text' },
+                            { key: 'location', label: 'Location', type: 'text' },
+                            {
+                                key: 'status', label: 'Status', type: 'select', options: [
+                                    { value: 'active', label: 'Active' },
+                                    { value: 'disabled', label: 'Disabled' },
+                                    { value: 'locked', label: 'Locked' },
+                                ]
+                            },
+                            { key: 'createdAt', label: 'Date Created', type: 'dateRange' },
+                        ]}
+                        onApplyFilters={(filters) => fetchInventory(filters)}
                     />
                 </Container>
             }
