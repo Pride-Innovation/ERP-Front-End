@@ -10,10 +10,8 @@ import {
     Box,
     Typography,
     Stack,
-    Divider,
     Paper,
     Grid,
-    useTheme
 } from '@mui/material';
 import { useContext, useEffect } from 'react';
 import { RequestContext } from '../../context/request/RequestContext';
@@ -29,7 +27,6 @@ const SECONDARY_COLOR = '#BC892C';
 const CURRENCY = 'UGX';
 
 const PriceTotals = () => {
-    const theme = useTheme();
     const {
         stockRows,
         setTotalCostPrice,

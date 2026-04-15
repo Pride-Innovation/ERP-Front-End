@@ -111,6 +111,18 @@ const TableData = () => {
                 paginationMode="server"
                 onStatusChange={handleStatusChange}
                 status
+                columnFilters={[
+                    { key: 'stockName', label: 'Stock Name', type: 'text' },
+                    {
+                        key: 'status', label: 'Status', type: 'select', options: [
+                            { value: 'active', label: 'Active' },
+                            { value: 'disabled', label: 'Disabled' },
+                            { value: 'locked', label: 'Locked' },
+                        ]
+                    },
+                    { key: 'createdAt', label: 'Stock Date', type: 'dateRange' },
+                ]}
+                // onApplyFilters={(filters) => fetchAllRequests(filters)}
             />
         </Box>
     );
