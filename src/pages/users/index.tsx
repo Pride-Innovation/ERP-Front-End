@@ -128,6 +128,20 @@ const Users = () => {
             status
             onStatusChange={handleStatusChange}
             selectedStatus={selectedStatus}
+            columnFilters={[
+              { key: 'firstName', label: 'First Name', type: 'text' },
+              { key: 'lastName', label: 'Last Name', type: 'text' },
+              { key: 'email', label: 'Email', type: 'text' },
+              {
+                key: 'status', label: 'Status', type: 'select', options: [
+                  { value: 'active', label: 'Active' },
+                  { value: 'disabled', label: 'Disabled' },
+                  { value: 'locked', label: 'Locked' },
+                ]
+              },
+              { key: 'createdAt', label: 'Date Created', type: 'dateRange' },
+            ]}
+            onApplyFilters={(filters) => fetchAllUsers(filters)}
           />
         </Container>
       }

@@ -102,6 +102,8 @@ const TableComponent = ({
     onStatusChange,
     selectedStatus = 'all',
     dateRangePicker = false,
+    columnFilters = [],
+    onApplyFilters,
 }: ITableComponent) => {
     const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
     const [currentOptions, setCurrentOptions] = useState<any[]>([]);
@@ -381,6 +383,8 @@ const TableComponent = ({
                 selectedStatus={selectedStatus}
                 onStatusChange={onStatusChange}
                 dateRangePicker={dateRangePicker}
+                columnFilters={columnFilters}
+                onApplyFilters={onApplyFilters}
             />
 
             {/* ── Table ───────────────────────────────────────────────── */}

@@ -12,6 +12,18 @@ import { IRequestsAxiosResponse } from "../../pages/request/interface";
 export interface IOptions {
     value: string | number, label: string, icon?: JSX.Element, header?: boolean;
 }
+
+// ─── Column filter definitions ────────────────────────────────────────────────
+export type FilterType = 'text' | 'select' | 'dateRange';
+
+export interface IColumnFilter {
+    key: string;
+    label: string;
+    type: FilterType;
+    /** Required when type === 'select' */
+    options?: Array<{ value: string; label: string }>;
+    placeholder?: string;
+}
 export interface ITableHeader {
     label: string;
     status?: boolean;
@@ -53,6 +65,9 @@ export interface ITableComponent {
     onStatusChange?: (status: string) => void;
     selectedStatus?: string;
     dateRangePicker?: boolean;
+    /** Column-level filter definitions; each triggers a backend call on Apply */
+    columnFilters?: IColumnFilter[];
+    onApplyFilters?: (filters: Record<string, any>) => void;
 }
 
 export interface ITableToolBar {
@@ -73,6 +88,8 @@ export interface ITableToolBar {
     onStatusChange?: (status: string) => void;
     selectedStatus?: string;
     dateRangePicker?: boolean;
+    columnFilters?: IColumnFilter[];
+    onApplyFilters?: (filters: Record<string, any>) => void;
 }
 
 export interface CustomToolbarWrapperProps {
@@ -90,6 +107,8 @@ export interface CustomToolbarWrapperProps {
     onStatusChange?: (status: string) => void;
     selectedStatus?: string;
     dateRangePicker?: boolean;
+    columnFilters?: IColumnFilter[];
+    onApplyFilters?: (filters: Record<string, any>) => void;
 }
 
 export interface ITableFilter {
