@@ -24,9 +24,8 @@ import {
 } from '../../components/forms';
 import { IUserForm } from './interface';
 import TitleUtills from '../settings/titles/utills';
-import { useContext, useEffect } from 'react';
+import { useEffect } from 'react';
 import BranchUtills from '../settings/branch/utills';
-import { AutocompleteContext } from '../../context/autocomplete';
 import DepartmentUtills from '../settings/departments/utills';
 
 // Icons
@@ -61,7 +60,6 @@ const UserForm = ({
     const { fetchAllTitles } = TitleUtills();
     const { fetchAllBranches } = BranchUtills();
     const { fetchAllDepartments } = DepartmentUtills();
-    const { displayDepartment } = useContext(AutocompleteContext);
 
     useEffect(() => { fetchAllTitles() }, []);
     useEffect(() => { fetchAllBranches() }, []);
@@ -72,7 +70,7 @@ const UserForm = ({
     );
 
     const workInfoFields = userFields.filter(field =>
-        ['branch', 'department', 'employmentType', 'designation', 'staffNumber'].includes(field.value)
+        ['branch', 'department', 'employmentType', 'designation', 'staffNumber', 'availability'].includes(field.value)
     );
 
     const accountFields = userFields.filter(field =>
@@ -166,10 +164,7 @@ const UserForm = ({
                             <UseFormSelect {...commonProps} options={field.options} />
                         )}
                         {field.type === "date" && <UseFormDatePicker {...commonProps} />}
-                        {field.type === "autocomplete" && !displayDepartment && (
-                            <UseFormAutocompleteComponent {...commonProps} options={field.options} />
-                        )}
-                        {field.type === "autocomplete" && displayDepartment && (
+                        {field.type === "autocomplete" && (
                             <UseFormAutocompleteComponent {...commonProps} options={field.options} />
                         )}
                     </Grid>

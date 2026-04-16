@@ -104,6 +104,7 @@ const TableComponent = ({
     dateRangePicker = false,
     columnFilters = [],
     onApplyFilters,
+    tableIcon,
 }: ITableComponent) => {
     const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
     const [currentOptions, setCurrentOptions] = useState<any[]>([]);
@@ -385,6 +386,7 @@ const TableComponent = ({
                 dateRangePicker={dateRangePicker}
                 columnFilters={columnFilters}
                 onApplyFilters={onApplyFilters}
+                tableIcon={tableIcon}
             />
 
             {/* ── Table ───────────────────────────────────────────────── */}

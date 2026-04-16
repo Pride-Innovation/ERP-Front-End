@@ -68,6 +68,8 @@ export interface ITableComponent {
     /** Column-level filter definitions; each triggers a backend call on Apply */
     columnFilters?: IColumnFilter[];
     onApplyFilters?: (filters: Record<string, any>) => void;
+    /** Optional icon shown in the toolbar header. Defaults to FilterAltOutlinedIcon. */
+    tableIcon?: React.ReactNode;
 }
 
 export interface ITableToolBar {
@@ -90,6 +92,7 @@ export interface ITableToolBar {
     dateRangePicker?: boolean;
     columnFilters?: IColumnFilter[];
     onApplyFilters?: (filters: Record<string, any>) => void;
+    tableIcon?: React.ReactNode;
 }
 
 export interface CustomToolbarWrapperProps {
@@ -109,6 +112,7 @@ export interface CustomToolbarWrapperProps {
     dateRangePicker?: boolean;
     columnFilters?: IColumnFilter[];
     onApplyFilters?: (filters: Record<string, any>) => void;
+    tableIcon?: React.ReactNode;
 }
 
 export interface ITableFilter {

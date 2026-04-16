@@ -20,6 +20,7 @@ import { IBulkUserData } from './interface';
 import { toast } from 'react-toastify';
 import { FileContext } from '../../context/file/FileContext';
 import { bulkInsertUsersService } from './service';
+import PeopleOutlinedIcon from '@mui/icons-material/PeopleOutlined';
 
 const Users = () => {
   const header = { plural: 'Users', singular: 'User' };
@@ -142,6 +143,7 @@ const Users = () => {
               { key: 'createdAt', label: 'Date Created', type: 'dateRange' },
             ]}
             onApplyFilters={(filters) => fetchAllUsers(filters)}
+            tableIcon={<PeopleOutlinedIcon sx={{ fontSize: 18, color: '#08796C' }} />}
           />
         </Container>
       }

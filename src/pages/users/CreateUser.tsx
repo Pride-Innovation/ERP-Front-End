@@ -8,7 +8,7 @@ Managing Director
 import { useEffect, useState } from 'react';
 import UserForm from './UserForm';
 import { ICreateUser, IUser, IUserCreationResponseAxiosResponse } from './interface';
-import { useForm } from 'react-hook-form';
+import { Resolver, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { userSchema } from './schema';
 import { Box } from '@mui/material';
@@ -20,7 +20,7 @@ import { addUser } from './slice';
 
 const CreateUser = ({ handleClose }: ICreateUser) => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
-    const defaultUser: IUser = {} as IUser;
+    const defaultUser: IUser = { availability: 'present' } as IUser;
     const dispatch = useDispatch<AppDispatch>()
 
     const {
@@ -31,7 +31,7 @@ const CreateUser = ({ handleClose }: ICreateUser) => {
         reset
     } = useForm<IUser>({
         mode: 'onChange',
-        resolver: yupResolver(userSchema),
+        resolver: yupResolver(userSchema) as unknown as Resolver<IUser>,
     });
 
     useEffect(() => {
@@ -43,14 +43,25 @@ const CreateUser = ({ handleClose }: ICreateUser) => {
         try {
             const response = await createUSerService(formData) as IUserCreationResponseAxiosResponse;
             if (response.status === 201) {
-                toast.success("User created successfully")
-                dispatch(addUser(response.data.user))
+                if (response.data?.response?.status === 'failed') {
+                    toast.error(
+                        response.data.response.message ||
+                        'User was not saved because the verification email could not be delivered. Please contact the system administrator.'
+                    );
+                } else {
+                    toast.success(
+                        response.data?.response?.message ||
+                        'User created successfully. A verification email has been sent.'
+                    );
+                    dispatch(addUser(response.data.user));
+                    handleClose();
+                }
             }
         } catch (error) {
-            console.log(error)
+            // Axios interceptor already shows the toast; log for debugging only
+            console.error('CreateUser unexpected error:', error);
         }
         setSendingRequest(false);
-        handleClose();
     };
 
     return (

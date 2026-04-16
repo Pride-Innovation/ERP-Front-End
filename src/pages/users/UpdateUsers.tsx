@@ -8,7 +8,7 @@ Managing Director
 import { useContext, useEffect, useState } from 'react';
 import { IUpdateUser, IUser, IUserAxiosResponse } from './interface';
 import { Box } from '@mui/material';
-import { useForm } from 'react-hook-form';
+import { Resolver, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { userSchema } from './schema';
 import UserForm from './UserForm';
@@ -45,7 +45,7 @@ const UpdateUsers = ({ handleClose, sendingRequest, setSendingRequest, user }: I
         reset
     } = useForm<IUser>({
         mode: 'onChange',
-        resolver: yupResolver(userSchema),
+        resolver: yupResolver(userSchema) as unknown as Resolver<IUser>,
     });
 
     useEffect(() => {
@@ -58,13 +58,14 @@ const UpdateUsers = ({ handleClose, sendingRequest, setSendingRequest, user }: I
             const response = await updateUSerService(formData, user.id as number) as IUserAxiosResponse;
             if (response.status === 201) {
                 toast.success("User updated successfully");
-                dispatch(updateUser(response.data))
+                dispatch(updateUser(response.data));
+                handleClose();
             }
         } catch (error) {
-            console.log(error)
+            // Axios interceptor already shows the error toast; log for debugging only
+            console.error('UpdateUsers unexpected error:', error);
         }
         setSendingRequest(false);
-        handleClose()
     };
 
     return (

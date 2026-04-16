@@ -43,16 +43,17 @@ const TableToolBar = ({
     importData,
     exportData,
     createAction,
-    searchAction,
-    onSearch,
+    // searchAction,
+    // onSearch,
     rows = [],
     refresh,
-    status = false,
-    onStatusChange,
-    selectedStatus = 'all',
-    dateRangePicker = false,
+    // status = false,
+    // onStatusChange,
+    // selectedStatus = 'all',
+    // dateRangePicker = false,
     columnFilters = [],
     onApplyFilters,
+    tableIcon,
 }: ITableToolBar) => {
     const { setFileName } = useContext(FileContext);
     useEffect(() => { setFileName(module) }, [module]);
@@ -148,7 +149,7 @@ const TableToolBar = ({
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         flexShrink: 0,
                     }}>
-                        <FilterAltOutlinedIcon sx={{ fontSize: 18, color: PRIMARY_COLOR }} />
+                        {tableIcon ?? <FilterAltOutlinedIcon sx={{ fontSize: 18, color: PRIMARY_COLOR }} />}
                     </Box>
                     <Box>
                         <Typography sx={{ fontWeight: 700, fontSize: '0.9rem', color: '#0F172A', lineHeight: 1.2 }}>

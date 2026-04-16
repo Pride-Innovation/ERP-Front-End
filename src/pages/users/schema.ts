@@ -14,4 +14,12 @@ export const userSchema = yup.object().shape({
     email: yup.string().required('Email Address is required').email("Invalid Email Address"),
     gender: yup.string().required('Gender is required'),
     staffNumber: yup.string().required('Staff Number is required'),
+    branch: yup
+        .number()
+        .required('Duty Station / Branch is required')
+        .typeError('Please select a Duty Station / Branch'),
+    title: yup
+        .number()
+        .required('Title is required')
+        .typeError('Please select a Title'),
 });
