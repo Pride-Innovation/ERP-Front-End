@@ -66,20 +66,28 @@ const HandleRoutes = () => {
         if (route.indexOf(ROUTES.INVENTORY) !== -1) {
             handleActiveRoute(sideBarList[5])
         }
-        if ([ROUTES.SETTINGS].includes(route)) {
-            handleClick(sideBarList[6])
+        if (route.indexOf(ROUTES.STORE) !== -1) {
             handleActiveRoute(sideBarList[6])
         }
-        if (route.indexOf(ROUTES.SETTINGS) !== -1) {
-            handleActiveRoute(sideBarList[6])
-        }
-        if (route === ROUTES.AUDIT_TRAILS) {
-            handleClick(sideBarList[7])
+
+        if (route.indexOf(ROUTES.MOVEMENT) !== -1) {
             handleActiveRoute(sideBarList[7])
         }
-        if (route === ROUTES.STORE) {
-            handleClick(sideBarList[8])
+
+        if (route.indexOf(ROUTES.REPORTS) !== -1) {
             handleActiveRoute(sideBarList[8])
+        }
+
+        if ([ROUTES.SETTINGS].includes(route)) {
+            handleClick(sideBarList[9])
+            handleActiveRoute(sideBarList[9])
+        }
+        if (route.indexOf(ROUTES.SETTINGS) !== -1) {
+            handleActiveRoute(sideBarList[9])
+        }
+        if (route === ROUTES.AUDIT_TRAILS) {
+            handleClick(sideBarList[10])
+            handleActiveRoute(sideBarList[10])
         }
     }
 

@@ -90,22 +90,6 @@ const SideBarElements = () => {
         },
         {
             id: 7,
-            name: "Settings",
-            route: ROUTES.SETTINGS,
-            icon: <SettingsIcon />,
-            subroutes: [],
-            access: rightsToViewRow(permissionsMock[27]) // Assuming this is the permission for settings access
-        },
-        {
-            id: 8,
-            name: "Audit Trails",
-            route: ROUTES.AUDIT_TRAILS,
-            icon: <ReceiptLongIcon />,
-            subroutes: [],
-            access: rightsToViewRow(permissionsMock[31]) // Assuming this is the permission for audit trails access
-        },
-        {
-            id: 9,
             name: "Store",
             route: ROUTES.STORE,
             icon: <Store />,
@@ -113,7 +97,7 @@ const SideBarElements = () => {
             access: rightsToViewRow(permissionsMock[35]) // Assuming this is the permission for store access
         },
         {
-            id: 10,
+            id: 8,
             name: "Movement",
             route: ROUTES.MOVEMENT,
             icon: <LocalShippingOutlinedIcon />,
@@ -121,12 +105,28 @@ const SideBarElements = () => {
             access: rightsToViewRow(permissionsMock[36]) // Assuming this is the permission for movement access
         },
         {
-            id: 11,
+            id: 9,
             name: "Reports",
             route: ROUTES.REPORTS,
             icon: <BarChartOutlinedIcon />,
             subroutes: [],
             access: rightsToViewRow(permissionsMock[31]) // Reuse READ_AUDIT or adjust to a dedicated report permission
+        },
+                {
+            id: 10,
+            name: "Settings",
+            route: ROUTES.SETTINGS,
+            icon: <SettingsIcon />,
+            subroutes: [],
+            access: rightsToViewRow(permissionsMock[27]) // Assuming this is the permission for settings access
+        },
+        {
+            id: 11,
+            name: "Audit Trails",
+            route: ROUTES.AUDIT_TRAILS,
+            icon: <ReceiptLongIcon />,
+            subroutes: [],
+            access: rightsToViewRow(permissionsMock[31]) // Assuming this is the permission for audit trails access
         },
     ]
     return ({ sideBarList })
