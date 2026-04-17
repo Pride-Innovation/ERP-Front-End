@@ -15,6 +15,7 @@ import ModalComponent from '../../components/modal';
 import DisableUser from './DisableUser';
 import UnblockUser from './UnblockUser';
 import EnableUser from './EnableUser';
+import BlockUserAccount from './BlockUser';
 import Container from './Container';
 import { IBulkUserData } from './interface';
 import { toast } from 'react-toastify';
@@ -117,6 +118,12 @@ const Users = () => {
       {modalState === crudStates.disable &&
         <ModalComponent title='Disable User Account' open={open} handleClose={handleClose} width="40%">
           <DisableUser setSendingRequest={setSendingRequest} user={user} handleClose={handleClose} buttonText='Disable' sendingRequest={false} />
+        </ModalComponent>
+      }
+      {
+        modalState === crudStates.block &&
+        <ModalComponent title='Block User Account' open={open} handleClose={handleClose} width="40%">
+          <BlockUserAccount sendingRequest={sendingRequest} user={user} handleClose={handleClose} setSendingRequest={setSendingRequest} buttonText='Block Account' />
         </ModalComponent>
       }
       {
