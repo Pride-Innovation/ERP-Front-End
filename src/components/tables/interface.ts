@@ -127,8 +127,10 @@ export interface ICustomTableFilterOperator {
 
 export interface ICustomTablePagination {
     endPoint: string;
-    params?: Record<string, any>
+    params?: Record<string, any>;
     selectedStatus?: string;
+    /** Active column-filter params to merge on every paginated request */
+    filterParams?: Record<string, any>;
 }
 
 export type IhandleTablePagination = IUsersAxiosResponse | IRequestsAxiosResponse;
