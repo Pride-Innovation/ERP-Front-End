@@ -75,12 +75,12 @@ const UserUtils = () => {
     }, [selectedItemDetails]);
 
 
-    const fetchAllUsers = async (params?: Record<string, any>) => {
+    const fetchAllUsers = async (params?: Record<string, any>, pageNumber = 0, pageSize = 10) => {
         setLoading(true)
         try {
             const response = await fetchRowsService({
-                pageNumber: 0,
-                pageSize: 10,
+                pageNumber,
+                pageSize,
                 endPoint,
                 params
             }) as IUsersAxiosResponse;
