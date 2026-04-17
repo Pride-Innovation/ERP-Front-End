@@ -35,6 +35,7 @@ export const crudStates: {
     repair: string;
     inStore: string;
     enable: string;
+    block: string;
 } = {
     create: "create",
     update: "update",
@@ -55,7 +56,8 @@ export const crudStates: {
     reassign: "reassign",
     repair: "repair",
     inStore: "inStore",
-    enable: "enable"
+    enable: "enable",
+    block: "block"
 }
 
 export const requestStatus: {
