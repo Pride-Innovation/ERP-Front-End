@@ -66,6 +66,29 @@ const Users = () => {
     }
   }
 
+  /**
+   * Translates the toolbar's flat filter object into params the backend understands.
+   * - "status" column filter (active/disabled/locked) → boolean fields
+   * - Date ranges arrive already flattened as createdAtFrom / createdAtTo ISO strings
+   */
+  const handleApplyFilters = (filters: Record<string, any>) => {
+    const params: Record<string, any> = { ...filters };
+    if (params.status) {
+      const s = params.status as string;
+      delete params.status;
+      if (s === 'active') {
+        params.isEnabled = true;
+        params.blocked = false;
+        params.isAccountNonLocked = true;
+      } else if (s === 'disabled') {
+        params.isEnabled = false;
+      } else if (s === 'locked') {
+        params.isAccountNonLocked = false;
+      }
+    }
+    fetchAllUsers(params);
+  };
+
   const bulkInsertUsers = async (users: Array<IBulkUserData>) => {
     try {
       const data = new FormData();
@@ -142,7 +165,7 @@ const Users = () => {
               },
               { key: 'createdAt', label: 'Date Created', type: 'dateRange' },
             ]}
-            onApplyFilters={(filters) => fetchAllUsers(filters)}
+            onApplyFilters={(filters) => handleApplyFilters(filters)}
             tableIcon={<PeopleOutlinedIcon sx={{ fontSize: 18, color: '#08796C' }} />}
           />
         </Container>
