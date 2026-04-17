@@ -29,9 +29,9 @@ export const fetchRowsService = async ({
         searchParams.append("pageNumber", (pageNumber as number).toString());
         searchParams.append("pageSize", (pageSize as number).toString());
 
-        // Append only truthy values
+        // Append only truthy primitive values (skip objects to avoid "[object Object]")
         Object.entries(params).forEach(([key, value]) => {
-            if (value !== undefined && value !== null && value !== "") {
+            if (value !== undefined && value !== null && value !== '' && typeof value !== 'object') {
                 searchParams.append(key, value.toString());
             }
         });
