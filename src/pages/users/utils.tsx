@@ -26,6 +26,7 @@ import { AutocompleteContext } from '../../context/autocomplete';
 import { UserContext } from '../../context/user/UserContext';
 import LockPersonOutlinedIcon from '@mui/icons-material/LockPersonOutlined';
 import VpnKeyOutlinedIcon from '@mui/icons-material/VpnKeyOutlined';
+import BlockIcon from '@mui/icons-material/Block';
 
 const UserUtils = () => {
     const endPoint: string = "users";
@@ -139,6 +140,7 @@ const UserUtils = () => {
             label: "options",
             options: [
                 { value: crudStates.disable, label: "Disable Account", icon: <InfoIcon fontSize='small' color='error' /> },
+                { value: crudStates.block, label: "Block Account", icon: <BlockIcon fontSize='small' color='error' /> },
                 { value: crudStates.update, label: "Update", icon: <ModeEditIcon fontSize='small' color='info' /> },
                 { value: crudStates.read, label: "View Details", icon: <RemoveRedEyeIcon fontSize='small' color='inherit' /> },
                 { value: crudStates.unblock, label: "Unblock", icon: <LockPersonOutlinedIcon fontSize='small' color='warning' /> },
@@ -166,6 +168,11 @@ const UserUtils = () => {
                 handleOpen();
                 break;
             case crudStates.enable:
+                setModalState(option as string)
+                setUser(findUser(moduleID as number))
+                handleOpen();
+                break;
+            case crudStates.block:
                 setModalState(option as string)
                 setUser(findUser(moduleID as number))
                 handleOpen();
@@ -216,17 +223,17 @@ const UserUtils = () => {
  * @param user The user object to evaluate
  * @returns 'present' if all conditions are met, otherwise 'absent'
  */
-const determineUserAvailability = (user: IUser): string => {
-    // Handle edge case of null/undefined user
-    if (!user) return 'absent';
-    
-    const isEnabled = Boolean(user.enabled);
-    const isNotBlocked = user.blocked === false || user.blocked === undefined;
-    const isNotLocked = Boolean(user.accountNonLocked);
-    
-    // User is present only when all conditions are met
-    return (isEnabled && isNotBlocked && isNotLocked) ? 'present' : 'absent';
-};
+    const determineUserAvailability = (user: IUser): string => {
+        // Handle edge case of null/undefined user
+        if (!user) return 'absent';
+
+        const isEnabled = Boolean(user.enabled);
+        const isNotBlocked = user.blocked === false || user.blocked === undefined;
+        const isNotLocked = Boolean(user.accountNonLocked);
+
+        // User is present only when all conditions are met
+        return (isEnabled && isNotBlocked && isNotLocked) ? 'present' : 'absent';
+    };
 
 
     const handleUsersTableData = (users: Array<IUser>) => {
