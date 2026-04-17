@@ -23,7 +23,7 @@ import { useContext } from "react";
 import { AssetContext } from "../../context/asset";
 
 
-const CustomTablePagination = ({ endPoint, params, selectedStatus }: ICustomTablePagination) => {
+const CustomTablePagination = ({ endPoint, params, selectedStatus, filterParams }: ICustomTablePagination) => {
     const dispatch = useDispatch<AppDispatch>();
     const { determineAssetTypeState, determineStatusId } = AssetUtills()
     const { fieldName, fieldText } = useContext(AssetContext);
@@ -67,26 +67,28 @@ const CustomTablePagination = ({ endPoint, params, selectedStatus }: ICustomTabl
 
     const handleTablePagination = async (model: GridPaginationModel) => {
         try {
-            const requestParams = fieldName.length > 0 ? ({
-                ...params, [fieldName]: fieldText
-            }) : params;
+            const baseParams = fieldName.length > 0 ? ({ ...params, [fieldName]: fieldText }) : params;
 
+            // Merge active column filters; they take precedence over static params
+            const mergedParams = { ...baseParams, ...(filterParams ?? {}) };
+
+            const requestParams = selectedStatus ? {
+                ...mergedParams,
+                assetStatusId: determineStatusId(selectedStatus),
+                blocked: selectedStatus === 'locked' ? true : selectedStatus === 'active' ? false : undefined,
+                isAccountNonLocked: selectedStatus === 'locked' ? false : selectedStatus === 'active' ? true : undefined,
+                isEnabled: selectedStatus === 'disabled' ? false : selectedStatus === 'active' ? true : undefined,
+            } : mergedParams;
             const response = await fetchRowsService({
                 pageNumber: model.page,
                 pageSize: model.pageSize,
                 endPoint,
-                params: selectedStatus ? {
-                    ...requestParams,
-                    assetStatusId: determineStatusId(selectedStatus), // Determine the status ID based on the selected status
-                    blocked: selectedStatus === 'locked' ? true : selectedStatus === "active" ? false : null, // For user account status blocked
-                    isAccountNonLocked: selectedStatus === 'locked' ? false : selectedStatus === "active" ? true : null, // For user account status non-locked
-                    isEnabled: selectedStatus === 'disabled' ? false : selectedStatus === "active" ? true : null, // For user account status enabled
-                } : requestParams
+                params: requestParams,
             }) as IhandleTablePagination;
-            const { content } = response.data
+            const { content } = response.data;
 
             if (content.length > 0) {
-                handleReduxStoreUpdate(endPoint, content, params)
+                handleReduxStoreUpdate(endPoint, content, params);
             }
 
         } catch (error) {
