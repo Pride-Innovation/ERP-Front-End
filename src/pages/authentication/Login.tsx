@@ -74,9 +74,26 @@ const Login = () => {
                 handleSessionStorage(response.data, accessToken, refreshToken);
                 toast.success(`Welcome back, ${response.data.firstName} 👋`);
                 navigate(ROUTES.ASSETS_MANAGEMENT);
+            } else {
+                // loginService catches errors and returns them — extract the error detail
+                const errorData = (response as any)?.response?.data;
+                const errorCode: string | undefined = errorData?.errorCode;
+                const detail: string | undefined = errorData?.detail;
+
+                if (errorCode === 'ACCOUNT_BLOCKED') {
+                    toast.error(detail || 'Your account has been blocked. Please contact your admin.');
+                } else if (errorCode === 'ACCOUNT_DISABLED') {
+                    toast.error('Your account has been disabled. Please contact your admin.');
+                } else if (errorCode === 'ACCOUNT_LOCKED') {
+                    toast.error(detail || 'Your account is locked. Please verify your email.');
+                } else if (errorCode === 'INVALID_CREDENTIALS') {
+                    toast.error(detail || 'Invalid email or password. Please try again.');
+                } else {
+                    toast.error(detail || 'Invalid email or password. Please try again.');
+                }
             }
         } catch {
-            toast.error('Invalid email or password. Please try again.');
+            toast.error('An error occurred. Please try again.');
         } finally {
             setLoggingIn(false);
         }
