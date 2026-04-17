@@ -71,6 +71,16 @@ const searchUserService = async (query: string) => {
   }
 };
 
+const blockUserService = async (id: string | number) => {
+  try { const response = await axiosInstance.post(`users/${id}/block`); return response; }
+  catch (error) { return error; }
+}
+
+const returnFromLeaveService = async (id: string | number) => {
+  try { const response = await axiosInstance.post(`users/${id}/return-from-leave`); return response; }
+  catch (error) { return error; }
+}
+
 const enableUserService = async (userId: number): Promise<IUserAxiosResponse> => {
   return await axiosInstance.post(`/users/${userId}/enable`);
 };
@@ -97,5 +107,7 @@ export {
   fetchRolesService,
   unBlockUserService,
   enableUserService,
-  bulkInsertUsersService
+  bulkInsertUsersService,
+  blockUserService,
+  returnFromLeaveService
 }
