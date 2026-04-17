@@ -114,11 +114,20 @@ const TableComponent = ({
     const [sortField, setSortField] = useState<string>('');
     const [sortDir, setSortDir] = useState<SortDir>('asc');
     const [searchValue, setSearchValue] = useState('');
+    const [activeFilters, setActiveFilters] = useState<Record<string, any>>({});
     const debouncedSearch = useDebounce(searchValue, 500);
 
     const { handleOptionsFilter } = TableUtills({ moduleName: module });
     const { handleTableFilter } = CustomTextFilterOperator({ endPoint, params });
-    const { handleTablePagination } = CustomTablePagination({ endPoint, params, selectedStatus });
+    const { handleTablePagination } = CustomTablePagination({ endPoint, params, selectedStatus, filterParams: activeFilters });
+
+    // Intercept onApplyFilters to save active filters in this component so pagination
+    // can include them on every subsequent page-change request.
+    const handleFiltersApplied = (filters: Record<string, any>) => {
+        setActiveFilters(filters);
+        setPage(0);
+        onApplyFilters?.(filters);
+    };
 
     // ── Server-side: fire pagination when page/rowsPerPage changes ────────────
     const handlePageChange = (_: unknown, newPage: number) => {
@@ -385,7 +394,7 @@ const TableComponent = ({
                 onStatusChange={onStatusChange}
                 dateRangePicker={dateRangePicker}
                 columnFilters={columnFilters}
-                onApplyFilters={onApplyFilters}
+                onApplyFilters={handleFiltersApplied}
                 tableIcon={tableIcon}
             />
 
