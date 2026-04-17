@@ -69,24 +69,41 @@ const TableToolBar = ({
         return true;
     }).length;
 
+    /** Builds the flat query-param object that is sent to the API. */
+    const buildApiFilters = (
+        values: Record<string, any>,
+        dateRanges: Record<string, { preset: string; from: Dayjs | null; to: Dayjs | null }>
+    ): Record<string, any> => {
+        const api: Record<string, any> = {};
+        Object.entries(values).forEach(([k, v]) => {
+            const colDef = columnFilters.find(c => c.key === k);
+            if (colDef?.type === 'dateRange') return;
+            if (v !== undefined && v !== null && v !== '') api[k] = v;
+        });
+        Object.entries(dateRanges).forEach(([k, dr]) => {
+            if (dr.preset) {
+                if (dr.from) api[`${k}From`] = dr.from.startOf('day').toISOString();
+                if (dr.to)   api[`${k}To`]   = dr.to.endOf('day').toISOString();
+            }
+        });
+        return api;
+    };
+
     const handleApplyFilters = () => {
-        const clean: Record<string, any> = {};
+        // Build display-friendly state (keeps date-range objects for chips)
+        const display: Record<string, any> = {};
         Object.entries(filterValues).forEach(([k, v]) => {
             const colDef = columnFilters.find(c => c.key === k);
             if (colDef?.type === 'dateRange') return;
-            if (v) clean[k] = v;
+            if (v !== undefined && v !== null && v !== '') display[k] = v;
         });
         Object.entries(drStates).forEach(([k, dr]) => {
             if (dr.preset) {
-                clean[k] = {
-                    preset: dr.preset,
-                    from: dr.from ? dr.from.toISOString() : undefined,
-                    to: dr.to ? dr.to.toISOString() : undefined,
-                };
+                display[k] = { preset: dr.preset, from: dr.from?.toISOString(), to: dr.to?.toISOString() };
             }
         });
-        setAppliedFilters(clean);
-        onApplyFilters?.(clean);
+        setAppliedFilters(display);
+        onApplyFilters?.(buildApiFilters(filterValues, drStates));
     };
 
     const handleClearAll = () => {
@@ -97,14 +114,19 @@ const TableToolBar = ({
     };
 
     const handleRemoveFilter = (key: string) => {
-        const next = { ...appliedFilters };
-        delete next[key];
+        const nextApplied = { ...appliedFilters };
+        delete nextApplied[key];
+        setAppliedFilters(nextApplied);
+
         const nextVals = { ...filterValues };
         delete nextVals[key];
         setFilterValues(nextVals);
-        setAppliedFilters(next);
-        setDrStates(prev => { const n = { ...prev }; delete n[key]; return n; });
-        onApplyFilters?.(next);
+
+        const nextDr = { ...drStates };
+        delete nextDr[key];
+        setDrStates(nextDr);
+
+        onApplyFilters?.(buildApiFilters(nextVals, nextDr));
     };
 
     // ── Date range column filter state ─────────────────────────────────────
