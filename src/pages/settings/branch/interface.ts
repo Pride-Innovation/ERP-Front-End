@@ -20,6 +20,7 @@ export interface IDistrict {
     name: string;
 }
 
+/** Response shape from list (GET /branches) and single get (GET /branches/:id) */
 export interface IBranch {
     id?: string | number;
     name: string
@@ -33,16 +34,42 @@ export interface IBranch {
     district?: IDistrict | null;
 }
 
+/** Request body shape for create (POST) and update (PUT) — managers/region/district are IDs */
+export interface IBranchDTO {
+    name: string;
+    email: string;
+    telephone: string;
+    region: number;
+    district: number;
+    branchManager?: number | null;
+    branchOperationsManager?: number | null;
+    relationshipManager?: number | null;
+    creditAdministrator?: number | null;
+}
+
+/** Response shape from create (POST) and update (PUT) — Branch entity without manager objects */
+export interface IBranchEntity {
+    id: number;
+    name: string;
+    email: string;
+    telephone?: string | null;
+    shortCode?: string | null;
+    region?: IRegion | null;
+    district?: IDistrict | null;
+}
+
 export interface IBranchForm {
-    formState: FormState<IBranch> & {
+    formState: FormState<IBranchDTO> & {
         errors: {
             name?: FieldError;
             email?: FieldError;
             telephone?: FieldError;
+            region?: FieldError;
+            district?: FieldError;
         };
     };
-    control: Control<IBranch>;
-    register: UseFormRegister<IBranch>;
+    control: Control<IBranchDTO>;
+    register: UseFormRegister<IBranchDTO>;
     buttonText: string;
     sendingRequest: boolean;
     handleClose: () => void;
@@ -84,6 +111,12 @@ export interface IBranchesAxiosResponse extends IAxiosResponse {
     data: IBranchResponse
 }
 
+/** Axios response wrapping the enriched BranchWithManagersDTO (single get) */
 export interface IBranchAxiosResponse extends IAxiosResponse {
     data: IBranch
+}
+
+/** Axios response wrapping the Branch entity returned by create and update */
+export interface IBranchEntityAxiosResponse extends IAxiosResponse {
+    data: IBranchEntity
 }
