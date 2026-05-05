@@ -27,7 +27,7 @@ const DeleteBranch = ({
         setSendingRequest(true)
         try {
             const response = await deleteBranchService(branch?.id as string) as IBranchAxiosResponse;
-            if (response.status === 204) {
+            if (response.status === 200) {
                 toast.success("Branch deleted successfully", { position: 'bottom-right' })
                 removeBranchToStore(branch)
             }
