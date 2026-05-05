@@ -14,13 +14,19 @@ import { IBranch, IBranchesAxiosResponse } from "./interface";
 import { useSelector } from "react-redux";
 import { IOptions } from "../../../components/tables/interface";
 import { fetchRowsService } from "../../../core/apis/globalService";
+import RegionUtills from "../regions/utills";
+import DistrictUtills from "../districts/utills";
 
 const BranchUtills = () => {
     const endPoint: string = "branches"
     const [modalState, setModalState] = useState<string>("");
     const [open, setOpen] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false);
+    const [totalElements, setTotalElements] = useState<number>(0);
+    const [totalPages, setTotalPages] = useState<number>(0);
     const dispatch = useDispatch<AppDispatch>();
+    const { fetchAllRegions } = RegionUtills();
+    const { fetchAllDistricts } = DistrictUtills();
     const [optionsObject, setOptionsObject] = useState<{
         usersOptions: Array<IOptions>,
         regionsOptions: Array<IOptions>,
@@ -34,17 +40,19 @@ const BranchUtills = () => {
     const { regions } = useSelector((state: RootState) => state.RegionStore);
     const { districts } = useSelector((state: RootState) => state.DistrictStore);
 
-    const fetchAllBranches = async (params?: Record<string, any>) => {
+    const fetchAllBranches = async (params?: Record<string, any>, pageNumber = 0, pageSize = 10) => {
         setLoading(true)
         try {
             const response = await fetchRowsService({
-                pageNumber: 0,
-                pageSize: 10,
+                pageNumber,
+                pageSize,
                 endPoint,
                 params
             }) as IBranchesAxiosResponse;
             if (response.status === 200) {
                 dispatch(loadBranches(response?.data?.content))
+                setTotalElements(response?.data?.totalElements ?? 0)
+                setTotalPages(response?.data?.totalPages ?? 0)
             }
         } catch (error) {
             console.log(error)
@@ -52,16 +60,19 @@ const BranchUtills = () => {
         setLoading(false)
     }
 
+    // Fetch regions and districts on mount if not already in store
     useEffect(() => {
-        if (users?.length > 0) {
-            setOptionsObject({
-                usersOptions: users?.map(user => ({ label: `${user.firstName} ${user.lastName}`, value: user.id as number })) || [],
-                regionsOptions: regions?.map(region => ({ label: region.name, value: region.id as number })) || [],
-                districtsOptions: districts?.map(district => ({ label: district.name, value: district.id as number })) || [],
-            });
-        }
+        if (regions.length === 0) fetchAllRegions();
+        if (districts.length === 0) fetchAllDistricts();
+    }, []);
 
-    }, [users, regions, districts])
+    useEffect(() => {
+        setOptionsObject({
+            usersOptions: users?.map(user => ({ label: `${user.firstName} ${user.lastName}`, value: user.id as number })) || [],
+            regionsOptions: regions?.map(region => ({ label: region.name, value: region.id as number })) || [],
+            districtsOptions: districts?.map(district => ({ label: district.name, value: district.id as number })) || [],
+        });
+    }, [users, regions, districts]);
 
     const filterBranchByName = (text: string) => {
         /**
@@ -82,7 +93,6 @@ const BranchUtills = () => {
         dispatch(updateBranch(branch))
     }
 
-    useEffect(() => { fetchAllBranches() }, []);
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
 
@@ -154,7 +164,10 @@ const BranchUtills = () => {
             updateBranchInStore,
             loading,
             fetchAllBranches,
-            users
+            users,
+            totalElements,
+            totalPages,
+            optionsObject,
         }
     )
 }
