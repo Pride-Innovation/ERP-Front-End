@@ -10,9 +10,9 @@ import { useEffect } from "react";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { toast } from "react-toastify";
 import BranchForm from "./BranchForm";
-import { IBranch, IBranchAxiosResponse, ICreateBranch } from "./interface";
+import { IBranchDTO, IBranchAxiosResponse, IBranchEntityAxiosResponse, ICreateBranch } from "./interface";
 import { branchSchema } from "./schema";
-import { createBranchService } from "./service";
+import { createBranchService, fetchSingleBranchService } from "./service";
 import BranchUtills from "./utills";
 
 const CreateBranch = ({
@@ -20,7 +20,6 @@ const CreateBranch = ({
     sendingRequest,
     setSendingRequest,
 }: ICreateBranch) => {
-    const defaultBranch: IBranch = {} as IBranch;
     const { addBranchToStore } = BranchUtills();
 
     const {
@@ -29,28 +28,35 @@ const CreateBranch = ({
         formState,
         register,
         reset,
-    } = useForm<IBranch>({
+    } = useForm<IBranchDTO>({
         mode: "onChange",
         resolver: yupResolver(branchSchema),
     });
 
     useEffect(() => {
-        reset({ ...defaultBranch });
+        reset({} as IBranchDTO);
     }, [reset]);
 
-    const onSubmit = async (formData: IBranch) => {
+    const onSubmit = async (formData: IBranchDTO) => {
         setSendingRequest(true);
         try {
-            const response = await createBranchService(formData) as IBranchAxiosResponse;
+            const response = await createBranchService(formData) as IBranchEntityAxiosResponse;
             if (response.status === 201) {
-                addBranchToStore(response.data);
-                toast.success("Branch created successfully")
+                // Fetch enriched branch (BranchWithManagersDTO) so manager names appear on the card
+                const enriched = await fetchSingleBranchService(response.data.id) as IBranchAxiosResponse;
+                if (enriched.status === 200) {
+                    addBranchToStore(enriched.data);
+                } else {
+                    addBranchToStore(response.data as any);
+                }
+                toast.success("Branch created successfully");
+                handleClose();
             }
         } catch (error) {
             console.log(error);
+            toast.error("Failed to create branch. Please try again.");
         }
         setSendingRequest(false);
-        handleClose()
     };
 
     return (
