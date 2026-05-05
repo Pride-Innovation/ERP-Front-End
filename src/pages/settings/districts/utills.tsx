@@ -10,7 +10,7 @@ const DistrictUtills = () => {
 
     const fetchAllDistricts = async () => {
         try {
-            const response = await fetchRowsService({ pageNumber: 0, pageSize: 10, endPoint }) as IDistrictsAxiosResponse;
+            const response = await fetchRowsService({ pageNumber: 0, pageSize: 100, endPoint }) as IDistrictsAxiosResponse;
             if (response.status === 200) {
                 dispatch(loadDistricts(response.data.content));
             }
