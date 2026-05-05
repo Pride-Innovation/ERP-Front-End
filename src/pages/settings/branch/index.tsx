@@ -21,10 +21,11 @@ import {
   MenuItem,
   Select,
   FormControl,
+  Pagination,
+  Chip,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
-import FilterListIcon from "@mui/icons-material/FilterList";
 import AccountBalanceOutlinedIcon from "@mui/icons-material/AccountBalanceOutlined";
 
 import ModalComponent from "../../../components/modal";
@@ -34,19 +35,25 @@ import UpdateBranch from "./UpdateBranch";
 import DeleteBranch from "./DeleteBranch";
 import { IBranch } from "./interface";
 import BranchUtills from "./utills";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { crudStates } from "../../../utils/constants";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../store";
 import Loading from "../../../components/loading";
+import { useDebounce } from "../../../hooks/useDebounce";
 
 const PRIMARY = '#08796C';
 
 const Branches = () => {
   const [currentBranch, setCurrentBranch] = useState<IBranch>({} as IBranch);
   const [sendingRequest, setSendingRequest] = useState<boolean>(false);
-  const [searchTerm, setSearchTerm] = useState<string>("");
-  const [filter, setFilter] = useState<string>("all");
+  const [nameFilter, setNameFilter] = useState<string>("");
+  const [regionId, setRegionId] = useState<string>("");
+  const [districtId, setDistrictId] = useState<string>("");
+  const [page, setPage] = useState<number>(0);
+  const [pageSize] = useState<number>(10);
+
+  const debouncedName = useDebounce(nameFilter, 400);
 
   const { branches } = useSelector((state: RootState) => state.BranchStore);
   const {
@@ -57,14 +64,39 @@ const Branches = () => {
     setModalState,
     loading,
     fetchAllBranches,
+    totalElements,
+    totalPages,
+    optionsObject,
   } = BranchUtills();
 
   const theme = useTheme();
-  // const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
+  const buildParams = useCallback(() => {
+    const params: Record<string, any> = {};
+    if (debouncedName) params.name = debouncedName;
+    if (regionId !== "") params.regionId = Number(regionId);
+    if (districtId !== "") params.districtId = Number(districtId);
+    return params;
+  }, [debouncedName, regionId, districtId]);
+
+  // Fetch whenever filters or page change
   useEffect(() => {
-    fetchAllBranches();
-  }, []);
+    fetchAllBranches(buildParams(), page, pageSize);
+  }, [debouncedName, regionId, districtId, page, pageSize]);
+
+  // Reset to page 0 when filters change
+  useEffect(() => {
+    setPage(0);
+  }, [debouncedName, regionId, districtId]);
+
+  const clearFilters = () => {
+    setNameFilter("");
+    setRegionId("");
+    setDistrictId("");
+    setPage(0);
+  };
+
+  const hasActiveFilters = nameFilter !== "" || regionId !== "" || districtId !== "";
 
   const createBranch = () => {
     setModalState(crudStates.create);
@@ -82,23 +114,6 @@ const Branches = () => {
     setModalState(crudStates.delete);
     handleOpen();
   };
-
-  // Filter branches based on search term and region filter
-  const filteredBranches = branches.filter(branch => {
-    const matchesSearch = searchTerm === "" ||
-      branch.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      branch.email.toLowerCase().includes(searchTerm.toLowerCase());
-
-    const matchesFilter = filter === "all" ||
-      (branch.region && branch.region.name.toLowerCase() === filter.toLowerCase());
-
-    return matchesSearch && matchesFilter;
-  });
-
-  // Get unique regions for filter
-  const regionNames = branches.map(branch => branch.region?.name).filter(Boolean) as string[];
-  const regionSet = new Set<string>(regionNames);
-  const regions = Array.from(regionSet);
 
   return (
     <>
@@ -172,7 +187,7 @@ const Branches = () => {
             flexShrink: 0, mt: 0.5,
           }}
         >
-          {filteredBranches.length} branches
+          {totalElements} {totalElements === 1 ? 'branch' : 'branches'}
         </Box>
       </Box>
 
@@ -192,9 +207,9 @@ const Branches = () => {
         >
           <TextField
             size="small"
-            placeholder="Search branches..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Search by name..."
+            value={nameFilter}
+            onChange={(e) => setNameFilter(e.target.value)}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
@@ -218,7 +233,7 @@ const Branches = () => {
             size="small"
             variant="outlined"
             sx={{
-              minWidth: 180,
+              minWidth: 160,
               flex: { xs: 1, md: "unset" },
               '& .MuiOutlinedInput-root': {
                 borderRadius: '8px', height: 36, bgcolor: '#fff',
@@ -229,30 +244,74 @@ const Branches = () => {
             }}
           >
             <Select
-              value={filter}
-              onChange={(e) => setFilter(e.target.value)}
-              startAdornment={
-                <FilterListIcon fontSize="small" sx={{ ml: 0.5, mr: 1, color: PRIMARY, opacity: 0.8 }} />
-              }
+              value={regionId}
+              onChange={(e) => { setRegionId(e.target.value as string); }}
               displayEmpty
               renderValue={(value) => (
-                <Typography variant="body2" sx={{ fontWeight: 500, color: value === "all" ? '#94A3B8' : PRIMARY }}>
-                  {value === "all" ? "All Regions" : value}
+                <Typography variant="body2" sx={{ fontWeight: 500, color: value === "" ? '#94A3B8' : PRIMARY }}>
+                  {value === "" ? "All Regions" : (optionsObject.regionsOptions.find(o => o.value === value)?.label ?? "Region")}
                 </Typography>
               )}
               MenuProps={{ PaperProps: { elevation: 4, sx: { mt: 0.5, borderRadius: 1.5, maxHeight: 300 } } }}
             >
-              <MenuItem value="all" sx={{ py: 1 }}>
+              <MenuItem value="">
                 <Typography variant="body2">All Regions</Typography>
               </MenuItem>
-              {regions.length > 0 && <Divider sx={{ my: 0.5 }} />}
-              {regions.map(region => (
-                <MenuItem key={region} value={region} sx={{ py: 1 }}>
-                  <Typography variant="body2">{region}</Typography>
+              <Divider sx={{ my: 0.5 }} />
+              {optionsObject.regionsOptions.map(opt => (
+                <MenuItem key={opt.value} value={opt.value} sx={{ py: 1 }}>
+                  <Typography variant="body2">{opt.label}</Typography>
                 </MenuItem>
               ))}
             </Select>
           </FormControl>
+
+          <FormControl
+            size="small"
+            variant="outlined"
+            sx={{
+              minWidth: 160,
+              flex: { xs: 1, md: "unset" },
+              '& .MuiOutlinedInput-root': {
+                borderRadius: '8px', height: 36, bgcolor: '#fff',
+                '& fieldset': { borderColor: '#E2E8F0' },
+                '&:hover fieldset': { borderColor: PRIMARY },
+                '&.Mui-focused fieldset': { borderColor: PRIMARY, borderWidth: 1.5 },
+              },
+            }}
+          >
+            <Select
+              value={districtId}
+              onChange={(e) => { setDistrictId(e.target.value as string); }}
+              displayEmpty
+              renderValue={(value) => (
+                <Typography variant="body2" sx={{ fontWeight: 500, color: value === "" ? '#94A3B8' : PRIMARY }}>
+                  {value === "" ? "All Districts" : (optionsObject.districtsOptions.find(o => o.value === value)?.label ?? "District")}
+                </Typography>
+              )}
+              MenuProps={{ PaperProps: { elevation: 4, sx: { mt: 0.5, borderRadius: 1.5, maxHeight: 300 } } }}
+            >
+              <MenuItem value="">
+                <Typography variant="body2">All Districts</Typography>
+              </MenuItem>
+              <Divider sx={{ my: 0.5 }} />
+              {optionsObject.districtsOptions.map(opt => (
+                <MenuItem key={opt.value} value={opt.value} sx={{ py: 1 }}>
+                  <Typography variant="body2">{opt.label}</Typography>
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          {hasActiveFilters && (
+            <Chip
+              label="Clear filters"
+              size="small"
+              onDelete={clearFilters}
+              onClick={clearFilters}
+              sx={{ height: 36, borderRadius: '8px', fontSize: '0.8rem', fontWeight: 500 }}
+            />
+          )}
         </Stack>
 
         <Button
@@ -288,16 +347,37 @@ const Branches = () => {
           >
             <Loading items="branches" />
           </Paper>
-        ) : filteredBranches.length > 0 ? (
-          <Fade in={!loading}>
-            <Grid container spacing={3}>
-              {filteredBranches.map((branch) => (
-                <Grid item xs={12} sm={6} md={6} lg={6} xl={4} key={branch.id}>
-                  <ViewBranch branch={branch} deleteBranch={deleteBranch} updateBranch={updateBranch} />
-                </Grid>
-              ))}
-            </Grid>
-          </Fade>
+        ) : branches.length > 0 ? (
+          <>
+            <Fade in={!loading}>
+              <Grid container spacing={3}>
+                {branches.map((branch) => (
+                  <Grid item xs={12} sm={6} md={6} lg={6} xl={4} key={branch.id}>
+                    <ViewBranch branch={branch} deleteBranch={deleteBranch} updateBranch={updateBranch} />
+                  </Grid>
+                ))}
+              </Grid>
+            </Fade>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+                <Pagination
+                  count={totalPages}
+                  page={page + 1}
+                  onChange={(_, value) => setPage(value - 1)}
+                  color="primary"
+                  shape="rounded"
+                  showFirstButton
+                  showLastButton
+                  sx={{
+                    '& .MuiPaginationItem-root': { borderRadius: '8px' },
+                    '& .Mui-selected': { bgcolor: `${PRIMARY} !important`, color: '#fff' },
+                  }}
+                />
+              </Box>
+            )}
+          </>
         ) : (
           <Fade in={!loading}>
             <Paper
@@ -317,20 +397,22 @@ const Branches = () => {
               <AccountBalanceOutlinedIcon sx={{ fontSize: 60, color: alpha(theme.palette.text.secondary, 0.3), mb: 2 }} />
 
               <Typography variant="h6" color="text.secondary" gutterBottom>
-                {searchTerm || filter !== "all" ? "No matching branches found" : "No branches available"}
+                {hasActiveFilters
+                  ? "No matching branches found"
+                  : "No branches available"}
               </Typography>
 
               <Typography variant="body2" color="text.secondary" sx={{ mb: 3, maxWidth: 450 }}>
-                {searchTerm || filter !== "all"
+                {hasActiveFilters
                   ? "Try adjusting your search or filter criteria to find what you're looking for."
                   : "Get started by creating your first branch office to manage bank locations."
                 }
               </Typography>
 
-              {searchTerm || filter !== "all" ? (
+              {hasActiveFilters ? (
                 <Button
                   variant="outlined"
-                  onClick={() => { setSearchTerm(""); setFilter("all"); }}
+                  onClick={clearFilters}
                   sx={{ textTransform: 'none', borderRadius: 1.5 }}
                 >
                   Clear Filters
