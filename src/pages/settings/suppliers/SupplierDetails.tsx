@@ -25,12 +25,12 @@ import PhoneAndroidOutlinedIcon from '@mui/icons-material/PhoneAndroidOutlined';
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
 import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
 import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
-import CategoryOutlinedIcon from '@mui/icons-material/CategoryOutlined';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import ContentCopyOutlinedIcon from '@mui/icons-material/ContentCopyOutlined';
 import DoneOutlinedIcon from '@mui/icons-material/DoneOutlined';
 import { useState } from 'react';
 import { ISupplierDetails } from './interface';
+import { ICommodity } from '../commodity/interface';
 
 const SupplierDetails = ({
     supplier,
@@ -129,28 +129,34 @@ const SupplierDetails = ({
                                     fontSize="small"
                                     sx={{ color: alpha(theme.palette.secondary.main, 0.8), mt: 0.25 }}
                                 />
-                                <Typography variant="body2" sx={{ fontWeight: 500, wordBreak: 'break-word', flex: 1 }}>
-                                    {supplier.email}
-                                </Typography>
-                                {supplier.email && (
-                                    <Tooltip title={copiedField === 'email' ? 'Copied!' : 'Copy email'}>
-                                        <IconButton
-                                            size="small"
-                                            onClick={() => handleCopy(supplier.email!, 'email')}
-                                            sx={{
-                                                color: copiedField === 'email'
-                                                    ? '#08796C'
-                                                    : alpha(theme.palette.text.secondary, 0.5),
-                                                '&:hover': { color: '#08796C' },
-                                                transition: 'color 0.2s'
-                                            }}
-                                        >
-                                            {copiedField === 'email'
-                                                ? <DoneOutlinedIcon sx={{ fontSize: 16 }} />
-                                                : <ContentCopyOutlinedIcon sx={{ fontSize: 16 }} />
-                                            }
-                                        </IconButton>
-                                    </Tooltip>
+                                {supplier.email ? (
+                                    <>
+                                        <Typography variant="body2" sx={{ fontWeight: 500, wordBreak: 'break-word', flex: 1 }}>
+                                            {supplier.email}
+                                        </Typography>
+                                        <Tooltip title={copiedField === 'email' ? 'Copied!' : 'Copy email'}>
+                                            <IconButton
+                                                size="small"
+                                                onClick={() => handleCopy(supplier.email!, 'email')}
+                                                sx={{
+                                                    color: copiedField === 'email'
+                                                        ? '#08796C'
+                                                        : alpha(theme.palette.text.secondary, 0.5),
+                                                    '&:hover': { color: '#08796C' },
+                                                    transition: 'color 0.2s'
+                                                }}
+                                            >
+                                                {copiedField === 'email'
+                                                    ? <DoneOutlinedIcon sx={{ fontSize: 16 }} />
+                                                    : <ContentCopyOutlinedIcon sx={{ fontSize: 16 }} />
+                                                }
+                                            </IconButton>
+                                        </Tooltip>
+                                    </>
+                                ) : (
+                                    <Typography variant="body2" sx={{ fontStyle: 'italic', color: alpha(theme.palette.text.secondary, 0.6), flex: 1 }}>
+                                        Not Provided
+                                    </Typography>
                                 )}
                             </Box>
 
@@ -159,37 +165,43 @@ const SupplierDetails = ({
                                     fontSize="small"
                                     sx={{ color: alpha(theme.palette.secondary.main, 0.8), mt: 0.25 }}
                                 />
-                                <Typography variant="body2" sx={{ fontWeight: 500, flex: 1 }}>
-                                    {supplier.telephone}
-                                </Typography>
-                                {supplier.telephone && (
-                                    <Tooltip title={copiedField === 'phone' ? 'Copied!' : 'Copy phone'}>
-                                        <IconButton
-                                            size="small"
-                                            onClick={() => handleCopy(supplier.telephone!, 'phone')}
-                                            sx={{
-                                                color: copiedField === 'phone'
-                                                    ? '#08796C'
-                                                    : alpha(theme.palette.text.secondary, 0.5),
-                                                '&:hover': { color: '#08796C' },
-                                                transition: 'color 0.2s'
-                                            }}
-                                        >
-                                            {copiedField === 'phone'
-                                                ? <DoneOutlinedIcon sx={{ fontSize: 16 }} />
-                                                : <ContentCopyOutlinedIcon sx={{ fontSize: 16 }} />
-                                            }
-                                        </IconButton>
-                                    </Tooltip>
+                                {supplier.telephone ? (
+                                    <>
+                                        <Typography variant="body2" sx={{ fontWeight: 500, flex: 1 }}>
+                                            {supplier.telephone}
+                                        </Typography>
+                                        <Tooltip title={copiedField === 'phone' ? 'Copied!' : 'Copy phone'}>
+                                            <IconButton
+                                                size="small"
+                                                onClick={() => handleCopy(supplier.telephone!, 'phone')}
+                                                sx={{
+                                                    color: copiedField === 'phone'
+                                                        ? '#08796C'
+                                                        : alpha(theme.palette.text.secondary, 0.5),
+                                                    '&:hover': { color: '#08796C' },
+                                                    transition: 'color 0.2s'
+                                                }}
+                                            >
+                                                {copiedField === 'phone'
+                                                    ? <DoneOutlinedIcon sx={{ fontSize: 16 }} />
+                                                    : <ContentCopyOutlinedIcon sx={{ fontSize: 16 }} />
+                                                }
+                                            </IconButton>
+                                        </Tooltip>
+                                    </>
+                                ) : (
+                                    <Typography variant="body2" sx={{ fontStyle: 'italic', color: alpha(theme.palette.text.secondary, 0.6), flex: 1 }}>
+                                        Not Provided
+                                    </Typography>
                                 )}
                             </Box>
 
-                            {supplier.address && (
-                                <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
-                                    <LocationOnOutlinedIcon
-                                        fontSize="small"
-                                        sx={{ color: alpha(theme.palette.secondary.main, 0.8), mt: 0.25 }}
-                                    />
+                            <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
+                                <LocationOnOutlinedIcon
+                                    fontSize="small"
+                                    sx={{ color: alpha(theme.palette.secondary.main, 0.8), mt: 0.25 }}
+                                />
+                                {supplier.address ? (
                                     <Typography
                                         variant="body2"
                                         sx={{
@@ -203,43 +215,51 @@ const SupplierDetails = ({
                                     >
                                         {supplier.address}
                                     </Typography>
-                                </Box>
-                            )}
+                                ) : (
+                                    <Typography variant="body2" sx={{ fontStyle: 'italic', color: alpha(theme.palette.text.secondary, 0.6) }}>
+                                        Not Provided
+                                    </Typography>
+                                )}
+                            </Box>
                         </Stack>
                     </Box>
 
-                    {/* Commodity Information */}
-                    {supplier.commodity && (
-                        <>
-                            <Divider sx={{ opacity: 0.5 }} />
-                            <Box>
-                                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, mb: 1, display: 'block' }}>
-                                    Commodity Supplied
+                    {/* Commodities Information */}
+                    <>
+                        <Divider sx={{ opacity: 0.5 }} />
+                        <Box>
+                            <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600, mb: 1.5, display: 'block' }}>
+                                Commodities Supplied
+                            </Typography>
+                            {supplier.commodities && supplier.commodities.length > 0 ? (
+                                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75 }}>
+                                    {supplier.commodities.map((c, index) => {
+                                        const commodity = typeof c === 'object' ? c as ICommodity : null;
+                                        if (!commodity) return null;
+                                        return (
+                                            <Chip
+                                                key={commodity.id ?? index}
+                                                icon={<Inventory2OutlinedIcon sx={{ fontSize: '14px !important' }} />}
+                                                label={commodity.name}
+                                                size="small"
+                                                sx={{
+                                                    bgcolor: 'rgba(8,121,108,0.08)',
+                                                    color: '#08796C',
+                                                    fontWeight: 500,
+                                                    fontSize: '0.72rem',
+                                                    '& .MuiChip-icon': { color: '#08796C' }
+                                                }}
+                                            />
+                                        );
+                                    })}
+                                </Box>
+                            ) : (
+                                <Typography variant="body2" sx={{ fontStyle: 'italic', color: alpha(theme.palette.text.secondary, 0.6) }}>
+                                    No commodities assigned
                                 </Typography>
-                                <Stack spacing={1}>
-                                    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
-                                        <Inventory2OutlinedIcon
-                                            fontSize="small"
-                                            sx={{ color: alpha(theme.palette.secondary.main, 0.8), mt: 0.25 }}
-                                        />
-                                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                                            {supplier.commodity.name}
-                                        </Typography>
-                                    </Box>
-
-                                    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
-                                        <CategoryOutlinedIcon
-                                            fontSize="small"
-                                            sx={{ color: alpha(theme.palette.secondary.main, 0.8), mt: 0.25 }}
-                                        />
-                                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                                            {supplier.commodity.groupName}
-                                        </Typography>
-                                    </Box>
-                                </Stack>
-                            </Box>
-                        </>
-                    )}
+                            )}
+                        </Box>
+                    </>
                 </Stack>
             </Box>
 
