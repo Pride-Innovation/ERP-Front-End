@@ -8,7 +8,6 @@ Managing Director
 import { Dispatch, SetStateAction } from "react";
 import {
     Control,
-    FieldError,
     FormState,
     UseFormRegister
 } from "react-hook-form";
@@ -21,72 +20,63 @@ export interface ISupplier {
     telephone: string;
     email: string;
     address?: string | null;
-    commodity?: ICommodity | null
+    commodities?: Array<ICommodity | number>;
 }
 
-interface ISupplierDetails {
+export interface ISupplierFormValues {
+    id?: string | number;
+    name: string;
+    telephone: string;
+    email: string;
+    address?: string | null;
+    commodities?: number[] | null;
+}
+
+export interface ISupplierDetails {
     supplier: ISupplier;
-    deleteSupplier: (role: ISupplier) => void;
-    updateSupplier: (role: ISupplier) => void;
+    deleteSupplier: (supplier: ISupplier) => void;
+    updateSupplier: (supplier: ISupplier) => void;
 }
 
-interface ICreateSupplier {
+export interface ICreateSupplier {
     handleClose: () => void;
     sendingRequest: boolean;
     setSendingRequest: Dispatch<SetStateAction<boolean>>;
 }
 
-interface IUpdateSupplier {
+export interface IUpdateSupplier {
     handleClose: () => void;
     sendingRequest: boolean;
     setSendingRequest: Dispatch<SetStateAction<boolean>>;
-    supplier: ISupplier
+    supplier: ISupplier;
 }
 
-interface IDeleteSupplier {
+export interface IDeleteSupplier {
     handleClose: () => void;
     sendingRequest: boolean;
     setSendingRequest: Dispatch<SetStateAction<boolean>>;
     buttonText: string;
-    supplier: ISupplier
+    supplier: ISupplier;
 }
 
-interface ISupplierForm {
-    formState: FormState<ISupplier> & {
-        errors: {
-            name?: FieldError;
-            email?: FieldError;
-            tel?: FieldError;
-            desc?: FieldError;
-            status?: FieldError;
-        };
-    };
-    control: Control<ISupplier>;
-    register: UseFormRegister<ISupplier>;
+export interface ISupplierForm {
+    formState: FormState<ISupplierFormValues>;
+    control: Control<ISupplierFormValues>;
+    register: UseFormRegister<ISupplierFormValues>;
     buttonText: string;
     sendingRequest: boolean;
     handleClose: () => void;
 }
 
-interface ISupplierResponse extends IFetchDataRequest {
-    content: Array<ISupplier>
+export interface ISupplierResponse extends IFetchDataRequest {
+    content: Array<ISupplier>;
 }
 
-interface ISuppliersAxiosResponse extends IAxiosResponse {
-    data: ISupplierResponse
+export interface ISuppliersAxiosResponse extends IAxiosResponse {
+    data: ISupplierResponse;
 }
 
-interface ISupplierAxiosResponse extends IAxiosResponse {
-    data: ISupplier
+export interface ISupplierAxiosResponse extends IAxiosResponse {
+    data: ISupplier;
 }
 
-export type {
-    ISupplierDetails,
-    ISupplierForm,
-    ICreateSupplier,
-    IUpdateSupplier,
-    IDeleteSupplier,
-    ISupplierAxiosResponse,
-    ISupplierResponse,
-    ISuppliersAxiosResponse
-}
