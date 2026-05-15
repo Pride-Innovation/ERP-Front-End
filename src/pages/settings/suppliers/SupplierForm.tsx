@@ -106,7 +106,7 @@ const SupplierForm = ({
     // Group fields by type
     const basicFields = formFields.filter(field => ['name'].includes(field.value));
     const contactFields = formFields.filter(field => ['email', 'telephone', 'address'].includes(field.value));
-    const commodityFields = formFields.filter(field => ['commodity'].includes(field.value));
+    const commodityFields = formFields.filter(field => ['commodities'].includes(field.value));
 
     // Render field with proper component type
     const renderField = (field: any) => {
@@ -130,7 +130,7 @@ const SupplierForm = ({
             case "date":
                 return <UseFormDatePicker {...commonProps} />;
             case "autocomplete":
-                return <UseFormAutocompleteComponent {...commonProps} options={field.options || []} />;
+                return <UseFormAutocompleteComponent {...commonProps} options={field.options || []} multiple={field.multiple} />;
             default:
                 return <UseFormInput {...commonProps} />;
         }
