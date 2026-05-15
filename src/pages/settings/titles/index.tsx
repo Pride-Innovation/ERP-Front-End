@@ -20,7 +20,8 @@ import {
   Fade,
   FormControl,
   Select,
-  MenuItem
+  MenuItem,
+  Pagination
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
@@ -39,6 +40,7 @@ import TitleCard from "./TitleCard";
 import CreateTitle from "./CreateTitle";
 import UpdateTitle from "./UpdateTitle";
 import DeleteTitle from "./DeleteTitle";
+import { useDebounce } from "../../../hooks/useDebounce";
 
 const PRIMARY = '#08796C';
 
@@ -46,9 +48,14 @@ const Titles = () => {
   const [currentTitle, setCurrentTitle] = useState<ITitle>({} as ITitle);
   const [sendingRequest, setSendingRequest] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [filter, setFilter] = useState<string>("all");
+  const [roleFilter, setRoleFilter] = useState<string>("");
+  const [pageNumber, setPageNumber] = useState<number>(0);
+  const pageSize = 9;
 
-  const { titles } = useSelector((state: RootState) => state.TitleStore);
+  const debouncedSearch = useDebounce(searchTerm, 500);
+
+  const { titles, totalPages, totalElements } = useSelector((state: RootState) => state.TitleStore);
+  const { roles } = useSelector((state: RootState) => state.RoleStore);
   const theme = useTheme();
 
   const {
@@ -58,12 +65,34 @@ const Titles = () => {
     loading,
     setModalState,
     handleOpen,
-    fetchAllTitles
+    fetchAllTitles,
+    fetchRolesForFilter
   } = TitleUtills();
 
   useEffect(() => {
-    fetchAllTitles();
+    if (!roles || roles.length === 0) {
+      fetchRolesForFilter();
+    }
   }, []);
+
+  useEffect(() => {
+    fetchAllTitles({
+      pageNumber,
+      pageSize,
+      name: debouncedSearch || undefined,
+      roleId: roleFilter || undefined,
+    });
+  }, [pageNumber, debouncedSearch, roleFilter]);
+
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value);
+    setPageNumber(0);
+  };
+
+  const handleRoleFilterChange = (value: string) => {
+    setRoleFilter(value);
+    setPageNumber(0);
+  };
 
   const createTitle = () => {
     setModalState(crudStates.create);
@@ -82,20 +111,13 @@ const Titles = () => {
     handleOpen();
   };
 
-  // Filter titles based on search term and role filter
-  const filteredTitles = titles.filter(title => {
-    const matchesSearch = searchTerm === "" ||
-      title.name.toLowerCase().includes(searchTerm.toLowerCase());
+  const clearFilters = () => {
+    setSearchTerm("");
+    setRoleFilter("");
+    setPageNumber(0);
+  };
 
-    const matchesFilter = filter === "all" ||
-      (title.role && title.role.name.toLowerCase() === filter.toLowerCase());
-
-    return matchesSearch && matchesFilter;
-  });
-
-  // Get unique roles for filter
-  const roles = titles.map(title => title.role?.name).filter(Boolean);
-  const uniqueRoles = Array.from(new Set(roles));
+  const hasActiveFilters = searchTerm !== "" || roleFilter !== "";
 
   return (
     <>
@@ -143,7 +165,7 @@ const Titles = () => {
           </Box>
         </Stack>
         <Box sx={{ bgcolor: alpha(PRIMARY, 0.08), color: PRIMARY, fontWeight: 700, borderRadius: '6px', px: 1.5, py: 0.5, fontSize: '0.75rem', flexShrink: 0, mt: 0.5 }}>
-          {filteredTitles.length} titles
+          {totalElements} titles
         </Box>
       </Box>
 
@@ -154,22 +176,33 @@ const Titles = () => {
             size="small"
             placeholder="Search titles..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => handleSearchChange(e.target.value)}
             InputProps={{ startAdornment: (<InputAdornment position="start"><SearchIcon fontSize="small" sx={{ color: '#94A3B8' }} /></InputAdornment>) }}
             sx={{ minWidth: 220, flex: { xs: 1, md: "unset" }, '& .MuiOutlinedInput-root': { borderRadius: '8px', height: 36, bgcolor: '#fff', '& fieldset': { borderColor: '#E2E8F0' }, '&:hover fieldset': { borderColor: PRIMARY }, '&.Mui-focused fieldset': { borderColor: PRIMARY, borderWidth: 1.5 } } }}
           />
           <FormControl size="small" variant="outlined" sx={{ minWidth: 180, flex: { xs: 1, md: "unset" }, '& .MuiOutlinedInput-root': { borderRadius: '8px', height: 36, bgcolor: '#fff', '& fieldset': { borderColor: '#E2E8F0' }, '&:hover fieldset': { borderColor: PRIMARY }, '&.Mui-focused fieldset': { borderColor: PRIMARY, borderWidth: 1.5 } } }}>
             <Select
-              value={filter}
-              onChange={(e) => setFilter(e.target.value)}
+              value={roleFilter}
+              onChange={(e) => handleRoleFilterChange(e.target.value)}
               startAdornment={<FilterListIcon fontSize="small" sx={{ ml: 0.5, mr: 1, color: PRIMARY, opacity: 0.8 }} />}
               displayEmpty
-              renderValue={(value) => (<Typography variant="body2" sx={{ fontWeight: 500, color: value === "all" ? '#94A3B8' : PRIMARY }}>{value === "all" ? "All Roles" : value}</Typography>)}
+              renderValue={(value) => {
+                const selectedRole = roles?.find(r => String(r.id) === String(value));
+                return (
+                  <Typography variant="body2" sx={{ fontWeight: 500, color: !value ? '#94A3B8' : PRIMARY }}>
+                    {selectedRole ? selectedRole.name : "All Roles"}
+                  </Typography>
+                );
+              }}
               MenuProps={{ PaperProps: { elevation: 4, sx: { mt: 0.5, borderRadius: 1.5, maxHeight: 300 } } }}
             >
-              <MenuItem value="all" sx={{ py: 1 }}><Typography variant="body2">All Roles</Typography></MenuItem>
-              {uniqueRoles.length > 0 && <Divider sx={{ my: 0.5 }} />}
-              {uniqueRoles.map(role => (<MenuItem key={role} value={role} sx={{ py: 1 }}><Typography variant="body2">{role}</Typography></MenuItem>))}
+              <MenuItem value=""><Typography variant="body2">All Roles</Typography></MenuItem>
+              {roles?.length > 0 && <Divider sx={{ my: 0.5 }} />}
+              {roles?.map(role => (
+                <MenuItem key={role.id} value={String(role.id)} sx={{ py: 1 }}>
+                  <Typography variant="body2">{role.name}</Typography>
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
         </Stack>
@@ -196,15 +229,32 @@ const Titles = () => {
           >
             <Loading items="titles" />
           </Paper>
-        ) : filteredTitles.length > 0 ? (
+        ) : titles.length > 0 ? (
           <Fade in={!loading}>
-            <Grid container spacing={3}>
-              {filteredTitles.map((title) => (
-                <Grid item xs={12} sm={6} md={6} lg={4} xl={4} key={title.id}>
-                  <TitleCard title={title} deleteTitle={deleteTitle} updateTitle={updateTitle} />
-                </Grid>
-              ))}
-            </Grid>
+            <Box>
+              <Grid container spacing={3}>
+                {titles.map((title) => (
+                  <Grid item xs={12} sm={6} md={6} lg={4} xl={4} key={title.id}>
+                    <TitleCard title={title} deleteTitle={deleteTitle} updateTitle={updateTitle} />
+                  </Grid>
+                ))}
+              </Grid>
+              {totalPages > 1 && (
+                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+                  <Pagination
+                    count={totalPages}
+                    page={pageNumber + 1}
+                    onChange={(_, value) => setPageNumber(value - 1)}
+                    color="primary"
+                    shape="rounded"
+                    sx={{
+                      '& .MuiPaginationItem-root': { borderRadius: '8px' },
+                      '& .Mui-selected': { bgcolor: PRIMARY, color: '#fff', '&:hover': { bgcolor: '#065E53' } }
+                    }}
+                  />
+                </Box>
+              )}
+            </Box>
           </Fade>
         ) : (
           <Fade in={!loading}>
@@ -225,20 +275,20 @@ const Titles = () => {
               <WorkOutlineOutlinedIcon sx={{ fontSize: 60, color: alpha(theme.palette.text.secondary, 0.3), mb: 2 }} />
 
               <Typography variant="h6" color="text.secondary" gutterBottom>
-                {searchTerm || filter !== "all" ? "No matching titles found" : "No titles available"}
+                {hasActiveFilters ? "No matching titles found" : "No titles available"}
               </Typography>
 
               <Typography variant="body2" color="text.secondary" sx={{ mb: 3, maxWidth: 450 }}>
-                {searchTerm || filter !== "all"
+                {hasActiveFilters
                   ? "Try adjusting your search or filter criteria to find what you're looking for."
                   : "Get started by creating your first organizational title to define roles and hierarchy."
                 }
               </Typography>
 
-              {searchTerm || filter !== "all" ? (
+              {hasActiveFilters ? (
                 <Button
                   variant="outlined"
-                  onClick={() => { setSearchTerm(""); setFilter("all"); }}
+                  onClick={clearFilters}
                   sx={{ textTransform: 'none', borderRadius: 1.5 }}
                 >
                   Clear Filters
