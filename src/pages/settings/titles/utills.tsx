@@ -10,10 +10,12 @@ import { fetchRowsService } from "../../../core/apis/globalService";
 import { ITitle, ITitlesAxiosResponse } from "./interface";
 import { useDispatch } from "react-redux";
 import { AppDispatch, RootState } from "../../../store";
-import { addTitle, loadAllTitles, removeTitle, updateTitle } from "./slice";
+import { addTitle, loadAllTitles, removeTitle, updateTitle, setPaginationMeta } from "./slice";
 import { IFormData } from "../../assets/interface";
 import { useSelector } from "react-redux";
 import { IOptions } from "../../../components/tables/interface";
+import { IRolesAxiosResponse } from "../../settings/interface";
+import { loadAllRoles } from "../roles/slice";
 
 const TitleUtills = () => {
     const endPoint: string = "titles";
@@ -33,12 +35,30 @@ const TitleUtills = () => {
         roleOptions: [],
     });
 
-    const fetchAllTitles = async () => {
+    const fetchAllTitles = async ({
+        pageNumber = 0,
+        pageSize = 10,
+        name,
+        roleId,
+    }: {
+        pageNumber?: number;
+        pageSize?: number;
+        name?: string;
+        roleId?: number | string;
+    } = {}) => {
         setLoading(true)
         try {
-            const response = await fetchRowsService({ pageNumber: 0, pageSize: 10, endPoint }) as ITitlesAxiosResponse;
+            const params: Record<string, any> = {};
+            if (name) params.name = name;
+            if (roleId) params.roleId = roleId;
+
+            const response = await fetchRowsService({ pageNumber, pageSize, endPoint, params }) as ITitlesAxiosResponse;
             if (response.status === 200) {
-                dispatch(loadAllTitles(response.data.content))
+                dispatch(loadAllTitles(response.data.content));
+                dispatch(setPaginationMeta({
+                    totalPages: response.data.totalPages,
+                    totalElements: response.data.totalElements,
+                }));
             }
         } catch (error) {
             console.log(error)
@@ -55,6 +75,17 @@ const TitleUtills = () => {
         }
 
     }, [titles, roles]);
+
+    const fetchRolesForFilter = async () => {
+        try {
+            const response = await fetchRowsService({ pageNumber: 0, pageSize: 1000, endPoint: "roles" }) as IRolesAxiosResponse;
+            if (response.status === 200) {
+                dispatch(loadAllRoles(response.data.content));
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }
 
     const addTitleToStore = (title: ITitle) => {
         dispatch(addTitle(title))
@@ -98,6 +129,7 @@ const TitleUtills = () => {
         handleClose,
         handleOpen,
         fetchAllTitles,
+        fetchRolesForFilter,
         formFields,
         addTitleToStore,
         updateTitleInStore,
