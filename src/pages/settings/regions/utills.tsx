@@ -9,7 +9,7 @@ import { useDispatch } from "react-redux";
 import { fetchRowsService } from "../../../core/apis/globalService";
 import { IRegion, IRegionsAxiosResponse } from "./interface";
 import { AppDispatch } from "../../../store";
-import { loadAllRegions, addRegion, updateRegion, removeRegion } from "./slice";
+import { loadAllRegions, setPaginationMeta, addRegion, updateRegion, removeRegion } from "./slice";
 import { useState } from "react";
 
 const RegionUtills = () => {
@@ -24,17 +24,31 @@ const RegionUtills = () => {
     };
     const dispatch = useDispatch<AppDispatch>();
 
-    const fetchAllRegions = async () => {
+    const fetchAllRegions = async ({
+        pageNumber = 0,
+        pageSize = 9,
+        name,
+    }: {
+        pageNumber?: number;
+        pageSize?: number;
+        name?: string;
+    } = {}) => {
         setLoading(true);
         try {
-            const response = await fetchRowsService({ 
-                pageNumber: 0, 
-                pageSize: 100, 
-                endPoint 
+            const params: Record<string, any> = {};
+            if (name) params.name = name;
+            const response = await fetchRowsService({
+                pageNumber,
+                pageSize,
+                endPoint,
+                params
             }) as IRegionsAxiosResponse;
-            
             if (response.status === 200) {
                 dispatch(loadAllRegions(response.data.content));
+                dispatch(setPaginationMeta({
+                    totalPages: response.data.totalPages,
+                    totalElements: response.data.totalElements,
+                }));
             }
         } catch (error) {
             console.error('Error fetching regions:', error);
