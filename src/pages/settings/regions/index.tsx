@@ -16,11 +16,14 @@ import {
     Paper,
     InputAdornment,
     TextField,
-    Fade
+    Fade,
+    Pagination,
+    Chip
 } from "@mui/material";
 import { useEffect, useState } from 'react';
 import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
+import FilterListOffIcon from "@mui/icons-material/FilterListOff";
 import PublicOutlinedIcon from '@mui/icons-material/PublicOutlined';
 
 import { IRegion } from './interface';
@@ -34,6 +37,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../../../store';
 import Loading from '../../../components/loading';
 import RegionDetails from './RegionDetails';
+import { useDebounce } from '../../../hooks/useDebounce';
 
 const PRIMARY = '#08796C';
 
@@ -42,13 +46,33 @@ const Regions = () => {
     const [currentRegion, setCurrentRegion] = useState<IRegion>({} as IRegion);
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
     const [searchTerm, setSearchTerm] = useState<string>("");
+    const [pageNumber, setPageNumber] = useState<number>(0);
+    const pageSize = 9;
     const theme = useTheme();
 
-    const { regions } = useSelector((state: RootState) => state.RegionStore);
+    const debouncedSearch = useDebounce(searchTerm, 500);
+
+    const { regions, totalPages, totalElements } = useSelector((state: RootState) => state.RegionStore);
 
     useEffect(() => {
-        fetchAllRegions();
-    }, []);
+        fetchAllRegions({
+            pageNumber,
+            pageSize,
+            name: debouncedSearch || undefined,
+        });
+    }, [pageNumber, debouncedSearch]);
+
+    const handleSearchChange = (value: string) => {
+        setSearchTerm(value);
+        setPageNumber(0);
+    };
+
+    const hasActiveFilters = searchTerm !== "";
+
+    const clearFilters = () => {
+        setSearchTerm("");
+        setPageNumber(0);
+    };
 
     const createRegion = () => {
         setModalState(crudStates.create);
@@ -66,12 +90,6 @@ const Regions = () => {
         setModalState(crudStates.delete);
         handleOpen();
     };
-
-    // Filter regions based on search term
-    const filteredRegions = regions.filter(region =>
-        searchTerm === "" ||
-        region.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
 
     return (
         <>
@@ -119,20 +137,31 @@ const Regions = () => {
                     </Box>
                 </Stack>
                 <Box sx={{ bgcolor: alpha(PRIMARY, 0.08), color: PRIMARY, fontWeight: 700, borderRadius: '6px', px: 1.5, py: 0.5, fontSize: '0.75rem', flexShrink: 0, mt: 0.5 }}>
-                    {filteredRegions.length} regions
+                    {totalElements} {totalElements === 1 ? 'region' : 'regions'}
                 </Box>
             </Box>
 
             {/* Filter Bar */}
             <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} alignItems={{ xs: "stretch", sm: "center" }} justifyContent="space-between" sx={{ mb: 3 }}>
-                <TextField
-                    size="small"
-                    placeholder="Search regions..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    InputProps={{ startAdornment: (<InputAdornment position="start"><SearchIcon fontSize="small" sx={{ color: '#94A3B8' }} /></InputAdornment>) }}
-                    sx={{ minWidth: 240, '& .MuiOutlinedInput-root': { borderRadius: '8px', height: 36, bgcolor: '#fff', '& fieldset': { borderColor: '#E2E8F0' }, '&:hover fieldset': { borderColor: PRIMARY }, '&.Mui-focused fieldset': { borderColor: PRIMARY, borderWidth: 1.5 } } }}
-                />
+                <Stack direction="row" spacing={1.5} alignItems="center" flexWrap="wrap" useFlexGap>
+                    <TextField
+                        size="small"
+                        placeholder="Search regions..."
+                        value={searchTerm}
+                        onChange={(e) => handleSearchChange(e.target.value)}
+                        InputProps={{ startAdornment: (<InputAdornment position="start"><SearchIcon fontSize="small" sx={{ color: '#94A3B8' }} /></InputAdornment>) }}
+                        sx={{ minWidth: 240, '& .MuiOutlinedInput-root': { borderRadius: '8px', height: 36, bgcolor: '#fff', '& fieldset': { borderColor: '#E2E8F0' }, '&:hover fieldset': { borderColor: PRIMARY }, '&.Mui-focused fieldset': { borderColor: PRIMARY, borderWidth: 1.5 } } }}
+                    />
+                    {hasActiveFilters && (
+                        <Chip
+                            label="Clear filters"
+                            size="small"
+                            onDelete={clearFilters}
+                            deleteIcon={<FilterListOffIcon fontSize="small" />}
+                            sx={{ height: 36, borderRadius: '8px', bgcolor: alpha(PRIMARY, 0.08), color: PRIMARY, fontWeight: 600, '& .MuiChip-deleteIcon': { color: PRIMARY } }}
+                        />
+                    )}
+                </Stack>
                 <Button onClick={createRegion} startIcon={<AddIcon />} variant="contained"
                     sx={{ height: 36, px: 2.5, borderRadius: '8px', textTransform: 'none', fontWeight: 600, bgcolor: PRIMARY, flexShrink: 0, '&:hover': { bgcolor: '#065E53' }, boxShadow: `0 2px 8px ${alpha(PRIMARY, 0.3)}` }}>
                     Add Region
@@ -156,19 +185,36 @@ const Regions = () => {
                     >
                         <Loading items="regions" />
                     </Paper>
-                ) : filteredRegions.length > 0 ? (
+                ) : regions.length > 0 ? (
                     <Fade in={!loading}>
-                        <Grid container spacing={3}>
-                            {filteredRegions.map((region) => (
-                                <Grid item xs={12} sm={6} md={6} lg={4} xl={4} key={region.id}>
-                                    <RegionDetails
-                                        region={region}
-                                        deleteRegion={deleteRegion}
-                                        updateRegion={updateRegion}
+                        <Box>
+                            <Grid container spacing={3}>
+                                {regions.map((region) => (
+                                    <Grid item xs={12} sm={6} md={6} lg={4} xl={4} key={region.id}>
+                                        <RegionDetails
+                                            region={region}
+                                            deleteRegion={deleteRegion}
+                                            updateRegion={updateRegion}
+                                        />
+                                    </Grid>
+                                ))}
+                            </Grid>
+                            {totalPages > 1 && (
+                                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+                                    <Pagination
+                                        count={totalPages}
+                                        page={pageNumber + 1}
+                                        onChange={(_, value) => setPageNumber(value - 1)}
+                                        color="primary"
+                                        shape="rounded"
+                                        sx={{
+                                            '& .MuiPaginationItem-root': { borderRadius: '8px' },
+                                            '& .Mui-selected': { bgcolor: `${PRIMARY} !important`, color: '#fff' }
+                                        }}
                                     />
-                                </Grid>
-                            ))}
-                        </Grid>
+                                </Box>
+                            )}
+                        </Box>
                     </Fade>
                 ) : (
                     <Fade in={!loading}>
@@ -202,7 +248,7 @@ const Regions = () => {
                             {searchTerm ? (
                                 <Button
                                     variant="outlined"
-                                    onClick={() => setSearchTerm("")}
+                                    onClick={clearFilters}
                                     sx={{ textTransform: 'none', borderRadius: 1.5 }}
                                 >
                                     Clear Search
