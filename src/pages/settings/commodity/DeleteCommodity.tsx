@@ -27,16 +27,23 @@ const DeleteCommodity = ({
         setSendingRequest(true);
         try {
             const response = await deleteCommodityService(commodity?.id as string) as ICommodityAxiosResponse;
-            if (response.status === 204) {
+            if (response.status === 200) {
                 toast.success("Commodity deleted successfully", { position: 'bottom-right' });
                 removeCommodityFromStore(commodity);
+                handleClose();
             }
-        } catch (error) {
-            console.error("Error deleting commodity:", error);
-            toast.error("Failed to delete commodity. Please try again.", { position: 'bottom-right' });
+        } catch (error: any) {
+            const detail = error?.response?.data?.detail;
+            const message = error?.response?.data?.message;
+            if (detail) {
+                toast.error(detail, { position: 'bottom-right' });
+            } else if (message) {
+                toast.error(message, { position: 'bottom-right' });
+            } else {
+                toast.error("Failed to delete commodity. Please try again.", { position: 'bottom-right' });
+            }
         }
         setSendingRequest(false);
-        handleClose();
     };
 
     return (
