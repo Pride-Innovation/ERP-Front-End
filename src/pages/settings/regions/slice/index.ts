@@ -1,12 +1,16 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { IRegion } from "../../branch/interface";
+import { IRegion } from "../interface";
 
 interface IRegionState {
-    regions: Array<IRegion>
+    regions: Array<IRegion>;
+    totalPages: number;
+    totalElements: number;
 }
 
 const initialState: IRegionState = {
-    regions: []
+    regions: [],
+    totalPages: 0,
+    totalElements: 0,
 };
 
 const regionSlice = createSlice({
@@ -16,12 +20,18 @@ const regionSlice = createSlice({
         loadAllRegions: (state, action) => {
             state.regions = action.payload;
         },
+        setPaginationMeta: (state, action) => {
+            state.totalPages = action.payload.totalPages;
+            state.totalElements = action.payload.totalElements;
+        },
         addRegion: (state, action) => {
             // add at the beginning 
             state.regions.unshift(action.payload);
         },
         updateRegion: (state, action) => {
-            state.regions.map(region => region.id === action.payload.id ? action.payload : region);
+            state.regions = state.regions.map(region =>
+                region.id === action.payload.id ? action.payload : region
+            );
         },
         removeRegion: (state, action) => {
             state.regions = state.regions.filter(region => region.id !== action.payload.id);
@@ -30,5 +40,5 @@ const regionSlice = createSlice({
 });
 
 const { actions, reducer } = regionSlice;
-export const { loadAllRegions, addRegion, updateRegion, removeRegion } = actions;
+export const { loadAllRegions, setPaginationMeta, addRegion, updateRegion, removeRegion } = actions;
 export default reducer;
