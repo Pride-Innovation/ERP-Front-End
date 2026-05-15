@@ -11,7 +11,6 @@ import {
   Typography,
   Button,
   Stack,
-  Divider,
   alpha,
   useTheme,
   Paper,
@@ -20,7 +19,8 @@ import {
   Fade,
   FormControl,
   Select,
-  MenuItem
+  MenuItem,
+  Pagination
 } from "@mui/material";
 import { useEffect, useState } from 'react';
 import AddIcon from "@mui/icons-material/Add";
@@ -39,6 +39,7 @@ import CommodityCard from "./ViewCommodity";
 import CreateCommodity from "./CreateCommodity";
 import UpdateCommodity from "./UpdateCommodity";
 import DeleteCommodity from "./DeleteCommodity";
+import { useDebounce } from "../../../hooks/useDebounce";
 
 const PRIMARY = '#08796C';
 
@@ -46,9 +47,14 @@ const Commodities = () => {
   const [currentCommodity, setCurrentCommodity] = useState<ICommodity>({} as ICommodity);
   const [sendingRequest, setSendingRequest] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [filter, setFilter] = useState<string>("all");
+  const [assetTypeFilter, setAssetTypeFilter] = useState<number | "all">("all");
+  const [pageNumber, setPageNumber] = useState<number>(0);
+  const pageSize = 9;
 
-  const { commodities } = useSelector((state: RootState) => state.CommodityStore);
+  const debouncedSearch = useDebounce(searchTerm, 500);
+
+  const { commodities, totalPages, totalElements } = useSelector((state: RootState) => state.CommodityStore);
+  const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore);
   const theme = useTheme();
 
   const {
@@ -62,8 +68,31 @@ const Commodities = () => {
   } = CommodityUtills();
 
   useEffect(() => {
-    fetchAllCommodities();
-  }, []);
+    fetchAllCommodities({
+      pageNumber,
+      pageSize,
+      name: debouncedSearch || undefined,
+      assetTypeId: assetTypeFilter !== "all" ? assetTypeFilter : undefined,
+    });
+  }, [pageNumber, debouncedSearch, assetTypeFilter]);
+
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value);
+    setPageNumber(0);
+  };
+
+  const handleAssetTypeChange = (value: number | "all") => {
+    setAssetTypeFilter(value);
+    setPageNumber(0);
+  };
+
+  const hasActiveFilters = searchTerm !== "" || assetTypeFilter !== "all";
+
+  const clearFilters = () => {
+    setSearchTerm("");
+    setAssetTypeFilter("all");
+    setPageNumber(0);
+  };
 
   const createCommodity = () => {
     setModalState(crudStates.create);
@@ -81,22 +110,6 @@ const Commodities = () => {
     setModalState(crudStates.delete);
     handleOpen();
   };
-
-  // Filter commodities based on search term and asset type filter
-  const filteredCommodities = commodities.filter(commodity => {
-    const matchesSearch = searchTerm === "" ||
-      commodity.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      commodity.groupName.toLowerCase().includes(searchTerm.toLowerCase());
-
-    const matchesFilter = filter === "all" ||
-      (commodity.assetType && commodity.assetType.name.toLowerCase() === filter.toLowerCase());
-
-    return matchesSearch && matchesFilter;
-  });
-
-  // Get unique asset types for filter
-  const assetTypes = commodities.map(commodity => commodity.assetType?.name).filter(Boolean);
-  const uniqueAssetTypes = Array.from(new Set(assetTypes));
 
   return (
     <>
@@ -144,7 +157,7 @@ const Commodities = () => {
           </Box>
         </Stack>
         <Box sx={{ bgcolor: alpha(PRIMARY, 0.08), color: PRIMARY, fontWeight: 700, borderRadius: '6px', px: 1.5, py: 0.5, fontSize: '0.75rem', flexShrink: 0, mt: 0.5 }}>
-          {filteredCommodities.length} items
+          {totalElements} items
         </Box>
       </Box>
 
@@ -155,22 +168,21 @@ const Commodities = () => {
             size="small"
             placeholder="Search commodities..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => handleSearchChange(e.target.value)}
             InputProps={{ startAdornment: (<InputAdornment position="start"><SearchIcon fontSize="small" sx={{ color: '#94A3B8' }} /></InputAdornment>) }}
             sx={{ minWidth: 220, flex: { xs: 1, md: "unset" }, '& .MuiOutlinedInput-root': { borderRadius: '8px', height: 36, bgcolor: '#fff', '& fieldset': { borderColor: '#E2E8F0' }, '&:hover fieldset': { borderColor: PRIMARY }, '&.Mui-focused fieldset': { borderColor: PRIMARY, borderWidth: 1.5 } } }}
           />
           <FormControl size="small" variant="outlined" sx={{ minWidth: 180, flex: { xs: 1, md: "unset" }, '& .MuiOutlinedInput-root': { borderRadius: '8px', height: 36, bgcolor: '#fff', '& fieldset': { borderColor: '#E2E8F0' }, '&:hover fieldset': { borderColor: PRIMARY }, '&.Mui-focused fieldset': { borderColor: PRIMARY, borderWidth: 1.5 } } }}>
             <Select
-              value={filter}
-              onChange={(e) => setFilter(e.target.value)}
+              value={assetTypeFilter}
+              onChange={(e) => handleAssetTypeChange(e.target.value as number | "all")}
               startAdornment={<FilterListIcon fontSize="small" sx={{ ml: 0.5, mr: 1, color: PRIMARY, opacity: 0.8 }} />}
               displayEmpty
-              renderValue={(value) => (<Typography variant="body2" sx={{ fontWeight: 500, color: value === "all" ? '#94A3B8' : PRIMARY }}>{value === "all" ? "All Asset Types" : value}</Typography>)}
+              renderValue={(value) => (<Typography variant="body2" sx={{ fontWeight: 500, color: value === "all" ? '#94A3B8' : PRIMARY }}>{value === "all" ? "All Asset Types" : assetTypes.find(a => a.id === value)?.name ?? "Selected"}</Typography>)}
               MenuProps={{ PaperProps: { elevation: 4, sx: { mt: 0.5, borderRadius: 1.5, maxHeight: 300 } } }}
             >
               <MenuItem value="all" sx={{ py: 1 }}><Typography variant="body2">All Asset Types</Typography></MenuItem>
-              {uniqueAssetTypes.length > 0 && <Divider sx={{ my: 0.5 }} />}
-              {uniqueAssetTypes.map(assetType => (<MenuItem key={assetType} value={assetType} sx={{ py: 1 }}><Typography variant="body2">{assetType}</Typography></MenuItem>))}
+              {assetTypes.map(assetType => (<MenuItem key={assetType.id as number} value={assetType.id as number} sx={{ py: 1 }}><Typography variant="body2">{assetType.name}</Typography></MenuItem>))}
             </Select>
           </FormControl>
         </Stack>
@@ -197,19 +209,36 @@ const Commodities = () => {
           >
             <Loading items="commodities" />
           </Paper>
-        ) : filteredCommodities.length > 0 ? (
+        ) : commodities.length > 0 ? (
           <Fade in={!loading}>
-            <Grid container spacing={3}>
-              {filteredCommodities.map((commodity) => (
-                <Grid item xs={12} sm={6} md={6} lg={6} xl={4} key={commodity.id}>
-                  <CommodityCard
-                    commodity={commodity}
-                    deleteCommodity={deleteCommodity}
-                    updateCommodity={updateCommodity}
+            <Box>
+              <Grid container spacing={3}>
+                {commodities.map((commodity) => (
+                  <Grid item xs={12} sm={6} md={6} lg={6} xl={4} key={commodity.id}>
+                    <CommodityCard
+                      commodity={commodity}
+                      deleteCommodity={deleteCommodity}
+                      updateCommodity={updateCommodity}
+                    />
+                  </Grid>
+                ))}
+              </Grid>
+              {totalPages > 1 && (
+                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+                  <Pagination
+                    count={totalPages}
+                    page={pageNumber + 1}
+                    onChange={(_, value) => setPageNumber(value - 1)}
+                    color="primary"
+                    shape="rounded"
+                    sx={{
+                      '& .MuiPaginationItem-root': { borderRadius: '8px' },
+                      '& .Mui-selected': { bgcolor: PRIMARY, color: '#fff', '&:hover': { bgcolor: '#065E53' } }
+                    }}
                   />
-                </Grid>
-              ))}
-            </Grid>
+                </Box>
+              )}
+            </Box>
           </Fade>
         ) : (
           <Fade in={!loading}>
@@ -230,20 +259,20 @@ const Commodities = () => {
               <CategoryOutlinedIcon sx={{ fontSize: 60, color: alpha(theme.palette.text.secondary, 0.3), mb: 2 }} />
 
               <Typography variant="h6" color="text.secondary" gutterBottom>
-                {searchTerm || filter !== "all" ? "No matching commodities found" : "No commodities available"}
+                {hasActiveFilters ? "No matching commodities found" : "No commodities available"}
               </Typography>
 
               <Typography variant="body2" color="text.secondary" sx={{ mb: 3, maxWidth: 450 }}>
-                {searchTerm || filter !== "all"
+                {hasActiveFilters
                   ? "Try adjusting your search or filter criteria to find what you're looking for."
                   : "Get started by creating your first commodity to define asset categories and inventory types."
                 }
               </Typography>
 
-              {searchTerm || filter !== "all" ? (
+              {hasActiveFilters ? (
                 <Button
                   variant="outlined"
-                  onClick={() => { setSearchTerm(""); setFilter("all"); }}
+                  onClick={clearFilters}
                   sx={{ textTransform: 'none', borderRadius: 1.5 }}
                 >
                   Clear Filters
