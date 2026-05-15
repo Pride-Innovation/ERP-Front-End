@@ -7,7 +7,7 @@ Managing Director
 */
 
 import { useEffect, useState } from "react";
-import { ICommodity, ICommodityAxiosResponse, IUpdateCommodity } from "./interface";
+import { ICommodityAxiosResponse, ICommodityFormValues, IUpdateCommodity } from "./interface";
 import CommodityUtills from "./utills";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -17,13 +17,13 @@ import { toast } from "react-toastify";
 import CommodityForm from "./CommodityForm";
 
 const UpdateCommodity = ({ handleClose, sendingRequest, setSendingRequest, commodity }: IUpdateCommodity) => {
-    const [defaultCommodity, setDefaultCommodity] = useState<any>(commodity);
+    const [defaultCommodity, setDefaultCommodity] = useState<ICommodityFormValues | null>(null);
     const { updateCommodityInStore } = CommodityUtills();
 
     useEffect(() => {
         setDefaultCommodity({
             ...commodity,
-            assetType: commodity.assetType?.id
+            assetType: (typeof commodity.assetType === 'object' ? commodity.assetType?.id : commodity.assetType) as number,
         });
     }, [commodity]);
 
@@ -33,29 +33,37 @@ const UpdateCommodity = ({ handleClose, sendingRequest, setSendingRequest, commo
         formState,
         register,
         reset
-    } = useForm<ICommodity>({
+    } = useForm<ICommodityFormValues>({
         mode: 'onChange',
         resolver: yupResolver(commoditySchema),
     });
 
     useEffect(() => {
-        reset({ ...defaultCommodity });
+        if (defaultCommodity) reset({ ...defaultCommodity });
     }, [defaultCommodity]);
 
-    const onSubmit = async (formData: ICommodity) => {
+    const onSubmit = async (formData: ICommodityFormValues) => {
         setSendingRequest(true);
         try {
             const response = await updateCommodityService(formData, commodity?.id as number) as ICommodityAxiosResponse;
-            if (response.status === 201) {
+            if (response.status === 200) {
                 updateCommodityInStore(response.data);
                 toast.success("Commodity updated successfully", { position: 'bottom-right' });
+                handleClose();
             }
-        } catch (error) {
-            console.error("Error updating commodity:", error);
-            toast.error("Failed to update commodity. Please try again.", { position: 'bottom-right' });
+        } catch (error: any) {
+            const detail = error?.response?.data?.detail;
+            const properties = error?.response?.data?.properties;
+            if (properties) {
+                const messages = Object.values(properties).join(', ');
+                toast.error(messages, { position: 'bottom-right' });
+            } else if (detail) {
+                toast.error(detail, { position: 'bottom-right' });
+            } else {
+                toast.error("Failed to update commodity. Please try again.", { position: 'bottom-right' });
+            }
         }
         setSendingRequest(false);
-        handleClose();
     };
 
     return (
