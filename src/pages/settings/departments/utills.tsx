@@ -11,7 +11,7 @@ import { AppDispatch, RootState } from "../../../store";
 import { useSelector } from "react-redux";
 import { IDepartment, IDepartmentsAxiosResponse } from "./interface";
 import { IFormData } from "../../assets/interface";
-import { addDepartment, loadAllDepartments, removeDepartment, updateDepartment } from "./slice";
+import { addDepartment, loadAllDepartments, removeDepartment, setPaginationMeta, updateDepartment } from "./slice";
 import { fetchRowsService } from "../../../core/apis/globalService";
 import { IOptions } from "../../../components/tables/interface";
 
@@ -21,7 +21,10 @@ const DepartmentUtills = () => {
     const [open, setOpen] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false);
     const handleOpen = () => setOpen(true);
-    const handleClose = () => setOpen(false);
+    const handleClose = () => {
+        setOpen(false);
+        setModalState("");
+    };
     const dispatch = useDispatch<AppDispatch>();
     const { users } = useSelector((state: RootState) => state.UserStore);
     const { branches } = useSelector((state: RootState) => state.BranchStore);
@@ -31,12 +34,26 @@ const DepartmentUtills = () => {
 
     }>({ usersOptions: [], branchesOptions: [] });
 
-    const fetchAllDepartments = async () => {
+    const fetchAllDepartments = async ({
+        pageNumber = 0,
+        pageSize = 9,
+        name,
+    }: {
+        pageNumber?: number;
+        pageSize?: number;
+        name?: string;
+    } = {}) => {
         setLoading(true)
         try {
-            const response = await fetchRowsService({ pageNumber: 0, pageSize: 10, endPoint }) as IDepartmentsAxiosResponse;
+            const params: Record<string, any> = {};
+            if (name) params.name = name;
+            const response = await fetchRowsService({ pageNumber, pageSize, endPoint, params }) as IDepartmentsAxiosResponse;
             if (response.status === 200) {
-                dispatch(loadAllDepartments(response.data.content))
+                dispatch(loadAllDepartments(response.data.content));
+                dispatch(setPaginationMeta({
+                    totalPages: response.data.totalPages,
+                    totalElements: response.data.totalElements,
+                }));
             }
         } catch (error) {
             console.log(error)
