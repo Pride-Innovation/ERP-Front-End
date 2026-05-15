@@ -10,7 +10,7 @@ import { IFormData } from "../../assets/interface";
 import { ISupplier, ISuppliersAxiosResponse } from "./interface";
 import { AppDispatch, RootState } from "../../../store";
 import { useDispatch } from "react-redux";
-import { addSupplier, loadSuppliers, removeSupplier, updateSupplier } from "./slice";
+import { addSupplier, loadSuppliers, removeSupplier, updateSupplier, setPaginationMeta } from "./slice";
 import { fetchRowsService } from "../../../core/apis/globalService";
 import { IOptions } from "../../../components/tables/interface";
 import { useSelector } from "react-redux";
@@ -30,17 +30,41 @@ const SupplierUtills = () => {
         commodityOptions: []
     });
 
-    const fetchAllSuppliers = async (params?: Record<string, any>) => {
+    const fetchAllSuppliers = async ({
+        pageNumber = 0,
+        pageSize = 9,
+        name,
+        email,
+        address,
+        telephone,
+    }: {
+        pageNumber?: number;
+        pageSize?: number;
+        name?: string;
+        email?: string;
+        address?: string;
+        telephone?: string;
+    } = {}) => {
         setLoading(true)
         try {
+            const params: Record<string, any> = {};
+            if (name) params.name = name;
+            if (email) params.email = email;
+            if (address) params.address = address;
+            if (telephone) params.telephone = telephone;
+
             const response = await fetchRowsService({
-                pageNumber: 0,
-                pageSize: 10,
+                pageNumber,
+                pageSize,
                 endPoint,
                 params
             }) as ISuppliersAxiosResponse;
             if (response.status === 200) {
-                dispatch(loadSuppliers(response.data.content))
+                dispatch(loadSuppliers(response.data.content));
+                dispatch(setPaginationMeta({
+                    totalPages: response.data.totalPages,
+                    totalElements: response.data.totalElements,
+                }));
             }
         } catch (error) {
             console.log(error)
@@ -90,10 +114,11 @@ const SupplierUtills = () => {
             type: "input"
         },
         {
-            value: "commodity",
-            label: 'Supplied commodity',
-            type: "select",
-            options: optionsObject.commodityOptions
+            value: "commodities",
+            label: 'Supplied Commodities',
+            type: "autocomplete",
+            options: optionsObject.commodityOptions,
+            multiple: true
         }
     ]
 
