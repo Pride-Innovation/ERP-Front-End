@@ -10,11 +10,15 @@ import { createSlice } from "@reduxjs/toolkit";
 import { ICommodity } from "../interface";
 
 interface ICommodityState {
-    commodities: Array<ICommodity>
+    commodities: Array<ICommodity>;
+    totalPages: number;
+    totalElements: number;
 }
 
 const initialState: ICommodityState = {
-    commodities: []
+    commodities: [],
+    totalPages: 0,
+    totalElements: 0,
 }
 
 const commoditySlice = createSlice({
@@ -23,6 +27,10 @@ const commoditySlice = createSlice({
     reducers: {
         loadAllCommodities: (state, action) => {
             state.commodities = action.payload
+        },
+        setPaginationMeta: (state, action) => {
+            state.totalPages = action.payload.totalPages;
+            state.totalElements = action.payload.totalElements;
         },
         addCommodity: (state, action) => {
             state.commodities = [...state.commodities, action.payload]
@@ -37,5 +45,5 @@ const commoditySlice = createSlice({
 });
 
 const { actions, reducer } = commoditySlice;
-export const { loadAllCommodities, addCommodity, updateCommodity, deleteCommodity } = actions;
+export const { loadAllCommodities, setPaginationMeta, addCommodity, updateCommodity, deleteCommodity } = actions;
 export default reducer;
