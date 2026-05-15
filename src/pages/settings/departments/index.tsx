@@ -16,11 +16,14 @@ import {
     Paper,
     InputAdornment,
     TextField,
-    Fade
+    Fade,
+    Pagination,
+    Chip
 } from "@mui/material";
 import { useEffect, useState } from 'react';
 import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
+import FilterListOffIcon from "@mui/icons-material/FilterListOff";
 import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined';
 
 import { IDepartment } from './interface';
@@ -34,6 +37,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../../../store';
 import Loading from '../../../components/loading';
 import DepartmentDetails from './DepartmentDetails';
+import { useDebounce } from '../../../hooks/useDebounce';
 
 const PRIMARY = '#08796C';
 
@@ -42,13 +46,28 @@ const Departments = () => {
     const [currentDepartment, setCurrentDepartment] = useState<IDepartment>({} as IDepartment);
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
     const [searchTerm, setSearchTerm] = useState<string>("");
+    const [pageNumber, setPageNumber] = useState<number>(0);
+    const pageSize = 9;
     const theme = useTheme();
 
-    const { departments } = useSelector((state: RootState) => state.DepartmentStore);
+    const debouncedSearch = useDebounce<string>(searchTerm, 500);
+    const { departments, totalPages, totalElements } = useSelector((state: RootState) => state.DepartmentStore);
 
     useEffect(() => {
-        fetchAllDepartments();
-    }, []);
+        fetchAllDepartments({ pageNumber, pageSize, name: debouncedSearch || undefined });
+    }, [pageNumber, debouncedSearch]);
+
+    const handleSearchChange = (value: string) => {
+        setSearchTerm(value);
+        setPageNumber(0);
+    };
+
+    const hasActiveFilters = searchTerm !== '';
+
+    const clearFilters = () => {
+        setSearchTerm('');
+        setPageNumber(0);
+    };
 
     const createDepartment = () => {
         setModalState(crudStates.create);
@@ -66,14 +85,6 @@ const Departments = () => {
         setModalState(crudStates.delete);
         handleOpen();
     };
-
-    // Filter departments based on search term
-    const filteredDepartments = departments.filter(department =>
-        searchTerm === "" ||
-        department.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        department.headOfDepartment?.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        department.headOfDepartment?.lastName?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
 
     return (
         <>
@@ -121,20 +132,32 @@ const Departments = () => {
                     </Box>
                 </Stack>
                 <Box sx={{ bgcolor: alpha(PRIMARY, 0.08), color: PRIMARY, fontWeight: 700, borderRadius: '6px', px: 1.5, py: 0.5, fontSize: '0.75rem', flexShrink: 0, mt: 0.5 }}>
-                    {filteredDepartments.length} departments
+                    {totalElements} {totalElements === 1 ? 'department' : 'departments'}
                 </Box>
             </Box>
 
             {/* Filter Bar */}
             <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} alignItems={{ xs: "stretch", sm: "center" }} justifyContent="space-between" sx={{ mb: 3 }}>
-                <TextField
-                    size="small"
-                    placeholder="Search departments..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    InputProps={{ startAdornment: (<InputAdornment position="start"><SearchIcon fontSize="small" sx={{ color: '#94A3B8' }} /></InputAdornment>) }}
-                    sx={{ minWidth: 240, '& .MuiOutlinedInput-root': { borderRadius: '8px', height: 36, bgcolor: '#fff', '& fieldset': { borderColor: '#E2E8F0' }, '&:hover fieldset': { borderColor: PRIMARY }, '&.Mui-focused fieldset': { borderColor: PRIMARY, borderWidth: 1.5 } } }}
-                />
+                <Stack direction="row" spacing={1} alignItems="center">
+                    <TextField
+                        size="small"
+                        placeholder="Search departments..."
+                        value={searchTerm}
+                        onChange={(e) => handleSearchChange(e.target.value)}
+                        InputProps={{ startAdornment: (<InputAdornment position="start"><SearchIcon fontSize="small" sx={{ color: '#94A3B8' }} /></InputAdornment>) }}
+                        sx={{ minWidth: 240, '& .MuiOutlinedInput-root': { borderRadius: '8px', height: 36, bgcolor: '#fff', '& fieldset': { borderColor: '#E2E8F0' }, '&:hover fieldset': { borderColor: PRIMARY }, '&.Mui-focused fieldset': { borderColor: PRIMARY, borderWidth: 1.5 } } }}
+                    />
+                    {hasActiveFilters && (
+                        <Chip
+                            label="Clear filters"
+                            size="small"
+                            icon={<FilterListOffIcon fontSize="small" />}
+                            onClick={clearFilters}
+                            onDelete={clearFilters}
+                            sx={{ borderRadius: '6px', fontWeight: 500 }}
+                        />
+                    )}
+                </Stack>
                 <Button onClick={createDepartment} startIcon={<AddIcon />} variant="contained"
                     sx={{ height: 36, px: 2.5, borderRadius: '8px', textTransform: 'none', fontWeight: 600, bgcolor: PRIMARY, flexShrink: 0, '&:hover': { bgcolor: '#065E53' }, boxShadow: `0 2px 8px ${alpha(PRIMARY, 0.3)}` }}>
                     Add Department
@@ -158,10 +181,10 @@ const Departments = () => {
                     >
                         <Loading items="departments" />
                     </Paper>
-                ) : filteredDepartments.length > 0 ? (
+                ) : departments.length > 0 ? (
                     <Fade in={!loading}>
                         <Grid container spacing={3}>
-                            {filteredDepartments.map((department) => (
+                            {departments.map((department) => (
                                 <Grid item xs={12} sm={6} md={6} lg={6} key={department.id}>
                                     <DepartmentDetails
                                         department={department}
@@ -191,20 +214,20 @@ const Departments = () => {
                             <AccountTreeOutlinedIcon sx={{ fontSize: 60, color: alpha(theme.palette.text.secondary, 0.3), mb: 2 }} />
 
                             <Typography variant="h6" color="text.secondary" gutterBottom>
-                                {searchTerm ? "No matching departments found" : "No departments available"}
+                                {hasActiveFilters ? "No matching departments found" : "No departments available"}
                             </Typography>
 
                             <Typography variant="body2" color="text.secondary" sx={{ mb: 3, maxWidth: 450 }}>
-                                {searchTerm
+                                {hasActiveFilters
                                     ? "Try adjusting your search criteria to find what you're looking for."
                                     : "Get started by adding your first department to organize your workforce structure."
                                 }
                             </Typography>
 
-                            {searchTerm ? (
+                            {hasActiveFilters ? (
                                 <Button
                                     variant="outlined"
-                                    onClick={() => setSearchTerm("")}
+                                    onClick={clearFilters}
                                     sx={{ textTransform: 'none', borderRadius: 1.5 }}
                                 >
                                     Clear Search
@@ -227,6 +250,19 @@ const Departments = () => {
                     </Fade>
                 )}
             </Box>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+                    <Pagination
+                        count={totalPages}
+                        page={pageNumber + 1}
+                        onChange={(_, value) => setPageNumber(value - 1)}
+                        color="primary"
+                        shape="rounded"
+                    />
+                </Box>
+            )}
         </>
     );
 };
