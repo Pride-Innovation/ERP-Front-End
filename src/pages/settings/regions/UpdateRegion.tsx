@@ -5,13 +5,12 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { useEffect, useMemo } from 'react';
-import { IRegion, IUpdateRegion } from './interface';
+import { useEffect } from 'react';
+import { IRegionAxiosResponse, IRegionFormValues, IUpdateRegion } from './interface';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { regionSchema } from './schema';
 import RegionUtills from './utills';
-import { IResponseData } from '../../users/interface';
 import { toast } from 'react-toastify';
 import RegionForm from './RegionForm';
 import { updateRegionService } from './service';
@@ -24,55 +23,52 @@ const UpdateRegion = ({
 }: IUpdateRegion) => {
     const { updateRegionInStore } = RegionUtills();
 
-    const defaultValues = useMemo(() => ({
-        name: region.name || '',
-    }), [region]);
-
     const {
         control,
         handleSubmit,
         formState,
         register,
         reset
-    } = useForm<IRegion>({
+    } = useForm<IRegionFormValues>({
         mode: 'onChange',
-        resolver: yupResolver(regionSchema) as any,
-        defaultValues: defaultValues,
+        resolver: yupResolver(regionSchema),
+        defaultValues: { name: region.name || '' },
     });
 
     useEffect(() => {
         if (region) {
-            reset({
-                name: region.name || '',
-            });
+            reset({ name: region.name || '' });
         }
     }, [region, reset]);
 
-    const onSubmit = async (formData: IRegion) => {
+    const onSubmit = async (formData: IRegionFormValues) => {
         setSendingRequest(true);
-
         try {
-            const updateData = {
-                name: formData.name,
-            };
-
             const response = await updateRegionService(
-                updateData,
+                { name: formData.name },
                 region?.id as string
-            ) as IResponseData;
+            ) as IRegionAxiosResponse;
 
-            if (response.status === 'success') {
-                const updatedRegion = response.data[0] as unknown as IRegion;
-                updateRegionInStore(updatedRegion);
-
-                toast.success(response.data.message || 'Region updated successfully');
+            if (response.status === 200) {
+                updateRegionInStore(response.data);
+                toast.success('Region updated successfully', { position: 'bottom-right' });
                 handleClose();
-            } else {
-                toast.error('Failed to update region');
             }
-        } catch (error) {
-            console.error('Error updating region:', error);
-            toast.error('An error occurred while updating the region');
+        } catch (error: any) {
+            const detail = error?.response?.data?.detail;
+            const properties = error?.response?.data?.properties;
+            const message = error?.response?.data?.message;
+            if (properties?.name) {
+                toast.error(properties.name, { position: 'bottom-right' });
+            } else if (properties) {
+                toast.error(Object.values(properties).join(', '), { position: 'bottom-right' });
+            } else if (detail) {
+                toast.error(detail, { position: 'bottom-right' });
+            } else if (message) {
+                toast.error(message, { position: 'bottom-right' });
+            } else {
+                toast.error('Failed to update region. Please try again.', { position: 'bottom-right' });
+            }
         } finally {
             setSendingRequest(false);
         }
