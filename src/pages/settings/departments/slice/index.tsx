@@ -10,10 +10,14 @@ import { IDepartment } from "../interface";
 
 interface IDepartmentState {
     departments: Array<IDepartment>;
+    totalPages: number;
+    totalElements: number;
 }
 
 const initialState: IDepartmentState = {
-    departments: []
+    departments: [],
+    totalPages: 0,
+    totalElements: 0,
 }
 
 export const departmentSlice = createSlice({
@@ -23,8 +27,12 @@ export const departmentSlice = createSlice({
         loadAllDepartments: (state, action) => {
             state.departments = action.payload;
         },
+        setPaginationMeta: (state, action) => {
+            state.totalPages = action.payload.totalPages;
+            state.totalElements = action.payload.totalElements;
+        },
         addDepartment: (state, action) => {
-            state.departments = [...state.departments, action.payload];
+            state.departments.unshift(action.payload);
         },
         removeDepartment: (state, action) => {
             state.departments = state.departments.filter(department => department.id !== action.payload?.id);
@@ -39,6 +47,7 @@ const { reducer, actions } = departmentSlice;
 
 export const {
     loadAllDepartments,
+    setPaginationMeta,
     addDepartment,
     removeDepartment,
     updateDepartment
