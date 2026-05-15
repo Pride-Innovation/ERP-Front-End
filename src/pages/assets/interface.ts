@@ -27,6 +27,7 @@ export interface IFormData<T> {
     options?: Array<IOptions>;
     required?: boolean;
     disabled?: boolean;
+    multiple?: boolean;
 }
 
 export interface IAssetAction {
