@@ -10,10 +10,14 @@ import { ITitle } from "../interface";
 
 interface ITitleState {
     titles: Array<ITitle>
+    totalPages: number
+    totalElements: number
 }
 
 const initialState: ITitleState = {
-    titles: []
+    titles: [],
+    totalPages: 0,
+    totalElements: 0
 }
 
 const titleSlice = createSlice({
@@ -22,6 +26,10 @@ const titleSlice = createSlice({
     reducers: {
         loadAllTitles: (state, action) => {
             state.titles = action.payload
+        },
+        setPaginationMeta: (state, action) => {
+            state.totalPages = action.payload.totalPages
+            state.totalElements = action.payload.totalElements
         },
         addTitle: (state, action) => {
             state.titles = [...state.titles, action.payload]
@@ -36,5 +44,5 @@ const titleSlice = createSlice({
 });
 
 const { actions, reducer } = titleSlice;
-export const { loadAllTitles, addTitle, updateTitle, removeTitle } = actions;
+export const { loadAllTitles, setPaginationMeta, addTitle, updateTitle, removeTitle } = actions;
 export default reducer;
