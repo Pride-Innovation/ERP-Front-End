@@ -12,7 +12,6 @@ import { toast } from 'react-toastify';
 import { IDeleteRegion } from './interface';
 import RegionUtills from './utills';
 import { deleteRegionService } from './service';
-import { IResponseData } from '../../users/interface';
 
 const DeleteRegion = ({
     sendingRequest,
@@ -27,17 +26,25 @@ const DeleteRegion = ({
     const deleteRegion = async () => {
         setSendingRequest(true);
         try {
-            const response = await deleteRegionService(region?.id as string) as IResponseData;
-            if (response?.status === "success") {
+            const response = await deleteRegionService(region?.id as string) as any;
+            if (response?.status === 200) {
                 removeRegionFromStore(region);
                 handleClose();
-                toast.success(response?.data?.message || "Region deleted successfully");
-            } else {
-                toast.error("Failed to delete region");
+                toast.success("Region deleted successfully", { position: 'bottom-right' });
             }
-        } catch (error) {
-            console.error('Error deleting region:', error);
-            toast.error("An error occurred while deleting the region");
+        } catch (error: any) {
+            const status = error?.response?.status;
+            const detail = error?.response?.data?.detail;
+            const message = error?.response?.data?.message;
+            if (status === 409) {
+                toast.error("Cannot delete this region. It is still assigned to one or more branches.", { position: 'bottom-right' });
+            } else if (detail) {
+                toast.error(detail, { position: 'bottom-right' });
+            } else if (message) {
+                toast.error(message, { position: 'bottom-right' });
+            } else {
+                toast.error("Failed to delete region. Please try again.", { position: 'bottom-right' });
+            }
         } finally {
             setSendingRequest(false);
         }
