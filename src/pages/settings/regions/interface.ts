@@ -5,12 +5,16 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { Control, FieldError, FormState, UseFormRegister } from "react-hook-form";
+import { Control, FormState, UseFormRegister } from "react-hook-form";
 import { IAxiosResponse, IFetchDataRequest } from "../../../core/apis/interface";
 import { Dispatch, SetStateAction } from "react";
 
 export interface IRegion {
     id?: string | number;
+    name: string;
+}
+
+export interface IRegionFormValues {
     name: string;
 }
 
@@ -22,13 +26,9 @@ export interface IRegionDetails {
 
 
 export interface IRegionForm {
-    formState: FormState<IRegion> & {
-        errors: {
-            name?: FieldError;
-        };
-    };
-    control: Control<IRegion>;
-    register: UseFormRegister<IRegion>;
+    formState: FormState<IRegionFormValues>;
+    control: Control<IRegionFormValues>;
+    register: UseFormRegister<IRegionFormValues>;
     buttonText: string;
     sendingRequest: boolean;
     handleClose: () => void;
