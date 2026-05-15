@@ -10,4 +10,5 @@ import * as yup from 'yup';
 export const commoditySchema = yup.object().shape({
     name: yup.string().required('Name is required'),
     groupName: yup.string().trim().required('Group Name is required'),
+    assetType: yup.number().required('Asset Type is required').typeError('Asset Type is required'),
 });
