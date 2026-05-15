@@ -25,12 +25,28 @@ const DeleteDepartment = ({
 
     const deleteDepartment = async () => {
         setSendingRequest(true);
-        const response = await deleteDepartmentService(department?.id as string);
-        setSendingRequest(false);
-        if (response?.status === "success") {
-            removeDepartmentFromStore(department);
-            handleClose();
-            toast.success(response?.data?.message);
+        try {
+            const response = await deleteDepartmentService(department?.id as string) as any;
+            if (response?.status === 200) {
+                removeDepartmentFromStore(department);
+                handleClose();
+                toast.success("Department deleted successfully", { position: 'bottom-right' });
+            }
+        } catch (error: any) {
+            const status = error?.response?.status;
+            const detail = error?.response?.data?.detail;
+            const message = error?.response?.data?.message;
+            if (status === 409) {
+                toast.error("Cannot delete this department. It may still have users or records assigned to it.", { position: 'bottom-right' });
+            } else if (detail) {
+                toast.error(detail, { position: 'bottom-right' });
+            } else if (message) {
+                toast.error(message, { position: 'bottom-right' });
+            } else {
+                toast.error("Failed to delete department. Please try again.", { position: 'bottom-right' });
+            }
+        } finally {
+            setSendingRequest(false);
         }
     };
 
