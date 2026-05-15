@@ -5,7 +5,7 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { Control, FieldError, FormState, UseFormRegister } from "react-hook-form";
+import { Control, FormState, UseFormRegister } from "react-hook-form";
 import { IUser } from "../../users/interface";
 import { Dispatch, SetStateAction } from "react";
 import { IAxiosResponse, IFetchDataRequest } from "../../../core/apis/interface";
@@ -17,6 +17,14 @@ interface IDepartment {
     headOfDepartment?: IUser | null;
     branch?: IBranch | null;
     managersGroupEmail?: string | null;
+    shortCode?: string | null;
+}
+
+interface IDepartmentFormValues {
+    name: string;
+    headOfDepartment: number;
+    branch: number;
+    managersGroupEmail?: string | null;
 }
 
 interface IDepartmentDetails {
@@ -27,17 +35,9 @@ interface IDepartmentDetails {
 
 
 interface IDepartmentForm {
-    formState: FormState<IDepartment> & {
-        errors: {
-            name?: FieldError;
-            email?: FieldError;
-            tel?: FieldError;
-            desc?: FieldError;
-            status?: FieldError;
-        };
-    };
-    control: Control<IDepartment>;
-    register: UseFormRegister<IDepartment>;
+    formState: FormState<IDepartmentFormValues>;
+    control: Control<IDepartmentFormValues>;
+    register: UseFormRegister<IDepartmentFormValues>;
     buttonText: string;
     sendingRequest: boolean;
     handleClose: () => void;
@@ -79,6 +79,7 @@ interface IDepartmentAxiosResponse extends IAxiosResponse {
 
 export type {
     IDepartment,
+    IDepartmentFormValues,
     IDepartmentDetails,
     IDepartmentForm,
     ICreateDepartment,
