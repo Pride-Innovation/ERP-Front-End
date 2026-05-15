@@ -5,8 +5,8 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { useEffect, useMemo, useState } from 'react';
-import { IDepartment, IDepartmentAxiosResponse, IUpdateDepartment } from './interface';
+import { useEffect } from 'react';
+import { IDepartmentAxiosResponse, IDepartmentFormValues, IUpdateDepartment } from './interface';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { departmentSchema } from './schema';
@@ -25,17 +25,6 @@ const UpdateDepartment = ({
 }: IUpdateDepartment) => {
     const { updateDepartmentInStore } = DepartmentUtills();
     const theme = useTheme();
-    const [defaultDepartment, setDefaultDepartment] = useState<any>(department);
-
-    // Convert objects to IDs for form default values
-    useEffect(() => {
-        setDefaultDepartment({
-            name: department.name || '',
-            headOfDepartment: department.headOfDepartment?.id || null, // Convert to ID
-            branch: department.branch?.id || null, // Convert to ID
-            managersGroupEmail: department.managersGroupEmail || null,
-        });
-    }, [department]);
 
     const {
         control,
@@ -43,49 +32,60 @@ const UpdateDepartment = ({
         formState,
         register,
         reset,
-    } = useForm<IDepartment>({
+    } = useForm<IDepartmentFormValues>({
         mode: 'onChange',
-        resolver: yupResolver(departmentSchema) as any,
+        resolver: yupResolver(departmentSchema),
+        defaultValues: {
+            name: department.name || '',
+            headOfDepartment: (department.headOfDepartment?.id as number) || undefined,
+            branch: (department.branch?.id as number) || undefined,
+            managersGroupEmail: department.managersGroupEmail || null,
+        },
     });
 
-    // Reset form when defaultDepartment changes
     useEffect(() => {
-        reset({ ...defaultDepartment });
-    }, [defaultDepartment, reset]);
+        if (department) {
+            reset({
+                name: department.name || '',
+                headOfDepartment: (department.headOfDepartment?.id as number) || undefined,
+                branch: (department.branch?.id as number) || undefined,
+                managersGroupEmail: department.managersGroupEmail || null,
+            });
+        }
+    }, [department, reset]);
 
-    // Check if form has changes
-    const hasChanges = useMemo(() => {
-        return formState.isDirty;
-    }, [formState.isDirty]);
-
-    const onSubmit = async (formData: IDepartment) => {
+    const onSubmit = async (formData: IDepartmentFormValues) => {
         setSendingRequest(true);
-
         try {
-            const updateData = {
-                name: formData.name,
-                headOfDepartment: formData.headOfDepartment,
-                branch: formData.branch,
-                managersGroupEmail: formData.managersGroupEmail,
-            };
-
             const response = await updateDepartmentService(
-                updateData,
+                {
+                    name: formData.name,
+                    headOfDepartment: formData.headOfDepartment,
+                    branch: formData.branch,
+                    managersGroupEmail: formData.managersGroupEmail || null,
+                },
                 department?.id as string
             ) as IDepartmentAxiosResponse;
 
-            if (response.status === 201) {
-                const updatedDepartment = response.data as unknown as IDepartment;
-                updateDepartmentInStore(updatedDepartment);
-
-                toast.success('Department updated successfully');
+            if (response.status === 200) {
+                updateDepartmentInStore(response.data);
+                toast.success('Department updated successfully', { position: 'bottom-right' });
                 handleClose();
-            } else {
-                toast.error('Failed to update department');
             }
-        } catch (error) {
-            console.error('Error updating department:', error);
-            toast.error('An error occurred while updating the department');
+        } catch (error: any) {
+            const detail = error?.response?.data?.detail;
+            const properties = error?.response?.data?.properties;
+            const message = error?.response?.data?.message;
+            if (properties) {
+                const messages = Object.values(properties).join(', ');
+                toast.error(messages, { position: 'bottom-right' });
+            } else if (detail) {
+                toast.error(detail, { position: 'bottom-right' });
+            } else if (message) {
+                toast.error(message, { position: 'bottom-right' });
+            } else {
+                toast.error('Failed to update department. Please try again.', { position: 'bottom-right' });
+            }
         } finally {
             setSendingRequest(false);
         }
@@ -94,7 +94,7 @@ const UpdateDepartment = ({
     return (
         <Box sx={{ width: '100%' }}>
             {/* Info Banner */}
-            {hasChanges && (
+            {formState.isDirty && (
                 <Box
                     sx={{
                         p: 2,
