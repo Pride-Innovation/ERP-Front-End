@@ -7,26 +7,30 @@ Managing Director
 
 
 import { Dispatch, SetStateAction } from "react";
-import { Control, FieldError, FormState, UseFormRegister } from "react-hook-form";
+import { Control, FormState, UseFormRegister } from "react-hook-form";
 import { IAxiosResponse, IFetchDataRequest } from "../../../core/apis/interface";
 import { IAssetType } from "../assetTypes/interface";
+import { ISupplier } from "../suppliers/interface";
 
 export interface ICommodity {
     id?: string | number;
-    name: string
+    name: string;
     groupName: string;
-    assetType?: IAssetType | null
+    assetType?: IAssetType | null;
+    suppliers?: ISupplier[];
+}
+
+export interface ICommodityFormValues {
+    id?: string | number;
+    name: string;
+    groupName: string;
+    assetType: number;
 }
 
 export interface ICommodityForm {
-    formState: FormState<ICommodity> & {
-        errors: {
-            name?: FieldError;
-            groupName?: FieldError;
-        };
-    };
-    control: Control<ICommodity>;
-    register: UseFormRegister<ICommodity>;
+    formState: FormState<ICommodityFormValues>;
+    control: Control<ICommodityFormValues>;
+    register: UseFormRegister<ICommodityFormValues>;
     buttonText: string;
     sendingRequest: boolean;
     handleClose: () => void;
