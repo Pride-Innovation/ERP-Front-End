@@ -28,7 +28,7 @@ const updateDepartmentService = async (body: Object, id: string | number) => {
 const deleteDepartmentService = async (id: string | number) => {
     try {
         const response = await axiosInstance.delete(`departments/${id}`);
-        return response.data
+        return response;
     } catch (error) {
         return error;
     }
