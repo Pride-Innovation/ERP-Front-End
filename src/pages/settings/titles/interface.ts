@@ -14,6 +14,7 @@ import { IBranch } from "../branch/interface";
 export interface ITitle {
     id?: string | number;
     name: string;
+    shortCode?: string;
     reportsTo?: ITitle | null;
     role?: IRole | null;
     branch?: IBranch | null
