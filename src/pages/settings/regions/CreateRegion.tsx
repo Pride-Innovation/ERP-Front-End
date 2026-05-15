@@ -6,9 +6,8 @@ Managing Director
 */
 
 import { useForm } from "react-hook-form";
-import { ICreateRegion, IRegion, IRegionAxiosResponse } from "./interface";
+import { ICreateRegion, IRegionAxiosResponse, IRegionFormValues } from "./interface";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useMemo } from "react";
 import RegionUtills from "./utills";
 import { toast } from "react-toastify";
 import { createRegionService } from "./service";
@@ -20,10 +19,6 @@ const CreateRegion = ({
     sendingRequest,
     setSendingRequest
 }: ICreateRegion) => {
-    const defaultRegion = useMemo<IRegion>(() => ({
-        name: '',
-    } as IRegion), []);
-
     const { addRegionToStore } = RegionUtills();
 
     const {
@@ -31,24 +26,36 @@ const CreateRegion = ({
         handleSubmit,
         formState,
         register,
-    } = useForm<IRegion>({
+    } = useForm<IRegionFormValues>({
         mode: 'onChange',
-        resolver: yupResolver(regionSchema) as any,
-        defaultValues: defaultRegion,
+        resolver: yupResolver(regionSchema),
+        defaultValues: { name: '' },
     });
 
-    const onSubmit = async (formData: IRegion) => {
+    const onSubmit = async (formData: IRegionFormValues) => {
         setSendingRequest(true);
         try {
-            const response = await createRegionService(formData) as IRegionAxiosResponse;
+            const response = await createRegionService({ name: formData.name }) as IRegionAxiosResponse;
             if (response.status === 201) {
-                toast.success("Region created successfully");
                 addRegionToStore(response.data);
+                toast.success("Region created successfully", { position: 'bottom-right' });
                 handleClose();
             }
-        } catch (error) {
-            console.error('Error creating region:', error);
-            toast.error("Failed to create region");
+        } catch (error: any) {
+            const detail = error?.response?.data?.detail;
+            const properties = error?.response?.data?.properties;
+            const message = error?.response?.data?.message;
+            if (properties?.name) {
+                toast.error(properties.name, { position: 'bottom-right' });
+            } else if (properties) {
+                toast.error(Object.values(properties).join(', '), { position: 'bottom-right' });
+            } else if (detail) {
+                toast.error(detail, { position: 'bottom-right' });
+            } else if (message) {
+                toast.error(message, { position: 'bottom-right' });
+            } else {
+                toast.error("Failed to create region. Please try again.", { position: 'bottom-right' });
+            }
         } finally {
             setSendingRequest(false);
         }
