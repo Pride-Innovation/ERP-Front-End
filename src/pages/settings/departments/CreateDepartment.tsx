@@ -6,9 +6,8 @@ Managing Director
 */
 
 import { useForm } from "react-hook-form";
-import { ICreateDepartment, IDepartment, IDepartmentAxiosResponse } from "./interface";
+import { ICreateDepartment, IDepartmentAxiosResponse, IDepartmentFormValues } from "./interface";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useMemo } from "react";
 import DepartmentUtills from "./utills";
 import { toast } from "react-toastify";
 import DepartmentForm from "./DepartmentForm";
@@ -20,14 +19,6 @@ const CreateDepartment = ({
     sendingRequest,
     setSendingRequest
 }: ICreateDepartment) => {
-    // Memoize default values to prevent recreation
-    const defaultDepartment = useMemo<IDepartment>(() => ({
-        name: '',
-        headOfDepartment: null,
-        branch: null,
-        managersGroupEmail: null,
-    } as IDepartment), []);
-
     const { addDepartmentToStore } = DepartmentUtills();
 
     const {
@@ -35,24 +26,45 @@ const CreateDepartment = ({
         handleSubmit,
         formState,
         register,
-    } = useForm<IDepartment>({
+    } = useForm<IDepartmentFormValues>({
         mode: 'onChange',
-        resolver: yupResolver(departmentSchema) as any,
-        defaultValues: defaultDepartment, // Use defaultValues instead of reset in useEffect
+        resolver: yupResolver(departmentSchema),
+        defaultValues: {
+            name: '',
+            headOfDepartment: undefined,
+            branch: undefined,
+            managersGroupEmail: null,
+        },
     });
 
-    const onSubmit = async (formData: IDepartment) => {
+    const onSubmit = async (formData: IDepartmentFormValues) => {
         setSendingRequest(true);
         try {
-            const response = await createDepartmentService(formData) as IDepartmentAxiosResponse;
+            const response = await createDepartmentService({
+                name: formData.name,
+                headOfDepartment: formData.headOfDepartment,
+                branch: formData.branch,
+                managersGroupEmail: formData.managersGroupEmail || null,
+            }) as IDepartmentAxiosResponse;
             if (response.status === 201) {
-                toast.success("Department created successfully");
                 addDepartmentToStore(response.data);
+                toast.success("Department created successfully", { position: 'bottom-right' });
                 handleClose();
             }
-        } catch (error) {
-            console.error('Error creating department:', error);
-            toast.error("Failed to create department");
+        } catch (error: any) {
+            const detail = error?.response?.data?.detail;
+            const properties = error?.response?.data?.properties;
+            const message = error?.response?.data?.message;
+            if (properties) {
+                const messages = Object.values(properties).join(', ');
+                toast.error(messages, { position: 'bottom-right' });
+            } else if (detail) {
+                toast.error(detail, { position: 'bottom-right' });
+            } else if (message) {
+                toast.error(message, { position: 'bottom-right' });
+            } else {
+                toast.error("Failed to create department. Please try again.", { position: 'bottom-right' });
+            }
         } finally {
             setSendingRequest(false);
         }
