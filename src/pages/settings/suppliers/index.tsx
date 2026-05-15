@@ -11,21 +11,18 @@ import {
     Typography,
     Button,
     Stack,
-    Divider,
     alpha,
     useTheme,
     Paper,
     InputAdornment,
     TextField,
     Fade,
-    FormControl,
-    Select,
-    MenuItem
+    Pagination
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
-import FilterListIcon from "@mui/icons-material/FilterList";
+import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
 import LocalShippingOutlinedIcon from "@mui/icons-material/LocalShippingOutlined";
 
 import ModalComponent from "../../../components/modal";
@@ -39,6 +36,7 @@ import SupplierDetails from "./SupplierDetails";
 import CreateSupplier from "./CreateSupplier";
 import UpdateSupplier from "./UpdateSupplier";
 import DeleteSupplier from "./DeleteSupplier";
+import { useDebounce } from "../../../hooks/useDebounce";
 
 const PRIMARY = '#08796C';
 
@@ -46,9 +44,14 @@ const Suppliers = () => {
     const [currentSupplier, setCurrentSupplier] = useState<ISupplier>({} as ISupplier);
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
     const [searchTerm, setSearchTerm] = useState<string>("");
-    const [filter, setFilter] = useState<string>("all");
+    const [addressFilter, setAddressFilter] = useState<string>("");
+    const [pageNumber, setPageNumber] = useState<number>(0);
+    const pageSize = 9;
 
-    const { suppliers } = useSelector((state: RootState) => state.SuppliersStore);
+    const debouncedSearch = useDebounce(searchTerm, 500);
+    const debouncedAddress = useDebounce(addressFilter, 500);
+
+    const { suppliers, totalPages, totalElements } = useSelector((state: RootState) => state.SuppliersStore);
     const theme = useTheme();
 
     const {
@@ -62,8 +65,31 @@ const Suppliers = () => {
     } = SupplierUtills();
 
     useEffect(() => {
-        fetchAllSuppliers();
-    }, []);
+        fetchAllSuppliers({
+            pageNumber,
+            pageSize,
+            name: debouncedSearch || undefined,
+            address: debouncedAddress || undefined,
+        });
+    }, [pageNumber, debouncedSearch, debouncedAddress]);
+
+    const handleSearchChange = (value: string) => {
+        setSearchTerm(value);
+        setPageNumber(0);
+    };
+
+    const handleAddressChange = (value: string) => {
+        setAddressFilter(value);
+        setPageNumber(0);
+    };
+
+    const clearFilters = () => {
+        setSearchTerm("");
+        setAddressFilter("");
+        setPageNumber(0);
+    };
+
+    const hasActiveFilters = searchTerm !== "" || addressFilter !== "";
 
     const createSupplier = () => {
         setModalState(crudStates.create);
@@ -81,22 +107,6 @@ const Suppliers = () => {
         setModalState(crudStates.delete);
         handleOpen();
     };
-
-    // Filter suppliers based on search term and commodity filter
-    const filteredSuppliers = suppliers.filter(supplier => {
-        const matchesSearch = searchTerm === "" ||
-            supplier.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            supplier.email.toLowerCase().includes(searchTerm.toLowerCase());
-
-        const matchesFilter = filter === "all" ||
-            (supplier.commodity && supplier.commodity.name.toLowerCase() === filter.toLowerCase());
-
-        return matchesSearch && matchesFilter;
-    });
-
-    // Get unique commodities for filter
-    const commodities = suppliers.map(supplier => supplier.commodity?.name).filter(Boolean);
-    const uniqueCommodities = Array.from(new Set(commodities));
 
     return (
         <>
@@ -144,7 +154,7 @@ const Suppliers = () => {
                     </Box>
                 </Stack>
                 <Box sx={{ bgcolor: alpha(PRIMARY, 0.08), color: PRIMARY, fontWeight: 700, borderRadius: '6px', px: 1.5, py: 0.5, fontSize: '0.75rem', flexShrink: 0, mt: 0.5 }}>
-                    {filteredSuppliers.length} suppliers
+                    {totalElements} suppliers
                 </Box>
             </Box>
 
@@ -153,26 +163,20 @@ const Suppliers = () => {
                 <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} alignItems={{ xs: "stretch", sm: "center" }} sx={{ flex: 1 }}>
                     <TextField
                         size="small"
-                        placeholder="Search suppliers..."
+                        placeholder="Search by name..."
                         value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
+                        onChange={(e) => handleSearchChange(e.target.value)}
                         InputProps={{ startAdornment: (<InputAdornment position="start"><SearchIcon fontSize="small" sx={{ color: '#94A3B8' }} /></InputAdornment>) }}
                         sx={{ minWidth: 220, flex: { xs: 1, md: "unset" }, '& .MuiOutlinedInput-root': { borderRadius: '8px', height: 36, bgcolor: '#fff', '& fieldset': { borderColor: '#E2E8F0' }, '&:hover fieldset': { borderColor: PRIMARY }, '&.Mui-focused fieldset': { borderColor: PRIMARY, borderWidth: 1.5 } } }}
                     />
-                    <FormControl size="small" variant="outlined" sx={{ minWidth: 180, flex: { xs: 1, md: "unset" }, '& .MuiOutlinedInput-root': { borderRadius: '8px', height: 36, bgcolor: '#fff', '& fieldset': { borderColor: '#E2E8F0' }, '&:hover fieldset': { borderColor: PRIMARY }, '&.Mui-focused fieldset': { borderColor: PRIMARY, borderWidth: 1.5 } } }}>
-                        <Select
-                            value={filter}
-                            onChange={(e) => setFilter(e.target.value)}
-                            startAdornment={<FilterListIcon fontSize="small" sx={{ ml: 0.5, mr: 1, color: PRIMARY, opacity: 0.8 }} />}
-                            displayEmpty
-                            renderValue={(value) => (<Typography variant="body2" sx={{ fontWeight: 500, color: value === "all" ? '#94A3B8' : PRIMARY }}>{value === "all" ? "All Commodities" : value}</Typography>)}
-                            MenuProps={{ PaperProps: { elevation: 4, sx: { mt: 0.5, borderRadius: 1.5, maxHeight: 300 } } }}
-                        >
-                            <MenuItem value="all" sx={{ py: 1 }}><Typography variant="body2">All Commodities</Typography></MenuItem>
-                            {uniqueCommodities.length > 0 && <Divider sx={{ my: 0.5 }} />}
-                            {uniqueCommodities.map(commodity => (<MenuItem key={commodity} value={commodity} sx={{ py: 1 }}><Typography variant="body2">{commodity}</Typography></MenuItem>))}
-                        </Select>
-                    </FormControl>
+                    <TextField
+                        size="small"
+                        placeholder="Filter by address..."
+                        value={addressFilter}
+                        onChange={(e) => handleAddressChange(e.target.value)}
+                        InputProps={{ startAdornment: (<InputAdornment position="start"><LocationOnOutlinedIcon fontSize="small" sx={{ color: '#94A3B8' }} /></InputAdornment>) }}
+                        sx={{ minWidth: 200, flex: { xs: 1, md: "unset" }, '& .MuiOutlinedInput-root': { borderRadius: '8px', height: 36, bgcolor: '#fff', '& fieldset': { borderColor: '#E2E8F0' }, '&:hover fieldset': { borderColor: PRIMARY }, '&.Mui-focused fieldset': { borderColor: PRIMARY, borderWidth: 1.5 } } }}
+                    />
                 </Stack>
                 <Button onClick={createSupplier} startIcon={<AddIcon />} variant="contained"
                     sx={{ height: 36, px: 2.5, borderRadius: '8px', textTransform: 'none', fontWeight: 600, bgcolor: PRIMARY, flexShrink: 0, '&:hover': { bgcolor: '#065E53' }, boxShadow: `0 2px 8px ${alpha(PRIMARY, 0.3)}` }}>
@@ -197,19 +201,36 @@ const Suppliers = () => {
                     >
                         <Loading items="suppliers" />
                     </Paper>
-                ) : filteredSuppliers.length > 0 ? (
+                ) : suppliers.length > 0 ? (
                     <Fade in={!loading}>
-                        <Grid container spacing={3}>
-                            {filteredSuppliers.map((supplier) => (
-                                <Grid item xs={12} sm={6} md={6} lg={6} key={supplier.id}>
-                                    <SupplierDetails
-                                        supplier={supplier}
-                                        deleteSupplier={deleteSupplier}
-                                        updateSupplier={updateSupplier}
+                        <Box>
+                            <Grid container spacing={3}>
+                                {suppliers.map((supplier) => (
+                                    <Grid item xs={12} sm={6} md={6} lg={6} key={supplier.id}>
+                                        <SupplierDetails
+                                            supplier={supplier}
+                                            deleteSupplier={deleteSupplier}
+                                            updateSupplier={updateSupplier}
+                                        />
+                                    </Grid>
+                                ))}
+                            </Grid>
+                            {totalPages > 1 && (
+                                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+                                    <Pagination
+                                        count={totalPages}
+                                        page={pageNumber + 1}
+                                        onChange={(_, value) => setPageNumber(value - 1)}
+                                        color="primary"
+                                        shape="rounded"
+                                        sx={{
+                                            '& .MuiPaginationItem-root': { borderRadius: '8px' },
+                                            '& .Mui-selected': { bgcolor: PRIMARY, color: '#fff', '&:hover': { bgcolor: '#065E53' } }
+                                        }}
                                     />
-                                </Grid>
-                            ))}
-                        </Grid>
+                                </Box>
+                            )}
+                        </Box>
                     </Fade>
                 ) : (
                     <Fade in={!loading}>
@@ -230,20 +251,20 @@ const Suppliers = () => {
                             <LocalShippingOutlinedIcon sx={{ fontSize: 60, color: alpha(theme.palette.text.secondary, 0.3), mb: 2 }} />
 
                             <Typography variant="h6" color="text.secondary" gutterBottom>
-                                {searchTerm || filter !== "all" ? "No matching suppliers found" : "No suppliers available"}
+                                {hasActiveFilters ? "No matching suppliers found" : "No suppliers available"}
                             </Typography>
 
                             <Typography variant="body2" color="text.secondary" sx={{ mb: 3, maxWidth: 450 }}>
-                                {searchTerm || filter !== "all"
+                                {hasActiveFilters
                                     ? "Try adjusting your search or filter criteria to find what you're looking for."
                                     : "Get started by adding your first supplier to manage your supply chain relationships."
                                 }
                             </Typography>
 
-                            {searchTerm || filter !== "all" ? (
+                            {hasActiveFilters ? (
                                 <Button
                                     variant="outlined"
-                                    onClick={() => { setSearchTerm(""); setFilter("all"); }}
+                                    onClick={clearFilters}
                                     sx={{ textTransform: 'none', borderRadius: 1.5 }}
                                 >
                                     Clear Filters
