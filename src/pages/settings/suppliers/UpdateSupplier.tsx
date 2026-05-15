@@ -8,7 +8,7 @@ Managing Director
 
 import { useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
-import { ISupplier, ISupplierAxiosResponse, IUpdateSupplier } from "./interface";
+import { ISupplierAxiosResponse, ISupplierFormValues, IUpdateSupplier } from "./interface";
 import SupplierForm from "./SupplierForm";
 import SupplierUtills from "./Utills";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -23,7 +23,7 @@ const UpdateSupplier = ({ handleClose, sendingRequest, supplier, setSendingReque
     useEffect(() => {
         setDefaultSupplier({
             ...supplier,
-            commodity: supplier.commodity?.id
+            commodities: supplier.commodities?.map(c => typeof c === 'object' ? c.id : c) || [],
         });
     }, [supplier]);
 
@@ -33,7 +33,7 @@ const UpdateSupplier = ({ handleClose, sendingRequest, supplier, setSendingReque
         formState,
         register,
         reset
-    } = useForm<ISupplier>({
+    } = useForm<ISupplierFormValues>({
         mode: 'onChange',
         resolver: yupResolver(supplierSchema),
     });
@@ -42,20 +42,28 @@ const UpdateSupplier = ({ handleClose, sendingRequest, supplier, setSendingReque
         reset({ ...defaultSupplier });
     }, [defaultSupplier]);
 
-    const onSubmit = async (formData: ISupplier) => {
+    const onSubmit = async (formData: ISupplierFormValues) => {
         setSendingRequest(true);
         try {
             const response = await updateSupplierService(formData, supplier.id as number) as ISupplierAxiosResponse;
-            if (response.status === 201) {
+            if (response.status === 200) {
                 toast.success("Supplier updated successfully", { position: 'bottom-right' });
                 updateSupplierInStore(response.data);
+                handleClose();
             }
-        } catch (error) {
-            console.error("Error updating supplier:", error);
-            toast.error("Failed to update supplier. Please try again.", { position: 'bottom-right' });
+        } catch (error: any) {
+            const detail = error?.response?.data?.detail;
+            const properties = error?.response?.data?.properties;
+            if (properties) {
+                const messages = Object.values(properties).join(', ');
+                toast.error(messages, { position: 'bottom-right' });
+            } else if (detail) {
+                toast.error(detail, { position: 'bottom-right' });
+            } else {
+                toast.error("Failed to update supplier. Please try again.", { position: 'bottom-right' });
+            }
         }
         setSendingRequest(false);
-        handleClose();
     };
 
     return (
