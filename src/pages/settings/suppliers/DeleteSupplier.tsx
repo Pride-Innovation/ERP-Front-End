@@ -27,7 +27,7 @@ const DeleteSupplier = ({
         setSendingRequest(true);
         try {
             const response = await deleteSupplierService(supplier?.id as number) as ISupplierAxiosResponse;
-            if (response.status === 204) {
+            if (response.status === 200) {
                 toast.success("Supplier deleted successfully", { position: 'bottom-right' });
                 removeSupplierToStore(supplier);
             }
