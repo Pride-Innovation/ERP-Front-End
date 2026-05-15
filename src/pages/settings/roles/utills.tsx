@@ -6,7 +6,7 @@ Managing Director
 */
 
 import { useState } from "react";
-import { IModule, IPermission, IRole, IRolesAxiosResponse } from "../interface";
+import { IModule, IPermission, IRole, IRolesAxiosResponse, IRoleAxiosResponse, IPermissionsAxiosResponse } from "../interface";
 import BalanceIcon from '@mui/icons-material/Balance';
 import SettingsBrightnessIcon from '@mui/icons-material/SettingsBrightness';
 import DirectionsCarFilledIcon from '@mui/icons-material/DirectionsCarFilled';
@@ -14,13 +14,14 @@ import GroupIcon from '@mui/icons-material/Group';
 import { crudStates } from "../../../utils/constants";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../../../store";
-import { loadAllRoles } from "./slice";
+import { addRole, loadAllRoles, removeRoles, setPaginationMeta, updateRole } from "./slice";
 import { fetchRowsService } from "../../../core/apis/globalService";
+import { fetchAllPermissionsService } from "./service";
 
 const RoleUtills = () => {
     const endPoint = "roles";
-    const [roles, setRoles] = useState<Array<IRole>>([] as Array<IRole>);
     const dispatch = useDispatch<AppDispatch>();
+    const [allPermissions, setAllPermissions] = useState<IPermission[]>([]);
     const [mainCheckedState, setMainCheckedState] = useState<{
         create: boolean,
         read: boolean,
@@ -35,8 +36,10 @@ const RoleUtills = () => {
     const [open, setOpen] = useState<boolean>(false);
     const [modalState, setModalState] = useState<string>("");
     const handleOpen = () => setOpen(true);
-    const handleClose = () => setOpen(false);
-    const [count, setCount] = useState<number>(0);
+    const handleClose = () => {
+        setOpen(false);
+        setModalState("");
+    };
     const [loading, setLoading] = useState<boolean>(false);
 
     const modulesList: IModule[] = [
@@ -83,8 +86,6 @@ const RoleUtills = () => {
     ]
 
     const filterPermissions = (verb: string, permissions: Array<IPermission>, module: string): Array<IPermission> => {
-        console.log(permissions, "permissions in utills");
-        console.log(module, "module in utills");
         return permissions?.filter(perm => perm.name.indexOf(verb.toUpperCase()) !== -1 && perm.name.indexOf(module.toUpperCase()) !== -1);
     }
 
@@ -93,62 +94,78 @@ const RoleUtills = () => {
         return val ? [...newList, newPermission] : newList
     }
 
-
     const determineCrudStates = (permissions: Array<IPermission>, module: string) => {
-
         const createList = filterPermissions(crudStates.create, permissions, module);
         const readList = filterPermissions(crudStates.read, permissions, module);
         const updateList = filterPermissions(crudStates.update, permissions, module);
         const deleteList = filterPermissions(crudStates.delete, permissions, module);
 
-        setMainCheckedState(() => {
-            return {
-                create: createList?.length > 0 ? true : false,
-                read: readList?.length > 0 ? true : false,
-                update: updateList?.length > 0 ? true : false,
-                delete: deleteList?.length > 0 ? true : false,
-            }
-        })
+        setMainCheckedState({
+            create: createList?.length > 0,
+            read: readList?.length > 0,
+            update: updateList?.length > 0,
+            delete: deleteList?.length > 0,
+        });
     }
 
-    const fetchAllRoles = async () => {
-        setLoading(true)
+    const fetchAllRoles = async ({ pageNumber = 0, pageSize = 9, name }: { pageNumber?: number; pageSize?: number; name?: string } = {}) => {
+        setLoading(true);
         try {
-            const response = await fetchRowsService({ pageNumber: 0, pageSize: 10, endPoint }) as IRolesAxiosResponse;
+            const response = await fetchRowsService({
+                pageNumber,
+                pageSize,
+                endPoint,
+                params: { name }
+            }) as IRolesAxiosResponse;
             if (response.status === 200) {
-                addAllRolesInStore(response.data.content);
-                setCount(response.data.totalElements)
+                dispatch(loadAllRoles(response.data.content));
+                dispatch(setPaginationMeta({
+                    totalPages: response.data.totalPages,
+                    totalElements: response.data.totalElements,
+                }));
             }
         } catch (error) {
-            console.log(error)
+            console.error('Error fetching roles:', error);
+        } finally {
+            setLoading(false);
         }
-        setLoading(false)
     }
 
-    const addAllRolesInStore = (roles: Array<IRole>) => {
-        dispatch(loadAllRoles(roles))
+    const fetchAllPermissions = async () => {
+        try {
+            const response = await fetchAllPermissionsService() as IPermissionsAxiosResponse;
+            if (response.status === 200) {
+                setAllPermissions(response.data);
+            }
+        } catch (error) {
+            console.error('Error fetching permissions:', error);
+        }
     }
 
-    return (
-        {
-            endPoint,
-            setRoles,
-            modulesList,
-            roles,
-            determineCrudStates,
-            mainCheckedState,
-            filterPermissions,
-            handleClose,
-            handleOpen,
-            open,
-            modalState,
-            setModalState,
-            updatePermissionsOnClick,
-            loading,
-            count,
-            fetchAllRoles
-        }
-    )
+    const addRoleToStore = (role: IRole) => dispatch(addRole(role));
+    const updateRoleInStore = (role: IRole) => dispatch(updateRole(role));
+    const removeRoleFromStore = (role: IRole) => dispatch(removeRoles(role));
+
+    return {
+        endPoint,
+        modulesList,
+        allPermissions,
+        fetchAllPermissions,
+        determineCrudStates,
+        mainCheckedState,
+        filterPermissions,
+        handleClose,
+        handleOpen,
+        open,
+        modalState,
+        setModalState,
+        updatePermissionsOnClick,
+        loading,
+        fetchAllRoles,
+        addRoleToStore,
+        updateRoleInStore,
+        removeRoleFromStore,
+    }
 }
 
 export default RoleUtills

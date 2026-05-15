@@ -5,7 +5,7 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { Control, FieldError, FormState, UseFormRegister } from "react-hook-form";
+import { Control, FormState, UseFormRegister } from "react-hook-form";
 import { IAxiosResponse, IFetchDataRequest } from "../../core/apis/interface";
 
 export interface IPermission {
@@ -18,9 +18,14 @@ export interface IPermission {
 export interface IRole {
     id?: string | number;
     name: string;
+    description?: string | null;
     permissions?: Array<IPermission>;
 }
 
+export interface IRoleFormValues {
+    name: string;
+    description?: string | null;
+}
 
 export interface IModule {
     id: number | string;
@@ -29,42 +34,43 @@ export interface IModule {
 }
 
 export interface IRoleRow {
-    role: IRole
-    module: IModule
+    role: IRole;
+    module: IModule;
+    allPermissions: IPermission[];
 }
 
 export interface IRoleDetails {
     role: IRole;
     deleteRole: (role: IRole) => void;
     updateRole: (role: IRole) => void;
+    allPermissions: IPermission[];
 }
 
 export interface IDeleteRole {
     handleClose: () => void;
     sendingRequest: boolean;
+    setSendingRequest: (val: boolean) => void;
     buttonText: string;
-    role: IRole
+    role: IRole;
 }
 
 export interface ICreateRole {
     handleClose: () => void;
     sendingRequest: boolean;
+    setSendingRequest: (val: boolean) => void;
 }
 
 export interface IUpdateRole {
     handleClose: () => void;
     sendingRequest: boolean;
-    role: IRole
+    setSendingRequest: (val: boolean) => void;
+    role: IRole;
 }
 
 export interface IRoleForm {
-    formState: FormState<IRole> & {
-        errors: {
-            name?: FieldError;
-        };
-    };
-    control: Control<IRole>;
-    register: UseFormRegister<IRole>;
+    formState: FormState<IRoleFormValues>;
+    control: Control<IRoleFormValues>;
+    register: UseFormRegister<IRoleFormValues>;
     buttonText: string;
     sendingRequest: boolean;
     handleClose: () => void;
@@ -81,10 +87,17 @@ export interface IRoleResponse extends IFetchDataRequest {
     content: Array<IRole>
 }
 
-export interface IRolesAxiosResponse extends IAxiosResponse {
-    data: IRoleResponse
+export interface IRolesAxiosResponse {
+    status: number;
+    data: IRoleResponse;
 }
 
-export interface IRoleAxiosResponse extends IAxiosResponse {
-    data: IRole
+export interface IRoleAxiosResponse {
+    status: number;
+    data: IRole;
+}
+
+export interface IPermissionsAxiosResponse {
+    status: number;
+    data: IPermission[];
 }

@@ -74,6 +74,30 @@ const RoleForm = ({
                 </FormControl>
             </Box>
 
+            {/* Description field */}
+            <Box sx={{ mb: 3 }}>
+                <FormControl fullWidth>
+                    <Controller
+                        control={control}
+                        name="description"
+                        render={({ field }) => (
+                            <InputComponent
+                                type='input'
+                                label='Description (optional)'
+                                field={field}
+                                error={formState.errors.description}
+                                id='description'
+                            />
+                        )}
+                    />
+                    {formState.errors.description && (
+                        <FormHelperText sx={{ color: 'error.main', ml: 0, mt: 0.5 }}>
+                            {formState.errors.description?.message}
+                        </FormHelperText>
+                    )}
+                </FormControl>
+            </Box>
+
             {/* Info tip */}
             <Box
                 sx={{

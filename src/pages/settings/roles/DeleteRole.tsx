@@ -8,33 +8,45 @@ Managing Director
 import { Stack, Typography, Box, alpha, useTheme, Divider, Paper, Avatar, Button as MuiButton, CircularProgress } from '@mui/material'
 import ShieldOutlinedIcon from '@mui/icons-material/ShieldOutlined';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
-import { IDeleteRole, IRoleAxiosResponse } from '../interface';
+import { IDeleteRole } from '../interface';
 import { deleteRoleService } from './service';
 import { toast } from 'react-toastify';
-import { useDispatch } from 'react-redux';
-import { AppDispatch } from '../../../store';
-import { removeRoles } from './slice';
+import RoleUtills from './utills';
 
 const DeleteRole = ({
     role,
     handleClose,
     sendingRequest,
+    setSendingRequest,
     buttonText
 }: IDeleteRole) => {
     const theme = useTheme();
-    const dispatch = useDispatch<AppDispatch>();
+    const { removeRoleFromStore } = RoleUtills();
 
     const deleteRole = async () => {
+        setSendingRequest(true);
         try {
-            const response = await deleteRoleService(role?.id as number) as IRoleAxiosResponse;
-            if (response.status === 204) {
-                toast.success("Role has been deleted successfully", { position: 'bottom-right' });
-                dispatch(removeRoles(role));
+            const response = await deleteRoleService(role?.id as number) as any;
+            if (response?.status === 200) {
+                removeRoleFromStore(role);
+                toast.success('Role deleted successfully', { position: 'bottom-right' });
                 handleClose();
             }
-        } catch (error) {
-            console.error("Error deleting role:", error);
-            toast.error("Failed to delete role. Please try again.", { position: 'bottom-right' });
+        } catch (error: any) {
+            const status = error?.response?.status;
+            const detail = error?.response?.data?.detail;
+            const message = error?.response?.data?.message;
+            if (status === 409) {
+                toast.error('Cannot delete this role. It is still assigned to one or more users.', { position: 'bottom-right' });
+            } else if (detail) {
+                toast.error(detail, { position: 'bottom-right' });
+            } else if (message) {
+                toast.error(message, { position: 'bottom-right' });
+            } else {
+                toast.error('Failed to delete role. Please try again.', { position: 'bottom-right' });
+            }
+        } finally {
+            setSendingRequest(false);
         }
     };
 

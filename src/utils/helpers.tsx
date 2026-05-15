@@ -463,3 +463,14 @@ export const determineBranchName = (item: IITEquipment | IFleet) => {
 
     return item.branch?.name || "";
 };
+
+
+/**
+ * 
+ * @param value - The string value to normalize.
+ * @returns The normalized string with underscores replaced by spaces.
+ */
+export const normalizeLabel = (value: string): string => {
+  if (!value) return '';
+  return value.replace(/_/g, ' ');
+}

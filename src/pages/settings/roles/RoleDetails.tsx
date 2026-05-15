@@ -27,8 +27,9 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { IRoleDetails } from "../interface";
 import RoleUtills from "./utills";
 import RoleRow from "./RoleRow";
+import { normalizeLabel } from "../../../utils/helpers";
 
-const RoleDetails = ({ role, deleteRole, updateRole }: IRoleDetails) => {
+const RoleDetails = ({ role, deleteRole, updateRole, allPermissions }: IRoleDetails) => {
     const { modulesList } = RoleUtills();
     const theme = useTheme();
 
@@ -75,8 +76,14 @@ const RoleDetails = ({ role, deleteRole, updateRole }: IRoleDetails) => {
                         </Box>
 
                         <Typography variant="h6" fontWeight={600} align="center">
-                            {role.name}
+                            {normalizeLabel(role.name)}
                         </Typography>
+
+                        {role.description && (
+                            <Typography variant="body2" color="text.secondary" align="center" sx={{ px: 1 }}>
+                                {role.description}
+                            </Typography>
+                        )}
 
                         <Chip
                             size="small"
@@ -188,7 +195,7 @@ const RoleDetails = ({ role, deleteRole, updateRole }: IRoleDetails) => {
                     {/* Permission rows */}
                     <Box sx={{ maxHeight: '400px', overflow: 'auto', py: 1 }}>
                         {modulesList.map((module, index) => (
-                            <RoleRow key={index} role={role} module={module} />
+                            <RoleRow key={index} role={role} module={module} allPermissions={allPermissions} />
                         ))}
                     </Box>
                 </Grid>

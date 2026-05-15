@@ -5,48 +5,57 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { useEffect } from 'react'
-import { ICreateRole, IRole, IRoleAxiosResponse } from '../interface';
 import { useForm } from 'react-hook-form';
+import { ICreateRole, IRoleAxiosResponse, IRoleFormValues } from '../interface';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { roleSchema } from './schema';
 import RoleForm from './RoleForm';
 import { createRoleService } from './service';
 import { toast } from 'react-toastify';
-import { useDispatch } from 'react-redux';
-import { AppDispatch } from '../../../store';
-import { addRole } from './slice';
+import RoleUtills from './utills';
 
-const CreateRole = ({ handleClose, sendingRequest }: ICreateRole) => {
-    const defaultUser: IRole = {} as IRole;
-    const dispatch = useDispatch<AppDispatch>();
+const CreateRole = ({ handleClose, sendingRequest, setSendingRequest }: ICreateRole) => {
+    const { addRoleToStore } = RoleUtills();
 
     const {
         control,
         handleSubmit,
         formState,
         register,
-        reset
-    } = useForm<IRole>({
+    } = useForm<IRoleFormValues>({
         mode: 'onChange',
         resolver: yupResolver(roleSchema),
+        defaultValues: { name: '', description: null },
     });
 
-    useEffect(() => {
-        reset({ ...defaultUser });
-    }, [reset]);
-
-    const onSubmit = async (formData: IRole) => {
+    const onSubmit = async (formData: IRoleFormValues) => {
+        setSendingRequest(true);
         try {
-            const response = await createRoleService(formData) as IRoleAxiosResponse;
+            const response = await createRoleService({
+                name: formData.name,
+                description: formData.description || null,
+            }) as IRoleAxiosResponse;
             if (response.status === 201) {
-                toast.success(`Role ${response.data.name} has been created successfully`);
-                dispatch(addRole(response.data))
+                addRoleToStore(response.data);
+                toast.success(`Role '${response.data.name}' created successfully`, { position: 'bottom-right' });
+                handleClose();
             }
-        } catch (error) {
-            console.log(error)
+        } catch (error: any) {
+            const properties = error?.response?.data?.properties;
+            const detail = error?.response?.data?.detail;
+            const message = error?.response?.data?.message;
+            if (properties) {
+                toast.error(Object.values(properties).join(', '), { position: 'bottom-right' });
+            } else if (detail) {
+                toast.error(detail, { position: 'bottom-right' });
+            } else if (message) {
+                toast.error(message, { position: 'bottom-right' });
+            } else {
+                toast.error('Failed to create role. Please try again.', { position: 'bottom-right' });
+            }
+        } finally {
+            setSendingRequest(false);
         }
-        handleClose();
     };
 
     return (

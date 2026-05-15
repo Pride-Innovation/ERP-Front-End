@@ -9,11 +9,15 @@ import { createSlice } from "@reduxjs/toolkit";
 import { IRole } from "../../interface";
 
 interface IRoletState {
-    roles: Array<IRole>
+    roles: Array<IRole>;
+    totalPages: number;
+    totalElements: number;
 }
 
 const initialState: IRoletState = {
-    roles: []
+    roles: [],
+    totalPages: 0,
+    totalElements: 0,
 }
 
 export const rolesSlice = createSlice({
@@ -22,6 +26,10 @@ export const rolesSlice = createSlice({
     reducers: {
         loadAllRoles: (state, action) => {
             state.roles = action?.payload
+        },
+        setPaginationMeta: (state, action) => {
+            state.totalPages = action.payload.totalPages;
+            state.totalElements = action.payload.totalElements;
         },
         removeRoles: (state, action) => {
             state.roles = state.roles.filter(role => role?.id !== action?.payload?.id)
@@ -36,5 +44,5 @@ export const rolesSlice = createSlice({
 });
 
 const { actions, reducer } = rolesSlice;
-export const { loadAllRoles, removeRoles, updateRole, addRole } = actions;
+export const { loadAllRoles, setPaginationMeta, removeRoles, updateRole, addRole } = actions;
 export default reducer;

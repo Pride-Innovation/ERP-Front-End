@@ -11,14 +11,13 @@ import CheckboxComponent from "../../../components/forms/CheckBox";
 import RoleUtills from "./utills";
 import { ChangeEvent, useEffect, useState } from "react";
 import { crudStates } from "../../../utils/constants";
-import { permissionsMock } from "../../../mocks/settings";
 import { toast } from "react-toastify";
 import { assignPermissionToRoleService, removePermissionFromRoleService } from "./service";
 import { AppDispatch } from "../../../store";
 import { useDispatch } from "react-redux";
 import { updateRole } from "./slice";
 
-const RoleRow = ({ role, module }: IRoleRow) => {
+const RoleRow = ({ role, module, allPermissions }: IRoleRow) => {
     const { determineCrudStates, mainCheckedState, filterPermissions, updatePermissionsOnClick } = RoleUtills();
     const [selectedPermissions, setSelectedPermissions] = useState<IPermission[]>([] as Array<IPermission>);
     const [updatedPermissions, setUpdatedPermissions] = useState<IPermission[]>([] as Array<IPermission>);
@@ -40,10 +39,15 @@ const RoleRow = ({ role, module }: IRoleRow) => {
     const handleChange = async (event: ChangeEvent<HTMLInputElement>) => {
         const verb = event.target.name;
         const val = event.target.checked;
-        const permission = filterPermissions(verb, permissionsMock, moduleNameFxn(module));
+        const permission = filterPermissions(verb, allPermissions, moduleNameFxn(module));
+
+        if (!permission || permission.length === 0) {
+            toast.error(`No permission found for ${verb.toUpperCase()}_${moduleNameFxn(module).toUpperCase()}`, { position: 'bottom-right' });
+            return;
+        }
 
         try {
-            let response = {} as IRoleAxiosResponse;
+            let response: IRoleAxiosResponse;
 
             if (val) {
                 response = await assignPermissionToRoleService(role?.id as number, permission[0].id as number) as IRoleAxiosResponse;
@@ -59,7 +63,7 @@ const RoleRow = ({ role, module }: IRoleRow) => {
                 );
             }
 
-            if (response?.status === 201) {
+            if (response?.status === 200) {
                 dispatch(updateRole(response.data));
             }
 
@@ -67,9 +71,16 @@ const RoleRow = ({ role, module }: IRoleRow) => {
             setSelectedPermissions([...result]);
             setUpdatedPermissions([...result]);
 
-        } catch (error) {
-            console.error("Error updating permission:", error);
-            toast.error("Failed to update permission. Please try again.", { position: 'bottom-right' });
+        } catch (error: any) {
+            const detail = error?.response?.data?.detail;
+            const message = error?.response?.data?.message;
+            if (detail) {
+                toast.error(detail, { position: 'bottom-right' });
+            } else if (message) {
+                toast.error(message, { position: 'bottom-right' });
+            } else {
+                toast.error('Failed to update permission. Please try again.', { position: 'bottom-right' });
+            }
         }
     }
 
