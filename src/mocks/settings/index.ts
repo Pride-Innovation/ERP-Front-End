@@ -16,16 +16,18 @@ export const suppliersMock: Array<ISupplier> = [
         telephone: "+1 345 2341426",
         email: "alicomsons@test.gmail.com",
         address: "Gulu City",
-        commodity: {
-            "id": 1,
-            "name": "Pens",
-            "groupName": "Box",
-            "assetType": {
-                "id": 3,
-                "name": "Stationery",
-                "description": "Stationery"
+        commodities: [
+            {
+                "id": 1,
+                "name": "Pens",
+                "groupName": "Box",
+                "assetType": {
+                    "id": 3,
+                    "name": "Stationery",
+                    "description": "Stationery"
+                }
             }
-        },
+        ],
     }
 ]
 
