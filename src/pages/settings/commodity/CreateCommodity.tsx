@@ -7,7 +7,7 @@ Managing Director
 */
 
 import { useForm } from "react-hook-form";
-import { ICommodity, ICommodityAxiosResponse, ICreateCommodity } from "./interface";
+import { ICommodityAxiosResponse, ICommodityFormValues, ICreateCommodity } from "./interface";
 import CommodityUtills from "./utills";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { commoditySchema } from "./schema";
@@ -21,7 +21,7 @@ const CreateCommodity = ({
     handleClose,
     sendingRequest
 }: ICreateCommodity) => {
-    const defaultCommodity: ICommodity = {} as ICommodity;
+    const defaultCommodity: ICommodityFormValues = {} as ICommodityFormValues;
     const { addCommodityToStore } = CommodityUtills();
 
     const {
@@ -30,7 +30,7 @@ const CreateCommodity = ({
         formState,
         register,
         reset,
-    } = useForm<ICommodity>({
+    } = useForm<ICommodityFormValues>({
         mode: "onChange",
         resolver: yupResolver(commoditySchema),
     });
@@ -39,20 +39,28 @@ const CreateCommodity = ({
         reset({ ...defaultCommodity });
     }, [reset]);
 
-    const onSubmit = async (formData: ICommodity) => {
+    const onSubmit = async (formData: ICommodityFormValues) => {
         setSendingRequest(true);
         try {
             const response = await createCommodityService(formData) as ICommodityAxiosResponse;
             if (response.status === 201) {
                 addCommodityToStore(response.data);
                 toast.success("Commodity created successfully", { position: 'bottom-right' });
+                handleClose();
             }
-        } catch (error) {
-            console.error("Error creating commodity:", error);
-            toast.error("Failed to create commodity. Please try again.", { position: 'bottom-right' });
+        } catch (error: any) {
+            const detail = error?.response?.data?.detail;
+            const properties = error?.response?.data?.properties;
+            if (properties) {
+                const messages = Object.values(properties).join(', ');
+                toast.error(messages, { position: 'bottom-right' });
+            } else if (detail) {
+                toast.error(detail, { position: 'bottom-right' });
+            } else {
+                toast.error("Failed to create commodity. Please try again.", { position: 'bottom-right' });
+            }
         }
         setSendingRequest(false);
-        handleClose();
     };
 
     return (
