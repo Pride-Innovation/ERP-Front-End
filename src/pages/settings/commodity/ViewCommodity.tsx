@@ -9,11 +9,11 @@ import {
     Box,
     Button,
     Card,
+    Chip,
     Stack,
     Typography,
     useTheme,
     alpha,
-    Chip,
     IconButton,
     Tooltip
 } from '@mui/material';
@@ -22,6 +22,7 @@ import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined
 import CategoryOutlinedIcon from '@mui/icons-material/CategoryOutlined';
 import LayersOutlinedIcon from '@mui/icons-material/LayersOutlined';
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
+import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { ICommodityDetails } from './interface';
 
@@ -128,31 +129,38 @@ const CommodityCard = ({ commodity, updateCommodity, deleteCommodity }: ICommodi
                         </Stack>
                     </Box>
 
-                    {/* Description */}
-                    {commodity.assetType?.description && (
-                        <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
-                            <DescriptionOutlinedIcon
-                                fontSize="small"
-                                sx={{ color: alpha(theme.palette.secondary.main, 0.8), mt: 0.25 }}
-                            />
-                            <Stack>
-                                <Typography variant="caption" color="text.secondary">Description</Typography>
-                                <Typography
-                                    variant="body2"
-                                    sx={{
-                                        fontWeight: 500,
-                                        overflow: 'hidden',
-                                        textOverflow: 'ellipsis',
-                                        display: '-webkit-box',
-                                        WebkitLineClamp: 2,
-                                        WebkitBoxOrient: 'vertical',
-                                    }}
-                                >
-                                    {commodity.assetType.description}
+                    {/* Suppliers */}
+                    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
+                        <LocalShippingOutlinedIcon
+                            fontSize="small"
+                            sx={{ color: alpha(theme.palette.secondary.main, 0.8), mt: 0.25 }}
+                        />
+                        <Stack sx={{ flex: 1 }}>
+                            <Typography variant="caption" color="text.secondary">Suppliers</Typography>
+                            {commodity.suppliers && commodity.suppliers.length > 0 ? (
+                                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 0.5 }}>
+                                    {commodity.suppliers.map((supplier) => (
+                                        <Chip
+                                            key={supplier.id}
+                                            label={supplier.name}
+                                            size="small"
+                                            sx={{
+                                                fontSize: '0.7rem',
+                                                height: 20,
+                                                bgcolor: alpha(theme.palette.primary.main, 0.08),
+                                                color: theme.palette.primary.main,
+                                                fontWeight: 500,
+                                            }}
+                                        />
+                                    ))}
+                                </Box>
+                            ) : (
+                                <Typography variant="body2" sx={{ fontStyle: 'italic', color: alpha(theme.palette.text.secondary, 0.7) }}>
+                                    No suppliers linked
                                 </Typography>
-                            </Stack>
-                        </Box>
-                    )}
+                            )}
+                        </Stack>
+                    </Box>
                 </Stack>
             </Box>
 
