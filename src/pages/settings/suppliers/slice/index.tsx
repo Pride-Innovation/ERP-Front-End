@@ -11,10 +11,14 @@ import { ISupplier } from '../interface';
 
 interface ISupplierState {
     suppliers: ISupplier[];
+    totalPages: number;
+    totalElements: number;
 }
 
 const initialState: ISupplierState = {
-    suppliers: []
+    suppliers: [],
+    totalPages: 0,
+    totalElements: 0,
 }
 
 export const supplierSlice = createSlice({
@@ -23,6 +27,10 @@ export const supplierSlice = createSlice({
     reducers: {
         loadSuppliers: (state, action) => {
             state.suppliers = action.payload;
+        },
+        setPaginationMeta: (state, action) => {
+            state.totalPages = action.payload.totalPages;
+            state.totalElements = action.payload.totalElements;
         },
         addSupplier: (state, action) => {
             state.suppliers = [action.payload, ...state.suppliers]
@@ -40,6 +48,7 @@ const { reducer, actions } = supplierSlice
 
 export const {
     loadSuppliers,
+    setPaginationMeta,
     addSupplier,
     removeSupplier,
     updateSupplier
