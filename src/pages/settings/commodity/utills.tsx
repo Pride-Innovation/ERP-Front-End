@@ -12,7 +12,7 @@ import { IFormData } from "../../assets/interface";
 import { fetchRowsService } from "../../../core/apis/globalService";
 import { useDispatch } from "react-redux";
 import { AppDispatch, RootState } from "../../../store";
-import { addCommodity, deleteCommodity, loadAllCommodities, updateCommodity } from "./slice";
+import { addCommodity, deleteCommodity, loadAllCommodities, setPaginationMeta, updateCommodity } from "./slice";
 import AssetTypeUtills from "../assetTypes/utills";
 import { IOptions } from "../../../components/tables/interface";
 import { useSelector } from "react-redux";
@@ -35,23 +35,43 @@ const CommodityUtills = () => {
     const handleClose = () => setOpen(false);
     useEffect(() => { fetchAllAssetTypes() }, []);
 
-    const fetchAllCommodities = async (params?: Record<string, any>) => {
-        setLoading(true)
+    const fetchAllCommodities = async ({
+        pageNumber = 0,
+        pageSize = 9,
+        name,
+        groupName,
+        assetTypeId,
+    }: {
+        pageNumber?: number;
+        pageSize?: number;
+        name?: string;
+        groupName?: string;
+        assetTypeId?: string | number | null;
+    } = {}) => {
+        setLoading(true);
         try {
+            const params: Record<string, any> = {};
+            if (name) params.name = name;
+            if (groupName) params.groupName = groupName;
+            if (assetTypeId) params.assetTypeId = assetTypeId;
             const response = await fetchRowsService({
-                pageNumber: 0,
-                pageSize: 10,
+                pageNumber,
+                pageSize,
                 endPoint,
                 params
             }) as ICommoditiesAxiosResponse;
             if (response.status === 200) {
-                dispatch(loadAllCommodities(response.data.content))
+                dispatch(loadAllCommodities(response.data.content));
+                dispatch(setPaginationMeta({
+                    totalPages: response.data.totalPages,
+                    totalElements: response.data.totalElements,
+                }));
             }
         } catch (error) {
-            console.log(error)
+            console.log(error);
         }
-        setLoading(false)
-    }
+        setLoading(false);
+    };
 
     const addCommodityToStore = (commodity: ICommodity) => {
         dispatch(addCommodity(commodity))
