@@ -69,11 +69,15 @@ const AssetsManagement = () => {
   }, [assetTypes]);
 
   const activeTabIndex = useMemo(() => {
-    const idx = navigations.findIndex(nav => pathname.startsWith(nav.path));
+    const idx = navigations.findIndex(nav =>
+      pathname === nav.path || pathname.startsWith(nav.path + '/')
+    );
     return idx >= 0 ? idx : false;
   }, [pathname, navigations]);
 
-  const activeNavLabel = navigations.find(nav => pathname.startsWith(nav.path))?.text;
+  const activeNavLabel = navigations.find(nav =>
+    pathname === nav.path || pathname.startsWith(nav.path + '/')
+  )?.text;
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: '#F1F5FB', pb: 4 }}>
@@ -143,35 +147,50 @@ const AssetsManagement = () => {
 
         {/* Navigation Tabs */}
         {navigations.length > 0 && (
-          <Tabs
-            value={activeTabIndex}
-            onChange={(_, idx) => navigate(navigations[idx].path)}
-            TabIndicatorProps={{ style: { backgroundColor: '#fff', height: 3, borderRadius: '2px 2px 0 0' } }}
-            sx={{
-              minHeight: 44,
-              '& .MuiTab-root': {
-                color: alpha('#fff', 0.62),
-                fontWeight: 500,
-                fontSize: '0.82rem',
+          <Box sx={{ position: 'relative' }}>
+            <Tabs
+              value={activeTabIndex}
+              onChange={(_, idx) => navigate(navigations[idx].path)}
+              variant="scrollable"
+              scrollButtons="auto"
+              allowScrollButtonsMobile
+              TabIndicatorProps={{ style: { backgroundColor: '#fff', height: 3, borderRadius: '2px 2px 0 0' } }}
+              sx={{
                 minHeight: 44,
-                textTransform: 'none',
-                px: 1.75,
-                py: 0,
-                gap: 0.75,
-                '&.Mui-selected': { color: '#fff', fontWeight: 700 },
-                '&:hover': { color: alpha('#fff', 0.9) },
-              },
-            }}
-          >
-            {navigations.map(nav => (
-              <Tab
-                key={nav.id}
-                label={nav.text}
-                icon={nav.icon}
-                iconPosition="start"
-              />
-            ))}
-          </Tabs>
+                '& .MuiTab-root': {
+                  color: alpha('#fff', 0.62),
+                  fontWeight: 500,
+                  fontSize: '0.82rem',
+                  minHeight: 44,
+                  textTransform: 'none',
+                  px: 1.75,
+                  py: 0,
+                  gap: 0.75,
+                  '&.Mui-selected': { color: '#fff', fontWeight: 700 },
+                  '&:hover': { color: alpha('#fff', 0.9) },
+                },
+                '& .MuiTabScrollButton-root': {
+                  color: alpha('#fff', 0.8),
+                  width: 32,
+                  '&.Mui-disabled': { opacity: 0.2 },
+                  '& svg': { fontSize: 20 },
+                },
+                '& .MuiTabs-scrollableX': {
+                  // fade left edge when scrolled right
+                  maskImage: 'linear-gradient(to right, transparent 0%, black 32px, black calc(100% - 32px), transparent 100%)',
+                },
+              }}
+            >
+              {navigations.map(nav => (
+                <Tab
+                  key={nav.id}
+                  label={nav.text}
+                  icon={nav.icon}
+                  iconPosition="start"
+                />
+              ))}
+            </Tabs>
+          </Box>
         )}
       </Box>
 
