@@ -80,6 +80,8 @@ export interface IOfficeEquipmentForm {
     isUpdate?: boolean;
     loading?: boolean;
     trigger?: UseFormTrigger<IOfficeEquipment>;
+    /** Override the asset type ID used for commodity filtering (for non-office-equipment categories) */
+    overrideAssetTypeId?: number;
 }
 
 
