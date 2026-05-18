@@ -68,6 +68,9 @@ const LIST_OFFICE_EQUIPMENT: string = `${LIST_ASSETS}/office-equipment`
 const CREATE_OFFICE_EQUIPMENT: string = `${LIST_ASSETS}/office-equipment/create`
 const UPDATE_OFFICE_EQUIPMENT: string = `${LIST_ASSETS}/office-equipment/update`
 
+/* General Asset Routes (all non-specialized categories) */
+const LIST_GENERAL_ASSETS: string = `${LIST_ASSETS}/general`
+
 /* Settings Routes */
 const BRANCHES: string = `${ASSETS_MANAGEMENT}/settings/branches`;
 const COMMODITY: string = `${ASSETS_MANAGEMENT}/settings/commodities`;
@@ -75,6 +78,7 @@ const TITLES: string = `${ASSETS_MANAGEMENT}/settings/titles`;
 const SUPPLIERS: string = `${ASSETS_MANAGEMENT}/settings/suppliers`;
 const REGIONS: string = `${ASSETS_MANAGEMENT}/settings/regions`;
 const DEPARTMENT: string = `${ASSETS_MANAGEMENT}/settings/departments`;
+const ASSET_TYPES: string = `${ASSETS_MANAGEMENT}/settings/asset-categories`;
 
 /* Errors Page */
 const ERRORS: string = `${ASSETS_MANAGEMENT}/restricted-access`
@@ -115,6 +119,7 @@ export const ROUTES = {
     UPDATE_FLEET,
     CREATE_OFFICE_EQUIPMENT,
     UPDATE_OFFICE_EQUIPMENT,
+    LIST_GENERAL_ASSETS,
     ERRORS,
     LIST_ALL,
     LIST_PENDING,
@@ -132,6 +137,7 @@ export const ROUTES = {
     REGIONS,
     INVENTORY,
     DEPARTMENT,
+    ASSET_TYPES,
     CREATE_INVENTORY,
     UPDATE_INVENTORY,
     READ_INVENTORY,
