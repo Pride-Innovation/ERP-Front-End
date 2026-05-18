@@ -22,6 +22,10 @@ import CreateOfficeEquipment from '../../../../pages/assets/officeEquipment/Crea
 import UpdateOfficeEquipment from '../../../../pages/assets/officeEquipment/UpdateOfficeEquipment'
 import CreateFleet from '../../../../pages/assets/fleet/CreateFleet'
 import UpdateFleet from '../../../../pages/assets/fleet/UpdateFleet'
+import GeneralAssets from '../../../../pages/assets/general'
+import CreateGeneralAsset from '../../../../pages/assets/general/CreateGeneralAsset'
+import UpdateGeneralAsset from '../../../../pages/assets/general/UpdateGeneralAsset'
+import GeneralAssetDetails from '../../../../pages/assets/general/view'
 
 const AssetRoutes = () => {
     return (
@@ -32,6 +36,8 @@ const AssetRoutes = () => {
                 {ITEquipmentRoutes()}
                 {FleetRoutes()}
                 {OfficeEquipmentRoutes()}
+                {/* General asset list (parameterized by category typeId) */}
+                <Route path={`${ROUTES.LIST_GENERAL_ASSETS}/:typeId`} element={<GeneralAssets />} />
             </Route>
             <Route element={<PrivateRoute permission={permissionsMock[39]} />}>
                 <Route path={`${ROUTES.LIST_ASSETS}/:id`} element={<ITEquipmentDetails />} />
@@ -65,6 +71,17 @@ const AssetRoutes = () => {
             </Route>
             <Route element={<PrivateRoute permission={permissionsMock[42]} />}>
                 <Route path={`${ROUTES.UPDATE_OFFICE_EQUIPMENT}/:id`} element={<UpdateOfficeEquipment />} />
+            </Route>
+
+            {/* General Asset Routes (all non-specialized categories) */}
+            <Route element={<PrivateRoute permission={permissionsMock[40]} />}>
+                <Route path={`${ROUTES.LIST_GENERAL_ASSETS}/:typeId/create`} element={<CreateGeneralAsset />} />
+            </Route>
+            <Route element={<PrivateRoute permission={permissionsMock[42]} />}>
+                <Route path={`${ROUTES.LIST_GENERAL_ASSETS}/:typeId/update/:id`} element={<UpdateGeneralAsset />} />
+            </Route>
+            <Route element={<PrivateRoute permission={permissionsMock[39]} />}>
+                <Route path={`${ROUTES.LIST_GENERAL_ASSETS}/:typeId/view/:id`} element={<GeneralAssetDetails />} />
             </Route>
 
         </Route>
