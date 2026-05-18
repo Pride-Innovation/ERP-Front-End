@@ -7,7 +7,6 @@ Managing Director
 
 import {
     Box,
-    Grid,
     Typography,
     Button,
     Stack,
@@ -183,17 +182,16 @@ const Departments = () => {
                     </Paper>
                 ) : departments.length > 0 ? (
                     <Fade in={!loading}>
-                        <Grid container spacing={3}>
+                        <Box className="department-grid">
                             {departments.map((department) => (
-                                <Grid item xs={12} sm={6} md={6} lg={6} key={department.id}>
-                                    <DepartmentDetails
-                                        department={department}
-                                        deleteDepartment={deleteDepartment}
-                                        updateDepartment={updateDepartment}
-                                    />
-                                </Grid>
+                                <DepartmentDetails
+                                    key={department.id}
+                                    department={department}
+                                    deleteDepartment={deleteDepartment}
+                                    updateDepartment={updateDepartment}
+                                />
                             ))}
-                        </Grid>
+                        </Box>
                     </Fade>
                 ) : (
                     <Fade in={!loading}>

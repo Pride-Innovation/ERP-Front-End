@@ -88,7 +88,7 @@ const AssetTypeCard = ({
             }}
         >
             {/* Top colour bar */}
-            <Box sx={{ height: 4, bgcolor: color }} />
+            {/* <Box sx={{ height: 4, bgcolor: color }} /> */}
 
             <Box sx={{ p: 2.5 }}>
                 <Stack direction="row" spacing={2} alignItems="flex-start">
@@ -442,19 +442,18 @@ const AssetTypes = () => {
                     </Paper>
                 ) : assetTypes.length > 0 ? (
                     <Fade in={!loading}>
-                        <Grid container spacing={2.5}>
+                        <Box className="asset-type-grid">
                             {assetTypes.map((assetType, index) => (
-                                <Grid item xs={12} sm={6} md={4} lg={3} key={assetType.id}>
-                                    <AssetTypeCard
-                                        assetType={assetType}
-                                        index={index}
-                                        onEdit={editAssetType}
-                                        onDelete={deleteAssetType}
-                                        onConfigure={configureFields}
-                                    />
-                                </Grid>
+                                <AssetTypeCard
+                                    key={assetType.id}
+                                    assetType={assetType}
+                                    index={index}
+                                    onEdit={editAssetType}
+                                    onDelete={deleteAssetType}
+                                    onConfigure={configureFields}
+                                />
                             ))}
-                        </Grid>
+                        </Box>
                     </Fade>
                 ) : (
                     <Fade in={!loading}>
