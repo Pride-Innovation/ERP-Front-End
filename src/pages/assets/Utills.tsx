@@ -10,6 +10,7 @@ import { IAssetType } from "../settings/assetTypes/interface"
 import SettingsBrightnessIcon from '@mui/icons-material/SettingsBrightness';
 import BalanceIcon from '@mui/icons-material/Balance';
 import DirectionsCarFilledIcon from '@mui/icons-material/DirectionsCarFilled';
+import CategoryOutlinedIcon from '@mui/icons-material/CategoryOutlined';
 import { useContext, useState } from "react";
 import { useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../store";
@@ -87,6 +88,18 @@ const AssetUtills = () => {
                 // permission: routePermission(16) as IPermission
             })
         }
+
+        // Generic fallback for all other asset categories
+        return {
+            id: assetType.id as number,
+            text: assetType.name,
+            path: `${ROUTES.LIST_GENERAL_ASSETS}/${assetType.id}`,
+            otherRoutes: [
+                `${ROUTES.LIST_GENERAL_ASSETS}/${assetType.id}/create`,
+                `${ROUTES.LIST_GENERAL_ASSETS}/${assetType.id}/update`,
+            ],
+            icon: <CategoryOutlinedIcon />,
+        };
 
     }
 
