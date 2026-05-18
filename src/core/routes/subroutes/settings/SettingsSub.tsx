@@ -14,6 +14,7 @@ import Departments from "../../../../pages/settings/departments"
 import Commodities from "../../../../pages/settings/commodity"
 import Titles from "../../../../pages/settings/titles"
 import Regions from "../../../../pages/settings/regions"
+import AssetTypes from "../../../../pages/settings/assetTypes"
 
 const SettingsSubRoutes = () => {
     return (
@@ -25,6 +26,7 @@ const SettingsSubRoutes = () => {
             <Route path={ROUTES.SUPPLIERS} element={<Suppliers />} />
             <Route path={ROUTES.REGIONS} element={<Regions />} />
             <Route path={ROUTES.DEPARTMENT} element={<Departments />} />
+            <Route path={ROUTES.ASSET_TYPES} element={<AssetTypes />} />
         </Route>
     )
 }
