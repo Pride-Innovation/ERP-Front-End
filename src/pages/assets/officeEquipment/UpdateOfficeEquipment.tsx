@@ -99,7 +99,8 @@ const UpdateOfficeEquipment = () => {
         trigger
     } = useForm<IOfficeEquipment>({
         mode: 'onChange',
-        resolver: yupResolver(officeEquipmentSchema),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        resolver: yupResolver(officeEquipmentSchema) as any,
     });
 
     useEffect(() => {
