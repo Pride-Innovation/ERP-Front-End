@@ -18,6 +18,7 @@ import { RootState } from "../../../store";
 import CommodityUtills from "../../settings/commodity/utills";
 import InventoryUtills from "../../inventory/Utills";
 import SteppedOfficeEquipmentForm from "./SteppedOfficeEquipmentForm";
+import { useAssetFieldConfig } from "../../../hooks/useAssetFieldConfig";
 
 const OfficeEquipmentForm = ({
     formState,
@@ -29,7 +30,8 @@ const OfficeEquipmentForm = ({
     userParams,
     supplierParams,
     branchParams,
-    trigger
+    trigger,
+    overrideAssetTypeId
 }: IOfficeEquipmentForm) => {
     const [assetTypeId, setAssetTypeId] = useState<number | null>();
     const [loading, setLoading] = useState<boolean>(true);
@@ -69,13 +71,15 @@ const OfficeEquipmentForm = ({
 
     // Determine asset type
     useEffect(() => {
-        if (assetTypes.length > 0) {
+        if (overrideAssetTypeId) {
+            setAssetTypeId(overrideAssetTypeId);
+        } else if (assetTypes.length > 0) {
             const assetType = determineOfficeAssetType();
-            if (assetType !== null) {
+            if (assetType) {
                 setAssetTypeId(assetType.id as number);
             }
         }
-    }, [assetTypes]);
+    }, [assetTypes, overrideAssetTypeId]);
 
     // Fetch commodities when asset type is determined
     useEffect(() => {
@@ -84,6 +88,9 @@ const OfficeEquipmentForm = ({
         }
     }, [assetTypeId]);
 
+    const { applyToFormFields } = useAssetFieldConfig(assetTypeId);
+    const configuredFormFields = applyToFormFields(formFields);
+
     return (
         <SteppedOfficeEquipmentForm
             formState={formState}
@@ -91,7 +98,7 @@ const OfficeEquipmentForm = ({
             register={register}
             buttonText={buttonText}
             sendingRequest={sendingRequest}
-            formFields={formFields}
+            formFields={configuredFormFields}
             isUpdate={!!lpoParams}
             loading={loading}
             trigger={trigger}
