@@ -220,7 +220,7 @@ const Store = () => {
                                 <Typography variant="caption" sx={{ fontWeight: 700, color: '#fff', fontSize: '0.75rem' }}>
                                     {countsLoading
                                         ? <Skeleton width={20} sx={{ display: 'inline-block', bgcolor: alpha('#fff', 0.2) }} />
-                                        : (categoryCounts[type.id] ?? 0)
+                                        : (categoryCounts[type.id!] ?? 0)
                                     }
                                 </Typography>
                                 <Typography variant="caption" sx={{ color: alpha('#fff', 0.7), fontSize: '0.7rem' }}>{type.name}</Typography>
@@ -316,7 +316,7 @@ const Store = () => {
                                             <Grid container spacing={1}>
                                                 {assetTypes.map(type => {
                                                     const { color, Icon: CatIcon } = getCategoryStyle(type.name);
-                                                    const count = categoryCounts[type.id];
+                                                    const count = categoryCounts[type.id!];
                                                     return (
                                                         <Grid item xs={6} key={type.id}>
                                                             <Box
