@@ -83,7 +83,7 @@ const FleetUtills = () => {
     useEffect(() => {
         if (statuses.length > 0)
             setOptionsObject({
-                assetTypesOptions: assetTypes?.map(type => ({ label: type.name, value: type.id })) || [],
+                assetTypesOptions: assetTypes?.map(type => ({ label: type.name, value: type.id as number })) || [],
                 branchesOptions: branches?.map(branch => ({ label: branch.name, value: branch?.id as number })),
                 assetsStatusesOptions: statuses?.map(status => ({ label: status.name, value: status.id as number })) || [],
                 usersOptions: users?.map(user => ({ label: `${user.firstName} ${user.lastName}` as string, value: user.id as number })) || [],
