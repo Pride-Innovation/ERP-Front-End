@@ -77,7 +77,7 @@ const OfficeEquipment = () => {
 
         const dateRange = extraParams?.createdAt;
         const params = {
-            assetTypeId: currentAssetType.id,
+            assetTypeId: currentAssetType?.id,
             assetStatusId: determineStatusId(status || extraParams?.status || 'all'),
             startDate: dateRange?.from
                 ? dayjs(dateRange.from).format('YYYY-MM-DDTHH:mm:ss')
@@ -116,7 +116,7 @@ const OfficeEquipment = () => {
     }, [assetTypes]);
 
     useEffect(() => {
-        if (currentAssetType.id) {
+        if (currentAssetType?.id) {
             fetchResources()
         }
     }, [currentAssetType])
@@ -274,7 +274,7 @@ const OfficeEquipment = () => {
                     handleOptionClicked={handleOptionClicked}
                     paginationMode='server'
                     params={{
-                        assetTypeId: currentAssetType.id
+                        assetTypeId: currentAssetType?.id
                     }}
                     refresh
                     filterMode="server"
