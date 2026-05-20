@@ -55,6 +55,7 @@ import OtherDetails from "./OtherDetails";
 import RequestCommodties from "./RequestCommodties";
 import MovementHistory from "./MovementHistory";
 import AttachmentViewer from "./AttachmentViewer";
+import WorkflowTimeline from "./WorkflowTimeline";
 
 // Services and contexts
 import { RequestContext } from "../../../../context/request/RequestContext";
@@ -662,6 +663,15 @@ const RequestDetails = () => {
                                                     content: (
                                                         <Box>
                                                             <MovementHistory request={request} />
+                                                        </Box>
+                                                    )
+                                                },
+                                                {
+                                                    label: "Approval History",
+                                                    position: 3,
+                                                    content: (
+                                                        <Box>
+                                                            <WorkflowTimeline requestId={request.id as number} />
                                                         </Box>
                                                     )
                                                 }

@@ -100,7 +100,7 @@ const AutocompleteComponent = ({
     renderOption,
     onChange
 }: IAutocompleteComponent & { onInputChange?: (event: any, value: string) => void, renderOption?: (props: any, option: any) => React.ReactNode, onChange?: (event: any, value: any) => void }) => {
-    const [selectedValue, setSelectedValue] = useState<IOptions | IOptions[] | null>(null);
+    const [selectedValue, setSelectedValue] = useState<IOptions | IOptions[] | null>(multiple ? [] : null);
     const [localInput, setLocalInput] = useState('');
     const debouncedInput = useDebounce(localInput, 500);
 

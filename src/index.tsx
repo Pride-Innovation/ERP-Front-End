@@ -26,6 +26,14 @@ import AssetContextProvider from './context/asset';
 import DashboardProvider from './context/dashboard';
 import FormContextProvider from './context/form';
 
+// Suppress the benign "ResizeObserver loop completed with undelivered notifications"
+// warning that fires from charting/layout libraries (recharts, MUI, etc.).
+window.addEventListener('error', (e) => {
+    if (e.message?.includes('ResizeObserver loop')) {
+        e.stopImmediatePropagation();
+    }
+});
+
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );

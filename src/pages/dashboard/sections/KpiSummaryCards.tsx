@@ -108,25 +108,18 @@ const KpiSummaryCards = () => {
         ]).finally(() => setLoading(false));
     }, []);
 
-    const totalAssets =
-        (assetStats?.itequipment?.total || 0) +
-        (assetStats?.officeequipment?.total || 0) +
-        (assetStats?.fleet?.total || 0);
+    const allStats = Object.values(assetStats || {});
 
-    const activeAssets =
-        ((assetStats?.itequipment?.total || 0) - (assetStats?.itequipment?.inMaintenance || 0) - (assetStats?.itequipment?.unassigned || 0)) +
-        ((assetStats?.officeequipment?.total || 0) - (assetStats?.officeequipment?.inMaintenance || 0) - (assetStats?.officeequipment?.unassigned || 0)) +
-        ((assetStats?.fleet?.total || 0) - (assetStats?.fleet?.inMaintenance || 0) - (assetStats?.fleet?.unassigned || 0));
+    const totalAssets = allStats.reduce((sum, s) => sum + (s.total || 0), 0);
 
-    const inMaintenance =
-        (assetStats?.itequipment?.inMaintenance || 0) +
-        (assetStats?.officeequipment?.inMaintenance || 0) +
-        (assetStats?.fleet?.inMaintenance || 0);
+    const activeAssets = allStats.reduce(
+        (sum, s) => sum + (s.total || 0) - (s.inMaintenance || 0) - (s.unassigned || 0),
+        0
+    );
 
-    const unassigned =
-        (assetStats?.itequipment?.unassigned || 0) +
-        (assetStats?.officeequipment?.unassigned || 0) +
-        (assetStats?.fleet?.unassigned || 0);
+    const inMaintenance = allStats.reduce((sum, s) => sum + (s.inMaintenance || 0), 0);
+
+    const unassigned = allStats.reduce((sum, s) => sum + (s.unassigned || 0), 0);
 
     const prevMonth = requestVariationStats?.previousMonth || 0;
     const currentMonth = requestVariationStats?.currentMonth || 0;
@@ -144,7 +137,7 @@ const KpiSummaryCards = () => {
                     value={totalAssets}
                     icon={<DevicesOutlinedIcon />}
                     color={PRIMARY_COLOR}
-                    subtitle="IT · Office · Fleet combined"
+                    subtitle="Across all asset categories"
                     loading={loading}
                 />
             </Grid>

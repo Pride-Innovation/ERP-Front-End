@@ -7,7 +7,6 @@ Managing Director
 
 import {
     Box,
-    Grid,
     Typography,
     Button,
     Stack,

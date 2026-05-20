@@ -28,6 +28,8 @@ import ResetPassword from '../../pages/authentication/ResetPassword'
 import MovementRoutes from './subroutes/movement'
 import StoreRoutes from './subroutes/StoreRoutes'
 import ReportsPage from '../../pages/reports'
+import ApprovalWorkflows from '../../pages/approvalWorkflows'
+import { NotificationContextProvider } from '../../context/notification/NotificationContext'
 
 const AppRoutes = () => {
 
@@ -37,7 +39,7 @@ const AppRoutes = () => {
       <Route path={ROUTES.FORGOT_PASSWORD} element={<PasswordReset />} />
       <Route path={ROUTES.RESET_PASSWORD} element={<ResetPassword />} />
       <Route element={<PrivateRoute />}>
-        <Route path={ROUTES.ASSETS_MANAGEMENT} element={<ApplicationDrawer />} >
+        <Route path={ROUTES.ASSETS_MANAGEMENT} element={<NotificationContextProvider><ApplicationDrawer /></NotificationContextProvider>} >
           <Route index element={<Dashboard />} />
 
           {/* Setting Routes */}
@@ -66,6 +68,11 @@ const AppRoutes = () => {
           {MovementRoutes()}
 
           <Route path={`${ROUTES.PROFILE}/:id`} element={<Profile />} />
+
+          {/* Approval Workflows Route */}
+          <Route element={<PrivateRoute permission={permissionsMock[27]} />}>
+            <Route path={ROUTES.APPROVAL_WORKFLOWS} element={<ApprovalWorkflows />} />
+          </Route>
 
           {/* Audit Trails Routes */}
           <Route element={<PrivateRoute permission={permissionsMock[31]} />}>

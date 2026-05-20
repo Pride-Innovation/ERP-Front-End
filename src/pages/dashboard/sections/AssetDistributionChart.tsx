@@ -13,6 +13,7 @@ import { Doughnut } from 'react-chartjs-2';
 import ComputerIcon from '@mui/icons-material/Computer';
 import ChairIcon from '@mui/icons-material/Chair';
 import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
+import CategoryOutlinedIcon from '@mui/icons-material/CategoryOutlined';
 import DonutLargeOutlinedIcon from '@mui/icons-material/DonutLargeOutlined';
 import CountUp from 'react-countup';
 import { useContext, useEffect, useState } from 'react';
@@ -20,29 +21,21 @@ import { DashboardContext } from '../../../context/dashboard';
 import SectionUtills from './utills';
 
 const PRIMARY_COLOR = '#08796C';
-const SECONDARY_COLOR = '#BC892C';
-const FLEET_COLOR = '#445069';
 
-const CATEGORIES = [
-    {
-        key: 'itequipment',
-        label: 'IT Equipment',
-        color: PRIMARY_COLOR,
-        icon: <ComputerIcon sx={{ fontSize: 18 }} />,
-    },
-    {
-        key: 'officeequipment',
-        label: 'Office Equipment',
-        color: SECONDARY_COLOR,
-        icon: <ChairIcon sx={{ fontSize: 18 }} />,
-    },
-    {
-        key: 'fleet',
-        label: 'Fleet / Vehicles',
-        color: FLEET_COLOR,
-        icon: <DirectionsCarIcon sx={{ fontSize: 18 }} />,
-    },
-];
+// Colour palette cycled across dynamic categories
+const PALETTE = [PRIMARY_COLOR, '#BC892C', '#445069', '#E57373', '#7986CB', '#4DB6AC', '#FFB74D'];
+
+/** Pick an icon that matches the category name; fall back to a generic icon. */
+const getIconForCategory = (label: string, color: string) => {
+    const t = label.toLowerCase();
+    if (t.includes('it') || t.includes('tech') || t.includes('computer'))
+        return <ComputerIcon sx={{ fontSize: 18, color }} />;
+    if (t.includes('office') || t.includes('furniture') || t.includes('chair'))
+        return <ChairIcon sx={{ fontSize: 18, color }} />;
+    if (t.includes('fleet') || t.includes('vehicle') || t.includes('car'))
+        return <DirectionsCarIcon sx={{ fontSize: 18, color }} />;
+    return <CategoryOutlinedIcon sx={{ fontSize: 18, color }} />;
+};
 
 // Mini segmented bar showing assigned / in-store / maintenance split
 const SegmentBar = ({
@@ -97,18 +90,27 @@ const AssetDistributionChart = () => {
         fetchBranchAssetStatics().finally(() => setLoading(false));
     }, []);
 
-    const categoryTotals = CATEGORIES.map(
-        (cat) => (assetStats as any)?.[cat.key]?.total || 0
-    );
+    // Build category list dynamically from whatever the API returned
+    const categories = Object.entries(assetStats || {}).map(([key, stats], i) => ({
+        key,
+        label: (stats as any).label ?? key,
+        color: PALETTE[i % PALETTE.length],
+        icon: null as React.ReactNode, // assigned below
+    })).map((cat) => ({
+        ...cat,
+        icon: getIconForCategory(cat.label, cat.color),
+    }));
+
+    const categoryTotals = categories.map((cat) => (assetStats as any)?.[cat.key]?.total || 0);
     const total = categoryTotals.reduce((a, b) => a + b, 0) || 1;
 
     const doughnutData = {
-        labels: CATEGORIES.map((c) => c.label),
+        labels: categories.map((c) => c.label),
         datasets: [
             {
                 data: categoryTotals,
-                backgroundColor: CATEGORIES.map((c) => c.color),
-                hoverBackgroundColor: CATEGORIES.map((c) => alpha(c.color, 0.75)),
+                backgroundColor: categories.map((c) => c.color),
+                hoverBackgroundColor: categories.map((c) => alpha(c.color, 0.75)),
                 borderWidth: 3,
                 borderColor: '#fff',
                 hoverOffset: 6,
@@ -182,7 +184,7 @@ const AssetDistributionChart = () => {
                         Asset Distribution
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
-                        By category — IT, Office, Fleet
+                        By category — all asset types
                     </Typography>
                 </Box>
                 <Chip
@@ -244,7 +246,7 @@ const AssetDistributionChart = () => {
 
                         {/* Color legend below chart */}
                         <Stack direction="row" justifyContent="center" spacing={2} mt={2} flexWrap="wrap">
-                            {CATEGORIES.map((cat) => (
+                            {categories.map((cat) => (
                                 <Stack key={cat.key} direction="row" alignItems="center" spacing={0.5}>
                                     <Box
                                         sx={{
@@ -266,7 +268,7 @@ const AssetDistributionChart = () => {
                     {/* Per-category breakdown */}
                     <Grid item xs={12} sm={7}>
                         <Stack spacing={0} divider={<Divider sx={{ opacity: 0.5 }} />}>
-                            {CATEGORIES.map((cat, i) => {
+                            {categories.map((cat, i) => {
                                 const stats = (assetStats as any)?.[cat.key];
                                 const catTotal = stats?.total || 0;
                                 const assigned = stats?.assigned || 0;

@@ -21,18 +21,21 @@ import PopoverComponent from '../forms/Popover';
 import { crudStates } from '../../utils/constants';
 import MaleLogo from '../../statics/images/male.jpg';
 import FemaleLogo from '../../statics/images/Female.jpg'
-import { grey } from '@mui/material/colors';
 import AppBarUtills, { modalStates } from './utills';
 import ModalComponent from '../modal';
 import ChangePassword from '../../pages/profile/ChangePassword';
 import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
 import RoutesUtills from '../../core/routes/utills';
 import FilterByTagName from './FilterByTagName';
+import { useNotifications } from '../../context/notification/NotificationContext';
+import NotificationPanel from './NotificationPanel';
 
 const NavBar = () => {
     const { getCurrentUser } = RoutesUtills();
     const [action, setAction] = useState<string>("");
     const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
+    const [notifAnchor, setNotifAnchor] = useState<HTMLElement | null>(null);
+    const { unreadCount } = useNotifications();
 
     const handleAnchorClick = (event: React.MouseEvent<HTMLButtonElement>) => {
         setAnchorEl(event.currentTarget);
@@ -69,7 +72,7 @@ const NavBar = () => {
                                 type='button' />
                         </Box>
                         <Badge
-                            badgeContent={4}
+                            badgeContent={unreadCount > 0 ? unreadCount : undefined}
                             color="warning"
                             sx={{
                                 '& .MuiBadge-badge': {
@@ -81,6 +84,7 @@ const NavBar = () => {
                             }}
                         >
                             <Box
+                                onClick={(e) => setNotifAnchor(e.currentTarget)}
                                 sx={{
                                     width: 36,
                                     height: 36,
@@ -98,6 +102,10 @@ const NavBar = () => {
                                 <NotificationsNoneIcon sx={{ color: 'rgba(255,255,255,0.9)', fontSize: '1.2rem' }} />
                             </Box>
                         </Badge>
+                        <NotificationPanel
+                            anchor={notifAnchor}
+                            onClose={() => setNotifAnchor(null)}
+                        />
                         <TypographyComponent
                             size='0.875rem'
                             weight={600}

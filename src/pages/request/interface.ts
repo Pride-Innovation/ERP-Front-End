@@ -304,16 +304,15 @@ export interface IBranchAssetStaticsAxiosResponse extends IAxiosResponse {
 
 export interface AssetStats {
     total: number;
-    active: number;
+    assigned: number;
     inMaintenance: number;
     unassigned: number;
+    /** Original display name from the API (e.g. "IT Equipment") */
+    label?: string;
 }
 
-export interface BranchAssetStats {
-    itequipment: AssetStats;
-    officeequipment: AssetStats;
-    fleet: AssetStats;
-}
+/** Keyed by normalised type name (spaces stripped, lower-cased). Dynamic — supports any asset type. */
+export type BranchAssetStats = Record<string, AssetStats>;
 
 export interface SubDomain {
     id: number;

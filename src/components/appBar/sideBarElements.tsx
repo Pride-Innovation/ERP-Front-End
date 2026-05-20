@@ -21,6 +21,7 @@ import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 import { Store } from '@mui/icons-material'
 import { permissionsMock } from '../../mocks/settings';
 import BarChartOutlinedIcon from '@mui/icons-material/BarChartOutlined';
+import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined';
 
 
 const SideBarElements = () => {
@@ -122,6 +123,14 @@ const SideBarElements = () => {
         },
         {
             id: 11,
+            name: "Approval Workflows",
+            route: ROUTES.APPROVAL_WORKFLOWS,
+            icon: <AccountTreeOutlinedIcon />,
+            subroutes: [],
+            access: rightsToViewRow(permissionsMock[27]) // Same as settings: READ_SETTING
+        },
+        {
+            id: 12,
             name: "Audit Trails",
             route: ROUTES.AUDIT_TRAILS,
             icon: <ReceiptLongIcon />,

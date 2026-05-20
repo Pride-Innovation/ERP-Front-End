@@ -85,9 +85,13 @@ const HandleRoutes = () => {
         if (route.indexOf(ROUTES.SETTINGS) !== -1) {
             handleActiveRoute(sideBarList[9])
         }
-        if (route === ROUTES.AUDIT_TRAILS) {
+        if (route === ROUTES.APPROVAL_WORKFLOWS) {
             handleClick(sideBarList[10])
             handleActiveRoute(sideBarList[10])
+        }
+        if (route === ROUTES.AUDIT_TRAILS) {
+            handleClick(sideBarList[11])
+            handleActiveRoute(sideBarList[11])
         }
     }
 

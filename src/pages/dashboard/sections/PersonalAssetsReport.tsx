@@ -40,11 +40,12 @@ const getStatusColor = (status: string): StatusColorConfig => {
 };
 
 const getCategoryIcon = (domain: string) => {
-    switch (domain) {
-        case 'IT Equipment': return <LaptopIcon sx={{ color: PRIMARY_COLOR, fontSize: 20 }} />;
-        case 'Office Equipment': return <ChairIcon sx={{ color: SECONDARY_COLOR, fontSize: 20 }} />;
-        default: return <LaptopIcon sx={{ color: PRIMARY_COLOR, fontSize: 20 }} />;
-    }
+    const t = domain.toLowerCase();
+    if (t.includes('it') || t.includes('tech') || t.includes('computer'))
+        return <LaptopIcon sx={{ color: PRIMARY_COLOR, fontSize: 20 }} />;
+    if (t.includes('office') || t.includes('furniture') || t.includes('chair'))
+        return <ChairIcon sx={{ color: SECONDARY_COLOR, fontSize: 20 }} />;
+    return <FolderSpecialOutlinedIcon sx={{ color: PRIMARY_COLOR, fontSize: 20 }} />;
 };
 
 const TableHeader: React.FC = () => (

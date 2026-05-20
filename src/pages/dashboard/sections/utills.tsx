@@ -212,56 +212,34 @@ const SectionUtills = () => {
     }
 
 
-    /**
-     * 
-     * @param apiData - Array of IYearlyRequestSummaryStats from the API response.
-     * * Maps the API data to an array of RequestCardProps for rendering in the UI.
-     * * Each card represents a different asset type (IT Equipment, Office Equipment, Stationery).
-     * 
-     * @returns 
-     */
+    // Config for well-known asset types; unknown types get sensible defaults.
+    const KNOWN_CARD_CONFIG: Record<string, { title: string; image: string; imageSize: number; progressColor: string }> = {
+        'it equipment': { title: 'IT Asset Requests', image: RequestImage, imageSize: 40, progressColor: '#1976d2' },
+        'office equipment': { title: 'Office Asset Requests', image: furnitureImage, imageSize: 60, progressColor: '#ab47bc' },
+        'stationery': { title: 'Stationery Requests', image: stationeryImage, imageSize: 40, progressColor: '#BC892C' },
+        'fleet': { title: 'Fleet Requests', image: RequestImage, imageSize: 40, progressColor: '#445069' },
+    };
+
+    const CARD_COLORS = ['#1976d2', '#ab47bc', '#BC892C', '#445069', '#2e7d32', '#f59300', '#e53935'];
+
     const mapApiDataToCardData = (apiData: Array<IYearlyRequestSummaryStats>): RequestCardProps[] => {
-
-        const dataMap = apiData.reduce((acc, cur) => {
-            acc[cur.assetType.toLowerCase()] = cur;
-            return acc;
-        }, {} as Record<string, { totalRequested: number; totalDelivered: number }>);
-
-        return [
-            {
-                title: "IT Asset Requests",
+        return apiData.map((item, index) => {
+            const key = item.assetType.toLowerCase();
+            const config = KNOWN_CARD_CONFIG[key] ?? {
+                title: `${item.assetType} Requests`,
                 image: RequestImage,
                 imageSize: 40,
-                value: formatNumber(dataMap['it equipment']?.totalRequested ?? 0),
-                completed: formatNumber(dataMap['it equipment']?.totalDelivered ?? 0),
-                pending: formatNumber((dataMap['it equipment']?.totalRequested ?? 0) - (dataMap['it equipment']?.totalDelivered ?? 0)),
-                progressColor: "#1976d2",
-                totalRequested: dataMap['it equipment']?.totalRequested ?? 0,
-                totalDelivered: dataMap['it equipment']?.totalDelivered ?? 0
-            },
-            {
-                title: "Office Asset Requests",
-                image: furnitureImage,
-                imageSize: 60,
-                value: formatNumber(dataMap['office equipment']?.totalRequested ?? 0),
-                completed: formatNumber(dataMap['office equipment']?.totalDelivered ?? 0),
-                pending: formatNumber((dataMap['office equipment']?.totalRequested ?? 0) - (dataMap['office equipment']?.totalDelivered ?? 0)),
-                progressColor: "#ab47bc",
-                totalRequested: dataMap['office equipment']?.totalRequested ?? 0,
-                totalDelivered: dataMap['office equipment']?.totalDelivered ?? 0
-            },
-            {
-                title: "Stationery Requests",
-                image: stationeryImage,
-                imageSize: 40,
-                value: formatNumber(dataMap['stationery']?.totalRequested ?? 0),
-                completed: formatNumber(dataMap['stationery']?.totalDelivered ?? 0),
-                pending: formatNumber((dataMap['stationery']?.totalRequested ?? 0) - (dataMap['stationery']?.totalDelivered ?? 0)),
-                progressColor: "secondary.main",
-                totalRequested: dataMap['stationery']?.totalRequested ?? 0,
-                totalDelivered: dataMap['stationery']?.totalDelivered ?? 0
-            },
-        ];
+                progressColor: CARD_COLORS[index % CARD_COLORS.length],
+            };
+            return {
+                ...config,
+                value: formatNumber(item.totalRequested),
+                completed: formatNumber(item.totalDelivered),
+                pending: formatNumber(item.totalRequested - item.totalDelivered),
+                totalRequested: item.totalRequested,
+                totalDelivered: item.totalDelivered,
+            };
+        });
     };
 
     const getCurrentYearRequestSummary = async () => {
@@ -287,17 +265,14 @@ const SectionUtills = () => {
         }
     }
 
-    // Formats the branch asset statistics data for easier access
+    // Formats the branch asset statistics data for easier access.
+    // Keeps the original assetType string as `label` so components can display it.
     const formatBranchAssetStatistics = (data: IBranchAssetStatics[]) => {
-        const res = data.reduce((acc: Record<string, Omit<IBranchAssetStatics, 'assetType'>>, item) => {
+        return data.reduce((acc: Record<string, Omit<IBranchAssetStatics, 'assetType'> & { label: string }>, item) => {
             const { assetType, ...stats } = item;
-            acc[(assetType.split(' ').join('').toLowerCase())] = stats;
+            acc[assetType.split(' ').join('').toLowerCase()] = { ...stats, label: assetType };
             return acc;
-        }, {} as Record<string, Omit<IBranchAssetStatics, 'assetType'>>);
-
-
-        return res;
-
+        }, {});
     };
 
     const fetchBranchAssetStatics = async () => {
@@ -313,9 +288,12 @@ const SectionUtills = () => {
 
 
     function transformApiData(data: IPersonalAssetReport[]): AssetDomain[] {
-        const planMap: Record<string, string> = {
-            "IT Equipment": "Hardware Assets",
-            "Office Equipment": "Workspace Assets",
+        const getPlanLabel = (type: string): string => {
+            const t = type.toLowerCase();
+            if (t.includes('it') || t.includes('tech') || t.includes('computer')) return 'Hardware Assets';
+            if (t.includes('office') || t.includes('furniture') || t.includes('chair')) return 'Workspace Assets';
+            if (t.includes('fleet') || t.includes('vehicle') || t.includes('car')) return 'Fleet Assets';
+            return 'General Assets';
         };
 
         return data.map((group, index) => {
@@ -335,7 +313,7 @@ const SectionUtills = () => {
             return {
                 id: index + 1,
                 domain: group.type,
-                plan: planMap[group.type] || "Other Assets",
+                plan: getPlanLabel(group.type),
                 totalItems: group.totalItems,
                 available: availableCount,
                 domains: group.assets.length,

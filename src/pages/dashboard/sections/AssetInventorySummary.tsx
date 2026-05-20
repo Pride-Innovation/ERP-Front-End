@@ -10,6 +10,7 @@ import {
 import ComputerIcon from '@mui/icons-material/Computer';
 import ChairIcon from '@mui/icons-material/Chair';
 import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
+import CategoryOutlinedIcon from '@mui/icons-material/CategoryOutlined';
 import InventoryOutlinedIcon from '@mui/icons-material/InventoryOutlined';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import BuildOutlinedIcon from '@mui/icons-material/BuildOutlined';
@@ -19,6 +20,20 @@ import SectionUtills from './utills';
 import { DashboardContext } from '../../../context/dashboard';
 
 const PRIMARY_COLOR = '#08796C';
+
+// Colour palette cycled across dynamic categories
+const PALETTE = [PRIMARY_COLOR, '#BC892C', '#445069', '#E57373', '#7986CB', '#4DB6AC', '#FFB74D'];
+
+const getIconForCategory = (label: string) => {
+    const t = label.toLowerCase();
+    if (t.includes('it') || t.includes('tech') || t.includes('computer'))
+        return <ComputerIcon />;
+    if (t.includes('office') || t.includes('furniture') || t.includes('chair'))
+        return <ChairIcon />;
+    if (t.includes('fleet') || t.includes('vehicle') || t.includes('car'))
+        return <DirectionsCarIcon />;
+    return <CategoryOutlinedIcon />;
+};
 
 interface CategoryData {
     title: string;
@@ -181,49 +196,22 @@ const AssetInventorySummary = () => {
         fetchBranchAssetStatics();
     }, []);
 
-    const totalAssets =
-        (assetStats?.itequipment?.total || 0) +
-        (assetStats?.officeequipment?.total || 0) +
-        (assetStats?.fleet?.total || 0);
+    // Build category list dynamically from whatever the API returned
+    const categories: CategoryData[] = Object.entries(assetStats || {}).map(([key, stats], i) => {
+        const label = (stats as any).label ?? key;
+        const color = PALETTE[i % PALETTE.length];
+        return {
+            title: label,
+            icon: getIconForCategory(label),
+            color,
+            total: stats.total || 0,
+            active: (stats.total || 0) - (stats.inMaintenance || 0) - (stats.unassigned || 0),
+            maintenance: stats.inMaintenance || 0,
+            unassigned: stats.unassigned || 0,
+        };
+    });
 
-    const categories: CategoryData[] = [
-        {
-            title: 'IT Equipment',
-            icon: <ComputerIcon />,
-            color: PRIMARY_COLOR,
-            total: assetStats?.itequipment?.total || 0,
-            active:
-                (assetStats?.itequipment?.total || 0) -
-                (assetStats?.itequipment?.inMaintenance || 0) -
-                (assetStats?.itequipment?.unassigned || 0),
-            maintenance: assetStats?.itequipment?.inMaintenance || 0,
-            unassigned: assetStats?.itequipment?.unassigned || 0,
-        },
-        {
-            title: 'Office Equipment',
-            icon: <ChairIcon />,
-            color: '#BC892C',
-            total: assetStats?.officeequipment?.total || 0,
-            active:
-                (assetStats?.officeequipment?.total || 0) -
-                (assetStats?.officeequipment?.inMaintenance || 0) -
-                (assetStats?.officeequipment?.unassigned || 0),
-            maintenance: assetStats?.officeequipment?.inMaintenance || 0,
-            unassigned: assetStats?.officeequipment?.unassigned || 0,
-        },
-        {
-            title: 'Fleet / Vehicles',
-            icon: <DirectionsCarIcon />,
-            color: '#445069',
-            total: assetStats?.fleet?.total || 0,
-            active:
-                (assetStats?.fleet?.total || 0) -
-                (assetStats?.fleet?.inMaintenance || 0) -
-                (assetStats?.fleet?.unassigned || 0),
-            maintenance: assetStats?.fleet?.inMaintenance || 0,
-            unassigned: assetStats?.fleet?.unassigned || 0,
-        },
-    ];
+    const totalAssets = categories.reduce((sum, c) => sum + c.total, 0);
 
     return (
         <Card

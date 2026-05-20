@@ -80,6 +80,8 @@ const REGIONS: string = `${ASSETS_MANAGEMENT}/settings/regions`;
 const DEPARTMENT: string = `${ASSETS_MANAGEMENT}/settings/departments`;
 const ASSET_TYPES: string = `${ASSETS_MANAGEMENT}/settings/asset-categories`;
 
+const APPROVAL_WORKFLOWS: string = `${ASSETS_MANAGEMENT}/approval-workflows`;
+
 /* Errors Page */
 const ERRORS: string = `${ASSETS_MANAGEMENT}/restricted-access`
 
@@ -151,5 +153,6 @@ export const ROUTES = {
     CREATE_MOVEMENT,
     UPDATE_MOVEMENT,
     READ_MOVEMENT,
-    REPORTS
+    REPORTS,
+    APPROVAL_WORKFLOWS
 }
