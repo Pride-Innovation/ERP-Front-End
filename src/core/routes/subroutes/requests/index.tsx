@@ -6,17 +6,27 @@ import CreateRequest from '../../../../pages/request/assetRequest/CreateRequest'
 import UpdateRequest from '../../../../pages/request/assetRequest/UpdateRequest'
 import RequestDetails from '../../../../pages/request/assetRequest/view'
 import IssueRequestDetails from '../../../../pages/request/assetRequest/issue/IssueRequestDetails'
+import { PrivateRoute } from '../../PrivateRoutes'
+import { PERMISSIONS } from '../../../permissions/constants'
 
 const RequestRoutes = () => {
     return (
         <Route>
-            <Route path={ROUTES.REQUEST} element={<RequestsManagement />}>
-                {RequestSubroutes()}
+            <Route element={<PrivateRoute permission={PERMISSIONS.READ_REQUEST} />}>
+                <Route path={ROUTES.REQUEST} element={<RequestsManagement />}>
+                    {RequestSubroutes()}
+                </Route>
+                <Route path={`${ROUTES.READ_REQUEST}/:id`} element={<RequestDetails />} />
             </Route>
-            <Route path={ROUTES.CREATE_REQUEST} element={<CreateRequest />} />
-            <Route path={`${ROUTES.UPDATE_REQUEST}/:id`} element={<UpdateRequest />} />
-            <Route path={`${ROUTES.READ_REQUEST}/:id`} element={<RequestDetails />} />
-            <Route path={`${ROUTES.ISSUE_REQUEST}/:id`} element={<IssueRequestDetails />} />
+            <Route element={<PrivateRoute permission={PERMISSIONS.CREATE_REQUEST} />}>
+                <Route path={ROUTES.CREATE_REQUEST} element={<CreateRequest />} />
+            </Route>
+            <Route element={<PrivateRoute permission={PERMISSIONS.UPDATE_REQUEST} />}>
+                <Route path={`${ROUTES.UPDATE_REQUEST}/:id`} element={<UpdateRequest />} />
+            </Route>
+            <Route element={<PrivateRoute permission={PERMISSIONS.ISSUE_ITEMS} />}>
+                <Route path={`${ROUTES.ISSUE_REQUEST}/:id`} element={<IssueRequestDetails />} />
+            </Route>
         </Route>
     )
 }

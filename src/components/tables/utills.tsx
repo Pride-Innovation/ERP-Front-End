@@ -135,17 +135,21 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
         }
     };
 
+    type ExportMeta = { filters?: Array<{ label: string; value: string }> };
+
     /**
      * Generate PDF directly from an array of rows (no DataGrid API needed).
+     * `meta.filters` is rendered as a strip under the header so the reader
+     * knows which slice of the data the export represents.
      */
-    const generatePDFFromRows = (rowsData: any[]) => {
+    const generatePDFFromRows = (rowsData: any[], meta?: ExportMeta) => {
         try {
             if (!rowsData || rowsData.length === 0) {
                 toast.error(`No data available for export`);
                 return;
             }
             const { columns, rows } = determineRowsandColumns(rowsData);
-            exportPDF(columns, rows, fileName || moduleName || 'export');
+            exportPDF(columns, rows, fileName || moduleName || 'export', meta);
         } catch (error) {
             console.error('Error generating PDF:', error);
             toast.error('Failed to generate PDF: ' + (error instanceof Error ? error.message : 'Unknown error'));
@@ -154,15 +158,16 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
 
     /**
      * Generate Excel directly from an array of rows (no DataGrid API needed).
+     * `meta.filters` is rendered on the cover sheet.
      */
-    const generateExcelFromRows = (rowsData: any[]) => {
+    const generateExcelFromRows = (rowsData: any[], meta?: ExportMeta) => {
         try {
             if (!rowsData || rowsData.length === 0) {
                 toast.error(`No data available for export`);
                 return;
             }
             const { columns, rows } = determineRowsandColumns(rowsData);
-            exportExcel(columns, rows, fileName || moduleName || 'export');
+            exportExcel(columns, rows, fileName || moduleName || 'export', meta);
         } catch (error) {
             console.error('Error generating Excel:', error);
             toast.error('Failed to generate Excel: ' + (error instanceof Error ? error.message : 'Unknown error'));

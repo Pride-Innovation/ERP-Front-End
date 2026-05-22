@@ -1,6 +1,6 @@
 /*
 13.9 Pride's Standard Copyright Notice:
-Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
+Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify,
 and distribute this software and its documentation for any purpose is prohibited unless authorized in writing by the
 Managing Director
 */
@@ -16,7 +16,6 @@ import {
     useMediaQuery,
     Drawer,
     IconButton,
-    Container
 } from "@mui/material";
 import { Outlet, useLocation, useNavigate } from "react-router";
 import { useEffect, useState } from "react";
@@ -25,6 +24,7 @@ import SettingsUtills from "./utills";
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
+import { PageHero } from '../../components/layout';
 
 const PRIMARY = '#08796C';
 
@@ -137,129 +137,90 @@ const Settings = () => {
     );
 
     return (
-        <Box sx={{ bgcolor: '#F1F5FB', minHeight: '100vh' }}>
-            {/* Page gradient header */}
-            <Box
+        <Box sx={{ minHeight: '100vh', pb: 4 }}>
+            <PageHero
+                title="System Settings"
+                subtitle="Manage organizational reference data"
+                icon={<SettingsOutlinedIcon />}
+            />
+
+            <Paper
+                elevation={0}
                 sx={{
-                    background: 'linear-gradient(135deg, #08796C 0%, #065E53 60%, #044a42 100%)',
-                    px: { xs: 2, md: 4 },
-                    pt: 4,
-                    pb: 7,
-                    position: 'relative',
-                    overflow: 'hidden',
+                    width: "100%",
+                    minHeight: "70vh",
+                    display: "flex",
+                    flexDirection: { xs: "column", md: "row" },
+                    borderRadius: 2,
+                    overflow: "hidden",
+                    border: `1px solid ${alpha(PRIMARY, 0.12)}`,
                 }}
             >
-                <Box sx={{
-                    position: 'absolute', top: -50, right: -30,
-                    width: 220, height: 220, borderRadius: '50%',
-                    bgcolor: 'rgba(255,255,255,0.04)',
-                    pointerEvents: 'none',
-                }} />
-                <Stack direction="row" alignItems="center" spacing={2}>
+                {/* Mobile header */}
+                {isMobile && (
                     <Box
                         sx={{
-                            width: 54, height: 54, borderRadius: '14px',
-                            bgcolor: 'rgba(255,255,255,0.15)',
-                            backdropFilter: 'blur(8px)',
-                            border: '1px solid rgba(255,255,255,0.2)',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            flexShrink: 0,
+                            background: 'linear-gradient(135deg, #08796C 0%, #065E53 100%)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            p: 2,
                         }}
                     >
-                        <SettingsOutlinedIcon sx={{ color: '#fff', fontSize: 28 }} />
-                    </Box>
-                    <Box>
-                        <Typography variant="h5" sx={{ color: '#fff', fontWeight: 700, mb: 0.25 }}>
-                            System Settings
+                        <Typography variant="h6" fontWeight={600} sx={{ color: '#fff' }}>
+                            Settings
                         </Typography>
-                        <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.72)' }}>
-                            Configure roles, branches, regions, commodities, titles, suppliers & departments
-                        </Typography>
+                        <IconButton onClick={handleDrawerToggle} edge="end" sx={{ color: '#fff' }}>
+                            <MenuIcon />
+                        </IconButton>
                     </Box>
-                </Stack>
-            </Box>
+                )}
 
-            {/* Main content pulled up to overlap gradient */}
-            <Container maxWidth="xl" sx={{ mt: -4, mb: 5, position: 'relative', zIndex: 1, px: { xs: 1, md: 3 } }}>
-                <Paper
-                    elevation={0}
+                {/* Sidebar - desktop version is fixed, mobile is in a drawer */}
+                {isMobile ? (
+                    <Drawer
+                        variant="temporary"
+                        open={mobileOpen}
+                        onClose={handleDrawerToggle}
+                        ModalProps={{
+                            keepMounted: true,
+                        }}
+                        sx={{
+                            display: { xs: 'block', md: 'none' },
+                            '& .MuiDrawer-paper': {
+                                boxSizing: 'border-box',
+                                width: 280,
+                                borderRadius: '0 8px 8px 0'
+                            },
+                        }}
+                    >
+                        {sidebar}
+                    </Drawer>
+                ) : (
+                    <Box
+                        sx={{
+                            width: { md: "260px" },
+                            bgcolor: '#fff',
+                            borderRight: `1px solid ${alpha(PRIMARY, 0.1)}`,
+                            display: { xs: 'none', md: 'block' },
+                        }}
+                    >
+                        {sidebar}
+                    </Box>
+                )}
+
+                <Box
                     sx={{
-                        width: "100%",
-                        minHeight: "80vh",
-                        display: "flex",
-                        flexDirection: { xs: "column", md: "row" },
-                        borderRadius: 3,
-                        overflow: "hidden",
-                        border: `1px solid ${alpha(PRIMARY, 0.12)}`,
-                        boxShadow: '0 4px 28px rgba(0,0,0,0.09)',
+                        flex: 1,
+                        p: { xs: 2, sm: 3, md: 4 },
+                        bgcolor: '#FAFBFE',
+                        position: 'relative',
+                        overflow: 'auto',
                     }}
                 >
-                    {/* Mobile header */}
-                    {isMobile && (
-                        <Box
-                            sx={{
-                                background: 'linear-gradient(135deg, #08796C 0%, #065E53 100%)',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'space-between',
-                                p: 2,
-                            }}
-                        >
-                            <Typography variant="h6" fontWeight={600} sx={{ color: '#fff' }}>
-                                Settings
-                            </Typography>
-                            <IconButton onClick={handleDrawerToggle} edge="end" sx={{ color: '#fff' }}>
-                                <MenuIcon />
-                            </IconButton>
-                        </Box>
-                    )}
-
-                    {/* Sidebar - desktop version is fixed, mobile is in a drawer */}
-                    {isMobile ? (
-                        <Drawer
-                            variant="temporary"
-                            open={mobileOpen}
-                            onClose={handleDrawerToggle}
-                            ModalProps={{
-                                keepMounted: true,
-                            }}
-                            sx={{
-                                display: { xs: 'block', md: 'none' },
-                                '& .MuiDrawer-paper': {
-                                    boxSizing: 'border-box',
-                                    width: 280,
-                                    borderRadius: '0 8px 8px 0'
-                                },
-                            }}
-                        >
-                            {sidebar}
-                        </Drawer>
-                    ) : (
-                        <Box
-                            sx={{
-                                width: { md: "260px" },
-                                bgcolor: '#fff',
-                                borderRight: `1px solid ${alpha(PRIMARY, 0.1)}`,
-                                display: { xs: 'none', md: 'block' },
-                            }}
-                        >
-                            {sidebar}
-                        </Box>
-                    )}
-
-                    <Box
-                        sx={{
-                            flex: 1,
-                            p: { xs: 2, sm: 3, md: 4 },
-                            bgcolor: '#FAFBFE',
-                            position: 'relative',
-                            overflow: 'auto',
-                        }}
-                    >
-                        <Outlet />
-                    </Box>
-                </Paper>
-            </Container>
+                    <Outlet />
+                </Box>
+            </Paper>
         </Box>
     );
 };

@@ -31,6 +31,7 @@ import Repair from "../Repair";
 import ToStore from "../ToStore";
 import { FormContext } from "../../../context/form";
 import dayjs from "dayjs";
+import { PERMISSIONS } from "../../../core/permissions/constants";
 
 const Fleet = () => {
     const [loading, setLoading] = useState<boolean>(false);
@@ -235,6 +236,7 @@ const Fleet = () => {
                     count={count}
                     exportData
                     createAction
+                    createPermission={PERMISSIONS.CREATE_ASSET}
                     module={module}
                     importData
                     header={header}

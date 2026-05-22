@@ -1,6 +1,6 @@
 /*
 13.9 Pride's Standard Copyright Notice:
-Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
+Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify,
 and distribute this software and its documentation for any purpose is prohibited unless authorized in writing by the
 Managing Director
 */
@@ -23,13 +23,13 @@ import AssetRoutes from './subroutes/assets'
 import RequestRoutes from './subroutes/requests'
 import UserRoutes from './subroutes/UserRoutes'
 import TransportRoutes from './subroutes/TransportRoutes'
-import { permissionsMock } from '../../mocks/settings'
 import ResetPassword from '../../pages/authentication/ResetPassword'
 import MovementRoutes from './subroutes/movement'
 import StoreRoutes from './subroutes/StoreRoutes'
 import ReportsPage from '../../pages/reports'
 import ApprovalWorkflows from '../../pages/approvalWorkflows'
 import { NotificationContextProvider } from '../../context/notification/NotificationContext'
+import { PERMISSIONS } from '../permissions/constants'
 
 const AppRoutes = () => {
 
@@ -43,7 +43,7 @@ const AppRoutes = () => {
           <Route index element={<Dashboard />} />
 
           {/* Setting Routes */}
-          <Route element={<PrivateRoute permission={permissionsMock[27]} />}>
+          <Route element={<PrivateRoute permission={PERMISSIONS.READ_SETTING} />}>
             <Route path={ROUTES.SETTINGS} element={<Settings />} >
               {SettingsSubRoutes()}
             </Route>
@@ -70,19 +70,19 @@ const AppRoutes = () => {
           <Route path={`${ROUTES.PROFILE}/:id`} element={<Profile />} />
 
           {/* Approval Workflows Route */}
-          <Route element={<PrivateRoute permission={permissionsMock[27]} />}>
+          <Route element={<PrivateRoute permission={PERMISSIONS.READ_SETTING} />}>
             <Route path={ROUTES.APPROVAL_WORKFLOWS} element={<ApprovalWorkflows />} />
           </Route>
 
           {/* Audit Trails Routes */}
-          <Route element={<PrivateRoute permission={permissionsMock[31]} />}>
+          <Route element={<PrivateRoute permission={PERMISSIONS.READ_AUDIT} />}>
             <Route path={ROUTES.AUDIT_TRAILS} element={<AuditTrails />} />
           </Route>
 
           <Route path={ROUTES.ERRORS} element={<ErrorsPage />} />
 
           {/* Store Routes */}
-          <Route element={<PrivateRoute permission={permissionsMock[35]} />}>
+          <Route element={<PrivateRoute permission={PERMISSIONS.READ_STORE} />}>
             <Route path={ROUTES.STORE} element={<Store />} />
           </Route>
 
@@ -90,7 +90,9 @@ const AppRoutes = () => {
           {StoreRoutes()}
 
           {/* Reports */}
-          <Route path={ROUTES.REPORTS} element={<ReportsPage />} />
+          <Route element={<PrivateRoute permission={PERMISSIONS.READ_AUDIT} />}>
+            <Route path={ROUTES.REPORTS} element={<ReportsPage />} />
+          </Route>
 
         </Route>
       </Route>

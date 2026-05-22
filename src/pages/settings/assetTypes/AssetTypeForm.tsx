@@ -18,6 +18,7 @@ import {
 import CategoryOutlinedIcon from '@mui/icons-material/CategoryOutlined';
 import TagIcon from '@mui/icons-material/Tag';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import GroupsOutlinedIcon from '@mui/icons-material/GroupsOutlined';
 import { UseFormInput } from '../../../components/forms';
 import { IAssetTypeForm } from './interface';
 
@@ -99,6 +100,26 @@ const AssetTypeForm = ({
                         value="shortCode"
                     />
                 </Stack>
+            </FormSection>
+
+            <FormSection title="Fulfilment Group" icon={<GroupsOutlinedIcon />}>
+                <UseFormInput
+                    label="Owner Group Email"
+                    register={register}
+                    control={control}
+                    formState={formState}
+                    value="ownerGroupEmail"
+                    required={false}
+                />
+                <Box sx={{ mt: 2, p: 2, borderRadius: 1.5, bgcolor: alpha('#08796C', 0.04), border: `1px solid ${alpha('#08796C', 0.1)}` }}>
+                    <Stack direction="row" spacing={1} alignItems="flex-start">
+                        <TagIcon sx={{ fontSize: 16, color: '#08796C', mt: 0.2, flexShrink: 0 }} />
+                        <Typography variant="caption" color="text.secondary" lineHeight={1.6}>
+                            Email group notified to fulfil a request after all approvals (e.g. <em>it-infra@…</em> for Computer,
+                            <em> admin@…</em> for Furniture). Leave empty if fulfilment routing is set per-workflow instead.
+                        </Typography>
+                    </Stack>
+                </Box>
             </FormSection>
 
             <FormSection title="Additional Information" icon={<InfoOutlinedIcon />}>

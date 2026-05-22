@@ -1,6 +1,6 @@
 /*
 13.9 Pride's Standard Copyright Notice:
-Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
+Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify,
 and distribute this software and its documentation for any purpose is prohibited unless authorized in writing by the
 Managing Director
 */
@@ -11,14 +11,18 @@ import { ROUTES } from "../routes"
 import Users from "../../../pages/users"
 import CreateUserPage from "../../../pages/users/CreateUserPage"
 import UpdateUserPage from "../../../pages/users/UpdateUserPage"
-import { permissionsMock } from "../../../mocks/settings"
+import { PERMISSIONS } from "../../permissions/constants"
 
 const UserRoutes = () => {
     return (
         <Route>
-            <Route element={<PrivateRoute permission={permissionsMock[9]} />}>
+            <Route element={<PrivateRoute permission={PERMISSIONS.READ_USER} />}>
                 <Route path={ROUTES.USERS} element={<Users />} />
+            </Route>
+            <Route element={<PrivateRoute permission={PERMISSIONS.CREATE_USER} />}>
                 <Route path={ROUTES.CREATE_USER} element={<CreateUserPage />} />
+            </Route>
+            <Route element={<PrivateRoute permission={PERMISSIONS.UPDATE_USER} />}>
                 <Route path={`${ROUTES.UPDATE_USER}/:id`} element={<UpdateUserPage />} />
             </Route>
         </Route>

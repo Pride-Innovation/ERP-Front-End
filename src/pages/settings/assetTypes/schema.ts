@@ -15,4 +15,9 @@ export const assetTypeSchema = yup.object({
         .nullable()
         .optional(),
     description: yup.string().nullable().optional(),
+    ownerGroupEmail: yup
+        .string()
+        .email('Owner group email must be a valid email')
+        .nullable()
+        .optional(),
 });

@@ -44,6 +44,9 @@ import Loading from '../../../components/loading';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../store';
 import { useDebounce } from '../../../hooks/useDebounce';
+import { RequirePermission } from '../../../core/permissions';
+import { PERMISSIONS } from '../../../core/permissions/constants';
+import { PageHero } from '../../../components/layout';
 
 const PRIMARY = '#08796C';
 
@@ -322,52 +325,29 @@ const AssetTypes = () => {
                 </ModalComponent>
             )}
 
-            {/* Sub-page Header */}
-            <Box
-                sx={{
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    justifyContent: 'space-between',
-                    mb: 3,
-                    pb: 2.5,
-                    borderBottom: '1px solid #E2E8F0',
-                }}
-            >
-                <Stack direction="row" alignItems="center" spacing={1.5}>
-                    <Box
-                        sx={{
-                            width: 44, height: 44, borderRadius: '12px',
-                            background: 'linear-gradient(135deg, #08796C, #065E53)',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                        }}
-                    >
-                        <CategoryOutlinedIcon sx={{ color: '#fff', fontSize: 22 }} />
-                    </Box>
-                    <Box>
-                        <Typography variant="h6" sx={{ fontWeight: 700, color: '#1E293B', lineHeight: 1.3 }}>
-                            Asset Category Management
-                        </Typography>
-                        <Typography variant="body2" sx={{ color: '#64748B' }}>
-                            Define and manage asset categories — each category groups related commodities and assets
-                        </Typography>
-                    </Box>
-                </Stack>
-                <Box
-                    sx={{
-                        bgcolor: alpha(PRIMARY, 0.08),
-                        color: PRIMARY,
-                        fontWeight: 700,
-                        borderRadius: '6px',
-                        px: 1.5,
-                        py: 0.5,
-                        fontSize: '0.75rem',
-                        flexShrink: 0,
-                        mt: 0.5,
-                    }}
-                >
-                    {totalElements} {totalElements === 1 ? 'category' : 'categories'}
-                </Box>
-            </Box>
+            <PageHero
+                title="Asset Category Management"
+                subtitle="Define and manage asset categories — each category groups related commodities and assets"
+                icon={<CategoryOutlinedIcon />}
+                stat={{ value: totalElements ?? 0, label: 'records' }}
+                actions={
+                    <RequirePermission permission={PERMISSIONS.CREATE_SETTING}>
+                        <Button
+                            onClick={createAssetType}
+                            startIcon={<AddIcon />}
+                            variant="contained"
+                            sx={{
+                                height: 36, px: 2.5, borderRadius: '8px', textTransform: 'none',
+                                fontWeight: 600, bgcolor: PRIMARY, flexShrink: 0,
+                                '&:hover': { bgcolor: '#065E53' },
+                                boxShadow: `0 2px 8px ${alpha(PRIMARY, 0.3)}`,
+                            }}
+                        >
+                            Add Category
+                        </Button>
+                    </RequirePermission>
+                }
+            />
 
             {/* Filter Bar */}
             <Stack
@@ -411,19 +391,6 @@ const AssetTypes = () => {
                         />
                     )}
                 </Stack>
-                <Button
-                    onClick={createAssetType}
-                    startIcon={<AddIcon />}
-                    variant="contained"
-                    sx={{
-                        height: 36, px: 2.5, borderRadius: '8px', textTransform: 'none',
-                        fontWeight: 600, bgcolor: PRIMARY, flexShrink: 0,
-                        '&:hover': { bgcolor: '#065E53' },
-                        boxShadow: `0 2px 8px ${alpha(PRIMARY, 0.3)}`,
-                    }}
-                >
-                    Add Category
-                </Button>
             </Stack>
 
             {/* Category Grid */}
@@ -484,14 +451,16 @@ const AssetTypes = () => {
                                     Clear Search
                                 </Button>
                             ) : (
-                                <Button
-                                    onClick={createAssetType}
-                                    variant="contained"
-                                    startIcon={<AddIcon />}
-                                    sx={{ textTransform: 'none', borderRadius: 1.5, bgcolor: PRIMARY, '&:hover': { bgcolor: '#065E53' } }}
-                                >
-                                    Add First Category
-                                </Button>
+                                <RequirePermission permission={PERMISSIONS.CREATE_SETTING}>
+                                    <Button
+                                        onClick={createAssetType}
+                                        variant="contained"
+                                        startIcon={<AddIcon />}
+                                        sx={{ textTransform: 'none', borderRadius: 1.5, bgcolor: PRIMARY, '&:hover': { bgcolor: '#065E53' } }}
+                                    >
+                                        Add First Category
+                                    </Button>
+                                </RequirePermission>
                             )}
                         </Paper>
                     </Fade>

@@ -1,6 +1,6 @@
 /*
 13.9 Pride's Standard Copyright Notice:
-Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
+Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify,
 and distribute this software and its documentation for any purpose is prohibited unless authorized in writing by the
 Managing Director
 */
@@ -11,15 +11,27 @@ import CssBaseline from '@mui/material/CssBaseline';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import { Outlet } from 'react-router';
-import { CSSObject, Divider, IconButton, styled, Theme } from '@mui/material';
+import {
+    CSSObject,
+    IconButton,
+    styled,
+    Theme,
+    Tooltip,
+} from '@mui/material';
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar';
 import MuiDrawer from '@mui/material/Drawer';
 import MenuIcon from '@mui/icons-material/Menu';
-import Logo from "../../statics/images/NavLogo-removebg-preview.png";
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import Logo from '../../statics/images/NavLogo-removebg-preview.png';
+import { brand, neutral, border, surface } from '../../utils/tokens';
 import SideBar from './SideBar';
 import NavBar from './NavBar';
 
-const drawerWidth = 240;
+const drawerWidth = 248;
+const collapsedWidth = 64;
+
+const SIDEBAR_PREF_KEY = 'sidebar:open';
 
 const openedMixin = (theme: Theme): CSSObject => ({
     width: drawerWidth,
@@ -36,10 +48,7 @@ const closedMixin = (theme: Theme): CSSObject => ({
         duration: theme.transitions.duration.leavingScreen,
     }),
     overflowX: 'hidden',
-    width: `calc(${theme.spacing(7)} + 10px)`,
-    [theme.breakpoints.up('sm')]: {
-        width: `calc(${theme.spacing(8)} + 10px)`,
-    },
+    width: collapsedWidth,
 });
 
 const DrawerHeader = styled('div')(({ theme }) => ({
@@ -70,6 +79,10 @@ const AppBar = styled(MuiAppBar, {
             duration: theme.transitions.duration.enteringScreen,
         }),
     }),
+    ...(!open && {
+        marginLeft: collapsedWidth,
+        width: `calc(100% - ${collapsedWidth}px)`,
+    }),
 }));
 
 const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' })(
@@ -94,12 +107,18 @@ interface Props { window?: () => Window; }
 
 export default function ApplicationDrawer({ window }: Props) {
     const [mobileOpen, setMobileOpen] = React.useState(false);
-    const [drawerOpen, setDrawerOpen] = React.useState(false);
+    const [drawerOpen, setDrawerOpen] = React.useState<boolean>(() => {
+        // Default to OPEN unless the user previously collapsed it.
+        const stored = globalThis.localStorage?.getItem(SIDEBAR_PREF_KEY);
+        return stored === null || stored === undefined ? true : stored === 'true';
+    });
 
-    const handleDrawerToggle = () => { setMobileOpen(!mobileOpen) };
+    React.useEffect(() => {
+        globalThis.localStorage?.setItem(SIDEBAR_PREF_KEY, String(drawerOpen));
+    }, [drawerOpen]);
 
-    const handleDrawerOpen = () => { setDrawerOpen(true); };
-    const handleDrawerClose = () => { setDrawerOpen(false); };
+    const handleDrawerToggle = () => setMobileOpen((v) => !v);
+    const handleSidebarToggle = () => setDrawerOpen((v) => !v);
 
     const container = window !== undefined ? () => window().document.body : undefined;
 
@@ -110,49 +129,60 @@ export default function ApplicationDrawer({ window }: Props) {
                 position="fixed"
                 open={drawerOpen}
                 sx={{
-                    background: 'linear-gradient(135deg, #08796C 0%, #065E54 100%)',
-                    borderBottom: 'none',
-                    boxShadow: '0 2px 12px rgba(8, 121, 108, 0.25)',
+                    background: surface.card,
+                    borderBottom: `1px solid ${border.subtle}`,
+                    boxShadow: 'none',
                 }}
             >
                 <Toolbar sx={{ minHeight: { xs: 52, sm: 56 } }}>
                     <IconButton
-                        color="inherit"
                         aria-label="open drawer"
                         edge="start"
                         onClick={handleDrawerToggle}
                         sx={{
-                            mr: 2,
+                            mr: 1,
                             display: { sm: 'none' },
-                            bgcolor: 'rgba(255,255,255,0.1)',
-                            '&:hover': { bgcolor: 'rgba(255,255,255,0.2)' },
+                            color: neutral[700],
                         }}
                     >
                         <MenuIcon />
                     </IconButton>
+                    <Tooltip title={drawerOpen ? 'Collapse sidebar' : 'Expand sidebar'}>
+                        <IconButton
+                            aria-label="toggle sidebar"
+                            onClick={handleSidebarToggle}
+                            sx={{
+                                mr: 1,
+                                display: { xs: 'none', sm: 'inline-flex' },
+                                color: neutral[600],
+                                '&:hover': { color: brand[600], bgcolor: neutral[100] },
+                            }}
+                        >
+                            {drawerOpen ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+                        </IconButton>
+                    </Tooltip>
                     <Box
                         src={Logo}
                         sx={{
-                            height: '44px',
-                            width: "44px",
-                            mr: '14px',
+                            height: '32px',
+                            width: '32px',
+                            mr: 1.25,
                             display: { xs: 'none', md: 'flex' },
-                            borderRadius: "8px",
-                            boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                            borderRadius: '8px',
                         }}
-                        component='img'
+                        component="img"
                     />
                     <Typography
                         sx={{
                             display: { xs: 'none', md: 'block' },
-                            fontSize: '15px',
+                            fontSize: '14px',
                             fontWeight: 700,
-                            color: 'white',
-                            letterSpacing: 0.8,
+                            color: neutral[900],
+                            letterSpacing: 0.6,
                             textTransform: 'uppercase',
                         }}
                     >
-                        <span style={{ color: "#F0B429", fontWeight: 800 }}>ASSETS</span>
+                        <span style={{ color: brand[500], fontWeight: 800 }}>ASSETS</span>
                         {' '}MANAGEMENT
                     </Typography>
                     <NavBar />
@@ -169,48 +199,46 @@ export default function ApplicationDrawer({ window }: Props) {
                     '& .MuiDrawer-paper': {
                         boxSizing: 'border-box',
                         width: drawerWidth,
-                        background: 'linear-gradient(180deg, #08796C 0%, #065E54 100%)',
-                        color: 'white',
-                        borderRight: 'none',
-                        boxShadow: '4px 0 20px rgba(0,0,0,0.15)',
+                        background: surface.card,
+                        color: neutral[900],
+                        borderRight: `1px solid ${border.subtle}`,
                     },
                 }}
             >
-                <DrawerHeader sx={{ bgcolor: 'transparent', borderBottom: '1px solid rgba(255,255,255,0.1)' }} />
-                <Box p={1} sx={{ height: '100%', bgcolor: 'transparent' }}>
+                <DrawerHeader sx={{ borderBottom: `1px solid ${border.subtle}` }} />
+                <Box p={0.5} sx={{ height: '100%' }}>
                     <SideBar drawerOpen={true} />
                 </Box>
             </MuiDrawer>
             <Drawer
-                onMouseEnter={handleDrawerOpen}
-                onMouseLeave={handleDrawerClose}
                 variant="permanent"
                 open={drawerOpen}
                 sx={{
                     display: { xs: 'none', sm: 'block' },
                     '& .MuiDrawer-paper': {
                         border: 'none',
-                        background: 'linear-gradient(180deg, #08796C 0%, #065E54 100%)',
-                        color: 'white',
-                        boxShadow: '4px 0 16px rgba(0,0,0,0.1)',
+                        background: surface.card,
+                        borderRight: `1px solid ${border.subtle}`,
+                        color: neutral[900],
+                        boxShadow: 'none',
                     },
                 }}
             >
-                <DrawerHeader sx={{ bgcolor: 'transparent', borderBottom: '1px solid rgba(255,255,255,0.1)' }} />
-                <Box p={1} sx={{ height: '100%', bgcolor: 'transparent' }}>
+                <DrawerHeader sx={{ borderBottom: `1px solid ${border.subtle}` }} />
+                <Box p={0.5} sx={{ height: '100%' }}>
                     <SideBar drawerOpen={drawerOpen} />
                 </Box>
             </Drawer>
             <Box
                 component="main"
-                sx={() => ({
+                sx={{
                     flexGrow: 1,
-                    width: 0,          /* flex child — prevents overflowing its container */
+                    width: 0,
                     minHeight: '100vh',
-                    bgcolor: "#F1F5FB",
+                    bgcolor: surface.page,
                     overflowX: 'hidden',
                     overflowY: 'auto',
-                })}
+                }}
             >
                 <DrawerHeader />
                 <Box sx={{ px: { xs: 1.5, sm: 2, md: 2.5 }, py: { xs: 1.5, sm: 2 }, minHeight: 'calc(100vh - 56px)' }}>

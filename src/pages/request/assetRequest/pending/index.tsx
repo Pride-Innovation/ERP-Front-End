@@ -18,15 +18,13 @@ import AcknowledgeRequest from "../AcknowledgeRequest";
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
-import RoutesUtills from "../../../../core/routes/utills";
-import { IPermission } from "../../../settings/interface";
-import { permissionsMock } from "../../../../mocks/settings";
+import usePermissions from "../../../../core/permissions/usePermissions";
+import { PERMISSIONS } from "../../../../core/permissions/constants";
 
 const PendingRequest = () => {
     const { requests } = useSelector((state: RootState) => state.AssetsRequestsStore)
     const { requestTableData, setOptions, setRequestStatusIds } = useContext(RequestContext);
-    const [permissions, setPermissions] = useState<IPermission[]>([] as IPermission[]);
-    const { getCurrentUser } = RoutesUtills();
+    const { has } = usePermissions();
     const [selectedStatus, setSelectedStatus] = useState<string>('all');
     const [statusIds, setStatusIds] = useState<string>(`${3},${4}`); // Default to '1' for "Request Created"
 
@@ -71,15 +69,8 @@ const PendingRequest = () => {
      * This effect checks the permissions of the current user and sets the options for the request actions accordingly.
      */
     useEffect(() => {
-        if (!permissions || permissions.length === 0) return;
-
-        const hasIssueRequestPermission = permissions.some(
-            (perm) => perm.name === permissionsMock.find(p => p.name === "ISSUE_ITEMS")?.name
-        );
-
-        const hasAcknowledgeRequestPermission = permissions.some(
-            (perm) => perm.name === permissionsMock.find(p => p.name === "ACKNOWLEDGE_REQUEST")?.name
-        );
+        const hasIssueRequestPermission = has(PERMISSIONS.ISSUE_ITEMS);
+        const hasAcknowledgeRequestPermission = has(PERMISSIONS.ACKNOWLEDGE_REQUEST);
 
         const newOptions = [
             {
@@ -107,13 +98,7 @@ const PendingRequest = () => {
         }
 
         setOptions(newOptions);
-    }, [permissions]);
-
-
-    useEffect(() => {
-        if (getCurrentUser()?.title?.role?.permissions) {
-            setPermissions(getCurrentUser()?.title?.role?.permissions || []);
-        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     /**

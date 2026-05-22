@@ -31,6 +31,7 @@ import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import usePermissions from '../../core/permissions/usePermissions';
 
 const PRIMARY_COLOR = '#08796C';
 
@@ -54,12 +55,16 @@ const TableToolBar = ({
     columnFilters = [],
     onApplyFilters,
     tableIcon,
+    createPermission,
+    onExport,
 }: ITableToolBar) => {
     const { setFileName } = useContext(FileContext);
     useEffect(() => { setFileName(module) }, [module]);
+    const { has } = usePermissions();
+    const canCreate = !createPermission || has(createPermission);
 
     // ── Column filter panel state ─────────────────────────────────────────────
-    const [showFilterPanel, setShowFilterPanel] = useState(true);
+    const [showFilterPanel, setShowFilterPanel] = useState(false);
     const [filterValues, setFilterValues] = useState<Record<string, any>>({});
     const [appliedFilters, setAppliedFilters] = useState<Record<string, any>>({});
 
@@ -227,9 +232,9 @@ const TableToolBar = ({
                     )}
 
                     {importData && <FileUploadButton title={header.plural} module={module} />}
-                    {exportData && <CustomGridToolbarExport module={module} rows={rows} />}
+                    {exportData && <CustomGridToolbarExport module={module} rows={rows} onExport={onExport} />}
 
-                    {createAction && (
+                    {createAction && canCreate && (
                         <Button
                             onClick={() => onCreationHandler()}
                             variant="contained"
@@ -272,9 +277,14 @@ const TableToolBar = ({
                                     const colDef = columnFilters.find(c => c.key === key);
                                     if (!colDef) return null;
                                     const isRange = typeof val === 'object' && val !== null;
+                                    // For select filters, resolve the option's label so the chip never
+                                    // shows a raw ID for things like Title / Branch / Department / Role.
+                                    const displayVal = colDef.type === 'select'
+                                        ? (colDef.options ?? []).find(o => String(o.value) === String(val))?.label ?? String(val)
+                                        : String(val);
                                     const chipLabel = isRange
                                         ? `${colDef.label}: ${val.from || '…'} → ${val.to || '…'}`
-                                        : `${colDef.label}: ${val}`;
+                                        : `${colDef.label}: ${displayVal}`;
                                     return (
                                         <Chip
                                             key={key}
@@ -434,6 +444,7 @@ const TableToolBar = ({
 
                                 if (col.type === 'select') {
                                     const val = filterValues[col.key] ?? '';
+                                    const selectedLabel = (col.options ?? []).find(o => String(o.value) === String(val))?.label ?? '';
                                     return (
                                         <FormControl key={col.key} size="small" sx={{ minWidth: 160 }}>
                                             <Select
@@ -454,7 +465,7 @@ const TableToolBar = ({
                                                     fontWeight: val ? 600 : 400,
                                                 }}
                                                 renderValue={v => v
-                                                    ? <Typography component="span" sx={{ fontSize: '0.8rem', color: PRIMARY_COLOR, fontWeight: 600 }}>{v as string}</Typography>
+                                                    ? <Typography component="span" sx={{ fontSize: '0.8rem', color: PRIMARY_COLOR, fontWeight: 600 }}>{selectedLabel || String(v)}</Typography>
                                                     : <Typography component="span" sx={{ fontSize: '0.8rem', color: '#94A3B8' }}>{col.label}</Typography>
                                                 }
                                             >

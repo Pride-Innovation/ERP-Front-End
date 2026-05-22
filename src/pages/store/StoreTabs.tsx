@@ -1,16 +1,13 @@
 import { INavigation } from "../request/interface";
-import { IPermission } from "../settings/interface";
 import InventoryOutlinedIcon from '@mui/icons-material/InventoryOutlined';
 import LaptopChromebookOutlinedIcon from '@mui/icons-material/LaptopChromebookOutlined';
 import { Box, Stack, Tab, Tabs, Typography, alpha, useTheme } from "@mui/material";
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 import AdminPanelSettingsOutlinedIcon from '@mui/icons-material/AdminPanelSettingsOutlined';
-import RoutesUtills from "../../core/routes/utills";
 import { useState } from "react";
 
 const StoreTabs = () => {
     const theme = useTheme();
-    const { routePermission } = RoutesUtills();
     const [activeTab, setActiveTab] = useState(0);
     const navigations: Array<INavigation> = [
         {
@@ -18,21 +15,18 @@ const StoreTabs = () => {
             text: "Admin Store",
             path: "/requests/pending",
             icon: <AdminPanelSettingsOutlinedIcon sx={{ fontSize: 17 }} />,
-            permission: routePermission(12) as IPermission
         },
         {
             id: 3,
             text: "IT Store",
             path: "/requests/rejected",
             icon: <LaptopChromebookOutlinedIcon sx={{ fontSize: 17 }} />,
-            permission: routePermission(16) as IPermission
         },
         {
             id: 4,
             text: "Disposal Store",
             path: "/requests/issued",
             icon: <DeleteOutlinedIcon sx={{ fontSize: 17 }} />,
-            permission: routePermission(16) as IPermission
         }
     ];
 

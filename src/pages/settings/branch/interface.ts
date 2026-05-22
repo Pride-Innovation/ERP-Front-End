@@ -26,6 +26,8 @@ export interface IBranch {
     name: string
     email: string
     telephone?: string | null;
+    /** Flagged by the backend seeder; drives the Head-Office-only Department picker on the User form. */
+    isHeadOffice?: boolean;
     branchManager?: IUser | null;
     branchOperationsManager?: IUser | null;
     relationshipManager?: IUser | null;

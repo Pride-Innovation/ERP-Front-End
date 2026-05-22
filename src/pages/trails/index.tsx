@@ -25,7 +25,6 @@ import {
 } from '@mui/material';
 import HistoryOutlinedIcon from '@mui/icons-material/HistoryOutlined';
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
-import CalendarTodayOutlinedIcon from '@mui/icons-material/CalendarTodayOutlined';
 import ListAltOutlinedIcon from '@mui/icons-material/ListAltOutlined';
 import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined';
 import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined';
@@ -40,6 +39,7 @@ import { auditTrailsMock } from '../../mocks/trails';
 import { IAuditTrail } from './interface';
 import { SummaryCard } from '../reports/ReportSummaryCards';
 import ReportDataTable, { ReportColumn } from '../reports/ReportDataTable';
+import { PageHero } from '../../components/layout';
 
 const PRIMARY = '#08796C';
 
@@ -205,68 +205,30 @@ const AuditTrails = () => {
     };
 
     return (
-        <Box sx={{ minHeight: '100vh', bgcolor: '#F1F5FB', pb: 4 }}>
-
-            {/* ── Page Header ──────────────────────────────────────────── */}
-            <Box
-                sx={{
-                    background: `linear-gradient(135deg, ${PRIMARY} 0%, #065E53 60%, #044a42 100%)`,
-                    px: { xs: 2, md: 4 },
-                    pt: 4,
-                    pb: 3,
-                    position: 'relative',
-                    overflow: 'hidden',
+        <Box sx={{ minHeight: '100vh', pb: 4 }}>
+            <PageHero
+                title="Audit Trails"
+                subtitle="System activity log"
+                icon={<HistoryOutlinedIcon />}
+                stat={{
+                    value: auditTrailsMock.length.toLocaleString(),
+                    label: 'events',
+                    helper: todayLabel,
                 }}
-            >
-                <Box sx={{ position: 'absolute', top: -40, right: -40, width: 220, height: 220, borderRadius: '50%', bgcolor: alpha('#fff', 0.04), pointerEvents: 'none' }} />
-                <Box sx={{ position: 'absolute', bottom: -30, right: 160, width: 120, height: 120, borderRadius: '50%', bgcolor: alpha('#fff', 0.03), pointerEvents: 'none' }} />
+                actions={
+                    <Chip
+                        label="Live"
+                        size="small"
+                        sx={{
+                            bgcolor: '#22C55E', color: '#fff', fontWeight: 700, fontSize: '0.72rem',
+                            animation: 'pulse 2s infinite',
+                            '@keyframes pulse': { '0%, 100%': { opacity: 1 }, '50%': { opacity: 0.55 } },
+                        }}
+                    />
+                }
+            />
 
-                <Stack direction="row" alignItems="center" justifyContent="space-between" flexWrap="wrap" gap={2}>
-                    <Stack direction="row" alignItems="center" gap={2}>
-                        <Box sx={{
-                            width: 48, height: 48, borderRadius: 2,
-                            bgcolor: alpha('#fff', 0.15),
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            backdropFilter: 'blur(4px)',
-                        }}>
-                            <HistoryOutlinedIcon sx={{ color: '#fff', fontSize: 26 }} />
-                        </Box>
-                        <Box>
-                            <Typography variant="h5" sx={{ color: '#fff', fontWeight: 700, lineHeight: 1.2 }}>
-                                Audit Trails
-                            </Typography>
-                            <Typography variant="body2" sx={{ color: alpha('#fff', 0.72), mt: 0.3 }}>
-                                Full system activity log — track every action, change and access event
-                            </Typography>
-                        </Box>
-                    </Stack>
-
-                    <Stack direction="row" gap={1} alignItems="center">
-                        <Chip
-                            label="Live"
-                            size="small"
-                            sx={{
-                                bgcolor: '#22C55E', color: '#fff', fontWeight: 700, fontSize: '0.72rem',
-                                animation: 'pulse 2s infinite',
-                                '@keyframes pulse': { '0%, 100%': { opacity: 1 }, '50%': { opacity: 0.55 } },
-                            }}
-                        />
-                        <Chip
-                            icon={<CalendarTodayOutlinedIcon sx={{ fontSize: '13px !important' }} />}
-                            label={todayLabel}
-                            size="small"
-                            sx={{
-                                bgcolor: alpha('#fff', 0.14), color: '#fff',
-                                border: `1px solid ${alpha('#fff', 0.2)}`,
-                                fontSize: '0.72rem', fontWeight: 600, backdropFilter: 'blur(4px)',
-                                '& .MuiChip-icon': { color: alpha('#fff', 0.8) },
-                            }}
-                        />
-                    </Stack>
-                </Stack>
-            </Box>
-
-            <Box sx={{ px: { xs: 1, md: 3 }, pt: 3 }}>
+            <Box>
 
                 {/* ── KPI Cards ─────────────────────────────────────────── */}
                 <Grid container spacing={2} sx={{ mb: 3 }}>

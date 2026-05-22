@@ -43,6 +43,7 @@ import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import AssignmentIndOutlinedIcon from '@mui/icons-material/AssignmentIndOutlined';
 import BuildOutlinedIcon from '@mui/icons-material/BuildOutlined';
 import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
+import { PERMISSIONS } from '../../../core/permissions/constants';
 
 const OfficeEquipment = () => {
     const [loading, setLoading] = useState<boolean>(false);
@@ -265,6 +266,7 @@ const OfficeEquipment = () => {
                     count={officeEquipmentCount}
                     exportData
                     createAction
+                    createPermission={PERMISSIONS.CREATE_ASSET}
                     importData
                     header={header}
                     module={module}

@@ -146,6 +146,8 @@ export interface IBulkUserData {
     "Staff Number": string;
     "Email": string;
     "Title": string;
+    "Role"?: string;
     "Duty Station": string;
+    "Department"?: string;
     "Gender": string;
 }

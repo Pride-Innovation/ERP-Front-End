@@ -105,6 +105,8 @@ const TableComponent = ({
     columnFilters = [],
     onApplyFilters,
     tableIcon,
+    createPermission,
+    onExport,
 }: ITableComponent) => {
     const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
     const [currentOptions, setCurrentOptions] = useState<any[]>([]);
@@ -396,6 +398,8 @@ const TableComponent = ({
                 columnFilters={columnFilters}
                 onApplyFilters={handleFiltersApplied}
                 tableIcon={tableIcon}
+                createPermission={createPermission}
+                onExport={onExport}
             />
 
             {/* ── Table ───────────────────────────────────────────────── */}
@@ -457,7 +461,11 @@ const TableComponent = ({
                         {!loading && pagedRows.length === 0 && (
                             <TableRow>
                                 <TableCell colSpan={columnHeaders.length} sx={{ border: 'none', p: 0 }}>
-                                    <NoContent item={header.singular} items={header.plural} />
+                                    <NoContent
+                                        item={header.singular}
+                                        items={header.plural}
+                                        filtered={Object.keys(activeFilters).length > 0}
+                                    />
                                 </TableCell>
                             </TableRow>
                         )}

@@ -12,6 +12,20 @@ import { IFetchDataRequest } from "../../../core/apis/interface";
 
 export type FieldConfigState = 'required' | 'optional' | 'hidden';
 
+export type CustomAttributeDataType = 'TEXT' | 'NUMBER' | 'DATE' | 'BOOLEAN' | 'SELECT';
+
+/** A per-category configurable attribute (e.g. "Warranty Period" for IT Equipment only). */
+export interface ICustomAttribute {
+    id?: string | number;
+    key: string;
+    label: string;
+    dataType: CustomAttributeDataType;
+    options?: string[] | null;
+    required: boolean;
+    order: number;
+    helperText?: string | null;
+}
+
 /** Maps every configurable form field to its visibility/requirement state for this asset type. */
 export interface IAssetFieldConfig {
     // Identification
@@ -56,13 +70,17 @@ export interface IAssetType {
     name: string;
     description?: string | null;
     shortCode?: string | null;
+    /** Email group notified when a request for this category reaches the fulfilment step (e.g. IT Infrastructure for Computer, Admin for Furniture). */
+    ownerGroupEmail?: string | null;
     fieldConfig?: IAssetFieldConfig | null;
+    customAttributes?: ICustomAttribute[] | null;
 }
 
 export interface IAssetTypeFormValues {
     name: string;
     description?: string | null;
     shortCode?: string | null;
+    ownerGroupEmail?: string | null;
 }
 
 export interface IAssetTypeForm {

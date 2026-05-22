@@ -21,9 +21,19 @@ export interface IColumnFilter {
     label: string;
     type: FilterType;
     /** Required when type === 'select' */
-    options?: Array<{ value: string; label: string }>;
+    options?: Array<{ value: string | number; label: string }>;
     placeholder?: string;
 }
+
+/** Supported export formats. */
+export type ExportFormat = 'pdf' | 'excel';
+
+/**
+ * Optional custom export handler. When provided, the export menu calls this
+ * instead of serializing the currently-visible `rows` prop. Pages use this to
+ * fetch the full filtered set from the backend before exporting.
+ */
+export type OnExportHandler = (format: ExportFormat) => void | Promise<void>;
 export interface ITableHeader {
     label: string;
     status?: boolean;
@@ -70,6 +80,13 @@ export interface ITableComponent {
     onApplyFilters?: (filters: Record<string, any>) => void;
     /** Optional icon shown in the toolbar header. Defaults to FilterAltOutlinedIcon. */
     tableIcon?: React.ReactNode;
+    /** Permission name required to render the create button. Hides the button when missing. */
+    createPermission?: string;
+    /**
+     * When provided, the export menu invokes this instead of serializing the
+     * visible rows. Lets pages fetch the full filtered set before exporting.
+     */
+    onExport?: OnExportHandler;
 }
 
 export interface ITableToolBar {
@@ -93,6 +110,8 @@ export interface ITableToolBar {
     columnFilters?: IColumnFilter[];
     onApplyFilters?: (filters: Record<string, any>) => void;
     tableIcon?: React.ReactNode;
+    createPermission?: string;
+    onExport?: OnExportHandler;
 }
 
 export interface CustomToolbarWrapperProps {
@@ -113,6 +132,8 @@ export interface CustomToolbarWrapperProps {
     columnFilters?: IColumnFilter[];
     onApplyFilters?: (filters: Record<string, any>) => void;
     tableIcon?: React.ReactNode;
+    createPermission?: string;
+    onExport?: OnExportHandler;
 }
 
 export interface ITableFilter {

@@ -48,6 +48,14 @@ const assetTypeSlice = createSlice({
                     : at
             );
         },
+        updateAssetTypeCustomAttributes: (state, action) => {
+            // action.payload = { id, customAttributes }
+            state.assetTypes = state.assetTypes.map(at =>
+                at.id === action.payload?.id
+                    ? { ...at, customAttributes: action.payload.customAttributes }
+                    : at
+            );
+        },
         removeAssetType: (state, action) => {
             state.assetTypes = state.assetTypes.filter(at => at.id !== action.payload?.id);
         },
@@ -61,6 +69,7 @@ export const {
     addAssetType,
     updateAssetType,
     updateAssetTypeFieldConfig,
+    updateAssetTypeCustomAttributes,
     removeAssetType,
 } = actions;
 export default reducer;

@@ -30,6 +30,7 @@ import AssignmentIndOutlinedIcon from '@mui/icons-material/AssignmentIndOutlined
 import BuildOutlinedIcon from '@mui/icons-material/BuildOutlined';
 import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
 import { AssetContext } from "../../../context/asset";
+import { PERMISSIONS } from "../../../core/permissions/constants";
 
 const GeneralAssets = () => {
     const { typeId } = useParams<{ typeId: string }>();
@@ -210,6 +211,7 @@ const GeneralAssets = () => {
                     count={assetCount}
                     exportData
                     createAction
+                    createPermission={PERMISSIONS.CREATE_ASSET}
                     importData
                     header={header}
                     module={module}

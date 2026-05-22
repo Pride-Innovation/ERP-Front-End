@@ -6,109 +6,112 @@ import {
 import {
     DataGrid,
 } from '@mui/x-data-grid';
+import { brand, neutral, border as borderToken, surface } from '../../utils/tokens';
 
-const PRIMARY_COLOR = '#08796C';
-const HEADER_TO = '#065E53';
-const BORDER_COLOR = '#EEF2F7';
-const HOVER_BG = '#F0FDF9';
-const ROW_EVEN = '#FAFBFC';
-const TEXT_PRIMARY = '#0F172A';
-const TEXT_SECONDARY = '#64748B';
+const HEADER_BG = surface.muted;
+const HEADER_TEXT = neutral[700];
+const HEADER_BORDER = borderToken.subtle;
+const ROW_BORDER = neutral[150];
+const HOVER_BG = alpha(brand[500], 0.05);
+const TEXT_PRIMARY = neutral[900];
+const TEXT_SECONDARY = neutral[500];
 
 export const DataGridStyled = styled(DataGrid)(() => ({
     border: 'none',
     borderRadius: 0,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: surface.card,
     fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
 
-    // v7: override the CSS variable that DataGrid uses to compute header background.
-    // Even if the gradient override below ever fails, this solid colour guarantees
-    // white text is readable.
-    '--DataGrid-containerBackground': PRIMARY_COLOR,
+    // v7 background CSS variable for the header row.
+    '--DataGrid-containerBackground': HEADER_BG,
 
-    // ── Column Headers ────────────────────────────────────────────────────────
-    // v7 DOM: .MuiDataGrid-columnHeaders > .MuiDataGrid-container--top > [role=row]
-    // The background is NOT on .MuiDataGrid-columnHeaders — it lives two levels
-    // deeper on [role=row] via: background: var(--DataGrid-containerBackground)
-    // We target that exact element with a matching specificity + !important.
+    // ── Column Headers (sticky) ───────────────────────────────────────────────
     '& .MuiDataGrid-columnHeaders': {
-        borderBottom: `2px solid ${alpha('#fff', 0.15)}`,
-        minHeight: '50px !important',
-        maxHeight: '50px !important',
+        borderBottom: `1px solid ${HEADER_BORDER}`,
+        minHeight: '44px !important',
+        maxHeight: '44px !important',
+        position: 'sticky',
+        top: 0,
+        zIndex: 2,
     },
 
     '& .MuiDataGrid-container--top [role=row]': {
-        background: `linear-gradient(120deg, ${PRIMARY_COLOR} 0%, ${HEADER_TO} 100%) !important`,
-        backgroundImage: `linear-gradient(120deg, ${PRIMARY_COLOR} 0%, ${HEADER_TO} 100%) !important`,
+        background: `${HEADER_BG} !important`,
+        backgroundImage: 'none !important',
     },
 
     '& .MuiDataGrid-columnHeader': {
         backgroundColor: 'transparent !important',
-        padding: '0 20px',
+        padding: '0 18px',
         '&:focus, &:focus-within': { outline: 'none' },
-        '&:hover': { backgroundColor: 'rgba(255,255,255,0.08) !important' },
+        '&:hover': {
+            backgroundColor: alpha(brand[500], 0.06),
+            // Reveal sort/menu icons on hover.
+            '& .MuiDataGrid-iconButtonContainer, & .MuiDataGrid-menuIconButton': {
+                opacity: 1,
+            },
+        },
     },
 
     // v7 trailing filler / scrollbar-gap header element
     '& .MuiDataGrid-scrollbarFiller': {
-        backgroundColor: `${HEADER_TO} !important`,
+        backgroundColor: `${HEADER_BG} !important`,
+        borderBottom: `1px solid ${HEADER_BORDER}`,
     },
 
     '& .MuiDataGrid-columnHeaderTitle': {
         textTransform: 'uppercase',
-        color: 'rgba(255,255,255,0.9)',
+        color: HEADER_TEXT,
         fontWeight: 700,
-        fontSize: '0.68rem',
+        fontSize: '0.65rem',
         letterSpacing: '0.07em',
         lineHeight: 1.4,
     },
 
-    '& .MuiDataGrid-columnHeaders .MuiSvgIcon-root': {
-        color: 'rgba(255,255,255,0.75) !important',
-        fontSize: '1.1rem',
+    // Header icons: hidden by default, revealed on header-cell hover.
+    '& .MuiDataGrid-iconButtonContainer, & .MuiDataGrid-menuIconButton': {
+        opacity: 0,
+        transition: 'opacity 0.15s ease',
     },
-    '& .MuiDataGrid-menuIconButton .MuiSvgIcon-root': {
-        color: 'rgba(255,255,255,0.75) !important',
+    '& .MuiDataGrid-columnHeader--sorted .MuiDataGrid-iconButtonContainer, & .MuiDataGrid-columnHeader--filtered .MuiDataGrid-iconButtonContainer': {
+        opacity: 1,
+    },
+    '& .MuiDataGrid-columnHeaders .MuiSvgIcon-root': {
+        color: `${neutral[500]} !important`,
+        fontSize: '0.95rem',
     },
     '& .MuiDataGrid-sortIcon': {
-        color: 'rgba(255,255,255,0.75) !important',
+        color: `${neutral[500]} !important`,
         opacity: '1 !important',
-        fontSize: '1rem',
-    },
-    '& .MuiDataGrid-filterIcon': {
-        color: 'rgba(255,255,255,0.75) !important',
-    },
-    '& .MuiDataGrid-columnHeaderMenuIcon': {
-        color: 'rgba(255,255,255,0.7) !important',
+        fontSize: '0.95rem',
     },
     '& .MuiDataGrid-iconButtonContainer': {
         visibility: 'visible !important',
     },
     '& .MuiDataGrid-columnSeparator': {
-        color: 'rgba(255,255,255,0.15)',
-        '&:hover': { color: 'rgba(255,255,255,0.4)' },
+        color: 'transparent',
+        '&:hover': { color: neutral[300] },
     },
 
-    // ── Rows ──────────────────────────────────────────────────────────────────
+    // ── Rows (compact, no zebra) ──────────────────────────────────────────────
     '& .MuiDataGrid-row': {
-        minHeight: '60px !important',
+        minHeight: '44px !important',
         maxHeight: 'none !important',
-        borderBottom: `1px solid ${BORDER_COLOR}`,
+        backgroundColor: surface.card,
+        borderBottom: `1px solid ${ROW_BORDER}`,
         transition: 'background-color 0.12s ease, box-shadow 0.12s ease',
         position: 'relative',
 
-        '&:nth-of-type(even)': { backgroundColor: ROW_EVEN },
-
         '&:hover': {
             backgroundColor: HOVER_BG,
-            boxShadow: `inset 3px 0 0 ${PRIMARY_COLOR}`,
+            boxShadow: `inset 3px 0 0 ${brand[500]}`,
             '& .MuiDataGrid-cell': { color: TEXT_PRIMARY },
         },
 
         '&.Mui-selected': {
-            backgroundColor: alpha(PRIMARY_COLOR, 0.06),
-            boxShadow: `inset 3px 0 0 ${PRIMARY_COLOR}`,
-            '&:hover': { backgroundColor: alpha(PRIMARY_COLOR, 0.1) },
+            backgroundColor: alpha(brand[500], 0.08),
+            boxShadow: `inset 3px 0 0 ${brand[500]}`,
+            '&:hover': { backgroundColor: alpha(brand[500], 0.12) },
         },
 
         '&:last-child': { borderBottom: 'none' },
@@ -116,26 +119,30 @@ export const DataGridStyled = styled(DataGrid)(() => ({
 
     // ── Cells ─────────────────────────────────────────────────────────────────
     '& .MuiDataGrid-cell': {
-        fontSize: '0.875rem',
+        fontSize: '0.825rem',
         color: TEXT_PRIMARY,
-        lineHeight: 1.55,
-        padding: '8px 20px',
+        lineHeight: 1.5,
+        padding: '6px 18px',
         display: 'flex',
         alignItems: 'center',
         borderBottom: 'none',
-        minHeight: '60px !important',
+        minHeight: '44px !important',
         maxHeight: 'none !important',
-        '&:focus, &:focus-within': { outline: 'none' },
+        '&:focus, &:focus-within': {
+            outline: `2px solid ${alpha(brand[500], 0.5)}`,
+            outlineOffset: -2,
+            borderRadius: 2,
+        },
     },
 
     // ── Virtual Scroller ──────────────────────────────────────────────────────
-    '& .MuiDataGrid-virtualScroller': { backgroundColor: '#FFFFFF' },
+    '& .MuiDataGrid-virtualScroller': { backgroundColor: surface.card },
 
     // ── Footer ────────────────────────────────────────────────────────────────
     '& .MuiDataGrid-footerContainer': {
-        borderTop: `1px solid ${BORDER_COLOR}`,
-        backgroundColor: ROW_EVEN,
-        minHeight: '50px',
+        borderTop: `1px solid ${HEADER_BORDER}`,
+        backgroundColor: surface.muted,
+        minHeight: '44px',
         padding: '4px 12px',
     },
 
@@ -152,14 +159,14 @@ export const DataGridStyled = styled(DataGrid)(() => ({
         fontSize: '0.8125rem',
         padding: '4px 8px',
         borderRadius: '6px',
-        '&:focus': { backgroundColor: alpha(PRIMARY_COLOR, 0.08) },
+        '&:focus': { backgroundColor: alpha(brand[500], 0.08) },
     },
     '& .MuiTablePagination-actions button': {
         borderRadius: '6px',
         transition: 'all 0.15s',
         '&:hover': {
-            backgroundColor: alpha(PRIMARY_COLOR, 0.08),
-            color: PRIMARY_COLOR,
+            backgroundColor: alpha(brand[500], 0.08),
+            color: brand[500],
         },
         '&.Mui-disabled': { opacity: 0.35 },
     },
@@ -173,13 +180,13 @@ export const DataGridStyled = styled(DataGrid)(() => ({
         backgroundColor: 'transparent',
     },
     '& .MuiDataGrid-virtualScroller::-webkit-scrollbar-thumb': {
-        backgroundColor: alpha(PRIMARY_COLOR, 0.22),
+        backgroundColor: alpha(brand[500], 0.22),
         borderRadius: '3px',
-        '&:hover': { backgroundColor: alpha(PRIMARY_COLOR, 0.42) },
+        '&:hover': { backgroundColor: alpha(brand[500], 0.42) },
     },
 
     // ── Overlays ──────────────────────────────────────────────────────────────
-    '& .MuiDataGrid-overlay': { backgroundColor: alpha('#FFFFFF', 0.85) },
+    '& .MuiDataGrid-overlay': { backgroundColor: alpha(surface.card, 0.85) },
     '& .MuiDataGrid-overlayWrapper': { minHeight: '220px' },
 
     // ── Loading skeleton ──────────────────────────────────────────────────────
@@ -194,44 +201,45 @@ export const StyledBox = styled(Box)({
     gap: '10px',
     width: '100%',
     padding: '4px 0',
-    minHeight: '44px',
+    minHeight: '40px',
     overflow: 'hidden',
 });
 
 export const TableContainer = styled(Box)(({ theme }) => ({
-    borderRadius: 14,
-    boxShadow: `0 1px 3px 0 rgba(0,0,0,0.08), 0 1px 2px -1px rgba(0,0,0,0.06)`,
-    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    boxShadow: 'none',
+    backgroundColor: surface.card,
     overflow: 'hidden',
-    border: `1px solid ${BORDER_COLOR}`,
+    border: `1px solid ${borderToken.subtle}`,
     margin: theme.spacing(0, 0, 2),
     position: 'relative',
-    transition: 'box-shadow 0.25s ease',
+    transition: 'border-color 0.25s ease, box-shadow 0.25s ease',
     '&:hover': {
-        boxShadow: `0 4px 12px -2px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.06)`,
+        borderColor: borderToken.default,
+        boxShadow: '0 1px 3px 0 rgba(0,0,0,0.04), 0 1px 2px -1px rgba(0,0,0,0.03)',
     },
 }));
 
 export const MultiLineCell = styled(Box)({
     display: 'flex',
     flexDirection: 'column',
-    gap: '2px',
+    gap: '1px',
     width: '100%',
     overflow: 'hidden',
 });
 
 export const CellPrimaryText = styled('div')({
-    fontSize: '0.875rem',
+    fontSize: '0.825rem',
     fontWeight: 600,
     color: TEXT_PRIMARY,
-    lineHeight: 1.4,
+    lineHeight: 1.35,
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
 });
 
 export const CellSecondaryText = styled('div')({
-    fontSize: '0.73rem',
+    fontSize: '0.72rem',
     fontWeight: 400,
     color: TEXT_SECONDARY,
     lineHeight: 1.3,

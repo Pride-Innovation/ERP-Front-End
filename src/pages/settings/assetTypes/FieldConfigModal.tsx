@@ -17,6 +17,8 @@ import {
     Divider,
     Chip,
     Paper,
+    Tab,
+    Tabs,
 } from '@mui/material';
 import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
 import StarOutlineIcon from '@mui/icons-material/StarOutline';
@@ -25,9 +27,16 @@ import { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import { AppDispatch } from '../../../store';
-import { IAssetFieldConfig, IAssetType, FieldConfigState } from './interface';
-import { updateAssetTypeFieldConfigService } from './service';
-import { updateAssetTypeFieldConfig } from './slice';
+import { IAssetFieldConfig, IAssetType, FieldConfigState, ICustomAttribute } from './interface';
+import {
+    updateAssetTypeCustomAttributesService,
+    updateAssetTypeFieldConfigService,
+} from './service';
+import {
+    updateAssetTypeCustomAttributes,
+    updateAssetTypeFieldConfig,
+} from './slice';
+import CustomAttributesEditor from './CustomAttributesEditor';
 
 // ─── Field catalogue ──────────────────────────────────────────────────────────
 
@@ -139,27 +148,63 @@ const FieldConfigModal = ({ assetType, handleClose }: FieldConfigModalProps) => 
     };
 
     const [config, setConfig] = useState<IAssetFieldConfig>(buildInitialConfig);
+    const [customAttributes, setCustomAttributes] = useState<ICustomAttribute[]>(
+        () => (assetType.customAttributes ?? []).map((attr, i) => ({ ...attr, order: attr.order ?? i + 1 }))
+    );
     const [saving, setSaving] = useState(false);
+    const [activeTab, setActiveTab] = useState<'standard' | 'custom'>('standard');
 
     const handleChange = (key: keyof IAssetFieldConfig, value: FieldConfigState | null) => {
         if (!value) return; // MUI ToggleButtonGroup passes null when deselecting
         setConfig(prev => ({ ...prev, [key]: value }));
     };
 
+    const validateCustomAttributes = (): string | null => {
+        const seenKeys = new Set<string>();
+        for (let i = 0; i < customAttributes.length; i++) {
+            const attr = customAttributes[i];
+            if (!attr.label.trim()) return `Attribute ${i + 1}: label is required.`;
+            if (!attr.key.trim()) return `Attribute ${i + 1}: key is required.`;
+            if (seenKeys.has(attr.key)) return `Attribute ${i + 1}: key "${attr.key}" is duplicated.`;
+            seenKeys.add(attr.key);
+            if (attr.dataType === 'SELECT' && (attr.options ?? []).length === 0) {
+                return `Attribute "${attr.label}": SELECT type needs at least one option.`;
+            }
+        }
+        return null;
+    };
+
     const handleSave = async () => {
+        const validationError = validateCustomAttributes();
+        if (validationError) {
+            toast.error(validationError, { position: 'bottom-right' });
+            setActiveTab('custom');
+            return;
+        }
+
         setSaving(true);
         try {
-            const response = await updateAssetTypeFieldConfigService(assetType.id as string | number, config) as any;
-            if (response.status === 200 || response.status === 204) {
+            const orderedAttrs = customAttributes.map((attr, i) => ({ ...attr, order: i + 1 }));
+
+            const [fieldConfigResponse, customAttrsResponse] = await Promise.all([
+                updateAssetTypeFieldConfigService(assetType.id as string | number, config) as Promise<any>,
+                updateAssetTypeCustomAttributesService(assetType.id as string | number, orderedAttrs) as Promise<any>,
+            ]);
+
+            const fcOk = fieldConfigResponse.status === 200 || fieldConfigResponse.status === 204;
+            const caOk = customAttrsResponse.status === 200 || customAttrsResponse.status === 204;
+
+            if (fcOk && caOk) {
                 dispatch(updateAssetTypeFieldConfig({ id: assetType.id, fieldConfig: config }));
-                toast.success(`Field configuration saved for "${assetType.name}"`, { position: 'bottom-right' });
+                dispatch(updateAssetTypeCustomAttributes({ id: assetType.id, customAttributes: orderedAttrs }));
+                toast.success(`Configuration saved for "${assetType.name}"`, { position: 'bottom-right' });
                 handleClose();
             } else {
-                toast.error('Failed to save field configuration.', { position: 'bottom-right' });
+                toast.error('Failed to save configuration.', { position: 'bottom-right' });
             }
         } catch (error: any) {
             const message = error?.response?.data?.message || error?.response?.data?.detail;
-            toast.error(message || 'Failed to save field configuration.', { position: 'bottom-right' });
+            toast.error(message || 'Failed to save configuration.', { position: 'bottom-right' });
         } finally {
             setSaving(false);
         }
@@ -170,6 +215,38 @@ const FieldConfigModal = ({ assetType, handleClose }: FieldConfigModalProps) => 
 
     return (
         <Box>
+            <Tabs
+                value={activeTab}
+                onChange={(_, val) => setActiveTab(val)}
+                sx={{
+                    mb: 3,
+                    borderBottom: `1px solid ${alpha(PRIMARY_COLOR, 0.15)}`,
+                    '& .MuiTab-root': { textTransform: 'none', fontWeight: 600, minHeight: 40 },
+                    '& .Mui-selected': { color: `${PRIMARY_COLOR} !important` },
+                    '& .MuiTabs-indicator': { bgcolor: PRIMARY_COLOR },
+                }}
+            >
+                <Tab
+                    value="standard"
+                    label={`Standard Fields (${
+                        FIELD_GROUPS.flatMap(g => g.fields).length
+                    })`}
+                />
+                <Tab
+                    value="custom"
+                    label={`Custom Attributes (${customAttributes.length})`}
+                />
+            </Tabs>
+
+            {activeTab === 'custom' && (
+                <CustomAttributesEditor
+                    attributes={customAttributes}
+                    onChange={setCustomAttributes}
+                />
+            )}
+
+            {activeTab === 'standard' && (
+            <>
             {/* Summary chips */}
             <Stack direction="row" spacing={1.5} sx={{ mb: 3 }}>
                 {STATE_OPTIONS.map(opt => (
@@ -311,6 +388,8 @@ const FieldConfigModal = ({ assetType, handleClose }: FieldConfigModalProps) => 
                     </Box>
                 ))}
             </Box>
+            </>
+            )}
 
             {/* Actions */}
             <Divider sx={{ mt: 1, mb: 2 }} />

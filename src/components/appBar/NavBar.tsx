@@ -29,6 +29,7 @@ import RoutesUtills from '../../core/routes/utills';
 import FilterByTagName from './FilterByTagName';
 import { useNotifications } from '../../context/notification/NotificationContext';
 import NotificationPanel from './NotificationPanel';
+import { brand, neutral } from '../../utils/tokens';
 
 const NavBar = () => {
     const { getCurrentUser } = RoutesUtills();
@@ -89,17 +90,17 @@ const NavBar = () => {
                                     width: 36,
                                     height: 36,
                                     borderRadius: '50%',
-                                    bgcolor: 'rgba(255,255,255,0.12)',
+                                    bgcolor: neutral[100],
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                     cursor: 'pointer',
-                                    border: '1px solid rgba(255,255,255,0.2)',
+                                    border: `1px solid ${neutral[200]}`,
                                     transition: 'all 0.2s ease',
-                                    '&:hover': { bgcolor: 'rgba(255,255,255,0.2)' },
+                                    '&:hover': { bgcolor: neutral[150], borderColor: neutral[300] },
                                 }}
                             >
-                                <NotificationsNoneIcon sx={{ color: 'rgba(255,255,255,0.9)', fontSize: '1.2rem' }} />
+                                <NotificationsNoneIcon sx={{ color: neutral[700], fontSize: '1.2rem' }} />
                             </Box>
                         </Badge>
                         <NotificationPanel
@@ -110,7 +111,7 @@ const NavBar = () => {
                             size='0.875rem'
                             weight={600}
                             sx={{
-                                color: 'rgba(255,255,255,0.92)',
+                                color: neutral[800],
                                 display: { xs: 'none', lg: 'block' },
                                 letterSpacing: 0.2,
                             }}
@@ -124,12 +125,12 @@ const NavBar = () => {
                             }}
                             sx={{
                                 p: 0.5,
-                                border: '2px solid rgba(255,255,255,0.3)',
+                                border: `2px solid ${neutral[200]}`,
                                 borderRadius: '50%',
                                 transition: 'all 0.2s ease',
                                 '&:hover': {
-                                    border: '2px solid rgba(255,255,255,0.6)',
-                                    boxShadow: '0 0 0 3px rgba(255,255,255,0.1)',
+                                    border: `2px solid ${brand[500]}`,
+                                    boxShadow: `0 0 0 3px rgba(8, 121, 108, 0.12)`,
                                 },
                             }}
                         >

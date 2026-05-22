@@ -9,7 +9,15 @@ import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 import Logo from '../statics/images/NavLogo-removebg-preview.png';
 
-export const exportPDF = (columns, rows, fileName) => {
+/**
+ * @param {Array<{title: string, dataKey: string}>} columns
+ * @param {Array<Record<string, any>>} rows
+ * @param {string} fileName
+ * @param {{ filters?: Array<{label: string, value: string}> }} [meta]
+ *   Optional metadata. `filters` is rendered as an "Applied Filters" strip
+ *   below the header so the reader knows the slice of data they're looking at.
+ */
+export const exportPDF = (columns, rows, fileName, meta = {}) => {
     // Create landscape PDF with slightly better quality
     const doc = new jsPDF({
         orientation: 'landscape',
@@ -80,8 +88,30 @@ export const exportPDF = (columns, rows, fileName) => {
     doc.text(`Generated on: ${formattedDate} at ${formattedTime}`, pageWidth - margin, margin + 35, { align: 'right' });
     doc.text(`Total Records: ${rows.length}`, pageWidth - margin, margin + 50, { align: 'right' });
 
+    // Applied-filters strip (drawn between the header and the table when provided)
+    const filters = Array.isArray(meta.filters) ? meta.filters : [];
+    let postHeaderOffset = 0;
+    if (filters.length > 0) {
+        const stripY = headerHeight + 10;
+        const stripHeight = Math.max(28, 18 + filters.length * 14);
+        doc.setFillColor(238, 248, 247);
+        doc.setDrawColor(220, 220, 220);
+        doc.setLineWidth(0.5);
+        doc.roundedRect(margin, stripY, pageWidth - margin * 2, stripHeight, 4, 4, 'FD');
+        doc.setTextColor(8, 121, 108);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(9);
+        doc.text('Applied Filters', margin + 10, stripY + 14);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(60, 60, 60);
+        filters.forEach((f, idx) => {
+            doc.text(`• ${f.label}: ${f.value}`, margin + 110, stripY + 14 + idx * 12);
+        });
+        postHeaderOffset = stripHeight + 6;
+    }
+
     // Add a divider below header
-    const startY = headerHeight + 20;
+    const startY = headerHeight + 20 + postHeaderOffset;
     doc.setDrawColor(220, 220, 220);
     doc.setLineWidth(0.5);
     doc.line(margin, startY - 10, pageWidth - margin, startY - 10);

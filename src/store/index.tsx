@@ -32,6 +32,7 @@ import AssetReducer from "../pages/assets/slice"
 import GeneralAssetReducer from "../pages/assets/general/slice"
 import AssetAssignmentHistoryReducer from "../pages/assets/trails/slice"
 import MovementReducer from "../pages/movement/slice"
+import ApprovalWorkflowReducer from "../pages/approvalWorkflows/slice"
 
 
 export const store = configureStore({
@@ -58,6 +59,7 @@ export const store = configureStore({
         GeneralAssetStore: GeneralAssetReducer,
         AssetAssignmentHistoryStore: AssetAssignmentHistoryReducer,
         MovementStore: MovementReducer,
+        ApprovalWorkflowStore: ApprovalWorkflowReducer,
     },
 });
 

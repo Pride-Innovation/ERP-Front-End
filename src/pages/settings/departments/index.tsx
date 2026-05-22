@@ -37,6 +37,9 @@ import { RootState } from '../../../store';
 import Loading from '../../../components/loading';
 import DepartmentDetails from './DepartmentDetails';
 import { useDebounce } from '../../../hooks/useDebounce';
+import { RequirePermission } from '../../../core/permissions';
+import { PERMISSIONS } from '../../../core/permissions/constants';
+import { PageHero } from '../../../components/layout';
 
 const PRIMARY = '#08796C';
 
@@ -119,21 +122,20 @@ const Departments = () => {
                 </ModalComponent>
             )}
 
-            {/* Sub-page Header */}
-            <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 3, pb: 2.5, borderBottom: '1px solid #E2E8F0' }}>
-                <Stack direction="row" alignItems="center" spacing={1.5}>
-                    <Box sx={{ width: 44, height: 44, borderRadius: '12px', background: 'linear-gradient(135deg, #08796C, #065E53)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                        <AccountTreeOutlinedIcon sx={{ color: '#fff', fontSize: 22 }} />
-                    </Box>
-                    <Box>
-                        <Typography variant="h6" sx={{ fontWeight: 700, color: '#1E293B', lineHeight: 1.3 }}>Department Management</Typography>
-                        <Typography variant="body2" sx={{ color: '#64748B' }}>Manage organizational departments, leadership, and team structures</Typography>
-                    </Box>
-                </Stack>
-                <Box sx={{ bgcolor: alpha(PRIMARY, 0.08), color: PRIMARY, fontWeight: 700, borderRadius: '6px', px: 1.5, py: 0.5, fontSize: '0.75rem', flexShrink: 0, mt: 0.5 }}>
-                    {totalElements} {totalElements === 1 ? 'department' : 'departments'}
-                </Box>
-            </Box>
+            <PageHero
+                title="Department Management"
+                subtitle="Manage organizational departments, leadership, and team structures"
+                icon={<AccountTreeOutlinedIcon />}
+                stat={{ value: totalElements ?? 0, label: 'records' }}
+                actions={
+                    <RequirePermission permission={PERMISSIONS.CREATE_SETTING}>
+                        <Button onClick={createDepartment} startIcon={<AddIcon />} variant="contained"
+                            sx={{ height: 36, px: 2.5, borderRadius: '8px', textTransform: 'none', fontWeight: 600, bgcolor: PRIMARY, flexShrink: 0, '&:hover': { bgcolor: '#065E53' }, boxShadow: `0 2px 8px ${alpha(PRIMARY, 0.3)}` }}>
+                            Add Department
+                        </Button>
+                    </RequirePermission>
+                }
+            />
 
             {/* Filter Bar */}
             <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} alignItems={{ xs: "stretch", sm: "center" }} justifyContent="space-between" sx={{ mb: 3 }}>
@@ -157,10 +159,6 @@ const Departments = () => {
                         />
                     )}
                 </Stack>
-                <Button onClick={createDepartment} startIcon={<AddIcon />} variant="contained"
-                    sx={{ height: 36, px: 2.5, borderRadius: '8px', textTransform: 'none', fontWeight: 600, bgcolor: PRIMARY, flexShrink: 0, '&:hover': { bgcolor: '#065E53' }, boxShadow: `0 2px 8px ${alpha(PRIMARY, 0.3)}` }}>
-                    Add Department
-                </Button>
             </Stack>
 
             {/* Department Cards */}
@@ -231,18 +229,20 @@ const Departments = () => {
                                     Clear Search
                                 </Button>
                             ) : (
-                                <Button
-                                    variant="contained"
-                                    onClick={createDepartment}
-                                    startIcon={<AddIcon />}
-                                    sx={{
-                                        textTransform: 'none',
-                                        borderRadius: 1.5,
-                                        px: 3
-                                    }}
-                                >
-                                    Add Department
-                                </Button>
+                                <RequirePermission permission={PERMISSIONS.CREATE_SETTING}>
+                                    <Button
+                                        variant="contained"
+                                        onClick={createDepartment}
+                                        startIcon={<AddIcon />}
+                                        sx={{
+                                            textTransform: 'none',
+                                            borderRadius: 1.5,
+                                            px: 3
+                                        }}
+                                    >
+                                        Add Department
+                                    </Button>
+                                </RequirePermission>
                             )}
                         </Paper>
                     </Fade>

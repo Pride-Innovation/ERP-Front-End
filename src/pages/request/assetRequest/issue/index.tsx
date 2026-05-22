@@ -19,15 +19,13 @@ import AcknowledgeReceipt from "../AcknowledgeReceipt";
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import ApproveIssuance from "../ApproveIssuance";
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
-import { IPermission } from "../../../settings/interface";
-import { permissionsMock } from "../../../../mocks/settings";
-import RoutesUtills from "../../../../core/routes/utills";
+import usePermissions from "../../../../core/permissions/usePermissions";
+import { PERMISSIONS } from "../../../../core/permissions/constants";
 
 const IssuedRequest = () => {
     const { requests } = useSelector((state: RootState) => state.AssetsRequestsStore)
     const { requestTableData, setOptions, setRequestStatusIds } = useContext(RequestContext);
-    const [permissions, setPermissions] = useState<IPermission[]>([] as IPermission[]);
-    const { getCurrentUser } = RoutesUtills();
+    const { has } = usePermissions();
     const [selectedStatus, setSelectedStatus] = useState<string>('all');
     const [statusIds, setStatusIds] = useState<string>(`${5},${6},${7}`); // Default to '1' for "Request Created"
 
@@ -72,11 +70,7 @@ const IssuedRequest = () => {
      * This effect checks the permissions of the current user and sets the options for the request actions accordingly.
      */
     useEffect(() => {
-        if (!permissions || permissions.length === 0) return;
-
-        const hasApproveIssuancePermission = permissions.some(
-            (perm) => perm.name === permissionsMock.find(p => p.name === "APPROVE_ISSUANCE")?.name
-        );
+        const hasApproveIssuancePermission = has(PERMISSIONS.APPROVE_ISSUANCE);
 
         const newOptions = [
             {
@@ -102,13 +96,7 @@ const IssuedRequest = () => {
 
 
         setOptions(newOptions);
-    }, [permissions]);
-
-
-    useEffect(() => {
-        if (getCurrentUser()?.title?.role?.permissions) {
-            setPermissions(getCurrentUser()?.title?.role?.permissions || []);
-        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
 

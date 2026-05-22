@@ -126,7 +126,8 @@ const UpdateRequest = () => {
         handleSubmit,
         formState,
         register,
-        reset
+        reset,
+        setValue
     } = useForm<IRequest>({
         mode: 'onChange',
         resolver: yupResolver(requestSchema),
@@ -147,6 +148,13 @@ const UpdateRequest = () => {
             payload.append("priority", formData.priority);
             payload.append("name", formData.name);
             payload.append("description", formData.description as string);
+
+            if (formData.assetTypeId != null && formData.assetTypeId !== '') {
+                payload.append("assetTypeId", String(formData.assetTypeId));
+            }
+            if (formData.attributes && Object.keys(formData.attributes).length > 0) {
+                payload.append("attributes", JSON.stringify(formData.attributes));
+            }
 
             // Only attach file if a new file was selected
             if (file) payload.append("file", file);
@@ -222,6 +230,7 @@ const UpdateRequest = () => {
                             formState={formState}
                             control={control}
                             register={register}
+                            setValue={setValue}
                             sendingRequest={sendingRequest}
                             buttonText="Update"
                         />

@@ -10,7 +10,7 @@ Managing Director
  * Module names match the values from assetTypesStatusConstants and the "user" module.
  */
 export const importTemplates: Record<string, string[]> = {
-    user: ['No.', 'Name', 'Staff Number', 'Email', 'Title', 'Duty Station', 'Gender'],
+    user: ['No.', 'Name', 'Staff Number', 'Email', 'Title', 'Role', 'Duty Station', 'Department', 'Gender'],
     'IT Equipment': ['No.', 'Product Name', 'Asset Tag', 'Asset Serial No.', 'Model', 'USER', 'LOCATION', 'DATE OF PM/Verification'],
     'Office Equipment': ['No.', 'Product Name', 'Asset Tag', 'Asset Serial No.', 'Model', 'USER', 'LOCATION', 'DATE OF PM/Verification'],
     Fleet: ['No.', 'Product Name', 'Asset Tag', 'Asset Serial No.', 'Model', 'USER', 'LOCATION', 'DATE OF PM/Verification'],

@@ -131,7 +131,7 @@ const UserUtils = () => {
         name: `${usersMock[0].firstName} ${usersMock[0].lastName} ${(usersMock[0].otherName !== null ? usersMock[0].otherName : "")}`,
         staffNumber: usersMock[0].staffNumber,
         email: usersMock[0].email,
-        title: usersMock[0].title?.name,
+        // title: usersMock[0].title?.name,
         dutyStation: usersMock[0].branch?.name,
         availability: usersMock[0].availability,
         ...data,
@@ -236,39 +236,45 @@ const UserUtils = () => {
     };
 
 
+    /**
+     * Maps the raw user payload to the flat row shape the table renders.
+     * Exposed (via `transformUsersForExport`) so the page can run the same
+     * mapping on a full filtered result-set fetched purely for export.
+     */
+    const mapUserToRow = (user: IUser): IUserTableData => {
+        const {
+            branch: _b,
+            department: _d,
+            lastModifiedBy: _lmb,
+            title: _t,
+            createdBy: _cb,
+            profileImage: _pi,
+            ...fieldsData
+        } = user;
+        return {
+            ...fieldsData,
+            image: user?.profileImage,
+            name: `${user.firstName} ${user.lastName} ${(user.otherName !== null ? user.otherName : "")}`,
+            staffNumber: user.staffNumber,
+            email: user.email,
+            title: user.title?.name as string,
+            dutyStation: determineDutyStation(user),
+            availability: determineUserAvailability(user),
+            status: determineUserStatus(user),
+        } as unknown as IUserTableData;
+    };
+
     const handleUsersTableData = (users: Array<IUser>) => {
-        const data: Array<IUserTableData> = users.map((user, index) => {
-            const {
-                branch,
-                department,
-                lastModifiedBy,
-                title,
-                createdBy,
-                profileImage,
-                ...fieldsData
-            } = users[index];
-
-            return (
-                {
-                    ...fieldsData,
-                    image: user?.profileImage,
-                    name: `${user.firstName} ${user.lastName} ${(user.otherName !== null ? user.otherName : "")}`,
-                    staffNumber: user.staffNumber,
-                    email: user.email,
-                    title: user.title?.name as string,
-                    dutyStation: determineDutyStation(user),
-                    availability: determineUserAvailability(user),
-                    // availability: user.availability, Update this value from the backend if user goes on leave, account is blocked or disabled
-                    status: determineUserStatus(user)
-                }
-            )
-        })
-
-        setUsersTableData(data);
+        setUsersTableData(users.map(mapUserToRow));
     }
 
+    const transformUsersForExport = (users: Array<IUser>) => users.map(mapUserToRow);
+
+    // Always mirror the redux user list — including the empty case, so that
+    // a filter combo returning zero rows clears the table instead of leaving
+    // stale rows on screen.
     useEffect(() => {
-        if (users.length > 0) { handleUsersTableData(users) }
+        handleUsersTableData(users);
     }, [users]);
 
     const generateUserFields = (): Array<IFormData<IUser>> => {
@@ -360,7 +366,8 @@ const UserUtils = () => {
         usersTableData,
         loading,
         endPoint,
-        count
+        count,
+        transformUsersForExport,
     })
 }
 

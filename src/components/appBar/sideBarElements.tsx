@@ -1,6 +1,6 @@
 /*
 13.9 Pride's Standard Copyright Notice:
-Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
+Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify,
 and distribute this software and its documentation for any purpose is prohibited unless authorized in writing by the
 Managing Director
 */
@@ -13,31 +13,18 @@ import GroupIcon from '@mui/icons-material/Group';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import RecentActorsIcon from '@mui/icons-material/RecentActors';
 import TuneIcon from '@mui/icons-material/Tune';
-import RoutesUtills from '../../core/routes/utills';
-import { IPermission } from '../../pages/settings/interface';
 import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
 import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
 import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 import { Store } from '@mui/icons-material'
-import { permissionsMock } from '../../mocks/settings';
 import BarChartOutlinedIcon from '@mui/icons-material/BarChartOutlined';
 import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined';
+import usePermissions from '../../core/permissions/usePermissions';
+import { PERMISSIONS } from '../../core/permissions/constants';
 
 
 const SideBarElements = () => {
-    const { getCurrentUser } = RoutesUtills();
-    const userPermissions = getCurrentUser()?.title?.role?.permissions as Array<IPermission>;
-
-    /**
-     * 
-     * @param permission - The permission to check against the user's permissions
-     * @returns 
-     */
-    const rightsToViewRow = (permission: IPermission): boolean => {
-        if (!userPermissions) return false;
-        // Check if the user has the specific permission
-        return userPermissions.some((userPermission: IPermission) => userPermission.id === permission.id);
-    }
+    const { has } = usePermissions();
 
     const sideBarList: Array<ISideBarItem> = [
         {
@@ -54,7 +41,7 @@ const SideBarElements = () => {
             route: ROUTES.LIST_ASSETS,
             icon: <TuneIcon />,
             subroutes: [],
-            access: rightsToViewRow(permissionsMock[39]) // Assuming this is the permission for asset read access
+            access: has(PERMISSIONS.READ_ASSET)
         },
         {
             id: 3,
@@ -62,7 +49,7 @@ const SideBarElements = () => {
             route: ROUTES.USERS,
             icon: <GroupIcon />,
             subroutes: [],
-            access: rightsToViewRow(permissionsMock[9]) // Assuming this is the permission for user read access
+            access: has(PERMISSIONS.READ_USER)
         },
         {
             id: 4,
@@ -70,7 +57,7 @@ const SideBarElements = () => {
             route: ROUTES.REQUEST,
             icon: <RecentActorsIcon />,
             subroutes: [],
-            access: rightsToViewRow(permissionsMock[12]) // Assuming this is the permission for request read access
+            access: has(PERMISSIONS.READ_REQUEST)
         },
         {
             id: 5,
@@ -78,8 +65,7 @@ const SideBarElements = () => {
             route: ROUTES.TRANSPORT_REQUEST,
             icon: <DirectionsCarIcon />,
             subroutes: [],
-            // access: rightsToViewRow(permissionsMock[19]) // Assuming this is the permission for transport read access
-            access: false // Temporarily set to false for testing purposes
+            access: has(PERMISSIONS.READ_TRANSPORT)
         },
         {
             id: 6,
@@ -87,7 +73,7 @@ const SideBarElements = () => {
             route: ROUTES.INVENTORY,
             icon: <Inventory2OutlinedIcon />,
             subroutes: [],
-            access: rightsToViewRow(permissionsMock[23]) // Assuming this is the permission for inventory read access
+            access: has(PERMISSIONS.READ_INVENTORY)
         },
         {
             id: 7,
@@ -95,7 +81,7 @@ const SideBarElements = () => {
             route: ROUTES.STORE,
             icon: <Store />,
             subroutes: [],
-            access: rightsToViewRow(permissionsMock[35]) // Assuming this is the permission for store access
+            access: has(PERMISSIONS.READ_STORE)
         },
         {
             id: 8,
@@ -103,7 +89,7 @@ const SideBarElements = () => {
             route: ROUTES.MOVEMENT,
             icon: <LocalShippingOutlinedIcon />,
             subroutes: [],
-            access: rightsToViewRow(permissionsMock[36]) // Assuming this is the permission for movement access
+            access: has(PERMISSIONS.READ_ASSET)
         },
         {
             id: 9,
@@ -111,15 +97,15 @@ const SideBarElements = () => {
             route: ROUTES.REPORTS,
             icon: <BarChartOutlinedIcon />,
             subroutes: [],
-            access: rightsToViewRow(permissionsMock[31]) // Reuse READ_AUDIT or adjust to a dedicated report permission
+            access: has(PERMISSIONS.READ_AUDIT)
         },
-                {
+        {
             id: 10,
             name: "Settings",
             route: ROUTES.SETTINGS,
             icon: <SettingsIcon />,
             subroutes: [],
-            access: rightsToViewRow(permissionsMock[27]) // Assuming this is the permission for settings access
+            access: has(PERMISSIONS.READ_SETTING)
         },
         {
             id: 11,
@@ -127,7 +113,7 @@ const SideBarElements = () => {
             route: ROUTES.APPROVAL_WORKFLOWS,
             icon: <AccountTreeOutlinedIcon />,
             subroutes: [],
-            access: rightsToViewRow(permissionsMock[27]) // Same as settings: READ_SETTING
+            access: has(PERMISSIONS.READ_SETTING)
         },
         {
             id: 12,
@@ -135,11 +121,10 @@ const SideBarElements = () => {
             route: ROUTES.AUDIT_TRAILS,
             icon: <ReceiptLongIcon />,
             subroutes: [],
-            access: rightsToViewRow(permissionsMock[31]) // Assuming this is the permission for audit trails access
+            access: has(PERMISSIONS.READ_AUDIT)
         },
     ]
     return ({ sideBarList })
 }
 
 export default SideBarElements
-

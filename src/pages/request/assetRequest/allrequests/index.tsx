@@ -27,9 +27,8 @@ import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import InfoIcon from '@mui/icons-material/Info';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
-import RoutesUtills from "../../../../core/routes/utills";
-import { IPermission } from "../../../settings/interface";
-import { permissionsMock } from "../../../../mocks/settings";
+import usePermissions from "../../../../core/permissions/usePermissions";
+import { PERMISSIONS } from "../../../../core/permissions/constants";
 import DeleteRequest from "../../DeleteRequest";
 import { FormContext } from "../../../../context/form";
 import dayjs from "dayjs";
@@ -45,8 +44,7 @@ const Request = () => {
     const { requestTableData, setOptions } = useContext(RequestContext);
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
     const { requests } = useSelector((state: RootState) => state.AssetsRequestsStore);
-    const { getCurrentUser } = RoutesUtills();
-    const [permissions, setPermissions] = useState<IPermission[]>([] as IPermission[]);
+    const { has } = usePermissions();
     const [selectedStatus, setSelectedStatus] = useState<string>('all');
     const [statusIds, setStatusIds] = useState<string>(`${1},${2},${3},${4},${5},${6},${7}`); // Default to '1' for "Request Created"
     const { setRequestStatusIds } = useContext(RequestContext);
@@ -109,27 +107,11 @@ const Request = () => {
      * Effect to set options based on permissions
      */
     useEffect(() => {
-        if (!permissions || permissions.length === 0) return;
-
-        const hasApproveRequestPermission = permissions.some(
-            (perm) => perm.name === permissionsMock.find(p => p.name === "APPROVE_REQUEST")?.name
-        );
-
-        const hasRejectRequestPermission = permissions.some(
-            (perm) => perm.name === permissionsMock.find(p => p.name === "REJECT_REQUEST")?.name
-        );
-
-        const hasApproveIssuancePermission = permissions.some(
-            (perm) => perm.name === permissionsMock.find(p => p.name === "APPROVE_ISSUANCE")?.name
-        );
-
-        const hasAcknowledgeRequestPermission = permissions.some(
-            (perm) => perm.name === permissionsMock.find(p => p.name === "ACKNOWLEDGE_REQUEST")?.name
-        );
-
-        const hasIssueItemsPermission = permissions.some(
-            (perm) => perm.name === permissionsMock.find(p => p.name === "ISSUE_ITEMS")?.name
-        );
+        const hasApproveRequestPermission = has(PERMISSIONS.APPROVE_REQUEST);
+        const hasRejectRequestPermission = has(PERMISSIONS.REJECT_REQUEST);
+        const hasApproveIssuancePermission = has(PERMISSIONS.APPROVE_ISSUANCE);
+        const hasAcknowledgeRequestPermission = has(PERMISSIONS.ACKNOWLEDGE_REQUEST);
+        const hasIssueItemsPermission = has(PERMISSIONS.ISSUE_ITEMS);
 
         const newOptions = [
             {
@@ -195,12 +177,7 @@ const Request = () => {
         }
 
         setOptions(newOptions);
-    }, [permissions]);
-
-    useEffect(() => {
-        if (getCurrentUser()?.title?.role?.permissions) {
-            setPermissions(getCurrentUser()?.title?.role?.permissions || []);
-        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     /**
@@ -369,6 +346,7 @@ const Request = () => {
                 count={count}
                 exportData
                 createAction
+                createPermission={PERMISSIONS.CREATE_REQUEST}
                 module={module}
                 header={header}
                 rows={requestTableData}

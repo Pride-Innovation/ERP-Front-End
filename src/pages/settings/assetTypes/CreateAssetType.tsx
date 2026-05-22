@@ -28,6 +28,7 @@ const CreateAssetType = ({
             name: '',
             shortCode: '',
             description: '',
+            ownerGroupEmail: '',
         },
     });
 
@@ -38,6 +39,7 @@ const CreateAssetType = ({
                 name: formData.name.trim(),
                 shortCode: formData.shortCode?.trim() || null,
                 description: formData.description?.trim() || null,
+                ownerGroupEmail: formData.ownerGroupEmail?.trim() || null,
             }) as IAssetTypeAxiosResponse;
             if (response.status === 201) {
                 addAssetTypeToStore(response.data);

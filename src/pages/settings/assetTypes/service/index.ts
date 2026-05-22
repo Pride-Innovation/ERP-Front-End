@@ -6,7 +6,7 @@ Managing Director
 */
 
 import axiosInstance from "../../../../core/apis/axiosInstance";
-import { IAssetFieldConfig } from "../interface";
+import { IAssetFieldConfig, ICustomAttribute } from "../interface";
 
 const createAssetTypeService = async (body: Object) => {
     const response = await axiosInstance.post('asset-types', body);
@@ -33,9 +33,20 @@ const updateAssetTypeFieldConfigService = async (id: string | number, fieldConfi
     return response;
 };
 
+/**
+ * Persists the custom attributes for an asset type.
+ * Backend endpoint: PUT /api/v1/asset-types/{id}/custom-attributes
+ * Body: ICustomAttribute[] (full replacement)
+ */
+const updateAssetTypeCustomAttributesService = async (id: string | number, customAttributes: ICustomAttribute[]) => {
+    const response = await axiosInstance.put(`asset-types/${id}/custom-attributes`, customAttributes);
+    return response;
+};
+
 export {
     createAssetTypeService,
     updateAssetTypeService,
     deleteAssetTypeService,
     updateAssetTypeFieldConfigService,
+    updateAssetTypeCustomAttributesService,
 };

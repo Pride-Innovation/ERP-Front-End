@@ -40,19 +40,19 @@ const FilterByTagName = () => {
                     display: 'flex',
                     alignItems: 'center',
                     width: { xs: 200, sm: 280, md: 340 },
-                    bgcolor: 'rgba(255,255,255,0.14)',
-                    border: '1px solid rgba(255,255,255,0.25)',
+                    bgcolor: 'grey.50',
+                    border: 1,
+                    borderColor: 'border.subtle',
                     borderRadius: '50px',
-                    backdropFilter: 'blur(8px)',
                     transition: 'all 0.2s ease',
                     '&:hover': {
-                        bgcolor: 'rgba(255,255,255,0.2)',
-                        border: '1px solid rgba(255,255,255,0.4)',
+                        bgcolor: 'grey.100',
+                        borderColor: 'border.default',
                     },
                     '&:focus-within': {
-                        bgcolor: 'rgba(255,255,255,0.22)',
-                        border: '1px solid rgba(255,255,255,0.55)',
-                        boxShadow: '0 0 0 3px rgba(255,255,255,0.1)',
+                        bgcolor: 'background.paper',
+                        borderColor: 'primary.main',
+                        boxShadow: (theme) => `0 0 0 3px ${theme.palette.brand[100]}`,
                     },
                 }}
             >
@@ -60,10 +60,10 @@ const FilterByTagName = () => {
                     sx={{
                         ml: 0.5,
                         flex: 1,
-                        color: 'rgba(255,255,255,0.95)',
+                        color: 'text.primary',
                         fontSize: '0.875rem',
                         '& input::placeholder': {
-                            color: 'rgba(255,255,255,0.6)',
+                            color: 'text.secondary',
                             opacity: 1,
                         },
                     }}
@@ -82,11 +82,11 @@ const FilterByTagName = () => {
                     size="small"
                     sx={{
                         p: '6px',
-                        bgcolor: 'rgba(255,255,255,0.15)',
-                        color: 'rgba(255,255,255,0.9)',
+                        bgcolor: 'primary.main',
+                        color: '#fff',
                         borderRadius: '50%',
                         '&:hover': {
-                            bgcolor: 'rgba(255,255,255,0.28)',
+                            bgcolor: 'primary.dark',
                             color: '#fff',
                         },
                     }}

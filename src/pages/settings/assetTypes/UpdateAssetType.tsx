@@ -30,6 +30,7 @@ const UpdateAssetType = ({
             name: assetType.name || '',
             shortCode: assetType.shortCode || '',
             description: assetType.description || '',
+            ownerGroupEmail: assetType.ownerGroupEmail || '',
         },
     });
 
@@ -38,6 +39,7 @@ const UpdateAssetType = ({
             name: assetType.name || '',
             shortCode: assetType.shortCode || '',
             description: assetType.description || '',
+            ownerGroupEmail: assetType.ownerGroupEmail || '',
         });
     }, [assetType, reset]);
 
@@ -49,6 +51,7 @@ const UpdateAssetType = ({
                     name: formData.name.trim(),
                     shortCode: formData.shortCode?.trim() || null,
                     description: formData.description?.trim() || null,
+                    ownerGroupEmail: formData.ownerGroupEmail?.trim() || null,
                 },
                 assetType.id as number
             ) as IAssetTypeAxiosResponse;

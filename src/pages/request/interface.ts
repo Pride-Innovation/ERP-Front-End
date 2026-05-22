@@ -9,7 +9,8 @@ import {
     Control,
     FieldError,
     FormState,
-    UseFormRegister
+    UseFormRegister,
+    UseFormSetValue
 } from "react-hook-form";
 import { IUser } from "../users/interface";
 import { IPermission } from "../settings/interface";
@@ -17,6 +18,7 @@ import { Dispatch, SetStateAction } from "react";
 import { IStatus } from "../settings/statuses/interface";
 import { IAxiosResponse, IFetchDataRequest } from "../../core/apis/interface";
 import { ICommodity } from "../settings/commodity/interface";
+import { IAssetType } from "../settings/assetTypes/interface";
 
 export interface IAssetParticulars {
     name: string;
@@ -56,7 +58,12 @@ export interface IRequest {
         commodity: ICommodity,
         quantity: number
     }> | null,
-    emailMessage?: string | null
+    emailMessage?: string | null,
+    /** Primary asset category for the request — drives custom attributes and workflow selection. */
+    assetTypeId?: string | number | null,
+    assetType?: IAssetType | null,
+    /** Values for the category's custom attributes, keyed by attribute key (e.g. { warranty_months: 24 }). */
+    attributes?: Record<string, any> | null,
 }
 
 export interface IRequestTableData {
@@ -85,6 +92,7 @@ export interface IRequestForm {
     };
     control: Control<IRequest>;
     register: UseFormRegister<IRequest>;
+    setValue: UseFormSetValue<IRequest>;
     buttonText: string;
     sendingRequest: boolean;
     setImage: Dispatch<SetStateAction<string>>
@@ -121,7 +129,7 @@ export interface INavigation {
     text: string;
     path: string;
     icon: JSX.Element;
-    permission: IPermission
+    permission?: IPermission | string
 }
 
 export interface ITransportRequest {

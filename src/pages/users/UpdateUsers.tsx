@@ -1,75 +1,104 @@
 /*
 13.9 Pride's Standard Copyright Notice:
-Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
+Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify,
 and distribute this software and its documentation for any purpose is prohibited unless authorized in writing by the
 Managing Director
 */
 
-import { useContext, useEffect, useState } from 'react';
-import { IUpdateUser, IUser, IUserAxiosResponse } from './interface';
+import { useEffect, useMemo, useState } from 'react';
 import { Box } from '@mui/material';
 import { Resolver, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { userSchema } from './schema';
-import UserForm from './UserForm';
-import { AutocompleteContext } from '../../context/autocomplete';
-import { updateUSerService } from './service';
 import { toast } from 'react-toastify';
 import { useDispatch } from 'react-redux';
+
+import { IUpdateUser, IUser, IUserAxiosResponse } from './interface';
+import { userSchema } from './schema';
+import UserForm from './UserForm';
+import { updateUSerService } from './service';
 import { AppDispatch } from '../../store';
 import { updateUser } from './slice';
+import { IAsyncAutocompleteOption } from '../../components/forms/AsyncAutocomplete';
 
 const UpdateUsers = ({ handleClose, sendingRequest, setSendingRequest, user }: IUpdateUser) => {
-    const [defaultUser, setDefaultUser] = useState<any>(user);
-    const { setDisplayDepartment } = useContext(AutocompleteContext);
     const dispatch = useDispatch<AppDispatch>();
 
-    const handleFormAutoFillOnUpdate = () => {
-        if (user.department || user.branch?.id === 1) { setDisplayDepartment(true) }
+    // Hydrate the async fields from the user's existing nested objects so the
+    // form shows the correct labels without an extra network round-trip.
+    const initialTitle: IAsyncAutocompleteOption | null = useMemo(
+        () => (user?.title ? { value: user.title.id as number, label: user.title.name, raw: user.title } : null),
+        [user?.title?.id]
+    );
+    const initialBranchOption: IAsyncAutocompleteOption | null = useMemo(
+        () =>
+            user?.branch
+                ? { value: user.branch.id as number, label: user.branch.name, raw: user.branch }
+                : null,
+        [user?.branch?.id]
+    );
+    const initialDepartmentOption: IAsyncAutocompleteOption | null = useMemo(
+        () =>
+            user?.department
+                ? { value: user.department.id as number, label: user.department.name, raw: user.department }
+                : null,
+        [user?.department?.id]
+    );
 
-        setDefaultUser({
-            ...user,
-            title: user?.title?.id,
-            branch: user?.branch?.id,
-            department: user.department?.id
-        })
-    }
-
-    useEffect(() => { handleFormAutoFillOnUpdate() }, [user]);
+    const [selectedBranch, setSelectedBranch] = useState<IAsyncAutocompleteOption | null>(initialBranchOption);
+    const isHeadOffice = Boolean(selectedBranch?.raw?.isHeadOffice);
 
     const {
         control,
         handleSubmit,
         formState,
         register,
-        reset
+        reset,
+        setValue,
     } = useForm<IUser>({
         mode: 'onChange',
-        resolver: yupResolver(userSchema) as unknown as Resolver<IUser>,
+        resolver: yupResolver(userSchema, { context: { isHeadOffice } }) as unknown as Resolver<IUser>,
     });
 
+    // Reset whenever the user changes (e.g. navigating between users).
     useEffect(() => {
-        reset({ ...defaultUser });
-    }, [defaultUser]);
+        reset({
+            ...user,
+            title: user?.title?.id as any,
+            branch: user?.branch?.id as any,
+            department: user?.department?.id as any,
+            availability: user?.availability ?? 'present',
+            otherName: user?.otherName ?? '',
+        } as any);
+        setSelectedBranch(initialBranchOption);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [user?.id]);
+
+    const handleBranchChange = (option: IAsyncAutocompleteOption | null) => {
+        setSelectedBranch(option);
+        setValue('department' as any, null as any, { shouldValidate: true });
+    };
 
     const onSubmit = async (formData: IUser) => {
         setSendingRequest(true);
         try {
-            const response = await updateUSerService(formData, user.id as number) as IUserAxiosResponse;
-            if (response.status === 201) {
-                toast.success("User updated successfully");
+            const payload = {
+                ...formData,
+                department: isHeadOffice ? formData.department : null,
+            };
+            const response = (await updateUSerService(payload, user.id as number)) as IUserAxiosResponse;
+            if (response.status === 200 || response.status === 201) {
+                toast.success('User updated successfully');
                 dispatch(updateUser(response.data));
                 handleClose();
             }
         } catch (error) {
-            // Axios interceptor already shows the error toast; log for debugging only
             console.error('UpdateUsers unexpected error:', error);
         }
         setSendingRequest(false);
     };
 
     return (
-        <Box sx={{ overflowY: 'auto', pb: 1, maxWidth: '1200px', mx: 'auto' }}>
+        <Box sx={{ overflowY: 'auto', pb: 1, maxWidth: 1200, mx: 'auto' }}>
             <form autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
                 <UserForm
                     handleClose={handleClose}
@@ -79,10 +108,14 @@ const UpdateUsers = ({ handleClose, sendingRequest, setSendingRequest, user }: I
                     sendingRequest={sendingRequest}
                     register={register}
                     mode="update"
+                    initialTitle={initialTitle}
+                    initialBranch={selectedBranch}
+                    initialDepartment={initialDepartmentOption}
+                    onBranchChange={handleBranchChange}
                 />
             </form>
         </Box>
-    )
-}
+    );
+};
 
-export default UpdateUsers
+export default UpdateUsers;

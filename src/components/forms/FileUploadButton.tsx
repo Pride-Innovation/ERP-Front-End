@@ -15,6 +15,7 @@ import { FileContext } from "../../context/file/FileContext";
 import * as XLSX from 'xlsx';
 import { toast } from "react-toastify";
 import { importTemplates } from "./importTemplates";
+import { downloadUserImportTemplate } from "../../pages/users/userImportTemplate";
 
 const toCamelCase = (str: string): string => {
     const cleanStr = str.replace(/[^\w\s]/g, ' ');
@@ -48,8 +49,21 @@ const FileUploadButton = ({ title, module }: IFileUploadButton) => {
         setAnchorEl(null);
     };
 
-    const handleDownloadTemplate = () => {
+    const handleDownloadTemplate = async () => {
         handleMenuClose();
+
+        // The user template is dropdown-validated and pulls live reference
+        // data; route to the dedicated generator instead of the static headers.
+        if (module === 'user') {
+            try {
+                await downloadUserImportTemplate();
+            } catch (e) {
+                console.error('Template download failed', e);
+                toast.error('Failed to generate the user import template.');
+            }
+            return;
+        }
+
         const headers = importTemplates[module];
         if (!headers) {
             toast.error(`No template available for module: ${module}`);

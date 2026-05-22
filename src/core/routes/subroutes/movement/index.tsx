@@ -7,6 +7,8 @@ import CreateMovement from '../../../../pages/movement/CreateMovement'
 import UpdateMovement from '../../../../pages/movement/UpdateMovement'
 import MovementDetails from '../../../../pages/movement/view'
 import MovementContextProvider from '../../../../context/movement/MovementContext'
+import { PrivateRoute } from '../../PrivateRoutes'
+import { PERMISSIONS } from '../../../permissions/constants'
 
 const MovementLayout = () => (
     <MovementContextProvider>
@@ -17,11 +19,17 @@ const MovementLayout = () => (
 const MovementRoutes = () => {
     return (
         <Route element={<MovementLayout />}>
-            <Route path={ROUTES.MOVEMENT} element={<Movement />} />
-            <Route path={`${ROUTES.MOVEMENT}/all`} element={<AllMovements />} />
-            <Route path={ROUTES.CREATE_MOVEMENT} element={<CreateMovement />} />
-            <Route path={`${ROUTES.UPDATE_MOVEMENT}/:id`} element={<UpdateMovement />} />
-            <Route path={`${ROUTES.READ_MOVEMENT}/:id`} element={<MovementDetails />} />
+            <Route element={<PrivateRoute permission={PERMISSIONS.READ_ASSET} />}>
+                <Route path={ROUTES.MOVEMENT} element={<Movement />} />
+                <Route path={`${ROUTES.MOVEMENT}/all`} element={<AllMovements />} />
+                <Route path={`${ROUTES.READ_MOVEMENT}/:id`} element={<MovementDetails />} />
+            </Route>
+            <Route element={<PrivateRoute permission={PERMISSIONS.CREATE_ASSET} />}>
+                <Route path={ROUTES.CREATE_MOVEMENT} element={<CreateMovement />} />
+            </Route>
+            <Route element={<PrivateRoute permission={PERMISSIONS.UPDATE_ASSET} />}>
+                <Route path={`${ROUTES.UPDATE_MOVEMENT}/:id`} element={<UpdateMovement />} />
+            </Route>
         </Route>
     )
 }
