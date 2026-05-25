@@ -18,8 +18,7 @@ import { ICommodity } from "../pages/settings/commodity/interface";
 import { IAssetType } from "../pages/settings/assetTypes/interface";
 import { assetTypesStatusConstants } from "./constants";
 import { IStockCommodities } from "../pages/inventory/interface";
-import { IITEquipment } from "../pages/assets/ITEquipment/interface";
-import { IFleet } from "../pages/assets/fleet/interface";
+import { IITEquipment, IFleet } from "../pages/assets/interface";
 
 export const camelCaseToWords = (camelCaseString: string) => {
     return camelCaseString ? camelCaseString

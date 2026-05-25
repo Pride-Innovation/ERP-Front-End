@@ -18,12 +18,12 @@ import TabComponent from '../../../../components/tabs';
 import AssignmentHistory from '../../trails/AssignmentHistory';
 import RepairHistory from '../../trails/RepairHistory';
 import { useEffect, useState } from 'react';
-import { IOfficeEquipment, IOfficeEquipmentAxiosResponse } from '../../officeEquipment/interface';
+import { IOfficeEquipment, IOfficeEquipmentAxiosResponse } from '../../interface';
 import {
     getOfficeEquipmentByIDService,
     removeOfficeEquipmentImageService,
     updateOfficeEquipmentImageService
-} from '../../officeEquipment/service';
+} from '../service';
 import Loading from '../../../../components/loading';
 import moment from 'moment';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -34,7 +34,7 @@ import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
 import CategoryOutlinedIcon from '@mui/icons-material/CategoryOutlined';
 import { toast } from 'react-toastify';
 import TimeLineDot from '../../../../components/timeLineDots';
-import AssetImageUpload from '../../ITEquipment/view/AssetImageUpload';
+import AssetImageUpload from './AssetImageUpload';
 import { IAssetAxiosResponse } from '../../interface';
 import { ROUTES } from '../../../../core/routes/routes';
 import { crudStates } from '../../../../utils/constants';

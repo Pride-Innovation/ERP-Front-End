@@ -15,15 +15,16 @@ import {
 } from './service/referenceData';
 
 /**
- * Generates a real .xlsx user import template with data-validation dropdowns
- * for Title / Role / Duty Station / Department / Gender. The lookup values are
- * pulled live from the backend so the template always reflects the current
- * configuration.
+ * Generates a real .xlsx user import template with proper Excel data-validation
+ * dropdowns for Gender / Title / Role / Duty Station / Department. Lookup
+ * values are pulled live from the backend so the template always reflects the
+ * current system configuration.
  *
- * Layout:
- *   Sheet "Users" — header row, sample row, 200 empty validated rows.
- *   Sheet "Lists" (hidden) — one column per validated field; the Users sheet
- *   references these via `=Lists!$<col>$2:$<col>$<lastRow>` named ranges.
+ * The dropdowns are backed by workbook-level *defined names* (named ranges)
+ * rather than direct cross-sheet cell references — defined names are the only
+ * pattern Excel honors reliably when the source range lives on a hidden sheet.
+ * The source sheet itself is `veryHidden`, so end-users cannot unhide it from
+ * the worksheet tabs and accidentally edit the master data.
  */
 export const downloadUserImportTemplate = async (): Promise<void> => {
     const [titles, roles, branches, departments] = await Promise.all([
@@ -37,44 +38,74 @@ export const downloadUserImportTemplate = async (): Promise<void> => {
     wb.creator = 'Pride Bank ERP';
     wb.created = new Date();
 
-    // ── Hidden "Lists" sheet — one column per validated field ─────────────
-    const lists = wb.addWorksheet('Lists', { state: 'hidden' });
-    lists.getCell('A1').value = 'Titles';
-    lists.getCell('B1').value = 'Roles';
-    lists.getCell('C1').value = 'Branches';
-    lists.getCell('D1').value = 'Departments';
-    lists.getCell('E1').value = 'Genders';
+    // ── Hidden source sheet — one column per lookup field ────────────────
+    // `veryHidden` prevents users from unhiding via the worksheet-tab context
+    // menu (only achievable through the VBA editor).
+    const lists = wb.addWorksheet('_Lists', { state: 'veryHidden' });
 
-    const writeColumn = (col: string, values: string[]) => {
+    const writeColumn = (col: string, header: string, values: string[]) => {
+        lists.getCell(`${col}1`).value = header;
         values.forEach((v, i) => {
             lists.getCell(`${col}${i + 2}`).value = v;
         });
     };
+
     const titleNames = titles.map((o: ReferenceOption) => o.label);
     const roleNames = roles.map((o: ReferenceOption) => o.label);
     const branchNames = branches.map((o: ReferenceOption) => o.label);
     const deptNames = departments.map((o: ReferenceOption) => o.label);
     const genderValues = ['Male', 'Female'];
 
-    writeColumn('A', titleNames);
-    writeColumn('B', roleNames);
-    writeColumn('C', branchNames);
-    writeColumn('D', deptNames);
-    writeColumn('E', genderValues);
+    writeColumn('A', 'Titles', titleNames);
+    writeColumn('B', 'Roles', roleNames);
+    writeColumn('C', 'Branches', branchNames);
+    writeColumn('D', 'Departments', deptNames);
+    writeColumn('E', 'Genders', genderValues);
+
+    // ── Defined names (named ranges) for each dropdown source ────────────
+    // Empty lists collapse to a single-cell range to avoid Excel rejecting
+    // an invalid `A2:A1` reference; the dropdown will simply be empty.
+    const addName = (name: string, col: string, count: number) => {
+        const lastRow = count > 0 ? count + 1 : 2;
+        wb.definedNames.add(`_Lists!$${col}$2:$${col}$${lastRow}`, name);
+    };
+    addName('TitleList', 'A', titleNames.length);
+    addName('RoleList', 'B', roleNames.length);
+    addName('BranchList', 'C', branchNames.length);
+    addName('DepartmentList', 'D', deptNames.length);
+    addName('GenderList', 'E', genderValues.length);
 
     // ── Main "Users" sheet ────────────────────────────────────────────────
     const users = wb.addWorksheet('Users', {
         views: [{ state: 'frozen', ySplit: 1 }],
     });
 
-    const headers = ['No.', 'Name', 'Staff Number', 'Email', 'Title', 'Role', 'Duty Station', 'Department', 'Gender'];
-    users.columns = headers.map(h => ({ header: h, key: h, width: Math.max(14, h.length + 6) }));
+    // Column order mirrors the user-creation form. Required columns are marked
+    // with * in the header; the sample row in row 2 shows the expected shape.
+    const headers = [
+        'No.',
+        'First Name *',
+        'Last Name *',
+        'Other Name',
+        'Email *',
+        'Staff Number *',
+        'Gender *',
+        'Title *',
+        'Role',
+        'Duty Station *',
+        'Department',
+    ];
+
+    // Per-column widths chosen to keep the header text readable without
+    // truncating typical values (emails, branch names).
+    const widths = [6, 18, 18, 18, 32, 16, 12, 24, 22, 24, 24];
+    users.columns = headers.map((h, i) => ({ header: h, key: h, width: widths[i] }));
 
     // Style the header row in brand colour.
     const headerRow = users.getRow(1);
     headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 11 };
     headerRow.alignment = { vertical: 'middle', horizontal: 'center' };
-    headerRow.height = 22;
+    headerRow.height = 24;
     headerRow.eachCell(cell => {
         cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF087970' } };
         cell.border = {
@@ -88,72 +119,76 @@ export const downloadUserImportTemplate = async (): Promise<void> => {
     // Sample row so the user sees exactly what's expected.
     const sample = [
         1,
-        'Jane Doe',
-        'PBL0001',
+        'Jane',
+        'Doe',
+        '',
         'jane.doe@pridebank.co.ug',
+        'PBL0001',
+        'Female',
         titleNames[0] ?? '',
-        roleNames[0] ?? '',
+        '',
         branchNames[0] ?? '',
         '',
-        'Female',
     ];
     users.addRow(sample);
     users.getRow(2).font = { italic: true, color: { argb: 'FF94A3B8' } };
 
-    // ── Data validation across 200 blank rows below the sample ────────────
-    const totalRows = 202; // rows 3 .. 202
+    // ── Data validation across the data rows below the sample ────────────
+    const totalRows = 502; // rows 2 .. 502 (sample + 500 empty rows)
 
-    /** Build a `Lists!$col$2:$col$N` formula reference. */
-    const range = (col: string, count: number) => `=Lists!$${col}$2:$${col}$${count + 1}`;
-
-    // Worksheet-level `dataValidations` exists at runtime but isn't exposed by
-    // ExcelJS's public types — cast through `any` to reach it.
+    // ExcelJS 4.x: `dataValidations` is a runtime property not exposed by the
+    // public types — cast through `any` to reach it.
     const dv = (users as any).dataValidations;
 
-    dv.add(`E2:E${totalRows}`, {
-        type: 'list',
-        allowBlank: true,
-        formulae: [range('A', titleNames.length)],
-        showErrorMessage: true,
-        errorTitle: 'Invalid Title',
-        error: 'Pick a value from the dropdown.',
-    });
-    dv.add(`F2:F${totalRows}`, {
-        type: 'list',
-        allowBlank: true,
-        formulae: [range('B', roleNames.length)],
-        showErrorMessage: true,
-        errorTitle: 'Invalid Role',
-        error: 'Pick a value from the dropdown.',
-    });
+    // Column letters per the header order above:
+    // A=No, B=FirstName, C=LastName, D=OtherName, E=Email, F=StaffNumber,
+    // G=Gender, H=Title, I=Role, J=DutyStation, K=Department
     dv.add(`G2:G${totalRows}`, {
         type: 'list',
         allowBlank: true,
-        formulae: [range('C', branchNames.length)],
+        formulae: ['=GenderList'],
         showErrorMessage: true,
-        errorTitle: 'Invalid Duty Station',
-        error: 'Pick a value from the dropdown.',
+        errorTitle: 'Invalid Gender',
+        error: 'Pick a value from the dropdown (Male or Female).',
     });
     dv.add(`H2:H${totalRows}`, {
         type: 'list',
         allowBlank: true,
-        formulae: [range('D', deptNames.length)],
+        formulae: ['=TitleList'],
         showErrorMessage: true,
-        errorTitle: 'Invalid Department',
-        error: 'Pick a value from the dropdown. Only applies when Duty Station is Head Office.',
+        errorTitle: 'Invalid Title',
+        error: 'Pick a value from the dropdown.',
     });
     dv.add(`I2:I${totalRows}`, {
         type: 'list',
         allowBlank: true,
-        formulae: ['"Male,Female"'],
+        formulae: ['=RoleList'],
         showErrorMessage: true,
-        errorTitle: 'Invalid Gender',
-        error: 'Pick Male or Female.',
+        errorTitle: 'Invalid Role',
+        error: 'Pick a value from the dropdown.',
     });
-    dv.add(`D2:D${totalRows}`, {
+    dv.add(`J2:J${totalRows}`, {
+        type: 'list',
+        allowBlank: true,
+        formulae: ['=BranchList'],
+        showErrorMessage: true,
+        errorTitle: 'Invalid Duty Station',
+        error: 'Pick a value from the dropdown.',
+    });
+    dv.add(`K2:K${totalRows}`, {
+        type: 'list',
+        allowBlank: true,
+        formulae: ['=DepartmentList'],
+        showErrorMessage: true,
+        errorTitle: 'Invalid Department',
+        error: 'Pick a value from the dropdown. Only applies when Duty Station is Head Office.',
+    });
+
+    // Soft warning if the email doesn't end with the bank's domain.
+    dv.add(`E2:E${totalRows}`, {
         type: 'custom',
         allowBlank: true,
-        formulae: ['=ISNUMBER(SEARCH("@pridebank.co.ug",D2))'],
+        formulae: ['=ISNUMBER(SEARCH("@pridebank.co.ug",E2))'],
         showErrorMessage: true,
         errorTitle: 'Invalid Email',
         errorStyle: 'warning',

@@ -20,6 +20,7 @@ import {
     Button as MuiButton,
     useMediaQuery,
 } from "@mui/material";
+import { IOfficeEquipmentForm } from "../interface";
 import {
     UseFormAutocompleteComponent,
     UseFormDatePicker,
@@ -32,14 +33,14 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import SaveIcon from '@mui/icons-material/Save';
 import DescriptionIcon from '@mui/icons-material/Description';
+import ChairIcon from '@mui/icons-material/Chair';
 import { toast } from "react-toastify";
 import CancelIcon from '@mui/icons-material/Cancel';
-import { IFleetForm } from "./interface";
-import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
+
 // Brand colors
 const PRIMARY_COLOR = '#08796C';
 
-const SteppedFleetForm = ({
+const SteppedOfficeEquipmentForm = ({
     formState,
     control,
     register,
@@ -48,7 +49,7 @@ const SteppedFleetForm = ({
     formFields,
     trigger,
     isUpdate,
-}: IFleetForm) => {
+}: IOfficeEquipmentForm) => {
     const [activeStep, setActiveStep] = useState(0);
     const navigate = useNavigate();
     const theme = useTheme();
@@ -126,7 +127,7 @@ const SteppedFleetForm = ({
         return [
             {
                 title: activeStep === 0 ? "Asset Information" : "Additional Details",
-                icon: activeStep === 0 ? <DescriptionIcon fontSize="small" /> : <DirectionsCarIcon fontSize="small" />,
+                icon: activeStep === 0 ? <DescriptionIcon fontSize="small" /> : <ChairIcon fontSize="small" />,
                 fields: fields || []
             }
         ];
@@ -202,16 +203,16 @@ const SteppedFleetForm = ({
                         flexShrink: 0,
                     }}
                 >
-                    <DirectionsCarIcon />
+                    <ChairIcon />
                 </Box>
                 <Box>
                     <Typography variant="h6" sx={{ color: 'text.primary', fontWeight: 600, mb: 0.25 }}>
-                        {isUpdate ? 'Update Fleet Item' : 'Register Fleet Item'}
+                        {isUpdate ? 'Update Office Equipment' : 'Register Office Equipment'}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
                         {isUpdate
-                            ? 'Modify the details of this fleet item record'
-                            : 'Fill in the fields below to register a new fleet item'}
+                            ? 'Modify the details of this office equipment record'
+                            : 'Fill in the fields below to register a new office equipment asset'}
                     </Typography>
                 </Box>
             </Box>
@@ -256,7 +257,7 @@ const SteppedFleetForm = ({
                         </Step>
                     ))}
                 </Stepper>
-                </Paper>
+            </Paper>
 
                 {/* Field sections */}
                 {fieldGroups.map((group, groupIndex) => {
@@ -295,7 +296,7 @@ const SteppedFleetForm = ({
                         >
                             {renderSectionHeader(group.title, group.icon)}
                             <Grid container spacing={2} sx={{ mt: 0.5 }}>
-                                {group.fields.map((field: any, index: number) => {
+                                {group.fields.map((field, index) => {
                                     if (!field) return null;
 
                                     const commonProps = {
@@ -361,7 +362,7 @@ const SteppedFleetForm = ({
                 >
                     <Stack direction="row" spacing={2} alignItems="center">
                         <MuiButton
-                            onClick={() => navigate(ROUTES.LIST_FLEET)}
+                            onClick={() => navigate(-1)}
                             type="button"
                             variant="text"
                             startIcon={<CancelIcon fontSize="small" />}
@@ -487,4 +488,4 @@ const SteppedFleetForm = ({
     );
 };
 
-export default SteppedFleetForm;
+export default SteppedOfficeEquipmentForm;

@@ -7,7 +7,6 @@ Managing Director
 
 import {
     Box,
-    Grid,
     Typography,
     Button,
     Stack,
@@ -186,17 +185,17 @@ const Regions = () => {
                 ) : regions.length > 0 ? (
                     <Fade in={!loading}>
                         <Box>
-                            <Grid container spacing={3}>
-                                {regions.map((region) => (
-                                    <Grid item xs={12} sm={6} md={6} lg={4} xl={4} key={region.id}>
-                                        <RegionDetails
-                                            region={region}
-                                            deleteRegion={deleteRegion}
-                                            updateRegion={updateRegion}
-                                        />
-                                    </Grid>
+                            <Box className="settings-card-grid">
+                                {regions.map((region, i) => (
+                                    <RegionDetails
+                                        key={region.id}
+                                        region={region}
+                                        deleteRegion={deleteRegion}
+                                        updateRegion={updateRegion}
+                                        index={i}
+                                    />
                                 ))}
-                            </Grid>
+                            </Box>
                             {totalPages > 1 && (
                                 <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
                                     <Pagination

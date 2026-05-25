@@ -54,6 +54,8 @@ export interface ICommodityDetails {
     commodity: ICommodity;
     deleteCommodity: (role: ICommodity) => void;
     updateCommodity: (role: ICommodity) => void;
+    /** Position in the rendered grid — used to rotate the card accent colour. */
+    index?: number;
 }
 
 export interface IDeleteCommodity {

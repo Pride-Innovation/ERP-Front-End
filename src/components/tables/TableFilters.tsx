@@ -3,16 +3,13 @@ import { ICustomTableFilterOperator, IhandleTablePagination } from "./interface"
 import { useDebounce } from "../../hooks/useDebounce";
 import { useContext, useEffect, useState } from "react";
 import { fetchRowsService } from "../../core/apis/globalService";
-import { assetTypesStatusConstants, ErrorMessage } from "../../utils/constants";
+import { ErrorMessage } from "../../utils/constants";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../../store";
 import { loadAllRequests } from "../../pages/request/assetRequest/slice";
 import { loadUsers } from "../../pages/users/slice";
 import { loadAllInventory } from "../../pages/inventory/slice";
-import AssetUtills from "../../pages/assets/Utills";
-import { loadAllFleet } from "../../pages/assets/fleet/slice";
-import { loadAllITAssets } from "../../pages/assets/ITEquipment/slice";
-import { loadAllOfficeAssets } from "../../pages/assets/officeEquipment/slice";
+import { loadAllGeneralAssets } from "../../pages/assets/general/slice";
 import { RequestContext } from "../../context/request/RequestContext";
 import { AssetContext } from "../../context/asset";
 
@@ -26,7 +23,6 @@ const CustomTableFilterOperator = ({ endPoint, params }: ICustomTableFilterOpera
     const [localInput, setLocalInput] = useState<string>('');
     const debouncedInput = useDebounce(localInput, 500);
     const dispatch = useDispatch<AppDispatch>();
-    const { determineAssetTypeState } = AssetUtills();
     const { setCount } = useContext(RequestContext);
 
     // Store all active filters as an array of filter items
@@ -62,17 +58,11 @@ const CustomTableFilterOperator = ({ endPoint, params }: ICustomTableFilterOpera
                 dispatch(loadAllInventory(content))
                 break;
             case "assets":
-                const assetType = determineAssetTypeState(params?.assetTypeId);
-
-                if (assetType.name === assetTypesStatusConstants.fleet) {
-                    dispatch(loadAllFleet(content))
-                }
-                if (assetType.name === assetTypesStatusConstants.itEquipment) {
-                    dispatch(loadAllITAssets(content))
-                    setItEquipmentCount(totalElements as number)
-                }
-                if (assetType.name === assetTypesStatusConstants.officeEquipment) {
-                    dispatch(loadAllOfficeAssets(content))
+                // All asset categories are unified under GeneralAssetStore — the
+                // per-category stores have been retired.
+                dispatch(loadAllGeneralAssets(content));
+                if (typeof totalElements === 'number') {
+                    setItEquipmentCount(totalElements);
                 }
                 break;
             default:

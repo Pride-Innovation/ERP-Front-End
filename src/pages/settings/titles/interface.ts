@@ -24,6 +24,8 @@ export interface ITitleDetails {
     title: ITitle;
     deleteTitle: (role: ITitle) => void;
     updateTitle: (role: ITitle) => void;
+    /** Position in the rendered grid — used to rotate the card accent colour. */
+    index?: number;
 }
 
 

@@ -15,13 +15,14 @@ import { fetchRowsService } from "../../../core/apis/globalService";
 import AssetUtills from "../Utills";
 import { useDispatch } from "react-redux";
 import { AppDispatch, RootState } from "../../../store";
-import { IOfficeEquipmentsAxiosResponse } from "../officeEquipment/interface";
+import { IOfficeEquipmentsAxiosResponse } from "../interface";
 import { loadAllGeneralAssets } from "./slice";
 import { useSelector } from "react-redux";
 import { crudStates } from "../../../utils/constants";
 import Reassign from "../Reassign";
 import Repair from "../Repair";
 import ToStore from "../ToStore";
+import CompleteDetails from "../CompleteDetails";
 import { FormContext } from "../../../context/form";
 import InfoIcon from '@mui/icons-material/Info';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
@@ -29,6 +30,7 @@ import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import AssignmentIndOutlinedIcon from '@mui/icons-material/AssignmentIndOutlined';
 import BuildOutlinedIcon from '@mui/icons-material/BuildOutlined';
 import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
+import FingerprintIcon from '@mui/icons-material/Fingerprint';
 import { AssetContext } from "../../../context/asset";
 import { PERMISSIONS } from "../../../core/permissions/constants";
 
@@ -124,6 +126,7 @@ const GeneralAssets = () => {
 
     const handleOptionChanged = () => {
         const options = [
+            { value: crudStates.complete, label: "Complete Details", icon: <FingerprintIcon fontSize='small' sx={{ color: '#08796C' }} /> },
             { value: crudStates.dispose, label: "Dispose", icon: <InfoIcon fontSize='small' color='error' /> },
             { value: crudStates.update, label: "Update", icon: <ModeEditIcon fontSize='small' color='info' /> },
             { value: crudStates.read, label: "View Details", icon: <RemoveRedEyeIcon fontSize='small' color='inherit' /> },
@@ -192,6 +195,17 @@ const GeneralAssets = () => {
                         sendingRequest={loading}
                         handleClose={handleClose}
                         buttonText='Confirm'
+                        asset={currentAsset}
+                        module={assetType?.name || ''}
+                    />
+                </ModalComponent>
+            }
+            {crudStates.complete === currentState
+                && <ModalComponent width={"55%"} title={`Complete ${assetType?.name || 'Asset'} Details`} open={open} handleClose={handleClose}>
+                    <CompleteDetails
+                        handleClose={handleClose}
+                        sendingRequest={loading}
+                        buttonText='Mark ready'
                         asset={currentAsset}
                         module={assetType?.name || ''}
                     />

@@ -1,147 +1,156 @@
-/*
-13.9 Pride's Standard Copyright Notice:
-Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
-and distribute this software and its documentation for any purpose is prohibited unless authorized in writing by the
-Managing Director
-*/
-
 import { useEffect, useState } from 'react';
-import TableComponent from '../../../../components/tables/TableComponent';
-import { ICommodity } from '../../../settings/commodity/interface';
-import { ITableHeader } from '../../../../components/tables/interface';
-import { getTableHeaders } from '../../../../components/tables/getTableHeaders';
-import { ICommodityTableData } from '../../interface';
-import { Box, Typography, alpha, Paper } from '@mui/material';
+import { Box, Typography, alpha, Paper, Chip, Divider } from '@mui/material';
 import InventoryIcon from '@mui/icons-material/Inventory';
+import CategoryOutlinedIcon from '@mui/icons-material/CategoryOutlined';
+import { ICommodity } from '../../../settings/commodity/interface';
 
-// Brand colors
-// const PRIMARY_COLOR = '#08796C';
-// const SECONDARY_COLOR = '#BC892C';
-
-const defaultCommodities: Array<{
-    commodity: ICommodity
-    quantity: number
-}> = [
-    {
-        commodity: {
-            id: 1,
-            name: "Pens",
-            groupName: "Box",
-            assetType: {
-                id: 3,
-                name: "Stationery",
-                description: "Stationery"
-            }
-        },
-        quantity: 3
-    }
-]
+const TEAL = '#08796C';
 
 const RequestCommodties = ({ requestCommodties }: {
     requestCommodties: Array<{
-        commodity: ICommodity
-        quantity: number
-    }>
+        commodity: ICommodity;
+        quantity: number;
+    }>;
 }) => {
-    const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
-    const [commoditiesTableData, setCommoditiesTableData] = useState<Array<ICommodityTableData>>([]);
-    const [loading, setLoading] = useState(true);
-
-    const {
-        commodity,
-        ...data
-    } = defaultCommodities[0];
-
-    const rowData = {
-        name: defaultCommodities[0].commodity.name,
-        unitOfMeasure: defaultCommodities[0].commodity.groupName,
-        assetType: defaultCommodities[0].commodity.assetType?.name,
-        ...data,
-    };
-
-    useEffect(() => {
-        setColumnHeaders(getTableHeaders(rowData));
-        setLoading(false);
-    }, []);
-
-    const handleCommoditiesTableData = (commodities: Array<{
-        commodity: ICommodity
-        quantity: number
-    }>) => {
-        if (!commodities || commodities.length === 0) {
-            setCommoditiesTableData([]);
-            return;
-        }
-
-        const data: Array<ICommodityTableData> = commodities.map((com, index) => {
-            return {
-                id: index,
-                name: com.commodity.name,
-                unitOfMeasure: com.commodity.groupName,
-                assetType: com.commodity.assetType?.name as string,
-                quantity: com.quantity
-            };
-        });
-
-        setCommoditiesTableData(data);
-    }
-
-    useEffect(() => { 
-        handleCommoditiesTableData(requestCommodties);
-    }, [requestCommodties]);
-
-    if (loading) {
+    if (!requestCommodties || requestCommodties.length === 0) {
         return (
-            <Box sx={{ py: 2 }}>
-                <Typography variant="body2" color="text.secondary">
-                    Loading commodities...
+            <Box
+                sx={{
+                    py: 6,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: 1,
+                    color: 'text.disabled',
+                }}
+            >
+                <InventoryIcon sx={{ fontSize: 40, opacity: 0.4 }} />
+                <Typography variant="body2" sx={{ fontStyle: 'italic' }}>
+                    No items requested
                 </Typography>
             </Box>
         );
     }
 
-    if (!requestCommodties || requestCommodties.length === 0) {
-        return (
+    const total = requestCommodties.reduce((sum, c) => sum + c.quantity, 0);
+
+    return (
+        <Box>
+            {/* Summary bar */}
+            <Box
+                sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    mb: 2,
+                    px: 0.5,
+                }}
+            >
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <CategoryOutlinedIcon sx={{ fontSize: 16, color: TEAL }} />
+                    <Typography variant="body2" fontWeight={600} color="text.secondary">
+                        {requestCommodties.length} item{requestCommodties.length !== 1 ? 's' : ''} requested
+                    </Typography>
+                </Box>
+                <Chip
+                    size="small"
+                    label={`Total qty: ${total}`}
+                    sx={{
+                        bgcolor: alpha(TEAL, 0.08),
+                        color: TEAL,
+                        fontWeight: 700,
+                        fontSize: '0.72rem',
+                        height: 24,
+                        border: `1px solid ${alpha(TEAL, 0.2)}`,
+                    }}
+                />
+            </Box>
+
+            {/* Table */}
             <Paper
                 elevation={0}
                 sx={{
-                    p: 3,
+                    border: `1px solid ${alpha('#000', 0.07)}`,
                     borderRadius: 2,
-                    border: `1px dashed ${alpha('#000', 0.15)}`,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: 2,
-                    bgcolor: alpha('#f5f5f5', 0.5),
-                    my: 2
+                    overflow: 'hidden',
                 }}
             >
-                <InventoryIcon sx={{ color: 'text.disabled' }} />
-                <Typography color="text.secondary" sx={{ fontStyle: 'italic' }}>
-                    No items requested
-                </Typography>
-            </Paper>
-        );
-    }
+                {/* Header */}
+                <Box
+                    sx={{
+                        display: 'grid',
+                        gridTemplateColumns: '1fr 1fr auto',
+                        gap: 2,
+                        px: 2.5,
+                        py: 1.25,
+                        bgcolor: alpha(TEAL, 0.04),
+                        borderBottom: `1px solid ${alpha('#000', 0.07)}`,
+                    }}
+                >
+                    {['Item', 'Category', 'Qty'].map((h) => (
+                        <Typography
+                            key={h}
+                            variant="caption"
+                            fontWeight={700}
+                            color="text.disabled"
+                            sx={{ textTransform: 'uppercase', letterSpacing: '0.5px', fontSize: '0.68rem' }}
+                        >
+                            {h}
+                        </Typography>
+                    ))}
+                </Box>
 
-    return columnHeaders.length === 0 ? null : (
-        <Box sx={{ mt: 1 }}>
-            <TableComponent
-                endPoint=""
-                loading={false}
-                count={requestCommodties.length}
-                exportData
-                header={{ plural: 'Requested Items', singular: 'Item' }}
-                module="RequestCommodities"
-                rows={commoditiesTableData}
-                createAction={false}
-                columnHeaders={columnHeaders}
-                searchAction={false}
-                paginationMode='client'
-                refresh={false}
-            />
+                {/* Rows */}
+                {requestCommodties.map((item, index) => (
+                    <Box
+                        key={index}
+                        sx={{
+                            display: 'grid',
+                            gridTemplateColumns: '1fr 1fr auto',
+                            gap: 2,
+                            px: 2.5,
+                            py: 1.5,
+                            alignItems: 'center',
+                            borderBottom: index < requestCommodties.length - 1
+                                ? `1px solid ${alpha('#000', 0.05)}`
+                                : 'none',
+                            '&:hover': { bgcolor: alpha(TEAL, 0.015) },
+                            transition: 'background 0.15s',
+                        }}
+                    >
+                        <Box>
+                            <Typography variant="body2" fontWeight={500} color="text.primary">
+                                {item.commodity.name}
+                            </Typography>
+                            {item.commodity.groupName && (
+                                <Typography variant="caption" color="text.secondary">
+                                    {item.commodity.groupName}
+                                </Typography>
+                            )}
+                        </Box>
+
+                        <Typography variant="body2" color="text.secondary">
+                            {item.commodity.assetType?.name ?? '—'}
+                        </Typography>
+
+                        <Chip
+                            size="small"
+                            label={item.quantity}
+                            sx={{
+                                bgcolor: alpha(TEAL, 0.08),
+                                color: TEAL,
+                                fontWeight: 700,
+                                fontSize: '0.75rem',
+                                minWidth: 36,
+                                height: 24,
+                                border: `1px solid ${alpha(TEAL, 0.18)}`,
+                            }}
+                        />
+                    </Box>
+                ))}
+            </Paper>
         </Box>
     );
-}
+};
 
 export default RequestCommodties;

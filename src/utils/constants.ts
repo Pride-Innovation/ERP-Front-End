@@ -36,6 +36,8 @@ export const crudStates: {
     inStore: string;
     enable: string;
     block: string;
+    /** Fill in engraved number + remaining details for a newly-stocked asset. */
+    complete: string;
 } = {
     create: "create",
     update: "update",
@@ -57,7 +59,8 @@ export const crudStates: {
     repair: "repair",
     inStore: "inStore",
     enable: "enable",
-    block: "block"
+    block: "block",
+    complete: "complete",
 }
 
 export const requestStatus: {

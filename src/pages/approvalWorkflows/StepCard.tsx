@@ -28,7 +28,10 @@ import { brand, gold } from '../../utils/tokens';
 import { IRole } from '../settings/interface';
 import {
     APPROVER_TYPE_LABELS,
+    COMPLETION_NOTIFY_SOURCES,
     IApprovalStep,
+    NOTIFY_GROUP_SOURCE_LABELS,
+    NotifyGroupSource,
     STEP_TYPE_LABELS,
 } from './interface';
 
@@ -146,15 +149,57 @@ const StepCard: React.FC<IStepCardProps> = ({ step, index, total, roles, onChang
                     id={`specific-user-${index}`}
                 />
             )}
-            <InputComponent
-                label="CC / Notify Email"
+            <SelectComponent
+                id={`notify-source-${index}`}
+                label="CC / Notify whom"
+                required={false}
                 field={{
-                    value: step.notifyGroupEmail,
-                    onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
-                        onChange(index, 'notifyGroupEmail', e.target.value),
+                    value: step.notifyGroupSource,
+                    onChange: (e: any) => onChange(index, 'notifyGroupSource', e.target.value),
                 }}
                 error={undefined}
-                id={`notify-email-${index}`}
+                options={Object.entries(NOTIFY_GROUP_SOURCE_LABELS).map(([k, v]) => ({ value: k, label: v }))}
+            />
+            {step.notifyGroupSource === 'STATIC' && (
+                <InputComponent
+                    label="CC Email Address"
+                    field={{
+                        value: step.notifyGroupEmail,
+                        onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
+                            onChange(index, 'notifyGroupEmail', e.target.value),
+                    }}
+                    error={undefined}
+                    id={`notify-email-${index}`}
+                />
+            )}
+            <Autocomplete
+                multiple
+                size="small"
+                options={COMPLETION_NOTIFY_SOURCES}
+                getOptionLabel={(opt) => NOTIFY_GROUP_SOURCE_LABELS[opt]}
+                value={(step.notifyOnCompletion ?? []).filter((s): s is NotifyGroupSource =>
+                    COMPLETION_NOTIFY_SOURCES.includes(s)
+                )}
+                onChange={(_, value) => onChange(index, 'notifyOnCompletion', value)}
+                isOptionEqualToValue={(opt, val) => opt === val}
+                renderTags={(value, getTagProps) =>
+                    value.map((src, i) => (
+                        <Chip
+                            {...getTagProps({ index: i })}
+                            key={src}
+                            label={NOTIFY_GROUP_SOURCE_LABELS[src]}
+                            size="small"
+                            sx={{ height: 20, fontSize: '0.65rem' }}
+                        />
+                    ))
+                }
+                renderInput={(params) => (
+                    <TextField
+                        {...params}
+                        label="Notify on completion"
+                        placeholder={(step.notifyOnCompletion ?? []).length === 0 ? 'No completion emails' : ''}
+                    />
+                )}
             />
             <InputComponent
                 label="Escalation (hrs)"

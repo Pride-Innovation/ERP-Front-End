@@ -14,7 +14,6 @@ import CategoryOutlinedIcon from '@mui/icons-material/CategoryOutlined';
 import { useContext, useState } from "react";
 import { useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../store";
-import { assetTypesStatusConstants } from "../../utils/constants";
 import InventoryUtills from "../inventory/Utills";
 import UserUtils from "../users/utils";
 import BranchUtills from "../settings/branch/utills";
@@ -39,57 +38,23 @@ const AssetUtills = () => {
     const { fetchAllBranches } = BranchUtills();
     const { fetchAllSuppliers } = SupplierUtills();
 
+    /**
+     * Every asset category — including the previously hardcoded IT Equipment /
+     * Office Equipment / Fleet — now resolves to the same parameterised
+     * `/assets-mgt/assets/general/{typeId}` route. The icon is the only thing
+     * still chosen by name so that the familiar three categories keep their
+     * distinct tab icons; all other categories fall back to a generic icon.
+     */
     const determineAssetTypeByAssetName = (assetType: IAssetType) => {
+        const lower = (assetType.name ?? '').toLocaleLowerCase();
+        const icon = lower.includes('it equipment')
+            ? <SettingsBrightnessIcon />
+            : lower.includes('office equipment')
+                ? <BalanceIcon />
+                : lower.includes('fleet')
+                    ? <DirectionsCarFilledIcon />
+                    : <CategoryOutlinedIcon />;
 
-        if (assetType.name.toLocaleLowerCase().indexOf(
-            assetTypesStatusConstants.itEquipment.toLocaleLowerCase()
-        ) !== -1) {
-            return ({
-                id: assetType.id as number,
-                text: assetType.name,
-                path: ROUTES.LIST_IT_EQUIPMENT,
-                otherRoutes: [
-                    ROUTES.CREATE_ITEQUIPMENT,
-                    ROUTES.UPDATE_ITEQUIPMENT
-                ],
-                icon: <SettingsBrightnessIcon />,
-                // permission: routePermission(8) as IPermission
-            })
-        }
-
-        if (assetType.name.toLocaleLowerCase().indexOf(
-            assetTypesStatusConstants.officeEquipment.toLocaleLowerCase()
-        ) !== -1) {
-            return ({
-                id: assetType.id as number,
-                text: assetType.name,
-                path: ROUTES.LIST_OFFICE_EQUIPMENT,
-                otherRoutes: [
-                    ROUTES.CREATE_OFFICE_EQUIPMENT,
-                    ROUTES.UPDATE_OFFICE_EQUIPMENT
-                ],
-                icon: <BalanceIcon />,
-                // permission: routePermission(12) as IPermission
-            })
-        }
-
-        if (assetType.name.toLocaleLowerCase().indexOf(
-            assetTypesStatusConstants.fleet.toLocaleLowerCase()
-        ) !== -1) {
-            return ({
-                id: assetType.id as number,
-                text: assetType.name,
-                path: ROUTES.LIST_FLEET,
-                otherRoutes: [
-                    ROUTES.CREATE_FLEET,
-                    ROUTES.UPDATE_FLEET
-                ],
-                icon: <DirectionsCarFilledIcon />,
-                // permission: routePermission(16) as IPermission
-            })
-        }
-
-        // Generic fallback for all other asset categories
         return {
             id: assetType.id as number,
             text: assetType.name,
@@ -98,9 +63,8 @@ const AssetUtills = () => {
                 `${ROUTES.LIST_GENERAL_ASSETS}/${assetType.id}/create`,
                 `${ROUTES.LIST_GENERAL_ASSETS}/${assetType.id}/update`,
             ],
-            icon: <CategoryOutlinedIcon />,
+            icon,
         };
-
     }
 
     const determineAssetTypeState = (id: number): IAssetType => {

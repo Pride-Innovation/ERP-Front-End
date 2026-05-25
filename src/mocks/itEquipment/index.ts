@@ -5,7 +5,7 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { IITEquipment } from "../../pages/assets/ITEquipment/interface";
+import { IITEquipment } from "../../pages/assets/interface";
 import { branchesMock } from "../branch";
 import { inventoryMock } from "../inventory";
 import { suppliersMock } from "../settings";

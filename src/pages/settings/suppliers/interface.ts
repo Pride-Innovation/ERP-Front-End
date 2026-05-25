@@ -36,6 +36,8 @@ export interface ISupplierDetails {
     supplier: ISupplier;
     deleteSupplier: (supplier: ISupplier) => void;
     updateSupplier: (supplier: ISupplier) => void;
+    /** Position in the rendered grid — used to rotate the card accent colour. */
+    index?: number;
 }
 
 export interface ICreateSupplier {

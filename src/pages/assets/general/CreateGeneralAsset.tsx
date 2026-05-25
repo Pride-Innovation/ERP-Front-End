@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { IOfficeEquipment, IOfficeEquipmentAxiosResponse } from "../officeEquipment/interface";
+import { IOfficeEquipment, IOfficeEquipmentAxiosResponse } from "../interface";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import {
@@ -11,10 +11,10 @@ import {
     Typography,
     alpha,
 } from "@mui/material";
-import { buildOfficeEquipmentSchema } from "../officeEquipment/schema";
-import OfficeEquipmentForm from "../officeEquipment/OfficeEquipmentForm";
+import { buildOfficeEquipmentSchema } from "./schema";
+import OfficeEquipmentForm from "./AssetForm";
 import { toast } from "react-toastify";
-import { createOfficeEquipmentService } from "../officeEquipment/service";
+import { createOfficeEquipmentService } from "./service";
 import CategoryOutlinedIcon from '@mui/icons-material/CategoryOutlined';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';

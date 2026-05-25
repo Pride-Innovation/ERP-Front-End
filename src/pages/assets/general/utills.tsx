@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import { ITableHeader } from "../../../components/tables/interface";
-import { IOfficeEquipment, IOfficeEquipmentTableData } from "../officeEquipment/interface";
+import { IOfficeEquipment, IOfficeEquipmentTableData } from "../interface";
 import { officeEquipmentMock } from "../../../mocks/officeEquipment";
 import { getTableHeaders } from "../../../components/tables/getTableHeaders";
 import { crudStates } from "../../../utils/constants";
@@ -144,6 +144,11 @@ const GeneralAssetUtills = (typeId: string) => {
             case crudStates.inStore:
                 setCurrentAsset(determineCurrentAsset(moduleID as number, generalAssets));
                 setCurrentState(crudStates.inStore);
+                handleOpen();
+                break;
+            case crudStates.complete:
+                setCurrentAsset(determineCurrentAsset(moduleID as number, generalAssets));
+                setCurrentState(crudStates.complete);
                 handleOpen();
                 break;
             default:

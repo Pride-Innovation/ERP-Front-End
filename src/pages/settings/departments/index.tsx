@@ -180,13 +180,14 @@ const Departments = () => {
                     </Paper>
                 ) : departments.length > 0 ? (
                     <Fade in={!loading}>
-                        <Box className="department-grid">
-                            {departments.map((department) => (
+                        <Box className="settings-card-grid">
+                            {departments.map((department, i) => (
                                 <DepartmentDetails
                                     key={department.id}
                                     department={department}
                                     deleteDepartment={deleteDepartment}
                                     updateDepartment={updateDepartment}
+                                    index={i}
                                 />
                             ))}
                         </Box>

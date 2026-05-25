@@ -7,7 +7,6 @@ Managing Director
 
 import {
     Box,
-    Grid,
     Typography,
     Button,
     Stack,
@@ -202,17 +201,17 @@ const Suppliers = () => {
                 ) : suppliers.length > 0 ? (
                     <Fade in={!loading}>
                         <Box>
-                            <Grid container spacing={3}>
-                                {suppliers.map((supplier) => (
-                                    <Grid item xs={12} sm={6} md={6} lg={6} key={supplier.id}>
-                                        <SupplierDetails
-                                            supplier={supplier}
-                                            deleteSupplier={deleteSupplier}
-                                            updateSupplier={updateSupplier}
-                                        />
-                                    </Grid>
+                            <Box className="settings-card-grid--wide">
+                                {suppliers.map((supplier, i) => (
+                                    <SupplierDetails
+                                        key={supplier.id}
+                                        supplier={supplier}
+                                        deleteSupplier={deleteSupplier}
+                                        updateSupplier={updateSupplier}
+                                        index={i}
+                                    />
                                 ))}
-                            </Grid>
+                            </Box>
                             {totalPages > 1 && (
                                 <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
                                     <Pagination

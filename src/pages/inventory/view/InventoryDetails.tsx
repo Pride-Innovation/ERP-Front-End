@@ -27,6 +27,7 @@ import {
 } from "@mui/material";
 import TabComponent from "../../../components/tabs";
 import OtherDetails from "./OtherDetails";
+import DeliveryStatusPanel from "./DeliveryStatusPanel";
 import moment from "moment";
 import ViewInventoryutills from "./utills";
 import ModalComponent from "../../../components/modal";
@@ -46,7 +47,9 @@ import BusinessOutlinedIcon from '@mui/icons-material/BusinessOutlined';
 import ReceiptOutlinedIcon from '@mui/icons-material/ReceiptOutlined';
 import CalendarTodayOutlinedIcon from '@mui/icons-material/CalendarTodayOutlined';
 import ContentPasteIcon from '@mui/icons-material/ContentPaste';
+import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
 import { camelCaseToWords } from "../../../utils/helpers";
+import { generateGrnPdf } from "./generateGrnPdf";
 
 // Define brand colors
 const PRIMARY_COLOR = '#08796C';
@@ -293,24 +296,46 @@ const InventoryDetails = () => {
                             Inventory Details
                         </Typography>
 
-                        <MuiButton
-                            color='inherit'
-                            type='button'
-                            variant='outlined'
-                            onClick={() => navigate(-1)}
-                            startIcon={<ArrowBackIcon />}
-                            size="small"
-                            sx={{
-                                borderColor: alpha('#000', 0.2),
-                                color: 'text.secondary',
-                                '&:hover': {
-                                    borderColor: alpha('#000', 0.3),
-                                    backgroundColor: alpha('#000', 0.05)
-                                }
-                            }}
-                        >
-                            Back
-                        </MuiButton>
+                        <Box sx={{ display: 'flex', gap: 1 }}>
+                            <MuiButton
+                                color='inherit'
+                                type='button'
+                                variant='outlined'
+                                onClick={() => generateGrnPdf(currentInventory)}
+                                startIcon={<FileDownloadOutlinedIcon />}
+                                size="small"
+                                disabled={!currentInventory?.id}
+                                sx={{
+                                    textTransform: 'none',
+                                    borderColor: alpha(PRIMARY_COLOR, 0.4),
+                                    color: PRIMARY_COLOR,
+                                    '&:hover': {
+                                        borderColor: PRIMARY_COLOR,
+                                        backgroundColor: alpha(PRIMARY_COLOR, 0.05)
+                                    }
+                                }}
+                            >
+                                Generate GRN
+                            </MuiButton>
+                            <MuiButton
+                                color='inherit'
+                                type='button'
+                                variant='outlined'
+                                onClick={() => navigate(-1)}
+                                startIcon={<ArrowBackIcon />}
+                                size="small"
+                                sx={{
+                                    borderColor: alpha('#000', 0.2),
+                                    color: 'text.secondary',
+                                    '&:hover': {
+                                        borderColor: alpha('#000', 0.3),
+                                        backgroundColor: alpha('#000', 0.05)
+                                    }
+                                }}
+                            >
+                                Back
+                            </MuiButton>
+                        </Box>
                     </Box>
                     {/* Header Section */}
                     <Box
@@ -589,13 +614,23 @@ const InventoryDetails = () => {
                                     <TabComponent
                                         headers={[
                                             {
-                                                label: "Stock Commodities",
+                                                label: "Delivery Status",
                                                 position: 0,
+                                                content: (
+                                                    <DeliveryStatusPanel
+                                                        inventory={currentInventory}
+                                                        onDeliveryReceived={() => fetchInventoryByID(id as string)}
+                                                    />
+                                                )
+                                            },
+                                            {
+                                                label: "Stock Commodities",
+                                                position: 1,
                                                 content: <OtherDetails inventory={currentInventory} />
                                             },
                                             {
                                                 label: "Goods Received Notes (GRN)",
-                                                position: 1,
+                                                position: 2,
                                                 content: <InventoryPRN grnList={currentInventory.grnReports as Array<IGRNReport>} />
                                             }
                                         ]}

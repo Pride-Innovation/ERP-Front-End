@@ -15,17 +15,14 @@ import { loadAllRequests } from "../../pages/request/assetRequest/slice";
 import { loadUsers } from "../../pages/users/slice";
 import { loadAllInventory } from "../../pages/inventory/slice";
 import AssetUtills from "../../pages/assets/Utills";
-import { assetTypesStatusConstants } from "../../utils/constants";
-import { loadAllFleet } from "../../pages/assets/fleet/slice";
-import { loadAllITAssets } from "../../pages/assets/ITEquipment/slice";
-import { loadAllOfficeAssets } from "../../pages/assets/officeEquipment/slice";
+import { loadAllGeneralAssets } from "../../pages/assets/general/slice";
 import { useContext } from "react";
 import { AssetContext } from "../../context/asset";
 
 
 const CustomTablePagination = ({ endPoint, params, selectedStatus, filterParams }: ICustomTablePagination) => {
     const dispatch = useDispatch<AppDispatch>();
-    const { determineAssetTypeState, determineStatusId } = AssetUtills()
+    const { determineStatusId } = AssetUtills()
     const { fieldName, fieldText } = useContext(AssetContext);
 
     // console.log(selectedStatus, 'selectedStatus from custom table pagination');
@@ -46,18 +43,8 @@ const CustomTablePagination = ({ endPoint, params, selectedStatus, filterParams 
                 dispatch(loadAllInventory(content))
                 break;
             case "assets":
-                const assetType = determineAssetTypeState(params?.assetTypeId);
-
-                if (assetType.name === assetTypesStatusConstants.fleet) {
-                    dispatch(loadAllFleet(content))
-                }
-                if (assetType.name === assetTypesStatusConstants.itEquipment) {
-                    dispatch(loadAllITAssets(content))
-                }
-                if (assetType.name === assetTypesStatusConstants.officeEquipment) {
-                    dispatch(loadAllOfficeAssets(content))
-                }
-
+                // Unified asset store — all categories live in GeneralAssetStore.
+                dispatch(loadAllGeneralAssets(content));
                 break;
             default:
                 break

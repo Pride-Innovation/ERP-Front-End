@@ -1,55 +1,55 @@
 /*
 13.9 Pride's Standard Copyright Notice:
-Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
+Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify,
 and distribute this software and its documentation for any purpose is prohibited unless authorized in writing by the
 Managing Director
 */
 
-// React imports
 import { useContext, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import moment from "moment";
 
-// MUI components
 import {
     Box,
     Button as MuiButton,
-    Card,
-    CardContent,
     Chip,
-    Container,
+    CircularProgress,
     Divider,
     Grid,
+    IconButton,
     Paper,
     Stack,
+    Tab,
+    Tabs,
+    Tooltip,
     Typography,
     alpha,
 } from "@mui/material";
 
-// Icons
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import EditIcon from '@mui/icons-material/Edit';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import PersonIcon from '@mui/icons-material/Person';
-import EventIcon from '@mui/icons-material/Event';
-import AssignmentIcon from '@mui/icons-material/Assignment';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import InventoryIcon from '@mui/icons-material/Inventory';
-import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
-import DescriptionIcon from '@mui/icons-material/Description';
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
+import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
+import BadgeOutlinedIcon from '@mui/icons-material/BadgeOutlined';
+import AccountBalanceOutlinedIcon from '@mui/icons-material/AccountBalanceOutlined';
+import CalendarTodayOutlinedIcon from '@mui/icons-material/CalendarTodayOutlined';
+import UpdateOutlinedIcon from '@mui/icons-material/UpdateOutlined';
+import HowToRegOutlinedIcon from '@mui/icons-material/HowToRegOutlined';
+import CategoryOutlinedIcon from '@mui/icons-material/CategoryOutlined';
+import AttachFileOutlinedIcon from '@mui/icons-material/AttachFileOutlined';
+import PictureAsPdfOutlinedIcon from '@mui/icons-material/PictureAsPdfOutlined';
+import ImageOutlinedIcon from '@mui/icons-material/ImageOutlined';
+import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
+import ListAltOutlinedIcon from '@mui/icons-material/ListAltOutlined';
+import TimelineOutlinedIcon from '@mui/icons-material/TimelineOutlined';
+import HistoryOutlinedIcon from '@mui/icons-material/HistoryOutlined';
+import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined';
 import {
-    Attachment as AttachmentIcon,
-    PictureAsPdf as PdfIcon,
-    Image as ImageIcon,
     PriorityHigh as PriorityHighIcon,
-    DoNotDisturbAlt as DoNotDisturbAltIcon,
-    Speed as SpeedIcon,
+    DoNotDisturbAlt as MediumIcon,
+    ArrowDownward as LowIcon,
 } from '@mui/icons-material';
 
-// App components
-import TabComponent from "../../../../components/tabs";
-import TimelineDot from "../../../../components/timeLineDots";
 import Loading from "../../../../components/loading";
 import OtherDetails from "./OtherDetails";
 import RequestCommodties from "./RequestCommodties";
@@ -57,322 +57,185 @@ import MovementHistory from "./MovementHistory";
 import AttachmentViewer from "./AttachmentViewer";
 import WorkflowTimeline from "./WorkflowTimeline";
 
-// Services and contexts
 import { RequestContext } from "../../../../context/request/RequestContext";
 import RequestUtills from "../utills";
 import { findAssetRequestByIDService } from "../service";
 
-// Types
 import { IRequest, IRequestAxiosResponse } from "../../interface";
 import { ICommodity } from "../../../settings/commodity/interface";
 
-// Constants
-const PRIMARY_COLOR = '#08796C';
-const SECONDARY_COLOR = '#BC892C';
+const TEAL = '#08796C';
+const TEAL_DARK = '#065E53';
 
-/**
- * Enhanced Detail Section Component
- */
-const EnhancedDetailSection = ({
-    label,
-    text,
-    icon,
-    chip,
-    emptyMessage = "Not specified"
-}: {
-    label: string;
-    text: string | null | undefined;
-    icon?: JSX.Element;
-    chip?: JSX.Element;
-    emptyMessage?: string;
-}) => {
-    const isEmpty = text === null || text === undefined || text === '';
-
-    return (
-        <Paper
-            elevation={0}
-            sx={{
-                display: 'flex',
-                alignItems: 'flex-start',
-                p: 1.8,
-                mb: 1.5,
-                borderRadius: 1.5,
-                border: `1px solid ${alpha('#000', 0.06)}`,
-                transition: 'all 0.2s',
-                '&:hover': {
-                    borderColor: alpha(PRIMARY_COLOR, 0.3),
-                    boxShadow: `0 2px 8px ${alpha('#000', 0.05)}`,
-                    bgcolor: alpha('#fff', 0.9)
-                }
-            }}
-        >
-            <Box
-                sx={{
-                    mr: 2,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    borderRadius: 1,
-                    bgcolor: alpha(PRIMARY_COLOR, 0.08),
-                    color: PRIMARY_COLOR,
-                    width: 34,
-                    height: 34,
-                    flexShrink: 0
-                }}
-            >
-                {icon}
-            </Box>
-
-            <Box sx={{ width: '100%' }}>
-                <Typography
-                    variant="caption"
-                    component="div"
-                    color="text.secondary"
-                    sx={{ fontWeight: 500, mb: 0.5 }}
-                >
-                    {label}
-                </Typography>
-
-                <Typography
-                    variant="body2"
-                    sx={{
-                        fontWeight: isEmpty ? 400 : 500,
-                        color: isEmpty ? 'text.disabled' : 'text.primary',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between'
-                    }}
-                >
-                    {chip ? (
-                        chip
-                    ) : (
-                        <Box sx={{ display: "flex", alignItems: "center" }}>
-                            {label === "Status" && text && <Box sx={{ mr: 1 }}><TimelineDot status={text} /></Box>}
-
-                            {isEmpty ? (
-                                <Typography variant="body2" fontStyle="italic" color="text.disabled">
-                                    {emptyMessage}
-                                </Typography>
-                            ) : (
-                                text
-                            )}
-                        </Box>
-                    )}
-                </Typography>
-            </Box>
-        </Paper>
-    );
+// ─── Status configuration — covers every backend status code ─────────────────
+const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
+    requestcreated:      { label: 'Submitted',           color: '#1565C0', bg: '#E3F2FD' },
+    requestapproved:     { label: 'Approved',            color: '#2E7D32', bg: '#E8F5E9' },
+    requestrejected:     { label: 'Rejected',            color: '#C62828', bg: '#FFEBEE' },
+    issuanceapproved:    { label: 'Issuance Approved',   color: '#6A1B9A', bg: '#F3E5F5' },
+    issued:              { label: 'Issued',              color: '#00695C', bg: '#E0F2F1' },
+    inmaintenance:       { label: 'In Maintenance',      color: '#E65100', bg: '#FFF3E0' },
+    receiptacknowledged: { label: 'Receipt Acknowledged',color: '#1B5E20', bg: '#F1F8E9' },
+    assetassigned:       { label: 'Assigned',            color: '#0277BD', bg: '#E1F5FE' },
+    requireupdate:       { label: 'Requires Update',     color: '#F57F17', bg: '#FFFDE7' },
+    stockpending:        { label: 'Stock Pending',       color: '#BF360C', bg: '#FBE9E7' },
+    stockcompleted:      { label: 'Stock Completed',     color: '#33691E', bg: '#F9FBE7' },
+    senttostore:         { label: 'Sent to Store',       color: '#4A148C', bg: '#EDE7F6' },
 };
 
-/**
- * Status Badge Component
- */
-const StatusBadge = ({ status }: { status: string }) => {
-    const getStatusColor = (status: string) => {
-        switch (status.toLowerCase()) {
-            case 'requestcreated':
-                return '#3f51b5'; // Indigo
-            case 'approved':
-                return '#4caf50'; // Green
-            case 'rejected':
-                return '#f44336'; // Red
-            case 'pending':
-                return '#ff9800'; // Orange
-            default:
-                return '#757575'; // Grey
-        }
-    };
+const getStatusConfig = (statusCode?: string) => {
+    if (!statusCode) return { label: 'Unknown', color: '#616161', bg: '#F5F5F5' };
+    return STATUS_CONFIG[statusCode.toLowerCase()] ?? { label: statusCode, color: '#616161', bg: '#F5F5F5' };
+};
 
-    const color = getStatusColor(status);
-
+const StatusChip = ({ statusCode }: { statusCode?: string }) => {
+    const cfg = getStatusConfig(statusCode);
     return (
         <Chip
             size="small"
-            label={status.replace(/([A-Z])/g, ' $1').trim()}
+            label={cfg.label}
             sx={{
-                bgcolor: alpha(color, 0.1),
-                color: color,
-                fontWeight: 500,
-                border: `1px solid ${alpha(color, 0.2)}`
+                bgcolor: cfg.bg,
+                color: cfg.color,
+                fontWeight: 700,
+                fontSize: '0.72rem',
+                border: `1px solid ${alpha(cfg.color, 0.25)}`,
+                height: 24,
             }}
         />
     );
 };
 
-/**
- * Attachment Item Component
- */
-const AttachmentItem = ({
-    fileName,
-    filePath,
-    onView
-}: {
-    fileName: string,
-    filePath: string | null,
-    onView: () => void
-}) => {
-    const extension = fileName.split('.').pop()?.toLowerCase() || '';
-
-    const getFileIcon = () => {
-        if (['jpg', 'jpeg', 'png', 'gif'].includes(extension)) {
-            return <ImageIcon fontSize="small" sx={{ mr: 1.5, color: '#2196f3' }} />;
-        } else if (extension === 'pdf') {
-            return <PdfIcon fontSize="small" sx={{ mr: 1.5, color: '#f44336' }} />;
-        } else {
-            return <DescriptionIcon fontSize="small" sx={{ mr: 1.5, color: SECONDARY_COLOR }} />;
-        }
+const PriorityChip = ({ priority }: { priority?: string }) => {
+    if (!priority) return null;
+    const map: Record<string, { label: string; color: string; bg: string; icon: React.ReactNode }> = {
+        high:   { label: 'High',   color: '#C62828', bg: '#FFEBEE', icon: <PriorityHighIcon sx={{ fontSize: 13 }} /> },
+        medium: { label: 'Medium', color: '#E65100', bg: '#FFF3E0', icon: <MediumIcon sx={{ fontSize: 13 }} /> },
+        low:    { label: 'Low',    color: '#2E7D32', bg: '#E8F5E9', icon: <LowIcon sx={{ fontSize: 13 }} /> },
     };
+    const cfg = map[priority.toLowerCase()] ?? { label: priority, color: '#616161', bg: '#F5F5F5', icon: null };
+    return (
+        <Chip
+            size="small"
+            icon={<Box sx={{ color: cfg.color, display: 'flex', pl: 0.5 }}>{cfg.icon}</Box>}
+            label={cfg.label}
+            sx={{
+                bgcolor: cfg.bg,
+                color: cfg.color,
+                fontWeight: 700,
+                fontSize: '0.72rem',
+                border: `1px solid ${alpha(cfg.color, 0.25)}`,
+                height: 24,
+                '& .MuiChip-icon': { ml: 0.5 },
+            }}
+        />
+    );
+};
+
+// ─── Info Row — lightweight label + value ────────────────────────────────────
+const InfoRow = ({
+    icon,
+    label,
+    children,
+}: {
+    icon: React.ReactNode;
+    label: string;
+    children: React.ReactNode;
+}) => (
+    <Box
+        sx={{
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: 1.5,
+            py: 1.25,
+            borderBottom: `1px solid ${alpha('#000', 0.05)}`,
+            '&:last-child': { borderBottom: 'none' },
+        }}
+    >
+        <Box sx={{ color: TEAL, mt: 0.1, flexShrink: 0, '& svg': { fontSize: 17 } }}>
+            {icon}
+        </Box>
+        <Box sx={{ minWidth: 0, flex: 1 }}>
+            <Typography variant="caption" color="text.disabled" sx={{ display: 'block', lineHeight: 1.2, mb: 0.3 }}>
+                {label}
+            </Typography>
+            <Box>{children}</Box>
+        </Box>
+    </Box>
+);
+
+// ─── Attachment pill ──────────────────────────────────────────────────────────
+const AttachmentPill = ({ filePath, onView }: { filePath: string; onView: () => void }) => {
+    const name = filePath.split(/[/\\]/).pop() ?? 'attachment';
+    const ext = name.split('.').pop()?.toLowerCase() ?? '';
+    const isImage = ['jpg', 'jpeg', 'png', 'gif'].includes(ext);
+    const isPdf = ext === 'pdf';
+    const Icon = isImage ? ImageOutlinedIcon : isPdf ? PictureAsPdfOutlinedIcon : DescriptionOutlinedIcon;
+    const iconColor = isImage ? '#1565C0' : isPdf ? '#C62828' : TEAL;
 
     return (
         <Paper
-            elevation={0}
-            sx={{
-                p: 2,
-                borderRadius: 1.5,
-                bgcolor: alpha('#f9f9f9', 0.7),
-                border: `1px solid ${alpha('#000', 0.06)}`,
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                '&:hover': {
-                    bgcolor: alpha(PRIMARY_COLOR, 0.05),
-                    borderColor: alpha(PRIMARY_COLOR, 0.2)
-                }
-            }}
+            variant="outlined"
             onClick={onView}
+            sx={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 1,
+                px: 1.5,
+                py: 0.75,
+                borderRadius: 5,
+                cursor: 'pointer',
+                borderColor: alpha(TEAL, 0.2),
+                bgcolor: alpha(TEAL, 0.02),
+                transition: 'all 0.15s',
+                '&:hover': { borderColor: TEAL, bgcolor: alpha(TEAL, 0.06) },
+            }}
         >
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                {getFileIcon()}
-                <Typography variant="body2">{fileName}</Typography>
-            </Box>
-            <MuiButton
-                size="small"
-                variant="outlined"
-                sx={{
-                    minWidth: 0,
-                    color: PRIMARY_COLOR,
-                    borderColor: alpha(PRIMARY_COLOR, 0.3)
-                }}
-                onClick={(e) => {
-                    e.stopPropagation();
-                    onView();
-                }}
-            >
-                View
-            </MuiButton>
+            <Icon sx={{ fontSize: 16, color: iconColor }} />
+            <Typography variant="caption" fontWeight={600} color="text.secondary" noWrap sx={{ maxWidth: 180 }}>
+                {name}
+            </Typography>
+            <Tooltip title="View attachment">
+                <VisibilityOutlinedIcon sx={{ fontSize: 14, color: 'text.disabled' }} />
+            </Tooltip>
         </Paper>
     );
 };
 
-/**
- * Request Details Component
- */
+// ─── Main component ───────────────────────────────────────────────────────────
 const RequestDetails = () => {
     const [request, setRequest] = useState<IRequest>({} as IRequest);
-    const [loading, setLoading] = useState<boolean>(true);
-    const [isAttachmentViewerOpen, setIsAttachmentViewerOpen] = useState<boolean>(false);
+    const [loading, setLoading] = useState(true);
+    const [activeTab, setActiveTab] = useState(0);
+    const [isAttachmentViewerOpen, setIsAttachmentViewerOpen] = useState(false);
 
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
 
-    const {
-        acknowledgeIssuance,
-        acknowledgeRequest,
-        issuanceApproval,
-        currentIssuance
-    } = useContext(RequestContext);
+    const { acknowledgeIssuance, acknowledgeRequest, issuanceApproval, currentIssuance } =
+        useContext(RequestContext);
 
     const {
         findAcknowledgeIssuanceReceiptByRequestId,
         findAcknowledgeRequestReceiptByRequestId,
         findIssuanceApprovalRecordByRequestId,
-        fetchIssuanceByRequestId
+        fetchIssuanceByRequestId,
     } = RequestUtills();
 
-    // Get attachment filename from path
-    const getAttachmentFileName = (): string => {
-        if (!request.signaturePath) return "";
-        // eslint-disable-next-line no-useless-escape
-        return request.signaturePath.split(/[\/\\]/).pop() || "";
-    };
-
-    // Fetch request details
     const fetchRequestDetails = async () => {
         setLoading(true);
         try {
-            const response = await findAssetRequestByIDService(id as string) as IRequestAxiosResponse;
-            if (response.status === 200) {
-                setRequest(response.data);
-            }
-        } catch (error) {
-            console.error("Error fetching request details:", error);
+            const response = (await findAssetRequestByIDService(id as string)) as IRequestAxiosResponse;
+            if (response.status === 200) setRequest(response.data);
+        } catch (err) {
+            console.error(err);
         } finally {
             setLoading(false);
         }
     };
 
-    // Get priority chip based on priority level
-    const getPriorityChip = (priority: string | undefined) => {
-        if (!priority) return null;
+    useEffect(() => { if (id) fetchRequestDetails(); }, [id]);
 
-        switch (priority.toLowerCase()) {
-            case 'high':
-                return (
-                    <Chip
-                        icon={<PriorityHighIcon fontSize="small" />}
-                        label="High Priority"
-                        size="small"
-                        sx={{
-                            bgcolor: alpha('#f44336', 0.1),
-                            color: '#f44336',
-                            fontWeight: 500,
-                            border: `1px solid ${alpha('#f44336', 0.2)}`
-                        }}
-                    />
-                );
-            case 'medium':
-                return (
-                    <Chip
-                        icon={<DoNotDisturbAltIcon fontSize="small" />}
-                        label="Medium Priority"
-                        size="small"
-                        sx={{
-                            bgcolor: alpha(SECONDARY_COLOR, 0.1),
-                            color: SECONDARY_COLOR,
-                            fontWeight: 500,
-                            border: `1px solid ${alpha(SECONDARY_COLOR, 0.2)}`
-                        }}
-                    />
-                );
-            case 'low':
-                return (
-                    <Chip
-                        icon={<SpeedIcon fontSize="small" />}
-                        label="Low Priority"
-                        size="small"
-                        sx={{
-                            bgcolor: alpha(PRIMARY_COLOR, 0.1),
-                            color: PRIMARY_COLOR,
-                            fontWeight: 500,
-                            border: `1px solid ${alpha(PRIMARY_COLOR, 0.2)}`
-                        }}
-                    />
-                );
-            default:
-                return null;
-        }
-    };
-
-    // Initial data fetch
-    useEffect(() => {
-        if (id) {
-            fetchRequestDetails();
-        }
-    }, [id]);
-
-    // Fetch related data when request changes
     useEffect(() => {
         if (request.id) {
             findAcknowledgeIssuanceReceiptByRequestId(request.id as number);
@@ -382,366 +245,325 @@ const RequestDetails = () => {
         }
     }, [request]);
 
+    const canEdit = request.status?.status === 'requestCreated';
+
+    const TABS = [
+        { label: 'Requested Items', icon: <ListAltOutlinedIcon fontSize="small" /> },
+        { label: 'Processing',      icon: <TimelineOutlinedIcon fontSize="small" /> },
+        { label: 'Movement',        icon: <HistoryOutlinedIcon fontSize="small" /> },
+        { label: 'Approval History',icon: <AccountTreeOutlinedIcon fontSize="small" /> },
+    ];
+
     return (
-        <Container maxWidth="xl" sx={{ mt: 2, mb: 4 }}>
-            {/* Page Header */}
+        <Box sx={{ bgcolor: '#F7F9FC', minHeight: '100vh' }}>
+            {/* ── Header ── */}
             <Box
                 sx={{
-                    mb: 3,
-                    p: { xs: 2, md: 3 },
-                    bgcolor: 'white',
-                    borderRadius: 2,
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03)',
-                    border: `1px solid ${alpha('#000', 0.06)}`,
-                    backgroundImage: `linear-gradient(to right, ${alpha(PRIMARY_COLOR, 0.02)}, rgba(255,255,255,0.5))`,
+                    background: `linear-gradient(135deg, ${TEAL} 0%, ${TEAL_DARK} 60%, #033c35 100%)`,
+                    px: { xs: 2, md: 4 },
+                    pt: { xs: 2.5, md: 3 },
+                    pb: { xs: 2, md: 2.5 },
                     position: 'relative',
                     overflow: 'hidden',
+                    '&::after': {
+                        content: '""',
+                        position: 'absolute',
+                        top: -60,
+                        right: -60,
+                        width: 260,
+                        height: 260,
+                        borderRadius: '50%',
+                        bgcolor: 'rgba(255,255,255,0.04)',
+                        pointerEvents: 'none',
+                    },
                 }}
             >
-                {/* Decorative accent element */}
-                <Box
-                    sx={{
-                        position: 'absolute',
-                        left: 0,
-                        top: 0,
-                        bottom: 0,
-                        width: 4,
-                        bgcolor: PRIMARY_COLOR,
-                    }}
-                />
+                {/* Back nav */}
+                <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
+                    <IconButton
+                        size="small"
+                        onClick={() => navigate(-1)}
+                        sx={{
+                            color: 'rgba(255,255,255,0.8)',
+                            border: '1px solid rgba(255,255,255,0.2)',
+                            '&:hover': { bgcolor: 'rgba(255,255,255,0.12)', color: '#fff' },
+                        }}
+                    >
+                        <ArrowBackIcon fontSize="small" />
+                    </IconButton>
+                    <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.6)' }}>
+                        Asset Requests
+                    </Typography>
+                </Stack>
 
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                {/* Title row */}
+                <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 2, flexWrap: 'wrap' }}>
                     <Box>
-                        <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 1 }}>
-                            <Typography
-                                variant="h5"
-                                fontWeight={600}
-                                color={PRIMARY_COLOR}
-                            >
-                                {request.name || "Asset Request"}
-                            </Typography>
-                            {getPriorityChip(request.priority)}
-                        </Stack>
-
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                        <Typography
+                            variant="h5"
+                            fontWeight={700}
+                            sx={{ color: '#fff', mb: 0.75, letterSpacing: '-0.3px', lineHeight: 1.2 }}
+                        >
+                            {request.name || 'Asset Request'}
+                        </Typography>
+                        <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
                             <Chip
                                 size="small"
-                                label={`ID: #${request.id || ''}`}
-                                sx={{
-                                    bgcolor: alpha(PRIMARY_COLOR, 0.08),
-                                    color: 'text.secondary',
-                                    fontWeight: 500,
-                                    borderRadius: 1,
-                                    '& .MuiChip-label': { px: 1 }
-                                }}
+                                label={`#${request.id || '—'}`}
+                                sx={{ bgcolor: 'rgba(255,255,255,0.15)', color: '#fff', fontWeight: 700, fontSize: '0.72rem', height: 22 }}
                             />
-                            <Typography variant="body2" color="text.secondary">
-                                Created on: {request.createDate ? moment(request.createDate).format('MMM DD, YYYY') : 'N/A'}
-                            </Typography>
-                        </Box>
+                            <StatusChip statusCode={request.status?.status ?? undefined} />
+                            <PriorityChip priority={request.priority} />
+                            {request.createDate && (
+                                <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.6)' }}>
+                                    {moment(request.createDate).format('D MMM YYYY')}
+                                </Typography>
+                            )}
+                        </Stack>
                     </Box>
 
-                    {/* Optionally add action buttons here if needed */}
-                </Box>
-
-                {/* Attachment Section integrated within the header card when available */}
-                {request.signaturePath && (
-                    <>
-                        <Divider sx={{ my: 2, opacity: 0.6 }} />
-
-                        <Box>
-                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
-                                <Box
-                                    sx={{
-                                        mr: 1.5,
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        borderRadius: 1,
-                                        bgcolor: alpha(PRIMARY_COLOR, 0.08),
-                                        color: PRIMARY_COLOR,
-                                        width: 28,
-                                        height: 28,
-                                    }}
-                                >
-                                    <AttachmentIcon fontSize="small" />
-                                </Box>
-                                <Typography variant="subtitle2" fontWeight={600} color="text.secondary">
-                                    Attachments
-                                </Typography>
-                            </Box>
-
-                            <Box sx={{ pl: { xs: 0, sm: 5 } }}>
-                                <AttachmentItem
-                                    fileName={getAttachmentFileName()}
-                                    filePath={request.signaturePath}
-                                    onView={() => setIsAttachmentViewerOpen(true)}
-                                />
-                            </Box>
-                        </Box>
-                    </>
-                )}
-            </Box>
-
-            {/* Main Content */}
-            <Box
-                sx={{
-                    p: { xs: 2, md: 3 },
-                    bgcolor: '#F3F7FB',
-                    borderRadius: 2,
-                    border: `1px solid ${alpha('#000', 0.08)}`
-                }}
-            >
-                {loading ? (
-                    <Loading items='Asset Request' />
-                ) : (
-                    <>
-                        <Grid container spacing={3}>
-                            {/* Left column - Request Summary */}
-                            <Grid item xs={12} md={4}>
-                                <Card
-                                    elevation={0}
-                                    sx={{
-                                        borderRadius: 2,
-                                        overflow: 'hidden',
-                                        border: `1px solid ${alpha('#000', 0.08)}`,
-                                        height: '100%'
-                                    }}
-                                >
-                                    <CardContent>
-                                        <Box sx={{ mb: 2 }}>
-                                            <Typography
-                                                variant="subtitle1"
-                                                fontWeight={600}
-                                                color="text.secondary"
-                                                sx={{
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    gap: 1
-                                                }}
-                                            >
-                                                <LibraryBooksIcon fontSize="small" />
-                                                Request Summary
-                                            </Typography>
-                                            <Divider sx={{ mt: 1, mb: 2 }} />
-                                        </Box>
-
-                                        <EnhancedDetailSection
-                                            label="Requested By"
-                                            text={request.requester ? `${request.requester.firstName} ${request.requester.lastName}` : null}
-                                            icon={<PersonIcon fontSize="small" />}
-                                        />
-
-                                        <EnhancedDetailSection
-                                            label="Staff Number"
-                                            text={request.requester?.staffNumber || null}
-                                            icon={<AssignmentIcon fontSize="small" />}
-                                        />
-
-                                        <EnhancedDetailSection
-                                            label="Department/Branch"
-                                            text={request.requester?.branch?.name || null}
-                                            icon={<LocationOnIcon fontSize="small" />}
-                                        />
-
-                                        <EnhancedDetailSection
-                                            label="Date Created"
-                                            text={request.createDate ? moment(request.createDate).format('MMMM DD, YYYY - h:mm A') : null}
-                                            icon={<EventIcon fontSize="small" />}
-                                        />
-
-                                        <EnhancedDetailSection
-                                            label="Last Modified"
-                                            text={request.lastModified ? moment(request.lastModified).format('MMMM DD, YYYY - h:mm A') : null}
-                                            icon={<AccessTimeIcon fontSize="small" />}
-                                        />
-
-                                        <EnhancedDetailSection
-                                            label="Current Approver"
-                                            text={request.currentApprover ? `${request.currentApprover.firstName} ${request.currentApprover.lastName}` : null}
-                                            icon={<CheckCircleOutlineIcon fontSize="small" />}
-                                        />
-
-                                        <EnhancedDetailSection
-                                            label="Request Status"
-                                            text={request.status?.name || request.status?.status || null}
-                                            icon={<InventoryIcon fontSize="small" />}
-                                            chip={request?.status ? <StatusBadge status={request.status.status as string} /> : undefined}
-                                        />
-
-                                        <EnhancedDetailSection
-                                            label="Priority"
-                                            text={request.priority ? request.priority.charAt(0).toUpperCase() + request.priority.slice(1) : null}
-                                            icon={<PriorityHighIcon fontSize="small" />}
-                                            chip={getPriorityChip(request.priority) || undefined}
-                                        />
-
-                                        {request.description && (
-                                            <Box sx={{ mt: 3 }}>
-                                                <Typography
-                                                    variant="subtitle2"
-                                                    fontWeight={600}
-                                                    color="text.secondary"
-                                                    sx={{
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        gap: 1,
-                                                        mb: 1
-                                                    }}
-                                                >
-                                                    <DescriptionIcon fontSize="small" />
-                                                    Description
-                                                </Typography>
-
-                                                <Paper
-                                                    elevation={0}
-                                                    sx={{
-                                                        p: 2,
-                                                        borderRadius: 1.5,
-                                                        bgcolor: alpha('#f5f5f5', 0.5),
-                                                        border: `1px solid ${alpha('#000', 0.06)}`
-                                                    }}
-                                                >
-                                                    <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: 'pre-line' }}>
-                                                        {request.description}
-                                                    </Typography>
-                                                </Paper>
-                                            </Box>
-                                        )}
-                                    </CardContent>
-                                </Card>
-                            </Grid>
-
-                            {/* Right column - Tabs */}
-                            <Grid item xs={12} md={8}>
-                                <Card
-                                    elevation={0}
-                                    sx={{
-                                        borderRadius: 2,
-                                        overflow: 'hidden',
-                                        border: `1px solid ${alpha('#000', 0.08)}`,
-                                        height: '100%'
-                                    }}
-                                >
-                                    <CardContent>
-                                        <TabComponent
-                                            headers={[
-                                                {
-                                                    label: "Requested Items",
-                                                    position: 0,
-                                                    content: (
-                                                        <Box>
-                                                            <RequestCommodties
-                                                                requestCommodties={
-                                                                    request.commodities as Array<{
-                                                                        commodity: ICommodity
-                                                                        quantity: number
-                                                                    }>
-                                                                }
-                                                            />
-                                                        </Box>
-                                                    )
-                                                },
-                                                {
-                                                    label: "Processing Details",
-                                                    position: 1,
-                                                    content: (
-                                                        <Box>
-                                                            <OtherDetails
-                                                                acknowledgeIssuance={acknowledgeIssuance}
-                                                                acknowledgeRequest={acknowledgeRequest}
-                                                                issuanceApproval={issuanceApproval}
-                                                                issuance={currentIssuance}
-                                                                request={request}
-                                                            />
-                                                        </Box>
-                                                    )
-                                                },
-                                                {
-                                                    label: "Movement History",
-                                                    position: 2,
-                                                    content: (
-                                                        <Box>
-                                                            <MovementHistory request={request} />
-                                                        </Box>
-                                                    )
-                                                },
-                                                {
-                                                    label: "Approval History",
-                                                    position: 3,
-                                                    content: (
-                                                        <Box>
-                                                            <WorkflowTimeline requestId={request.id as number} />
-                                                        </Box>
-                                                    )
-                                                }
-                                            ]}
-                                        />
-                                    </CardContent>
-                                </Card>
-                            </Grid>
-                        </Grid>
-
-                        {/* Action buttons */}
-                        <Box
+                    {/* Action buttons */}
+                    <Stack direction="row" spacing={1} sx={{ flexShrink: 0 }}>
+                        <MuiButton
+                            variant="outlined"
+                            size="small"
+                            startIcon={<EditOutlinedIcon fontSize="small" />}
+                            disabled={!canEdit}
+                            onClick={() => navigate(`/requests/edit/${request.id}`)}
                             sx={{
-                                mt: 3,
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center'
+                                color: canEdit ? '#fff' : 'rgba(255,255,255,0.35)',
+                                borderColor: canEdit ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.15)',
+                                textTransform: 'none',
+                                fontSize: '0.8rem',
+                                '&:hover': { borderColor: '#fff', bgcolor: 'rgba(255,255,255,0.1)' },
+                                '&.Mui-disabled': { color: 'rgba(255,255,255,0.3)', borderColor: 'rgba(255,255,255,0.12)' },
                             }}
                         >
-                            <MuiButton
-                                color="inherit"
-                                variant="outlined"
-                                onClick={() => navigate(-1)}
-                                startIcon={<ArrowBackIcon />}
-                                sx={{
-                                    borderColor: alpha('#000', 0.2),
-                                    color: 'text.secondary',
-                                    '&:hover': {
-                                        borderColor: alpha('#000', 0.3),
-                                        backgroundColor: alpha('#000', 0.05)
-                                    }
-                                }}
-                            >
-                                Back to Requests
-                            </MuiButton>
+                            Edit
+                        </MuiButton>
+                    </Stack>
+                </Box>
 
-                            <Stack direction="row" spacing={1.5}>
-                                <MuiButton
-                                    color="primary"
-                                    variant="outlined"
-                                    startIcon={<EditIcon />}
-                                    onClick={() => navigate(`/requests/edit/${request.id}`)}
-                                    disabled={request.status?.status !== "requestCreated"}
-                                >
-                                    Edit Request
-                                </MuiButton>
-
-                                {request.status?.status === "requestCreated" && (
-                                    <MuiButton
-                                        color="success"
-                                        variant="contained"
-                                        onClick={() => navigate(`/requests/approve/${request.id}`)}
-                                    >
-                                        Process Request
-                                    </MuiButton>
-                                )}
-                            </Stack>
-                        </Box>
-                    </>
+                {/* Attachment pill in header */}
+                {request.signaturePath && (
+                    <Box sx={{ mt: 2 }}>
+                        <Stack direction="row" spacing={1} alignItems="center">
+                            <AttachFileOutlinedIcon sx={{ fontSize: 14, color: 'rgba(255,255,255,0.5)' }} />
+                            <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.5)', mr: 0.5 }}>
+                                Attachment:
+                            </Typography>
+                            <AttachmentPill
+                                filePath={request.signaturePath}
+                                onView={() => setIsAttachmentViewerOpen(true)}
+                            />
+                        </Stack>
+                    </Box>
                 )}
             </Box>
 
-            {/* Attachment Viewer Modal */}
+            {/* ── Body ── */}
+            <Box sx={{ px: { xs: 2, md: 4 }, py: 3 }}>
+                {loading ? (
+                    <Loading items="Asset Request" />
+                ) : (
+                    <Grid container spacing={3}>
+                        {/* ── Left: Summary card ── */}
+                        <Grid item xs={12} md={4} lg={3}>
+                            <Paper
+                                elevation={0}
+                                sx={{
+                                    borderRadius: 2,
+                                    border: `1px solid ${alpha('#000', 0.08)}`,
+                                    overflow: 'hidden',
+                                    bgcolor: '#fff',
+                                }}
+                            >
+                                {/* Card header */}
+                                <Box
+                                    sx={{
+                                        px: 2.5,
+                                        py: 1.75,
+                                        borderBottom: `1px solid ${alpha('#000', 0.06)}`,
+                                        bgcolor: alpha(TEAL, 0.03),
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: 1,
+                                    }}
+                                >
+                                    <Box
+                                        sx={{
+                                            width: 28,
+                                            height: 28,
+                                            borderRadius: '7px',
+                                            background: `linear-gradient(135deg, ${TEAL}, ${TEAL_DARK})`,
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                        }}
+                                    >
+                                        <ListAltOutlinedIcon sx={{ fontSize: 15, color: '#fff' }} />
+                                    </Box>
+                                    <Typography variant="subtitle2" fontWeight={700} color={TEAL}>
+                                        Request Summary
+                                    </Typography>
+                                </Box>
+
+                                {/* Info rows */}
+                                <Box sx={{ px: 2.5, py: 1.5 }}>
+                                    <InfoRow icon={<PersonOutlineIcon />} label="Requested By">
+                                        <Typography variant="body2" fontWeight={600}>
+                                            {request.requester
+                                                ? `${request.requester.firstName} ${request.requester.lastName}`
+                                                : '—'}
+                                        </Typography>
+                                    </InfoRow>
+
+                                    <InfoRow icon={<BadgeOutlinedIcon />} label="Staff Number">
+                                        <Typography variant="body2" fontWeight={500}>
+                                            {request.requester?.staffNumber ?? '—'}
+                                        </Typography>
+                                    </InfoRow>
+
+                                    <InfoRow icon={<AccountBalanceOutlinedIcon />} label="Branch">
+                                        <Typography variant="body2" fontWeight={500}>
+                                            {request.requester?.branch?.name ?? '—'}
+                                        </Typography>
+                                    </InfoRow>
+
+                                    <InfoRow icon={<CategoryOutlinedIcon />} label="Asset Category">
+                                        <Typography variant="body2" fontWeight={500}>
+                                            {request.assetType?.name ?? '—'}
+                                        </Typography>
+                                    </InfoRow>
+
+                                    <InfoRow icon={<HowToRegOutlinedIcon />} label="Current Approver">
+                                        <Typography variant="body2" fontWeight={500}>
+                                            {request.currentApprover
+                                                ? `${request.currentApprover.firstName} ${request.currentApprover.lastName}`
+                                                : '—'}
+                                        </Typography>
+                                    </InfoRow>
+
+                                    <InfoRow icon={<CalendarTodayOutlinedIcon />} label="Submitted">
+                                        <Typography variant="body2" fontWeight={500}>
+                                            {request.createDate
+                                                ? moment(request.createDate).format('D MMM YYYY, h:mm A')
+                                                : '—'}
+                                        </Typography>
+                                    </InfoRow>
+
+                                    <InfoRow icon={<UpdateOutlinedIcon />} label="Last Modified">
+                                        <Typography variant="body2" fontWeight={500}>
+                                            {request.lastModified
+                                                ? moment(request.lastModified).format('D MMM YYYY, h:mm A')
+                                                : '—'}
+                                        </Typography>
+                                    </InfoRow>
+                                </Box>
+
+                                {/* Description */}
+                                {request.description && (
+                                    <>
+                                        <Divider />
+                                        <Box sx={{ px: 2.5, py: 2 }}>
+                                            <Typography
+                                                variant="caption"
+                                                color="text.disabled"
+                                                sx={{ display: 'block', mb: 0.75, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}
+                                            >
+                                                Description
+                                            </Typography>
+                                            <Typography
+                                                variant="body2"
+                                                color="text.secondary"
+                                                sx={{ whiteSpace: 'pre-line', lineHeight: 1.7 }}
+                                            >
+                                                {request.description}
+                                            </Typography>
+                                        </Box>
+                                    </>
+                                )}
+                            </Paper>
+                        </Grid>
+
+                        {/* ── Right: Tab panel ── */}
+                        <Grid item xs={12} md={8} lg={9}>
+                            <Paper
+                                elevation={0}
+                                sx={{
+                                    borderRadius: 2,
+                                    border: `1px solid ${alpha('#000', 0.08)}`,
+                                    overflow: 'hidden',
+                                    bgcolor: '#fff',
+                                }}
+                            >
+                                {/* Tab bar */}
+                                <Tabs
+                                    value={activeTab}
+                                    onChange={(_, v) => setActiveTab(v)}
+                                    variant="scrollable"
+                                    scrollButtons="auto"
+                                    sx={{
+                                        px: 2,
+                                        borderBottom: `1px solid ${alpha('#000', 0.07)}`,
+                                        minHeight: 48,
+                                        bgcolor: alpha(TEAL, 0.02),
+                                        '& .MuiTab-root': {
+                                            minHeight: 48,
+                                            textTransform: 'none',
+                                            fontSize: '0.82rem',
+                                            fontWeight: 500,
+                                            color: 'text.secondary',
+                                            gap: 0.75,
+                                            px: 2,
+                                        },
+                                        '& .Mui-selected': { color: TEAL, fontWeight: 700 },
+                                        '& .MuiTabs-indicator': { bgcolor: TEAL, height: 3, borderRadius: '3px 3px 0 0' },
+                                    }}
+                                >
+                                    {TABS.map((tab, i) => (
+                                        <Tab key={i} label={tab.label} icon={tab.icon} iconPosition="start" />
+                                    ))}
+                                </Tabs>
+
+                                {/* Tab panels */}
+                                <Box sx={{ p: { xs: 2, md: 3 } }}>
+                                    {activeTab === 0 && (
+                                        <RequestCommodties
+                                            requestCommodties={
+                                                request.commodities as Array<{
+                                                    commodity: ICommodity;
+                                                    quantity: number;
+                                                }>
+                                            }
+                                        />
+                                    )}
+                                    {activeTab === 1 && (
+                                        <OtherDetails
+                                            acknowledgeIssuance={acknowledgeIssuance}
+                                            acknowledgeRequest={acknowledgeRequest}
+                                            issuanceApproval={issuanceApproval}
+                                            issuance={currentIssuance}
+                                            request={request}
+                                        />
+                                    )}
+                                    {activeTab === 2 && <MovementHistory request={request} />}
+                                    {activeTab === 3 && <WorkflowTimeline requestId={request.id as number} />}
+                                </Box>
+                            </Paper>
+                        </Grid>
+                    </Grid>
+                )}
+            </Box>
+
+            {/* Attachment Viewer */}
             <AttachmentViewer
                 open={isAttachmentViewerOpen}
                 onClose={() => setIsAttachmentViewerOpen(false)}
                 filePath={request.signaturePath || null}
-                fileName={getAttachmentFileName()}
+                fileName={request.signaturePath?.split(/[/\\]/).pop() ?? ''}
             />
-        </Container>
+        </Box>
     );
 };
 

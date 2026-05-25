@@ -14,6 +14,12 @@ export const branchSchema = yup.object().shape({
         .string()
         .required('Telephone is required')
         .matches(/^\+256\d{9}$/, 'Must be a valid Ugandan phone number (e.g. +256700000000)'),
+    managersGroupEmail: yup
+        .string()
+        .trim()
+        .email('Invalid email format')
+        .nullable()
+        .notRequired(),
     region: yup
         .number()
         .typeError('Region is required')

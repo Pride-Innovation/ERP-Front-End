@@ -185,24 +185,51 @@ img, svg {
   .asset-type-grid { grid-template-columns: repeat(6, 1fr); } /* 6 cols */
 }
 
-/* ── Department cards grid ── */
-.department-grid {
+/* ─── Generic settings-card grid ───────────────────────────────
+ * Shared layout for Branch / Department / Supplier / Title /
+ * Commodity / Region card lists. Mirrors `.asset-type-grid` so
+ * settings pages keep a uniform card density across breakpoints.
+ * Cards have a comfortable min width (~280 px) and fill the
+ * available width equally up to the column cap per viewport tier.
+ */
+.settings-card-grid {
   display: grid;
-  gap: 24px;
-  grid-template-columns: 1fr;               /* < 600 px  – 1 col  */
+  gap: 20px;
+  grid-template-columns: 1fr;               /* < 480 px  – 1 col */
 }
-
-/* Tablet and up */
-@media (min-width: 600px) {
-  .department-grid { grid-template-columns: repeat(2, 1fr); } /* 2 cols */
+@media (min-width: 480px) {
+  .settings-card-grid { grid-template-columns: repeat(2, 1fr); } /* 2 cols */
 }
-
-/* Standard FHD / large desktop (1440 px) */
+@media (min-width: 1024px) {
+  .settings-card-grid { grid-template-columns: repeat(3, 1fr); } /* 3 cols */
+}
 @media (min-width: 1440px) {
-  .department-grid { grid-template-columns: repeat(3, 1fr); } /* 3 cols */
+  .settings-card-grid { grid-template-columns: repeat(4, 1fr); } /* 4 cols */
+}
+@media (min-width: 1920px) {
+  .settings-card-grid { grid-template-columns: repeat(5, 1fr); } /* 5 cols */
+}
+@media (min-width: 2560px) {
+  .settings-card-grid { grid-template-columns: repeat(6, 1fr); } /* 6 cols */
 }
 
-/* Wide monitor (1920 px) */
-@media (min-width: 1920px) {
-  .department-grid { grid-template-columns: repeat(4, 1fr); } /* 4 cols */
+/* Wider variant for cards with denser content (suppliers, branches
+ * with management team + contact info). Caps one column lower so
+ * each card has room to breathe. */
+.settings-card-grid--wide {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 600px) {
+  .settings-card-grid--wide { grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 1280px) {
+  .settings-card-grid--wide { grid-template-columns: repeat(3, 1fr); }
+}
+@media (min-width: 1700px) {
+  .settings-card-grid--wide { grid-template-columns: repeat(4, 1fr); }
+}
+@media (min-width: 2200px) {
+  .settings-card-grid--wide { grid-template-columns: repeat(5, 1fr); }
 }

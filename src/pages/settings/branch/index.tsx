@@ -7,7 +7,6 @@ Managing Director
 
 import {
   Box,
-  Grid,
   useTheme,
   Typography,
   Button,
@@ -321,13 +320,17 @@ const Branches = () => {
         ) : branches.length > 0 ? (
           <>
             <Fade in={!loading}>
-              <Grid container spacing={3}>
-                {branches.map((branch) => (
-                  <Grid item xs={12} sm={6} md={6} lg={6} xl={4} key={branch.id}>
-                    <ViewBranch branch={branch} deleteBranch={deleteBranch} updateBranch={updateBranch} />
-                  </Grid>
+              <Box className="settings-card-grid--wide">
+                {branches.map((branch, i) => (
+                  <ViewBranch
+                    key={branch.id}
+                    branch={branch}
+                    deleteBranch={deleteBranch}
+                    updateBranch={updateBranch}
+                    index={i}
+                  />
                 ))}
-              </Grid>
+              </Box>
             </Fade>
 
             {/* Pagination */}

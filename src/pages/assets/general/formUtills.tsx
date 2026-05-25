@@ -7,16 +7,12 @@ Managing Director
 
 import { useContext, useEffect, useState } from "react";
 import { IOptions, ITableHeader } from "../../../components/tables/interface";
-import { fleetsMock } from "../../../mocks/fleet";
-import InfoIcon from '@mui/icons-material/Info';
-import ModeEditIcon from '@mui/icons-material/ModeEdit';
-import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
+import { IFormData, IOfficeEquipment, IOfficeEquipmentTableData } from "../interface";
+import { officeEquipmentMock } from "../../../mocks/officeEquipment";
 import { getTableHeaders } from "../../../components/tables/getTableHeaders";
-import { IFormData } from "../interface";
-import { IFleet, IFleetTableData } from "./interface";
 import { assetTypesStatusConstants, crudStates, unitsOfMeasure } from "../../../utils/constants";
-import { useNavigate } from "react-router";
 import { ROUTES } from "../../../core/routes/routes";
+import { useNavigate } from "react-router";
 import moment from "moment";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../store";
@@ -24,20 +20,19 @@ import { IAssetType } from "../../settings/assetTypes/interface";
 import { AutocompleteContext } from "../../../context/autocomplete";
 import AssetUtills from "../Utills";
 import { determineBranchName } from "../../../utils/helpers";
-import AssignmentIndOutlinedIcon from '@mui/icons-material/AssignmentIndOutlined';
-import BuildOutlinedIcon from '@mui/icons-material/BuildOutlined';
-import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
+import { AssetContext } from "../../../context/asset";
 
-const FleetUtills = () => {
+const OfficeEquipmentUtills = () => {
     const endPoint = 'assets';
-    const module = "Fleet";
-    const header = { plural: 'Fleet', singular: 'Fleet' };
+    const module = 'Office Equipment';
+    const header = { plural: 'Office Equipment', singular: 'Office Equipment' };
     const [open, setOpen] = useState<boolean>(false);
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
-    const [fleetTableData, setFleetTableData] = useState<IFleetTableData[]>([] as IFleetTableData[])
+    const [currentAsset, setCurrentAsset] = useState<IOfficeEquipment>({} as IOfficeEquipment);
+    const [officeEquipmentTableData, setOfficeEquipmentTableData] = useState<IOfficeEquipmentTableData[]>([] as IOfficeEquipmentTableData[])
     const { selectedItemDetails, value, inputValue, label } = useContext(AutocompleteContext)
-    const [currentAsset, setCurrentAsset] = useState<IFleet>({} as IFleet);
     const [currentState, setCurrentState] = useState<string>("");
+    const { options } = useContext(AssetContext);
 
     const {
         searchStockByLPONumber,
@@ -46,14 +41,13 @@ const FleetUtills = () => {
         searchSupplierByName
     } = AssetUtills();
 
-
     const [optionsObject, setOptionsObject] = useState<{
         assetsStatusesOptions: Array<IOptions>,
         branchesOptions: Array<IOptions>,
         usersOptions: Array<IOptions>
         suppliersOptions: Array<IOptions>
         assetTypesOptions: Array<IOptions>,
-        commoditiesOptions: Array<IOptions>
+        commoditiesOptions: Array<IOptions>,
         inventoryOptions: Array<IOptions>
     }>({
         assetsStatusesOptions: [],
@@ -62,7 +56,7 @@ const FleetUtills = () => {
         assetTypesOptions: [],
         suppliersOptions: [],
         commoditiesOptions: [],
-        inventoryOptions: []
+        inventoryOptions: [],
     });
 
     const handleOpen = () => setOpen(true);
@@ -75,10 +69,11 @@ const FleetUtills = () => {
     const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore)
     const { commodities } = useSelector((state: RootState) => state.CommodityStore)
     const { inventory } = useSelector((state: RootState) => state.InventoryStore)
-    const { fleetAssets } = useSelector((state: RootState) => state.FleetStore)
+    // Unified store — all categories live in GeneralAssetStore. Alias kept as
+    // `officeAsset` to minimise downstream churn in this legacy utill.
+    const { generalAssets: officeAsset } = useSelector((state: RootState) => state.GeneralAssetStore)
 
     const navigate = useNavigate()
-
 
     useEffect(() => {
         if (statuses.length > 0)
@@ -88,7 +83,7 @@ const FleetUtills = () => {
                 assetsStatusesOptions: statuses?.map(status => ({ label: status.name, value: status.id as number })) || [],
                 usersOptions: users?.map(user => ({ label: `${user.firstName} ${user.lastName}` as string, value: user.id as number })) || [],
                 suppliersOptions: suppliers?.map(supplier => ({ label: supplier.name, value: supplier?.id as number })) || [],
-                commoditiesOptions: commodities?.map(supplier => ({ label: supplier.name, value: supplier?.id as number })) || [],
+                commoditiesOptions: commodities?.map(commodity => ({ label: commodity.name, value: commodity?.id as number })) || [],
                 inventoryOptions: inventory?.map(invent => ({ label: invent.lpoNumber, value: invent?.lpoNumber as string })) || [],
             })
 
@@ -106,51 +101,41 @@ const FleetUtills = () => {
         detailNetBookValue,
         netValueB,
         unitOfMeasure,
-        dateReceipt,
-        image,
+        lpoNumber,
         stock,
         commodity,
+        dateReceipt,
         purchaseCost,
         costOfTheAsset,
         hostname,
-        lpoNumber,
         make,
-        model,
         assetName,
         engravedNumber,
+        image,
         ...data
-    } = fleetsMock[0];
+    } = officeEquipmentMock[0];
 
     const rowData = {
         ...data,
-        assetName,
-        manufacturer: make,
-        engravedNumber,
-        model,
+        assetName: "",
+        manufacturer: "",
+        engravedNumber: "",
         dateReceived: "",
         location: "",
-        assignedTo: fleetsMock[0].assignedTo?.firstName,
-        status: fleetsMock[0].assetStatus?.name,
+        assignedTo: officeEquipmentMock[0].assignedTo?.firstName,
+        status: officeEquipmentMock[0].assetStatus?.name,
         action: {
             label: "options",
-            options: [
-                { value: "dispose", label: "Dispose", icon: <InfoIcon fontSize='small' color='error' /> },
-                { value: "update", label: "Update", icon: <ModeEditIcon fontSize='small' color='info' /> },
-                { value: "read", label: "View Details", icon: <RemoveRedEyeIcon fontSize='small' color='inherit' /> },
-                { value: crudStates.reassign, label: "Reassign", icon: <AssignmentIndOutlinedIcon fontSize='small' color='secondary' /> },
-                { value: crudStates.repair, label: "Repair", icon: <BuildOutlinedIcon fontSize='small' color='primary' /> },
-                { value: crudStates.inStore, label: "Send to Store", icon: <HomeOutlinedIcon fontSize='small' color='action' /> },
-            ]
+            options: options
         },
     };
 
     useEffect(() => {
         setColumnHeaders(getTableHeaders(rowData))
-    }, []);
+    }, [options]);
 
-
-    const handleFleetTableData = (list: Array<IFleet>) => {
-        const data: Array<IFleetTableData> = list.map((item, index) => {
+    const handleOfficeEquipmentTableData = (list: Array<IOfficeEquipment>) => {
+        const data: Array<IOfficeEquipmentTableData> = list.map((item, index) => {
             const {
                 branch,
                 assignedTo,
@@ -162,18 +147,17 @@ const FleetUtills = () => {
                 detailNetBookValue,
                 netValueB,
                 unitOfMeasure,
-                dateReceipt,
-                image,
+                lpoNumber,
                 stock,
                 commodity,
+                dateReceipt,
                 purchaseCost,
                 costOfTheAsset,
                 hostname,
-                lpoNumber,
                 make,
-                model,
                 assetName,
                 engravedNumber,
+                image,
                 ...fielsdata
             } = list[index];
 
@@ -183,21 +167,17 @@ const FleetUtills = () => {
                     assetName: item.assetName,
                     engravedNumber: item.engravedNumber,
                     dateReceived: moment(item.dateReceipt).format('Do MMMM YYYY'),
-                    make: item.make as string,
-                    model: item.model as string,
-                    purchaseCost: item.purchaseCost,
-                    costOfAsset: item.costOfTheAsset,
+                    make: item.make,
                     status: item?.assetStatus?.status as string,
                     assignedTo: item.assignedTo?.firstName ? `${item.assignedTo?.lastName} ${item.assignedTo?.firstName}` : "",
                     location: determineBranchName(item),
-                    manufacturer: item.make as string,
+                    manufacturer: item.make,
                 }
             )
         })
-        setFleetTableData(data);
+        setOfficeEquipmentTableData(data);
 
     }
-
 
     /**
      * Determine that there is a search text.
@@ -248,7 +228,7 @@ const FleetUtills = () => {
 
     }, [inputValue])
 
-    const formFields: Array<IFormData<IFleet>> = [
+    const formFields: Array<IFormData<IOfficeEquipment>> = [
         {
             value: "category",
             label: 'Select Category',
@@ -274,14 +254,12 @@ const FleetUtills = () => {
         {
             value: "netValueB",
             label: 'Net Value',
-            type: "input",
-            required: false
+            type: "input"
         },
         {
             value: "assetDepreciationRate",
             label: 'Depreciation Rate',
-            type: "input",
-            required: false
+            type: "input"
         },
         {
             value: "branch",
@@ -298,13 +276,11 @@ const FleetUtills = () => {
             value: "hostname",
             label: 'Host Name',
             type: "input",
-            required: false
         },
         {
             value: "detailNetBookValue",
             label: 'Detail Net Book Value',
             type: "input",
-            required: false
         },
         {
             value: "dateReceipt",
@@ -320,7 +296,6 @@ const FleetUtills = () => {
             value: "make",
             label: 'Make',
             type: "input",
-            required: false
         },
         {
             value: "supplier",
@@ -334,51 +309,50 @@ const FleetUtills = () => {
             type: "autocomplete",
             options: optionsObject.inventoryOptions,
             disabled: true
-        },
-        {
-            value: "serialNumber",
-            label: 'Chasis Number',
-            type: "input",
-            required: false
         }
     ]
 
-    const determineCurrentAsset = (id: number, itemList: Array<IFleet>): IFleet => {
+    const determineCurrentAsset = (id: number, itemList: Array<IOfficeEquipment>): IOfficeEquipment => {
         const item = itemList.find(item => item.id === id);
-        return item as IFleet;
+        return item as IOfficeEquipment;
     }
 
-    const determineFleetAssetType = () => {
+    const determineOfficeAssetType = () => {
         return assetTypes.find(assetType => assetType
             .name.toLocaleLowerCase()
-            .indexOf(assetTypesStatusConstants.fleet.toLocaleLowerCase()) !== -1) as IAssetType
+            .indexOf(assetTypesStatusConstants.officeEquipment.toLocaleLowerCase()) !== -1) as IAssetType
     }
 
-    const handleOptionClicked = (option: string | number, moduleID?: string | number) => {
+    const handleOptionClicked = async (option: string | number, moduleID?: string | number) => {
+        // The legacy hardcoded `/office-equipment` routes are gone. Use the
+        // parameterised generic route with the resolved Office Equipment
+        // asset-type ID instead.
+        const officeType = determineOfficeAssetType();
+        const officeTypeId = officeType?.id;
         switch (option) {
             case crudStates.update:
-                navigate(`${ROUTES.UPDATE_FLEET}/${moduleID}`)
+                navigate(`${ROUTES.LIST_GENERAL_ASSETS}/${officeTypeId}/update/${moduleID}`)
                 break;
             case crudStates.read:
-                navigate(`${ROUTES.LIST_FLEET}/${moduleID}`);
+                navigate(`${ROUTES.LIST_GENERAL_ASSETS}/${officeTypeId}/view/${moduleID}`);
                 break;
             case crudStates.dispose:
-                setCurrentAsset(determineCurrentAsset(moduleID as number, fleetAssets as IFleet[]))
+                setCurrentAsset(determineCurrentAsset(moduleID as number, officeAsset as IOfficeEquipment[]))
                 setCurrentState(crudStates.dispose);
-                handleOpen();
+                handleOpen()
                 break;
             case crudStates.reassign:
-                setCurrentAsset(determineCurrentAsset(moduleID as number, fleetAssets as IFleet[]))
+                setCurrentAsset(determineCurrentAsset(moduleID as number, officeAsset as IOfficeEquipment[]))
                 setCurrentState(crudStates.reassign);
                 handleOpen();
                 break;
             case crudStates.repair:
-                setCurrentAsset(determineCurrentAsset(moduleID as number, fleetAssets as IFleet[]))
+                setCurrentAsset(determineCurrentAsset(moduleID as number, officeAsset as IOfficeEquipment[]))
                 setCurrentState(crudStates.repair);
                 handleOpen();
                 break;
             case crudStates.inStore:
-                setCurrentAsset(determineCurrentAsset(moduleID as number, fleetAssets as IFleet[]))
+                setCurrentAsset(determineCurrentAsset(moduleID as number, officeAsset as IOfficeEquipment[]))
                 setCurrentState(crudStates.inStore);
                 handleOpen();
                 break;
@@ -390,22 +364,22 @@ const FleetUtills = () => {
     return (
         {
             endPoint,
-            open,
-            handleClose,
-            handleOpen,
-            columnHeaders,
             header,
+            open,
+            columnHeaders,
+            handleOpen,
+            handleClose,
             formFields,
             determineCurrentAsset,
             module,
             handleOptionClicked,
-            fleetTableData,
-            handleFleetTableData,
-            determineFleetAssetType,
             currentAsset,
+            officeEquipmentTableData,
+            handleOfficeEquipmentTableData,
+            determineOfficeAssetType,
             currentState
         }
     )
 }
 
-export default FleetUtills;
+export default OfficeEquipmentUtills

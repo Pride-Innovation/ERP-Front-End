@@ -31,14 +31,9 @@ import { searchUserService } from "../users/service";
 import { IUsersAxiosResponse } from "../users/interface";
 import { useDispatch } from "react-redux";
 import { loadUsers } from "../users/slice";
-import { reassignITEquipmentService } from "./ITEquipment/service";
-import { updateITAsset } from "./ITEquipment/slice";
 import { toast } from "react-toastify";
-import { assetTypesStatusConstants } from "../../utils/constants";
-import { reassignOfficeEquipmentService } from "./officeEquipment/service";
-import { updateOfficeAsset } from "./officeEquipment/slice";
-import { updateFleetAsset } from "./fleet/slice";
-import { reassignFleetService } from "./fleet/service";
+import axiosInstance from "../../core/apis/axiosInstance";
+import { updateGeneralAssetInStore } from "./general/slice";
 
 const PRIMARY_COLOR = '#08796C';
 
@@ -123,28 +118,16 @@ const Reassign = ({
 
     const reassignAsset = async () => {
         try {
-            const response = module === assetTypesStatusConstants.itEquipment
-                ? await reassignITEquipmentService(
-                    asset?.id as number,
-                    { assignedTo: selectedUser?.value }
-                ) as IAssetAxiosResponse
-                : module === assetTypesStatusConstants.officeEquipment
-                    ? await reassignOfficeEquipmentService(
-                        asset?.id as number,
-                        { assignedTo: selectedUser?.value }
-                    ) as IAssetAxiosResponse
-                    : await reassignFleetService(
-                        asset?.id as number,
-                        { assignedTo: selectedUser?.value }
-                    ) as IAssetAxiosResponse;
+            // The legacy per-category reassign services all hit the same
+            // `assets/reassign/{id}` endpoint — call it directly.
+            const response = await axiosInstance.post(
+                `assets/reassign/${asset?.id}`,
+                { assignedTo: selectedUser?.value }
+            ) as IAssetAxiosResponse;
 
             if (response.status === 201) {
                 toast.success("Asset reassigned successfully");
-                module === assetTypesStatusConstants.itEquipment
-                    ? dispatch(updateITAsset(response.data))
-                    : module === assetTypesStatusConstants.officeEquipment
-                        ? dispatch(updateOfficeAsset(response.data))
-                        : dispatch(updateFleetAsset(response.data));
+                dispatch(updateGeneralAssetInStore(response.data));
             }
         } catch (error) {
             console.error("Error reassigning asset:", error);

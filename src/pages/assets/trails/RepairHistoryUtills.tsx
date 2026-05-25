@@ -12,7 +12,7 @@ import { crudStates } from "../../../utils/constants";
 import { repairHistoryMock } from "../../../mocks/repairHistory";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../../store";
-import { listRepairDetailService } from "../officeEquipment/service";
+import { listRepairDetailService } from "../general/service";
 import { IRepairDetails, IRepairDetailsAxiosResponse, IRepairsTableData } from "../interface";
 import { loadAssetRepairHistory } from "./slice";
 import moment from "moment";

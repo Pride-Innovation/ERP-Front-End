@@ -1,8 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { IOfficeEquipment } from "../../officeEquipment/interface";
+import { IAsset } from "../../interface";
 
 interface IGeneralAssetState {
-    generalAssets: IOfficeEquipment[];
+    generalAssets: IAsset[];
 }
 
 const initialState: IGeneralAssetState = {

@@ -113,6 +113,11 @@ const BranchUtills = () => {
             type: "input"
         },
         {
+            value: "managersGroupEmail",
+            label: "Managers Group Email",
+            type: "input"
+        },
+        {
             value: "branchManager",
             label: "Branch Manager",
             type: "autocomplete",

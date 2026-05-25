@@ -9,7 +9,9 @@ import { useEffect, useState } from 'react'
 import { ITableHeader } from '../../../components/tables/interface';
 import { getTableHeaders } from '../../../components/tables/getTableHeaders';
 import { itEquipmentMock } from '../../../mocks/itEquipment';
-import { IITEquipment } from '../../assets/ITEquipment/interface';
+// All asset categories share the same canonical shape now that the
+// per-category routes/pages have been consolidated under /general/{typeId}.
+import { IAsset as IITEquipment } from '../../assets/interface';
 import { IAssetTableData } from '../interface';
 import moment from 'moment';
 

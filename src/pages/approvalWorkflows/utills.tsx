@@ -36,6 +36,8 @@ export const blankApprovalStep = (order = 1): IApprovalStep => ({
     groupEmail: '',
     specificUserId: '',
     notifyGroupEmail: '',
+    notifyGroupSource: 'STATIC',
+    notifyOnCompletion: [],
     optional: false,
     escalationHours: 48,
     skipIfRequesterRoleIds: [],

@@ -22,6 +22,8 @@ export interface IRegionDetails {
     region: IRegion;
     deleteRegion: (role: IRegion) => void;
     updateRegion: (role: IRegion) => void;
+    /** Position in the rendered grid — used to rotate the card accent colour. */
+    index?: number;
 }
 
 

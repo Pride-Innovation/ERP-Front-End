@@ -12,7 +12,9 @@ import { getTableHeaders } from '../../../components/tables/getTableHeaders';
 import InfoIcon from '@mui/icons-material/Info';
 import DoNotDisturbAltIcon from '@mui/icons-material/DoNotDisturbAlt';
 import { IAssetTableData } from '../interface';
-import { IOfficeEquipment } from '../../assets/officeEquipment/interface';
+// All asset categories share the same canonical shape now that the
+// per-category routes/pages have been consolidated under /general/{typeId}.
+import { IAsset as IOfficeEquipment } from '../../assets/interface';
 import moment from 'moment';
 
 const DashboardOfficeAssetsUtills = () => {

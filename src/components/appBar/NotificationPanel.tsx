@@ -19,6 +19,8 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import AssignmentOutlinedIcon from '@mui/icons-material/AssignmentOutlined';
 import { useNotifications } from '../../context/notification/NotificationContext';
 import { formatDistanceToNow } from 'date-fns';
+import { useNavigate } from 'react-router';
+import { ROUTES } from '../../core/routes/routes';
 
 const TEAL = '#05544B';
 const GOLD = '#BC892C';
@@ -39,7 +41,13 @@ interface Props {
 
 const NotificationPanel: React.FC<Props> = ({ anchor, onClose }) => {
     const { notifications, unreadCount, handleMarkRead, handleMarkAllRead } = useNotifications();
+    const navigate = useNavigate();
     const open = Boolean(anchor);
+
+    const goToAll = () => {
+        onClose();
+        navigate(ROUTES.NOTIFICATIONS);
+    };
 
     return (
         <Popover
@@ -132,6 +140,18 @@ const NotificationPanel: React.FC<Props> = ({ anchor, onClose }) => {
                     ))
                 )}
             </List>
+
+            {/* Footer — link to the full Notifications page. */}
+            <Box sx={{ borderTop: '1px solid rgba(0,0,0,0.08)', px: 2, py: 1, bgcolor: '#fafafa' }}>
+                <Button
+                    fullWidth
+                    size="small"
+                    onClick={goToAll}
+                    sx={{ textTransform: 'none', color: TEAL, fontWeight: 600 }}
+                >
+                    View all notifications
+                </Button>
+            </Box>
         </Popover>
     );
 };

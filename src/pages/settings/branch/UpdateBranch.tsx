@@ -24,6 +24,7 @@ const UpdateBranch = ({ handleClose, sendingRequest, branch, setSendingRequest }
             name: branch.name,
             email: branch.email,
             telephone: branch.telephone ?? "",
+            managersGroupEmail: branch.managersGroupEmail ?? "",
             region: branch.region?.id as number,
             district: branch.district?.id as number,
             branchManager: branch.branchManager?.id as number ?? null,

@@ -7,7 +7,7 @@ Managing Director
 
 import { useContext, useEffect } from "react";
 import TableComponent from "../../../../components/tables/TableComponent";
-import { Box, Card } from "@mui/material";
+import { Box } from "@mui/material";
 import RequestUtills from "../utills";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../store";
@@ -80,53 +80,37 @@ const RejectedRequest = () => {
             }
         </>)
     return (
-        <Box width={'100%'} sx={{
-            px: 3,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center'
-        }}>
+        <Box width={'100%'}>
             {renderModals()}
-            <Card
-                elevation={0}
-                sx={{
-                    borderRadius: 2,
-                    width: '100%',
-                    maxWidth: "1500px",
-                    overflow: 'hidden',
-                    border: "none",
-                    bgcolor: 'white'
-                }}
-            >
-                {columnHeaders.length > 0 &&
-                    <TableComponent
-                        endPoint={endPoint}
-                        loading={loading}
-                        count={count}
-                        exportData
-                        module={"rejected requests"}
-                        header={{ plural: "Rejected Requests", singular: "Rejected Requests" }}
-                        rows={requestTableData}
-                        columnHeaders={columnHeaders}
-                        handleOptionClicked={handleOptionClicked}
-                        params={{ statusIds: 2 }}
-                        columnFilters={[
-                            { key: 'assetName', label: 'Asset Name', type: 'text' },
-                            { key: 'requestedBy', label: 'Requested By', type: 'text' },
-                            { key: 'requestedFrom', label: 'Requested From', type: 'text' },
-                            {
-                                key: 'status', label: 'Status', type: 'select', options: [
-                                    { value: 'active', label: 'Active' },
-                                    { value: 'disabled', label: 'Disabled' },
-                                    { value: 'locked', label: 'Locked' },
-                                ]
-                            },
-                            { key: 'createdAt', label: 'Request Created', type: 'dateRange' },
-                        ]}
-                        onApplyFilters={(filters) => fetchAllRequests(filters)}
-                    />
-                }
-            </Card>
+            {columnHeaders.length > 0 &&
+                <TableComponent
+                    endPoint={endPoint}
+                    loading={loading}
+                    count={count}
+                    exportData
+                    module={"rejected requests"}
+                    header={{ plural: "Rejected Requests", singular: "Rejected Requests" }}
+                    rows={requestTableData}
+                    columnHeaders={columnHeaders}
+                    handleOptionClicked={handleOptionClicked}
+                    params={{ statusIds: 2 }}
+                    refresh
+                    columnFilters={[
+                        { key: 'assetName', label: 'Asset Name', type: 'text' },
+                        { key: 'requestedBy', label: 'Requested By', type: 'text' },
+                        { key: 'requestedFrom', label: 'Requested From', type: 'text' },
+                        {
+                            key: 'status', label: 'Status', type: 'select', options: [
+                                { value: 'active', label: 'Active' },
+                                { value: 'disabled', label: 'Disabled' },
+                                { value: 'locked', label: 'Locked' },
+                            ]
+                        },
+                        { key: 'createdAt', label: 'Request Created', type: 'dateRange' },
+                    ]}
+                    onApplyFilters={(filters) => fetchAllRequests(filters)}
+                />
+            }
         </Box>
     )
 }

@@ -305,19 +305,30 @@ const MovementHistory = ({ request }: { request: IRequest }) => {
                 }} />}
             </Box>
 
-            <Box
-                sx={{
-                    textAlign: 'center',
-                    mt: 2,
-                    pt: 1.5,
-                    pb: 0.5,
-                    borderTop: `1px dashed ${alpha(theme.palette.divider, 0.3)}`
-                }}
-            >
-                <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.8rem' }}>
-                    This request was initiated on <b>14 Sep 2025</b> and is currently in the <b>Items Issued</b> stage.
-                </Typography>
-            </Box>
+            {request.createDate && (
+                <Box
+                    sx={{
+                        textAlign: 'center',
+                        mt: 2,
+                        pt: 1.5,
+                        pb: 0.5,
+                        borderTop: `1px dashed ${alpha(theme.palette.divider, 0.3)}`
+                    }}
+                >
+                    <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.8rem' }}>
+                        Request initiated on{' '}
+                        <b>{new Date(request.createDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</b>
+                        {' '}· current stage:{' '}
+                        <b>
+                            {acknowledgeIssuance ? 'Items Received' :
+                                issuanceApproval ? 'Issuance Approved' :
+                                    currentIssuance ? 'Items Issued' :
+                                        acknowledgeRequest ? 'Admin Acknowledgment' :
+                                            'Request Submitted'}
+                        </b>
+                    </Typography>
+                </Box>
+            )}
 
             {/* Add custom animation for the pulsing dot */}
             <Box

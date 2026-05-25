@@ -26,13 +26,10 @@ import {
     LocalShipping as ShippingIcon
 } from '@mui/icons-material';
 import { toast } from "react-toastify";
-import { sendAssetToStoreService } from "./ITEquipment/service";
+import axiosInstance from "../../core/apis/axiosInstance";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../../store";
-import { updateITAsset } from "./ITEquipment/slice";
-import { assetTypesStatusConstants } from "../../utils/constants";
-import { updateOfficeAsset } from "./officeEquipment/slice";
-import { updateFleetAsset } from "./fleet/slice";
+import { updateGeneralAssetInStore } from "./general/slice";
 
 const ToStore = ({
     handleClose,
@@ -46,16 +43,12 @@ const ToStore = ({
 
     const handleSendingAssetToStore = async () => {
         try {
-            const response = module === assetTypesStatusConstants.itEquipment
-                ? await sendAssetToStoreService(asset?.id as number) as IAssetAxiosResponse
-                : await sendAssetToStoreService(asset?.id as number) as IAssetAxiosResponse;
+            const response = await axiosInstance.put(
+                `assets/store/${asset?.id}`
+            ) as IAssetAxiosResponse;
 
             if (response.status === 201) {
-                module === assetTypesStatusConstants.itEquipment
-                    ? dispatch(updateITAsset(response.data))
-                    : module === assetTypesStatusConstants.officeEquipment
-                        ? dispatch(updateOfficeAsset(response.data))
-                        : dispatch(updateFleetAsset(response.data));
+                dispatch(updateGeneralAssetInStore(response.data));
                 toast.success("Asset sent to store successfully");
             }
         } catch (error) {

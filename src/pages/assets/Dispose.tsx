@@ -26,16 +26,11 @@ import {
     Fingerprint as FingerprintIcon,
     Warning as WarningIcon
 } from '@mui/icons-material';
-import { disposeITEquipmentService } from "./ITEquipment/service";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../../store";
-import { disposeAsset } from "./ITEquipment/slice";
 import { toast } from "react-toastify";
-import { assetTypesStatusConstants } from "../../utils/constants";
-import { disposeOfficeEquipmentService } from "./officeEquipment/service";
-import { disposeOfficeAsset } from "./officeEquipment/slice";
-import { disposeFleetService } from "./fleet/service";
-import { disposeFleetAsset } from "./fleet/slice";
+import axiosInstance from "../../core/apis/axiosInstance";
+import { disposeGeneralAssetFromStore } from "./general/slice";
 
 const Dispose = ({
     handleClose,
@@ -49,19 +44,15 @@ const Dispose = ({
 
     const handleDisposal = async () => {
         try {
-            const response = module === assetTypesStatusConstants.itEquipment
-                ? await disposeITEquipmentService(asset?.id as string) as IAssetAxiosResponse
-                : module === assetTypesStatusConstants.officeEquipment
-                    ? await disposeOfficeEquipmentService(asset?.id as string) as IAssetAxiosResponse
-                    : await disposeFleetService(asset?.id as string) as IAssetAxiosResponse;
+            // The legacy per-category dispose services all POST to the same
+            // `assets/{id}` endpoint, so we hit it directly here.
+            const response = await axiosInstance.post(`assets/${asset?.id}`) as IAssetAxiosResponse;
 
             if (response.status === 201) {
                 toast.success("Asset disposed successfully");
-                module === assetTypesStatusConstants.itEquipment
-                    ? dispatch(disposeAsset(response.data))
-                    : module === assetTypesStatusConstants.officeEquipment
-                        ? dispatch(disposeOfficeAsset(response.data))
-                        : dispatch(disposeFleetAsset(response.data));
+                // Remove the disposed asset from the unified store (every
+                // category lives in GeneralAssetStore now).
+                dispatch(disposeGeneralAssetFromStore(asset?.id));
             }
         } catch (error) {
             console.log(error, "Error Message")

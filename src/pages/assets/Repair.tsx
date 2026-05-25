@@ -51,13 +51,10 @@ import LaptopIcon from '@mui/icons-material/Laptop';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { toast } from "react-toastify";
-import { repairAssetService } from "./ITEquipment/service";
-import { assetTypesStatusConstants } from "../../utils/constants";
+import axiosInstance from "../../core/apis/axiosInstance";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../store";
-import { updateITAsset } from "./ITEquipment/slice";
-import { updateOfficeAsset } from "./officeEquipment/slice";
-import { updateFleetAsset } from "./fleet/slice";
+import { updateGeneralAssetInStore } from "./general/slice";
 import HandymanOutlinedIcon from '@mui/icons-material/HandymanOutlined';
 import { IOptions } from "../../components/tables/interface";
 import { useDebounce } from "../../hooks/useDebounce";
@@ -222,19 +219,16 @@ const Repair = ({
         }
 
         try {
-            const response = module === assetTypesStatusConstants.itEquipment
-                ? await repairAssetService(asset?.id as number, payload) as IAssetAxiosResponse
-                : module === assetTypesStatusConstants.officeEquipment
-                    ? await repairAssetService(asset?.id as number, payload) as IAssetAxiosResponse
-                    : await repairAssetService(asset?.id as number, payload) as IAssetAxiosResponse;
+            // Single backend endpoint serves every asset category.
+            const response = await axiosInstance.post(
+                `assets/repairs/${asset?.id}`,
+                payload,
+                { headers: { 'Content-Type': 'multipart/form-data' } }
+            ) as IAssetAxiosResponse;
 
             if (response.status === 201) {
                 toast.success("Asset repair request submitted successfully");
-                module === assetTypesStatusConstants.itEquipment
-                    ? dispatch(updateITAsset(response.data))
-                    : module === assetTypesStatusConstants.officeEquipment
-                        ? dispatch(updateOfficeAsset(response.data))
-                        : dispatch(updateFleetAsset(response.data));
+                dispatch(updateGeneralAssetInStore(response.data));
             }
         } catch (error) {
             console.error("Error repairing asset:", error);

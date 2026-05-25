@@ -10,8 +10,7 @@ import { IAxiosResponse } from "../../core/apis/interface";
 export type StepType =
     | 'ACKNOWLEDGE_REQUEST'
     | 'REQUEST_APPROVAL'
-    | 'ISSUE'
-    | 'APPROVE_ISSUANCE'
+    | 'ISSUANCE'
     | 'ACKNOWLEDGE_RECEIPT';
 
 export type ApproverType =
@@ -21,9 +20,25 @@ export type ApproverType =
     | 'BRANCH_MANAGER'
     | 'ADMIN'
     | 'GROUP_EMAIL'
-    | 'SPECIFIC_USER';
+    | 'SPECIFIC_USER'
+    | 'REQUESTER';
 
 export type BranchScope = 'ALL' | 'HEAD_OFFICE' | 'BRANCH';
+
+/**
+ * How a step's CC / notify group is resolved at send time.
+ * - STATIC: use the literal `notifyGroupEmail` typed on the form.
+ * - REQUESTER_MANAGERS_GROUP: dynamic — picks the requester's department managers group (Head Office)
+ *   or branch managers group (other branches). One workflow then works across all departments / branches.
+ * - NONE: do not CC anyone.
+ */
+export type NotifyGroupSource =
+    | 'STATIC'
+    | 'REQUESTER_MANAGERS_GROUP'
+    | 'REQUESTER'
+    | 'REQUESTER_DIRECT_SUPERVISOR'
+    | 'ADMIN'
+    | 'NONE';
 
 export interface IApprovalStep {
     id?: number;
@@ -34,6 +49,9 @@ export interface IApprovalStep {
     groupEmail: string;
     specificUserId: string;
     notifyGroupEmail: string;
+    notifyGroupSource: NotifyGroupSource;
+    /** Recipients to email when this step is completed. STATIC and NONE entries are ignored. */
+    notifyOnCompletion: NotifyGroupSource[];
     optional: boolean;
     escalationHours: number;
     /** If the requester has any of these role ids, this step is skipped (e.g. skip "Direct Supervisor" when a manager raises the request). */
@@ -60,8 +78,7 @@ export interface IApprovalWorkflow {
 export const STEP_TYPE_LABELS: Record<StepType, string> = {
     ACKNOWLEDGE_REQUEST: 'Acknowledge Request',
     REQUEST_APPROVAL:    'Approve Request',
-    ISSUE:               'Issue Asset',
-    APPROVE_ISSUANCE:    'Approve Issuance',
+    ISSUANCE:            'Issue Asset',
     ACKNOWLEDGE_RECEIPT: 'Acknowledge Receipt',
 };
 
@@ -73,6 +90,7 @@ export const APPROVER_TYPE_LABELS: Record<ApproverType, string> = {
     ADMIN:             'Admin',
     GROUP_EMAIL:       'Group Email',
     SPECIFIC_USER:     'Specific User',
+    REQUESTER:         'Requester',
 };
 
 export const BRANCH_SCOPE_LABELS: Record<BranchScope, string> = {
@@ -80,6 +98,23 @@ export const BRANCH_SCOPE_LABELS: Record<BranchScope, string> = {
     HEAD_OFFICE: 'Head Office Only',
     BRANCH:      'Branch Only',
 };
+
+export const NOTIFY_GROUP_SOURCE_LABELS: Record<NotifyGroupSource, string> = {
+    STATIC:                       'Specific email address',
+    REQUESTER_MANAGERS_GROUP:     "Requester's managers group (dynamic)",
+    REQUESTER:                    'Requester',
+    REQUESTER_DIRECT_SUPERVISOR:  "Requester's direct supervisor",
+    ADMIN:                        'Admin',
+    NONE:                         'No CC',
+};
+
+/** Recipients available on the "Notify on completion" multi-select. Excludes STATIC and NONE — those only make sense for the CC dropdown. */
+export const COMPLETION_NOTIFY_SOURCES: NotifyGroupSource[] = [
+    'REQUESTER',
+    'REQUESTER_DIRECT_SUPERVISOR',
+    'REQUESTER_MANAGERS_GROUP',
+    'ADMIN',
+];
 
 export interface IApprovalWorkflowsAxiosResponse extends IAxiosResponse {
     data: IApprovalWorkflow[];

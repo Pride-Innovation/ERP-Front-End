@@ -22,6 +22,56 @@ import GroupsOutlinedIcon from '@mui/icons-material/GroupsOutlined';
 import { UseFormInput } from '../../../components/forms';
 import { IAssetTypeForm } from './interface';
 
+const FormSection = ({
+    title,
+    icon,
+    children,
+}: {
+    title: string;
+    icon: React.ReactNode;
+    children: React.ReactNode;
+}) => (
+    <Paper
+        elevation={0}
+        sx={{
+            mb: 3,
+            borderRadius: 2,
+            overflow: 'hidden',
+            border: `1px solid ${alpha('#08796C', 0.15)}`,
+        }}
+    >
+        <Box
+            sx={{
+                p: 2,
+                bgcolor: alpha('#08796C', 0.04),
+                borderBottom: `1px solid ${alpha('#08796C', 0.1)}`,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1.5,
+            }}
+        >
+            <Box
+                sx={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: '7px',
+                    background: 'linear-gradient(135deg, #08796C, #065E53)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    '& .MuiSvgIcon-root': { color: '#fff', fontSize: '15px' },
+                }}
+            >
+                {icon}
+            </Box>
+            <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#08796C' }}>
+                {title}
+            </Typography>
+        </Box>
+        <Box sx={{ p: 3 }}>{children}</Box>
+    </Paper>
+);
+
 const AssetTypeForm = ({
     register,
     control,
@@ -30,56 +80,6 @@ const AssetTypeForm = ({
     sendingRequest,
     buttonText,
 }: IAssetTypeForm) => {
-
-    const FormSection = ({
-        title,
-        icon,
-        children,
-    }: {
-        title: string;
-        icon: React.ReactNode;
-        children: React.ReactNode;
-    }) => (
-        <Paper
-            elevation={0}
-            sx={{
-                mb: 3,
-                borderRadius: 2,
-                overflow: 'hidden',
-                border: `1px solid ${alpha('#08796C', 0.15)}`,
-            }}
-        >
-            <Box
-                sx={{
-                    p: 2,
-                    bgcolor: alpha('#08796C', 0.04),
-                    borderBottom: `1px solid ${alpha('#08796C', 0.1)}`,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 1.5,
-                }}
-            >
-                <Box
-                    sx={{
-                        width: 32,
-                        height: 32,
-                        borderRadius: '7px',
-                        background: 'linear-gradient(135deg, #08796C, #065E53)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        '& .MuiSvgIcon-root': { color: '#fff', fontSize: '15px' },
-                    }}
-                >
-                    {icon}
-                </Box>
-                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#08796C' }}>
-                    {title}
-                </Typography>
-            </Box>
-            <Box sx={{ p: 3 }}>{children}</Box>
-        </Paper>
-    );
 
     return (
         <Box>

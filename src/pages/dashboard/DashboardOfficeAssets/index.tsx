@@ -1,6 +1,6 @@
 /*
 13.9 Pride's Standard Copyright Notice:
-Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
+Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify,
 and distribute this software and its documentation for any purpose is prohibited unless authorized in writing by the
 Managing Director
 */
@@ -11,15 +11,15 @@ import TableComponent from "../../../components/tables/TableComponent";
 import AssetUtills from "../../assets/Utills";
 import RoutesUtills from "../../../core/routes/utills";
 import { fetchRowsService } from "../../../core/apis/globalService";
-import { IOfficeEquipmentsAxiosResponse } from "../../assets/officeEquipment/interface";
+import { IAssetsAxiosResponse } from "../../assets/interface";
 import { useDispatch } from "react-redux";
 import { AppDispatch, RootState } from "../../../store";
-import { loadAllOfficeAssets } from "../../assets/officeEquipment/slice";
+import { loadAllGeneralAssets } from "../../assets/general/slice";
 import { AssetContext } from "../../../context/asset";
 import { ErrorMessage } from "../../../utils/constants";
 import { useSelector } from "react-redux";
-import OfficeEquipmentUtills from "../../assets/officeEquipment/utills";
 import AssetTypeUtills from "../../settings/assetTypes/utills";
+import { IAssetType } from "../../settings/assetTypes/interface";
 
 const DashboardOfficeAssets = () => {
     const [loading, setLoading] = useState<boolean>(false)
@@ -29,7 +29,8 @@ const DashboardOfficeAssets = () => {
     const { officeEquipmentCount, setOfficeEquipmentCount } = useContext(AssetContext);
     const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore);
     const { fetchAllAssetTypes } = AssetTypeUtills();
-    const { officeAsset } = useSelector((state: RootState) => state.OfficeAssetStore)
+    // Unified store — filtered by the "Office Equipment" asset type below.
+    const { generalAssets } = useSelector((state: RootState) => state.GeneralAssetStore);
 
     const {
         endPoint,
@@ -38,10 +39,6 @@ const DashboardOfficeAssets = () => {
         officeEquipmentTableData,
         handleOfficeEquipmentTableData
     } = DashboardOfficeAssetsUtills();
-
-    const {
-        determineOfficeAssetType
-    } = OfficeEquipmentUtills();
 
     const fetchResources = async () => {
         setLoading(true)
@@ -56,9 +53,9 @@ const DashboardOfficeAssets = () => {
                 pageSize: 5,
                 endPoint,
                 params
-            }) as IOfficeEquipmentsAxiosResponse;
+            }) as IAssetsAxiosResponse;
             if (response.status === 200) {
-                dispatch(loadAllOfficeAssets(response.data.content));
+                dispatch(loadAllGeneralAssets(response.data.content));
                 setOfficeEquipmentCount(response.data.totalElements)
             }
         } catch (error) {
@@ -74,18 +71,20 @@ const DashboardOfficeAssets = () => {
 
     useEffect(() => {
         if (assetTypes.length > 0) {
-            const assetType = determineOfficeAssetType()
-            setCurrentAssetType(assetType);
+            const officeType = assetTypes.find(t =>
+                (t.name ?? '').toLocaleLowerCase().includes('office equipment')
+            ) as IAssetType | undefined;
+            if (officeType) setCurrentAssetType(officeType);
         }
     }, [assetTypes]);
 
     useEffect(() => { fetchAllAssetTypes() }, [])
 
     useEffect(() => {
-        if (officeAsset.length > 0) {
-            handleOfficeEquipmentTableData(officeAsset)
+        if (generalAssets.length > 0) {
+            handleOfficeEquipmentTableData(generalAssets as any)
         }
-    }, [officeAsset])
+    }, [generalAssets])
 
     return (
         <TableComponent

@@ -28,6 +28,7 @@ import MovementRoutes from './subroutes/movement'
 import StoreRoutes from './subroutes/StoreRoutes'
 import ReportsPage from '../../pages/reports'
 import ApprovalWorkflows from '../../pages/approvalWorkflows'
+import Notifications from '../../pages/notifications'
 import { NotificationContextProvider } from '../../context/notification/NotificationContext'
 import { PERMISSIONS } from '../permissions/constants'
 
@@ -73,6 +74,11 @@ const AppRoutes = () => {
           <Route element={<PrivateRoute permission={PERMISSIONS.READ_SETTING} />}>
             <Route path={ROUTES.APPROVAL_WORKFLOWS} element={<ApprovalWorkflows />} />
           </Route>
+
+          {/* Full-page notifications list (the navbar bell is the popover).
+              Pending-completion lives inside each per-category assets page as
+              a row action — filter by `requireUpdate` status to see them. */}
+          <Route path={ROUTES.NOTIFICATIONS} element={<Notifications />} />
 
           {/* Audit Trails Routes */}
           <Route element={<PrivateRoute permission={PERMISSIONS.READ_AUDIT} />}>

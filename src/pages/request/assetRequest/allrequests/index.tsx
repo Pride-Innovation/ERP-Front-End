@@ -334,11 +334,7 @@ const Request = () => {
     );
 
     return (
-        <Box width={'100%'} sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center'
-        }}>
+        <Box width={'100%'}>
             {renderModals()}
             <TableComponent
                 endPoint={endPoint}

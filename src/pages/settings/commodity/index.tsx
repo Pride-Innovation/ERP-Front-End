@@ -7,7 +7,6 @@ Managing Director
 
 import {
   Box,
-  Grid,
   Typography,
   Button,
   Stack,
@@ -210,17 +209,17 @@ const Commodities = () => {
         ) : commodities.length > 0 ? (
           <Fade in={!loading}>
             <Box>
-              <Grid container spacing={3}>
-                {commodities.map((commodity) => (
-                  <Grid item xs={12} sm={6} md={6} lg={6} xl={4} key={commodity.id}>
-                    <CommodityCard
-                      commodity={commodity}
-                      deleteCommodity={deleteCommodity}
-                      updateCommodity={updateCommodity}
-                    />
-                  </Grid>
+              <Box className="settings-card-grid--wide">
+                {commodities.map((commodity, i) => (
+                  <CommodityCard
+                    key={commodity.id}
+                    commodity={commodity}
+                    deleteCommodity={deleteCommodity}
+                    updateCommodity={updateCommodity}
+                    index={i}
+                  />
                 ))}
-              </Grid>
+              </Box>
               {totalPages > 1 && (
                 <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
                   <Pagination

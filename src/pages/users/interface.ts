@@ -140,14 +140,21 @@ export interface IUserCreationResponseAxiosResponse extends IAxiosResponse {
     data: IUserCreationResponse
 }
 
+/**
+ * Shape of one row after the import template has been parsed and the header
+ * names have been camel-cased by the upload handler. Mirrors the backend
+ * `BulkUserDTO` and the column order in `userImportTemplate.ts`.
+ */
 export interface IBulkUserData {
-    "No.": number;
-    "Name": string;
-    "Staff Number": string;
-    "Email": string;
-    "Title": string;
-    "Role"?: string;
-    "Duty Station": string;
-    "Department"?: string;
-    "Gender": string;
+    no?: number;
+    firstName: string;
+    lastName: string;
+    otherName?: string;
+    email: string;
+    staffNumber: string;
+    gender: string;
+    title: string;
+    role?: string;
+    dutyStation: string;
+    department?: string;
 }

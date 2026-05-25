@@ -1,6 +1,6 @@
 /*
 13.9 Pride's Standard Copyright Notice:
-Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
+Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify,
 and distribute this software and its documentation for any purpose is prohibited unless authorized in writing by the
 Managing Director
 */
@@ -9,28 +9,29 @@ import { useContext, useEffect, useState } from 'react'
 import TableComponent from '../../../components/tables/TableComponent';
 import IndividualRequestUtill from './utill';
 import { fetchRowsService } from '../../../core/apis/globalService';
-import { IITEquipmentsAxiosResponse } from '../../assets/ITEquipment/interface';
+import { IAssetsAxiosResponse } from '../../assets/interface';
 import { useDispatch } from 'react-redux';
 import { AppDispatch, RootState } from '../../../store';
 import { AssetContext } from '../../../context/asset';
-import { loadAllITAssets } from '../../assets/ITEquipment/slice';
+import { loadAllGeneralAssets } from '../../assets/general/slice';
 import { ErrorMessage } from '../../../utils/constants';
 import { useSelector } from 'react-redux';
-import ITEquipmentUtills from '../../assets/ITEquipment/utills';
 import AssetUtills from '../../assets/Utills';
 import AssetTypeUtills from '../../settings/assetTypes/utills';
 import RoutesUtills from '../../../core/routes/utills';
+import { IAssetType } from '../../settings/assetTypes/interface';
 
 const PersonalAssets = () => {
     const [loading, setLoading] = useState<boolean>(false)
     const dispatch = useDispatch<AppDispatch>();
     const { setItEquipmentCount, itEquipmentCount } = useContext(AssetContext);
     const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore);
-    const { determineITAssetType } = ITEquipmentUtills();
     const { currentAssetType, setCurrentAssetType } = AssetUtills()
     const { fetchAllAssetTypes } = AssetTypeUtills();
     const { getCurrentUser } = RoutesUtills();
-    const { itAssets } = useSelector((state: RootState) => state.ITAssetStore)
+    // All asset categories now share the same store (per the unified routing
+    // refactor); this dashboard filters by the "IT Equipment" type below.
+    const { generalAssets } = useSelector((state: RootState) => state.GeneralAssetStore);
 
     const {
         endPoint,
@@ -54,9 +55,9 @@ const PersonalAssets = () => {
                 pageSize: 10,
                 endPoint,
                 params
-            }) as IITEquipmentsAxiosResponse;
+            }) as IAssetsAxiosResponse;
             if (response.status === 200) {
-                dispatch(loadAllITAssets(response.data.content));
+                dispatch(loadAllGeneralAssets(response.data.content));
                 setItEquipmentCount(response.data.totalElements)
             }
         } catch (error) {
@@ -72,18 +73,20 @@ const PersonalAssets = () => {
 
     useEffect(() => {
         if (assetTypes.length > 0) {
-            const assetType = determineITAssetType()
-            setCurrentAssetType(assetType);
+            const itType = assetTypes.find(t =>
+                (t.name ?? '').toLocaleLowerCase().includes('it equipment')
+            ) as IAssetType | undefined;
+            if (itType) setCurrentAssetType(itType);
         }
     }, [assetTypes]);
 
     useEffect(() => { fetchAllAssetTypes() }, [])
 
     useEffect(() => {
-        if (itAssets.length > 0) {
-            handleITEquipmentTableData(itAssets)
+        if (generalAssets.length > 0) {
+            handleITEquipmentTableData(generalAssets as any)
         }
-    }, [itAssets])
+    }, [generalAssets])
 
     return (
         <TableComponent

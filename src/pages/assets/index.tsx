@@ -18,27 +18,32 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import AssetTypeUtills from '../settings/assetTypes/utills';
 import AssetUtills from './Utills';
-import { ROUTES } from '../../core/routes/routes';
 import { PageHero } from '../../components/layout';
 
 const AssetsManagement = () => {
   const [navigations, setNavigations] = useState<INavigation[]>([] as INavigation[]);
   const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore);
-  const { itAssets } = useSelector((state: RootState) => state.ITAssetStore);
-  const { officeAsset } = useSelector((state: RootState) => state.OfficeAssetStore);
-  const { fleetAssets } = useSelector((state: RootState) => state.FleetStore);
+  // Single unified asset list — all categories live in GeneralAssetStore now
+  // that the per-category stores have been retired in favour of the generic
+  // `/assets-mgt/assets/general/{typeId}` route.
+  const { generalAssets } = useSelector((state: RootState) => state.GeneralAssetStore);
   const { pathname } = useLocation();
   const { determineAssetTypeByAssetName } = AssetUtills();
 
   const navigate = useNavigate();
   const { fetchAllAssetTypes } = AssetTypeUtills();
 
+  // The active category's `typeId` is in the URL — `/assets/general/:typeId`.
+  // Count the assets currently loaded into the unified store that match it.
+  const activeTypeId = useMemo(() => {
+    const match = pathname.match(/\/assets\/general\/(\d+)/);
+    return match ? Number(match[1]) : null;
+  }, [pathname]);
+
   const activeCount = useMemo(() => {
-    if (pathname.startsWith(ROUTES.LIST_IT_EQUIPMENT)) return itAssets.length;
-    if (pathname.startsWith(ROUTES.LIST_OFFICE_EQUIPMENT)) return officeAsset.length;
-    if (pathname.startsWith(ROUTES.LIST_FLEET)) return fleetAssets.length;
-    return 0;
-  }, [pathname, itAssets.length, officeAsset.length, fleetAssets.length]);
+    if (activeTypeId == null) return generalAssets.length;
+    return generalAssets.filter((a: any) => a?.assetType?.id === activeTypeId).length;
+  }, [activeTypeId, generalAssets]);
 
   const todayLabel = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 

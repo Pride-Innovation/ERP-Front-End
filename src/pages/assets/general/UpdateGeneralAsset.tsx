@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
-import { IOfficeEquipment, IOfficeEquipmentAxiosResponse } from '../officeEquipment/interface';
+import { IOfficeEquipment, IOfficeEquipmentAxiosResponse } from '../interface';
 import { useNavigate, useParams } from 'react-router';
 import { officeEquipmentMock } from '../../../mocks/officeEquipment';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { buildOfficeEquipmentSchema } from '../officeEquipment/schema';
+import { buildOfficeEquipmentSchema } from './schema';
 import {
     Box,
     Breadcrumbs,
@@ -14,8 +14,8 @@ import {
     Typography,
     alpha,
 } from '@mui/material';
-import OfficeEquipmentForm from '../officeEquipment/OfficeEquipmentForm';
-import { getOfficeEquipmentByIDService, updateOfficeEquipmentService } from '../officeEquipment/service';
+import OfficeEquipmentForm from './AssetForm';
+import { getOfficeEquipmentByIDService, updateOfficeEquipmentService } from './service';
 import Loading from '../../../components/loading';
 import { toast } from 'react-toastify';
 import { useDispatch, useSelector } from 'react-redux';

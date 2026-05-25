@@ -6,8 +6,8 @@ Managing Director
 */
 
 import { useEffect, useState } from "react";
-import OfficeEquipmentUtills from "./utills";
-import { IOfficeEquipmentForm } from "./interface";
+import OfficeEquipmentUtills from "./formUtills";
+import { IOfficeEquipmentForm } from "../interface";
 import BranchUtills from "../../settings/branch/utills";
 import StatusUtills from "../../settings/statuses/Utills";
 import UserUtils from "../../users/utils";
@@ -17,7 +17,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../../store";
 import CommodityUtills from "../../settings/commodity/utills";
 import InventoryUtills from "../../inventory/Utills";
-import SteppedOfficeEquipmentForm from "./SteppedOfficeEquipmentForm";
+import SteppedOfficeEquipmentForm from "./SteppedAssetForm";
 import { useAssetFieldConfig } from "../../../hooks/useAssetFieldConfig";
 
 const OfficeEquipmentForm = ({

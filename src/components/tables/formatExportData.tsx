@@ -6,7 +6,7 @@ Managing Director
 */
 
 import { fetchAllRowsService } from "../../core/apis/globalService";
-import { IITEquipment } from "../../pages/assets/ITEquipment/interface";
+import { IITEquipment } from "../../pages/assets/interface";
 import { IInventory, IStockCommodities } from "../../pages/inventory/interface";
 import { IRequest } from "../../pages/request/interface";
 import { IUser } from "../../pages/users/interface";

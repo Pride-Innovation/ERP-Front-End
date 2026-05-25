@@ -279,9 +279,9 @@ const WorkflowForm: React.FC<{
     };
 
     return (
-        <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+        <Box sx={{ p: 3 }}>
             {/* Page Header */}
-            <Box sx={{ px: 3, py: 2, borderBottom: `1px solid ${alpha(TEAL, 0.15)}`, bgcolor: '#fff', flexShrink: 0 }}>
+            <Paper variant="outlined" sx={{ p: 3, borderRadius: 3, borderColor: alpha(TEAL, 0.2), mb: 3 }}>
                 <Stack direction="row" alignItems="center" justifyContent="space-between">
                     <Stack direction="row" alignItems="center" spacing={1.5}>
                         <IconButton size="small" onClick={onCancel}
@@ -289,7 +289,7 @@ const WorkflowForm: React.FC<{
                             <ArrowBackIcon fontSize="small" />
                         </IconButton>
                         <Box>
-                            <Typography variant="h6" fontWeight={700} color={TEAL}>
+                            <Typography variant="subtitle1" fontWeight={700} color={TEAL}>
                                 {isEdit ? `Edit: ${initial.name}` : 'New Approval Workflow'}
                             </Typography>
                             <Typography variant="caption" color="text.secondary">
@@ -313,11 +313,10 @@ const WorkflowForm: React.FC<{
                         </Button>
                     </Stack>
                 </Stack>
-            </Box>
+            </Paper>
 
             {/* Two-column body */}
-            <Box sx={{ flex: 1, overflow: 'auto', p: 3 }}>
-                <Stack direction={{ xs: 'column', lg: 'row' }} spacing={3} alignItems="flex-start">
+            <Stack direction={{ xs: 'column', lg: 'row' }} spacing={3} alignItems="flex-start">
 
                     {/* ── LEFT: Workflow Settings ── */}
                     <Box sx={{ width: { xs: '100%', lg: 380 }, flexShrink: 0 }}>
@@ -466,7 +465,6 @@ const WorkflowForm: React.FC<{
                         </Paper>
                     </Box>
                 </Stack>
-            </Box>
         </Box>
     );
 };

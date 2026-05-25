@@ -20,6 +20,7 @@ import { IBulkUserData, IUser } from './interface';
 import { toast } from 'react-toastify';
 import { FileContext } from '../../context/file/FileContext';
 import { bulkInsertUsersService } from './service';
+import BulkImportResult, { IBulkImportResult } from './BulkImportResult';
 import PeopleOutlinedIcon from '@mui/icons-material/PeopleOutlined';
 import { PERMISSIONS } from '../../core/permissions/constants';
 import { PageHero } from '../../components/layout';
@@ -45,7 +46,10 @@ const Users = () => {
   const [sendingRequest, setSendingRequest] = useState<boolean>(false);
   const { user, totalUsers } = useContext(UserContext);
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
-  const { fileData } = useContext(FileContext);
+  const { fileData, setFileData } = useContext(FileContext);
+
+  /** Result summary shown after a bulk import completes (success, partial, or all-failed). */
+  const [importResult, setImportResult] = useState<IBulkImportResult | null>(null);
 
   /** Latest filter object that has been applied (already in backend-param shape). */
   const [activeFilters, setActiveFilters] = useState<Record<string, any>>({});
@@ -138,21 +142,62 @@ const Users = () => {
       const data = new FormData();
       data.append('users', JSON.stringify(users));
 
-      const response = await bulkInsertUsersService(data);
+      const payload: any = await bulkInsertUsersService(data);
 
-      if (response.success === true) {
-        toast.success('Bulk Insert Successful');
+      if (!payload || typeof payload !== 'object' || !('inserted' in payload)) {
+        toast.error('Bulk import request failed. Please try again.');
+        return;
+      }
+
+      // Tolerate older payloads that returned `errors: string[]` by upgrading to
+      // the structured shape the modal expects.
+      const rawErrors = Array.isArray(payload.errors) ? payload.errors : [];
+      const normalizedErrors = rawErrors.map((e: any, idx: number) =>
+        typeof e === 'string'
+          ? { row: idx + 1, error: e }
+          : {
+            row: typeof e.row === 'number' ? e.row : idx + 1,
+            name: e.name ?? null,
+            staffNumber: e.staffNumber ?? null,
+            email: e.email ?? null,
+            error: e.error ?? 'Unknown error',
+          }
+      );
+
+      const result: IBulkImportResult = {
+        success: Boolean(payload.success),
+        total: Number(payload.total ?? users.length),
+        inserted: Number(payload.inserted ?? 0),
+        failed: Number(payload.failed ?? normalizedErrors.length),
+        errors: normalizedErrors,
+      };
+
+      setImportResult(result);
+
+      if (result.inserted > 0) {
+        toast.success(
+          result.failed === 0
+            ? `Imported ${result.inserted} user${result.inserted === 1 ? '' : 's'} successfully.`
+            : `Imported ${result.inserted} of ${result.total} users. ${result.failed} failed — see details.`
+        );
         fetchAllUsers();
+      } else {
+        toast.error('Bulk import failed — no users were created. See details.');
       }
     } catch (error) {
-      console.log('Bulk Insert Error', error);
+      console.error('Bulk Insert Error', error);
+      toast.error('Bulk import request failed. Please try again.');
+    } finally {
+      // Clear the FileContext so re-uploading the same file re-runs the import.
+      setFileData({} as any);
     }
   };
 
   useEffect(() => {
-    if (fileData?.jsonData?.length > 0) {
+    if (fileData?.jsonData?.length > 0 && fileData?.module === 'user') {
       bulkInsertUsers(fileData.jsonData as unknown as Array<IBulkUserData>);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fileData]);
 
   const todayLabel = useMemo(
@@ -308,6 +353,17 @@ const Users = () => {
             setSendingRequest={setSendingRequest}
             buttonText="Enable"
           />
+        </ModalComponent>
+      )}
+
+      {importResult && (
+        <ModalComponent
+          title="Bulk Import Summary"
+          open={true}
+          handleClose={() => setImportResult(null)}
+          width="60%"
+        >
+          <BulkImportResult result={importResult} handleClose={() => setImportResult(null)} />
         </ModalComponent>
       )}
 
