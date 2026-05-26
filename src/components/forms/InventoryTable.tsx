@@ -12,8 +12,6 @@ import {
     Button,
     Typography,
     alpha,
-    useTheme,
-    useMediaQuery,
     Chip,
     Tooltip,
     Stack,
@@ -41,6 +39,14 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 
 const PRIMARY_COLOR = '#08796C';
 const SECONDARY_COLOR = '#BC892C';
+
+const selectSx = {
+    fontSize: '0.83rem',
+    borderRadius: '7px',
+    '& .MuiOutlinedInput-notchedOutline': { borderColor: '#E2E8F0' },
+    '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: alpha(PRIMARY_COLOR, 0.5) },
+    '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: PRIMARY_COLOR, borderWidth: 1.5 },
+};
 
 const tableHeaders = [
     {
@@ -82,33 +88,40 @@ const tableHeaders = [
     }
 ];
 
-const NoItemsPlaceholder = ({ message, onAddItem }: { message: string; onAddItem: () => void }) => {
-    return (
-        <Box sx={{ py: 4, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <InventoryIcon sx={{ fontSize: 40, color: PRIMARY_COLOR, mb: 2, opacity: 0.7 }} />
-            <Typography variant="body1" color="text.secondary" gutterBottom>
-                {message}
-            </Typography>
-            <Button
-                variant="outlined"
-                startIcon={<AddIcon />}
-                onClick={onAddItem}
-                sx={{
-                    mt: 2,
-                    textTransform: 'none',
-                    borderColor: PRIMARY_COLOR,
-                    color: PRIMARY_COLOR,
-                    '&:hover': {
-                        borderColor: PRIMARY_COLOR,
-                        backgroundColor: alpha(PRIMARY_COLOR, 0.04),
-                    }
-                }}
-            >
-                Add First Item
-            </Button>
+const NoItemsPlaceholder = ({ message, onAddItem }: { message: string; onAddItem: () => void }) => (
+    <Box sx={{ py: 5, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1.5 }}>
+        <Box sx={{
+            width: 52, height: 52, borderRadius: '12px',
+            bgcolor: alpha(PRIMARY_COLOR, 0.08),
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+            <InventoryIcon sx={{ fontSize: 26, color: PRIMARY_COLOR }} />
         </Box>
-    );
-};
+        <Typography sx={{ fontSize: '0.875rem', color: '#64748B', fontWeight: 500 }}>
+            {message}
+        </Typography>
+        <Button
+            variant="outlined"
+            startIcon={<AddIcon sx={{ fontSize: '15px !important' }} />}
+            onClick={onAddItem}
+            size="small"
+            sx={{
+                mt: 0.5,
+                textTransform: 'none',
+                fontWeight: 600,
+                fontSize: '0.8rem',
+                height: 32,
+                px: 2,
+                borderRadius: '8px',
+                borderColor: alpha(PRIMARY_COLOR, 0.4),
+                color: PRIMARY_COLOR,
+                '&:hover': { borderColor: PRIMARY_COLOR, bgcolor: alpha(PRIMARY_COLOR, 0.05) },
+            }}
+        >
+            Add First Item
+        </Button>
+    </Box>
+);
 
 const InventoryTable = ({ issue, title }: { issue?: boolean, title: string }) => {
     const { fetchAllCommodities } = CommodityUtills();
@@ -116,8 +129,6 @@ const InventoryTable = ({ issue, title }: { issue?: boolean, title: string }) =>
     const { rows, setRows, setAssetType } = useContext(RequestContext);
     const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore);
     const { commodities } = useSelector((state: RootState) => state.CommodityStore);
-    const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
     const [recentlyAdded, setRecentlyAdded] = useState<number | null>(null);
 
     const handleInputChange = (id: number, field: keyof RowData, value: any) => {
@@ -206,10 +217,11 @@ const InventoryTable = ({ issue, title }: { issue?: boolean, title: string }) =>
         <Card
             elevation={0}
             sx={{
-                borderRadius: 1,
-                border: `1px solid ${alpha('#000', 0.12)}`,
+                borderRadius: '10px',
+                border: '1px solid #E8EDF3',
                 overflow: 'hidden',
-                width: '100%'
+                width: '100%',
+                boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
             }}
         >
             <Box
@@ -217,63 +229,61 @@ const InventoryTable = ({ issue, title }: { issue?: boolean, title: string }) =>
                 justifyContent="space-between"
                 alignItems="center"
                 sx={{
-                    borderBottom: `1px solid ${alpha('#000', 0.12)}`,
-                    p: { xs: 1.5, sm: 2 },
-                    background: `linear-gradient(to right, ${alpha(PRIMARY_COLOR, 0.9)}, ${alpha(PRIMARY_COLOR, 0.7)})`,
-                    color: 'white',
+                    borderBottom: '1px solid #F1F5F9',
+                    px: { xs: 1.5, sm: 2 },
+                    py: 1.25,
+                    bgcolor: '#F8FAFC',
                 }}
             >
-                <Stack direction="row" spacing={1} alignItems="center">
+                <Stack direction="row" spacing={1.25} alignItems="center">
                     <Box
                         sx={{
-                            bgcolor: 'white',
-                            color: PRIMARY_COLOR,
+                            bgcolor: alpha(PRIMARY_COLOR, 0.1),
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            borderRadius: '50%',
-                            width: 40,
-                            height: 40,
+                            borderRadius: '8px',
+                            width: 32,
+                            height: 32,
                         }}
                     >
-                        <InventoryIcon sx={{ color: PRIMARY_COLOR }} />
+                        <InventoryIcon sx={{ color: PRIMARY_COLOR, fontSize: 18 }} />
                     </Box>
-                    <Typography
-                        sx={{
-                            fontWeight: 600,
-                            fontSize: "16px",
-                        }}
-                    >
+                    <Typography sx={{ fontWeight: 700, fontSize: '0.875rem', color: '#1E293B' }}>
                         {title}
                     </Typography>
                     <Chip
                         label={`${rows.length} ${rows.length === 1 ? 'item' : 'items'}`}
                         size="small"
-                        variant="outlined"
-                        color='secondary'
                         sx={{
-                            borderColor: "white",
-                            color: "white",
-                            fontWeight: 500,
-                            height: 24,
+                            height: 20,
+                            fontSize: '0.7rem',
+                            fontWeight: 600,
+                            bgcolor: alpha(PRIMARY_COLOR, 0.1),
+                            color: PRIMARY_COLOR,
+                            border: 'none',
                         }}
                     />
                 </Stack>
                 <Button
                     variant="outlined"
-                    startIcon={<AddIcon />}
+                    startIcon={<AddIcon sx={{ fontSize: '15px !important' }} />}
                     onClick={handleAddRow}
                     size="small"
                     sx={{
                         textTransform: 'none',
-                        fontWeight: 500,
-                        bgcolor: 'white',
+                        fontWeight: 600,
+                        fontSize: '0.8rem',
+                        height: 30,
+                        px: 1.5,
+                        borderRadius: '7px',
+                        borderColor: alpha(PRIMARY_COLOR, 0.35),
                         color: PRIMARY_COLOR,
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                        bgcolor: 'white',
                         '&:hover': {
-                            bgcolor: "white",
+                            bgcolor: alpha(PRIMARY_COLOR, 0.05),
+                            borderColor: PRIMARY_COLOR,
                         },
-                        py: 1,
                     }}
                 >
                     Add Item
@@ -300,26 +310,28 @@ const InventoryTable = ({ issue, title }: { issue?: boolean, title: string }) =>
                     }
                 }}
             >
-                <Table stickyHeader size={isMobile ? "small" : "medium"}>
+                <Table stickyHeader size="small">
                     <TableHead>
                         <TableRow>
                             {visibleHeaders.map((header) => (
                                 <TableCell
                                     key={header.id}
-                                    align={header.id === 'quantity' ? 'center' : header.id === 'remove' ? 'center' : 'left'}
+                                    align={header.id === 'quantity' || header.id === 'remove' ? 'center' : 'left'}
                                     sx={{
-                                        bgcolor: '#fff',
-                                        color: '#555',
-                                        fontWeight: 600,
-                                        fontSize: { xs: 12, sm: 13 },
-                                        py: 1.5,
-                                        borderBottom: '1px solid rgba(0, 0, 0, 0.1)',
-                                        whiteSpace: 'normal',
-                                        px: { xs: 1, sm: 2 },
+                                        bgcolor: '#F8FAFC',
+                                        color: '#64748B',
+                                        fontWeight: 700,
+                                        fontSize: '0.67rem',
+                                        letterSpacing: '0.06em',
+                                        textTransform: 'uppercase',
+                                        py: 1.25,
+                                        px: { xs: 1, sm: 1.5 },
+                                        borderBottom: '1px solid #E8EDF3',
+                                        whiteSpace: 'nowrap',
                                     }}
                                 >
                                     <Tooltip title={header.tooltip} arrow placement="top">
-                                        <Box sx={{ display: "flex", alignItems: "center" }}>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                                             {header.icon}
                                             {header.name}
                                         </Box>
@@ -339,141 +351,92 @@ const InventoryTable = ({ issue, title }: { issue?: boolean, title: string }) =>
                                 </TableCell>
                             </TableRow>
                         ) : (
-                            rows.map((row, index) => (
+                            rows.map((row) => (
                                 <TableRow
                                     key={row.id}
                                     sx={{
-                                        backgroundColor: recentlyAdded === row.id
-                                            ? alpha(PRIMARY_COLOR, 0.04)
-                                            : '#fff',
-                                        transition: 'background-color 0.3s ease',
-                                        '&:hover': {
-                                            backgroundColor: alpha('#000', 0.02),
-                                        },
+                                        bgcolor: recentlyAdded === row.id ? alpha(PRIMARY_COLOR, 0.03) : '#fff',
+                                        transition: 'background-color 0.25s ease',
+                                        '&:hover': { bgcolor: '#F8FAFC' },
                                     }}
                                 >
-                                    <TableCell sx={{
-                                        borderBottom: '1px solid rgba(0, 0, 0, 0.05)',
-                                        px: { xs: 1, sm: 2 },
-                                        py: 1.5,
-                                        whiteSpace: 'normal',
-                                        wordBreak: 'break-word'
-                                    }}>
+                                    {/* Asset Type */}
+                                    <TableCell sx={{ borderBottom: '1px solid #F1F5F9', px: { xs: 1, sm: 1.5 }, py: 1.25 }}>
                                         <Select
                                             fullWidth
-                                            value={row.assetTypeId || ""}
+                                            value={row.assetTypeId || ''}
                                             onChange={(e) => handleAssetTypeNameChange(row.id, e.target.value as string)}
                                             displayEmpty
                                             size="small"
-                                            sx={{
-                                                fontSize: 14,
-                                                '& .MuiOutlinedInput-notchedOutline': {
-                                                    borderColor: alpha('#000', 0.2),
-                                                },
-                                                '&:hover .MuiOutlinedInput-notchedOutline': {
-                                                    borderColor: PRIMARY_COLOR,
-                                                },
-                                                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                                    borderColor: PRIMARY_COLOR,
-                                                    borderWidth: 1,
-                                                },
-                                            }}
+                                            sx={selectSx}
                                         >
-                                            <MenuItem value="" disabled>
-                                                <em>Select Type</em>
-                                            </MenuItem>
+                                            <MenuItem value="" disabled><em>Select Type</em></MenuItem>
                                             {assetTypes.map((assetTyp) => (
-                                                <MenuItem key={assetTyp.id} value={assetTyp.id}>
-                                                    {assetTyp.name}
-                                                </MenuItem>
+                                                <MenuItem key={assetTyp.id} value={assetTyp.id}>{assetTyp.name}</MenuItem>
                                             ))}
                                         </Select>
                                     </TableCell>
-                                    <TableCell sx={{
-                                        borderBottom: '1px solid rgba(0, 0, 0, 0.05)',
-                                        px: { xs: 1, sm: 2 },
-                                        py: 1.5,
-                                        whiteSpace: 'normal',
-                                        wordBreak: 'break-word'
-                                    }}>
+
+                                    {/* Name */}
+                                    <TableCell sx={{ borderBottom: '1px solid #F1F5F9', px: { xs: 1, sm: 1.5 }, py: 1.25 }}>
                                         <Select
                                             fullWidth
-                                            value={row.name || ""}
+                                            value={row.name || ''}
                                             onChange={(e) => handleNameChange(row.id, e.target.value as string)}
                                             displayEmpty
                                             size="small"
                                             disabled={!row.assetTypeId}
                                             sx={{
-                                                fontSize: 14,
-                                                '& .MuiOutlinedInput-notchedOutline': {
-                                                    borderColor: alpha('#000', 0.2),
-                                                },
-                                                '&:hover .MuiOutlinedInput-notchedOutline': {
-                                                    borderColor: PRIMARY_COLOR,
-                                                },
-                                                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                                    borderColor: PRIMARY_COLOR,
-                                                    borderWidth: 1,
-                                                },
-                                                '&.Mui-disabled': {
-                                                    backgroundColor: alpha('#000', 0.03),
-                                                }
+                                                ...selectSx,
+                                                '&.Mui-disabled': { bgcolor: '#F8FAFC' },
                                             }}
                                         >
                                             <MenuItem value="" disabled>
-                                                <em>{row.assetTypeId ? 'Select Item' : 'Select Asset Type first'}</em>
+                                                <em>{row.assetTypeId ? 'Select Item' : 'Select type first'}</em>
                                             </MenuItem>
                                             {itemOptions
-                                                .filter(ele => ele.assetTypeId === row.assetTypeId)
+                                                .filter((ele) => ele.assetTypeId === row.assetTypeId)
                                                 .map((item) => (
-                                                    <MenuItem key={item.name} value={item.name}>
-                                                        {item.name}
-                                                    </MenuItem>
+                                                    <MenuItem key={item.name} value={item.name}>{item.name}</MenuItem>
                                                 ))}
                                         </Select>
                                     </TableCell>
-                                    <TableCell sx={{
-                                        borderBottom: '1px solid rgba(0, 0, 0, 0.05)',
-                                        px: { xs: 1, sm: 2 },
-                                        py: 1.5,
-                                        whiteSpace: 'normal',
-                                        wordBreak: 'break-word'
-                                    }}>
+
+                                    {/* Unit of Measure */}
+                                    <TableCell sx={{ borderBottom: '1px solid #F1F5F9', px: { xs: 1, sm: 1.5 }, py: 1.25 }}>
                                         {row.groupName ? (
                                             <Chip
                                                 label={row.groupName}
                                                 size="small"
-                                                variant="outlined"
                                                 sx={{
-                                                    borderColor: alpha(SECONDARY_COLOR, 0.3),
-                                                    color: SECONDARY_COLOR,
+                                                    height: 22,
+                                                    fontSize: '0.75rem',
                                                     fontWeight: 500,
-                                                    fontSize: 13
+                                                    bgcolor: alpha(SECONDARY_COLOR, 0.08),
+                                                    color: SECONDARY_COLOR,
+                                                    border: `1px solid ${alpha(SECONDARY_COLOR, 0.2)}`,
                                                 }}
                                             />
                                         ) : (
-                                            <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
-                                                Not specified
+                                            <Typography sx={{ fontSize: '0.8rem', color: '#94A3B8', fontStyle: 'italic' }}>
+                                                —
                                             </Typography>
                                         )}
                                     </TableCell>
-                                    <TableCell align="center" sx={{
-                                        borderBottom: '1px solid rgba(0, 0, 0, 0.05)',
-                                        px: { xs: 1, sm: 2 },
-                                        py: 1.5
-                                    }}>
-                                        <Box
-                                            sx={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center',
-                                                border: '1px solid rgba(0, 0, 0, 0.1)',
-                                                borderRadius: 1,
-                                                px: 0.5,
-                                                maxWidth: 120,
-                                                mx: 'auto'
-                                            }}
-                                        >
+
+                                    {/* Quantity */}
+                                    <TableCell align="center" sx={{ borderBottom: '1px solid #F1F5F9', px: { xs: 1, sm: 1.5 }, py: 1.25 }}>
+                                        <Box sx={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            border: '1px solid #E2E8F0',
+                                            borderRadius: '8px',
+                                            bgcolor: '#fff',
+                                            px: 0.25,
+                                            maxWidth: 110,
+                                            mx: 'auto',
+                                        }}>
                                             <IconButton
                                                 size="small"
                                                 onClick={() => handleInputChange(row.id, 'quantity', Math.max(0, row.quantity - 1))}
@@ -481,7 +444,8 @@ const InventoryTable = ({ issue, title }: { issue?: boolean, title: string }) =>
                                                 disabled={row.quantity <= 0}
                                             >
                                                 <RemoveCircleOutlineIcon fontSize="small" sx={{
-                                                    color: row.quantity <= 0 ? alpha('#000', 0.2) : SECONDARY_COLOR
+                                                    fontSize: 16,
+                                                    color: row.quantity <= 0 ? '#CBD5E1' : SECONDARY_COLOR,
                                                 }} />
                                             </IconButton>
                                             <TextField
@@ -491,21 +455,13 @@ const InventoryTable = ({ issue, title }: { issue?: boolean, title: string }) =>
                                                 onChange={(e) => handleInputChange(
                                                     row.id,
                                                     'quantity',
-                                                    e.target.value === '' ? 0 : parseInt(e.target.value)
+                                                    e.target.value === '' ? 0 : parseInt(e.target.value),
                                                 )}
-                                                inputProps={{
-                                                    min: 0,
-                                                    style: { textAlign: 'center', width: '40px', padding: '4px 0' }
-                                                }}
+                                                inputProps={{ min: 0, style: { textAlign: 'center', width: 36, padding: '3px 0' } }}
                                                 variant="standard"
                                                 sx={{
-                                                    '& input': {
-                                                        fontWeight: 600,
-                                                        fontSize: 15
-                                                    },
-                                                    '& .MuiInput-underline:before, & .MuiInput-underline:after': {
-                                                        borderBottom: 'none',
-                                                    }
+                                                    '& input': { fontWeight: 700, fontSize: '0.875rem', color: '#1E293B' },
+                                                    '& .MuiInput-underline:before, & .MuiInput-underline:after': { borderBottom: 'none' },
                                                 }}
                                             />
                                             <IconButton
@@ -513,37 +469,31 @@ const InventoryTable = ({ issue, title }: { issue?: boolean, title: string }) =>
                                                 onClick={() => handleInputChange(row.id, 'quantity', row.quantity + 1)}
                                                 sx={{ p: 0.5 }}
                                             >
-                                                <AddCircleOutlineOutlinedIcon fontSize="small" sx={{ color: PRIMARY_COLOR }} />
+                                                <AddCircleOutlineOutlinedIcon fontSize="small" sx={{ fontSize: 16, color: PRIMARY_COLOR }} />
                                             </IconButton>
                                         </Box>
                                     </TableCell>
 
                                     {issue && <FilterEngravedNumbers row={row} />}
 
-                                    <TableCell align="center" sx={{
-                                        borderBottom: '1px solid rgba(0, 0, 0, 0.05)',
-                                        px: { xs: 1, sm: 2 },
-                                        py: 1.5
-                                    }}>
-                                        <Tooltip title={rows.length <= 1 ? "At least one item is required" : "Remove this item"}>
+                                    {/* Actions */}
+                                    <TableCell align="center" sx={{ borderBottom: '1px solid #F1F5F9', px: 1, py: 1.25 }}>
+                                        <Tooltip title={rows.length <= 1 ? 'At least one item is required' : 'Remove this item'}>
                                             <span>
                                                 <IconButton
                                                     onClick={() => handleRemoveRow(row.id)}
                                                     disabled={rows.length <= 1}
                                                     size="small"
                                                     sx={{
-                                                        border: '1px solid rgba(0, 0, 0, 0.1)',
-                                                        '&:disabled': { opacity: 0.3 },
-                                                        '&:hover': {
-                                                            backgroundColor: alpha('#f44336', 0.04),
-                                                            borderColor: alpha('#f44336', 0.5),
-                                                        }
+                                                        width: 28,
+                                                        height: 28,
+                                                        border: '1px solid #FEE2E2',
+                                                        bgcolor: '#FFF5F5',
+                                                        '&:disabled': { opacity: 0.35, bgcolor: 'transparent', border: '1px solid #E2E8F0' },
+                                                        '&:hover': { bgcolor: '#FEE2E2', borderColor: '#FCA5A5' },
                                                     }}
                                                 >
-                                                    <DeleteOutlineIcon
-                                                        fontSize="small"
-                                                        sx={{ color: rows.length <= 1 ? alpha('#f44336', 0.4) : '#f44336' }}
-                                                    />
+                                                    <DeleteOutlineIcon sx={{ fontSize: 15, color: rows.length <= 1 ? '#CBD5E1' : '#EF4444' }} />
                                                 </IconButton>
                                             </span>
                                         </Tooltip>
@@ -557,40 +507,43 @@ const InventoryTable = ({ issue, title }: { issue?: boolean, title: string }) =>
 
             {rows.length > 0 && (
                 <Box sx={{
-                    p: 2,
-                    borderTop: '1px solid rgba(0, 0, 0, 0.1)',
+                    px: 2,
+                    py: 1.25,
+                    borderTop: '1px solid #F1F5F9',
+                    bgcolor: '#FAFBFC',
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
                     flexWrap: 'wrap',
-                    gap: 1
+                    gap: 1,
                 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <InfoOutlinedIcon
-                            fontSize="small"
-                            sx={{ color: '#666', mr: 1 }}
-                        />
-                        <Typography variant="body2" sx={{ color: '#666' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                        <InfoOutlinedIcon sx={{ fontSize: 14, color: '#94A3B8' }} />
+                        <Typography sx={{ fontSize: '0.78rem', color: '#64748B' }}>
                             {rows.filter(r => r.name && r.quantity > 0).length} of {rows.length} items completed
                         </Typography>
                     </Box>
                     <Button
                         size="small"
-                        startIcon={<AddIcon />}
+                        startIcon={<AddIcon sx={{ fontSize: '14px !important' }} />}
                         onClick={handleAddRow}
+                        variant="outlined"
                         sx={{
                             textTransform: 'none',
-                            fontWeight: 500,
+                            fontWeight: 600,
+                            fontSize: '0.78rem',
+                            height: 28,
+                            px: 1.25,
+                            borderRadius: '7px',
                             color: PRIMARY_COLOR,
                             borderColor: alpha(PRIMARY_COLOR, 0.3),
-                            borderWidth: 1,
                             borderStyle: 'dashed',
                             '&:hover': {
-                                backgroundColor: alpha(PRIMARY_COLOR, 0.04),
+                                bgcolor: alpha(PRIMARY_COLOR, 0.04),
                                 borderColor: PRIMARY_COLOR,
-                            }
+                                borderStyle: 'solid',
+                            },
                         }}
-                        variant="outlined"
                     >
                         Add Another Item
                     </Button>

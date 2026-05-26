@@ -27,6 +27,7 @@ import {
     assetRequestApprovalRejectionService,
     findAssetRequestByIDService
 } from "./service";
+import RoutesUtills from "../../../core/routes/utills";
 import { ICommodity } from "../../settings/commodity/interface";
 import { IRejectRequest, IRequestAxiosResponse } from "../interface";
 import InventoryOutlinedIcon from '@mui/icons-material/InventoryOutlined';
@@ -55,6 +56,7 @@ const RejectRequest = ({
 }: IRejectRequest) => {
     const theme = useTheme();
     const dispatch = useDispatch<AppDispatch>();
+    const { getCurrentUser } = RoutesUtills();
     const [comment, setComment] = useState("");
     const [loading, setLoading] = useState(true);
     const [requestCommodities, setRequestCommodities] = useState<
@@ -105,15 +107,22 @@ const RejectRequest = ({
             return;
         }
 
+        const loggedInUser = getCurrentUser();
+        if (
+            loggedInUser?.id &&
+            request.requester?.id &&
+            String(loggedInUser.id) === String(request.requester.id)
+        ) {
+            toast.error("You cannot reject your own request.");
+            return;
+        }
+
         setSendingRequest(true);
         try {
-            /**
-             * NB: Please note that the status ID must match the Rejected Status ID in the Database.
-             */
             const data = {
                 requestId: request.id,
                 approverId: request.currentApprover?.id,
-                statusId: 2, // ID 2 must match the Rejected Status ID in the Database
+                workflowAction: "REJECTED",
                 comment
             }
             const response = await assetRequestApprovalRejectionService(data) as IRequestAxiosResponse;

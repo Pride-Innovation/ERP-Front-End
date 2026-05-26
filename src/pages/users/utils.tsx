@@ -127,7 +127,7 @@ const UserUtils = () => {
     } = usersMock[0];
 
     const rowData = {
-        image: usersMock[0]?.profileImage,
+        // image: usersMock[0]?.profileImage,
         name: `${usersMock[0].firstName} ${usersMock[0].lastName} ${(usersMock[0].otherName !== null ? usersMock[0].otherName : "")}`,
         staffNumber: usersMock[0].staffNumber,
         email: usersMock[0].email,

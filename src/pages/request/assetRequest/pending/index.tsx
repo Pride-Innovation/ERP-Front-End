@@ -15,21 +15,30 @@ import { RequestContext } from "../../../../context/request/RequestContext";
 import { crudStates } from "../../../../utils/constants";
 import ModalComponent from "../../../../components/modal";
 import AcknowledgeRequest from "../AcknowledgeRequest";
+import ApproveRequest from "../ApprovedRequest";
+import RejectRequest from "../RejectRequest";
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
+import AddTaskIcon from '@mui/icons-material/AddTask';
+import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import usePermissions from "../../../../core/permissions/usePermissions";
 import { PERMISSIONS } from "../../../../core/permissions/constants";
+import RoutesUtills from "../../../../core/routes/utills";
 
 const PendingRequest = () => {
     const { requests } = useSelector((state: RootState) => state.AssetsRequestsStore)
     const { requestTableData, setOptions, setRequestStatusIds } = useContext(RequestContext);
     const { has } = usePermissions();
+    const { getCurrentUser } = RoutesUtills();
+    const currentUser = getCurrentUser();
     const [selectedStatus, setSelectedStatus] = useState<string>('all');
-    const [statusIds, setStatusIds] = useState<string>(`${3},${4}`); // Default to '1' for "Request Created"
+    const [statusIds, setStatusIds] = useState<string>('');
 
     useEffect(() => {
-        setRequestStatusIds(statusIds.split(',').map(id => parseInt(id, 10)));
+        if (statusIds) {
+            setRequestStatusIds(statusIds.split(',').map(id => parseInt(id, 10)));
+        }
     }, [statusIds]);
 
     const {
@@ -49,12 +58,13 @@ const PendingRequest = () => {
         // module
     } = RequestUtills()
 
-    const params = { statusIds: statusIds, status: "PENDING" };
+    const params = {
+        ...(statusIds ? { statusIds } : {}),
+        status: "PENDING",
+        ...(currentUser?.id ? { currentApproverId: currentUser.id } : {})
+    };
 
     useEffect(() => {
-        /**
-         * This should contain the Status ID for Pending Requests
-         */
         fetchAllRequests(params);
 
         // setFileData({ file: "", module: "", jsonData: [] });
@@ -69,6 +79,8 @@ const PendingRequest = () => {
      * This effect checks the permissions of the current user and sets the options for the request actions accordingly.
      */
     useEffect(() => {
+        const hasApproveRequestPermission = has(PERMISSIONS.APPROVE_REQUEST);
+        const hasRejectRequestPermission = has(PERMISSIONS.REJECT_REQUEST);
         const hasIssueRequestPermission = has(PERMISSIONS.ISSUE_ITEMS);
         const hasAcknowledgeRequestPermission = has(PERMISSIONS.ACKNOWLEDGE_REQUEST);
 
@@ -76,10 +88,25 @@ const PendingRequest = () => {
             {
                 value: crudStates.read,
                 label: "View Details",
-                icon: <RemoveRedEyeIcon fontSize='small'
-                    color='inherit' />
+                icon: <RemoveRedEyeIcon fontSize='small' color='inherit' />
             }
         ];
+
+        if (hasApproveRequestPermission) {
+            newOptions.push({
+                value: crudStates.approve,
+                label: "Approve Request",
+                icon: <AddTaskIcon fontSize='small' color='primary' />
+            });
+        }
+
+        if (hasRejectRequestPermission) {
+            newOptions.push({
+                value: crudStates.reject,
+                label: "Reject Request",
+                icon: <RemoveCircleOutlineIcon fontSize='small' color='error' />
+            });
+        }
 
         if (hasIssueRequestPermission) {
             newOptions.push({
@@ -106,36 +133,54 @@ const PendingRequest = () => {
      * Updates the request list based on the selected status filter
      * @param status - The status filter to apply
      */
+    const approverParam = currentUser?.id ? { currentApproverId: currentUser.id } : {};
+
     const handleStatusChange = (status: string) => {
-        let param;
-        let statusId;
-
         switch (status) {
-            // PENDING status group
-            case 'requestApproved':
-                param = { status: "PENDING", statusIds: '3' };
-                statusId = '3';
+            case 'requestApproved': {
+                const param = { status: "PENDING", statusIds: '3', ...approverParam };
+                fetchAllRequests(param);
+                setSelectedStatus(status);
+                setStatusIds('3');
                 break;
-
-            case 'requestAcknowledged':
-                param = { status: "PENDING", statusIds: '4' };
-                statusId = '4';
+            }
+            case 'requestAcknowledged': {
+                const param = { status: "PENDING", statusIds: '4', ...approverParam };
+                fetchAllRequests(param);
+                setSelectedStatus(status);
+                setStatusIds('4');
                 break;
-
+            }
             default:
-                fetchAllRequests(params);
+                setStatusIds('');
+                fetchAllRequests({ status: "PENDING", ...approverParam });
                 setSelectedStatus('all');
-                return; // Exit early for the default case
+                break;
         }
-
-        // For all non-default cases:
-        fetchAllRequests(param);
-        setSelectedStatus(status);
-        setStatusIds(statusId);
     }
 
     const renderModals = () => (
         <>
+            {crudStates.approve === modalState &&
+                <ModalComponent width={"60%"} title='Approve Request' open={open} handleClose={handleClose}>
+                    <ApproveRequest
+                        setSendingRequest={setSendingRequest}
+                        handleClose={handleClose}
+                        request={currentRequest}
+                        sendingRequest={sendingRequest}
+                        buttonText="Approve" />
+                </ModalComponent>
+            }
+            {crudStates.reject === modalState &&
+                <ModalComponent width={"60%"} title='Reject Request' open={open} handleClose={handleClose}>
+                    <RejectRequest
+                        setSendingRequest={setSendingRequest}
+                        handleClose={handleClose}
+                        request={currentRequest}
+                        sendingRequest={sendingRequest}
+                        buttonText="Reject" />
+                </ModalComponent>
+            }
             {crudStates.acknowledgeRequest === modalState &&
                 <ModalComponent width={"70%"} title='Acknowledge Request' open={open} handleClose={handleClose}>
                     <AcknowledgeRequest
@@ -162,7 +207,7 @@ const PendingRequest = () => {
                     rows={requestTableData}
                     columnHeaders={columnHeaders}
                     handleOptionClicked={handleOptionClicked}
-                    params={{ statusIds: statusIds }}
+                    params={{ ...(statusIds ? { statusIds } : {}), ...approverParam }}
                     filterOptions
                     refresh
                     optionsfilterParams={{ status: "PENDING" }}
@@ -182,7 +227,7 @@ const PendingRequest = () => {
                         },
                         { key: 'createdAt', label: 'Request Created', type: 'dateRange' },
                     ]}
-                    onApplyFilters={(filters) => fetchAllRequests(filters)}
+                    onApplyFilters={(filters) => fetchAllRequests({ ...filters, ...approverParam })}
                 />
             }
         </Box>

@@ -47,12 +47,14 @@ const RequestForm = ({
             elevation={0}
             sx={{
                 p: { xs: 2, sm: 3, md: 4 },
-                borderRadius: 2,
-                bgcolor: '#FFFFFF',
-                border: `1px solid ${alpha('#000', 0.08)}`,
+                borderRadius: '12px',
+                bgcolor: '#fff',
+                border: '1px solid #E8EDF3',
+                boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
             }}
         >
             <Grid container spacing={4}>
+                {/* Left column — core request details */}
                 <Grid item xs={12} md={hideFileUpload ? 12 : 8}>
                     <PageSection
                         title="Basic Information"
@@ -71,19 +73,9 @@ const RequestForm = ({
                     <CategoryAttributesPanel control={control} setValue={setValue} />
 
                     <WorkflowPreviewPanel control={control} />
-
-                    <PageSection
-                        title="Request Items"
-                        subtitle="Add items you want to request"
-                        helpText="Specify the assets you're requesting with accurate quantities"
-                        icon={<DescriptionIcon />}
-                    >
-                        <Box sx={{ width: '100%' }}>
-                            <InventoryTable title="Request Items" />
-                        </Box>
-                    </PageSection>
                 </Grid>
 
+                {/* Right column — supporting docs */}
                 {!hideFileUpload && (
                     <Grid item xs={12} md={4}>
                         <PageSection
@@ -102,13 +94,26 @@ const RequestForm = ({
                         </PageSection>
                     </Grid>
                 )}
+
+                {/* Full-width row — request items table */}
+                <Grid item xs={12}>
+                    <PageSection
+                        title="Request Items"
+                        subtitle="Add the assets you want to request with accurate quantities"
+                        helpText="Specify each item — select the asset type first, then the item name"
+                        icon={<DescriptionIcon />}
+                        mb={0}
+                    >
+                        <InventoryTable title="Request Items" />
+                    </PageSection>
+                </Grid>
             </Grid>
 
             <Box
                 sx={{
                     mt: 4,
-                    pt: 3,
-                    borderTop: `1px solid ${alpha('#000', 0.08)}`,
+                    pt: 2.5,
+                    borderTop: '1px solid #F1F5F9',
                     display: 'flex',
                     justifyContent: 'flex-end',
                     width: '100%',
@@ -116,7 +121,7 @@ const RequestForm = ({
             >
                 <Stack
                     direction={{ xs: 'column', sm: 'row' }}
-                    spacing={2}
+                    spacing={1.5}
                     sx={{ width: { xs: '100%', sm: 'auto' } }}
                 >
                     <Button
@@ -126,13 +131,14 @@ const RequestForm = ({
                         startIcon={<ArrowBackIcon />}
                         sx={{
                             minWidth: { xs: '100%', sm: 110 },
-                            borderColor: alpha('#000', 0.2),
-                            color: 'text.secondary',
+                            height: 38,
+                            borderRadius: '8px',
+                            borderColor: '#E2E8F0',
+                            color: '#64748B',
                             textTransform: 'none',
-                            '&:hover': {
-                                borderColor: alpha('#000', 0.3),
-                                bgcolor: alpha('#000', 0.05),
-                            },
+                            fontWeight: 500,
+                            fontSize: '0.85rem',
+                            '&:hover': { borderColor: '#CBD5E1', bgcolor: '#F8FAFC' },
                         }}
                     >
                         Back
@@ -144,23 +150,24 @@ const RequestForm = ({
                         startIcon={<SendIcon />}
                         sx={{
                             minWidth: { xs: '100%', sm: 160 },
+                            height: 38,
+                            borderRadius: '8px',
                             bgcolor: PRIMARY_COLOR,
-                            boxShadow: `0 4px 12px ${alpha(PRIMARY_COLOR, 0.3)}`,
+                            boxShadow: `0 2px 8px ${alpha(PRIMARY_COLOR, 0.25)}`,
                             textTransform: 'none',
                             fontWeight: 600,
+                            fontSize: '0.85rem',
                             '&:hover': {
                                 bgcolor: '#065f54',
-                                transform: 'translateY(-1px)',
-                                boxShadow: `0 6px 16px ${alpha(PRIMARY_COLOR, 0.4)}`,
+                                boxShadow: `0 4px 14px ${alpha(PRIMARY_COLOR, 0.35)}`,
                             },
-                            transition: 'all 0.2s ease',
                             '&.Mui-disabled': {
-                                bgcolor: alpha(PRIMARY_COLOR, 0.5),
+                                bgcolor: alpha(PRIMARY_COLOR, 0.45),
                                 color: '#fff',
                             },
                         }}
                     >
-                        {sendingRequest ? 'Submitting...' : buttonText}
+                        {sendingRequest ? 'Submitting…' : buttonText}
                     </Button>
                 </Stack>
             </Box>

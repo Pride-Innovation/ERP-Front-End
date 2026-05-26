@@ -1,5 +1,4 @@
-import { useEffect, useState } from 'react';
-import { Box, Typography, alpha, Paper, Chip, Divider } from '@mui/material';
+import { Box, Typography, alpha, Paper, Chip } from '@mui/material';
 import InventoryIcon from '@mui/icons-material/Inventory';
 import CategoryOutlinedIcon from '@mui/icons-material/CategoryOutlined';
 import { ICommodity } from '../../../settings/commodity/interface';

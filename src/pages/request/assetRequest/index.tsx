@@ -60,7 +60,7 @@ const ALL_TABS: INavTab[] = [
         label: 'Issued',
         path: ROUTES.LIST_ISSUED,
         icon: <MoveToInboxOutlinedIcon fontSize="small" />,
-        permission: PERMISSIONS.ISSUE_ITEMS,
+        permission: PERMISSIONS.READ_REQUEST,
     },
 ];
 

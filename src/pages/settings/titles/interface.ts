@@ -29,6 +29,11 @@ export interface ITitleDetails {
 }
 
 
+export interface ITitleOption {
+    value: number;
+    label: string;
+}
+
 export interface ITitleForm {
     formState: FormState<ITitle> & {
         errors: {
@@ -41,6 +46,8 @@ export interface ITitleForm {
     sendingRequest: boolean;
     handleClose: () => void;
     update?: boolean;
+    /** Pre-populated option for the "Reports To" picker when editing an existing title. */
+    initialReportsTo?: ITitleOption | null;
 }
 
 export interface ICreateTitle {

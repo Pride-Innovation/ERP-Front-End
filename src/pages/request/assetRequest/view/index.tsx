@@ -13,7 +13,6 @@ import {
     Box,
     Button as MuiButton,
     Chip,
-    CircularProgress,
     Divider,
     Grid,
     IconButton,
@@ -48,6 +47,8 @@ import {
     PriorityHigh as PriorityHighIcon,
     DoNotDisturbAlt as MediumIcon,
     ArrowDownward as LowIcon,
+    CheckCircle as ApproveIcon,
+    Cancel as RejectIcon,
 } from '@mui/icons-material';
 
 import Loading from "../../../../components/loading";
@@ -56,10 +57,16 @@ import RequestCommodties from "./RequestCommodties";
 import MovementHistory from "./MovementHistory";
 import AttachmentViewer from "./AttachmentViewer";
 import WorkflowTimeline from "./WorkflowTimeline";
+import ModalComponent from "../../../../components/modal";
+import ApproveRequest from "../ApprovedRequest";
+import RejectRequest from "../RejectRequest";
 
 import { RequestContext } from "../../../../context/request/RequestContext";
 import RequestUtills from "../utills";
 import { findAssetRequestByIDService } from "../service";
+import RoutesUtills from "../../../../core/routes/utills";
+import usePermissions from "../../../../core/permissions/usePermissions";
+import { PERMISSIONS } from "../../../../core/permissions/constants";
 
 import { IRequest, IRequestAxiosResponse } from "../../interface";
 import { ICommodity } from "../../../settings/commodity/interface";
@@ -69,18 +76,22 @@ const TEAL_DARK = '#065E53';
 
 // ─── Status configuration — covers every backend status code ─────────────────
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
-    requestcreated:      { label: 'Submitted',           color: '#1565C0', bg: '#E3F2FD' },
-    requestapproved:     { label: 'Approved',            color: '#2E7D32', bg: '#E8F5E9' },
-    requestrejected:     { label: 'Rejected',            color: '#C62828', bg: '#FFEBEE' },
-    issuanceapproved:    { label: 'Issuance Approved',   color: '#6A1B9A', bg: '#F3E5F5' },
-    issued:              { label: 'Issued',              color: '#00695C', bg: '#E0F2F1' },
-    inmaintenance:       { label: 'In Maintenance',      color: '#E65100', bg: '#FFF3E0' },
-    receiptacknowledged: { label: 'Receipt Acknowledged',color: '#1B5E20', bg: '#F1F8E9' },
-    assetassigned:       { label: 'Assigned',            color: '#0277BD', bg: '#E1F5FE' },
-    requireupdate:       { label: 'Requires Update',     color: '#F57F17', bg: '#FFFDE7' },
-    stockpending:        { label: 'Stock Pending',       color: '#BF360C', bg: '#FBE9E7' },
-    stockcompleted:      { label: 'Stock Completed',     color: '#33691E', bg: '#F9FBE7' },
-    senttostore:         { label: 'Sent to Store',       color: '#4A148C', bg: '#EDE7F6' },
+    requestcreated:          { label: 'Submitted',                color: '#1565C0', bg: '#E3F2FD' },
+    requestapproved:         { label: 'Approved',                 color: '#2E7D32', bg: '#E8F5E9' },
+    managerapproved:         { label: 'Manager Approved',         color: '#2E7D32', bg: '#E8F5E9' },
+    hodapproved:             { label: 'HOD Approved',             color: '#1B5E20', bg: '#C8E6C9' },
+    bomapproved:             { label: 'BOM Approved',             color: '#33691E', bg: '#DCEDC8' },
+    branchmanagerapproved:   { label: 'Branch Manager Approved',  color: '#1A237E', bg: '#E8EAF6' },
+    requestrejected:         { label: 'Rejected',                 color: '#C62828', bg: '#FFEBEE' },
+    issuanceapproved:        { label: 'Issuance Approved',        color: '#6A1B9A', bg: '#F3E5F5' },
+    issued:                  { label: 'Issued',                   color: '#00695C', bg: '#E0F2F1' },
+    inmaintenance:           { label: 'In Maintenance',           color: '#E65100', bg: '#FFF3E0' },
+    receiptacknowledged:     { label: 'Receipt Acknowledged',     color: '#1B5E20', bg: '#F1F8E9' },
+    assetassigned:           { label: 'Assigned',                 color: '#0277BD', bg: '#E1F5FE' },
+    requireupdate:           { label: 'Requires Update',          color: '#F57F17', bg: '#FFFDE7' },
+    stockpending:            { label: 'Stock Pending',            color: '#BF360C', bg: '#FBE9E7' },
+    stockcompleted:          { label: 'Stock Completed',          color: '#33691E', bg: '#F9FBE7' },
+    senttostore:             { label: 'Sent to Store',            color: '#4A148C', bg: '#EDE7F6' },
 };
 
 const getStatusConfig = (statusCode?: string) => {
@@ -208,9 +219,15 @@ const RequestDetails = () => {
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState(0);
     const [isAttachmentViewerOpen, setIsAttachmentViewerOpen] = useState(false);
+    const [approveModalOpen, setApproveModalOpen] = useState(false);
+    const [rejectModalOpen, setRejectModalOpen] = useState(false);
+    const [sendingAction, setSendingAction] = useState(false);
 
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
+    const { getCurrentUser } = RoutesUtills();
+    const { has } = usePermissions();
+    const currentUser = getCurrentUser();
 
     const { acknowledgeIssuance, acknowledgeRequest, issuanceApproval, currentIssuance } =
         useContext(RequestContext);
@@ -245,7 +262,19 @@ const RequestDetails = () => {
         }
     }, [request]);
 
-    const canEdit = request.status?.status === 'requestCreated';
+    const canEdit =
+        request.status?.status === 'requestCreated' ||
+        request.status?.status === 'requestRejected';
+
+    const TERMINAL_STATUSES = new Set(['requestRejected', 'receiptAcknowledged', 'issued', 'assetAssigned']);
+    const isDesignatedApprover =
+        !!request.currentApprover?.id &&
+        !!currentUser?.id &&
+        String(request.currentApprover.id) === String(currentUser.id);
+    const hasNoDesignatedApprover = !request.currentApprover?.id;
+    const isApprovable = !!request.status?.status && !TERMINAL_STATUSES.has(request.status.status);
+    const canApprove = (isDesignatedApprover || hasNoDesignatedApprover) && isApprovable && has(PERMISSIONS.APPROVE_REQUEST);
+    const canReject  = (isDesignatedApprover || hasNoDesignatedApprover) && isApprovable && has(PERMISSIONS.REJECT_REQUEST);
 
     const TABS = [
         { label: 'Requested Items', icon: <ListAltOutlinedIcon fontSize="small" /> },
@@ -323,7 +352,7 @@ const RequestDetails = () => {
                     </Box>
 
                     {/* Action buttons */}
-                    <Stack direction="row" spacing={1} sx={{ flexShrink: 0 }}>
+                    <Stack direction="row" spacing={1} sx={{ flexShrink: 0, flexWrap: 'wrap', gap: 1 }}>
                         <MuiButton
                             variant="outlined"
                             size="small"
@@ -341,6 +370,42 @@ const RequestDetails = () => {
                         >
                             Edit
                         </MuiButton>
+
+                        {canApprove && (
+                            <MuiButton
+                                variant="contained"
+                                size="small"
+                                startIcon={<ApproveIcon fontSize="small" />}
+                                onClick={() => setApproveModalOpen(true)}
+                                sx={{
+                                    bgcolor: '#2E7D32',
+                                    color: '#fff',
+                                    textTransform: 'none',
+                                    fontSize: '0.8rem',
+                                    '&:hover': { bgcolor: '#1B5E20' },
+                                }}
+                            >
+                                Approve
+                            </MuiButton>
+                        )}
+
+                        {canReject && (
+                            <MuiButton
+                                variant="contained"
+                                size="small"
+                                startIcon={<RejectIcon fontSize="small" />}
+                                onClick={() => setRejectModalOpen(true)}
+                                sx={{
+                                    bgcolor: '#C62828',
+                                    color: '#fff',
+                                    textTransform: 'none',
+                                    fontSize: '0.8rem',
+                                    '&:hover': { bgcolor: '#B71C1C' },
+                                }}
+                            >
+                                Reject
+                            </MuiButton>
+                        )}
                     </Stack>
                 </Box>
 
@@ -563,6 +628,28 @@ const RequestDetails = () => {
                 filePath={request.signaturePath || null}
                 fileName={request.signaturePath?.split(/[/\\]/).pop() ?? ''}
             />
+
+            {/* Approve modal */}
+            <ModalComponent width="60%" title="Approve Request" open={approveModalOpen} handleClose={() => setApproveModalOpen(false)}>
+                <ApproveRequest
+                    request={request}
+                    sendingRequest={sendingAction}
+                    setSendingRequest={setSendingAction}
+                    handleClose={() => { setApproveModalOpen(false); fetchRequestDetails(); }}
+                    buttonText="Approve"
+                />
+            </ModalComponent>
+
+            {/* Reject modal */}
+            <ModalComponent width="60%" title="Reject Request" open={rejectModalOpen} handleClose={() => setRejectModalOpen(false)}>
+                <RejectRequest
+                    request={request}
+                    sendingRequest={sendingAction}
+                    setSendingRequest={setSendingAction}
+                    handleClose={() => { setRejectModalOpen(false); fetchRequestDetails(); }}
+                    buttonText="Reject"
+                />
+            </ModalComponent>
         </Box>
     );
 };

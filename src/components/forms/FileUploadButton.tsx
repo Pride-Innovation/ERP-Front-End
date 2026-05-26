@@ -5,7 +5,7 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { Button, Menu, MenuItem, ListItemIcon, ListItemText, alpha, Divider } from "@mui/material";
+import { alpha, Box, Button, Divider, ListItemIcon, ListItemText, Menu, MenuItem, Typography } from "@mui/material";
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
 import InputFileUpload from "./FileUpload";
@@ -143,63 +143,99 @@ const FileUploadButton = ({ title, module }: IFileUploadButton) => {
         reader.readAsArrayBuffer(file);
     };
 
+    const AMBER = '#B45309';
+    const AMBER_LIGHT = alpha('#D97706', 0.08);
+
     return (
         <>
             <Button
-                sx={{
-                    textTransform: 'none',
-                    height: 40,
-                    px: 2,
-                    borderRadius: '8px',
-                    borderColor: alpha('#BC892C', 0.5),
-                    color: '#BC892C',
-                    fontWeight: 600,
-                    fontSize: '0.875rem',
-                    boxShadow: 'none',
-                    '&:hover': {
-                        borderColor: '#BC892C',
-                        bgcolor: alpha('#BC892C', 0.06),
-                        boxShadow: `0 2px 8px ${alpha('#BC892C', 0.2)}`,
-                    },
-                    transition: 'all 0.2s ease',
-                }}
                 variant="outlined"
-                color="secondary"
-                startIcon={<CloudUploadIcon sx={{ fontSize: '17px !important', color: '#BC892C' }} />}
+                size="small"
+                startIcon={<CloudUploadIcon sx={{ fontSize: '16px !important' }} />}
                 onClick={handleButtonClick}
                 aria-controls={menuOpen ? 'import-menu' : undefined}
                 aria-haspopup="true"
                 aria-expanded={menuOpen ? 'true' : undefined}
+                sx={{
+                    height: 34, px: 1.75, borderRadius: '8px',
+                    border: `1px solid ${alpha(AMBER, 0.3)}`,
+                    color: AMBER,
+                    textTransform: 'none', fontWeight: 600, fontSize: '0.82rem',
+                    bgcolor: 'transparent',
+                    transition: 'all 0.15s',
+                    '&:hover': {
+                        bgcolor: AMBER_LIGHT,
+                        borderColor: alpha(AMBER, 0.6),
+                        boxShadow: `0 1px 4px ${alpha(AMBER, 0.15)}`,
+                    },
+                }}
             >
                 Import
             </Button>
+
             <Menu
                 id="import-menu"
                 anchorEl={anchorEl}
                 open={menuOpen}
                 onClose={handleMenuClose}
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-                transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+                transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+                anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
                 slotProps={{
                     paper: {
-                        elevation: 3,
-                        sx: { borderRadius: '8px', minWidth: 200, mt: 0.5 },
+                        elevation: 0,
+                        sx: {
+                            mt: 0.75, minWidth: 210,
+                            borderRadius: '10px',
+                            border: '1px solid #E8EDF3',
+                            boxShadow: '0 4px 6px -1px rgba(0,0,0,0.07), 0 10px 24px -4px rgba(0,0,0,0.09)',
+                            overflow: 'hidden',
+                        },
                     },
                 }}
             >
-                <MenuItem onClick={handleDownloadTemplate}>
-                    <ListItemIcon>
-                        <FileDownloadOutlinedIcon fontSize="small" sx={{ color: '#08796C' }} />
-                    </ListItemIcon>
-                    <ListItemText primary="Download Template" primaryTypographyProps={{ fontSize: '0.875rem' }} />
-                </MenuItem>
-                <Divider />
-                <MenuItem onClick={handleImportFile}>
-                    <ListItemIcon>
-                        <CloudUploadIcon fontSize="small" sx={{ color: '#BC892C' }} />
-                    </ListItemIcon>
-                    <ListItemText primary="Import File" primaryTypographyProps={{ fontSize: '0.875rem' }} />
-                </MenuItem>
+                {/* Header label */}
+                <Box sx={{ px: 2, pt: 1.25, pb: 0.75 }}>
+                    <Typography sx={{ fontSize: '0.67rem', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                        Import options
+                    </Typography>
+                </Box>
+                <Divider sx={{ borderColor: '#F1F5F9', mx: 1 }} />
+                <Box sx={{ p: 0.5 }}>
+                    <MenuItem
+                        onClick={handleDownloadTemplate}
+                        sx={{
+                            borderRadius: '7px', py: 1, px: 1.25, gap: 1,
+                            '&:hover': { bgcolor: alpha('#08796C', 0.06) },
+                        }}
+                    >
+                        <ListItemIcon sx={{ minWidth: 30 }}>
+                            <FileDownloadOutlinedIcon sx={{ fontSize: 17, color: '#08796C' }} />
+                        </ListItemIcon>
+                        <ListItemText
+                            primary="Download Template"
+                            secondary="Get the import format"
+                            primaryTypographyProps={{ fontSize: '0.83rem', fontWeight: 600, color: '#1E293B' }}
+                            secondaryTypographyProps={{ fontSize: '0.72rem', color: '#94A3B8' }}
+                        />
+                    </MenuItem>
+                    <MenuItem
+                        onClick={handleImportFile}
+                        sx={{
+                            borderRadius: '7px', py: 1, px: 1.25, gap: 1,
+                            '&:hover': { bgcolor: AMBER_LIGHT },
+                        }}
+                    >
+                        <ListItemIcon sx={{ minWidth: 30 }}>
+                            <CloudUploadIcon sx={{ fontSize: 17, color: AMBER }} />
+                        </ListItemIcon>
+                        <ListItemText
+                            primary="Upload File"
+                            secondary=".xlsx or .csv"
+                            primaryTypographyProps={{ fontSize: '0.83rem', fontWeight: 600, color: '#1E293B' }}
+                            secondaryTypographyProps={{ fontSize: '0.72rem', color: '#94A3B8' }}
+                        />
+                    </MenuItem>
+                </Box>
             </Menu>
             <InputFileUpload inputRef={inputRef} handleFileUpload={handleFileUpload} />
         </>

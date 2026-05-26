@@ -32,24 +32,25 @@ const PRIMARY_COLOR = '#08796C';
 const SECONDARY_COLOR = '#BC892C';
 
 // Status color mapping - refined with opacity options
-const statusColors = {
-    requestApproved: {
-        main: "#1e8e3e", // darker green
-        light: alpha("#1e8e3e", 0.1),
-        border: alpha("#1e8e3e", 0.3)
-    },
+const APPROVED_GREEN = { main: "#1e8e3e", light: alpha("#1e8e3e", 0.1), border: alpha("#1e8e3e", 0.3) };
+const statusColors: Record<string, { main: string; light: string; border: string }> = {
+    requestApproved:        APPROVED_GREEN,
+    managerApproved:        APPROVED_GREEN,
+    hodApproved:            { main: "#1B5E20", light: alpha("#1B5E20", 0.1), border: alpha("#1B5E20", 0.3) },
+    bomApproved:            { main: "#33691E", light: alpha("#33691E", 0.1), border: alpha("#33691E", 0.3) },
+    branchManagerApproved:  { main: "#1A237E", light: alpha("#1A237E", 0.1), border: alpha("#1A237E", 0.3) },
     requestPending: {
-        main: "#f59300", // warmer orange
+        main: "#f59300",
         light: alpha("#f59300", 0.1),
         border: alpha("#f59300", 0.3)
     },
     requestRejected: {
-        main: "#d93025", // refined red
+        main: "#d93025",
         light: alpha("#d93025", 0.1),
         border: alpha("#d93025", 0.3)
     },
     default: {
-        main: "#5f6368", // neutral gray
+        main: "#5f6368",
         light: alpha("#5f6368", 0.1),
         border: alpha("#5f6368", 0.3)
     }

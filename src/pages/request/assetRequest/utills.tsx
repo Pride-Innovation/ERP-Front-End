@@ -136,8 +136,12 @@ const RequestUtills = () => {
         requestDate: requestMock[0]?.createDate,
         priority: requestMock[0]?.priority,
         ...data,
-        requestedBy: `${requestMock[0].requester?.firstName} ${requestMock[0].requester?.lastName}`,
-        approver: `${requestMock[0].currentApprover?.firstName} ${requestMock[0].currentApprover?.lastName}`,
+        requestedBy: requestMock[0].requester
+            ? `${requestMock[0].requester.firstName ?? ''} ${requestMock[0].requester.lastName ?? ''}`.trim() || null
+            : null,
+        approver: requestMock[0].currentApprover
+            ? `${requestMock[0].currentApprover.firstName ?? ''} ${requestMock[0].currentApprover.lastName ?? ''}`.trim() || null
+            : null,
         requestedFrom: requestMock[0].requester?.branch?.name,
         status: requestMock[0]?.status?.status,
         action: {
@@ -160,16 +164,18 @@ const RequestUtills = () => {
             case crudStates.read:
                 navigate(`${ROUTES.READ_REQUEST}/${moduleID}`)
                 break;
-            case crudStates.reject:
-                setModalState(crudStates.reject)
-                setCurrentRequest(determineCurrentRequest(moduleID as number, requests as IRequest[]))
+            case crudStates.reject: {
+                setModalState(crudStates.reject);
+                setCurrentRequest(determineCurrentRequest(moduleID as number, requests as IRequest[]));
                 handleOpen();
                 break;
-            case crudStates.approve:
-                setModalState(crudStates.approve)
-                setCurrentRequest(determineCurrentRequest(moduleID as number, requests as IRequest[]))
+            }
+            case crudStates.approve: {
+                setModalState(crudStates.approve);
+                setCurrentRequest(determineCurrentRequest(moduleID as number, requests as IRequest[]));
                 handleOpen();
                 break;
+            }
             case crudStates.issue:
                 navigate(`${ROUTES.ISSUE_REQUEST}/${moduleID}`)
                 break;
@@ -237,8 +243,12 @@ const RequestUtills = () => {
                     name: request.name,
                     requestDate: moment(request.createDate).format('Do MMMM YYYY'),
                     priority: request.priority,
-                    requestedBy: `${request.requester?.firstName} ${request.requester?.lastName}`,
-                    approver: `${request.currentApprover?.firstName} ${request.currentApprover?.lastName}`,
+                    requestedBy: request.requester
+                        ? `${request.requester.firstName ?? ''} ${request.requester.lastName ?? ''}`.trim() || null
+                        : null,
+                    approver: request.currentApprover
+                        ? `${request.currentApprover.firstName ?? ''} ${request.currentApprover.lastName ?? ''}`.trim() || null
+                        : null,
                     requestedFrom: request.requester?.branch?.name,
                     status: request.status?.status,
                     requesterID: request.requester?.id as number,

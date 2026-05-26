@@ -31,6 +31,18 @@ import dayjs from "dayjs";
 import { camelCaseToWords } from "../../utils/helpers";
 import { RequestContext } from "../../context/request/RequestContext";
 
+// All statuses that represent an in-progress approval stage.
+// Any request whose status is in this set should be treated the same
+// as the old generic "requestApproved" for option-filtering purposes.
+const APPROVAL_STATUSES = new Set([
+    'requestApproved',
+    'managerApproved',
+    'hodApproved',
+    'bomApproved',
+    'branchManagerApproved',
+]);
+const isApprovalStatus = (s?: string) => !!s && APPROVAL_STATUSES.has(s);
+
 const TableUtills = ({ moduleName }: { moduleName?: string }) => {
     const { fileName } = useContext(FileContext);
     const { getCurrentUser } = RoutesUtills();
@@ -422,7 +434,7 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
                     )
                 }
 
-                if (status === "CREATED" && row?.status === "requestApproved") {
+                if (status === "CREATED" && isApprovalStatus(row?.status)) {
                     return options.filter(
                         (option: any) =>
                             option.value !== crudStates.approve &&
@@ -510,7 +522,7 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
                     );
                 }
 
-                if (status === "CREATED" && row?.status === "requestApproved") {
+                if (status === "CREATED" && isApprovalStatus(row?.status)) {
                     return options.filter(
                         (option: any) =>
                             option.value !== crudStates.approve &&
@@ -586,7 +598,7 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
                     );
                 }
 
-                if (status === "PENDING" && row?.status === "requestApproved") {
+                if (status === "PENDING" && isApprovalStatus(row?.status)) {
                     return options.filter(
                         (option: any) => option.value !== 'issue'
                     );
