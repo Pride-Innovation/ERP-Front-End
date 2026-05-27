@@ -43,6 +43,7 @@ import ListAltOutlinedIcon from '@mui/icons-material/ListAltOutlined';
 import TimelineOutlinedIcon from '@mui/icons-material/TimelineOutlined';
 import HistoryOutlinedIcon from '@mui/icons-material/HistoryOutlined';
 import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined';
+import InboxOutlinedIcon from '@mui/icons-material/InboxOutlined';
 import {
     PriorityHigh as PriorityHighIcon,
     DoNotDisturbAlt as MediumIcon,
@@ -70,11 +71,11 @@ import { PERMISSIONS } from "../../../../core/permissions/constants";
 
 import { IRequest, IRequestAxiosResponse } from "../../interface";
 import { ICommodity } from "../../../settings/commodity/interface";
+import { brand, neutral, border, surface } from "../../../../utils/tokens";
 
 const TEAL = '#08796C';
-const TEAL_DARK = '#065E53';
 
-// ─── Status configuration — covers every backend status code ─────────────────
+// ─── Status configuration ─────────────────────────────────────────────────────
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
     requestcreated:          { label: 'Submitted',                color: '#1565C0', bg: '#E3F2FD' },
     requestapproved:         { label: 'Approved',                 color: '#2E7D32', bg: '#E8F5E9' },
@@ -143,7 +144,7 @@ const PriorityChip = ({ priority }: { priority?: string }) => {
     );
 };
 
-// ─── Info Row — lightweight label + value ────────────────────────────────────
+// ─── Info Row ────────────────────────────────────────────────────────────────
 const InfoRow = ({
     icon,
     label,
@@ -284,342 +285,385 @@ const RequestDetails = () => {
     ];
 
     return (
-        <Box sx={{ bgcolor: '#F7F9FC', minHeight: '100vh' }}>
-            {/* ── Header ── */}
+        <Box sx={{ bgcolor: surface.page, minHeight: '100vh', px: { xs: 2, md: 4 }, py: { xs: 2, md: 3 } }}>
+
+            {/* ── Light Hero Card ── */}
             <Box
                 sx={{
-                    background: `linear-gradient(135deg, ${TEAL} 0%, ${TEAL_DARK} 60%, #033c35 100%)`,
-                    px: { xs: 2, md: 4 },
-                    pt: { xs: 2.5, md: 3 },
-                    pb: { xs: 2, md: 2.5 },
                     position: 'relative',
+                    borderRadius: 2,
+                    border: `1px solid ${border.subtle}`,
+                    background: `linear-gradient(135deg, ${alpha(brand[50], 0.75)} 0%, #FFFFFF 65%)`,
                     overflow: 'hidden',
+                    mb: 3,
                     '&::after': {
                         content: '""',
                         position: 'absolute',
-                        top: -60,
-                        right: -60,
-                        width: 260,
-                        height: 260,
+                        top: -70,
+                        right: -70,
+                        width: 240,
+                        height: 240,
                         borderRadius: '50%',
-                        bgcolor: 'rgba(255,255,255,0.04)',
+                        bgcolor: alpha(brand[100], 0.22),
                         pointerEvents: 'none',
                     },
                 }}
             >
-                {/* Back nav */}
-                <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
-                    <IconButton
-                        size="small"
-                        onClick={() => navigate(-1)}
-                        sx={{
-                            color: 'rgba(255,255,255,0.8)',
-                            border: '1px solid rgba(255,255,255,0.2)',
-                            '&:hover': { bgcolor: 'rgba(255,255,255,0.12)', color: '#fff' },
-                        }}
-                    >
-                        <ArrowBackIcon fontSize="small" />
-                    </IconButton>
-                    <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.6)' }}>
-                        Asset Requests
-                    </Typography>
-                </Stack>
+                {/* 3px brand accent bar on the left */}
+                <Box
+                    sx={{
+                        position: 'absolute',
+                        left: 0,
+                        top: 0,
+                        bottom: 0,
+                        width: 3,
+                        background: `linear-gradient(180deg, ${brand[500]} 0%, ${brand[700]} 100%)`,
+                    }}
+                />
 
-                {/* Title row */}
-                <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 2, flexWrap: 'wrap' }}>
-                    <Box>
-                        <Typography
-                            variant="h5"
-                            fontWeight={700}
-                            sx={{ color: '#fff', mb: 0.75, letterSpacing: '-0.3px', lineHeight: 1.2 }}
+                <Box sx={{ px: { xs: 2.5, md: 3.5 }, pt: 2.5, pb: 2.5 }}>
+                    {/* Back nav */}
+                    <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
+                        <IconButton
+                            size="small"
+                            onClick={() => navigate(-1)}
+                            sx={{
+                                color: brand[600],
+                                border: `1px solid ${alpha(brand[500], 0.25)}`,
+                                bgcolor: alpha(brand[50], 0.6),
+                                '&:hover': { bgcolor: alpha(brand[100], 0.7), borderColor: brand[500] },
+                            }}
                         >
-                            {request.name || 'Asset Request'}
+                            <ArrowBackIcon fontSize="small" />
+                        </IconButton>
+                        <Typography variant="caption" color="text.secondary">
+                            Asset Requests
                         </Typography>
-                        <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
-                            <Chip
-                                size="small"
-                                label={`#${request.id || '—'}`}
-                                sx={{ bgcolor: 'rgba(255,255,255,0.15)', color: '#fff', fontWeight: 700, fontSize: '0.72rem', height: 22 }}
-                            />
-                            <StatusChip statusCode={request.status?.status ?? undefined} />
-                            <PriorityChip priority={request.priority} />
-                            {request.createDate && (
-                                <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.6)' }}>
-                                    {moment(request.createDate).format('D MMM YYYY')}
+                    </Stack>
+
+                    {/* Title row */}
+                    <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 2, flexWrap: 'wrap' }}>
+                        <Stack direction="row" alignItems="flex-start" gap={2}>
+                            {/* Icon tile */}
+                            <Box
+                                sx={{
+                                    width: 44,
+                                    height: 44,
+                                    borderRadius: 1.5,
+                                    bgcolor: alpha(brand[500], 0.1),
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    flexShrink: 0,
+                                    mt: 0.25,
+                                }}
+                            >
+                                <InboxOutlinedIcon sx={{ fontSize: 22, color: brand[600] }} />
+                            </Box>
+
+                            <Box>
+                                <Typography
+                                    variant="h5"
+                                    fontWeight={700}
+                                    sx={{ color: neutral[900], mb: 0.6, letterSpacing: '-0.3px', lineHeight: 1.2 }}
+                                >
+                                    {request.name || 'Asset Request'}
                                 </Typography>
+                                <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
+                                    <Chip
+                                        size="small"
+                                        label={`#${request.id || '—'}`}
+                                        sx={{
+                                            bgcolor: alpha(brand[500], 0.1),
+                                            color: brand[700],
+                                            fontWeight: 700,
+                                            fontSize: '0.72rem',
+                                            height: 22,
+                                            border: `1px solid ${alpha(brand[500], 0.2)}`,
+                                        }}
+                                    />
+                                    <StatusChip statusCode={request.status?.status ?? undefined} />
+                                    <PriorityChip priority={request.priority} />
+                                    {request.createDate && (
+                                        <Typography variant="caption" color="text.secondary">
+                                            {moment(request.createDate).format('D MMM YYYY')}
+                                        </Typography>
+                                    )}
+                                </Stack>
+                            </Box>
+                        </Stack>
+
+                        {/* Action buttons */}
+                        <Stack direction="row" spacing={1} sx={{ flexShrink: 0, flexWrap: 'wrap', gap: 1, alignItems: 'flex-start' }}>
+                            <MuiButton
+                                variant="outlined"
+                                size="small"
+                                startIcon={<EditOutlinedIcon fontSize="small" />}
+                                disabled={!canEdit}
+                                onClick={() => navigate(`/requests/edit/${request.id}`)}
+                                sx={{
+                                    color: brand[600],
+                                    borderColor: alpha(brand[500], 0.35),
+                                    textTransform: 'none',
+                                    fontSize: '0.8rem',
+                                    fontWeight: 600,
+                                    '&:hover': { borderColor: brand[500], bgcolor: alpha(brand[50], 0.7) },
+                                    '&.Mui-disabled': { color: neutral[400], borderColor: neutral[200] },
+                                }}
+                            >
+                                Edit
+                            </MuiButton>
+
+                            {canApprove && (
+                                <MuiButton
+                                    variant="contained"
+                                    size="small"
+                                    startIcon={<ApproveIcon fontSize="small" />}
+                                    onClick={() => setApproveModalOpen(true)}
+                                    sx={{
+                                        bgcolor: '#2E7D32',
+                                        color: '#fff',
+                                        textTransform: 'none',
+                                        fontSize: '0.8rem',
+                                        fontWeight: 600,
+                                        '&:hover': { bgcolor: '#1B5E20' },
+                                    }}
+                                >
+                                    Approve
+                                </MuiButton>
+                            )}
+
+                            {canReject && (
+                                <MuiButton
+                                    variant="contained"
+                                    size="small"
+                                    startIcon={<RejectIcon fontSize="small" />}
+                                    onClick={() => setRejectModalOpen(true)}
+                                    sx={{
+                                        bgcolor: '#C62828',
+                                        color: '#fff',
+                                        textTransform: 'none',
+                                        fontSize: '0.8rem',
+                                        fontWeight: 600,
+                                        '&:hover': { bgcolor: '#B71C1C' },
+                                    }}
+                                >
+                                    Reject
+                                </MuiButton>
                             )}
                         </Stack>
                     </Box>
 
-                    {/* Action buttons */}
-                    <Stack direction="row" spacing={1} sx={{ flexShrink: 0, flexWrap: 'wrap', gap: 1 }}>
-                        <MuiButton
-                            variant="outlined"
-                            size="small"
-                            startIcon={<EditOutlinedIcon fontSize="small" />}
-                            disabled={!canEdit}
-                            onClick={() => navigate(`/requests/edit/${request.id}`)}
-                            sx={{
-                                color: canEdit ? '#fff' : 'rgba(255,255,255,0.35)',
-                                borderColor: canEdit ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.15)',
-                                textTransform: 'none',
-                                fontSize: '0.8rem',
-                                '&:hover': { borderColor: '#fff', bgcolor: 'rgba(255,255,255,0.1)' },
-                                '&.Mui-disabled': { color: 'rgba(255,255,255,0.3)', borderColor: 'rgba(255,255,255,0.12)' },
-                            }}
-                        >
-                            Edit
-                        </MuiButton>
-
-                        {canApprove && (
-                            <MuiButton
-                                variant="contained"
-                                size="small"
-                                startIcon={<ApproveIcon fontSize="small" />}
-                                onClick={() => setApproveModalOpen(true)}
-                                sx={{
-                                    bgcolor: '#2E7D32',
-                                    color: '#fff',
-                                    textTransform: 'none',
-                                    fontSize: '0.8rem',
-                                    '&:hover': { bgcolor: '#1B5E20' },
-                                }}
-                            >
-                                Approve
-                            </MuiButton>
-                        )}
-
-                        {canReject && (
-                            <MuiButton
-                                variant="contained"
-                                size="small"
-                                startIcon={<RejectIcon fontSize="small" />}
-                                onClick={() => setRejectModalOpen(true)}
-                                sx={{
-                                    bgcolor: '#C62828',
-                                    color: '#fff',
-                                    textTransform: 'none',
-                                    fontSize: '0.8rem',
-                                    '&:hover': { bgcolor: '#B71C1C' },
-                                }}
-                            >
-                                Reject
-                            </MuiButton>
-                        )}
-                    </Stack>
+                    {/* Attachment pill */}
+                    {request.signaturePath && (
+                        <Box sx={{ mt: 2, pt: 2, borderTop: `1px solid ${alpha(brand[500], 0.1)}` }}>
+                            <Stack direction="row" spacing={1} alignItems="center">
+                                <AttachFileOutlinedIcon sx={{ fontSize: 14, color: 'text.disabled' }} />
+                                <Typography variant="caption" color="text.secondary" sx={{ mr: 0.5 }}>
+                                    Attachment:
+                                </Typography>
+                                <AttachmentPill
+                                    filePath={request.signaturePath}
+                                    onView={() => setIsAttachmentViewerOpen(true)}
+                                />
+                            </Stack>
+                        </Box>
+                    )}
                 </Box>
-
-                {/* Attachment pill in header */}
-                {request.signaturePath && (
-                    <Box sx={{ mt: 2 }}>
-                        <Stack direction="row" spacing={1} alignItems="center">
-                            <AttachFileOutlinedIcon sx={{ fontSize: 14, color: 'rgba(255,255,255,0.5)' }} />
-                            <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.5)', mr: 0.5 }}>
-                                Attachment:
-                            </Typography>
-                            <AttachmentPill
-                                filePath={request.signaturePath}
-                                onView={() => setIsAttachmentViewerOpen(true)}
-                            />
-                        </Stack>
-                    </Box>
-                )}
             </Box>
 
             {/* ── Body ── */}
-            <Box sx={{ px: { xs: 2, md: 4 }, py: 3 }}>
-                {loading ? (
-                    <Loading items="Asset Request" />
-                ) : (
-                    <Grid container spacing={3}>
-                        {/* ── Left: Summary card ── */}
-                        <Grid item xs={12} md={4} lg={3}>
-                            <Paper
-                                elevation={0}
+            {loading ? (
+                <Loading items="Asset Request" />
+            ) : (
+                <Grid container spacing={3}>
+                    {/* ── Left: Summary card ── */}
+                    <Grid item xs={12} md={4} lg={3}>
+                        <Paper
+                            elevation={0}
+                            sx={{
+                                borderRadius: 2,
+                                border: `1px solid ${border.subtle}`,
+                                overflow: 'hidden',
+                                bgcolor: '#fff',
+                            }}
+                        >
+                            {/* Card header */}
+                            <Box
                                 sx={{
-                                    borderRadius: 2,
-                                    border: `1px solid ${alpha('#000', 0.08)}`,
-                                    overflow: 'hidden',
-                                    bgcolor: '#fff',
+                                    px: 2.5,
+                                    py: 1.75,
+                                    borderBottom: `1px solid ${alpha('#000', 0.06)}`,
+                                    bgcolor: alpha(brand[500], 0.03),
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 1,
                                 }}
                             >
-                                {/* Card header */}
                                 <Box
                                     sx={{
-                                        px: 2.5,
-                                        py: 1.75,
-                                        borderBottom: `1px solid ${alpha('#000', 0.06)}`,
-                                        bgcolor: alpha(TEAL, 0.03),
+                                        width: 28,
+                                        height: 28,
+                                        borderRadius: '7px',
+                                        background: `linear-gradient(135deg, ${brand[500]}, ${brand[700]})`,
                                         display: 'flex',
                                         alignItems: 'center',
-                                        gap: 1,
+                                        justifyContent: 'center',
                                     }}
                                 >
-                                    <Box
-                                        sx={{
-                                            width: 28,
-                                            height: 28,
-                                            borderRadius: '7px',
-                                            background: `linear-gradient(135deg, ${TEAL}, ${TEAL_DARK})`,
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                        }}
-                                    >
-                                        <ListAltOutlinedIcon sx={{ fontSize: 15, color: '#fff' }} />
-                                    </Box>
-                                    <Typography variant="subtitle2" fontWeight={700} color={TEAL}>
-                                        Request Summary
+                                    <ListAltOutlinedIcon sx={{ fontSize: 15, color: '#fff' }} />
+                                </Box>
+                                <Typography variant="subtitle2" fontWeight={700} color={brand[600]}>
+                                    Request Summary
+                                </Typography>
+                            </Box>
+
+                            {/* Info rows */}
+                            <Box sx={{ px: 2.5, py: 1.5 }}>
+                                <InfoRow icon={<PersonOutlineIcon />} label="Requested By">
+                                    <Typography variant="body2" fontWeight={600}>
+                                        {request.requester
+                                            ? `${request.requester.firstName} ${request.requester.lastName}`
+                                            : '—'}
                                     </Typography>
-                                </Box>
+                                </InfoRow>
 
-                                {/* Info rows */}
-                                <Box sx={{ px: 2.5, py: 1.5 }}>
-                                    <InfoRow icon={<PersonOutlineIcon />} label="Requested By">
-                                        <Typography variant="body2" fontWeight={600}>
-                                            {request.requester
-                                                ? `${request.requester.firstName} ${request.requester.lastName}`
-                                                : '—'}
+                                <InfoRow icon={<BadgeOutlinedIcon />} label="Staff Number">
+                                    <Typography variant="body2" fontWeight={500}>
+                                        {request.requester?.staffNumber ?? '—'}
+                                    </Typography>
+                                </InfoRow>
+
+                                <InfoRow icon={<AccountBalanceOutlinedIcon />} label="Branch">
+                                    <Typography variant="body2" fontWeight={500}>
+                                        {request.requester?.branch?.name ?? '—'}
+                                    </Typography>
+                                </InfoRow>
+
+                                <InfoRow icon={<CategoryOutlinedIcon />} label="Asset Category">
+                                    <Typography variant="body2" fontWeight={500}>
+                                        {request.assetType?.name ?? '—'}
+                                    </Typography>
+                                </InfoRow>
+
+                                <InfoRow icon={<HowToRegOutlinedIcon />} label="Current Approver">
+                                    <Typography variant="body2" fontWeight={500}>
+                                        {request.currentApprover
+                                            ? `${request.currentApprover.firstName} ${request.currentApprover.lastName}`
+                                            : '—'}
+                                    </Typography>
+                                </InfoRow>
+
+                                <InfoRow icon={<CalendarTodayOutlinedIcon />} label="Submitted">
+                                    <Typography variant="body2" fontWeight={500}>
+                                        {request.createDate
+                                            ? moment(request.createDate).format('D MMM YYYY, h:mm A')
+                                            : '—'}
+                                    </Typography>
+                                </InfoRow>
+
+                                <InfoRow icon={<UpdateOutlinedIcon />} label="Last Modified">
+                                    <Typography variant="body2" fontWeight={500}>
+                                        {request.lastModified
+                                            ? moment(request.lastModified).format('D MMM YYYY, h:mm A')
+                                            : '—'}
+                                    </Typography>
+                                </InfoRow>
+                            </Box>
+
+                            {/* Description */}
+                            {request.description && (
+                                <>
+                                    <Divider />
+                                    <Box sx={{ px: 2.5, py: 2 }}>
+                                        <Typography
+                                            variant="caption"
+                                            color="text.disabled"
+                                            sx={{ display: 'block', mb: 0.75, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}
+                                        >
+                                            Description
                                         </Typography>
-                                    </InfoRow>
-
-                                    <InfoRow icon={<BadgeOutlinedIcon />} label="Staff Number">
-                                        <Typography variant="body2" fontWeight={500}>
-                                            {request.requester?.staffNumber ?? '—'}
+                                        <Typography
+                                            variant="body2"
+                                            color="text.secondary"
+                                            sx={{ whiteSpace: 'pre-line', lineHeight: 1.7 }}
+                                        >
+                                            {request.description}
                                         </Typography>
-                                    </InfoRow>
+                                    </Box>
+                                </>
+                            )}
+                        </Paper>
+                    </Grid>
 
-                                    <InfoRow icon={<AccountBalanceOutlinedIcon />} label="Branch">
-                                        <Typography variant="body2" fontWeight={500}>
-                                            {request.requester?.branch?.name ?? '—'}
-                                        </Typography>
-                                    </InfoRow>
-
-                                    <InfoRow icon={<CategoryOutlinedIcon />} label="Asset Category">
-                                        <Typography variant="body2" fontWeight={500}>
-                                            {request.assetType?.name ?? '—'}
-                                        </Typography>
-                                    </InfoRow>
-
-                                    <InfoRow icon={<HowToRegOutlinedIcon />} label="Current Approver">
-                                        <Typography variant="body2" fontWeight={500}>
-                                            {request.currentApprover
-                                                ? `${request.currentApprover.firstName} ${request.currentApprover.lastName}`
-                                                : '—'}
-                                        </Typography>
-                                    </InfoRow>
-
-                                    <InfoRow icon={<CalendarTodayOutlinedIcon />} label="Submitted">
-                                        <Typography variant="body2" fontWeight={500}>
-                                            {request.createDate
-                                                ? moment(request.createDate).format('D MMM YYYY, h:mm A')
-                                                : '—'}
-                                        </Typography>
-                                    </InfoRow>
-
-                                    <InfoRow icon={<UpdateOutlinedIcon />} label="Last Modified">
-                                        <Typography variant="body2" fontWeight={500}>
-                                            {request.lastModified
-                                                ? moment(request.lastModified).format('D MMM YYYY, h:mm A')
-                                                : '—'}
-                                        </Typography>
-                                    </InfoRow>
-                                </Box>
-
-                                {/* Description */}
-                                {request.description && (
-                                    <>
-                                        <Divider />
-                                        <Box sx={{ px: 2.5, py: 2 }}>
-                                            <Typography
-                                                variant="caption"
-                                                color="text.disabled"
-                                                sx={{ display: 'block', mb: 0.75, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}
-                                            >
-                                                Description
-                                            </Typography>
-                                            <Typography
-                                                variant="body2"
-                                                color="text.secondary"
-                                                sx={{ whiteSpace: 'pre-line', lineHeight: 1.7 }}
-                                            >
-                                                {request.description}
-                                            </Typography>
-                                        </Box>
-                                    </>
-                                )}
-                            </Paper>
-                        </Grid>
-
-                        {/* ── Right: Tab panel ── */}
-                        <Grid item xs={12} md={8} lg={9}>
-                            <Paper
-                                elevation={0}
+                    {/* ── Right: Tab panel ── */}
+                    <Grid item xs={12} md={8} lg={9}>
+                        <Paper
+                            elevation={0}
+                            sx={{
+                                borderRadius: 2,
+                                border: `1px solid ${border.subtle}`,
+                                overflow: 'hidden',
+                                bgcolor: '#fff',
+                            }}
+                        >
+                            {/* Tab bar */}
+                            <Tabs
+                                value={activeTab}
+                                onChange={(_, v) => setActiveTab(v)}
+                                variant="scrollable"
+                                scrollButtons="auto"
                                 sx={{
-                                    borderRadius: 2,
-                                    border: `1px solid ${alpha('#000', 0.08)}`,
-                                    overflow: 'hidden',
-                                    bgcolor: '#fff',
+                                    px: 2,
+                                    borderBottom: `1px solid ${alpha('#000', 0.07)}`,
+                                    minHeight: 48,
+                                    bgcolor: alpha(brand[500], 0.025),
+                                    '& .MuiTab-root': {
+                                        minHeight: 48,
+                                        textTransform: 'none',
+                                        fontSize: '0.82rem',
+                                        fontWeight: 500,
+                                        color: 'text.secondary',
+                                        gap: 0.75,
+                                        px: 2,
+                                    },
+                                    '& .Mui-selected': { color: brand[600], fontWeight: 700 },
+                                    '& .MuiTabs-indicator': { bgcolor: brand[500], height: 3, borderRadius: '3px 3px 0 0' },
                                 }}
                             >
-                                {/* Tab bar */}
-                                <Tabs
-                                    value={activeTab}
-                                    onChange={(_, v) => setActiveTab(v)}
-                                    variant="scrollable"
-                                    scrollButtons="auto"
-                                    sx={{
-                                        px: 2,
-                                        borderBottom: `1px solid ${alpha('#000', 0.07)}`,
-                                        minHeight: 48,
-                                        bgcolor: alpha(TEAL, 0.02),
-                                        '& .MuiTab-root': {
-                                            minHeight: 48,
-                                            textTransform: 'none',
-                                            fontSize: '0.82rem',
-                                            fontWeight: 500,
-                                            color: 'text.secondary',
-                                            gap: 0.75,
-                                            px: 2,
-                                        },
-                                        '& .Mui-selected': { color: TEAL, fontWeight: 700 },
-                                        '& .MuiTabs-indicator': { bgcolor: TEAL, height: 3, borderRadius: '3px 3px 0 0' },
-                                    }}
-                                >
-                                    {TABS.map((tab, i) => (
-                                        <Tab key={i} label={tab.label} icon={tab.icon} iconPosition="start" />
-                                    ))}
-                                </Tabs>
+                                {TABS.map((tab, i) => (
+                                    <Tab key={i} label={tab.label} icon={tab.icon} iconPosition="start" />
+                                ))}
+                            </Tabs>
 
-                                {/* Tab panels */}
-                                <Box sx={{ p: { xs: 2, md: 3 } }}>
-                                    {activeTab === 0 && (
-                                        <RequestCommodties
-                                            requestCommodties={
-                                                request.commodities as Array<{
-                                                    commodity: ICommodity;
-                                                    quantity: number;
-                                                }>
-                                            }
-                                        />
-                                    )}
-                                    {activeTab === 1 && (
-                                        <OtherDetails
-                                            acknowledgeIssuance={acknowledgeIssuance}
-                                            acknowledgeRequest={acknowledgeRequest}
-                                            issuanceApproval={issuanceApproval}
-                                            issuance={currentIssuance}
-                                            request={request}
-                                        />
-                                    )}
-                                    {activeTab === 2 && <MovementHistory request={request} />}
-                                    {activeTab === 3 && <WorkflowTimeline requestId={request.id as number} />}
-                                </Box>
-                            </Paper>
-                        </Grid>
+                            {/* Tab panels */}
+                            <Box sx={{ p: { xs: 2, md: 3 } }}>
+                                {activeTab === 0 && (
+                                    <RequestCommodties
+                                        requestCommodties={
+                                            request.commodities as Array<{
+                                                commodity: ICommodity;
+                                                quantity: number;
+                                            }>
+                                        }
+                                    />
+                                )}
+                                {activeTab === 1 && (
+                                    <OtherDetails
+                                        acknowledgeIssuance={acknowledgeIssuance}
+                                        acknowledgeRequest={acknowledgeRequest}
+                                        issuanceApproval={issuanceApproval}
+                                        issuance={currentIssuance}
+                                        request={request}
+                                    />
+                                )}
+                                {activeTab === 2 && <MovementHistory request={request} />}
+                                {activeTab === 3 && <WorkflowTimeline requestId={request.id as number} />}
+                            </Box>
+                        </Paper>
                     </Grid>
-                )}
-            </Box>
+                </Grid>
+            )}
 
             {/* Attachment Viewer */}
             <AttachmentViewer

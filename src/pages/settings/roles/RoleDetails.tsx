@@ -27,6 +27,7 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { IRoleDetails } from "../interface";
 import RoleUtills from "./utills";
 import RoleRow from "./RoleRow";
+import ActionPermissions from "./ActionPermissions";
 import { normalizeLabel } from "../../../utils/helpers";
 
 const RoleDetails = ({ role, deleteRole, updateRole, allPermissions }: IRoleDetails) => {
@@ -193,10 +194,15 @@ const RoleDetails = ({ role, deleteRole, updateRole, allPermissions }: IRoleDeta
                     </Box>
 
                     {/* Permission rows */}
-                    <Box sx={{ maxHeight: '400px', overflow: 'auto', py: 1 }}>
-                        {modulesList.map((module, index) => (
-                            <RoleRow key={index} role={role} module={module} allPermissions={allPermissions} />
-                        ))}
+                    <Box sx={{ maxHeight: '600px', overflow: 'auto' }}>
+                        <Box sx={{ py: 1 }}>
+                            {modulesList.map((module, index) => (
+                                <RoleRow key={index} role={role} module={module} allPermissions={allPermissions} />
+                            ))}
+                        </Box>
+
+                        {/* Action / workflow permissions (non-CRUD) */}
+                        <ActionPermissions role={role} allPermissions={allPermissions} />
                     </Box>
                 </Grid>
             </Grid>

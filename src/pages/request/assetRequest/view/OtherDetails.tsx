@@ -22,6 +22,7 @@ import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
 import AccessTimeOutlinedIcon from '@mui/icons-material/AccessTimeOutlined';
 import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
 import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined';
+import { brand, border } from '../../../../utils/tokens';
 
 const TEAL = '#08796C';
 
@@ -32,9 +33,9 @@ const SectionHeader = ({ title, icon }: { title: string; icon: React.ReactNode }
             sx={{
                 width: 26,
                 height: 26,
-                borderRadius: '6px',
-                bgcolor: alpha(TEAL, 0.1),
-                color: TEAL,
+                borderRadius: '7px',
+                bgcolor: alpha(brand[500], 0.1),
+                color: brand[600],
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -98,7 +99,7 @@ const InfoCard = ({ children, mt = 0 }: { children: React.ReactNode; mt?: number
     <Paper
         elevation={0}
         sx={{
-            border: `1px solid ${alpha('#000', 0.07)}`,
+            border: `1px solid ${border.subtle}`,
             borderRadius: 2,
             overflow: 'hidden',
             bgcolor: '#fff',
@@ -111,7 +112,7 @@ const InfoCard = ({ children, mt = 0 }: { children: React.ReactNode; mt?: number
 
 const CardContent = ({ children, header }: { children: React.ReactNode; header: React.ReactNode }) => (
     <>
-        <Box sx={{ px: 2, pt: 2, pb: 1.5, bgcolor: alpha(TEAL, 0.025), borderBottom: `1px solid ${alpha('#000', 0.05)}` }}>
+        <Box sx={{ px: 2, pt: 2, pb: 1.5, bgcolor: alpha(brand[500], 0.025), borderBottom: `1px solid ${alpha(brand[500], 0.07)}` }}>
             {header}
         </Box>
         <Box sx={{ px: 2, py: 0.5 }}>

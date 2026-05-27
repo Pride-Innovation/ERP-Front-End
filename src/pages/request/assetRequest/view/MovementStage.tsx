@@ -1,5 +1,6 @@
 import { alpha, Avatar, Box, Card, CardContent, Chip, Typography, useTheme } from '@mui/material'
 import { MovementStep } from './MovementHistory'
+import { brand } from '../../../../utils/tokens'
 
 import {
     ReceiptLong as ReceiptLongIcon,
@@ -78,14 +79,14 @@ const UserAvatar = ({ user }: { user: MovementStep['user'] }) => {
         .toUpperCase();
 
     return user.avatar ? (
-        <Avatar alt={user.name} src={user.avatar} sx={{ width: 36, height: 36 }} />
+        <Avatar alt={user.name} src={user.avatar} sx={{ width: 34, height: 34 }} />
     ) : (
         <Avatar sx={{
-            width: 36,
-            height: 36,
-            bgcolor: alpha(PRIMARY_COLOR, 0.8),
-            fontWeight: 600,
-            fontSize: '0.9rem'
+            width: 34,
+            height: 34,
+            bgcolor: brand[500],
+            fontWeight: 700,
+            fontSize: '0.8rem',
         }}>
             {initials}
         </Avatar>
@@ -182,27 +183,21 @@ const MovementStage = ({ step }: { step: MovementStep }) => {
                 <Card
                     elevation={0}
                     sx={{
-                        borderRadius: 1.5,
+                        borderRadius: 2,
                         mb: { xs: 1, sm: 2 },
                         border: `1px solid ${step.isCurrent
-                            ? alpha(PRIMARY_COLOR, 0.3)
-                            : alpha(theme.palette.divider, 0.1)}`,
-                        transition: 'all 0.25s ease',
+                            ? alpha(PRIMARY_COLOR, 0.28)
+                            : alpha(theme.palette.divider, 0.6)}`,
+                        transition: 'box-shadow 0.2s ease, border-color 0.2s ease',
                         boxShadow: step.isCurrent
-                            ? `0 3px 10px ${alpha(PRIMARY_COLOR, 0.15)}`
-                            : '0 1px 3px rgba(0,0,0,0.03)',
-                        transform: step.isCurrent ? 'translateY(-1px)' : 'none',
-                        opacity: step.isCompleted ? 1 : 0.7,
-                        bgcolor: step.isCurrent ? alpha(PRIMARY_COLOR, 0.02) : '#fff',
+                            ? `0 2px 8px ${alpha(PRIMARY_COLOR, 0.12)}`
+                            : '0 1px 2px rgba(0,0,0,0.04)',
+                        opacity: step.isCompleted ? 1 : 0.65,
+                        bgcolor: step.isCurrent ? alpha(PRIMARY_COLOR, 0.025) : '#fff',
                         '&:hover': {
-                            boxShadow: `0 3px 8px ${step.isCurrent
-                                ? alpha(PRIMARY_COLOR, 0.2)
-                                : 'rgba(0,0,0,0.08)'}`,
-                            transform: 'translateY(-2px)',
-                            borderColor: step.isCurrent
-                                ? alpha(PRIMARY_COLOR, 0.4)
-                                : alpha(theme.palette.primary.main, 0.2)
-                        }
+                            boxShadow: `0 4px 12px ${alpha(PRIMARY_COLOR, step.isCurrent ? 0.18 : 0.08)}`,
+                            borderColor: alpha(PRIMARY_COLOR, step.isCurrent ? 0.4 : 0.18),
+                        },
                     }}
                 >
                     <CardContent sx={{ p: { xs: 1.5, sm: 2 }, '&:last-child': { pb: { xs: 1.5, sm: 2 } } }}>
@@ -235,14 +230,14 @@ const MovementStage = ({ step }: { step: MovementStep }) => {
                         {step.comments && (
                             <Box
                                 sx={{
-                                    mt: 1,
+                                    mt: 1.25,
                                     p: 1.5,
-                                    bgcolor: alpha('#f5f5f5', 0.5),
-                                    borderRadius: 1,
+                                    bgcolor: alpha(step.isCurrent ? PRIMARY_COLOR : '#64748B', 0.04),
+                                    borderRadius: 1.5,
                                     borderLeft: `3px solid ${alpha(
                                         step.isCurrent ? PRIMARY_COLOR : '#64748B',
-                                        step.isCurrent ? 0.7 : 0.4
-                                    )}`
+                                        step.isCurrent ? 0.6 : 0.3
+                                    )}`,
                                 }}
                             >
                                 <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>

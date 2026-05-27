@@ -16,8 +16,9 @@ import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
 import FactCheckOutlinedIcon from '@mui/icons-material/FactCheckOutlined';
 import moment from 'moment';
+import { brand } from '../../../../utils/tokens';
 
-const TEAL = '#05544B';
+const TEAL = brand[800];
 const GOLD = '#BC892C';
 const BASE_URL = process.env.REACT_APP_BASE_URL;
 
@@ -106,10 +107,12 @@ const WorkflowTimeline: React.FC<Props> = ({ requestId }) => {
                         <Paper
                             variant="outlined"
                             sx={{
-                                flex: 1, p: 1.5, mb: isLast ? 0 : 0,
+                                flex: 1, p: 1.5,
                                 borderRadius: 2,
-                                borderColor: alpha(config.color, 0.3),
-                                bgcolor: log.action === 'PENDING' ? alpha(GOLD, 0.02) : 'background.paper',
+                                borderColor: alpha(config.color, 0.22),
+                                bgcolor: log.action === 'PENDING' ? alpha(GOLD, 0.025) : '#fff',
+                                transition: 'box-shadow 0.15s',
+                                '&:hover': { boxShadow: `0 2px 8px ${alpha(config.color, 0.1)}` },
                             }}
                         >
                             <Stack direction="row" alignItems="flex-start" justifyContent="space-between" spacing={1} flexWrap="wrap">
