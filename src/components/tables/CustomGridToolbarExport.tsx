@@ -14,7 +14,7 @@ import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
 import TableUtills from './utills';
 import { OnExportHandler } from './interface';
 
-const PRIMARY = '#08796C';
+// const PRIMARY = '#08796C';
 const GREEN   = '#15803d';
 
 interface CustomGridToolbarExportProps {

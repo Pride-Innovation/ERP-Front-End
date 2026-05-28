@@ -49,7 +49,7 @@ const SideBar = ({ drawerOpen }: SideBarProps) => {
             }}
         >
             <List
-                sx={{ width: '100%', bgcolor: 'transparent', padding: 0, pt: 1 }}
+                sx={{ width: '100%', bgcolor: 'transparent', px: 0, pt: 1.5, pb: 1 }}
                 component="nav"
             >
                 {sideBarList.map((item) => {
@@ -59,33 +59,37 @@ const SideBar = ({ drawerOpen }: SideBarProps) => {
 
                     const button = (
                         <ListItemButton
+                            disableRipple
                             sx={{
                                 position: 'relative',
-                                bgcolor: isActive ? alpha(brand[500], 0.08) : 'transparent',
+                                bgcolor: isActive ? alpha(brand[500], 0.1) : 'transparent',
                                 color: isActive ? brand[700] : neutral[700],
-                                borderRadius: 1.5,
-                                mx: 1,
-                                my: 0.25,
-                                px: drawerOpen ? 1.75 : 1.25,
-                                py: 0.75,
+                                borderRadius: '10px',
+                                mx: drawerOpen ? 1.25 : 1,
+                                my: 0.35,
+                                px: drawerOpen ? 1.5 : 0,
+                                py: 0.85,
                                 justifyContent: drawerOpen ? 'flex-start' : 'center',
-                                minHeight: 38,
-                                fontWeight: isActive ? 600 : 500,
-                                transition: 'background-color 0.15s ease, color 0.15s ease',
+                                minHeight: 42,
+                                transition: 'background-color 0.18s ease, color 0.18s ease',
                                 '&:hover': {
-                                    bgcolor: isActive ? alpha(brand[500], 0.12) : neutral[100],
+                                    bgcolor: isActive ? alpha(brand[500], 0.14) : neutral[100],
                                     color: isActive ? brand[700] : neutral[900],
                                 },
-                                // 3px brand bar on the left edge when active
+                                '&:hover .MuiListItemIcon-root': {
+                                    color: isActive ? brand[600] : neutral[700],
+                                },
+                                // Brand accent bar pinned to the drawer edge when active
                                 '&::before': isActive
                                     ? {
                                         content: '""',
                                         position: 'absolute',
-                                        left: -4,
-                                        top: 6,
-                                        bottom: 6,
+                                        left: drawerOpen ? -10 : -8,
+                                        top: '50%',
+                                        transform: 'translateY(-50%)',
+                                        height: 22,
                                         width: 3,
-                                        borderRadius: '0 3px 3px 0',
+                                        borderRadius: '0 4px 4px 0',
                                         bgcolor: brand[500],
                                     }
                                     : undefined,
@@ -98,7 +102,8 @@ const SideBar = ({ drawerOpen }: SideBarProps) => {
                                     minWidth: 0,
                                     mr: drawerOpen ? 1.5 : 0,
                                     justifyContent: 'center',
-                                    transition: 'color 0.15s ease, margin 0.2s ease',
+                                    transition: 'color 0.18s ease, margin 0.2s ease',
+                                    '& svg': { fontSize: '1.3rem' },
                                 }}
                             >
                                 {React.cloneElement(item.icon, { fontSize: 'small' })}
@@ -124,8 +129,8 @@ const SideBar = ({ drawerOpen }: SideBarProps) => {
 
                             {item.subroutes.length > 0 && drawerOpen && (
                                 expandedItemId === item.id
-                                    ? <ExpandLess sx={{ color: neutral[400] }} fontSize="small" />
-                                    : <ExpandMore sx={{ color: neutral[400] }} fontSize="small" />
+                                    ? <ExpandLess sx={{ color: isActive ? brand[500] : neutral[400] }} fontSize="small" />
+                                    : <ExpandMore sx={{ color: isActive ? brand[500] : neutral[400] }} fontSize="small" />
                             )}
                         </ListItemButton>
                     );

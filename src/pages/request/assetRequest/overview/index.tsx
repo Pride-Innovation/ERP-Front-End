@@ -30,6 +30,7 @@ import { Doughnut, Bar } from 'react-chartjs-2';
 import CountUp from 'react-countup';
 import { fetchRowsService } from '../../../../core/apis/globalService';
 import { IRequest, IRequestsAxiosResponse } from '../../interface';
+import { workflowApprovalStatusIds, workflowApprovalStatusIdsCsv } from '../../../../utils/constants';
 import InboxOutlinedIcon from '@mui/icons-material/InboxOutlined';
 import HourglassEmptyOutlinedIcon from '@mui/icons-material/HourglassEmptyOutlined';
 import BlockOutlinedIcon from '@mui/icons-material/BlockOutlined';
@@ -159,7 +160,7 @@ const RequestOverview = () => {
                     pageNumber: 0,
                     pageSize: 100,
                     endPoint: 'requests',
-                    params: { statusIds: '1,2,3,4,5,6,7' },
+                    params: { statusIds: `1,2,3,4,5,6,7,${workflowApprovalStatusIdsCsv}` },
                 }) as IRequestsAxiosResponse;
                 if (res.status === 200) {
                     setRequests(res.data.content || []);
@@ -173,7 +174,7 @@ const RequestOverview = () => {
     const total = requests.length;
     const created = requests.filter(r => Number(r.status?.id) === 1).length;
     const rejected = requests.filter(r => Number(r.status?.id) === 2).length;
-    const pending = requests.filter(r => [3, 4].includes(Number(r.status?.id))).length;
+    const pending = requests.filter(r => [3, 4, ...workflowApprovalStatusIds].includes(Number(r.status?.id))).length;
     const issued = requests.filter(r => [5, 6, 7].includes(Number(r.status?.id))).length;
 
     const pct = (n: number) => (total > 0 ? Math.round((n / total) * 100) : 0);

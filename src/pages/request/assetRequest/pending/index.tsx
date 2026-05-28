@@ -12,7 +12,7 @@ import { useContext, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../store";
 import { RequestContext } from "../../../../context/request/RequestContext";
-import { crudStates } from "../../../../utils/constants";
+import { crudStates, workflowApprovalStatusIdsCsv } from "../../../../utils/constants";
 import ModalComponent from "../../../../components/modal";
 import AcknowledgeRequest from "../AcknowledgeRequest";
 import ApproveRequest from "../ApprovedRequest";
@@ -51,7 +51,7 @@ const PendingRequest = () => {
         count,
         modalState,
         open,
-        handleClose,
+        handleClose: closeModal,
         currentRequest,
         sendingRequest,
         setSendingRequest,
@@ -62,6 +62,13 @@ const PendingRequest = () => {
         ...(statusIds ? { statusIds } : {}),
         status: "PENDING",
         ...(currentUser?.id ? { currentApproverId: currentUser.id } : {})
+    };
+
+    // Close the modal and re-fetch from the server so the list reflects the
+    // request's new state (e.g. it leaves this approver's queue once actioned).
+    const handleClose = () => {
+        closeModal();
+        fetchAllRequests(params);
     };
 
     useEffect(() => {
@@ -138,10 +145,13 @@ const PendingRequest = () => {
     const handleStatusChange = (status: string) => {
         switch (status) {
             case 'requestApproved': {
-                const param = { status: "PENDING", statusIds: '3', ...approverParam };
+                // Includes the per-stage workflow approvals (13-17) — approved at one
+                // stage, awaiting the next — so in-progress requests stay listed.
+                const inProgressIds = `3,${workflowApprovalStatusIdsCsv}`;
+                const param = { status: "PENDING", statusIds: inProgressIds, ...approverParam };
                 fetchAllRequests(param);
                 setSelectedStatus(status);
-                setStatusIds('3');
+                setStatusIds(inProgressIds);
                 break;
             }
             case 'requestAcknowledged': {

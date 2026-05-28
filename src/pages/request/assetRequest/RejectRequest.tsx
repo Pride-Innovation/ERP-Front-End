@@ -38,9 +38,6 @@ import AssignmentIndOutlinedIcon from '@mui/icons-material/AssignmentIndOutlined
 import CommentOutlinedIcon from '@mui/icons-material/CommentOutlined';
 import AssetTable from "../../../components/assetTable";
 import DescriptionText from "../../dashboard/sections/DescriptionText";
-import { useDispatch } from "react-redux";
-import { AppDispatch } from "../../../store";
-import { removeRequest } from "./slice";
 
 // Brand colors
 const PRIMARY_COLOR = '#08796C';
@@ -55,7 +52,6 @@ const RejectRequest = ({
     buttonText = "Reject Request",
 }: IRejectRequest) => {
     const theme = useTheme();
-    const dispatch = useDispatch<AppDispatch>();
     const { getCurrentUser } = RoutesUtills();
     const [comment, setComment] = useState("");
     const [loading, setLoading] = useState(true);
@@ -128,7 +124,6 @@ const RejectRequest = ({
             const response = await assetRequestApprovalRejectionService(data) as IRequestAxiosResponse;
             if (response.status === 201) {
                 toast.success("Request has been rejected.");
-                dispatch(removeRequest(response.data)); // Filter out the rejected request from the store
             }
         } catch (error) {
             console.error(error);
@@ -556,6 +551,7 @@ const RejectRequest = ({
                             type="button"
                             variant="outlined"
                             size="small"
+                            disabled={sendingRequest}
                             sx={{
                                 px: 2,
                                 borderColor: alpha('#000', 0.12),
@@ -573,7 +569,9 @@ const RejectRequest = ({
                             variant="contained"
                             disabled={sendingRequest}
                             size="small"
-                            startIcon={<CancelOutlinedIcon />}
+                            startIcon={sendingRequest
+                                ? <CircularProgress size={16} color="inherit" />
+                                : <CancelOutlinedIcon />}
                             sx={{
                                 px: 2,
                                 boxShadow: `0 4px 8px ${alpha(ERROR_COLOR, 0.2)}`,
@@ -581,7 +579,7 @@ const RejectRequest = ({
                                     boxShadow: `0 4px 12px ${alpha(ERROR_COLOR, 0.25)}`,
                                 }
                             }}
-                        >{buttonText || "Reject Request"}</MuiButton>
+                        >{sendingRequest ? "Processing…" : (buttonText || "Reject Request")}</MuiButton>
                     </Stack>
                 </Box>
             </Box>

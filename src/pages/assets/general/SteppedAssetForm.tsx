@@ -28,7 +28,6 @@ import {
     UseFormSelect
 } from "../../../components/forms";
 import { useNavigate } from "react-router-dom";
-import { ROUTES } from "../../../core/routes/routes";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import SaveIcon from '@mui/icons-material/Save';

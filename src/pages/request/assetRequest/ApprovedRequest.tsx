@@ -36,9 +36,6 @@ import AssignmentIndOutlinedIcon from '@mui/icons-material/AssignmentIndOutlined
 import CommentOutlinedIcon from '@mui/icons-material/CommentOutlined';
 import AssetTable from "../../../components/assetTable";
 import DescriptionText from "../../dashboard/sections/DescriptionText";
-import { useDispatch } from "react-redux";
-import { AppDispatch } from "../../../store";
-import { removeRequest } from "./slice";
 
 // Brand colors
 const PRIMARY_COLOR = '#08796C';
@@ -52,7 +49,6 @@ const ApproveRequest = ({
     buttonText = "Approve Request",
 }: IApproveRequest) => {
     const theme = useTheme();
-    const dispatch = useDispatch<AppDispatch>();
     const { getCurrentUser } = RoutesUtills();
     const [comment, setComment] = useState("");
     const [loading, setLoading] = useState(true);
@@ -125,7 +121,6 @@ const ApproveRequest = ({
             const response = await assetRequestApprovalRejectionService(data) as IRequestAxiosResponse;
             if (response.status === 201) {
                 toast.success("Request has been Approved.");
-                dispatch(removeRequest(response.data)); // Filter out the approved request from the store
             }
         } catch (error) {
             console.error(error);
@@ -511,6 +506,7 @@ const ApproveRequest = ({
                             type="button"
                             variant="outlined"
                             size="small"
+                            disabled={sendingRequest}
                             sx={{
                                 px: 2,
                                 borderColor: alpha('#000', 0.12),
@@ -527,7 +523,10 @@ const ApproveRequest = ({
                             type="submit"
                             size="small"
                             variant="outlined"
-                            startIcon={<CheckCircleOutlineIcon />}
+                            disabled={sendingRequest}
+                            startIcon={sendingRequest
+                                ? <CircularProgress size={16} color="inherit" />
+                                : <CheckCircleOutlineIcon />}
                             sx={{
                                 px: 2,
                                 boxShadow: `0 4px 8px ${alpha(PRIMARY_COLOR, 0.2)}`,
@@ -535,7 +534,7 @@ const ApproveRequest = ({
                                     boxShadow: `0 4px 12px ${alpha(PRIMARY_COLOR, 0.25)}`,
                                 }
                             }}
-                        >{buttonText}</MuiButton>
+                        >{sendingRequest ? "Processing…" : buttonText}</MuiButton>
                     </Stack>
                 </Box>
             </Box>

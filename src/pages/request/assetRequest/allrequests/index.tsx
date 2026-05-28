@@ -13,7 +13,7 @@ import {
 import { useNavigate } from "react-router";
 import { Box } from "@mui/material";
 import { RequestContext } from "../../../../context/request/RequestContext";
-import { crudStates } from "../../../../utils/constants";
+import { crudStates, workflowApprovalStatusIdsCsv } from "../../../../utils/constants";
 import { ROUTES } from "../../../../core/routes/routes";
 import ModalComponent from "../../../../components/modal";
 import TableComponent from "../../../../components/tables/TableComponent";
@@ -46,7 +46,7 @@ const Request = () => {
     const { requests } = useSelector((state: RootState) => state.AssetsRequestsStore);
     const { has } = usePermissions();
     const [selectedStatus, setSelectedStatus] = useState<string>('all');
-    const [statusIds, setStatusIds] = useState<string>(`${1},${2},${3},${4},${5},${6},${7}`); // Default to '1' for "Request Created"
+    const [statusIds, setStatusIds] = useState<string>(`1,2,3,4,5,6,7,${workflowApprovalStatusIdsCsv}`); // legacy 1-7 + workflow approval statuses (13-17)
     const { setRequestStatusIds } = useContext(RequestContext);
     const { tableStartDate, tableEndDate } = useContext(FormContext);
 
@@ -62,7 +62,7 @@ const Request = () => {
         endPoint,
         header,
         module,
-        handleClose,
+        handleClose: closeModal,
         open,
         fetchAllRequests,
         modalState,
@@ -72,6 +72,18 @@ const Request = () => {
         loading,
         currentRequest,
     } = RequestUtills();
+
+    // Close the modal and re-fetch so the list shows the request's updated
+    // state after an action (status/approver change) instead of going stale.
+    const handleClose = () => {
+        closeModal();
+        fetchAllRequests({
+            statusIds,
+            status: "CREATED",
+            startDate: tableStartDate ? dayjs(tableStartDate).format('YYYY-MM-DDTHH:mm:ss') : '',
+            endDate: tableEndDate ? dayjs(tableEndDate).format('YYYY-MM-DDTHH:mm:ss') : ''
+        });
+    };
 
 
     useEffect(() => {
@@ -189,10 +201,11 @@ const Request = () => {
         let statusId;
 
         switch (status) {
-            // PENDING status group
+            // PENDING status group — includes the per-stage workflow approvals (13-17),
+            // which all mean "approved at one stage, awaiting the next".
             case 'requestApproved':
-                param = { status: "PENDING", statusIds: '3' };
-                statusId = '3';
+                param = { status: "PENDING", statusIds: `3,${workflowApprovalStatusIdsCsv}` };
+                statusId = `3,${workflowApprovalStatusIdsCsv}`;
                 break;
 
             case 'requestAcknowledged':

@@ -15,7 +15,6 @@ import {
     TextField,
     Typography,
     alpha,
-    useTheme,
 } from '@mui/material';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import FingerprintIcon from '@mui/icons-material/Fingerprint';
@@ -58,7 +57,7 @@ const CompleteDetails = ({
     module,
     handleClose,
 }: IAssetAction) => {
-    const theme = useTheme();
+    // const theme = useTheme();
     const dispatch = useDispatch<AppDispatch>();
 
     // The IAssetAction union doesn't expose every per-category field on its

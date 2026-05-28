@@ -9,7 +9,7 @@ import React from 'react';
 import Box from '@mui/material/Box';
 import CssBaseline from '@mui/material/CssBaseline';
 import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
+// import Typography from '@mui/material/Typography';
 import { Outlet } from 'react-router';
 import {
     CSSObject,
@@ -23,7 +23,7 @@ import MuiDrawer from '@mui/material/Drawer';
 import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import Logo from '../../statics/images/NavLogo-removebg-preview.png';
+import Logo from '../../statics/images/pride_logo_horizontal.png';
 import { brand, neutral, border, surface } from '../../utils/tokens';
 import SideBar from './SideBar';
 import NavBar from './NavBar';
@@ -164,15 +164,15 @@ export default function ApplicationDrawer({ window }: Props) {
                     <Box
                         src={Logo}
                         sx={{
-                            height: '32px',
-                            width: '32px',
+                            height: '50px',
+                            width: '250px',
                             mr: 1.25,
                             display: { xs: 'none', md: 'flex' },
                             borderRadius: '8px',
                         }}
                         component="img"
                     />
-                    <Typography
+                    {/* <Typography
                         sx={{
                             display: { xs: 'none', md: 'block' },
                             fontSize: '14px',
@@ -184,7 +184,7 @@ export default function ApplicationDrawer({ window }: Props) {
                     >
                         <span style={{ color: brand[500], fontWeight: 800 }}>ASSETS</span>
                         {' '}MANAGEMENT
-                    </Typography>
+                    </Typography> */}
                     <NavBar />
                 </Toolbar>
             </AppBar>

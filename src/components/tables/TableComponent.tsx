@@ -5,7 +5,6 @@ import {
     Box,
     Button,
     Card,
-    Chip,
     CircularProgress,
     Paper,
     Table,
@@ -26,7 +25,6 @@ import {
     isCamelCase
 } from '../../utils/helpers';
 import { ITableComponent } from './interface';
-import { TypographyComponent } from '../headers/TypographyComponent';
 import ChipComponent from '../forms/Chip';
 import PopoverComponent from '../forms/Popover';
 import CustomToolbarWrapper from './TableToolBar';

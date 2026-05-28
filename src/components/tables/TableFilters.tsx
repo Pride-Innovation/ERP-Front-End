@@ -35,7 +35,6 @@ const CustomTableFilterOperator = ({ endPoint, params }: ICustomTableFilterOpera
 
     const {
         setItEquipmentCount,
-        fieldName,
         setFieldName,
         setFieldText
     } = useContext(AssetContext);
