@@ -7,6 +7,7 @@ Managing Director
 
 import React from 'react';
 import Popover from '@mui/material/Popover';
+import Grow from '@mui/material/Grow';
 import { IPopover } from './interface';
 import { alpha, Box, Divider, ListItemIcon, MenuItem, Typography } from '@mui/material';
 import { IOptions } from '../tables/interface';
@@ -32,6 +33,11 @@ const PopoverComponent = ({
                 onClose={handleClose}
                 anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
                 transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+                // Don't lock body scroll for a small dropdown — locking adds
+                // scrollbar-compensation padding that shifts the fixed navbar.
+                disableScrollLock
+                TransitionComponent={Grow}
+                transitionDuration={180}
                 PaperProps={{
                     elevation: 0,
                     sx: {

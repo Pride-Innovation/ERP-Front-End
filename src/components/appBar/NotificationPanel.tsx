@@ -12,6 +12,7 @@ import {
     Popover,
     Typography,
 } from '@mui/material';
+import Grow from '@mui/material/Grow';
 import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
@@ -56,6 +57,11 @@ const NotificationPanel: React.FC<Props> = ({ anchor, onClose }) => {
             onClose={onClose}
             anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
             transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+            // Don't lock body scroll — it adds scrollbar-compensation padding
+            // that shifts the fixed navbar when the panel opens.
+            disableScrollLock
+            TransitionComponent={Grow}
+            transitionDuration={180}
             PaperProps={{
                 elevation: 4,
                 sx: {
