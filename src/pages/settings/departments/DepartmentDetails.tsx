@@ -26,6 +26,7 @@ import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
 import GroupsOutlinedIcon from '@mui/icons-material/GroupsOutlined';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DoneOutlinedIcon from '@mui/icons-material/DoneOutlined';
+import GroupWorkOutlinedIcon from '@mui/icons-material/GroupWorkOutlined';
 
 import { IDepartmentDetails } from './interface';
 import { getCardColor } from '../cardColors';
@@ -34,6 +35,7 @@ const DepartmentDetails = ({
     department,
     deleteDepartment,
     updateDepartment,
+    manageUnits,
     index = 0,
 }: IDepartmentDetails) => {
     const color = getCardColor(index);
@@ -161,6 +163,20 @@ const DepartmentDetails = ({
                 </Stack>
 
                 <Stack direction="row" justifyContent="flex-end" spacing={1} sx={{ mt: 'auto', pt: 2 }}>
+                    <Tooltip title="Manage units" arrow>
+                        <IconButton
+                            size="small"
+                            onClick={() => manageUnits(department)}
+                            sx={{
+                                color,
+                                bgcolor: alpha(color, 0.06),
+                                borderRadius: '8px',
+                                '&:hover': { bgcolor: alpha(color, 0.14) },
+                            }}
+                        >
+                            <GroupWorkOutlinedIcon fontSize="small" />
+                        </IconButton>
+                    </Tooltip>
                     <Tooltip title="Edit department" arrow>
                         <IconButton
                             size="small"

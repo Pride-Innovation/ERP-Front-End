@@ -81,4 +81,12 @@ export const userSchema = yup.object({
             then: (s) => s.required('Department is required for Head Office staff'),
             otherwise: (s) => s.notRequired(),
         }),
+
+    // Unit is always optional (Head Office only). Declared so the resolved form
+    // value preserves the selected unit id rather than stripping it.
+    unit: yup
+        .number()
+        .typeError('Please select a Unit')
+        .nullable()
+        .notRequired(),
 });

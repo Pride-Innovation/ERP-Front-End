@@ -16,6 +16,7 @@ export type StepType =
 export type ApproverType =
     | 'DIRECT_SUPERVISOR'
     | 'SUPERVISOR'
+    | 'MANAGER'
     | 'DEPT_HEAD'
     | 'BOM'
     | 'BRANCH_MANAGER'
@@ -86,6 +87,7 @@ export const STEP_TYPE_LABELS: Record<StepType, string> = {
 export const APPROVER_TYPE_LABELS: Record<ApproverType, string> = {
     DIRECT_SUPERVISOR: 'Direct Supervisor',
     SUPERVISOR:        'Supervisor (auto-skipped if officer has none)',
+    MANAGER:           'Manager (nearest in chain; managers-group fallback)',
     DEPT_HEAD:         'Department Head',
     BOM:               'Branch Operations Manager',
     BRANCH_MANAGER:    'Branch Manager',

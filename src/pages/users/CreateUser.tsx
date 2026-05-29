@@ -49,10 +49,13 @@ const CreateUser = ({ handleClose }: ICreateUser) => {
 
     const handleBranchChange = (option: IAsyncAutocompleteOption | null) => {
         setSelectedBranch(option);
-        // Clear any previously chosen department when the duty station changes,
-        // so a stale Head Office department never leaks into a branch submission.
+        // Clear any previously chosen department/unit when the duty station changes,
+        // so a stale Head Office department/unit never leaks into a branch submission.
         setValue('department' as any, null as any, { shouldValidate: true });
+        setValue('unit' as any, null as any, { shouldValidate: true });
     };
+
+    const clearUnit = () => setValue('unit' as any, null as any, { shouldValidate: true });
 
     const onSubmit = async (formData: IUser) => {
         setSendingRequest(true);
@@ -60,6 +63,7 @@ const CreateUser = ({ handleClose }: ICreateUser) => {
             const payload = {
                 ...formData,
                 department: isHeadOffice ? formData.department : null,
+                unit: isHeadOffice ? formData.unit : null,
             };
             const response = (await createUSerService(payload)) as IUserCreationResponseAxiosResponse;
             if (response.status === 201) {
@@ -97,6 +101,7 @@ const CreateUser = ({ handleClose }: ICreateUser) => {
                     mode="create"
                     initialBranch={selectedBranch}
                     onBranchChange={handleBranchChange}
+                    onDepartmentChange={clearUnit}
                 />
             </form>
         </Box>

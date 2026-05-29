@@ -76,14 +76,13 @@ export const requestStatus: {
 }
 
 /**
- * Per-stage approval status IDs set by the workflow engine — Manager Approved (13),
- * HOD Approved (14), BOM Approved (15), Branch Manager Approved (16), Supervisor
- * Approved (17). A request in any of these has been approved at one stage and is
- * awaiting the next, so it's still in-progress/pending. Listing and pending views
- * must include these IDs, otherwise a request vanishes the moment it advances past
- * the first approval step.
+ * In-progress workflow status IDs set by the engine — Manager Approved (13), HOD Approved (14),
+ * BOM Approved (15), Branch Manager Approved (16), Supervisor Approved (17) and Unit Acknowledged
+ * (18). A request in any of these has advanced past one stage and is awaiting the next, so it's
+ * still in-progress/pending. Listing and pending views must include these IDs, otherwise a request
+ * vanishes the moment it advances past the first step.
  */
-export const workflowApprovalStatusIds: ReadonlyArray<number> = [13, 14, 15, 16, 17];
+export const workflowApprovalStatusIds: ReadonlyArray<number> = [13, 14, 15, 16, 17, 18];
 export const workflowApprovalStatusIdsCsv: string = workflowApprovalStatusIds.join(',');
 
 export const assetStatus: {

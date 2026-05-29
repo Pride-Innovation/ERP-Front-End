@@ -32,6 +32,7 @@ import ModalComponent from '../../../components/modal';
 import CreateDepartment from './CreateDepartment';
 import UpdateDepartment from './UpdateDepartment';
 import DeleteDepartment from './DeleteDepartment';
+import ManageUnits from '../units/ManageUnits';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../store';
 import Loading from '../../../components/loading';
@@ -46,6 +47,7 @@ const PRIMARY = '#08796C';
 const Departments = () => {
     const { setModalState, handleClose, handleOpen, modalState, open, fetchAllDepartments, loading } = DepartmentUtills();
     const [currentDepartment, setCurrentDepartment] = useState<IDepartment>({} as IDepartment);
+    const [unitsDepartment, setUnitsDepartment] = useState<IDepartment | null>(null);
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
     const [searchTerm, setSearchTerm] = useState<string>("");
     const [pageNumber, setPageNumber] = useState<number>(0);
@@ -88,6 +90,10 @@ const Departments = () => {
         handleOpen();
     };
 
+    const manageUnits = (department: IDepartment) => {
+        setUnitsDepartment(department);
+    };
+
     return (
         <>
             {/* Modals */}
@@ -118,6 +124,14 @@ const Departments = () => {
                         sendingRequest={sendingRequest}
                         setSendingRequest={setSendingRequest}
                         buttonText="Delete"
+                    />
+                </ModalComponent>
+            )}
+            {unitsDepartment && (
+                <ModalComponent width="55%" title="Manage Units" open={Boolean(unitsDepartment)} handleClose={() => setUnitsDepartment(null)}>
+                    <ManageUnits
+                        department={unitsDepartment}
+                        handleClose={() => setUnitsDepartment(null)}
                     />
                 </ModalComponent>
             )}
@@ -187,6 +201,7 @@ const Departments = () => {
                                     department={department}
                                     deleteDepartment={deleteDepartment}
                                     updateDepartment={updateDepartment}
+                                    manageUnits={manageUnits}
                                     index={i}
                                 />
                             ))}

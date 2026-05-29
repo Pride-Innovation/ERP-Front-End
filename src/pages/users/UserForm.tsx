@@ -25,6 +25,7 @@ import {
     fetchBranchesPage,
     fetchDepartmentsPage,
     fetchTitlesPage,
+    fetchUnitsPage,
 } from './service/referenceData';
 
 import PersonIcon from '@mui/icons-material/Person';
@@ -49,8 +50,11 @@ interface IUserFormProps extends IUserForm {
     initialTitle?: IAsyncAutocompleteOption | null;
     initialBranch?: IAsyncAutocompleteOption | null;
     initialDepartment?: IAsyncAutocompleteOption | null;
+    initialUnit?: IAsyncAutocompleteOption | null;
     /** Notifies parent when the selected branch changes (used to drive department visibility & schema context). */
     onBranchChange?: (option: IAsyncAutocompleteOption | null) => void;
+    /** Notifies parent when the selected department changes (used to clear a stale unit selection). */
+    onDepartmentChange?: (option: IAsyncAutocompleteOption | null) => void;
 }
 
 const SectionHeader = ({ title, icon }: { title: string; icon: React.ReactNode }) => (
@@ -86,11 +90,14 @@ const UserForm = ({
     initialTitle = null,
     initialBranch = null,
     initialDepartment = null,
+    initialUnit = null,
     onBranchChange,
+    onDepartmentChange,
 }: IUserFormProps) => {
     // The Department field exists in the form schema; useWatch lets us react to
     // the live branch selection without rerendering the whole tree.
     const selectedBranchId = useWatch({ control, name: 'branch' as any });
+    const selectedDepartmentId = useWatch({ control, name: 'department' as any });
 
     const isHeadOffice = useMemo(() => {
         // initialBranch covers Update form pre-fill; onBranchChange callback (parent state) covers post-change.
@@ -278,8 +285,24 @@ const UserForm = ({
                                                 error={(formState.errors as any).department}
                                                 fetchPage={fetchDepartmentsPage(selectedBranchId)}
                                                 initialOption={initialDepartment}
+                                                onOptionChange={onDepartmentChange}
                                                 refetchKey={selectedBranchId}
                                                 placeholder="Search Head Office departments…"
+                                            />
+                                        </Grid>
+                                    )}
+                                    {isHeadOffice && selectedDepartmentId && (
+                                        <Grid item xs={12}>
+                                            <AsyncAutocomplete
+                                                control={control}
+                                                name={'unit' as any}
+                                                label="Unit (optional)"
+                                                required={false}
+                                                error={(formState.errors as any).unit}
+                                                fetchPage={fetchUnitsPage(selectedDepartmentId)}
+                                                initialOption={initialUnit}
+                                                refetchKey={selectedDepartmentId}
+                                                placeholder="Search units in this department…"
                                             />
                                         </Grid>
                                     )}

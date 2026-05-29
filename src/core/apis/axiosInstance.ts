@@ -141,10 +141,15 @@ axiosInstance.interceptors.response.use(
 
         const data = error.response?.data as
             | { message?: string; detail?: string; error?: string }
+            | string
             | undefined;
-        const message =
-            data?.message ?? data?.detail ?? data?.error ??
-            error.message ?? 'An unknown error occurred';
+        // The backend returns some errors as a plain string body (e.g. business-rule
+        // violations) and others as an object — handle both so the real message shows.
+        const serverMessage =
+            typeof data === 'string'
+                ? (data.trim() || undefined)
+                : (data?.message ?? data?.detail ?? data?.error);
+        const message = serverMessage ?? error.message ?? 'An unknown error occurred';
 
         toast.error(message);
         return Promise.reject(new Error(message));

@@ -43,6 +43,16 @@ const UpdateUsers = ({ handleClose, sendingRequest, setSendingRequest, user }: I
                 : null,
         [user?.department?.id]
     );
+    const initialUnitOption: IAsyncAutocompleteOption | null = useMemo(
+        () => {
+            const u = (user as any)?.unit;
+            return u && typeof u === 'object'
+                ? { value: u.id as number, label: u.name, raw: u }
+                : null;
+        },
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [(user as any)?.unit?.id]
+    );
 
     const [selectedBranch, setSelectedBranch] = useState<IAsyncAutocompleteOption | null>(initialBranchOption);
     const isHeadOffice = Boolean(selectedBranch?.raw?.isHeadOffice);
@@ -66,6 +76,7 @@ const UpdateUsers = ({ handleClose, sendingRequest, setSendingRequest, user }: I
             title: user?.title?.id as any,
             branch: user?.branch?.id as any,
             department: user?.department?.id as any,
+            unit: (typeof (user as any)?.unit === 'object' ? (user as any)?.unit?.id : (user as any)?.unit) ?? null,
             availability: user?.availability ?? 'present',
             otherName: user?.otherName ?? '',
         } as any);
@@ -76,7 +87,10 @@ const UpdateUsers = ({ handleClose, sendingRequest, setSendingRequest, user }: I
     const handleBranchChange = (option: IAsyncAutocompleteOption | null) => {
         setSelectedBranch(option);
         setValue('department' as any, null as any, { shouldValidate: true });
+        setValue('unit' as any, null as any, { shouldValidate: true });
     };
+
+    const clearUnit = () => setValue('unit' as any, null as any, { shouldValidate: true });
 
     const onSubmit = async (formData: IUser) => {
         setSendingRequest(true);
@@ -84,6 +98,7 @@ const UpdateUsers = ({ handleClose, sendingRequest, setSendingRequest, user }: I
             const payload = {
                 ...formData,
                 department: isHeadOffice ? formData.department : null,
+                unit: isHeadOffice ? formData.unit : null,
             };
             const response = (await updateUSerService(payload, user.id as number)) as IUserAxiosResponse;
             if (response.status === 200 || response.status === 201) {
@@ -111,7 +126,9 @@ const UpdateUsers = ({ handleClose, sendingRequest, setSendingRequest, user }: I
                     initialTitle={initialTitle}
                     initialBranch={selectedBranch}
                     initialDepartment={initialDepartmentOption}
+                    initialUnit={initialUnitOption}
                     onBranchChange={handleBranchChange}
+                    onDepartmentChange={clearUnit}
                 />
             </form>
         </Box>

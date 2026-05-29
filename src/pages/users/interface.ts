@@ -31,6 +31,8 @@ export interface IUser {
     availability?: string | null;
     branch?: IBranch | null;
     department?: IDepartment | null
+    /** Optional unit (Head Office). Carries the id when set from the form, or the summary object from the API. */
+    unit?: { id: number; name: string; groupEmail?: string | null } | number | null;
     enabled?: boolean | null;
     lastModifiedBy?: IUser | null
     createdBy?: IUser | null

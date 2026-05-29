@@ -10,6 +10,7 @@ import { IAsyncAutocompletePage } from '../../../components/forms/AsyncAutocompl
 import { ITitle } from '../../settings/titles/interface';
 import { IBranch } from '../../settings/branch/interface';
 import { IDepartment } from '../../settings/departments/interface';
+import { IUnit } from '../../settings/units/interface';
 
 interface SpringPage<T> {
     content: T[];
@@ -110,6 +111,30 @@ export const fetchDepartmentsPage = (branchId: number | string | undefined) =>
                 value: d.id as number,
                 label: d.name,
                 raw: d,
+            })),
+        };
+    };
+
+/**
+ * Paginated, name-searchable unit fetcher. Always scoped to a department so the
+ * Head Office unit picker only shows units belonging to the chosen department.
+ */
+export const fetchUnitsPage = (departmentId: number | string | undefined) =>
+    async (
+        query: string,
+        page: number,
+        pageSize: number
+    ): Promise<IAsyncAutocompletePage> => {
+        if (!departmentId) return { options: [], totalElements: 0 };
+        const { data } = await axiosInstance.get<SpringPage<IUnit>>('units', {
+            params: { pageNumber: page, pageSize, name: query || undefined, departmentId },
+        });
+        return {
+            totalElements: data.totalElements,
+            options: data.content.map((u) => ({
+                value: u.id as number,
+                label: u.name,
+                raw: u,
             })),
         };
     };
