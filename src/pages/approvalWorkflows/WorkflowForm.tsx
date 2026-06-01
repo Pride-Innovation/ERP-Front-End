@@ -17,6 +17,7 @@ import {
     Paper,
     Stack,
     Switch,
+    Tooltip,
     Typography,
     alpha,
 } from '@mui/material';
@@ -101,6 +102,20 @@ const WorkflowForm: React.FC<IWorkflowFormProps> = ({ initial, branches, roles, 
             ...prev,
             steps: [...prev.steps, blankApprovalStep(prev.steps.length + 1)],
         }));
+    };
+
+    /**
+     * Insert a blank step at position {@code at} (0-based) and re-number stepOrder
+     * so subsequent steps shift right. Used by the "+ insert" affordance shown on
+     * each connector between cards.
+     */
+    const insertStep = (at: number) => {
+        setForm((prev) => {
+            const next = [...prev.steps];
+            next.splice(at, 0, blankApprovalStep(at + 1));
+            const renumbered = next.map((s, i) => ({ ...s, stepOrder: i + 1 }));
+            return { ...prev, steps: renumbered };
+        });
     };
 
     const removeStep = (idx: number) => {
@@ -376,10 +391,34 @@ const WorkflowForm: React.FC<IWorkflowFormProps> = ({ initial, branches, roles, 
                                         display: 'flex',
                                         alignItems: 'center',
                                         pt: 2,
-                                        px: 0.75,
+                                        px: 0.5,
                                         flexShrink: 0,
                                     }}>
-                                        <ArrowForwardIcon sx={{ color: alpha(TEAL, 0.4), fontSize: '1.3rem' }} />
+                                        <ArrowForwardIcon sx={{ color: alpha(TEAL, 0.4), fontSize: '1.1rem' }} />
+                                        <Tooltip title="Insert step here" arrow>
+                                            <IconButton
+                                                size="small"
+                                                onClick={() => insertStep(idx + 1)}
+                                                aria-label="Insert step here"
+                                                sx={{
+                                                    mx: 0.25,
+                                                    width: 28,
+                                                    height: 28,
+                                                    color: TEAL,
+                                                    bgcolor: alpha(TEAL, 0.06),
+                                                    border: `1px dashed ${alpha(TEAL, 0.4)}`,
+                                                    transition: 'all 0.15s ease',
+                                                    '&:hover': {
+                                                        bgcolor: alpha(TEAL, 0.14),
+                                                        borderStyle: 'solid',
+                                                        transform: 'scale(1.06)',
+                                                    },
+                                                }}
+                                            >
+                                                <AddCircleOutlineIcon sx={{ fontSize: '1rem' }} />
+                                            </IconButton>
+                                        </Tooltip>
+                                        <ArrowForwardIcon sx={{ color: alpha(TEAL, 0.4), fontSize: '1.1rem' }} />
                                     </Box>
                                 )}
                             </React.Fragment>
