@@ -96,22 +96,22 @@ function ReportDataTable<T>({ columns, rows, accentColor = PRIMARY, loading, row
                                             style={{ minWidth: col.minWidth ?? 120 }}
                                             sortDirection={orderBy === col.id ? order : false}
                                             sx={{
-                                                background: `linear-gradient(120deg, ${accentColor} 0%, ${alpha(accentColor, 0.85)} 100%)`,
-                                                color: '#fff',
+                                                bgcolor: '#F8FAFC',
+                                                color: '#475569',
                                                 fontWeight: 700,
                                                 fontSize: '0.68rem',
                                                 textTransform: 'uppercase',
                                                 letterSpacing: '0.07em',
-                                                py: 1.5,
+                                                py: 1.25,
                                                 px: 2,
                                                 whiteSpace: 'nowrap',
-                                                borderBottom: 'none',
+                                                borderBottom: '1px solid #E2E8F0',
                                                 '& .MuiTableSortLabel-root': {
-                                                    color: alpha('#fff', 0.85),
-                                                    '&:hover': { color: '#fff' },
-                                                    '&.Mui-active': { color: '#fff' },
+                                                    color: '#475569',
+                                                    '&:hover': { color: accentColor },
+                                                    '&.Mui-active': { color: accentColor },
                                                 },
-                                                '& .MuiTableSortLabel-icon': { color: 'rgba(255,255,255,0.7) !important' },
+                                                '& .MuiTableSortLabel-icon': { color: `${accentColor} !important` },
                                             }}
                                         >
                                             <TableSortLabel

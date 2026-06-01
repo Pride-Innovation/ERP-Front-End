@@ -7,11 +7,9 @@ Managing Director
 
 import { useState } from 'react';
 import {
-    alpha,
     Box,
     Tab,
     Tabs,
-    Typography,
 } from '@mui/material';
 import AssessmentOutlinedIcon from '@mui/icons-material/AssessmentOutlined';
 import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
@@ -33,65 +31,20 @@ interface ReportTab {
     label: string;
     shortLabel: string;
     icon: JSX.Element;
-    description: string;
-    color: string;
 }
 
 const REPORT_TABS: ReportTab[] = [
-    {
-        id: 0,
-        label: 'Stock Management',
-        shortLabel: 'Stock',
-        icon: <Inventory2OutlinedIcon fontSize="small" />,
-        description: 'Track inventory inflow, suppliers and stock levels',
-        color: '#0369A1',
-    },
-    {
-        id: 1,
-        label: 'Asset Register',
-        shortLabel: 'Assets',
-        icon: <TuneOutlinedIcon fontSize="small" />,
-        description: 'Full asset register with values and assignments',
-        color: '#059669',
-    },
-    {
-        id: 2,
-        label: 'Requests / Requisitions',
-        shortLabel: 'Requests',
-        icon: <RecentActorsOutlinedIcon fontSize="small" />,
-        description: 'Asset requests with approval and status tracking',
-        color: '#D97706',
-    },
-    {
-        id: 3,
-        label: 'Asset Movement',
-        shortLabel: 'Movement',
-        icon: <LocalShippingOutlinedIcon fontSize="small" />,
-        description: 'Transfers and location changes of assets',
-        color: '#7C3AED',
-    },
-    {
-        id: 4,
-        label: 'Asset Disposal',
-        shortLabel: 'Disposal',
-        icon: <DeleteForeverOutlinedIcon fontSize="small" />,
-        description: 'Decommissioned assets and disposal audit trail',
-        color: '#DC2626',
-    },
-    {
-        id: 5,
-        label: 'Maintenance',
-        shortLabel: 'Maintenance',
-        icon: <BuildOutlinedIcon fontSize="small" />,
-        description: 'Repair history, costs and vendor management',
-        color: '#0891B2',
-    },
+    { id: 0, label: 'Stock Management', shortLabel: 'Stock', icon: <Inventory2OutlinedIcon fontSize="small" /> },
+    { id: 1, label: 'Asset Register', shortLabel: 'Assets', icon: <TuneOutlinedIcon fontSize="small" /> },
+    { id: 2, label: 'Requests / Requisitions', shortLabel: 'Requests', icon: <RecentActorsOutlinedIcon fontSize="small" /> },
+    { id: 3, label: 'Asset Movement', shortLabel: 'Movement', icon: <LocalShippingOutlinedIcon fontSize="small" /> },
+    { id: 4, label: 'Asset Disposal', shortLabel: 'Disposal', icon: <DeleteForeverOutlinedIcon fontSize="small" /> },
+    { id: 5, label: 'Maintenance', shortLabel: 'Maintenance', icon: <BuildOutlinedIcon fontSize="small" /> },
 ];
 
 const ReportsPage = () => {
     const [activeTab, setActiveTab] = useState<number>(0);
 
-    const currentTab = REPORT_TABS[activeTab];
     const todayLabel = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 
     const renderPanel = () => {
@@ -148,41 +101,8 @@ const ReportsPage = () => {
                 }
             />
 
-            {/* ── Sub-header: current report context bar ───────────────── */}
-            <Box sx={{
-                bgcolor: '#fff',
-                borderBottom: '1px solid #EEF2F7',
-                borderRadius: 2,
-                border: '1px solid #EEF2F7',
-                px: { xs: 2, md: 3 },
-                py: 1.5,
-                mb: 2.5,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 2,
-                flexWrap: 'wrap',
-            }}>
-                <Box sx={{
-                    width: 34, height: 34, borderRadius: 1.5,
-                    bgcolor: alpha(currentTab.color, 0.1),
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                }}>
-                    <Box sx={{ color: currentTab.color, display: 'flex' }}>
-                        {currentTab.icon}
-                    </Box>
-                </Box>
-                <Box sx={{ flex: 1 }}>
-                    <Typography sx={{ fontWeight: 700, fontSize: '0.9rem', color: '#0F172A', lineHeight: 1.2 }}>
-                        {currentTab.label} Report
-                    </Typography>
-                    <Typography sx={{ fontSize: '0.75rem', color: '#64748B' }}>
-                        {currentTab.description}
-                    </Typography>
-                </Box>
-            </Box>
-
             {/* ── Report Panel Content ──────────────────────────────────── */}
-            <Box>
+            <Box sx={{ mt: 2.5 }}>
                 {renderPanel()}
             </Box>
         </Box>
