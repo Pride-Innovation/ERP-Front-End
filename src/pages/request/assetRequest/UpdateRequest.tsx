@@ -20,8 +20,6 @@ import { ICommodity } from '../../settings/commodity/interface';
 import { RowData } from '../../../components/forms/interface';
 import { validateInventoryItems } from '../../../utils/helpers';
 import { toast } from 'react-toastify';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../../store';
 import CommodityUtills from '../../settings/commodity/utills';
 import { ROUTES } from '../../../core/routes/routes';
 
@@ -32,7 +30,6 @@ const UpdateRequest = () => {
     const [defaultRequest, setDefaultRequest] = useState<any>(requestMock[0]);
     const { setRows, rows } = useContext(RequestContext);
     const [file, setFile] = useState<File | null>(null);
-    const { commodities } = useSelector((state: RootState) => state.CommodityStore);
     const { fetchAllCommodities } = CommodityUtills();
     const navigate = useNavigate();
 
@@ -47,7 +44,10 @@ const UpdateRequest = () => {
         filePath: null
     });
 
-    useEffect(() => { fetchAllCommodities() }, []);
+    // Load the full commodity catalogue (not the default 9-row page) so every
+    // saved item has a matching option in the "Name" dropdown — otherwise items
+    // outside the first page render blank.
+    useEffect(() => { fetchAllCommodities({ pageSize: 1000 }) }, []);
 
     // Helper function to determine file type from extension
     const getFileType = (fileName: string): 'pdf' | 'word' | 'excel' | 'image' | 'other' => {
@@ -75,6 +75,12 @@ const UpdateRequest = () => {
                 const { data } = response;
                 setDefaultRequest({ ...data, status: data.status?.id });
 
+                // Populate the Request Items table straight from the fetched request.
+                // We map from data.commodities directly (it carries name, unit, quantity,
+                // commodity id and asset type), so this does not depend on any other
+                // async store having loaded first.
+                setRows(buildRows(data.commodities));
+
                 // Process file information from signaturePath
                 if (data.signaturePath) {
                     const filePath = data.signaturePath;
@@ -101,24 +107,23 @@ const UpdateRequest = () => {
 
     useEffect(() => { findAssetRequestById() }, [id]);
 
-    const handleRows = () => {
-        if (defaultRequest?.commodities
-            && commodities?.length > 0) {
-            const rowData = (defaultRequest.commodities as Array<{
-                commodity: ICommodity,
-                quantity: number
-            }>
-            ).map((commodity, index) => ({
-                id: Date.now() + index,
-                name: commodity.commodity.name,
-                groupName: commodity.commodity.groupName,
-                quantity: commodity.quantity,
-                commodityId: commodity.commodity.id,
-                assetTypeId: commodity.commodity.assetType?.id,
-            })) as Array<RowData>;
-
-            setRows(rowData);
-        }
+    /**
+     * Maps a request's saved commodities into the InventoryTable's RowData shape.
+     * Each row carries every column the table renders: asset type, name, unit of
+     * measure (groupName), quantity and the commodity id used on submit.
+     */
+    const buildRows = (
+        requestCommodities?: Array<{ commodity: ICommodity, quantity: number }> | null,
+    ): Array<RowData> => {
+        if (!Array.isArray(requestCommodities)) return [];
+        return requestCommodities.map((item, index) => ({
+            id: Date.now() + index,
+            name: item.commodity.name,
+            groupName: item.commodity.groupName,
+            quantity: item.quantity,
+            commodityId: item.commodity.id,
+            assetTypeId: item.commodity.assetType?.id,
+        })) as Array<RowData>;
     }
 
     const {
@@ -134,7 +139,6 @@ const UpdateRequest = () => {
     });
 
     useEffect(() => {
-        handleRows()
         reset({ ...defaultRequest });
     }, [defaultRequest]);
 
