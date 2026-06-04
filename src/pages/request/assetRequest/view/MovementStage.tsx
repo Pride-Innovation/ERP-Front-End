@@ -1,6 +1,5 @@
-import { alpha, Avatar, Box, Card, CardContent, Chip, Typography, useTheme } from '@mui/material'
+import { alpha, Avatar, Box, Card, CardContent, Chip, Typography } from '@mui/material'
 import { MovementStep } from './MovementHistory'
-import { brand } from '../../../../utils/tokens'
 
 import {
     ReceiptLong as ReceiptLongIcon,
@@ -16,18 +15,18 @@ import {
     Comment as CommentIcon,
 } from '@mui/icons-material';
 
-// Brand colors (consistent with other components)
+// A single, restrained palette — completed steps use the brand colour, rejected
+// steps use red, pending steps use grey. No per-stage rainbow.
 const PRIMARY_COLOR = '#08796C';
-// const ACCENT_COLOR = '#BC892C';
+const REJECT_COLOR = '#DC2626';
+const PENDING_COLOR = '#94A3B8';
 
 const getStepIcon = (step: MovementStep) => {
     if (step.isRejected) return <CancelIcon />;
-
     switch (step.status) {
+        case 'Request Submitted':
         case 'Request Created':
             return <ReceiptLongIcon />;
-        case 'Manager Approval':
-            return <CheckCircleOutlineIcon />;
         case 'Admin Acknowledgment':
             return <PendingActionsIcon />;
         case 'Items Stocked':
@@ -39,39 +38,18 @@ const getStepIcon = (step: MovementStep) => {
         case 'Items Received':
             return <TaskAltIcon />;
         default:
-            return <AccessTimeIcon />;
+            return step.isCompleted ? <CheckCircleOutlineIcon /> : <AccessTimeIcon />;
     }
 };
 
-// Helper to get appropriate color for the step
 const getStepColor = (step: MovementStep): string => {
-    if (step.isRejected) return '#f44336'; // error
-    if (!step.isCompleted) return '#9e9e9e'; // grey
-    if (step.isCurrent) return PRIMARY_COLOR; // primary
-
-    switch (step.status) {
-        case 'Request Created':
-            return '#2196f3'; // info
-        case 'Manager Approval':
-            return '#4caf50'; // success
-        case 'Admin Acknowledgment':
-            return '#9c27b0'; // secondary
-        case 'Items Stocked':
-            return '#ff9800'; // warning
-        case 'Items Issued':
-            return '#2196f3'; // info
-        case 'Issuance Approved':
-            return '#4caf50'; // success
-        case 'Items Received':
-            return '#4caf50'; // success
-        default:
-            return PRIMARY_COLOR; // primary
-    }
+    if (step.isRejected) return REJECT_COLOR;
+    if (!step.isCompleted) return PENDING_COLOR;
+    return PRIMARY_COLOR;
 };
 
-// Component for the avatar with optional image or initials
-const UserAvatar = ({ user }: { user: MovementStep['user'] }) => {
-    const initials = user.name
+const UserAvatar = ({ user, color }: { user: MovementStep['user']; color: string }) => {
+    const initials = (user.name || '')
         .split(' ')
         .map(n => n[0])
         .join('')
@@ -84,92 +62,59 @@ const UserAvatar = ({ user }: { user: MovementStep['user'] }) => {
         <Avatar sx={{
             width: 34,
             height: 34,
-            bgcolor: brand[500],
+            bgcolor: alpha(color, 0.12),
+            color,
             fontWeight: 700,
             fontSize: '0.8rem',
         }}>
-            {initials}
+            {initials || '?'}
         </Avatar>
     );
 };
 
 const MovementStage = ({ step }: { step: MovementStep }) => {
-    const theme = useTheme();
+    const color = getStepColor(step);
+
     return (
-        <Box
-            // key={step.id}
-            sx={{
-                display: 'flex',
-                flexDirection: 'row', // Always right-aligned
-                mb: 3.5,
-                position: 'relative'
-            }}
-        >
-            {/* Timeline dot - consistently on the left */}
+        <Box sx={{ display: 'flex', mb: 3, position: 'relative' }}>
+            {/* Timeline dot */}
             <Box
                 sx={{
                     width: 32,
                     height: 32,
                     borderRadius: '50%',
-                    bgcolor: step.isCompleted ? getStepColor(step) : '#fff',
-                    border: step.isCompleted ? 'none' : `2px solid ${getStepColor(step)}`,
+                    bgcolor: step.isCompleted ? color : '#fff',
+                    border: step.isCompleted ? 'none' : `2px solid ${PENDING_COLOR}`,
+                    color: step.isCompleted ? '#fff' : PENDING_COLOR,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    color: step.isCompleted ? 'white' : getStepColor(step),
                     zIndex: 2,
                     position: 'absolute',
                     left: 0,
-                    boxShadow: step.isCurrent
-                        ? `0 0 0 4px ${alpha(PRIMARY_COLOR, 0.15)}, 0 2px 8px ${alpha('#000', 0.1)}`
-                        : step.isCompleted
-                            ? `0 2px 4px ${alpha('#000', 0.2)}`
-                            : 'none',
-                    transition: 'all 0.3s ease'
+                    boxShadow: step.isCurrent ? `0 0 0 4px ${alpha(color, 0.15)}` : 'none',
+                    '& svg': { fontSize: 17 },
                 }}
             >
-                <Box sx={{ fontSize: step.isCompleted ? 18 : 16 }}>
-                    {getStepIcon(step)}
-                </Box>
+                {getStepIcon(step)}
             </Box>
 
-            {/* Content - consistently on the right */}
-            <Box
-                sx={{
-                    flex: 1,
-                    pl: 4.5, // Consistent padding from timeline
-                    pr: 1,
-                    position: 'relative',
-                    width: 'calc(100% - 32px)',
-                }}
-            >
-                {/* Date display - always left aligned */}
-                <Box
-                    sx={{
-                        mb: 0.5,
-                        textAlign: 'left'
-                    }}
-                >
+            {/* Content */}
+            <Box sx={{ flex: 1, pl: 4.5, pr: 1, width: 'calc(100% - 32px)' }}>
+                <Box sx={{ mb: 0.75 }}>
                     <Typography
                         variant="subtitle2"
                         sx={{
-                            fontWeight: 600,
-                            color: step.isCompleted
-                                ? step.isCurrent
-                                    ? PRIMARY_COLOR
-                                    : 'text.primary'
-                                : 'text.disabled'
+                            fontWeight: 700,
+                            color: step.isRejected
+                                ? REJECT_COLOR
+                                : step.isCompleted ? 'text.primary' : 'text.disabled',
                         }}
                     >
                         {step.status}
                     </Typography>
-                    <Box sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'flex-start',
-                        opacity: step.isCompleted ? 1 : 0.5
-                    }}>
-                        <DateRangeIcon sx={{ fontSize: 14, mr: 0.5 }} />
+                    <Box sx={{ display: 'flex', alignItems: 'center', color: 'text.disabled' }}>
+                        <DateRangeIcon sx={{ fontSize: 13, mr: 0.5 }} />
                         <Typography variant="caption">{step.date}</Typography>
                         {step.time && (
                             <>
@@ -184,98 +129,67 @@ const MovementStage = ({ step }: { step: MovementStep }) => {
                     elevation={0}
                     sx={{
                         borderRadius: 2,
-                        mb: { xs: 1, sm: 2 },
-                        border: `1px solid ${step.isCurrent
-                            ? alpha(PRIMARY_COLOR, 0.28)
-                            : alpha(theme.palette.divider, 0.6)}`,
-                        transition: 'box-shadow 0.2s ease, border-color 0.2s ease',
-                        boxShadow: step.isCurrent
-                            ? `0 2px 8px ${alpha(PRIMARY_COLOR, 0.12)}`
-                            : '0 1px 2px rgba(0,0,0,0.04)',
-                        opacity: step.isCompleted ? 1 : 0.65,
-                        bgcolor: step.isCurrent ? alpha(PRIMARY_COLOR, 0.025) : '#fff',
-                        '&:hover': {
-                            boxShadow: `0 4px 12px ${alpha(PRIMARY_COLOR, step.isCurrent ? 0.18 : 0.08)}`,
-                            borderColor: alpha(PRIMARY_COLOR, step.isCurrent ? 0.4 : 0.18),
-                        },
+                        border: '1px solid',
+                        borderColor: step.isRejected
+                            ? alpha(REJECT_COLOR, 0.3)
+                            : step.isCurrent ? alpha(PRIMARY_COLOR, 0.3) : 'divider',
+                        bgcolor: '#fff',
                     }}
                 >
-                    <CardContent sx={{ p: { xs: 1.5, sm: 2 }, '&:last-child': { pb: { xs: 1.5, sm: 2 } } }}>
-                        <Box sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            mb: step.comments ? 1 : 0
-                        }}>
-                            <UserAvatar user={step.user} />
-                            <Box sx={{ ml: 1.5 }}>
+                    <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <UserAvatar user={step.user} color={color} />
+                            <Box sx={{ ml: 1.5, minWidth: 0 }}>
                                 <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                                    {step.user.name}
+                                    {step.user.name?.trim() || '—'}
                                 </Typography>
-                                <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
-                                    <Typography variant="caption" color="text.secondary">
-                                        {step.user.title}
-                                    </Typography>
+                                <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', color: 'text.secondary' }}>
+                                    {step.user.title && (
+                                        <Typography variant="caption">{step.user.title}</Typography>
+                                    )}
+                                    {step.user.title && step.user.department && (
+                                        <Typography variant="caption" sx={{ mx: 0.5 }}>•</Typography>
+                                    )}
                                     {step.user.department && (
-                                        <>
-                                            <Typography variant="caption" color="text.secondary" sx={{ mx: 0.5 }}>•</Typography>
-                                            <Typography variant="caption" color="text.secondary">
-                                                {step.user.department}
-                                            </Typography>
-                                        </>
+                                        <Typography variant="caption">{step.user.department}</Typography>
                                     )}
                                 </Box>
                             </Box>
+                            {step.isCurrent && (
+                                <Chip
+                                    size="small"
+                                    label="Current"
+                                    sx={{
+                                        ml: 'auto',
+                                        height: 22,
+                                        fontWeight: 600,
+                                        fontSize: '0.68rem',
+                                        bgcolor: alpha(PRIMARY_COLOR, 0.1),
+                                        color: PRIMARY_COLOR,
+                                    }}
+                                />
+                            )}
                         </Box>
 
                         {step.comments && (
                             <Box
                                 sx={{
-                                    mt: 1.25,
-                                    p: 1.5,
-                                    bgcolor: alpha(step.isCurrent ? PRIMARY_COLOR : '#64748B', 0.04),
+                                    mt: 1.5,
+                                    p: 1.25,
+                                    bgcolor: step.isRejected ? alpha(REJECT_COLOR, 0.04) : alpha('#000', 0.02),
                                     borderRadius: 1.5,
-                                    borderLeft: `3px solid ${alpha(
-                                        step.isCurrent ? PRIMARY_COLOR : '#64748B',
-                                        step.isCurrent ? 0.6 : 0.3
-                                    )}`,
+                                    display: 'flex',
+                                    alignItems: 'flex-start',
                                 }}
                             >
-                                <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
-                                    <CommentIcon sx={{
-                                        fontSize: 16,
-                                        mr: 1,
-                                        mt: 0.3,
-                                        color: alpha(step.isCurrent ? PRIMARY_COLOR : '#64748B', 0.7)
-                                    }} />
-                                    <Typography
-                                        variant="body2"
-                                        color={step.isCurrent ? 'text.primary' : 'text.secondary'}
-                                        sx={{ fontSize: '0.875rem', lineHeight: 1.5 }}
-                                    >
-                                        {step.comments}
-                                    </Typography>
-                                </Box>
-                            </Box>
-                        )}
-
-                        {step.isCurrent && (
-                            <Box sx={{
-                                display: 'flex',
-                                justifyContent: 'flex-end',
-                                mt: step.comments ? 2 : 1,
-                                alignItems: 'center'
-                            }}>
-                                <Chip
-                                    size="small"
-                                    label="Current Stage"
-                                    sx={{
-                                        fontWeight: 500,
-                                        bgcolor: alpha(PRIMARY_COLOR, 0.1),
-                                        color: PRIMARY_COLOR,
-                                        border: `1px solid ${alpha(PRIMARY_COLOR, 0.2)}`,
-                                        height: 24
-                                    }}
-                                />
+                                <CommentIcon sx={{ fontSize: 15, mr: 1, mt: 0.3, color: 'text.disabled' }} />
+                                <Typography
+                                    variant="body2"
+                                    color="text.secondary"
+                                    sx={{ fontSize: '0.85rem', lineHeight: 1.5 }}
+                                >
+                                    {step.comments}
+                                </Typography>
                             </Box>
                         )}
                     </CardContent>

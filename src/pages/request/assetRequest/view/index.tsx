@@ -57,7 +57,6 @@ import OtherDetails from "./OtherDetails";
 import RequestCommodties from "./RequestCommodties";
 import MovementHistory from "./MovementHistory";
 import AttachmentViewer from "./AttachmentViewer";
-import WorkflowTimeline from "./WorkflowTimeline";
 import ModalComponent from "../../../../components/modal";
 import ApproveRequest from "../ApprovedRequest";
 import RejectRequest from "../RejectRequest";
@@ -657,8 +656,15 @@ const RequestDetails = () => {
                                         request={request}
                                     />
                                 )}
-                                {activeTab === 2 && <MovementHistory request={request} />}
-                                {activeTab === 3 && <WorkflowTimeline requestId={request.id as number} />}
+                                {activeTab === 2 && (
+                                    <Box sx={{ py: 8, textAlign: 'center' }}>
+                                        <HistoryOutlinedIcon sx={{ fontSize: 40, color: 'text.disabled', opacity: 0.4, mb: 1 }} />
+                                        <Typography variant="body2" color="text.secondary">
+                                            Movement history will be available soon.
+                                        </Typography>
+                                    </Box>
+                                )}
+                                {activeTab === 3 && <MovementHistory request={request} />}
                             </Box>
                         </Paper>
                     </Grid>

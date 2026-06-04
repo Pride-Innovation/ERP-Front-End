@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react';
+import { useContext } from 'react';
 import {
     Box,
     Typography,
@@ -8,14 +8,13 @@ import {
 import {
     History as HistoryIcon,
 } from '@mui/icons-material';
-import { IRequest, IRequestReport, IRequestReportAxiosResponse } from '../../interface';
+import { IRequest, IRequestReport } from '../../interface';
 import MovementStage from './MovementStage';
-import { findRequestReportByRequestService } from '../service';
 import { RequestContext } from '../../../../context/request/RequestContext';
 import { brand } from '../../../../utils/tokens';
 
 const PRIMARY_COLOR = '#08796C';
-const ACCENT_COLOR = '#BC892C';
+const REJECT_COLOR = '#DC2626';
 
 export interface MovementStep {
     id?: number;
@@ -34,40 +33,50 @@ export interface MovementStep {
     isCurrent?: boolean;
 }
 
+const fmtDate = (d?: string | null) =>
+    d ? new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A';
+const fmtTime = (d?: string | null) =>
+    d ? new Date(d).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : '';
+const fullName = (u?: { firstName?: string; lastName?: string } | null) =>
+    `${u?.firstName ?? ''} ${u?.lastName ?? ''}`.trim();
+
+const isRejection = (report: IRequestReport) =>
+    (report.status?.status ?? '').toLowerCase().includes('reject');
+
+/** Human label for an approval-history entry, derived from its status code. */
+const reportLabel = (report: IRequestReport): string => {
+    const code = (report.status?.status ?? '').toLowerCase();
+    if (code.includes('reject')) return 'Request Rejected';
+    // A fresh "requestCreated" record after the first one is a resubmission by the requester.
+    if (code === 'requestcreated') return 'Request Resubmitted';
+    return report.status?.name || 'Approved';
+};
+
 const MovementHistory = ({ request }: { request: IRequest }) => {
-    const [requestReport, setRequestReport] = React.useState<IRequestReport | null>(null);
     const { acknowledgeRequest, currentIssuance, issuanceApproval, acknowledgeIssuance } = useContext(RequestContext);
 
-    const findRequestReportByRequest = async (requestId: number) => {
-        try {
-            const response = await findRequestReportByRequestService(requestId) as IRequestReportAxiosResponse;
-            if (response.data && response.data.id && response.status === 200) {
-                setRequestReport(response.data);
-                return response;
-            }
-            return null;
-        } catch (error) {
-            console.error("Error fetching request report:", error);
-            return null;
-        }
-    };
+    // The full, append-only approval trail comes back on the request itself — every
+    // approval, rejection and resubmission is its own persisted record.
+    const reports = [...(request.requestReports ?? [])].sort(
+        (a, b) => new Date(a.createDate).getTime() - new Date(b.createDate).getTime(),
+    );
 
-    useEffect(() => {
-        if (request && request.id) {
-            findRequestReportByRequest(request.id as number);
-        }
-    }, [request]);
+    // Header/progress reflect the request's *current* state; individual rejections
+    // are still rendered in the trail below regardless of where the request is now.
+    const requestIsRejected = (request.status?.status ?? '').toLowerCase() === 'requestrejected';
 
-    const progressPercent = acknowledgeIssuance ? 100
-        : issuanceApproval ? 80
-        : currentIssuance ? 60
-        : acknowledgeRequest ? 40
+    const progressPercent = requestIsRejected ? 100
+        : acknowledgeIssuance?.createDate ? 100
+        : issuanceApproval?.createDate ? 80
+        : currentIssuance?.createDate ? 60
+        : acknowledgeRequest?.createDate ? 40
         : request ? 20 : 0;
 
-    const currentStageLabel = acknowledgeIssuance ? 'Items Received'
-        : issuanceApproval ? 'Issuance Approved'
-        : currentIssuance ? 'Items Issued'
-        : acknowledgeRequest ? 'Admin Acknowledgment'
+    const currentStageLabel = requestIsRejected ? 'Request Rejected'
+        : acknowledgeIssuance?.createDate ? 'Items Received'
+        : issuanceApproval?.createDate ? 'Issuance Approved'
+        : currentIssuance?.createDate ? 'Items Issued'
+        : acknowledgeRequest?.createDate ? 'Admin Acknowledgment'
         : request ? 'Request Submitted' : 'Initiated';
 
     return (
@@ -91,31 +100,18 @@ const MovementHistory = ({ request }: { request: IRequest }) => {
                 </Box>
                 <Box>
                     <Typography variant="subtitle2" fontWeight={700} color="text.primary">
-                        Asset Request Workflow
+                        Approval History
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
-                        Track approval, processing, and delivery status
+                        Track approvals, processing and delivery
                     </Typography>
                 </Box>
             </Box>
 
             {/* Progress strip */}
-            <Box
-                sx={{
-                    mb: 3,
-                    px: 2,
-                    py: 1.5,
-                    bgcolor: alpha(brand[50], 0.6),
-                    borderRadius: 1.5,
-                    border: `1px solid ${alpha(brand[500], 0.1)}`,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 2,
-                    flexWrap: 'wrap',
-                }}
-            >
+            <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexShrink: 0 }}>
-                    <Typography variant="caption" color="text.secondary" fontWeight={500}>
+                    <Typography variant="caption" color="text.secondary">
                         Current stage:
                     </Typography>
                     <Chip
@@ -124,14 +120,14 @@ const MovementHistory = ({ request }: { request: IRequest }) => {
                         sx={{
                             fontWeight: 700,
                             fontSize: '0.72rem',
-                            bgcolor: brand[500],
+                            bgcolor: requestIsRejected ? REJECT_COLOR : brand[500],
                             color: '#fff',
                             height: 22,
                         }}
                     />
                 </Box>
                 <Box sx={{ flex: 1, minWidth: 120 }}>
-                    <Box sx={{ position: 'relative', height: 6, bgcolor: alpha(PRIMARY_COLOR, 0.1), borderRadius: 3 }}>
+                    <Box sx={{ position: 'relative', height: 5, bgcolor: alpha('#000', 0.06), borderRadius: 3 }}>
                         <Box
                             sx={{
                                 position: 'absolute',
@@ -139,19 +135,11 @@ const MovementHistory = ({ request }: { request: IRequest }) => {
                                 top: 0,
                                 height: '100%',
                                 width: `${progressPercent}%`,
-                                background: `linear-gradient(90deg, ${PRIMARY_COLOR} 0%, ${ACCENT_COLOR} 100%)`,
+                                bgcolor: requestIsRejected ? REJECT_COLOR : PRIMARY_COLOR,
                                 borderRadius: 3,
-                                transition: 'width 0.8s ease-in-out',
+                                transition: 'width 0.6s ease',
                             }}
                         />
-                    </Box>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 0.5 }}>
-                        <Typography variant="caption" color="text.disabled" sx={{ fontSize: '0.67rem' }}>
-                            Start
-                        </Typography>
-                        <Typography variant="caption" color="text.disabled" sx={{ fontSize: '0.67rem' }}>
-                            {Math.round(progressPercent)}% Complete
-                        </Typography>
                     </Box>
                 </Box>
             </Box>
@@ -163,29 +151,23 @@ const MovementHistory = ({ request }: { request: IRequest }) => {
                     sx={{
                         position: 'absolute',
                         left: 16,
-                        top: 0,
-                        bottom: 0,
+                        top: 4,
+                        bottom: 16,
                         width: 2,
-                        background: `linear-gradient(to bottom,
-                            ${alpha(PRIMARY_COLOR, 0.65)},
-                            ${alpha(PRIMARY_COLOR, 0.15)} 75%,
-                            ${alpha(PRIMARY_COLOR, 0.05)})`,
+                        bgcolor: alpha('#000', 0.06),
                         zIndex: 0,
                     }}
                 />
 
+                {/* Original submission */}
                 {request && (
                     <MovementStage step={{
-                        id: 1,
-                        status: request.status?.name as string,
-                        date: request.createDate
-                            ? new Date(request.createDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
-                            : 'N/A',
-                        time: request.createDate
-                            ? new Date(request.createDate).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
-                            : '',
+                        id: 0,
+                        status: 'Request Submitted',
+                        date: fmtDate(request.createDate),
+                        time: fmtTime(request.createDate),
                         user: {
-                            name: (request.requester?.firstName ?? '') + ' ' + (request.requester?.lastName ?? ''),
+                            name: fullName(request.requester),
                             title: request.requester?.title?.name || '',
                             department: request.requester?.department?.name || request.requester?.branch?.name,
                         },
@@ -194,36 +176,30 @@ const MovementHistory = ({ request }: { request: IRequest }) => {
                     }} />
                 )}
 
-                {requestReport && (
-                    <MovementStage step={{
-                        status: 'Manager Approval',
-                        date: requestReport.createDate
-                            ? new Date(requestReport.createDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
-                            : 'N/A',
-                        time: requestReport.createDate
-                            ? new Date(requestReport.createDate).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
-                            : '',
+                {/* Every approval, rejection and resubmission — append-only */}
+                {reports.map((report) => (
+                    <MovementStage key={report.id} step={{
+                        status: reportLabel(report),
+                        date: fmtDate(report.createDate),
+                        time: fmtTime(report.createDate),
                         user: {
-                            name: (requestReport.approver?.firstName ?? '') + ' ' + (requestReport.approver?.lastName ?? ''),
-                            title: requestReport.approver?.title?.name || '',
-                            department: requestReport.approver?.department?.name || requestReport.approver?.branch?.name,
+                            name: fullName(report.approver),
+                            title: report.approver?.title?.name || '',
+                            department: report.approver?.department?.name || report.approver?.branch?.name,
                         },
-                        comments: requestReport.comment || '',
+                        comments: report.comment || '',
                         isCompleted: true,
+                        isRejected: isRejection(report),
                     }} />
-                )}
+                ))}
 
-                {acknowledgeRequest && (
+                {acknowledgeRequest?.createDate && (
                     <MovementStage step={{
                         status: 'Admin Acknowledgment',
-                        date: acknowledgeRequest.createDate
-                            ? new Date(acknowledgeRequest.createDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
-                            : 'N/A',
-                        time: acknowledgeRequest.createDate
-                            ? new Date(acknowledgeRequest.createDate).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
-                            : '',
+                        date: fmtDate(acknowledgeRequest.createDate),
+                        time: fmtTime(acknowledgeRequest.createDate),
                         user: {
-                            name: (acknowledgeRequest.user?.firstName ?? '') + ' ' + (acknowledgeRequest.user?.lastName ?? ''),
+                            name: fullName(acknowledgeRequest.user),
                             title: acknowledgeRequest.user?.title?.name || '',
                             department: acknowledgeRequest.user?.department?.name || acknowledgeRequest.user?.branch?.name,
                         },
@@ -232,17 +208,13 @@ const MovementHistory = ({ request }: { request: IRequest }) => {
                     }} />
                 )}
 
-                {currentIssuance && (
+                {currentIssuance?.createDate && (
                     <MovementStage step={{
                         status: 'Items Issued',
-                        date: currentIssuance.createDate
-                            ? new Date(currentIssuance.createDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
-                            : 'N/A',
-                        time: currentIssuance.createDate
-                            ? new Date(currentIssuance.createDate).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
-                            : '',
+                        date: fmtDate(currentIssuance.createDate),
+                        time: fmtTime(currentIssuance.createDate),
                         user: {
-                            name: (currentIssuance.issuer?.firstName ?? '') + ' ' + (currentIssuance.issuer?.lastName ?? ''),
+                            name: fullName(currentIssuance.issuer),
                             title: currentIssuance.issuer?.title?.name || '',
                             department: currentIssuance.issuer?.department?.name || currentIssuance.issuer?.branch?.name,
                         },
@@ -251,17 +223,13 @@ const MovementHistory = ({ request }: { request: IRequest }) => {
                     }} />
                 )}
 
-                {issuanceApproval && (
+                {issuanceApproval?.createDate && (
                     <MovementStage step={{
                         status: 'Issuance Approved',
-                        date: issuanceApproval.createDate
-                            ? new Date(issuanceApproval.createDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
-                            : 'N/A',
-                        time: issuanceApproval.createDate
-                            ? new Date(issuanceApproval.createDate).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
-                            : '',
+                        date: fmtDate(issuanceApproval.createDate),
+                        time: fmtTime(issuanceApproval.createDate),
                         user: {
-                            name: (issuanceApproval.user?.firstName ?? '') + ' ' + (issuanceApproval.user?.lastName ?? ''),
+                            name: fullName(issuanceApproval.user),
                             title: issuanceApproval.user?.title?.name || '',
                             department: issuanceApproval.user?.department?.name || issuanceApproval.user?.branch?.name,
                         },
@@ -270,17 +238,13 @@ const MovementHistory = ({ request }: { request: IRequest }) => {
                     }} />
                 )}
 
-                {acknowledgeIssuance && (
+                {acknowledgeIssuance?.createDate && (
                     <MovementStage step={{
                         status: 'Items Received',
-                        date: acknowledgeIssuance.createDate
-                            ? new Date(acknowledgeIssuance.createDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
-                            : 'N/A',
-                        time: acknowledgeIssuance.createDate
-                            ? new Date(acknowledgeIssuance.createDate).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
-                            : '',
+                        date: fmtDate(acknowledgeIssuance.createDate),
+                        time: fmtTime(acknowledgeIssuance.createDate),
                         user: {
-                            name: (acknowledgeIssuance.user?.firstName ?? '') + ' ' + (acknowledgeIssuance.user?.lastName ?? ''),
+                            name: fullName(acknowledgeIssuance.user),
                             title: acknowledgeIssuance.user?.title?.name || '',
                             department: acknowledgeIssuance.user?.department?.name || acknowledgeIssuance.user?.branch?.name,
                         },
@@ -289,29 +253,6 @@ const MovementHistory = ({ request }: { request: IRequest }) => {
                     }} />
                 )}
             </Box>
-
-            {/* Footer note */}
-            {request.createDate && (
-                <Box
-                    sx={{
-                        mt: 2,
-                        pt: 1.5,
-                        borderTop: `1px dashed ${alpha(PRIMARY_COLOR, 0.15)}`,
-                        textAlign: 'center',
-                    }}
-                >
-                    <Typography variant="caption" color="text.disabled">
-                        Request initiated on{' '}
-                        <Box component="span" sx={{ fontWeight: 600, color: 'text.secondary' }}>
-                            {new Date(request.createDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
-                        </Box>
-                        {' · '}current stage:{' '}
-                        <Box component="span" sx={{ fontWeight: 600, color: 'text.secondary' }}>
-                            {currentStageLabel}
-                        </Box>
-                    </Typography>
-                </Box>
-            )}
         </Box>
     );
 };
