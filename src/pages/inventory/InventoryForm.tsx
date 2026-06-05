@@ -1,6 +1,6 @@
 /*
 13.9 Pride's Standard Copyright Notice:
-Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
+Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify,
 and distribute this software and its documentation for any purpose is prohibited unless authorized in writing by the
 Managing Director
 */
@@ -12,7 +12,6 @@ import {
     Typography,
     Paper,
     alpha,
-    Card,
     Button
 } from "@mui/material";
 import InventoryUtills from "./Utills";
@@ -34,10 +33,10 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import SaveIcon from "@mui/icons-material/Save";
 import { useNavigate } from "react-router";
 import { ROUTES } from "../../core/routes/routes";
+import { PageSection } from "../../components/layout";
+import { brand, neutral, border } from "../../utils/tokens";
 
-// Brand colors
-const PRIMARY_COLOR = '#08796C';
-// const SECONDARY_COLOR = '#BC892C';
+const PRIMARY_COLOR = brand[500];
 
 const InventoryForm = ({
     register,
@@ -80,191 +79,165 @@ const InventoryForm = ({
         };
     }, [formFields]);
 
-    const renderFormFields = (fields: any[], title: string, icon: React.ReactNode) => (
-        <Card
+    const renderFormFields = (
+        fields: any[],
+        title: string,
+        subtitle: string,
+        icon: React.ReactNode,
+    ) => (
+        <Paper
             elevation={0}
             sx={{
-                p: 3,
-                mb: 3,
+                p: { xs: 2, md: 3 },
+                mb: 2.5,
                 borderRadius: 2,
-                border: `1px solid ${alpha('#000', 0.08)}`,
-                bgcolor: 'white'
+                border: `1px solid ${border.subtle}`,
+                bgcolor: '#fff',
             }}
         >
-            <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                <Box
-                    sx={{
-                        bgcolor: alpha(PRIMARY_COLOR, 0.1),
-                        color: PRIMARY_COLOR,
-                        width: 36,
-                        height: 36,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        borderRadius: 1
-                    }}
-                >
-                    {icon}
-                </Box>
-                <Typography variant="h6" fontWeight={600} color="text.primary">
-                    {title}
-                </Typography>
-            </Box>
+            <PageSection title={title} subtitle={subtitle} icon={icon} mb={2.5}>
+                <Grid container spacing={2.5}>
+                    {fields.map((field, idx) => {
+                        const commonProps = {
+                            register,
+                            control,
+                            formState,
+                            value: field.value,
+                            label: field.label,
+                            required: field.required === false ? field.required : true
+                        };
 
-            <Grid container spacing={3}>
-                {fields.map((field, idx) => {
-                    const commonProps = {
-                        register,
-                        control,
-                        formState,
-                        value: field.value,
-                        label: field.label,
-                        required: field.required === false ? field.required : true
-                    };
+                        // Adjust grid size based on field type or importance
+                        const gridSize = field.type === "textarea" ? 12 :
+                            ["lpoNumber", "name", "supplier"].includes(field.value) ? 6 : 4;
 
-                    // Adjust grid size based on field type or importance
-                    const gridSize = field.type === "textarea" ? 12 :
-                        ["lpoNumber", "name", "supplier"].includes(field.value) ? 6 : 4;
-
-                    return (
-                        <Grid item xs={12} sm={6} md={gridSize} key={`${field.value}-${idx}`}>
-                            {field.type === "input" || field.type === "number" ? (
-                                <UseFormInput {...commonProps} type={field.type === "number" ? "number" : "text"} />
-                            ) : field.type === "textarea" ? (
-                                <UseFormInput
-                                    {...commonProps}
-                                    multiline
-                                    row={5}
-                                // helperText={field.helperText || "Provide any additional information needed"} 
-                                />
-                            ) : field.type === "select" ? (
-                                <UseFormSelect {...commonProps} options={field.options} />
-                            ) : field.type === "date" ? (
-                                <UseFormDatePicker {...commonProps} />
-                            ) : field.type === "time" ? (
-                                <UseFormTimePicker {...commonProps} />
-                            ) : field.type === "autocomplete" ? (
-                                <UseFormAutocompleteComponent {...commonProps} options={field.options} />
-                            ) : null}
-                        </Grid>
-                    );
-                })}
-            </Grid>
-        </Card>
+                        return (
+                            <Grid item xs={12} sm={6} md={gridSize} key={`${field.value}-${idx}`}>
+                                {field.type === "input" || field.type === "number" ? (
+                                    <UseFormInput {...commonProps} type={field.type === "number" ? "number" : "text"} />
+                                ) : field.type === "textarea" ? (
+                                    <UseFormInput
+                                        {...commonProps}
+                                        multiline
+                                        row={5}
+                                    />
+                                ) : field.type === "select" ? (
+                                    <UseFormSelect {...commonProps} options={field.options} />
+                                ) : field.type === "date" ? (
+                                    <UseFormDatePicker {...commonProps} />
+                                ) : field.type === "time" ? (
+                                    <UseFormTimePicker {...commonProps} />
+                                ) : field.type === "autocomplete" ? (
+                                    <UseFormAutocompleteComponent {...commonProps} options={field.options} />
+                                ) : null}
+                            </Grid>
+                        );
+                    })}
+                </Grid>
+            </PageSection>
+        </Paper>
     );
 
     return (
-        <Box sx={{
-            maxWidth: '100%',
-            backgroundColor: alpha('#f5f5f5', 0.5),
-            borderRadius: 2,
-            p: { xs: 0, sm: 2 }
-        }}>
-            <Grid container spacing={3}>
-                <Grid item xs={12}>
-                    {renderFormFields(
-                        formSections.basicFields,
-                        "LPO Information",
-                        <BusinessIcon fontSize="small" />
-                    )}
+        <Box sx={{ maxWidth: '100%' }}>
+            {renderFormFields(
+                formSections.basicFields,
+                "LPO Information",
+                "Reference details for this purchase order and supplier",
+                <BusinessIcon fontSize="small" />
+            )}
 
-                    {formSections.otherFields.length > 0 && renderFormFields(
-                        formSections.otherFields,
-                        "Other Information",
-                        <InventoryIcon fontSize="small" />
-                    )}
+            {formSections.otherFields.length > 0 && renderFormFields(
+                formSections.otherFields,
+                "Other Information",
+                "Any additional details for this stock entry",
+                <InventoryIcon fontSize="small" />
+            )}
 
-                    <Box
-                        sx={{
-                            width: "100%",
-                            mt: 3,
-                            mb: 3,
-                            position: 'relative'
-                        }}
-                    >
-                        <StockItems />
+            {/* Stock items table */}
+            <Box sx={{ mb: 2.5 }}>
+                <StockItems />
+            </Box>
+
+            {/* Submit bar */}
+            <Paper
+                elevation={0}
+                sx={{
+                    p: { xs: 2, md: 2.5 },
+                    borderRadius: 2,
+                    border: `1px solid ${border.subtle}`,
+                    bgcolor: '#fff',
+                }}
+            >
+                <Stack
+                    direction={{ xs: "column", sm: "row" }}
+                    spacing={2}
+                    justifyContent="space-between"
+                    alignItems={{ xs: "stretch", sm: "center" }}
+                >
+                    <Box>
+                        <Typography variant="body2" sx={{ fontWeight: 600, color: neutral[800] }}>
+                            {sendingRequest ? 'Processing your request…' : 'Ready to submit?'}
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: neutral[500] }}>
+                            Please verify all information before submitting
+                        </Typography>
                     </Box>
-                </Grid>
 
-                <Grid item xs={12}>
-                    <Paper
-                        elevation={0}
-                        sx={{
-                            p: 3,
-                            borderRadius: 2,
-                            border: `1px solid ${alpha('#000', 0.08)}`,
-                            bgcolor: 'white'
-                        }}
+                    <Stack
+                        direction="row"
+                        spacing={1.5}
+                        sx={{ width: { xs: '100%', sm: 'auto' } }}
                     >
-                        <Stack
-                            direction={{ xs: "column", sm: "row" }}
-                            spacing={2}
-                            justifyContent="space-between"
-                            alignItems={{ xs: "stretch", sm: "center" }}
+                        <Button
+                            type="button"
+                            variant="outlined"
+                            onClick={() => navigate(ROUTES.INVENTORY)}
+                            startIcon={<ArrowBackIcon />}
+                            sx={{
+                                minWidth: { xs: '100%', sm: 120 },
+                                height: 40,
+                                borderRadius: '8px',
+                                borderColor: border.subtle,
+                                color: neutral[600],
+                                textTransform: 'none',
+                                fontWeight: 500,
+                                '&:hover': {
+                                    borderColor: neutral[300],
+                                    bgcolor: neutral[50],
+                                },
+                            }}
                         >
-                            <Box>
-                                <Typography variant="body1" fontWeight={500} color="text.primary">
-                                    {sendingRequest ? 'Processing your request...' : 'Ready to submit?'}
-                                </Typography>
-                                <Typography variant="caption" color="text.secondary">
-                                    Please verify all information before submitting
-                                </Typography>
-                            </Box>
-
-                            <Stack
-                                direction="row"
-                                spacing={2}
-                                sx={{ width: { xs: '100%', sm: 'auto' } }}
-                            >
-                                <Button
-                                    type="button"
-                                    variant="outlined"
-                                    onClick={() => navigate(ROUTES.INVENTORY)}
-                                    startIcon={<ArrowBackIcon />}
-                                    sx={{
-                                        minWidth: { xs: '100%', sm: 120 },
-                                        borderColor: alpha('#000', 0.2),
-                                        color: 'text.secondary',
-                                        textTransform: 'none',
-                                        fontWeight: 500,
-                                        '&:hover': {
-                                            borderColor: alpha('#000', 0.35),
-                                            bgcolor: alpha('#000', 0.04),
-                                        },
-                                    }}
-                                >
-                                    Cancel
-                                </Button>
-                                <Button
-                                    type="submit"
-                                    variant="contained"
-                                    disabled={sendingRequest}
-                                    startIcon={<SaveIcon />}
-                                    sx={{
-                                        minWidth: { xs: '100%', sm: 160 },
-                                        bgcolor: PRIMARY_COLOR,
-                                        boxShadow: `0 4px 12px ${alpha(PRIMARY_COLOR, 0.3)}`,
-                                        textTransform: 'none',
-                                        fontWeight: 600,
-                                        '&:hover': {
-                                            bgcolor: '#065f54',
-                                            transform: 'translateY(-1px)',
-                                            boxShadow: `0 6px 16px ${alpha(PRIMARY_COLOR, 0.4)}`,
-                                        },
-                                        transition: 'all 0.2s ease',
-                                        '&.Mui-disabled': {
-                                            bgcolor: alpha(PRIMARY_COLOR, 0.5),
-                                            color: '#fff',
-                                        },
-                                    }}
-                                >
-                                    {sendingRequest ? 'Saving…' : buttonText}
-                                </Button>
-                            </Stack>
-                        </Stack>
-                    </Paper>
-                </Grid>
-            </Grid>
+                            Cancel
+                        </Button>
+                        <Button
+                            type="submit"
+                            variant="contained"
+                            disabled={sendingRequest}
+                            startIcon={<SaveIcon />}
+                            sx={{
+                                minWidth: { xs: '100%', sm: 160 },
+                                height: 40,
+                                borderRadius: '8px',
+                                bgcolor: PRIMARY_COLOR,
+                                boxShadow: `0 2px 8px ${alpha(PRIMARY_COLOR, 0.25)}`,
+                                textTransform: 'none',
+                                fontWeight: 600,
+                                '&:hover': {
+                                    bgcolor: '#065f54',
+                                    boxShadow: `0 4px 14px ${alpha(PRIMARY_COLOR, 0.35)}`,
+                                },
+                                '&.Mui-disabled': {
+                                    bgcolor: alpha(PRIMARY_COLOR, 0.45),
+                                    color: '#fff',
+                                },
+                            }}
+                        >
+                            {sendingRequest ? 'Saving…' : buttonText}
+                        </Button>
+                    </Stack>
+                </Stack>
+            </Paper>
         </Box>
     );
 };

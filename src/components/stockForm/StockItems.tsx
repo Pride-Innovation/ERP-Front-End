@@ -47,12 +47,24 @@ import PriceTotals from './priceTotals';
 import { formatNumberWithCommas } from './helper';
 import AppRegistrationOutlinedIcon from '@mui/icons-material/AppRegistrationOutlined';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import { neutral, border } from '../../utils/tokens';
 
 const PRIMARY_COLOR = '#08796C';
 const SECONDARY_COLOR = '#BC892C';
 const TABLE_HEADER_BG = alpha(PRIMARY_COLOR, 0.08);
 const TABLE_HEADER_COLOR = PRIMARY_COLOR;
 const TABLE_BORDER_COLOR = alpha('#000', 0.08);
+
+// Mirrors the "Request Items" table (InventoryTable.tsx) so the selected value
+// text and inputs render at the exact same size/weight across both tables.
+const selectSx = {
+    fontSize: '0.83rem',
+    borderRadius: '7px',
+    backgroundColor: 'white',
+    '& .MuiOutlinedInput-notchedOutline': { borderColor: '#E2E8F0' },
+    '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: alpha(PRIMARY_COLOR, 0.5) },
+    '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: PRIMARY_COLOR, borderWidth: 1.5 },
+};
 
 const StockItems = () => {
     const theme = useTheme();
@@ -175,10 +187,10 @@ const StockItems = () => {
         <Paper
             elevation={0}
             sx={{
-                borderRadius: 3,
-                border: `1px solid ${TABLE_BORDER_COLOR}`,
+                borderRadius: 2,
+                border: `1px solid ${border.subtle}`,
                 overflow: 'hidden',
-                boxShadow: '0 2px 12px rgba(0,0,0,0.03)'
+                bgcolor: '#fff',
             }}
         >
             <Box
@@ -186,62 +198,57 @@ const StockItems = () => {
                 justifyContent="space-between"
                 alignItems="center"
                 sx={{
-                    p: 3,
-                    background: `linear-gradient(to right, ${alpha(PRIMARY_COLOR, 0.9)}, ${alpha(PRIMARY_COLOR, 0.7)})`,
-                    color: 'white',
+                    px: { xs: 2, sm: 3 },
+                    py: 2,
+                    borderBottom: `1px solid ${border.subtle}`,
+                    bgcolor: '#fff',
+                    gap: 1.5,
+                    flexWrap: 'wrap',
                 }}
             >
-                <Stack direction="row" spacing={2} alignItems="center">
+                <Stack direction="row" spacing={1.5} alignItems="center">
                     <Box
                         sx={{
-                            bgcolor: 'white',
+                            bgcolor: alpha(PRIMARY_COLOR, 0.1),
                             color: PRIMARY_COLOR,
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            borderRadius: '50%',
+                            borderRadius: 1.5,
                             width: 40,
                             height: 40,
+                            flexShrink: 0,
                         }}
                     >
                         <ShoppingCartIcon />
                     </Box>
                     <Box>
-                        <Typography
-                            variant="h6"
-                            sx={{
-                                fontWeight: 600,
-                                fontSize: "18px",
-                                letterSpacing: 0.5,
-                            }}
-                        >
+                        <Typography sx={{ fontWeight: 700, fontSize: '1rem', color: neutral[900] }}>
                             Stock Items
                         </Typography>
-                        <Typography variant="caption" sx={{ opacity: 0.9, color: 'white' }}>
-                            Add and manage stock items for this order
+                        <Typography variant="caption" sx={{ color: neutral[500] }}>
+                            Add and manage the items received in this delivery
                         </Typography>
                     </Box>
                 </Stack>
-                <Tooltip title="Add new item" arrow placement="left">
-                    <Button
-                        variant="contained"
-                        startIcon={<AddIcon />}
-                        onClick={handleAddRow}
-                        sx={{
-                            textTransform: 'none',
-                            fontWeight: 500,
-                            bgcolor: 'white',
-                            color: PRIMARY_COLOR,
-                            boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-                            '&:hover': {
-                                bgcolor: "white",
-                            },
-                            py: 1,
-                        }}
-                    >
-                        Add Item
-                    </Button>
-                </Tooltip>
+                <Button
+                    variant="outlined"
+                    startIcon={<AddIcon />}
+                    onClick={handleAddRow}
+                    sx={{
+                        textTransform: 'none',
+                        fontWeight: 600,
+                        color: PRIMARY_COLOR,
+                        borderColor: alpha(PRIMARY_COLOR, 0.4),
+                        borderRadius: '8px',
+                        '&:hover': {
+                            borderColor: PRIMARY_COLOR,
+                            bgcolor: alpha(PRIMARY_COLOR, 0.05),
+                        },
+                    }}
+                >
+                    Add Item
+                </Button>
             </Box>
 
             <TableContainer
@@ -316,22 +323,8 @@ const StockItems = () => {
                                             }
                                         }}
                                         sx={{
-                                            fontSize: 14,
-                                            fontWeight: 400,
+                                            ...selectSx,
                                             color: row.assetTypeId ? 'text.primary' : 'text.secondary',
-                                            backgroundColor: 'white',
-                                            '& .MuiOutlinedInput-notchedOutline': {
-                                                borderColor: alpha('#000', 0.1),
-                                            },
-                                            '&:hover .MuiOutlinedInput-notchedOutline': {
-                                                borderColor: alpha(PRIMARY_COLOR, 0.5),
-                                            },
-                                            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                                borderColor: PRIMARY_COLOR,
-                                            },
-                                            '& .MuiSelect-select': {
-                                                py: 1,
-                                            }
                                         }}
                                     >
                                         <MenuItem value="" disabled>
@@ -362,22 +355,9 @@ const StockItems = () => {
                                             }
                                         }}
                                         sx={{
-                                            fontSize: 14,
-                                            fontWeight: 400,
+                                            ...selectSx,
                                             color: row.name ? 'text.primary' : 'text.secondary',
-                                            backgroundColor: 'white',
-                                            '& .MuiOutlinedInput-notchedOutline': {
-                                                borderColor: alpha('#000', 0.1),
-                                            },
-                                            '&:hover .MuiOutlinedInput-notchedOutline': {
-                                                borderColor: alpha(PRIMARY_COLOR, 0.5),
-                                            },
-                                            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                                borderColor: PRIMARY_COLOR,
-                                            },
-                                            '& .MuiSelect-select': {
-                                                py: 1,
-                                            }
+                                            '&.Mui-disabled': { bgcolor: '#F8FAFC' },
                                         }}
                                     >
                                         <MenuItem value="" disabled>
@@ -401,11 +381,12 @@ const StockItems = () => {
                                         InputProps={{
                                             readOnly: true,
                                             sx: {
-                                                fontSize: 14,
+                                                fontSize: '0.83rem',
+                                                borderRadius: '7px',
                                                 backgroundColor: alpha('#f5f5f5', 0.5),
                                                 color: theme.palette.text.secondary,
                                                 '& .MuiOutlinedInput-notchedOutline': {
-                                                    borderColor: alpha('#000', 0.08),
+                                                    borderColor: '#E2E8F0',
                                                 },
                                             }
                                         }}
@@ -454,8 +435,8 @@ const StockItems = () => {
                                                 sx: {
                                                     width: 40,
                                                     textAlign: 'center',
-                                                    fontSize: 14,
-                                                    fontWeight: 500,
+                                                    fontSize: '0.875rem',
+                                                    fontWeight: 700,
                                                     input: { textAlign: 'center' },
                                                     '& input[type=number]::-webkit-inner-spin-button': { display: 'none' },
                                                     '& input[type=number]::-webkit-outer-spin-button': { display: 'none' },
@@ -522,8 +503,8 @@ const StockItems = () => {
                                                 sx: {
                                                     width: 40,
                                                     textAlign: 'center',
-                                                    fontSize: 14,
-                                                    fontWeight: 500,
+                                                    fontSize: '0.875rem',
+                                                    fontWeight: 700,
                                                     input: { textAlign: 'center' },
                                                     '& input[type=number]::-webkit-inner-spin-button': { display: 'none' },
                                                     '& input[type=number]::-webkit-outer-spin-button': { display: 'none' },
@@ -567,16 +548,18 @@ const StockItems = () => {
                                         }}
                                         InputProps={{
                                             sx: {
-                                                fontSize: 14,
+                                                fontSize: '0.83rem',
+                                                borderRadius: '7px',
                                                 backgroundColor: 'white',
                                                 '& .MuiOutlinedInput-notchedOutline': {
-                                                    borderColor: alpha('#000', 0.1),
+                                                    borderColor: '#E2E8F0',
                                                 },
                                                 '&:hover .MuiOutlinedInput-notchedOutline': {
                                                     borderColor: alpha(PRIMARY_COLOR, 0.5),
                                                 },
                                                 '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
                                                     borderColor: PRIMARY_COLOR,
+                                                    borderWidth: 1.5,
                                                 },
                                             }
                                         }}
@@ -601,16 +584,18 @@ const StockItems = () => {
                                         }}
                                         InputProps={{
                                             sx: {
-                                                fontSize: 14,
+                                                fontSize: '0.83rem',
+                                                borderRadius: '7px',
                                                 backgroundColor: 'white',
                                                 '& .MuiOutlinedInput-notchedOutline': {
-                                                    borderColor: alpha('#000', 0.1),
+                                                    borderColor: '#E2E8F0',
                                                 },
                                                 '&:hover .MuiOutlinedInput-notchedOutline': {
                                                     borderColor: alpha(PRIMARY_COLOR, 0.5),
                                                 },
                                                 '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
                                                     borderColor: PRIMARY_COLOR,
+                                                    borderWidth: 1.5,
                                                 },
                                             }
                                         }}
