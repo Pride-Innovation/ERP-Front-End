@@ -38,16 +38,27 @@ const UpdateTitle = ({ handleClose, sendingRequest, setSendingRequest, title }: 
     useEffect(() => {
         reset({
             ...title,
-            // The picker stores the ID so the backend receives reportsToId-style payload
+            // The pickers store IDs so the backend receives the scalar ids the
+            // TitleRequestDTO expects (reportsTo: Long, role: Long) rather than nested objects.
             reportsTo: title.reportsTo?.id as any,
+            role: (typeof title.role === 'object' && title.role ? (title.role as any).id : title.role) as any,
         });
     }, [title, reset]);
 
     const onSubmit = async (formData: ITitle) => {
         setSendingRequest(true);
         try {
-            const response = await updateTitleService(formData, title.id as number) as ITitleAxiosResponse;
-            if (response.status === 201) {
+            // TitleRequestDTO expects scalar ids; normalise in case a field is still an object
+            // (e.g. role left untouched after reset) so Jackson can bind it to a Long.
+            const role = formData.role as any;
+            const payload = {
+                name: formData.name,
+                shortCode: (formData as any).shortCode,
+                reportsTo: formData.reportsTo != null ? Number(formData.reportsTo) : null,
+                role: role && typeof role === 'object' ? role.id : role,
+            };
+            const response = await updateTitleService(payload, title.id as number) as ITitleAxiosResponse;
+            if (response.status === 200 || response.status === 201) {
                 toast.success("Title updated successfully", { position: "bottom-right" });
                 updateTitleInStore(response.data);
             }

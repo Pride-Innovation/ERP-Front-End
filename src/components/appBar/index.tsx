@@ -12,6 +12,7 @@ import Toolbar from '@mui/material/Toolbar';
 // import Typography from '@mui/material/Typography';
 import { Outlet } from 'react-router';
 import {
+    alpha,
     CSSObject,
     IconButton,
     styled,
@@ -142,10 +143,19 @@ export default function ApplicationDrawer({ window }: Props) {
                         sx={{
                             mr: 1,
                             display: { sm: 'none' },
-                            color: neutral[700],
+                            width: 38,
+                            height: 38,
+                            bgcolor: neutral[100],
+                            border: `1px solid ${neutral[200]}`,
+                            transition: 'all 0.2s ease',
+                            '&:hover': {
+                                bgcolor: alpha(brand[500], 0.08),
+                                borderColor: alpha(brand[500], 0.3),
+                                '& svg': { color: brand[600] },
+                            },
                         }}
                     >
-                        <MenuIcon />
+                        <MenuIcon sx={{ color: neutral[600], fontSize: '1.25rem', transition: 'color 0.2s ease' }} />
                     </IconButton>
                     <Tooltip title={drawerOpen ? 'Collapse sidebar' : 'Expand sidebar'}>
                         <IconButton
