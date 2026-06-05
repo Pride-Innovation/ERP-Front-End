@@ -1,6 +1,6 @@
 /*
 13.9 Pride's Standard Copyright Notice:
-Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
+Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify,
 and distribute this software and its documentation for any purpose is prohibited unless authorized in writing by the
 Managing Director
 */
@@ -11,20 +11,78 @@ import {
     Typography,
     Stack,
     Paper,
-    Grid,
 } from '@mui/material';
 import { useContext, useEffect } from 'react';
 import { RequestContext } from '../../context/request/RequestContext';
 import { formatNumberWithCommas } from './helper';
 import AccountBalanceWalletOutlinedIcon from '@mui/icons-material/AccountBalanceWalletOutlined';
 import ShoppingBasketOutlinedIcon from '@mui/icons-material/ShoppingBasketOutlined';
-
-// Use the same color constants as in StockItems
-const PRIMARY_COLOR = '#08796C';
-const SECONDARY_COLOR = '#BC892C';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import { brand, gold, neutral, border, status } from '../../utils/tokens';
 
 // Currency symbol (can be made configurable if needed)
 const CURRENCY = 'UGX';
+
+interface TotalCardProps {
+    label: string;
+    value: number;
+    accent: string;
+    icon: React.ReactNode;
+}
+
+const TotalCard = ({ label, value, accent, icon }: TotalCardProps) => (
+    <Paper
+        elevation={0}
+        sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1.5,
+            px: 2,
+            py: 1.25,
+            borderRadius: 2,
+            border: `1px solid ${border.subtle}`,
+            bgcolor: '#fff',
+            minWidth: { xs: '100%', md: 230 },
+        }}
+    >
+        <Box
+            sx={{
+                width: 38,
+                height: 38,
+                borderRadius: 1.5,
+                flexShrink: 0,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                bgcolor: alpha(accent, 0.1),
+                color: accent,
+                '& .MuiSvgIcon-root': { fontSize: 20 },
+            }}
+        >
+            {icon}
+        </Box>
+        <Box sx={{ minWidth: 0 }}>
+            <Typography
+                sx={{
+                    color: neutral[500],
+                    fontWeight: 600,
+                    fontSize: '0.62rem',
+                    letterSpacing: '0.06em',
+                    textTransform: 'uppercase',
+                    lineHeight: 1.2,
+                }}
+            >
+                {label}
+            </Typography>
+            <Typography sx={{ fontWeight: 800, fontSize: '1.05rem', color: neutral[900], lineHeight: 1.25, mt: 0.25 }}>
+                <Box component="span" sx={{ fontSize: '0.7rem', fontWeight: 700, color: neutral[400], mr: 0.5 }}>
+                    {CURRENCY}
+                </Box>
+                {formatNumberWithCommas(value || 0)}
+            </Typography>
+        </Box>
+    </Paper>
+);
 
 const PriceTotals = () => {
     const {
@@ -48,161 +106,65 @@ const PriceTotals = () => {
         calculateTotalPurchasePrice();
     }, [stockRows]);
 
+    const hasIncomplete = stockRows.some(row =>
+        !row.name || !row.assetTypeId || row.orderedQuantity === 0
+    );
+
     return (
-        <Grid
-            container
-            spacing={3}
+        <Stack
+            direction={{ xs: 'column', md: 'row' }}
+            spacing={2}
             justifyContent="space-between"
-            alignItems="center"
+            alignItems={{ xs: 'stretch', md: 'center' }}
         >
-            <Grid item xs={12} sm={6}>
-                <Stack direction="row" spacing={2} alignItems="center">
-                    <Typography
-                        variant="subtitle2"
+            {/* Left — item count + completeness hint */}
+            <Stack direction="row" spacing={1.5} alignItems="center" flexWrap="wrap" useFlexGap>
+                <Typography variant="body2" sx={{ fontWeight: 600, color: neutral[700] }}>
+                    {stockRows.length} item{stockRows.length !== 1 ? 's' : ''} in this delivery
+                </Typography>
+
+                {hasIncomplete && (
+                    <Stack
+                        direction="row"
+                        spacing={0.5}
+                        alignItems="center"
                         sx={{
-                            fontWeight: 500,
-                            color: 'text.secondary',
+                            px: 1,
+                            py: 0.4,
+                            borderRadius: 1,
+                            bgcolor: status.warning.soft,
+                            color: status.warning.strong,
+                            border: `1px solid ${alpha(status.warning.main, 0.3)}`,
                         }}
                     >
-                        {stockRows.length} item{stockRows.length !== 1 ? 's' : ''} in inventory
-                    </Typography>
+                        <InfoOutlinedIcon sx={{ fontSize: 14 }} />
+                        <Typography variant="caption" sx={{ fontWeight: 600 }}>
+                            Some items are incomplete
+                        </Typography>
+                    </Stack>
+                )}
+            </Stack>
 
-                    {stockRows.some(row =>
-                        !row.name ||
-                        !row.assetTypeId ||
-                        row.orderedQuantity === 0
-                    ) && (
-                            <Typography
-                                variant="caption"
-                                color="error"
-                                sx={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: 0.5,
-                                    bgcolor: alpha('#f44336', 0.1),
-                                    px: 1,
-                                    py: 0.5,
-                                    borderRadius: 1,
-                                }}
-                            >
-                                Some items are incomplete
-                            </Typography>
-                        )}
-                </Stack>
-            </Grid>
-
-            <Grid item xs={12} sm={6}>
-                <Stack
-                    direction={{ xs: 'column', md: 'row' }}
-                    spacing={2}
-                    justifyContent={{ xs: 'flex-start', sm: 'flex-end' }}
-                >
-                    {/* Cost Price Total */}
-                    <Paper
-                        elevation={0}
-                        sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            px: 2.5,
-                            py: 1.5,
-                            borderRadius: 2,
-                            border: `1px solid ${alpha(PRIMARY_COLOR, 0.2)}`,
-                            bgcolor: alpha(PRIMARY_COLOR, 0.05),
-                            transition: 'all 0.2s ease',
-                            '&:hover': {
-                                boxShadow: `0 2px 8px ${alpha(PRIMARY_COLOR, 0.15)}`,
-                                bgcolor: alpha(PRIMARY_COLOR, 0.08),
-                            },
-                            minWidth: { xs: '100%', md: 220 }
-                        }}
-                    >
-                        <AccountBalanceWalletOutlinedIcon
-                            sx={{
-                                color: PRIMARY_COLOR,
-                                mr: 1.5,
-                                fontSize: 20
-                            }}
-                        />
-                        <Box>
-                            <Typography
-                                variant="caption"
-                                sx={{
-                                    color: 'text.secondary',
-                                    fontWeight: 500,
-                                    display: 'block',
-                                    lineHeight: 1.2
-                                }}
-                            >
-                                Total Cost Price
-                            </Typography>
-                            <Typography
-                                variant="body1"
-                                sx={{
-                                    fontWeight: 700,
-                                    fontSize: 16,
-                                    color: PRIMARY_COLOR,
-                                    mt: 0.3
-                                }}
-                            >
-                                {CURRENCY} {formatNumberWithCommas(totalCostPrice || 0)}
-                            </Typography>
-                        </Box>
-                    </Paper>
-
-                    {/* Purchase Price Total */}
-                    <Paper
-                        elevation={0}
-                        sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            px: 2.5,
-                            py: 1.5,
-                            borderRadius: 2,
-                            border: `1px solid ${alpha(SECONDARY_COLOR, 0.2)}`,
-                            bgcolor: alpha(SECONDARY_COLOR, 0.05),
-                            transition: 'all 0.2s ease',
-                            '&:hover': {
-                                boxShadow: `0 2px 8px ${alpha(SECONDARY_COLOR, 0.15)}`,
-                                bgcolor: alpha(SECONDARY_COLOR, 0.08),
-                            },
-                            minWidth: { xs: '100%', md: 220 }
-                        }}
-                    >
-                        <ShoppingBasketOutlinedIcon
-                            sx={{
-                                color: SECONDARY_COLOR,
-                                mr: 1.5,
-                                fontSize: 20
-                            }}
-                        />
-                        <Box>
-                            <Typography
-                                variant="caption"
-                                sx={{
-                                    color: 'text.secondary',
-                                    fontWeight: 500,
-                                    display: 'block',
-                                    lineHeight: 1.2
-                                }}
-                            >
-                                Total Purchase Price
-                            </Typography>
-                            <Typography
-                                variant="body1"
-                                sx={{
-                                    fontWeight: 700,
-                                    fontSize: 16,
-                                    color: SECONDARY_COLOR,
-                                    mt: 0.3
-                                }}
-                            >
-                                {CURRENCY} {formatNumberWithCommas(totalPurchasePrice || 0)}
-                            </Typography>
-                        </Box>
-                    </Paper>
-                </Stack>
-            </Grid>
-        </Grid>
+            {/* Right — totals */}
+            <Stack
+                direction={{ xs: 'column', sm: 'row' }}
+                spacing={1.5}
+                justifyContent={{ xs: 'flex-start', md: 'flex-end' }}
+            >
+                <TotalCard
+                    label="Total Cost Price"
+                    value={totalCostPrice}
+                    accent={brand[500]}
+                    icon={<AccountBalanceWalletOutlinedIcon />}
+                />
+                <TotalCard
+                    label="Total Purchase Price"
+                    value={totalPurchasePrice}
+                    accent={gold[500]}
+                    icon={<ShoppingBasketOutlinedIcon />}
+                />
+            </Stack>
+        </Stack>
     );
 };
 

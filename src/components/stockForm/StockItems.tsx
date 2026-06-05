@@ -22,7 +22,6 @@ import {
     Button,
     Typography,
     alpha,
-    Divider,
     Tooltip,
     Stack,
     Zoom,
@@ -171,11 +170,13 @@ const StockItems = () => {
         },
         {
             name: "Cost Price",
-            icon: <AttachMoneyIcon sx={{ fontSize: 16 }} />
+            icon: <AttachMoneyIcon sx={{ fontSize: 16 }} />,
+            minWidth: 190
         },
         {
             name: "Purchase Price",
-            icon: <MonetizationOnOutlinedIcon sx={{ fontSize: 16 }} />
+            icon: <MonetizationOnOutlinedIcon sx={{ fontSize: 16 }} />,
+            minWidth: 190
         },
         {
             name: "Actions",
@@ -282,6 +283,7 @@ const StockItems = () => {
                                         borderBottom: `1px solid ${TABLE_BORDER_COLOR}`,
                                         py: 1.75,
                                         whiteSpace: 'nowrap',
+                                        minWidth: (header as { minWidth?: number }).minWidth,
                                     }}
                                 >
                                     <Stack direction="row" spacing={1} alignItems="center" justifyContent={idx === 7 ? 'center' : 'flex-start'}>
@@ -548,9 +550,11 @@ const StockItems = () => {
                                         }}
                                         InputProps={{
                                             sx: {
-                                                fontSize: '0.83rem',
+                                                fontSize: '0.95rem',
+                                                fontWeight: 600,
                                                 borderRadius: '7px',
                                                 backgroundColor: 'white',
+                                                '& input': { letterSpacing: '0.01em' },
                                                 '& .MuiOutlinedInput-notchedOutline': {
                                                     borderColor: '#E2E8F0',
                                                 },
@@ -584,9 +588,11 @@ const StockItems = () => {
                                         }}
                                         InputProps={{
                                             sx: {
-                                                fontSize: '0.83rem',
+                                                fontSize: '0.95rem',
+                                                fontWeight: 600,
                                                 borderRadius: '7px',
                                                 backgroundColor: 'white',
+                                                '& input': { letterSpacing: '0.01em' },
                                                 '& .MuiOutlinedInput-notchedOutline': {
                                                     borderColor: '#E2E8F0',
                                                 },
@@ -631,9 +637,7 @@ const StockItems = () => {
                 </Table>
             </TableContainer>
 
-            <Divider sx={{ mt: 0, mb: 0 }} />
-
-            <Box sx={{ p: 3, bgcolor: alpha(PRIMARY_COLOR, 0.02) }}>
+            <Box sx={{ px: { xs: 2, sm: 3 }, py: 2, borderTop: `1px solid ${border.subtle}`, bgcolor: '#FAFBFC' }}>
                 <PriceTotals />
             </Box>
         </Paper>
