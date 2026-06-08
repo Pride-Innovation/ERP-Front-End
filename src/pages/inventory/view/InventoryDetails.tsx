@@ -1,647 +1,355 @@
 /*
 13.9 Pride's Standard Copyright Notice:
-Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
+Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify,
 and distribute this software and its documentation for any purpose is prohibited unless authorized in writing by the
 Managing Director
 */
 
-import { useNavigate, useParams } from "react-router"
-import { useContext, useEffect, useState } from "react";
-import { InventoryContext } from "../../../context/inventory";
+import { useNavigate, useParams } from "react-router";
+import { useContext, useEffect, useMemo, useState } from "react";
 import {
     Box,
-    Card,
-    CardContent,
+    Button as MuiButton,
+    Chip,
     Divider,
     Grid,
-    Stack,
-    Typography,
-    useTheme,
-    alpha,
-    Chip,
+    IconButton,
     Paper,
-    Container,
-    Button as MuiButton,
+    Stack,
+    Tab,
+    Tabs,
     Tooltip,
-    IconButton
+    Typography,
+    alpha,
 } from "@mui/material";
-import TabComponent from "../../../components/tabs";
-import OtherDetails from "./OtherDetails";
-import DeliveryStatusPanel from "./DeliveryStatusPanel";
 import moment from "moment";
-import ViewInventoryutills from "./utills";
-import ModalComponent from "../../../components/modal";
-import InventoryUtills from "../Utills";
-import InventoryPRN from "./InventoryGRN";
-import { IGRNReport } from "../interface";
-import Loading from "../../../components/loading";
 import { toast } from "react-toastify";
 
-// Material Icons
+import { InventoryContext } from "../../../context/inventory";
+import ViewInventoryutills from "./utills";
+import OtherDetails from "./OtherDetails";
+import DeliveryStatusPanel from "./DeliveryStatusPanel";
+import InventoryPRN from "./InventoryGRN";
+import Loading from "../../../components/loading";
+import { IGRNReport, IStockCommodities } from "../interface";
+import { camelCaseToWords } from "../../../utils/helpers";
+import { generateGrnPdf } from "./generateGrnPdf";
+import { brand, neutral, border, surface, status as statusTokens } from "../../../utils/tokens";
+
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
+import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
+import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
+import ReceiptLongOutlinedIcon from '@mui/icons-material/ReceiptLongOutlined';
+import BusinessOutlinedIcon from '@mui/icons-material/BusinessOutlined';
 import LocalPhoneOutlinedIcon from '@mui/icons-material/LocalPhoneOutlined';
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
 import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import InventoryOutlinedIcon from '@mui/icons-material/InventoryOutlined';
-import BusinessOutlinedIcon from '@mui/icons-material/BusinessOutlined';
 import ReceiptOutlinedIcon from '@mui/icons-material/ReceiptOutlined';
 import CalendarTodayOutlinedIcon from '@mui/icons-material/CalendarTodayOutlined';
-import ContentPasteIcon from '@mui/icons-material/ContentPaste';
-import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
-import { camelCaseToWords } from "../../../utils/helpers";
-import { generateGrnPdf } from "./generateGrnPdf";
+import ContentCopyOutlinedIcon from '@mui/icons-material/ContentCopyOutlined';
+import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
 
-// Define brand colors
-const PRIMARY_COLOR = '#08796C';
-const SECONDARY_COLOR = '#BC892C';
+const BRAND = brand[500];
 
-// Enhanced DetailSection component to match ITEquipmentDetails style
-const EnhancedDetailSection = ({
-    label,
-    text,
-    icon,
-    chip,
-    emptyMessage = "Not specified"
-}: {
-    label: string;
-    text: string | null;
-    icon?: JSX.Element;
-    chip?: JSX.Element;
-    emptyMessage?: string;
-}) => {
-    const isEmpty = text === null || text === undefined || text === '';
+// ── Status chip ───────────────────────────────────────────────────────────────
+const statusTone = (code?: string) => {
+    switch ((code ?? '').toLowerCase()) {
+        case 'stockcompleted':
+        case 'active':
+            return statusTokens.success;
+        case 'stockpending':
+            return statusTokens.warning;
+        case 'cancelled':
+        case 'disposed':
+            return statusTokens.danger;
+        default:
+            return statusTokens.info;
+    }
+};
 
+const StatusChip = ({ code }: { code?: string }) => {
+    if (!code) return null;
+    const tone = statusTone(code);
     return (
-        <Paper
-            elevation={0}
+        <Chip
+            size="small"
+            label={camelCaseToWords(code)}
             sx={{
-                display: 'flex',
-                alignItems: 'flex-start',
-                p: 1.8,
-                mb: 1.5,
-                borderRadius: 1.5,
-                border: `1px solid ${alpha('#000', 0.06)}`,
-                transition: 'all 0.2s',
-                '&:hover': {
-                    borderColor: alpha(PRIMARY_COLOR, 0.3),
-                    boxShadow: `0 2px 8px ${alpha('#000', 0.05)}`,
-                    bgcolor: alpha('#fff', 0.9)
-                }
+                height: 24,
+                fontWeight: 700,
+                fontSize: '0.72rem',
+                bgcolor: tone.soft,
+                color: tone.strong,
+                border: `1px solid ${alpha(tone.main, 0.3)}`,
             }}
-        >
-            <Box
-                sx={{
-                    mr: 2,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    borderRadius: 1,
-                    bgcolor: alpha(PRIMARY_COLOR, 0.08),
-                    color: PRIMARY_COLOR,
-                    width: 34,
-                    height: 34,
-                    flexShrink: 0
-                }}
-            >
-                {icon}
-            </Box>
-
-            <Box sx={{ width: '100%' }}>
-                <Typography
-                    variant="caption"
-                    component="div"
-                    color="text.secondary"
-                    sx={{ fontWeight: 500, mb: 0.5 }}
-                >
-                    {label}
-                </Typography>
-
-                <Typography
-                    variant="body2"
-                    sx={{
-                        fontWeight: isEmpty ? 400 : 500,
-                        color: isEmpty ? 'text.disabled' : 'text.primary',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between'
-                    }}
-                >
-                    {chip ? (
-                        chip
-                    ) : (
-                        <Box sx={{ display: "flex", alignItems: "center" }}>
-                            {isEmpty ? (
-                                <Typography variant="body2" fontStyle="italic" color="text.disabled">
-                                    {emptyMessage}
-                                </Typography>
-                            ) : (
-                                text
-                            )}
-
-                            {label === "LPO Number" && !isEmpty && (
-                                <Tooltip title="Copy to clipboard">
-                                    <IconButton
-                                        size="small"
-                                        onClick={() => {
-                                            navigator.clipboard.writeText(text || '');
-                                            toast.success('LPO Number copied to clipboard');
-                                        }}
-                                        sx={{
-                                            ml: 1,
-                                            color: alpha(PRIMARY_COLOR, 0.7),
-                                            '&:hover': { bgcolor: alpha(PRIMARY_COLOR, 0.1) }
-                                        }}
-                                    >
-                                        <ContentPasteIcon fontSize='small' />
-                                    </IconButton>
-                                </Tooltip>
-                            )}
-                        </Box>
-                    )}
-                </Typography>
-            </Box>
-        </Paper>
+        />
     );
 };
+
+// ── Header fact pill (LPO / delivery date) ────────────────────────────────────
+const FactPill = ({
+    icon, label, value, accent, onCopy,
+}: { icon: React.ReactNode; label: string; value: string; accent: string; onCopy?: () => void }) => (
+    <Box
+        sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+            px: 1.5,
+            py: 0.75,
+            borderRadius: 1.5,
+            bgcolor: alpha(accent, 0.05),
+            border: `1px solid ${alpha(accent, 0.18)}`,
+        }}
+    >
+        <Box sx={{ color: accent, display: 'flex', '& svg': { fontSize: 16 } }}>{icon}</Box>
+        <Box>
+            <Typography sx={{ fontSize: '0.6rem', fontWeight: 600, color: neutral[500], textTransform: 'uppercase', letterSpacing: '0.05em', lineHeight: 1.1 }}>
+                {label}
+            </Typography>
+            <Typography sx={{ fontSize: '0.82rem', fontWeight: 700, color: neutral[800], lineHeight: 1.3 }}>
+                {value}
+            </Typography>
+        </Box>
+        {onCopy && (
+            <Tooltip title="Copy">
+                <IconButton size="small" onClick={onCopy} sx={{ color: alpha(accent, 0.7), p: 0.3 }}>
+                    <ContentCopyOutlinedIcon sx={{ fontSize: 13 }} />
+                </IconButton>
+            </Tooltip>
+        )}
+    </Box>
+);
+
+// ── Stat tile ─────────────────────────────────────────────────────────────────
+const StatTile = ({ label, value, accent }: { label: string; value: number | string; accent: string }) => (
+    <Paper
+        elevation={0}
+        sx={{
+            p: 1.75,
+            borderRadius: 2,
+            border: `1px solid ${border.subtle}`,
+            bgcolor: '#fff',
+            height: '100%',
+        }}
+    >
+        <Typography sx={{ fontSize: '0.62rem', fontWeight: 700, color: neutral[500], textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+            {label}
+        </Typography>
+        <Typography sx={{ fontWeight: 800, fontSize: '1.4rem', color: accent, lineHeight: 1.2, mt: 0.5 }}>
+            {value}
+        </Typography>
+    </Paper>
+);
+
+// ── Supplier info row ─────────────────────────────────────────────────────────
+const InfoRow = ({ icon, label, value }: { icon: React.ReactNode; label: string; value?: string | null }) => (
+    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5, py: 1.1, borderBottom: `1px solid ${alpha('#000', 0.05)}`, '&:last-of-type': { borderBottom: 'none' } }}>
+        <Box sx={{ color: BRAND, mt: 0.2, flexShrink: 0, '& svg': { fontSize: 17 } }}>{icon}</Box>
+        <Box sx={{ minWidth: 0 }}>
+            <Typography variant="caption" sx={{ color: neutral[500], display: 'block', lineHeight: 1.2 }}>{label}</Typography>
+            <Typography variant="body2" sx={{ fontWeight: 500, color: value ? neutral[800] : neutral[400], fontStyle: value ? 'normal' : 'italic', wordBreak: 'break-word' }}>
+                {value || 'Not specified'}
+            </Typography>
+        </Box>
+    </Box>
+);
+
+const TABS = [
+    { label: 'Delivery Status', icon: <LocalShippingOutlinedIcon fontSize="small" /> },
+    { label: 'Stock Commodities', icon: <Inventory2OutlinedIcon fontSize="small" /> },
+    { label: 'Goods Received Notes', icon: <ReceiptLongOutlinedIcon fontSize="small" /> },
+];
 
 const InventoryDetails = () => {
     const { currentInventory } = useContext(InventoryContext);
     const { id } = useParams<{ id: string }>();
     const { fetchInventoryByID } = ViewInventoryutills();
-    const [fileURL, setFileURL] = useState<string>("");
     const navigate = useNavigate();
-    const theme = useTheme();
     const [loading, setLoading] = useState<boolean>(true);
-
-    const {
-        handleClose,
-        open,
-    } = InventoryUtills();
+    const [tab, setTab] = useState(0);
 
     useEffect(() => {
         setLoading(true);
         fetchInventoryByID(id as string).finally(() => setLoading(false));
-    }, []);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [id]);
 
-    useEffect(() => {
-        if (currentInventory?.id) {
-            if (currentInventory.grnReports && currentInventory.grnReports.length > 0) {
-                const report = currentInventory.grnReports[0];
-                const filename = report.documentPath?.split('/').pop();
-                const publicPath = `/statics/${filename}`;
-                setFileURL(publicPath);
-            }
-        }
-    }, [currentInventory?.id]);
+    const totals = useMemo(() => {
+        const c = (currentInventory?.commodities ?? []) as IStockCommodities[];
+        const ordered = c.reduce((s, x) => s + (x.orderedQuantity || 0), 0);
+        const delivered = c.reduce((s, x) => s + (x.deliveredQuantity || 0), 0);
+        return { ordered, delivered, outstanding: Math.max(ordered - delivered, 0), lines: c.length };
+    }, [currentInventory]);
 
-    // Check if inventory data is available
-    // const hasInventoryData = Boolean(currentInventory?.id);
-
-    // Format status for display
-    const getStatusChip = () => {
-        const status = currentInventory?.status?.status;
-        if (!status) return null;
-
-        let color = 'default';
-        let bgcolor = alpha('#757575', 0.08);
-        let textColor = '#757575';
-
-        switch (status.toLowerCase()) {
-            case 'active':
-            case 'stockcompleted':
-                color = 'success';
-                bgcolor = alpha('#2e7d32', 0.08);
-                textColor = '#2e7d32';
-                break;
-            case 'stockpending':
-                console.log("here");
-                color = 'warning';
-                bgcolor = alpha('#ed6c02', 0.08);
-                textColor = '#ed6c02';
-                break;
-            case 'cancelled':
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                color = 'error';
-                bgcolor = alpha('#d32f2f', 0.08);
-                textColor = '#d32f2f';
-                break;
-        }
-
-        return (
-            <Chip
-                label={camelCaseToWords(status)}
-                size="small"
-                sx={{
-                    fontWeight: 600,
-                    bgcolor: bgcolor,
-                    color: textColor,
-                    border: 'none'
-                }}
-            />
-        );
+    const copyLpo = () => {
+        navigator.clipboard.writeText(currentInventory?.lpoNumber || '');
+        toast.success('LPO Number copied');
     };
 
+    if (loading) {
+        return (
+            <Box sx={{ bgcolor: surface.page, minHeight: '100vh', p: 3 }}>
+                <Loading items="Inventory" />
+            </Box>
+        );
+    }
+
     return (
-        <Container maxWidth="xl" sx={{ pt: 3, pb: 3, bgcolor: '#F3F7FB', borderRadius: 2, border: `1px solid ${alpha('#000', 0.08)}` }}>
-            {/* GRN Document Modal */}
-            <ModalComponent
-                title='View Goods Received Note'
-                open={open}
-                handleClose={handleClose}
-                width="50%"
-            >
-                <iframe
-                    src={fileURL}
-                    title="PDF Preview"
-                    width="100%"
-                    style={{ border: 'none', minHeight: '600px', overflow: 'hidden' }}
-                />
-                <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
-                    <MuiButton
-                        color="secondary"
-                        variant="contained"
-                        onClick={handleClose}
-                    >
-                        Close
-                    </MuiButton>
-                </Box>
-            </ModalComponent>
+        <Box sx={{ bgcolor: surface.page, minHeight: '100vh', px: { xs: 1.5, md: 3 }, py: { xs: 2, md: 3 } }}>
+            <Box sx={{ maxWidth: 1400, mx: 'auto' }}>
 
-            {loading ? (
-                <Loading items='Inventory' />
-            ) : (
-                <>
-                    {/* Navigation Row - Added at the top */}
-                    <Box
-                        sx={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            mb: 2
-                        }}
-                    >
-                        <Typography
-                            variant="body2"
-                            color="text.secondary"
-                            sx={{
-                                fontWeight: 500,
-                                display: 'flex',
-                                alignItems: 'center'
-                            }}
-                        >
-                            {/* <ArrowBackIcon
-                                fontSize="small"
-                                sx={{ mr: 0.5, opacity: 0.7 }}
-                            /> */}
-                            Inventory Details
-                        </Typography>
+                {/* ── Header ── */}
+                <Box
+                    sx={{
+                        position: 'relative',
+                        borderRadius: 2,
+                        border: `1px solid ${border.subtle}`,
+                        background: `linear-gradient(135deg, ${alpha(brand[50], 0.7)} 0%, #FFFFFF 60%)`,
+                        overflow: 'hidden',
+                        mb: 2.5,
+                    }}
+                >
+                    <Box sx={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, background: `linear-gradient(180deg, ${brand[500]} 0%, ${brand[700]} 100%)` }} />
 
-                        <Box sx={{ display: 'flex', gap: 1 }}>
-                            <MuiButton
-                                color='inherit'
-                                type='button'
-                                variant='outlined'
-                                onClick={() => generateGrnPdf(currentInventory)}
-                                startIcon={<FileDownloadOutlinedIcon />}
+                    <Box sx={{ px: { xs: 2.5, md: 3.5 }, py: 2.5 }}>
+                        {/* Back + breadcrumb */}
+                        <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
+                            <IconButton
                                 size="small"
-                                disabled={!currentInventory?.id}
-                                sx={{
-                                    textTransform: 'none',
-                                    borderColor: alpha(PRIMARY_COLOR, 0.4),
-                                    color: PRIMARY_COLOR,
-                                    '&:hover': {
-                                        borderColor: PRIMARY_COLOR,
-                                        backgroundColor: alpha(PRIMARY_COLOR, 0.05)
-                                    }
-                                }}
-                            >
-                                Generate GRN
-                            </MuiButton>
-                            <MuiButton
-                                color='inherit'
-                                type='button'
-                                variant='outlined'
                                 onClick={() => navigate(-1)}
-                                startIcon={<ArrowBackIcon />}
-                                size="small"
-                                sx={{
-                                    borderColor: alpha('#000', 0.2),
-                                    color: 'text.secondary',
-                                    '&:hover': {
-                                        borderColor: alpha('#000', 0.3),
-                                        backgroundColor: alpha('#000', 0.05)
-                                    }
-                                }}
+                                sx={{ color: brand[600], border: `1px solid ${alpha(brand[500], 0.25)}`, bgcolor: alpha(brand[50], 0.6), '&:hover': { bgcolor: alpha(brand[100], 0.7) } }}
                             >
-                                Back
-                            </MuiButton>
-                        </Box>
-                    </Box>
-                    {/* Header Section */}
-                    <Box
-                        sx={{
-                            mb: 3,
-                            borderRadius: 2,
-                            overflow: 'hidden',
-                            boxShadow: `0 1px 3px ${alpha('#000', 0.08)}`,
-                            border: `1px solid ${alpha('#000', 0.08)}`,
-                            bgcolor: '#ffffff'
-                        }}
-                    >
-                        {/* Accent color bar at top */}
-                        <Box sx={{ height: 4, bgcolor: PRIMARY_COLOR }} />
+                                <ArrowBackIcon fontSize="small" />
+                            </IconButton>
+                            <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: neutral[400] }}>
+                                <HomeOutlinedIcon sx={{ fontSize: 14 }} />
+                                <Typography variant="caption" sx={{ color: neutral[500] }}>Inventory</Typography>
+                                <Typography variant="caption" sx={{ color: neutral[300] }}>/</Typography>
+                                <Typography variant="caption" sx={{ color: brand[700], fontWeight: 600 }}>Details</Typography>
+                            </Stack>
+                        </Stack>
 
-                        <Box sx={{ p: 2.5 }}>
-                            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
-                                {/* Left side - Inventory Identity */}
-                                <Box sx={{ display: 'flex', alignItems: 'flex-start', flex: 1 }}>
-                                    <Box
-                                        sx={{
-                                            mr: 2,
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            borderRadius: 1.5,
-                                            background: `linear-gradient(135deg, ${alpha(PRIMARY_COLOR, 0.12)} 0%, ${alpha(PRIMARY_COLOR, 0.22)} 100%)`,
-                                            color: PRIMARY_COLOR,
-                                            width: 48,
-                                            height: 48,
-                                            flexShrink: 0,
-                                            boxShadow: `0 2px 6px ${alpha(PRIMARY_COLOR, 0.15)}`
-                                        }}
-                                    >
-                                        <InventoryOutlinedIcon fontSize="medium" />
-                                    </Box>
-
-                                    <Box>
-                                        <Typography
-                                            variant="h5"
-                                            fontWeight={600}
-                                            color="text.primary"
-                                            sx={{ lineHeight: 1.2, mb: 1 }}
-                                        >
-                                            {currentInventory?.name || "Inventory"}
-                                        </Typography>
-
-                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                                            <Chip
-                                                size="small"
-                                                label={currentInventory?.supplier?.name || "Unknown Supplier"}
-                                                sx={{
-                                                    bgcolor: alpha(PRIMARY_COLOR, 0.08),
-                                                    color: PRIMARY_COLOR,
-                                                    fontWeight: 500,
-                                                    borderRadius: 1
-                                                }}
-                                            />
-
-                                            {currentInventory?.status?.status && getStatusChip()}
-                                        </Box>
-                                    </Box>
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', justifyContent: 'space-between', gap: 2 }}>
+                            {/* Identity */}
+                            <Stack direction="row" spacing={2} alignItems="flex-start" sx={{ minWidth: 0 }}>
+                                <Box sx={{ width: 46, height: 46, borderRadius: 1.5, bgcolor: alpha(brand[500], 0.1), display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, mt: 0.25 }}>
+                                    <Inventory2OutlinedIcon sx={{ fontSize: 24, color: brand[600] }} />
                                 </Box>
+                                <Box sx={{ minWidth: 0 }}>
+                                    <Typography variant="h5" sx={{ fontWeight: 700, color: neutral[900], lineHeight: 1.2, letterSpacing: '-0.3px' }}>
+                                        {currentInventory?.name || 'Inventory'}
+                                    </Typography>
+                                    <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap sx={{ mt: 0.75 }}>
+                                        <Chip
+                                            size="small"
+                                            icon={<BusinessOutlinedIcon sx={{ fontSize: 14 }} />}
+                                            label={currentInventory?.supplier?.name || 'Unknown Supplier'}
+                                            sx={{ height: 24, fontWeight: 600, fontSize: '0.72rem', bgcolor: alpha(brand[500], 0.08), color: brand[700], '& .MuiChip-icon': { color: brand[600] } }}
+                                        />
+                                        <StatusChip code={currentInventory?.status?.status ?? undefined} />
+                                    </Stack>
+                                </Box>
+                            </Stack>
 
-                                {/* Right side - Inventory Details */}
-                                <Box
-                                    sx={{
-                                        display: 'flex',
-                                        gap: 2,
-                                        flexWrap: 'wrap',
-                                        justifyContent: { xs: 'flex-start', md: 'flex-end' },
-                                        alignItems: 'center'
-                                    }}
+                            {/* Actions */}
+                            <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                                <MuiButton
+                                    variant="outlined"
+                                    size="small"
+                                    startIcon={<FileDownloadOutlinedIcon fontSize="small" />}
+                                    onClick={() => generateGrnPdf(currentInventory)}
+                                    disabled={!currentInventory?.id}
+                                    sx={{ textTransform: 'none', fontWeight: 600, borderRadius: '8px', borderColor: alpha(brand[500], 0.4), color: brand[600], '&:hover': { borderColor: brand[500], bgcolor: alpha(brand[500], 0.05) } }}
                                 >
-                                    {/* LPO Number */}
-                                    {currentInventory?.lpoNumber && (
-                                        <Box
-                                            sx={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                py: 0.75,
-                                                px: 1.5,
-                                                borderRadius: 1.5,
-                                                bgcolor: alpha(SECONDARY_COLOR, 0.05),
-                                                border: `1px solid ${alpha(SECONDARY_COLOR, 0.15)}`,
-                                                minWidth: 'fit-content'
-                                            }}
-                                        >
-                                            <ReceiptOutlinedIcon
-                                                fontSize="small"
-                                                sx={{
-                                                    color: alpha(SECONDARY_COLOR, 0.7),
-                                                    mr: 0.75
-                                                }}
-                                            />
-
-                                            <Box>
-                                                <Typography
-                                                    variant="caption"
-                                                    color="text.secondary"
-                                                    sx={{ fontWeight: 500, display: 'block', mb: 0.2 }}
-                                                >
-                                                    LPO Number
-                                                </Typography>
-
-                                                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                                    <Typography
-                                                        variant="body2"
-                                                        fontWeight={600}
-                                                        color={SECONDARY_COLOR}
-                                                    >
-                                                        {currentInventory?.lpoNumber}
-                                                    </Typography>
-
-                                                    <Tooltip title="Copy to clipboard">
-                                                        <IconButton
-                                                            size="small"
-                                                            onClick={() => {
-                                                                navigator.clipboard.writeText(currentInventory?.lpoNumber || '');
-                                                                toast.success('LPO Number copied to clipboard');
-                                                            }}
-                                                            sx={{
-                                                                ml: 0.5,
-                                                                p: 0.3,
-                                                                color: alpha(SECONDARY_COLOR, 0.7),
-                                                                '&:hover': {
-                                                                    bgcolor: alpha(SECONDARY_COLOR, 0.1),
-                                                                    color: SECONDARY_COLOR
-                                                                }
-                                                            }}
-                                                        >
-                                                            <ContentPasteIcon sx={{ fontSize: 14 }} />
-                                                        </IconButton>
-                                                    </Tooltip>
-                                                </Box>
-                                            </Box>
-                                        </Box>
-                                    )}
-
-                                    {/* Delivery Date */}
-                                    {currentInventory?.createDate && (
-                                        <Box
-                                            sx={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                py: 0.75,
-                                                px: 1.5,
-                                                borderRadius: 1.5,
-                                                bgcolor: alpha(PRIMARY_COLOR, 0.05),
-                                                border: `1px solid ${alpha(PRIMARY_COLOR, 0.15)}`,
-                                                minWidth: 'fit-content'
-                                            }}
-                                        >
-                                            <CalendarTodayOutlinedIcon
-                                                fontSize="small"
-                                                sx={{
-                                                    color: alpha(PRIMARY_COLOR, 0.7),
-                                                    mr: 0.75
-                                                }}
-                                            />
-
-                                            <Box>
-                                                <Typography
-                                                    variant="caption"
-                                                    color="text.secondary"
-                                                    sx={{ fontWeight: 500, display: 'block', mb: 0.2 }}
-                                                >
-                                                    Delivery Date
-                                                </Typography>
-
-                                                <Typography
-                                                    variant="body2"
-                                                    fontWeight={600}
-                                                    color={PRIMARY_COLOR}
-                                                >
-                                                    {moment(currentInventory?.createDate).format('DD MMM YYYY')}
-                                                </Typography>
-                                            </Box>
-                                        </Box>
-                                    )}
-                                </Box>
-                            </Box>
+                                    Generate GRN
+                                </MuiButton>
+                            </Stack>
                         </Box>
+
+                        {/* Fact pills */}
+                        <Stack direction="row" spacing={1.5} flexWrap="wrap" useFlexGap sx={{ mt: 2.25 }}>
+                            {currentInventory?.lpoNumber && (
+                                <FactPill icon={<ReceiptOutlinedIcon />} label="LPO Number" value={currentInventory.lpoNumber} accent={brand[600]} onCopy={copyLpo} />
+                            )}
+                            {currentInventory?.grnNumber && (
+                                <FactPill icon={<ReceiptLongOutlinedIcon />} label="GRN Number" value={currentInventory.grnNumber} accent={neutral[600]} />
+                            )}
+                            {currentInventory?.createDate && (
+                                <FactPill icon={<CalendarTodayOutlinedIcon />} label="Delivery Date" value={moment(currentInventory.createDate).format('DD MMM YYYY')} accent="#BC892C" />
+                            )}
+                        </Stack>
                     </Box>
+                </Box>
 
-                    {/* Main Content Grid */}
-                    <Grid container spacing={3}>
-                        {/* Left Column - Inventory Info */}
-                        <Grid item xs={12} md={4}>
-                            <Card
-                                elevation={0}
-                                sx={{
-                                    borderRadius: 2,
-                                    overflow: 'hidden',
-                                    border: `1px solid ${alpha('#000', 0.08)}`,
-                                    height: '100%',
-                                    bgcolor: '#ffffff'
-                                }}
-                            >
-                                <CardContent sx={{ p: 0, height: '100%', display: 'flex', flexDirection: 'column' }}>
-                                    {/* Supplier header */}
-                                    <Box sx={{
-                                        p: 2.5,
-                                        bgcolor: alpha(theme.palette.primary.light, 0.04),
-                                        borderBottom: `1px solid ${alpha('#000', 0.08)}`
-                                    }}>
-                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                                            <BusinessOutlinedIcon color="primary" />
-                                            <Typography
-                                                variant="subtitle1"
-                                                color="primary"
-                                                fontWeight={600}
-                                            >
-                                                Supplier Information
-                                            </Typography>
-                                        </Box>
+                {/* ── Stat strip ── */}
+                <Grid container spacing={2} sx={{ mb: 2.5 }}>
+                    <Grid item xs={6} md={3}><StatTile label="Ordered" value={totals.ordered.toLocaleString()} accent={neutral[900]} /></Grid>
+                    <Grid item xs={6} md={3}><StatTile label="Delivered" value={totals.delivered.toLocaleString()} accent={BRAND} /></Grid>
+                    <Grid item xs={6} md={3}><StatTile label="Outstanding" value={totals.outstanding.toLocaleString()} accent={totals.outstanding > 0 ? statusTokens.danger.main : neutral[400]} /></Grid>
+                    <Grid item xs={6} md={3}><StatTile label="Commodities" value={totals.lines.toLocaleString()} accent="#BC892C" /></Grid>
+                </Grid>
 
-                                        <Typography variant="h6" sx={{ mb: 1, fontWeight: 500 }}>
-                                            {currentInventory?.supplier?.name || "No supplier information"}
-                                        </Typography>
-                                    </Box>
-
-                                    {/* Inventory details */}
-                                    <Box sx={{ p: 2.5, flex: 1 }}>
-                                        <Stack spacing={2}>
-                                            <EnhancedDetailSection
-                                                label='Contact Number'
-                                                icon={<LocalPhoneOutlinedIcon />}
-                                                text={currentInventory?.supplier?.telephone as string}
-                                            />
-
-                                            <EnhancedDetailSection
-                                                label='Email Address'
-                                                icon={<EmailOutlinedIcon />}
-                                                text={currentInventory?.supplier?.email || null}
-                                            />
-
-                                            <EnhancedDetailSection
-                                                label='Address'
-                                                icon={<LocationOnOutlinedIcon />}
-                                                text={currentInventory?.supplier?.address || null}
-                                            />
-
-                                            <Divider sx={{ my: 0.5 }} />
-
-                                            <EnhancedDetailSection
-                                                label="LPO Number"
-                                                icon={<ReceiptOutlinedIcon />}
-                                                text={currentInventory?.lpoNumber || null}
-                                            />
-
-                                            <EnhancedDetailSection
-                                                label="Delivery Date"
-                                                icon={<CalendarTodayOutlinedIcon />}
-                                                text={currentInventory?.createDate ? moment(currentInventory?.createDate).format('Do MMMM YYYY, h:mm') : null}
-                                            />
-                                        </Stack>
-                                    </Box>
-
-                                </CardContent>
-                            </Card>
-                        </Grid>
-
-                        {/* Right Column - Tabs */}
-                        <Grid item xs={12} md={8}>
-                            <Card
-                                elevation={0}
-                                sx={{
-                                    borderRadius: 2,
-                                    border: `1px solid ${alpha('#000', 0.08)}`,
-                                    height: '100%',
-                                    bgcolor: '#ffffff'
-                                }}
-                            >
-                                <CardContent sx={{ p: 0 }}>
-                                    <TabComponent
-                                        headers={[
-                                            {
-                                                label: "Delivery Status",
-                                                position: 0,
-                                                content: (
-                                                    <DeliveryStatusPanel
-                                                        inventory={currentInventory}
-                                                        onDeliveryReceived={() => fetchInventoryByID(id as string)}
-                                                    />
-                                                )
-                                            },
-                                            {
-                                                label: "Stock Commodities",
-                                                position: 1,
-                                                content: <OtherDetails inventory={currentInventory} />
-                                            },
-                                            {
-                                                label: "Goods Received Notes (GRN)",
-                                                position: 2,
-                                                content: <InventoryPRN grnList={currentInventory.grnReports as Array<IGRNReport>} />
-                                            }
-                                        ]}
-                                    />
-                                </CardContent>
-                            </Card>
-                        </Grid>
+                {/* ── Body ── */}
+                <Grid container spacing={2.5} alignItems="stretch">
+                    {/* Supplier card */}
+                    <Grid item xs={12} md={4}>
+                        <Paper elevation={0} sx={{ borderRadius: 2, border: `1px solid ${border.subtle}`, bgcolor: '#fff', overflow: 'hidden', height: '100%' }}>
+                            <Box sx={{ px: 2.5, py: 1.75, borderBottom: `1px solid ${alpha('#000', 0.06)}`, bgcolor: alpha(brand[500], 0.03), display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <BusinessOutlinedIcon sx={{ fontSize: 18, color: brand[600] }} />
+                                <Typography variant="subtitle2" sx={{ fontWeight: 700, color: brand[700] }}>Supplier</Typography>
+                            </Box>
+                            <Box sx={{ px: 2.5, py: 1 }}>
+                                <Typography variant="h6" sx={{ fontWeight: 600, color: neutral[900], mt: 1, mb: 0.5, fontSize: '1.05rem' }}>
+                                    {currentInventory?.supplier?.name || 'No supplier'}
+                                </Typography>
+                                <InfoRow icon={<LocalPhoneOutlinedIcon />} label="Contact Number" value={currentInventory?.supplier?.telephone as string} />
+                                <InfoRow icon={<EmailOutlinedIcon />} label="Email Address" value={currentInventory?.supplier?.email} />
+                                <InfoRow icon={<LocationOnOutlinedIcon />} label="Address" value={currentInventory?.supplier?.address} />
+                                <Divider sx={{ my: 0.5 }} />
+                                <InfoRow icon={<ReceiptOutlinedIcon />} label="LPO Number" value={currentInventory?.lpoNumber} />
+                                <InfoRow icon={<CalendarTodayOutlinedIcon />} label="Delivery Date" value={currentInventory?.createDate ? moment(currentInventory.createDate).format('Do MMMM YYYY, h:mm A') : null} />
+                            </Box>
+                        </Paper>
                     </Grid>
-                </>
-            )}
-        </Container>
+
+                    {/* Tabbed content */}
+                    <Grid item xs={12} md={8}>
+                        <Paper elevation={0} sx={{ borderRadius: 2, border: `1px solid ${border.subtle}`, bgcolor: '#fff', overflow: 'hidden', height: '100%' }}>
+                            <Tabs
+                                value={tab}
+                                onChange={(_, v) => setTab(v)}
+                                variant="scrollable"
+                                scrollButtons="auto"
+                                sx={{
+                                    px: 1.5,
+                                    minHeight: 50,
+                                    borderBottom: `1px solid ${alpha('#000', 0.07)}`,
+                                    bgcolor: alpha(brand[500], 0.025),
+                                    '& .MuiTab-root': { minHeight: 50, textTransform: 'none', fontSize: '0.83rem', fontWeight: 500, color: neutral[500], gap: 0.75, px: 2 },
+                                    '& .Mui-selected': { color: brand[700], fontWeight: 700 },
+                                    '& .MuiTabs-indicator': { bgcolor: brand[500], height: 3, borderRadius: '3px 3px 0 0' },
+                                }}
+                            >
+                                {TABS.map((t, i) => <Tab key={i} label={t.label} icon={t.icon} iconPosition="start" />)}
+                            </Tabs>
+
+                            <Box>
+                                {tab === 0 && (
+                                    <DeliveryStatusPanel
+                                        inventory={currentInventory}
+                                        onDeliveryReceived={() => fetchInventoryByID(id as string)}
+                                    />
+                                )}
+                                {tab === 1 && <OtherDetails inventory={currentInventory} />}
+                                {tab === 2 && <InventoryPRN grnList={currentInventory?.grnReports as Array<IGRNReport>} />}
+                            </Box>
+                        </Paper>
+                    </Grid>
+                </Grid>
+            </Box>
+        </Box>
     );
 };
 

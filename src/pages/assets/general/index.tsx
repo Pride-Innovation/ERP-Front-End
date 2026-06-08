@@ -97,16 +97,26 @@ const GeneralAssets = () => {
         }
     }, [assetTypes, typeId]);
 
+    // When the category in the URL changes, immediately clear the previously-loaded
+    // assets so a slow (or empty) fetch for the new category can't leave stale rows
+    // from the old one on screen.
+    useEffect(() => {
+        dispatch(loadAllGeneralAssets([]));
+        setSelectedStatus('all');
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [typeId]);
+
     useEffect(() => {
         if (currentAssetType.id) {
             fetchResources();
         }
     }, [currentAssetType]);
 
+    // Rebuild the table rows whenever the loaded assets change — including when the
+    // new category returns an empty list, so a previous category's rows never linger.
     useEffect(() => {
-        if (generalAssets.length > 0) {
-            handleGeneralAssetTableData(generalAssets);
-        }
+        handleGeneralAssetTableData(generalAssets);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [generalAssets]);
 
     const handleStatusChange = (status: string) => {

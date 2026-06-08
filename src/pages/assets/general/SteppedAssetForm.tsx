@@ -33,6 +33,7 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import SaveIcon from '@mui/icons-material/Save';
 import DescriptionIcon from '@mui/icons-material/Description';
 import ChairIcon from '@mui/icons-material/Chair';
+import MemoryOutlinedIcon from '@mui/icons-material/MemoryOutlined';
 import { toast } from "react-toastify";
 import CancelIcon from '@mui/icons-material/Cancel';
 
@@ -54,8 +55,24 @@ const SteppedOfficeEquipmentForm = ({
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-    // Define form steps
-    const steps = ['Basic Information', 'Additional Details'];
+    // Fields that make up the "Technical Details" step. The step is only shown when
+    // the category enables at least one of them via fieldConfig.
+    const technicalFields = [
+        'hostname', 'serialNumber', 'description', 'ram', 'cpuSpeed',
+        'hardDiskSize', 'macAddress', 'ipAddress', 'interfaceType',
+    ];
+    const hasTechnical = (formFields || []).some((f: any) => technicalFields.includes(f.value as string));
+
+    // Define form steps — "Technical Details" is appended only when relevant.
+    const steps = hasTechnical
+        ? ['Basic Information', 'Additional Details', 'Technical Details']
+        : ['Basic Information', 'Additional Details'];
+
+    const stepMeta = [
+        { title: 'Asset Information', icon: <DescriptionIcon fontSize="small" /> },
+        { title: 'Additional Details', icon: <ChairIcon fontSize="small" /> },
+        { title: 'Technical Details', icon: <MemoryOutlinedIcon fontSize="small" /> },
+    ];
 
     // Helper to check if the form has errors in the current section
     const hasErrorsInStep = (stepIndex: number) => {
@@ -108,14 +125,18 @@ const SteppedOfficeEquipmentForm = ({
         ];
 
         if (step === 0) {
-            return formFields.filter((field: any) =>
-                basicFields.includes(field.value as string)
-            );
-        } else {
-            return formFields.filter((field: any) =>
-                !basicFields.includes(field.value as string)
-            );
+            return formFields.filter((field: any) => basicFields.includes(field.value as string));
         }
+
+        if (hasTechnical && step === 2) {
+            return formFields.filter((field: any) => technicalFields.includes(field.value as string));
+        }
+
+        // "Additional Details" — everything that isn't a basic or a technical field.
+        return formFields.filter((field: any) =>
+            !basicFields.includes(field.value as string)
+            && !technicalFields.includes(field.value as string)
+        );
     };
 
     // Get the fields for the current step
@@ -123,10 +144,11 @@ const SteppedOfficeEquipmentForm = ({
 
     // Group form fields into sections
     const groupFields = (fields: any[] = []) => {
+        const meta = stepMeta[activeStep] ?? stepMeta[1];
         return [
             {
-                title: activeStep === 0 ? "Asset Information" : "Additional Details",
-                icon: activeStep === 0 ? <DescriptionIcon fontSize="small" /> : <ChairIcon fontSize="small" />,
+                title: meta.title,
+                icon: meta.icon,
                 fields: fields || []
             }
         ];
@@ -274,7 +296,7 @@ const SteppedOfficeEquipmentForm = ({
                                 }}
                             >
                                 <Typography color="text.secondary">
-                                    No {activeStep === 0 ? 'basic' : 'additional'} fields available for this form.
+                                    No fields available for this section.
                                 </Typography>
                             </Paper>
                         );

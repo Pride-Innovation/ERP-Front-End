@@ -309,7 +309,60 @@ const OfficeEquipmentUtills = () => {
             type: "autocomplete",
             options: optionsObject.inventoryOptions,
             disabled: true
-        }
+        },
+        {
+            value: "model",
+            label: 'Model',
+            type: "input",
+        },
+        {
+            value: "serialNumber",
+            label: 'Serial Number',
+            type: "input",
+        },
+        {
+            value: "assignedTo",
+            label: 'Assigned To',
+            type: "autocomplete",
+            options: optionsObject.usersOptions,
+        },
+        {
+            value: "description",
+            label: 'Description',
+            type: "textarea",
+        },
+        // Technical (IT / network) fields — only surfaced for categories that
+        // enable them via fieldConfig (e.g. Computers). Hidden elsewhere.
+        {
+            value: "ram",
+            label: 'RAM',
+            type: "input",
+        },
+        {
+            value: "cpuSpeed",
+            label: 'CPU Speed',
+            type: "input",
+        },
+        {
+            value: "hardDiskSize",
+            label: 'Hard Disk Size',
+            type: "input",
+        },
+        {
+            value: "macAddress",
+            label: 'MAC Address',
+            type: "input",
+        },
+        {
+            value: "ipAddress",
+            label: 'IP Address',
+            type: "input",
+        },
+        {
+            value: "interfaceType",
+            label: 'Interface Type',
+            type: "input",
+        },
     ]
 
     const determineCurrentAsset = (id: number, itemList: Array<IOfficeEquipment>): IOfficeEquipment => {

@@ -72,6 +72,16 @@ export const buildOfficeEquipmentSchema = (fieldConfig?: IAssetFieldConfig | nul
         // ── Classification ───────────────────────────────────────────────────
         unitOfMeasure:      strField(fieldConfig, 'unitOfMeasure',      'Unit of measure is required',   true),
         category:           strField(fieldConfig, 'category',           'Category is required',          false),
+        // ── Identification (extended) ────────────────────────────────────────
+        model:              strField(fieldConfig, 'model',              'Model is required',             false),
+        serialNumber:       strField(fieldConfig, 'serialNumber',       'Serial number is required',     false),
+        // ── Technical (IT / network) ─────────────────────────────────────────
+        ram:                strField(fieldConfig, 'ram',                'RAM is required',               false),
+        cpuSpeed:           strField(fieldConfig, 'cpuSpeed',           'CPU speed is required',         false),
+        hardDiskSize:       strField(fieldConfig, 'hardDiskSize',       'Hard disk size is required',    false),
+        macAddress:         strField(fieldConfig, 'macAddress',         'MAC address is required',       false),
+        ipAddress:          strField(fieldConfig, 'ipAddress',          'IP address is required',        false),
+        interfaceType:      strField(fieldConfig, 'interfaceType',      'Interface type is required',    false),
         // ── Other string fields (optional by default) ────────────────────────
         description:        strField(fieldConfig, 'description',        'Description is required',       false),
         image:              strField(fieldConfig, 'image',              'Image is required',             false),
