@@ -1,6 +1,6 @@
 /*
 13.9 Pride's Standard Copyright Notice:
-Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
+Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify,
 and distribute this software and its documentation for any purpose is prohibited unless authorized in writing by the
 Managing Director
 */
@@ -27,6 +27,8 @@ import {
     UseFormInput,
     UseFormSelect
 } from "../../../components/forms";
+import { PageSection } from "../../../components/layout";
+import { brand, neutral, border } from "../../../utils/tokens";
 import { useNavigate } from "react-router-dom";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
@@ -34,11 +36,11 @@ import SaveIcon from '@mui/icons-material/Save';
 import DescriptionIcon from '@mui/icons-material/Description';
 import ChairIcon from '@mui/icons-material/Chair';
 import MemoryOutlinedIcon from '@mui/icons-material/MemoryOutlined';
+import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
+import CloseIcon from '@mui/icons-material/Close';
 import { toast } from "react-toastify";
-import CancelIcon from '@mui/icons-material/Cancel';
 
-// Brand colors
-const PRIMARY_COLOR = '#08796C';
+const P = brand[500];
 
 const SteppedOfficeEquipmentForm = ({
     formState,
@@ -69,33 +71,24 @@ const SteppedOfficeEquipmentForm = ({
         : ['Basic Information', 'Additional Details'];
 
     const stepMeta = [
-        { title: 'Asset Information', icon: <DescriptionIcon fontSize="small" /> },
-        { title: 'Additional Details', icon: <ChairIcon fontSize="small" /> },
-        { title: 'Technical Details', icon: <MemoryOutlinedIcon fontSize="small" /> },
+        { title: 'Asset Information', subtitle: 'Identity, classification and cost', icon: <DescriptionIcon fontSize="small" /> },
+        { title: 'Additional Details', subtitle: 'Valuation, references and dates', icon: <ChairIcon fontSize="small" /> },
+        { title: 'Technical Details', subtitle: 'Hardware, network and specifications', icon: <MemoryOutlinedIcon fontSize="small" /> },
     ];
 
-    // Helper to check if the form has errors in the current section
     const hasErrorsInStep = (stepIndex: number) => {
         const fields = getFieldsForStep(stepIndex);
-
         if (!fields || fields.length === 0) return false;
-
         const fieldNames = fields.map((field: any) => field.value);
-
-        return Object.keys(formState.errors).some(errorField =>
-            fieldNames.includes(errorField)
-        );
+        return Object.keys(formState.errors).some(errorField => fieldNames.includes(errorField));
     };
 
     const handleNext = async () => {
-        // Validate current step fields before proceeding
         if (trigger) {
             const fieldsToValidate = getFieldsForStep(activeStep)
                 .map((field: any) => field.value)
                 .filter((fieldName: any) => typeof fieldName === 'string');
-
             const isValid = await trigger(fieldsToValidate as any[]);
-
             if (!isValid) {
                 toast.error("Please fix the errors before proceeding");
                 return;
@@ -104,21 +97,15 @@ const SteppedOfficeEquipmentForm = ({
             toast.error("Please fix the errors before proceeding");
             return;
         }
-
-        setActiveStep((prevActiveStep) => prevActiveStep + 1);
+        setActiveStep((prev) => prev + 1);
     };
 
-    const handleBack = () => {
-        setActiveStep((prevActiveStep) => prevActiveStep - 1);
-    };
+    const handleBack = () => setActiveStep((prev) => prev - 1);
 
     // Divide fields into steps
     const getFieldsForStep = (step: number) => {
-        if (!formFields || formFields.length === 0) {
-            return [];
-        }
+        if (!formFields || formFields.length === 0) return [];
 
-        // Define which fields belong in which step
         const basicFields = [
             'assetName', 'assetType', 'category', 'assetStatus', 'branch',
             'supplier', 'assignedTo', 'purchaseCost', 'costOfTheAsset'
@@ -139,292 +126,139 @@ const SteppedOfficeEquipmentForm = ({
         );
     };
 
-    // Get the fields for the current step
     const currentStepFields = getFieldsForStep(activeStep);
-
-    // Group form fields into sections
-    const groupFields = (fields: any[] = []) => {
-        const meta = stepMeta[activeStep] ?? stepMeta[1];
-        return [
-            {
-                title: meta.title,
-                icon: meta.icon,
-                fields: fields || []
-            }
-        ];
-    };
-
-    const fieldGroups = groupFields(currentStepFields);
-
-    const renderSectionHeader = (title: string, icon: any) => (
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, position: 'relative' }}>
-            <Box
-                sx={{
-                    bgcolor: alpha(PRIMARY_COLOR, 0.1),
-                    color: PRIMARY_COLOR,
-                    width: 36,
-                    height: 36,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    borderRadius: 1,
-                    mr: 2,
-                }}
-            >
-                {icon}
-            </Box>
-            <Typography variant="h6" sx={{ fontWeight: 600, color: 'text.primary', position: 'relative', zIndex: 1 }}>
-                {title}
-            </Typography>
-            <Box
-                sx={{
-                    position: 'absolute',
-                    left: 0,
-                    right: 0,
-                    height: '1px',
-                    bgcolor: alpha('#000', 0.1),
-                    bottom: -8,
-                    zIndex: 0,
-                }}
-            />
-        </Box>
-    );
+    const meta = stepMeta[activeStep] ?? stepMeta[1];
+    const progressPct = ((activeStep + 1) / steps.length) * 100;
 
     return (
         <Paper
             elevation={0}
             sx={{
                 width: '100%',
-                borderRadius: 2,
+                borderRadius: 2.5,
                 overflow: 'hidden',
-                border: `1px solid ${alpha('#000', 0.08)}`,
+                border: `1px solid ${border.subtle}`,
+                bgcolor: '#fff',
             }}
         >
-            {/* Header */}
-            <Box
-                sx={{
-                    background: `linear-gradient(135deg, ${alpha(PRIMARY_COLOR, 0.07)} 0%, ${alpha(PRIMARY_COLOR, 0.02)} 100%)`,
-                    borderBottom: `1px solid ${alpha('#000', 0.08)}`,
-                    p: 3,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 2,
-                }}
-            >
-                <Box
-                    sx={{
-                        bgcolor: alpha(PRIMARY_COLOR, 0.12),
-                        color: PRIMARY_COLOR,
-                        width: 44,
-                        height: 44,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        borderRadius: 1.5,
-                        flexShrink: 0,
-                    }}
-                >
-                    <ChairIcon />
+            {/* ── Header ── */}
+            <Box sx={{ px: { xs: 2.5, md: 3.5 }, py: 2.5, borderBottom: `1px solid ${border.subtle}`, display: 'flex', alignItems: 'center', gap: 2 }}>
+                <Box sx={{ width: 44, height: 44, borderRadius: 1.5, bgcolor: alpha(P, 0.1), color: brand[600], display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <Inventory2OutlinedIcon />
                 </Box>
-                <Box>
-                    <Typography variant="h6" sx={{ color: 'text.primary', fontWeight: 600, mb: 0.25 }}>
-                        {isUpdate ? 'Update Office Equipment' : 'Register Office Equipment'}
+                <Box sx={{ minWidth: 0 }}>
+                    <Typography variant="h6" sx={{ fontWeight: 700, color: neutral[900], lineHeight: 1.25 }}>
+                        {isUpdate ? 'Update Asset' : 'Register Asset'}
                     </Typography>
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography variant="body2" sx={{ color: neutral[500] }}>
                         {isUpdate
-                            ? 'Modify the details of this office equipment record'
-                            : 'Fill in the fields below to register a new office equipment asset'}
+                            ? 'Modify the details of this asset record'
+                            : 'Complete each step to register a new asset'}
                     </Typography>
                 </Box>
             </Box>
 
-            {/* Form Content */}
-            <Box sx={{ p: { xs: 2, sm: 3 } }}>
-                {/* Stepper */}
-                <Paper
-                    elevation={0}
-                    sx={{
-                        p: { xs: 2, sm: 2.5 },
-                        mb: 3,
-                        borderRadius: 2,
-                        border: `1px solid ${alpha('#000', 0.07)}`,
-                        bgcolor: alpha(PRIMARY_COLOR, 0.02),
-                    }}
-                >
-                    <Stepper
+            {/* ── Stepper strip ── */}
+            <Box sx={{ px: { xs: 1.5, md: 3.5 }, py: 2, bgcolor: '#FAFBFC', borderBottom: `1px solid ${border.subtle}` }}>
+                <Stepper
                     activeStep={activeStep}
                     alternativeLabel={isMobile}
                     sx={{
-                        '& .MuiStepLabel-root .Mui-completed': {
-                            color: PRIMARY_COLOR,
-                        },
-                        '& .MuiStepLabel-root .Mui-active': {
-                            color: PRIMARY_COLOR,
-                        },
-                        '& .MuiStepConnector-line': {
-                            borderColor: alpha('#000', 0.1)
-                        },
-                        '& .MuiStepConnector-root.Mui-active .MuiStepConnector-line': {
-                            borderColor: PRIMARY_COLOR,
-                        },
-                        '& .MuiStepConnector-root.Mui-completed .MuiStepConnector-line': {
-                            borderColor: PRIMARY_COLOR,
-                        },
+                        '& .MuiStepIcon-root': { color: neutral[200], '& text': { fill: neutral[500], fontWeight: 700 } },
+                        '& .MuiStepIcon-root.Mui-active': { color: P, '& text': { fill: '#fff' } },
+                        '& .MuiStepIcon-root.Mui-completed': { color: brand[600] },
+                        '& .MuiStepLabel-label': { fontSize: '0.8rem', color: neutral[500], mt: isMobile ? 0.5 : 0 },
+                        '& .MuiStepLabel-label.Mui-active': { color: brand[700], fontWeight: 700 },
+                        '& .MuiStepLabel-label.Mui-completed': { color: neutral[700], fontWeight: 600 },
+                        '& .MuiStepConnector-line': { borderColor: border.subtle, borderTopWidth: 2 },
+                        '& .MuiStepConnector-root.Mui-active .MuiStepConnector-line': { borderColor: P },
+                        '& .MuiStepConnector-root.Mui-completed .MuiStepConnector-line': { borderColor: brand[600] },
                     }}
                 >
                     {steps.map((label) => (
-                        <Step key={label}>
-                            <StepLabel>{label}</StepLabel>
-                        </Step>
+                        <Step key={label}><StepLabel>{label}</StepLabel></Step>
                     ))}
                 </Stepper>
-            </Paper>
-
-                {/* Field sections */}
-                {fieldGroups.map((group, groupIndex) => {
-                    if (!group.fields || group.fields.length === 0) {
-                        return (
-                            <Paper
-                                key={`group-${groupIndex}`}
-                                elevation={0}
-                                sx={{
-                                    p: 4,
-                                    mb: 3,
-                                    borderRadius: 2,
-                                    border: `1px dashed ${alpha('#000', 0.15)}`,
-                                    textAlign: 'center'
-                                }}
-                            >
-                                <Typography color="text.secondary">
-                                    No fields available for this section.
-                                </Typography>
-                            </Paper>
-                        );
-                    }
-
-                    return (
-                        <Paper
-                            key={`group-${groupIndex}`}
-                            elevation={0}
-                            sx={{
-                                p: { xs: 2, sm: 3 },
-                                mb: 3,
-                                borderRadius: 2,
-                                border: `1px solid ${alpha('#000', 0.08)}`,
-                                bgcolor: alpha(PRIMARY_COLOR, 0.02),
-                                boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
-                            }}
-                        >
-                            {renderSectionHeader(group.title, group.icon)}
-                            <Grid container spacing={2} sx={{ mt: 0.5 }}>
-                                {group.fields.map((field, index) => {
-                                    if (!field) return null;
-
-                                    const commonProps = {
-                                        register,
-                                        control,
-                                        formState,
-                                        value: field.value,
-                                        label: field.label,
-                                        required: field.required === false ? field.required : true,
-                                        disabled: field.disabled ? true : false
-                                    };
-
-                                    const gridSize = field.type === "textarea"
-                                        ? { xs: 12 }
-                                        : { xs: 12, sm: 6 };
-
-                                    return (
-                                        <Grid item {...gridSize} key={`${field.value}-${index}`}>
-                                            {field.type === "input" && <UseFormInput {...commonProps} />}
-                                            {field.type === "textarea" && <UseFormInput {...commonProps} multiline row={4} />}
-                                            {field.type === "number" && <UseFormInput {...commonProps} type="number" />}
-                                            {field.type === "select" && (
-                                                <UseFormSelect {...commonProps} options={field.options} />
-                                            )}
-                                            {field.type === "date" && <UseFormDatePicker {...commonProps} />}
-                                            {field.type === "autocomplete" && (
-                                                <UseFormAutocompleteComponent {...commonProps} options={field.options} />
-                                            )}
-                                        </Grid>
-                                    );
-                                })}
-                            </Grid>
-                        </Paper>
-                    );
-                })}
             </Box>
 
-            {/* Footer navigation */}
-            <Box
-                sx={{
-                    borderTop: `1px solid ${alpha('#000', 0.08)}`,
-                    overflow: 'hidden',
-                }}
-            >
+            {/* ── Body ── */}
+            <Box sx={{ px: { xs: 2.5, md: 3.5 }, py: 3 }}>
+                {currentStepFields.length === 0 ? (
+                    <Box sx={{ py: 6, textAlign: 'center', borderRadius: 2, border: `1px dashed ${neutral[200]}` }}>
+                        <Typography variant="body2" sx={{ color: neutral[500] }}>
+                            No fields available for this section.
+                        </Typography>
+                    </Box>
+                ) : (
+                    <PageSection title={meta.title} subtitle={meta.subtitle} icon={meta.icon} mb={0}>
+                        <Grid container spacing={2.5}>
+                            {currentStepFields.map((field: any, index: number) => {
+                                if (!field) return null;
+                                const commonProps = {
+                                    register,
+                                    control,
+                                    formState,
+                                    value: field.value,
+                                    label: field.label,
+                                    required: field.required === false ? field.required : true,
+                                    disabled: field.disabled ? true : false,
+                                };
+                                const gridSize = field.type === "textarea" ? { xs: 12 } : { xs: 12, sm: 6 };
+
+                                return (
+                                    <Grid item {...gridSize} key={`${field.value}-${index}`}>
+                                        {field.type === "input" && <UseFormInput {...commonProps} />}
+                                        {field.type === "textarea" && <UseFormInput {...commonProps} multiline row={4} />}
+                                        {field.type === "number" && <UseFormInput {...commonProps} type="number" />}
+                                        {field.type === "select" && <UseFormSelect {...commonProps} options={field.options} />}
+                                        {field.type === "date" && <UseFormDatePicker {...commonProps} />}
+                                        {field.type === "autocomplete" && <UseFormAutocompleteComponent {...commonProps} options={field.options} />}
+                                    </Grid>
+                                );
+                            })}
+                        </Grid>
+                    </PageSection>
+                )}
+            </Box>
+
+            {/* ── Footer ── */}
+            <Box sx={{ borderTop: `1px solid ${border.subtle}` }}>
+                {/* progress */}
+                <Box sx={{ height: 3, bgcolor: alpha(P, 0.1) }}>
+                    <Box sx={{ height: '100%', width: `${progressPct}%`, bgcolor: P, transition: 'width 0.4s ease' }} />
+                </Box>
+
                 <Box
                     sx={{
-                        height: 3,
-                        background: `linear-gradient(90deg, ${PRIMARY_COLOR} ${((activeStep + 1) / steps.length) * 100}%, ${alpha(PRIMARY_COLOR, 0.12)} ${((activeStep + 1) / steps.length) * 100}%)`,
-                        transition: 'all 0.4s ease',
-                    }}
-                />
-                <Box
-                    sx={{
-                        px: 3,
-                        py: 2.5,
+                        px: { xs: 2, md: 3.5 },
+                        py: 2,
                         display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
                         flexDirection: { xs: 'column', sm: 'row' },
-                        gap: 2,
-                        bgcolor: alpha(PRIMARY_COLOR, 0.015),
+                        alignItems: { xs: 'stretch', sm: 'center' },
+                        justifyContent: 'space-between',
+                        gap: 1.5,
+                        bgcolor: '#FAFBFC',
                     }}
                 >
-                    <Stack direction="row" spacing={2} alignItems="center">
+                    <Stack direction="row" spacing={1.5} alignItems="center">
                         <MuiButton
                             onClick={() => navigate(-1)}
                             type="button"
                             variant="text"
-                            startIcon={<CancelIcon fontSize="small" />}
+                            startIcon={<CloseIcon fontSize="small" />}
                             sx={{
-                                color: 'text.secondary',
-                                fontSize: '0.8125rem',
-                                px: 1.5,
-                                py: 1,
-                                borderRadius: '8px',
-                                '&:hover': {
-                                    color: '#D32F2F',
-                                    backgroundColor: alpha('#D32F2F', 0.06),
-                                },
-                                transition: 'all 0.2s ease',
+                                color: neutral[500], textTransform: 'none', fontSize: '0.82rem', borderRadius: '8px',
+                                '&:hover': { color: '#D32F2F', bgcolor: alpha('#D32F2F', 0.06) },
                             }}
                         >
                             Cancel
                         </MuiButton>
-
-                        <Box
-                            sx={{
-                                height: 20,
-                                width: '1px',
-                                bgcolor: alpha('#000', 0.12),
-                                display: { xs: 'none', sm: 'block' },
-                            }}
-                        />
-
-                        <Typography
-                            variant="caption"
-                            sx={{
-                                color: 'text.secondary',
-                                fontSize: '0.75rem',
-                                display: { xs: 'none', sm: 'block' },
-                            }}
-                        >
-                            Step {activeStep + 1} of {steps.length} &mdash; <strong style={{ color: PRIMARY_COLOR }}>{steps[activeStep]}</strong>
+                        <Typography variant="caption" sx={{ color: neutral[400], display: { xs: 'none', sm: 'block' } }}>
+                            Step {activeStep + 1} of {steps.length} · <Box component="span" sx={{ color: brand[700], fontWeight: 600 }}>{steps[activeStep]}</Box>
                         </Typography>
                     </Stack>
 
-                    <Stack direction="row" spacing={1.5} alignItems="center">
+                    <Stack direction="row" spacing={1.25} sx={{ width: { xs: '100%', sm: 'auto' } }}>
                         {activeStep > 0 && (
                             <MuiButton
                                 onClick={handleBack}
@@ -432,74 +266,43 @@ const SteppedOfficeEquipmentForm = ({
                                 variant="outlined"
                                 startIcon={<ArrowBackIcon fontSize="small" />}
                                 sx={{
-                                    borderColor: alpha(PRIMARY_COLOR, 0.4),
-                                    color: PRIMARY_COLOR,
-                                    fontSize: '0.8125rem',
-                                    px: 2.5,
-                                    py: 1,
-                                    borderRadius: '8px',
-                                    '&:hover': {
-                                        borderColor: PRIMARY_COLOR,
-                                        backgroundColor: alpha(PRIMARY_COLOR, 0.06),
-                                    },
-                                    transition: 'all 0.2s ease',
+                                    flex: { xs: 1, sm: 'initial' }, height: 40, borderRadius: '8px', textTransform: 'none', fontWeight: 600,
+                                    borderColor: alpha(P, 0.4), color: brand[600],
+                                    '&:hover': { borderColor: P, bgcolor: alpha(P, 0.05) },
                                 }}
                             >
                                 Previous
                             </MuiButton>
                         )}
 
-                        {activeStep < steps.length - 1 && (
+                        {activeStep < steps.length - 1 ? (
                             <MuiButton
                                 onClick={handleNext}
                                 type="button"
                                 variant="contained"
                                 endIcon={<ArrowForwardIcon fontSize="small" />}
                                 sx={{
-                                    bgcolor: PRIMARY_COLOR,
-                                    fontSize: '0.8125rem',
-                                    px: 3,
-                                    py: 1,
-                                    borderRadius: '8px',
-                                    boxShadow: `0 2px 8px ${alpha(PRIMARY_COLOR, 0.35)}`,
-                                    '&:hover': {
-                                        bgcolor: '#065f54',
-                                        boxShadow: `0 4px 14px ${alpha(PRIMARY_COLOR, 0.45)}`,
-                                        transform: 'translateY(-1px)',
-                                    },
-                                    '&:active': { transform: 'translateY(0)' },
-                                    '&.Mui-disabled': { bgcolor: alpha('#000', 0.12), boxShadow: 'none' },
-                                    transition: 'all 0.2s ease',
+                                    flex: { xs: 1, sm: 'initial' }, height: 40, minWidth: 140, borderRadius: '8px', textTransform: 'none', fontWeight: 600,
+                                    bgcolor: P, boxShadow: `0 2px 8px ${alpha(P, 0.3)}`,
+                                    '&:hover': { bgcolor: '#065f54', boxShadow: `0 4px 14px ${alpha(P, 0.4)}` },
                                 }}
                             >
                                 Continue
                             </MuiButton>
-                        )}
-
-                        {activeStep === steps.length - 1 && (
+                        ) : (
                             <MuiButton
                                 type="submit"
                                 variant="contained"
                                 startIcon={<SaveIcon fontSize="small" />}
                                 disabled={sendingRequest}
                                 sx={{
-                                    bgcolor: PRIMARY_COLOR,
-                                    fontSize: '0.8125rem',
-                                    px: 3,
-                                    py: 1,
-                                    borderRadius: '8px',
-                                    boxShadow: `0 2px 8px ${alpha(PRIMARY_COLOR, 0.35)}`,
-                                    '&:hover': {
-                                        bgcolor: '#065f54',
-                                        boxShadow: `0 4px 14px ${alpha(PRIMARY_COLOR, 0.45)}`,
-                                        transform: 'translateY(-1px)',
-                                    },
-                                    '&:active': { transform: 'translateY(0)' },
-                                    '&.Mui-disabled': { bgcolor: alpha('#000', 0.12), boxShadow: 'none' },
-                                    transition: 'all 0.2s ease',
+                                    flex: { xs: 1, sm: 'initial' }, height: 40, minWidth: 160, borderRadius: '8px', textTransform: 'none', fontWeight: 600,
+                                    bgcolor: P, boxShadow: `0 2px 8px ${alpha(P, 0.3)}`,
+                                    '&:hover': { bgcolor: '#065f54', boxShadow: `0 4px 14px ${alpha(P, 0.4)}` },
+                                    '&.Mui-disabled': { bgcolor: alpha(P, 0.45), color: '#fff' },
                                 }}
                             >
-                                {buttonText || 'Save Asset'}
+                                {sendingRequest ? 'Saving…' : (buttonText || 'Save Asset')}
                             </MuiButton>
                         )}
                     </Stack>
