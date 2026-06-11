@@ -18,20 +18,18 @@ import {
 } from '@mui/material';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import FingerprintIcon from '@mui/icons-material/Fingerprint';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 import axiosInstance from '../../core/apis/axiosInstance';
-import { AppDispatch } from '../../store';
+import { AppDispatch, RootState } from '../../store';
 import { updateGeneralAssetInStore } from './general/slice';
 import { IAssetAction } from './interface';
+import { statusIdByCode } from '../../utils/helpers';
+import StatusUtills from '../settings/statuses/Utills';
 
 const PRIMARY = '#08796C';
-
-// Backend status IDs (mirrors AssetUtills.determineStatusId)
-const STATUS_REQUIRE_UPDATE = 9;
-const STATUS_ISSUANCE_AVAILABLE = 8;
 
 interface CompleteDetailsForm {
     engravedNumber: string;
@@ -59,6 +57,17 @@ const CompleteDetails = ({
 }: IAssetAction) => {
     // const theme = useTheme();
     const dispatch = useDispatch<AppDispatch>();
+    const { statuses } = useSelector((state: RootState) => state.StatusesStore);
+    const { fetchAllStatuses } = StatusUtills();
+
+    useEffect(() => {
+        if (!statuses.length) fetchAllStatuses();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    // Resolve status ids by code — never hardcode (seeded ids vary by environment).
+    const requireUpdateId = statusIdByCode(statuses, 'requireUpdate');
+    const issuanceAvailableId = statusIdByCode(statuses, 'issuanceAvailable');
 
     // The IAssetAction union doesn't expose every per-category field on its
     // common interface — read them defensively. Each category's underlying
@@ -92,6 +101,14 @@ const CompleteDetails = ({
             toast.error('An engraved number is required before marking this asset ready for issuance.');
             return;
         }
+        if (markReady && issuanceAvailableId == null) {
+            toast.error('The "Available for Issuance" status is not configured. Please contact an administrator.');
+            return;
+        }
+        if (requireUpdateId == null) {
+            toast.error('Statuses are still loading. Please try again in a moment.');
+            return;
+        }
 
         setSaving(true);
         try {
@@ -110,8 +127,8 @@ const CompleteDetails = ({
                 branch: refOf((asset as any)?.branch),
                 supplier: refOf((asset as any)?.supplier),
                 lpoNumber: (asset as any)?.stock?.lpoNumber ?? '',
-                // Status transition (or stay)
-                assetStatus: markReady ? STATUS_ISSUANCE_AVAILABLE : STATUS_REQUIRE_UPDATE,
+                // Status transition (or stay) — resolved by code
+                assetStatus: markReady ? issuanceAvailableId : requireUpdateId,
             };
 
             const response = await axiosInstance.put(`assets/${asset?.id}`, body);
@@ -130,8 +147,7 @@ const CompleteDetails = ({
         }
     };
 
-    const stillNeedsCompletion = (asset as any)?.assetStatus?.status === 'requireUpdate'
-        || (asset as any)?.assetStatus?.id === STATUS_REQUIRE_UPDATE;
+    const stillNeedsCompletion = (asset as any)?.assetStatus?.status === 'requireUpdate';
 
     return (
         <Card

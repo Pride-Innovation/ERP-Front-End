@@ -19,6 +19,7 @@ import { IAssetType } from "../pages/settings/assetTypes/interface";
 import { assetTypesStatusConstants } from "./constants";
 import { IStockCommodities } from "../pages/inventory/interface";
 import { IITEquipment, IFleet } from "../pages/assets/interface";
+import { IStatus } from "../pages/settings/statuses/interface";
 
 export const camelCaseToWords = (camelCaseString: string) => {
     return camelCaseString ? camelCaseString
@@ -26,6 +27,25 @@ export const camelCaseToWords = (camelCaseString: string) => {
         .replace(/_/g, ' ')
         .replace(/^./, (str) => str.toUpperCase()) : '';
 }
+
+/**
+ * Frontend status codes that don't 1:1 match a seeded status `status` value.
+ * (The asset list filters by `inStore`, but the seeded status code is `sentToStore`.)
+ */
+const STATUS_CODE_ALIASES: Record<string, string> = {
+    inStore: 'sentToStore',
+};
+
+/**
+ * Resolves a status id from the loaded statuses by its code.
+ * The single source of truth for status ids on the frontend — never hardcode them,
+ * since seeded ids vary by environment.
+ */
+export const statusIdByCode = (statuses: IStatus[], code: string): number | null => {
+    const target = STATUS_CODE_ALIASES[code] ?? code;
+    const match = (statuses ?? []).find((s) => s.status === target);
+    return (match?.id as number) ?? null;
+};
 
 
 export const convertStringToUpperCase = (str: string) => {

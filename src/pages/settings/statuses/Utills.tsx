@@ -26,7 +26,9 @@ const StatusUtills = () => {
 
     const fetchAllStatuses = async () => {
         try {
-            const response = await fetchRowsService({ pageNumber: 0, pageSize: 10, endPoint }) as IStatusesAxiosResponse;
+            // Load the full status catalogue (there are 19+) so callers can reliably
+            // resolve a status id by its code from the store.
+            const response = await fetchRowsService({ pageNumber: 0, pageSize: 100, endPoint }) as IStatusesAxiosResponse;
             if (response.status === 200) {
                 dispatch(loadStatuses(response.data.content))
             }

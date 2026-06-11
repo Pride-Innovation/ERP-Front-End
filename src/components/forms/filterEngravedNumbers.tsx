@@ -14,10 +14,14 @@ import {
 } from '@mui/material';
 import { RequestContext } from '../../context/request/RequestContext';
 import { useContext, useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { RowData } from './interface';
 import AssetUtills from '../../pages/assets/Utills';
+import StatusUtills from '../../pages/settings/statuses/Utills';
 import { useDebounce } from '../../hooks/useDebounce';
 import { IAsset } from '../../pages/assets/interface';
+import { RootState } from '../../store';
+import { statusIdByCode } from '../../utils/helpers';
 
 const FilterEngravedNumbers = ({ row }: { row: RowData }) => {
     const { fetchAllAssets } = AssetUtills();
@@ -29,21 +33,31 @@ const FilterEngravedNumbers = ({ row }: { row: RowData }) => {
         setRows
     } = useContext(RequestContext);
 
+    const { statuses } = useSelector((state: RootState) => state.StatusesStore);
+    const { fetchAllStatuses } = StatusUtills();
+    useEffect(() => {
+        if (!statuses.length) fetchAllStatuses();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    // Assets are issuable only once completed → status "Available for Issuance".
+    const issuanceAvailableId = statusIdByCode(statuses, 'issuanceAvailable');
+
     const [localInput, setLocalInput] = useState<string>('');
     const [inputValue, setInputValue] = useState<string>('');
     const debouncedInput = useDebounce(localInput, 500);
 
     useEffect(() => {
-        if (row.groupName.length > 0 && assetType.name.length > 0) {
+        if (row.groupName.length > 0 && assetType.name.length > 0 && issuanceAvailableId) {
             const params = {
                 assetTypeId: row.assetTypeId,
-                assetStatusId: 8, // This should contain Status ID for Available for Issuance 
+                assetStatusId: issuanceAvailableId, // Available for Issuance
                 commodityId: row.commodityId
             }
             fetchAllAssets(params)
         }
-
-    }, [row]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [row, issuanceAvailableId]);
 
     useEffect(() => {
         setInputValue(debouncedInput);
@@ -53,16 +67,18 @@ const FilterEngravedNumbers = ({ row }: { row: RowData }) => {
     useEffect(() => {
         if (row.groupName.length > 0 &&
             assetType.name.length > 0 &&
-            inputValue.length > 0
+            inputValue.length > 0 &&
+            issuanceAvailableId
         ) {
             const params = {
                 assetTypeId: row.assetTypeId,
-                assetStatusId: 7, // This should contain the actual IDs for asset status when it is just registered and not assigned to users. 
+                assetStatusId: issuanceAvailableId, // Available for Issuance
                 commodityId: row.commodityId,
                 engravedNumber: inputValue
             }
             fetchAllAssets(params)
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [inputValue]);
 
     const addEngravedNumberListToRow = (list: IAsset[]) => {

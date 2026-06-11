@@ -23,10 +23,12 @@ import { IAssetsAxiosResponse } from "./interface";
 import { useDispatch } from "react-redux";
 import { listAllAssets } from "./slice";
 import { RequestContext } from "../../context/request/RequestContext";
+import { statusIdByCode } from "../../utils/helpers";
 
 const AssetUtills = () => {
     const [currentAssetType, setCurrentAssetType] = useState<IAssetType>({} as IAssetType);
     const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore);
+    const { statuses } = useSelector((state: RootState) => state.StatusesStore);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [loading, setLoading] = useState<boolean>(false);
     const endPoint: string = "assets";
@@ -135,22 +137,9 @@ const AssetUtills = () => {
     }
 
 
-    const determineStatusId = (status: string) => {
-        switch (status) {
-            case 'requireUpdate':
-                return 9;
-            case 'issuanceAvailable':
-                return 8;
-            case 'receiptAcknowledged':
-                return 7;
-            case 'inStore':
-                return 12;
-            case 'inMaintenance':
-                return 13;
-            default:
-                return null;
-        }
-    }
+    // Resolve a status id from its code against the loaded status catalogue.
+    // Replaces the previously hardcoded (and partly wrong) id map.
+    const determineStatusId = (status: string) => statusIdByCode(statuses, status);
 
     return ({
         determineAssetTypeByAssetName,

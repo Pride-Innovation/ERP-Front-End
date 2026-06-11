@@ -33,6 +33,7 @@ import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
 import FingerprintIcon from '@mui/icons-material/Fingerprint';
 import { AssetContext } from "../../../context/asset";
 import { PERMISSIONS } from "../../../core/permissions/constants";
+import StatusUtills from "../../settings/statuses/Utills";
 
 const GeneralAssets = () => {
     const { typeId } = useParams<{ typeId: string }>();
@@ -46,6 +47,8 @@ const GeneralAssets = () => {
     const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore);
     const { tableStartDate, tableEndDate } = useContext(FormContext);
     const { setOptions } = useContext(AssetContext);
+    const { statuses } = useSelector((state: RootState) => state.StatusesStore);
+    const { fetchAllStatuses } = StatusUtills();
 
     const {
         columnHeaders,
@@ -149,6 +152,12 @@ const GeneralAssets = () => {
 
     useEffect(() => {
         handleOptionChanged();
+    }, []);
+
+    // Statuses power the status filter (resolved by code) and the Complete Details modal.
+    useEffect(() => {
+        if (!statuses.length) fetchAllStatuses();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
