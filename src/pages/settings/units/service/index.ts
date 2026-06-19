@@ -17,6 +17,15 @@ const getUnitsByDepartmentService = async (departmentId: string | number) => {
     }
 };
 
+/** Generic paginated list / search — used by the dedicated Units page and the assign Autocomplete. */
+const fetchUnitsService = async (params?: Record<string, any>) => {
+    try {
+        return await axiosInstance.get('units', { params });
+    } catch (error) {
+        return error;
+    }
+};
+
 const createUnitService = async (body: Object) => {
     try {
         return await axiosInstance.post('units', body);
@@ -43,6 +52,7 @@ const deleteUnitService = async (id: string | number) => {
 
 export {
     getUnitsByDepartmentService,
+    fetchUnitsService,
     createUnitService,
     updateUnitService,
     deleteUnitService,

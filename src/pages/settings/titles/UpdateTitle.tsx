@@ -21,7 +21,7 @@ const UpdateTitle = ({ handleClose, sendingRequest, setSendingRequest, title }: 
 
     const { control, handleSubmit, formState, register, reset } = useForm<ITitle>({
         mode: "onChange",
-        resolver: yupResolver(titleSchema),
+        resolver: yupResolver(titleSchema) as any,
     });
 
     // Build the initial "Reports To" option from the title being edited.

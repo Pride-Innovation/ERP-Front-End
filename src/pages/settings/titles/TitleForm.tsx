@@ -265,7 +265,7 @@ const TitleForm = ({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const basicFields  = formFields.filter((f) => f.value === 'name');
+    const basicFields  = formFields.filter((f) => f.value === 'name' || f.value === 'shortCode');
     const roleFields   = formFields.filter((f) => f.value === 'role');
 
     return (
@@ -288,7 +288,7 @@ const TitleForm = ({
             {/* Basic Information */}
             <FormSection title="Basic Information" icon={<InfoIcon fontSize="small" />}>
                 {basicFields.map((field) => (
-                    <Grid item xs={12} key={field.value}>
+                    <Grid item xs={12} sm={6} key={field.value}>
                         <UseFormInput
                             register={register}
                             control={control}

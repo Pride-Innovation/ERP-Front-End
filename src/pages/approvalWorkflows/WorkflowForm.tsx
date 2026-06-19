@@ -35,6 +35,8 @@ import { brand } from '../../utils/tokens';
 import { IAssetType } from '../settings/assetTypes/interface';
 import { IBranch } from '../settings/branch/interface';
 import { IRole } from '../settings/interface';
+import { IUnit } from '../settings/units/interface';
+import { fetchUnitsService } from '../settings/units/service';
 import StepCard from './StepCard';
 import WorkflowTester from './WorkflowTester';
 import {
@@ -63,6 +65,16 @@ const WorkflowForm: React.FC<IWorkflowFormProps> = ({ initial, branches, roles, 
     const [catOptions, setCatOptions] = useState<IOptions[]>([]);
     const [catSearch, setCatSearch] = useState('');
     const debouncedCatSearch = useDebounce(catSearch, 400);
+
+    // Units power the GROUP_EMAIL step picker — selecting a unit routes the step to that unit
+    // directly, so the engine never has to match a hand-typed email string.
+    const [units, setUnits] = useState<IUnit[]>([]);
+
+    useEffect(() => {
+        fetchUnitsService({ pageSize: 200 })
+            .then((r: any) => setUnits(r?.data?.content ?? r?.data ?? []))
+            .catch(() => {});
+    }, []);
 
     useEffect(() => {
         searchAssetTypesForWorkflowService()
@@ -383,6 +395,7 @@ const WorkflowForm: React.FC<IWorkflowFormProps> = ({ initial, branches, roles, 
                                     index={idx}
                                     total={form.steps.length}
                                     roles={roles}
+                                    units={units}
                                     onChange={handleStepChange}
                                     onRemove={removeStep}
                                 />

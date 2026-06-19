@@ -33,6 +33,7 @@ export const blankApprovalStep = (order = 1): IApprovalStep => ({
     stepName: '',
     stepType: 'ACKNOWLEDGE_REQUEST',
     approverType: 'DIRECT_SUPERVISOR',
+    unitId: null,
     groupEmail: '',
     specificUserId: '',
     notifyGroupEmail: '',

@@ -106,6 +106,11 @@ const TitleUtills = () => {
             type: "input"
         },
         {
+            value: "shortCode",
+            label: 'Short Code',
+            type: "input"
+        },
+        {
             value: "reportsTo",
             label: 'Reports To',
             type: "select",

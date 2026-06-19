@@ -9,4 +9,5 @@ import * as yup from 'yup';
 
 export const titleSchema = yup.object().shape({
     name: yup.string().required('Name is required'),
+    shortCode: yup.string().required('Short code is required'),
 });

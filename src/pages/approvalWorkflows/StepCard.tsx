@@ -26,6 +26,7 @@ import { InputComponent } from '../../components/forms/Inputs';
 import SelectComponent from '../../components/forms/Select';
 import { brand, gold } from '../../utils/tokens';
 import { IRole } from '../settings/interface';
+import { IUnit } from '../settings/units/interface';
 import {
     APPROVER_TYPE_LABELS,
     COMPLETION_NOTIFY_SOURCES,
@@ -43,11 +44,12 @@ interface IStepCardProps {
     index: number;
     total: number;
     roles: IRole[];
+    units: IUnit[];
     onChange: (index: number, field: keyof IApprovalStep, value: any) => void;
     onRemove: (index: number) => void;
 }
 
-const StepCard: React.FC<IStepCardProps> = ({ step, index, total, roles, onChange, onRemove }) => (
+const StepCard: React.FC<IStepCardProps> = ({ step, index, total, roles, units, onChange, onRemove }) => (
     <Paper
         variant="outlined"
         sx={{
@@ -125,16 +127,36 @@ const StepCard: React.FC<IStepCardProps> = ({ step, index, total, roles, onChang
                 options={Object.entries(APPROVER_TYPE_LABELS).map(([k, v]) => ({ value: k, label: v }))}
             />
             {step.approverType === 'GROUP_EMAIL' && (
-                <InputComponent
-                    label="Group Email"
-                    field={{
-                        value: step.groupEmail,
-                        onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
-                            onChange(index, 'groupEmail', e.target.value),
-                    }}
-                    error={undefined}
-                    id={`group-email-${index}`}
-                />
+                <Box>
+                    <SelectComponent
+                        id={`group-unit-${index}`}
+                        label="Unit"
+                        required={false}
+                        field={{
+                            value: String(step.unitId ?? ''),
+                            onChange: (e: any) =>
+                                onChange(index, 'unitId', e.target.value ? Number(e.target.value) : null),
+                        }}
+                        error={undefined}
+                        options={[
+                            { value: '', label: 'Select unit…' },
+                            ...units.map((u) => ({ value: String(u.id), label: u.name })),
+                        ]}
+                    />
+                    <Typography sx={{ mt: 0.5, fontSize: '0.68rem', color: 'text.secondary' }}>
+                        {(() => {
+                            const u = units.find((x) => x.id === step.unitId);
+                            if (u) {
+                                return u.groupEmail
+                                    ? `Routes to ${u.groupEmail}`
+                                    : '⚠ This unit has no group email — set one on the Units page.';
+                            }
+                            return step.groupEmail
+                                ? `Legacy email: ${step.groupEmail} — pick a unit to replace it.`
+                                : 'The unit’s group email is attached automatically.';
+                        })()}
+                    </Typography>
+                </Box>
             )}
             {step.approverType === 'SPECIFIC_USER' && (
                 <InputComponent

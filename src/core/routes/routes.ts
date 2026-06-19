@@ -70,6 +70,7 @@ const TITLES: string = `${ASSETS_MANAGEMENT}/settings/titles`;
 const SUPPLIERS: string = `${ASSETS_MANAGEMENT}/settings/suppliers`;
 const REGIONS: string = `${ASSETS_MANAGEMENT}/settings/regions`;
 const DEPARTMENT: string = `${ASSETS_MANAGEMENT}/settings/departments`;
+const UNITS: string = `${ASSETS_MANAGEMENT}/settings/units`;
 const ASSET_TYPES: string = `${ASSETS_MANAGEMENT}/settings/asset-categories`;
 
 const APPROVAL_WORKFLOWS: string = `${ASSETS_MANAGEMENT}/approval-workflows`;
@@ -122,6 +123,7 @@ export const ROUTES = {
     REGIONS,
     INVENTORY,
     DEPARTMENT,
+    UNITS,
     ASSET_TYPES,
     CREATE_INVENTORY,
     UPDATE_INVENTORY,

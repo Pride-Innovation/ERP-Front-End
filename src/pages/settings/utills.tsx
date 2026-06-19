@@ -15,6 +15,7 @@ import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined
 import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined';
 import PublicOutlinedIcon from '@mui/icons-material/PublicOutlined';
 import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
+import GroupWorkOutlinedIcon from '@mui/icons-material/GroupWorkOutlined';
 
 const SettingsUtills = () => {
 
@@ -63,6 +64,12 @@ const SettingsUtills = () => {
         },
         {
             id: 8,
+            text: "Units",
+            path: ROUTES.UNITS,
+            icon: <GroupWorkOutlinedIcon />
+        },
+        {
+            id: 9,
             text: "Asset Categories",
             path: ROUTES.ASSET_TYPES,
             icon: <Inventory2OutlinedIcon />

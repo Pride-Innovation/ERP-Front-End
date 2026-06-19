@@ -48,6 +48,10 @@ export interface IApprovalStep {
     stepName: string;
     stepType: StepType;
     approverType: ApproverType;
+    /** Selected fulfilment unit for a GROUP_EMAIL step (preferred over groupEmail; resolves routing by unit, not by matching an email string). */
+    unitId?: number | null;
+    /** Display name of the selected unit (response only). */
+    unitName?: string | null;
     groupEmail: string;
     specificUserId: string;
     notifyGroupEmail: string;
