@@ -56,6 +56,7 @@ import Loading from "../../../../components/loading";
 import OtherDetails from "./OtherDetails";
 import RequestCommodties from "./RequestCommodties";
 import MovementHistory from "./MovementHistory";
+import RequestMovements from "./RequestMovements";
 import AttachmentViewer from "./AttachmentViewer";
 import ModalComponent from "../../../../components/modal";
 import ApproveRequest from "../ApprovedRequest";
@@ -657,12 +658,7 @@ const RequestDetails = () => {
                                     />
                                 )}
                                 {activeTab === 2 && (
-                                    <Box sx={{ py: 8, textAlign: 'center' }}>
-                                        <HistoryOutlinedIcon sx={{ fontSize: 40, color: 'text.disabled', opacity: 0.4, mb: 1 }} />
-                                        <Typography variant="body2" color="text.secondary">
-                                            Movement history will be available soon.
-                                        </Typography>
-                                    </Box>
+                                    <RequestMovements requestId={request.id} />
                                 )}
                                 {activeTab === 3 && <MovementHistory request={request} />}
                             </Box>

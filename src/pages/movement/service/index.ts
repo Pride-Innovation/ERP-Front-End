@@ -6,31 +6,18 @@ Managing Director
 */
 
 import axiosInstance from '../../../core/apis/axiosInstance';
+import {
+    IMovementCreatePayload,
+} from '../interface';
+import { ReceiptStatus, StoreType } from '../constants';
 
 const ENDPOINT = 'movements';
 
-export const createMovementService = async (body: object) => {
-    try {
-        const response = await axiosInstance.post(ENDPOINT, body);
-        return response;
-    } catch (error) {
-        return error;
-    }
-};
+// ── Core movement lifecycle ────────────────────────────────────────────────
 
-export const updateMovementService = async (body: object, id: string | number) => {
+export const createMovementService = async (body: IMovementCreatePayload) => {
     try {
-        const response = await axiosInstance.put(`${ENDPOINT}/${id}`, body);
-        return response;
-    } catch (error) {
-        return error;
-    }
-};
-
-export const deleteMovementService = async (id: string | number) => {
-    try {
-        const response = await axiosInstance.delete(`${ENDPOINT}/${id}`);
-        return response;
+        return await axiosInstance.post(ENDPOINT, body);
     } catch (error) {
         return error;
     }
@@ -38,64 +25,148 @@ export const deleteMovementService = async (id: string | number) => {
 
 export const findMovementByIdService = async (id: string | number) => {
     try {
-        const response = await axiosInstance.get(`${ENDPOINT}/${id}`);
-        return response;
+        return await axiosInstance.get(`${ENDPOINT}/${id}`);
     } catch (error) {
         return error;
     }
 };
 
-export const submitMovementForApprovalService = async (id: string | number) => {
+export const findMovementsByRequestService = async (requestId: string | number) => {
     try {
-        const response = await axiosInstance.post(`${ENDPOINT}/${id}/submit`);
-        return response;
+        return await axiosInstance.get(`${ENDPOINT}/by-request/${requestId}`);
     } catch (error) {
         return error;
     }
 };
 
-export const approveMovementService = async (body: object) => {
+export const dispatchMovementService = async (
+    id: string | number,
+    body: {
+        courierService?: string | null;
+        trackingNumber?: string | null;
+        dispatchDate?: string | null;
+        expectedDeliveryDate?: string | null;
+        deliveryDocuments?: string[];
+    }
+) => {
     try {
-        const response = await axiosInstance.post(`${ENDPOINT}/approve`, body);
-        return response;
+        return await axiosInstance.post(`${ENDPOINT}/${id}/dispatch`, body);
     } catch (error) {
         return error;
     }
 };
 
-export const rejectMovementService = async (body: object) => {
+export const markInTransitService = async (id: string | number) => {
     try {
-        const response = await axiosInstance.post(`${ENDPOINT}/reject`, body);
-        return response;
+        return await axiosInstance.post(`${ENDPOINT}/${id}/in-transit`);
     } catch (error) {
         return error;
     }
 };
 
-export const releaseMovementService = async (body: object) => {
+export const receiveMovementService = async (
+    id: string | number,
+    body?: { receiptStatus?: ReceiptStatus; remarks?: string | null }
+) => {
     try {
-        const response = await axiosInstance.post(`${ENDPOINT}/release`, body);
-        return response;
+        return await axiosInstance.post(`${ENDPOINT}/${id}/receive`, body ?? {});
     } catch (error) {
         return error;
     }
 };
 
-export const receiveMovementService = async (body: object) => {
+export const cancelMovementService = async (id: string | number, reason?: string) => {
     try {
-        const response = await axiosInstance.post(`${ENDPOINT}/receive`, body);
-        return response;
+        return await axiosInstance.post(`${ENDPOINT}/${id}/cancel`, { reason: reason ?? '' });
     } catch (error) {
         return error;
     }
 };
 
-export const downloadSecurityPassService = async (id: string | number) => {
+export const completeMovementService = async (id: string | number, remarks?: string) => {
     try {
-        const response = await axiosInstance.get(`${ENDPOINT}/${id}/security-pass`, {
-            responseType: 'blob',
-        });
-        return response;
+        return await axiosInstance.post(`${ENDPOINT}/${id}/complete`, { remarks: remarks ?? '' });
+    } catch (error) {
+        return error;
+    }
+};
+
+// ── Repair / temp-replacement / return / disposal (§14-17) ─────────────────
+
+export const repairTransferService = async (body: object) => {
+    try {
+        return await axiosInstance.post(`${ENDPOINT}/repair-transfer`, body);
+    } catch (error) {
+        return error;
+    }
+};
+
+export const tempReplacementService = async (body: object) => {
+    try {
+        return await axiosInstance.post(`${ENDPOINT}/temp-replacement`, body);
+    } catch (error) {
+        return error;
+    }
+};
+
+export const returnAfterRepairService = async (body: object) => {
+    try {
+        return await axiosInstance.post(`${ENDPOINT}/return-after-repair`, body);
+    } catch (error) {
+        return error;
+    }
+};
+
+export const disposeAssetService = async (body: object) => {
+    try {
+        return await axiosInstance.post(`${ENDPOINT}/disposal`, body);
+    } catch (error) {
+        return error;
+    }
+};
+
+// ── Inventory directory helpers (for the create / repair forms) ────────────
+
+/** Store containers, optionally filtered by location / type / department. */
+export const fetchStoresService = async (params?: {
+    locationId?: number | string;
+    storeType?: StoreType;
+    departmentId?: number | string;
+}) => {
+    try {
+        return await axiosInstance.get('inventory/stores', { params });
+    } catch (error) {
+        return error;
+    }
+};
+
+/** Serialized assets currently held by a store. */
+export const fetchStoreAssetsService = async (storeId: number | string) => {
+    try {
+        return await axiosInstance.get(`inventory/stores/${storeId}/assets`);
+    } catch (error) {
+        return error;
+    }
+};
+
+/** Serialized assets held by any store of a given type across locations. */
+export const fetchAssetsByStoreTypeService = async (storeType: StoreType) => {
+    try {
+        return await axiosInstance.get('inventory/assets', { params: { storeType } });
+    } catch (error) {
+        return error;
+    }
+};
+
+/** Consumable balances, filtered by store / location / department / type. */
+export const fetchStoreBalancesService = async (params?: {
+    storeId?: number | string;
+    locationId?: number | string;
+    departmentId?: number | string;
+    storeType?: StoreType;
+}) => {
+    try {
+        return await axiosInstance.get('inventory/balances', { params });
     } catch (error) {
         return error;
     }

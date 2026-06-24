@@ -4,7 +4,6 @@ import { ROUTES } from '../../routes'
 import Movement from '../../../../pages/movement'
 import AllMovements from '../../../../pages/movement/allMovements'
 import CreateMovement from '../../../../pages/movement/CreateMovement'
-import UpdateMovement from '../../../../pages/movement/UpdateMovement'
 import MovementDetails from '../../../../pages/movement/view'
 import MovementContextProvider from '../../../../context/movement/MovementContext'
 import { PrivateRoute } from '../../PrivateRoutes'
@@ -26,9 +25,6 @@ const MovementRoutes = () => {
             </Route>
             <Route element={<PrivateRoute permission={PERMISSIONS.CREATE_ASSET} />}>
                 <Route path={ROUTES.CREATE_MOVEMENT} element={<CreateMovement />} />
-            </Route>
-            <Route element={<PrivateRoute permission={PERMISSIONS.UPDATE_ASSET} />}>
-                <Route path={`${ROUTES.UPDATE_MOVEMENT}/:id`} element={<UpdateMovement />} />
             </Route>
         </Route>
     )
