@@ -35,7 +35,9 @@ const deleteApprovalWorkflowService = async (id: string | number) => {
 
 const searchAssetTypesForWorkflowService = async (name?: string) => {
     const query = name ? `&name=${encodeURIComponent(name)}` : '';
-    const response = await axiosInstance.get(`asset-types?pageNumber=0&pageSize=10${query}`);
+    // Asset categories are a small, bounded set — load them all so the multi-select
+    // shows every category and client-side filtering can narrow them without a refetch.
+    const response = await axiosInstance.get(`asset-types?pageNumber=0&pageSize=200${query}`);
     return response;
 };
 

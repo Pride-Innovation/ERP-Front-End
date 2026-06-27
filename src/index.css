@@ -18,33 +18,28 @@ html {
   scroll-behavior: smooth;
   overflow-x: hidden;
   /*
-   * RESPONSIVE SCALING STRATEGY
-   * Browser default is 16px. By setting 14px here, every rem-based value
-   * in MUI (spacing, font sizes, component heights) shrinks by ~12.5%
-   * across ALL screens without touching individual components.
-   * Additional reductions apply at smaller viewports.
+   * RESPONSIVE SCALING STRATEGY (desktop / laptop only — no mobile tier)
+   *
+   * The root font size is the single lever that scales every rem-based
+   * MUI value (spacing, typography, component heights) proportionally,
+   * without touching individual components.
+   *
+   * Instead of stepped px breakpoints we scale fluidly with clamp() in
+   * rem units, so the value tracks the viewport smoothly AND still
+   * honours the user's browser font-size / zoom preference (px would
+   * override it and hurt accessibility).
+   *
+   *   clamp(min, preferred, max)
+   *     min  0.8125rem (13px) — floor for 13" laptops (≈1280px and below);
+   *                             never shrinks past this.
+   *     pref 0.6875rem + 0.156vw — grows with viewport width:
+   *                             ≈14px at 1920 (FHD, our established
+   *                             baseline density).
+   *     max  0.9375rem (15px) — ceiling for large / ultra-wide monitors
+   *                             (2560px+), so text stays comfortable
+   *                             without breaking the dense ERP feel.
    */
-  font-size: 14px;
-}
-
-/* 14" laptop / 1366×768 */
-@media (max-width: 1366px) {
-  html { font-size: 13.5px; }
-}
-
-/* Small laptop / large tablet */
-@media (max-width: 1024px) {
-  html { font-size: 13px; }
-}
-
-/* Tablet */
-@media (max-width: 768px) {
-  html { font-size: 12.5px; }
-}
-
-/* Phone */
-@media (max-width: 480px) {
-  html { font-size: 12px; }
+  font-size: clamp(0.8125rem, 0.6875rem + 0.156vw, 0.9375rem);
 }
 
 body {

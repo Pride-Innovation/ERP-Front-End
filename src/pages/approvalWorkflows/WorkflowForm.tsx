@@ -29,7 +29,6 @@ import SaveOutlinedIcon from '@mui/icons-material/SaveOutlined';
 import { InputComponent } from '../../components/forms/Inputs';
 import SelectComponent from '../../components/forms/Select';
 import AutocompleteComponent from '../../components/forms/Autocomplete';
-import { useDebounce } from '../../hooks/useDebounce';
 import { IOptions } from '../../components/tables/interface';
 import { brand } from '../../utils/tokens';
 import { IAssetType } from '../settings/assetTypes/interface';
@@ -63,8 +62,6 @@ const WorkflowForm: React.FC<IWorkflowFormProps> = ({ initial, branches, roles, 
     const isEdit = !!initial?.id;
 
     const [catOptions, setCatOptions] = useState<IOptions[]>([]);
-    const [catSearch, setCatSearch] = useState('');
-    const debouncedCatSearch = useDebounce(catSearch, 400);
 
     // Units power the GROUP_EMAIL step picker — selecting a unit routes the step to that unit
     // directly, so the engine never has to match a hand-typed email string.
@@ -86,17 +83,10 @@ const WorkflowForm: React.FC<IWorkflowFormProps> = ({ initial, branches, roles, 
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    useEffect(() => {
-        const q = debouncedCatSearch.trim();
-        if (!q) return;
-        searchAssetTypesForWorkflowService(q)
-            .then((r) => {
-                const items: IAssetType[] = r.data?.content ?? r.data ?? [];
-                setCatOptions(items.map((a) => ({ value: a.id as number, label: a.name })));
-            })
-            .catch(() => {});
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [debouncedCatSearch]);
+    // Categories are loaded in full once above; narrowing is done client-side by the
+    // Autocomplete itself. We deliberately do NOT refetch-and-replace the option list on
+    // keystroke — replacing options drops already-selected chips and makes it impossible to
+    // accumulate multiple categories.
 
     const setField = (field: keyof IApprovalWorkflow, value: any) =>
         setForm((prev) => ({ ...prev, [field]: value }));
@@ -152,11 +142,16 @@ const WorkflowForm: React.FC<IWorkflowFormProps> = ({ initial, branches, roles, 
     return (
         <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
 
+            {/* Inset to the same horizontal bounds as the cards below (content uses p:3),
+                so the header strip aligns with "Workflow Settings"/"Approval Steps" instead
+                of overhanging them. Card-style border + radius keeps the stack consistent. */}
             <Box sx={{
-                px: 3, py: 2,
-                borderBottom: `1px solid ${alpha(TEAL, 0.15)}`,
-                bgcolor: '#fff',
                 flexShrink: 0,
+                mx: 3, mt: 3,
+                px: 3, py: 2,
+                bgcolor: '#fff',
+                border: `1px solid ${alpha(TEAL, 0.2)}`,
+                borderRadius: 3,
             }}>
                 <Stack direction="row" alignItems="center" justifyContent="space-between">
                     <Stack direction="row" alignItems="center" spacing={1.5}>
@@ -257,7 +252,6 @@ const WorkflowForm: React.FC<IWorkflowFormProps> = ({ initial, branches, roles, 
                                         setField('assetTypeIds', newIds ?? []),
                                 }}
                                 error={undefined}
-                                onInputChange={(_event: any, val: string) => setCatSearch(val)}
                             />
                         </Grid>
                         <Grid item xs={12} sm={6} md={3}>

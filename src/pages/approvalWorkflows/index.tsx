@@ -174,8 +174,11 @@ const WorkflowCard = ({ wf, onEdit, onToggle, onDelete }: WorkflowCardProps) => 
 
             <Box sx={{ flex: 1, p: 0 }}>
                 {/* ── header row ── */}
+                {/* px aligns the card content column with the PageHero above:
+                    hero indents to 20px (xs) / 28px (md); the 4px accent bar + these
+                    paddings land on the same vertical line. */}
                 <Box sx={{
-                    px: 2.5,
+                    px: { xs: 2, md: 3 },
                     py: 1.75,
                     display: 'flex',
                     alignItems: 'flex-start',
@@ -265,7 +268,7 @@ const WorkflowCard = ({ wf, onEdit, onToggle, onDelete }: WorkflowCardProps) => 
                 <Divider sx={{ borderColor: '#F1F5F9' }} />
 
                 {/* ── meta row ── */}
-                <Box sx={{ px: 2.5, py: 1.25, display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 2, bgcolor: '#FAFBFC' }}>
+                <Box sx={{ px: { xs: 2, md: 3 }, py: 1.25, display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 2, bgcolor: '#FAFBFC' }}>
                     <MetaItem
                         icon={<AccountBalanceOutlinedIcon sx={{ fontSize: 13 }} />}
                         label={BRANCH_SCOPE_LABELS[wf.branchScope] ?? wf.branchScope}
@@ -292,7 +295,7 @@ const WorkflowCard = ({ wf, onEdit, onToggle, onDelete }: WorkflowCardProps) => 
                 {(wf.assetTypeNames ?? []).length > 0 && (
                     <>
                         <Divider sx={{ borderColor: '#F1F5F9' }} />
-                        <Box sx={{ px: 2.5, py: 1.25, display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+                        <Box sx={{ px: { xs: 2, md: 3 }, py: 1.25, display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mr: 0.5 }}>
                                 <CategoryOutlinedIcon sx={{ fontSize: 13, color: '#94A3B8' }} />
                                 <Typography sx={{ fontSize: '0.68rem', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
@@ -317,7 +320,7 @@ const WorkflowCard = ({ wf, onEdit, onToggle, onDelete }: WorkflowCardProps) => 
                 {(wf.steps?.length ?? 0) > 0 && (
                     <>
                         <Divider sx={{ borderColor: '#F1F5F9' }} />
-                        <Box sx={{ px: 2.5, py: 1.5 }}>
+                        <Box sx={{ px: { xs: 2, md: 3 }, py: 1.5 }}>
                             <Typography sx={{
                                 fontSize: '0.68rem', fontWeight: 700, color: '#94A3B8',
                                 textTransform: 'uppercase', letterSpacing: '0.06em', mb: 1,
