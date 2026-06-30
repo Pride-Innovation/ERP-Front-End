@@ -71,12 +71,13 @@ const PopoverComponent = ({
                         const isHeader = option?.header;
                         const isLast   = idx === (options?.length ?? 0) - 1;
 
-                        // Detect destructive action by label keywords
+                        // Detect destructive / primary actions by label keywords
                         const label    = String(option.label ?? '').toLowerCase();
                         const isDanger = label.includes('reject') || label.includes('delet') || label.includes('remov') || label.includes('dispos');
+                        const isView   = label.includes('view') || label.includes('detail');
 
-                        const itemColor  = isDanger ? '#DC2626' : isHeader ? PRIMARY : '#334155';
-                        const hoverBg    = isDanger ? alpha('#DC2626', 0.05) : isHeader ? alpha(PRIMARY, 0.07) : alpha(PRIMARY, 0.04);
+                        const itemColor  = isDanger ? '#DC2626' : (isHeader || isView) ? PRIMARY : '#334155';
+                        const hoverBg    = isDanger ? alpha('#DC2626', 0.05) : (isHeader || isView) ? alpha(PRIMARY, 0.07) : alpha(PRIMARY, 0.04);
 
                         return (
                             <React.Fragment key={idx}>
@@ -96,7 +97,7 @@ const PopoverComponent = ({
                                         px: 1.25,
                                         mb: isLast ? 0 : 0.15,
                                         gap: 1,
-                                        bgcolor: isHeader ? alpha(PRIMARY, 0.04) : 'transparent',
+                                        bgcolor: isHeader ? alpha(PRIMARY, 0.04) : isView ? alpha(PRIMARY, 0.05) : 'transparent',
                                         transition: 'background-color 0.1s',
                                         '&:hover': { bgcolor: hoverBg },
                                     }}
@@ -114,13 +115,17 @@ const PopoverComponent = ({
                                     )}
                                     <Typography sx={{
                                         fontSize: '0.82rem',
-                                        fontWeight: isHeader ? 700 : 500,
+                                        fontWeight: (isHeader || isView) ? 700 : 500,
                                         color: itemColor,
                                         lineHeight: 1.4,
                                     }}>
                                         {option.label}
                                     </Typography>
                                 </MenuItem>
+                                {/* Explicit separator after this option (e.g. to set the primary view action apart) */}
+                                {option.divider && !isLast && (
+                                    <Divider sx={{ my: 0.5, mx: 1, borderColor: '#F1F5F9' }} />
+                                )}
                             </React.Fragment>
                         );
                     })}
