@@ -201,7 +201,7 @@ const SteppedOfficeEquipmentForm = ({
                                     value: field.value,
                                     label: field.label,
                                     required: field.required === false ? field.required : true,
-                                    disabled: field.disabled ? true : false,
+                                    disabled: field.disabled || (isUpdate && field.disabledOnUpdate) ? true : false,
                                 };
                                 const gridSize = field.type === "textarea" ? { xs: 12 } : { xs: 12, sm: 6 };
 
