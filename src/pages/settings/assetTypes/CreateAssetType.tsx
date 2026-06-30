@@ -29,6 +29,8 @@ const CreateAssetType = ({
             shortCode: '',
             description: '',
             ownerGroupEmail: '',
+            depreciationRate: '',
+            residualPercent: '',
         },
     });
 
@@ -40,6 +42,8 @@ const CreateAssetType = ({
                 shortCode: formData.shortCode?.trim() || null,
                 description: formData.description?.trim() || null,
                 ownerGroupEmail: formData.ownerGroupEmail?.trim() || null,
+                depreciationRate: formData.depreciationRate?.trim() ? Number(formData.depreciationRate) : null,
+                residualPercent: formData.residualPercent?.trim() ? Number(formData.residualPercent) : null,
             }) as IAssetTypeAxiosResponse;
             if (response.status === 201) {
                 addAssetTypeToStore(response.data);
