@@ -74,9 +74,13 @@ const FIELD_GROUPS: FieldGroup[] = [
         fields: [
             { key: 'purchaseCost', label: 'Purchase Cost' },
             { key: 'costOfTheAsset', label: 'Cost of Asset' },
-            { key: 'netValueB', label: 'Net Book Value' },
+            { key: 'netValueB', label: 'Net Value' },
             { key: 'detailNetBookValue', label: 'Detail Net Book Value' },
             { key: 'assetDepreciationRate', label: 'Depreciation Rate' },
+            { key: 'accumulatedDepreciation', label: 'Accumulated Depreciation' },
+            { key: 'annualDepreciation', label: 'Annual Depreciation' },
+            { key: 'monthlyDepreciation', label: 'Monthly Depreciation' },
+            { key: 'disposalStatus', label: 'Disposal Status' },
         ],
     },
     {

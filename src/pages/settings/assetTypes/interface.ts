@@ -44,6 +44,10 @@ export interface IAssetFieldConfig {
     netValueB?: FieldConfigState;
     detailNetBookValue?: FieldConfigState;
     assetDepreciationRate?: FieldConfigState;
+    accumulatedDepreciation?: FieldConfigState;
+    annualDepreciation?: FieldConfigState;
+    monthlyDepreciation?: FieldConfigState;
+    disposalStatus?: FieldConfigState;
     // Dates & References
     dateReceipt?: FieldConfigState;
     lpoNumber?: FieldConfigState;
