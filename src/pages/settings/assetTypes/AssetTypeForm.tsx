@@ -19,6 +19,7 @@ import CategoryOutlinedIcon from '@mui/icons-material/CategoryOutlined';
 import TagIcon from '@mui/icons-material/Tag';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import GroupsOutlinedIcon from '@mui/icons-material/GroupsOutlined';
+import TrendingDownOutlinedIcon from '@mui/icons-material/TrendingDownOutlined';
 import { UseFormInput } from '../../../components/forms';
 import { IAssetTypeForm } from './interface';
 
@@ -117,6 +118,41 @@ const AssetTypeForm = ({
                         <Typography variant="caption" color="text.secondary" lineHeight={1.6}>
                             Email group notified to fulfil a request after all approvals (e.g. <em>it-infra@…</em> for Computer,
                             <em> admin@…</em> for Furniture). Leave empty if fulfilment routing is set per-workflow instead.
+                        </Typography>
+                    </Stack>
+                </Box>
+            </FormSection>
+
+            <FormSection title="Depreciation" icon={<TrendingDownOutlinedIcon />}>
+                <Stack spacing={2.5}>
+                    <UseFormInput
+                        label="Annual Depreciation Rate (%)"
+                        register={register}
+                        control={control}
+                        formState={formState}
+                        value="depreciationRate"
+                        type="number"
+                        required={false}
+                    />
+                    <UseFormInput
+                        label="Residual Value (% of cost)"
+                        register={register}
+                        control={control}
+                        formState={formState}
+                        value="residualPercent"
+                        type="number"
+                        required={false}
+                    />
+                </Stack>
+                <Box sx={{ mt: 2, p: 2, borderRadius: 1.5, bgcolor: alpha('#08796C', 0.04), border: `1px solid ${alpha('#08796C', 0.1)}` }}>
+                    <Stack direction="row" spacing={1} alignItems="flex-start">
+                        <TagIcon sx={{ fontSize: 16, color: '#08796C', mt: 0.2, flexShrink: 0 }} />
+                        <Typography variant="caption" color="text.secondary" lineHeight={1.6}>
+                            Reducing-balance method: each year's charge is <em>opening NBV × rate</em>, so it
+                            shrinks over time. NBV depreciates down to the residual floor (<em>cost × residual%</em>)
+                            and stops — an asset that reaches it is flagged ready for disposal. On an asset, the
+                            Net Value, Net Book Value, Accumulated / Annual / Monthly Depreciation and Disposal Status
+                            are all derived from these and shown read-only.
                         </Typography>
                     </Stack>
                 </Box>
