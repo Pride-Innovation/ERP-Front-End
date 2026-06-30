@@ -28,8 +28,12 @@ export const useWebSocket = ({ userId, onMessage, enabled = true }: UseWebSocket
             reconnectDelay: 5000,
             connectHeaders: token ? { Authorization: `Bearer ${token}` } : {},
             onConnect: () => {
+                // Canonical user-destination subscription: Spring rewrites `/user/queue/...`
+                // to this session's private queue using the connection principal. This must
+                // NOT include the user id — an explicit-id form registers a destination that
+                // won't match what convertAndSendToUser(...) produces, so pushes never arrive.
                 subscriptionRef.current = client.subscribe(
-                    `/user/${userId}/queue/notifications`,
+                    `/user/queue/notifications`,
                     (message: IMessage) => {
                         onMessage(message.body);
                     }
