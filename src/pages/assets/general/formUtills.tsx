@@ -274,8 +274,9 @@ const OfficeEquipmentUtills = () => {
         {
             value: "purchaseCost",
             label: 'Purchase Cost',
-            type: "number",
-            // Captured at stocking — locked once the asset exists.
+            // Text (not number) so the server's comma-formatted money displays. Captured at
+            // stocking — locked once the asset exists.
+            type: "input",
             disabledOnUpdate: true
         },
         {
@@ -326,8 +327,9 @@ const OfficeEquipmentUtills = () => {
         {
             value: "costOfTheAsset",
             label: 'Cost Of The Asset',
-            type: "number",
-            // Captured at stocking — locked once the asset exists.
+            // Text (not number) so the server's comma-formatted money displays. Captured at
+            // stocking — locked once the asset exists.
+            type: "input",
             disabledOnUpdate: true
         },
         {
