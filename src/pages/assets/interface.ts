@@ -47,6 +47,14 @@ export interface IAsset {
     assignedTo?: IUser | null;
     branch?: IBranch | null;
     assetDepreciationRate?: string | null;
+    /** Derived: total depreciation to date (gross cost − current net book value). Read-only. */
+    accumulatedDepreciation?: string | null;
+    /** Derived: current year's depreciation charge. Read-only. */
+    annualDepreciation?: string | null;
+    /** Derived: monthly depreciation charge (year's charge ÷ 12). Read-only. */
+    monthlyDepreciation?: string | null;
+    /** Derived: "In service" / "Ready for disposal". Read-only. */
+    disposalStatus?: string | null;
     description?: string | null;
     model?: string | null;
     serialNumber?: string | null;
@@ -110,6 +118,8 @@ export interface IFormData<T> {
     options?: Array<IOptions>;
     required?: boolean;
     disabled?: boolean;
+    /** Disable this field only on the update form (e.g. cost fields are set at stocking and locked thereafter). */
+    disabledOnUpdate?: boolean;
     multiple?: boolean;
 }
 
