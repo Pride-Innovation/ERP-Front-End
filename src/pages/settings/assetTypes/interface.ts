@@ -72,6 +72,10 @@ export interface IAssetType {
     shortCode?: string | null;
     /** Email group notified when a request for this category reaches the fulfilment step (e.g. IT Infrastructure for Computer, Admin for Furniture). */
     ownerGroupEmail?: string | null;
+    /** Annual reducing-balance depreciation rate (percent) for assets of this category. */
+    depreciationRate?: number | null;
+    /** Residual (salvage) value as a percent of cost; depreciation floors here. */
+    residualPercent?: number | null;
     fieldConfig?: IAssetFieldConfig | null;
     customAttributes?: ICustomAttribute[] | null;
 }
@@ -81,6 +85,10 @@ export interface IAssetTypeFormValues {
     description?: string | null;
     shortCode?: string | null;
     ownerGroupEmail?: string | null;
+    /** Annual reducing-balance depreciation rate (percent). Held as a string in the form input. */
+    depreciationRate?: string | null;
+    /** Residual (salvage) value as a percent of cost. Held as a string in the form input. */
+    residualPercent?: string | null;
 }
 
 export interface IAssetTypeForm {
