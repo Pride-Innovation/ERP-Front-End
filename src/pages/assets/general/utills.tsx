@@ -146,11 +146,6 @@ const GeneralAssetUtills = (typeId: string) => {
                 setCurrentState(crudStates.inStore);
                 handleOpen();
                 break;
-            case crudStates.complete:
-                setCurrentAsset(determineCurrentAsset(moduleID as number, generalAssets));
-                setCurrentState(crudStates.complete);
-                handleOpen();
-                break;
             default:
                 break;
         }
