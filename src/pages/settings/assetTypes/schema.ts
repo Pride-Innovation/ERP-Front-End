@@ -20,4 +20,30 @@ export const assetTypeSchema = yup.object({
         .email('Owner group email must be a valid email')
         .nullable()
         .optional(),
+    depreciationRate: yup
+        .string()
+        .nullable()
+        .optional()
+        .test(
+            'is-valid-rate',
+            'Depreciation rate must be a number between 0 and 100',
+            (value) => {
+                if (value == null || value.trim() === '') return true;
+                const n = Number(value);
+                return !Number.isNaN(n) && n >= 0 && n <= 100;
+            }
+        ),
+    residualPercent: yup
+        .string()
+        .nullable()
+        .optional()
+        .test(
+            'is-valid-residual',
+            'Residual value must be a number between 0 and 100',
+            (value) => {
+                if (value == null || value.trim() === '') return true;
+                const n = Number(value);
+                return !Number.isNaN(n) && n >= 0 && n <= 100;
+            }
+        ),
 });
