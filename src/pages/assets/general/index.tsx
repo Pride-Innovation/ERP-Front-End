@@ -22,7 +22,6 @@ import { crudStates } from "../../../utils/constants";
 import Reassign from "../Reassign";
 import Repair from "../Repair";
 import ToStore from "../ToStore";
-import CompleteDetails from "../CompleteDetails";
 import { FormContext } from "../../../context/form";
 import InfoIcon from '@mui/icons-material/Info';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
@@ -30,7 +29,6 @@ import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import AssignmentIndOutlinedIcon from '@mui/icons-material/AssignmentIndOutlined';
 import BuildOutlinedIcon from '@mui/icons-material/BuildOutlined';
 import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
-import FingerprintIcon from '@mui/icons-material/Fingerprint';
 import { AssetContext } from "../../../context/asset";
 import { PERMISSIONS } from "../../../core/permissions/constants";
 import StatusUtills from "../../settings/statuses/Utills";
@@ -139,13 +137,12 @@ const GeneralAssets = () => {
 
     const handleOptionChanged = () => {
         const options = [
-            { value: crudStates.complete, label: "Complete Details", icon: <FingerprintIcon fontSize='small' sx={{ color: '#08796C' }} /> },
-            { value: crudStates.dispose, label: "Dispose", icon: <InfoIcon fontSize='small' color='error' /> },
+            { value: crudStates.read, label: "View Details", icon: <RemoveRedEyeIcon fontSize='small' />, divider: true },
             { value: crudStates.update, label: "Update", icon: <ModeEditIcon fontSize='small' color='info' /> },
-            { value: crudStates.read, label: "View Details", icon: <RemoveRedEyeIcon fontSize='small' color='inherit' /> },
             { value: crudStates.reassign, label: "Reassign", icon: <AssignmentIndOutlinedIcon fontSize='small' color='secondary' /> },
             { value: crudStates.repair, label: "Repair", icon: <BuildOutlinedIcon fontSize='small' color='primary' /> },
             { value: crudStates.inStore, label: "Send to Store", icon: <HomeOutlinedIcon fontSize='small' color='action' /> },
+            { value: crudStates.dispose, label: "Dispose", icon: <InfoIcon fontSize='small' color='error' /> },
         ];
         setOptions(options);
     };
@@ -154,7 +151,7 @@ const GeneralAssets = () => {
         handleOptionChanged();
     }, []);
 
-    // Statuses power the status filter (resolved by code) and the Complete Details modal.
+    // Statuses power the status filter (resolved by code).
     useEffect(() => {
         if (!statuses.length) fetchAllStatuses();
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -214,17 +211,6 @@ const GeneralAssets = () => {
                         sendingRequest={loading}
                         handleClose={handleClose}
                         buttonText='Confirm'
-                        asset={currentAsset}
-                        module={assetType?.name || ''}
-                    />
-                </ModalComponent>
-            }
-            {crudStates.complete === currentState
-                && <ModalComponent width={"55%"} title={`Complete ${assetType?.name || 'Asset'} Details`} open={open} handleClose={handleClose}>
-                    <CompleteDetails
-                        handleClose={handleClose}
-                        sendingRequest={loading}
-                        buttonText='Mark ready'
                         asset={currentAsset}
                         module={assetType?.name || ''}
                     />
