@@ -753,6 +753,11 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
             label: "In Use",
             value: "receiptAcknowledged",
             color: theme.palette.info.main
+        },
+        {
+            label: "Due for Disposal",
+            value: "dueForDisposal",
+            color: theme.palette.error.dark
         }
     ];
 
