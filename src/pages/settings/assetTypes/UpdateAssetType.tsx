@@ -31,6 +31,8 @@ const UpdateAssetType = ({
             shortCode: assetType.shortCode || '',
             description: assetType.description || '',
             ownerGroupEmail: assetType.ownerGroupEmail || '',
+            depreciationRate: assetType.depreciationRate != null ? String(assetType.depreciationRate) : '',
+            residualPercent: assetType.residualPercent != null ? String(assetType.residualPercent) : '',
         },
     });
 
@@ -52,6 +54,8 @@ const UpdateAssetType = ({
                     shortCode: formData.shortCode?.trim() || null,
                     description: formData.description?.trim() || null,
                     ownerGroupEmail: formData.ownerGroupEmail?.trim() || null,
+                    depreciationRate: formData.depreciationRate?.trim() ? Number(formData.depreciationRate) : null,
+                    residualPercent: formData.residualPercent?.trim() ? Number(formData.residualPercent) : null,
                 },
                 assetType.id as number
             ) as IAssetTypeAxiosResponse;
