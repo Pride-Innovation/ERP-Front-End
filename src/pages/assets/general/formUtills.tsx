@@ -254,12 +254,16 @@ const OfficeEquipmentUtills = () => {
         {
             value: "netValueB",
             label: 'Net Value',
-            type: "input"
+            type: "input",
+            // Derived (gross/original value) — computed server-side, shown read-only.
+            disabled: true
         },
         {
             value: "assetDepreciationRate",
             label: 'Depreciation Rate',
-            type: "input"
+            type: "input",
+            // Derived from the asset category's configured rate — read-only.
+            disabled: true
         },
         {
             value: "branch",
@@ -271,6 +275,8 @@ const OfficeEquipmentUtills = () => {
             value: "purchaseCost",
             label: 'Purchase Cost',
             type: "number",
+            // Captured at stocking — locked once the asset exists.
+            disabledOnUpdate: true
         },
         {
             value: "hostname",
@@ -281,6 +287,36 @@ const OfficeEquipmentUtills = () => {
             value: "detailNetBookValue",
             label: 'Detail Net Book Value',
             type: "input",
+            // Derived (current net book value) — computed server-side, shown read-only.
+            disabled: true
+        },
+        {
+            value: "accumulatedDepreciation",
+            label: 'Accumulated Depreciation',
+            type: "input",
+            // Derived (gross cost − current net book value) — computed server-side, read-only.
+            disabled: true
+        },
+        {
+            value: "annualDepreciation",
+            label: 'Annual Depreciation',
+            type: "input",
+            // Derived (current year's reducing-balance charge) — computed server-side, read-only.
+            disabled: true
+        },
+        {
+            value: "monthlyDepreciation",
+            label: 'Monthly Depreciation',
+            type: "input",
+            // Derived (year's charge ÷ 12) — computed server-side, read-only.
+            disabled: true
+        },
+        {
+            value: "disposalStatus",
+            label: 'Disposal Status',
+            type: "input",
+            // Derived ("In service" / "Ready for disposal") — computed server-side, read-only.
+            disabled: true
         },
         {
             value: "dateReceipt",
@@ -291,6 +327,8 @@ const OfficeEquipmentUtills = () => {
             value: "costOfTheAsset",
             label: 'Cost Of The Asset',
             type: "number",
+            // Captured at stocking — locked once the asset exists.
+            disabledOnUpdate: true
         },
         {
             value: "make",
