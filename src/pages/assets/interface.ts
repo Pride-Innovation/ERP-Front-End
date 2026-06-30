@@ -217,7 +217,7 @@ export interface IBulkAssetData {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// Modal action props (used by Dispose/Repair/Reassign/ToStore/CompleteDetails)
+// Modal action props (used by Dispose/Repair/Reassign/ToStore)
 // ─────────────────────────────────────────────────────────────────────────
 
 export interface IAssetAction {
