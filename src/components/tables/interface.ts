@@ -11,6 +11,8 @@ import { IRequestsAxiosResponse } from "../../pages/request/interface";
 
 export interface IOptions {
     value: string | number, label: string, icon?: JSX.Element, header?: boolean;
+    /** Render a separator immediately after this option (e.g. to set a primary action apart). */
+    divider?: boolean;
 }
 
 // ─── Column filter definitions ────────────────────────────────────────────────
