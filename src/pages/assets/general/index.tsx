@@ -64,9 +64,12 @@ const GeneralAssets = () => {
     const fetchResources = async (status?: string, extraParams?: Record<string, any>) => {
         setLoading(true);
         const dateRange = extraParams?.createdAt;
+        // "Due for disposal" is a derived state, not a stored status — send it as its own flag
+        // rather than a `status` filter the backend wouldn't recognise.
+        const isDueForDisposal = status === 'dueForDisposal';
         const params = {
             assetTypeId: currentAssetType.id,
-            ...(status && status !== 'all' ? { status } : {}),
+            ...(isDueForDisposal ? { dueForDisposal: true } : (status && status !== 'all' ? { status } : {})),
             ...(dateRange ? { createdAt: dateRange } : (tableStartDate && tableEndDate ? { createdAt: `${tableStartDate},${tableEndDate}` } : {})),
             ...(extraParams ? { ...extraParams, createdAt: undefined } : {})
         };
@@ -126,6 +129,7 @@ const GeneralAssets = () => {
             || status === 'receiptAcknowledged'
             || status === 'inStore'
             || status === 'inMaintenance'
+            || status === 'dueForDisposal'
         ) {
             fetchResources(status);
             setSelectedStatus(status);
