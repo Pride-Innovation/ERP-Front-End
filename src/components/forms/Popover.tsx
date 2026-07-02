@@ -9,10 +9,12 @@ import React from 'react';
 import Popover from '@mui/material/Popover';
 import Grow from '@mui/material/Grow';
 import { IPopover } from './interface';
-import { alpha, Box, Divider, ListItemIcon, MenuItem, Typography } from '@mui/material';
+import { alpha, Box, Divider, MenuItem, Typography } from '@mui/material';
 import { IOptions } from '../tables/interface';
 
 const PRIMARY = '#08796C';
+const DANGER = '#DC2626';
+const SLATE = '#334155';
 
 const PopoverComponent = ({
     setAnchorEl,
@@ -41,11 +43,11 @@ const PopoverComponent = ({
                 PaperProps={{
                     elevation: 0,
                     sx: {
-                        mt: 0.75,
-                        minWidth: 196,
-                        borderRadius: '10px',
+                        mt: 0.9,
+                        minWidth: 218,
+                        borderRadius: '14px',
                         border: '1px solid #E8EDF3',
-                        boxShadow: '0 4px 6px -1px rgba(0,0,0,0.07), 0 10px 28px -4px rgba(0,0,0,0.1)',
+                        boxShadow: '0 6px 12px -4px rgba(15,23,42,0.08), 0 14px 34px -6px rgba(15,23,42,0.14)',
                         overflow: 'hidden',
                         // caret
                         '&::before': {
@@ -66,7 +68,7 @@ const PopoverComponent = ({
                     },
                 }}
             >
-                <Box sx={{ p: 0.5 }}>
+                <Box sx={{ p: 0.75 }}>
                     {options?.map((option: IOptions, idx: number) => {
                         const isHeader = option?.header;
                         const isLast   = idx === (options?.length ?? 0) - 1;
@@ -76,14 +78,15 @@ const PopoverComponent = ({
                         const isDanger = label.includes('reject') || label.includes('delet') || label.includes('remov') || label.includes('dispos');
                         const isView   = label.includes('view') || label.includes('detail');
 
-                        const itemColor  = isDanger ? '#DC2626' : (isHeader || isView) ? PRIMARY : '#334155';
-                        const hoverBg    = isDanger ? alpha('#DC2626', 0.05) : (isHeader || isView) ? alpha(PRIMARY, 0.07) : alpha(PRIMARY, 0.04);
+                        // `accent` tints the icon tile + drives the hover; `labelColor` keeps text readable.
+                        const accent     = isDanger ? DANGER : PRIMARY;
+                        const labelColor = isDanger ? DANGER : (isHeader || isView) ? PRIMARY : SLATE;
 
                         return (
                             <React.Fragment key={idx}>
                                 {/* Divider before destructive actions (not at index 0) */}
                                 {isDanger && idx > 0 && (
-                                    <Divider sx={{ my: 0.5, mx: 1, borderColor: '#F1F5F9' }} />
+                                    <Divider sx={{ my: 0.6, mx: 0.75, borderColor: '#EEF2F6' }} />
                                 )}
                                 <MenuItem
                                     onClick={() => {
@@ -92,39 +95,44 @@ const PopoverComponent = ({
                                     }}
                                     value={option.value}
                                     sx={{
-                                        borderRadius: '7px',
-                                        py: 0.9,
-                                        px: 1.25,
-                                        mb: isLast ? 0 : 0.15,
-                                        gap: 1,
-                                        bgcolor: isHeader ? alpha(PRIMARY, 0.04) : isView ? alpha(PRIMARY, 0.05) : 'transparent',
-                                        transition: 'background-color 0.1s',
-                                        '&:hover': { bgcolor: hoverBg },
+                                        borderRadius: '9px',
+                                        py: 0.7,
+                                        pl: 0.75,
+                                        pr: 1.25,
+                                        mb: isLast ? 0 : 0.25,
+                                        gap: 1.1,
+                                        bgcolor: isView ? alpha(PRIMARY, 0.05) : isHeader ? alpha(PRIMARY, 0.04) : 'transparent',
+                                        transition: 'background-color 0.14s ease, transform 0.14s ease',
+                                        '&:hover': {
+                                            bgcolor: alpha(accent, isDanger ? 0.07 : 0.08),
+                                            transform: 'translateX(2px)',
+                                        },
                                     }}
                                 >
                                     {option?.icon && (
-                                        <ListItemIcon sx={{
-                                            minWidth: 26,
-                                            '& .MuiSvgIcon-root': {
-                                                fontSize: 16,
-                                                color: itemColor,
-                                            },
-                                        }}>
+                                        <Box
+                                            sx={{
+                                                width: 28, height: 28, borderRadius: '8px', flexShrink: 0,
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                bgcolor: alpha(accent, 0.1),
+                                                '& .MuiSvgIcon-root': { fontSize: 16, color: accent },
+                                            }}
+                                        >
                                             {option.icon}
-                                        </ListItemIcon>
+                                        </Box>
                                     )}
                                     <Typography sx={{
                                         fontSize: '0.82rem',
-                                        fontWeight: (isHeader || isView) ? 700 : 500,
-                                        color: itemColor,
-                                        lineHeight: 1.4,
+                                        fontWeight: (isHeader || isView) ? 700 : 600,
+                                        color: labelColor,
+                                        lineHeight: 1.3,
                                     }}>
                                         {option.label}
                                     </Typography>
                                 </MenuItem>
                                 {/* Explicit separator after this option (e.g. to set the primary view action apart) */}
                                 {option.divider && !isLast && (
-                                    <Divider sx={{ my: 0.5, mx: 1, borderColor: '#F1F5F9' }} />
+                                    <Divider sx={{ my: 0.6, mx: 0.75, borderColor: '#EEF2F6' }} />
                                 )}
                             </React.Fragment>
                         );

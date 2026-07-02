@@ -24,7 +24,8 @@ import {
 } from "../../components/forms";
 import { IInventoryForm } from "./interface";
 import SupplierUtills from "../settings/suppliers/Utills";
-import { useEffect, useMemo } from "react";
+import { useContext, useEffect, useMemo } from "react";
+import { AutocompleteContext } from "../../context/autocomplete";
 import StockItems from "../../components/stockForm/StockItems";
 import AssetTypeUtills from "../settings/assetTypes/utills";
 import InventoryIcon from "@mui/icons-material/Inventory";
@@ -51,8 +52,22 @@ const InventoryForm = ({
     const { fetchAllAssetTypes } = AssetTypeUtills();
     const navigate = useNavigate();
 
-    useEffect(() => { fetchAllSuppliers() }, []);
+    // The reusable Autocomplete pushes its (debounced) typed text into this shared context.
+    const { inputValue, label } = useContext(AutocompleteContext);
+
+    // Load the first page of suppliers up front.
+    useEffect(() => { fetchAllSuppliers({ pageSize: 10 }) }, []);
     useEffect(() => { fetchAllAssetTypes() }, []);
+
+    // Supplier list is paginated (first 10). When the user types in the Supplier field,
+    // re-query by name so a supplier outside the first page is still reachable. Guarded on the
+    // field label so it never fires for other autocompletes sharing the context.
+    useEffect(() => {
+        if (label === 'supplier') {
+            fetchAllSuppliers({ name: inputValue || undefined, pageSize: 10 });
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [inputValue]);
 
     const formSections = useMemo(() => {
         const basicFields = formFields.filter(field =>

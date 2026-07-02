@@ -7,9 +7,7 @@ Managing Director
 
 import {
     Grid,
-    Paper,
     Dialog,
-    DialogTitle,
     DialogContent,
     DialogActions,
     Box,
@@ -19,17 +17,13 @@ import {
     Chip,
     Link,
     Stack,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableRow,
     IconButton,
     Fade,
-    Card
+    Button as MuiButton,
+    CircularProgress
 } from "@mui/material"
 import { IInventory, IInventoryAxiosResponse } from "./interface"
-import { useContext, useEffect, useState } from "react";
+import { ReactNode, useContext, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { inventorySchema } from "./schema";
@@ -38,7 +32,7 @@ import { RequestContext } from "../../context/request/RequestContext";
 import { toast } from "react-toastify";
 import { generateReferenceNumber, validateStockItems } from "../../utils/helpers";
 import { addStockService } from "./service";
-import ButtonComponent from "../../components/forms/Button";
+import { brand, gold, neutral, border, surface } from "../../utils/tokens";
 import InventoryIcon from "@mui/icons-material/Inventory";
 import BusinessIcon from "@mui/icons-material/Business";
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
@@ -52,10 +46,30 @@ import { ROUTES } from "../../core/routes/routes";
 import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
 import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import PaidOutlinedIcon from '@mui/icons-material/PaidOutlined';
+import SellOutlinedIcon from '@mui/icons-material/SellOutlined';
 
 // Brand colors
-const PRIMARY_COLOR = '#08796C';
-const SECONDARY_COLOR = '#BC892C';
+const PRIMARY_COLOR = brand[500];
+
+/** Money display with thousands separators, e.g. 1234567 → "1,234,567.00". */
+const fmtMoney = (n?: number) =>
+    (Number(n) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+/** Compact stat card for the confirmation totals (Total Cost / Total Purchase Price). */
+const TotalCard = ({ icon, label, value, tone }: {
+    icon: ReactNode; label: string; value: string; tone: Record<number, string>;
+}) => (
+    <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', gap: 1.25, p: 1.75, bgcolor: '#fff', border: `1px solid ${border.subtle}`, borderRadius: 2 }}>
+        <Box sx={{ width: 38, height: 38, borderRadius: 1.5, bgcolor: alpha(tone[500], 0.1), color: tone[600], display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, '& .MuiSvgIcon-root': { fontSize: 20 } }}>
+            {icon}
+        </Box>
+        <Box sx={{ minWidth: 0 }}>
+            <Typography sx={{ fontSize: '0.6rem', fontWeight: 700, color: neutral[400], textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</Typography>
+            <Typography sx={{ fontSize: '1.05rem', fontWeight: 800, color: neutral[900], lineHeight: 1.2 }}>{value}</Typography>
+        </Box>
+    </Box>
+);
 
 const CreateInventory = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
@@ -136,183 +150,160 @@ const CreateInventory = () => {
         return supplier?.name || "Not specified";
     };
 
-    const ConfirmationModal = () => (
-        <Dialog
-            open={confirmModalOpen}
-            onClose={() => !sendingRequest && setConfirmModalOpen(false)}
-            maxWidth="md"
-            fullWidth
-            TransitionComponent={Fade}
-        >
-            <DialogTitle sx={{
-                p: 2.5,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                borderBottom: `1px solid ${alpha('#000', 0.08)}`
-            }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <CheckCircleOutlineIcon color="success" />
-                    <Typography variant="h6">Confirm Inventory Submission</Typography>
-                </Box>
-                <IconButton
-                    onClick={() => setConfirmModalOpen(false)}
-                    aria-label="close"
-                    size="small"
-                    disabled={sendingRequest}
-                >
-                    <CloseIcon fontSize="small" />
-                </IconButton>
-            </DialogTitle>
+    const ConfirmationModal = () => {
+        const infoRows = [
+            { label: 'LPO Number', value: formDataToSubmit?.lpoNumber || 'Not specified' },
+            { label: 'Inventory Name', value: formDataToSubmit?.name || 'Not specified' },
+            { label: 'Supplier', value: getSupplierName() },
+        ];
 
-            <DialogContent sx={{ p: 3 }}>
-                <Box sx={{ mb: 3 }}>
-                    <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
-                        Please review the following information before submitting:
-                    </Typography>
-
-                    <Card
-                        elevation={0}
-                        sx={{
-                            mb: 3,
-                            borderRadius: 2,
-                            border: `1px solid ${alpha('#000', 0.08)}`
-                        }}
-                    >
-                        <Box sx={{ bgcolor: alpha(PRIMARY_COLOR, 0.05), p: 2, borderTopLeftRadius: 8, borderTopRightRadius: 8 }}>
-                            <Typography variant="subtitle1" fontWeight={600}>
-                                <BusinessIcon fontSize="small" sx={{ mr: 1, verticalAlign: 'middle', color: PRIMARY_COLOR }} />
-                                LPO Information
-                            </Typography>
-                        </Box>
-
-                        <TableContainer>
-                            <Table size="small">
-                                <TableBody>
-                                    <TableRow>
-                                        <TableCell sx={{ width: '35%', fontWeight: 600 }}>
-                                            LPO Number
-                                        </TableCell>
-                                        <TableCell>
-                                            {formDataToSubmit?.lpoNumber || 'Not specified'}
-                                        </TableCell>
-                                    </TableRow>
-                                    <TableRow>
-                                        <TableCell sx={{ width: '35%', fontWeight: 600 }}>
-                                            Inventory Name
-                                        </TableCell>
-                                        <TableCell>
-                                            {formDataToSubmit?.name || 'Not specified'}
-                                        </TableCell>
-                                    </TableRow>
-                                    <TableRow>
-                                        <TableCell sx={{ width: '35%', fontWeight: 600 }}>
-                                            Supplier
-                                        </TableCell>
-                                        <TableCell>
-                                            {getSupplierName()}
-                                        </TableCell>
-                                    </TableRow>
-                                    {/* <TableRow>
-                                        <TableCell sx={{ width: '35%', fontWeight: 600 }}>
-                                            PO Number
-                                        </TableCell>
-                                        <TableCell>
-                                            {formDataToSubmit?.lpoNumber || 'Not specified'}
-                                        </TableCell>
-                                    </TableRow> */}
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
-                    </Card>
-
-                    <Card
-                        elevation={0}
-                        sx={{
-                            borderRadius: 2,
-                            border: `1px solid ${alpha('#000', 0.08)}`
-                        }}
-                    >
-                        <Box sx={{ bgcolor: alpha(SECONDARY_COLOR, 0.05), p: 2, borderTopLeftRadius: 8, borderTopRightRadius: 8 }}>
-                            <Typography variant="subtitle1" fontWeight={600}>
-                                <InventoryIcon fontSize="small" sx={{ mr: 1, verticalAlign: 'middle', color: SECONDARY_COLOR }} />
-                                Stock Items ({stockRows.length})
-                            </Typography>
-                        </Box>
-
-                        {stockRows.length > 0 ? (
-                            <TableContainer sx={{ maxHeight: 200 }}>
-                                <Table size="small" stickyHeader>
-                                    <TableBody>
-                                        {stockRows.map((item, idx) => (
-                                            <TableRow key={`item-${idx}`}>
-                                                <TableCell sx={{ width: '45%' }}>
-                                                    {item.name || 'Unknown Item'}
-                                                </TableCell>
-                                                <TableCell>
-                                                    <Chip
-                                                        size="small"
-                                                        label={`Qty: ${item.orderedQuantity}`}
-                                                        sx={{
-                                                            bgcolor: alpha(SECONDARY_COLOR, 0.1),
-                                                            color: SECONDARY_COLOR,
-                                                            fontWeight: 500
-                                                        }}
-                                                    />
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            </TableContainer>
-                        ) : (
-                            <Box sx={{ p: 2, textAlign: 'center' }}>
-                                <Typography variant="body2" color="text.secondary">
-                                    No stock items have been added
-                                </Typography>
-                            </Box>
-                        )}
-                    </Card>
-                </Box>
-
-                <Paper
-                    elevation={0}
+        return (
+            <Dialog
+                open={confirmModalOpen}
+                onClose={() => !sendingRequest && setConfirmModalOpen(false)}
+                maxWidth="sm"
+                fullWidth
+                TransitionComponent={Fade}
+                PaperProps={{ elevation: 0, sx: { borderRadius: 3, border: `1px solid ${border.subtle}`, overflow: 'hidden' } }}
+            >
+                {/* Header */}
+                <Box
                     sx={{
-                        p: 2,
-                        bgcolor: alpha('#FFFDE7', 0.5),
-                        border: `1px solid ${alpha('#FBC02D', 0.2)}`,
-                        borderRadius: 1
+                        position: 'relative', px: 3, pt: 2.75, pb: 2.25,
+                        borderBottom: `1px solid ${border.subtle}`,
+                        background: `linear-gradient(135deg, ${alpha(brand[50], 0.7)} 0%, #fff 65%)`,
                     }}
                 >
-                    <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <WarningAmberIcon sx={{ color: '#F57F17', fontSize: '1.1rem' }} />
-                        Once submitted, this information cannot be easily modified. Please ensure all details are correct.
-                    </Typography>
-                </Paper>
-            </DialogContent>
-
-            <DialogActions sx={{ p: 2.5, borderTop: `1px solid ${alpha('#000', 0.08)}` }}>
-                <Box sx={{ display: 'flex', gap: 2, width: '50%', justifyContent: 'flex-end' }}>
-                    <ButtonComponent
-                        handleClick={() => setConfirmModalOpen(false)}
-                        buttonColor="inherit"
-                        type="button"
-                        sendingRequest={false}
-                        buttonText="Review Again"
-                        variant="outlined"
-                    />
-                    <ButtonComponent
-                        handleClick={onSubmit}
-                        buttonColor="success"
-                        type="button"
-                        sendingRequest={sendingRequest}
-                        buttonText="Confirm"
-                        variant="contained"
-                    />
+                    <Box sx={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 4, background: `linear-gradient(180deg, ${brand[500]}, ${brand[700]})` }} />
+                    <Stack direction="row" alignItems="center" justifyContent="space-between">
+                        <Stack direction="row" spacing={1.5} alignItems="center">
+                            <Box sx={{ width: 44, height: 44, borderRadius: 2, bgcolor: alpha(brand[500], 0.1), display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <CheckCircleOutlineIcon sx={{ color: brand[600], fontSize: 24 }} />
+                            </Box>
+                            <Box>
+                                <Typography sx={{ fontSize: '1.05rem', fontWeight: 800, color: neutral[900], lineHeight: 1.2 }}>
+                                    Confirm Inventory Submission
+                                </Typography>
+                                <Typography sx={{ fontSize: '0.8rem', color: neutral[500] }}>
+                                    Review the details below before creating this stock entry
+                                </Typography>
+                            </Box>
+                        </Stack>
+                        <IconButton onClick={() => setConfirmModalOpen(false)} aria-label="close" size="small" disabled={sendingRequest} sx={{ color: neutral[400] }}>
+                            <CloseIcon fontSize="small" />
+                        </IconButton>
+                    </Stack>
                 </Box>
-            </DialogActions>
-        </Dialog>
-    );
+
+                <DialogContent sx={{ p: 3, bgcolor: surface.page }}>
+                    {/* LPO information */}
+                    <Box sx={{ bgcolor: '#fff', border: `1px solid ${border.subtle}`, borderRadius: 2, overflow: 'hidden', mb: 2 }}>
+                        <Stack direction="row" alignItems="center" spacing={1} sx={{ px: 2, py: 1.5, borderBottom: `1px solid ${border.subtle}` }}>
+                            <BusinessIcon sx={{ fontSize: 18, color: brand[600] }} />
+                            <Typography sx={{ fontSize: '0.72rem', fontWeight: 700, color: neutral[600], textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                                LPO Information
+                            </Typography>
+                        </Stack>
+                        <Box sx={{ px: 2, py: 0.5 }}>
+                            {infoRows.map((r, i) => (
+                                <Stack
+                                    key={r.label}
+                                    direction="row"
+                                    justifyContent="space-between"
+                                    alignItems="center"
+                                    spacing={2}
+                                    sx={{ py: 1.15, borderBottom: i < infoRows.length - 1 ? `1px solid ${alpha(neutral[900], 0.05)}` : 'none' }}
+                                >
+                                    <Typography sx={{ fontSize: '0.82rem', color: neutral[500], fontWeight: 500, flexShrink: 0 }}>{r.label}</Typography>
+                                    <Typography sx={{ fontSize: '0.85rem', color: neutral[900], fontWeight: 600, textAlign: 'right' }}>{r.value}</Typography>
+                                </Stack>
+                            ))}
+                        </Box>
+                    </Box>
+
+                    {/* Stock items */}
+                    <Box sx={{ bgcolor: '#fff', border: `1px solid ${border.subtle}`, borderRadius: 2, overflow: 'hidden', mb: 2 }}>
+                        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ px: 2, py: 1.5, borderBottom: `1px solid ${border.subtle}` }}>
+                            <Stack direction="row" alignItems="center" spacing={1}>
+                                <InventoryIcon sx={{ fontSize: 18, color: gold[500] }} />
+                                <Typography sx={{ fontSize: '0.72rem', fontWeight: 700, color: neutral[600], textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                                    Stock Items
+                                </Typography>
+                            </Stack>
+                            <Chip size="small" label={stockRows.length} sx={{ height: 20, minWidth: 24, fontSize: '0.7rem', fontWeight: 700, bgcolor: alpha(gold[500], 0.12), color: gold[700] }} />
+                        </Stack>
+                        {stockRows.length > 0 ? (
+                            <Box sx={{ maxHeight: 210, overflowY: 'auto' }}>
+                                {stockRows.map((item, idx) => (
+                                    <Stack
+                                        key={`item-${idx}`}
+                                        direction="row"
+                                        alignItems="center"
+                                        justifyContent="space-between"
+                                        spacing={1.5}
+                                        sx={{ px: 2, py: 1.15, borderBottom: idx < stockRows.length - 1 ? `1px solid ${alpha(neutral[900], 0.05)}` : 'none' }}
+                                    >
+                                        <Stack direction="row" spacing={1.25} alignItems="center" sx={{ minWidth: 0 }}>
+                                            <Box sx={{ width: 22, height: 22, borderRadius: '50%', bgcolor: alpha(brand[500], 0.08), color: brand[700], fontSize: '0.66rem', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                                {idx + 1}
+                                            </Box>
+                                            <Typography noWrap sx={{ fontSize: '0.85rem', color: neutral[800], fontWeight: 600 }}>
+                                                {item.name || 'Unknown item'}
+                                            </Typography>
+                                        </Stack>
+                                        <Chip size="small" label={`Qty: ${item.orderedQuantity ?? 0}`} sx={{ height: 22, fontSize: '0.72rem', fontWeight: 600, bgcolor: alpha(brand[500], 0.08), color: brand[700], flexShrink: 0 }} />
+                                    </Stack>
+                                ))}
+                            </Box>
+                        ) : (
+                            <Box sx={{ p: 3, textAlign: 'center' }}>
+                                <Typography sx={{ fontSize: '0.83rem', color: neutral[500] }}>No stock items have been added</Typography>
+                            </Box>
+                        )}
+                    </Box>
+
+                    {/* Totals */}
+                    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ mb: 2 }}>
+                        <TotalCard icon={<PaidOutlinedIcon />} label="Total Cost" value={fmtMoney(totalCostPrice)} tone={brand} />
+                        <TotalCard icon={<SellOutlinedIcon />} label="Total Purchase Price" value={fmtMoney(totalPurchasePrice)} tone={gold} />
+                    </Stack>
+
+                    {/* Warning */}
+                    <Stack direction="row" spacing={1.25} alignItems="flex-start" sx={{ p: 1.75, borderRadius: 2, bgcolor: alpha(gold[500], 0.07), border: `1px solid ${alpha(gold[500], 0.25)}` }}>
+                        <WarningAmberIcon sx={{ fontSize: 18, color: gold[700], mt: 0.1, flexShrink: 0 }} />
+                        <Typography sx={{ fontSize: '0.82rem', color: neutral[700], lineHeight: 1.5 }}>
+                            Once submitted, this information cannot be easily modified. Please ensure all details are correct.
+                        </Typography>
+                    </Stack>
+                </DialogContent>
+
+                <DialogActions sx={{ px: 3, py: 2, borderTop: `1px solid ${border.subtle}`, gap: 1.25 }}>
+                    <MuiButton
+                        onClick={() => setConfirmModalOpen(false)}
+                        disabled={sendingRequest}
+                        variant="outlined"
+                        sx={{ height: 42, px: 3, borderRadius: 2, textTransform: 'none', fontWeight: 600, borderColor: border.default, color: neutral[600], '&:hover': { borderColor: neutral[400], bgcolor: neutral[50] } }}
+                    >
+                        Review Again
+                    </MuiButton>
+                    <MuiButton
+                        onClick={onSubmit}
+                        disabled={sendingRequest}
+                        variant="contained"
+                        startIcon={sendingRequest ? <CircularProgress size={16} sx={{ color: '#fff' }} /> : <CheckCircleOutlineIcon fontSize="small" />}
+                        sx={{
+                            height: 42, px: 4, borderRadius: 2, textTransform: 'none', fontWeight: 700,
+                            bgcolor: brand[500], boxShadow: `0 3px 10px ${alpha(brand[500], 0.3)}`,
+                            '&:hover': { bgcolor: brand[700], boxShadow: `0 5px 16px ${alpha(brand[500], 0.4)}` },
+                            '&.Mui-disabled': { bgcolor: alpha(brand[500], 0.5), color: '#fff' },
+                        }}
+                    >
+                        {sendingRequest ? 'Submitting…' : 'Confirm & Submit'}
+                    </MuiButton>
+                </DialogActions>
+            </Dialog>
+        );
+    };
 
     return (
         <Box

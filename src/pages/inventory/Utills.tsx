@@ -90,9 +90,9 @@ const InventoryUtills = () => {
         action: {
             label: "options",
             options: [
-                { value: crudStates.delete, label: "Delete", icon: <InfoIcon fontSize='small' color='error' /> },
+                { value: crudStates.read, label: "View Details", icon: <RemoveRedEyeIcon fontSize='small' />, divider: true },
                 { value: crudStates.update, label: "Update", icon: <ModeEditIcon fontSize='small' color='info' /> },
-                { value: crudStates.read, label: "View Details", icon: <RemoveRedEyeIcon fontSize='small' color='inherit' /> }
+                { value: crudStates.delete, label: "Delete", icon: <InfoIcon fontSize='small' color='error' /> }
             ]
         },
     };
