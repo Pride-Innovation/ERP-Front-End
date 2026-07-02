@@ -241,6 +241,13 @@ const OfficeEquipmentUtills = () => {
             type: "input"
         },
         {
+            // Set to "Available for Issuance" once details are completed to make the asset issuable.
+            value: "assetStatus",
+            label: 'Status',
+            type: "select",
+            options: optionsObject.assetsStatusesOptions
+        },
+        {
             value: "engravedNumber",
             label: 'Engraved number',
             type: "input"
