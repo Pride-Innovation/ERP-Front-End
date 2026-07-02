@@ -6,7 +6,6 @@ Managing Director
 */
 
 import * as yup from 'yup';
-import { IStatus } from '../../settings/statuses/interface';
 import { IAssetType, IAssetFieldConfig, FieldConfigState } from '../../settings/assetTypes/interface';
 
 /**
@@ -88,7 +87,7 @@ export const buildOfficeEquipmentSchema = (fieldConfig?: IAssetFieldConfig | nul
         // ── Object / mixed fields ────────────────────────────────────────────
         supplier:           mixedField(fieldConfig, 'supplier',         'Supplier is required',          false),
         assignedTo:         mixedField(fieldConfig, 'assignedTo',       'Assigned to is required',       false),
-        assetStatus:        yup.mixed<IStatus>().nullable().optional(),
+        assetStatus:        mixedField(fieldConfig, 'assetStatus',      'Status is required',            false),
         assetType:          yup.mixed<IAssetType>().nullable().optional(),
         branch:             mixedField(fieldConfig, 'branch',           'Branch is required',            false),
     });
