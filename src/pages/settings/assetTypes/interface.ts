@@ -78,8 +78,8 @@ export interface IAssetType {
     ownerGroupEmail?: string | null;
     /** Annual reducing-balance depreciation rate (percent) for assets of this category. */
     depreciationRate?: number | null;
-    /** Residual (salvage) value as a percent of cost; depreciation floors here. */
-    residualPercent?: number | null;
+    /** Useful life in months; an asset is flagged for disposal once its age reaches this. */
+    usefulLifeMonths?: number | null;
     fieldConfig?: IAssetFieldConfig | null;
     customAttributes?: ICustomAttribute[] | null;
 }
@@ -91,8 +91,8 @@ export interface IAssetTypeFormValues {
     ownerGroupEmail?: string | null;
     /** Annual reducing-balance depreciation rate (percent). Held as a string in the form input. */
     depreciationRate?: string | null;
-    /** Residual (salvage) value as a percent of cost. Held as a string in the form input. */
-    residualPercent?: string | null;
+    /** Useful life in months. Held as a string in the form input. */
+    usefulLifeMonths?: string | null;
 }
 
 export interface IAssetTypeForm {
