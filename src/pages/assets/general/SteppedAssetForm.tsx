@@ -5,7 +5,7 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { useState } from "react";
+import React, { useState } from "react";
 import {
     Box,
     Grid,
@@ -101,6 +101,40 @@ const SteppedOfficeEquipmentForm = ({
     };
 
     const handleBack = () => setActiveStep((prev) => prev - 1);
+
+    /**
+     * Single primary action. It is ALWAYS a plain button (never type="submit"), so neither a
+     * click on a non-final step nor an Enter keypress can ever submit the form. Submission only
+     * happens here, and only when we are genuinely on the last step — guarding against the case
+     * where the step count changes (e.g. the "Technical Details" step appears/disappears as the
+     * category field-config loads).
+     */
+    const handlePrimaryAction = async (e: React.MouseEvent<HTMLButtonElement>) => {
+        const isLast = activeStep === steps.length - 1;
+        if (!isLast) {
+            await handleNext();
+            return;
+        }
+        // Capture the form element synchronously — React nulls out the synthetic event's
+        // currentTarget after the first `await`, so we must grab it before validating.
+        const form = e.currentTarget.closest('form');
+
+        // On the last step: validate its fields for a friendly message, then submit the parent form.
+        let valid = true;
+        if (trigger) {
+            const fieldsToValidate = getFieldsForStep(activeStep)
+                .map((field: any) => field.value)
+                .filter((fieldName: any) => typeof fieldName === 'string');
+            valid = await trigger(fieldsToValidate as any[]);
+        } else {
+            valid = !hasErrorsInStep(activeStep);
+        }
+        if (!valid) {
+            toast.error("Please fix the errors before proceeding");
+            return;
+        }
+        form?.requestSubmit();
+    };
 
     // Divide fields into steps
     const getFieldsForStep = (step: number) => {
@@ -275,36 +309,27 @@ const SteppedOfficeEquipmentForm = ({
                             </MuiButton>
                         )}
 
-                        {activeStep < steps.length - 1 ? (
-                            <MuiButton
-                                onClick={handleNext}
-                                type="button"
-                                variant="contained"
-                                endIcon={<ArrowForwardIcon fontSize="small" />}
-                                sx={{
-                                    flex: { xs: 1, sm: 'initial' }, height: 40, minWidth: 140, borderRadius: '8px', textTransform: 'none', fontWeight: 600,
-                                    bgcolor: P, boxShadow: `0 2px 8px ${alpha(P, 0.3)}`,
-                                    '&:hover': { bgcolor: '#065f54', boxShadow: `0 4px 14px ${alpha(P, 0.4)}` },
-                                }}
-                            >
-                                Continue
-                            </MuiButton>
-                        ) : (
-                            <MuiButton
-                                type="submit"
-                                variant="contained"
-                                startIcon={<SaveIcon fontSize="small" />}
-                                disabled={sendingRequest}
-                                sx={{
-                                    flex: { xs: 1, sm: 'initial' }, height: 40, minWidth: 160, borderRadius: '8px', textTransform: 'none', fontWeight: 600,
-                                    bgcolor: P, boxShadow: `0 2px 8px ${alpha(P, 0.3)}`,
-                                    '&:hover': { bgcolor: '#065f54', boxShadow: `0 4px 14px ${alpha(P, 0.4)}` },
-                                    '&.Mui-disabled': { bgcolor: alpha(P, 0.45), color: '#fff' },
-                                }}
-                            >
-                                {sendingRequest ? 'Saving…' : (buttonText || 'Save Asset')}
-                            </MuiButton>
-                        )}
+                        {(() => {
+                            const isLastStep = activeStep === steps.length - 1;
+                            return (
+                                <MuiButton
+                                    onClick={handlePrimaryAction}
+                                    type="button"
+                                    variant="contained"
+                                    endIcon={!isLastStep ? <ArrowForwardIcon fontSize="small" /> : undefined}
+                                    startIcon={isLastStep ? <SaveIcon fontSize="small" /> : undefined}
+                                    disabled={isLastStep && sendingRequest}
+                                    sx={{
+                                        flex: { xs: 1, sm: 'initial' }, height: 40, minWidth: isLastStep ? 160 : 140, borderRadius: '8px', textTransform: 'none', fontWeight: 600,
+                                        bgcolor: P, boxShadow: `0 2px 8px ${alpha(P, 0.3)}`,
+                                        '&:hover': { bgcolor: '#065f54', boxShadow: `0 4px 14px ${alpha(P, 0.4)}` },
+                                        '&.Mui-disabled': { bgcolor: alpha(P, 0.45), color: '#fff' },
+                                    }}
+                                >
+                                    {isLastStep ? (sendingRequest ? 'Saving…' : (buttonText || 'Save Asset')) : 'Continue'}
+                                </MuiButton>
+                            );
+                        })()}
                     </Stack>
                 </Box>
             </Box>
