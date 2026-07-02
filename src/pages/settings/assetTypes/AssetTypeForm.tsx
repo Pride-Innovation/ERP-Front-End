@@ -135,11 +135,11 @@ const AssetTypeForm = ({
                         required={false}
                     />
                     <UseFormInput
-                        label="Residual Value (% of cost)"
+                        label="Useful Life (months)"
                         register={register}
                         control={control}
                         formState={formState}
-                        value="residualPercent"
+                        value="usefulLifeMonths"
                         type="number"
                         required={false}
                     />
@@ -149,10 +149,9 @@ const AssetTypeForm = ({
                         <TagIcon sx={{ fontSize: 16, color: '#08796C', mt: 0.2, flexShrink: 0 }} />
                         <Typography variant="caption" color="text.secondary" lineHeight={1.6}>
                             Reducing-balance method: each year's charge is <em>opening NBV × rate</em>, so it
-                            shrinks over time. NBV depreciates down to the residual floor (<em>cost × residual%</em>)
-                            and stops — an asset that reaches it is flagged ready for disposal. On an asset, the
-                            Net Value, Net Book Value, Accumulated / Annual / Monthly Depreciation and Disposal Status
-                            are all derived from these and shown read-only.
+                            shrinks over time. On an asset, the Net Value, Net Book Value, Accumulated / Annual /
+                            Monthly Depreciation are all derived from the rate and shown read-only. Useful Life is
+                            the number of months an asset is kept before it is flagged ready for disposal.
                         </Typography>
                     </Stack>
                 </Box>
