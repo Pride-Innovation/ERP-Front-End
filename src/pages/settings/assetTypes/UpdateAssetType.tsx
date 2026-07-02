@@ -36,14 +36,21 @@ const UpdateAssetType = ({
         },
     });
 
+    // Re-sync the form only when a different category is opened (keyed on id), and include
+    // EVERY field — reset() clears any field omitted from its argument, which was wiping the
+    // Depreciation Rate / Useful Life values. Keying on the object reference instead of the id
+    // also caused it to re-fire on unrelated re-renders, clearing fields mid-edit.
     useEffect(() => {
         reset({
             name: assetType.name || '',
             shortCode: assetType.shortCode || '',
             description: assetType.description || '',
             ownerGroupEmail: assetType.ownerGroupEmail || '',
+            depreciationRate: assetType.depreciationRate != null ? String(assetType.depreciationRate) : '',
+            usefulLifeMonths: assetType.usefulLifeMonths != null ? String(assetType.usefulLifeMonths) : '',
         });
-    }, [assetType, reset]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [assetType.id, reset]);
 
     const onSubmit = async (formData: IAssetTypeFormValues) => {
         setSendingRequest(true);
