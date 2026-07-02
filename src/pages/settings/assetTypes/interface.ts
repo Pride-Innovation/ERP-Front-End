@@ -38,6 +38,7 @@ export interface IAssetFieldConfig {
     // Classification
     category?: FieldConfigState;
     unitOfMeasure?: FieldConfigState;
+    assetStatus?: FieldConfigState;
     // Financial
     purchaseCost?: FieldConfigState;
     costOfTheAsset?: FieldConfigState;
