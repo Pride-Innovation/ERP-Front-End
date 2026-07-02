@@ -33,17 +33,17 @@ export const assetTypeSchema = yup.object({
                 return !Number.isNaN(n) && n >= 0 && n <= 100;
             }
         ),
-    residualPercent: yup
+    usefulLifeMonths: yup
         .string()
         .nullable()
         .optional()
         .test(
-            'is-valid-residual',
-            'Residual value must be a number between 0 and 100',
+            'is-valid-useful-life',
+            'Useful life must be a whole number of months greater than 0',
             (value) => {
                 if (value == null || value.trim() === '') return true;
                 const n = Number(value);
-                return !Number.isNaN(n) && n >= 0 && n <= 100;
+                return Number.isInteger(n) && n > 0;
             }
         ),
 });
