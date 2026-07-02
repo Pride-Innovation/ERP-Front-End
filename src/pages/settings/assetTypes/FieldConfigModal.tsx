@@ -67,6 +67,7 @@ const FIELD_GROUPS: FieldGroup[] = [
         fields: [
             { key: 'category', label: 'Category' },
             { key: 'unitOfMeasure', label: 'Unit of Measure' },
+            { key: 'assetStatus', label: 'Status' },
         ],
     },
     {
