@@ -28,6 +28,13 @@ export type ApproverType =
 export type BranchScope = 'ALL' | 'HEAD_OFFICE' | 'BRANCH';
 
 /**
+ * Whose reporting line a role-based approver type climbs.
+ * - REQUESTER: the requester's chain (default).
+ * - ISSUER: the chain of the person who issued the items — e.g. issuance approval by the issuer's manager.
+ */
+export type ApproverSubject = 'REQUESTER' | 'ISSUER';
+
+/**
  * How a step's CC / notify group is resolved at send time.
  * - STATIC: use the literal `notifyGroupEmail` typed on the form.
  * - REQUESTER_MANAGERS_GROUP: dynamic — picks the requester's department managers group (Head Office)
@@ -48,6 +55,8 @@ export interface IApprovalStep {
     stepName: string;
     stepType: StepType;
     approverType: ApproverType;
+    /** Whose reporting line a role-based approver type climbs (requester by default, or the issuer). */
+    approverSubject?: ApproverSubject;
     /** Selected fulfilment unit for a GROUP_EMAIL step (preferred over groupEmail; resolves routing by unit, not by matching an email string). */
     unitId?: number | null;
     /** Display name of the selected unit (response only). */
@@ -100,6 +109,16 @@ export const APPROVER_TYPE_LABELS: Record<ApproverType, string> = {
     SPECIFIC_USER:     'Specific User',
     REQUESTER:         'Requester',
 };
+
+export const APPROVER_SUBJECT_LABELS: Record<ApproverSubject, string> = {
+    REQUESTER: 'The requester',
+    ISSUER:    'The issuer (who issued the items)',
+};
+
+/** Role-based approver types whose reporting line can target the requester OR the issuer. */
+export const SUBJECT_AWARE_APPROVER_TYPES: ApproverType[] = [
+    'DIRECT_SUPERVISOR', 'SUPERVISOR', 'MANAGER', 'DEPT_HEAD', 'BOM', 'BRANCH_MANAGER',
+];
 
 export const BRANCH_SCOPE_LABELS: Record<BranchScope, string> = {
     ALL:         'All Branches',
