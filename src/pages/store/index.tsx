@@ -8,11 +8,19 @@ Managing Director
 import {
     Avatar,
     Box,
+    Button,
+    Chip,
     Divider,
     IconButton,
     Paper,
     Skeleton,
     Stack,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
     Tooltip,
     Typography,
     alpha,
@@ -31,6 +39,8 @@ import ContentPasteOutlinedIcon from '@mui/icons-material/ContentPasteOutlined';
 import CategoryOutlinedIcon from '@mui/icons-material/CategoryOutlined';
 import ArrowForwardIosOutlinedIcon from '@mui/icons-material/ArrowForwardIosOutlined';
 import StorefrontOutlinedIcon from '@mui/icons-material/StorefrontOutlined';
+import SwapHorizOutlinedIcon from '@mui/icons-material/SwapHorizOutlined';
+import AccountBalanceOutlinedIcon from '@mui/icons-material/AccountBalanceOutlined';
 import { SvgIconComponent } from '@mui/icons-material';
 
 import { PageHero } from '../../components/layout';
@@ -39,6 +49,8 @@ import { RootState } from '../../store';
 import AssetTypeUtills from '../settings/assetTypes/utills';
 import RoutesUtills from '../../core/routes/utills';
 import { fetchRowsService } from '../../core/apis/globalService';
+import { fetchLowStockService } from './service';
+import BalancesPanel from './BalancesPanel';
 import { IStoresAxiosResponse } from './interface';
 import { IAssetType } from '../settings/assetTypes/interface';
 
@@ -104,7 +116,40 @@ const Store = () => {
     const [categoryCounts, setCategoryCounts] = useState<Record<string | number, number>>({});
     const [countsLoading, setCountsLoading] = useState(false);
 
-    useEffect(() => { fetchAllAssetTypes(); }, []);
+    // Cross-branch snapshot for the Admin: stocked item lines + low-stock count per branch store.
+    const [branchRows, setBranchRows] = useState<Array<{ id: number; name: string; region?: string; itemLines: number; low: number }>>([]);
+    const [branchesLoading, setBranchesLoading] = useState(false);
+
+    useEffect(() => { fetchAllAssetTypes(); fetchBranchesOverview(); }, []);
+
+    const fetchBranchesOverview = async () => {
+        setBranchesLoading(true);
+        try {
+            const [bRes, lowRes] = await Promise.all([
+                fetchRowsService({ pageNumber: 0, pageSize: 100, endPoint: 'branches', params: {} }) as any,
+                fetchLowStockService() as any,
+            ]);
+            const branches: any[] = bRes?.status === 200 ? (bRes.data?.content ?? []) : [];
+            const lowByLocation: Record<number, number> = {};
+            if (lowRes?.status === 200) {
+                (lowRes.data ?? []).forEach((b: any) => {
+                    if (b.locationId != null) lowByLocation[b.locationId] = (lowByLocation[b.locationId] ?? 0) + 1;
+                });
+            }
+            const withCounts = await Promise.all(branches.map(async (b) => {
+                const sRes = (await fetchRowsService({ pageNumber: 0, pageSize: 1, endPoint: 'store', params: { branchId: b.id } })) as any;
+                return {
+                    id: b.id, name: b.name, region: b.region?.name,
+                    itemLines: sRes?.status === 200 ? (sRes.data.totalElements ?? 0) : 0,
+                    low: lowByLocation[b.id] ?? 0,
+                };
+            }));
+            setBranchRows(withCounts);
+        } catch (e) {
+            console.log(e);
+        }
+        setBranchesLoading(false);
+    };
 
     useEffect(() => {
         if (assetTypes.length > 0) {
@@ -148,6 +193,16 @@ const Store = () => {
                 title="Store Management"
                 subtitle="Overview of all organizational stores and inventory"
                 icon={<StorefrontOutlinedIcon />}
+                actions={
+                    <Button
+                        variant="contained"
+                        startIcon={<SwapHorizOutlinedIcon />}
+                        onClick={() => navigate(ROUTES.CREATE_MOVEMENT)}
+                        sx={{ bgcolor: '#08796C', textTransform: 'none', fontWeight: 600, borderRadius: '8px', '&:hover': { bgcolor: '#065f54' } }}
+                    >
+                        Initiate Movement
+                    </Button>
+                }
                 stat={{
                     value: countsLoading
                         ? (<Skeleton width={50} sx={{ display: 'inline-block' }} /> as any)
@@ -169,6 +224,80 @@ const Store = () => {
                     />
                 ))}
             </Box>
+
+            {/* ── Branches overview: cross-branch item status for the Admin ── */}
+            <Paper elevation={0} sx={{ mt: 3, borderRadius: 2.5, border: '1px solid #E8EDF3', overflow: 'hidden' }}>
+                <Box sx={{ px: 2.5, py: 1.75, borderBottom: '1px solid #EEF2F7', display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+                    <AccountBalanceOutlinedIcon sx={{ fontSize: 18, color: '#08796C' }} />
+                    <Typography sx={{ fontWeight: 700 }}>Branches Overview</Typography>
+                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>Stocked item lines per branch store — spot shortfalls and replenish</Typography>
+                </Box>
+                <TableContainer>
+                    <Table size="small">
+                        <TableHead>
+                            <TableRow sx={{ bgcolor: '#F8FAFC' }}>
+                                <TableCell sx={{ fontWeight: 700, fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748B' }}>Branch</TableCell>
+                                <TableCell sx={{ fontWeight: 700, fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748B' }}>Region</TableCell>
+                                <TableCell align="right" sx={{ fontWeight: 700, fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748B' }}>Item Lines</TableCell>
+                                <TableCell align="right" sx={{ fontWeight: 700, fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748B' }}>Low Stock</TableCell>
+                                <TableCell align="right" sx={{ fontWeight: 700, fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748B' }}>Action</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {branchesLoading ? (
+                                [0, 1, 2].map((i) => (
+                                    <TableRow key={i}>
+                                        <TableCell><Skeleton width={140} /></TableCell>
+                                        <TableCell><Skeleton width={90} /></TableCell>
+                                        <TableCell align="right"><Skeleton width={40} sx={{ ml: 'auto' }} /></TableCell>
+                                        <TableCell align="right"><Skeleton width={40} sx={{ ml: 'auto' }} /></TableCell>
+                                        <TableCell align="right"><Skeleton width={80} sx={{ ml: 'auto' }} /></TableCell>
+                                    </TableRow>
+                                ))
+                            ) : branchRows.length > 0 ? (
+                                branchRows.map((b) => (
+                                    <TableRow key={b.id} hover>
+                                        <TableCell sx={{ fontWeight: 600 }}>{b.name}</TableCell>
+                                        <TableCell sx={{ color: '#64748B' }}>{b.region ?? '—'}</TableCell>
+                                        <TableCell align="right">
+                                            <Chip
+                                                label={b.itemLines}
+                                                size="small"
+                                                sx={{
+                                                    height: 22, fontWeight: 700, fontVariantNumeric: 'tabular-nums',
+                                                    bgcolor: alpha(b.itemLines === 0 ? '#DC2626' : '#08796C', 0.1),
+                                                    color: b.itemLines === 0 ? '#DC2626' : '#08796C',
+                                                }}
+                                            />
+                                        </TableCell>
+                                        <TableCell align="right">
+                                            {b.low > 0 ? (
+                                                <Chip label={b.low} size="small" sx={{ height: 22, fontWeight: 700, bgcolor: alpha('#B45309', 0.12), color: '#B45309' }} />
+                                            ) : (
+                                                <Typography variant="caption" sx={{ color: '#94A3B8' }}>—</Typography>
+                                            )}
+                                        </TableCell>
+                                        <TableCell align="right">
+                                            <Button size="small" variant="text" startIcon={<SwapHorizOutlinedIcon sx={{ fontSize: 15 }} />}
+                                                onClick={() => navigate(ROUTES.CREATE_MOVEMENT)}
+                                                sx={{ textTransform: 'none', fontWeight: 600, fontSize: '0.72rem', color: '#08796C' }}>
+                                                Replenish
+                                            </Button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={5} align="center" sx={{ py: 3, color: 'text.disabled' }}>No branches found.</TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+            </Paper>
+
+            {/* ── Consumable balances: set reorder thresholds + see low stock ── */}
+            <BalancesPanel />
         </Box>
     );
 };

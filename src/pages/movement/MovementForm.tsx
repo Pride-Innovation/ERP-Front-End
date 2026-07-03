@@ -7,9 +7,10 @@ Managing Director
 
 import { useEffect, useMemo, useState } from 'react';
 import {
-    alpha, Autocomplete, Box, Button, Chip, CircularProgress, Divider, Grid, IconButton,
-    MenuItem, Paper, Stack, TextField, ToggleButton, ToggleButtonGroup, Tooltip, Typography,
+    alpha, Autocomplete, Box, Button, Chip, CircularProgress, Divider, FormControlLabel, Grid, IconButton,
+    MenuItem, Paper, Stack, Switch, TextField, ToggleButton, ToggleButtonGroup, Tooltip, Typography,
 } from '@mui/material';
+import HowToRegOutlinedIcon from '@mui/icons-material/HowToRegOutlined';
 import SwapHorizOutlinedIcon from '@mui/icons-material/SwapHorizOutlined';
 import StorefrontOutlinedIcon from '@mui/icons-material/StorefrontOutlined';
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
@@ -370,8 +371,31 @@ const MovementForm = ({ setValue, watch, formState, items, setItems, sendingRequ
                 </Paper>
             )}
 
-            {/* ── Section 5: Remarks + submit ──────────────────────────────── */}
+            {/* ── Section 5: Approval + remarks + submit ───────────────────── */}
             <Paper elevation={0} sx={{ p: 3, borderRadius: 2.5, border: `1px solid ${alpha('#000', 0.07)}` }}>
+                <Box sx={{ mb: 2, p: 1.75, borderRadius: 2, bgcolor: alpha(PRIMARY, 0.04), border: `1px solid ${alpha(PRIMARY, 0.12)}` }}>
+                    <FormControlLabel
+                        control={
+                            <Switch
+                                checked={!!watch('requiresApproval')}
+                                onChange={(e) => setValue('requiresApproval', e.target.checked)}
+                                color="primary"
+                            />
+                        }
+                        label={
+                            <Stack direction="row" spacing={1} alignItems="center">
+                                <HowToRegOutlinedIcon sx={{ fontSize: 18, color: PRIMARY }} />
+                                <Box>
+                                    <Typography variant="body2" sx={{ fontWeight: 700 }}>Requires approval</Typography>
+                                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                                        Route through your reporting ladder before dispatch (e.g. a BOM fulfilling a request from the branch store → Branch Manager approves).
+                                    </Typography>
+                                </Box>
+                            </Stack>
+                        }
+                        sx={{ alignItems: 'flex-start', m: 0 }}
+                    />
+                </Box>
                 <TextField fullWidth size="small" multiline rows={2} label="Remarks (optional)" value={watch('remarks') ?? ''} onChange={(e) => setValue('remarks', e.target.value)} sx={{ mb: 2.5 }} />
                 <Stack direction="row" justifyContent="flex-end">
                     <ButtonComponent sendingRequest={sendingRequest} buttonText={buttonText} buttonColor="primary" variant="contained" type="submit" />

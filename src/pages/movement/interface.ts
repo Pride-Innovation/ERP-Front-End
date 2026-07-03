@@ -68,6 +68,9 @@ export interface IMovement {
     remarks?: string | null;
 
     initiator?: IUser | null;
+    /** While DRAFT (awaiting approval): the ladder tier that must approve now. */
+    currentApprover?: IUser | null;
+    approvalTierIndex?: number;
     completionDate?: string | null;
     inventorySettled?: boolean;
 
@@ -106,6 +109,8 @@ export interface IMovementCreatePayload {
     requestId?: number | string | null;
     repairId?: number | string | null;
     remarks?: string | null;
+    /** Route this movement through the initiator's approval ladder before it can be dispatched. */
+    requiresApproval?: boolean | null;
     items: { assetId?: number | string | null; commodityId?: number | string | null; quantity?: number }[];
 }
 
@@ -121,6 +126,7 @@ export interface IMovementFormData {
     dispatchDate?: string | null;
     expectedDeliveryDate?: string | null;
     remarks?: string | null;
+    requiresApproval?: boolean;
 }
 
 /** Paginated list response. */

@@ -51,6 +51,7 @@ const CreateMovement = () => {
             dispatchDate: toIso(data.dispatchDate),
             expectedDeliveryDate: toIso(data.expectedDeliveryDate),
             remarks: data.remarks || null,
+            requiresApproval: data.requiresApproval ?? false,
             items: items.map((i) => ({ assetId: i.assetId ?? null, commodityId: i.commodityId ?? null, quantity: i.quantity })),
         };
 

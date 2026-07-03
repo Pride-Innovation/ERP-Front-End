@@ -91,6 +91,42 @@ export const completeMovementService = async (id: string | number, remarks?: str
     }
 };
 
+export const approveMovementService = async (id: string | number, comment?: string) => {
+    try {
+        return await axiosInstance.post(`${ENDPOINT}/${id}/approve`, { comment: comment ?? '' });
+    } catch (error) {
+        return error;
+    }
+};
+
+export const rejectMovementService = async (id: string | number, comment?: string) => {
+    try {
+        return await axiosInstance.post(`${ENDPOINT}/${id}/reject`, { comment: comment ?? '' });
+    } catch (error) {
+        return error;
+    }
+};
+
+export const fetchMovementApprovalsService = async (id: string | number) => {
+    try {
+        return await axiosInstance.get(`${ENDPOINT}/${id}/approvals`);
+    } catch (error) {
+        return error;
+    }
+};
+
+export const uploadMovementDocumentService = async (id: string | number, file: File) => {
+    try {
+        const formData = new FormData();
+        formData.append('file', file);
+        return await axiosInstance.post(`${ENDPOINT}/${id}/documents`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+        });
+    } catch (error) {
+        return error;
+    }
+};
+
 // ── Repair / temp-replacement / return / disposal (§14-17) ─────────────────
 
 export const repairTransferService = async (body: object) => {

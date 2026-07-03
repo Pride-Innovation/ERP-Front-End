@@ -33,14 +33,19 @@ import MovementActionModal from '../MovementActionModal';
 import { IMovement } from '../interface';
 import {
     getStatusConfig, movementTypeLabel,
-    canDispatch, canMarkInTransit, canReceive, canComplete, canCancel,
+    canDispatch, canMarkInTransit, canReceive, canComplete, canCancel, canApproveMovement,
 } from '../constants';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import HighlightOffIcon from '@mui/icons-material/HighlightOff';
+import PendingActionsOutlinedIcon from '@mui/icons-material/PendingActionsOutlined';
+import RoutesUtills from '../../../core/routes/utills';
 
 const PRIMARY = '#08796C';
 const SECONDARY = '#BC892C';
 
 const STATUS_TABS: Array<{ value: string; label: string }> = [
     { value: 'all', label: 'All' },
+    { value: 'DRAFT', label: 'Awaiting Approval' },
     { value: 'INITIATED', label: 'Initiated' },
     { value: 'DISPATCHED', label: 'Dispatched' },
     { value: 'IN_TRANSIT', label: 'In Transit' },
@@ -89,6 +94,22 @@ const AllMovements = () => {
 
     const paginated = filtered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
+    const statusCounts = movements.reduce((acc: Record<string, number>, m) => {
+        const s = m.status ?? '';
+        acc[s] = (acc[s] ?? 0) + 1;
+        return acc;
+    }, {});
+
+    const summaryTiles: Array<{ status: string; label: string; icon: JSX.Element }> = [
+        { status: 'DRAFT', label: 'Awaiting Approval', icon: <PendingActionsOutlinedIcon sx={{ fontSize: 18 }} /> },
+        { status: 'INITIATED', label: 'Initiated', icon: <SwapHorizOutlinedIcon sx={{ fontSize: 18 }} /> },
+        { status: 'DISPATCHED', label: 'Dispatched', icon: <LocalShippingOutlinedIcon sx={{ fontSize: 18 }} /> },
+        { status: 'RECEIVED', label: 'Received', icon: <AssignmentTurnedInOutlinedIcon sx={{ fontSize: 18 }} /> },
+        { status: 'COMPLETED', label: 'Completed', icon: <TaskAltOutlinedIcon sx={{ fontSize: 18 }} /> },
+    ];
+
+    const currentUserId = RoutesUtills().getCurrentUser()?.id;
+
     const openModal = (state: string, movement: IMovement) => {
         setCurrentMovement(movement);
         setModalState(state);
@@ -121,6 +142,37 @@ const AllMovements = () => {
             </Box>
 
             <Box sx={{ px: { xs: 1, md: 3 }, pt: 3, width: '100%', maxWidth: '1500px' }}>
+                {/* Status summary tiles */}
+                <Stack direction="row" spacing={1.5} sx={{ mb: 2, flexWrap: 'wrap', gap: 1.5 }}>
+                    {summaryTiles.map((t) => {
+                        const cfg = getStatusConfig(t.status);
+                        const cnt = statusCounts[t.status] ?? 0;
+                        const active = statusTab === t.status;
+                        return (
+                            <Paper
+                                key={t.status}
+                                elevation={0}
+                                onClick={() => { setStatusTab(t.status); setPage(0); }}
+                                sx={{
+                                    flex: '1 1 150px', minWidth: 150, p: 1.5, borderRadius: 2.5, cursor: 'pointer', bgcolor: '#fff',
+                                    border: `1px solid ${active ? cfg.color : '#E8EDF3'}`,
+                                    boxShadow: active ? `0 3px 12px ${alpha(cfg.color, 0.2)}` : 'none',
+                                    transition: 'all .15s ease',
+                                    '&:hover': { borderColor: cfg.color, transform: 'translateY(-1px)' },
+                                }}
+                            >
+                                <Stack direction="row" alignItems="center" spacing={1.25}>
+                                    <Box sx={{ width: 36, height: 36, borderRadius: 1.5, bgcolor: alpha(cfg.color, 0.1), color: cfg.color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{t.icon}</Box>
+                                    <Box sx={{ minWidth: 0 }}>
+                                        <Typography sx={{ fontSize: '1.25rem', fontWeight: 800, lineHeight: 1, color: '#0F172A', fontVariantNumeric: 'tabular-nums' }}>{cnt}</Typography>
+                                        <Typography sx={{ fontSize: '0.62rem', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em', mt: 0.5 }} noWrap>{t.label}</Typography>
+                                    </Box>
+                                </Stack>
+                            </Paper>
+                        );
+                    })}
+                </Stack>
+
                 <Card sx={{ width: '100%', boxShadow: '0 1px 3px rgba(0,0,0,0.07), 0 4px 24px rgba(0,0,0,0.05)', borderRadius: '14px', overflow: 'hidden', border: 'none' }}>
                     {/* Toolbar */}
                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 3, pt: 2.5, pb: 1.5, flexWrap: 'wrap', gap: 1.5, bgcolor: '#fff', borderBottom: '1px solid #F1F5F9' }}>
@@ -214,6 +266,12 @@ const AllMovements = () => {
                                                         <VisibilityOutlinedIcon sx={{ fontSize: 15 }} />
                                                     </IconButton>
                                                 </Tooltip>
+                                                {canApproveMovement(mov, currentUserId) && (
+                                                    <>
+                                                        <Tooltip title="Approve"><IconButton size="small" onClick={() => openModal('approve', mov)} sx={{ color: '#15803D' }}><CheckCircleOutlineIcon sx={{ fontSize: 15 }} /></IconButton></Tooltip>
+                                                        <Tooltip title="Reject"><IconButton size="small" onClick={() => openModal('reject', mov)} sx={{ color: '#B91C1C' }}><HighlightOffIcon sx={{ fontSize: 15 }} /></IconButton></Tooltip>
+                                                    </>
+                                                )}
                                                 {canDispatch(mov) && (
                                                     <Tooltip title="Dispatch"><IconButton size="small" onClick={() => openModal('dispatch', mov)} sx={{ color: '#2563EB' }}><LocalShippingOutlinedIcon sx={{ fontSize: 15 }} /></IconButton></Tooltip>
                                                 )}

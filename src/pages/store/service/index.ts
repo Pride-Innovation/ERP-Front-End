@@ -25,7 +25,37 @@ const fetchLastIssuedCommodityService = async (id: string | number) => {
     }
 }
 
+/** All consumable balances (with minLevel + lowStock), optionally filtered. */
+const fetchBalancesService = async (params?: Record<string, any>) => {
+    try {
+        return await axiosInstance.get('inventory/balances', { params });
+    } catch (error) {
+        return error;
+    }
+}
+
+/** Balances at or below their own reorder threshold. */
+const fetchLowStockService = async () => {
+    try {
+        return await axiosInstance.get('inventory/low-stock');
+    } catch (error) {
+        return error;
+    }
+}
+
+/** Sets (or clears, with 0) a balance's reorder threshold. */
+const setBalanceMinLevelService = async (balanceId: string | number, minLevel: number) => {
+    try {
+        return await axiosInstance.put(`inventory/balances/${balanceId}/min-level`, { minLevel });
+    } catch (error) {
+        return error;
+    }
+}
+
 export {
     fetchStoreDetailsPerBranchService,
-    fetchLastIssuedCommodityService
+    fetchLastIssuedCommodityService,
+    fetchBalancesService,
+    fetchLowStockService,
+    setBalanceMinLevelService,
 }

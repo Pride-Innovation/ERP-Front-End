@@ -15,20 +15,25 @@ import AssignmentTurnedInOutlinedIcon from '@mui/icons-material/AssignmentTurned
 import TaskAltOutlinedIcon from '@mui/icons-material/TaskAltOutlined';
 import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
 import FlightTakeoffOutlinedIcon from '@mui/icons-material/FlightTakeoffOutlined';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import { toast } from 'react-toastify';
 import { IMovementAction } from './interface';
 import { movementTypeLabel, receiptStatusLabels, ReceiptStatus, getStatusConfig } from './constants';
 import {
     dispatchMovementService, markInTransitService, receiveMovementService,
     completeMovementService, cancelMovementService,
+    approveMovementService, rejectMovementService,
 } from './service';
 import ButtonComponent from '../../components/forms/Button';
 
 const PRIMARY = '#08796C';
 
-type ActionKind = 'dispatch' | 'in-transit' | 'receive' | 'complete' | 'cancel';
+type ActionKind = 'dispatch' | 'in-transit' | 'receive' | 'complete' | 'cancel' | 'approve' | 'reject';
 
 const ACTION_META: Record<ActionKind, { title: string; subtitle: string; icon: JSX.Element; color: string; cta: string }> = {
+    approve: { title: 'Approve Movement', subtitle: 'Approve this movement so it can proceed up the approval ladder.', icon: <CheckCircleOutlineIcon />, color: '#15803D', cta: 'Approve' },
+    reject: { title: 'Reject Movement', subtitle: 'Reject this movement. It will be cancelled and the initiator notified.', icon: <HighlightOffIcon />, color: '#B91C1C', cta: 'Reject' },
     dispatch: { title: 'Dispatch Movement', subtitle: 'Capture courier and tracking details for this inter-location movement.', icon: <LocalShippingOutlinedIcon />, color: '#2563EB', cta: 'Dispatch' },
     'in-transit': { title: 'Mark In Transit', subtitle: 'Flag this dispatched movement as currently in transit.', icon: <FlightTakeoffOutlinedIcon />, color: '#4338CA', cta: 'Mark In Transit' },
     receive: { title: 'Receive Movement', subtitle: 'Acknowledge receipt at the destination and apply inventory effects.', icon: <AssignmentTurnedInOutlinedIcon />, color: '#047857', cta: 'Confirm Receipt' },
@@ -59,6 +64,17 @@ const MovementActionModal = ({ action, movement, handleClose, sendingRequest, se
         try {
             let response: any;
             switch (action) {
+                case 'approve':
+                    response = await approveMovementService(movement.id, remarks || undefined);
+                    break;
+                case 'reject':
+                    if (!reason.trim()) {
+                        toast.error('Please give a reason for rejecting.');
+                        setSendingRequest(false);
+                        return;
+                    }
+                    response = await rejectMovementService(movement.id, reason);
+                    break;
                 case 'dispatch':
                     response = await dispatchMovementService(movement.id, {
                         courierService: courierService || null,
@@ -144,6 +160,14 @@ const MovementActionModal = ({ action, movement, handleClose, sendingRequest, se
                             </TextField>
                             <TextField label="Remarks" size="small" fullWidth multiline rows={2} value={remarks} onChange={(e) => setRemarks(e.target.value)} />
                         </Stack>
+                    )}
+
+                    {action === 'approve' && (
+                        <TextField label="Comment (optional)" size="small" fullWidth multiline rows={2} value={remarks} onChange={(e) => setRemarks(e.target.value)} sx={{ mb: 2.5 }} />
+                    )}
+
+                    {action === 'reject' && (
+                        <TextField label="Reason for rejection" size="small" fullWidth multiline rows={3} value={reason} onChange={(e) => setReason(e.target.value)} sx={{ mb: 2.5 }} />
                     )}
 
                     {action === 'complete' && (

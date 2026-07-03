@@ -5,7 +5,7 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
     alpha, Avatar, Box, Button, Chip, Grid, Paper, Stack, Typography,
@@ -22,17 +22,35 @@ import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
 import FingerprintIcon from '@mui/icons-material/Fingerprint';
 import CategoryOutlinedIcon from '@mui/icons-material/CategoryOutlined';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import HighlightOffIcon from '@mui/icons-material/HighlightOff';
+import HowToRegOutlinedIcon from '@mui/icons-material/HowToRegOutlined';
+import UploadFileOutlinedIcon from '@mui/icons-material/UploadFileOutlined';
+import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
+import PictureAsPdfOutlinedIcon from '@mui/icons-material/PictureAsPdfOutlined';
 import { toast } from 'react-toastify';
 import { IMovement } from '../interface';
-import { findMovementByIdService } from '../service';
+import { findMovementByIdService, fetchMovementApprovalsService, uploadMovementDocumentService } from '../service';
+import { generateReleaseNote } from './generateReleaseNote';
 import { ROUTES } from '../../../core/routes/routes';
 import Loading from '../../../components/loading';
 import ModalComponent from '../../../components/modal';
 import MovementActionModal from '../MovementActionModal';
+import RoutesUtills from '../../../core/routes/utills';
 import {
     getStatusConfig, movementTypeLabel, categoryLabels, receiptStatusLabels,
     canDispatch, canMarkInTransit, canReceive, canComplete, canCancel,
+    canApproveMovement, isPendingApproval,
 } from '../constants';
+
+interface IApprovalRecord {
+    id: number;
+    actor?: { firstName?: string; lastName?: string } | null;
+    action: 'PENDING' | 'APPROVED' | 'REJECTED';
+    tierRole?: string | null;
+    comment?: string | null;
+    createDate?: string | null;
+}
 
 const PRIMARY = '#08796C';
 const BLUE = '#2563EB';
@@ -53,10 +71,33 @@ const MovementDetails = () => {
     const navigate = useNavigate();
 
     const [movement, setMovement] = useState<IMovement | null>(null);
+    const [approvals, setApprovals] = useState<IApprovalRecord[]>([]);
     const [loading, setLoading] = useState(true);
     const [action, setAction] = useState('');
     const [open, setOpen] = useState(false);
     const [sendingRequest, setSendingRequest] = useState(false);
+
+    const currentUserId = RoutesUtills().getCurrentUser()?.id;
+    const fileInputRef = useRef<HTMLInputElement | null>(null);
+    const [uploading, setUploading] = useState(false);
+
+    const handleUploadDocument = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file || !id) return;
+        setUploading(true);
+        try {
+            const res = (await uploadMovementDocumentService(id, file)) as any;
+            if (res?.status === 200) {
+                toast.success('Document uploaded');
+                await load();
+            } else {
+                toast.error(res?.data?.message ?? 'Failed to upload document');
+            }
+        } finally {
+            setUploading(false);
+            if (fileInputRef.current) fileInputRef.current.value = '';
+        }
+    };
 
     const load = async () => {
         setLoading(true);
@@ -64,6 +105,8 @@ const MovementDetails = () => {
             const response = (await findMovementByIdService(id as string)) as any;
             if (response?.status === 200) setMovement(response.data);
             else toast.error('Could not load movement details');
+            const trail = (await fetchMovementApprovalsService(id as string)) as any;
+            if (trail?.status === 200) setApprovals(trail.data ?? []);
         } catch {
             toast.error('An unexpected error occurred');
         } finally {
@@ -111,6 +154,12 @@ const MovementDetails = () => {
                     </Stack>
                     <Stack direction="row" spacing={1} flexWrap="wrap" justifyContent="flex-end">
                         <Button variant="outlined" startIcon={<ArrowBackIcon />} onClick={() => navigate(ROUTES.MOVEMENT)} sx={{ borderRadius: 2, fontWeight: 600, fontSize: '0.78rem' }}>Back</Button>
+                        {canApproveMovement(movement, currentUserId) && (
+                            <>
+                                <Button variant="contained" startIcon={<CheckCircleOutlineIcon />} onClick={() => openAction('approve')} sx={{ borderRadius: 2, fontWeight: 600, fontSize: '0.78rem', bgcolor: '#15803D' }}>Approve</Button>
+                                <Button variant="outlined" startIcon={<HighlightOffIcon />} onClick={() => openAction('reject')} sx={{ borderRadius: 2, fontWeight: 600, fontSize: '0.78rem', borderColor: '#B91C1C', color: '#B91C1C' }}>Reject</Button>
+                            </>
+                        )}
                         {canDispatch(movement) && <Button variant="contained" startIcon={<LocalShippingOutlinedIcon />} onClick={() => openAction('dispatch')} sx={{ borderRadius: 2, fontWeight: 600, fontSize: '0.78rem', bgcolor: BLUE }}>Dispatch</Button>}
                         {canMarkInTransit(movement) && <Button variant="contained" startIcon={<FlightTakeoffOutlinedIcon />} onClick={() => openAction('in-transit')} sx={{ borderRadius: 2, fontWeight: 600, fontSize: '0.78rem', bgcolor: '#4338CA' }}>In Transit</Button>}
                         {canReceive(movement) && <Button variant="contained" startIcon={<AssignmentTurnedInOutlinedIcon />} onClick={() => openAction('receive')} sx={{ borderRadius: 2, fontWeight: 600, fontSize: '0.78rem', bgcolor: '#047857' }}>Receive</Button>}
@@ -191,12 +240,86 @@ const MovementDetails = () => {
                                 </Grid>
                             </Paper>
                         )}
+
+                        {/* Documents (signed release / delivery notes) */}
+                        <Paper elevation={0} sx={{ p: 2.5, borderRadius: 3, border: `1px solid ${alpha('#000', 0.07)}` }}>
+                            <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1.5}>
+                                <Stack direction="row" spacing={1} alignItems="center">
+                                    <DescriptionOutlinedIcon sx={{ fontSize: 16, color: PRIMARY }} />
+                                    <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>Documents</Typography>
+                                </Stack>
+                                <Stack direction="row" spacing={1}>
+                                    <Button size="small" variant="text" startIcon={<PictureAsPdfOutlinedIcon sx={{ fontSize: 16 }} />}
+                                        onClick={() => generateReleaseNote(movement)}
+                                        sx={{ borderRadius: 2, fontWeight: 600, fontSize: '0.72rem', color: PRIMARY }}>
+                                        Release Note
+                                    </Button>
+                                    <Button size="small" variant="outlined" startIcon={<UploadFileOutlinedIcon sx={{ fontSize: 16 }} />} disabled={uploading}
+                                        onClick={() => fileInputRef.current?.click()}
+                                        sx={{ borderRadius: 2, fontWeight: 600, fontSize: '0.72rem' }}>
+                                        {uploading ? 'Uploading…' : 'Upload'}
+                                    </Button>
+                                </Stack>
+                                <input ref={fileInputRef} type="file" hidden onChange={handleUploadDocument} />
+                            </Stack>
+                            {movement.deliveryDocuments && movement.deliveryDocuments.length > 0 ? (
+                                <Stack spacing={0.75}>
+                                    {movement.deliveryDocuments.map((doc, i) => {
+                                        const name = doc.split('/').pop();
+                                        return (
+                                            <Stack key={i} direction="row" spacing={1} alignItems="center" component="a" href={`/statics/${name}`} target="_blank" rel="noopener noreferrer"
+                                                sx={{ p: 1, borderRadius: 1.5, border: `1px solid ${alpha('#000', 0.06)}`, textDecoration: 'none', color: 'inherit', '&:hover': { bgcolor: alpha(PRIMARY, 0.04) } }}>
+                                                <DescriptionOutlinedIcon sx={{ fontSize: 16, color: PRIMARY }} />
+                                                <Typography variant="caption" sx={{ fontWeight: 600 }} noWrap>{name}</Typography>
+                                            </Stack>
+                                        );
+                                    })}
+                                </Stack>
+                            ) : (
+                                <Typography variant="caption" color="text.disabled">
+                                    No documents attached. Upload the signed release / delivery note.
+                                </Typography>
+                            )}
+                        </Paper>
                     </Stack>
                 </Grid>
 
                 {/* Right: parties / receiving / meta */}
                 <Grid item xs={12} md={5}>
                     <Stack spacing={2.5}>
+                        {(approvals.length > 0 || isPendingApproval(movement)) && (
+                            <Paper elevation={0} sx={{ p: 2.5, borderRadius: 3, border: `1px solid ${alpha(PRIMARY, 0.16)}` }}>
+                                <Stack direction="row" spacing={1} alignItems="center" mb={1.5}>
+                                    <HowToRegOutlinedIcon sx={{ fontSize: 18, color: PRIMARY }} />
+                                    <Typography variant="subtitle2" sx={{ fontWeight: 700, color: PRIMARY }}>Approval</Typography>
+                                </Stack>
+                                {isPendingApproval(movement) && movement.currentApprover && (
+                                    <Box sx={{ mb: 1.5, p: 1.25, borderRadius: 1.5, bgcolor: alpha('#A16207', 0.08), border: `1px solid ${alpha('#A16207', 0.2)}` }}>
+                                        <Typography variant="caption" sx={{ color: '#A16207', fontWeight: 700 }}>
+                                            Awaiting approval by {movement.currentApprover.firstName} {movement.currentApprover.lastName}
+                                        </Typography>
+                                    </Box>
+                                )}
+                                <Stack spacing={1}>
+                                    {approvals.map((a) => {
+                                        const tone = a.action === 'APPROVED' ? '#15803D' : a.action === 'REJECTED' ? '#B91C1C' : '#A16207';
+                                        return (
+                                            <Stack key={a.id} direction="row" spacing={1.25} alignItems="flex-start" sx={{ p: 1, borderRadius: 1.5, border: `1px solid ${alpha('#000', 0.06)}` }}>
+                                                <Chip label={a.action} size="small" sx={{ height: 18, fontSize: '0.6rem', fontWeight: 700, bgcolor: alpha(tone, 0.1), color: tone }} />
+                                                <Box flex={1} minWidth={0}>
+                                                    <Typography variant="caption" sx={{ fontWeight: 700, display: 'block' }}>
+                                                        {a.tierRole ?? 'Tier'}{a.actor ? ` · ${a.actor.firstName} ${a.actor.lastName}` : ''}
+                                                    </Typography>
+                                                    {a.comment && <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block' }}>{a.comment}</Typography>}
+                                                    <Typography variant="caption" sx={{ color: 'text.disabled' }}>{fmtDateTime(a.createDate) ?? ''}</Typography>
+                                                </Box>
+                                            </Stack>
+                                        );
+                                    })}
+                                </Stack>
+                            </Paper>
+                        )}
+
                         <Paper elevation={0} sx={{ p: 2.5, borderRadius: 3, border: `1px solid ${alpha('#000', 0.07)}` }}>
                             <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 2, color: PRIMARY }}>Parties</Typography>
                             <Field label="Initiator" value={movement.initiator ? `${movement.initiator.firstName} ${movement.initiator.lastName}` : null} />

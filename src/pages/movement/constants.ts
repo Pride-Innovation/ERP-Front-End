@@ -98,9 +98,9 @@ export const storeTypeLabels: Record<StoreType, string> = {
     DISPOSAL: 'Disposal Store',
 };
 
-/** Whether the movement is awaiting dispatch (inter-location, not yet shipped). */
+/** Whether the movement is awaiting dispatch (inter-location, approved and not yet shipped). */
 export const canDispatch = (m: { movementCategory?: string; status?: string }) =>
-    m.movementCategory === 'INTER_LOCATION' && (m.status === 'INITIATED' || m.status === 'DRAFT');
+    m.movementCategory === 'INTER_LOCATION' && m.status === 'INITIATED';
 
 export const canMarkInTransit = (m: { status?: string }) => m.status === 'DISPATCHED';
 
@@ -108,9 +108,23 @@ export const canMarkInTransit = (m: { status?: string }) => m.status === 'DISPAT
 export const canReceive = (m: { movementCategory?: string; status?: string }) =>
     m.movementCategory === 'INTER_LOCATION' && (m.status === 'DISPATCHED' || m.status === 'IN_TRANSIT');
 
-/** Intra-location movements complete in one step. */
+/** Intra-location movements complete in one step (once approved / initiated). */
 export const canComplete = (m: { movementCategory?: string; status?: string }) =>
-    m.movementCategory === 'INTRA_LOCATION' && (m.status === 'INITIATED' || m.status === 'DRAFT' || m.status === 'RECEIVED');
+    m.movementCategory === 'INTRA_LOCATION' && (m.status === 'INITIATED' || m.status === 'RECEIVED');
 
 export const canCancel = (m: { status?: string }) =>
     m.status !== 'COMPLETED' && m.status !== 'CANCELLED';
+
+/**
+ * A DRAFT movement is awaiting approval. The current user can act on it only when they are the
+ * tier currently assigned (`currentApprover`).
+ */
+export const isPendingApproval = (m: { status?: string }) => m.status === 'DRAFT';
+
+export const canApproveMovement = (
+    m: { status?: string; currentApprover?: { id?: number | string } | null },
+    currentUserId?: number | string,
+) =>
+    m.status === 'DRAFT'
+    && m.currentApprover?.id != null
+    && String(m.currentApprover.id) === String(currentUserId ?? '');
