@@ -13,6 +13,8 @@ export interface IOptions {
     value: string | number, label: string, icon?: JSX.Element, header?: boolean;
     /** Render a separator immediately after this option (e.g. to set a primary action apart). */
     divider?: boolean;
+    /** Style this option as destructive (red) regardless of its label — e.g. Block / Disable Account. */
+    danger?: boolean;
 }
 
 // ─── Column filter definitions ────────────────────────────────────────────────
