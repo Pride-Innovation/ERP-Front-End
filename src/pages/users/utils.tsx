@@ -139,12 +139,12 @@ const UserUtils = () => {
         action: {
             label: "options",
             options: [
-                { value: crudStates.disable, label: "Disable Account", icon: <InfoIcon fontSize='small' color='error' /> },
-                { value: crudStates.block, label: "Block Account", icon: <BlockIcon fontSize='small' color='error' /> },
+                { value: crudStates.read, label: "View Details", icon: <RemoveRedEyeIcon fontSize='small' />, divider: true },
                 { value: crudStates.update, label: "Update", icon: <ModeEditIcon fontSize='small' color='info' /> },
-                { value: crudStates.read, label: "View Details", icon: <RemoveRedEyeIcon fontSize='small' color='inherit' /> },
-                { value: crudStates.unblock, label: "Unblock", icon: <LockPersonOutlinedIcon fontSize='small' color='warning' /> },
                 { value: crudStates.enable, label: "Enable", icon: <VpnKeyOutlinedIcon fontSize='small' color='success' /> },
+                { value: crudStates.unblock, label: "Unblock", icon: <LockPersonOutlinedIcon fontSize='small' color='warning' /> },
+                { value: crudStates.disable, label: "Disable Account", icon: <InfoIcon fontSize='small' />, danger: true },
+                { value: crudStates.block, label: "Block Account", icon: <BlockIcon fontSize='small' />, danger: true },
             ]
         },
     };
