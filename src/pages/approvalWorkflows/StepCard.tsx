@@ -28,12 +28,14 @@ import { brand, gold } from '../../utils/tokens';
 import { IRole } from '../settings/interface';
 import { IUnit } from '../settings/units/interface';
 import {
+    APPROVER_SUBJECT_LABELS,
     APPROVER_TYPE_LABELS,
     COMPLETION_NOTIFY_SOURCES,
     IApprovalStep,
     NOTIFY_GROUP_SOURCE_LABELS,
     NotifyGroupSource,
     STEP_TYPE_LABELS,
+    SUBJECT_AWARE_APPROVER_TYPES,
 } from './interface';
 
 const TEAL = brand[800];
@@ -126,6 +128,26 @@ const StepCard: React.FC<IStepCardProps> = ({ step, index, total, roles, units, 
                 error={undefined}
                 options={Object.entries(APPROVER_TYPE_LABELS).map(([k, v]) => ({ value: k, label: v }))}
             />
+            {SUBJECT_AWARE_APPROVER_TYPES.includes(step.approverType) && (
+                <Box>
+                    <SelectComponent
+                        id={`approver-subject-${index}`}
+                        label="Resolve against"
+                        required={false}
+                        field={{
+                            value: step.approverSubject ?? 'REQUESTER',
+                            onChange: (e: any) => onChange(index, 'approverSubject', e.target.value),
+                        }}
+                        error={undefined}
+                        options={Object.entries(APPROVER_SUBJECT_LABELS).map(([k, v]) => ({ value: k, label: v }))}
+                    />
+                    {step.approverSubject === 'ISSUER' && (
+                        <Typography sx={{ mt: 0.5, fontSize: '0.68rem', color: 'text.secondary' }}>
+                            Climbs the issuer’s reporting line (e.g. the issuer’s manager). Use on an issuance-approval step.
+                        </Typography>
+                    )}
+                </Box>
+            )}
             {step.approverType === 'GROUP_EMAIL' && (
                 <Box>
                     <SelectComponent
