@@ -16,6 +16,18 @@ const PRIMARY = '#08796C';
 const DANGER = '#DC2626';
 const SLATE = '#334155';
 
+/**
+ * Destructive actions get red styling + a leading separator. Detected by an explicit
+ * `danger` flag (e.g. Block / Disable Account) or a destructive label keyword.
+ * Keyword matching deliberately avoids "block" so "Unblock" isn't flagged.
+ */
+const isDangerOption = (option?: IOptions): boolean => {
+    if (!option) return false;
+    if (option.danger) return true;
+    const label = String(option.label ?? '').toLowerCase();
+    return label.includes('reject') || label.includes('delet') || label.includes('remov') || label.includes('dispos');
+};
+
 const PopoverComponent = ({
     setAnchorEl,
     anchorEl,
@@ -73,9 +85,11 @@ const PopoverComponent = ({
                         const isHeader = option?.header;
                         const isLast   = idx === (options?.length ?? 0) - 1;
 
-                        // Detect destructive / primary actions by label keywords
+                        // Destructive = an explicit `danger` flag (e.g. Block / Disable) OR a
+                        // destructive label keyword. Primary = the "view / details" action.
                         const label    = String(option.label ?? '').toLowerCase();
-                        const isDanger = label.includes('reject') || label.includes('delet') || label.includes('remov') || label.includes('dispos');
+                        const isDanger = isDangerOption(option);
+                        const prevIsDanger = idx > 0 ? isDangerOption(options?.[idx - 1]) : false;
                         const isView   = label.includes('view') || label.includes('detail');
 
                         // `accent` tints the icon tile + drives the hover; `labelColor` keeps text readable.
@@ -84,8 +98,8 @@ const PopoverComponent = ({
 
                         return (
                             <React.Fragment key={idx}>
-                                {/* Divider before destructive actions (not at index 0) */}
-                                {isDanger && idx > 0 && (
+                                {/* One divider before a run of destructive actions (not at index 0) */}
+                                {isDanger && idx > 0 && !prevIsDanger && (
                                     <Divider sx={{ my: 0.6, mx: 0.75, borderColor: '#EEF2F6' }} />
                                 )}
                                 <MenuItem
