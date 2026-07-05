@@ -10,7 +10,7 @@ import {
     Box,
     Button,
     Chip,
-    Divider,
+    Collapse,
     IconButton,
     Paper,
     Skeleton,
@@ -21,52 +21,31 @@ import {
     TableContainer,
     TableHead,
     TableRow,
-    Tooltip,
     Typography,
     alpha,
 } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
 
 import AdminPanelSettingsOutlinedIcon from '@mui/icons-material/AdminPanelSettingsOutlined';
 import LaptopChromebookOutlinedIcon from '@mui/icons-material/LaptopChromebookOutlined';
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
-import BusinessCenterOutlinedIcon from '@mui/icons-material/BusinessCenterOutlined';
-import MonitorOutlinedIcon from '@mui/icons-material/MonitorOutlined';
-import DirectionsCarOutlinedIcon from '@mui/icons-material/DirectionsCarOutlined';
-import ContentPasteOutlinedIcon from '@mui/icons-material/ContentPasteOutlined';
-import CategoryOutlinedIcon from '@mui/icons-material/CategoryOutlined';
 import ArrowForwardIosOutlinedIcon from '@mui/icons-material/ArrowForwardIosOutlined';
 import StorefrontOutlinedIcon from '@mui/icons-material/StorefrontOutlined';
 import SwapHorizOutlinedIcon from '@mui/icons-material/SwapHorizOutlined';
 import AccountBalanceOutlinedIcon from '@mui/icons-material/AccountBalanceOutlined';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import PublicOutlinedIcon from '@mui/icons-material/PublicOutlined';
+import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined';
 import { SvgIconComponent } from '@mui/icons-material';
 
 import { PageHero } from '../../components/layout';
 import { ROUTES } from '../../core/routes/routes';
-import { RootState } from '../../store';
-import AssetTypeUtills from '../settings/assetTypes/utills';
-import RoutesUtills from '../../core/routes/utills';
 import { fetchRowsService } from '../../core/apis/globalService';
 import { fetchLowStockService } from './service';
 import BalancesPanel from './BalancesPanel';
-import { IStoresAxiosResponse } from './interface';
-import { IAssetType } from '../settings/assetTypes/interface';
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
-
-const getCategoryStyle = (name: string): { color: string; Icon: SvgIconComponent } => {
-    const lower = (name ?? '').toLowerCase();
-    if (lower.includes('office')) return { color: '#6366f1', Icon: BusinessCenterOutlinedIcon };
-    if (lower.includes('it') || lower.includes('tech') || lower.includes('computer') || lower.includes('laptop'))
-        return { color: '#0ea5e9', Icon: MonitorOutlinedIcon };
-    if (lower.includes('fleet') || lower.includes('vehicle') || lower.includes('car') || lower.includes('transport'))
-        return { color: '#f59e0b', Icon: DirectionsCarOutlinedIcon };
-    if (lower.includes('station') || lower.includes('paper') || lower.includes('print'))
-        return { color: '#10b981', Icon: ContentPasteOutlinedIcon };
-    return { color: '#8b5cf6', Icon: CategoryOutlinedIcon };
-};
+// ── Store definitions ─────────────────────────────────────────────────────────
 
 type StoreDef = {
     type: string;
@@ -104,23 +83,33 @@ const STORES: StoreDef[] = [
     },
 ];
 
+interface IBranchRow {
+    id: number;
+    name: string;
+    region?: string;
+    itemLines: number;
+    low: number;
+}
+
+const headerCellSx = {
+    fontWeight: 700,
+    fontSize: '0.72rem',
+    textTransform: 'uppercase',
+    letterSpacing: '0.04em',
+    color: '#64748B',
+} as const;
+
 // ── Component ─────────────────────────────────────────────────────────────────
 
 const Store = () => {
     const navigate = useNavigate();
-    const { fetchAllAssetTypes } = AssetTypeUtills();
-    const { getCurrentUser } = RoutesUtills();
-    const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore);
-
-    // categoryCounts: keyed by assetType.id → totalElements
-    const [categoryCounts, setCategoryCounts] = useState<Record<string | number, number>>({});
-    const [countsLoading, setCountsLoading] = useState(false);
 
     // Cross-branch snapshot for the Admin: stocked item lines + low-stock count per branch store.
-    const [branchRows, setBranchRows] = useState<Array<{ id: number; name: string; region?: string; itemLines: number; low: number }>>([]);
+    const [branchRows, setBranchRows] = useState<IBranchRow[]>([]);
     const [branchesLoading, setBranchesLoading] = useState(false);
+    const [expandedRegions, setExpandedRegions] = useState<Set<string>>(new Set());
 
-    useEffect(() => { fetchAllAssetTypes(); fetchBranchesOverview(); }, []);
+    useEffect(() => { fetchBranchesOverview(); }, []);
 
     const fetchBranchesOverview = async () => {
         setBranchesLoading(true);
@@ -145,47 +134,45 @@ const Store = () => {
                 };
             }));
             setBranchRows(withCounts);
+            // Surface problems immediately: regions carrying low-stock alerts start expanded.
+            setExpandedRegions(new Set(
+                withCounts.filter((b) => b.low > 0).map((b) => b.region ?? 'Unassigned')
+            ));
         } catch (e) {
             console.log(e);
         }
         setBranchesLoading(false);
     };
 
-    useEffect(() => {
-        if (assetTypes.length > 0) {
-            fetchCounts(assetTypes);
-        }
-    }, [assetTypes]);
+    // Group branches by region so the overview reads as a short list of regions
+    // instead of one long flat table.
+    const regionGroups = useMemo(() => {
+        const groups = new Map<string, IBranchRow[]>();
+        branchRows.forEach((b) => {
+            const key = b.region ?? 'Unassigned';
+            if (!groups.has(key)) groups.set(key, []);
+            groups.get(key)!.push(b);
+        });
+        return Array.from(groups.entries())
+            .map(([region, rows]) => ({
+                region,
+                rows: rows.sort((a, b) => a.name.localeCompare(b.name)),
+                itemLines: rows.reduce((sum, r) => sum + r.itemLines, 0),
+                low: rows.reduce((sum, r) => sum + r.low, 0),
+            }))
+            .sort((a, b) => a.region.localeCompare(b.region));
+    }, [branchRows]);
 
-    const fetchCounts = async (types: IAssetType[]) => {
-        const branchId = getCurrentUser()?.title?.branch?.id;
-        setCountsLoading(true);
-        try {
-            const results = await Promise.all(
-                types.map(async (type) => {
-                    const response = await fetchRowsService({
-                        pageNumber: 0,
-                        pageSize: 1,
-                        endPoint: 'store',
-                        params: { branchId, assetTypeId: type.id },
-                    }) as IStoresAxiosResponse;
-                    return {
-                        id: type.id,
-                        count: response?.status === 200 ? response.data.totalElements : 0,
-                    };
-                })
-            );
-            const counts: Record<string | number, number> = {};
-            results.forEach(r => { if (r.id !== undefined) counts[r.id] = r.count; });
-            setCategoryCounts(counts);
-        } catch (e) {
-            console.log(e);
-        }
-        setCountsLoading(false);
+    const toggleRegion = (region: string) => {
+        setExpandedRegions((prev) => {
+            const next = new Set(prev);
+            if (next.has(region)) next.delete(region); else next.add(region);
+            return next;
+        });
     };
 
     const todayLabel = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-    const totalItems = Object.values(categoryCounts).reduce((sum, n) => sum + n, 0);
+    const totalItemLines = branchRows.reduce((sum, b) => sum + b.itemLines, 0);
 
     return (
         <Box sx={{ minHeight: '100vh', pb: 4 }}>
@@ -204,96 +191,141 @@ const Store = () => {
                     </Button>
                 }
                 stat={{
-                    value: countsLoading
+                    value: branchesLoading
                         ? (<Skeleton width={50} sx={{ display: 'inline-block' }} /> as any)
-                        : totalItems.toLocaleString(),
-                    label: 'total items',
+                        : totalItemLines.toLocaleString(),
+                    label: 'stocked item lines',
                     helper: todayLabel,
                 }}
             />
 
+            {/* ── Store tiles: lightweight navigation — details live on each store's page ── */}
             <Box className="settings-card-grid--wide">
                 {STORES.map(store => (
-                    <StoreCard
-                        key={store.type}
-                        store={store}
-                        assetTypes={assetTypes}
-                        categoryCounts={categoryCounts}
-                        countsLoading={countsLoading}
-                        onView={() => navigate(store.path)}
-                    />
+                    <StoreCard key={store.type} store={store} onView={() => navigate(store.path)} />
                 ))}
             </Box>
 
-            {/* ── Branches overview: cross-branch item status for the Admin ── */}
+            {/* ── Branches overview, grouped by region ── */}
             <Paper elevation={0} sx={{ mt: 3, borderRadius: 2.5, border: '1px solid #E8EDF3', overflow: 'hidden' }}>
                 <Box sx={{ px: 2.5, py: 1.75, borderBottom: '1px solid #EEF2F7', display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
                     <AccountBalanceOutlinedIcon sx={{ fontSize: 18, color: '#08796C' }} />
                     <Typography sx={{ fontWeight: 700 }}>Branches Overview</Typography>
-                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>Stocked item lines per branch store — spot shortfalls and replenish</Typography>
+                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                        Grouped by region — expand a region to see its branch stores. Regions with low-stock alerts open automatically.
+                    </Typography>
                 </Box>
-                <TableContainer>
-                    <Table size="small">
-                        <TableHead>
-                            <TableRow sx={{ bgcolor: '#F8FAFC' }}>
-                                <TableCell sx={{ fontWeight: 700, fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748B' }}>Branch</TableCell>
-                                <TableCell sx={{ fontWeight: 700, fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748B' }}>Region</TableCell>
-                                <TableCell align="right" sx={{ fontWeight: 700, fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748B' }}>Item Lines</TableCell>
-                                <TableCell align="right" sx={{ fontWeight: 700, fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748B' }}>Low Stock</TableCell>
-                                <TableCell align="right" sx={{ fontWeight: 700, fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748B' }}>Action</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {branchesLoading ? (
-                                [0, 1, 2].map((i) => (
-                                    <TableRow key={i}>
-                                        <TableCell><Skeleton width={140} /></TableCell>
-                                        <TableCell><Skeleton width={90} /></TableCell>
-                                        <TableCell align="right"><Skeleton width={40} sx={{ ml: 'auto' }} /></TableCell>
-                                        <TableCell align="right"><Skeleton width={40} sx={{ ml: 'auto' }} /></TableCell>
-                                        <TableCell align="right"><Skeleton width={80} sx={{ ml: 'auto' }} /></TableCell>
-                                    </TableRow>
-                                ))
-                            ) : branchRows.length > 0 ? (
-                                branchRows.map((b) => (
-                                    <TableRow key={b.id} hover>
-                                        <TableCell sx={{ fontWeight: 600 }}>{b.name}</TableCell>
-                                        <TableCell sx={{ color: '#64748B' }}>{b.region ?? '—'}</TableCell>
-                                        <TableCell align="right">
-                                            <Chip
-                                                label={b.itemLines}
-                                                size="small"
-                                                sx={{
-                                                    height: 22, fontWeight: 700, fontVariantNumeric: 'tabular-nums',
-                                                    bgcolor: alpha(b.itemLines === 0 ? '#DC2626' : '#08796C', 0.1),
-                                                    color: b.itemLines === 0 ? '#DC2626' : '#08796C',
-                                                }}
-                                            />
-                                        </TableCell>
-                                        <TableCell align="right">
-                                            {b.low > 0 ? (
-                                                <Chip label={b.low} size="small" sx={{ height: 22, fontWeight: 700, bgcolor: alpha('#B45309', 0.12), color: '#B45309' }} />
-                                            ) : (
-                                                <Typography variant="caption" sx={{ color: '#94A3B8' }}>—</Typography>
-                                            )}
-                                        </TableCell>
-                                        <TableCell align="right">
-                                            <Button size="small" variant="text" startIcon={<SwapHorizOutlinedIcon sx={{ fontSize: 15 }} />}
-                                                onClick={() => navigate(ROUTES.CREATE_MOVEMENT)}
-                                                sx={{ textTransform: 'none', fontWeight: 600, fontSize: '0.72rem', color: '#08796C' }}>
-                                                Replenish
-                                            </Button>
-                                        </TableCell>
-                                    </TableRow>
-                                ))
-                            ) : (
-                                <TableRow>
-                                    <TableCell colSpan={5} align="center" sx={{ py: 3, color: 'text.disabled' }}>No branches found.</TableCell>
-                                </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
+
+                {branchesLoading ? (
+                    <Stack spacing={0} divider={<Box sx={{ borderBottom: '1px solid #EEF2F7' }} />}>
+                        {[0, 1, 2].map((i) => (
+                            <Box key={i} sx={{ px: 2.5, py: 1.75, display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                                <Skeleton variant="rounded" width={28} height={28} />
+                                <Skeleton width={160} />
+                                <Box sx={{ flex: 1 }} />
+                                <Skeleton width={90} />
+                                <Skeleton width={60} />
+                            </Box>
+                        ))}
+                    </Stack>
+                ) : regionGroups.length > 0 ? (
+                    regionGroups.map(({ region, rows, itemLines, low }, idx) => {
+                        const open = expandedRegions.has(region);
+                        return (
+                            <Box key={region} sx={{ borderTop: idx > 0 ? '1px solid #EEF2F7' : 'none' }}>
+                                {/* Region header — the whole row toggles */}
+                                <Box
+                                    onClick={() => toggleRegion(region)}
+                                    sx={{
+                                        px: 2.5, py: 1.5,
+                                        display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap',
+                                        cursor: 'pointer', userSelect: 'none',
+                                        bgcolor: open ? alpha('#08796C', 0.025) : 'transparent',
+                                        transition: 'background-color 0.15s ease',
+                                        '&:hover': { bgcolor: alpha('#08796C', 0.04) },
+                                    }}
+                                >
+                                    <Box sx={{ width: 28, height: 28, borderRadius: 1, bgcolor: alpha('#08796C', 0.08), color: '#08796C', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                        <PublicOutlinedIcon sx={{ fontSize: 15 }} />
+                                    </Box>
+                                    <Typography sx={{ fontWeight: 700, fontSize: '0.9rem', color: '#1E293B' }}>{region}</Typography>
+                                    <Typography variant="caption" sx={{ color: '#94A3B8' }}>
+                                        {rows.length} branch{rows.length !== 1 ? 'es' : ''}
+                                    </Typography>
+                                    <Box sx={{ flex: 1 }} />
+                                    <Chip
+                                        label={`${itemLines.toLocaleString()} item lines`}
+                                        size="small"
+                                        sx={{ height: 22, fontWeight: 700, fontSize: '0.68rem', fontVariantNumeric: 'tabular-nums', bgcolor: alpha('#08796C', 0.08), color: '#08796C' }}
+                                    />
+                                    {low > 0 && (
+                                        <Chip
+                                            icon={<WarningAmberOutlinedIcon sx={{ fontSize: 13 }} />}
+                                            label={`${low} low stock`}
+                                            size="small"
+                                            sx={{ height: 22, fontWeight: 700, fontSize: '0.68rem', bgcolor: alpha('#B45309', 0.12), color: '#B45309', '& .MuiChip-icon': { color: '#B45309' } }}
+                                        />
+                                    )}
+                                    <IconButton size="small" sx={{ ml: 0.5 }} aria-label={open ? `Collapse ${region}` : `Expand ${region}`}>
+                                        <ExpandMoreIcon sx={{ fontSize: 18, color: '#64748B', transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s ease' }} />
+                                    </IconButton>
+                                </Box>
+
+                                {/* Branches within the region */}
+                                <Collapse in={open} timeout="auto" unmountOnExit>
+                                    <TableContainer>
+                                        <Table size="small">
+                                            <TableHead>
+                                                <TableRow sx={{ bgcolor: '#F8FAFC' }}>
+                                                    <TableCell sx={{ ...headerCellSx, pl: 7 }}>Branch</TableCell>
+                                                    <TableCell align="right" sx={headerCellSx}>Item Lines</TableCell>
+                                                    <TableCell align="right" sx={headerCellSx}>Low Stock</TableCell>
+                                                    <TableCell align="right" sx={{ ...headerCellSx, pr: 2.5 }}>Action</TableCell>
+                                                </TableRow>
+                                            </TableHead>
+                                            <TableBody>
+                                                {rows.map((b) => (
+                                                    <TableRow key={b.id} hover>
+                                                        <TableCell sx={{ fontWeight: 600, pl: 7 }}>{b.name}</TableCell>
+                                                        <TableCell align="right">
+                                                            <Chip
+                                                                label={b.itemLines}
+                                                                size="small"
+                                                                sx={{
+                                                                    height: 22, fontWeight: 700, fontVariantNumeric: 'tabular-nums',
+                                                                    bgcolor: alpha(b.itemLines === 0 ? '#DC2626' : '#08796C', 0.1),
+                                                                    color: b.itemLines === 0 ? '#DC2626' : '#08796C',
+                                                                }}
+                                                            />
+                                                        </TableCell>
+                                                        <TableCell align="right">
+                                                            {b.low > 0 ? (
+                                                                <Chip label={b.low} size="small" sx={{ height: 22, fontWeight: 700, bgcolor: alpha('#B45309', 0.12), color: '#B45309' }} />
+                                                            ) : (
+                                                                <Typography variant="caption" sx={{ color: '#94A3B8' }}>—</Typography>
+                                                            )}
+                                                        </TableCell>
+                                                        <TableCell align="right" sx={{ pr: 2.5 }}>
+                                                            <Button size="small" variant="text" startIcon={<SwapHorizOutlinedIcon sx={{ fontSize: 15 }} />}
+                                                                onClick={() => navigate(ROUTES.CREATE_MOVEMENT)}
+                                                                sx={{ textTransform: 'none', fontWeight: 600, fontSize: '0.72rem', color: '#08796C' }}>
+                                                                Replenish
+                                                            </Button>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ))}
+                                            </TableBody>
+                                        </Table>
+                                    </TableContainer>
+                                </Collapse>
+                            </Box>
+                        );
+                    })
+                ) : (
+                    <Box sx={{ py: 4, textAlign: 'center', color: 'text.disabled' }}>
+                        <Typography variant="body2">No branches found.</Typography>
+                    </Box>
+                )}
             </Paper>
 
             {/* ── Consumable balances: set reorder thresholds + see low stock ── */}
@@ -302,233 +334,86 @@ const Store = () => {
     );
 };
 
-// ── Store card ────────────────────────────────────────────────────────────────
+// ── Store card — a clean navigation tile; the breakdown lives on the store page ──
 
 interface StoreCardProps {
     store: StoreDef;
-    assetTypes: IAssetType[];
-    categoryCounts: Record<string | number, number>;
-    countsLoading: boolean;
     onView: () => void;
 }
 
-const StoreCard = ({ store, assetTypes, categoryCounts, countsLoading, onView }: StoreCardProps) => {
+const StoreCard = ({ store, onView }: StoreCardProps) => {
     const color = store.accentColor;
-    const subtotal = assetTypes.reduce(
-        (sum, t) => sum + (t.id !== undefined ? (categoryCounts[t.id] ?? 0) : 0),
-        0
-    );
 
     return (
         <Paper
             elevation={0}
+            onClick={onView}
+            role="link"
+            aria-label={`Open ${store.title}`}
             sx={{
                 borderRadius: 2.5,
                 border: `1px solid ${alpha(color, 0.18)}`,
+                borderTop: `3px solid ${color}`,
                 overflow: 'hidden',
+                cursor: 'pointer',
                 height: '100%',
-                display: 'flex',
-                flexDirection: 'column',
                 transition: 'all 0.2s ease',
                 '&:hover': {
                     boxShadow: `0 6px 22px ${alpha(color, 0.18)}`,
                     transform: 'translateY(-2px)',
                     borderColor: alpha(color, 0.35),
+                    '& .store-card-arrow': { bgcolor: alpha(color, 0.16), transform: 'translateX(2px)' },
                 },
             }}
         >
-            <Box sx={{ p: 2.5, flex: 1, display: 'flex', flexDirection: 'column' }}>
-                {/* Header — icon tile + title/subtitle */}
-                <Stack direction="row" spacing={2} alignItems="flex-start">
-                    <Avatar
-                        sx={{
-                            width: 48,
-                            height: 48,
-                            bgcolor: alpha(color, 0.1),
-                            color,
-                            borderRadius: '12px',
-                            flexShrink: 0,
-                            border: `1px solid ${alpha(color, 0.2)}`,
-                        }}
-                    >
-                        <store.Icon fontSize="small" />
-                    </Avatar>
+            <Stack direction="row" spacing={2} alignItems="center" sx={{ p: 2.5 }}>
+                <Avatar
+                    sx={{
+                        width: 48,
+                        height: 48,
+                        bgcolor: alpha(color, 0.1),
+                        color,
+                        borderRadius: '12px',
+                        flexShrink: 0,
+                        border: `1px solid ${alpha(color, 0.2)}`,
+                    }}
+                >
+                    <store.Icon fontSize="small" />
+                </Avatar>
 
-                    <Box sx={{ flex: 1, minWidth: 0 }}>
-                        <Typography
-                            variant="subtitle1"
-                            sx={{ fontWeight: 700, color: '#1E293B', lineHeight: 1.3, mb: 0.5 }}
-                            noWrap
-                            title={store.title}
-                        >
-                            {store.title}
-                        </Typography>
-                        <Typography
-                            variant="caption"
-                            color="text.secondary"
-                            sx={{ fontSize: '0.78rem', lineHeight: 1.45 }}
-                        >
-                            {store.subtitle}
-                        </Typography>
-                    </Box>
-                </Stack>
-
-                <Divider sx={{ my: 2, borderColor: alpha(color, 0.1) }} />
-
-                {/* Inventory breakdown — one row per asset type */}
-                <Box sx={{ mb: 0.5 }}>
+                <Box sx={{ flex: 1, minWidth: 0 }}>
                     <Typography
-                        variant="caption"
-                        sx={{
-                            color: '#94A3B8',
-                            fontWeight: 700,
-                            textTransform: 'uppercase',
-                            letterSpacing: '0.06em',
-                            fontSize: '0.65rem',
-                            display: 'block',
-                            mb: 1,
-                        }}
+                        variant="subtitle1"
+                        sx={{ fontWeight: 700, color: '#1E293B', lineHeight: 1.3 }}
+                        noWrap
+                        title={store.title}
                     >
-                        Inventory by category
+                        {store.title}
                     </Typography>
-
-                    <Stack spacing={0.75}>
-                        {assetTypes.length > 0
-                            ? assetTypes.map(type => {
-                                const { color: catColor, Icon: CatIcon } = getCategoryStyle(type.name);
-                                const count = type.id !== undefined ? categoryCounts[type.id] : undefined;
-                                return (
-                                    <Stack
-                                        key={type.id}
-                                        direction="row"
-                                        spacing={1}
-                                        alignItems="center"
-                                        sx={{ minWidth: 0, py: 0.25 }}
-                                    >
-                                        <Box
-                                            sx={{
-                                                width: 22,
-                                                height: 22,
-                                                borderRadius: 1,
-                                                bgcolor: alpha(catColor, 0.1),
-                                                color: catColor,
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center',
-                                                flexShrink: 0,
-                                            }}
-                                        >
-                                            <CatIcon sx={{ fontSize: 13 }} />
-                                        </Box>
-                                        <Typography
-                                            variant="body2"
-                                            sx={{
-                                                flex: 1,
-                                                minWidth: 0,
-                                                color: '#334155',
-                                                fontSize: '0.8rem',
-                                                fontWeight: 500,
-                                                overflow: 'hidden',
-                                                textOverflow: 'ellipsis',
-                                                whiteSpace: 'nowrap',
-                                            }}
-                                            title={type.name}
-                                        >
-                                            {type.name}
-                                        </Typography>
-                                        {countsLoading ? (
-                                            <Skeleton width={32} height={18} />
-                                        ) : (
-                                            <Typography
-                                                variant="body2"
-                                                sx={{
-                                                    fontWeight: 700,
-                                                    color: '#1E293B',
-                                                    fontSize: '0.85rem',
-                                                    flexShrink: 0,
-                                                    fontVariantNumeric: 'tabular-nums',
-                                                }}
-                                            >
-                                                {(count ?? 0).toLocaleString()}
-                                            </Typography>
-                                        )}
-                                    </Stack>
-                                );
-                            })
-                            : [0, 1, 2, 3].map(i => (
-                                <Stack key={i} direction="row" spacing={1} alignItems="center" sx={{ py: 0.25 }}>
-                                    <Skeleton variant="rounded" width={22} height={22} />
-                                    <Skeleton variant="text" sx={{ flex: 1 }} />
-                                    <Skeleton variant="text" width={32} />
-                                </Stack>
-                            ))}
-                    </Stack>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.78rem', lineHeight: 1.45 }}>
+                        {store.subtitle}
+                    </Typography>
                 </Box>
 
-                <Divider sx={{ my: 2, borderColor: alpha(color, 0.1) }} />
-
-                {/* Footer — total + view action */}
-                <Stack
-                    direction="row"
-                    alignItems="center"
-                    justifyContent="space-between"
-                    sx={{ mt: 'auto' }}
+                <Box
+                    className="store-card-arrow"
+                    sx={{
+                        color,
+                        bgcolor: alpha(color, 0.08),
+                        borderRadius: '10px',
+                        width: 36,
+                        height: 36,
+                        border: `1px solid ${alpha(color, 0.18)}`,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0,
+                        transition: 'all 0.15s ease',
+                    }}
                 >
-                    <Box sx={{ minWidth: 0 }}>
-                        <Typography
-                            variant="caption"
-                            sx={{
-                                color: '#94A3B8',
-                                fontWeight: 700,
-                                textTransform: 'uppercase',
-                                letterSpacing: '0.06em',
-                                fontSize: '0.65rem',
-                                display: 'block',
-                                lineHeight: 1,
-                                mb: 0.5,
-                            }}
-                        >
-                            Total items
-                        </Typography>
-                        <Typography
-                            variant="h6"
-                            sx={{
-                                fontWeight: 800,
-                                color: '#1E293B',
-                                lineHeight: 1.1,
-                                fontVariantNumeric: 'tabular-nums',
-                            }}
-                        >
-                            {countsLoading
-                                ? <Skeleton width={50} sx={{ display: 'inline-block' }} />
-                                : subtotal.toLocaleString()}
-                        </Typography>
-                    </Box>
-
-                    <Tooltip title={`Open ${store.title}`} arrow>
-                        <IconButton
-                            onClick={onView}
-                            aria-label={`Open ${store.title}`}
-                            sx={{
-                                color,
-                                bgcolor: alpha(color, 0.08),
-                                borderRadius: '10px',
-                                width: 36,
-                                height: 36,
-                                border: `1px solid ${alpha(color, 0.18)}`,
-                                transition: 'all 0.15s ease',
-                                '&:hover': {
-                                    bgcolor: alpha(color, 0.16),
-                                    transform: 'translateX(2px)',
-                                    borderColor: alpha(color, 0.32),
-                                },
-                            }}
-                        >
-                            <ArrowForwardIosOutlinedIcon sx={{ fontSize: 14 }} />
-                        </IconButton>
-                    </Tooltip>
-                </Stack>
-            </Box>
+                    <ArrowForwardIosOutlinedIcon sx={{ fontSize: 14 }} />
+                </Box>
+            </Stack>
         </Paper>
     );
 };

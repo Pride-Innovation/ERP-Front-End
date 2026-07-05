@@ -127,6 +127,35 @@ export const uploadMovementDocumentService = async (id: string | number, file: F
     }
 };
 
+/**
+ * Uploads a document BEFORE its movement exists and returns `{ path }` for the create payload —
+ * needed by flows that must carry documents at creation (an EXTERNAL repair transfer is rejected
+ * without dispatch documents).
+ */
+export const uploadStandaloneMovementDocumentService = async (file: File) => {
+    try {
+        const formData = new FormData();
+        formData.append('file', file);
+        return await axiosInstance.post(`${ENDPOINT}/documents`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+        });
+    } catch (error) {
+        return error;
+    }
+};
+
+/** The current user's movement-approval inbox: DRAFT movements assigned to them. */
+export const fetchPendingApprovalMovementsService = async (
+    approverId: string | number,
+    params?: { pageSize?: number; pageNumber?: number }
+) => {
+    try {
+        return await axiosInstance.get(`${ENDPOINT}/pending-approval/${approverId}`, { params });
+    } catch (error) {
+        return error;
+    }
+};
+
 // ── Repair / temp-replacement / return / disposal (§14-17) ─────────────────
 
 export const repairTransferService = async (body: object) => {

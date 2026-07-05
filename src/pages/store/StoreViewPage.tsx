@@ -27,6 +27,7 @@ import StoreUtills from './utillls';
 import Loading from '../../components/loading';
 import { StoreContext } from '../../context/store';
 import BranchStoreReport from './BranchStoreReport';
+import CategorySummary from './CategorySummary';
 import AssetTypeUtills from '../settings/assetTypes/utills';
 import FilterBranchForm from './FilterBranchForm';
 import { ROUTES } from '../../core/routes/routes';
@@ -216,6 +217,10 @@ const StoreViewPage = ({ title, subtitle, Icon, accentColor }: StoreViewPageProp
                     </Box>
                 </Stack>
             </Stack>
+
+            {/* Items per category for the selected branch — moved here from the
+                store landing page so that page stays a lightweight overview. */}
+            <CategorySummary accentColor={accentColor} />
 
             {/* Main content */}
             {sendingRequest ? (

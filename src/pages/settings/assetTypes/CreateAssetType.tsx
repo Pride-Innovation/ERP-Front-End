@@ -31,6 +31,8 @@ const CreateAssetType = ({
             ownerGroupEmail: '',
             depreciationRate: '',
             usefulLifeMonths: '',
+            repairable: true,
+            repairDestination: 'IT',
         },
     });
 
@@ -44,6 +46,8 @@ const CreateAssetType = ({
                 ownerGroupEmail: formData.ownerGroupEmail?.trim() || null,
                 depreciationRate: formData.depreciationRate?.trim() ? Number(formData.depreciationRate) : null,
                 usefulLifeMonths: formData.usefulLifeMonths?.trim() ? Number(formData.usefulLifeMonths) : null,
+                repairable: formData.repairable !== false,
+                repairDestination: formData.repairDestination || null,
             }) as IAssetTypeAxiosResponse;
             if (response.status === 201) {
                 addAssetTypeToStore(response.data);

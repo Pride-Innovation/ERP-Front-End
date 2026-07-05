@@ -7,28 +7,36 @@ Managing Director
 
 import { useEffect, useState } from 'react';
 import {
-    alpha, Autocomplete, Box, Button, CircularProgress, Divider, Grid,
-    Paper, Stack, TextField, Typography,
+    alpha, Alert, Autocomplete, Box, Button, Chip, CircularProgress, Divider, Grid,
+    MenuItem, Paper, Stack, TextField, Typography,
 } from '@mui/material';
 import BuildOutlinedIcon from '@mui/icons-material/BuildOutlined';
 import SwapHorizOutlinedIcon from '@mui/icons-material/SwapHorizOutlined';
 import RestartAltOutlinedIcon from '@mui/icons-material/RestartAltOutlined';
 import DeleteSweepOutlinedIcon from '@mui/icons-material/DeleteSweepOutlined';
 import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
+import UploadFileOutlinedIcon from '@mui/icons-material/UploadFileOutlined';
+import CloseIcon from '@mui/icons-material/Close';
 import { toast } from 'react-toastify';
 import ButtonComponent from '../../components/forms/Button';
 import { fetchRowsService } from '../../core/apis/globalService';
 import { IAsset } from '../assets/interface';
 import { IUser } from '../users/interface';
 import { IBranch } from '../settings/branch/interface';
-import { fetchAssetsByStoreTypeService, repairTransferService, tempReplacementService, returnAfterRepairService, disposeAssetService } from './service';
+import { IConsultant, IConsultantsAxiosResponse } from '../settings/consultants/interface';
+import { fetchConsultantsService } from '../settings/consultants/service';
+import { RepairDestination } from '../settings/assetTypes/interface';
+import {
+    fetchAssetsByStoreTypeService, repairTransferService, tempReplacementService,
+    returnAfterRepairService, disposeAssetService, uploadStandaloneMovementDocumentService,
+} from './service';
 
 const PRIMARY = '#08796C';
 
 type Flow = 'repair-transfer' | 'temp-replacement' | 'return-after-repair' | 'disposal';
 
 const FLOWS: { key: Flow; label: string; description: string; icon: JSX.Element; color: string }[] = [
-    { key: 'repair-transfer', label: 'Repair Transfer', description: 'Send a faulty asset to the Head Office IT store (§14)', icon: <BuildOutlinedIcon />, color: '#2563EB' },
+    { key: 'repair-transfer', label: 'Repair Transfer', description: 'Send a faulty asset for repair — routed by its category (IT / Admin / External) (§14)', icon: <BuildOutlinedIcon />, color: '#2563EB' },
     { key: 'temp-replacement', label: 'Temporary Replacement', description: 'Issue a temporary asset from the IT store (§15)', icon: <SwapHorizOutlinedIcon />, color: '#A16207' },
     { key: 'return-after-repair', label: 'Return After Repair', description: 'Return a repaired asset to its location (§16)', icon: <RestartAltOutlinedIcon />, color: '#047857' },
     { key: 'disposal', label: 'Disposal', description: 'Move an irreparable asset to the Disposal store (§17)', icon: <DeleteSweepOutlinedIcon />, color: '#B91C1C' },
@@ -62,6 +70,14 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
     const [expectedDeliveryDate, setExpectedDeliveryDate] = useState('');
     const [remarks, setRemarks] = useState('');
 
+    // repair routing (repair-transfer only)
+    const [repairDestination, setRepairDestination] = useState<RepairDestination>('IT');
+    const [consultants, setConsultants] = useState<IConsultant[]>([]);
+    const [consultant, setConsultant] = useState<IConsultant | null>(null);
+    const [dispatchDocs, setDispatchDocs] = useState<File[]>([]);
+
+    const categoryNotRepairable = flow === 'repair-transfer' && asset?.assetType?.repairable === false;
+
     const needsItAssets = flow === 'temp-replacement' || flow === 'return-after-repair' || flow === 'disposal';
     const needsBranches = flow === 'return-after-repair';
 
@@ -79,6 +95,21 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
             })();
         }
     }, [flow]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    // The chosen asset's category dictates the default repair routing (overridable below).
+    useEffect(() => {
+        if (flow !== 'repair-transfer') return;
+        setRepairDestination(asset?.assetType?.repairDestination ?? 'IT');
+    }, [asset, flow]);
+
+    // External routing needs the active consultants directory for the picker.
+    useEffect(() => {
+        if (repairDestination !== 'EXTERNAL' || consultants.length > 0) return;
+        (async () => {
+            const r = (await fetchConsultantsService(true)) as IConsultantsAxiosResponse;
+            if (r?.status === 200) setConsultants(r.data ?? []);
+        })();
+    }, [repairDestination]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const searchAssets = async (q: string) => {
         if (!q) return;
@@ -105,6 +136,7 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
     const reset = () => {
         setAsset(null); setTempAsset(null); setRecipient(null); setDestLocation(null);
         setCourierService(''); setTrackingNumber(''); setDispatchDate(''); setExpectedDeliveryDate(''); setRemarks('');
+        setRepairDestination('IT'); setConsultant(null); setDispatchDocs([]);
     };
 
     const back = () => { setFlow(null); reset(); };
@@ -116,6 +148,21 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
         expectedDeliveryDate: expectedDeliveryDate ? new Date(expectedDeliveryDate).toISOString() : null,
     });
 
+    /** Uploads the selected dispatch documents and returns their stored paths (EXTERNAL repairs). */
+    const uploadDispatchDocs = async (): Promise<string[] | null> => {
+        const paths: string[] = [];
+        for (const file of dispatchDocs) {
+            const r = (await uploadStandaloneMovementDocumentService(file)) as any;
+            if ((r?.status === 200 || r?.status === 201) && r.data?.path) {
+                paths.push(r.data.path);
+            } else {
+                toast.error(`Failed to upload "${file.name}".`);
+                return null;
+            }
+        }
+        return paths;
+    };
+
     const submit = async () => {
         if (!flow) return;
         setSending(true);
@@ -123,7 +170,26 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
             let response: any;
             if (flow === 'repair-transfer') {
                 if (!asset) { toast.warning('Select the faulty asset.'); setSending(false); return; }
-                response = await repairTransferService({ assetId: asset.id, ...logistics(), remarks: remarks || null });
+
+                let deliveryDocuments: string[] | undefined;
+                let consultantId: number | undefined;
+                if (!categoryNotRepairable && repairDestination === 'EXTERNAL') {
+                    if (!consultant) { toast.warning('Select the external consultant.'); setSending(false); return; }
+                    if (dispatchDocs.length === 0) { toast.warning('Attach at least one signed dispatch document.'); setSending(false); return; }
+                    const paths = await uploadDispatchDocs();
+                    if (!paths) { setSending(false); return; }
+                    deliveryDocuments = paths;
+                    consultantId = consultant.id;
+                }
+
+                response = await repairTransferService({
+                    assetId: asset.id,
+                    repairDestination: categoryNotRepairable ? null : repairDestination,
+                    consultantId: consultantId ?? null,
+                    deliveryDocuments: deliveryDocuments ?? null,
+                    ...logistics(),
+                    remarks: remarks || null,
+                });
             } else if (flow === 'temp-replacement') {
                 if (!tempAsset || !recipient) { toast.warning('Select the temporary asset and recipient.'); setSending(false); return; }
                 response = await tempReplacementService({ tempAssetId: tempAsset.id, recipientUserId: recipient.id, ...logistics(), remarks: remarks || null });
@@ -154,7 +220,8 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
     };
 
     const meta = FLOWS.find((f) => f.key === flow);
-    const showLogistics = flow !== 'disposal';
+    // A non-repairable divert becomes a disposal on the backend, which carries no logistics leg.
+    const showLogistics = flow !== 'disposal' && !categoryNotRepairable;
 
     const assetPicker = (label: string, options: IAsset[], value: IAsset | null, onChange: (a: IAsset | null) => void, searchable = false) => (
         <Autocomplete
@@ -208,7 +275,88 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
                 ) : (
                     <Stack spacing={2}>
                         {/* Asset / temp asset / recipient / location pickers per flow */}
-                        {flow === 'repair-transfer' && assetPicker('Faulty Asset (search by engraved no.)', assetSearch, asset, setAsset, true)}
+                        {flow === 'repair-transfer' && (
+                            <>
+                                {assetPicker('Faulty Asset (search by engraved no.)', assetSearch, asset, setAsset, true)}
+
+                                {categoryNotRepairable ? (
+                                    <Alert severity="warning" sx={{ borderRadius: 2 }}>
+                                        The <strong>{asset?.assetType?.name}</strong> category is marked non-repairable —
+                                        this transfer will be diverted straight to the <strong>Disposal store</strong>.
+                                    </Alert>
+                                ) : asset && (
+                                    <>
+                                        <TextField
+                                            select fullWidth size="small"
+                                            label="Repair Destination"
+                                            value={repairDestination}
+                                            onChange={(e) => { setRepairDestination(e.target.value as RepairDestination); setConsultant(null); }}
+                                            helperText={asset.assetType?.repairDestination
+                                                ? `Category default: ${asset.assetType.repairDestination}`
+                                                : 'No category default configured — IT store assumed'}
+                                        >
+                                            <MenuItem value="IT">IT Store — in-house IT workshop</MenuItem>
+                                            <MenuItem value="ADMIN">Admin Store — facilities / administration team</MenuItem>
+                                            <MenuItem value="EXTERNAL">External Consultant — outside repair vendor</MenuItem>
+                                        </TextField>
+
+                                        {repairDestination === 'EXTERNAL' && (
+                                            <>
+                                                <Autocomplete
+                                                    options={consultants}
+                                                    value={consultant}
+                                                    getOptionLabel={(c) => c.specialization ? `${c.name} — ${c.specialization}` : c.name}
+                                                    isOptionEqualToValue={(o, v) => o.id === v.id}
+                                                    onChange={(_, v) => setConsultant(v)}
+                                                    noOptionsText="No active consultants — register one under Settings → Repair Consultants"
+                                                    renderInput={(params) => <TextField {...params} label="External Consultant *" size="small" />}
+                                                />
+                                                <Box>
+                                                    <Button
+                                                        component="label"
+                                                        variant="outlined"
+                                                        size="small"
+                                                        startIcon={<UploadFileOutlinedIcon />}
+                                                        sx={{ textTransform: 'none', borderRadius: 2, fontWeight: 600 }}
+                                                    >
+                                                        Attach signed dispatch document(s) *
+                                                        <input
+                                                            type="file"
+                                                            hidden
+                                                            multiple
+                                                            accept=".pdf,.png,.jpg,.jpeg"
+                                                            onChange={(e) => {
+                                                                const files = Array.from(e.target.files ?? []);
+                                                                if (files.length) setDispatchDocs((prev) => [...prev, ...files]);
+                                                                e.target.value = '';
+                                                            }}
+                                                        />
+                                                    </Button>
+                                                    {dispatchDocs.length > 0 && (
+                                                        <Stack direction="row" spacing={0.75} sx={{ mt: 1, flexWrap: 'wrap', gap: 0.75 }}>
+                                                            {dispatchDocs.map((f, i) => (
+                                                                <Chip
+                                                                    key={`${f.name}-${i}`}
+                                                                    label={f.name}
+                                                                    size="small"
+                                                                    deleteIcon={<CloseIcon />}
+                                                                    onDelete={() => setDispatchDocs((prev) => prev.filter((_, j) => j !== i))}
+                                                                    sx={{ maxWidth: 220 }}
+                                                                />
+                                                            ))}
+                                                        </Stack>
+                                                    )}
+                                                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.75 }}>
+                                                        External repairs require the consultant and at least one signed dispatch
+                                                        document; custody is coordinated by the Head Office Admin store.
+                                                    </Typography>
+                                                </Box>
+                                            </>
+                                        )}
+                                    </>
+                                )}
+                            </>
+                        )}
                         {flow === 'disposal' && assetPicker('Asset to Dispose (in IT store)', itAssets, asset, setAsset)}
 
                         {flow === 'temp-replacement' && (

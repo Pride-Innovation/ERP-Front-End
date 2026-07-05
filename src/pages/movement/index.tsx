@@ -5,11 +5,11 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import {
-    alpha, Box, Button, Card, Chip, CircularProgress, Grid, IconButton,
+    alpha, Box, Button, Chip, CircularProgress, Grid, IconButton,
     Paper, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
     Tooltip, Typography,
 } from '@mui/material';
@@ -18,7 +18,9 @@ import SwapHorizOutlinedIcon from '@mui/icons-material/SwapHorizOutlined';
 import PendingActionsOutlinedIcon from '@mui/icons-material/PendingActionsOutlined';
 import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
 import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
-import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import HighlightOffIcon from '@mui/icons-material/HighlightOff';
+import AssignmentTurnedInOutlinedIcon from '@mui/icons-material/AssignmentTurnedInOutlined';
 import BuildOutlinedIcon from '@mui/icons-material/BuildOutlined';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
@@ -26,38 +28,82 @@ import ListAltOutlinedIcon from '@mui/icons-material/ListAltOutlined';
 import { RootState } from '../../store';
 import { ROUTES } from '../../core/routes/routes';
 import ModalComponent from '../../components/modal';
+import { PageHero, PageSection, StatTile, StatusChip, EmptyState } from '../../components/layout';
+import { brand, neutral, border } from '../../utils/tokens';
+import RoutesUtills from '../../core/routes/utills';
+import { MovementContext } from '../../context/movement/MovementContext';
 import MovementUtills from './utills';
 import RepairFlowsModal from './RepairFlowsModal';
-import { getStatusConfig, movementTypeLabel, MovementStatus } from './constants';
+import MovementActionModal from './MovementActionModal';
+import { fetchPendingApprovalMovementsService } from './service';
+import { movementTypeLabel, statusLabel, statusTone, MovementStatus } from './constants';
 import { IMovement } from './interface';
-
-const PRIMARY = '#08796C';
-
-const StatCard = ({ icon, label, value, color }: { icon: JSX.Element; label: string; value: number; color: string }) => (
-    <Paper elevation={0} sx={{ p: 2.25, borderRadius: 2.5, border: `1px solid ${alpha('#000', 0.06)}`, display: 'flex', alignItems: 'center', gap: 1.75 }}>
-        <Box sx={{ width: 44, height: 44, borderRadius: 2, bgcolor: alpha(color, 0.1), color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{icon}</Box>
-        <Box>
-            <Typography variant="h5" sx={{ fontWeight: 800, lineHeight: 1 }}>{value}</Typography>
-            <Typography variant="caption" sx={{ color: 'text.secondary' }}>{label}</Typography>
-        </Box>
-    </Paper>
-);
-
-const StatusChip = ({ status }: { status?: string }) => {
-    const cfg = getStatusConfig(status);
-    return <Chip label={cfg.label} size="small" sx={{ height: 20, fontSize: '0.66rem', fontWeight: 700, bgcolor: cfg.bg, color: cfg.color }} />;
-};
 
 const destLabel = (m: IMovement) =>
     m.destStore?.name ?? (m.recipientUser ? `${m.recipientUser.firstName} ${m.recipientUser.lastName}` : '—');
 
+const fmtDate = (d?: string | null) =>
+    d ? new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
+
+/** Shared cell styles so the two tables on this page read identically. */
+const headCellSx = {
+    bgcolor: neutral[50],
+    color: neutral[500],
+    fontWeight: 700,
+    fontSize: '0.66rem',
+    textTransform: 'uppercase',
+    letterSpacing: '0.06em',
+    py: 1.25,
+    px: 2.5,
+    borderBottom: `1px solid ${border.subtle}`,
+} as const;
+
+const bodyRowSx = (isLast: boolean) => ({
+    '& .MuiTableCell-root': {
+        py: 1.25,
+        px: 2.5,
+        fontSize: '0.78rem',
+        borderBottom: isLast ? 'none' : `1px solid ${border.subtle}`,
+    },
+    '&:hover': { bgcolor: alpha(brand[500], 0.03) },
+});
+
 const Movement = () => {
     const navigate = useNavigate();
     const { movements } = useSelector((state: RootState) => state.MovementStore);
-    const { fetchAllMovements, loading, count } = MovementUtills();
+    const { setCurrentMovement } = useContext(MovementContext);
+    const {
+        fetchAllMovements, loading, count, modalState, setModalState,
+        open, handleOpen, handleClose, sendingRequest, setSendingRequest,
+        currentMovement,
+    } = MovementUtills();
     const [repairOpen, setRepairOpen] = useState(false);
 
-    useEffect(() => { fetchAllMovements({ pageSize: 100 }); }, []);
+    // Approval inbox: DRAFT movements assigned to the logged-in user, from the dedicated
+    // server-side endpoint (not a client-side filter of the general list).
+    const [pendingApprovals, setPendingApprovals] = useState<IMovement[]>([]);
+    const [approvalsLoading, setApprovalsLoading] = useState(false);
+    const currentUserId = RoutesUtills().getCurrentUser()?.id;
+
+    const fetchPendingApprovals = async () => {
+        if (!currentUserId) return;
+        setApprovalsLoading(true);
+        try {
+            const r = (await fetchPendingApprovalMovementsService(currentUserId, { pageSize: 25, pageNumber: 0 })) as any;
+            if (r?.status === 200) setPendingApprovals(r.data?.content ?? []);
+        } finally {
+            setApprovalsLoading(false);
+        }
+    };
+
+    const refresh = () => { fetchAllMovements({ pageSize: 100 }); fetchPendingApprovals(); };
+    useEffect(() => { refresh(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+    const openApprovalAction = (state: 'approve' | 'reject', movement: IMovement) => {
+        setCurrentMovement(movement);
+        setModalState(state);
+        handleOpen();
+    };
 
     const countBy = (s: MovementStatus) => movements.filter((m) => m.status === s).length;
     const inTransit = countBy('DISPATCHED') + countBy('IN_TRANSIT');
@@ -66,63 +112,195 @@ const Movement = () => {
         .sort((a, b) => new Date(b.createDate ?? 0).getTime() - new Date(a.createDate ?? 0).getTime())
         .slice(0, 8);
 
+    const todayLabel = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+
     return (
-        <Box sx={{ minHeight: '100vh', width: '100%', bgcolor: '#F1F5FB', pb: 4 }}>
-            {/* Header */}
-            <Box sx={{ background: 'linear-gradient(135deg, #08796C 0%, #065E53 60%, #044a42 100%)', px: { xs: 2, md: 4 }, pt: 3, pb: 3, position: 'relative', overflow: 'hidden' }}>
-                <Box sx={{ position: 'absolute', top: -50, right: -50, width: 200, height: 200, borderRadius: '50%', bgcolor: 'rgba(255,255,255,0.04)', pointerEvents: 'none' }} />
-                <Stack direction="row" alignItems="center" justifyContent="space-between" gap={2} flexWrap="wrap">
-                    <Stack direction="row" alignItems="center" gap={2}>
-                        <Box sx={{ width: 46, height: 46, borderRadius: 2, bgcolor: 'rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <SwapHorizOutlinedIcon sx={{ color: '#fff', fontSize: 24 }} />
-                        </Box>
-                        <Box>
-                            <Typography variant="h5" sx={{ color: '#fff', fontWeight: 700, lineHeight: 1.2 }}>Movement Management</Typography>
-                            <Typography variant="body2" sx={{ color: alpha('#fff', 0.70), mt: 0.25 }}>Transfers, replenishment, repairs and disposals</Typography>
-                        </Box>
-                    </Stack>
+        <Box sx={{ minHeight: '100vh', pb: 4 }}>
+            <PageHero
+                title="Movement Management"
+                subtitle="Transfers, replenishment, repairs and disposals across stores"
+                icon={<SwapHorizOutlinedIcon />}
+                stat={{ value: (count ?? 0).toLocaleString(), label: 'movements', helper: todayLabel }}
+                actions={
                     <Stack direction="row" spacing={1.25}>
-                        <Button variant="outlined" startIcon={<BuildOutlinedIcon />} onClick={() => setRepairOpen(true)}
-                            sx={{ height: 40, borderRadius: 2, textTransform: 'none', fontWeight: 600, color: '#fff', borderColor: 'rgba(255,255,255,0.4)', '&:hover': { borderColor: '#fff', bgcolor: 'rgba(255,255,255,0.08)' } }}>
+                        <Button
+                            variant="outlined"
+                            startIcon={<BuildOutlinedIcon />}
+                            onClick={() => setRepairOpen(true)}
+                            sx={{ height: 36, px: 2, borderRadius: '8px', textTransform: 'none', fontWeight: 600 }}
+                        >
                             Repair / Disposal
                         </Button>
-                        <Button variant="contained" startIcon={<AddIcon />} onClick={() => navigate(ROUTES.CREATE_MOVEMENT)}
-                            sx={{ height: 40, borderRadius: 2, textTransform: 'none', fontWeight: 700, bgcolor: '#fff', color: PRIMARY, '&:hover': { bgcolor: '#F1F5F9' } }}>
+                        <Button
+                            variant="contained"
+                            startIcon={<AddIcon />}
+                            onClick={() => navigate(ROUTES.CREATE_MOVEMENT)}
+                            sx={{
+                                height: 36, px: 2.5, borderRadius: '8px', textTransform: 'none', fontWeight: 600,
+                                bgcolor: brand[500], '&:hover': { bgcolor: brand[700] },
+                                boxShadow: `0 2px 8px ${alpha(brand[500], 0.3)}`,
+                            }}
+                        >
                             New Movement
                         </Button>
                     </Stack>
-                </Stack>
-            </Box>
+                }
+            />
 
-            <Box sx={{ px: { xs: 1, md: 3 }, pt: 3, width: '100%', maxWidth: 1500 }}>
-                {/* Stats */}
-                <Grid container spacing={2} sx={{ mb: 3 }}>
-                    <Grid item xs={6} md={2.4}><StatCard icon={<PendingActionsOutlinedIcon />} label="Initiated" value={countBy('INITIATED')} color="#A16207" /></Grid>
-                    <Grid item xs={6} md={2.4}><StatCard icon={<LocalShippingOutlinedIcon />} label="In Transit" value={inTransit} color="#2563EB" /></Grid>
-                    <Grid item xs={6} md={2.4}><StatCard icon={<CheckCircleOutlineOutlinedIcon />} label="Received" value={countBy('RECEIVED')} color="#047857" /></Grid>
-                    <Grid item xs={6} md={2.4}><StatCard icon={<CheckCircleOutlineOutlinedIcon />} label="Completed" value={countBy('COMPLETED')} color="#15803D" /></Grid>
-                    <Grid item xs={6} md={2.4}><StatCard icon={<CancelOutlinedIcon />} label="Cancelled" value={countBy('CANCELLED')} color="#B91C1C" /></Grid>
+            {/* Status overview */}
+            <Grid container spacing={2} sx={{ mb: 3 }}>
+                <Grid item xs={6} sm={4} md={2.4}>
+                    <StatTile
+                        label="Awaiting Approval"
+                        value={countBy('DRAFT')}
+                        accent="warning"
+                        icon={<PendingActionsOutlinedIcon />}
+                        onClick={() => navigate(`${ROUTES.MOVEMENT}/all`)}
+                    />
                 </Grid>
+                <Grid item xs={6} sm={4} md={2.4}>
+                    <StatTile
+                        label="Initiated"
+                        value={countBy('INITIATED')}
+                        accent="gold"
+                        icon={<SwapHorizOutlinedIcon />}
+                        onClick={() => navigate(`${ROUTES.MOVEMENT}/all`)}
+                    />
+                </Grid>
+                <Grid item xs={6} sm={4} md={2.4}>
+                    <StatTile
+                        label="In Transit"
+                        value={inTransit}
+                        accent="info"
+                        icon={<LocalShippingOutlinedIcon />}
+                        onClick={() => navigate(`${ROUTES.MOVEMENT}/all`)}
+                    />
+                </Grid>
+                <Grid item xs={6} sm={4} md={2.4}>
+                    <StatTile
+                        label="Received"
+                        value={countBy('RECEIVED')}
+                        accent="brand"
+                        icon={<AssignmentTurnedInOutlinedIcon />}
+                        onClick={() => navigate(`${ROUTES.MOVEMENT}/all`)}
+                    />
+                </Grid>
+                <Grid item xs={6} sm={4} md={2.4}>
+                    <StatTile
+                        label="Completed"
+                        value={countBy('COMPLETED')}
+                        accent="success"
+                        icon={<CheckCircleOutlineOutlinedIcon />}
+                        onClick={() => navigate(`${ROUTES.MOVEMENT}/all`)}
+                    />
+                </Grid>
+            </Grid>
 
-                {/* Recent */}
-                <Card sx={{ borderRadius: '14px', boxShadow: '0 1px 3px rgba(0,0,0,0.07)', border: 'none', overflow: 'hidden' }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 3, py: 2, borderBottom: '1px solid #F1F5F9' }}>
-                        <Stack direction="row" alignItems="center" gap={1.25}>
-                            <Box sx={{ width: 34, height: 34, borderRadius: 1.5, bgcolor: alpha(PRIMARY, 0.08), display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <SwapHorizOutlinedIcon sx={{ fontSize: 17, color: PRIMARY }} />
-                            </Box>
-                            <Typography sx={{ fontWeight: 700, fontSize: '0.9rem' }}>Recent Movements</Typography>
-                        </Stack>
-                        <Button endIcon={<ArrowForwardIcon />} onClick={() => navigate(`${ROUTES.MOVEMENT}/all`)} startIcon={<ListAltOutlinedIcon />}
-                            sx={{ textTransform: 'none', fontWeight: 600, color: PRIMARY }}>
-                            View All
-                        </Button>
-                    </Box>
+            {/* Approval inbox — movements awaiting the logged-in user's decision */}
+            {(approvalsLoading || pendingApprovals.length > 0) && (
+                <PageSection
+                    title="Pending My Approval"
+                    subtitle="Movements waiting for your decision before they can proceed"
+                    icon={<PendingActionsOutlinedIcon />}
+                    actions={
+                        <Chip
+                            label={pendingApprovals.length}
+                            size="small"
+                            sx={{ height: 22, fontWeight: 800, bgcolor: alpha('#F59E0B', 0.14), color: '#B45309' }}
+                        />
+                    }
+                    mb={4}
+                >
+                    <Paper variant="outlined" sx={{ borderRadius: 2, overflow: 'hidden', borderColor: border.subtle }}>
+                        <TableContainer>
+                            <Table size="small">
+                                <TableHead>
+                                    <TableRow sx={{ '& .MuiTableCell-head': headCellSx }}>
+                                        <TableCell>Ref</TableCell>
+                                        <TableCell>Type</TableCell>
+                                        <TableCell>Source → Destination</TableCell>
+                                        <TableCell>Initiated By</TableCell>
+                                        <TableCell>Date</TableCell>
+                                        <TableCell align="right">Actions</TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {approvalsLoading ? (
+                                        <TableRow><TableCell colSpan={6} sx={{ textAlign: 'center', py: 3, border: 'none' }}><CircularProgress size={24} sx={{ color: brand[500] }} /></TableCell></TableRow>
+                                    ) : pendingApprovals.map((mov, idx) => (
+                                        <TableRow key={mov.id} sx={bodyRowSx(idx === pendingApprovals.length - 1)}>
+                                            <TableCell>
+                                                <Typography variant="caption" sx={{ fontWeight: 700, color: brand[600], fontFamily: 'monospace' }}>#{mov.id}</Typography>
+                                            </TableCell>
+                                            <TableCell>
+                                                <StatusChip label={movementTypeLabel(mov.movementType)} tone="brand" />
+                                            </TableCell>
+                                            <TableCell>
+                                                <Stack direction="row" alignItems="center" spacing={0.75}>
+                                                    <Typography variant="caption" noWrap>{mov.sourceStore?.name ?? '—'}</Typography>
+                                                    <ArrowForwardIcon sx={{ fontSize: 11, color: neutral[400] }} />
+                                                    <Typography variant="caption" sx={{ fontWeight: 600 }} noWrap>{destLabel(mov)}</Typography>
+                                                </Stack>
+                                            </TableCell>
+                                            <TableCell>
+                                                <Typography variant="caption" sx={{ color: neutral[500] }}>
+                                                    {mov.initiator ? `${mov.initiator.firstName} ${mov.initiator.lastName}` : '—'}
+                                                </Typography>
+                                            </TableCell>
+                                            <TableCell>
+                                                <Typography variant="caption" sx={{ color: neutral[500] }}>{fmtDate(mov.createDate)}</Typography>
+                                            </TableCell>
+                                            <TableCell align="right">
+                                                <Stack direction="row" spacing={0.5} justifyContent="flex-end">
+                                                    <Tooltip title="View details" arrow>
+                                                        <IconButton size="small" onClick={() => navigate(`${ROUTES.READ_MOVEMENT}/${mov.id}`)} sx={{ color: brand[600] }}>
+                                                            <VisibilityOutlinedIcon sx={{ fontSize: 15 }} />
+                                                        </IconButton>
+                                                    </Tooltip>
+                                                    <Tooltip title="Approve" arrow>
+                                                        <IconButton size="small" onClick={() => openApprovalAction('approve', mov)} sx={{ color: '#15803D' }}>
+                                                            <CheckCircleOutlineIcon sx={{ fontSize: 15 }} />
+                                                        </IconButton>
+                                                    </Tooltip>
+                                                    <Tooltip title="Reject" arrow>
+                                                        <IconButton size="small" onClick={() => openApprovalAction('reject', mov)} sx={{ color: '#B91C1C' }}>
+                                                            <HighlightOffIcon sx={{ fontSize: 15 }} />
+                                                        </IconButton>
+                                                    </Tooltip>
+                                                </Stack>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                    </Paper>
+                </PageSection>
+            )}
 
-                    <TableContainer component={Paper} elevation={0}>
+            {/* Recent movements */}
+            <PageSection
+                title="Recent Movements"
+                subtitle="The latest transfers across all stores"
+                icon={<SwapHorizOutlinedIcon />}
+                actions={
+                    <Button
+                        size="small"
+                        endIcon={<ArrowForwardIcon />}
+                        startIcon={<ListAltOutlinedIcon />}
+                        onClick={() => navigate(`${ROUTES.MOVEMENT}/all`)}
+                        sx={{ textTransform: 'none', fontWeight: 600, color: brand[600] }}
+                    >
+                        View All
+                    </Button>
+                }
+                mb={0}
+            >
+                <Paper variant="outlined" sx={{ borderRadius: 2, overflow: 'hidden', borderColor: border.subtle }}>
+                    <TableContainer>
                         <Table size="small">
                             <TableHead>
-                                <TableRow sx={{ '& .MuiTableCell-head': { bgcolor: '#F8FAFC', color: '#64748B', fontWeight: 700, fontSize: '0.66rem', textTransform: 'uppercase', letterSpacing: '0.06em', py: 1.25, px: 2.5 } }}>
+                                <TableRow sx={{ '& .MuiTableCell-head': headCellSx }}>
                                     <TableCell>Ref</TableCell>
                                     <TableCell>Type</TableCell>
                                     <TableCell>Source → Destination</TableCell>
@@ -132,24 +310,45 @@ const Movement = () => {
                             </TableHead>
                             <TableBody>
                                 {loading ? (
-                                    <TableRow><TableCell colSpan={5} sx={{ textAlign: 'center', py: 4, border: 'none' }}><CircularProgress size={28} sx={{ color: PRIMARY }} /></TableCell></TableRow>
+                                    <TableRow><TableCell colSpan={5} sx={{ textAlign: 'center', py: 4, border: 'none' }}><CircularProgress size={28} sx={{ color: brand[500] }} /></TableCell></TableRow>
                                 ) : recent.length === 0 ? (
-                                    <TableRow><TableCell colSpan={5} sx={{ textAlign: 'center', py: 5, border: 'none' }}><Typography variant="body2" color="text.disabled">No movements yet.</Typography></TableCell></TableRow>
+                                    <TableRow>
+                                        <TableCell colSpan={5} sx={{ border: 'none', p: 0 }}>
+                                            <EmptyState
+                                                variant="inline"
+                                                title="No movements yet"
+                                                description="Create a movement or initiate a repair / disposal to see it here."
+                                                icon={<SwapHorizOutlinedIcon />}
+                                                action={
+                                                    <Button variant="contained" startIcon={<AddIcon />} onClick={() => navigate(ROUTES.CREATE_MOVEMENT)}
+                                                        sx={{ textTransform: 'none', borderRadius: '8px', bgcolor: brand[500], '&:hover': { bgcolor: brand[700] } }}>
+                                                        New Movement
+                                                    </Button>
+                                                }
+                                            />
+                                        </TableCell>
+                                    </TableRow>
                                 ) : recent.map((mov, idx) => (
-                                    <TableRow key={mov.id} sx={{ '& .MuiTableCell-root': { py: 1.25, px: 2.5, fontSize: '0.78rem', borderBottom: idx === recent.length - 1 ? 'none' : '1px solid #EEF2F7' }, '&:hover': { bgcolor: '#F0FDF9' } }}>
-                                        <TableCell><Typography variant="caption" sx={{ fontWeight: 700, color: PRIMARY, fontFamily: 'monospace' }}>#{mov.id}</Typography></TableCell>
-                                        <TableCell><Chip label={movementTypeLabel(mov.movementType)} size="small" sx={{ height: 18, fontSize: '0.62rem', fontWeight: 600, bgcolor: alpha(PRIMARY, 0.06), color: PRIMARY }} /></TableCell>
+                                    <TableRow key={mov.id} sx={bodyRowSx(idx === recent.length - 1)}>
+                                        <TableCell>
+                                            <Typography variant="caption" sx={{ fontWeight: 700, color: brand[600], fontFamily: 'monospace' }}>#{mov.id}</Typography>
+                                        </TableCell>
+                                        <TableCell>
+                                            <StatusChip label={movementTypeLabel(mov.movementType)} tone="brand" />
+                                        </TableCell>
                                         <TableCell>
                                             <Stack direction="row" alignItems="center" spacing={0.75}>
                                                 <Typography variant="caption" noWrap>{mov.sourceStore?.name ?? '—'}</Typography>
-                                                <ArrowForwardIcon sx={{ fontSize: 11, color: 'text.disabled' }} />
+                                                <ArrowForwardIcon sx={{ fontSize: 11, color: neutral[400] }} />
                                                 <Typography variant="caption" sx={{ fontWeight: 600 }} noWrap>{destLabel(mov)}</Typography>
                                             </Stack>
                                         </TableCell>
-                                        <TableCell><StatusChip status={mov.status} /></TableCell>
+                                        <TableCell>
+                                            <StatusChip label={statusLabel(mov.status)} tone={statusTone(mov.status)} />
+                                        </TableCell>
                                         <TableCell align="right">
-                                            <Tooltip title="View details">
-                                                <IconButton size="small" onClick={() => navigate(`${ROUTES.READ_MOVEMENT}/${mov.id}`)} sx={{ color: PRIMARY }}>
+                                            <Tooltip title="View details" arrow>
+                                                <IconButton size="small" onClick={() => navigate(`${ROUTES.READ_MOVEMENT}/${mov.id}`)} sx={{ color: brand[600] }}>
                                                     <VisibilityOutlinedIcon sx={{ fontSize: 15 }} />
                                                 </IconButton>
                                             </Tooltip>
@@ -159,11 +358,23 @@ const Movement = () => {
                             </TableBody>
                         </Table>
                     </TableContainer>
-                </Card>
-            </Box>
+                </Paper>
+            </PageSection>
 
             <ModalComponent open={repairOpen} handleClose={() => setRepairOpen(false)} title="" width="46%">
-                <RepairFlowsModal handleClose={() => setRepairOpen(false)} onDone={() => fetchAllMovements({ pageSize: 100 })} />
+                <RepairFlowsModal handleClose={() => setRepairOpen(false)} onDone={refresh} />
+            </ModalComponent>
+
+            {/* Approve / Reject from the inbox */}
+            <ModalComponent open={open} handleClose={handleClose} title="">
+                <MovementActionModal
+                    action={modalState as any}
+                    movement={currentMovement}
+                    handleClose={handleClose}
+                    sendingRequest={sendingRequest}
+                    setSendingRequest={setSendingRequest}
+                    onDone={refresh}
+                />
             </ModalComponent>
         </Box>
     );

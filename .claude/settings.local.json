@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(npx tsc *)",
-      "Read(//c/Users/sodong/Projects/ERP-Back-End/src/main/java/pride/bank/erp/assetType/**)"
+      "Read(//c/Users/sodong/Projects/ERP-Back-End/src/main/java/pride/bank/erp/assetType/**)",
+      "Bash(git fetch *)"
     ]
   }
 }

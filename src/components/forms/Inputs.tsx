@@ -19,7 +19,7 @@ import { Visibility, VisibilityOff } from '@mui/icons-material';
 
 const PRIMARY_COLOR = '#08796C';
 
-const fieldSx = {
+export const fieldSx = {
     '& .MuiOutlinedInput-root': {
         borderRadius: '8px',
         backgroundColor: '#FAFAFA',

@@ -33,6 +33,8 @@ const UpdateAssetType = ({
             ownerGroupEmail: assetType.ownerGroupEmail || '',
             depreciationRate: assetType.depreciationRate != null ? String(assetType.depreciationRate) : '',
             usefulLifeMonths: assetType.usefulLifeMonths != null ? String(assetType.usefulLifeMonths) : '',
+            repairable: assetType.repairable !== false,
+            repairDestination: assetType.repairDestination ?? 'IT',
         },
     });
 
@@ -48,6 +50,8 @@ const UpdateAssetType = ({
             ownerGroupEmail: assetType.ownerGroupEmail || '',
             depreciationRate: assetType.depreciationRate != null ? String(assetType.depreciationRate) : '',
             usefulLifeMonths: assetType.usefulLifeMonths != null ? String(assetType.usefulLifeMonths) : '',
+            repairable: assetType.repairable !== false,
+            repairDestination: assetType.repairDestination ?? 'IT',
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [assetType.id, reset]);
@@ -63,6 +67,8 @@ const UpdateAssetType = ({
                     ownerGroupEmail: formData.ownerGroupEmail?.trim() || null,
                     depreciationRate: formData.depreciationRate?.trim() ? Number(formData.depreciationRate) : null,
                     usefulLifeMonths: formData.usefulLifeMonths?.trim() ? Number(formData.usefulLifeMonths) : null,
+                    repairable: formData.repairable !== false,
+                    repairDestination: formData.repairDestination || null,
                 },
                 assetType.id as number
             ) as IAssetTypeAxiosResponse;

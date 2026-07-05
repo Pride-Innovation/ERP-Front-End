@@ -70,6 +70,9 @@ export interface IAssetFieldConfig {
     lastRepairedBy?: FieldConfigState;
 }
 
+/** Where a faulty asset of a category is sent for repair — mirrors the backend RepairDestination enum. */
+export type RepairDestination = 'IT' | 'ADMIN' | 'EXTERNAL';
+
 export interface IAssetType {
     id?: string | number;
     name: string;
@@ -81,6 +84,10 @@ export interface IAssetType {
     depreciationRate?: number | null;
     /** Useful life in months; an asset is flagged for disposal once its age reaches this. */
     usefulLifeMonths?: number | null;
+    /** Whether faulty assets can be repaired at all; false diverts repair transfers straight to disposal. */
+    repairable?: boolean | null;
+    /** Default routing for a faulty asset (IT / ADMIN / EXTERNAL); overridable at transfer time. */
+    repairDestination?: RepairDestination | null;
     fieldConfig?: IAssetFieldConfig | null;
     customAttributes?: ICustomAttribute[] | null;
 }
@@ -94,6 +101,8 @@ export interface IAssetTypeFormValues {
     depreciationRate?: string | null;
     /** Useful life in months. Held as a string in the form input. */
     usefulLifeMonths?: string | null;
+    repairable?: boolean;
+    repairDestination?: string | null;
 }
 
 export interface IAssetTypeForm {

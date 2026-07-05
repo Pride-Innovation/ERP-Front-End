@@ -60,6 +60,27 @@ export const getStatusConfig = (status?: string): IStatusCfg =>
         border: '#E2E8F0',
     };
 
+/**
+ * Semantic tone per status for the shared `<StatusChip>` layout component —
+ * use this instead of hand-rolled colour pairs so movement pages match the app.
+ */
+export const statusTone = (
+    status?: string,
+): 'success' | 'pending' | 'danger' | 'info' | 'brand' | 'gold' | 'neutral' => {
+    switch (status) {
+        case 'DRAFT': return 'pending';
+        case 'INITIATED': return 'gold';
+        case 'DISPATCHED':
+        case 'IN_TRANSIT': return 'info';
+        case 'RECEIVED': return 'brand';
+        case 'COMPLETED': return 'success';
+        case 'CANCELLED': return 'danger';
+        default: return 'neutral';
+    }
+};
+
+export const statusLabel = (status?: string): string => getStatusConfig(status).label;
+
 /** Human labels for each movement type. */
 export const movementTypeLabels: Record<MovementType, string> = {
     REPLENISHMENT: 'Replenishment',

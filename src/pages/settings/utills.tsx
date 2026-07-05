@@ -16,6 +16,7 @@ import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined';
 import PublicOutlinedIcon from '@mui/icons-material/PublicOutlined';
 import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 import GroupWorkOutlinedIcon from '@mui/icons-material/GroupWorkOutlined';
+import EngineeringOutlinedIcon from '@mui/icons-material/EngineeringOutlined';
 
 const SettingsUtills = () => {
 
@@ -73,6 +74,12 @@ const SettingsUtills = () => {
             text: "Asset Categories",
             path: ROUTES.ASSET_TYPES,
             icon: <Inventory2OutlinedIcon />
+        },
+        {
+            id: 10,
+            text: "Repair Consultants",
+            path: ROUTES.CONSULTANTS,
+            icon: <EngineeringOutlinedIcon />
         },
     ]
 

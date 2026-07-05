@@ -46,4 +46,10 @@ export const assetTypeSchema = yup.object({
                 return Number.isInteger(n) && n > 0;
             }
         ),
+    repairable: yup.boolean().optional(),
+    repairDestination: yup
+        .string()
+        .nullable()
+        .optional()
+        .oneOf(['', 'IT', 'ADMIN', 'EXTERNAL', null], 'Repair destination must be IT, Admin or External'),
 });

@@ -14,12 +14,18 @@ import {
     Button as MuiButton,
     CircularProgress,
     Divider,
+    FormControlLabel,
+    MenuItem,
+    Switch,
+    TextField,
 } from '@mui/material';
+import { Controller, useWatch } from 'react-hook-form';
 import CategoryOutlinedIcon from '@mui/icons-material/CategoryOutlined';
 import TagIcon from '@mui/icons-material/Tag';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import GroupsOutlinedIcon from '@mui/icons-material/GroupsOutlined';
 import TrendingDownOutlinedIcon from '@mui/icons-material/TrendingDownOutlined';
+import BuildOutlinedIcon from '@mui/icons-material/BuildOutlined';
 import { UseFormInput } from '../../../components/forms';
 import { IAssetTypeForm } from './interface';
 
@@ -81,6 +87,7 @@ const AssetTypeForm = ({
     sendingRequest,
     buttonText,
 }: IAssetTypeForm) => {
+    const repairable = useWatch({ control, name: 'repairable' });
 
     return (
         <Box>
@@ -152,6 +159,57 @@ const AssetTypeForm = ({
                             shrinks over time. On an asset, the Net Value, Net Book Value, Accumulated / Annual /
                             Monthly Depreciation are all derived from the rate and shown read-only. Useful Life is
                             the number of months an asset is kept before it is flagged ready for disposal.
+                        </Typography>
+                    </Stack>
+                </Box>
+            </FormSection>
+
+            <FormSection title="Repair Routing" icon={<BuildOutlinedIcon />}>
+                <Stack spacing={2}>
+                    <Controller
+                        control={control}
+                        name="repairable"
+                        render={({ field }) => (
+                            <FormControlLabel
+                                control={
+                                    <Switch
+                                        checked={field.value !== false}
+                                        onChange={(e) => field.onChange(e.target.checked)}
+                                        color="primary"
+                                    />
+                                }
+                                label="Assets in this category can be repaired"
+                            />
+                        )}
+                    />
+                    <Controller
+                        control={control}
+                        name="repairDestination"
+                        render={({ field }) => (
+                            <TextField
+                                select
+                                fullWidth
+                                size="small"
+                                label="Default Repair Destination"
+                                value={field.value ?? 'IT'}
+                                onChange={field.onChange}
+                                disabled={repairable === false}
+                            >
+                                <MenuItem value="IT">IT Store — in-house IT workshop</MenuItem>
+                                <MenuItem value="ADMIN">Admin Store — facilities / administration team</MenuItem>
+                                <MenuItem value="EXTERNAL">External Consultant — outside repair vendor</MenuItem>
+                            </TextField>
+                        )}
+                    />
+                </Stack>
+                <Box sx={{ mt: 2, p: 2, borderRadius: 1.5, bgcolor: alpha('#08796C', 0.04), border: `1px solid ${alpha('#08796C', 0.1)}` }}>
+                    <Stack direction="row" spacing={1} alignItems="flex-start">
+                        <TagIcon sx={{ fontSize: 16, color: '#08796C', mt: 0.2, flexShrink: 0 }} />
+                        <Typography variant="caption" color="text.secondary" lineHeight={1.6}>
+                            Where a faulty asset of this category is sent for repair — e.g. Computers to the
+                            IT store, Furniture to the Admin store or an external vendor. When the category is
+                            marked non-repairable, a repair transfer is diverted straight to the Disposal store.
+                            External repairs require a consultant and signed dispatch documents at transfer time.
                         </Typography>
                     </Stack>
                 </Box>

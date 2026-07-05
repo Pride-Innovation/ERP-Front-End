@@ -35,10 +35,11 @@ import { generateReleaseNote } from './generateReleaseNote';
 import { ROUTES } from '../../../core/routes/routes';
 import Loading from '../../../components/loading';
 import ModalComponent from '../../../components/modal';
+import { PageShell, StatusChip } from '../../../components/layout';
 import MovementActionModal from '../MovementActionModal';
 import RoutesUtills from '../../../core/routes/utills';
 import {
-    getStatusConfig, movementTypeLabel, categoryLabels, receiptStatusLabels,
+    movementTypeLabel, statusLabel, statusTone, categoryLabels, receiptStatusLabels,
     canDispatch, canMarkInTransit, canReceive, canComplete, canCancel,
     canApproveMovement, isPendingApproval,
 } from '../constants';
@@ -127,47 +128,50 @@ const MovementDetails = () => {
         );
     }
 
-    const statusCfg = getStatusConfig(movement.status);
     const recipient = movement.recipientUser ? `${movement.recipientUser.firstName} ${movement.recipientUser.lastName}` : null;
     const openAction = (a: string) => { setAction(a); setOpen(true); };
 
     return (
-        <Box sx={{ maxWidth: 1100, mx: 'auto', width: '100%' }}>
-            {/* Top bar */}
-            <Paper elevation={0} sx={{ borderRadius: 3, border: `1px solid ${alpha(PRIMARY, 0.14)}`, overflow: 'hidden', mb: 3 }}>
-                <Box sx={{ height: 4, background: `linear-gradient(90deg, ${PRIMARY} 0%, #BC892C 100%)` }} />
-                <Box sx={{ px: { xs: 2.5, md: 4 }, py: 2.5, display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { sm: 'center' }, justifyContent: 'space-between', gap: 2 }}>
-                    <Stack direction="row" spacing={2} alignItems="center">
-                        <Box sx={{ width: 46, height: 46, borderRadius: 2, bgcolor: alpha(PRIMARY, 0.1), display: 'flex', alignItems: 'center', justifyContent: 'center', color: PRIMARY }}>
-                            <SwapHorizOutlinedIcon />
-                        </Box>
-                        <Box>
-                            <Typography variant="h5" sx={{ fontWeight: 800, lineHeight: 1.2 }}>Movement #{movement.id}</Typography>
-                            <Stack direction="row" spacing={1} alignItems="center" mt={0.5} flexWrap="wrap">
-                                <Chip label={statusCfg.label} size="small" sx={{ height: 20, fontSize: '0.68rem', fontWeight: 700, bgcolor: statusCfg.bg, color: statusCfg.color }} />
-                                <Chip label={movementTypeLabel(movement.movementType)} size="small" sx={{ height: 20, fontSize: '0.66rem', bgcolor: alpha(PRIMARY, 0.08), color: PRIMARY, fontWeight: 600 }} />
-                                {movement.movementCategory && (
-                                    <Chip label={categoryLabels[movement.movementCategory]} size="small" sx={{ height: 20, fontSize: '0.66rem', bgcolor: alpha(BLUE, 0.08), color: BLUE, fontWeight: 600 }} />
-                                )}
-                            </Stack>
-                        </Box>
-                    </Stack>
-                    <Stack direction="row" spacing={1} flexWrap="wrap" justifyContent="flex-end">
-                        <Button variant="outlined" startIcon={<ArrowBackIcon />} onClick={() => navigate(ROUTES.MOVEMENT)} sx={{ borderRadius: 2, fontWeight: 600, fontSize: '0.78rem' }}>Back</Button>
-                        {canApproveMovement(movement, currentUserId) && (
-                            <>
-                                <Button variant="contained" startIcon={<CheckCircleOutlineIcon />} onClick={() => openAction('approve')} sx={{ borderRadius: 2, fontWeight: 600, fontSize: '0.78rem', bgcolor: '#15803D' }}>Approve</Button>
-                                <Button variant="outlined" startIcon={<HighlightOffIcon />} onClick={() => openAction('reject')} sx={{ borderRadius: 2, fontWeight: 600, fontSize: '0.78rem', borderColor: '#B91C1C', color: '#B91C1C' }}>Reject</Button>
-                            </>
-                        )}
-                        {canDispatch(movement) && <Button variant="contained" startIcon={<LocalShippingOutlinedIcon />} onClick={() => openAction('dispatch')} sx={{ borderRadius: 2, fontWeight: 600, fontSize: '0.78rem', bgcolor: BLUE }}>Dispatch</Button>}
-                        {canMarkInTransit(movement) && <Button variant="contained" startIcon={<FlightTakeoffOutlinedIcon />} onClick={() => openAction('in-transit')} sx={{ borderRadius: 2, fontWeight: 600, fontSize: '0.78rem', bgcolor: '#4338CA' }}>In Transit</Button>}
-                        {canReceive(movement) && <Button variant="contained" startIcon={<AssignmentTurnedInOutlinedIcon />} onClick={() => openAction('receive')} sx={{ borderRadius: 2, fontWeight: 600, fontSize: '0.78rem', bgcolor: '#047857' }}>Receive</Button>}
-                        {canComplete(movement) && <Button variant="contained" startIcon={<TaskAltOutlinedIcon />} onClick={() => openAction('complete')} sx={{ borderRadius: 2, fontWeight: 600, fontSize: '0.78rem', bgcolor: '#15803D' }}>Complete</Button>}
-                        {canCancel(movement) && <Button variant="outlined" startIcon={<CancelOutlinedIcon />} onClick={() => openAction('cancel')} sx={{ borderRadius: 2, fontWeight: 600, fontSize: '0.78rem', borderColor: '#DC2626', color: '#DC2626' }}>Cancel</Button>}
-                    </Stack>
-                </Box>
-            </Paper>
+        <PageShell
+            title={`Movement #${movement.id}`}
+            subtitle={`${movementTypeLabel(movement.movementType)}${movement.movementCategory ? ` · ${categoryLabels[movement.movementCategory]}` : ''}`}
+            icon={<SwapHorizOutlinedIcon />}
+            breadcrumbs={[
+                { label: 'Movements', href: ROUTES.MOVEMENT },
+                { label: `Movement #${movement.id}` },
+            ]}
+            actions={
+                <>
+                    <Button variant="outlined" startIcon={<ArrowBackIcon />} onClick={() => navigate(ROUTES.MOVEMENT)} sx={{ height: 36, borderRadius: '8px', textTransform: 'none', fontWeight: 600, fontSize: '0.78rem' }}>Back</Button>
+                    {canApproveMovement(movement, currentUserId) && (
+                        <>
+                            <Button variant="contained" startIcon={<CheckCircleOutlineIcon />} onClick={() => openAction('approve')} sx={{ height: 36, borderRadius: '8px', textTransform: 'none', fontWeight: 600, fontSize: '0.78rem', bgcolor: '#15803D' }}>Approve</Button>
+                            <Button variant="outlined" startIcon={<HighlightOffIcon />} onClick={() => openAction('reject')} sx={{ height: 36, borderRadius: '8px', textTransform: 'none', fontWeight: 600, fontSize: '0.78rem', borderColor: '#B91C1C', color: '#B91C1C' }}>Reject</Button>
+                        </>
+                    )}
+                    {canDispatch(movement) && <Button variant="contained" startIcon={<LocalShippingOutlinedIcon />} onClick={() => openAction('dispatch')} sx={{ height: 36, borderRadius: '8px', textTransform: 'none', fontWeight: 600, fontSize: '0.78rem', bgcolor: BLUE }}>Dispatch</Button>}
+                    {canMarkInTransit(movement) && <Button variant="contained" startIcon={<FlightTakeoffOutlinedIcon />} onClick={() => openAction('in-transit')} sx={{ height: 36, borderRadius: '8px', textTransform: 'none', fontWeight: 600, fontSize: '0.78rem', bgcolor: '#4338CA' }}>In Transit</Button>}
+                    {canReceive(movement) && <Button variant="contained" startIcon={<AssignmentTurnedInOutlinedIcon />} onClick={() => openAction('receive')} sx={{ height: 36, borderRadius: '8px', textTransform: 'none', fontWeight: 600, fontSize: '0.78rem', bgcolor: '#047857' }}>Receive</Button>}
+                    {canComplete(movement) && <Button variant="contained" startIcon={<TaskAltOutlinedIcon />} onClick={() => openAction('complete')} sx={{ height: 36, borderRadius: '8px', textTransform: 'none', fontWeight: 600, fontSize: '0.78rem', bgcolor: '#15803D' }}>Complete</Button>}
+                    {canCancel(movement) && <Button variant="outlined" startIcon={<CancelOutlinedIcon />} onClick={() => openAction('cancel')} sx={{ height: 36, borderRadius: '8px', textTransform: 'none', fontWeight: 600, fontSize: '0.78rem', borderColor: '#DC2626', color: '#DC2626' }}>Cancel</Button>}
+                </>
+            }
+        >
+            {/* Status strip */}
+            <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap sx={{ mb: 3 }}>
+                <StatusChip label={statusLabel(movement.status)} tone={statusTone(movement.status)} size="md" />
+                {movement.receiptStatus && movement.receiptStatus !== 'PENDING' && (
+                    <StatusChip
+                        label={receiptStatusLabels[movement.receiptStatus]}
+                        tone={movement.receiptStatus === 'RECEIVED_OK' ? 'success' : 'pending'}
+                        size="md"
+                        variant="outlined"
+                    />
+                )}
+                {movement.trackingNumber && (
+                    <StatusChip label={`Tracking · ${movement.trackingNumber}`} tone="info" size="md" variant="outlined" />
+                )}
+            </Stack>
 
             <Grid container spacing={3} alignItems="flex-start">
                 {/* Left: route + items */}
@@ -358,7 +362,7 @@ const MovementDetails = () => {
                     onDone={load}
                 />
             </ModalComponent>
-        </Box>
+        </PageShell>
     );
 };
 
