@@ -18,7 +18,7 @@ interface BranchStoreReportProps {
 }
 
 const BranchStoreReport = ({ accentColor }: BranchStoreReportProps) => {
-    const { branchId, currentAssetType, setStoreReportTableData } = useContext(StoreContext);
+    const { branchId, currentAssetType, storeType, setStoreReportTableData } = useContext(StoreContext);
     const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore);
 
     const {
@@ -39,11 +39,15 @@ const BranchStoreReport = ({ accentColor }: BranchStoreReportProps) => {
         }
     };
 
+    // storeType is a dependency because switching between the Admin / IT / Disposal pages does
+    // NOT remount this component (all three render the same StoreViewPage) — without it the
+    // table would keep showing the previous store's rows.
     useEffect(() => {
         if (currentAssetType.id !== null && branchId !== null) {
             fetchStoresCommoditiesPerBranchPerAsset();
         }
-    }, [currentAssetType]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [currentAssetType, storeType]);
 
     return (
         <Box
