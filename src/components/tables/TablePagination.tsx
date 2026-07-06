@@ -16,6 +16,7 @@ import { loadUsers } from "../../pages/users/slice";
 import { loadAllInventory } from "../../pages/inventory/slice";
 import AssetUtills from "../../pages/assets/Utills";
 import { loadAllGeneralAssets } from "../../pages/assets/general/slice";
+import { loadAllStores } from "../../pages/store/slice";
 import { useContext } from "react";
 import { AssetContext } from "../../context/asset";
 
@@ -45,6 +46,10 @@ const CustomTablePagination = ({ endPoint, params, selectedStatus, filterParams 
             case "assets":
                 // Unified asset store — all categories live in GeneralAssetStore.
                 dispatch(loadAllGeneralAssets(content));
+                break;
+            case "store":
+                // Store balance listings (Admin / IT / Disposal store pages).
+                dispatch(loadAllStores(content));
                 break;
             default:
                 break
