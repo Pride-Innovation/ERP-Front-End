@@ -37,6 +37,7 @@ const StoreUtills = () => {
         setCurrentBranch,
         branchId,
         currentAssetType,
+        storeType,
         setCount
     } = useContext(StoreContext);
 
@@ -141,7 +142,10 @@ const StoreUtills = () => {
             if (branchId && currentAssetType.id) {
                 const params = {
                     branchId,
-                    assetTypeId: currentAssetType.id
+                    assetTypeId: currentAssetType.id,
+                    // Scope to the page's store container (ADMIN / IT / DISPOSAL) when set —
+                    // otherwise the Admin, IT and Disposal pages all show the same branch list.
+                    ...(storeType ? { storeType: storeType.toUpperCase() } : {})
                 }
                 const response = await fetchRowsService({
                     pageNumber: 0,
