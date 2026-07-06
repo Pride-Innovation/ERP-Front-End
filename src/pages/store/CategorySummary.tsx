@@ -44,14 +44,16 @@ interface CategorySummaryProps {
  * store landing page can stay a lightweight navigation surface.
  */
 const CategorySummary = ({ accentColor }: CategorySummaryProps) => {
-    const { branchId } = useContext(StoreContext);
+    const { branchId, storeType } = useContext(StoreContext);
     const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore);
 
     const [counts, setCounts] = useState<Record<string | number, number>>({});
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        if (!branchId || assetTypes.length === 0) return;
+        // storeType is stamped by StoreViewPage (the only host of this panel); waiting for it
+        // avoids a first unscoped probe that would flash branch-wide counts before correcting.
+        if (!branchId || !storeType || assetTypes.length === 0) return;
         (async () => {
             setLoading(true);
             try {
@@ -61,7 +63,13 @@ const CategorySummary = ({ accentColor }: CategorySummaryProps) => {
                             pageNumber: 0,
                             pageSize: 1,
                             endPoint: 'store',
-                            params: { branchId, assetTypeId: type.id },
+                            params: {
+                                branchId,
+                                assetTypeId: type.id,
+                                // Scope the counts to this page's store container (ADMIN / IT /
+                                // DISPOSAL) — without it every store page shows branch-wide totals.
+                                ...(storeType ? { storeType: storeType.toUpperCase() } : {}),
+                            },
                         }) as IStoresAxiosResponse;
                         return {
                             id: type.id,
@@ -77,7 +85,7 @@ const CategorySummary = ({ accentColor }: CategorySummaryProps) => {
             }
             setLoading(false);
         })();
-    }, [branchId, assetTypes]);
+    }, [branchId, assetTypes, storeType]);
 
     const total = Object.values(counts).reduce((sum, n) => sum + n, 0);
 
@@ -94,7 +102,7 @@ const CategorySummary = ({ accentColor }: CategorySummaryProps) => {
                     Inventory by category
                 </Typography>
                 <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600 }}>
-                    {loading ? <Skeleton width={70} sx={{ display: 'inline-block' }} /> : `${total.toLocaleString()} items in this branch`}
+                    {loading ? <Skeleton width={70} sx={{ display: 'inline-block' }} /> : `${total.toLocaleString()} item line${total === 1 ? '' : 's'} in this store`}
                 </Typography>
             </Box>
 
