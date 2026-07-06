@@ -361,7 +361,7 @@ const Movement = () => {
                 </Paper>
             </PageSection>
 
-            <ModalComponent open={repairOpen} handleClose={() => setRepairOpen(false)} title="" width="46%">
+            <ModalComponent open={repairOpen} handleClose={() => setRepairOpen(false)} title="Repair & Disposal" width="46%">
                 <RepairFlowsModal handleClose={() => setRepairOpen(false)} onDone={refresh} />
             </ModalComponent>
 
