@@ -25,7 +25,10 @@ import { Box } from '@mui/material';
 const TableData = () => {
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
     const { stores } = useSelector((state: RootState) => state.StoreStore);
-    const { count, setStoreReportTableData, storeReportTableData, setSelectedStatus } = useContext(StoreContext);
+    const {
+        count, setStoreReportTableData, storeReportTableData, setSelectedStatus,
+        branchId, currentAssetType, storeType,
+    } = useContext(StoreContext);
 
     const {
         sendingRequest,
@@ -98,6 +101,13 @@ const TableData = () => {
             {/* Data table */}
             <TableComponent
                 endPoint="store"
+                // Server pagination must carry the same scope as the initial fetch —
+                // branch, asset category, and the page's store container.
+                params={{
+                    branchId,
+                    assetTypeId: currentAssetType.id,
+                    ...(storeType ? { storeType: storeType.toUpperCase() } : {}),
+                }}
                 loading={sendingRequest}
                 count={count}
                 exportData
