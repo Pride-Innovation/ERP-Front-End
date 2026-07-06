@@ -43,8 +43,8 @@ interface StoreViewPageProps {
     accentColor: string;
 }
 
-const StoreViewPage = ({ title, subtitle, Icon, accentColor }: StoreViewPageProps) => {
-    const { branchId, currentBranch } = useContext(StoreContext);
+const StoreViewPage = ({ storeType, title, subtitle, Icon, accentColor }: StoreViewPageProps) => {
+    const { branchId, currentBranch, setStoreType } = useContext(StoreContext);
     const { fetchAllAssetTypes } = AssetTypeUtills();
     const navigate = useNavigate();
     const {
@@ -52,6 +52,13 @@ const StoreViewPage = ({ title, subtitle, Icon, accentColor }: StoreViewPageProp
         fetchBranchDetails,
         sendingRequest,
     } = StoreUtills();
+
+    // Scope every balance query on this page to the store container it represents
+    // (Admin / IT / Disposal) — without this, all three pages show the same branch-wide list.
+    useEffect(() => {
+        setStoreType(storeType);
+        return () => setStoreType('');
+    }, [storeType]); // eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => { setCurrentUserBranch(); }, []);
     useEffect(() => { fetchAllAssetTypes(); }, []);
