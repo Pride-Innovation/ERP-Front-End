@@ -15,7 +15,7 @@ import TableData from "./TableData";
 import { crudStates } from "../../utils/constants";
 import { useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../store";
-import { IBranchAxiosResponse } from "../settings/branch/interface";
+import { IBranch, IBranchAxiosResponse, IBranchesAxiosResponse } from "../settings/branch/interface";
 import { fetchSingleBranchService } from "../settings/branch/service";
 import { fetchRowsService } from "../../core/apis/globalService";
 import { useDispatch } from "react-redux";
@@ -46,11 +46,41 @@ const StoreUtills = () => {
 
     const { getCurrentUser } = RoutesUtills();
 
-    const setCurrentUserBranch = (id?: number) => {
+    /**
+     * Resolves the Head Office branch from the branches directory — the default scope when the
+     * logged-in user has no branch of their own (or their cached branch no longer exists).
+     */
+    const resolveHeadOfficeBranch = async (): Promise<IBranch | null> => {
+        try {
+            const response = await fetchRowsService({
+                pageNumber: 0,
+                pageSize: 200,
+                endPoint: "branches"
+            }) as IBranchesAxiosResponse;
+            if (response.status === 200) {
+                return (response.data.content ?? []).find((branch) => branch.isHeadOffice) ?? null;
+            }
+        } catch (error) {
+            console.log(error)
+        }
+        return null;
+    }
+
+    const setCurrentUserBranch = async (id?: number) => {
         if (id) {
             setBranchId(id)
-        } else {
-            setBranchId(getCurrentUser()?.title?.branch?.id as number)
+            return;
+        }
+        const userBranchId = getCurrentUser()?.title?.branch?.id;
+        if (userBranchId) {
+            setBranchId(userBranchId as number)
+            return;
+        }
+        // User has no branch → default the store scope to Head Office.
+        const headOffice = await resolveHeadOfficeBranch();
+        if (headOffice) {
+            setBranchId(headOffice.id as number)
+            setCurrentBranch(headOffice)
         }
     }
 
@@ -59,8 +89,16 @@ const StoreUtills = () => {
             const response = await fetchSingleBranchService(id) as IBranchAxiosResponse
             if (response.status === 200) {
                 setCurrentBranch(response.data)
+                return;
             }
-
+            // Branch lookup failed (e.g. a stale session pointing at a deleted branch) →
+            // fall back to Head Office so the page still loads with a sensible scope.
+            // Re-setting an identical branchId is a no-op, so this cannot loop.
+            const headOffice = await resolveHeadOfficeBranch();
+            if (headOffice) {
+                setBranchId(headOffice.id as number)
+                setCurrentBranch(headOffice)
+            }
         } catch (error) {
             console.log(error)
         }

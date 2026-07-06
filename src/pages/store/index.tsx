@@ -200,7 +200,13 @@ const Store = () => {
             />
 
             {/* ── Store tiles: lightweight navigation — details live on each store's page ── */}
-            <Box className="settings-card-grid--wide">
+            <Box
+                sx={{
+                    display: 'grid',
+                    gap: 2,
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                }}
+            >
                 {STORES.map(store => (
                     <StoreCard key={store.type} store={store} onView={() => navigate(store.path)} />
                 ))}
@@ -349,61 +355,114 @@ const StoreCard = ({ store, onView }: StoreCardProps) => {
             elevation={0}
             onClick={onView}
             role="link"
+            tabIndex={0}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onView(); } }}
             aria-label={`Open ${store.title}`}
             sx={{
                 borderRadius: 2.5,
-                border: `1px solid ${alpha(color, 0.18)}`,
-                borderTop: `3px solid ${color}`,
+                border: '1px solid #E8EDF3',
                 overflow: 'hidden',
                 cursor: 'pointer',
                 height: '100%',
-                transition: 'all 0.2s ease',
+                display: 'flex',
+                flexDirection: 'column',
+                transition: 'border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease',
                 '&:hover': {
-                    boxShadow: `0 6px 22px ${alpha(color, 0.18)}`,
+                    borderColor: alpha(color, 0.4),
+                    boxShadow: `0 10px 28px -10px ${alpha(color, 0.28)}`,
                     transform: 'translateY(-2px)',
-                    borderColor: alpha(color, 0.35),
-                    '& .store-card-arrow': { bgcolor: alpha(color, 0.16), transform: 'translateX(2px)' },
+                    '& .store-card-cta': { color },
+                    '& .store-card-arrow': {
+                        bgcolor: color,
+                        borderColor: color,
+                        color: '#fff',
+                        transform: 'translateX(2px)',
+                    },
                 },
+                '&:focus-visible': { outline: `2px solid ${color}`, outlineOffset: 2 },
             }}
         >
-            <Stack direction="row" spacing={2} alignItems="center" sx={{ p: 2.5 }}>
+            {/* Accent strip keeps the store's identity without tinting the whole border */}
+            <Box sx={{ height: 3, bgcolor: color, flexShrink: 0 }} />
+
+            {/* Body — stacks vertically so extra width just becomes breathing room */}
+            <Stack direction="row" spacing={1.75} alignItems="flex-start" sx={{ p: 2.5, pb: 2.25, flex: 1 }}>
                 <Avatar
                     sx={{
-                        width: 48,
-                        height: 48,
-                        bgcolor: alpha(color, 0.1),
+                        width: 44,
+                        height: 44,
+                        bgcolor: alpha(color, 0.09),
                         color,
                         borderRadius: '12px',
                         flexShrink: 0,
-                        border: `1px solid ${alpha(color, 0.2)}`,
+                        border: `1px solid ${alpha(color, 0.18)}`,
                     }}
                 >
-                    <store.Icon fontSize="small" />
+                    <store.Icon sx={{ fontSize: 22 }} />
                 </Avatar>
 
-                <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Box sx={{ minWidth: 0 }}>
                     <Typography
                         variant="subtitle1"
-                        sx={{ fontWeight: 700, color: '#1E293B', lineHeight: 1.3 }}
+                        sx={{ fontWeight: 700, color: '#1E293B', lineHeight: 1.3, mb: 0.25 }}
                         noWrap
                         title={store.title}
                     >
                         {store.title}
                     </Typography>
-                    <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.78rem', lineHeight: 1.45 }}>
+                    <Typography
+                        variant="body2"
+                        sx={{
+                            color: '#64748B',
+                            fontSize: '0.8rem',
+                            lineHeight: 1.5,
+                            display: '-webkit-box',
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: 'vertical',
+                            overflow: 'hidden',
+                        }}
+                    >
                         {store.subtitle}
                     </Typography>
                 </Box>
+            </Stack>
 
+            {/* Footer — a full-width action bar anchors the card at any width */}
+            <Box
+                sx={{
+                    px: 2.5,
+                    py: 1.25,
+                    borderTop: '1px solid #EEF2F7',
+                    bgcolor: '#FAFBFC',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: 1,
+                }}
+            >
+                <Typography
+                    className="store-card-cta"
+                    variant="caption"
+                    sx={{
+                        fontWeight: 700,
+                        color: '#64748B',
+                        letterSpacing: '0.03em',
+                        textTransform: 'uppercase',
+                        fontSize: '0.66rem',
+                        transition: 'color 0.15s ease',
+                    }}
+                >
+                    View store
+                </Typography>
                 <Box
                     className="store-card-arrow"
                     sx={{
                         color,
                         bgcolor: alpha(color, 0.08),
-                        borderRadius: '10px',
-                        width: 36,
-                        height: 36,
                         border: `1px solid ${alpha(color, 0.18)}`,
+                        borderRadius: '8px',
+                        width: 28,
+                        height: 28,
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -411,9 +470,9 @@ const StoreCard = ({ store, onView }: StoreCardProps) => {
                         transition: 'all 0.15s ease',
                     }}
                 >
-                    <ArrowForwardIosOutlinedIcon sx={{ fontSize: 14 }} />
+                    <ArrowForwardIosOutlinedIcon sx={{ fontSize: 12 }} />
                 </Box>
-            </Stack>
+            </Box>
         </Paper>
     );
 };

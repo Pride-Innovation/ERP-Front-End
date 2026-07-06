@@ -15,38 +15,45 @@ import CircularProgress from '@mui/material/CircularProgress';
 import StoreUtills from './utillls';
 import { StoreContext } from '../../context/store';
 import { autocompleteSx, PRIMARY_COLOR } from '../../components/forms/Autocomplete';
+import { useDebounce } from '../../hooks/useDebounce';
 
 const FilterBranchForm = () => {
     const [optionsObject, setOptionsObject] = useState<{ branchesOptions: Array<IOptions> }>({ branchesOptions: [] });
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const [selectedBranch, setSelectedBranch] = useState<IOptions | null>(null);
+    const [inputText, setInputText] = useState('');
+    const debouncedInput = useDebounce(inputText, 500);
     const { setCurrentUserBranch, fetchStoresCommoditiesPerBranchPerAsset } = StoreUtills();
     const { branchId } = useContext(StoreContext);
 
-    const handleOpen = () => {
-        setOpen(true);
-        (async () => {
-            setLoading(true);
-            await fetchAllBranches();
-            setLoading(false);
-        })();
-    };
+    const handleOpen = () => setOpen(true);
 
     const handleClose = () => {
         setOpen(false);
-        setOptionsObject({ branchesOptions: [] });
+        setInputText('');
     };
 
     const { fetchAllBranches } = BranchUtills();
     const { branches } = useSelector((state: RootState) => state.BranchStore);
 
+    // The branches list is paginated (first 10) — the first page alone can't reach every branch.
+    // Like the Supplier field on the inventory form, re-query the backend by name as the user
+    // types (debounced), so any branch is reachable. Also runs on open for the initial page.
     useEffect(() => {
-        if (branches.length > 0) {
-            setOptionsObject({
-                branchesOptions: branches.map(branch => ({ label: branch.name, value: branch.id as number })) || [],
-            });
-        }
+        if (!open) return;
+        (async () => {
+            setLoading(true);
+            await fetchAllBranches({ name: debouncedInput || undefined });
+            setLoading(false);
+        })();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [debouncedInput, open]);
+
+    useEffect(() => {
+        setOptionsObject({
+            branchesOptions: branches.map(branch => ({ label: branch.name, value: branch.id as number })) || [],
+        });
     }, [branches]);
 
     useEffect(() => {
@@ -99,6 +106,14 @@ const FilterBranchForm = () => {
             options={optionsObject.branchesOptions}
             value={selectedBranch}
             onChange={(_, value) => setSelectedBranch(value)}
+            // Options are already server-filtered by name — don't re-filter them client-side,
+            // or a lagging input would hide freshly returned matches.
+            filterOptions={(x) => x}
+            onInputChange={(_, value, reason) => {
+                if (reason === 'input') setInputText(value);
+                if (reason === 'clear') setInputText('');
+            }}
+            noOptionsText={loading ? 'Searching…' : 'No branches match'}
             loading={loading}
             size="small"
             PaperComponent={CustomPaper}
