@@ -32,6 +32,9 @@ interface IStoreContext {
     setCurrentBranch: Dispatch<SetStateAction<IBranch>>;
     selectedStatus: string;
     setSelectedStatus: Dispatch<SetStateAction<string>>;
+    /** Which store container the current page is scoped to ('admin' | 'it' | 'disposal'); '' = unscoped. */
+    storeType: string;
+    setStoreType: Dispatch<SetStateAction<string>>;
 }
 
 export const StoreContext = createContext<IStoreContext>({} as IStoreContext);
@@ -44,6 +47,7 @@ const StoreContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
     const [storeReportTableData, setStoreReportTableData] = useState<Array<IStoreReportTableData>>([]);
     const [currentBranch, setCurrentBranch] = useState<IBranch>({} as IBranch)
     const [selectedStatus, setSelectedStatus] = useState<string>('officeEquipment');
+    const [storeType, setStoreType] = useState<string>('');
 
 
     return <StoreContext.Provider value={{
@@ -60,7 +64,9 @@ const StoreContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
         currentBranch,
         setCurrentBranch,
         selectedStatus,
-        setSelectedStatus
+        setSelectedStatus,
+        storeType,
+        setStoreType
     }}>
         {children}
     </StoreContext.Provider>
