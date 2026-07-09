@@ -216,7 +216,10 @@ const StepCard: React.FC<IStepCardProps> = ({ step, index, total, roles, units, 
                     id={`notify-email-${index}`}
                 />
             )}
-            <Autocomplete
+            {/* Generics pinned explicitly: newer TS versions (e.g. VS Code's bundled 5.x) fail to
+                infer T here and degrade the callback params to `any`, tripping TS7053 on the
+                Record lookups even though the project compiler (4.9.5) is fine. */}
+            <Autocomplete<NotifyGroupSource, true>
                 multiple
                 size="small"
                 options={COMPLETION_NOTIFY_SOURCES}
