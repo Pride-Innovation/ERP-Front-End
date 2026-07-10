@@ -31,6 +31,7 @@ const CreateAssetType = ({
             ownerGroupEmail: '',
             depreciationRate: '',
             usefulLifeMonths: '',
+            tracksAssets: false,
             repairable: true,
             repairDestination: 'IT',
         },
@@ -46,6 +47,7 @@ const CreateAssetType = ({
                 ownerGroupEmail: formData.ownerGroupEmail?.trim() || null,
                 depreciationRate: formData.depreciationRate?.trim() ? Number(formData.depreciationRate) : null,
                 usefulLifeMonths: formData.usefulLifeMonths?.trim() ? Number(formData.usefulLifeMonths) : null,
+                tracksAssets: formData.tracksAssets === true,
                 repairable: formData.repairable !== false,
                 repairDestination: formData.repairDestination || null,
             }) as IAssetTypeAxiosResponse;

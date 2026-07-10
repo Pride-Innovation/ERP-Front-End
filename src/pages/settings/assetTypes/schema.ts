@@ -46,6 +46,7 @@ export const assetTypeSchema = yup.object({
                 return Number.isInteger(n) && n > 0;
             }
         ),
+    tracksAssets: yup.boolean().optional(),
     repairable: yup.boolean().optional(),
     repairDestination: yup
         .string()

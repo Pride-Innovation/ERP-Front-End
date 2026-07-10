@@ -33,6 +33,7 @@ const UpdateAssetType = ({
             ownerGroupEmail: assetType.ownerGroupEmail || '',
             depreciationRate: assetType.depreciationRate != null ? String(assetType.depreciationRate) : '',
             usefulLifeMonths: assetType.usefulLifeMonths != null ? String(assetType.usefulLifeMonths) : '',
+            tracksAssets: assetType.tracksAssets === true,
             repairable: assetType.repairable !== false,
             repairDestination: assetType.repairDestination ?? 'IT',
         },
@@ -50,6 +51,7 @@ const UpdateAssetType = ({
             ownerGroupEmail: assetType.ownerGroupEmail || '',
             depreciationRate: assetType.depreciationRate != null ? String(assetType.depreciationRate) : '',
             usefulLifeMonths: assetType.usefulLifeMonths != null ? String(assetType.usefulLifeMonths) : '',
+            tracksAssets: assetType.tracksAssets === true,
             repairable: assetType.repairable !== false,
             repairDestination: assetType.repairDestination ?? 'IT',
         });
@@ -67,6 +69,7 @@ const UpdateAssetType = ({
                     ownerGroupEmail: formData.ownerGroupEmail?.trim() || null,
                     depreciationRate: formData.depreciationRate?.trim() ? Number(formData.depreciationRate) : null,
                     usefulLifeMonths: formData.usefulLifeMonths?.trim() ? Number(formData.usefulLifeMonths) : null,
+                    tracksAssets: formData.tracksAssets === true,
                     repairable: formData.repairable !== false,
                     repairDestination: formData.repairDestination || null,
                 },

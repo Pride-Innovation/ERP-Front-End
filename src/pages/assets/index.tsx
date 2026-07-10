@@ -52,7 +52,10 @@ const AssetsManagement = () => {
   }, []);
 
   const determineNavigation = () => {
+    // Only categories that track serialized assets belong on the asset register —
+    // consumable categories (tracksAssets off) live on the Store pages instead.
     const data = assetTypes
+      .filter(assetType => assetType.tracksAssets === true)
       .map(assetType => determineAssetTypeByAssetName(assetType))
       .filter(item => item != null) as Array<INavigation>;
 

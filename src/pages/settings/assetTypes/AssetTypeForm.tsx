@@ -26,6 +26,7 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import GroupsOutlinedIcon from '@mui/icons-material/GroupsOutlined';
 import TrendingDownOutlinedIcon from '@mui/icons-material/TrendingDownOutlined';
 import BuildOutlinedIcon from '@mui/icons-material/BuildOutlined';
+import QrCode2OutlinedIcon from '@mui/icons-material/QrCode2Outlined';
 import { UseFormInput } from '../../../components/forms';
 import { IAssetTypeForm } from './interface';
 
@@ -108,6 +109,36 @@ const AssetTypeForm = ({
                         value="shortCode"
                     />
                 </Stack>
+            </FormSection>
+
+            <FormSection title="Asset Tracking" icon={<QrCode2OutlinedIcon />}>
+                <Controller
+                    control={control}
+                    name="tracksAssets"
+                    render={({ field }) => (
+                        <FormControlLabel
+                            control={
+                                <Switch
+                                    checked={field.value === true}
+                                    onChange={(e) => field.onChange(e.target.checked)}
+                                    color="primary"
+                                />
+                            }
+                            label="Stocking creates serialized asset records"
+                        />
+                    )}
+                />
+                <Box sx={{ mt: 2, p: 2, borderRadius: 1.5, bgcolor: alpha('#08796C', 0.04), border: `1px solid ${alpha('#08796C', 0.1)}` }}>
+                    <Stack direction="row" spacing={1} alignItems="flex-start">
+                        <TagIcon sx={{ fontSize: 16, color: '#08796C', mt: 0.2, flexShrink: 0 }} />
+                        <Typography variant="caption" color="text.secondary" lineHeight={1.6}>
+                            Turn on for durable goods (Computers, Furniture, Vehicles): every stocked unit
+                            becomes a trackable asset and the category appears on the Assets pages. Leave off
+                            for consumables (Stationery, Cleaning, Paint) — their stock lives only as store
+                            balances on the Store pages.
+                        </Typography>
+                    </Stack>
+                </Box>
             </FormSection>
 
             <FormSection title="Fulfilment Group" icon={<GroupsOutlinedIcon />}>

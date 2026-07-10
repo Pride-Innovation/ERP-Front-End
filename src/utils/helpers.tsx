@@ -16,7 +16,6 @@ import {
 } from "../components/forms/interface";
 import { ICommodity } from "../pages/settings/commodity/interface";
 import { IAssetType } from "../pages/settings/assetTypes/interface";
-import { assetTypesStatusConstants } from "./constants";
 import { IStockCommodities } from "../pages/inventory/interface";
 import { IITEquipment, IFleet } from "../pages/assets/interface";
 import { IStatus } from "../pages/settings/statuses/interface";
@@ -331,14 +330,16 @@ export const validateAssetsOfItems = (
         const { quantity, selectedAssets } = record;
         const prefix = `Item ${index + 1}:`;
 
-        const assetTypeName = assetTypes.find(ast => record.assetTypeId === ast.id)?.name;
+        const assetType = assetTypes.find(ast => record.assetTypeId === ast.id);
 
         let hasError = false;
 
-        // Quantity mismatch validation (excluding stationery)
+        // Engraved numbers must cover the quantity — but only for categories that track
+        // serialized assets. Consumable categories (tracksAssets off: Stationery, Building
+        // & Construction, Cleaning, …) have no asset records, so nothing can be selected.
+        // Replaces the old hardcoded "not Stationery" name check.
         if (
-            assetTypeName &&
-            assetTypeName !== assetTypesStatusConstants.stationery &&
+            assetType?.tracksAssets === true &&
             selectedAssets?.length !== quantity
         ) {
             errors.push(

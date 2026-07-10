@@ -40,7 +40,9 @@ const AssetsLanding = () => {
         );
     }
 
-    const first = assetTypes[0];
+    // Land on the first category that tracks serialized assets — consumable categories
+    // have no asset register page (their stock lives on the Store pages).
+    const first = assetTypes.find((t) => t.tracksAssets === true) ?? assetTypes[0];
     return <Navigate to={`${ROUTES.LIST_GENERAL_ASSETS}/${first.id}`} replace />;
 };
 

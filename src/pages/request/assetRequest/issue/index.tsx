@@ -6,7 +6,7 @@ Managing Director
 */
 
 import TableComponent from "../../../../components/tables/TableComponent";
-import { Box, Card } from "@mui/material";
+import { Box } from "@mui/material";
 import RequestUtills from "../utills";
 import { useContext, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
@@ -166,26 +166,11 @@ const IssuedRequest = () => {
     )
 
     return (
-        <Box width={'100%'} sx={{
-            px: 3,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center'
-        }}>
+        // Full-width like the other request tabs (All/Pending/Rejected) — the previous
+        // px-padding + 1500px-capped Card made this tab's table visibly narrower.
+        <Box width={'100%'}>
             {renderModals()}
-            <Card
-                elevation={0}
-                sx={{
-                    borderRadius: 2,
-                    width: '100%',
-                    maxWidth: "1500px",
-                    overflow: 'hidden',
-                    border: "none",
-                    bgcolor: 'white'
-                }}
-            >
-
-                {columnHeaders.length > 0 &&
+            {columnHeaders.length > 0 &&
                     <TableComponent
                         endPoint={endPoint}
                         loading={loading}
@@ -223,7 +208,6 @@ const IssuedRequest = () => {
                         onApplyFilters={(filters) => fetchAllRequests(filters)}
                     />
                 }
-            </Card>
         </Box>
     )
 }

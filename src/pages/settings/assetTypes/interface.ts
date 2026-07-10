@@ -84,6 +84,8 @@ export interface IAssetType {
     depreciationRate?: number | null;
     /** Useful life in months; an asset is flagged for disposal once its age reaches this. */
     usefulLifeMonths?: number | null;
+    /** Whether stocking items of this category auto-creates trackable Asset records (false = consumable). */
+    tracksAssets?: boolean | null;
     /** Whether faulty assets can be repaired at all; false diverts repair transfers straight to disposal. */
     repairable?: boolean | null;
     /** Default routing for a faulty asset (IT / ADMIN / EXTERNAL); overridable at transfer time. */
@@ -101,6 +103,8 @@ export interface IAssetTypeFormValues {
     depreciationRate?: string | null;
     /** Useful life in months. Held as a string in the form input. */
     usefulLifeMonths?: string | null;
+    /** Stocking creates serialized asset records; off for consumables. */
+    tracksAssets?: boolean;
     repairable?: boolean;
     repairDestination?: string | null;
 }
