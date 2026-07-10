@@ -69,7 +69,9 @@ const BasicInformationPanel = ({
                         value={field.value}
                         label={field.label}
                         multiline
-                        row={4}
+                        // Tall enough to bring the section level with the upload card beside it —
+                        // a shorter textarea leaves a dead band under this column.
+                        row={9}
                     />
                 </Grid>
             ))}

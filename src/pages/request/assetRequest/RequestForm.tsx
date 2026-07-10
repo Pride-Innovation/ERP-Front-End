@@ -18,9 +18,9 @@ import InventoryTable from '../../../components/forms/InventoryTable';
 import { brand } from '../../../utils/tokens';
 import { PageSection } from '../../../components/layout';
 import BasicInformationPanel from './panels/BasicInformationPanel';
-import CategoryAttributesPanel from './panels/CategoryAttributesPanel';
 import FileUploadPanel from './panels/FileUploadPanel';
-import WorkflowPreviewPanel from './panels/WorkflowPreviewPanel';
+import WorkflowRoutesPanel from './panels/WorkflowRoutesPanel';
+import ApprovalTipsPanel from './panels/ApprovalTipsPanel';
 
 const PRIMARY_COLOR = brand[500];
 
@@ -56,11 +56,14 @@ const RequestForm = ({
             <Grid container spacing={4}>
                 {/* Left column — core request details */}
                 <Grid item xs={12} md={hideFileUpload ? 12 : 8}>
+                    {/* mb=0: the grid's own row gap provides the spacing below — the default
+                        section margin doubled it and opened a band above Request Items. */}
                     <PageSection
                         title="Basic Information"
                         subtitle="Enter the core details of your request"
                         helpText="Provide essential information to identify and prioritize your request"
                         icon={<ArticleIcon />}
+                        mb={0}
                     >
                         <BasicInformationPanel
                             register={register}
@@ -70,9 +73,6 @@ const RequestForm = ({
                         />
                     </PageSection>
 
-                    <CategoryAttributesPanel control={control} setValue={setValue} />
-
-                    <WorkflowPreviewPanel control={control} />
                 </Grid>
 
                 {/* Right column — supporting docs */}
@@ -82,6 +82,7 @@ const RequestForm = ({
                             title="Supporting Documentation"
                             subtitle="Attach any relevant files to support your request"
                             helpText="Add documents like approvals, specifications, or justifications"
+                            mb={0}
                         >
                             <FileUploadPanel
                                 image={image}
@@ -106,6 +107,15 @@ const RequestForm = ({
                     >
                         <InventoryTable title="Request Items" />
                     </PageSection>
+                </Grid>
+
+                {/* Reference zone — guidance only, kept below the actionable form so it
+                    never crowds it (route cards collapse, so a growing workflow list stays short) */}
+                <Grid item xs={12} md={8}>
+                    <WorkflowRoutesPanel />
+                </Grid>
+                <Grid item xs={12} md={4}>
+                    <ApprovalTipsPanel />
                 </Grid>
             </Grid>
 

@@ -297,30 +297,6 @@ const FileUploadPanel = ({
                     <InputFileUpload inputRef={inputRef} handleFileUpload={handleFileUpload} />
                 </CardContent>
             </Card>
-
-            <Card
-                sx={{
-                    mt: 3,
-                    borderRadius: 2,
-                    bgcolor: 'rgba(8,121,108,0.04)',
-                    border: `1px solid rgba(8,121,108,0.15)`,
-                }}
-            >
-                <CardContent>
-                    <Typography variant="subtitle2" sx={{ mb: 1, color: '#065E54', fontWeight: 600 }}>
-                        Tips for Faster Approval
-                    </Typography>
-                    <Typography variant="body2" sx={{ color: '#08796C', mb: 0.5 }}>
-                        • Be specific in your request description
-                    </Typography>
-                    <Typography variant="body2" sx={{ color: '#08796C', mb: 0.5 }}>
-                        • Include accurate quantities needed
-                    </Typography>
-                    <Typography variant="body2" sx={{ color: '#08796C' }}>
-                        • Attach supporting documentation when available
-                    </Typography>
-                </CardContent>
-            </Card>
         </>
     );
 };
