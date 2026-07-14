@@ -17,6 +17,7 @@ import ModalComponent from "../../../../components/modal";
 import AcknowledgeRequest from "../AcknowledgeRequest";
 import ApproveRequest from "../ApprovedRequest";
 import RejectRequest from "../RejectRequest";
+import ApproveIssuance from "../ApproveIssuance";
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
@@ -90,6 +91,7 @@ const PendingRequest = () => {
         const hasRejectRequestPermission = has(PERMISSIONS.REJECT_REQUEST);
         const hasIssueRequestPermission = has(PERMISSIONS.ISSUE_ITEMS);
         const hasAcknowledgeRequestPermission = has(PERMISSIONS.ACKNOWLEDGE_REQUEST);
+        const hasApproveIssuancePermission = has(PERMISSIONS.APPROVE_ISSUANCE);
 
         const newOptions = [
             {
@@ -103,6 +105,19 @@ const PendingRequest = () => {
             newOptions.push({
                 value: crudStates.approve,
                 label: "Approve Request",
+                icon: <AddTaskIcon fontSize='small' color='primary' />
+            });
+        }
+
+        // Distinct from a normal ladder approval: a pending item whose request status is
+        // "issued" is waiting on the issuer's-manager sign-off (approverSubject=ISSUER), which
+        // must go through the dedicated /approve-issuance endpoint — that's the only path that
+        // creates the cross-location fulfilment movement. handleOptionsFilter (tables/utills.tsx)
+        // swaps this in for "Approve Request" on those rows specifically.
+        if (hasApproveIssuancePermission) {
+            newOptions.push({
+                value: crudStates.approveIssuance,
+                label: "Approve Issuance",
                 icon: <AddTaskIcon fontSize='small' color='primary' />
             });
         }
@@ -199,6 +214,16 @@ const PendingRequest = () => {
                         request={currentRequest}
                         sendingRequest={sendingRequest}
                         buttonText="Acknowledge" />
+                </ModalComponent>
+            }
+            {crudStates.approveIssuance === modalState &&
+                <ModalComponent width={"60%"} title='Approve Issuance' open={open} handleClose={handleClose}>
+                    <ApproveIssuance
+                        setSendingRequest={setSendingRequest}
+                        handleClose={handleClose}
+                        request={currentRequest}
+                        sendingRequest={sendingRequest}
+                        buttonText="Approve" />
                 </ModalComponent>
             }
         </>)

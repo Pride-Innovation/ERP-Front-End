@@ -7,8 +7,8 @@ Managing Director
 
 import { useState } from 'react';
 import {
-    alpha, Box, Button, Chip, Divider, Fade, MenuItem,
-    Paper, Stack, TextField, Typography,
+    alpha, Box, Button, Chip, Divider, MenuItem,
+    Stack, TextField, Typography,
 } from '@mui/material';
 import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
 import AssignmentTurnedInOutlinedIcon from '@mui/icons-material/AssignmentTurnedInOutlined';
@@ -26,6 +26,7 @@ import {
     approveMovementService, rejectMovementService,
 } from './service';
 import ButtonComponent from '../../components/forms/Button';
+import { fieldSx } from '../../components/forms/Inputs';
 
 const PRIMARY = '#08796C';
 
@@ -39,6 +40,43 @@ const ACTION_META: Record<ActionKind, { title: string; subtitle: string; icon: J
     receive: { title: 'Receive Movement', subtitle: 'Acknowledge receipt at the destination and apply inventory effects.', icon: <AssignmentTurnedInOutlinedIcon />, color: '#047857', cta: 'Confirm Receipt' },
     complete: { title: 'Complete Movement', subtitle: 'Complete this intra-location movement and apply inventory effects.', icon: <TaskAltOutlinedIcon />, color: '#15803D', cta: 'Complete' },
     cancel: { title: 'Cancel Movement', subtitle: 'Cancel this movement. No inventory effects will be applied.', icon: <CancelOutlinedIcon />, color: '#B91C1C', cta: 'Cancel Movement' },
+};
+
+/** Uppercase micro-label with a trailing rule — the same section idiom as Repair & Disposal. */
+const SectionLabel = ({ children }: { children: React.ReactNode }) => (
+    <Stack direction="row" alignItems="center" spacing={1.25} sx={{ pt: 0.5 }}>
+        <Typography
+            variant="caption"
+            sx={{
+                fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase',
+                color: '#94A3B8', fontSize: '0.66rem', whiteSpace: 'nowrap',
+            }}
+        >
+            {children}
+        </Typography>
+        <Divider sx={{ flex: 1, borderColor: '#EEF2F7' }} />
+    </Stack>
+);
+
+/** Styled menu for TextField `select` fields — matches Repair & Disposal's Repair Destination select. */
+const selectMenuProps = {
+    MenuProps: {
+        PaperProps: {
+            elevation: 4,
+            sx: {
+                mt: 0.5, borderRadius: '8px',
+                boxShadow: `0 4px 24px ${alpha('#000', 0.12)}`,
+                '& .MuiMenuItem-root': {
+                    fontSize: '0.875rem', minHeight: 40, px: 2,
+                    '&:hover': { backgroundColor: alpha(PRIMARY, 0.06) },
+                    '&.Mui-selected': {
+                        backgroundColor: alpha(PRIMARY, 0.1),
+                        color: PRIMARY, fontWeight: 500,
+                    },
+                },
+            },
+        },
+    },
 };
 
 interface Props extends IMovementAction {
@@ -111,94 +149,164 @@ const MovementActionModal = ({ action, movement, handleClose, sendingRequest, se
     };
 
     return (
-        <Fade in timeout={250}>
-            <Box>
-                {/* Header */}
-                <Stack direction="row" spacing={2} alignItems="center" sx={{ p: 2.5, borderBottom: `1px solid ${alpha(meta.color, 0.15)}`, bgcolor: alpha(meta.color, 0.04) }}>
-                    <Box sx={{ width: 42, height: 42, borderRadius: '50%', bgcolor: alpha(meta.color, 0.12), color: meta.color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                        {meta.icon}
-                    </Box>
-                    <Box>
-                        <Typography variant="subtitle1" sx={{ fontWeight: 700, color: meta.color }}>{meta.title}</Typography>
-                        <Typography variant="caption" sx={{ color: 'text.secondary' }}>{meta.subtitle}</Typography>
-                    </Box>
-                </Stack>
-
-                <Box sx={{ p: 2.5 }}>
-                    {/* Movement summary */}
-                    <Paper elevation={0} sx={{ p: 2, borderRadius: 2, border: `1px solid ${alpha('#000', 0.07)}`, mb: 2.5 }}>
-                        <Stack direction="row" alignItems="center" spacing={1} flexWrap="wrap">
-                            <Typography variant="caption" sx={{ fontWeight: 700, color: PRIMARY, fontFamily: 'monospace' }}>
-                                #{movement.id}
-                            </Typography>
-                            <Chip label={movementTypeLabel(movement.movementType)} size="small" sx={{ height: 18, fontSize: '0.65rem', fontWeight: 600, bgcolor: alpha(PRIMARY, 0.08), color: PRIMARY }} />
-                            <Chip label={statusCfg.label} size="small" sx={{ height: 18, fontSize: '0.65rem', fontWeight: 700, bgcolor: statusCfg.bg, color: statusCfg.color }} />
-                        </Stack>
-                        <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mt: 1 }}>
-                            {movement.sourceStore?.name ?? '—'} → {movement.destStore?.name ?? (movement.recipientUser ? `${movement.recipientUser.firstName} ${movement.recipientUser.lastName}` : '—')}
-                        </Typography>
-                    </Paper>
-
-                    {/* Action-specific fields */}
-                    {action === 'dispatch' && (
-                        <Stack spacing={2} sx={{ mb: 2.5 }}>
-                            <TextField label="Courier Service" size="small" fullWidth value={courierService} onChange={(e) => setCourierService(e.target.value)} />
-                            <TextField label="Tracking Number" size="small" fullWidth value={trackingNumber} onChange={(e) => setTrackingNumber(e.target.value)} />
-                            <Stack direction="row" spacing={2}>
-                                <TextField label="Dispatch Date" type="date" size="small" fullWidth InputLabelProps={{ shrink: true }} value={dispatchDate} onChange={(e) => setDispatchDate(e.target.value)} />
-                                <TextField label="Expected Delivery" type="date" size="small" fullWidth InputLabelProps={{ shrink: true }} value={expectedDeliveryDate} onChange={(e) => setExpectedDeliveryDate(e.target.value)} />
-                            </Stack>
-                        </Stack>
-                    )}
-
-                    {action === 'receive' && (
-                        <Stack spacing={2} sx={{ mb: 2.5 }}>
-                            <TextField select label="Receipt Status" size="small" fullWidth value={receiptStatus} onChange={(e) => setReceiptStatus(e.target.value as ReceiptStatus)}>
-                                {(Object.keys(receiptStatusLabels) as ReceiptStatus[]).filter((k) => k !== 'PENDING').map((k) => (
-                                    <MenuItem key={k} value={k}>{receiptStatusLabels[k]}</MenuItem>
-                                ))}
-                            </TextField>
-                            <TextField label="Remarks" size="small" fullWidth multiline rows={2} value={remarks} onChange={(e) => setRemarks(e.target.value)} />
-                        </Stack>
-                    )}
-
-                    {action === 'approve' && (
-                        <TextField label="Comment (optional)" size="small" fullWidth multiline rows={2} value={remarks} onChange={(e) => setRemarks(e.target.value)} sx={{ mb: 2.5 }} />
-                    )}
-
-                    {action === 'reject' && (
-                        <TextField label="Reason for rejection" size="small" fullWidth multiline rows={3} value={reason} onChange={(e) => setReason(e.target.value)} sx={{ mb: 2.5 }} />
-                    )}
-
-                    {action === 'complete' && (
-                        <TextField label="Remarks (optional)" size="small" fullWidth multiline rows={3} value={remarks} onChange={(e) => setRemarks(e.target.value)} sx={{ mb: 2.5 }} />
-                    )}
-
-                    {action === 'cancel' && (
-                        <TextField label="Cancellation Reason" size="small" fullWidth multiline rows={3} value={reason} onChange={(e) => setReason(e.target.value)} sx={{ mb: 2.5 }} />
-                    )}
-
-                    {action === 'in-transit' && (
-                        <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2.5 }}>
-                            Confirm that this movement has left the source location and is in transit.
-                        </Typography>
-                    )}
-
-                    <Divider sx={{ mb: 2 }} />
-                    <Stack direction="row" justifyContent="flex-end" spacing={1.5}>
-                        <Button variant="outlined" onClick={handleClose} sx={{ borderRadius: 2, fontWeight: 600 }}>Close</Button>
-                        <ButtonComponent
-                            sendingRequest={sendingRequest}
-                            buttonText={meta.cta}
-                            buttonColor="primary"
-                            variant="contained"
-                            type="button"
-                            handleClick={run}
-                        />
-                    </Stack>
+        <Stack spacing={2.25}>
+            {/* Action identity bar — same treatment as the Repair & Disposal flow header */}
+            <Stack
+                direction="row"
+                spacing={1.5}
+                alignItems="center"
+                sx={{
+                    p: 1.5,
+                    borderRadius: 2,
+                    bgcolor: alpha(meta.color, 0.05),
+                    border: `1px solid ${alpha(meta.color, 0.16)}`,
+                }}
+            >
+                <Box
+                    sx={{
+                        width: 36, height: 36, borderRadius: '10px', flexShrink: 0,
+                        bgcolor: alpha(meta.color, 0.12), color: meta.color,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        '& svg': { fontSize: 19 },
+                    }}
+                >
+                    {meta.icon}
                 </Box>
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1E293B', lineHeight: 1.25 }}>
+                        {meta.title}
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: '#64748B', display: 'block', lineHeight: 1.4 }}>
+                        {meta.subtitle}
+                    </Typography>
+                </Box>
+            </Stack>
+
+            {/* Movement summary */}
+            <SectionLabel>Movement</SectionLabel>
+            <Box
+                sx={{
+                    p: 1.75, borderRadius: 2,
+                    border: '1px solid #E8EDF3', bgcolor: '#FAFBFC',
+                }}
+            >
+                <Stack direction="row" alignItems="center" spacing={1} flexWrap="wrap">
+                    <Typography variant="caption" sx={{ fontWeight: 700, color: PRIMARY, fontFamily: 'monospace' }}>
+                        #{movement.id}
+                    </Typography>
+                    <Chip label={movementTypeLabel(movement.movementType)} size="small" sx={{ height: 20, fontSize: '0.68rem', fontWeight: 700, bgcolor: alpha(PRIMARY, 0.08), color: PRIMARY }} />
+                    <Chip label={statusCfg.label} size="small" sx={{ height: 20, fontSize: '0.68rem', fontWeight: 700, bgcolor: statusCfg.bg, color: statusCfg.color }} />
+                </Stack>
+                <Typography variant="caption" sx={{ color: '#64748B', display: 'block', mt: 1 }}>
+                    {movement.sourceStore?.name ?? '—'} → {movement.destStore?.name ?? (movement.recipientUser ? `${movement.recipientUser.firstName} ${movement.recipientUser.lastName}` : '—')}
+                </Typography>
             </Box>
-        </Fade>
+
+            {/* Action-specific fields */}
+            {action === 'dispatch' && (
+                <>
+                    <SectionLabel>Logistics</SectionLabel>
+                    <TextField fullWidth sx={fieldSx} label="Courier Service" value={courierService} onChange={(e) => setCourierService(e.target.value)} />
+                    <TextField fullWidth sx={fieldSx} label="Tracking Number" value={trackingNumber} onChange={(e) => setTrackingNumber(e.target.value)} />
+                    {/* Plain CSS grid — MUI Grid's negative-margin spacing shifts fields out of
+                        line with the full-width inputs above it inside a Stack. */}
+                    <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, alignItems: 'start' }}>
+                        <TextField fullWidth sx={fieldSx} type="date" label="Dispatch Date" InputLabelProps={{ shrink: true }} value={dispatchDate} onChange={(e) => setDispatchDate(e.target.value)} />
+                        <TextField fullWidth sx={fieldSx} type="date" label="Expected Delivery" InputLabelProps={{ shrink: true }} value={expectedDeliveryDate} onChange={(e) => setExpectedDeliveryDate(e.target.value)} />
+                    </Box>
+                </>
+            )}
+
+            {action === 'receive' && (
+                <>
+                    <SectionLabel>Receipt</SectionLabel>
+                    <TextField
+                        select fullWidth sx={{ ...fieldSx, '& .MuiSelect-select': { paddingRight: '32px' } }}
+                        label="Receipt Status" value={receiptStatus}
+                        onChange={(e) => setReceiptStatus(e.target.value as ReceiptStatus)}
+                        SelectProps={selectMenuProps}
+                    >
+                        {(Object.keys(receiptStatusLabels) as ReceiptStatus[]).filter((k) => k !== 'PENDING').map((k) => (
+                            <MenuItem key={k} value={k}>{receiptStatusLabels[k]}</MenuItem>
+                        ))}
+                    </TextField>
+                    <TextField
+                        fullWidth multiline rows={2} label="Remarks" value={remarks} onChange={(e) => setRemarks(e.target.value)}
+                        sx={{ ...fieldSx, '& .MuiInputBase-input': { padding: 0, fontSize: '0.875rem', lineHeight: 1.5 } }}
+                    />
+                </>
+            )}
+
+            {action === 'approve' && (
+                <>
+                    <SectionLabel>Comment — optional</SectionLabel>
+                    <TextField
+                        fullWidth multiline rows={2} placeholder="Add a comment…" value={remarks} onChange={(e) => setRemarks(e.target.value)}
+                        sx={{ ...fieldSx, '& .MuiInputBase-input': { padding: 0, fontSize: '0.875rem', lineHeight: 1.5 } }}
+                    />
+                </>
+            )}
+
+            {action === 'reject' && (
+                <>
+                    <SectionLabel>Reason — required</SectionLabel>
+                    <TextField
+                        fullWidth multiline rows={3} placeholder="Explain why this movement is being rejected…" value={reason} onChange={(e) => setReason(e.target.value)}
+                        sx={{ ...fieldSx, '& .MuiInputBase-input': { padding: 0, fontSize: '0.875rem', lineHeight: 1.5 } }}
+                    />
+                </>
+            )}
+
+            {action === 'complete' && (
+                <>
+                    <SectionLabel>Remarks — optional</SectionLabel>
+                    <TextField
+                        fullWidth multiline rows={3} placeholder="Add any remarks…" value={remarks} onChange={(e) => setRemarks(e.target.value)}
+                        sx={{ ...fieldSx, '& .MuiInputBase-input': { padding: 0, fontSize: '0.875rem', lineHeight: 1.5 } }}
+                    />
+                </>
+            )}
+
+            {action === 'cancel' && (
+                <>
+                    <SectionLabel>Cancellation reason — required</SectionLabel>
+                    <TextField
+                        fullWidth multiline rows={3} placeholder="Explain why this movement is being cancelled…" value={reason} onChange={(e) => setReason(e.target.value)}
+                        sx={{ ...fieldSx, '& .MuiInputBase-input': { padding: 0, fontSize: '0.875rem', lineHeight: 1.5 } }}
+                    />
+                </>
+            )}
+
+            {action === 'in-transit' && (
+                <Typography variant="body2" sx={{ color: '#64748B' }}>
+                    Confirm that this movement has left the source location and is in transit.
+                </Typography>
+            )}
+
+            {/* Footer */}
+            <Divider sx={{ borderColor: '#EEF2F7' }} />
+            <Stack direction="row" justifyContent="flex-end" spacing={1.5}>
+                <Button
+                    variant="outlined"
+                    onClick={handleClose}
+                    sx={{
+                        borderRadius: '8px', fontWeight: 600, textTransform: 'none',
+                        color: '#64748B', borderColor: '#E2E8F0',
+                        '&:hover': { borderColor: '#CBD5E1', bgcolor: '#F8FAFC' },
+                    }}
+                >
+                    Close
+                </Button>
+                <ButtonComponent
+                    sendingRequest={sendingRequest}
+                    buttonText={meta.cta}
+                    buttonColor="primary"
+                    variant="contained"
+                    type="button"
+                    handleClick={run}
+                />
+            </Stack>
+        </Stack>
     );
 };
 

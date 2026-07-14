@@ -594,13 +594,24 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
 
                 if (status === "PENDING" && row?.status === "requestAcknowledged") {
                     return options.filter(
-                        (option: any) => option.value !== 'acknowledgeRequest'
+                        (option: any) => option.value !== 'acknowledgeRequest' && option.value !== crudStates.approveIssuance
                     );
                 }
 
                 if (status === "PENDING" && isApprovalStatus(row?.status)) {
                     return options.filter(
-                        (option: any) => option.value !== 'issue'
+                        (option: any) => option.value !== 'issue' && option.value !== crudStates.approveIssuance
+                    );
+                }
+
+                // A pending item whose request has reached "issued" is waiting on the
+                // issuer's-manager sign-off (approverSubject=ISSUER), not a ladder approval —
+                // it must go through Approve Issuance (POST /approve-issuance), the only path
+                // that creates the fulfilment movement. "Approve Request" would silently advance
+                // the step without ever triggering it.
+                if (status === "PENDING" && row?.status === "issued") {
+                    return options.filter(
+                        (option: any) => option.value !== crudStates.approve
                     );
                 }
 
@@ -627,10 +638,14 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
                 }
             }
 
+            // Default: strip destructive actions and Approve Issuance — the latter is only
+            // ever shown on the explicit "issued" branch above so it can't leak onto a normal
+            // ladder-approval row.
             return options.filter(
                 (option: any) =>
                     option.value !== 'delete' &&
-                    option.value !== 'update'
+                    option.value !== 'update' &&
+                    option.value !== crudStates.approveIssuance
             );
         }
 

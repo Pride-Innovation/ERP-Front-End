@@ -64,6 +64,12 @@ interface RequestActionLayoutProps {
     /** Label for the current-approver line, e.g. "You are approving as". Omit to hide. */
     actingLabel?: string;
     /**
+     * Extra read-only key/value lines in the summary strip, alongside the requester —
+     * e.g. issuance's "Issued" date / "By" issuer, for stages that aren't just a plain
+     * request approval.
+     */
+    metaLines?: Array<{ label: string; value: string }>;
+    /**
      * Callout shown above the content — 'error' for destructive stages (reject),
      * 'success'/'info' for confirmations (receipt acknowledgement).
      */
@@ -72,6 +78,10 @@ interface RequestActionLayoutProps {
     /** Requested items state. */
     loading: boolean;
     commodities: Array<{ commodity: ICommodity; quantity: number }>;
+    /** Defaults to "Requested Items" — override for a stage-specific label (e.g. "Issued Items"). */
+    itemsSectionTitle?: string;
+    /** Optional labelled note shown under the description (e.g. the issuer's own comment). */
+    additionalNote?: { label: string; body: string } | null;
 
     /** Comment field. */
     commentLabel: string;
@@ -157,9 +167,12 @@ const RequestActionLayout = ({
     icon,
     kicker,
     actingLabel,
+    metaLines,
     banner,
     loading,
     commodities,
+    itemsSectionTitle = 'Requested Items',
+    additionalNote,
     commentLabel,
     commentPlaceholder,
     commentHelper,
@@ -240,6 +253,12 @@ const RequestActionLayout = ({
                             <Box component="span" sx={{ color: accent, fontWeight: 700 }}>{approverName}</Box>
                         </Typography>
                     )}
+                    {metaLines?.map((line) => (
+                        <Typography key={line.label} variant="caption" sx={{ color: '#64748B' }}>
+                            {line.label}:{' '}
+                            <Box component="span" sx={{ color: '#1E293B', fontWeight: 700 }}>{line.value}</Box>
+                        </Typography>
+                    ))}
                 </Stack>
             </Stack>
 
@@ -260,7 +279,7 @@ const RequestActionLayout = ({
             {/* ── Requested items ── */}
             <Section
                 accent={accent}
-                title="Requested Items"
+                title={itemsSectionTitle}
                 meta={!loading ? (
                     <Chip
                         size="small"
@@ -383,6 +402,19 @@ const RequestActionLayout = ({
                             description={(request.description as string) || 'No description provided.'}
                             MAX_LENGTH={400}
                         />
+                        {additionalNote && (
+                            <Box sx={{ mt: 1.25, pt: 1.25, borderTop: '1px dashed #E2E8F0' }}>
+                                <Typography
+                                    variant="caption"
+                                    sx={{ fontWeight: 800, letterSpacing: '0.04em', textTransform: 'uppercase', color: '#94A3B8', fontSize: '0.62rem' }}
+                                >
+                                    {additionalNote.label}
+                                </Typography>
+                                <Typography variant="body2" sx={{ mt: 0.25, color: '#475569', fontSize: '0.82rem', lineHeight: 1.6 }}>
+                                    {additionalNote.body}
+                                </Typography>
+                            </Box>
+                        )}
                     </Box>
                 </Stack>
             </Section>
