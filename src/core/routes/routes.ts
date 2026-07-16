@@ -73,6 +73,7 @@ const DEPARTMENT: string = `${ASSETS_MANAGEMENT}/settings/departments`;
 const UNITS: string = `${ASSETS_MANAGEMENT}/settings/units`;
 const ASSET_TYPES: string = `${ASSETS_MANAGEMENT}/settings/asset-categories`;
 const CONSULTANTS: string = `${ASSETS_MANAGEMENT}/settings/consultants`;
+const COURIERS: string = `${ASSETS_MANAGEMENT}/settings/couriers`;
 
 const APPROVAL_WORKFLOWS: string = `${ASSETS_MANAGEMENT}/approval-workflows`;
 
@@ -127,6 +128,7 @@ export const ROUTES = {
     UNITS,
     ASSET_TYPES,
     CONSULTANTS,
+    COURIERS,
     CREATE_INVENTORY,
     UPDATE_INVENTORY,
     READ_INVENTORY,

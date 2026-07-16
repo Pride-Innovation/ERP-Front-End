@@ -25,6 +25,7 @@ import BuildOutlinedIcon from '@mui/icons-material/BuildOutlined';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import ListAltOutlinedIcon from '@mui/icons-material/ListAltOutlined';
+import { toast } from 'react-toastify';
 import { RootState } from '../../store';
 import { ROUTES } from '../../core/routes/routes';
 import ModalComponent from '../../components/modal';
@@ -35,6 +36,10 @@ import { MovementContext } from '../../context/movement/MovementContext';
 import MovementUtills from './utills';
 import RepairFlowsModal from './RepairFlowsModal';
 import MovementActionModal from './MovementActionModal';
+import MovementFilters, {
+    MovementFilterValues, matchesMovementFilters, deriveMovementFilterOptions, hasActiveMovementFilters,
+} from './allMovements/MovementFilters';
+import { exportMovementsPdf, exportMovementsExcel, exportMovementsCsv } from './allMovements/exportMovements';
 import { fetchPendingApprovalMovementsService } from './service';
 import { movementTypeLabel, statusLabel, statusTone, MovementStatus } from './constants';
 import { IMovement } from './interface';
@@ -108,14 +113,30 @@ const Movement = () => {
     const countBy = (s: MovementStatus) => movements.filter((m) => m.status === s).length;
     const inTransit = countBy('DISPATCHED') + countBy('IN_TRANSIT');
 
-    const recent = [...movements]
+    const [filters, setFilters] = useState<MovementFilterValues>({});
+    const filtersActive = hasActiveMovementFilters(filters);
+    const filterOptions = deriveMovementFilterOptions(movements);
+
+    const filteredMovements = movements.filter((m) => matchesMovementFilters(m, filters));
+
+    // Latest-first; capped at 8 as a "recent" digest, but a filtered view shows every match.
+    const recent = [...filteredMovements]
         .sort((a, b) => new Date(b.createDate ?? 0).getTime() - new Date(a.createDate ?? 0).getTime())
-        .slice(0, 8);
+        .slice(0, filtersActive ? filteredMovements.length : 8);
+
+    const handleExport = (fn: (rows: IMovement[]) => void) => {
+        if (filteredMovements.length === 0) {
+            toast.warning('There are no movements matching the current filters to export.');
+            return;
+        }
+        fn(filteredMovements);
+    };
 
     const todayLabel = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 
     return (
-        <Box sx={{ minHeight: '100vh', pb: 4 }}>
+        // Same page padding as PageShell (used by /movement/all) so the two pages align.
+        <Box sx={{ minHeight: '100vh', px: { xs: 2, sm: 3 }, py: { xs: 2, sm: 3 }, pb: 4 }}>
             <PageHero
                 title="Movement Management"
                 subtitle="Transfers, replenishment, repairs and disposals across stores"
@@ -278,10 +299,25 @@ const Movement = () => {
                 </PageSection>
             )}
 
+            {/* Filters & export bar — same styling as the Reports page */}
+            <MovementFilters
+                sources={filterOptions.sources}
+                destinations={filterOptions.destinations}
+                couriers={filterOptions.couriers}
+                initiators={filterOptions.initiators}
+                onApply={setFilters}
+                onExportPdf={() => handleExport(exportMovementsPdf)}
+                onExportExcel={() => handleExport(exportMovementsExcel)}
+                onExportCsv={() => handleExport(exportMovementsCsv)}
+                onRefresh={refresh}
+            />
+
             {/* Recent movements */}
             <PageSection
-                title="Recent Movements"
-                subtitle="The latest transfers across all stores"
+                title={filtersActive ? 'Filtered Movements' : 'Recent Movements'}
+                subtitle={filtersActive
+                    ? `${recent.length} movement(s) matching the current filters`
+                    : 'The latest transfers across all stores'}
                 icon={<SwapHorizOutlinedIcon />}
                 actions={
                     <Button
@@ -316,15 +352,17 @@ const Movement = () => {
                                         <TableCell colSpan={5} sx={{ border: 'none', p: 0 }}>
                                             <EmptyState
                                                 variant="inline"
-                                                title="No movements yet"
-                                                description="Create a movement or initiate a repair / disposal to see it here."
+                                                title={filtersActive ? 'No movements matched your filters' : 'No movements yet'}
+                                                description={filtersActive
+                                                    ? 'Adjust or clear the filters above to see movements.'
+                                                    : 'Create a movement or initiate a repair / disposal to see it here.'}
                                                 icon={<SwapHorizOutlinedIcon />}
-                                                action={
+                                                action={filtersActive ? undefined : (
                                                     <Button variant="contained" startIcon={<AddIcon />} onClick={() => navigate(ROUTES.CREATE_MOVEMENT)}
                                                         sx={{ textTransform: 'none', borderRadius: '8px', bgcolor: brand[500], '&:hover': { bgcolor: brand[700] } }}>
                                                         New Movement
                                                     </Button>
-                                                }
+                                                )}
                                             />
                                         </TableCell>
                                     </TableRow>

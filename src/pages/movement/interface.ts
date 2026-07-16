@@ -61,6 +61,11 @@ export interface IMovement {
     dispatchDate?: string | null;
     expectedDeliveryDate?: string | null;
     deliveryDocuments?: string[];
+    /** The courier currently (or last) holding custody — set at dispatch. */
+    courier?: { id: number | string; name: string; vetted?: boolean } | null;
+    plateNumber?: string | null;
+    /** True once the source → courier custody-store ledger hop has been applied. */
+    custodyTransferSettled?: boolean;
 
     receivingOfficer?: IUser | null;
     receiptDate?: string | null;

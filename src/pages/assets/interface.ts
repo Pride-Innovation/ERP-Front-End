@@ -66,6 +66,8 @@ export interface IAsset {
     commodity?: ICommodity | null;
     stock?: IInventory | null;
     lastRepairedBy?: string | null;
+    /** Pool stock for temporary replacement loans while another asset of the same category is under repair. */
+    temporaryPool?: boolean | null;
 
     // IT-Equipment-shaped optional fields — kept on the canonical IAsset
     // (vs a separate IITEquipment) because the backend Asset entity has all
@@ -243,6 +245,7 @@ export type IDispose = IAssetAction;
 export type IRepair = IAssetAction;
 export type IReassign = IAssetAction;
 export type IToStore = IAssetAction;
+export type ITogglePool = IAssetAction;
 
 // ─────────────────────────────────────────────────────────────────────────
 // Navigation

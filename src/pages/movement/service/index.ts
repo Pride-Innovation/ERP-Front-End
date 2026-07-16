@@ -47,6 +47,11 @@ export const dispatchMovementService = async (
         dispatchDate?: string | null;
         expectedDeliveryDate?: string | null;
         deliveryDocuments?: string[];
+        /** A vetted courier picked from the registry. Takes priority over courierName. */
+        courierId?: number | string | null;
+        /** Free-text courier name for an ad-hoc (unvetted) courier — resolved/auto-created by name. */
+        courierName?: string | null;
+        plateNumber?: string | null;
     }
 ) => {
     try {

@@ -383,10 +383,14 @@ const MovementDetails = () => {
                     <Grid item xs={12} md={6}>
                         <WidgetCard icon={<LocalShippingOutlinedIcon fontSize="small" />} title="Logistics" subtitle="Courier & delivery window" accent={BLUE} borderColor={alpha(BLUE, 0.2)}>
                             <Box sx={{ display: 'grid', gap: 1.5, gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, alignItems: 'start' }}>
-                                <Field label="Courier" value={movement.courierService} />
+                                <Field label="Courier" value={movement.courier?.name ?? movement.courierService} />
+                                <Field label="Plate Number" value={movement.plateNumber} />
                                 <Field label="Tracking #" value={movement.trackingNumber} />
                                 <Field label="Dispatch Date" value={fmtDate(movement.dispatchDate)} />
                                 <Field label="Expected Delivery" value={fmtDate(movement.expectedDeliveryDate)} />
+                                {movement.status !== 'INITIATED' && movement.status !== 'DRAFT' && (
+                                    <Field label="Custody" value={movement.custodyTransferSettled ? `With ${movement.courier?.name ?? 'courier'} / delivered` : 'Not yet handed to courier'} />
+                                )}
                             </Box>
                         </WidgetCard>
                     </Grid>

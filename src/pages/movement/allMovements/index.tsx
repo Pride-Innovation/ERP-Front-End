@@ -27,6 +27,7 @@ import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import PendingActionsOutlinedIcon from '@mui/icons-material/PendingActionsOutlined';
 import { useSelector } from 'react-redux';
+import { toast } from 'react-toastify';
 import { RootState } from '../../../store';
 import { MovementContext } from '../../../context/movement/MovementContext';
 import { ROUTES } from '../../../core/routes/routes';
@@ -35,6 +36,10 @@ import { PageShell, StatTile, StatusChip, EmptyState } from '../../../components
 import { brand, neutral, border } from '../../../utils/tokens';
 import MovementUtills from '../utills';
 import MovementActionModal from '../MovementActionModal';
+import MovementFilters, {
+    MovementFilterValues, matchesMovementFilters, deriveMovementFilterOptions,
+} from './MovementFilters';
+import { exportMovementsPdf, exportMovementsExcel, exportMovementsCsv } from './exportMovements';
 import { IMovement } from '../interface';
 import {
     movementTypeLabel, statusLabel, statusTone,
@@ -70,6 +75,7 @@ const AllMovements = () => {
     const [statusTab, setStatusTab] = useState('all');
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
+    const [filters, setFilters] = useState<MovementFilterValues>({});
 
     const refresh = () => fetchAllMovements({ pageSize: 100 });
     useEffect(() => { refresh(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -83,8 +89,18 @@ const AllMovements = () => {
             m.trackingNumber,
         ].some((f) => f?.toLowerCase().includes(search.toLowerCase()));
         const matchesStatus = statusTab === 'all' || m.status === statusTab;
-        return matchesSearch && matchesStatus;
+        return matchesSearch && matchesStatus && matchesMovementFilters(m, filters);
     });
+
+    const filterOptions = deriveMovementFilterOptions(movements);
+
+    const handleExport = (fn: (rows: IMovement[]) => void) => {
+        if (filtered.length === 0) {
+            toast.warning('There are no movements matching the current filters to export.');
+            return;
+        }
+        fn(filtered);
+    };
 
     const paginated = filtered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
@@ -162,6 +178,19 @@ const AllMovements = () => {
                     </Grid>
                 ))}
             </Grid>
+
+            {/* Filters & export bar — same styling as the Reports page */}
+            <MovementFilters
+                sources={filterOptions.sources}
+                destinations={filterOptions.destinations}
+                couriers={filterOptions.couriers}
+                initiators={filterOptions.initiators}
+                onApply={(f) => { setFilters(f); setPage(0); }}
+                onExportPdf={() => handleExport(exportMovementsPdf)}
+                onExportExcel={() => handleExport(exportMovementsExcel)}
+                onExportCsv={() => handleExport(exportMovementsCsv)}
+                onRefresh={refresh}
+            />
 
             <Paper variant="outlined" sx={{ borderRadius: 2, overflow: 'hidden', borderColor: border.subtle }}>
                 {/* Toolbar: search + count */}

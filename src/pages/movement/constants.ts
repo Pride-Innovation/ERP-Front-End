@@ -123,11 +123,13 @@ export const storeTypeLabels: Record<StoreType, string> = {
 export const canDispatch = (m: { movementCategory?: string; status?: string }) =>
     m.movementCategory === 'INTER_LOCATION' && m.status === 'INITIATED';
 
+/** Marking in-transit is compulsory, not optional — it's the only way out of DISPATCHED. */
 export const canMarkInTransit = (m: { status?: string }) => m.status === 'DISPATCHED';
 
-/** Inter-location movements are received after dispatch / transit. */
+/** Inter-location movements can only be received once actually marked in-transit — the backend
+ *  rejects receiving straight from DISPATCHED, since custody must hand off to the courier first. */
 export const canReceive = (m: { movementCategory?: string; status?: string }) =>
-    m.movementCategory === 'INTER_LOCATION' && (m.status === 'DISPATCHED' || m.status === 'IN_TRANSIT');
+    m.movementCategory === 'INTER_LOCATION' && m.status === 'IN_TRANSIT';
 
 /** Intra-location movements complete in one step (once approved / initiated). */
 export const canComplete = (m: { movementCategory?: string; status?: string }) =>

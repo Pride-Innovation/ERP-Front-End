@@ -11,9 +11,11 @@ import { IMovement } from '../interface';
 import { movementTypeLabel } from '../constants';
 
 /**
- * Generates the (unsigned) Store Release Note / Gate Pass for a movement leaving a store —
- * used especially for dispatches out of Head Office. The admin prints it, has it signed by the
- * releasing officer and the courier, then uploads the signed scan via the Documents panel.
+ * Generates the (unsigned) Store Release Note / Gate Pass / Dispatch Note for a movement leaving a
+ * store — used both for the post-dispatch reprint on the movement view page, and (with a draft
+ * movement built from the in-progress form values) as the "Generate Dispatch Note" step inside the
+ * Dispatch action modal, before the movement has actually been dispatched. The admin prints it, has
+ * it signed by the releasing officer and the courier, then uploads the signed scan.
  *
  * Mirrors the GRN layout: brand header, movement metadata, item table, and signature blocks.
  */
@@ -32,7 +34,7 @@ export const generateReleaseNote = (movement: IMovement): void => {
     doc.text('Pride Bank Limited', margin, 28);
     doc.setFontSize(11);
     doc.setFont('helvetica', 'normal');
-    doc.text('Store Release Note / Gate Pass', margin, 46);
+    doc.text('Store Release Note / Dispatch Note', margin, 46);
 
     const generatedLabel = new Date().toLocaleString('en-GB', {
         day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
@@ -58,7 +60,8 @@ export const generateReleaseNote = (movement: IMovement): void => {
         ['Destination', movement.destStore?.name ?? recipient ?? '—'],
         ['From Location', movement.sourceStore?.location?.name ?? '—'],
         ['To Location', movement.destStore?.location?.name ?? movement.recipientUser?.branch?.name ?? '—'],
-        ['Courier', movement.courierService || '—'],
+        ['Courier', movement.courier?.name || movement.courierService || '—'],
+        ['Plate Number', movement.plateNumber || '—'],
         ['Tracking No', movement.trackingNumber || '—'],
         ['Dispatch Date', fmtDate(movement.dispatchDate)],
         ['Expected Delivery', fmtDate(movement.expectedDeliveryDate)],

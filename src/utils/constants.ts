@@ -38,6 +38,8 @@ export const crudStates: {
     block: string;
     /** Fill in engraved number + remaining details for a newly-stocked asset. */
     complete: string;
+    /** Toggle whether an asset is pool stock for temporary replacements during repairs. */
+    temporaryPool: string;
 } = {
     create: "create",
     update: "update",
@@ -61,6 +63,7 @@ export const crudStates: {
     enable: "enable",
     block: "block",
     complete: "complete",
+    temporaryPool: "temporaryPool",
 }
 
 export const requestStatus: {

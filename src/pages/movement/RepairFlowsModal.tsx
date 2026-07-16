@@ -119,6 +119,7 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
     const [assetSearch, setAssetSearch] = useState<IAsset[]>([]);
     const [assetSearchLoading, setAssetSearchLoading] = useState(false);
     const [itAssets, setItAssets] = useState<IAsset[]>([]);
+    const [poolAssets, setPoolAssets] = useState<IAsset[]>([]);
     const [users, setUsers] = useState<IUser[]>([]);
     const [usersLoading, setUsersLoading] = useState(false);
     const [branches, setBranches] = useState<IBranch[]>([]);
@@ -145,11 +146,29 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
     const needsItAssets = flow === 'temp-replacement' || flow === 'return-after-repair' || flow === 'disposal';
     const needsBranches = flow === 'return-after-repair';
 
+    const needsPoolAssets = flow === 'temp-replacement' || flow === 'return-after-repair';
+
     useEffect(() => {
         if (needsItAssets && itAssets.length === 0) {
             (async () => {
                 const r = (await fetchAssetsByStoreTypeService('IT')) as any;
                 if (r?.status === 200) setItAssets(r.data ?? []);
+            })();
+        }
+        if (needsPoolAssets && poolAssets.length === 0) {
+            // Pool stock can sit in either the IT store or the Head Office Admin store, depending on
+            // the category's repair routing (e.g. loaner chairs live in Admin, not IT) — fetch both
+            // and keep only assets actually flagged as pool stock and currently unassigned.
+            (async () => {
+                const [itRes, adminRes] = await Promise.all([
+                    fetchAssetsByStoreTypeService('IT') as any,
+                    fetchAssetsByStoreTypeService('ADMIN') as any,
+                ]);
+                const combined: IAsset[] = [
+                    ...(itRes?.status === 200 ? itRes.data ?? [] : []),
+                    ...(adminRes?.status === 200 ? adminRes.data ?? [] : []),
+                ];
+                setPoolAssets(combined.filter((a) => a.temporaryPool === true && !a.assignedTo));
             })();
         }
         if (needsBranches && branches.length === 0) {
@@ -614,7 +633,7 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
             {flow === 'temp-replacement' && (
                 <>
                     <SectionLabel>Replacement</SectionLabel>
-                    {assetPicker('Temporary Asset (IT store)', itAssets, tempAsset, setTempAsset)}
+                    {assetPicker('Temporary Asset (pool stock)', poolAssets, tempAsset, setTempAsset)}
                     {userPicker('Recipient User')}
                 </>
             )}
@@ -643,7 +662,7 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
                     </Box>
 
                     <SectionLabel>Temporary asset</SectionLabel>
-                    {assetPicker('Return Temporary Asset (optional)', itAssets, tempAsset, setTempAsset)}
+                    {assetPicker('Return Temporary Asset (optional)', poolAssets, tempAsset, setTempAsset)}
                 </>
             )}
 

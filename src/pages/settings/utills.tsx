@@ -17,6 +17,7 @@ import PublicOutlinedIcon from '@mui/icons-material/PublicOutlined';
 import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 import GroupWorkOutlinedIcon from '@mui/icons-material/GroupWorkOutlined';
 import EngineeringOutlinedIcon from '@mui/icons-material/EngineeringOutlined';
+import DeliveryDiningOutlinedIcon from '@mui/icons-material/DeliveryDiningOutlined';
 
 const SettingsUtills = () => {
 
@@ -80,6 +81,12 @@ const SettingsUtills = () => {
             text: "Repair Consultants",
             path: ROUTES.CONSULTANTS,
             icon: <EngineeringOutlinedIcon />
+        },
+        {
+            id: 11,
+            text: "Couriers",
+            path: ROUTES.COURIERS,
+            icon: <DeliveryDiningOutlinedIcon />
         },
     ]
 

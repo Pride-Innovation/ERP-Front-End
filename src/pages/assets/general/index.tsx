@@ -23,6 +23,7 @@ import { crudStates } from "../../../utils/constants";
 import Reassign from "../Reassign";
 import Repair from "../Repair";
 import ToStore from "../ToStore";
+import TogglePool from "../TogglePool";
 import { FormContext } from "../../../context/form";
 import InfoIcon from '@mui/icons-material/Info';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
@@ -30,6 +31,7 @@ import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import AssignmentIndOutlinedIcon from '@mui/icons-material/AssignmentIndOutlined';
 import BuildOutlinedIcon from '@mui/icons-material/BuildOutlined';
 import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
+import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 import { AssetContext } from "../../../context/asset";
 import { PERMISSIONS } from "../../../core/permissions/constants";
 import StatusUtills from "../../settings/statuses/Utills";
@@ -147,6 +149,7 @@ const GeneralAssets = () => {
             { value: crudStates.reassign, label: "Reassign", icon: <AssignmentIndOutlinedIcon fontSize='small' color='secondary' /> },
             { value: crudStates.repair, label: "Repair", icon: <BuildOutlinedIcon fontSize='small' color='primary' /> },
             { value: crudStates.inStore, label: "Send to Store", icon: <HomeOutlinedIcon fontSize='small' color='action' /> },
+            { value: crudStates.temporaryPool, label: "Temporary Pool", icon: <Inventory2OutlinedIcon fontSize='small' sx={{ color: '#B45309' }} /> },
             { value: crudStates.dispose, label: "Dispose", icon: <InfoIcon fontSize='small' color='error' /> },
         ];
         setOptions(options);
@@ -229,6 +232,18 @@ const GeneralAssets = () => {
                         sendingRequest={loading}
                         handleClose={handleClose}
                         buttonText='Confirm'
+                        asset={currentAsset}
+                        module={assetType?.name || ''}
+                    />
+                </ModalComponent>
+            }
+            {crudStates.temporaryPool === currentState
+                && <ModalComponent width={"40%"} title={`Temporary Replacement Pool — ${assetType?.name || 'Asset'}`} open={open} handleClose={handleClose}>
+                    <TogglePool
+                        handleClickAction={handleOptionClicked}
+                        sendingRequest={loading}
+                        handleClose={handleClose}
+                        buttonText={currentAsset.temporaryPool ? 'Remove from Pool' : 'Mark as Pool Stock'}
                         asset={currentAsset}
                         module={assetType?.name || ''}
                     />

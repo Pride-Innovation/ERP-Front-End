@@ -17,6 +17,7 @@ import Regions from "../../../../pages/settings/regions"
 import AssetTypes from "../../../../pages/settings/assetTypes"
 import Units from "../../../../pages/settings/units"
 import Consultants from "../../../../pages/settings/consultants"
+import Couriers from "../../../../pages/settings/couriers"
 
 const SettingsSubRoutes = () => {
     return (
@@ -31,6 +32,7 @@ const SettingsSubRoutes = () => {
             <Route path={ROUTES.UNITS} element={<Units />} />
             <Route path={ROUTES.ASSET_TYPES} element={<AssetTypes />} />
             <Route path={ROUTES.CONSULTANTS} element={<Consultants />} />
+            <Route path={ROUTES.COURIERS} element={<Couriers />} />
         </Route>
     )
 }

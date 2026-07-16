@@ -5,9 +5,9 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
-    alpha, Box, Button, Chip, Divider, MenuItem,
+    alpha, Autocomplete, Box, Button, Chip, Divider, MenuItem,
     Stack, TextField, Typography,
 } from '@mui/material';
 import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
@@ -17,16 +17,23 @@ import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
 import FlightTakeoffOutlinedIcon from '@mui/icons-material/FlightTakeoffOutlined';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
+import UploadFileOutlinedIcon from '@mui/icons-material/UploadFileOutlined';
+import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
+import PictureAsPdfOutlinedIcon from '@mui/icons-material/PictureAsPdfOutlined';
 import { toast } from 'react-toastify';
 import { IMovementAction } from './interface';
 import { movementTypeLabel, receiptStatusLabels, ReceiptStatus, getStatusConfig } from './constants';
 import {
     dispatchMovementService, markInTransitService, receiveMovementService,
     completeMovementService, cancelMovementService,
-    approveMovementService, rejectMovementService,
+    approveMovementService, rejectMovementService, uploadMovementDocumentService,
 } from './service';
+import { generateReleaseNote } from './view/generateReleaseNote';
 import ButtonComponent from '../../components/forms/Button';
 import { fieldSx } from '../../components/forms/Inputs';
+import { autocompleteSx } from '../../components/forms/Autocomplete';
+import { ICourier } from '../settings/couriers/interface';
+import { fetchCouriersService } from '../settings/couriers/service';
 
 const PRIMARY = '#08796C';
 
@@ -86,13 +93,58 @@ interface Props extends IMovementAction {
 const MovementActionModal = ({ action, movement, handleClose, sendingRequest, setSendingRequest, onDone }: Props) => {
     const meta = ACTION_META[action];
 
-    const [courierService, setCourierService] = useState(movement.courierService ?? '');
     const [trackingNumber, setTrackingNumber] = useState(movement.trackingNumber ?? '');
     const [dispatchDate, setDispatchDate] = useState('');
     const [expectedDeliveryDate, setExpectedDeliveryDate] = useState('');
     const [receiptStatus, setReceiptStatus] = useState<ReceiptStatus>('RECEIVED_OK');
     const [remarks, setRemarks] = useState('');
     const [reason, setReason] = useState('');
+
+    // Dispatch: courier (vetted pick or ad-hoc free text) + plate number + required signed document.
+    const [couriers, setCouriers] = useState<ICourier[]>([]);
+    const [courierValue, setCourierValue] = useState<ICourier | string | null>(null);
+    const [plateNumber, setPlateNumber] = useState('');
+    const [documents, setDocuments] = useState<string[]>(movement.deliveryDocuments ?? []);
+    const [uploading, setUploading] = useState(false);
+
+    useEffect(() => {
+        if (action !== 'dispatch') return;
+        (async () => {
+            const res = (await fetchCouriersService(true)) as any;
+            if (res?.status === 200) setCouriers(res.data ?? []);
+        })();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [action]);
+
+    const handleUploadDocument = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file || !movement.id) return;
+        setUploading(true);
+        try {
+            const res = (await uploadMovementDocumentService(movement.id, file)) as any;
+            if (res?.status === 200) {
+                setDocuments(res.data?.deliveryDocuments ?? []);
+                toast.success('Document uploaded');
+            } else {
+                toast.error(res?.data?.message ?? 'Failed to upload document');
+            }
+        } finally {
+            setUploading(false);
+            e.target.value = '';
+        }
+    };
+
+    const handleGenerateDispatchNote = () => {
+        const courierName = typeof courierValue === 'object' ? courierValue?.name : courierValue;
+        generateReleaseNote({
+            ...movement,
+            courierService: courierName || movement.courierService,
+            plateNumber: plateNumber || movement.plateNumber,
+            trackingNumber: trackingNumber || movement.trackingNumber,
+            dispatchDate: dispatchDate ? new Date(dispatchDate).toISOString() : movement.dispatchDate,
+            expectedDeliveryDate: expectedDeliveryDate ? new Date(expectedDeliveryDate).toISOString() : movement.expectedDeliveryDate,
+        });
+    };
 
     const statusCfg = getStatusConfig(movement.status);
 
@@ -114,11 +166,29 @@ const MovementActionModal = ({ action, movement, handleClose, sendingRequest, se
                     response = await rejectMovementService(movement.id, reason);
                     break;
                 case 'dispatch':
+                    if (!courierValue) {
+                        toast.error('Please pick a vetted courier or type the name of the courier used.');
+                        setSendingRequest(false);
+                        return;
+                    }
+                    if (!plateNumber.trim()) {
+                        toast.error('Please provide the vehicle plate number.');
+                        setSendingRequest(false);
+                        return;
+                    }
+                    if (documents.length === 0) {
+                        toast.error('Please upload at least one signed dispatch document before dispatching.');
+                        setSendingRequest(false);
+                        return;
+                    }
                     response = await dispatchMovementService(movement.id, {
-                        courierService: courierService || null,
+                        courierId: typeof courierValue === 'object' ? courierValue.id ?? null : null,
+                        courierName: typeof courierValue === 'string' ? courierValue : null,
+                        plateNumber: plateNumber.trim(),
                         trackingNumber: trackingNumber || null,
                         dispatchDate: dispatchDate ? new Date(dispatchDate).toISOString() : null,
                         expectedDeliveryDate: expectedDeliveryDate ? new Date(expectedDeliveryDate).toISOString() : null,
+                        deliveryDocuments: documents,
                     });
                     break;
                 case 'in-transit':
@@ -205,8 +275,27 @@ const MovementActionModal = ({ action, movement, handleClose, sendingRequest, se
             {/* Action-specific fields */}
             {action === 'dispatch' && (
                 <>
-                    <SectionLabel>Logistics</SectionLabel>
-                    <TextField fullWidth sx={fieldSx} label="Courier Service" value={courierService} onChange={(e) => setCourierService(e.target.value)} />
+                    <SectionLabel>Courier</SectionLabel>
+                    <Autocomplete
+                        freeSolo
+                        options={couriers}
+                        value={courierValue}
+                        getOptionLabel={(o) => (typeof o === 'string' ? o : o.name)}
+                        onChange={(_, val) => setCourierValue(val)}
+                        onInputChange={(_, val, reason) => { if (reason === 'input') setCourierValue(val || null); }}
+                        renderOption={(props, option) => (
+                            <Box component="li" {...props} key={option.id}>
+                                <Stack>
+                                    <Typography variant="body2">{option.name}</Typography>
+                                    {option.contactPerson && <Typography variant="caption" color="text.secondary">{option.contactPerson}</Typography>}
+                                </Stack>
+                            </Box>
+                        )}
+                        renderInput={(params) => (
+                            <TextField {...params} label="Courier" placeholder="Pick a vetted courier or type a name" sx={autocompleteSx} />
+                        )}
+                    />
+                    <TextField fullWidth sx={fieldSx} label="Vehicle Plate Number" value={plateNumber} onChange={(e) => setPlateNumber(e.target.value)} />
                     <TextField fullWidth sx={fieldSx} label="Tracking Number" value={trackingNumber} onChange={(e) => setTrackingNumber(e.target.value)} />
                     {/* Plain CSS grid — MUI Grid's negative-margin spacing shifts fields out of
                         line with the full-width inputs above it inside a Stack. */}
@@ -214,6 +303,31 @@ const MovementActionModal = ({ action, movement, handleClose, sendingRequest, se
                         <TextField fullWidth sx={fieldSx} type="date" label="Dispatch Date" InputLabelProps={{ shrink: true }} value={dispatchDate} onChange={(e) => setDispatchDate(e.target.value)} />
                         <TextField fullWidth sx={fieldSx} type="date" label="Expected Delivery" InputLabelProps={{ shrink: true }} value={expectedDeliveryDate} onChange={(e) => setExpectedDeliveryDate(e.target.value)} />
                     </Box>
+
+                    <SectionLabel>Signed dispatch document — required</SectionLabel>
+                    <Typography variant="caption" sx={{ color: '#64748B' }}>
+                        1. Generate the dispatch note. 2. Print it and get it signed by the courier.
+                        3. Upload the signed copy here.
+                    </Typography>
+                    <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
+                        <Button size="small" variant="text" startIcon={<PictureAsPdfOutlinedIcon sx={{ fontSize: 16 }} />}
+                            onClick={handleGenerateDispatchNote}
+                            sx={{ borderRadius: 2, fontWeight: 600, fontSize: '0.72rem', textTransform: 'none', color: PRIMARY }}>
+                            Generate Dispatch Note
+                        </Button>
+                        <Button component="label" size="small" variant="outlined" startIcon={<UploadFileOutlinedIcon sx={{ fontSize: 16 }} />} disabled={uploading}
+                            sx={{ borderRadius: 2, fontWeight: 600, fontSize: '0.72rem', textTransform: 'none' }}>
+                            {uploading ? 'Uploading…' : 'Upload Signed Copy'}
+                            <input type="file" hidden onChange={handleUploadDocument} />
+                        </Button>
+                        {documents.map((doc, i) => {
+                            const name = doc.split('/').pop();
+                            return (
+                                <Chip key={i} size="small" icon={<DescriptionOutlinedIcon sx={{ fontSize: 14 }} />} label={name}
+                                    sx={{ height: 24, fontWeight: 500, fontSize: '0.72rem', bgcolor: alpha(PRIMARY, 0.07), color: PRIMARY }} />
+                            );
+                        })}
+                    </Stack>
                 </>
             )}
 
@@ -279,7 +393,9 @@ const MovementActionModal = ({ action, movement, handleClose, sendingRequest, se
 
             {action === 'in-transit' && (
                 <Typography variant="body2" sx={{ color: '#64748B' }}>
-                    Confirm that this movement has left the source location and is in transit.
+                    Confirm that {movement.courier?.name ?? 'the courier'} has taken custody of these items.
+                    This hands the balance from the source store to the courier's custody store — it's
+                    required before the movement can be received at its destination.
                 </Typography>
             )}
 
