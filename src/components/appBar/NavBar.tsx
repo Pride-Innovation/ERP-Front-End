@@ -10,22 +10,19 @@ import {
     Avatar,
     Badge,
     Box,
-    Container,
     Divider,
     Stack,
-    Toolbar
 } from '@mui/material'
 import React, { useState } from 'react'
-// import ButtonComponent from '../forms/Button'
 import { TypographyComponent } from '../headers/TypographyComponent';
 import PopoverComponent from '../forms/Popover';
-// import { crudStates } from '../../utils/constants';
 import MaleLogo from '../../statics/images/male.jpg';
 import FemaleLogo from '../../statics/images/Female.jpg'
 import AppBarUtills, { modalStates } from './utills';
 import ModalComponent from '../modal';
 import ChangePassword from '../../pages/profile/ChangePassword';
 import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
+import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded';
 import RoutesUtills from '../../core/routes/utills';
 import FilterByTagName from './FilterByTagName';
 import { useNotifications } from '../../context/notification/NotificationContext';
@@ -52,27 +49,15 @@ const NavBar = () => {
     } = AppBarUtills();
 
     return (
-        <Container maxWidth="xl">
+        <Box sx={{ width: '100%', display: 'flex', alignItems: 'center' }}>
             {modalState === modalStates.password &&
                 <ModalComponent title='Change Password' open={open} handleClose={handleClose} width="60%">
                     <ChangePassword handleClose={handleClose} />
                 </ModalComponent>
             }
-            <Toolbar disableGutters sx={{ minHeight: { xs: 52, sm: 56 } }}>
                 {getCurrentUser() &&
                     <Stack direction="row" spacing={1.75} sx={{ ml: "auto", display: "flex", alignItems: "center" }}>
                         <FilterByTagName />
-                        {/* <Box>
-                            <ButtonComponent
-                                handleClick={(event: React.MouseEvent<HTMLButtonElement>) => {
-                                    setAction(crudStates.create)
-                                    handleAnchorClick?.(event);
-                                }}
-                                sendingRequest={false}
-                                buttonText="+ New"
-                                buttonColor='secondary'
-                                type='button' />
-                        </Box> */}
                         <Badge
                             badgeContent={unreadCount > 0 ? unreadCount : undefined}
                             color="warning"
@@ -184,6 +169,9 @@ const NavBar = () => {
                                     </TypographyComponent>
                                 }
                             </Box>
+                            <KeyboardArrowDownRoundedIcon
+                                sx={{ fontSize: 18, color: neutral[400], display: { xs: 'none', lg: 'block' } }}
+                            />
                         </Stack>
                     </Stack>}
                 <PopoverComponent
@@ -192,10 +180,7 @@ const NavBar = () => {
                     moduleID={getCurrentUser().id}
                     handleOptionClicked={handleOptionClicked}
                     options={options(action)} />
-
-            </Toolbar>
-        </Container >
-
+        </Box>
     )
 }
 

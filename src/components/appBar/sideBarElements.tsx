@@ -26,12 +26,15 @@ import { PERMISSIONS } from '../../core/permissions/constants';
 const SideBarElements = () => {
     const { has } = usePermissions();
 
+    // Items are rendered in this order, sectioned by `group` (uppercase micro-label
+    // when the drawer is open, hairline divider when collapsed).
     const sideBarList: Array<ISideBarItem> = [
         {
             id: 1,
             name: "Dashboard",
             route: ROUTES.ASSETS_MANAGEMENT,
             icon: <DashboardIcon />,
+            group: "Overview",
             subroutes: [],
             access: true
         },
@@ -40,22 +43,16 @@ const SideBarElements = () => {
             name: "Assets",
             route: ROUTES.LIST_ASSETS,
             icon: <TuneIcon />,
+            group: "Operations",
             subroutes: [],
             access: has(PERMISSIONS.READ_ASSET)
-        },
-        {
-            id: 3,
-            name: "Users",
-            route: ROUTES.USERS,
-            icon: <GroupIcon />,
-            subroutes: [],
-            access: has(PERMISSIONS.READ_USER)
         },
         {
             id: 4,
             name: "Requests",
             route: ROUTES.REQUEST,
             icon: <RecentActorsIcon />,
+            group: "Operations",
             subroutes: [],
             access: has(PERMISSIONS.READ_REQUEST)
         },
@@ -64,6 +61,7 @@ const SideBarElements = () => {
             name: "Transport",
             route: ROUTES.TRANSPORT_REQUEST,
             icon: <DirectionsCarIcon />,
+            group: "Operations",
             subroutes: [],
             access: has(PERMISSIONS.READ_TRANSPORT)
         },
@@ -72,6 +70,7 @@ const SideBarElements = () => {
             name: "Inventory",
             route: ROUTES.INVENTORY,
             icon: <Inventory2OutlinedIcon />,
+            group: "Operations",
             subroutes: [],
             access: has(PERMISSIONS.READ_INVENTORY)
         },
@@ -80,6 +79,7 @@ const SideBarElements = () => {
             name: "Store",
             route: ROUTES.STORE,
             icon: <Store />,
+            group: "Operations",
             subroutes: [],
             access: has(PERMISSIONS.READ_STORE)
         },
@@ -88,6 +88,7 @@ const SideBarElements = () => {
             name: "Movement",
             route: ROUTES.MOVEMENT,
             icon: <LocalShippingOutlinedIcon />,
+            group: "Operations",
             subroutes: [],
             access: has(PERMISSIONS.READ_ASSET)
         },
@@ -96,14 +97,34 @@ const SideBarElements = () => {
             name: "Reports",
             route: ROUTES.REPORTS,
             icon: <BarChartOutlinedIcon />,
+            group: "Insights",
             subroutes: [],
             access: has(PERMISSIONS.READ_AUDIT)
+        },
+        {
+            id: 12,
+            name: "Audit Trails",
+            route: ROUTES.AUDIT_TRAILS,
+            icon: <ReceiptLongIcon />,
+            group: "Insights",
+            subroutes: [],
+            access: has(PERMISSIONS.READ_AUDIT)
+        },
+        {
+            id: 3,
+            name: "Users",
+            route: ROUTES.USERS,
+            icon: <GroupIcon />,
+            group: "Administration",
+            subroutes: [],
+            access: has(PERMISSIONS.READ_USER)
         },
         {
             id: 10,
             name: "Settings",
             route: ROUTES.SETTINGS,
             icon: <SettingsIcon />,
+            group: "Administration",
             subroutes: [],
             access: has(PERMISSIONS.READ_SETTING)
         },
@@ -112,16 +133,9 @@ const SideBarElements = () => {
             name: "Approval Workflows",
             route: ROUTES.APPROVAL_WORKFLOWS,
             icon: <AccountTreeOutlinedIcon />,
+            group: "Administration",
             subroutes: [],
             access: has(PERMISSIONS.READ_SETTING)
-        },
-        {
-            id: 12,
-            name: "Audit Trails",
-            route: ROUTES.AUDIT_TRAILS,
-            icon: <ReceiptLongIcon />,
-            subroutes: [],
-            access: has(PERMISSIONS.READ_AUDIT)
         },
     ]
     return ({ sideBarList })

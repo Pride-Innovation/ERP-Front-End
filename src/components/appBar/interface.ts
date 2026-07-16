@@ -11,6 +11,8 @@ export interface ISideBarItem {
     route: string;
     icon: JSX.Element;
     access?: boolean;
+    /** Section heading this item is rendered under (uppercase micro-label when the drawer is open). */
+    group?: string;
     subroutes: Array<{
         id: number;
         name: string;
