@@ -32,7 +32,7 @@ import { RootState } from '../../../store';
 import { MovementContext } from '../../../context/movement/MovementContext';
 import { ROUTES } from '../../../core/routes/routes';
 import ModalComponent from '../../../components/modal';
-import { PageShell, StatTile, StatusChip, EmptyState } from '../../../components/layout';
+import { PageHero, StatTile, StatusChip, EmptyState } from '../../../components/layout';
 import { brand, neutral, border } from '../../../utils/tokens';
 import MovementUtills from '../utills';
 import MovementActionModal from '../MovementActionModal';
@@ -126,44 +126,45 @@ const AllMovements = () => {
         handleOpen();
     };
 
+    const todayLabel = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+
     return (
-        <PageShell
-            title="All Movements"
-            subtitle="Store-to-store and asset transfers across locations"
-            icon={<SwapHorizOutlinedIcon />}
-            breadcrumbs={[
-                { label: 'Movements', href: ROUTES.MOVEMENT },
-                { label: 'All Movements' },
-            ]}
-            actions={
-                <>
-                    <Tooltip title="Refresh" arrow>
-                        <IconButton
-                            onClick={refresh}
+        // Same page padding PageShell applied, so swapping the header for PageHero keeps alignment.
+        <Box sx={{ px: { xs: 2, sm: 3 }, py: { xs: 2, sm: 3 } }}>
+            <PageHero
+                title="All Movements"
+                subtitle="Store-to-store and asset transfers across locations"
+                icon={<SwapHorizOutlinedIcon />}
+                stat={{ value: (count ?? 0).toLocaleString(), label: 'movements', helper: todayLabel }}
+                actions={
+                    <Stack direction="row" spacing={1.25} alignItems="center">
+                        <Tooltip title="Refresh" arrow>
+                            <IconButton
+                                onClick={refresh}
+                                sx={{
+                                    width: 36, height: 36, borderRadius: '8px', bgcolor: '#fff',
+                                    border: `1px solid ${border.subtle}`, color: neutral[500],
+                                    '&:hover': { borderColor: brand[500], color: brand[600], bgcolor: alpha(brand[500], 0.04) },
+                                }}
+                            >
+                                <RefreshIcon sx={{ fontSize: 18 }} />
+                            </IconButton>
+                        </Tooltip>
+                        <Button
+                            variant="contained"
+                            startIcon={<AddIcon />}
+                            onClick={() => navigate(ROUTES.CREATE_MOVEMENT)}
                             sx={{
-                                width: 36, height: 36, borderRadius: '8px',
-                                border: `1px solid ${border.subtle}`, color: neutral[500],
-                                '&:hover': { borderColor: brand[500], color: brand[600], bgcolor: alpha(brand[500], 0.04) },
+                                height: 36, px: 2.5, borderRadius: '8px', textTransform: 'none', fontWeight: 600,
+                                bgcolor: brand[500], '&:hover': { bgcolor: brand[700] },
+                                boxShadow: `0 2px 8px ${alpha(brand[500], 0.3)}`,
                             }}
                         >
-                            <RefreshIcon sx={{ fontSize: 18 }} />
-                        </IconButton>
-                    </Tooltip>
-                    <Button
-                        variant="contained"
-                        startIcon={<AddIcon />}
-                        onClick={() => navigate(ROUTES.CREATE_MOVEMENT)}
-                        sx={{
-                            height: 36, px: 2.5, borderRadius: '8px', textTransform: 'none', fontWeight: 600,
-                            bgcolor: brand[500], '&:hover': { bgcolor: brand[700] },
-                            boxShadow: `0 2px 8px ${alpha(brand[500], 0.3)}`,
-                        }}
-                    >
-                        New Movement
-                    </Button>
-                </>
-            }
-        >
+                            New Movement
+                        </Button>
+                    </Stack>
+                }
+            />
             {/* Status summary tiles (click to filter) */}
             <Grid container spacing={2} sx={{ mb: 3 }}>
                 {summaryTiles.map((t) => (
@@ -372,7 +373,7 @@ const AllMovements = () => {
                     onDone={refresh}
                 />
             </ModalComponent>
-        </PageShell>
+        </Box>
     );
 };
 
