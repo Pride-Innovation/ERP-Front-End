@@ -205,7 +205,8 @@ const AuditTrails = () => {
     };
 
     return (
-        <Box sx={{ minHeight: '100vh', pb: 4 }}>
+        // Same page padding as PageShell / the movement pages so all modules align.
+        <Box sx={{ minHeight: '100vh', px: { xs: 2, sm: 3 }, py: { xs: 2, sm: 3 }, pb: 4 }}>
             <PageHero
                 title="Audit Trails"
                 subtitle="System activity log"
