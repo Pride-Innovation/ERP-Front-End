@@ -5,21 +5,22 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { useEffect, useMemo, useState } from 'react';
+import { Dispatch, SetStateAction, useMemo, useState } from 'react';
 import {
     alpha, Box, Chip, InputAdornment, Paper, Skeleton, Stack, Table, TableBody, TableCell,
-    TableContainer, TableHead, TableRow, TextField, Typography,
+    TableContainer, TableHead, TableRow, TextField, Tooltip, Typography,
 } from '@mui/material';
 import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined';
 import { toast } from 'react-toastify';
-import { fetchBalancesService, setBalanceMinLevelService } from './service';
+import { setBalanceMinLevelService } from './service';
 
 const PRIMARY = '#08796C';
 const AMBER = '#B45309';
+const RED = '#DC2626';
 
-interface IBalanceView {
+export interface IBalanceView {
     balanceId: number;
     storeName?: string;
     storeType?: string;
@@ -31,32 +32,52 @@ interface IBalanceView {
     lowStock: boolean;
 }
 
-const BalancesPanel = () => {
-    const [rows, setRows] = useState<IBalanceView[]>([]);
-    const [loading, setLoading] = useState(true);
+interface BalancesPanelProps {
+    rows: IBalanceView[];
+    setRows: Dispatch<SetStateAction<IBalanceView[]>>;
+    loading: boolean;
+    /** "Low stock only" filter — lifted so the page's KPI tile can toggle it too. */
+    lowOnly: boolean;
+    onLowOnlyChange: (v: boolean) => void;
+}
+
+const TYPE_FILTERS = [
+    { value: 'ALL', label: 'All stores' },
+    { value: 'ADMIN', label: 'Admin' },
+    { value: 'IT', label: 'IT' },
+    { value: 'DISPOSAL', label: 'Disposal' },
+];
+
+/** Compact on-hand vs reorder-level health bar: green → amber → red as stock approaches zero. */
+const StockHealthBar = ({ quantity, minLevel }: { quantity: number; minLevel: number }) => {
+    if (!minLevel || minLevel <= 0) return null;
+    // Full bar at 2× the reorder level — "comfortably stocked" — clamped to [0, 1].
+    const ratio = Math.max(0, Math.min(1, quantity / (minLevel * 2)));
+    const color = quantity <= minLevel ? (quantity <= minLevel / 2 ? RED : AMBER) : PRIMARY;
+    return (
+        <Tooltip title={`${quantity} on hand · reorder at ${minLevel}`} arrow>
+            <Box sx={{ width: 48, height: 4, borderRadius: 2, bgcolor: alpha('#000', 0.07), overflow: 'hidden', ml: 'auto', mt: 0.5 }}>
+                <Box sx={{ width: `${ratio * 100}%`, height: '100%', bgcolor: color, transition: 'width 0.3s ease' }} />
+            </Box>
+        </Tooltip>
+    );
+};
+
+const BalancesPanel = ({ rows, setRows, loading, lowOnly, onLowOnlyChange }: BalancesPanelProps) => {
     const [search, setSearch] = useState('');
+    const [typeFilter, setTypeFilter] = useState('ALL');
     const [drafts, setDrafts] = useState<Record<number, string>>({});
     const [saving, setSaving] = useState<number | null>(null);
 
-    const load = async () => {
-        setLoading(true);
-        try {
-            const res = (await fetchBalancesService()) as any;
-            if (res?.status === 200) setRows(res.data ?? []);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => { load(); }, []);
-
     const filtered = useMemo(() => {
         const q = search.trim().toLowerCase();
-        if (!q) return rows;
-        return rows.filter((r) =>
-            [r.commodityName, r.storeName, r.locationName].some((v) => (v ?? '').toLowerCase().includes(q)),
-        );
-    }, [rows, search]);
+        return rows.filter((r) => {
+            if (lowOnly && !r.lowStock) return false;
+            if (typeFilter !== 'ALL' && r.storeType !== typeFilter) return false;
+            if (q && ![r.commodityName, r.storeName, r.locationName].some((v) => (v ?? '').toLowerCase().includes(q))) return false;
+            return true;
+        });
+    }, [rows, search, typeFilter, lowOnly]);
 
     const lowCount = rows.filter((r) => r.lowStock).length;
 
@@ -79,6 +100,18 @@ const BalancesPanel = () => {
             setDrafts((d) => { const n = { ...d }; delete n[row.balanceId]; return n; });
         }
     };
+
+    const filterChipSx = (active: boolean, color = PRIMARY) => ({
+        height: 26,
+        fontWeight: 700,
+        fontSize: '0.7rem',
+        cursor: 'pointer',
+        bgcolor: active ? alpha(color, 0.12) : '#fff',
+        color: active ? color : '#64748B',
+        border: `1px solid ${active ? alpha(color, 0.35) : '#E2E8F0'}`,
+        transition: 'all 0.15s ease',
+        '&:hover': { borderColor: alpha(color, 0.5), bgcolor: alpha(color, 0.06) },
+    });
 
     const headCell = { fontWeight: 700, fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.04em', color: '#64748B' } as const;
 
@@ -103,6 +136,34 @@ const BalancesPanel = () => {
                     InputProps={{ startAdornment: <InputAdornment position="start"><SearchOutlinedIcon sx={{ fontSize: 18, color: '#94A3B8' }} /></InputAdornment> }}
                 />
             </Box>
+
+            {/* Filter chips: store type + low-stock-only */}
+            <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap sx={{ px: 2.5, py: 1.25, borderBottom: '1px solid #EEF2F7', bgcolor: '#FAFBFC' }}>
+                {TYPE_FILTERS.map((t) => (
+                    <Chip
+                        key={t.value}
+                        label={t.label}
+                        size="small"
+                        onClick={() => setTypeFilter(t.value)}
+                        sx={filterChipSx(typeFilter === t.value)}
+                    />
+                ))}
+                <Box sx={{ width: 1, height: 20, bgcolor: '#E2E8F0', mx: 0.5 }} />
+                <Chip
+                    label="Low stock only"
+                    size="small"
+                    icon={<WarningAmberOutlinedIcon sx={{ fontSize: 13 }} />}
+                    onClick={() => onLowOnlyChange(!lowOnly)}
+                    sx={{
+                        ...filterChipSx(lowOnly, AMBER),
+                        '& .MuiChip-icon': { color: lowOnly ? AMBER : '#94A3B8' },
+                    }}
+                />
+                <Box sx={{ flex: 1 }} />
+                <Typography variant="caption" sx={{ color: '#94A3B8', fontWeight: 600 }}>
+                    {filtered.length} of {rows.length} line(s)
+                </Typography>
+            </Stack>
 
             <TableContainer sx={{ maxHeight: 460 }}>
                 <Table size="small" stickyHeader>
@@ -129,7 +190,10 @@ const BalancesPanel = () => {
                                     <TableCell sx={{ fontWeight: 600 }}>{r.commodityName ?? '—'}</TableCell>
                                     <TableCell sx={{ color: '#475569' }}>{r.storeName ?? '—'}</TableCell>
                                     <TableCell sx={{ color: '#64748B' }}>{r.locationName ?? '—'}</TableCell>
-                                    <TableCell align="right" sx={{ fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>{r.quantity}</TableCell>
+                                    <TableCell align="right" sx={{ fontVariantNumeric: 'tabular-nums' }}>
+                                        <Typography component="span" sx={{ fontWeight: 700, fontSize: '0.84rem' }}>{r.quantity}</Typography>
+                                        <StockHealthBar quantity={r.quantity} minLevel={r.minLevel} />
+                                    </TableCell>
                                     <TableCell align="right">
                                         <TextField
                                             size="small" type="number"
@@ -156,7 +220,9 @@ const BalancesPanel = () => {
                         ) : (
                             <TableRow>
                                 <TableCell colSpan={6} align="center" sx={{ py: 4, color: 'text.disabled' }}>
-                                    No consumable balances found.
+                                    {lowOnly || typeFilter !== 'ALL' || search
+                                        ? 'No balances match the current filters.'
+                                        : 'No consumable balances found.'}
                                 </TableCell>
                             </TableRow>
                         )}

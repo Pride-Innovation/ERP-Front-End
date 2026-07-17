@@ -21,7 +21,7 @@ import StorefrontOutlinedIcon from '@mui/icons-material/StorefrontOutlined';
 import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
 import { SvgIconComponent } from '@mui/icons-material';
 import { useContext, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import StoreUtills from './utillls';
 import Loading from '../../components/loading';
@@ -47,6 +47,7 @@ const StoreViewPage = ({ storeType, title, subtitle, Icon, accentColor }: StoreV
     const { branchId, currentBranch, setStoreType } = useContext(StoreContext);
     const { fetchAllAssetTypes } = AssetTypeUtills();
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
     const {
         setCurrentUserBranch,
         fetchBranchDetails,
@@ -60,7 +61,13 @@ const StoreViewPage = ({ storeType, title, subtitle, Icon, accentColor }: StoreV
         return () => setStoreType('');
     }, [storeType]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    useEffect(() => { setCurrentUserBranch(); }, []);
+    // A ?branchId= query param (from the store landing page's branch drill-down) overrides
+    // the default scope (the user's own branch / Head Office).
+    useEffect(() => {
+        const qp = searchParams.get('branchId');
+        setCurrentUserBranch(qp ? Number(qp) : undefined);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
     useEffect(() => { fetchAllAssetTypes(); }, []);
     useEffect(() => { if (branchId) { fetchBranchDetails(branchId as number); } }, [branchId]);
 

@@ -6,25 +6,20 @@ Managing Director
 */
 
 import {
-    Avatar,
     Box,
     Button,
     Chip,
     Collapse,
+    Grid,
     IconButton,
     Paper,
     Skeleton,
     Stack,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
+    Tooltip,
     Typography,
     alpha,
 } from '@mui/material';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import AdminPanelSettingsOutlinedIcon from '@mui/icons-material/AdminPanelSettingsOutlined';
@@ -37,13 +32,15 @@ import AccountBalanceOutlinedIcon from '@mui/icons-material/AccountBalanceOutlin
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import PublicOutlinedIcon from '@mui/icons-material/PublicOutlined';
 import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined';
+import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
+import FormatListNumberedOutlinedIcon from '@mui/icons-material/FormatListNumberedOutlined';
 import { SvgIconComponent } from '@mui/icons-material';
 
-import { PageHero } from '../../components/layout';
+import { PageHero, StatTile } from '../../components/layout';
 import { ROUTES } from '../../core/routes/routes';
 import { fetchRowsService } from '../../core/apis/globalService';
-import { fetchLowStockService } from './service';
-import BalancesPanel from './BalancesPanel';
+import { fetchBalancesService, fetchLowStockService } from './service';
+import BalancesPanel, { IBalanceView } from './BalancesPanel';
 
 // ── Store definitions ─────────────────────────────────────────────────────────
 
@@ -91,14 +88,6 @@ interface IBranchRow {
     low: number;
 }
 
-const headerCellSx = {
-    fontWeight: 700,
-    fontSize: '0.72rem',
-    textTransform: 'uppercase',
-    letterSpacing: '0.04em',
-    color: '#64748B',
-} as const;
-
 // ── Component ─────────────────────────────────────────────────────────────────
 
 const Store = () => {
@@ -109,7 +98,24 @@ const Store = () => {
     const [branchesLoading, setBranchesLoading] = useState(false);
     const [expandedRegions, setExpandedRegions] = useState<Set<string>>(new Set());
 
-    useEffect(() => { fetchBranchesOverview(); }, []);
+    // Consumable balances — lifted from BalancesPanel so the KPI strip can read the
+    // counts and the low-stock tile can toggle the panel's filter.
+    const [balanceRows, setBalanceRows] = useState<IBalanceView[]>([]);
+    const [balancesLoading, setBalancesLoading] = useState(true);
+    const [lowOnly, setLowOnly] = useState(false);
+    const balancesRef = useRef<HTMLDivElement | null>(null);
+
+    const loadBalances = async () => {
+        setBalancesLoading(true);
+        try {
+            const res = (await fetchBalancesService()) as any;
+            if (res?.status === 200) setBalanceRows(res.data ?? []);
+        } finally {
+            setBalancesLoading(false);
+        }
+    };
+
+    useEffect(() => { fetchBranchesOverview(); loadBalances(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     const fetchBranchesOverview = async () => {
         setBranchesLoading(true);
@@ -173,9 +179,17 @@ const Store = () => {
 
     const todayLabel = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
     const totalItemLines = branchRows.reduce((sum, b) => sum + b.itemLines, 0);
+    const branchesStocked = branchRows.filter((b) => b.itemLines > 0).length;
+    const lowStockCount = balanceRows.filter((r) => r.lowStock).length;
+
+    const jumpToLowStock = () => {
+        setLowOnly(true);
+        balancesRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
 
     return (
-        <Box sx={{ minHeight: '100vh', pb: 4 }}>
+        // Same page padding as PageShell / the other module pages so everything aligns.
+        <Box sx={{ minHeight: '100vh', px: { xs: 2, sm: 3 }, py: { xs: 2, sm: 3 }, pb: 4 }}>
             <PageHero
                 title="Store Management"
                 subtitle="Overview of all organizational stores and inventory"
@@ -197,20 +211,81 @@ const Store = () => {
                     label: 'stocked item lines',
                     helper: todayLabel,
                 }}
+                tabs={
+                    // Store quick links — accent-colored pills; each store's own page carries
+                    // the full identity, so the tile descriptions now live in tooltips.
+                    <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ py: 1.25 }}>
+                        {STORES.map((store) => (
+                            <Tooltip key={store.type} title={store.subtitle} arrow>
+                                <Button
+                                    onClick={() => navigate(store.path)}
+                                    startIcon={<store.Icon sx={{ fontSize: '16px !important' }} />}
+                                    endIcon={<ArrowForwardIosOutlinedIcon sx={{ fontSize: '10px !important' }} />}
+                                    sx={{
+                                        height: 34,
+                                        px: 1.75,
+                                        borderRadius: '8px',
+                                        textTransform: 'none',
+                                        fontWeight: 700,
+                                        fontSize: '0.78rem',
+                                        color: store.accentColor,
+                                        bgcolor: alpha(store.accentColor, 0.07),
+                                        border: `1px solid ${alpha(store.accentColor, 0.2)}`,
+                                        transition: 'all 0.15s ease',
+                                        '&:hover': {
+                                            bgcolor: alpha(store.accentColor, 0.14),
+                                            borderColor: alpha(store.accentColor, 0.45),
+                                        },
+                                    }}
+                                >
+                                    {store.title}
+                                </Button>
+                            </Tooltip>
+                        ))}
+                    </Stack>
+                }
             />
 
-            {/* ── Store tiles: lightweight navigation — details live on each store's page ── */}
-            <Box
-                sx={{
-                    display: 'grid',
-                    gap: 2,
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                }}
-            >
-                {STORES.map(store => (
-                    <StoreCard key={store.type} store={store} onView={() => navigate(store.path)} />
-                ))}
-            </Box>
+            {/* ── KPI strip ── */}
+            <Grid container spacing={2} sx={{ mb: 3 }}>
+                <Grid item xs={6} sm={3}>
+                    <StatTile
+                        label="Branches Stocked"
+                        value={branchesLoading ? '…' : branchesStocked}
+                        helper={`of ${branchRows.length} branches`}
+                        icon={<AccountBalanceOutlinedIcon />}
+                        accent="brand"
+                    />
+                </Grid>
+                <Grid item xs={6} sm={3}>
+                    <StatTile
+                        label="Total Item Lines"
+                        value={branchesLoading ? '…' : totalItemLines.toLocaleString()}
+                        helper="across all branch stores"
+                        icon={<FormatListNumberedOutlinedIcon />}
+                        accent="gold"
+                    />
+                </Grid>
+                <Grid item xs={6} sm={3}>
+                    <StatTile
+                        label="Low-Stock Alerts"
+                        value={balancesLoading ? '…' : lowStockCount}
+                        helper="click to review"
+                        icon={<WarningAmberOutlinedIcon />}
+                        accent="warning"
+                        onClick={jumpToLowStock}
+                    />
+                </Grid>
+                <Grid item xs={6} sm={3}>
+                    <StatTile
+                        label="Consumable Balances"
+                        value={balancesLoading ? '…' : balanceRows.length}
+                        helper="tracked balance lines"
+                        icon={<Inventory2OutlinedIcon />}
+                        accent="info"
+                    />
+                </Grid>
+            </Grid>
 
             {/* ── Branches overview, grouped by region ── */}
             <Paper elevation={0} sx={{ mt: 3, borderRadius: 2.5, border: '1px solid #E8EDF3', overflow: 'hidden' }}>
@@ -277,52 +352,63 @@ const Store = () => {
                                     </IconButton>
                                 </Box>
 
-                                {/* Branches within the region */}
+                                {/* Branches within the region — lean clickable rows that drill into
+                                    the branch's Admin store (pre-filtered via ?branchId=). */}
                                 <Collapse in={open} timeout="auto" unmountOnExit>
-                                    <TableContainer>
-                                        <Table size="small">
-                                            <TableHead>
-                                                <TableRow sx={{ bgcolor: '#F8FAFC' }}>
-                                                    <TableCell sx={{ ...headerCellSx, pl: 7 }}>Branch</TableCell>
-                                                    <TableCell align="right" sx={headerCellSx}>Item Lines</TableCell>
-                                                    <TableCell align="right" sx={headerCellSx}>Low Stock</TableCell>
-                                                    <TableCell align="right" sx={{ ...headerCellSx, pr: 2.5 }}>Action</TableCell>
-                                                </TableRow>
-                                            </TableHead>
-                                            <TableBody>
-                                                {rows.map((b) => (
-                                                    <TableRow key={b.id} hover>
-                                                        <TableCell sx={{ fontWeight: 600, pl: 7 }}>{b.name}</TableCell>
-                                                        <TableCell align="right">
-                                                            <Chip
-                                                                label={b.itemLines}
-                                                                size="small"
-                                                                sx={{
-                                                                    height: 22, fontWeight: 700, fontVariantNumeric: 'tabular-nums',
-                                                                    bgcolor: alpha(b.itemLines === 0 ? '#DC2626' : '#08796C', 0.1),
-                                                                    color: b.itemLines === 0 ? '#DC2626' : '#08796C',
-                                                                }}
-                                                            />
-                                                        </TableCell>
-                                                        <TableCell align="right">
-                                                            {b.low > 0 ? (
-                                                                <Chip label={b.low} size="small" sx={{ height: 22, fontWeight: 700, bgcolor: alpha('#B45309', 0.12), color: '#B45309' }} />
-                                                            ) : (
-                                                                <Typography variant="caption" sx={{ color: '#94A3B8' }}>—</Typography>
-                                                            )}
-                                                        </TableCell>
-                                                        <TableCell align="right" sx={{ pr: 2.5 }}>
-                                                            <Button size="small" variant="text" startIcon={<SwapHorizOutlinedIcon sx={{ fontSize: 15 }} />}
-                                                                onClick={() => navigate(ROUTES.CREATE_MOVEMENT)}
-                                                                sx={{ textTransform: 'none', fontWeight: 600, fontSize: '0.72rem', color: '#08796C' }}>
-                                                                Replenish
-                                                            </Button>
-                                                        </TableCell>
-                                                    </TableRow>
-                                                ))}
-                                            </TableBody>
-                                        </Table>
-                                    </TableContainer>
+                                    {rows.map((b, bi) => (
+                                        <Box
+                                            key={b.id}
+                                            onClick={() => navigate(`${ROUTES.STORE_ADMIN}?branchId=${b.id}`)}
+                                            role="link"
+                                            tabIndex={0}
+                                            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navigate(`${ROUTES.STORE_ADMIN}?branchId=${b.id}`); } }}
+                                            aria-label={`Open ${b.name} store`}
+                                            sx={{
+                                                pl: 7, pr: 2.5, py: 1.1,
+                                                display: 'flex', alignItems: 'center', gap: 1.25, flexWrap: 'wrap',
+                                                cursor: 'pointer',
+                                                borderTop: bi === 0 ? '1px solid #EEF2F7' : 'none',
+                                                borderBottom: '1px solid #F4F7FA',
+                                                transition: 'background-color 0.13s ease',
+                                                '&:hover': { bgcolor: alpha('#08796C', 0.035) },
+                                                '&:hover .branch-row-arrow': { color: '#08796C', transform: 'translateX(2px)' },
+                                                '&:focus-visible': { outline: '2px solid #08796C', outlineOffset: -2 },
+                                            }}
+                                        >
+                                            <StorefrontOutlinedIcon sx={{ fontSize: 15, color: '#94A3B8', flexShrink: 0 }} />
+                                            <Typography sx={{ fontWeight: 600, fontSize: '0.84rem', color: '#1E293B' }}>{b.name}</Typography>
+                                            <Box sx={{ flex: 1 }} />
+                                            <Chip
+                                                label={`${b.itemLines} line${b.itemLines !== 1 ? 's' : ''}`}
+                                                size="small"
+                                                sx={{
+                                                    height: 22, fontWeight: 700, fontSize: '0.68rem', fontVariantNumeric: 'tabular-nums',
+                                                    bgcolor: alpha(b.itemLines === 0 ? '#DC2626' : '#08796C', 0.1),
+                                                    color: b.itemLines === 0 ? '#DC2626' : '#08796C',
+                                                }}
+                                            />
+                                            {b.low > 0 && (
+                                                <Chip
+                                                    icon={<WarningAmberOutlinedIcon sx={{ fontSize: 12 }} />}
+                                                    label={`${b.low} low`}
+                                                    size="small"
+                                                    sx={{ height: 22, fontWeight: 700, fontSize: '0.68rem', bgcolor: alpha('#B45309', 0.12), color: '#B45309', '& .MuiChip-icon': { color: '#B45309' } }}
+                                                />
+                                            )}
+                                            <Button
+                                                size="small" variant="text"
+                                                startIcon={<SwapHorizOutlinedIcon sx={{ fontSize: 15 }} />}
+                                                onClick={(e) => { e.stopPropagation(); navigate(ROUTES.CREATE_MOVEMENT); }}
+                                                sx={{ textTransform: 'none', fontWeight: 600, fontSize: '0.72rem', color: '#08796C' }}
+                                            >
+                                                Replenish
+                                            </Button>
+                                            <ArrowForwardIosOutlinedIcon
+                                                className="branch-row-arrow"
+                                                sx={{ fontSize: 11, color: '#CBD5E1', flexShrink: 0, transition: 'all 0.15s ease' }}
+                                            />
+                                        </Box>
+                                    ))}
                                 </Collapse>
                             </Box>
                         );
@@ -335,145 +421,16 @@ const Store = () => {
             </Paper>
 
             {/* ── Consumable balances: set reorder thresholds + see low stock ── */}
-            <BalancesPanel />
-        </Box>
-    );
-};
-
-// ── Store card — a clean navigation tile; the breakdown lives on the store page ──
-
-interface StoreCardProps {
-    store: StoreDef;
-    onView: () => void;
-}
-
-const StoreCard = ({ store, onView }: StoreCardProps) => {
-    const color = store.accentColor;
-
-    return (
-        <Paper
-            elevation={0}
-            onClick={onView}
-            role="link"
-            tabIndex={0}
-            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onView(); } }}
-            aria-label={`Open ${store.title}`}
-            sx={{
-                borderRadius: 2.5,
-                border: '1px solid #E8EDF3',
-                overflow: 'hidden',
-                cursor: 'pointer',
-                height: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-                transition: 'border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease',
-                '&:hover': {
-                    borderColor: alpha(color, 0.4),
-                    boxShadow: `0 10px 28px -10px ${alpha(color, 0.28)}`,
-                    transform: 'translateY(-2px)',
-                    '& .store-card-cta': { color },
-                    '& .store-card-arrow': {
-                        bgcolor: color,
-                        borderColor: color,
-                        color: '#fff',
-                        transform: 'translateX(2px)',
-                    },
-                },
-                '&:focus-visible': { outline: `2px solid ${color}`, outlineOffset: 2 },
-            }}
-        >
-            {/* Accent strip keeps the store's identity without tinting the whole border */}
-            <Box sx={{ height: 3, bgcolor: color, flexShrink: 0 }} />
-
-            {/* Body — stacks vertically so extra width just becomes breathing room */}
-            <Stack direction="row" spacing={1.75} alignItems="flex-start" sx={{ p: 2.5, pb: 2.25, flex: 1 }}>
-                <Avatar
-                    sx={{
-                        width: 44,
-                        height: 44,
-                        bgcolor: alpha(color, 0.09),
-                        color,
-                        borderRadius: '12px',
-                        flexShrink: 0,
-                        border: `1px solid ${alpha(color, 0.18)}`,
-                    }}
-                >
-                    <store.Icon sx={{ fontSize: 22 }} />
-                </Avatar>
-
-                <Box sx={{ minWidth: 0 }}>
-                    <Typography
-                        variant="subtitle1"
-                        sx={{ fontWeight: 700, color: '#1E293B', lineHeight: 1.3, mb: 0.25 }}
-                        noWrap
-                        title={store.title}
-                    >
-                        {store.title}
-                    </Typography>
-                    <Typography
-                        variant="body2"
-                        sx={{
-                            color: '#64748B',
-                            fontSize: '0.8rem',
-                            lineHeight: 1.5,
-                            display: '-webkit-box',
-                            WebkitLineClamp: 2,
-                            WebkitBoxOrient: 'vertical',
-                            overflow: 'hidden',
-                        }}
-                    >
-                        {store.subtitle}
-                    </Typography>
-                </Box>
-            </Stack>
-
-            {/* Footer — a full-width action bar anchors the card at any width */}
-            <Box
-                sx={{
-                    px: 2.5,
-                    py: 1.25,
-                    borderTop: '1px solid #EEF2F7',
-                    bgcolor: '#FAFBFC',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    gap: 1,
-                }}
-            >
-                <Typography
-                    className="store-card-cta"
-                    variant="caption"
-                    sx={{
-                        fontWeight: 700,
-                        color: '#64748B',
-                        letterSpacing: '0.03em',
-                        textTransform: 'uppercase',
-                        fontSize: '0.66rem',
-                        transition: 'color 0.15s ease',
-                    }}
-                >
-                    View store
-                </Typography>
-                <Box
-                    className="store-card-arrow"
-                    sx={{
-                        color,
-                        bgcolor: alpha(color, 0.08),
-                        border: `1px solid ${alpha(color, 0.18)}`,
-                        borderRadius: '8px',
-                        width: 28,
-                        height: 28,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flexShrink: 0,
-                        transition: 'all 0.15s ease',
-                    }}
-                >
-                    <ArrowForwardIosOutlinedIcon sx={{ fontSize: 12 }} />
-                </Box>
+            <Box ref={balancesRef} sx={{ scrollMarginTop: 80 }}>
+                <BalancesPanel
+                    rows={balanceRows}
+                    setRows={setBalanceRows}
+                    loading={balancesLoading}
+                    lowOnly={lowOnly}
+                    onLowOnlyChange={setLowOnly}
+                />
             </Box>
-        </Paper>
+        </Box>
     );
 };
 
