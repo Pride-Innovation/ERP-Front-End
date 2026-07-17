@@ -64,6 +64,8 @@ const getStatusMeta = (raw: string): { bg: string; text: string; border: string;
         return { bg: alpha('#dc2626', 0.08), text: '#b91c1c', border: alpha('#dc2626', 0.18), dot: '#dc2626' };
     if (s.includes('issued') || s.includes('acknowledge') || s.includes('available') || s.includes('repair') || s === 'inmaintenance')
         return { bg: alpha('#0284c7', 0.08), text: '#0369a1', border: alpha('#0284c7', 0.18), dot: '#0284c7' };
+    if (s === 'intransit' || s.includes('transit'))
+        return { bg: alpha('#4338CA', 0.08), text: '#4338CA', border: alpha('#4338CA', 0.18), dot: '#4338CA' };
     return { bg: alpha('#7c3aed', 0.08), text: '#6d28d9', border: alpha('#7c3aed', 0.18), dot: '#7c3aed' };
 };
 
