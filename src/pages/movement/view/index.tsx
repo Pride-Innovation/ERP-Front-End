@@ -37,7 +37,7 @@ import { generateReleaseNote } from './generateReleaseNote';
 import { ROUTES } from '../../../core/routes/routes';
 import Loading from '../../../components/loading';
 import ModalComponent from '../../../components/modal';
-import { PageShell, StatusChip, EmptyState } from '../../../components/layout';
+import { PageHero, StatusChip, EmptyState } from '../../../components/layout';
 import MovementActionModal from '../MovementActionModal';
 import RoutesUtills from '../../../core/routes/utills';
 import { brand, gold, neutral, border, status } from '../../../utils/tokens';
@@ -249,31 +249,34 @@ const MovementDetails = () => {
     const showLogistics = movement.movementCategory === 'INTER_LOCATION';
 
     return (
-        <PageShell
-            title={`Movement #${movement.id}`}
-            subtitle={`${movementTypeLabel(movement.movementType)}${movement.movementCategory ? ` · ${categoryLabels[movement.movementCategory]}` : ''}`}
-            icon={<SwapHorizOutlinedIcon />}
-            breadcrumbs={[
-                { label: 'Movements', href: ROUTES.MOVEMENT },
-                { label: `Movement #${movement.id}` },
-            ]}
-            actions={
-                <>
-                    <Button variant="outlined" startIcon={<ArrowBackIcon />} onClick={() => navigate(ROUTES.MOVEMENT)} sx={{ height: 36, borderRadius: '8px', textTransform: 'none', fontWeight: 600, fontSize: '0.78rem' }}>Back</Button>
-                    {canApproveMovement(movement, currentUserId) && (
-                        <>
-                            <Button variant="contained" startIcon={<CheckCircleOutlineIcon />} onClick={() => openAction('approve')} sx={{ height: 36, borderRadius: '8px', textTransform: 'none', fontWeight: 600, fontSize: '0.78rem', bgcolor: status.success.strong }}>Approve</Button>
-                            <Button variant="outlined" startIcon={<HighlightOffIcon />} onClick={() => openAction('reject')} sx={{ height: 36, borderRadius: '8px', textTransform: 'none', fontWeight: 600, fontSize: '0.78rem', borderColor: status.danger.main, color: status.danger.main }}>Reject</Button>
-                        </>
-                    )}
-                    {canDispatch(movement) && <Button variant="contained" startIcon={<LocalShippingOutlinedIcon />} onClick={() => openAction('dispatch')} sx={{ height: 36, borderRadius: '8px', textTransform: 'none', fontWeight: 600, fontSize: '0.78rem', bgcolor: BLUE }}>Dispatch</Button>}
-                    {canMarkInTransit(movement) && <Button variant="contained" startIcon={<FlightTakeoffOutlinedIcon />} onClick={() => openAction('in-transit')} sx={{ height: 36, borderRadius: '8px', textTransform: 'none', fontWeight: 600, fontSize: '0.78rem', bgcolor: INDIGO }}>In Transit</Button>}
-                    {canReceive(movement) && <Button variant="contained" startIcon={<AssignmentTurnedInOutlinedIcon />} onClick={() => openAction('receive')} sx={{ height: 36, borderRadius: '8px', textTransform: 'none', fontWeight: 600, fontSize: '0.78rem', bgcolor: status.success.strong }}>Receive</Button>}
-                    {canComplete(movement) && <Button variant="contained" startIcon={<TaskAltOutlinedIcon />} onClick={() => openAction('complete')} sx={{ height: 36, borderRadius: '8px', textTransform: 'none', fontWeight: 600, fontSize: '0.78rem', bgcolor: status.success.strong }}>Complete</Button>}
-                    {canCancel(movement) && <Button variant="outlined" startIcon={<CancelOutlinedIcon />} onClick={() => openAction('cancel')} sx={{ height: 36, borderRadius: '8px', textTransform: 'none', fontWeight: 600, fontSize: '0.78rem', borderColor: status.danger.main, color: status.danger.main }}>Cancel</Button>}
-                </>
-            }
-        >
+        // Same page padding PageShell applied, so swapping the header for PageHero keeps alignment.
+        <Box sx={{ px: { xs: 2, sm: 3 }, py: { xs: 2, sm: 3 } }}>
+            <PageHero
+                title={`Movement #${movement.id}`}
+                subtitle={`${movementTypeLabel(movement.movementType)}${movement.movementCategory ? ` · ${categoryLabels[movement.movementCategory]}` : ''}`}
+                icon={<SwapHorizOutlinedIcon />}
+                stat={{
+                    value: movement.items?.length ?? 0,
+                    label: movement.items?.length === 1 ? 'item' : 'items',
+                    helper: fmtDate(movement.createDate) ?? undefined,
+                }}
+                actions={
+                    <Stack direction="row" spacing={1.25} alignItems="center" flexWrap="wrap" useFlexGap>
+                        <Button variant="outlined" startIcon={<ArrowBackIcon />} onClick={() => navigate(ROUTES.MOVEMENT)} sx={{ height: 36, borderRadius: '8px', textTransform: 'none', fontWeight: 600, fontSize: '0.78rem', bgcolor: '#fff' }}>Back</Button>
+                        {canApproveMovement(movement, currentUserId) && (
+                            <>
+                                <Button variant="contained" startIcon={<CheckCircleOutlineIcon />} onClick={() => openAction('approve')} sx={{ height: 36, borderRadius: '8px', textTransform: 'none', fontWeight: 600, fontSize: '0.78rem', bgcolor: status.success.strong }}>Approve</Button>
+                                <Button variant="outlined" startIcon={<HighlightOffIcon />} onClick={() => openAction('reject')} sx={{ height: 36, borderRadius: '8px', textTransform: 'none', fontWeight: 600, fontSize: '0.78rem', bgcolor: '#fff', borderColor: status.danger.main, color: status.danger.main }}>Reject</Button>
+                            </>
+                        )}
+                        {canDispatch(movement) && <Button variant="contained" startIcon={<LocalShippingOutlinedIcon />} onClick={() => openAction('dispatch')} sx={{ height: 36, borderRadius: '8px', textTransform: 'none', fontWeight: 600, fontSize: '0.78rem', bgcolor: BLUE }}>Dispatch</Button>}
+                        {canMarkInTransit(movement) && <Button variant="contained" startIcon={<FlightTakeoffOutlinedIcon />} onClick={() => openAction('in-transit')} sx={{ height: 36, borderRadius: '8px', textTransform: 'none', fontWeight: 600, fontSize: '0.78rem', bgcolor: INDIGO }}>In Transit</Button>}
+                        {canReceive(movement) && <Button variant="contained" startIcon={<AssignmentTurnedInOutlinedIcon />} onClick={() => openAction('receive')} sx={{ height: 36, borderRadius: '8px', textTransform: 'none', fontWeight: 600, fontSize: '0.78rem', bgcolor: status.success.strong }}>Receive</Button>}
+                        {canComplete(movement) && <Button variant="contained" startIcon={<TaskAltOutlinedIcon />} onClick={() => openAction('complete')} sx={{ height: 36, borderRadius: '8px', textTransform: 'none', fontWeight: 600, fontSize: '0.78rem', bgcolor: status.success.strong }}>Complete</Button>}
+                        {canCancel(movement) && <Button variant="outlined" startIcon={<CancelOutlinedIcon />} onClick={() => openAction('cancel')} sx={{ height: 36, borderRadius: '8px', textTransform: 'none', fontWeight: 600, fontSize: '0.78rem', bgcolor: '#fff', borderColor: status.danger.main, color: status.danger.main }}>Cancel</Button>}
+                    </Stack>
+                }
+            />
             {/* ── Overview: status chips + lifecycle progress (mirrors the dashboard's gradient greeting banner) ── */}
             <Paper
                 elevation={0}
@@ -516,7 +519,7 @@ const MovementDetails = () => {
                     onDone={load}
                 />
             </ModalComponent>
-        </PageShell>
+        </Box>
     );
 };
 
