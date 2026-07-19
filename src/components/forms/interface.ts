@@ -33,6 +33,8 @@ export interface IInputForm {
     handleMouseDown?: (event: React.MouseEvent<HTMLButtonElement>) => void;
     row?: number;
     disabled?: boolean
+    placeholder?: string;
+    helperText?: string;
 }
 
 export interface IInputPropAdornment {
@@ -87,6 +89,8 @@ export interface IUseFormInput<T extends FieldValues> {
     onInputChange?: (event: any, value: string) => void;
     renderOption?: (props: any, option: any) => React.ReactNode;
     onChange?: (event: any, value: any) => void;
+    placeholder?: string;
+    helperText?: string;
 }
 
 export interface IDatePickerComponent {
