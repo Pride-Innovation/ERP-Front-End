@@ -30,7 +30,7 @@ import { InputComponent } from '../../components/forms/Inputs';
 import SelectComponent from '../../components/forms/Select';
 import AutocompleteComponent from '../../components/forms/Autocomplete';
 import { IOptions } from '../../components/tables/interface';
-import { brand } from '../../utils/tokens';
+import { brand, neutral, border, elevation, radii } from '../../utils/tokens';
 import { IAssetType } from '../settings/assetTypes/interface';
 import { IBranch } from '../settings/branch/interface';
 import { IRole } from '../settings/interface';
@@ -144,39 +144,74 @@ const WorkflowForm: React.FC<IWorkflowFormProps> = ({ initial, branches, roles, 
 
             {/* Inset to the same horizontal bounds as the cards below (content uses p:3),
                 so the header strip aligns with "Workflow Settings"/"Approval Steps" instead
-                of overhanging them. Card-style border + radius keeps the stack consistent. */}
+                of overhanging them. Clean-card chrome matches PageHero/PageShell. */}
             <Box sx={{
                 flexShrink: 0,
                 mx: 3, mt: 3,
-                px: 3, py: 2,
+                px: { xs: 2.5, md: 3.5 }, py: 2.5,
                 bgcolor: '#fff',
-                border: `1px solid ${alpha(TEAL, 0.2)}`,
-                borderRadius: 3,
+                border: `1px solid ${border.subtle}`,
+                borderRadius: `${radii.lg}px`,
+                boxShadow: elevation.card,
             }}>
-                <Stack direction="row" alignItems="center" justifyContent="space-between">
-                    <Stack direction="row" alignItems="center" spacing={1.5}>
-                        <IconButton size="small" onClick={onCancel}
-                            sx={{
-                                color: TEAL,
-                                border: `1px solid ${alpha(TEAL, 0.3)}`,
-                                '&:hover': { bgcolor: alpha(TEAL, 0.06) },
-                            }}>
-                            <ArrowBackIcon fontSize="small" />
-                        </IconButton>
-                        <Box>
-                            <Typography variant="h6" fontWeight={700} color={TEAL}>
+                <Stack
+                    direction={{ xs: 'column', sm: 'row' }}
+                    alignItems={{ xs: 'flex-start', sm: 'center' }}
+                    justifyContent="space-between"
+                    spacing={2}
+                >
+                    <Stack direction="row" alignItems="center" spacing={2} sx={{ minWidth: 0 }}>
+                        <Tooltip title="Back to workflows" arrow>
+                            <IconButton size="small" onClick={onCancel}
+                                sx={{
+                                    width: 36, height: 36,
+                                    borderRadius: '8px',
+                                    color: brand[600],
+                                    border: `1px solid ${alpha(brand[500], 0.3)}`,
+                                    '&:hover': { bgcolor: alpha(brand[500], 0.06), borderColor: brand[500] },
+                                }}>
+                                <ArrowBackIcon fontSize="small" />
+                            </IconButton>
+                        </Tooltip>
+                        <Box sx={{
+                            width: 44,
+                            height: 44,
+                            borderRadius: 1.5,
+                            bgcolor: alpha(brand[500], 0.08),
+                            border: `1px solid ${alpha(brand[500], 0.18)}`,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexShrink: 0,
+                        }}>
+                            <AccountTreeOutlinedIcon sx={{ fontSize: 22, color: brand[600] }} />
+                        </Box>
+                        <Box sx={{ minWidth: 0 }}>
+                            <Typography
+                                variant="h6"
+                                noWrap
+                                sx={{ fontWeight: 700, color: neutral[900], lineHeight: 1.25, letterSpacing: '-0.01em' }}
+                            >
                                 {isEdit ? `Edit: ${initial!.name}` : 'New Approval Workflow'}
                             </Typography>
-                            <Typography variant="caption" color="text.secondary">
+                            <Typography variant="body2" sx={{ color: neutral[500], mt: 0.25 }}>
                                 {isEdit
                                     ? 'Update workflow configuration and approval steps'
                                     : 'Define workflow routing and approval steps'}
                             </Typography>
                         </Box>
                     </Stack>
-                    <Stack direction="row" spacing={1}>
+                    <Stack direction="row" spacing={1.25} sx={{ flexShrink: 0, width: { xs: '100%', sm: 'auto' } }}>
                         <Button variant="outlined" onClick={onCancel}
-                            sx={{ color: 'text.secondary', borderColor: alpha('#000', 0.2) }}>
+                            sx={{
+                                height: 40,
+                                borderRadius: '8px',
+                                textTransform: 'none',
+                                fontWeight: 600,
+                                color: neutral[600],
+                                borderColor: border.default,
+                                '&:hover': { borderColor: neutral[400], bgcolor: neutral[50] },
+                            }}>
                             Cancel
                         </Button>
                         <Button
@@ -186,7 +221,17 @@ const WorkflowForm: React.FC<IWorkflowFormProps> = ({ initial, branches, roles, 
                                 : <SaveOutlinedIcon />}
                             onClick={handleSave}
                             disabled={saving || !form.name.trim()}
-                            sx={{ bgcolor: TEAL, '&:hover': { bgcolor: '#03413A' }, minWidth: 120 }}
+                            sx={{
+                                height: 40,
+                                minWidth: 130,
+                                borderRadius: '8px',
+                                textTransform: 'none',
+                                fontWeight: 600,
+                                bgcolor: brand[500],
+                                boxShadow: `0 2px 8px ${alpha(brand[500], 0.3)}`,
+                                '&:hover': { bgcolor: brand[700], boxShadow: `0 4px 14px ${alpha(brand[500], 0.4)}` },
+                                '&.Mui-disabled': { bgcolor: alpha(brand[500], 0.45), color: '#fff' },
+                            }}
                         >
                             {saving ? 'Saving…' : isEdit ? 'Update' : 'Create'}
                         </Button>

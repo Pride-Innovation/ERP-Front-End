@@ -20,11 +20,16 @@ import {
     Fade,
     IconButton,
     Stack,
+    Tab,
+    Tabs,
     Tooltip,
     Typography,
     alpha,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import PauseCircleOutlineIcon from '@mui/icons-material/PauseCircleOutline';
+import ViewListOutlinedIcon from '@mui/icons-material/ViewListOutlined';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined';
@@ -35,7 +40,7 @@ import LowPriorityOutlinedIcon from '@mui/icons-material/LowPriorityOutlined';
 import PeopleOutlineIcon from '@mui/icons-material/PeopleOutline';
 import ArrowRightAltIcon from '@mui/icons-material/ArrowRightAlt';
 import { RootState } from '../../store';
-import { brand, gold } from '../../utils/tokens';
+import { brand, gold, neutral, border, surface, elevation, radii, status } from '../../utils/tokens';
 import { PageHero, EmptyState } from '../../components/layout';
 import WorkflowForm from './WorkflowForm';
 import ApprovalWorkflowUtills from './utills';
@@ -43,10 +48,33 @@ import { BRANCH_SCOPE_LABELS, IApprovalWorkflow, IApprovalStep, APPROVER_TYPE_LA
 import { RequirePermission } from '../../core/permissions';
 import { PERMISSIONS } from '../../core/permissions/constants';
 
-const P = brand[800];     // teal
+const P = brand[600];     // teal
 const GOLD = gold[500];
 
 type PageView = 'list' | 'form';
+type StatusFilter = 'all' | 'active' | 'inactive';
+
+/** Tab label with a small count pill — used by the hero's filter tabs. */
+const TabLabel = ({ text, count }: { text: string; count: number }) => (
+    <Stack direction="row" spacing={0.75} alignItems="center">
+        <span>{text}</span>
+        <Box
+            component="span"
+            sx={{
+                px: 0.75,
+                borderRadius: '10px',
+                fontSize: '0.68rem',
+                fontWeight: 700,
+                lineHeight: 1.6,
+                bgcolor: neutral[100],
+                color: neutral[600],
+                fontVariantNumeric: 'tabular-nums',
+            }}
+        >
+            {count}
+        </Box>
+    </Stack>
+);
 
 /* ── small helpers ──────────────────────────────────────── */
 
@@ -57,17 +85,17 @@ const ActiveBadge = ({ active }: { active: boolean }) => (
         gap: 0.5,
         px: 1,
         py: 0.25,
-        borderRadius: '20px',
+        borderRadius: `${radii.pill}px`,
         fontSize: '0.7rem',
         fontWeight: 700,
         letterSpacing: '0.04em',
-        bgcolor: active ? alpha('#16A34A', 0.1) : alpha('#64748B', 0.1),
-        color: active ? '#16A34A' : '#64748B',
-        border: `1px solid ${active ? alpha('#16A34A', 0.2) : alpha('#64748B', 0.15)}`,
+        bgcolor: active ? status.success.soft : neutral[100],
+        color: active ? status.success.strong : neutral[500],
+        border: `1px solid ${active ? alpha(status.success.main, 0.25) : border.default}`,
     }}>
         <Box sx={{
             width: 5, height: 5, borderRadius: '50%',
-            bgcolor: active ? '#16A34A' : '#94A3B8',
+            bgcolor: active ? status.success.main : neutral[400],
         }} />
         {active ? 'Active' : 'Inactive'}
     </Box>
@@ -75,14 +103,14 @@ const ActiveBadge = ({ active }: { active: boolean }) => (
 
 const MetaItem = ({ icon, label }: { icon: React.ReactNode; label: string }) => (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6 }}>
-        <Box sx={{ color: '#94A3B8', display: 'flex', alignItems: 'center' }}>{icon}</Box>
-        <Typography sx={{ fontSize: '0.75rem', color: '#64748B', fontWeight: 500 }}>{label}</Typography>
+        <Box sx={{ color: neutral[400], display: 'flex', alignItems: 'center' }}>{icon}</Box>
+        <Typography sx={{ fontSize: '0.75rem', color: neutral[500], fontWeight: 500 }}>{label}</Typography>
     </Box>
 );
 
 const StepFlow = ({ steps }: { steps: IApprovalStep[] }) => {
     if (!steps?.length) return (
-        <Typography sx={{ fontSize: '0.72rem', color: '#94A3B8', fontStyle: 'italic' }}>No steps configured</Typography>
+        <Typography sx={{ fontSize: '0.72rem', color: neutral[400], fontStyle: 'italic' }}>No steps configured</Typography>
     );
     return (
         <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 0.5 }}>
@@ -115,7 +143,7 @@ const StepFlow = ({ steps }: { steps: IApprovalStep[] }) => {
                                     {i + 1}
                                 </Typography>
                             </Box>
-                            <Typography sx={{ fontSize: '0.72rem', fontWeight: 600, color: '#1E293B', whiteSpace: 'nowrap' }}>
+                            <Typography sx={{ fontSize: '0.72rem', fontWeight: 600, color: neutral[800], whiteSpace: 'nowrap' }}>
                                 {s.stepName || `Step ${i + 1}`}
                             </Typography>
                             {s.optional && (
@@ -125,7 +153,7 @@ const StepFlow = ({ steps }: { steps: IApprovalStep[] }) => {
                                 }} />
                             )}
                         </Box>
-                        <Typography sx={{ fontSize: '0.62rem', color: '#94A3B8', fontWeight: 500 }}>
+                        <Typography sx={{ fontSize: '0.62rem', color: neutral[400], fontWeight: 500 }}>
                             {APPROVER_TYPE_LABELS[s.approverType] ?? s.approverType}
                         </Typography>
                     </Box>
@@ -151,32 +179,21 @@ const WorkflowCard = ({ wf, onEdit, onToggle, onDelete }: WorkflowCardProps) => 
     <Fade in>
         <Box sx={{
             display: 'flex',
-            borderRadius: '12px',
-            border: '1px solid #E8EDF3',
-            bgcolor: '#fff',
-            boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
+            borderRadius: `${radii.lg}px`,
+            border: `1px solid ${border.subtle}`,
+            bgcolor: surface.card,
+            boxShadow: elevation.card,
             overflow: 'hidden',
             mb: 2,
             opacity: wf.active ? 1 : 0.72,
             transition: 'box-shadow 0.2s, border-color 0.2s',
             '&:hover': {
-                borderColor: alpha(P, 0.35),
-                boxShadow: `0 4px 16px ${alpha(P, 0.08)}`,
+                borderColor: alpha(brand[500], 0.35),
+                boxShadow: `0 4px 16px ${alpha(brand[500], 0.1)}`,
             },
         }}>
-            {/* Left accent bar */}
-            <Box sx={{
-                width: 4,
-                flexShrink: 0,
-                bgcolor: wf.active ? P : '#CBD5E1',
-                borderRadius: '12px 0 0 12px',
-            }} />
-
             <Box sx={{ flex: 1, p: 0 }}>
                 {/* ── header row ── */}
-                {/* px aligns the card content column with the PageHero above:
-                    hero indents to 20px (xs) / 28px (md); the 4px accent bar + these
-                    paddings land on the same vertical line. */}
                 <Box sx={{
                     px: { xs: 2, md: 3 },
                     py: 1.75,
@@ -191,8 +208,8 @@ const WorkflowCard = ({ wf, onEdit, onToggle, onDelete }: WorkflowCardProps) => 
                             width: 38,
                             height: 38,
                             borderRadius: '9px',
-                            bgcolor: alpha(P, 0.09),
-                            border: `1px solid ${alpha(P, 0.18)}`,
+                            bgcolor: alpha(brand[500], 0.08),
+                            border: `1px solid ${alpha(brand[500], 0.18)}`,
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
@@ -202,7 +219,7 @@ const WorkflowCard = ({ wf, onEdit, onToggle, onDelete }: WorkflowCardProps) => 
                         </Box>
                         <Box sx={{ minWidth: 0 }}>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap', mb: 0.5 }}>
-                                <Typography sx={{ fontWeight: 700, fontSize: '0.95rem', color: '#0F172A', lineHeight: 1.3 }}>
+                                <Typography sx={{ fontWeight: 700, fontSize: '0.95rem', color: neutral[900], lineHeight: 1.3, letterSpacing: '-0.01em' }}>
                                     {wf.name}
                                 </Typography>
                                 <ActiveBadge active={wf.active} />
@@ -220,7 +237,7 @@ const WorkflowCard = ({ wf, onEdit, onToggle, onDelete }: WorkflowCardProps) => 
                                 />
                             </Box>
                             {wf.description && (
-                                <Typography sx={{ fontSize: '0.78rem', color: '#64748B', lineHeight: 1.4 }}>
+                                <Typography sx={{ fontSize: '0.78rem', color: neutral[500], lineHeight: 1.4 }}>
                                     {wf.description}
                                 </Typography>
                             )}
@@ -232,10 +249,10 @@ const WorkflowCard = ({ wf, onEdit, onToggle, onDelete }: WorkflowCardProps) => 
                         <Tooltip title={wf.active ? 'Deactivate' : 'Activate'}>
                             <IconButton size="small" onClick={onToggle} sx={{
                                 width: 30, height: 30,
-                                border: `1px solid ${alpha(wf.active ? P : '#64748B', 0.2)}`,
-                                bgcolor: alpha(wf.active ? P : '#64748B', 0.06),
-                                color: wf.active ? P : '#64748B',
-                                '&:hover': { bgcolor: alpha(wf.active ? P : '#64748B', 0.12) },
+                                border: `1px solid ${alpha(wf.active ? P : neutral[500], 0.2)}`,
+                                bgcolor: alpha(wf.active ? P : neutral[500], 0.06),
+                                color: wf.active ? P : neutral[500],
+                                '&:hover': { bgcolor: alpha(wf.active ? P : neutral[500], 0.12) },
                             }}>
                                 <PowerSettingsNewIcon sx={{ fontSize: 15 }} />
                             </IconButton>
@@ -254,10 +271,10 @@ const WorkflowCard = ({ wf, onEdit, onToggle, onDelete }: WorkflowCardProps) => 
                         <Tooltip title="Delete workflow">
                             <IconButton size="small" onClick={onDelete} sx={{
                                 width: 30, height: 30,
-                                border: '1px solid #FEE2E2',
-                                bgcolor: '#FFF5F5',
-                                color: '#EF4444',
-                                '&:hover': { bgcolor: '#FEE2E2' },
+                                border: `1px solid ${status.danger.soft}`,
+                                bgcolor: alpha(status.danger.main, 0.04),
+                                color: status.danger.main,
+                                '&:hover': { bgcolor: status.danger.soft },
                             }}>
                                 <DeleteOutlineIcon sx={{ fontSize: 15 }} />
                             </IconButton>
@@ -265,10 +282,10 @@ const WorkflowCard = ({ wf, onEdit, onToggle, onDelete }: WorkflowCardProps) => 
                     </Stack>
                 </Box>
 
-                <Divider sx={{ borderColor: '#F1F5F9' }} />
+                <Divider sx={{ borderColor: border.subtle }} />
 
                 {/* ── meta row ── */}
-                <Box sx={{ px: { xs: 2, md: 3 }, py: 1.25, display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 2, bgcolor: '#FAFBFC' }}>
+                <Box sx={{ px: { xs: 2, md: 3 }, py: 1.25, display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 2, bgcolor: surface.muted }}>
                     <MetaItem
                         icon={<AccountBalanceOutlinedIcon sx={{ fontSize: 13 }} />}
                         label={BRANCH_SCOPE_LABELS[wf.branchScope] ?? wf.branchScope}
@@ -294,11 +311,11 @@ const WorkflowCard = ({ wf, onEdit, onToggle, onDelete }: WorkflowCardProps) => 
                 {/* ── categories ── */}
                 {(wf.assetTypeNames ?? []).length > 0 && (
                     <>
-                        <Divider sx={{ borderColor: '#F1F5F9' }} />
+                        <Divider sx={{ borderColor: border.subtle }} />
                         <Box sx={{ px: { xs: 2, md: 3 }, py: 1.25, display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mr: 0.5 }}>
-                                <CategoryOutlinedIcon sx={{ fontSize: 13, color: '#94A3B8' }} />
-                                <Typography sx={{ fontSize: '0.68rem', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                                <CategoryOutlinedIcon sx={{ fontSize: 13, color: neutral[400] }} />
+                                <Typography sx={{ fontSize: '0.68rem', fontWeight: 700, color: neutral[400], textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                                     Categories
                                 </Typography>
                             </Box>
@@ -319,10 +336,10 @@ const WorkflowCard = ({ wf, onEdit, onToggle, onDelete }: WorkflowCardProps) => 
                 {/* ── steps flow ── */}
                 {(wf.steps?.length ?? 0) > 0 && (
                     <>
-                        <Divider sx={{ borderColor: '#F1F5F9' }} />
+                        <Divider sx={{ borderColor: border.subtle }} />
                         <Box sx={{ px: { xs: 2, md: 3 }, py: 1.5 }}>
                             <Typography sx={{
-                                fontSize: '0.68rem', fontWeight: 700, color: '#94A3B8',
+                                fontSize: '0.68rem', fontWeight: 700, color: neutral[400],
                                 textTransform: 'uppercase', letterSpacing: '0.06em', mb: 1,
                             }}>
                                 Approval Flow
@@ -342,6 +359,7 @@ const ApprovalWorkflows: React.FC = () => {
     const [view, setView] = useState<PageView>('list');
     const [editing, setEditing] = useState<IApprovalWorkflow | undefined>();
     const [deleteTarget, setDeleteTarget] = useState<IApprovalWorkflow | null>(null);
+    const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
 
     const {
         loading,
@@ -356,6 +374,11 @@ const ApprovalWorkflows: React.FC = () => {
     } = ApprovalWorkflowUtills();
 
     const workflows = useSelector((state: RootState) => state.ApprovalWorkflowStore.workflows);
+
+    const activeCount = workflows.filter(wf => wf.active).length;
+    const inactiveCount = workflows.length - activeCount;
+    const filteredWorkflows =
+        statusFilter === 'all' ? workflows : workflows.filter(wf => wf.active === (statusFilter === 'active'));
 
     useEffect(() => {
         fetchAllApprovalWorkflows();
@@ -391,7 +414,11 @@ const ApprovalWorkflows: React.FC = () => {
                 title="Approval Workflows"
                 subtitle="Configure request approval chains"
                 icon={<AccountTreeOutlinedIcon />}
-                stat={{ value: (workflows?.length ?? 0).toLocaleString(), label: 'workflows' }}
+                stat={{
+                    value: (workflows?.length ?? 0).toLocaleString(),
+                    label: 'workflows',
+                    helper: workflows.length > 0 ? `${activeCount} active` : undefined,
+                }}
                 actions={
                     <RequirePermission permission={PERMISSIONS.CREATE_SETTING}>
                         <Button
@@ -399,16 +426,58 @@ const ApprovalWorkflows: React.FC = () => {
                             startIcon={<AddIcon />}
                             onClick={openCreate}
                             sx={{
-                                bgcolor: P,
+                                height: 40,
+                                px: 2.5,
+                                bgcolor: brand[500],
                                 textTransform: 'none',
                                 fontWeight: 600,
                                 borderRadius: '8px',
-                                '&:hover': { bgcolor: '#065f54' },
+                                boxShadow: `0 2px 8px ${alpha(brand[500], 0.3)}`,
+                                '&:hover': { bgcolor: brand[700], boxShadow: `0 4px 14px ${alpha(brand[500], 0.4)}` },
                             }}
                         >
                             New Workflow
                         </Button>
                     </RequirePermission>
+                }
+                tabs={
+                    <Tabs
+                        value={statusFilter}
+                        onChange={(_, v: StatusFilter) => setStatusFilter(v)}
+                        variant="scrollable"
+                        scrollButtons="auto"
+                        allowScrollButtonsMobile
+                        sx={{
+                            minHeight: 44,
+                            '& .MuiTab-root': {
+                                fontSize: '0.82rem',
+                                minHeight: 44,
+                                textTransform: 'none',
+                                px: 1.75,
+                                py: 0,
+                                gap: 0.75,
+                            },
+                        }}
+                    >
+                        <Tab
+                            value="all"
+                            icon={<ViewListOutlinedIcon sx={{ fontSize: 18 }} />}
+                            iconPosition="start"
+                            label={<TabLabel text="All" count={workflows.length} />}
+                        />
+                        <Tab
+                            value="active"
+                            icon={<CheckCircleOutlineIcon sx={{ fontSize: 18 }} />}
+                            iconPosition="start"
+                            label={<TabLabel text="Active" count={activeCount} />}
+                        />
+                        <Tab
+                            value="inactive"
+                            icon={<PauseCircleOutlineIcon sx={{ fontSize: 18 }} />}
+                            iconPosition="start"
+                            label={<TabLabel text="Inactive" count={inactiveCount} />}
+                        />
+                    </Tabs>
                 }
             />
 
@@ -430,9 +499,19 @@ const ApprovalWorkflows: React.FC = () => {
                         </RequirePermission>
                     }
                 />
+            ) : filteredWorkflows.length === 0 ? (
+                <EmptyState
+                    icon={statusFilter === 'active' ? <CheckCircleOutlineIcon /> : <PauseCircleOutlineIcon />}
+                    title={`No ${statusFilter} workflows`}
+                    description={
+                        statusFilter === 'active'
+                            ? 'None of your workflows are currently active. Activate one from the Inactive tab.'
+                            : 'All of your workflows are currently active.'
+                    }
+                />
             ) : (
                 <Box sx={{ mt: 0.5 }}>
-                    {workflows.map((wf) => (
+                    {filteredWorkflows.map((wf) => (
                         <WorkflowCard
                             key={wf.id}
                             wf={wf}
@@ -452,27 +531,27 @@ const ApprovalWorkflows: React.FC = () => {
                 fullWidth
                 PaperProps={{
                     elevation: 0,
-                    sx: { borderRadius: '12px', border: '1px solid #E8EDF3' },
+                    sx: { borderRadius: `${radii.lg}px`, border: `1px solid ${border.subtle}` },
                 }}
             >
                 <DialogTitle sx={{ pb: 1 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                         <Box sx={{
                             width: 36, height: 36, borderRadius: '9px',
-                            bgcolor: '#FFF5F5', border: '1px solid #FEE2E2',
+                            bgcolor: alpha(status.danger.main, 0.06), border: `1px solid ${status.danger.soft}`,
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
                         }}>
-                            <DeleteOutlineIcon sx={{ fontSize: 18, color: '#EF4444' }} />
+                            <DeleteOutlineIcon sx={{ fontSize: 18, color: status.danger.main }} />
                         </Box>
-                        <Typography sx={{ fontWeight: 700, fontSize: '1rem', color: '#0F172A' }}>
+                        <Typography sx={{ fontWeight: 700, fontSize: '1rem', color: neutral[900] }}>
                             Delete Workflow
                         </Typography>
                     </Box>
                 </DialogTitle>
                 <DialogContent>
-                    <Typography sx={{ fontSize: '0.875rem', color: '#475569' }}>
+                    <Typography sx={{ fontSize: '0.875rem', color: neutral[600] }}>
                         Are you sure you want to delete{' '}
-                        <Box component="span" sx={{ fontWeight: 700, color: '#0F172A' }}>
+                        <Box component="span" sx={{ fontWeight: 700, color: neutral[900] }}>
                             "{deleteTarget?.name}"
                         </Box>
                         ? This action cannot be undone.
@@ -482,9 +561,9 @@ const ApprovalWorkflows: React.FC = () => {
                     <Button
                         onClick={() => setDeleteTarget(null)}
                         sx={{
-                            textTransform: 'none', fontWeight: 500, color: '#64748B',
-                            borderRadius: '8px', border: '1px solid #E2E8F0',
-                            '&:hover': { bgcolor: '#F8FAFC' },
+                            textTransform: 'none', fontWeight: 500, color: neutral[500],
+                            borderRadius: '8px', border: `1px solid ${border.default}`,
+                            '&:hover': { bgcolor: neutral[50] },
                         }}
                         variant="outlined"
                     >
@@ -495,8 +574,8 @@ const ApprovalWorkflows: React.FC = () => {
                         onClick={async () => { if (deleteTarget) { await deleteWorkflow(deleteTarget); setDeleteTarget(null); } }}
                         sx={{
                             textTransform: 'none', fontWeight: 600,
-                            borderRadius: '8px', bgcolor: '#EF4444',
-                            '&:hover': { bgcolor: '#DC2626' },
+                            borderRadius: '8px', bgcolor: status.danger.main,
+                            '&:hover': { bgcolor: status.danger.strong },
                         }}
                     >
                         Delete
