@@ -13,6 +13,9 @@ import { brand, neutral } from '../../utils/tokens';
 export interface IPageShellBreadcrumb {
     label: string;
     href?: string;
+    /** SPA navigation handler. When provided the crumb renders as a button-style
+     *  link and `href` is ignored — avoids the full page reload of a plain href. */
+    onClick?: () => void;
 }
 
 export interface IPageShellProps {
@@ -50,7 +53,7 @@ const PageShell = ({
             >
                 {breadcrumbs.map((crumb, idx) => {
                     const isLast = idx === breadcrumbs.length - 1;
-                    if (isLast || !crumb.href) {
+                    if (isLast || (!crumb.href && !crumb.onClick)) {
                         return (
                             <Typography
                                 key={`${crumb.label}-${idx}`}
@@ -67,12 +70,16 @@ const PageShell = ({
                     return (
                         <Link
                             key={`${crumb.label}-${idx}`}
-                            href={crumb.href}
+                            component={crumb.onClick ? 'button' : 'a'}
+                            type={crumb.onClick ? 'button' : undefined}
+                            href={crumb.onClick ? undefined : crumb.href}
+                            onClick={crumb.onClick}
                             underline="hover"
                             sx={{
                                 color: neutral[500],
                                 fontSize: '0.75rem',
                                 fontWeight: 500,
+                                cursor: 'pointer',
                                 '&:hover': { color: brand[600] },
                             }}
                         >
