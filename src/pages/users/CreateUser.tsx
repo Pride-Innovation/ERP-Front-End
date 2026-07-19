@@ -5,14 +5,16 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Resolver, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Box } from '@mui/material';
 import { toast } from 'react-toastify';
 import { useDispatch } from 'react-redux';
+import { useBlocker } from 'react-router-dom';
 
 import UserForm from './UserForm';
+import ConfirmDiscardDialog from './ConfirmDiscardDialog';
 import { ICreateUser, IUser, IUserCreationResponseAxiosResponse } from './interface';
 import { userSchema } from './schema';
 import { createUSerService } from './service';
@@ -47,6 +49,14 @@ const CreateUser = ({ handleClose }: ICreateUser) => {
         } as Partial<IUser> as any,
     });
 
+    // Blocks EVERY route change while the form is dirty — Cancel, breadcrumbs,
+    // the header Back button and the browser's own Back/Forward. The ref (not
+    // formState.isDirty directly) lets a successful submit clear the guard
+    // synchronously before handleClose() navigates.
+    const dirtyRef = useRef(false);
+    dirtyRef.current = formState.isDirty;
+    const blocker = useBlocker(() => dirtyRef.current);
+
     const handleBranchChange = (option: IAsyncAutocompleteOption | null) => {
         setSelectedBranch(option);
         // Clear any previously chosen department/unit when the duty station changes,
@@ -78,6 +88,7 @@ const CreateUser = ({ handleClose }: ICreateUser) => {
                             'User created successfully. A verification email has been sent.'
                     );
                     dispatch(addUser(response.data.user));
+                    dirtyRef.current = false;
                     handleClose();
                 }
             }
@@ -104,6 +115,12 @@ const CreateUser = ({ handleClose }: ICreateUser) => {
                     onDepartmentChange={clearUnit}
                 />
             </form>
+
+            <ConfirmDiscardDialog
+                open={blocker.state === 'blocked'}
+                onKeepEditing={() => blocker.reset?.()}
+                onDiscard={() => blocker.proceed?.()}
+            />
         </Box>
     );
 };
