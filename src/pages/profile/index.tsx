@@ -161,7 +161,12 @@ const Profile = () => {
             {formModalState === crudStates.update && (
                 <ModalComponent title='Update Personal Information' open={formOpen} handleClose={formHandleClose} width="70%">
                     <UpdateUsers
-                        handleClose={formHandleClose}
+                        handleClose={() => {
+                            formHandleClose();
+                            // UpdateUsers writes to the Redux store, but this page renders
+                            // from UserContext — refetch so the header/cards show the edit.
+                            getUserDetails();
+                        }}
                         sendingRequest={false}
                         setSendingRequest={() => { }}
                         user={user}

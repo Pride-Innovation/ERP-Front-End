@@ -49,13 +49,26 @@ const CreateUser = ({ handleClose }: ICreateUser) => {
         } as Partial<IUser> as any,
     });
 
-    // Blocks EVERY route change while the form is dirty — Cancel, breadcrumbs,
-    // the header Back button and the browser's own Back/Forward. The ref (not
+    // Blocks EVERY route change while the form is dirty — breadcrumbs, the
+    // header Back button and the browser's own Back/Forward. The ref (not
     // formState.isDirty directly) lets a successful submit clear the guard
     // synchronously before handleClose() navigates.
     const dirtyRef = useRef(false);
     dirtyRef.current = formState.isDirty;
     const blocker = useBlocker(() => dirtyRef.current);
+
+    // Cancel guard. When this form lives in a modal, handleClose doesn't
+    // navigate — the blocker never fires — so Cancel needs its own dirty check.
+    // Clearing dirtyRef before handleClose keeps the blocker from showing a
+    // second dialog when handleClose DOES navigate (standalone page context).
+    const [confirmClose, setConfirmClose] = useState(false);
+    const requestClose = () => {
+        if (dirtyRef.current) {
+            setConfirmClose(true);
+            return;
+        }
+        handleClose();
+    };
 
     const handleBranchChange = (option: IAsyncAutocompleteOption | null) => {
         setSelectedBranch(option);
@@ -103,7 +116,7 @@ const CreateUser = ({ handleClose }: ICreateUser) => {
         <Box sx={{ overflowY: 'auto', pb: 1, maxWidth: 1200, mx: 'auto' }}>
             <form autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
                 <UserForm
-                    handleClose={handleClose}
+                    handleClose={requestClose}
                     buttonText="Create User"
                     formState={formState}
                     control={control}
@@ -117,9 +130,20 @@ const CreateUser = ({ handleClose }: ICreateUser) => {
             </form>
 
             <ConfirmDiscardDialog
-                open={blocker.state === 'blocked'}
-                onKeepEditing={() => blocker.reset?.()}
-                onDiscard={() => blocker.proceed?.()}
+                open={blocker.state === 'blocked' || confirmClose}
+                onKeepEditing={() => {
+                    if (blocker.state === 'blocked') blocker.reset?.();
+                    setConfirmClose(false);
+                }}
+                onDiscard={() => {
+                    if (blocker.state === 'blocked') {
+                        blocker.proceed?.();
+                        return;
+                    }
+                    setConfirmClose(false);
+                    dirtyRef.current = false;
+                    handleClose();
+                }}
             />
         </Box>
     );
