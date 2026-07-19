@@ -104,14 +104,14 @@ const PageShell = ({
                             width: 44,
                             height: 44,
                             borderRadius: 1.5,
-                            background: `linear-gradient(135deg, ${brand[500]} 0%, ${brand[700]} 100%)`,
+                            bgcolor: alpha(brand[500], 0.08),
+                            border: `1px solid ${alpha(brand[500], 0.18)}`,
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
                             flexShrink: 0,
-                            color: '#fff',
-                            boxShadow: `0 4px 12px ${alpha(brand[500], 0.25)}`,
-                            '& .MuiSvgIcon-root': { color: '#fff', fontSize: 22 },
+                            color: brand[600],
+                            '& .MuiSvgIcon-root': { color: brand[600], fontSize: 22 },
                         }}
                     >
                         {icon}

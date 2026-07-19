@@ -6,8 +6,8 @@ Managing Director
 */
 
 import { ReactNode } from 'react';
-import { Box, Stack, Typography, alpha } from '@mui/material';
-import { brand, neutral, border } from '../../utils/tokens';
+import { Box, Divider, Stack, Typography, alpha } from '@mui/material';
+import { brand, neutral, border, surface, elevation, radii } from '../../utils/tokens';
 
 export interface IPageHeroStat {
     /** The value rendered large (string or number — formatted by the caller). */
@@ -32,10 +32,10 @@ export interface IPageHeroProps {
 }
 
 /**
- * Anchor-page hero. Light, brand-tinted surface with a 3px brand bar on the
- * left edge. Use for module landing pages (Assets, Settings, Movements,
- * Dashboard, Inventory). For ordinary list/detail pages, prefer the calmer
- * `<PageShell>`.
+ * Anchor-page hero. A calm white card where typography and spacing carry the
+ * hierarchy; brand colour appears only in the icon tile. Use for module
+ * landing pages (Assets, Settings, Movements, Dashboard, Inventory). For
+ * ordinary list/detail pages, prefer the calmer `<PageShell>`.
  */
 const PageHero = ({
     title,
@@ -48,25 +48,14 @@ const PageHero = ({
     <Box
         sx={{
             position: 'relative',
-            borderRadius: 2,
+            borderRadius: `${radii.lg}px`,
             border: `1px solid ${border.subtle}`,
-            background: `linear-gradient(135deg, ${alpha(brand[50], 0.6)} 0%, #FFFFFF 60%)`,
+            bgcolor: surface.card,
+            boxShadow: elevation.card,
             overflow: 'hidden',
             mb: 3,
         }}
     >
-        {/* 3px brand bar on the left edge */}
-        {/* <Box
-            sx={{
-                position: 'absolute',
-                left: 0,
-                top: 0,
-                bottom: 0,
-                width: 3,
-                background: `linear-gradient(180deg, ${brand[500]} 0%, ${brand[700]} 100%)`,
-            }}
-        /> */}
-
         <Box sx={{ px: { xs: 2.5, md: 3.5 }, pt: 2.5, pb: tabs ? 0 : 2.5 }}>
             <Stack
                 direction={{ xs: 'column', sm: 'row' }}
@@ -82,7 +71,8 @@ const PageHero = ({
                                 width: 44,
                                 height: 44,
                                 borderRadius: 1.5,
-                                bgcolor: alpha(brand[500], 0.1),
+                                bgcolor: alpha(brand[500], 0.08),
+                                border: `1px solid ${alpha(brand[500], 0.18)}`,
                                 color: brand[600],
                                 display: 'flex',
                                 alignItems: 'center',
@@ -97,7 +87,12 @@ const PageHero = ({
                     <Box sx={{ minWidth: 0 }}>
                         <Typography
                             variant="h5"
-                            sx={{ color: neutral[900], fontWeight: 700, lineHeight: 1.2 }}
+                            sx={{
+                                color: neutral[900],
+                                fontWeight: 700,
+                                lineHeight: 1.2,
+                                letterSpacing: '-0.01em',
+                            }}
                             noWrap
                         >
                             {title}
@@ -105,7 +100,7 @@ const PageHero = ({
                         {subtitle && (
                             <Typography
                                 variant="body2"
-                                sx={{ color: neutral[500], mt: 0.25 }}
+                                sx={{ color: neutral[500], mt: 0.5 }}
                             >
                                 {subtitle}
                             </Typography>
@@ -116,27 +111,35 @@ const PageHero = ({
                 {(stat || actions) && (
                     <Stack
                         direction="row"
-                        spacing={1.5}
+                        spacing={2}
                         alignItems="center"
                         sx={{ flexShrink: 0, width: { xs: '100%', sm: 'auto' }, justifyContent: { xs: 'flex-start', sm: 'flex-end' } }}
                     >
                         {actions}
+                        {stat && actions && (
+                            <Divider
+                                orientation="vertical"
+                                flexItem
+                                sx={{ borderColor: border.subtle, display: { xs: 'none', sm: 'block' } }}
+                            />
+                        )}
                         {stat && (
                             <Box
                                 sx={{
-                                    px: 2.25,
-                                    py: 1,
-                                    bgcolor: '#fff',
-                                    border: `1px solid ${border.subtle}`,
-                                    borderRadius: 1.5,
                                     textAlign: 'right',
                                     display: { xs: 'none', sm: 'block' },
-                                    minWidth: 96,
+                                    minWidth: 72,
                                 }}
                             >
                                 <Typography
                                     variant="h5"
-                                    sx={{ color: neutral[900], fontWeight: 800, lineHeight: 1 }}
+                                    sx={{
+                                        color: neutral[900],
+                                        fontWeight: 800,
+                                        lineHeight: 1,
+                                        letterSpacing: '-0.01em',
+                                        fontVariantNumeric: 'tabular-nums',
+                                    }}
                                 >
                                     {stat.value}
                                 </Typography>
@@ -162,7 +165,7 @@ const PageHero = ({
                                             color: neutral[400],
                                             fontSize: '0.65rem',
                                             display: 'block',
-                                            mt: 0.5,
+                                            mt: 0.25,
                                         }}
                                     >
                                         {stat.helper}
@@ -175,7 +178,14 @@ const PageHero = ({
             </Stack>
 
             {tabs && (
-                <Box sx={{ mx: { xs: -2.5, md: -3.5 }, px: { xs: 2.5, md: 3.5 }, borderTop: `1px solid ${border.subtle}` }}>
+                <Box
+                    sx={{
+                        mx: { xs: -2.5, md: -3.5 },
+                        px: { xs: 2.5, md: 3.5 },
+                        borderTop: `1px solid ${border.subtle}`,
+                        bgcolor: surface.muted,
+                    }}
+                >
                     {tabs}
                 </Box>
             )}
