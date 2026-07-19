@@ -7,31 +7,27 @@ Managing Director
 
 import { Route } from 'react-router'
 import { ROUTES } from '../routes'
-import TransportRequestsManagement from '../../../pages/request/transportRequest'
-import TransportRequest from '../../../pages/request/transportRequest/allRequests'
-import TransportPendingRequest from '../../../pages/request/transportRequest/pending'
-import TransportRejectedRequest from '../../../pages/request/transportRequest/rejected'
-import CreateTranportRequest from '../../../pages/request/transportRequest/CreateTranportRequest'
-import UpdateTransportRequest from '../../../pages/request/transportRequest/UpdateTransportRequest'
-import { PrivateRoute } from '../PrivateRoutes'
-import { PERMISSIONS } from '../../permissions/constants'
+import TransportComingSoon from '../../../pages/request/transportRequest/ComingSoon'
 
+/**
+ * The Transport Requests backend is not implemented yet, so every transport
+ * route renders the Coming Soon page instead of the data-driven screens
+ * (which would only surface failed-request errors). The original pages still
+ * live in pages/request/transportRequest — restore the previous route
+ * elements here once the backend ships.
+ *
+ * No permission gate on purpose: the module's permissions may not exist yet
+ * on the backend, and this page is purely informational. Authentication is
+ * still enforced by the parent PrivateRoute layout in AppRoutes.
+ */
 const TransportRoutes = () => {
     return (
         <Route>
-            <Route element={<PrivateRoute permission={PERMISSIONS.READ_TRANSPORT} />}>
-                <Route path={ROUTES.TRANSPORT_REQUEST} element={<TransportRequestsManagement />}>
-                    <Route index element={<TransportRequest />} />
-                    <Route path={ROUTES.LIST_TRANSPORT_PENDING} element={<TransportPendingRequest />} />
-                    <Route path={ROUTES.LIST_TRANSPORT_REJECTED} element={<TransportRejectedRequest />} />
-                </Route>
-            </Route>
-            <Route element={<PrivateRoute permission={PERMISSIONS.CREATE_TRANSPORT} />}>
-                <Route path={ROUTES.CREATE_TRANSPORT_REQUEST} element={<CreateTranportRequest />} />
-            </Route>
-            <Route element={<PrivateRoute permission={PERMISSIONS.UPDATE_TRANSPORT} />}>
-                <Route path={`${ROUTES.UPDATE_TRANSPORT_REQUEST}/:id`} element={<UpdateTransportRequest />} />
-            </Route>
+            <Route path={ROUTES.TRANSPORT_REQUEST} element={<TransportComingSoon />} />
+            <Route path={ROUTES.LIST_TRANSPORT_PENDING} element={<TransportComingSoon />} />
+            <Route path={ROUTES.LIST_TRANSPORT_REJECTED} element={<TransportComingSoon />} />
+            <Route path={ROUTES.CREATE_TRANSPORT_REQUEST} element={<TransportComingSoon />} />
+            <Route path={`${ROUTES.UPDATE_TRANSPORT_REQUEST}/:id`} element={<TransportComingSoon />} />
         </Route>
     )
 }
