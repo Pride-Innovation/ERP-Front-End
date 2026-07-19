@@ -26,7 +26,9 @@ export const UseFormInput = <T extends FieldValues>({
     row = 0,
     multiline = false,
     required = true,
-    disabled = false
+    disabled = false,
+    placeholder,
+    helperText
 }: IUseFormInput<T>) => {
     return (
         <React.Fragment>
@@ -46,6 +48,8 @@ export const UseFormInput = <T extends FieldValues>({
                             error={formState.errors[value]?.message}
                             id={value}
                             disabled={disabled}
+                            placeholder={placeholder}
+                            helperText={helperText}
                         />
                     )}
                 />
@@ -65,7 +69,8 @@ export const UseFormSelect = <T extends FieldValues>({
     formState,
     value,
     label,
-    options
+    options,
+    helperText
 }: IUseFormInput<T>) => {
     return (
         <React.Fragment>
@@ -84,9 +89,11 @@ export const UseFormSelect = <T extends FieldValues>({
                         />
                     )}
                 />
-                {formState.errors[value] && (
+                {formState.errors[value] ? (
                     <FormHelperText sx={{ color: 'error.main' }}>{formState.errors[value].message}</FormHelperText>
-                )}
+                ) : helperText ? (
+                    <FormHelperText>{helperText}</FormHelperText>
+                ) : null}
             </FormControl>
         </React.Fragment>
     )
