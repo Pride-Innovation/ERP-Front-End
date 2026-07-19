@@ -5,16 +5,18 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Box } from '@mui/material';
 import { Resolver, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { toast } from 'react-toastify';
 import { useDispatch } from 'react-redux';
+import { useBlocker } from 'react-router-dom';
 
 import { IUpdateUser, IUser, IUserAxiosResponse } from './interface';
 import { userSchema } from './schema';
 import UserForm from './UserForm';
+import ConfirmDiscardDialog from './ConfirmDiscardDialog';
 import { updateUSerService } from './service';
 import { AppDispatch } from '../../store';
 import { updateUser } from './slice';
@@ -84,6 +86,14 @@ const UpdateUsers = ({ handleClose, sendingRequest, setSendingRequest, user }: I
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user?.id]);
 
+    // Blocks EVERY route change while the form is dirty — Cancel, breadcrumbs,
+    // the header Back button and the browser's own Back/Forward. The ref (not
+    // formState.isDirty directly) lets a successful submit clear the guard
+    // synchronously before handleClose() navigates.
+    const dirtyRef = useRef(false);
+    dirtyRef.current = formState.isDirty;
+    const blocker = useBlocker(() => dirtyRef.current);
+
     const handleBranchChange = (option: IAsyncAutocompleteOption | null) => {
         setSelectedBranch(option);
         setValue('department' as any, null as any, { shouldValidate: true });
@@ -104,6 +114,7 @@ const UpdateUsers = ({ handleClose, sendingRequest, setSendingRequest, user }: I
             if (response.status === 200 || response.status === 201) {
                 toast.success('User updated successfully');
                 dispatch(updateUser(response.data));
+                dirtyRef.current = false;
                 handleClose();
             }
         } catch (error) {
@@ -131,6 +142,12 @@ const UpdateUsers = ({ handleClose, sendingRequest, setSendingRequest, user }: I
                     onDepartmentChange={clearUnit}
                 />
             </form>
+
+            <ConfirmDiscardDialog
+                open={blocker.state === 'blocked'}
+                onKeepEditing={() => blocker.reset?.()}
+                onDiscard={() => blocker.proceed?.()}
+            />
         </Box>
     );
 };
