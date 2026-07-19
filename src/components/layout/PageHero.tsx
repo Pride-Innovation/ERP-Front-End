@@ -56,7 +56,7 @@ const PageHero = ({
         }}
     >
         {/* 3px brand bar on the left edge */}
-        <Box
+        {/* <Box
             sx={{
                 position: 'absolute',
                 left: 0,
@@ -65,7 +65,7 @@ const PageHero = ({
                 width: 3,
                 background: `linear-gradient(180deg, ${brand[500]} 0%, ${brand[700]} 100%)`,
             }}
-        />
+        /> */}
 
         <Box sx={{ px: { xs: 2.5, md: 3.5 }, pt: 2.5, pb: tabs ? 0 : 2.5 }}>
             <Stack
