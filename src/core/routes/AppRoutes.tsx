@@ -5,7 +5,8 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { Route, Routes } from 'react-router'
+import { Route } from 'react-router'
+import { createBrowserRouter, createRoutesFromElements } from 'react-router-dom'
 import Login from '../../pages/authentication/Login'
 import { ROUTES } from './routes'
 import PasswordReset from '../../pages/authentication/PasswordReset'
@@ -32,10 +33,13 @@ import Notifications from '../../pages/notifications'
 import { NotificationContextProvider } from '../../context/notification/NotificationContext'
 import { PERMISSIONS } from '../permissions/constants'
 
-const AppRoutes = () => {
-
-  return (
-    <Routes>
+/**
+ * Route tree as JSX. Rendered through a data router (createBrowserRouter) so
+ * navigation-blocking hooks like useBlocker work — plain <BrowserRouter>
+ * does not support them.
+ */
+const routeElements = (
+    <>
       <Route path={ROUTES.LOGIN} element={<Login />} />
       <Route path={ROUTES.FORGOT_PASSWORD} element={<PasswordReset />} />
       <Route path={ROUTES.RESET_PASSWORD} element={<ResetPassword />} />
@@ -102,8 +106,9 @@ const AppRoutes = () => {
 
         </Route>
       </Route>
-    </Routes>
-  )
-}
+    </>
+)
 
-export default AppRoutes;
+export const router = createBrowserRouter(createRoutesFromElements(routeElements));
+
+export default router;
