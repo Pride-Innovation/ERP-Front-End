@@ -310,7 +310,7 @@ const RequestDetails = () => {
                 }}
             >
                 {/* 3px brand accent bar on the left */}
-                <Box
+                {/* <Box
                     sx={{
                         position: 'absolute',
                         left: 0,
@@ -319,7 +319,7 @@ const RequestDetails = () => {
                         width: 3,
                         background: `linear-gradient(180deg, ${brand[500]} 0%, ${brand[700]} 100%)`,
                     }}
-                />
+                /> */}
 
                 <Box sx={{ px: { xs: 2.5, md: 3.5 }, pt: 2.5, pb: 2.5 }}>
                     {/* Back nav */}
