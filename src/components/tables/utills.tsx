@@ -760,6 +760,16 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
             color: theme.palette.success.main
         },
         {
+            label: "Issued",
+            value: "assetIssued",
+            color: theme.palette.info.main
+        },
+        {
+            label: "In Transit",
+            value: "inTransit",
+            color: theme.palette.primary.main
+        },
+        {
             label: "In Store",
             value: "inStore",
             color: theme.palette.error.main
