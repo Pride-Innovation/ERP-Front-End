@@ -52,31 +52,22 @@ const PopoverComponent = ({
                 disableScrollLock
                 TransitionComponent={Grow}
                 transitionDuration={180}
+                // Radius/border are inherited from the theme's default popover paper (matching the
+                // app's Select dropdowns), but the shadow is overridden: the theme's soft
+                // 0 10px 30px (zero-spread) shadow blooms heavily on this tall row-action menu. A
+                // tight, negative-spread shadow hugs the edge so it reads clean and light — as light
+                // as the short Select dropdowns — regardless of the menu's height. The nested
+                // selector is required to reliably beat the theme's `.MuiPopover-paper` shadow.
+                sx={{
+                    '& .MuiPopover-paper': {
+                        boxShadow: '0 6px 16px -8px rgba(15, 23, 42, 0.12)',
+                    },
+                }}
                 PaperProps={{
-                    elevation: 0,
                     sx: {
-                        mt: 0.9,
+                        mt: 0.5,
                         minWidth: 218,
-                        borderRadius: '14px',
-                        border: '1px solid #E8EDF3',
-                        boxShadow: '0 6px 12px -4px rgba(15,23,42,0.08), 0 14px 34px -6px rgba(15,23,42,0.14)',
                         overflow: 'hidden',
-                        // caret
-                        '&::before': {
-                            content: '""',
-                            display: 'block',
-                            position: 'absolute',
-                            top: -5,
-                            left: 18,
-                            width: 10,
-                            height: 10,
-                            bgcolor: '#fff',
-                            transform: 'rotate(45deg)',
-                            border: '1px solid #E8EDF3',
-                            borderBottom: 'none',
-                            borderRight: 'none',
-                            zIndex: 0,
-                        },
                     },
                 }}
             >
