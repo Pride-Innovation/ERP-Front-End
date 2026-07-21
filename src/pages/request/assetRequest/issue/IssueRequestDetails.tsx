@@ -345,7 +345,7 @@ const IssueRequestDetails = () => {
                     overflow: 'hidden', mb: 2.5,
                 }}
             >
-                <Box sx={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 4, background: `linear-gradient(180deg, ${brand[500]}, ${brand[700]})` }} />
+                {/* <Box sx={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 4, background: `linear-gradient(180deg, ${brand[500]}, ${brand[700]})` }} /> */}
                 <Box sx={{ p: { xs: 2.5, md: 3.5 } }}>
                     <Stack direction={{ xs: 'column', md: 'row' }} justifyContent="space-between" spacing={2} alignItems={{ md: 'flex-start' }}>
                         <Stack direction="row" spacing={2} alignItems="center" sx={{ minWidth: 0 }}>
