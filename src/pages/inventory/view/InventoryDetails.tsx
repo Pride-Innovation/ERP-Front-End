@@ -211,7 +211,7 @@ const InventoryDetails = () => {
                         mb: 2.5,
                     }}
                 >
-                    <Box sx={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, background: `linear-gradient(180deg, ${brand[500]} 0%, ${brand[700]} 100%)` }} />
+                    {/* <Box sx={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, background: `linear-gradient(180deg, ${brand[500]} 0%, ${brand[700]} 100%)` }} /> */}
 
                     <Box sx={{ px: { xs: 2.5, md: 3.5 }, py: 2.5 }}>
                         {/* Back + breadcrumb */}
