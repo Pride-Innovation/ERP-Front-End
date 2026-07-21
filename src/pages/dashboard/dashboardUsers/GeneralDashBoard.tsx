@@ -193,7 +193,7 @@ const GeneralDashBoard = () => {
                                 p: 2.5,
                                 border: `1px solid ${alpha('#000', 0.07)}`,
                                 borderRadius: 2,
-                                borderTop: `3px solid ${stat.color}`,
+                                // borderTop: `3px solid ${stat.color}`,
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: 2,
