@@ -133,6 +133,7 @@ const GeneralAssets = () => {
             || status === 'inStore'
             || status === 'inMaintenance'
             || status === 'inTransit'
+            || status === 'assetIssued'
             || status === 'dueForDisposal'
         ) {
             fetchResources(status);
