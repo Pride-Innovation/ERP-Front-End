@@ -43,6 +43,8 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../../../../store';
 import { brand, neutral, border, surface, status as statusTokens } from '../../../../utils/tokens';
 import { toast } from 'react-toastify';
+import usePermissions from '../../../../core/permissions/usePermissions';
+import { PERMISSIONS } from '../../../../core/permissions/constants';
 
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
@@ -144,6 +146,8 @@ const GeneralAssetDetails = () => {
     const navigate = useNavigate();
     const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore);
     const assetType = assetTypes.find(t => String(t.id) === typeId);
+    const { has } = usePermissions();
+    const canUpdateAsset = has(PERMISSIONS.UPDATE_ASSET);
 
     const fetchAsset = async () => {
         setLoading(true);
@@ -290,10 +294,12 @@ const GeneralAssetDetails = () => {
                 </Box>
 
                 {/* ── Body ── */}
-                <Grid container spacing={2.5} alignItems="stretch">
+                {/* flex-start (not stretch) so each column sizes to its own content — a short
+                    history table no longer forces a tall empty void in the opposite column. */}
+                <Grid container spacing={2.5} alignItems="flex-start">
                     {/* Left: image + quick facts */}
                     <Grid item xs={12} md={4}>
-                        <Paper elevation={0} sx={{ borderRadius: 2, border: `1px solid ${border.subtle}`, bgcolor: '#fff', overflow: 'hidden', height: '100%' }}>
+                        <Paper elevation={0} sx={{ borderRadius: 2, border: `1px solid ${border.subtle}`, bgcolor: '#fff', overflow: 'hidden' }}>
                             <Box sx={{ px: 2.5, py: 1.75, borderBottom: `1px solid ${alpha('#000', 0.06)}`, bgcolor: alpha(brand[500], 0.03), display: 'flex', alignItems: 'center', gap: 1 }}>
                                 <Inventory2OutlinedIcon sx={{ fontSize: 18, color: brand[600] }} />
                                 <Typography variant="subtitle2" sx={{ fontWeight: 700, color: brand[700] }}>Asset</Typography>
@@ -305,6 +311,7 @@ const GeneralAssetDetails = () => {
                                     assetType={asset.assetType?.name || ''}
                                     onImageUpdate={handleImageUpdate}
                                     onImageRemove={handleImageRemove}
+                                    readOnly={!canUpdateAsset}
                                 />
                                 <Divider sx={{ my: 1.5 }} />
                                 <Field label="Status" value={asset.assetStatus?.status ? camelCaseToWords(asset.assetStatus.status) : null} />
@@ -317,7 +324,7 @@ const GeneralAssetDetails = () => {
 
                     {/* Right: tabs */}
                     <Grid item xs={12} md={8}>
-                        <Paper elevation={0} sx={{ borderRadius: 2, border: `1px solid ${border.subtle}`, bgcolor: '#fff', overflow: 'hidden', height: '100%' }}>
+                        <Paper elevation={0} sx={{ borderRadius: 2, border: `1px solid ${border.subtle}`, bgcolor: '#fff', overflow: 'hidden' }}>
                             <Tabs
                                 value={tab}
                                 onChange={(_, v) => setTab(v)}
@@ -333,7 +340,10 @@ const GeneralAssetDetails = () => {
                                 {TABS.map((t, i) => <Tab key={i} label={t.label} icon={t.icon} iconPosition="start" />)}
                             </Tabs>
 
-                            <Box sx={{ p: { xs: 2, md: 3 } }}>
+                            {/* Details gets generous padding; the history tabs render their own
+                                bordered table card, so they take a slim even inset to avoid a
+                                heavy card-in-card frame. */}
+                            <Box sx={{ p: tab === 0 ? { xs: 2, md: 3 } : { xs: 1.25, md: 1.5 } }}>
                                 {tab === 0 && (
                                     <>
                                         <Section title="Identity" icon={<BadgeOutlinedIcon />}>
