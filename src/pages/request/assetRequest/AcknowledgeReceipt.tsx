@@ -7,15 +7,16 @@ Managing Director
 
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import DoneAllIcon from '@mui/icons-material/DoneAll';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import { IAcknowledegeReceipt, IRequestAxiosResponse } from "../interface";
 import { ICommodity } from "../../settings/commodity/interface";
 import { acknowledgeIssuanceService, findAssetRequestByIDService } from "./service";
-import { AppDispatch } from "../../../store";
+import { AppDispatch, RootState } from "../../../store";
 import { updateRequest } from "./slice";
 import RequestActionLayout from "./RequestActionLayout";
+import { statusIdByCode } from "../../../utils/helpers";
 
 const PRIMARY = '#08796C';
 
@@ -31,6 +32,7 @@ const AcknowledgeReceipt = ({
     const [requestCommodities, setRequestCommodities] = useState<
         Array<{ commodity: ICommodity; quantity: number }>
     >([]);
+    const { statuses } = useSelector((state: RootState) => state.StatusesStore);
     const dispatch = useDispatch<AppDispatch>();
 
     const fetchRequestCommodities = async () => {
@@ -70,11 +72,13 @@ const AcknowledgeReceipt = ({
         setSendingRequest(true);
         try {
             /**
-             * NB: Please note that the status ID must match the Receipt Acknowledged in the Database.
+             * The status id is resolved from the stable "receiptAcknowledged" code (seeded ids vary
+             * by environment). Only consumed by the backend legacy (non-workflow) path; in workflow
+             * mode the engine sets the status itself.
              */
             const data = {
                 requestId: request.id,
-                statusId: 7, // Receipt Acknowledged Status ID
+                statusId: statusIdByCode(statuses, 'receiptAcknowledged'),
                 comment
             }
 
