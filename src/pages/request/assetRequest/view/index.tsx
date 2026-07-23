@@ -26,13 +26,11 @@ import {
 } from "@mui/material";
 
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import BadgeOutlinedIcon from '@mui/icons-material/BadgeOutlined';
-import AccountBalanceOutlinedIcon from '@mui/icons-material/AccountBalanceOutlined';
-import CalendarTodayOutlinedIcon from '@mui/icons-material/CalendarTodayOutlined';
 import UpdateOutlinedIcon from '@mui/icons-material/UpdateOutlined';
-import HowToRegOutlinedIcon from '@mui/icons-material/HowToRegOutlined';
 import CategoryOutlinedIcon from '@mui/icons-material/CategoryOutlined';
 import AttachFileOutlinedIcon from '@mui/icons-material/AttachFileOutlined';
 import PictureAsPdfOutlinedIcon from '@mui/icons-material/PictureAsPdfOutlined';
@@ -176,6 +174,34 @@ const InfoRow = ({
     </Box>
 );
 
+// ─── Hero "at a glance" fact (light tile across the base of the hero) ───────────
+const HeroFact = ({ label, value, first }: { label: string; value?: string | null; first?: boolean }) => {
+    const empty = value === null || value === undefined || value === '';
+    return (
+        <Box
+            sx={{
+                flex: '1 1 150px',
+                minWidth: 140,
+                px: { xs: 2, md: 2.75 },
+                py: 1.5,
+                borderLeft: { xs: 'none', sm: first ? 'none' : `1px solid ${border.subtle}` },
+            }}
+        >
+            <Typography sx={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.09em', textTransform: 'uppercase', color: neutral[500] }}>
+                {label}
+            </Typography>
+            <Typography noWrap sx={{
+                fontSize: '0.9rem', mt: 0.35,
+                fontWeight: empty ? 400 : 700,
+                fontStyle: empty ? 'italic' : 'normal',
+                color: empty ? neutral[400] : neutral[800],
+            }}>
+                {empty ? 'Not specified' : value}
+            </Typography>
+        </Box>
+    );
+};
+
 // ─── Attachment pill ──────────────────────────────────────────────────────────
 const AttachmentPill = ({ filePath, onView }: { filePath: string; onView: () => void }) => {
     const name = filePath.split(/[/\\]/).pop() ?? 'attachment';
@@ -287,43 +313,24 @@ const RequestDetails = () => {
     return (
         <Box sx={{ bgcolor: surface.page, minHeight: '100vh', px: { xs: 2, md: 4 }, py: { xs: 2, md: 3 } }}>
 
-            {/* ── Light Hero Card ── */}
+            {/* ── Hero header (light card idiom, matching the asset pages) ── */}
             <Box
                 sx={{
                     position: 'relative',
-                    borderRadius: 2,
-                    border: `1px solid ${border.subtle}`,
-                    background: `linear-gradient(135deg, ${alpha(brand[50], 0.75)} 0%, #FFFFFF 65%)`,
+                    borderRadius: '16px',
                     overflow: 'hidden',
                     mb: 3,
-                    '&::after': {
-                        content: '""',
-                        position: 'absolute',
-                        top: -70,
-                        right: -70,
-                        width: 240,
-                        height: 240,
-                        borderRadius: '50%',
-                        bgcolor: alpha(brand[100], 0.22),
-                        pointerEvents: 'none',
-                    },
+                    bgcolor: '#fff',
+                    boxShadow: 'hsla(220, 30%, 5%, 0.05) 0px 5px 15px 0px, hsla(220, 25%, 10%, 0.05) 0px 15px 35px -5px',
                 }}
             >
-                {/* 3px brand accent bar on the left */}
-                {/* <Box
-                    sx={{
-                        position: 'absolute',
-                        left: 0,
-                        top: 0,
-                        bottom: 0,
-                        width: 3,
-                        background: `linear-gradient(180deg, ${brand[500]} 0%, ${brand[700]} 100%)`,
-                    }}
-                /> */}
+                {/* Faint brand accents for a touch of depth on the white card */}
+                <Box sx={{ position: 'absolute', inset: 0, background: `radial-gradient(circle at 92% -10%, ${alpha(brand[500], 0.07)} 0%, transparent 42%)`, pointerEvents: 'none' }} />
+                <InboxOutlinedIcon sx={{ position: 'absolute', right: -18, top: -20, fontSize: 180, color: alpha(brand[500], 0.05), transform: 'rotate(-12deg)', pointerEvents: 'none' }} />
 
-                <Box sx={{ px: { xs: 2.5, md: 3.5 }, pt: 2.5, pb: 2.5 }}>
-                    {/* Back nav */}
-                    <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
+                <Box sx={{ position: 'relative', px: { xs: 2.5, md: 3.5 }, pt: 2.25, pb: 2.5 }}>
+                    {/* Back nav + breadcrumb */}
+                    <Stack direction="row" alignItems="center" spacing={1.25} sx={{ mb: 2.25 }}>
                         <IconButton
                             size="small"
                             onClick={() => navigate(-1)}
@@ -336,40 +343,35 @@ const RequestDetails = () => {
                         >
                             <ArrowBackIcon fontSize="small" />
                         </IconButton>
-                        <Typography variant="caption" color="text.secondary">
-                            Asset Requests
-                        </Typography>
+                        <Stack direction="row" alignItems="center" spacing={0.5}>
+                            <HomeOutlinedIcon sx={{ fontSize: 14, color: neutral[400] }} />
+                            <Typography variant="caption" sx={{ color: neutral[500] }}>Asset Requests</Typography>
+                            <Typography variant="caption" sx={{ color: neutral[300] }}>/</Typography>
+                            <Typography variant="caption" sx={{ color: brand[700], fontWeight: 700 }}>Details</Typography>
+                        </Stack>
                     </Stack>
 
                     {/* Title row */}
                     <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 2, flexWrap: 'wrap' }}>
-                        <Stack direction="row" alignItems="flex-start" gap={2}>
+                        <Stack direction="row" alignItems="center" gap={2} sx={{ minWidth: 0 }}>
                             {/* Icon tile */}
                             <Box
                                 sx={{
-                                    width: 44,
-                                    height: 44,
-                                    borderRadius: 1.5,
-                                    bgcolor: alpha(brand[500], 0.1),
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    flexShrink: 0,
-                                    mt: 0.25,
+                                    width: 56, height: 56, borderRadius: '16px', flexShrink: 0,
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    bgcolor: alpha(brand[500], 0.1), color: brand[600], border: `1px solid ${alpha(brand[500], 0.16)}`,
                                 }}
                             >
-                                <InboxOutlinedIcon sx={{ fontSize: 22, color: brand[600] }} />
+                                <InboxOutlinedIcon sx={{ fontSize: 28 }} />
                             </Box>
 
-                            <Box>
+                            <Box sx={{ minWidth: 0 }}>
                                 <Typography
-                                    variant="h5"
-                                    fontWeight={700}
-                                    sx={{ color: neutral[900], mb: 0.6, letterSpacing: '-0.3px', lineHeight: 1.2 }}
+                                    sx={{ fontSize: { xs: '1.35rem', md: '1.6rem' }, fontWeight: 800, color: neutral[900], letterSpacing: '-0.4px', lineHeight: 1.15 }}
                                 >
                                     {request.name || 'Asset Request'}
                                 </Typography>
-                                <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
+                                <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap sx={{ mt: 1 }}>
                                     <Chip
                                         size="small"
                                         label={`#${request.id || '—'}`}
@@ -378,17 +380,12 @@ const RequestDetails = () => {
                                             color: brand[700],
                                             fontWeight: 700,
                                             fontSize: '0.72rem',
-                                            height: 22,
+                                            height: 24,
                                             border: `1px solid ${alpha(brand[500], 0.2)}`,
                                         }}
                                     />
                                     <StatusChip statusCode={request.status?.status ?? undefined} />
                                     <PriorityChip priority={request.priority} />
-                                    {request.createDate && (
-                                        <Typography variant="caption" color="text.secondary">
-                                            {moment(request.createDate).format('D MMM YYYY')}
-                                        </Typography>
-                                    )}
                                 </Stack>
                             </Box>
                         </Stack>
@@ -404,9 +401,10 @@ const RequestDetails = () => {
                                 sx={{
                                     color: brand[600],
                                     borderColor: alpha(brand[500], 0.35),
+                                    borderRadius: '10px',
                                     textTransform: 'none',
                                     fontSize: '0.8rem',
-                                    fontWeight: 600,
+                                    fontWeight: 700,
                                     '&:hover': { borderColor: brand[500], bgcolor: alpha(brand[50], 0.7) },
                                     '&.Mui-disabled': { color: neutral[400], borderColor: neutral[200] },
                                 }}
@@ -418,14 +416,16 @@ const RequestDetails = () => {
                                 <MuiButton
                                     variant="contained"
                                     size="small"
+                                    disableElevation
                                     startIcon={<ApproveIcon fontSize="small" />}
                                     onClick={() => setApproveModalOpen(true)}
                                     sx={{
                                         bgcolor: '#2E7D32',
                                         color: '#fff',
+                                        borderRadius: '10px',
                                         textTransform: 'none',
                                         fontSize: '0.8rem',
-                                        fontWeight: 600,
+                                        fontWeight: 700,
                                         '&:hover': { bgcolor: '#1B5E20' },
                                     }}
                                 >
@@ -437,14 +437,16 @@ const RequestDetails = () => {
                                 <MuiButton
                                     variant="contained"
                                     size="small"
+                                    disableElevation
                                     startIcon={<RejectIcon fontSize="small" />}
                                     onClick={() => setRejectModalOpen(true)}
                                     sx={{
                                         bgcolor: '#C62828',
                                         color: '#fff',
+                                        borderRadius: '10px',
                                         textTransform: 'none',
                                         fontSize: '0.8rem',
-                                        fontWeight: 600,
+                                        fontWeight: 700,
                                         '&:hover': { bgcolor: '#B71C1C' },
                                     }}
                                 >
@@ -469,6 +471,14 @@ const RequestDetails = () => {
                             </Stack>
                         </Box>
                     )}
+                </Box>
+
+                {/* At-a-glance strip — key facts as light tiles across the base of the hero */}
+                <Box sx={{ position: 'relative', display: 'flex', flexWrap: 'wrap', bgcolor: alpha(brand[500], 0.03), borderTop: `1px solid ${border.subtle}` }}>
+                    <HeroFact first label="Branch / Location" value={request.requester?.branch?.name || null} />
+                    <HeroFact label="Current Approver" value={request.currentApprover ? `${request.currentApprover.firstName ?? ''} ${request.currentApprover.lastName ?? ''}`.trim() : null} />
+                    <HeroFact label="Submitted" value={request.createDate ? moment(request.createDate).format('D MMM YYYY') : null} />
+                    <HeroFact label="Requested Items" value={request.commodities?.length ? `${request.commodities.length} ${request.commodities.length === 1 ? 'item' : 'items'}` : null} />
                 </Box>
             </Box>
 
@@ -534,31 +544,9 @@ const RequestDetails = () => {
                                     </Typography>
                                 </InfoRow>
 
-                                <InfoRow icon={<AccountBalanceOutlinedIcon />} label="Branch">
-                                    <Typography variant="body2" fontWeight={500}>
-                                        {request.requester?.branch?.name ?? '—'}
-                                    </Typography>
-                                </InfoRow>
-
                                 <InfoRow icon={<CategoryOutlinedIcon />} label="Asset Category">
                                     <Typography variant="body2" fontWeight={500}>
                                         {request.assetType?.name ?? '—'}
-                                    </Typography>
-                                </InfoRow>
-
-                                <InfoRow icon={<HowToRegOutlinedIcon />} label="Current Approver">
-                                    <Typography variant="body2" fontWeight={500}>
-                                        {request.currentApprover
-                                            ? `${request.currentApprover.firstName} ${request.currentApprover.lastName}`
-                                            : '—'}
-                                    </Typography>
-                                </InfoRow>
-
-                                <InfoRow icon={<CalendarTodayOutlinedIcon />} label="Submitted">
-                                    <Typography variant="body2" fontWeight={500}>
-                                        {request.createDate
-                                            ? moment(request.createDate).format('D MMM YYYY, h:mm A')
-                                            : '—'}
                                     </Typography>
                                 </InfoRow>
 

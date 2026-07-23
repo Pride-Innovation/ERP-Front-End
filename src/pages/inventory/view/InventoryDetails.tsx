@@ -11,7 +11,6 @@ import {
     Box,
     Button as MuiButton,
     Chip,
-    Divider,
     Grid,
     IconButton,
     Paper,
@@ -45,8 +44,6 @@ import BusinessOutlinedIcon from '@mui/icons-material/BusinessOutlined';
 import LocalPhoneOutlinedIcon from '@mui/icons-material/LocalPhoneOutlined';
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
 import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
-import ReceiptOutlinedIcon from '@mui/icons-material/ReceiptOutlined';
-import CalendarTodayOutlinedIcon from '@mui/icons-material/CalendarTodayOutlined';
 import ContentCopyOutlinedIcon from '@mui/icons-material/ContentCopyOutlined';
 import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
 
@@ -87,40 +84,44 @@ const StatusChip = ({ code }: { code?: string }) => {
     );
 };
 
-// ── Header fact pill (LPO / delivery date) ────────────────────────────────────
-const FactPill = ({
-    icon, label, value, accent, onCopy,
-}: { icon: React.ReactNode; label: string; value: string; accent: string; onCopy?: () => void }) => (
-    <Box
-        sx={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 1,
-            px: 1.5,
-            py: 0.75,
-            borderRadius: 1.5,
-            bgcolor: alpha(accent, 0.05),
-            border: `1px solid ${alpha(accent, 0.18)}`,
-        }}
-    >
-        <Box sx={{ color: accent, display: 'flex', '& svg': { fontSize: 16 } }}>{icon}</Box>
-        <Box>
-            <Typography sx={{ fontSize: '0.6rem', fontWeight: 600, color: neutral[500], textTransform: 'uppercase', letterSpacing: '0.05em', lineHeight: 1.1 }}>
+// ── Hero "at a glance" fact (light tile across the base of the hero) ────────────
+const HeroFact = ({
+    label, value, first, onCopy,
+}: { label: string; value?: string | null; first?: boolean; onCopy?: () => void }) => {
+    const empty = value === null || value === undefined || value === '';
+    return (
+        <Box
+            sx={{
+                flex: '1 1 150px',
+                minWidth: 140,
+                px: { xs: 2, md: 2.75 },
+                py: 1.5,
+                borderLeft: { xs: 'none', sm: first ? 'none' : `1px solid ${border.subtle}` },
+            }}
+        >
+            <Typography sx={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.09em', textTransform: 'uppercase', color: neutral[500] }}>
                 {label}
             </Typography>
-            <Typography sx={{ fontSize: '0.82rem', fontWeight: 700, color: neutral[800], lineHeight: 1.3 }}>
-                {value}
-            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.35 }}>
+                <Typography noWrap sx={{
+                    fontSize: '0.9rem',
+                    fontWeight: empty ? 400 : 700,
+                    fontStyle: empty ? 'italic' : 'normal',
+                    color: empty ? neutral[400] : neutral[800],
+                }}>
+                    {empty ? 'Not specified' : value}
+                </Typography>
+                {onCopy && !empty && (
+                    <Tooltip title="Copy">
+                        <IconButton size="small" onClick={onCopy} sx={{ p: 0.2, color: alpha(brand[500], 0.7) }}>
+                            <ContentCopyOutlinedIcon sx={{ fontSize: 13 }} />
+                        </IconButton>
+                    </Tooltip>
+                )}
+            </Box>
         </Box>
-        {onCopy && (
-            <Tooltip title="Copy">
-                <IconButton size="small" onClick={onCopy} sx={{ color: alpha(accent, 0.7), p: 0.3 }}>
-                    <ContentCopyOutlinedIcon sx={{ fontSize: 13 }} />
-                </IconButton>
-            </Tooltip>
-        )}
-    </Box>
-);
+    );
+};
 
 // ── Stat tile ─────────────────────────────────────────────────────────────────
 const StatTile = ({ label, value, accent }: { label: string; value: number | string; accent: string }) => (
@@ -200,53 +201,59 @@ const InventoryDetails = () => {
         <Box sx={{ bgcolor: surface.page, minHeight: '100vh', px: { xs: 1.5, md: 3 }, py: { xs: 2, md: 3 } }}>
             <Box sx={{ maxWidth: 1400, mx: 'auto' }}>
 
-                {/* ── Header ── */}
+                {/* ── Hero header (light card idiom, matching the asset/request pages) ── */}
                 <Box
                     sx={{
                         position: 'relative',
-                        borderRadius: 2,
-                        border: `1px solid ${border.subtle}`,
-                        background: `linear-gradient(135deg, ${alpha(brand[50], 0.7)} 0%, #FFFFFF 60%)`,
+                        borderRadius: '16px',
                         overflow: 'hidden',
                         mb: 2.5,
+                        bgcolor: '#fff',
+                        boxShadow: 'hsla(220, 30%, 5%, 0.05) 0px 5px 15px 0px, hsla(220, 25%, 10%, 0.05) 0px 15px 35px -5px',
                     }}
                 >
-                    {/* <Box sx={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, background: `linear-gradient(180deg, ${brand[500]} 0%, ${brand[700]} 100%)` }} /> */}
+                    {/* Faint brand accents for a touch of depth on the white card */}
+                    <Box sx={{ position: 'absolute', inset: 0, background: `radial-gradient(circle at 92% -10%, ${alpha(brand[500], 0.07)} 0%, transparent 42%)`, pointerEvents: 'none' }} />
+                    <Inventory2OutlinedIcon sx={{ position: 'absolute', right: -18, top: -20, fontSize: 180, color: alpha(brand[500], 0.05), transform: 'rotate(-12deg)', pointerEvents: 'none' }} />
 
-                    <Box sx={{ px: { xs: 2.5, md: 3.5 }, py: 2.5 }}>
+                    <Box sx={{ position: 'relative', px: { xs: 2.5, md: 3.5 }, pt: 2.25, pb: 2.5 }}>
                         {/* Back + breadcrumb */}
-                        <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
+                        <Stack direction="row" alignItems="center" spacing={1.25} sx={{ mb: 2.25 }}>
                             <IconButton
                                 size="small"
                                 onClick={() => navigate(-1)}
-                                sx={{ color: brand[600], border: `1px solid ${alpha(brand[500], 0.25)}`, bgcolor: alpha(brand[50], 0.6), '&:hover': { bgcolor: alpha(brand[100], 0.7) } }}
+                                sx={{ color: brand[600], border: `1px solid ${alpha(brand[500], 0.25)}`, bgcolor: alpha(brand[50], 0.6), '&:hover': { bgcolor: alpha(brand[100], 0.7), borderColor: brand[500] } }}
                             >
                                 <ArrowBackIcon fontSize="small" />
                             </IconButton>
-                            <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: neutral[400] }}>
-                                <HomeOutlinedIcon sx={{ fontSize: 14 }} />
+                            <Stack direction="row" alignItems="center" spacing={0.5}>
+                                <HomeOutlinedIcon sx={{ fontSize: 14, color: neutral[400] }} />
                                 <Typography variant="caption" sx={{ color: neutral[500] }}>Inventory</Typography>
                                 <Typography variant="caption" sx={{ color: neutral[300] }}>/</Typography>
-                                <Typography variant="caption" sx={{ color: brand[700], fontWeight: 600 }}>Details</Typography>
+                                <Typography variant="caption" sx={{ color: brand[700], fontWeight: 700 }}>Details</Typography>
                             </Stack>
                         </Stack>
 
                         <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', justifyContent: 'space-between', gap: 2 }}>
                             {/* Identity */}
-                            <Stack direction="row" spacing={2} alignItems="flex-start" sx={{ minWidth: 0 }}>
-                                <Box sx={{ width: 46, height: 46, borderRadius: 1.5, bgcolor: alpha(brand[500], 0.1), display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, mt: 0.25 }}>
-                                    <Inventory2OutlinedIcon sx={{ fontSize: 24, color: brand[600] }} />
+                            <Stack direction="row" spacing={2} alignItems="center" sx={{ minWidth: 0 }}>
+                                <Box sx={{
+                                    width: 56, height: 56, borderRadius: '16px', flexShrink: 0,
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    bgcolor: alpha(brand[500], 0.1), color: brand[600], border: `1px solid ${alpha(brand[500], 0.16)}`,
+                                }}>
+                                    <Inventory2OutlinedIcon sx={{ fontSize: 28 }} />
                                 </Box>
                                 <Box sx={{ minWidth: 0 }}>
-                                    <Typography variant="h5" sx={{ fontWeight: 700, color: neutral[900], lineHeight: 1.2, letterSpacing: '-0.3px' }}>
+                                    <Typography sx={{ fontSize: { xs: '1.35rem', md: '1.6rem' }, fontWeight: 800, color: neutral[900], lineHeight: 1.15, letterSpacing: '-0.4px' }}>
                                         {currentInventory?.name || 'Inventory'}
                                     </Typography>
-                                    <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap sx={{ mt: 0.75 }}>
+                                    <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap sx={{ mt: 1 }}>
                                         <Chip
                                             size="small"
                                             icon={<BusinessOutlinedIcon sx={{ fontSize: 14 }} />}
                                             label={currentInventory?.supplier?.name || 'Unknown Supplier'}
-                                            sx={{ height: 24, fontWeight: 600, fontSize: '0.72rem', bgcolor: alpha(brand[500], 0.08), color: brand[700], '& .MuiChip-icon': { color: brand[600] } }}
+                                            sx={{ height: 24, fontWeight: 600, fontSize: '0.72rem', bgcolor: alpha(brand[500], 0.08), color: brand[700], border: `1px solid ${alpha(brand[500], 0.14)}`, '& .MuiChip-icon': { color: brand[600] } }}
                                         />
                                         <StatusChip code={currentInventory?.status?.status ?? undefined} />
                                     </Stack>
@@ -261,25 +268,19 @@ const InventoryDetails = () => {
                                     startIcon={<FileDownloadOutlinedIcon fontSize="small" />}
                                     onClick={() => generateGrnPdf(currentInventory)}
                                     disabled={!currentInventory?.id}
-                                    sx={{ textTransform: 'none', fontWeight: 600, borderRadius: '8px', borderColor: alpha(brand[500], 0.4), color: brand[600], '&:hover': { borderColor: brand[500], bgcolor: alpha(brand[500], 0.05) } }}
+                                    sx={{ textTransform: 'none', fontWeight: 700, borderRadius: '10px', borderColor: alpha(brand[500], 0.4), color: brand[600], '&:hover': { borderColor: brand[500], bgcolor: alpha(brand[500], 0.05) } }}
                                 >
                                     Generate GRN
                                 </MuiButton>
                             </Stack>
                         </Box>
+                    </Box>
 
-                        {/* Fact pills */}
-                        <Stack direction="row" spacing={1.5} flexWrap="wrap" useFlexGap sx={{ mt: 2.25 }}>
-                            {currentInventory?.lpoNumber && (
-                                <FactPill icon={<ReceiptOutlinedIcon />} label="LPO Number" value={currentInventory.lpoNumber} accent={brand[600]} onCopy={copyLpo} />
-                            )}
-                            {currentInventory?.grnNumber && (
-                                <FactPill icon={<ReceiptLongOutlinedIcon />} label="GRN Number" value={currentInventory.grnNumber} accent={neutral[600]} />
-                            )}
-                            {currentInventory?.createDate && (
-                                <FactPill icon={<CalendarTodayOutlinedIcon />} label="Delivery Date" value={moment(currentInventory.createDate).format('DD MMM YYYY')} accent="#BC892C" />
-                            )}
-                        </Stack>
+                    {/* At-a-glance strip — document references as light tiles across the base */}
+                    <Box sx={{ position: 'relative', display: 'flex', flexWrap: 'wrap', bgcolor: alpha(brand[500], 0.03), borderTop: `1px solid ${border.subtle}` }}>
+                        <HeroFact first label="LPO Number" value={currentInventory?.lpoNumber || null} onCopy={currentInventory?.lpoNumber ? copyLpo : undefined} />
+                        <HeroFact label="GRN Number" value={currentInventory?.grnNumber || null} />
+                        <HeroFact label="Delivery Date" value={currentInventory?.createDate ? moment(currentInventory.createDate).format('DD MMM YYYY') : null} />
                     </Box>
                 </Box>
 
@@ -307,9 +308,6 @@ const InventoryDetails = () => {
                                 <InfoRow icon={<LocalPhoneOutlinedIcon />} label="Contact Number" value={currentInventory?.supplier?.telephone as string} />
                                 <InfoRow icon={<EmailOutlinedIcon />} label="Email Address" value={currentInventory?.supplier?.email} />
                                 <InfoRow icon={<LocationOnOutlinedIcon />} label="Address" value={currentInventory?.supplier?.address} />
-                                <Divider sx={{ my: 0.5 }} />
-                                <InfoRow icon={<ReceiptOutlinedIcon />} label="LPO Number" value={currentInventory?.lpoNumber} />
-                                <InfoRow icon={<CalendarTodayOutlinedIcon />} label="Delivery Date" value={currentInventory?.createDate ? moment(currentInventory.createDate).format('Do MMMM YYYY, h:mm A') : null} />
                             </Box>
                         </Paper>
                     </Grid>

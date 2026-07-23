@@ -136,6 +136,45 @@ const Section = ({ title, icon, children }: { title: string; icon: React.ReactNo
     </Box>
 );
 
+/**
+ * Formats a monetary value (stored as a string) as "UGX 1,234,567".
+ * Tolerates comma/space-formatted strings; returns null for empty or non-numeric
+ * values so the caller can render a "Not specified" fallback instead of "UGX NaN".
+ */
+const formatUGX = (value?: string | number | null): string | null => {
+    if (value === null || value === undefined || value === '') return null;
+    const n = Number(String(value).replace(/[,\s]/g, ''));
+    return Number.isFinite(n) ? `UGX ${n.toLocaleString()}` : null;
+};
+
+// ── Hero "at a glance" fact (light tile across the base of the hero) ─────────────
+const HeroFact = ({ label, value, first }: { label: string; value?: string | null; first?: boolean }) => {
+    const empty = value === null || value === undefined || value === '';
+    return (
+        <Box
+            sx={{
+                flex: '1 1 150px',
+                minWidth: 140,
+                px: { xs: 2, md: 2.75 },
+                py: 1.5,
+                borderLeft: { xs: 'none', sm: first ? 'none' : `1px solid ${border.subtle}` },
+            }}
+        >
+            <Typography sx={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.09em', textTransform: 'uppercase', color: neutral[500] }}>
+                {label}
+            </Typography>
+            <Typography noWrap sx={{
+                fontSize: '0.9rem', mt: 0.35,
+                fontWeight: empty ? 400 : 700,
+                fontStyle: empty ? 'italic' : 'normal',
+                color: empty ? neutral[400] : neutral[800],
+            }}>
+                {empty ? 'Not specified' : value}
+            </Typography>
+        </Box>
+    );
+};
+
 const GeneralAssetDetails = () => {
     const [asset, setAsset] = useState<IOfficeEquipment>({} as IOfficeEquipment);
     const { typeId, id } = useParams<{ typeId: string; id: string }>();
@@ -226,50 +265,57 @@ const GeneralAssetDetails = () => {
                     </ModalComponent>
                 )}
 
-                {/* ── Hero header ── */}
+                {/* ── Hero header (light card idiom, matching the category pages) ── */}
                 <Box
                     sx={{
                         position: 'relative',
-                        borderRadius: 2,
-                        border: `1px solid ${border.subtle}`,
-                        background: `linear-gradient(135deg, ${alpha(brand[50], 0.7)} 0%, #FFFFFF 60%)`,
+                        borderRadius: '16px',
                         overflow: 'hidden',
                         mb: 2.5,
+                        bgcolor: '#fff',
+                        boxShadow: 'hsla(220, 30%, 5%, 0.05) 0px 5px 15px 0px, hsla(220, 25%, 10%, 0.05) 0px 15px 35px -5px',
                     }}
                 >
-                    {/* <Box sx={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, background: `linear-gradient(180deg, ${brand[500]} 0%, ${brand[700]} 100%)` }} /> */}
-                    <Box sx={{ px: { xs: 2.5, md: 3.5 }, py: 2.5 }}>
+                    {/* Faint brand accents for a touch of depth on the white card */}
+                    <Box sx={{ position: 'absolute', inset: 0, background: `radial-gradient(circle at 92% -10%, ${alpha(brand[500], 0.07)} 0%, transparent 42%)`, pointerEvents: 'none' }} />
+                    <Inventory2OutlinedIcon sx={{ position: 'absolute', right: -18, top: -20, fontSize: 180, color: alpha(brand[500], 0.05), transform: 'rotate(-12deg)', pointerEvents: 'none' }} />
+
+                    <Box sx={{ position: 'relative', px: { xs: 2.5, md: 3.5 }, pt: 2.25 }}>
                         {/* breadcrumb */}
-                        <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
+                        <Stack direction="row" alignItems="center" spacing={1.25} sx={{ mb: 2.25 }}>
                             <IconButton size="small" onClick={() => navigate(`${ROUTES.LIST_GENERAL_ASSETS}/${typeId}`)}
                                 sx={{ color: brand[600], border: `1px solid ${alpha(brand[500], 0.25)}`, bgcolor: alpha(brand[50], 0.6), '&:hover': { bgcolor: alpha(brand[100], 0.7) } }}>
                                 <ArrowBackIcon fontSize="small" />
                             </IconButton>
-                            <Stack direction="row" alignItems="center" spacing={0.5} sx={{ color: neutral[400] }}>
-                                <HomeOutlinedIcon sx={{ fontSize: 14 }} />
+                            <Stack direction="row" alignItems="center" spacing={0.5}>
+                                <HomeOutlinedIcon sx={{ fontSize: 14, color: neutral[400] }} />
                                 <Typography variant="caption" sx={{ color: neutral[500] }}>{assetType?.name || 'Assets'}</Typography>
                                 <Typography variant="caption" sx={{ color: neutral[300] }}>/</Typography>
-                                <Typography variant="caption" sx={{ color: brand[700], fontWeight: 600 }}>Details</Typography>
+                                <Typography variant="caption" sx={{ color: brand[700], fontWeight: 700 }}>Details</Typography>
                             </Stack>
                         </Stack>
 
-                        <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', justifyContent: 'space-between', gap: 2 }}>
-                            <Stack direction="row" spacing={2} alignItems="flex-start" sx={{ minWidth: 0 }}>
-                                <Box sx={{ width: 46, height: 46, borderRadius: 1.5, bgcolor: alpha(brand[500], 0.1), display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, mt: 0.25 }}>
-                                    <Inventory2OutlinedIcon sx={{ fontSize: 24, color: brand[600] }} />
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', justifyContent: 'space-between', gap: 2, pb: 2.75 }}>
+                            <Stack direction="row" spacing={2} alignItems="center" sx={{ minWidth: 0 }}>
+                                <Box sx={{
+                                    width: 56, height: 56, borderRadius: '16px', flexShrink: 0,
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    bgcolor: alpha(brand[500], 0.1), color: brand[600], border: `1px solid ${alpha(brand[500], 0.16)}`,
+                                }}>
+                                    <Inventory2OutlinedIcon sx={{ fontSize: 28 }} />
                                 </Box>
                                 <Box sx={{ minWidth: 0 }}>
-                                    <Typography variant="h5" sx={{ fontWeight: 700, color: neutral[900], lineHeight: 1.2, letterSpacing: '-0.3px' }}>
+                                    <Typography sx={{ fontSize: { xs: '1.35rem', md: '1.6rem' }, fontWeight: 800, lineHeight: 1.15, letterSpacing: '-0.4px', color: neutral[900] }}>
                                         {asset.assetName || assetType?.name || 'Asset'}
                                     </Typography>
-                                    <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap sx={{ mt: 0.75 }}>
+                                    <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap sx={{ mt: 1 }}>
                                         <Chip size="small" icon={<CategoryOutlinedIcon sx={{ fontSize: 14 }} />}
                                             label={asset.assetType?.name || assetType?.name || 'Asset'}
-                                            sx={{ height: 24, fontWeight: 600, fontSize: '0.72rem', bgcolor: alpha(brand[500], 0.08), color: brand[700], '& .MuiChip-icon': { color: brand[600] } }} />
+                                            sx={{ height: 24, fontWeight: 600, fontSize: '0.72rem', bgcolor: alpha(brand[500], 0.08), color: brand[700], border: `1px solid ${alpha(brand[500], 0.14)}`, '& .MuiChip-icon': { color: brand[600] } }} />
                                         <StatusChip code={asset.assetStatus?.status ?? undefined} />
                                         {asset.engravedNumber && (
-                                            <Chip size="small" label={`#${asset.engravedNumber}`}
-                                                sx={{ height: 24, fontWeight: 600, fontSize: '0.72rem', bgcolor: neutral[100], color: neutral[600] }} />
+                                            <Chip size="small" icon={<BadgeOutlinedIcon sx={{ fontSize: 13 }} />} label={`#${asset.engravedNumber}`}
+                                                sx={{ height: 24, fontWeight: 600, fontSize: '0.72rem', bgcolor: neutral[100], color: neutral[600], '& .MuiChip-icon': { color: neutral[500] } }} />
                                         )}
                                     </Stack>
                                 </Box>
@@ -278,18 +324,26 @@ const GeneralAssetDetails = () => {
                             <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
                                 <MuiButton variant="outlined" size="small" startIcon={<EditOutlinedIcon fontSize="small" />}
                                     onClick={() => navigate(`${ROUTES.LIST_GENERAL_ASSETS}/${typeId}/update/${asset.id}`)}
-                                    sx={{ textTransform: 'none', fontWeight: 600, borderRadius: '8px', borderColor: alpha(brand[500], 0.4), color: brand[600], '&:hover': { borderColor: brand[500], bgcolor: alpha(brand[500], 0.05) } }}>
+                                    sx={{ textTransform: 'none', fontWeight: 700, borderRadius: '10px', borderColor: alpha(brand[500], 0.4), color: brand[600], '&:hover': { borderColor: brand[500], bgcolor: alpha(brand[500], 0.05) } }}>
                                     Edit
                                 </MuiButton>
                                 {asset?.assetStatus?.status === 'inStore' && (
-                                    <MuiButton variant="contained" size="small" startIcon={<AssignmentIndOutlinedIcon fontSize="small" />}
+                                    <MuiButton variant="contained" size="small" disableElevation startIcon={<AssignmentIndOutlinedIcon fontSize="small" />}
                                         onClick={() => { setCurrentState(crudStates.reassign); setOpen(true); }}
-                                        sx={{ textTransform: 'none', fontWeight: 600, borderRadius: '8px', bgcolor: '#2E7D32', '&:hover': { bgcolor: '#1B5E20' } }}>
+                                        sx={{ textTransform: 'none', fontWeight: 700, borderRadius: '10px', bgcolor: brand[600], '&:hover': { bgcolor: brand[700] } }}>
                                         Assign
                                     </MuiButton>
                                 )}
                             </Stack>
                         </Box>
+                    </Box>
+
+                    {/* At-a-glance strip — key facts as light tiles across the base of the hero */}
+                    <Box sx={{ position: 'relative', display: 'flex', flexWrap: 'wrap', bgcolor: alpha(brand[500], 0.03), borderTop: `1px solid ${border.subtle}` }}>
+                        <HeroFact first label="Assigned To" value={asset.assignedTo ? `${asset.assignedTo.lastName ?? ''} ${asset.assignedTo.firstName ?? ''}`.trim() : 'Unassigned'} />
+                        <HeroFact label="Branch / Location" value={asset.branch?.name || null} />
+                        <HeroFact label="Date Received" value={asset.dateReceipt ? moment(asset.dateReceipt).format('Do MMM YYYY') : null} />
+                        <HeroFact label="Purchase Cost" value={formatUGX(asset.purchaseCost)} />
                     </Box>
                 </Box>
 
@@ -297,12 +351,12 @@ const GeneralAssetDetails = () => {
                 {/* flex-start (not stretch) so each column sizes to its own content — a short
                     history table no longer forces a tall empty void in the opposite column. */}
                 <Grid container spacing={2.5} alignItems="flex-start">
-                    {/* Left: image + quick facts */}
+                    {/* Left: photo + physical identity (assignment/financials live in the hero strip) */}
                     <Grid item xs={12} md={4}>
                         <Paper elevation={0} sx={{ borderRadius: 2, border: `1px solid ${border.subtle}`, bgcolor: '#fff', overflow: 'hidden' }}>
                             <Box sx={{ px: 2.5, py: 1.75, borderBottom: `1px solid ${alpha('#000', 0.06)}`, bgcolor: alpha(brand[500], 0.03), display: 'flex', alignItems: 'center', gap: 1 }}>
                                 <Inventory2OutlinedIcon sx={{ fontSize: 18, color: brand[600] }} />
-                                <Typography variant="subtitle2" sx={{ fontWeight: 700, color: brand[700] }}>Asset</Typography>
+                                <Typography variant="subtitle2" sx={{ fontWeight: 700, color: brand[700] }}>Photo</Typography>
                             </Box>
                             <Box sx={{ p: 2.5 }}>
                                 <AssetImageUpload
@@ -314,10 +368,9 @@ const GeneralAssetDetails = () => {
                                     readOnly={!canUpdateAsset}
                                 />
                                 <Divider sx={{ my: 1.5 }} />
-                                <Field label="Status" value={asset.assetStatus?.status ? camelCaseToWords(asset.assetStatus.status) : null} />
-                                <Field label="Branch / Location" value={asset.branch?.name || null} />
-                                <Field label="Assigned To" value={asset.assignedTo ? `${asset.assignedTo.lastName ?? ''} ${asset.assignedTo.firstName ?? ''}`.trim() : null} />
-                                <Field label="Date Received" value={asset.dateReceipt ? moment(asset.dateReceipt).format('Do MMMM YYYY') : null} />
+                                <Field label="Make" value={asset.make || null} />
+                                <Field label="Model" value={asset.model || null} />
+                                <Field label="Serial Number" value={asset.serialNumber || null} copyable />
                             </Box>
                         </Paper>
                     </Grid>
