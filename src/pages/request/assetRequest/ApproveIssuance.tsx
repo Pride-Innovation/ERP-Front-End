@@ -7,7 +7,7 @@ Managing Director
 
 import { useContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
 import { approveIssueRequestService, findAssetRequestByIDService } from "./service";
@@ -15,9 +15,10 @@ import { ICommodity } from "../../settings/commodity/interface";
 import { IApproveIssuance, IRequestAxiosResponse } from "../interface";
 import RequestUtills from "./utills";
 import { RequestContext } from "../../../context/request/RequestContext";
-import { AppDispatch } from "../../../store";
+import { AppDispatch, RootState } from "../../../store";
 import { updateRequest } from "./slice";
 import RequestActionLayout from "./RequestActionLayout";
+import { statusIdByCode } from "../../../utils/helpers";
 
 const PRIMARY = '#08796C';
 
@@ -39,6 +40,7 @@ const ApproveIssuance = ({
 }: IApproveIssuance) => {
     const { fetchIssuanceByRequestId } = RequestUtills();
     const { currentIssuance } = useContext(RequestContext);
+    const { statuses } = useSelector((state: RootState) => state.StatusesStore);
     const dispatch = useDispatch<AppDispatch>();
     const [comment, setComment] = useState("");
     const [loading, setLoading] = useState(true);
@@ -89,11 +91,13 @@ const ApproveIssuance = ({
         setSendingRequest(true);
         try {
             /**
-             * NB: Please note that the status ID must match the Issuance Approved in the Database.
+             * The status id is resolved from the stable "issuanceApproved" code (seeded ids vary
+             * by environment). Only consumed by the backend legacy (non-workflow) path; in workflow
+             * mode the engine sets the status itself.
              */
             const data = {
                 requestId: request.id,
-                statusId: 6, // ID 6 must match the Issuance Approved Status ID in the Database
+                statusId: statusIdByCode(statuses, 'issuanceApproved'),
                 comment,
                 issuanceId: currentIssuance?.id,
             }
