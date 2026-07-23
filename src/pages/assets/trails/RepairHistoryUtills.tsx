@@ -9,7 +9,6 @@ import { useContext, useEffect, useState } from "react";
 import { ITableHeader } from "../../../components/tables/interface";
 import { getTableHeaders } from "../../../components/tables/getTableHeaders";
 import { crudStates } from "../../../utils/constants";
-import { repairHistoryMock } from "../../../mocks/repairHistory";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../../store";
 import { listRepairDetailService } from "../general/service";
@@ -19,7 +18,7 @@ import moment from "moment";
 import { AssetContext } from "../../../context/asset";
 
 const RepairHistoryUtills = () => {
-    const endPoint = 'posts';
+    const endPoint = 'assets/repairs';
     const header = { plural: 'Repair History', singular: 'Repair History' };
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
     const [modalState, setModalState] = useState<string>("");
@@ -38,18 +37,14 @@ const RepairHistoryUtills = () => {
         handleOpen();
     };
 
-    const {
-        id,
-        asset,
-        documents,
-        completionDocuments,
-        completionNotes,
-        status,
-        ...data
-    } = repairHistoryMock[0];
-
+    // Column template derived from the real table-data shape (IRepairsTableData), not a mock —
+    // so the columns stay in sync with what the API actually maps in. The `action` column carries
+    // the per-row options menu.
     const rowData = {
-        ...data,
+        repairStartDate: "",
+        repairEndDate: "",
+        technician: "",
+        repairReason: "",
         action: {
             label: "options",
             options: options
