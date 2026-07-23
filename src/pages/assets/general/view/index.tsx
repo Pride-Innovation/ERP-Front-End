@@ -237,7 +237,7 @@ const GeneralAssetDetails = () => {
                         mb: 2.5,
                     }}
                 >
-                    <Box sx={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, background: `linear-gradient(180deg, ${brand[500]} 0%, ${brand[700]} 100%)` }} />
+                    {/* <Box sx={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, background: `linear-gradient(180deg, ${brand[500]} 0%, ${brand[700]} 100%)` }} /> */}
                     <Box sx={{ px: { xs: 2.5, md: 3.5 }, py: 2.5 }}>
                         {/* breadcrumb */}
                         <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
@@ -340,10 +340,10 @@ const GeneralAssetDetails = () => {
                                 {TABS.map((t, i) => <Tab key={i} label={t.label} icon={t.icon} iconPosition="start" />)}
                             </Tabs>
 
-                            {/* Details gets generous padding; the history tabs render their own
-                                bordered table card, so they take a slim even inset to avoid a
-                                heavy card-in-card frame. */}
-                            <Box sx={{ p: tab === 0 ? { xs: 2, md: 3 } : { xs: 1.25, md: 1.5 } }}>
+                            {/* Details gets generous padding; the history tabs render a `flat`
+                                table (no card chrome), so they sit flush at p:0 — the panel's own
+                                border is the single frame. */}
+                            <Box sx={{ p: tab === 0 ? { xs: 2, md: 3 } : 0 }}>
                                 {tab === 0 && (
                                     <>
                                         <Section title="Identity" icon={<BadgeOutlinedIcon />}>

@@ -123,6 +123,7 @@ const TableComponent = ({
     tableIcon,
     createPermission,
     onExport,
+    flat = false,
 }: ITableComponent) => {
     const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
     const [currentOptions, setCurrentOptions] = useState<any[]>([]);
@@ -433,10 +434,12 @@ const TableComponent = ({
     return (
         <Card elevation={0} sx={{
             width: '100%',
-            border: `1px solid ${BORDER}`,
-            borderRadius: '12px',
             overflow: 'hidden',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.06), 0 4px 20px rgba(0,0,0,0.04)',
+            // `flat` blends the table into its parent surface (e.g. a tab panel); the default
+            // keeps the standalone bordered/rounded/shadowed card used everywhere else.
+            border: flat ? 'none' : `1px solid ${BORDER}`,
+            borderRadius: flat ? 0 : '12px',
+            boxShadow: flat ? 'none' : '0 1px 3px rgba(0,0,0,0.06), 0 4px 20px rgba(0,0,0,0.04)',
         }}>
 
             {/* ── Toolbar ────────────────────────────────────────────────────── */}

@@ -91,6 +91,7 @@ const RepairHistory = ({ id }: { id: string | number }) => {
                         endPoint={endPoint}
                         loading={loading}
                         exportData
+                        flat
                         // createAction
                         header={header}
                         rows={repairsTableData}

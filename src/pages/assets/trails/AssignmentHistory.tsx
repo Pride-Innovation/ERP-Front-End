@@ -45,6 +45,7 @@ const AssignmentHistory = ({ id }: { id: string | number }) => {
                     endPoint={endPoint}
                     loading={loading}
                     exportData
+                    flat
                     // createAction
                     header={header}
                     module="assignment history"

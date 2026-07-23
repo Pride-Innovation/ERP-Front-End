@@ -91,6 +91,11 @@ export interface ITableComponent {
      * visible rows. Lets pages fetch the full filtered set before exporting.
      */
     onExport?: OnExportHandler;
+    /**
+     * When true, drops the table's own border/shadow/rounding so it blends into
+     * its parent surface (e.g. a tab panel). Default false — standalone card.
+     */
+    flat?: boolean;
 }
 
 export interface ITableToolBar {
