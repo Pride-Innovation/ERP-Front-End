@@ -21,16 +21,33 @@ import ApproveIssuance from "../ApproveIssuance";
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import usePermissions from "../../../../core/permissions/usePermissions";
 import { PERMISSIONS } from "../../../../core/permissions/constants";
+import StatusUtills from "../../../settings/statuses/Utills";
+import { statusIdByCode } from "../../../../utils/helpers";
 
 const IssuedRequest = () => {
     const { requests } = useSelector((state: RootState) => state.AssetsRequestsStore)
+    const { statuses } = useSelector((state: RootState) => state.StatusesStore);
+    const { fetchAllStatuses } = StatusUtills();
     const { requestTableData, setOptions, setRequestStatusIds } = useContext(RequestContext);
     const { has } = usePermissions();
     const [selectedStatus, setSelectedStatus] = useState<string>('all');
-    const [statusIds, setStatusIds] = useState<string>(`${5},${6},${7}`); // Default to '1' for "Request Created"
+
+    // The "Issued" tab groups the three post-issuance request states. Ids are resolved from
+    // status codes (never hardcoded — seeded ids vary by environment, see utils/helpers).
+    const ISSUED_GROUP_CODES = ['issued', 'issuanceApproved', 'receiptAcknowledged'];
+    const issuedGroupCsv = ISSUED_GROUP_CODES
+        .map((code) => statusIdByCode(statuses, code))
+        .filter((id): id is number => id != null)
+        .join(',');
+
+    const [statusIds, setStatusIds] = useState<string>('');
+
+    useEffect(() => { fetchAllStatuses(); }, []);
 
     useEffect(() => {
-        setRequestStatusIds(statusIds.split(',').map(id => parseInt(id, 10)));
+        if (statusIds) {
+            setRequestStatusIds(statusIds.split(',').map(id => parseInt(id, 10)));
+        }
     }, [statusIds]);
 
     const {
@@ -49,16 +66,16 @@ const IssuedRequest = () => {
         setSendingRequest
     } = RequestUtills();
 
-    const params = { statusIds: statusIds, status: "ISSUED" }
-
+    // Load the issued-group requests once the status catalogue resolves the group ids
+    // (Request Issued + Issuance Approved + Receipt Acknowledged). Only drives the default
+    // "all" view; per-status filters are handled by handleStatusChange.
     useEffect(() => {
-        /**
-         * This should contain the Status ID for Request Issued for Approval and Issuance Approved.
-         */
-        fetchAllRequests(params);
-
-        // setFileData({ file: "", module: "", jsonData: [] });
-    }, []);
+        if (issuedGroupCsv && selectedStatus === 'all') {
+            setStatusIds(issuedGroupCsv);
+            fetchAllRequests({ statusIds: issuedGroupCsv, status: "ISSUED" });
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [issuedGroupCsv]);
 
 
     useEffect(() => { handleRequest(requests) }, [requests]);
@@ -106,35 +123,27 @@ const IssuedRequest = () => {
      * @param status - The status filter to apply
      */
     const handleStatusChange = (status: string) => {
-        let param;
-        let statusId;
+        // Map the filter option to its status code, then resolve the id (never hardcode).
+        const codeByOption: Record<string, string> = {
+            requestIssued: 'issued',
+            issuanceApproved: 'issuanceApproved',
+            receiptAcknowledged: 'receiptAcknowledged',
+        };
 
-        switch (status) {
-            // ISSUED status group
-            case 'requestIssued':
-                param = { status: "ISSUED", statusIds: '5' };
-                statusId = '5';
-                break;
-
-            case 'issuanceApproved':
-                param = { status: "ISSUED", statusIds: '6' };
-                statusId = '6';
-                break;
-
-            case 'receiptAcknowledged':
-                param = { status: "ISSUED", statusIds: '7' };
-                statusId = '7';
-                break;
-
-            // Default (all) case
-            default:
-                fetchAllRequests(params);
-                setSelectedStatus('all');
-                return; // Exit early for the default case
+        const code = codeByOption[status];
+        if (!code) {
+            // Default (all) case — the whole issued group.
+            fetchAllRequests({ statusIds: issuedGroupCsv, status: "ISSUED" });
+            setStatusIds(issuedGroupCsv);
+            setSelectedStatus('all');
+            return;
         }
 
-        // For all non-default cases:
-        fetchAllRequests(param);
+        const resolved = statusIdByCode(statuses, code);
+        if (resolved == null) return; // status catalogue not loaded yet
+        const statusId = String(resolved);
+
+        fetchAllRequests({ status: "ISSUED", statusIds: statusId });
         setSelectedStatus(status);
         setStatusIds(statusId);
     }
