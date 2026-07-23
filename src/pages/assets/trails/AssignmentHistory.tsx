@@ -6,7 +6,7 @@ Managing Director
 */
 
 import { useEffect } from "react"
-import { Grid } from "@mui/material"
+import { Box } from "@mui/material"
 import TableComponent from "../../../components/tables/TableComponent"
 import AssignmentHistoryUtills from "./AssignmentHistoryUtills"
 import { crudStates } from "../../../utils/constants"
@@ -34,30 +34,27 @@ const AssignmentHistory = ({ id }: { id: string | number }) => {
     }, [id]);
 
     return (
-        <>
-            <Grid xs={12} container>
-                {modalState === crudStates.create &&
-                    <ModalComponent title='Create User' open={open} handleClose={handleClose} width="60%">
-                        <p>Modal Information!!</p>
-                    </ModalComponent>
-                }
-                {columnHeaders.length > 0 &&
-                    <TableComponent
-                        endPoint={endPoint}
-                        loading={loading}
-                        count={100}
-                        exportData
-                        // createAction
-                        header={header}
-                        module="assignment history"
-                        rows={assetAssignmentHistoryTableData || []}
-                        columnHeaders={columnHeaders}
-                        paginationMode='server'
-                        onCreationHandler={handleCreation}
-                    />
-                }
-            </Grid>
-        </>
+        <Box sx={{ width: '100%' }}>
+            {modalState === crudStates.create &&
+                <ModalComponent title='Create User' open={open} handleClose={handleClose} width="60%">
+                    <p>Modal Information!!</p>
+                </ModalComponent>
+            }
+            {columnHeaders.length > 0 &&
+                <TableComponent
+                    endPoint={endPoint}
+                    loading={loading}
+                    exportData
+                    // createAction
+                    header={header}
+                    module="assignment history"
+                    rows={assetAssignmentHistoryTableData || []}
+                    columnHeaders={columnHeaders}
+                    paginationMode='client'
+                    onCreationHandler={handleCreation}
+                />
+            }
+        </Box>
     )
 }
 
