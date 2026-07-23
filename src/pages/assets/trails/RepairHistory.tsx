@@ -7,7 +7,7 @@ Managing Director
 
 import { useContext, useEffect } from "react";
 import { crudStates } from "../../../utils/constants";
-import { Grid } from "@mui/material";
+import { Box } from "@mui/material";
 import ModalComponent from "../../../components/modal";
 import TableComponent from "../../../components/tables/TableComponent";
 import RepairHistoryUtills from "./RepairHistoryUtills";
@@ -75,7 +75,7 @@ const RepairHistory = ({ id }: { id: string | number }) => {
                 </ModalComponent>
             }
 
-            <Grid xs={12} container>
+            <Box sx={{ width: '100%' }}>
                 {modalState === crudStates.create &&
                     <ModalComponent
                         title='Create Repair History'
@@ -90,20 +90,19 @@ const RepairHistory = ({ id }: { id: string | number }) => {
                     <TableComponent
                         endPoint={endPoint}
                         loading={loading}
-                        count={100}
                         exportData
                         // createAction
                         header={header}
                         rows={repairsTableData}
                         module="Repairs & Maintenance"
                         columnHeaders={columnHeaders}
-                        paginationMode='server'
+                        paginationMode='client'
                         onCreationHandler={handleCreation}
                         handleOptionClicked={handleOptionClicked}
                         filterOptions
                     />
                 }
-            </Grid>
+            </Box>
         </>
     )
 }
