@@ -84,9 +84,10 @@ const completeRepairAssetService = async (id: string | number, body: object) => 
     }
 };
 
-const listRepairDetailService = async (id: string | number) => {
+const listRepairDetailService = async (id: string | number, pageSize = 200) => {
     try {
-        const response = await axiosInstance.get(`assets/repairs/${id}`);
+        // Pull the full repair history in one page; the table pages client-side.
+        const response = await axiosInstance.get(`assets/repairs/${id}`, { params: { pageSize } });
         return response;
     } catch (error) {
         return error;
