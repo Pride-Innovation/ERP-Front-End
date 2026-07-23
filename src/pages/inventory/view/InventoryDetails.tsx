@@ -34,11 +34,14 @@ import { IGRNReport, IStockCommodities } from "../interface";
 import { camelCaseToWords } from "../../../utils/helpers";
 import { generateGrnPdf } from "./generateGrnPdf";
 import { brand, neutral, border, surface, status as statusTokens } from "../../../utils/tokens";
+import { StatTile } from "../../../components/layout";
 
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
 import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
+import ShoppingCartOutlinedIcon from '@mui/icons-material/ShoppingCartOutlined';
+import PendingActionsOutlinedIcon from '@mui/icons-material/PendingActionsOutlined';
 import ReceiptLongOutlinedIcon from '@mui/icons-material/ReceiptLongOutlined';
 import BusinessOutlinedIcon from '@mui/icons-material/BusinessOutlined';
 import LocalPhoneOutlinedIcon from '@mui/icons-material/LocalPhoneOutlined';
@@ -122,27 +125,6 @@ const HeroFact = ({
         </Box>
     );
 };
-
-// ── Stat tile ─────────────────────────────────────────────────────────────────
-const StatTile = ({ label, value, accent }: { label: string; value: number | string; accent: string }) => (
-    <Paper
-        elevation={0}
-        sx={{
-            p: 1.75,
-            borderRadius: 2,
-            border: `1px solid ${border.subtle}`,
-            bgcolor: '#fff',
-            height: '100%',
-        }}
-    >
-        <Typography sx={{ fontSize: '0.62rem', fontWeight: 700, color: neutral[500], textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-            {label}
-        </Typography>
-        <Typography sx={{ fontWeight: 800, fontSize: '1.4rem', color: accent, lineHeight: 1.2, mt: 0.5 }}>
-            {value}
-        </Typography>
-    </Paper>
-);
 
 // ── Supplier info row ─────────────────────────────────────────────────────────
 const InfoRow = ({ icon, label, value }: { icon: React.ReactNode; label: string; value?: string | null }) => (
@@ -286,17 +268,31 @@ const InventoryDetails = () => {
 
                 {/* ── Stat strip ── */}
                 <Grid container spacing={2} sx={{ mb: 2.5 }}>
-                    <Grid item xs={6} md={3}><StatTile label="Ordered" value={totals.ordered.toLocaleString()} accent={neutral[900]} /></Grid>
-                    <Grid item xs={6} md={3}><StatTile label="Delivered" value={totals.delivered.toLocaleString()} accent={BRAND} /></Grid>
-                    <Grid item xs={6} md={3}><StatTile label="Outstanding" value={totals.outstanding.toLocaleString()} accent={totals.outstanding > 0 ? statusTokens.danger.main : neutral[400]} /></Grid>
-                    <Grid item xs={6} md={3}><StatTile label="Commodities" value={totals.lines.toLocaleString()} accent="#BC892C" /></Grid>
+                    <Grid item xs={6} md={3}>
+                        <StatTile label="Ordered" value={totals.ordered.toLocaleString()} helper="units ordered" accent="info" icon={<ShoppingCartOutlinedIcon />} />
+                    </Grid>
+                    <Grid item xs={6} md={3}>
+                        <StatTile label="Delivered" value={totals.delivered.toLocaleString()} helper="units received" accent="brand" icon={<LocalShippingOutlinedIcon />} />
+                    </Grid>
+                    <Grid item xs={6} md={3}>
+                        <StatTile
+                            label="Outstanding"
+                            value={totals.outstanding.toLocaleString()}
+                            helper={totals.outstanding > 0 ? 'still due' : 'fully delivered'}
+                            accent={totals.outstanding > 0 ? 'danger' : 'neutral'}
+                            icon={<PendingActionsOutlinedIcon />}
+                        />
+                    </Grid>
+                    <Grid item xs={6} md={3}>
+                        <StatTile label="Commodities" value={totals.lines.toLocaleString()} helper="line items" accent="gold" icon={<Inventory2OutlinedIcon />} />
+                    </Grid>
                 </Grid>
 
                 {/* ── Body ── */}
-                <Grid container spacing={2.5} alignItems="stretch">
+                <Grid container spacing={2.5} alignItems="flex-start">
                     {/* Supplier card */}
                     <Grid item xs={12} md={4}>
-                        <Paper elevation={0} sx={{ borderRadius: 2, border: `1px solid ${border.subtle}`, bgcolor: '#fff', overflow: 'hidden', height: '100%' }}>
+                        <Paper elevation={0} sx={{ borderRadius: '16px', border: `1px solid ${border.subtle}`, bgcolor: '#fff', overflow: 'hidden', boxShadow: 'hsla(220, 30%, 5%, 0.04) 0px 4px 12px 0px' }}>
                             <Box sx={{ px: 2.5, py: 1.75, borderBottom: `1px solid ${alpha('#000', 0.06)}`, bgcolor: alpha(brand[500], 0.03), display: 'flex', alignItems: 'center', gap: 1 }}>
                                 <BusinessOutlinedIcon sx={{ fontSize: 18, color: brand[600] }} />
                                 <Typography variant="subtitle2" sx={{ fontWeight: 700, color: brand[700] }}>Supplier</Typography>
@@ -314,7 +310,7 @@ const InventoryDetails = () => {
 
                     {/* Tabbed content */}
                     <Grid item xs={12} md={8}>
-                        <Paper elevation={0} sx={{ borderRadius: 2, border: `1px solid ${border.subtle}`, bgcolor: '#fff', overflow: 'hidden', height: '100%' }}>
+                        <Paper elevation={0} sx={{ borderRadius: '16px', border: `1px solid ${border.subtle}`, bgcolor: '#fff', overflow: 'hidden', boxShadow: 'hsla(220, 30%, 5%, 0.04) 0px 4px 12px 0px' }}>
                             <Tabs
                                 value={tab}
                                 onChange={(_, v) => setTab(v)}
