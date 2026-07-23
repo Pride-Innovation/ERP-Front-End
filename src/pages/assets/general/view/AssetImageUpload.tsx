@@ -50,8 +50,11 @@ const AssetImageUpload = ({
     const [error, setError] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [previewImage, setPreviewImage] = useState<string | null>(currentImage);
+    // Tracks a failed image load so we fall back to the placeholder instead of a broken image icon.
+    const [loadFailed, setLoadFailed] = useState<boolean>(false);
 
     useEffect(() => {
+        setLoadFailed(false);
         if (currentImage) {
             if (currentImage.startsWith('http') || currentImage.startsWith('data:')) {
                 setPreviewImage(currentImage);
@@ -64,6 +67,9 @@ const AssetImageUpload = ({
             setPreviewImage(null);
         }
     }, [currentImage]);
+
+    // Show the image only when we have a source that hasn't failed to load.
+    const showImage = !!previewImage && !loadFailed;
 
     const handleDragEnter = (e: React.DragEvent) => {
         e.preventDefault();
@@ -117,6 +123,7 @@ const AssetImageUpload = ({
         try {
             setIsUploading(true);
             setError(null);
+            setLoadFailed(false);
 
             const reader = new FileReader();
             reader.onload = (e) => {
@@ -305,8 +312,8 @@ const AssetImageUpload = ({
                 onDragOver={handleDragOver}
                 onDrop={handleDrop}
             >
-                {/* Add actual image element when we have a preview image */}
-                {previewImage && (
+                {/* Add actual image element when we have a preview image that loads successfully */}
+                {showImage && (
                     <Box
                         sx={{
                             position: 'absolute',
@@ -321,7 +328,7 @@ const AssetImageUpload = ({
                         }}
                     >
                         <img
-                            src={previewImage}
+                            src={previewImage as string}
                             alt="Asset Preview"
                             style={{
                                 maxWidth: '100%',
@@ -329,9 +336,9 @@ const AssetImageUpload = ({
                                 objectFit: 'contain',
                                 display: 'block'
                             }}
-                            onError={(e) => {
+                            onError={() => {
                                 console.error('Image failed to load:', previewImage);
-                                // Add a fallback if needed or log the error
+                                setLoadFailed(true); // fall back to the placeholder
                             }}
                         />
                     </Box>
@@ -349,7 +356,7 @@ const AssetImageUpload = ({
                     />
                 )}
 
-                {!previewImage && renderPlaceholder()}
+                {!showImage && renderPlaceholder()}
 
                 {isDragging && !readOnly && (
                     <Box
@@ -373,7 +380,7 @@ const AssetImageUpload = ({
                     </Box>
                 )}
 
-                {previewImage && !readOnly && !isDragging && !isUploading && (
+                {showImage && !readOnly && !isDragging && !isUploading && (
                     <Box
                         sx={{
                             position: 'absolute',
