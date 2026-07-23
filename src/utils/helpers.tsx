@@ -46,6 +46,18 @@ export const statusIdByCode = (statuses: IStatus[], code: string): number | null
     return (match?.id as number) ?? null;
 };
 
+/**
+ * Resolves a set of status codes to their ids from the loaded statuses.
+ * Codes that don't resolve are dropped. Returns a CSV string (e.g. "4,6,8"),
+ * ready to pass straight to the request-list `statusIds` param — so a status
+ * group is defined by stable codes, never by environment-specific ids.
+ */
+export const statusIdsByCodes = (statuses: IStatus[], codes: ReadonlyArray<string>): string =>
+    codes
+        .map((code) => statusIdByCode(statuses, code))
+        .filter((id): id is number => id != null)
+        .join(',');
+
 
 export const convertStringToUpperCase = (str: string) => {
 
