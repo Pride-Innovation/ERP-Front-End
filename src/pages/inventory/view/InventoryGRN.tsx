@@ -68,7 +68,7 @@ const InventoryGRN = ({ grnList }: { grnList: IGRNReport[] }) => {
     }, [currentGRN]);
 
     return (
-        <Box sx={{ p: { xs: 2, md: 2.5 } }}>
+        <Box>
             {/* Upload GRN Modal */}
             {modalState === crudStates.upload && (
                 <ModalComponent title='Upload Signed GRN' open={open} handleClose={handleClose} width="40%">
@@ -128,7 +128,7 @@ const InventoryGRN = ({ grnList }: { grnList: IGRNReport[] }) => {
             )}
 
             {/* Section header */}
-            <Stack direction="row" spacing={1.25} alignItems="center" sx={{ mb: 2 }}>
+            <Stack direction="row" spacing={1.25} alignItems="center" sx={{ px: { xs: 2, md: 2.5 }, pt: { xs: 2, md: 2.5 }, pb: 1.5 }}>
                 <Box sx={{ width: 32, height: 32, borderRadius: 1.5, bgcolor: alpha(GOLD, 0.1), color: GOLD, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <ReceiptLongOutlinedIcon sx={{ fontSize: 18 }} />
                 </Box>
@@ -146,13 +146,13 @@ const InventoryGRN = ({ grnList }: { grnList: IGRNReport[] }) => {
                 <TableComponent
                     endPoint={endPoint}
                     loading={false}
-                    count={stocksTableData.length}
                     exportData
+                    flat
                     header={header}
                     module="GRN documents"
                     rows={stocksTableData || []}
                     columnHeaders={columnHeaders}
-                    paginationMode='server'
+                    paginationMode='client'
                     handleOptionClicked={handleOptionClicked}
                     filterOptions
                 />
