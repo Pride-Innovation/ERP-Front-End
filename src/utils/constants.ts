@@ -79,14 +79,36 @@ export const requestStatus: {
 }
 
 /**
- * In-progress workflow status IDs set by the engine — Manager Approved (13), HOD Approved (14),
- * BOM Approved (15), Branch Manager Approved (16), Supervisor Approved (17) and Unit Acknowledged
- * (18). A request in any of these has advanced past one stage and is awaiting the next, so it's
- * still in-progress/pending. Listing and pending views must include these IDs, otherwise a request
- * vanishes the moment it advances past the first step.
+ * Request-status *codes* grouped by lifecycle stage. Ids are resolved at runtime from the loaded
+ * status catalogue (see `statusIdsByCodes` in utils/helpers) — never hardcode ids, since seeded
+ * ids vary by environment. Codes, by contrast, are stable across re-seeds.
+ *
+ * A request in any of the workflow-approval codes has advanced past one approval stage and is
+ * awaiting the next, so listing/pending views must include them or a request vanishes the moment
+ * it advances past the first step.
  */
-export const workflowApprovalStatusIds: ReadonlyArray<number> = [13, 14, 15, 16, 17, 18];
-export const workflowApprovalStatusIdsCsv: string = workflowApprovalStatusIds.join(',');
+export const WORKFLOW_APPROVAL_CODES: ReadonlyArray<string> = [
+    'managerApproved',
+    'hodApproved',
+    'bomApproved',
+    'branchManagerApproved',
+    'supervisorApproved',
+    'unitAcknowledged',
+];
+
+/** "Approved at some stage, awaiting the next" — the in-progress approval chain (Pending tab). */
+export const PENDING_REQUEST_CODES: ReadonlyArray<string> = ['requestApproved', ...WORKFLOW_APPROVAL_CODES];
+
+/** Post-issuance states — awaiting issuance approval / receipt acknowledgement (Issued tab). */
+export const ISSUED_REQUEST_CODES: ReadonlyArray<string> = ['issued', 'issuanceApproved', 'receiptAcknowledged'];
+
+/** Every request lifecycle state — the "All" view. */
+export const ALL_REQUEST_CODES: ReadonlyArray<string> = [
+    'requestCreated',
+    'requestRejected',
+    ...PENDING_REQUEST_CODES,
+    ...ISSUED_REQUEST_CODES,
+];
 
 export const assetStatus: {
     use: string;
