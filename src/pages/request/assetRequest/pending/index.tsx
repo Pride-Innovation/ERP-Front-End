@@ -12,7 +12,9 @@ import { useContext, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../store";
 import { RequestContext } from "../../../../context/request/RequestContext";
-import { crudStates, workflowApprovalStatusIdsCsv } from "../../../../utils/constants";
+import { crudStates, PENDING_REQUEST_CODES } from "../../../../utils/constants";
+import { statusIdsByCodes } from "../../../../utils/helpers";
+import StatusUtills from "../../../settings/statuses/Utills";
 import ModalComponent from "../../../../components/modal";
 import AcknowledgeRequest from "../AcknowledgeRequest";
 import ApproveRequest from "../ApprovedRequest";
@@ -29,6 +31,8 @@ import RoutesUtills from "../../../../core/routes/utills";
 
 const PendingRequest = () => {
     const { requests } = useSelector((state: RootState) => state.AssetsRequestsStore)
+    const { statuses } = useSelector((state: RootState) => state.StatusesStore);
+    const { fetchAllStatuses } = StatusUtills();
     const { requestTableData, setOptions, setRequestStatusIds } = useContext(RequestContext);
     const { has } = usePermissions();
     const { getCurrentUser } = RoutesUtills();
@@ -71,6 +75,8 @@ const PendingRequest = () => {
         closeModal();
         fetchAllRequests(params);
     };
+
+    useEffect(() => { fetchAllStatuses(); }, []);
 
     useEffect(() => {
         fetchAllRequests(params);
@@ -160,9 +166,10 @@ const PendingRequest = () => {
     const handleStatusChange = (status: string) => {
         switch (status) {
             case 'requestApproved': {
-                // Includes the per-stage workflow approvals (13-17) — approved at one
-                // stage, awaiting the next — so in-progress requests stay listed.
-                const inProgressIds = `3,${workflowApprovalStatusIdsCsv}`;
+                // "Approved at one stage, awaiting the next" — the in-progress approval chain.
+                // Ids resolved from codes at call time (never hardcoded).
+                const inProgressIds = statusIdsByCodes(statuses, PENDING_REQUEST_CODES);
+                if (!inProgressIds) return; // status catalogue not loaded yet
                 const param = { status: "PENDING", statusIds: inProgressIds, ...approverParam };
                 fetchAllRequests(param);
                 setSelectedStatus(status);
@@ -170,10 +177,12 @@ const PendingRequest = () => {
                 break;
             }
             case 'requestAcknowledged': {
-                const param = { status: "PENDING", statusIds: '4', ...approverParam };
+                const acknowledgedIds = statusIdsByCodes(statuses, ['unitAcknowledged']);
+                if (!acknowledgedIds) return; // status catalogue not loaded yet
+                const param = { status: "PENDING", statusIds: acknowledgedIds, ...approverParam };
                 fetchAllRequests(param);
                 setSelectedStatus(status);
-                setStatusIds('4');
+                setStatusIds(acknowledgedIds);
                 break;
             }
             default:
