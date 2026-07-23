@@ -13,7 +13,9 @@ import {
 import { useNavigate } from "react-router";
 import { Box } from "@mui/material";
 import { RequestContext } from "../../../../context/request/RequestContext";
-import { crudStates, workflowApprovalStatusIdsCsv } from "../../../../utils/constants";
+import { crudStates, ALL_REQUEST_CODES, PENDING_REQUEST_CODES } from "../../../../utils/constants";
+import { statusIdsByCodes } from "../../../../utils/helpers";
+import StatusUtills from "../../../settings/statuses/Utills";
 import { ROUTES } from "../../../../core/routes/routes";
 import ModalComponent from "../../../../components/modal";
 import TableComponent from "../../../../components/tables/TableComponent";
@@ -44,17 +46,25 @@ const Request = () => {
     const { requestTableData, setOptions } = useContext(RequestContext);
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
     const { requests } = useSelector((state: RootState) => state.AssetsRequestsStore);
+    const { statuses } = useSelector((state: RootState) => state.StatusesStore);
+    const { fetchAllStatuses } = StatusUtills();
     const { has } = usePermissions();
     const [selectedStatus, setSelectedStatus] = useState<string>('all');
-    const [statusIds, setStatusIds] = useState<string>(`1,2,3,4,5,6,7,${workflowApprovalStatusIdsCsv}`); // legacy 1-7 + workflow approval statuses (13-17)
+    const [statusIds, setStatusIds] = useState<string>('');
     const { setRequestStatusIds } = useContext(RequestContext);
     const { tableStartDate, tableEndDate } = useContext(FormContext);
 
+    // Every request lifecycle state, resolved from codes (never hardcode ids — see utils/helpers).
+    const allRequestCsv = statusIdsByCodes(statuses, ALL_REQUEST_CODES);
+
     const navigate = useNavigate();
 
+    useEffect(() => { fetchAllStatuses(); }, []);
 
     useEffect(() => {
-        setRequestStatusIds(statusIds.split(',').map(id => parseInt(id, 10)));
+        if (statusIds) {
+            setRequestStatusIds(statusIds.split(',').map(id => parseInt(id, 10)));
+        }
     }, [statusIds]);
 
     const {
@@ -86,20 +96,24 @@ const Request = () => {
     };
 
 
+    // Load the full (all-statuses) list once the status catalogue resolves the group ids.
+    // Only drives the default "all" view; per-status filters go through handleStatusChange.
     useEffect(() => {
-        const params = {
-            statusIds,
-            status: "CREATED",
-            startDate: tableStartDate ? dayjs(tableStartDate).format('YYYY-MM-DDTHH:mm:ss') : '',
-            endDate: tableEndDate ? dayjs(tableEndDate).format('YYYY-MM-DDTHH:mm:ss') : ''
-        }; // Fetching requests with status Asset Request Created ID
-
-        fetchAllRequests(params);
-    }, []);
+        if (allRequestCsv && selectedStatus === 'all') {
+            setStatusIds(allRequestCsv);
+            fetchAllRequests({
+                statusIds: allRequestCsv,
+                status: "CREATED",
+                startDate: tableStartDate ? dayjs(tableStartDate).format('YYYY-MM-DDTHH:mm:ss') : '',
+                endDate: tableEndDate ? dayjs(tableEndDate).format('YYYY-MM-DDTHH:mm:ss') : ''
+            });
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [allRequestCsv]);
 
 
     useEffect(() => {
-        if (tableStartDate && tableEndDate) {
+        if (statusIds && tableStartDate && tableEndDate) {
             const params = {
                 statusIds,
                 status: "CREATED",
@@ -109,6 +123,7 @@ const Request = () => {
 
             fetchAllRequests(params);
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [tableStartDate, tableEndDate]);
 
     useEffect(() => {
@@ -197,59 +212,31 @@ const Request = () => {
      * Updates the request list based on the selected status filter
      */
     const handleStatusChange = (status: string) => {
-        let param;
-        let statusId;
+        // Each filter option maps to a status *group* (backend "status" hint + status codes).
+        // Ids are resolved from the loaded catalogue at call time — never hardcoded.
+        const groups: Record<string, { status: string; codes: ReadonlyArray<string> }> = {
+            // "Approved at one stage, awaiting the next" — the in-progress approval chain.
+            requestApproved:    { status: "PENDING",  codes: PENDING_REQUEST_CODES },
+            requestAcknowledged:{ status: "PENDING",  codes: ['unitAcknowledged'] },
+            requestRejected:    { status: "REJECTED", codes: ['requestRejected'] },
+            requestCreated:     { status: "CREATED",  codes: ['requestCreated'] },
+            requestIssued:      { status: "ISSUED",   codes: ['issued'] },
+            issuanceApproved:   { status: "ISSUED",   codes: ['issuanceApproved'] },
+            receiptAcknowledged:{ status: "ISSUED",   codes: ['receiptAcknowledged'] },
+        };
 
-        switch (status) {
-            // PENDING status group — includes the per-stage workflow approvals (13-17),
-            // which all mean "approved at one stage, awaiting the next".
-            case 'requestApproved':
-                param = { status: "PENDING", statusIds: `3,${workflowApprovalStatusIdsCsv}` };
-                statusId = `3,${workflowApprovalStatusIdsCsv}`;
-                break;
-
-            case 'requestAcknowledged':
-                param = { status: "PENDING", statusIds: '4' };
-                statusId = '4';
-                break;
-
-            // REJECTED status group
-            case 'requestRejected':
-                param = { status: "REJECTED", statusIds: '2' };
-                statusId = '2';
-                break;
-
-            // CREATED status group
-            case 'requestCreated':
-                param = { status: "CREATED", statusIds: '1' };
-                statusId = '1';
-                break;
-
-            // ISSUED status group
-            case 'requestIssued':
-                param = { status: "ISSUED", statusIds: '5' };
-                statusId = '5';
-                break;
-
-            case 'issuanceApproved':
-                param = { status: "ISSUED", statusIds: '6' };
-                statusId = '6';
-                break;
-
-            case 'receiptAcknowledged':
-                param = { status: "ISSUED", statusIds: '7' };
-                statusId = '7';
-                break;
-
+        const group = groups[status];
+        if (!group) {
             // Default (all) case
-            default:
-                fetchAllRequests({ statusIds, status: "CREATED" });
-                setSelectedStatus('all');
-                return; // Exit early for the default case
+            fetchAllRequests({ statusIds: allRequestCsv, status: "CREATED" });
+            setStatusIds(allRequestCsv);
+            setSelectedStatus('all');
+            return;
         }
 
-        // For all non-default cases:
-        fetchAllRequests(param);
+        const statusId = statusIdsByCodes(statuses, group.codes);
+        if (!statusId) return; // status catalogue not loaded yet
+        fetchAllRequests({ status: group.status, statusIds: statusId });
         setSelectedStatus(status);
         setStatusIds(statusId);
     };
