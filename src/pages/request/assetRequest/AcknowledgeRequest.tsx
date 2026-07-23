@@ -7,7 +7,7 @@ Managing Director
 
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import {
     IAcknowledegeRequest,
@@ -18,9 +18,10 @@ import {
     acknowledgeRequestService,
     findAssetRequestByIDService
 } from "./service";
-import { AppDispatch } from "../../../store";
+import { AppDispatch, RootState } from "../../../store";
 import { updateRequest } from "./slice";
 import RequestActionLayout from "./RequestActionLayout";
+import { statusIdByCode } from "../../../utils/helpers";
 
 const PRIMARY = '#08796C';
 
@@ -36,6 +37,7 @@ const AcknowledgeRequest = ({
     const [requestCommodities, setRequestCommodities] = useState<
         Array<{ commodity: ICommodity; quantity: number }>
     >([]);
+    const { statuses } = useSelector((state: RootState) => state.StatusesStore);
     const dispatch = useDispatch<AppDispatch>();
 
     const fetchRequestCommodities = async () => {
@@ -75,11 +77,13 @@ const AcknowledgeRequest = ({
         setSendingRequest(true);
         try {
             /**
-             * NB: Please note that the status ID must match the Acknowledege Request Status ID in the Database.
+             * The status id is resolved from the stable "unitAcknowledged" code (seeded ids vary
+             * by environment). Only consumed by the backend legacy (non-workflow) path; in workflow
+             * mode the engine sets the status itself.
              */
             const data = {
                 requestId: request.id,
-                statusId: 4, // Acknowledge Request Status ID
+                statusId: statusIdByCode(statuses, 'unitAcknowledged'),
                 comment
             }
 
