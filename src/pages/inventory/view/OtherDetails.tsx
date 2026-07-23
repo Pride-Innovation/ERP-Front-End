@@ -42,14 +42,14 @@ const OtherDetails = ({ inventory }: { inventory: IInventory }) => {
     const uniqueCount = stocksTableData?.length || 0;
 
     return (
-        <Box sx={{ p: { xs: 2, md: 2.5 } }}>
+        <Box>
             {/* Section header */}
             <Stack
                 direction={{ xs: 'column', sm: 'row' }}
                 justifyContent="space-between"
                 alignItems={{ xs: 'flex-start', sm: 'center' }}
                 spacing={1.5}
-                sx={{ mb: 2 }}
+                sx={{ px: { xs: 2, md: 2.5 }, pt: { xs: 2, md: 2.5 }, pb: 1.5 }}
             >
                 <Stack direction="row" spacing={1.25} alignItems="center">
                     <Box sx={{ width: 32, height: 32, borderRadius: 1.5, bgcolor: alpha(brand[500], 0.1), color: brand[600], display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -83,13 +83,13 @@ const OtherDetails = ({ inventory }: { inventory: IInventory }) => {
                 <TableComponent
                     endPoint={endPoint}
                     loading={loading}
-                    count={stocksTableData.length || 0}
                     exportData
+                    flat
                     header={{ ...header, singular: "Inventory Commodity", plural: "Inventory Commodities" }}
                     module="inventory commodities"
                     rows={stocksTableData || []}
                     columnHeaders={columnHeaders}
-                    paginationMode='server'
+                    paginationMode='client'
                 />
             ) : (
                 <Box sx={{ py: 6, textAlign: 'center' }}>
