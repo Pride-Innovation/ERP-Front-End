@@ -7,8 +7,12 @@ Managing Director
 
 import { useContext, useEffect, useMemo, useState } from "react";
 import { Box } from "@mui/material";
+import { useSelector } from "react-redux";
+import { RootState } from "../../store";
 import TableComponent from "../../components/tables/TableComponent";
 import InventoryUtills from "./Utills";
+import StatusUtills from "../settings/statuses/Utills";
+import { statusIdByCode } from "../../utils/helpers";
 import { crudStates } from "../../utils/constants";
 import ModalComponent from "../../components/modal";
 import DeleteInventory from "./DeleteInventory";
@@ -22,9 +26,10 @@ import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 
 const Inventory = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
-    const [selectedStatus, setSelectedStatus] = useState<string>('all');
     const { tableStartDate, tableEndDate } = useContext(FormContext);
     const { inventoryCount } = useContext(InventoryContext);
+    const { statuses } = useSelector((state: RootState) => state.StatusesStore);
+    const { fetchAllStatuses } = StatusUtills();
 
     const {
         columnHeaders,
@@ -42,19 +47,19 @@ const Inventory = () => {
     } = InventoryUtills();
 
     useEffect(() => { fetchInventory() }, []);
+    // Load the status catalogue so the stocking-status filter can resolve a stable status id.
+    useEffect(() => { if (statuses.length === 0) fetchAllStatuses(); }, []);
 
-    const handleStatusChange = (status: string) => {
-        if (status.length > 0) {
-            const param = {
-                stockStatusId: status === "stockPending" ? 10
-                    : status === "stockCompleted" ? 11 : ""
-            };
-            fetchInventory(param);
-            setSelectedStatus(status);
-        } else {
-            fetchInventory();
-            setSelectedStatus('all');
+    // Translate the "Stocking Status" column filter (a status code) to the backend's stockStatusId,
+    // and pass any other column filters straight through.
+    const applyInventoryFilters = (filters: Record<string, any>) => {
+        const { status, ...rest } = filters || {};
+        const params: Record<string, any> = { ...rest };
+        if (status) {
+            const id = statusIdByCode(statuses, status);
+            if (id != null) params.stockStatusId = id;
         }
+        fetchInventory(params);
     };
 
     useEffect(() => {
@@ -118,25 +123,21 @@ const Inventory = () => {
                         paginationMode="server"
                         endPoint={endPoint}
                         refresh
-                        status
-                        onStatusChange={handleStatusChange}
-                        selectedStatus={selectedStatus}
                         dateRangePicker
                         tableIcon={<Inventory2OutlinedIcon sx={{ fontSize: 18, color: '#08796C' }} />}
                         columnFilters={[
                             { key: 'lpoNumber', label: 'LPO Number', type: 'text' },
                             { key: 'supplier', label: 'Supplier', type: 'text' },
-                            { key: 'location', label: 'Location', type: 'text' },
                             {
-                                key: 'status', label: 'Status', type: 'select', options: [
-                                    { value: 'active', label: 'Active' },
-                                    { value: 'disabled', label: 'Disabled' },
-                                    { value: 'locked', label: 'Locked' },
+                                key: 'status', label: 'Stocking Status', type: 'select', options: [
+                                    { value: 'stockCompleted', label: 'Fully Stocked' },
+                                    { value: 'stockPending', label: 'Partially Stocked' },
+                                    { value: 'stockClosedShort', label: 'Closed Short' },
                                 ]
                             },
                             { key: 'createdAt', label: 'Date Created', type: 'dateRange' },
                         ]}
-                        onApplyFilters={(filters) => fetchInventory(filters)}
+                        onApplyFilters={applyInventoryFilters}
                     />
                 </Box>
             )}

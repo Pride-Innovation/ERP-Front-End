@@ -30,6 +30,13 @@ interface IInventory {
     commodities?: Array<IStockCommodities> | null
     referenceNumber?: string | null;
     lpoNumber: string;
+    poNumber?: string | null;
+    // Real business dates for the purchase (ISO strings). deliveryDate is the basis
+    // for asset depreciation/age.
+    orderDate?: string | null;
+    deliveryDate?: string | null;
+    invoiceDate?: string | null;
+    closeShortReason?: string | null;
     totalCost?: number | null;
     balanceCost?: number | null;
     branch?: IBranch | null;
@@ -81,6 +88,10 @@ interface IInventoryForm {
     buttonText: string;
     sendingRequest: boolean;
     handleClose: () => void;
+    /** Wizard mode: render only one part of the form. Omit to render the whole form (Update page). */
+    section?: 'details' | 'items';
+    /** Hide the internal Cancel/Submit bar (the wizard supplies its own navigation). */
+    hideSubmitBar?: boolean;
 }
 
 

@@ -105,6 +105,7 @@ export const UseFormDatePicker = <T extends FieldValues>({
     formState,
     value,
     label,
+    required = true,
 }: IUseFormInput<T>) => {
     return (
         <React.Fragment>
@@ -112,7 +113,7 @@ export const UseFormDatePicker = <T extends FieldValues>({
                 <Controller
                     control={control}
                     {...register(value)}
-                    rules={{ required: true }}
+                    rules={{ required }}
                     render={({ field }) => (
                         <DatePickerComponent field={field} label={label} error={formState.errors[value]?.message} />
                     )}

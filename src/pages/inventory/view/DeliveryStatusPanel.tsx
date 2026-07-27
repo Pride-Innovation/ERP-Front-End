@@ -38,6 +38,8 @@ import { toast } from 'react-toastify';
 
 import { IInventory, IStockCommodities } from '../interface';
 import axiosInstance from '../../../core/apis/axiosInstance';
+import { closeShortService } from '../service';
+import BlockOutlinedIcon from '@mui/icons-material/BlockOutlined';
 
 const PRIMARY = '#08796C';
 
@@ -58,6 +60,8 @@ const DeliveryStatusPanel = ({ inventory, onDeliveryReceived }: Props) => {
     const commodities = inventory.commodities ?? [];
 
     const [receivingRow, setReceivingRow] = useState<IStockCommodities | null>(null);
+    const [closeShortOpen, setCloseShortOpen] = useState(false);
+    const isClosedShort = (inventory.status?.status ?? '').toLowerCase() === 'stockclosedshort';
 
     if (commodities.length === 0) {
         return (
@@ -109,6 +113,33 @@ const DeliveryStatusPanel = ({ inventory, onDeliveryReceived }: Props) => {
                     sx={{ mb: 2 }}
                 >
                     Every commodity in this delivery is now fully received. The GRN can be generated, signed by the supplier, and uploaded.
+                </Alert>
+            )}
+
+            {isClosedShort && (
+                <Alert icon={<BlockOutlinedIcon fontSize="small" />} severity="info" sx={{ mb: 2 }}>
+                    This delivery was closed short — the outstanding balance is not expected.
+                    {inventory.closeShortReason ? ` Reason: ${inventory.closeShortReason}` : ''}
+                </Alert>
+            )}
+
+            {!fullyDelivered && !isClosedShort && (
+                <Alert
+                    severity="warning"
+                    sx={{ mb: 2 }}
+                    action={
+                        <Button
+                            color="inherit"
+                            size="small"
+                            startIcon={<BlockOutlinedIcon fontSize="small" />}
+                            onClick={() => setCloseShortOpen(true)}
+                            sx={{ textTransform: 'none', fontWeight: 600 }}
+                        >
+                            Close short
+                        </Button>
+                    }
+                >
+                    {totalOutstanding.toLocaleString()} unit{totalOutstanding === 1 ? '' : 's'} still outstanding. If the supplier will not deliver the rest, close this delivery short.
                 </Alert>
             )}
 
@@ -246,7 +277,99 @@ const DeliveryStatusPanel = ({ inventory, onDeliveryReceived }: Props) => {
                     onDeliveryReceived?.();
                 }}
             />
+
+            <CloseShortDialog
+                open={closeShortOpen}
+                stockId={inventory.id as number}
+                outstanding={totalOutstanding}
+                onClose={() => setCloseShortOpen(false)}
+                onSaved={() => {
+                    setCloseShortOpen(false);
+                    onDeliveryReceived?.();
+                }}
+            />
         </Box>
+    );
+};
+
+const CloseShortDialog = ({
+    open,
+    stockId,
+    outstanding,
+    onClose,
+    onSaved,
+}: {
+    open: boolean;
+    stockId: number;
+    outstanding: number;
+    onClose: () => void;
+    onSaved: () => void;
+}) => {
+    const [reason, setReason] = useState('');
+    const [saving, setSaving] = useState(false);
+
+    const handleClose = () => {
+        setReason('');
+        onClose();
+    };
+
+    const handleSubmit = async () => {
+        setSaving(true);
+        try {
+            await closeShortService(stockId, reason.trim());
+            toast.success('Delivery closed short.');
+            setReason('');
+            onSaved();
+        } catch (e) {
+            // toast handled by axios interceptor
+            console.error(e);
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    return (
+        <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
+            <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', pb: 1 }}>
+                <Box>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                        Close delivery short
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                        {outstanding.toLocaleString()} unit{outstanding === 1 ? '' : 's'} outstanding will be accepted as undelivered
+                    </Typography>
+                </Box>
+                <IconButton size="small" onClick={handleClose}>
+                    <CloseIcon fontSize="small" />
+                </IconButton>
+            </DialogTitle>
+            <DialogContent dividers>
+                <Alert severity="warning" sx={{ mb: 2 }}>
+                    This marks the stock as <strong>Closed Short</strong>. Already-received units and their
+                    assets are unaffected. You can still receive more later if the supplier delivers.
+                </Alert>
+                <FieldRow
+                    label="Reason (optional)"
+                    helper="e.g. supplier cancelled the balance, item discontinued"
+                    value={reason}
+                    onChange={setReason}
+                />
+            </DialogContent>
+            <DialogActions sx={{ px: 3, py: 2 }}>
+                <Button onClick={handleClose} disabled={saving} sx={{ textTransform: 'none' }}>
+                    Cancel
+                </Button>
+                <Button
+                    onClick={handleSubmit}
+                    disabled={saving}
+                    variant="contained"
+                    color="warning"
+                    sx={{ textTransform: 'none' }}
+                >
+                    Confirm close short
+                </Button>
+            </DialogActions>
+        </Dialog>
     );
 };
 
@@ -284,7 +407,6 @@ const ReceiveMoreDialog = ({
     onSaved: () => void;
 }) => {
     const [qty, setQty] = useState<string>('');
-    const [grnNumber, setGrnNumber] = useState<string>('');
     const [costPrice, setCostPrice] = useState<string>('');
     const [purchasePrice, setPurchasePrice] = useState<string>('');
     const [saving, setSaving] = useState(false);
@@ -297,7 +419,6 @@ const ReceiveMoreDialog = ({
 
     const reset = () => {
         setQty('');
-        setGrnNumber('');
         setCostPrice('');
         setPurchasePrice('');
     };
@@ -317,15 +438,11 @@ const ReceiveMoreDialog = ({
             toast.error(`You can receive at most ${outstanding} more unit${outstanding === 1 ? '' : 's'}.`);
             return;
         }
-        if (!grnNumber.trim()) {
-            toast.error('GRN reference is required for this top-up delivery.');
-            return;
-        }
 
         setSaving(true);
         try {
+            // The GRN number is issued by the server for this delivery — not supplied by the client.
             await axiosInstance.post(`stocks/${stockId}/complete-delivery`, {
-                grnNumber: grnNumber.trim(),
                 additionalDeliveries: [
                     {
                         commodityId: row.commodity?.id,
@@ -364,19 +481,36 @@ const ReceiveMoreDialog = ({
             </DialogTitle>
             <DialogContent dividers>
                 <Stack spacing={2} sx={{ pt: 1 }}>
-                    <FieldRow
-                        label="Quantity received now *"
-                        helper={`Maximum ${outstanding}`}
-                        value={qty}
-                        onChange={setQty}
-                        type="number"
-                    />
-                    <FieldRow
-                        label="GRN reference *"
-                        helper="Goods Received Note number for this top-up"
-                        value={grnNumber}
-                        onChange={setGrnNumber}
-                    />
+                    <Box>
+                        <Stack direction="row" alignItems="center" justifyContent="space-between">
+                            <Typography variant="caption" sx={{ fontWeight: 600, color: '#475569' }}>
+                                Quantity received now *
+                            </Typography>
+                            <Button
+                                size="small"
+                                onClick={() => setQty(String(outstanding))}
+                                sx={{ textTransform: 'none', minWidth: 0, p: 0.25, color: PRIMARY, fontWeight: 600 }}
+                            >
+                                Receive all ({outstanding})
+                            </Button>
+                        </Stack>
+                        <TextField
+                            size="small"
+                            fullWidth
+                            value={qty}
+                            onChange={(e) => setQty(e.target.value)}
+                            type="number"
+                            helperText={`Maximum ${outstanding}`}
+                            sx={{
+                                '& .MuiOutlinedInput-root': {
+                                    borderRadius: '8px',
+                                    '& fieldset': { borderColor: '#E2E8F0' },
+                                    '&:hover fieldset': { borderColor: PRIMARY },
+                                    '&.Mui-focused fieldset': { borderColor: PRIMARY, borderWidth: 1.5 },
+                                },
+                            }}
+                        />
+                    </Box>
                     <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
                         <FieldRow
                             label="Cost price"

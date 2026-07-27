@@ -33,6 +33,7 @@ import CommodityUtills from '../../pages/settings/commodity/utills';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import { RequestContext } from '../../context/request/RequestContext';
+import { toast } from 'react-toastify';
 import { StockRowData } from '../forms/interface';
 import ScaleOutlinedIcon from '@mui/icons-material/ScaleOutlined';
 import FeedOutlinedIcon from '@mui/icons-material/FeedOutlined';
@@ -80,6 +81,23 @@ const StockItems = () => {
         setStockRows(updatedRows);
     };
 
+    // Changing Ordered keeps Delivered in step: a line that was fully delivered stays full
+    // (delivered = ordered), while an intentional partial delivery is preserved but clamped so it
+    // never exceeds the new ordered amount. Full delivery is the default so stocked asset items
+    // actually register as assets (asset creation is driven by the DELIVERED quantity).
+    const handleOrderedChange = (id: number, rawOrdered: number) => {
+        const newOrdered = Math.max(0, rawOrdered || 0);
+        const updatedRows = stockRows.map((row) => {
+            if (row.id !== id) return row;
+            const wasFull = (row.deliveredQuantity || 0) >= (row.orderedQuantity || 0);
+            const newDelivered = wasFull
+                ? newOrdered
+                : Math.min(row.deliveredQuantity || 0, newOrdered);
+            return { ...row, orderedQuantity: newOrdered, deliveredQuantity: newDelivered };
+        });
+        setStockRows(updatedRows);
+    };
+
     const handleAssetTypeNameChange = (id: number, value: string) => {
         const updatedRows = stockRows.map((row) =>
             row.id === id ? { ...row, assetTypeId: value } : row
@@ -97,6 +115,16 @@ const StockItems = () => {
         const selectedItem = commodities.find(item => item.name === value);
 
         if (!selectedItem) return;
+
+        // Prevent the same commodity being added on two lines — it should be a single line
+        // with a combined quantity.
+        const alreadyUsed = stockRows.some(
+            row => row.id !== id && row.commodityId === (selectedItem.id as number)
+        );
+        if (alreadyUsed) {
+            toast.error(`"${value}" is already added. Adjust the quantity on its existing row instead.`);
+            return;
+        }
 
         const updatedRows = stockRows.map(row =>
             row.id === id
@@ -409,11 +437,7 @@ const StockItems = () => {
                                     }}>
                                         <IconButton
                                             size="small"
-                                            onClick={() => handleInputChange(
-                                                row.id,
-                                                'orderedQuantity',
-                                                Math.max(0, (row.orderedQuantity || 0) - 1)
-                                            )}
+                                            onClick={() => handleOrderedChange(row.id, (row.orderedQuantity || 0) - 1)}
                                             sx={{
                                                 color: SECONDARY_COLOR,
                                                 '&:hover': { bgcolor: alpha(SECONDARY_COLOR, 0.1) }
@@ -426,11 +450,7 @@ const StockItems = () => {
                                             size="small"
                                             type="number"
                                             value={row.orderedQuantity}
-                                            onChange={(e) => handleInputChange(
-                                                row.id,
-                                                'orderedQuantity',
-                                                parseInt(e.target.value) || 0
-                                            )}
+                                            onChange={(e) => handleOrderedChange(row.id, parseInt(e.target.value) || 0)}
                                             variant="standard"
                                             InputProps={{
                                                 disableUnderline: true,
@@ -449,11 +469,7 @@ const StockItems = () => {
 
                                         <IconButton
                                             size="small"
-                                            onClick={() => handleInputChange(
-                                                row.id,
-                                                'orderedQuantity',
-                                                (row.orderedQuantity || 0) + 1
-                                            )}
+                                            onClick={() => handleOrderedChange(row.id, (row.orderedQuantity || 0) + 1)}
                                             sx={{
                                                 color: PRIMARY_COLOR,
                                                 '&:hover': { bgcolor: alpha(PRIMARY_COLOR, 0.1) }
@@ -497,7 +513,8 @@ const StockItems = () => {
                                             onChange={(e) => handleInputChange(
                                                 row.id,
                                                 'deliveredQuantity',
-                                                parseInt(e.target.value) || 0
+                                                // Delivered can never exceed what was ordered.
+                                                Math.min(row.orderedQuantity || 0, Math.max(0, parseInt(e.target.value) || 0))
                                             )}
                                             variant="standard"
                                             InputProps={{
@@ -517,10 +534,12 @@ const StockItems = () => {
 
                                         <IconButton
                                             size="small"
+                                            disabled={(row.deliveredQuantity || 0) >= (row.orderedQuantity || 0)}
                                             onClick={() => handleInputChange(
                                                 row.id,
                                                 'deliveredQuantity',
-                                                (row.deliveredQuantity || 0) + 1
+                                                // Clamp to ordered — can't receive more than was ordered.
+                                                Math.min(row.orderedQuantity || 0, (row.deliveredQuantity || 0) + 1)
                                             )}
                                             sx={{
                                                 color: PRIMARY_COLOR,

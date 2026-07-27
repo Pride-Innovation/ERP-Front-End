@@ -14,7 +14,7 @@ import { uploadGRNService } from "./service";
 import { toast } from "react-toastify";
 import { IGRNUploadResponse } from "./interface";
 
-const UploadGRN = ({ id }: { id?: string | number }) => {
+const UploadGRN = ({ id, onUploaded }: { id?: string | number; onUploaded?: () => void }) => {
     const inputRef = useRef<HTMLInputElement>(null);
     const [fileUrl, setFileUrl] = useState<string>("");
     const [file, setFile] = useState<File | null>(null);
@@ -49,6 +49,7 @@ const UploadGRN = ({ id }: { id?: string | number }) => {
             const response = await uploadGRNService(payload, id as string) as IGRNUploadResponse;
             if (response.status === 201) {
                 toast.success("File uploaded successfully!");
+                onUploaded?.();
             }
         } catch (error) {
             console.error("Error uploading file:", error);

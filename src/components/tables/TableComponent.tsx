@@ -60,13 +60,22 @@ const getStatusMeta = (raw: string): { bg: string; text: string; border: string;
         return { bg: alpha('#16a34a', 0.08), text: '#15803d', border: alpha('#16a34a', 0.18), dot: '#16a34a' };
     if (s.includes('pending') || s.includes('created') || s === 'inactive' || s.includes('process') || s === 'requireupdate')
         return { bg: alpha('#d97706', 0.08), text: '#b45309', border: alpha('#d97706', 0.18), dot: '#d97706' };
-    if (s.includes('reject') || s === 'blocked' || s === 'disabled' || s.includes('cancel') || s === 'disposed')
+    if (s.includes('reject') || s === 'blocked' || s === 'disabled' || s.includes('cancel') || s === 'disposed' || s.includes('short'))
         return { bg: alpha('#dc2626', 0.08), text: '#b91c1c', border: alpha('#dc2626', 0.18), dot: '#dc2626' };
     if (s.includes('issued') || s.includes('acknowledge') || s.includes('available') || s.includes('repair') || s === 'inmaintenance')
         return { bg: alpha('#0284c7', 0.08), text: '#0369a1', border: alpha('#0284c7', 0.18), dot: '#0284c7' };
     if (s === 'intransit' || s.includes('transit'))
         return { bg: alpha('#4338CA', 0.08), text: '#4338CA', border: alpha('#4338CA', 0.18), dot: '#4338CA' };
     return { bg: alpha('#7c3aed', 0.08), text: '#6d28d9', border: alpha('#7c3aed', 0.18), dot: '#7c3aed' };
+};
+
+// Friendlier labels for status codes that read better than their camelCase form. Codes not
+// listed here fall back to camelCaseToWords(). Stock statuses are derived by the backend from
+// delivered-vs-ordered quantities.
+const STATUS_DISPLAY_LABELS: Record<string, string> = {
+    stockCompleted: 'Fully Stocked',
+    stockPending: 'Partially Stocked',
+    stockClosedShort: 'Closed Short',
 };
 
 // ─── Avatar colour from string ────────────────────────────────────────────────
@@ -352,7 +361,7 @@ const TableComponent = ({
                         fontSize: '0.725rem', fontWeight: 600, color: meta.text,
                         textTransform: 'capitalize', lineHeight: 1, whiteSpace: 'nowrap',
                     }}>
-                        {camelCaseToWords(value)}
+                        {STATUS_DISPLAY_LABELS[value] ?? camelCaseToWords(value)}
                     </Typography>
                 </Box>
             );

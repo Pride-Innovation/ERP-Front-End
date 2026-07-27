@@ -60,6 +60,8 @@ const statusTone = (code?: string) => {
             return statusTokens.success;
         case 'stockpending':
             return statusTokens.warning;
+        case 'stockclosedshort':
+            return statusTokens.info;
         case 'cancelled':
         case 'disposed':
             return statusTokens.danger;
@@ -262,7 +264,7 @@ const InventoryDetails = () => {
                     <Box sx={{ position: 'relative', display: 'flex', flexWrap: 'wrap', bgcolor: alpha(brand[500], 0.03), borderTop: `1px solid ${border.subtle}` }}>
                         <HeroFact first label="LPO Number" value={currentInventory?.lpoNumber || null} onCopy={currentInventory?.lpoNumber ? copyLpo : undefined} />
                         <HeroFact label="GRN Number" value={currentInventory?.grnNumber || null} />
-                        <HeroFact label="Delivery Date" value={currentInventory?.createDate ? moment(currentInventory.createDate).format('DD MMM YYYY') : null} />
+                        <HeroFact label="Delivery Date" value={(currentInventory?.deliveryDate || currentInventory?.createDate) ? moment(currentInventory?.deliveryDate || currentInventory?.createDate).format('DD MMM YYYY') : null} />
                     </Box>
                 </Box>
 
@@ -337,7 +339,12 @@ const InventoryDetails = () => {
                                     />
                                 )}
                                 {tab === 1 && <OtherDetails inventory={currentInventory} />}
-                                {tab === 2 && <InventoryPRN grnList={currentInventory?.grnReports as Array<IGRNReport>} />}
+                                {tab === 2 && (
+                                    <InventoryPRN
+                                        grnList={currentInventory?.grnReports as Array<IGRNReport>}
+                                        onUploaded={() => fetchInventoryByID(id as string)}
+                                    />
+                                )}
                             </Box>
                         </Paper>
                     </Grid>

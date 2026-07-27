@@ -30,6 +30,7 @@ import StockItems from "../../components/stockForm/StockItems";
 import AssetTypeUtills from "../settings/assetTypes/utills";
 import InventoryIcon from "@mui/icons-material/Inventory";
 import BusinessIcon from "@mui/icons-material/Business";
+import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import SaveIcon from "@mui/icons-material/Save";
 import { useNavigate } from "react-router";
@@ -45,8 +46,12 @@ const InventoryForm = ({
     formState,
     // handleClose,
     sendingRequest,
-    buttonText
+    buttonText,
+    section,
+    hideSubmitBar
 }: IInventoryForm) => {
+    const showDetails = section === undefined || section === 'details';
+    const showItems = section === undefined || section === 'items';
     const { formFields } = InventoryUtills();
     const { fetchAllSuppliers } = SupplierUtills();
     const { fetchAllAssetTypes } = AssetTypeUtills();
@@ -75,7 +80,7 @@ const InventoryForm = ({
         );
 
         const dateFields = formFields.filter(field =>
-            ["dateOrdered", "dateDelivered", "dateInvoice"].includes(field.value)
+            ["orderDate", "deliveryDate", "invoiceDate"].includes(field.value)
         );
 
         const detailFields = formFields.filter(field =>
@@ -155,14 +160,21 @@ const InventoryForm = ({
 
     return (
         <Box sx={{ maxWidth: '100%' }}>
-            {renderFormFields(
+            {showDetails && renderFormFields(
                 formSections.basicFields,
                 "LPO Information",
                 "Reference details for this purchase order and supplier",
                 <BusinessIcon fontSize="small" />
             )}
 
-            {formSections.otherFields.length > 0 && renderFormFields(
+            {showDetails && formSections.dateFields.length > 0 && renderFormFields(
+                formSections.dateFields,
+                "Order & Delivery Dates",
+                "When the order was placed, delivered and invoiced — the delivery date drives asset depreciation",
+                <CalendarMonthIcon fontSize="small" />
+            )}
+
+            {showDetails && formSections.otherFields.length > 0 && renderFormFields(
                 formSections.otherFields,
                 "Other Information",
                 "Any additional details for this stock entry",
@@ -170,11 +182,14 @@ const InventoryForm = ({
             )}
 
             {/* Stock items table */}
-            <Box sx={{ mb: 2.5 }}>
-                <StockItems />
-            </Box>
+            {showItems && (
+                <Box sx={{ mb: 2.5 }}>
+                    <StockItems />
+                </Box>
+            )}
 
             {/* Submit bar */}
+            {!hideSubmitBar && (
             <Paper
                 elevation={0}
                 sx={{
@@ -253,6 +268,7 @@ const InventoryForm = ({
                     </Stack>
                 </Stack>
             </Paper>
+            )}
         </Box>
     );
 };

@@ -14,6 +14,7 @@ import TableComponent from "../../../components/tables/TableComponent";
 import { crudStates } from "../../../utils/constants";
 import ModalComponent from "../../../components/modal";
 import UploadGRN from "../UploadGRN";
+import { fetchGrnDocumentService } from "../service";
 import ButtonComponent from "../../../components/forms/Button";
 import ReceiptLongOutlinedIcon from '@mui/icons-material/ReceiptLongOutlined';
 import AssignmentOutlinedIcon from '@mui/icons-material/AssignmentOutlined';
@@ -27,7 +28,7 @@ import { brand, neutral, status as statusTokens } from "../../../utils/tokens";
 
 const GOLD = '#BC892C';
 
-const InventoryGRN = ({ grnList }: { grnList: IGRNReport[] }) => {
+const InventoryGRN = ({ grnList, onUploaded }: { grnList: IGRNReport[]; onUploaded?: () => void }) => {
     const [fileURL, setFileURL] = useState<string>("");
     const { setOptions } = useContext(InventoryContext);
 
@@ -50,12 +51,24 @@ const InventoryGRN = ({ grnList }: { grnList: IGRNReport[] }) => {
     }, [grnList]);
 
     useEffect(() => {
-        if ((currentGRN?.documentPath as string)?.length > 0) {
-            const filename = currentGRN?.documentPath.split('/').pop();
-            setFileURL(`/statics/${filename}`);
+        let objectUrl: string | null = null;
+
+        if (currentGRN?.id && (currentGRN?.documentPath as string)?.length > 0) {
+            // Fetch the signed document through the authenticated API (not a public /statics URL)
+            // and render it from an in-memory object URL.
+            fetchGrnDocumentService(currentGRN.id)
+                .then((res) => {
+                    objectUrl = URL.createObjectURL(res.data as Blob);
+                    setFileURL(objectUrl);
+                })
+                .catch(() => setFileURL(""));
         } else {
             setFileURL("");
         }
+
+        return () => {
+            if (objectUrl) URL.revokeObjectURL(objectUrl);
+        };
     }, [currentGRN]);
 
     useEffect(() => {
@@ -72,7 +85,10 @@ const InventoryGRN = ({ grnList }: { grnList: IGRNReport[] }) => {
             {/* Upload GRN Modal */}
             {modalState === crudStates.upload && (
                 <ModalComponent title='Upload Signed GRN' open={open} handleClose={handleClose} width="40%">
-                    <UploadGRN id={currentGRN?.id} />
+                    <UploadGRN
+                        id={currentGRN?.id}
+                        onUploaded={() => { handleClose(); onUploaded?.(); }}
+                    />
                 </ModalComponent>
             )}
 

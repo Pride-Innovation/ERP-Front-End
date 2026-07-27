@@ -234,16 +234,32 @@ export function validateStockItems(items: any[]): StockValidationResult {
             errors.push(`${prefix} Ordered Quantity must be a number greater than 0.`);
         }
 
-        if (typeof deliveredQuantity !== 'number' || deliveredQuantity <= 0) {
-            errors.push(`${prefix} Delivered Quantity must be a number greater than 0.`);
+        // Delivered may legitimately be 0 (ordered but nothing has arrived yet) — only the
+        // total, later top-ups, must never exceed what was ordered.
+        if (typeof deliveredQuantity !== 'number' || deliveredQuantity < 0) {
+            errors.push(`${prefix} Delivered Quantity cannot be negative.`);
         }
 
-        if (typeof costPrice !== 'number' || costPrice <= 0) {
-            errors.push(`${prefix} Cost Price must be a number greater than 0.`);
+        if (
+            typeof deliveredQuantity === 'number' &&
+            typeof orderedQuantity === 'number' &&
+            deliveredQuantity > orderedQuantity
+        ) {
+            errors.push(`${prefix} Delivered Quantity (${deliveredQuantity}) cannot exceed Ordered Quantity (${orderedQuantity}).`);
         }
 
-        if (typeof purchasePrice !== 'number' || purchasePrice <= 0) {
-            errors.push(`${prefix} Purchase Price must be a number greater than 0.`);
+        // Prices may be 0 (e.g. donated / zero-cost items) but never negative. An empty field
+        // is a distinct "required" case — don't report it as "negative".
+        if (typeof costPrice !== 'number') {
+            errors.push(`${prefix} Cost Price is required.`);
+        } else if (costPrice < 0) {
+            errors.push(`${prefix} Cost Price cannot be negative.`);
+        }
+
+        if (typeof purchasePrice !== 'number') {
+            errors.push(`${prefix} Purchase Price is required.`);
+        } else if (purchasePrice < 0) {
+            errors.push(`${prefix} Purchase Price cannot be negative.`);
         }
 
         if (
@@ -251,9 +267,10 @@ export function validateStockItems(items: any[]): StockValidationResult {
             typeof name === 'string' && name.trim() !== '' &&
             typeof groupName === 'string' && groupName.trim() !== '' &&
             typeof orderedQuantity === 'number' && orderedQuantity > 0 &&
-            typeof deliveredQuantity === 'number' && deliveredQuantity > 0 &&
-            typeof costPrice === 'number' && costPrice > 0 &&
-            typeof purchasePrice === 'number' && purchasePrice > 0
+            typeof deliveredQuantity === 'number' && deliveredQuantity >= 0 &&
+            deliveredQuantity <= orderedQuantity &&
+            typeof costPrice === 'number' && costPrice >= 0 &&
+            typeof purchasePrice === 'number' && purchasePrice >= 0
         ) {
             validItems.push({
                 id: commodityId,

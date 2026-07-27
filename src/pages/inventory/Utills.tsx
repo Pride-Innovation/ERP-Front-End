@@ -196,10 +196,37 @@ const InventoryUtills = () => {
             type: "input"
         },
         {
+            value: "poNumber",
+            label: 'PO Number',
+            type: "input",
+            required: false
+        },
+        {
             value: "supplier",
             label: 'supplier',
             type: "autocomplete",
             options: optionsObject.suppliersOptions
+        },
+        // Business dates. deliveryDate drives asset depreciation/age. Marked not-required
+        // at the RHF level so the shared form (also used by Update) isn't blocked on legacy
+        // records; the create flow enforces deliveryDate via its yup schema.
+        {
+            value: "orderDate",
+            label: 'Order Date',
+            type: "date",
+            required: false
+        },
+        {
+            value: "deliveryDate",
+            label: 'Delivery Date',
+            type: "date",
+            required: false
+        },
+        {
+            value: "invoiceDate",
+            label: 'Invoice Date',
+            type: "date",
+            required: false
         },
     ]
 

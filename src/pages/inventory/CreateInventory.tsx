@@ -7,47 +7,53 @@ Managing Director
 
 import {
     Grid,
-    Dialog,
-    DialogContent,
-    DialogActions,
     Box,
-    Breadcrumbs,
     Typography,
     alpha,
     Chip,
-    Link,
     Stack,
-    IconButton,
-    Fade,
     Button as MuiButton,
-    CircularProgress
+    CircularProgress,
+    Paper,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    TableFooter
 } from "@mui/material"
 import { IInventory, IInventoryAxiosResponse } from "./interface"
 import { ReactNode, useContext, useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Resolver } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { inventorySchema } from "./schema";
 import InventoryForm from "./InventoryForm";
 import { RequestContext } from "../../context/request/RequestContext";
 import { toast } from "react-toastify";
-import { generateReferenceNumber, validateStockItems } from "../../utils/helpers";
+import { validateStockItems } from "../../utils/helpers";
 import { addStockService } from "./service";
-import { brand, gold, neutral, border, surface } from "../../utils/tokens";
+import { brand, gold, neutral, border, surface, elevation, radii, status as statusTokens } from "../../utils/tokens";
 import InventoryIcon from "@mui/icons-material/Inventory";
 import BusinessIcon from "@mui/icons-material/Business";
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import CloseIcon from '@mui/icons-material/Close';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import { useSelector } from "react-redux";
 import { ISupplier } from "../settings/suppliers/interface";
 import { RootState } from "../../store";
 import { useNavigate } from "react-router";
 import { ROUTES } from "../../core/routes/routes";
-import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
-import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
-import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import PaidOutlinedIcon from '@mui/icons-material/PaidOutlined';
 import SellOutlinedIcon from '@mui/icons-material/SellOutlined';
+import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
+import RateReviewOutlinedIcon from '@mui/icons-material/RateReviewOutlined';
+import Inventory2Icon from '@mui/icons-material/Inventory2';
+import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
+import ArrowForwardIosRoundedIcon from '@mui/icons-material/ArrowForwardIosRounded';
+import ListAltOutlinedIcon from '@mui/icons-material/ListAltOutlined';
+import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
+import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
+import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 
 // Brand colors
 const PRIMARY_COLOR = brand[500];
@@ -76,59 +82,140 @@ const CreateInventory = () => {
     const { stockRows, totalCostPrice, totalPurchasePrice } = useContext(RequestContext);
     const defaultInventory: IInventory = {} as IInventory;
     const { suppliers } = useSelector((state: RootState) => state.SuppliersStore);
-    // Add confirmation modal state
-    const [confirmModalOpen, setConfirmModalOpen] = useState(false);
+    // Snapshot of the form values captured when entering the Review step; also the payload source.
     const [formDataToSubmit, setFormDataToSubmit] = useState<IInventory | null>(null);
+    // Stable per-submission key so a network retry (or an accidental double click that
+    // slips past the disabled button) can never create a duplicate stock + duplicate assets.
+    const [idempotencyKey, setIdempotencyKey] = useState<string>(() => crypto.randomUUID());
     const navigate = useNavigate();
+
+    // Wizard step: 0 = Order details, 1 = Stock items, 2 = Review & submit.
+    const [activeStep, setActiveStep] = useState(0);
 
     const {
         control,
-        handleSubmit,
         formState,
         register,
-        reset
+        reset,
+        trigger,
+        watch,
+        getValues
     } = useForm<IInventory>({
         mode: 'onChange',
-        resolver: yupResolver(inventorySchema),
+        // Cast: the schema's inferred type is narrower than IInventory (deliveryDate is
+        // optional/nullable on the model but required at create time).
+        resolver: yupResolver(inventorySchema) as unknown as Resolver<IInventory>,
     });
 
     useEffect(() => {
         reset({ ...defaultInventory });
     }, [reset]);
 
-    // Intercept form submission to show confirmation modal
-    const handleFormPreSubmit = (formData: IInventory) => {
-        setFormDataToSubmit(formData);
-        setConfirmModalOpen(true);
+    // Step 1 → 2: validate the order-detail fields before advancing to the items step.
+    const handleNext = async () => {
+        const valid = await trigger(['name', 'lpoNumber', 'deliveryDate']);
+        if (valid) setActiveStep(1);
     };
 
-    // Handle actual submission after confirmation
+    // Items step → Review: re-checks the order details, then the stock lines, then snapshots the
+    // form values and advances to the Review page. Navigation never goes through native form
+    // submit, so an Enter keypress can't trigger item validation early.
+    const goToReview = async () => {
+        const orderValid = await trigger(['name', 'lpoNumber', 'deliveryDate']);
+        if (!orderValid) {
+            setActiveStep(0);
+            toast.error('Please complete the order details first.');
+            return;
+        }
+        const result = validateStockItems(stockRows);
+        if (!result.isValid) {
+            toast.error(`Please fix the stock items: ${result.errors[0] ?? ''}`);
+            return;
+        }
+        setFormDataToSubmit(getValues());
+        setActiveStep(2);
+    };
+
+    const steps = ['Order details', 'Stock items', 'Review'];
+
+    // ── Hero: live field checklist + completion (mirrors the Create Request hero) ──
+    const formValues = watch();
+    const checklist = [
+        { label: 'Name', done: Boolean(formValues.name) },
+        { label: 'LPO Number', done: Boolean(formValues.lpoNumber) },
+        { label: 'Supplier', done: Boolean(formValues.supplier) },
+        { label: 'Delivery Date', done: Boolean(formValues.deliveryDate) },
+        { label: 'Items', done: stockRows.some((r) => r.commodityId && (r.orderedQuantity || 0) > 0) },
+    ];
+    const doneCount = checklist.filter((c) => c.done).length;
+    const formProgress = Math.round((doneCount / checklist.length) * 100);
+    const isDone = formProgress === 100;
+
+    // Lifecycle rail — advances with the wizard step; the Review step is the confirm modal.
+    const LIFECYCLE = [
+        { label: 'Order Details', icon: <BusinessIcon sx={{ fontSize: 14 }} /> },
+        { label: 'Stock Items', icon: <ListAltOutlinedIcon sx={{ fontSize: 14 }} /> },
+        { label: 'Review & Submit', icon: <RateReviewOutlinedIcon sx={{ fontSize: 14 }} /> },
+        { label: 'Stocked', icon: <Inventory2OutlinedIcon sx={{ fontSize: 14 }} /> },
+    ];
+    const lifecycleActiveIdx = activeStep;
+
+    // Shared style for the footer's primary CTA — gradient fill + lift-on-hover.
+    const primaryBtnSx = {
+        height: 44,
+        px: 3.5,
+        borderRadius: `${radii.pill}px`,
+        textTransform: 'none' as const,
+        fontWeight: 700,
+        fontSize: '0.9rem',
+        color: '#fff',
+        background: `linear-gradient(135deg, ${brand[500]} 0%, ${brand[700]} 100%)`,
+        boxShadow: `0 6px 16px ${alpha(brand[500], 0.32)}`,
+        transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+        '&:hover': {
+            background: `linear-gradient(135deg, ${brand[600]} 0%, ${brand[700]} 100%)`,
+            boxShadow: `0 9px 22px ${alpha(brand[500], 0.42)}`,
+            transform: 'translateY(-1px)',
+        },
+        '&.Mui-disabled': { background: alpha(brand[500], 0.5), color: '#fff', boxShadow: 'none' },
+    };
+
+    // Handle actual submission from the Review step.
     const onSubmit = async () => {
         if (!formDataToSubmit) return;
 
         setSendingRequest(true);
-        setConfirmModalOpen(false);
 
         const result = validateStockItems(stockRows);
 
         if (result.isValid && result.validData) {
+            // NOTE: `status` and `grnNumber` are intentionally omitted — both are
+            // authoritative on the server (status is derived from delivered vs ordered,
+            // the GRN number is issued from a server sequence).
+            // Date pickers emit 'YYYY-MM-DD'; the backend fields are LocalDateTime, so pin to a
+            // start-of-day ISO datetime. Accept a full ISO value too, just in case.
+            const toDateTime = (d?: string | null) => (d ? (d.includes('T') ? d : `${d}T00:00:00`) : null);
+
             const data = {
                 stock: {
                     name: formDataToSubmit.name,
                     referenceNumber: formDataToSubmit.referenceNumber,
                     lpoNumber: formDataToSubmit.lpoNumber,
-                    grnNumber: generateReferenceNumber(),
+                    poNumber: formDataToSubmit.poNumber,
+                    orderDate: toDateTime(formDataToSubmit.orderDate),
+                    deliveryDate: toDateTime(formDataToSubmit.deliveryDate),
+                    invoiceDate: toDateTime(formDataToSubmit.invoiceDate),
                     totalCost: totalCostPrice,
                     balanceCost: totalPurchasePrice
                 },
-                status: 1,
+                idempotencyKey,
                 supplier: formDataToSubmit.supplier,
                 stockCommoditiesRequest: result.validData
             }
 
             try {
                 const response = await addStockService(data) as IInventoryAxiosResponse;
-                if (response.status === 201) {
+                if (response.status === 201 || response.status === 200) {
                     toast.success("Stock created successfully");
                     navigate(ROUTES.INVENTORY);
                 }
@@ -150,158 +237,182 @@ const CreateInventory = () => {
         return supplier?.name || "Not specified";
     };
 
-    const ConfirmationModal = () => {
-        const infoRows = [
-            { label: 'LPO Number', value: formDataToSubmit?.lpoNumber || 'Not specified' },
-            { label: 'Inventory Name', value: formDataToSubmit?.name || 'Not specified' },
+    // ── Step 3: Review page — a full, spacious summary shown before submit ──
+    const ReviewStep = () => {
+        const fmtDate = (d?: string | null) =>
+            d ? new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
+
+        const detailItems = [
+            { label: 'LPO Number', value: formDataToSubmit?.lpoNumber || '—' },
+            { label: 'PO Number', value: formDataToSubmit?.poNumber || '—' },
+            { label: 'Inventory Name', value: formDataToSubmit?.name || '—' },
             { label: 'Supplier', value: getSupplierName() },
+            { label: 'Order Date', value: fmtDate(formDataToSubmit?.orderDate) },
+            { label: 'Delivery Date', value: fmtDate(formDataToSubmit?.deliveryDate) },
+            { label: 'Invoice Date', value: fmtDate(formDataToSubmit?.invoiceDate) },
         ];
 
+        const totalOrdered = stockRows.reduce((s, r) => s + (r.orderedQuantity || 0), 0);
+        const totalDelivered = stockRows.reduce((s, r) => s + (r.deliveredQuantity || 0), 0);
+        const grandTotal = stockRows.reduce((s, r) => s + (Number(r.purchasePrice) || 0) * (r.orderedQuantity || 0), 0);
+
         return (
-            <Dialog
-                open={confirmModalOpen}
-                onClose={() => !sendingRequest && setConfirmModalOpen(false)}
-                maxWidth="sm"
-                fullWidth
-                TransitionComponent={Fade}
-                PaperProps={{ elevation: 0, sx: { borderRadius: 3, border: `1px solid ${border.subtle}`, overflow: 'hidden' } }}
-            >
-                {/* Header */}
-                <Box
-                    sx={{
-                        position: 'relative', px: 3, pt: 2.75, pb: 2.25,
-                        borderBottom: `1px solid ${border.subtle}`,
-                        background: `linear-gradient(135deg, ${alpha(brand[50], 0.7)} 0%, #fff 65%)`,
-                    }}
-                >
-                    <Box sx={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 4, background: `linear-gradient(180deg, ${brand[500]}, ${brand[700]})` }} />
-                    <Stack direction="row" alignItems="center" justifyContent="space-between">
-                        <Stack direction="row" spacing={1.5} alignItems="center">
-                            <Box sx={{ width: 44, height: 44, borderRadius: 2, bgcolor: alpha(brand[500], 0.1), display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <CheckCircleOutlineIcon sx={{ color: brand[600], fontSize: 24 }} />
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+                {/* Order details */}
+                <Paper elevation={0} sx={{ borderRadius: 2, border: `1px solid ${border.subtle}`, bgcolor: '#fff', overflow: 'hidden' }}>
+                    <Stack direction="row" alignItems="center" spacing={1.25} sx={{ px: { xs: 2, md: 3 }, py: 2, borderBottom: `1px solid ${border.subtle}` }}>
+                        <Box sx={{ width: 36, height: 36, borderRadius: 1.5, bgcolor: alpha(brand[500], 0.09), color: brand[600], display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <BusinessIcon sx={{ fontSize: 20 }} />
+                        </Box>
+                        <Box>
+                            <Typography sx={{ fontWeight: 700, fontSize: '0.98rem', color: neutral[900] }}>Order Details</Typography>
+                            <Typography variant="caption" sx={{ color: neutral[500] }}>Purchase order & supplier information</Typography>
+                        </Box>
+                    </Stack>
+                    <Grid container sx={{ px: { xs: 1, md: 2 }, py: 1 }}>
+                        {detailItems.map((d) => (
+                            <Grid item xs={12} sm={6} md={4} key={d.label}>
+                                <Box sx={{ px: { xs: 1, md: 1.5 }, py: 1.25 }}>
+                                    <Typography sx={{ fontSize: '0.66rem', fontWeight: 700, color: neutral[400], textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                                        {d.label}
+                                    </Typography>
+                                    <Typography sx={{ fontSize: '0.9rem', fontWeight: 600, color: d.value === '—' ? neutral[400] : neutral[900], mt: 0.25 }}>
+                                        {d.value}
+                                    </Typography>
+                                </Box>
+                            </Grid>
+                        ))}
+                    </Grid>
+                </Paper>
+
+                {/* Requested items */}
+                <Paper elevation={0} sx={{ borderRadius: 2, border: `1px solid ${border.subtle}`, bgcolor: '#fff', overflow: 'hidden' }}>
+                    <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ px: { xs: 2, md: 3 }, py: 2, borderBottom: `1px solid ${border.subtle}`, bgcolor: alpha(gold[500], 0.04) }}>
+                        <Stack direction="row" alignItems="center" spacing={1.25}>
+                            <Box sx={{ width: 36, height: 36, borderRadius: 1.5, bgcolor: alpha(gold[500], 0.14), color: gold[700], display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <InventoryIcon sx={{ fontSize: 20 }} />
                             </Box>
                             <Box>
-                                <Typography sx={{ fontSize: '1.05rem', fontWeight: 800, color: neutral[900], lineHeight: 1.2 }}>
-                                    Confirm Inventory Submission
-                                </Typography>
-                                <Typography sx={{ fontSize: '0.8rem', color: neutral[500] }}>
-                                    Review the details below before creating this stock entry
-                                </Typography>
+                                <Typography sx={{ fontWeight: 700, fontSize: '0.98rem', color: neutral[900] }}>Requested Items</Typography>
+                                <Typography variant="caption" sx={{ color: neutral[500] }}>Items to be stocked in this delivery</Typography>
                             </Box>
                         </Stack>
-                        <IconButton onClick={() => setConfirmModalOpen(false)} aria-label="close" size="small" disabled={sendingRequest} sx={{ color: neutral[400] }}>
-                            <CloseIcon fontSize="small" />
-                        </IconButton>
-                    </Stack>
-                </Box>
-
-                <DialogContent sx={{ p: 3, bgcolor: surface.page }}>
-                    {/* LPO information */}
-                    <Box sx={{ bgcolor: '#fff', border: `1px solid ${border.subtle}`, borderRadius: 2, overflow: 'hidden', mb: 2 }}>
-                        <Stack direction="row" alignItems="center" spacing={1} sx={{ px: 2, py: 1.5, borderBottom: `1px solid ${border.subtle}` }}>
-                            <BusinessIcon sx={{ fontSize: 18, color: brand[600] }} />
-                            <Typography sx={{ fontSize: '0.72rem', fontWeight: 700, color: neutral[600], textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                                LPO Information
-                            </Typography>
-                        </Stack>
-                        <Box sx={{ px: 2, py: 0.5 }}>
-                            {infoRows.map((r, i) => (
-                                <Stack
-                                    key={r.label}
-                                    direction="row"
-                                    justifyContent="space-between"
-                                    alignItems="center"
-                                    spacing={2}
-                                    sx={{ py: 1.15, borderBottom: i < infoRows.length - 1 ? `1px solid ${alpha(neutral[900], 0.05)}` : 'none' }}
-                                >
-                                    <Typography sx={{ fontSize: '0.82rem', color: neutral[500], fontWeight: 500, flexShrink: 0 }}>{r.label}</Typography>
-                                    <Typography sx={{ fontSize: '0.85rem', color: neutral[900], fontWeight: 600, textAlign: 'right' }}>{r.value}</Typography>
-                                </Stack>
-                            ))}
-                        </Box>
-                    </Box>
-
-                    {/* Stock items */}
-                    <Box sx={{ bgcolor: '#fff', border: `1px solid ${border.subtle}`, borderRadius: 2, overflow: 'hidden', mb: 2 }}>
-                        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ px: 2, py: 1.5, borderBottom: `1px solid ${border.subtle}` }}>
-                            <Stack direction="row" alignItems="center" spacing={1}>
-                                <InventoryIcon sx={{ fontSize: 18, color: gold[500] }} />
-                                <Typography sx={{ fontSize: '0.72rem', fontWeight: 700, color: neutral[600], textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                                    Stock Items
-                                </Typography>
-                            </Stack>
-                            <Chip size="small" label={stockRows.length} sx={{ height: 20, minWidth: 24, fontSize: '0.7rem', fontWeight: 700, bgcolor: alpha(gold[500], 0.12), color: gold[700] }} />
-                        </Stack>
-                        {stockRows.length > 0 ? (
-                            <Box sx={{ maxHeight: 210, overflowY: 'auto' }}>
-                                {stockRows.map((item, idx) => (
-                                    <Stack
-                                        key={`item-${idx}`}
-                                        direction="row"
-                                        alignItems="center"
-                                        justifyContent="space-between"
-                                        spacing={1.5}
-                                        sx={{ px: 2, py: 1.15, borderBottom: idx < stockRows.length - 1 ? `1px solid ${alpha(neutral[900], 0.05)}` : 'none' }}
-                                    >
-                                        <Stack direction="row" spacing={1.25} alignItems="center" sx={{ minWidth: 0 }}>
-                                            <Box sx={{ width: 22, height: 22, borderRadius: '50%', bgcolor: alpha(brand[500], 0.08), color: brand[700], fontSize: '0.66rem', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                                                {idx + 1}
-                                            </Box>
-                                            <Typography noWrap sx={{ fontSize: '0.85rem', color: neutral[800], fontWeight: 600 }}>
-                                                {item.name || 'Unknown item'}
-                                            </Typography>
-                                        </Stack>
-                                        <Chip size="small" label={`Qty: ${item.orderedQuantity ?? 0}`} sx={{ height: 22, fontSize: '0.72rem', fontWeight: 600, bgcolor: alpha(brand[500], 0.08), color: brand[700], flexShrink: 0 }} />
-                                    </Stack>
-                                ))}
-                            </Box>
-                        ) : (
-                            <Box sx={{ p: 3, textAlign: 'center' }}>
-                                <Typography sx={{ fontSize: '0.83rem', color: neutral[500] }}>No stock items have been added</Typography>
-                            </Box>
-                        )}
-                    </Box>
-
-                    {/* Totals */}
-                    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ mb: 2 }}>
-                        <TotalCard icon={<PaidOutlinedIcon />} label="Total Cost" value={fmtMoney(totalCostPrice)} tone={brand} />
-                        <TotalCard icon={<SellOutlinedIcon />} label="Total Purchase Price" value={fmtMoney(totalPurchasePrice)} tone={gold} />
+                        <Chip size="small" label={`${stockRows.length} item${stockRows.length === 1 ? '' : 's'}`} sx={{ fontWeight: 700, bgcolor: alpha(gold[500], 0.14), color: gold[700] }} />
                     </Stack>
 
-                    {/* Warning */}
-                    <Stack direction="row" spacing={1.25} alignItems="flex-start" sx={{ p: 1.75, borderRadius: 2, bgcolor: alpha(gold[500], 0.07), border: `1px solid ${alpha(gold[500], 0.25)}` }}>
-                        <WarningAmberIcon sx={{ fontSize: 18, color: gold[700], mt: 0.1, flexShrink: 0 }} />
-                        <Typography sx={{ fontSize: '0.82rem', color: neutral[700], lineHeight: 1.5 }}>
-                            Once submitted, this information cannot be easily modified. Please ensure all details are correct.
-                        </Typography>
-                    </Stack>
-                </DialogContent>
+                    <TableContainer sx={{ overflowX: 'auto' }}>
+                        <Table sx={{ minWidth: 680 }}>
+                            <TableHead>
+                                <TableRow sx={{
+                                    '& th': {
+                                        bgcolor: alpha(brand[500], 0.04),
+                                        borderBottom: `1px solid ${border.subtle}`,
+                                        fontWeight: 700, fontSize: '0.68rem', color: brand[700],
+                                        textTransform: 'uppercase', letterSpacing: '0.05em',
+                                        py: 1.5, whiteSpace: 'nowrap',
+                                    },
+                                }}>
+                                    <TableCell>Item</TableCell>
+                                    <TableCell align="center">Ordered</TableCell>
+                                    <TableCell align="center">Delivered</TableCell>
+                                    <TableCell align="right">Unit Cost</TableCell>
+                                    <TableCell align="right">Unit Price</TableCell>
+                                    <TableCell align="right">Line Total</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {stockRows.map((row, idx) => {
+                                    const ordered = row.orderedQuantity || 0;
+                                    const delivered = row.deliveredQuantity || 0;
+                                    const purchase = Number(row.purchasePrice) || 0;
+                                    const lineTotal = purchase * ordered;
+                                    const deliveredTone = delivered === 0
+                                        ? statusTokens.danger
+                                        : delivered >= ordered ? statusTokens.success : statusTokens.warning;
+                                    return (
+                                        <TableRow
+                                            key={row.id ?? idx}
+                                            sx={{
+                                                '&:nth-of-type(odd)': { bgcolor: alpha(neutral[900], 0.015) },
+                                                '&:hover': { bgcolor: alpha(brand[500], 0.04) },
+                                                transition: 'background 0.15s',
+                                                '& td': { borderBottom: `1px solid ${alpha(neutral[900], 0.05)}`, py: 1.85 },
+                                            }}
+                                        >
+                                            {/* Item */}
+                                            <TableCell>
+                                                <Stack direction="row" spacing={1.5} alignItems="center">
+                                                    <Box sx={{ width: 30, height: 30, borderRadius: '9px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.78rem', fontWeight: 800, color: brand[700], bgcolor: alpha(brand[500], 0.1) }}>
+                                                        {idx + 1}
+                                                    </Box>
+                                                    <Box sx={{ minWidth: 0 }}>
+                                                        <Typography sx={{ fontSize: '0.88rem', fontWeight: 700, color: neutral[900], lineHeight: 1.3 }}>
+                                                            {row.name || '—'}
+                                                        </Typography>
+                                                        {row.groupName && (
+                                                            <Typography sx={{ fontSize: '0.72rem', color: neutral[500] }}>{row.groupName}</Typography>
+                                                        )}
+                                                    </Box>
+                                                </Stack>
+                                            </TableCell>
+                                            {/* Ordered */}
+                                            <TableCell align="center">
+                                                <Box component="span" sx={{ display: 'inline-flex', minWidth: 34, justifyContent: 'center', px: 1, py: 0.4, borderRadius: '8px', fontSize: '0.82rem', fontWeight: 700, color: neutral[700], bgcolor: alpha(neutral[900], 0.05) }}>
+                                                    {ordered}
+                                                </Box>
+                                            </TableCell>
+                                            {/* Delivered */}
+                                            <TableCell align="center">
+                                                <Box component="span" sx={{ display: 'inline-flex', minWidth: 34, justifyContent: 'center', px: 1, py: 0.4, borderRadius: '8px', fontSize: '0.82rem', fontWeight: 700, color: deliveredTone.strong, bgcolor: deliveredTone.soft }}>
+                                                    {delivered}
+                                                </Box>
+                                            </TableCell>
+                                            {/* Unit cost */}
+                                            <TableCell align="right" sx={{ fontSize: '0.85rem', color: neutral[700], fontVariantNumeric: 'tabular-nums' }}>{fmtMoney(Number(row.costPrice) || 0)}</TableCell>
+                                            {/* Unit price */}
+                                            <TableCell align="right" sx={{ fontSize: '0.85rem', color: neutral[700], fontVariantNumeric: 'tabular-nums' }}>{fmtMoney(purchase)}</TableCell>
+                                            {/* Line total */}
+                                            <TableCell align="right">
+                                                <Box component="span" sx={{ display: 'inline-block', px: 1.25, py: 0.45, borderRadius: '8px', bgcolor: alpha(brand[500], 0.08), color: brand[700], fontWeight: 800, fontSize: '0.85rem', fontVariantNumeric: 'tabular-nums' }}>
+                                                    {fmtMoney(lineTotal)}
+                                                </Box>
+                                            </TableCell>
+                                        </TableRow>
+                                    );
+                                })}
+                            </TableBody>
+                            <TableFooter>
+                                <TableRow sx={{ '& td': { borderTop: `2px solid ${border.subtle}`, borderBottom: 'none', py: 1.75, bgcolor: alpha(brand[500], 0.02) } }}>
+                                    <TableCell sx={{ fontWeight: 800, color: neutral[700], fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Total</TableCell>
+                                    <TableCell align="center" sx={{ fontWeight: 800, color: neutral[800], fontSize: '0.85rem' }}>{totalOrdered}</TableCell>
+                                    <TableCell align="center" sx={{ fontWeight: 800, color: neutral[800], fontSize: '0.85rem' }}>{totalDelivered}</TableCell>
+                                    <TableCell />
+                                    <TableCell />
+                                    <TableCell align="right">
+                                        <Typography sx={{ fontWeight: 800, color: brand[700], fontSize: '0.95rem', fontVariantNumeric: 'tabular-nums' }}>
+                                            {fmtMoney(grandTotal)}
+                                        </Typography>
+                                    </TableCell>
+                                </TableRow>
+                            </TableFooter>
+                        </Table>
+                    </TableContainer>
+                </Paper>
 
-                <DialogActions sx={{ px: 3, py: 2, borderTop: `1px solid ${border.subtle}`, gap: 1.25 }}>
-                    <MuiButton
-                        onClick={() => setConfirmModalOpen(false)}
-                        disabled={sendingRequest}
-                        variant="outlined"
-                        sx={{ height: 42, px: 3, borderRadius: 2, textTransform: 'none', fontWeight: 600, borderColor: border.default, color: neutral[600], '&:hover': { borderColor: neutral[400], bgcolor: neutral[50] } }}
-                    >
-                        Review Again
-                    </MuiButton>
-                    <MuiButton
-                        onClick={onSubmit}
-                        disabled={sendingRequest}
-                        variant="contained"
-                        startIcon={sendingRequest ? <CircularProgress size={16} sx={{ color: '#fff' }} /> : <CheckCircleOutlineIcon fontSize="small" />}
-                        sx={{
-                            height: 42, px: 4, borderRadius: 2, textTransform: 'none', fontWeight: 700,
-                            bgcolor: brand[500], boxShadow: `0 3px 10px ${alpha(brand[500], 0.3)}`,
-                            '&:hover': { bgcolor: brand[700], boxShadow: `0 5px 16px ${alpha(brand[500], 0.4)}` },
-                            '&.Mui-disabled': { bgcolor: alpha(brand[500], 0.5), color: '#fff' },
-                        }}
-                    >
-                        {sendingRequest ? 'Submitting…' : 'Confirm & Submit'}
-                    </MuiButton>
-                </DialogActions>
-            </Dialog>
+                {/* Totals */}
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
+                    <TotalCard icon={<PaidOutlinedIcon />} label="Total Cost" value={fmtMoney(totalCostPrice)} tone={brand} />
+                    <TotalCard icon={<SellOutlinedIcon />} label="Total Purchase Price" value={fmtMoney(totalPurchasePrice)} tone={gold} />
+                </Stack>
+
+                {/* Notice */}
+                <Stack direction="row" spacing={1.25} alignItems="flex-start" sx={{ p: 1.75, borderRadius: 2, bgcolor: alpha(gold[500], 0.07), border: `1px solid ${alpha(gold[500], 0.25)}` }}>
+                    <WarningAmberIcon sx={{ fontSize: 18, color: gold[700], mt: 0.1, flexShrink: 0 }} />
+                    <Typography sx={{ fontSize: '0.82rem', color: neutral[700], lineHeight: 1.5 }}>
+                        Please confirm everything above is correct. Once submitted, this stock entry cannot be easily modified.
+                    </Typography>
+                </Stack>
+            </Box>
         );
     };
 
@@ -318,104 +429,311 @@ const CreateInventory = () => {
                 py: { xs: 1.5, sm: 2 },
             }}
         >
-            {/* ── Page Nav Bar ── */}
+            {/* ── Page header card (matches the Create Request hero) ── */}
             <Box
                 sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    flexWrap: 'wrap',
-                    gap: 1.5,
+                    borderRadius: `${radii.lg}px`,
+                    border: `1px solid ${border.subtle}`,
+                    bgcolor: surface.card,
+                    overflow: 'hidden',
+                    boxShadow: elevation.card,
                 }}
             >
-                <Stack direction="row" alignItems="center" spacing={2}>
-                    <Box
-                        onClick={() => navigate(ROUTES.INVENTORY)}
-                        sx={{
+                {/* Title row */}
+                <Box sx={{
+                    px: { xs: 2.5, sm: 3.5 },
+                    py: 2.5,
+                    display: 'flex',
+                    flexDirection: { xs: 'column', md: 'row' },
+                    alignItems: { xs: 'flex-start', md: 'center' },
+                    justifyContent: 'space-between',
+                    gap: 2,
+                }}>
+                    {/* Left — icon + title */}
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, minWidth: 0 }}>
+                        <Box sx={{
+                            width: 44,
+                            height: 44,
+                            borderRadius: 1.5,
+                            bgcolor: alpha(PRIMARY_COLOR, 0.08),
+                            border: `1px solid ${alpha(PRIMARY_COLOR, 0.18)}`,
                             display: 'flex',
                             alignItems: 'center',
-                            gap: 0.75,
-                            cursor: 'pointer',
-                            color: alpha(PRIMARY_COLOR, 0.85),
-                            px: 1.5,
-                            py: 0.6,
-                            borderRadius: 1.5,
-                            border: `1px solid ${alpha(PRIMARY_COLOR, 0.22)}`,
-                            bgcolor: alpha(PRIMARY_COLOR, 0.04),
-                            transition: 'all 0.18s ease',
-                            '&:hover': {
-                                bgcolor: alpha(PRIMARY_COLOR, 0.09),
-                                borderColor: alpha(PRIMARY_COLOR, 0.4),
-                                color: PRIMARY_COLOR,
-                            },
-                        }}
-                    >
-                        <ArrowBackIosNewOutlinedIcon sx={{ fontSize: 12 }} />
-                        <Typography variant="caption" sx={{ fontWeight: 700, fontSize: '0.78rem', color: 'inherit' }}>
-                            Back to Inventory
-                        </Typography>
+                            justifyContent: 'center',
+                            flexShrink: 0,
+                        }}>
+                            <Inventory2Icon sx={{ fontSize: 22, color: brand[600] }} />
+                        </Box>
+                        <Box sx={{ minWidth: 0 }}>
+                            <Typography variant="h6" sx={{ fontWeight: 700, color: neutral[900], lineHeight: 1.25, letterSpacing: '-0.01em' }}>
+                                Create New Stock
+                            </Typography>
+                            <Typography variant="body2" sx={{ color: neutral[500], mt: 0.25 }}>
+                                Record a new delivery of stock items into inventory
+                            </Typography>
+                        </Box>
                     </Box>
 
-                    <Breadcrumbs
-                        separator="›"
-                        sx={{
-                            '& .MuiBreadcrumbs-separator': { color: alpha('#000', 0.3), mx: 0.5 },
-                            display: { xs: 'none', sm: 'flex' },
-                        }}
-                    >
-                        <Link
-                            underline="hover"
-                            onClick={() => navigate(ROUTES.ASSETS_MANAGEMENT)}
-                            sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: 'text.disabled', fontSize: '0.75rem', cursor: 'pointer' }}
+                    {/* Right — live field checklist */}
+                    <Box sx={{ flexShrink: 0, width: { xs: '100%', md: 'auto' } }}>
+                        <Stack
+                            direction="row"
+                            alignItems="center"
+                            spacing={1}
+                            sx={{ mb: 1, justifyContent: { xs: 'flex-start', md: 'flex-end' } }}
                         >
-                            <HomeOutlinedIcon sx={{ fontSize: 14 }} />
-                            Home
-                        </Link>
-                        <Link
-                            underline="hover"
-                            onClick={() => navigate(ROUTES.INVENTORY)}
-                            sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: 'text.secondary', fontSize: '0.75rem', cursor: 'pointer' }}
-                        >
-                            <InventoryIcon sx={{ fontSize: 14 }} />
-                            Inventory
-                        </Link>
-                        <Typography sx={{ fontSize: '0.75rem', color: PRIMARY_COLOR, fontWeight: 600 }}>
-                            Create Stock
-                        </Typography>
-                    </Breadcrumbs>
-                </Stack>
+                            <Typography sx={{
+                                fontSize: '0.68rem',
+                                fontWeight: 700,
+                                color: neutral[400],
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.08em',
+                            }}>
+                                Completion
+                            </Typography>
+                            <Typography sx={{
+                                fontSize: '0.78rem',
+                                fontWeight: 800,
+                                fontVariantNumeric: 'tabular-nums',
+                                color: isDone ? statusTokens.success.strong : brand[700],
+                            }}>
+                                {formProgress}%
+                            </Typography>
+                            {isDone && (
+                                <Typography sx={{ fontSize: '0.72rem', fontWeight: 600, color: statusTokens.success.strong }}>
+                                    · Ready to submit
+                                </Typography>
+                            )}
+                        </Stack>
 
-                <Chip
-                    icon={<AddCircleOutlineIcon sx={{ fontSize: 14 }} />}
-                    label="New Stock Entry"
-                    size="small"
-                    sx={{
-                        height: 26,
-                        fontSize: '0.72rem',
-                        fontWeight: 600,
-                        bgcolor: alpha(PRIMARY_COLOR, 0.08),
-                        color: PRIMARY_COLOR,
-                        border: `1px solid ${alpha(PRIMARY_COLOR, 0.2)}`,
-                        '& .MuiChip-icon': { color: PRIMARY_COLOR },
-                    }}
-                />
+                        <Stack direction="row" spacing={0.75} sx={{ flexWrap: 'wrap', rowGap: 0.75, justifyContent: { xs: 'flex-start', md: 'flex-end' } }}>
+                            {checklist.map((item) => (
+                                <Stack
+                                    key={item.label}
+                                    direction="row"
+                                    alignItems="center"
+                                    spacing={0.5}
+                                    sx={{
+                                        px: 1,
+                                        py: 0.4,
+                                        borderRadius: `${radii.pill}px`,
+                                        border: `1px solid ${item.done ? alpha(PRIMARY_COLOR, 0.35) : border.default}`,
+                                        bgcolor: item.done ? alpha(PRIMARY_COLOR, 0.07) : 'transparent',
+                                        transition: 'all 0.25s ease',
+                                    }}
+                                >
+                                    {item.done ? (
+                                        <CheckRoundedIcon sx={{ fontSize: 12, color: brand[600] }} />
+                                    ) : (
+                                        <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: neutral[300], mx: '3px' }} />
+                                    )}
+                                    <Typography sx={{
+                                        fontSize: '0.68rem',
+                                        fontWeight: 600,
+                                        color: item.done ? brand[700] : neutral[500],
+                                    }}>
+                                        {item.label}
+                                    </Typography>
+                                </Stack>
+                            ))}
+                        </Stack>
+                    </Box>
+                </Box>
+
+                {/* Lifecycle rail — advances with the wizard step */}
+                <Box sx={{
+                    px: { xs: 2.5, sm: 3.5 },
+                    py: 1.5,
+                    borderTop: `1px solid ${border.subtle}`,
+                    bgcolor: surface.muted,
+                    overflowX: 'auto',
+                }}>
+                    <Stack direction="row" alignItems="center" spacing={1} sx={{ width: 'max-content' }}>
+                        {LIFECYCLE.map((step, idx) => {
+                            const state = idx < lifecycleActiveIdx ? 'done' : idx === lifecycleActiveIdx ? 'active' : 'todo';
+                            return (
+                                <Stack key={step.label} direction="row" alignItems="center" spacing={1}>
+                                    {idx > 0 && (
+                                        <ArrowForwardIosRoundedIcon sx={{ fontSize: 10, color: neutral[300] }} />
+                                    )}
+                                    <Stack
+                                        direction="row"
+                                        alignItems="center"
+                                        spacing={0.75}
+                                        sx={{
+                                            px: 1.25,
+                                            py: 0.5,
+                                            borderRadius: `${radii.pill}px`,
+                                            transition: 'all 0.25s ease',
+                                            ...(state === 'active' && { bgcolor: PRIMARY_COLOR, color: '#fff' }),
+                                            ...(state === 'done' && { bgcolor: alpha(PRIMARY_COLOR, 0.08), color: brand[700] }),
+                                            ...(state === 'todo' && { color: neutral[400] }),
+                                        }}
+                                    >
+                                        <Box sx={{ display: 'flex', color: 'inherit' }}>
+                                            {state === 'done' ? <CheckRoundedIcon sx={{ fontSize: 14 }} /> : step.icon}
+                                        </Box>
+                                        <Typography sx={{
+                                            fontSize: '0.72rem',
+                                            fontWeight: state === 'active' ? 700 : 600,
+                                            color: 'inherit',
+                                            whiteSpace: 'nowrap',
+                                        }}>
+                                            {step.label}
+                                        </Typography>
+                                    </Stack>
+                                </Stack>
+                            );
+                        })}
+                    </Stack>
+                </Box>
             </Box>
 
-            {/* ── Form ── */}
-            <ConfirmationModal />
-            <form autoComplete="off" onSubmit={handleSubmit(handleFormPreSubmit)}>
+            {/* Navigation is driven by explicit button clicks, not native submit — preventDefault
+                stops an Enter keypress from submitting/validating prematurely. */}
+            <form autoComplete="off" onSubmit={(e) => e.preventDefault()}>
                 <Grid container spacing={2}>
                     <Grid item xs={12}>
-                        <InventoryForm
-                            handleClose={() => { }}
-                            buttonText="Submit"
-                            formState={formState}
-                            control={control}
-                            sendingRequest={sendingRequest}
-                            register={register}
-                        />
+                        {/* Steps 0 & 1 stay mounted (display-toggled) so RHF + stock rows keep their
+                            state as the user moves between steps. */}
+                        <Box sx={{ display: activeStep === 0 ? 'block' : 'none' }}>
+                            <InventoryForm
+                                handleClose={() => { }}
+                                buttonText="Submit"
+                                formState={formState}
+                                control={control}
+                                sendingRequest={sendingRequest}
+                                register={register}
+                                section="details"
+                                hideSubmitBar
+                            />
+                        </Box>
+                        <Box sx={{ display: activeStep === 1 ? 'block' : 'none' }}>
+                            <InventoryForm
+                                handleClose={() => { }}
+                                buttonText="Submit"
+                                formState={formState}
+                                control={control}
+                                sendingRequest={sendingRequest}
+                                register={register}
+                                section="items"
+                                hideSubmitBar
+                            />
+                        </Box>
+                        {activeStep === 2 && <ReviewStep />}
                     </Grid>
                 </Grid>
+
+                {/* Wizard navigation — action bar */}
+                <Paper
+                    elevation={0}
+                    sx={{
+                        mt: 2.5,
+                        p: { xs: 2, md: 2.5 },
+                        borderRadius: 2,
+                        border: `1px solid ${border.subtle}`,
+                        bgcolor: '#fff',
+                    }}
+                >
+                    <Stack
+                        direction={{ xs: 'column', sm: 'row' }}
+                        spacing={2}
+                        justifyContent="space-between"
+                        alignItems={{ xs: 'stretch', sm: 'center' }}
+                    >
+                        {/* Left — step context */}
+                        <Stack direction="row" spacing={1.5} alignItems="center">
+                            <Box sx={{
+                                width: 34,
+                                height: 34,
+                                borderRadius: '50%',
+                                flexShrink: 0,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: '0.85rem',
+                                fontWeight: 800,
+                                color: brand[700],
+                                bgcolor: alpha(PRIMARY_COLOR, 0.1),
+                            }}>
+                                {activeStep + 1}
+                            </Box>
+                            <Box sx={{ minWidth: 0 }}>
+                                <Typography sx={{ fontSize: '0.88rem', fontWeight: 700, color: neutral[800], lineHeight: 1.2 }}>
+                                    {steps[activeStep]}
+                                </Typography>
+                                <Typography sx={{ fontSize: '0.72rem', color: neutral[500] }}>
+                                    Step {activeStep + 1} of 3 · {activeStep === 0
+                                        ? 'Order & delivery details'
+                                        : activeStep === 1
+                                            ? 'Items received in this delivery'
+                                            : 'Confirm & submit'}
+                                </Typography>
+                            </Box>
+                        </Stack>
+
+                        {/* Right — actions */}
+                        <Stack
+                            direction={{ xs: 'column-reverse', sm: 'row' }}
+                            spacing={1.25}
+                            sx={{ width: { xs: '100%', sm: 'auto' } }}
+                        >
+                            <MuiButton
+                                type="button"
+                                variant="outlined"
+                                disabled={sendingRequest}
+                                onClick={() => (activeStep === 0 ? navigate(ROUTES.INVENTORY) : setActiveStep(activeStep - 1))}
+                                startIcon={activeStep === 0 ? <CloseRoundedIcon /> : <ArrowBackRoundedIcon />}
+                                sx={{
+                                    height: 44,
+                                    px: 2.75,
+                                    borderRadius: `${radii.pill}px`,
+                                    textTransform: 'none',
+                                    fontWeight: 600,
+                                    borderColor: border.default,
+                                    color: neutral[600],
+                                    '&:hover': { borderColor: neutral[400], bgcolor: neutral[50], color: neutral[800] },
+                                }}
+                            >
+                                {activeStep === 0 ? 'Cancel' : 'Back'}
+                            </MuiButton>
+
+                            {activeStep === 0 && (
+                                <MuiButton
+                                    type="button"
+                                    onClick={handleNext}
+                                    endIcon={<ArrowForwardRoundedIcon />}
+                                    sx={primaryBtnSx}
+                                >
+                                    Next: Stock items
+                                </MuiButton>
+                            )}
+                            {activeStep === 1 && (
+                                <MuiButton
+                                    type="button"
+                                    onClick={goToReview}
+                                    endIcon={<ArrowForwardRoundedIcon />}
+                                    sx={primaryBtnSx}
+                                >
+                                    Next: Review
+                                </MuiButton>
+                            )}
+                            {activeStep === 2 && (
+                                <MuiButton
+                                    type="button"
+                                    onClick={onSubmit}
+                                    disabled={sendingRequest}
+                                    startIcon={sendingRequest
+                                        ? <CircularProgress size={16} sx={{ color: '#fff' }} />
+                                        : <CheckCircleOutlineIcon fontSize="small" />}
+                                    sx={primaryBtnSx}
+                                >
+                                    {sendingRequest ? 'Submitting…' : 'Confirm & Submit'}
+                                </MuiButton>
+                            )}
+                        </Stack>
+                    </Stack>
+                </Paper>
             </form>
         </Box>
     )
