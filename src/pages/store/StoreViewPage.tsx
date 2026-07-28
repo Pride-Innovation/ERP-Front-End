@@ -27,6 +27,7 @@ import StoreUtills from './utillls';
 import Loading from '../../components/loading';
 import { StoreContext } from '../../context/store';
 import BranchStoreReport from './BranchStoreReport';
+import StoreAssetsPanel from './StoreAssetsPanel';
 import CategorySummary from './CategorySummary';
 import AssetTypeUtills from '../settings/assetTypes/utills';
 import FilterBranchForm from './FilterBranchForm';
@@ -254,7 +255,17 @@ const StoreViewPage = ({ storeType, title, subtitle, Icon, accentColor }: StoreV
                     <Loading items="Store Commodity" />
                 </Paper>
             ) : (
-                <BranchStoreReport accentColor={accentColor} />
+                <Stack spacing={3}>
+                    {/* Consumables live as StoreBalance rows; assets hang off Asset.currentStore.
+                        The IT and Disposal stores hold only assets, so showing them the balance
+                        table alone made them look permanently empty. Admin stores hold both. */}
+                    {storeType === 'admin' && <BranchStoreReport accentColor={accentColor} />}
+                    <StoreAssetsPanel
+                        branchId={branchId as number | null}
+                        storeType={storeType.toUpperCase()}
+                        accentColor={accentColor}
+                    />
+                </Stack>
             )}
         </Box>
     );

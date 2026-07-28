@@ -34,12 +34,13 @@ import PublicOutlinedIcon from '@mui/icons-material/PublicOutlined';
 import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined';
 import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 import FormatListNumberedOutlinedIcon from '@mui/icons-material/FormatListNumberedOutlined';
+import BadgeOutlinedIcon from '@mui/icons-material/BadgeOutlined';
+import FactCheckOutlinedIcon from '@mui/icons-material/FactCheckOutlined';
 import { SvgIconComponent } from '@mui/icons-material';
 
 import { PageHero, StatTile } from '../../components/layout';
 import { ROUTES } from '../../core/routes/routes';
-import { fetchRowsService } from '../../core/apis/globalService';
-import { fetchBalancesService, fetchLowStockService } from './service';
+import { fetchBalancesService, fetchBranchOverviewService } from './service';
 import BalancesPanel, { IBalanceView } from './BalancesPanel';
 
 // ── Store definitions ─────────────────────────────────────────────────────────
@@ -85,6 +86,10 @@ interface IBranchRow {
     name: string;
     region?: string;
     itemLines: number;
+    /** Units on hand across those lines — what a storekeeper actually cares about. */
+    totalQuantity: number;
+    /** Serialized assets booked into the branch's stores. */
+    assetsHeld: number;
     low: number;
 }
 
@@ -117,32 +122,27 @@ const Store = () => {
 
     useEffect(() => { fetchBranchesOverview(); loadBalances(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+    // One aggregated call for every branch. This used to fan out into a request per branch just to
+    // read a count, so a 50-branch estate meant 50 round trips on every page load.
     const fetchBranchesOverview = async () => {
         setBranchesLoading(true);
         try {
-            const [bRes, lowRes] = await Promise.all([
-                fetchRowsService({ pageNumber: 0, pageSize: 100, endPoint: 'branches', params: {} }) as any,
-                fetchLowStockService() as any,
-            ]);
-            const branches: any[] = bRes?.status === 200 ? (bRes.data?.content ?? []) : [];
-            const lowByLocation: Record<number, number> = {};
-            if (lowRes?.status === 200) {
-                (lowRes.data ?? []).forEach((b: any) => {
-                    if (b.locationId != null) lowByLocation[b.locationId] = (lowByLocation[b.locationId] ?? 0) + 1;
-                });
-            }
-            const withCounts = await Promise.all(branches.map(async (b) => {
-                const sRes = (await fetchRowsService({ pageNumber: 0, pageSize: 1, endPoint: 'store', params: { branchId: b.id } })) as any;
-                return {
-                    id: b.id, name: b.name, region: b.region?.name,
-                    itemLines: sRes?.status === 200 ? (sRes.data.totalElements ?? 0) : 0,
-                    low: lowByLocation[b.id] ?? 0,
-                };
-            }));
-            setBranchRows(withCounts);
+            const res = (await fetchBranchOverviewService()) as any;
+            const rows: IBranchRow[] = res?.status === 200
+                ? (res.data ?? []).map((b: any) => ({
+                    id: b.branchId,
+                    name: b.branchName,
+                    region: b.regionName,
+                    itemLines: b.itemLines ?? 0,
+                    totalQuantity: b.totalQuantity ?? 0,
+                    assetsHeld: b.assetsHeld ?? 0,
+                    low: b.lowStockLines ?? 0,
+                }))
+                : [];
+            setBranchRows(rows);
             // Surface problems immediately: regions carrying low-stock alerts start expanded.
             setExpandedRegions(new Set(
-                withCounts.filter((b) => b.low > 0).map((b) => b.region ?? 'Unassigned')
+                rows.filter((b) => b.low > 0).map((b) => b.region ?? 'Unassigned')
             ));
         } catch (e) {
             console.log(e);
@@ -164,6 +164,7 @@ const Store = () => {
                 region,
                 rows: rows.sort((a, b) => a.name.localeCompare(b.name)),
                 itemLines: rows.reduce((sum, r) => sum + r.itemLines, 0),
+                totalQuantity: rows.reduce((sum, r) => sum + r.totalQuantity, 0),
                 low: rows.reduce((sum, r) => sum + r.low, 0),
             }))
             .sort((a, b) => a.region.localeCompare(b.region));
@@ -179,6 +180,8 @@ const Store = () => {
 
     const todayLabel = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
     const totalItemLines = branchRows.reduce((sum, b) => sum + b.itemLines, 0);
+    const totalUnits = branchRows.reduce((sum, b) => sum + b.totalQuantity, 0);
+    const totalAssetsHeld = branchRows.reduce((sum, b) => sum + b.assetsHeld, 0);
     const branchesStocked = branchRows.filter((b) => b.itemLines > 0).length;
     const lowStockCount = balanceRows.filter((r) => r.lowStock).length;
 
@@ -195,20 +198,40 @@ const Store = () => {
                 subtitle="Overview of all organizational stores and inventory"
                 icon={<StorefrontOutlinedIcon />}
                 actions={
-                    <Button
-                        variant="contained"
-                        startIcon={<SwapHorizOutlinedIcon />}
-                        onClick={() => navigate(ROUTES.CREATE_MOVEMENT)}
-                        sx={{ bgcolor: '#08796C', textTransform: 'none', fontWeight: 600, borderRadius: '8px', '&:hover': { bgcolor: '#065f54' } }}
-                    >
-                        Initiate Movement
-                    </Button>
+                    <Stack direction="row" spacing={1}>
+                        <Button
+                            variant="outlined"
+                            startIcon={<FactCheckOutlinedIcon />}
+                            onClick={() => navigate(ROUTES.STOCK_TAKE)}
+                            sx={{ textTransform: 'none', fontWeight: 600, borderRadius: '8px', borderColor: alpha('#08796C', 0.4), color: '#08796C' }}
+                        >
+                            Stock Take
+                        </Button>
+                        <Button
+                            variant="outlined"
+                            startIcon={<BadgeOutlinedIcon />}
+                            onClick={() => navigate(ROUTES.MY_ITEMS)}
+                            sx={{ textTransform: 'none', fontWeight: 600, borderRadius: '8px', borderColor: alpha('#08796C', 0.4), color: '#08796C' }}
+                        >
+                            My Items
+                        </Button>
+                        <Button
+                            variant="contained"
+                            startIcon={<SwapHorizOutlinedIcon />}
+                            onClick={() => navigate(ROUTES.CREATE_MOVEMENT)}
+                            sx={{ bgcolor: '#08796C', textTransform: 'none', fontWeight: 600, borderRadius: '8px', '&:hover': { bgcolor: '#065f54' } }}
+                        >
+                            Initiate Movement
+                        </Button>
+                    </Stack>
                 }
                 stat={{
+                    // Units, not lines: "12 lines" says nothing about whether a store can meet a
+                    // request; the quantity on hand does.
                     value: branchesLoading
                         ? (<Skeleton width={50} sx={{ display: 'inline-block' }} /> as any)
-                        : totalItemLines.toLocaleString(),
-                    label: 'stocked item lines',
+                        : totalUnits.toLocaleString(),
+                    label: 'units on hand',
                     helper: todayLabel,
                 }}
                 tabs={
@@ -259,9 +282,9 @@ const Store = () => {
                 </Grid>
                 <Grid item xs={6} sm={3}>
                     <StatTile
-                        label="Total Item Lines"
-                        value={branchesLoading ? '…' : totalItemLines.toLocaleString()}
-                        helper="across all branch stores"
+                        label="Assets in Stores"
+                        value={branchesLoading ? '…' : totalAssetsHeld.toLocaleString()}
+                        helper={`${totalItemLines.toLocaleString()} consumable lines`}
                         icon={<FormatListNumberedOutlinedIcon />}
                         accent="gold"
                     />
@@ -379,7 +402,7 @@ const Store = () => {
                                             <Typography sx={{ fontWeight: 600, fontSize: '0.84rem', color: '#1E293B' }}>{b.name}</Typography>
                                             <Box sx={{ flex: 1 }} />
                                             <Chip
-                                                label={`${b.itemLines} line${b.itemLines !== 1 ? 's' : ''}`}
+                                                label={`${b.totalQuantity.toLocaleString()} unit${b.totalQuantity !== 1 ? 's' : ''} · ${b.itemLines} line${b.itemLines !== 1 ? 's' : ''}`}
                                                 size="small"
                                                 sx={{
                                                     height: 22, fontWeight: 700, fontSize: '0.68rem', fontVariantNumeric: 'tabular-nums',
@@ -387,6 +410,16 @@ const Store = () => {
                                                     color: b.itemLines === 0 ? '#DC2626' : '#08796C',
                                                 }}
                                             />
+                                            {b.assetsHeld > 0 && (
+                                                <Chip
+                                                    label={`${b.assetsHeld} asset${b.assetsHeld !== 1 ? 's' : ''}`}
+                                                    size="small"
+                                                    sx={{
+                                                        height: 22, fontWeight: 700, fontSize: '0.68rem', fontVariantNumeric: 'tabular-nums',
+                                                        bgcolor: alpha('#0369a1', 0.1), color: '#0369a1',
+                                                    }}
+                                                />
+                                            )}
                                             {b.low > 0 && (
                                                 <Chip
                                                     icon={<WarningAmberOutlinedIcon sx={{ fontSize: 12 }} />}

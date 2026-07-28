@@ -38,8 +38,6 @@ export const crudStates: {
     block: string;
     /** Fill in engraved number + remaining details for a newly-stocked asset. */
     complete: string;
-    /** Toggle whether an asset is pool stock for temporary replacements during repairs. */
-    temporaryPool: string;
     /** Record a physical delivery against a stock order (credits the store, registers assets, issues a GRN). */
     receiveDelivery: string;
 } = {
@@ -65,7 +63,6 @@ export const crudStates: {
     enable: "enable",
     block: "block",
     complete: "complete",
-    temporaryPool: "temporaryPool",
     receiveDelivery: "receiveDelivery",
 }
 

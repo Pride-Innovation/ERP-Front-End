@@ -26,7 +26,8 @@ export type MovementType =
     | 'REPAIR_TRANSFER'
     | 'TEMP_REPLACEMENT'
     | 'RETURN_AFTER_REPAIR'
-    | 'DISPOSAL_TRANSFER';
+    | 'DISPOSAL_TRANSFER'
+    | 'RETURN_TO_STORE';
 
 export type MovementCategory = 'INTER_LOCATION' | 'INTRA_LOCATION';
 
@@ -90,6 +91,9 @@ export const movementTypeLabels: Record<MovementType, string> = {
     TEMP_REPLACEMENT: 'Temporary Replacement',
     RETURN_AFTER_REPAIR: 'Return After Repair',
     DISPOSAL_TRANSFER: 'Disposal Transfer',
+    // Raised by "Receive into Store" — the source is a person, not a store, so it is not one of
+    // the types offered on the create form.
+    RETURN_TO_STORE: 'Return to Store',
 };
 
 export const movementTypeLabel = (type?: string): string =>

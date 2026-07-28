@@ -245,7 +245,6 @@ export type IDispose = IAssetAction;
 export type IRepair = IAssetAction;
 export type IReassign = IAssetAction;
 export type IToStore = IAssetAction;
-export type ITogglePool = IAssetAction;
 
 // ─────────────────────────────────────────────────────────────────────────
 // Navigation

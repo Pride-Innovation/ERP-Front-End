@@ -23,6 +23,10 @@ const STORE: string = `${ASSETS_MANAGEMENT}/store`;
 const STORE_ADMIN: string = `${STORE}/admin`;
 const STORE_IT: string = `${STORE}/it`;
 const STORE_DISPOSAL: string = `${STORE}/disposal`;
+/** What the signed-in user is personally holding — not a store, a personal accountability view. */
+const MY_ITEMS: string = `${STORE}/my-items`;
+/** Counting a store and reconciling its balances to the shelf. */
+const STOCK_TAKE: string = `${STORE}/stock-take`;
 
 /* Inventory Routes */
 const INVENTORY: string = `${ASSETS_MANAGEMENT}/inventory`;
@@ -141,6 +145,8 @@ export const ROUTES = {
     STORE_ADMIN,
     STORE_IT,
     STORE_DISPOSAL,
+    MY_ITEMS,
+    STOCK_TAKE,
     MOVEMENT,
     CREATE_MOVEMENT,
     UPDATE_MOVEMENT,
