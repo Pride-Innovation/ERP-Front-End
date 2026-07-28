@@ -13,12 +13,15 @@ import { PrivateRoute } from '../PrivateRoutes'
 import { PERMISSIONS } from '../../permissions/constants'
 import CreateInventory from '../../../pages/inventory/CreateInventory'
 import UpdateInventory from '../../../pages/inventory/UpdateInventory'
+import Reconciliation from '../../../pages/inventory/Reconciliation'
 
 const InventoryRoutes = () => {
     return (
         <Route>
             <Route element={<PrivateRoute permission={PERMISSIONS.READ_INVENTORY} />}>
                 <Route path={ROUTES.INVENTORY} index element={<Inventory />} />
+                {/* Declared before the /:id route so "reconciliation" isn't captured as a stock id. */}
+                <Route path={ROUTES.INVENTORY_RECONCILIATION} element={<Reconciliation />} />
                 <Route path={`${ROUTES.INVENTORY}/:id`} element={<InventoryDetails />} />
                 <Route path={`${ROUTES.READ_INVENTORY}/:id`} element={<InventoryDetails />} />
             </Route>

@@ -40,6 +40,8 @@ export const crudStates: {
     complete: string;
     /** Toggle whether an asset is pool stock for temporary replacements during repairs. */
     temporaryPool: string;
+    /** Record a physical delivery against a stock order (credits the store, registers assets, issues a GRN). */
+    receiveDelivery: string;
 } = {
     create: "create",
     update: "update",
@@ -64,6 +66,7 @@ export const crudStates: {
     block: "block",
     complete: "complete",
     temporaryPool: "temporaryPool",
+    receiveDelivery: "receiveDelivery",
 }
 
 export const requestStatus: {

@@ -24,6 +24,67 @@ export interface IStockCommodities {
     commodity: ICommodity
 }
 
+/** One line of a physical delivery. */
+export interface IStockReceiptLine {
+    commodityId: number;
+    commodityName: string;
+    /** What arrived in this batch. */
+    quantityReceived: number;
+    orderedQuantity: number;
+    /** Running total delivered against the line after this batch. */
+    cumulativeDelivered: number;
+    costPrice?: number | null;
+    purchasePrice?: number | null;
+}
+
+/**
+ * One physical delivery against an order, and the GRN it produced. An order delivered in three
+ * batches has three of these — each with its own date, delivery note and receiving officer.
+ */
+export interface IStockReceipt {
+    id: number;
+    receiptDate?: string | null;
+    deliveryNoteNumber?: string | null;
+    invoiceNumber?: string | null;
+    notes?: string | null;
+    storeName?: string | null;
+    grnNumber?: string | null;
+    grnReportId?: number | null;
+    receivedBy?: number | null;
+    receivedByName?: string | null;
+    totalQuantityReceived: number;
+    lines: Array<IStockReceiptLine>;
+}
+
+/** One order line in the reconciliation report, with the records that should agree about it. */
+export interface IStockReconciliationRow {
+    stockId: number;
+    lpoNumber?: string | null;
+    stockName?: string | null;
+    branchName?: string | null;
+    statusName?: string | null;
+    commodityId: number;
+    commodityName: string;
+    assetTypeName?: string | null;
+    tracksAssets: boolean;
+    orderedQuantity: number;
+    deliveredQuantity: number;
+    grnCoveredQuantity: number;
+    registeredNumber: number;
+    assetsOnRegister: number;
+    quantityMissingFromGrn: number;
+    assetsMissing: number;
+    discrepant: boolean;
+}
+
+export interface IStockReconciliationReport {
+    linesExamined: number;
+    linesWithDiscrepancies: number;
+    totalQuantityMissingFromGrn: number;
+    totalAssetsMissing: number;
+    rows: Array<IStockReconciliationRow>;
+}
+
 interface IInventory {
     id?: string | number;
     name: string;
@@ -92,6 +153,12 @@ interface IInventoryForm {
     section?: 'details' | 'items';
     /** Hide the internal Cancel/Submit bar (the wizard supplies its own navigation). */
     hideSubmitBar?: boolean;
+    /**
+     * Make the Delivered column read-only (the Update/correction page). Deliveries are recorded
+     * against the order as receipts so the store, the asset register and the GRN move with them;
+     * typing a new figure into a correction form cannot do any of that.
+     */
+    lockDeliveredQuantity?: boolean;
 }
 
 

@@ -6,7 +6,10 @@ Managing Director
 */
 
 import { useContext, useEffect, useMemo, useState } from "react";
-import { Box } from "@mui/material";
+import { Box, Button, Stack } from "@mui/material";
+import { useNavigate } from "react-router";
+import FactCheckOutlinedIcon from '@mui/icons-material/FactCheckOutlined';
+import { ROUTES } from "../../core/routes/routes";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store";
 import TableComponent from "../../components/tables/TableComponent";
@@ -30,6 +33,7 @@ const Inventory = () => {
     const { inventoryCount } = useContext(InventoryContext);
     const { statuses } = useSelector((state: RootState) => state.StatusesStore);
     const { fetchAllStatuses } = StatusUtills();
+    const navigate = useNavigate();
 
     const {
         columnHeaders,
@@ -89,6 +93,18 @@ const Inventory = () => {
                     helper: todayLabel,
                 }}
             />
+
+            {/* Entry point to the read-only cross-check of orders against GRNs and the asset register. */}
+            <Stack direction="row" justifyContent="flex-end" sx={{ px: { xs: 1, md: 0 }, mb: 1.5 }}>
+                <Button
+                    variant="outlined"
+                    startIcon={<FactCheckOutlinedIcon />}
+                    onClick={() => navigate(ROUTES.INVENTORY_RECONCILIATION)}
+                    sx={{ textTransform: 'none', fontWeight: 600, borderRadius: '999px' }}
+                >
+                    Reconciliation
+                </Button>
+            </Stack>
 
             {modalState === crudStates.delete && (
                 <ModalComponent title='Delete Inventory' open={open} handleClose={handleClose} width="40%">

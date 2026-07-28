@@ -48,6 +48,7 @@ import { formatNumberWithCommas } from './helper';
 import AppRegistrationOutlinedIcon from '@mui/icons-material/AppRegistrationOutlined';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import { neutral, border } from '../../utils/tokens';
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 
 const PRIMARY_COLOR = '#08796C';
 const SECONDARY_COLOR = '#BC892C';
@@ -66,7 +67,16 @@ const selectSx = {
     '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: PRIMARY_COLOR, borderWidth: 1.5 },
 };
 
-const StockItems = () => {
+interface StockItemsProps {
+    /**
+     * Render Delivered as a read-only figure. Set on the correction page: what has been received
+     * is owned by the receipt trail, because crediting the store, registering assets and issuing a
+     * GRN all have to happen with it — none of which a correction form can do.
+     */
+    lockDeliveredQuantity?: boolean;
+}
+
+const StockItems = ({ lockDeliveredQuantity = false }: StockItemsProps) => {
     const theme = useTheme();
     const { fetchAllCommodities } = CommodityUtills();
     const [itemOptions, setItemOptions] = useState<{ name: string; groupName: string, assetTypeId: number | string }[]>([]);
@@ -86,9 +96,18 @@ const StockItems = () => {
     // never exceeds the new ordered amount. Full delivery is the default so stocked asset items
     // actually register as assets (asset creation is driven by the DELIVERED quantity).
     const handleOrderedChange = (id: number, rawOrdered: number) => {
-        const newOrdered = Math.max(0, rawOrdered || 0);
         const updatedRows = stockRows.map((row) => {
             if (row.id !== id) return row;
+
+            // On the correction page Delivered is fixed, so Ordered simply cannot go below what
+            // the supplier has already delivered — the server rejects it, and clamping here says
+            // so immediately instead of at submit time.
+            if (lockDeliveredQuantity) {
+                const floor = row.deliveredQuantity || 0;
+                return { ...row, orderedQuantity: Math.max(floor, rawOrdered || 0) };
+            }
+
+            const newOrdered = Math.max(0, rawOrdered || 0);
             const wasFull = (row.deliveredQuantity || 0) >= (row.orderedQuantity || 0);
             const newDelivered = wasFull
                 ? newOrdered
@@ -481,74 +500,100 @@ const StockItems = () => {
                                 </TableCell>
 
                                 <TableCell align="center" sx={{ borderBottom: `1px solid ${alpha('#000', 0.05)}`, py: 1.5 }}>
-                                    <Box sx={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        bgcolor: 'white',
-                                        border: `1px solid ${alpha('#000', 0.1)}`,
-                                        borderRadius: 1,
-                                        maxWidth: 160,
-                                        mx: 'auto'
-                                    }}>
-                                        <IconButton
-                                            size="small"
-                                            onClick={() => handleInputChange(
-                                                row.id,
-                                                'deliveredQuantity',
-                                                Math.max(0, (row.deliveredQuantity || 0) - 1)
-                                            )}
-                                            sx={{
-                                                color: SECONDARY_COLOR,
-                                                '&:hover': { bgcolor: alpha(SECONDARY_COLOR, 0.1) }
-                                            }}
+                                    {lockDeliveredQuantity ? (
+                                        <Tooltip
+                                            title="Received quantities are recorded as deliveries, so the store, the asset register and the GRN are updated together. Use “Receive Delivery” on this stock."
+                                            arrow
+                                            TransitionComponent={Zoom}
                                         >
-                                            <RemoveCircleOutlineIcon fontSize="small" />
-                                        </IconButton>
+                                            <Box sx={{
+                                                display: 'inline-flex',
+                                                alignItems: 'center',
+                                                gap: 0.75,
+                                                px: 1.5,
+                                                py: 0.85,
+                                                borderRadius: 1,
+                                                bgcolor: alpha('#000', 0.04),
+                                                border: `1px dashed ${alpha('#000', 0.15)}`,
+                                                color: neutral[600],
+                                                cursor: 'help',
+                                            }}>
+                                                <LockOutlinedIcon sx={{ fontSize: 14 }} />
+                                                <Typography sx={{ fontSize: '0.875rem', fontWeight: 700, color: neutral[800] }}>
+                                                    {row.deliveredQuantity || 0}
+                                                </Typography>
+                                            </Box>
+                                        </Tooltip>
+                                    ) : (
+                                        <Box sx={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            bgcolor: 'white',
+                                            border: `1px solid ${alpha('#000', 0.1)}`,
+                                            borderRadius: 1,
+                                            maxWidth: 160,
+                                            mx: 'auto'
+                                        }}>
+                                            <IconButton
+                                                size="small"
+                                                onClick={() => handleInputChange(
+                                                    row.id,
+                                                    'deliveredQuantity',
+                                                    Math.max(0, (row.deliveredQuantity || 0) - 1)
+                                                )}
+                                                sx={{
+                                                    color: SECONDARY_COLOR,
+                                                    '&:hover': { bgcolor: alpha(SECONDARY_COLOR, 0.1) }
+                                                }}
+                                            >
+                                                <RemoveCircleOutlineIcon fontSize="small" />
+                                            </IconButton>
 
-                                        <TextField
-                                            size="small"
-                                            type="number"
-                                            value={row.deliveredQuantity}
-                                            onChange={(e) => handleInputChange(
-                                                row.id,
-                                                'deliveredQuantity',
-                                                // Delivered can never exceed what was ordered.
-                                                Math.min(row.orderedQuantity || 0, Math.max(0, parseInt(e.target.value) || 0))
-                                            )}
-                                            variant="standard"
-                                            InputProps={{
-                                                disableUnderline: true,
-                                                sx: {
-                                                    width: 40,
-                                                    textAlign: 'center',
-                                                    fontSize: '0.875rem',
-                                                    fontWeight: 700,
-                                                    input: { textAlign: 'center' },
-                                                    '& input[type=number]::-webkit-inner-spin-button': { display: 'none' },
-                                                    '& input[type=number]::-webkit-outer-spin-button': { display: 'none' },
-                                                    '& input[type=number]': { MozAppearance: 'textfield' },
-                                                }
-                                            }}
-                                        />
+                                            <TextField
+                                                size="small"
+                                                type="number"
+                                                value={row.deliveredQuantity}
+                                                onChange={(e) => handleInputChange(
+                                                    row.id,
+                                                    'deliveredQuantity',
+                                                    // Delivered can never exceed what was ordered.
+                                                    Math.min(row.orderedQuantity || 0, Math.max(0, parseInt(e.target.value) || 0))
+                                                )}
+                                                variant="standard"
+                                                InputProps={{
+                                                    disableUnderline: true,
+                                                    sx: {
+                                                        width: 40,
+                                                        textAlign: 'center',
+                                                        fontSize: '0.875rem',
+                                                        fontWeight: 700,
+                                                        input: { textAlign: 'center' },
+                                                        '& input[type=number]::-webkit-inner-spin-button': { display: 'none' },
+                                                        '& input[type=number]::-webkit-outer-spin-button': { display: 'none' },
+                                                        '& input[type=number]': { MozAppearance: 'textfield' },
+                                                    }
+                                                }}
+                                            />
 
-                                        <IconButton
-                                            size="small"
-                                            disabled={(row.deliveredQuantity || 0) >= (row.orderedQuantity || 0)}
-                                            onClick={() => handleInputChange(
-                                                row.id,
-                                                'deliveredQuantity',
-                                                // Clamp to ordered — can't receive more than was ordered.
-                                                Math.min(row.orderedQuantity || 0, (row.deliveredQuantity || 0) + 1)
-                                            )}
-                                            sx={{
-                                                color: PRIMARY_COLOR,
-                                                '&:hover': { bgcolor: alpha(PRIMARY_COLOR, 0.1) }
-                                            }}
-                                        >
-                                            <AddCircleOutlineOutlinedIcon fontSize="small" />
-                                        </IconButton>
-                                    </Box>
+                                            <IconButton
+                                                size="small"
+                                                disabled={(row.deliveredQuantity || 0) >= (row.orderedQuantity || 0)}
+                                                onClick={() => handleInputChange(
+                                                    row.id,
+                                                    'deliveredQuantity',
+                                                    // Clamp to ordered — can't receive more than was ordered.
+                                                    Math.min(row.orderedQuantity || 0, (row.deliveredQuantity || 0) + 1)
+                                                )}
+                                                sx={{
+                                                    color: PRIMARY_COLOR,
+                                                    '&:hover': { bgcolor: alpha(PRIMARY_COLOR, 0.1) }
+                                                }}
+                                            >
+                                                <AddCircleOutlineOutlinedIcon fontSize="small" />
+                                            </IconButton>
+                                        </Box>
+                                    )}
                                 </TableCell>
 
                                 <TableCell sx={{ borderBottom: `1px solid ${alpha('#000', 0.05)}`, py: 1.5 }}>
@@ -629,7 +674,13 @@ const StockItems = () => {
 
                                 <TableCell align="center" sx={{ borderBottom: `1px solid ${alpha('#000', 0.05)}`, py: 1.5 }}>
                                     <Tooltip
-                                        title={stockRows.length === 1 ? "Cannot remove the last item" : "Remove item"}
+                                        title={
+                                            stockRows.length === 1
+                                                ? "Cannot remove the last item"
+                                                : lockDeliveredQuantity && (row.deliveredQuantity || 0) > 0
+                                                    ? `Cannot remove — ${row.deliveredQuantity} unit(s) have already been received and are held in the store`
+                                                    : "Remove item"
+                                        }
                                         arrow
                                         TransitionComponent={Zoom}
                                     >
@@ -637,7 +688,10 @@ const StockItems = () => {
                                             <IconButton
                                                 color="error"
                                                 onClick={() => handleRemoveRow(row.id)}
-                                                disabled={stockRows.length === 1}
+                                                disabled={
+                                                    stockRows.length === 1
+                                                    || (lockDeliveredQuantity && (row.deliveredQuantity || 0) > 0)
+                                                }
                                                 size="small"
                                                 sx={{
                                                     '&:disabled': { opacity: 0.3 },

@@ -58,6 +58,7 @@ import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
 import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
+import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
 
 const PRIMARY_COLOR = brand[500];
 
@@ -458,9 +459,21 @@ const UpdateInventory = () => {
                 {/* Notice */}
                 <Stack direction="row" spacing={1.25} alignItems="flex-start" sx={{ p: 1.75, borderRadius: 2, bgcolor: alpha(gold[500], 0.07), border: `1px solid ${alpha(gold[500], 0.25)}` }}>
                     <WarningAmberIcon sx={{ fontSize: 18, color: gold[700], mt: 0.1, flexShrink: 0 }} />
-                    <Typography sx={{ fontSize: '0.82rem', color: neutral[700], lineHeight: 1.5 }}>
-                        This corrects the existing stock record. To record a new delivery instead, use “Receive more” on the stock's Delivery Status.
-                    </Typography>
+                    <Box>
+                        <Typography sx={{ fontSize: '0.82rem', color: neutral[700], lineHeight: 1.5 }}>
+                            This corrects the order — supplier, references, dates, quantities <strong>ordered</strong> and unit prices.
+                            Quantities <strong>received</strong> are not editable here: recording a delivery also credits the store,
+                            registers the assets and issues a GRN, which all have to happen together.
+                        </Typography>
+                        <MuiButton
+                            size="small"
+                            onClick={() => navigate(`${ROUTES.READ_INVENTORY}/${id}`)}
+                            startIcon={<LocalShippingOutlinedIcon fontSize="small" />}
+                            sx={{ mt: 0.75, textTransform: 'none', fontWeight: 700, color: gold[700], px: 0 }}
+                        >
+                            Record a delivery instead
+                        </MuiButton>
+                    </Box>
                 </Stack>
             </Box>
         );
@@ -494,10 +507,10 @@ const UpdateInventory = () => {
                         </Box>
                         <Box sx={{ minWidth: 0 }}>
                             <Typography variant="h6" sx={{ fontWeight: 700, color: neutral[900], lineHeight: 1.25, letterSpacing: '-0.01em' }}>
-                                Update Stock
+                                Correct Stock Details
                             </Typography>
                             <Typography variant="body2" sx={{ color: neutral[500], mt: 0.25 }}>
-                                Correct the order details and commodity lines for {defaultInventory?.name || defaultInventory?.lpoNumber || 'this stock entry'}
+                                Fix the order details and ordered quantities for {defaultInventory?.name || defaultInventory?.lpoNumber || 'this stock entry'}
                             </Typography>
                         </Box>
                     </Box>
@@ -590,6 +603,7 @@ const UpdateInventory = () => {
                                 register={register}
                                 section="items"
                                 hideSubmitBar
+                                lockDeliveredQuantity
                             />
                         </Box>
                         {activeStep === 2 && <ReviewStep />}

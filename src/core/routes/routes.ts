@@ -29,6 +29,8 @@ const INVENTORY: string = `${ASSETS_MANAGEMENT}/inventory`;
 const CREATE_INVENTORY: string = `${ASSETS_MANAGEMENT}/inventory/create`
 const UPDATE_INVENTORY: string = `${ASSETS_MANAGEMENT}/inventory/update`
 const READ_INVENTORY: string = `${ASSETS_MANAGEMENT}/inventory/view`
+/** Read-only report: order lines where the GRN trail or asset register disagrees with the order. */
+const INVENTORY_RECONCILIATION: string = `${ASSETS_MANAGEMENT}/inventory/reconciliation`
 
 /* Request Routes */
 const REQUEST: string = `${ASSETS_MANAGEMENT}/asset-request`
@@ -132,6 +134,7 @@ export const ROUTES = {
     CREATE_INVENTORY,
     UPDATE_INVENTORY,
     READ_INVENTORY,
+    INVENTORY_RECONCILIATION,
     CREATE_USER,
     UPDATE_USER,
     STORE,

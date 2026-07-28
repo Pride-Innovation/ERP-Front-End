@@ -14,6 +14,7 @@ import { crudStates } from "../../utils/constants";
 import InfoIcon from '@mui/icons-material/Info';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
+import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
 import { getTableHeaders } from "../../components/tables/getTableHeaders";
 import {
     IInventoriesAxiosResponse,
@@ -91,7 +92,11 @@ const InventoryUtills = () => {
             label: "options",
             options: [
                 { value: crudStates.read, label: "View Details", icon: <RemoveRedEyeIcon fontSize='small' />, divider: true },
-                { value: crudStates.update, label: "Update", icon: <ModeEditIcon fontSize='small' color='info' /> },
+                // Receiving and correcting are different jobs with different consequences, so they
+                // are different menu items. "Update" on its own read as the way to complete a
+                // partial delivery, which it never was.
+                { value: crudStates.receiveDelivery, label: "Receive Delivery", icon: <LocalShippingOutlinedIcon fontSize='small' color='primary' /> },
+                { value: crudStates.update, label: "Correct Details", icon: <ModeEditIcon fontSize='small' color='info' /> },
                 { value: crudStates.delete, label: "Delete", icon: <InfoIcon fontSize='small' color='error' /> }
             ]
         },
@@ -246,6 +251,11 @@ const InventoryUtills = () => {
                 break;
             case crudStates.update:
                 navigate(`${ROUTES.UPDATE_INVENTORY}/${moduleID}`)
+                break;
+            case crudStates.receiveDelivery:
+                // The Delivery Status panel on the detail page owns receiving; it knows what is
+                // still outstanding per line, which the list row does not.
+                navigate(`${ROUTES.READ_INVENTORY}/${moduleID}?action=receive`)
                 break;
             case crudStates.read:
                 navigate(`${ROUTES.READ_INVENTORY}/${moduleID}`)
