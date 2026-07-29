@@ -8,35 +8,25 @@ Managing Director
 import {
     Autocomplete,
     Box,
-    Card,
-    CardContent,
-    Divider,
     FormControlLabel,
     Stack,
     Switch,
     TextField,
     Typography,
-    Paper,
+    alpha,
     useTheme,
-    alpha
 } from "@mui/material";
 import { useEffect, useState } from "react";
-import ButtonComponent from "../../components/forms/Button";
 import { IAssetAxiosResponse, IToStore } from "./interface";
-import {
-    Assignment as AssetIcon,
-    Store as StoreIcon,
-    Fingerprint as FingerprintIcon,
-    LocalShipping as ShippingIcon,
-    Inventory2Outlined as PoolIcon,
-    PersonOutline as PersonIcon
-} from '@mui/icons-material';
+import StoreIcon from '@mui/icons-material/Store';
+import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 import { toast } from "react-toastify";
 import axiosInstance from "../../core/apis/axiosInstance";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../../store";
 import { updateGeneralAssetInStore } from "./general/slice";
 import { fieldSx } from "../../components/forms/Inputs";
+import ActionModalShell, { ActionPoints, AssetIdentityCard } from "./ActionModalShell";
 
 interface IStoreOption {
     id: number;
@@ -107,124 +97,37 @@ const ToStore = ({
     };
 
     return (
-        <Card
-            elevation={0}
-            sx={{
-                borderRadius: 2,
-                overflow: 'hidden',
-                border: `1px solid ${alpha(theme.palette.success.main, 0.15)}`,
-            }}
+        <ActionModalShell
+            tone="success"
+            icon={<StoreIcon />}
+            title="Receive Asset into Store"
+            subtitle="Takes the asset off its holder and books it into a store"
+            onCancel={handleClose}
+            onConfirm={handleSendingAssetToStore}
+            confirmText={buttonText}
+            confirmIcon={<StoreIcon />}
+            busy={sendingRequest || saving}
+            busyText="Receiving..."
         >
-            {/* Top accent bar */}
-            <Box sx={{ height: 3, bgcolor: theme.palette.success.main }} />
-
-            <Box
-                sx={{
-                    bgcolor: alpha(theme.palette.success.main, 0.05),
-                    py: 1.75,
-                    px: 3,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 1.5,
-                    borderBottom: `1px solid ${alpha(theme.palette.success.main, 0.1)}`
-                }}
-            >
-                <Box sx={{
-                    width: 34, height: 34, borderRadius: 1.5,
-                    bgcolor: alpha(theme.palette.success.main, 0.12),
-                    display: 'flex', alignItems: 'center', justifyContent: 'center'
-                }}>
-                    <StoreIcon sx={{ color: theme.palette.success.main, fontSize: 18 }} />
-                </Box>
+            <Stack spacing={3}>
                 <Box>
-                    <Typography variant="subtitle1" fontWeight={700} sx={{ color: theme.palette.success.main, lineHeight: 1.2 }}>
-                        Receive Asset into Store
+                    <Typography variant="body1" sx={{ mb: 2, fontWeight: 500 }}>
+                        This hands the asset back into stores. The action:
                     </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                        Takes the asset off its holder and books it into a store
-                    </Typography>
+                    <ActionPoints
+                        tone="success"
+                        points={[
+                            'Books the asset into the chosen store',
+                            'Closes its current assignment, so it is no longer held by anyone',
+                            'Records the hand-back as a movement in the audit trail',
+                        ]}
+                    />
                 </Box>
-            </Box>
 
-            <CardContent sx={{ p: 3 }}>
-                <Paper
-                    elevation={0}
-                    sx={{
-                        p: 2.5,
-                        borderRadius: 1.5,
-                        bgcolor: alpha(theme.palette.success.main, 0.02),
-                        border: `1px solid ${alpha(theme.palette.success.main, 0.08)}`,
-                        borderLeft: `3px solid ${alpha(theme.palette.success.main, 0.45)}`,
-                    }}
-                >
-                    <Stack spacing={2.5}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                            <Box sx={{
-                                bgcolor: theme.palette.primary.main, color: 'white',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                p: 0.8, borderRadius: 1,
-                                boxShadow: `0 3px 6px ${alpha(theme.palette.primary.main, 0.25)}`
-                            }}>
-                                <AssetIcon fontSize="small" />
-                            </Box>
-                            <Box>
-                                <Typography variant="caption" color="text.secondary" fontWeight={500}>
-                                    Asset Name
-                                </Typography>
-                                <Typography variant="subtitle1" fontWeight={600} color="text.primary">
-                                    {asset.assetName}
-                                </Typography>
-                            </Box>
-                        </Box>
-
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                            <Box sx={{
-                                bgcolor: alpha(theme.palette.grey[500], 0.1), color: theme.palette.grey[600],
-                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                p: 0.8, borderRadius: 1
-                            }}>
-                                <FingerprintIcon fontSize="small" />
-                            </Box>
-                            <Box>
-                                <Typography variant="caption" color="text.secondary" fontWeight={500}>
-                                    Engraved Number
-                                </Typography>
-                                {asset.engravedNumber ? (
-                                    <Typography variant="subtitle1" fontWeight={500} color="text.primary">
-                                        {asset.engravedNumber}
-                                    </Typography>
-                                ) : (
-                                    <Typography variant="body2" fontStyle="italic" color="text.disabled">
-                                        Not specified
-                                    </Typography>
-                                )}
-                            </Box>
-                        </Box>
-
-                        {asset.assignedTo && (
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                                <Box sx={{
-                                    bgcolor: alpha(theme.palette.warning.main, 0.12), color: theme.palette.warning.dark,
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    p: 0.8, borderRadius: 1
-                                }}>
-                                    <PersonIcon fontSize="small" />
-                                </Box>
-                                <Box>
-                                    <Typography variant="caption" color="text.secondary" fontWeight={500}>
-                                        Currently Held By
-                                    </Typography>
-                                    <Typography variant="subtitle1" fontWeight={500} color="text.primary">
-                                        {`${asset.assignedTo.firstName ?? ''} ${asset.assignedTo.lastName ?? ''}`.trim() || '—'}
-                                    </Typography>
-                                </Box>
-                            </Box>
-                        )}
-                    </Stack>
-                </Paper>
+                <AssetIdentityCard asset={asset} />
 
                 {/* Destination */}
-                <Box sx={{ mt: 3 }}>
+                <Box>
                     <Typography variant="caption" sx={{ fontWeight: 700, color: '#475569', display: 'block', mb: 0.75 }}>
                         Destination Store
                     </Typography>
@@ -248,7 +151,7 @@ const ToStore = ({
 
                 {/* Pool flag — only meaningful once the asset is actually in a store */}
                 <Box sx={{
-                    mt: 2.5, p: 2, borderRadius: 1.5,
+                    p: 2, borderRadius: 1.5,
                     bgcolor: alpha(theme.palette.warning.main, temporaryPool ? 0.08 : 0.03),
                     border: `1px solid ${alpha(theme.palette.warning.main, temporaryPool ? 0.3 : 0.12)}`,
                     transition: 'all 0.2s ease',
@@ -263,7 +166,7 @@ const ToStore = ({
                         }
                         label={
                             <Stack direction="row" spacing={1} alignItems="center">
-                                <PoolIcon sx={{ fontSize: 17, color: theme.palette.warning.main }} />
+                                <Inventory2OutlinedIcon sx={{ fontSize: 17, color: theme.palette.warning.main }} />
                                 <Box>
                                     <Typography variant="body2" fontWeight={600} color="text.primary">
                                         Available for temporary issuance
@@ -276,40 +179,8 @@ const ToStore = ({
                         }
                     />
                 </Box>
-
-                <Box sx={{ mt: 2.5, p: 2, bgcolor: alpha(theme.palette.success.main, 0.05), borderRadius: 1.5 }}>
-                    <Stack direction="row" spacing={1.5} alignItems="flex-start">
-                        <ShippingIcon color="success" fontSize="small" sx={{ mt: 0.2 }} />
-                        <Typography variant="body2" color="text.secondary">
-                            The asset is booked into the store, its current assignment is closed, and the
-                            hand-back is recorded as a movement so it appears in the audit trail.
-                        </Typography>
-                    </Stack>
-                </Box>
-
-                <Divider sx={{ my: 3 }} />
-
-                <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-                    <Stack direction="row" spacing={2}>
-                        <ButtonComponent
-                            handleClick={handleClose}
-                            buttonColor='info'
-                            type='button'
-                            variant="outlined"
-                            sendingRequest={false}
-                            buttonText="Cancel"
-                        />
-                        <ButtonComponent
-                            buttonColor='success'
-                            type='submit'
-                            sendingRequest={sendingRequest || saving}
-                            handleClick={handleSendingAssetToStore}
-                            buttonText={buttonText}
-                        />
-                    </Stack>
-                </Box>
-            </CardContent>
-        </Card>
+            </Stack>
+        </ActionModalShell>
     );
 }
 
