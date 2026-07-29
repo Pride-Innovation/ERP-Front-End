@@ -452,12 +452,23 @@ const CloseShortDialog = ({
                     This marks the stock as <strong>Closed Short</strong>. Already-received units and their
                     assets are unaffected. You can still receive more later if the supplier delivers.
                 </Alert>
-                <FieldRow
-                    label="Reason (optional)"
-                    helper="e.g. supplier cancelled the balance, item discontinued"
-                    value={reason}
-                    onChange={setReason}
-                />
+                {/* Mirrors the "Notes" section of the Record a Delivery dialog so the two
+                    receipt-side dialogs read as one family. */}
+                <Paper elevation={0} sx={panelSx}>
+                    <SectionHeader title="Reason" hint="Optional" />
+                    <TextField
+                        fullWidth
+                        size="medium"
+                        multiline
+                        rows={3}
+                        label="Close-short reason"
+                        value={reason}
+                        onChange={(e) => setReason(e.target.value)}
+                        placeholder="e.g. supplier cancelled the balance, item discontinued, order superseded…"
+                        helperText="Recorded against this stock and shown wherever it appears as closed short"
+                        sx={fieldSx}
+                    />
+                </Paper>
             </DialogContent>
             <DialogActions sx={{ px: 3, py: 2 }}>
                 <Button onClick={handleClose} disabled={saving} sx={{ textTransform: 'none' }}>
@@ -999,12 +1010,16 @@ const panelSx = {
     bgcolor: surface.card,
 };
 
-/** Numbered section heading with an optional right-aligned action. */
+/**
+ * Section heading with an optional right-aligned action. The numbered badge is only rendered when
+ * an `index` is given — a dialog with a single section shouldn't imply a numbered sequence.
+ */
 const SectionHeader = ({ index, title, hint, action }: {
-    index: number; title: string; hint?: string; action?: ReactNode;
+    index?: number; title: string; hint?: string; action?: ReactNode;
 }) => (
     <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={1.5} sx={{ mb: 1.5 }}>
         <Stack direction="row" spacing={1.25} alignItems="center" sx={{ minWidth: 0 }}>
+            {index !== undefined && (
             <Box
                 sx={{
                     width: 22, height: 22, borderRadius: '50%', flexShrink: 0,
@@ -1015,6 +1030,7 @@ const SectionHeader = ({ index, title, hint, action }: {
             >
                 {index}
             </Box>
+            )}
             <Box sx={{ minWidth: 0 }}>
                 <Typography sx={{ fontSize: '0.82rem', fontWeight: 700, color: neutral[800], lineHeight: 1.3 }}>
                     {title}
@@ -1199,50 +1215,6 @@ const MoneyField = ({ value, fallback, onChange }: {
             },
         }}
     />
-);
-
-const inputSx = {
-    '& .MuiOutlinedInput-root': {
-        borderRadius: `${radii.md}px`,
-        bgcolor: surface.card,
-        fontSize: '0.86rem',
-        transition: 'box-shadow 0.15s ease',
-        '& fieldset': { borderColor: border.default },
-        '&:hover fieldset': { borderColor: alpha(brand[500], 0.5) },
-        '&.Mui-focused': { boxShadow: `0 0 0 3px ${alpha(brand[500], 0.12)}` },
-        '&.Mui-focused fieldset': { borderColor: brand[500], borderWidth: 1 },
-    },
-    '& .MuiFormHelperText-root': { marginLeft: 0, fontSize: '0.68rem', color: neutral[400] },
-};
-
-const FieldRow = ({
-    label,
-    helper,
-    value,
-    onChange,
-    type = 'text',
-}: {
-    label: string;
-    helper?: string;
-    value: string;
-    onChange: (v: string) => void;
-    type?: string;
-}) => (
-    <Box sx={{ flex: 1 }}>
-        <Typography variant="caption" sx={{ fontWeight: 600, color: '#475569', display: 'block', mb: 0.5 }}>
-            {label}
-        </Typography>
-        <TextField
-            size="small"
-            fullWidth
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-            type={type}
-            helperText={helper}
-            InputLabelProps={type === 'date' ? { shrink: true } : undefined}
-            sx={inputSx}
-        />
-    </Box>
 );
 
 export default DeliveryStatusPanel;
