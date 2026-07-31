@@ -87,6 +87,8 @@ const InventoryGRN = ({ grnList, onUploaded }: { grnList: IGRNReport[]; onUpload
                 <ModalComponent title='Upload Signed GRN' open={open} handleClose={handleClose} width="40%">
                     <UploadGRN
                         id={currentGRN?.id}
+                        grnNumber={currentGRN?.name}
+                        handleClose={handleClose}
                         onUploaded={() => { handleClose(); onUploaded?.(); }}
                     />
                 </ModalComponent>
