@@ -118,7 +118,9 @@ const Inventory = () => {
             )}
             {modalState === crudStates.upload && (
                 <ModalComponent title='Upload Signed GRN' open={open} handleClose={handleClose} width="40%">
-                    <UploadGRN />
+                    {/* No single GRN is in context from the list — a stock can hold several, so the
+                        modal explains where to attach the scan rather than guessing. */}
+                    <UploadGRN handleClose={handleClose} />
                 </ModalComponent>
             )}
 
