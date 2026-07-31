@@ -93,17 +93,23 @@ const PriceTotals = () => {
         totalPurchasePrice
     } = useContext(RequestContext);
 
-    const calculateTotalCostPrice = () => {
-        setTotalCostPrice(stockRows.reduce((acc, cur) => (acc + (Number(cur.costPrice) || 0)), 0));
-    };
-
-    const calculateTotalPurchasePrice = () => {
-        setTotalPurchasePrice(stockRows.reduce((acc, cur) => (acc + (Number(cur.purchasePrice) || 0)), 0));
-    };
-
+    /**
+     * Extended totals: the table captures a *unit* price, so a total is only meaningful once it is
+     * multiplied by the quantity. These previously summed the unit prices alone, which understated
+     * every stock — and because the backend stores whatever the client sends, the wrong figure was
+     * persisted and carried through to exports, asset records and the printed GRN.
+     *
+     * <p>Quantity is the *ordered* one, not delivered, so the total states the value the order
+     * commits to and stays stable as goods arrive in batches. A delivered-based total would drop on
+     * a partial delivery and then never recover, since receiving a top-up doesn't recalculate it.
+     */
     useEffect(() => {
-        calculateTotalCostPrice();
-        calculateTotalPurchasePrice();
+        const extend = (price: number | string | undefined, qty: number | undefined) =>
+            (Number(price) || 0) * (Number(qty) || 0);
+
+        setTotalCostPrice(stockRows.reduce((acc, cur) => acc + extend(cur.costPrice, cur.orderedQuantity), 0));
+        setTotalPurchasePrice(stockRows.reduce((acc, cur) => acc + extend(cur.purchasePrice, cur.orderedQuantity), 0));
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [stockRows]);
 
     const hasIncomplete = stockRows.some(row =>
@@ -121,6 +127,9 @@ const PriceTotals = () => {
             <Stack direction="row" spacing={1.5} alignItems="center" flexWrap="wrap" useFlexGap>
                 <Typography variant="body2" sx={{ fontWeight: 600, color: neutral[700] }}>
                     {stockRows.length} item{stockRows.length !== 1 ? 's' : ''} in this delivery
+                </Typography>
+                <Typography variant="caption" sx={{ color: neutral[500] }}>
+                    Totals are unit price × ordered qty
                 </Typography>
 
                 {hasIncomplete && (
@@ -152,13 +161,13 @@ const PriceTotals = () => {
                 justifyContent={{ xs: 'flex-start', md: 'flex-end' }}
             >
                 <TotalCard
-                    label="Total Cost Price"
+                    label="Total Cost Value"
                     value={totalCostPrice}
                     accent={brand[500]}
                     icon={<AccountBalanceWalletOutlinedIcon />}
                 />
                 <TotalCard
-                    label="Total Purchase Price"
+                    label="Total Purchase Value"
                     value={totalPurchasePrice}
                     accent={gold[500]}
                     icon={<ShoppingBasketOutlinedIcon />}
