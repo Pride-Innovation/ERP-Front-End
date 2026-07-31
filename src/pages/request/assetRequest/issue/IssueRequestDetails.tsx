@@ -14,6 +14,7 @@ import {
 } from "react";
 import {
     Box,
+    Grid,
     Stack,
     Typography,
     CircularProgress,
@@ -22,23 +23,30 @@ import {
     TableCell,
     TableHead,
     TableRow,
-    Divider,
     Chip,
     Avatar,
     Button as MuiButton,
+    IconButton,
+    LinearProgress,
     Paper,
     Skeleton,
     TextField,
+    Tooltip,
     alpha,
 } from "@mui/material";
 import { toast } from "react-toastify";
 import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
-import AccountBalanceOutlinedIcon from '@mui/icons-material/AccountBalanceOutlined';
 import ReceiptLongOutlinedIcon from '@mui/icons-material/ReceiptLongOutlined';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import CalendarTodayOutlinedIcon from '@mui/icons-material/CalendarTodayOutlined';
+import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
+import ListAltOutlinedIcon from '@mui/icons-material/ListAltOutlined';
+import Inventory2Outlined from '@mui/icons-material/Inventory2Outlined';
+import TaskAltOutlinedIcon from '@mui/icons-material/TaskAltOutlined';
+import PendingActionsOutlinedIcon from '@mui/icons-material/PendingActionsOutlined';
+import ContentCopyOutlinedIcon from '@mui/icons-material/ContentCopyOutlined';
+import { StatTile } from "../../../../components/layout";
 import { RowData } from "../../../../components/forms/interface";
 import { IRequest, IRequestAxiosResponse } from "../../interface";
 import { RequestContext } from "../../../../context/request/RequestContext";
@@ -107,63 +115,50 @@ const SectionCard = ({
     </Paper>
 );
 
-const StatTile = ({ value, label }: { value: ReactNode; label: string }) => (
-    <Box
-        sx={{
-            px: 2,
-            py: 1.25,
-            bgcolor: '#fff',
-            border: `1px solid ${border.subtle}`,
-            borderRadius: 1.5,
-            textAlign: 'center',
-            minWidth: 86,
-        }}
-    >
-        <Typography sx={{ fontSize: '1.4rem', fontWeight: 800, color: neutral[900], lineHeight: 1 }}>
-            {value}
-        </Typography>
-        <Typography
-            sx={{
-                fontSize: '0.58rem',
-                fontWeight: 700,
-                color: neutral[500],
-                textTransform: 'uppercase',
-                letterSpacing: '0.07em',
-                mt: 0.7,
-            }}
-        >
-            {label}
-        </Typography>
-    </Box>
-);
-
-const MetaItem = ({ icon, label, value }: { icon: ReactNode; label: string; value: string }) => (
-    <Stack direction="row" spacing={1.25} alignItems="center">
+/**
+ * A key fact in the light strip across the base of the hero — the same "at a glance" idiom the
+ * asset and inventory detail pages use, so the three read as one family.
+ */
+const HeroFact = ({
+    label, value, first, avatar, onCopy,
+}: {
+    label: string; value?: string | null; first?: boolean; avatar?: ReactNode; onCopy?: () => void;
+}) => {
+    const empty = value === null || value === undefined || value === '';
+    return (
         <Box
             sx={{
-                width: 38,
-                height: 38,
-                borderRadius: 1.5,
-                bgcolor: alpha(brand[500], 0.08),
-                color: brand[600],
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
+                flex: '1 1 160px',
+                minWidth: 150,
+                px: { xs: 2, md: 2.75 },
+                py: 1.5,
+                borderLeft: { xs: 'none', sm: first ? 'none' : `1px solid ${border.subtle}` },
             }}
         >
-            {icon}
-        </Box>
-        <Box>
-            <Typography sx={{ fontSize: '0.6rem', fontWeight: 700, color: neutral[400], textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+            <Typography sx={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.09em', textTransform: 'uppercase', color: neutral[500] }}>
                 {label}
             </Typography>
-            <Typography sx={{ fontSize: '0.9rem', fontWeight: 700, color: neutral[800] }}>
-                {value}
-            </Typography>
+            <Stack direction="row" spacing={0.85} alignItems="center" sx={{ mt: 0.35, minWidth: 0 }}>
+                {avatar}
+                <Typography noWrap sx={{
+                    fontSize: '0.9rem',
+                    fontWeight: empty ? 400 : 700,
+                    fontStyle: empty ? 'italic' : 'normal',
+                    color: empty ? neutral[400] : neutral[800],
+                }}>
+                    {empty ? 'Not specified' : value}
+                </Typography>
+                {onCopy && !empty && (
+                    <Tooltip title="Copy">
+                        <IconButton size="small" onClick={onCopy} sx={{ p: 0.2, color: alpha(brand[500], 0.7) }}>
+                            <ContentCopyOutlinedIcon sx={{ fontSize: 13 }} />
+                        </IconButton>
+                    </Tooltip>
+                )}
+            </Stack>
         </Box>
-    </Stack>
-);
+    );
+};
 
 const IssueRequestDetails = () => {
     const [loading, setLoading] = useState(true);
@@ -250,6 +245,10 @@ const IssueRequestDetails = () => {
     const lineStatuses = requestCommodities.map(lineStatus);
     const readyCount = lineStatuses.filter((s) => s === 'ready').length;
     const allReady = requestCommodities.length > 0 && readyCount === requestCommodities.length;
+    /** Drives the hero's fulfilment bar — same source of truth as the submit gate. */
+    const readyPct = requestCommodities.length === 0
+        ? 0
+        : Math.round((readyCount / requestCommodities.length) * 100);
 
     const handleIssueItems = async () => {
         setSendingRequest(true);
@@ -321,59 +320,91 @@ const IssueRequestDetails = () => {
         : '—';
 
     return (
-        <Box sx={{ maxWidth: 1180, mx: 'auto', pb: 6, px: { xs: 1, sm: 0 } }}>
-            {/* Back link */}
-            <Box
-                onClick={() => navigate(-1)}
-                sx={{
-                    display: 'inline-flex', alignItems: 'center', gap: 0.75, cursor: 'pointer', mb: 2,
-                    px: 1.25, py: 0.6, borderRadius: 1.5, color: brand[600],
-                    border: `1px solid ${alpha(brand[500], 0.25)}`, bgcolor: alpha(brand[500], 0.04),
-                    transition: 'all .18s ease',
-                    '&:hover': { bgcolor: alpha(brand[500], 0.09), borderColor: alpha(brand[500], 0.4) },
-                }}
-            >
-                <ArrowBackIcon sx={{ fontSize: 15 }} />
-                <Typography variant="caption" sx={{ fontWeight: 700 }}>Back</Typography>
-            </Box>
+        <Box sx={{ bgcolor: surface.page, minHeight: '100vh', px: { xs: 1.5, md: 3 }, py: { xs: 2, md: 3 } }}>
+            <Box sx={{ maxWidth: 1180, mx: 'auto', pb: 6 }}>
 
-            {/* Hero */}
+            {/* ── Hero (light card idiom shared with the asset & inventory detail pages) ── */}
             <Box
                 sx={{
-                    position: 'relative', borderRadius: 2.5, border: `1px solid ${border.subtle}`,
-                    background: `linear-gradient(135deg, ${alpha(brand[50], 0.7)} 0%, #FFFFFF 60%)`,
-                    overflow: 'hidden', mb: 2.5,
+                    position: 'relative',
+                    borderRadius: '16px',
+                    overflow: 'hidden',
+                    mb: 2.5,
+                    bgcolor: '#fff',
+                    boxShadow: 'hsla(220, 30%, 5%, 0.05) 0px 5px 15px 0px, hsla(220, 25%, 10%, 0.05) 0px 15px 35px -5px',
                 }}
             >
-                {/* <Box sx={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 4, background: `linear-gradient(180deg, ${brand[500]}, ${brand[700]})` }} /> */}
-                <Box sx={{ p: { xs: 2.5, md: 3.5 } }}>
-                    <Stack direction={{ xs: 'column', md: 'row' }} justifyContent="space-between" spacing={2} alignItems={{ md: 'flex-start' }}>
+                {/* Faint brand accents for depth on the white card */}
+                <Box sx={{ position: 'absolute', inset: 0, background: `radial-gradient(circle at 92% -10%, ${alpha(brand[500], 0.07)} 0%, transparent 42%)`, pointerEvents: 'none' }} />
+                <LocalShippingOutlinedIcon sx={{ position: 'absolute', right: -18, top: -20, fontSize: 180, color: alpha(brand[500], 0.05), transform: 'rotate(-12deg)', pointerEvents: 'none' }} />
+
+                <Box sx={{ position: 'relative', px: { xs: 2.5, md: 3.5 }, pt: 2.25 }}>
+                    {/* Back + breadcrumb */}
+                    <Stack direction="row" alignItems="center" spacing={1.25} sx={{ mb: 2.25 }}>
+                        <IconButton
+                            size="small"
+                            onClick={() => navigate(-1)}
+                            sx={{ color: brand[600], border: `1px solid ${alpha(brand[500], 0.25)}`, bgcolor: alpha(brand[50], 0.6), '&:hover': { bgcolor: alpha(brand[100], 0.7), borderColor: brand[500] } }}
+                        >
+                            <ArrowBackIcon fontSize="small" />
+                        </IconButton>
+                        <Stack direction="row" alignItems="center" spacing={0.5}>
+                            <HomeOutlinedIcon sx={{ fontSize: 14, color: neutral[400] }} />
+                            <Typography variant="caption" sx={{ color: neutral[500] }}>Requests</Typography>
+                            <Typography variant="caption" sx={{ color: neutral[300] }}>/</Typography>
+                            <Typography variant="caption" sx={{ color: brand[700], fontWeight: 700 }}>Issue</Typography>
+                        </Stack>
+                    </Stack>
+
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', justifyContent: 'space-between', gap: 2, pb: 2.5 }}>
+                        {/* Identity */}
                         <Stack direction="row" spacing={2} alignItems="center" sx={{ minWidth: 0 }}>
-                            <Box sx={{ width: 54, height: 54, borderRadius: 2, bgcolor: alpha(brand[500], 0.1), display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                                <LocalShippingOutlinedIcon sx={{ color: brand[600], fontSize: 27 }} />
+                            <Box sx={{
+                                width: 56, height: 56, borderRadius: '16px', flexShrink: 0,
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                bgcolor: alpha(brand[500], 0.1), color: brand[600], border: `1px solid ${alpha(brand[500], 0.16)}`,
+                            }}>
+                                <LocalShippingOutlinedIcon sx={{ fontSize: 28 }} />
                             </Box>
                             <Box sx={{ minWidth: 0 }}>
-                                <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 0.4 }} flexWrap="wrap" useFlexGap>
-                                    <Typography variant="overline" sx={{ color: brand[700], fontWeight: 800, letterSpacing: '0.12em', lineHeight: 1 }}>
-                                        Issue Request
-                                    </Typography>
-                                    <Chip size="small" label={`#${request.id ?? id ?? ''}`} sx={{ height: 20, fontSize: '0.66rem', fontWeight: 700, bgcolor: '#fff', color: neutral[700], border: `1px solid ${border.subtle}` }} />
-                                    {request.status?.name && (
-                                        <Chip size="small" label={request.status.name} sx={{ height: 20, fontSize: '0.66rem', fontWeight: 700, bgcolor: alpha(gold[500], 0.12), color: gold[700], border: `1px solid ${alpha(gold[500], 0.3)}` }} />
-                                    )}
-                                </Stack>
                                 {loading && !request.id ? (
                                     <>
-                                        <Skeleton width={260} height={32} />
-                                        <Skeleton width={340} height={18} />
+                                        <Skeleton width={260} height={34} />
+                                        <Skeleton width={340} height={20} />
                                     </>
                                 ) : (
                                     <>
-                                        <Typography variant="h5" sx={{ fontWeight: 800, color: neutral[900], lineHeight: 1.15 }}>
-                                            {request.name || '—'}
+                                        <Typography sx={{ fontSize: { xs: '1.35rem', md: '1.6rem' }, fontWeight: 800, lineHeight: 1.15, letterSpacing: '-0.4px', color: neutral[900] }}>
+                                            {request.name || 'Issue Request'}
                                         </Typography>
+                                        <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap sx={{ mt: 1 }}>
+                                            <Chip
+                                                size="small"
+                                                icon={<ReceiptLongOutlinedIcon sx={{ fontSize: 14 }} />}
+                                                label={`Request #${request.id ?? id ?? ''}`}
+                                                sx={{ height: 24, fontWeight: 600, fontSize: '0.72rem', bgcolor: alpha(brand[500], 0.08), color: brand[700], border: `1px solid ${alpha(brand[500], 0.14)}`, '& .MuiChip-icon': { color: brand[600] } }}
+                                            />
+                                            {request.status?.name && (
+                                                <Chip size="small" label={request.status.name}
+                                                    sx={{ height: 24, fontWeight: 700, fontSize: '0.72rem', bgcolor: alpha(gold[500], 0.12), color: gold[700], border: `1px solid ${alpha(gold[500], 0.3)}` }} />
+                                            )}
+                                            <Chip
+                                                size="small"
+                                                icon={allReady
+                                                    ? <TaskAltOutlinedIcon sx={{ fontSize: 14 }} />
+                                                    : <PendingActionsOutlinedIcon sx={{ fontSize: 14 }} />}
+                                                label={allReady ? 'Ready to issue' : `${readyCount}/${requestCommodities.length} ready`}
+                                                sx={{
+                                                    height: 24, fontWeight: 700, fontSize: '0.72rem',
+                                                    bgcolor: allReady ? alpha(statusTokens.success.main, 0.12) : alpha(gold[500], 0.12),
+                                                    color: allReady ? statusTokens.success.strong : gold[700],
+                                                    border: `1px solid ${alpha(allReady ? statusTokens.success.main : gold[500], 0.3)}`,
+                                                    '& .MuiChip-icon': { color: 'inherit' },
+                                                }}
+                                            />
+                                        </Stack>
                                         {request.description && (
-                                            <Typography variant="body2" sx={{ color: neutral[500], mt: 0.5, maxWidth: 620 }}>
+                                            <Typography variant="body2" sx={{ color: neutral[500], mt: 1.25, maxWidth: 620 }}>
                                                 {request.description}
                                             </Typography>
                                         )}
@@ -382,29 +413,79 @@ const IssueRequestDetails = () => {
                             </Box>
                         </Stack>
 
-                        <Stack direction="row" spacing={1.25} sx={{ flexShrink: 0 }}>
-                            <StatTile value={requestCommodities.length} label="Line items" />
-                            <StatTile value={totalQty} label="Units" />
-                        </Stack>
-                    </Stack>
-
-                    <Divider sx={{ my: 2.25, borderColor: alpha(brand[500], 0.12) }} />
-
-                    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={{ xs: 1.75, sm: 4 }} flexWrap="wrap" useFlexGap>
-                        <Stack direction="row" spacing={1.25} alignItems="center">
-                            <Avatar sx={{ width: 38, height: 38, bgcolor: brand[500], fontSize: '0.82rem', fontWeight: 700 }}>{initials}</Avatar>
-                            <Box>
-                                <Typography sx={{ fontSize: '0.6rem', fontWeight: 700, color: neutral[400], textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                                    Requested by
+                        {/* Fulfilment dial — the one number that decides whether this page can be submitted */}
+                        <Box sx={{ minWidth: 210, flexShrink: 0 }}>
+                            <Stack direction="row" alignItems="baseline" justifyContent="space-between" sx={{ mb: 0.75 }}>
+                                <Typography sx={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.09em', textTransform: 'uppercase', color: neutral[500] }}>
+                                    Fulfilment
                                 </Typography>
-                                <Typography sx={{ fontSize: '0.9rem', fontWeight: 700, color: neutral[800] }}>{requesterName}</Typography>
-                            </Box>
-                        </Stack>
-                        <MetaItem icon={<AccountBalanceOutlinedIcon sx={{ fontSize: 18 }} />} label="Branch" value={branchName} />
-                        <MetaItem icon={<CalendarTodayOutlinedIcon sx={{ fontSize: 18 }} />} label="Requested on" value={requestedOn} />
-                    </Stack>
+                                <Typography sx={{ fontSize: '0.9rem', fontWeight: 800, color: allReady ? statusTokens.success.strong : gold[700] }}>
+                                    {readyPct}%
+                                </Typography>
+                            </Stack>
+                            <LinearProgress
+                                variant="determinate"
+                                value={readyPct}
+                                sx={{
+                                    height: 8, borderRadius: 4, bgcolor: alpha(neutral[900], 0.06),
+                                    '& .MuiLinearProgress-bar': {
+                                        borderRadius: 4,
+                                        bgcolor: allReady ? statusTokens.success.main : gold[500],
+                                        transition: 'transform .35s ease',
+                                    },
+                                }}
+                            />
+                            <Typography sx={{ fontSize: '0.7rem', color: neutral[500], mt: 0.75 }}>
+                                {allReady
+                                    ? 'Every line is ready to issue'
+                                    : `${requestCommodities.length - readyCount} line(s) still need attention`}
+                            </Typography>
+                        </Box>
+                    </Box>
+                </Box>
+
+                {/* At-a-glance strip across the base of the hero */}
+                <Box sx={{ position: 'relative', display: 'flex', flexWrap: 'wrap', bgcolor: alpha(brand[500], 0.03), borderTop: `1px solid ${border.subtle}` }}>
+                    <HeroFact
+                        first
+                        label="Requested by"
+                        value={requesterName}
+                        avatar={<Avatar sx={{ width: 22, height: 22, bgcolor: brand[500], fontSize: '0.6rem', fontWeight: 700 }}>{initials}</Avatar>}
+                    />
+                    <HeroFact label="Branch" value={branchName === '—' ? null : branchName} />
+                    <HeroFact label="Requested on" value={requestedOn === '—' ? null : requestedOn} />
+                    <HeroFact
+                        label="Reference"
+                        value={`REQ-${String(request.id ?? id ?? '').padStart(5, '0')}`}
+                        onCopy={() => {
+                            navigator.clipboard.writeText(`REQ-${String(request.id ?? id ?? '').padStart(5, '0')}`);
+                            toast.success('Reference copied');
+                        }}
+                    />
                 </Box>
             </Box>
+
+            {/* ── Stat strip (inventory-detail idiom) ── */}
+            <Grid container spacing={2} sx={{ mb: 2.5 }}>
+                <Grid item xs={6} md={3}>
+                    <StatTile label="Line Items" value={requestCommodities.length} helper="on this request" accent="info" icon={<ListAltOutlinedIcon />} />
+                </Grid>
+                <Grid item xs={6} md={3}>
+                    <StatTile label="Total Units" value={totalQty} helper="units requested" accent="gold" icon={<Inventory2Outlined />} />
+                </Grid>
+                <Grid item xs={6} md={3}>
+                    <StatTile label="Ready" value={readyCount} helper="lines good to go" accent="success" icon={<TaskAltOutlinedIcon />} />
+                </Grid>
+                <Grid item xs={6} md={3}>
+                    <StatTile
+                        label="Outstanding"
+                        value={requestCommodities.length - readyCount}
+                        helper={allReady ? 'nothing pending' : 'need attention'}
+                        accent={allReady ? 'neutral' : 'warning'}
+                        icon={<PendingActionsOutlinedIcon />}
+                    />
+                </Grid>
+            </Grid>
 
             {/* Requested commodities + live readiness */}
             <SectionCard
@@ -432,34 +513,64 @@ const IssueRequestDetails = () => {
                     <Box sx={{ border: `1px solid ${border.subtle}`, borderRadius: 2, overflow: 'hidden' }}>
                         <Table size="small">
                             <TableHead>
-                                <TableRow sx={{ bgcolor: surface.muted }}>
-                                    {['Commodity', 'Unit of Measure', 'Asset Type'].map(h => (
-                                        <TableCell key={h} sx={{ fontWeight: 700, fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: neutral[500], borderBottom: `1px solid ${border.subtle}` }}>
-                                            {h}
-                                        </TableCell>
-                                    ))}
-                                    <TableCell align="right" sx={{ fontWeight: 700, fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: neutral[500], borderBottom: `1px solid ${border.subtle}` }}>
-                                        Qty
-                                    </TableCell>
-                                    <TableCell align="right" sx={{ fontWeight: 700, fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: neutral[500], borderBottom: `1px solid ${border.subtle}` }}>
-                                        Status
-                                    </TableCell>
+                                <TableRow sx={{
+                                    '& th': {
+                                        bgcolor: alpha(brand[500], 0.04),
+                                        fontWeight: 700, fontSize: '0.68rem', textTransform: 'uppercase',
+                                        letterSpacing: '0.05em', color: brand[700],
+                                        borderBottom: `1px solid ${border.subtle}`, py: 1.4, whiteSpace: 'nowrap',
+                                    },
+                                }}>
+                                    <TableCell>Commodity</TableCell>
+                                    <TableCell>Asset Type</TableCell>
+                                    <TableCell align="center">Qty</TableCell>
+                                    <TableCell align="right">Status</TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
                                 {requestCommodities.map((item, idx) => {
                                     const st = LINE_STATUS_CFG[lineStatuses[idx]];
+                                    const isReady = lineStatuses[idx] === 'ready';
                                     return (
                                         <TableRow
                                             key={idx}
                                             sx={{
                                                 transition: 'background 0.12s',
-                                                '&:hover': { bgcolor: alpha(brand[500], 0.03) },
-                                                '& td': { borderBottom: idx === requestCommodities.length - 1 ? 'none' : `1px solid ${border.subtle}` },
+                                                // A ready line gets a faint green rail, so scanning the list
+                                                // shows what's outstanding without reading the status column.
+                                                boxShadow: isReady
+                                                    ? `inset 3px 0 0 ${statusTokens.success.main}`
+                                                    : `inset 3px 0 0 ${alpha(st.color, 0.5)}`,
+                                                '&:nth-of-type(odd)': { bgcolor: alpha(neutral[900], 0.015) },
+                                                '&:hover': { bgcolor: alpha(brand[500], 0.04) },
+                                                '& td': {
+                                                    py: 1.6,
+                                                    borderBottom: idx === requestCommodities.length - 1 ? 'none' : `1px solid ${border.subtle}`,
+                                                },
                                             }}
                                         >
-                                            <TableCell sx={{ fontWeight: 600, color: neutral[800] }}>{item.commodity.name}</TableCell>
-                                            <TableCell sx={{ color: neutral[600] }}>{item.commodity.groupName || '—'}</TableCell>
+                                            <TableCell>
+                                                <Stack direction="row" spacing={1.5} alignItems="center">
+                                                    <Box sx={{
+                                                        width: 28, height: 28, borderRadius: '9px', flexShrink: 0,
+                                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                        fontSize: '0.74rem', fontWeight: 800,
+                                                        color: brand[700], bgcolor: alpha(brand[500], 0.1),
+                                                    }}>
+                                                        {idx + 1}
+                                                    </Box>
+                                                    <Box sx={{ minWidth: 0 }}>
+                                                        <Typography sx={{ fontSize: '0.86rem', fontWeight: 700, color: neutral[900], lineHeight: 1.3 }}>
+                                                            {item.commodity.name}
+                                                        </Typography>
+                                                        {item.commodity.groupName && (
+                                                            <Typography sx={{ fontSize: '0.72rem', color: neutral[500] }}>
+                                                                {item.commodity.groupName}
+                                                            </Typography>
+                                                        )}
+                                                    </Box>
+                                                </Stack>
+                                            </TableCell>
                                             <TableCell>
                                                 <Chip
                                                     size="small"
@@ -467,8 +578,8 @@ const IssueRequestDetails = () => {
                                                     sx={{ height: 22, fontSize: '0.7rem', fontWeight: 600, bgcolor: alpha(brand[500], 0.08), color: brand[700], border: `1px solid ${alpha(brand[500], 0.2)}` }}
                                                 />
                                             </TableCell>
-                                            <TableCell align="right">
-                                                <Box component="span" sx={{ display: 'inline-flex', minWidth: 26, justifyContent: 'center', px: 1, py: 0.35, borderRadius: 1, bgcolor: neutral[900], color: '#fff', fontSize: '0.76rem', fontWeight: 700 }}>
+                                            <TableCell align="center">
+                                                <Box component="span" sx={{ display: 'inline-flex', minWidth: 32, justifyContent: 'center', px: 1, py: 0.4, borderRadius: '8px', bgcolor: alpha(neutral[900], 0.06), color: neutral[800], fontSize: '0.8rem', fontWeight: 700 }}>
                                                     {item.quantity}
                                                 </Box>
                                             </TableCell>
@@ -523,16 +634,30 @@ const IssueRequestDetails = () => {
                     bgcolor: '#fff', boxShadow: `0 -4px 24px ${alpha('#000', 0.08)}`,
                 }}
             >
-                <Stack direction="row" spacing={1} alignItems="center">
+                <Stack direction="row" spacing={1.5} alignItems="center" sx={{ minWidth: 0 }}>
                     <Box sx={{
-                        width: 10, height: 10, borderRadius: '50%', flexShrink: 0,
-                        bgcolor: allReady ? statusTokens.success.main : gold[500],
-                    }} />
-                    <Typography variant="body2" sx={{ fontWeight: 600, color: neutral[700] }}>
+                        width: 34, height: 34, borderRadius: '10px', flexShrink: 0,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        bgcolor: alpha(allReady ? statusTokens.success.main : gold[500], 0.12),
+                        color: allReady ? statusTokens.success.strong : gold[700],
+                        transition: 'all .2s ease',
+                    }}>
                         {allReady
-                            ? 'All lines ready — you can issue now.'
-                            : `${readyCount} of ${requestCommodities.length} line(s) ready`}
-                    </Typography>
+                            ? <TaskAltOutlinedIcon sx={{ fontSize: 19 }} />
+                            : <PendingActionsOutlinedIcon sx={{ fontSize: 19 }} />}
+                    </Box>
+                    <Box sx={{ minWidth: 0 }}>
+                        <Typography variant="body2" sx={{ fontWeight: 700, color: neutral[800], lineHeight: 1.25 }}>
+                            {allReady
+                                ? 'All lines ready — you can issue now.'
+                                : `${readyCount} of ${requestCommodities.length} line(s) ready`}
+                        </Typography>
+                        <Typography sx={{ fontSize: '0.72rem', color: neutral[500] }}>
+                            {allReady
+                                ? `${totalQty} unit(s) will be recorded against ${requesterName}`
+                                : 'Pick engraved numbers or fix quantities to continue'}
+                        </Typography>
+                    </Box>
                 </Stack>
                 <MuiButton
                     onClick={handleIssueItems}
@@ -550,6 +675,7 @@ const IssueRequestDetails = () => {
                     {sendingRequest ? 'Issuing…' : 'Issue Items'}
                 </MuiButton>
             </Paper>
+            </Box>
         </Box>
     );
 }
