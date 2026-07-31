@@ -29,8 +29,7 @@ import { useDispatch } from "react-redux";
 import { loadAllInventory } from "./slice";
 import { fetchRowsService } from "../../core/apis/globalService";
 import moment from "moment";
-import { generateGoodsReceivedNote } from "../../utils/goodReceivedNotes";
-import Logo from "../../statics/images/grnFormLogo.png";
+import { generateGrnPdf } from "./view/generateGrnPdf";
 import { InventoryContext } from "../../context/inventory";
 
 const InventoryUtills = () => {
@@ -261,8 +260,9 @@ const InventoryUtills = () => {
                 navigate(`${ROUTES.READ_INVENTORY}/${moduleID}`)
                 break;
             case crudStates.download:
-                const data = findStockById(moduleID as number);
-                generateGoodsReceivedNote(data as IInventory, Logo);
+                // From the list there is no single GRN in context, so this prints the order's
+                // cumulative position across every delivery.
+                await generateGrnPdf(findStockById(moduleID as number) as IInventory);
                 break;
             case crudStates.upload:
                 const val = findStockById(moduleID as number) as IInventory;
