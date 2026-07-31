@@ -179,9 +179,14 @@ interface IGRNCommodity {
     id?: string | number;
     grnReport?: IGRNReport | null;
     commodity?: ICommodity | null;
+    /** Units received on THIS delivery. */
     deliveredQuantity: number;
+    orderedQuantity?: number;
     costPrice?: number | null;
     purchasePrice?: number | null;
+    /** Cumulative position for the commodity after this delivery (snapshot at GRN time). */
+    totalDeliveredQuantity?: number;
+    totalOrderedQuantity?: number;
 }
 
 interface IGRNCommodityResponse extends IFetchDataRequest {
