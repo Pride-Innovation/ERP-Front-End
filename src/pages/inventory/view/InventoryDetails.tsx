@@ -250,7 +250,7 @@ const InventoryDetails = () => {
                                     variant="outlined"
                                     size="small"
                                     startIcon={<FileDownloadOutlinedIcon fontSize="small" />}
-                                    onClick={() => generateGrnPdf(currentInventory)}
+                                    onClick={() => { void generateGrnPdf(currentInventory); }}
                                     disabled={!currentInventory?.id}
                                     sx={{ textTransform: 'none', fontWeight: 700, borderRadius: '10px', borderColor: alpha(brand[500], 0.4), color: brand[600], '&:hover': { borderColor: brand[500], bgcolor: alpha(brand[500], 0.05) } }}
                                 >
