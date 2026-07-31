@@ -16,8 +16,7 @@ import moment from "moment";
 import { crudStates } from "../../../utils/constants";
 import { InventoryContext } from "../../../context/inventory";
 import { downloadGoodsReceivedNote, fetchGrnCommoditiesByStockIDService } from "../service";
-import { generateGoodsReceivedNote } from "../../../utils/goodReceivedNotes";
-import Logo from "../../../statics/images/whitelogo.png"
+import { generateGrnPdf } from "./generateGrnPdf";
 import RoutesUtills from "../../../core/routes/utills";
 
 
@@ -132,16 +131,15 @@ const GrnReportUtills = () => {
     const handleOptionClicked = async (option: string | number, moduleID?: string | number) => {
         switch (option) {
             case crudStates.download:
-                const grnData = {
-                    ...currentInventory,
-                    reports: filterGRNCommoditiesByGRNNumber(findGRNById(moduleID as number)?.name as string)
-                };
-
-                generateGoodsReceivedNote(
-                    grnData,
-                    Logo,
-                    getCurrentUser()?.firstName + " " + getCurrentUser()?.lastName,
-                );
+                // Prints THIS delivery's lines, not the order's cumulative position — one GRN
+                // document describes one physical receipt.
+                const grnReport = findGRNById(moduleID as number) ?? null;
+                await generateGrnPdf(currentInventory, {
+                    grnReport,
+                    lines: filterGRNCommoditiesByGRNNumber(grnReport?.name as string),
+                    receivedBy: [getCurrentUser()?.firstName, getCurrentUser()?.lastName]
+                        .filter(Boolean).join(' ').trim(),
+                });
 
                 await downloadGoodsReceivedNote(moduleID as number);
                 break;
