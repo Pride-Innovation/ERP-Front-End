@@ -11,21 +11,13 @@ import { IMovement } from '../interface';
 import { movementTypeLabel, categoryLabels } from '../constants';
 import RoutesUtills from '../../../core/routes/utills';
 import LogoSrc from '../../../statics/images/pride_logo_horizontal.png';
-
-// ── Palette (light, professional) ────────────────────────────────────────────
-const TEAL = '#08796C';
-const TEAL_DARK = '#065E54';
-const TEAL_50 = '#E9F3F1';   // very light brand tint for the table head
-const GOLD = '#BC892C';
-const GOLD_DARK = '#9B7024';
-const INK = '#1E293B';
-const MUTED = '#64748B';
-const FAINT = '#94A3B8';
-const BORDER = '#E5EAF0';
-const WASH = '#F8FAFC';
-const WHITE = '#FFFFFF';
-
-const LOGO_RATIO = 909 / 275; // ≈ 3.305
+// Palette and primitives are shared with the Goods Received Note so the inbound and outbound
+// halves of the custody trail stay visually identical. See utils/pdf/docKit.
+import {
+    BORDER, FAINT, GOLD, INK, MUTED, TEAL, TEAL_50, TEAL_DARK, WASH,
+    drawDocHeader, drawFooter, drawPill, drawSignatureCards, ensureSpace,
+    loadImage, partyPanel, rightAlignHeaders, sectionLabel,
+} from '../../../utils/pdf/docKit';
 
 const STATUS_META: Record<string, [string, string, string]> = {
     DRAFT: ['Draft', '#EEF1F5', '#475569'],
@@ -36,31 +28,6 @@ const STATUS_META: Record<string, [string, string, string]> = {
     COMPLETED: ['Completed', '#DCFCE7', '#15803D'],
     CANCELLED: ['Cancelled', '#FEE2E2', '#B91C1C'],
 };
-
-/**
- * Loads a bundled image URL into a base64 data URL (via canvas) so jsPDF can embed it.
- * Resolves null on any failure so PDF generation never blocks on a missing/broken asset.
- */
-const loadImage = (src: string): Promise<string | null> =>
-    new Promise((resolve) => {
-        try {
-            const img = new Image();
-            img.crossOrigin = 'anonymous';
-            img.onload = () => {
-                try {
-                    const canvas = document.createElement('canvas');
-                    canvas.width = img.naturalWidth;
-                    canvas.height = img.naturalHeight;
-                    const ctx = canvas.getContext('2d');
-                    if (!ctx) { resolve(null); return; }
-                    ctx.drawImage(img, 0, 0);
-                    resolve(canvas.toDataURL('image/png'));
-                } catch { resolve(null); }
-            };
-            img.onerror = () => resolve(null);
-            img.src = src;
-        } catch { resolve(null); }
-    });
 
 /**
  * Generates the (unsigned) Store Release / Dispatch Note for a movement leaving a store — used both
@@ -92,41 +59,7 @@ export const generateReleaseNote = async (movement: IMovement): Promise<void> =>
     const releasedByName = [currentUser?.firstName, currentUser?.lastName].filter(Boolean).join(' ').trim();
 
     // ── Header (light) ───────────────────────────────────────────────────────
-    // Slim brand strip at the very top for a touch of colour without a heavy band.
-    doc.setFillColor(TEAL);
-    doc.rect(0, 0, pageW, 4, 'F');
-
-    const headerTop = 30;
-    if (logo) {
-        const h = 34;
-        const w = h * LOGO_RATIO;
-        doc.addImage(logo, 'PNG', margin, headerTop, w, h);
-    } else {
-        // Fallback wordmark if the logo asset can't be loaded.
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(16);
-        doc.setTextColor(TEAL);
-        doc.text('PRIDE BANK LIMITED', margin, headerTop + 22);
-    }
-
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(12);
-    doc.setTextColor(TEAL);
-    doc.text('STORE RELEASE / DISPATCH NOTE', pageW - margin, headerTop + 14, { align: 'right' });
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(9.5);
-    doc.setTextColor(MUTED);
-    doc.text(`No. ${refNo}`, pageW - margin, headerTop + 30, { align: 'right' });
-
-    // Header divider: hairline across, with a short teal accent segment on the left.
-    const hrY = headerTop + 48;
-    doc.setDrawColor(BORDER);
-    doc.setLineWidth(0.8);
-    doc.line(margin, hrY, pageW - margin, hrY);
-    doc.setDrawColor(TEAL);
-    doc.setLineWidth(2);
-    doc.line(margin, hrY, margin + 54, hrY);
-    doc.setLineWidth(0.5);
+    const hrY = drawDocHeader(doc, { logo, title: 'STORE RELEASE / DISPATCH NOTE', refNo, pageW, margin });
 
     // ── Reference row ────────────────────────────────────────────────────────
     let y = hrY + 30;
@@ -157,9 +90,9 @@ export const generateReleaseNote = async (movement: IMovement): Promise<void> =>
     const panelH = 54;
     const panelY = y;
 
-    routePanel(doc, margin, panelY, panelW, panelH, 'SOURCE', TEAL,
+    partyPanel(doc, margin, panelY, panelW, panelH, 'SOURCE', TEAL,
         movement.sourceStore?.name ?? '—', movement.sourceStore?.location?.name ?? '');
-    routePanel(doc, margin + panelW + gap, panelY, panelW, panelH, 'DESTINATION', GOLD,
+    partyPanel(doc, margin + panelW + gap, panelY, panelW, panelH, 'DESTINATION', GOLD,
         movement.destStore?.name ?? recipient ?? '—',
         movement.destStore?.location?.name ?? movement.recipientUser?.branch?.name ?? '');
 
@@ -221,11 +154,18 @@ export const generateReleaseNote = async (movement: IMovement): Promise<void> =>
         ])
         : [['—', 'No items listed', '—', '—', '—']];
 
+    // A long movement spills over: the column head repeats, and every continuation page gets the
+    // document header back so a loose page is still identifiable as this note.
+    const redrawHeader = (): number =>
+        drawDocHeader(doc, { logo, title: 'STORE RELEASE / DISPATCH NOTE', refNo, pageW, margin }) + 26;
+    const tableFirstPage = doc.getNumberOfPages();
+
     autoTable(doc, {
         startY: y,
         head: [['#', 'Item', 'Reference', 'Kind', 'Qty']],
         body,
         theme: 'plain',
+        showHead: 'everyPage',
         styles: { fontSize: 9, cellPadding: { top: 7, right: 8, bottom: 7, left: 8 }, textColor: INK },
         headStyles: { fillColor: TEAL_50, textColor: TEAL_DARK, fontStyle: 'bold', fontSize: 8, cellPadding: { top: 8, right: 8, bottom: 8, left: 8 } },
         alternateRowStyles: { fillColor: WASH },
@@ -235,6 +175,10 @@ export const generateReleaseNote = async (movement: IMovement): Promise<void> =>
             3: { cellWidth: 84, textColor: MUTED },
             4: { cellWidth: 40, halign: 'right', fontStyle: 'bold' },
         },
+        // Headings for the right-aligned columns (# / Qty) must follow their figures.
+        didParseCell: rightAlignHeaders([0, 4]),
+        // top clears the repeated header; bottom keeps rows clear of the footer rule.
+        margin: { top: 104, left: margin, right: margin, bottom: 58 },
         // Thin hairline under each row for a clean, light ledger look.
         didDrawCell: (data) => {
             if (data.section === 'body' && data.column.index === 0) {
@@ -243,153 +187,43 @@ export const generateReleaseNote = async (movement: IMovement): Promise<void> =>
                 doc.line(margin, data.cell.y + data.row.height, pageW - margin, data.cell.y + data.row.height);
             }
         },
-        margin: { left: margin, right: margin },
+        didDrawPage: () => {
+            if (doc.getNumberOfPages() > tableFirstPage) redrawHeader();
+        },
     });
 
     // @ts-expect-error autoTable augments the doc with lastAutoTable at runtime
-    y = (doc.lastAutoTable?.finalY ?? y + 40) + 12;
+    y = (doc.lastAutoTable?.finalY ?? y + 40) + 22;
+    y = ensureSpace(doc, { y, needed: 28, pageH, margin, onNewPage: redrawHeader });
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(8.5);
     doc.setTextColor(MUTED);
     doc.text(`Total:  ${items.length} line item(s)   ·   ${totalUnits} unit(s)`, pageW - margin, y, { align: 'right' });
-    y += 26;
+    y += 36;
 
     // ── Authorisation ────────────────────────────────────────────────────────
+    // Kept whole: the label and all three cards move together rather than stranding a heading at
+    // the foot of one page and its cards at the top of the next.
     const sigH = 128;
-    if (y + sigH + 30 > pageH - margin) {
-        doc.addPage();
-        y = margin + 6;
-    }
+    y = ensureSpace(doc, { y, needed: sigH + 24, pageH, margin, onNewPage: redrawHeader });
     y = sectionLabel(doc, 'Authorisation', margin, y);
 
-    const sigGap = 18;
-    const sigW = (contentW - sigGap * 2) / 3;
     // Released-by is pre-filled with the logged-in (releasing) officer; the other two are blank
     // dotted lines for the courier and the receiving officer to complete by hand.
-    const sigCards: Array<{ role: string; name: string }> = [
-        { role: 'Released by', name: releasedByName },
-        { role: 'Carried by', name: '' },
-        { role: 'Received by', name: '' },
-    ];
+    drawSignatureCards(
+        doc,
+        [
+            { role: 'Released by', name: releasedByName },
+            { role: 'Carried by', name: '' },
+            { role: 'Received by', name: '' },
+        ],
+        { x: margin, y, contentW, height: sigH },
+    );
 
-    /** One labelled field: a printed value on a solid line, or a dotted line to write on. */
-    const fillField = (fx: number, fw: number, lineY: number, caption: string, value?: string) => {
-        if (value) {
-            doc.setFont('helvetica', 'bold');
-            doc.setFontSize(9);
-            doc.setTextColor(INK);
-            doc.text(value, fx, lineY - 4, { maxWidth: fw });
-            doc.setDrawColor(BORDER);
-            doc.setLineWidth(0.6);
-            doc.line(fx, lineY, fx + fw, lineY);
-        } else {
-            doc.setDrawColor(FAINT);
-            doc.setLineWidth(0.6);
-            doc.setLineDashPattern([1, 2.2], 0);
-            doc.line(fx, lineY, fx + fw, lineY);
-            doc.setLineDashPattern([], 0);
-        }
-        doc.setLineWidth(0.5);
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(7);
-        doc.setTextColor(FAINT);
-        doc.text(caption, fx, lineY + 9);
-    };
-
-    sigCards.forEach(({ role, name }, i) => {
-        const x = margin + i * (sigW + sigGap);
-        const padX = 14;
-        const fw = sigW - padX * 2;
-
-        doc.setDrawColor(BORDER);
-        doc.roundedRect(x, y, sigW, sigH, 5, 5, 'S');
-
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(8);
-        doc.setTextColor(TEAL);
-        doc.text(role.toUpperCase(), x + padX, y + 19);
-
-        fillField(x + padX, fw, y + 50, 'Name', name || undefined);
-        fillField(x + padX, fw, y + 82, 'Signature');
-        fillField(x + padX, fw, y + 114, 'Date');
+    drawFooter(doc, {
+        pageW, pageH, margin, refNo,
+        note: 'Confidential — for internal store & logistics use',
     });
-
-    // ── Footer on every page ─────────────────────────────────────────────────
-    const pages = doc.getNumberOfPages();
-    for (let p = 1; p <= pages; p++) {
-        doc.setPage(p);
-        const fy = pageH - 26;
-        doc.setDrawColor(BORDER);
-        doc.setLineWidth(0.5);
-        doc.line(margin, fy, pageW - margin, fy);
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(7.5);
-        doc.setTextColor(FAINT);
-        // Left: confidentiality note (with the ref number appended so nothing overlaps the
-        // right-aligned page count). Right: page count.
-        doc.text(`Pride Bank Limited   ·   Confidential — for internal store & logistics use   ·   ${refNo}`, margin, fy + 12);
-        doc.text(`Page ${p} of ${pages}`, pageW - margin, fy + 12, { align: 'right' });
-    }
 
     doc.save(`release-note-movement-${movement.id ?? 'draft'}.pdf`);
 };
-
-// ── Helpers ──────────────────────────────────────────────────────────────────
-
-/** Gold-underlined uppercase section heading. Returns the y where content should start. */
-function sectionLabel(doc: jsPDF, label: string, x: number, y: number): number {
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(9);
-    doc.setTextColor(GOLD_DARK);
-    const text = label.toUpperCase();
-    doc.text(text, x, y);
-    const w = Math.max(doc.getTextWidth(text), 22);
-    doc.setDrawColor(GOLD);
-    doc.setLineWidth(1.4);
-    doc.line(x, y + 4, x + w, y + 4);
-    doc.setLineWidth(0.5);
-    return y + 17;
-}
-
-/** A tinted source/destination panel. */
-function routePanel(
-    doc: jsPDF, x: number, y: number, w: number, h: number,
-    label: string, accent: string, name: string, sub: string,
-): void {
-    doc.setDrawColor(BORDER);
-    doc.setFillColor(WASH);
-    doc.roundedRect(x, y, w, h, 5, 5, 'FD');
-    doc.setFillColor(accent);
-    doc.roundedRect(x, y, 3.5, h, 2, 2, 'F');
-
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(7.5);
-    doc.setTextColor(accent);
-    doc.text(label, x + 15, y + 18);
-
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(11);
-    doc.setTextColor(INK);
-    doc.text(name, x + 15, y + 34, { maxWidth: w - 26 });
-
-    if (sub) {
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(8.5);
-        doc.setTextColor(MUTED);
-        doc.text(sub, x + 15, y + 46, { maxWidth: w - 26 });
-    }
-}
-
-/** A rounded status pill, right-anchored at x. */
-function drawPill(doc: jsPDF, text: string, x: number, y: number, bg: string, fg: string): void {
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(8);
-    const padX = 9;
-    const w = doc.getTextWidth(text) + padX * 2;
-    const h = 16;
-    const bx = x - w;
-    doc.setFillColor(bg);
-    doc.roundedRect(bx, y - 11, w, h, 8, 8, 'F');
-    doc.setTextColor(fg);
-    doc.text(text, bx + padX, y);
-}
