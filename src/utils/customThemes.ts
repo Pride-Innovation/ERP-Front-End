@@ -431,9 +431,16 @@ const customThemes = createTheme({
         MuiPopover: {
             styleOverrides: {
                 paper: {
+                    // Set explicitly so MuiPaper.root's larger radii.lg can't compete on the same
+                    // element — two radii on one box reads as a doubled edge.
                     borderRadius: radii.md,
                     border: `1px solid ${border.subtle}`,
-                    boxShadow: elevation.floating,
+                    // Not elevation.floating: that is 30px of blur at zero spread, which scales with
+                    // the element. It reads as a gentle lift under a short Select dropdown, but a
+                    // tall row-action menu paints the same halo down its whole height and pools it at
+                    // the bottom. Negative spread keeps the shadow hugging the edge whatever the
+                    // height, so a six-item menu looks as light as a three-item one.
+                    boxShadow: elevation.popover,
                 },
             },
         },

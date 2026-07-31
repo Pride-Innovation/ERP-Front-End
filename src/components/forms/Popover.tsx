@@ -11,6 +11,7 @@ import Grow from '@mui/material/Grow';
 import { IPopover } from './interface';
 import { alpha, Box, Divider, MenuItem, Typography } from '@mui/material';
 import { IOptions } from '../tables/interface';
+import { elevation } from '../../utils/tokens';
 
 const PRIMARY = '#08796C';
 const DANGER = '#DC2626';
@@ -52,22 +53,27 @@ const PopoverComponent = ({
                 disableScrollLock
                 TransitionComponent={Grow}
                 transitionDuration={180}
-                // Radius/border are inherited from the theme's default popover paper (matching the
-                // app's Select dropdowns), but the shadow is overridden: the theme's soft
-                // 0 10px 30px (zero-spread) shadow blooms heavily on this tall row-action menu. A
-                // tight, negative-spread shadow hugs the edge so it reads clean and light — as light
-                // as the short Select dropdowns — regardless of the menu's height. The nested
-                // selector is required to reliably beat the theme's `.MuiPopover-paper` shadow.
-                sx={{
-                    '& .MuiPopover-paper': {
-                        boxShadow: '0 6px 16px -8px rgba(15, 23, 42, 0.12)',
-                    },
-                }}
+                // Popover defaults to elevation 8; 0 keeps MUI's own elevation shadow out of the way
+                // so the only box-shadow in play is the one set below.
+                elevation={0}
                 PaperProps={{
                     sx: {
                         mt: 0.5,
                         minWidth: 218,
-                        overflow: 'hidden',
+                        // Must stay scrollable vertically. MUI clamps the paper to
+                        // `maxHeight: calc(100% - 32px)` and pins it to `top: 16px` once the menu is
+                        // taller than the space below its anchor — with `overflow: hidden` the items
+                        // past that clamp are clipped with no way to reach them, and the destructive
+                        // action sits last. Horizontal stays hidden so hover states keep to the
+                        // rounded corners.
+                        overflowY: 'auto',
+                        overflowX: 'hidden',
+                        // `elevation.floating` (the theme default for menu surfaces) is a 30px blur
+                        // at zero spread. That reads as a gentle lift under a short Select, but this
+                        // menu runs ~400px tall and the same blur smears down its whole height and
+                        // pools at the bottom. The negative spread here pulls the shadow back against
+                        // the edge, so the lift stays identical whatever the menu's height.
+                        boxShadow: elevation.flat,
                     },
                 }}
             >

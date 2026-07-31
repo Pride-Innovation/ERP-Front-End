@@ -141,8 +141,13 @@ export const elevation = {
     card:     '0px 1px 3px rgba(0, 0, 0, 0.08), 0px 1px 2px rgba(0, 0, 0, 0.04)',
     /** Slightly raised — hover state, sticky toolbars. */
     raised:   '0px 4px 6px -1px rgba(0, 0, 0, 0.07), 0px 2px 4px -1px rgba(0, 0, 0, 0.04)',
-    /** Floating — menus, popovers. */
+    /** Floating — short dropdowns. Zero spread, so the halo grows with the element's height. */
     floating: '0px 10px 30px rgba(0, 0, 0, 0.12)',
+    /**
+     * Popovers and any menu tall enough for {@link floating} to bloom — negative spread pulls the
+     * shadow back against the edge, so the surface reads the same whether it holds three rows or ten.
+     */
+    popover:  '0px 6px 16px -6px rgba(15, 23, 42, 0.18), 0px 2px 6px -2px rgba(15, 23, 42, 0.08)',
     /** Overlay — modal/dialog. */
     overlay:  '0px 25px 50px -12px rgba(0, 0, 0, 0.25)',
 } as const;
