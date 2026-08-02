@@ -38,6 +38,12 @@ const UserInfoCard = ({
 }: UserInfoCardProps) => {
     // const theme = useTheme();
 
+    // Drop missing parts rather than stitching them into a name padded with
+    // stray spaces (or one made entirely of them).
+    const fullName = [user?.firstName, user?.lastName, user?.otherName]
+        .filter(Boolean)
+        .join(' ');
+
     return (
         <Paper
             elevation={0}
@@ -112,26 +118,30 @@ const UserInfoCard = ({
                     <InfoItem
                         icon={<PersonIcon fontSize="small" />}
                         label="Full Name"
-                        value={`${user?.firstName || ''} ${user?.lastName || ''} ${user?.otherName || ''}`}
+                        value={fullName}
+                        emptyText="Name not on record"
                     />
 
                     <InfoItem
                         icon={<EmailIcon fontSize="small" />}
                         label="Email Address"
-                        value={user?.email || 'Not specified'}
+                        value={user?.email || ''}
+                        emptyText="No email address"
                         copyable
                     />
 
                     <InfoItem
                         icon={<WcIcon fontSize="small" />}
                         label="Gender"
-                        value={user?.gender ? user.gender.charAt(0).toUpperCase() + user.gender.slice(1) : 'Not specified'}
+                        value={user?.gender ? user.gender.charAt(0).toUpperCase() + user.gender.slice(1) : ''}
+                        emptyText="Not specified"
                     />
 
                     <InfoItem
                         icon={<PersonIcon fontSize="small" />}
                         label="Title"
-                        value={user?.title?.name || 'Not specified'}
+                        value={user?.title?.name || ''}
+                        emptyText="No title assigned"
                     />
                 </Stack>
             </Box>
