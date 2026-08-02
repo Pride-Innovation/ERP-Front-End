@@ -73,6 +73,10 @@ const UserHeader = ({
     const isAvailable = user?.availability === 'present';
     const account = accountState(user);
 
+    const fullName = [user?.firstName, user?.lastName, user?.otherName]
+        .filter(Boolean)
+        .join(' ');
+
     const unitName =
         user?.unit && typeof user.unit === 'object' ? user.unit.name : null;
     const departmentLine = [user?.department?.name, unitName].filter(Boolean).join(' · ');
@@ -128,7 +132,7 @@ const UserHeader = ({
                     >
                         <Avatar
                             src={userImage}
-                            alt={`${user?.firstName || ''} ${user?.lastName || ''}`}
+                            alt={fullName || 'User profile photo'}
                             sx={{
                                 width: { xs: 96, md: 104 },
                                 height: { xs: 96, md: 104 },
@@ -165,8 +169,7 @@ const UserHeader = ({
                                     lineHeight: 1.2,
                                 }}
                             >
-                                {user?.firstName} {user?.lastName}
-                                {user?.otherName && ` ${user.otherName}`}
+                                {fullName || 'Unnamed User'}
                             </Typography>
 
                             <StatusChip
