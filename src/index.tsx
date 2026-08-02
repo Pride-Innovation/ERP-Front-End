@@ -23,7 +23,6 @@ import customThemes from './utils/customThemes';
 import AutocompleteContextProvider from './context/autocomplete';
 import StoreContextProvider from './context/store';
 import AssetContextProvider from './context/asset';
-import DashboardProvider from './context/dashboard';
 import FormContextProvider from './context/form';
 
 // Suppress the benign "ResizeObserver loop completed with undelivered notifications"
@@ -52,11 +51,9 @@ root.render(
                       <TestContextProvider>
                         <StoreContextProvider>
                           <AssetContextProvider>
-                            <DashboardProvider>
-                              <FormContextProvider>
-                                <App />
-                              </FormContextProvider>
-                            </DashboardProvider>
+                            <FormContextProvider>
+                              <App />
+                            </FormContextProvider>
                           </AssetContextProvider>
                         </StoreContextProvider>
                       </TestContextProvider>

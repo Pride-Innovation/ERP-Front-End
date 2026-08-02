@@ -22,6 +22,9 @@ import { validateInventoryItems } from '../../../utils/helpers';
 import { toast } from 'react-toastify';
 import CommodityUtills from '../../settings/commodity/utills';
 import { ROUTES } from '../../../core/routes/routes';
+import usePermissions from '../../../core/permissions/usePermissions';
+import RoutesUtills from '../../../core/routes/utills';
+import { canEditRequest } from './actionRules';
 
 const UpdateRequest = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
@@ -32,6 +35,8 @@ const UpdateRequest = () => {
     const [file, setFile] = useState<File | null>(null);
     const { fetchAllCommodities } = CommodityUtills();
     const navigate = useNavigate();
+    const { has } = usePermissions();
+    const { getCurrentUser } = RoutesUtills();
 
     // New state to track if file was initially present and file type
     const [initialFile, setInitialFile] = useState<{
@@ -73,6 +78,15 @@ const UpdateRequest = () => {
             const response = await findAssetRequestByIDService(id as string) as IRequestAxiosResponse;
             if (response.status === 200) {
                 const { data } = response;
+
+                // The route is reachable by typing the URL, so re-check here rather than trusting
+                // that the caller only linked here from an Edit button it had already gated.
+                if (!canEditRequest(data, { id: getCurrentUser()?.id, has })) {
+                    toast.error("This request can no longer be edited.");
+                    navigate(ROUTES.REQUEST);
+                    return;
+                }
+
                 setDefaultRequest({ ...data, status: data.status?.id });
 
                 // Populate the Request Items table straight from the fetched request.

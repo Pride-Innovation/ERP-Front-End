@@ -26,7 +26,7 @@ import {
     Typography,
 } from '@mui/material';
 import NotesOutlinedIcon from '@mui/icons-material/NotesOutlined';
-import DescriptionText from '../../dashboard/sections/DescriptionText';
+import DescriptionText from './DescriptionText';
 import { fieldSx } from '../../../components/forms/Inputs';
 import { ICommodity } from '../../settings/commodity/interface';
 

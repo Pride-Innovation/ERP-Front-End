@@ -125,6 +125,23 @@ export const assetStatus: {
 }
 
 
+/**
+ * @deprecated These category names no longer exist.
+ *
+ * Asset categories became configurable (Settings → Asset Categories) and the seed now defines
+ * twelve of them: "IT Equipment" is now "Computers", "Office Equipment" split into "Furniture"
+ * and "Equipment", and "Fleet" is "Vehicle/Fleet". Only "Stationery" survives by name. Every
+ * comparison against these values therefore fails silently and takes the fallback branch.
+ *
+ * The dashboard no longer reads this — it derives categories from the AssetType store (see
+ * `pages/dashboard/categories.ts`). Two callers still do, and both need the same treatment:
+ *
+ *   - `components/tables/utills.tsx` — also carries hardcoded `assetTypeId` values (2, 1, 55)
+ *     that are environment-specific ids, not stable identifiers.
+ *   - `pages/assets/general/formUtills.tsx`
+ *
+ * Fix those by looking the category up in the AssetType store by id, then delete this.
+ */
 export const assetTypesStatusConstants: {
     itEquipment: string;
     officeEquipment: string;

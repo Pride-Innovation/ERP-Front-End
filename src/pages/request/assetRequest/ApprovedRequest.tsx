@@ -79,21 +79,29 @@ const ApproveRequest = ({
         setSendingRequest(true);
         try {
             const data = {
+                // The actor is whoever is signed in, not the request's `currentApprover`. The
+                // backend records this id as the step actor and checks it against the requester
+                // for self-approval, so sending the request's own field credited the wrong person
+                // — and sent nothing at all when the request had no approver assigned.
                 requestId: request.id,
-                approverId: request.currentApprover?.id,
+                approverId: loggedInUser?.id,
                 workflowAction: "APPROVED",
                 comment
             }
             const response = await assetRequestApprovalRejectionService(data) as IRequestAxiosResponse;
             if (response.status === 201) {
                 toast.success("Request has been Approved.");
+                handleClose();
+            } else {
+                // Leave the modal open on failure so the typed comment survives and the user can
+                // retry — closing regardless used to make a rejected call look like a success.
+                toast.error("Failed to approve request. Please try again.");
             }
         } catch (error) {
             console.error(error);
             toast.error("Failed to approve request. Please try again.");
         } finally {
             setSendingRequest(false);
-            handleClose();
         }
     };
 

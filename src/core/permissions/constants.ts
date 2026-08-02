@@ -69,6 +69,14 @@ export const PERMISSIONS = {
     ISSUE_ITEMS: 'ISSUE_ITEMS',
     ACKNOWLEDGE_REQUEST: 'ACKNOWLEDGE_REQUEST',
     APPROVE_ISSUANCE: 'APPROVE_ISSUANCE',
+
+    /**
+     * Lifts the "your branch only" restriction — the holder sees every branch plus Head Office.
+     * Granted and revoked like any other permission, so Head Office staff who need a national
+     * view get it and branch staff do not. Mirrors the backend's BranchScopeService, which
+     * enforces the same rule server-side; this constant only decides what the UI offers.
+     */
+    VIEW_ALL_BRANCHES: 'VIEW_ALL_BRANCHES',
 } as const;
 
 export type PermissionName = typeof PERMISSIONS[keyof typeof PERMISSIONS];

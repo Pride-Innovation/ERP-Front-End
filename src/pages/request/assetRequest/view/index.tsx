@@ -64,16 +64,20 @@ import { RequestContext } from "../../../../context/request/RequestContext";
 import RequestUtills from "../utills";
 import { findAssetRequestByIDService } from "../service";
 import RoutesUtills from "../../../../core/routes/utills";
+import { ROUTES } from "../../../../core/routes/routes";
 import usePermissions from "../../../../core/permissions/usePermissions";
-import { PERMISSIONS } from "../../../../core/permissions/constants";
+import { canApproveRequest, canEditRequest, canRejectRequest } from "../actionRules";
 
 import { IRequest, IRequestAxiosResponse } from "../../interface";
 import { ICommodity } from "../../../settings/commodity/interface";
 import { brand, neutral, border, surface } from "../../../../utils/tokens";
+import { camelCaseToWords } from "../../../../utils/helpers";
 
 const TEAL = '#08796C';
 
 // ─── Status configuration ─────────────────────────────────────────────────────
+// Keys are the seeded status *codes* lowercased (see StatusSeeder on the backend). Every code
+// the seeder defines should appear here, since an entry is what gives the chip its colour.
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
     requestcreated:          { label: 'Submitted',                color: '#1565C0', bg: '#E3F2FD' },
     requestapproved:         { label: 'Approved',                 color: '#2E7D32', bg: '#E8F5E9' },
@@ -81,21 +85,37 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }
     hodapproved:             { label: 'HOD Approved',             color: '#1B5E20', bg: '#C8E6C9' },
     bomapproved:             { label: 'BOM Approved',             color: '#33691E', bg: '#DCEDC8' },
     branchmanagerapproved:   { label: 'Branch Manager Approved',  color: '#1A237E', bg: '#E8EAF6' },
+    supervisorapproved:      { label: 'Supervisor Approved',      color: '#2E7D32', bg: '#E8F5E9' },
+    unitacknowledged:        { label: 'Unit Acknowledged',        color: '#00695C', bg: '#E0F2F1' },
     requestrejected:         { label: 'Rejected',                 color: '#C62828', bg: '#FFEBEE' },
+    issuanceavailable:       { label: 'Available for Issuance',   color: '#00838F', bg: '#E0F7FA' },
     issuanceapproved:        { label: 'Issuance Approved',        color: '#6A1B9A', bg: '#F3E5F5' },
     issued:                  { label: 'Issued',                   color: '#00695C', bg: '#E0F2F1' },
+    assetissued:             { label: 'Issued',                   color: '#00695C', bg: '#E0F2F1' },
+    intransit:               { label: 'In Transit',               color: '#4338CA', bg: '#E8EAF6' },
     inmaintenance:           { label: 'In Maintenance',           color: '#E65100', bg: '#FFF3E0' },
     receiptacknowledged:     { label: 'Receipt Acknowledged',     color: '#1B5E20', bg: '#F1F8E9' },
     assetassigned:           { label: 'Assigned',                 color: '#0277BD', bg: '#E1F5FE' },
+    pendingdisposal:         { label: 'Pending Disposal',         color: '#8D6E63', bg: '#EFEBE9' },
     requireupdate:           { label: 'Requires Update',          color: '#F57F17', bg: '#FFFDE7' },
     stockpending:            { label: 'Stock Pending',            color: '#BF360C', bg: '#FBE9E7' },
     stockcompleted:          { label: 'Stock Completed',          color: '#33691E', bg: '#F9FBE7' },
+    stockclosedshort:        { label: 'Closed Short',             color: '#BF360C', bg: '#FBE9E7' },
     senttostore:             { label: 'Sent to Store',            color: '#4A148C', bg: '#EDE7F6' },
 };
 
+/**
+ * Falls back to spacing out the camelCase code rather than printing it raw.
+ *
+ * A code missing from the map above used to reach the user verbatim — "supervisorApproved" on
+ * the chip — which reads as a bug to anyone who is not a developer. Statuses are seeded and can
+ * be added without a frontend change, so the fallback has to stay readable on its own.
+ * `camelCaseToWords` is the same helper the request table uses, so both views agree.
+ */
 const getStatusConfig = (statusCode?: string) => {
     if (!statusCode) return { label: 'Unknown', color: '#616161', bg: '#F5F5F5' };
-    return STATUS_CONFIG[statusCode.toLowerCase()] ?? { label: statusCode, color: '#616161', bg: '#F5F5F5' };
+    return STATUS_CONFIG[statusCode.toLowerCase()]
+        ?? { label: camelCaseToWords(statusCode), color: '#616161', bg: '#F5F5F5' };
 };
 
 const StatusChip = ({ statusCode }: { statusCode?: string }) => {
@@ -289,19 +309,10 @@ const RequestDetails = () => {
         }
     }, [request]);
 
-    const canEdit =
-        request.status?.status === 'requestCreated' ||
-        request.status?.status === 'requestRejected';
-
-    const TERMINAL_STATUSES = new Set(['requestRejected', 'receiptAcknowledged', 'issued', 'assetAssigned']);
-    const isDesignatedApprover =
-        !!request.currentApprover?.id &&
-        !!currentUser?.id &&
-        String(request.currentApprover.id) === String(currentUser.id);
-    const hasNoDesignatedApprover = !request.currentApprover?.id;
-    const isApprovable = !!request.status?.status && !TERMINAL_STATUSES.has(request.status.status);
-    const canApprove = (isDesignatedApprover || hasNoDesignatedApprover) && isApprovable && has(PERMISSIONS.APPROVE_REQUEST);
-    const canReject  = (isDesignatedApprover || hasNoDesignatedApprover) && isApprovable && has(PERMISSIONS.REJECT_REQUEST);
+    const actor = { id: currentUser?.id, has };
+    const canEdit = canEditRequest(request, actor);
+    const canApprove = canApproveRequest(request, actor);
+    const canReject = canRejectRequest(request, actor);
 
     const TABS = [
         { label: 'Requested Items', icon: <ListAltOutlinedIcon fontSize="small" /> },
@@ -392,25 +403,28 @@ const RequestDetails = () => {
 
                         {/* Action buttons */}
                         <Stack direction="row" spacing={1} sx={{ flexShrink: 0, flexWrap: 'wrap', gap: 1, alignItems: 'flex-start' }}>
-                            <MuiButton
-                                variant="outlined"
-                                size="small"
-                                startIcon={<EditOutlinedIcon fontSize="small" />}
-                                disabled={!canEdit}
-                                onClick={() => navigate(`/requests/edit/${request.id}`)}
-                                sx={{
-                                    color: brand[600],
-                                    borderColor: alpha(brand[500], 0.35),
-                                    borderRadius: '10px',
-                                    textTransform: 'none',
-                                    fontSize: '0.8rem',
-                                    fontWeight: 700,
-                                    '&:hover': { borderColor: brand[500], bgcolor: alpha(brand[50], 0.7) },
-                                    '&.Mui-disabled': { color: neutral[400], borderColor: neutral[200] },
-                                }}
-                            >
-                                Edit
-                            </MuiButton>
+                            {/* Hidden rather than disabled, to match Approve and Reject below —
+                                a permanently dead button on every request you did not raise
+                                reads as a fault rather than as "not yours to edit". */}
+                            {canEdit && (
+                                <MuiButton
+                                    variant="outlined"
+                                    size="small"
+                                    startIcon={<EditOutlinedIcon fontSize="small" />}
+                                    onClick={() => navigate(`${ROUTES.UPDATE_REQUEST}/${request.id}`)}
+                                    sx={{
+                                        color: brand[600],
+                                        borderColor: alpha(brand[500], 0.35),
+                                        borderRadius: '10px',
+                                        textTransform: 'none',
+                                        fontSize: '0.8rem',
+                                        fontWeight: 700,
+                                        '&:hover': { borderColor: brand[500], bgcolor: alpha(brand[50], 0.7) },
+                                    }}
+                                >
+                                    Edit
+                                </MuiButton>
+                            )}
 
                             {canApprove && (
                                 <MuiButton

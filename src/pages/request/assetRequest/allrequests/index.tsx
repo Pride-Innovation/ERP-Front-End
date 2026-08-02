@@ -140,22 +140,25 @@ const Request = () => {
         const hasAcknowledgeRequestPermission = has(PERMISSIONS.ACKNOWLEDGE_REQUEST);
         const hasIssueItemsPermission = has(PERMISSIONS.ISSUE_ITEMS);
 
+        // Update and Delete were unconditional, so the menu offered them to users holding neither
+        // permission and the failure only surfaced on the destination page. Per-row status and
+        // ownership are still narrowed by handleOptionsFilter in components/tables/utills.
         const newOptions = [
             {
                 value: crudStates.read,
                 label: "View Details",
                 icon: <RemoveRedEyeIcon fontSize="small" color="inherit" />
             },
-            {
+            ...(has(PERMISSIONS.UPDATE_REQUEST) ? [{
                 value: crudStates.update,
                 label: "Update",
                 icon: <ModeEditIcon fontSize="small" color="info" />
-            },
-            {
+            }] : []),
+            ...(has(PERMISSIONS.DELETE_REQUEST) ? [{
                 value: crudStates.delete,
                 label: "Delete",
                 icon: <InfoIcon fontSize="small" color="error" />
-            },
+            }] : []),
             {
                 value: crudStates.acknowledgeReceipt,
                 label: "Acknowledge Receipt",

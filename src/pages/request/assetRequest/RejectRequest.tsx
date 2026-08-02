@@ -80,21 +80,26 @@ const RejectRequest = ({
         setSendingRequest(true);
         try {
             const data = {
+                // See ApprovedRequest — the actor is the signed-in user, not the request's
+                // `currentApprover`.
                 requestId: request.id,
-                approverId: request.currentApprover?.id,
+                approverId: loggedInUser?.id,
                 workflowAction: "REJECTED",
                 comment
             }
             const response = await assetRequestApprovalRejectionService(data) as IRequestAxiosResponse;
             if (response.status === 201) {
                 toast.success("Request has been rejected.");
+                handleClose();
+            } else {
+                // Keep the modal open so the typed reason is not lost on a failed call.
+                toast.error("Failed to reject request. Please try again.");
             }
         } catch (error) {
             console.error(error);
             toast.error("Failed to reject request. Please try again.");
         } finally {
             setSendingRequest(false);
-            handleClose();
         }
     };
 
