@@ -62,7 +62,10 @@ import RejectRequest from "../RejectRequest";
 
 import { RequestContext } from "../../../../context/request/RequestContext";
 import RequestUtills from "../utills";
-import { findAssetRequestByIDService } from "../service";
+import { toast } from "react-toastify";
+import { fetchWorkflowStepLogsService, findAssetRequestByIDService } from "../service";
+import { IStepLog, printEligibility } from "./approvalTrail";
+import { generateApprovalPdf } from "./generateApprovalPdf";
 import RoutesUtills from "../../../../core/routes/utills";
 import { ROUTES } from "../../../../core/routes/routes";
 import usePermissions from "../../../../core/permissions/usePermissions";
@@ -269,6 +272,9 @@ const RequestDetails = () => {
     const [approveModalOpen, setApproveModalOpen] = useState(false);
     const [rejectModalOpen, setRejectModalOpen] = useState(false);
     const [sendingAction, setSendingAction] = useState(false);
+    const [stepLogs, setStepLogs] = useState<IStepLog[]>([]);
+    const [stepLogsLoaded, setStepLogsLoaded] = useState(false);
+    const [printing, setPrinting] = useState(false);
 
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
@@ -298,7 +304,17 @@ const RequestDetails = () => {
         }
     };
 
-    useEffect(() => { if (id) fetchRequestDetails(); }, [id]);
+    // The workflow trail decides both whether the approval certificate may be printed and what
+    // goes in it, so it is fetched with the page rather than only when the button is pressed.
+    const fetchStepLogs = async () => {
+        if (!id) return;
+        setStepLogsLoaded(false);
+        const response = (await fetchWorkflowStepLogsService(id)) as { status?: number; data?: IStepLog[] };
+        setStepLogs(response?.status === 200 ? (response.data ?? []) : []);
+        setStepLogsLoaded(true);
+    };
+
+    useEffect(() => { if (id) { fetchRequestDetails(); fetchStepLogs(); } }, [id]);
 
     useEffect(() => {
         if (request.id) {
@@ -313,6 +329,20 @@ const RequestDetails = () => {
     const canEdit = canEditRequest(request, actor);
     const canApprove = canApproveRequest(request, actor);
     const canReject = canRejectRequest(request, actor);
+
+    const printable = printEligibility(request, stepLogs, stepLogsLoaded);
+
+    const handlePrintApprovals = async () => {
+        setPrinting(true);
+        try {
+            await generateApprovalPdf(request, stepLogs);
+        } catch (err) {
+            console.error(err);
+            toast.error('Could not generate the approval certificate. Please try again.');
+        } finally {
+            setPrinting(false);
+        }
+    };
 
     const TABS = [
         { label: 'Requested Items', icon: <ListAltOutlinedIcon fontSize="small" /> },
@@ -403,6 +433,42 @@ const RequestDetails = () => {
 
                         {/* Action buttons */}
                         <Stack direction="row" spacing={1} sx={{ flexShrink: 0, flexWrap: 'wrap', gap: 1, alignItems: 'flex-start' }}>
+                            {/* Shown disabled rather than hidden, unlike Edit/Approve/Reject: those
+                                depend on who you are, so a hidden button is simply "not yours".
+                                This one depends on how far the request has got, so anyone may
+                                eventually print it — and the tooltip says what is still missing. */}
+                            <Tooltip
+                                arrow
+                                title={printable.allowed
+                                    ? 'Download the approval certificate as a PDF'
+                                    : printable.reason}
+                            >
+                                {/* A disabled button fires no events, so the tooltip needs a live
+                                    wrapper to hang off — otherwise the explanation never shows on
+                                    exactly the rows where it matters. */}
+                                <Box component="span" sx={{ display: 'inline-flex' }}>
+                                    <MuiButton
+                                        variant="outlined"
+                                        size="small"
+                                        disabled={!printable.allowed || printing}
+                                        startIcon={<PictureAsPdfOutlinedIcon fontSize="small" />}
+                                        onClick={handlePrintApprovals}
+                                        sx={{
+                                            color: brand[600],
+                                            borderColor: alpha(brand[500], 0.35),
+                                            borderRadius: '10px',
+                                            textTransform: 'none',
+                                            fontSize: '0.8rem',
+                                            fontWeight: 700,
+                                            '&:hover': { borderColor: brand[500], bgcolor: alpha(brand[50], 0.7) },
+                                            '&.Mui-disabled': { color: neutral[400], borderColor: neutral[200] },
+                                        }}
+                                    >
+                                        {printing ? 'Preparing…' : 'Print Approvals'}
+                                    </MuiButton>
+                                </Box>
+                            </Tooltip>
+
                             {/* Hidden rather than disabled, to match Approve and Reject below —
                                 a permanently dead button on every request you did not raise
                                 reads as a fault rather than as "not yours to edit". */}
