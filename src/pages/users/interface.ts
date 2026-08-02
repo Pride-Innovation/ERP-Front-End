@@ -34,8 +34,9 @@ export interface IUser {
     /** Optional unit (Head Office). Carries the id when set from the form, or the summary object from the API. */
     unit?: { id: number; name: string; groupEmail?: string | null } | number | null;
     enabled?: boolean | null;
-    lastModifiedBy?: IUser | null
-    createdBy?: IUser | null
+    /** Audit columns — the API returns the actor's user id, not the user object. */
+    lastModifiedBy?: number | null
+    createdBy?: number | null
     createDate?: string | null
     lastModified?: string | null
     accountNonLocked?: boolean | null;
