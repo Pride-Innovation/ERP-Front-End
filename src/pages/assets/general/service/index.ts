@@ -44,14 +44,10 @@ const updateAssetService = async (body: object, id: string | number) => {
     }
 };
 
-const disposeAssetService = async (id: string | number) => {
-    try {
-        const response = await axiosInstance.post(`assets/${id}`);
-        return response;
-    } catch (error) {
-        return error;
-    }
-};
+// The flag-only dispose (POST assets/{id}) has been removed. It set `disposed` and a date but
+// created no movement, moved no stock and changed no status, so an asset could read as disposed
+// while still sitting in a branch store. Disposal now goes through `disposeAssetService` in
+// pages/movement/service, which raises a DISPOSAL_TRANSFER and enforces the eligibility rules.
 
 const reassignAssetService = async (id: string | number, body: object) => {
     try {
@@ -139,7 +135,6 @@ export {
     createAssetService,
     getAssetByIdService,
     updateAssetService,
-    disposeAssetService,
     reassignAssetService,
     repairAssetService,
     completeRepairAssetService,
@@ -160,9 +155,6 @@ export {
     updateAssetService as updateOfficeEquipmentService,
     updateAssetService as updateITEquipmentService,
     updateAssetService as updateFleetEquipmentService,
-    disposeAssetService as disposeOfficeEquipmentService,
-    disposeAssetService as disposeITEquipmentService,
-    disposeAssetService as disposeFleetService,
     reassignAssetService as reassignOfficeEquipmentService,
     reassignAssetService as reassignITEquipmentService,
     reassignAssetService as reassignFleetService,

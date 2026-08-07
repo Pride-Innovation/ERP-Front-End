@@ -67,6 +67,12 @@ export interface IMovement {
     /** True once the source → courier custody-store ledger hop has been applied. */
     custodyTransferSettled?: boolean;
 
+    /**
+     * The journey this movement rides on, if any. Set means dispatch and transit belong to the
+     * consignment — a movement travelling with others is never driven on its own.
+     */
+    consignment?: { id: number; reference?: string | null; status?: string | null } | null;
+
     receivingOfficer?: IUser | null;
     receiptDate?: string | null;
     receiptStatus?: ReceiptStatus | null;
@@ -114,7 +120,11 @@ export interface IMovementCreatePayload {
     requestId?: number | string | null;
     repairId?: number | string | null;
     remarks?: string | null;
-    /** Route this movement through the initiator's approval ladder before it can be dispatched. */
+    /**
+     * Opt a movement into the initiator's approval ladder. The manual create form no longer sends
+     * this — the server derives it from the movement category — but the repair and return flows do,
+     * since those need approval even when they stay within one location.
+     */
     requiresApproval?: boolean | null;
     items: { assetId?: number | string | null; commodityId?: number | string | null; quantity?: number }[];
 }
@@ -131,7 +141,45 @@ export interface IMovementFormData {
     dispatchDate?: string | null;
     expectedDeliveryDate?: string | null;
     remarks?: string | null;
-    requiresApproval?: boolean;
+}
+
+/**
+ * What a repair-flow form can state before anything is submitted. Every field is display-only —
+ * none of it is sent back, because the server re-derives it on write from the same code path.
+ */
+export interface IMovementFlowPreview {
+    sourceStoreName?: string | null;
+    sourceLocationName?: string | null;
+    destinationStoreName?: string | null;
+    destinationLocationName?: string | null;
+    /** Drives whether the form asks for courier, tracking, dispatch and expected-delivery at all. */
+    interLocation: boolean;
+    recipientUserId?: number | null;
+    recipientUserName?: string | null;
+    /** The recorded holder has left, so the asset returns to its branch unassigned as pool stock. */
+    returningToBranchUnassigned: boolean;
+    loanerAssetId?: number | null;
+    loanerAssetLabel?: string | null;
+    /** Set when the flow cannot proceed — shown beside the field rather than thrown at submit. */
+    blockedReason?: string | null;
+}
+
+/**
+ * An asset offered by the disposal picker. The age judgement is made server-side so the same rule
+ * governs what the picker shows and what the write endpoint accepts.
+ */
+export interface IDisposalCandidate {
+    id: number;
+    name?: string | null;
+    engravedNumber?: string | null;
+    serialNumber?: string | null;
+    assetTypeName?: string | null;
+    storeName?: string | null;
+    locationName?: string | null;
+    monthsInService: number;
+    usefulLifeMonths?: number | null;
+    /** When false, disposing this asset requires a written reason. */
+    pastUsefulLife: boolean;
 }
 
 /** Paginated list response. */

@@ -95,6 +95,8 @@ const MOVEMENT: string = `${ASSETS_MANAGEMENT}/movement`;
 const CREATE_MOVEMENT: string = `${ASSETS_MANAGEMENT}/movement/create`
 const UPDATE_MOVEMENT: string = `${ASSETS_MANAGEMENT}/movement/update`
 const READ_MOVEMENT: string = `${ASSETS_MANAGEMENT}/movement/view`
+/** Consignments — the physical journeys that movements ride on. */
+const CONSIGNMENTS: string = `${ASSETS_MANAGEMENT}/movement/consignments`
 
 export const ROUTES = {
     FORGOT_PASSWORD,
@@ -151,6 +153,7 @@ export const ROUTES = {
     CREATE_MOVEMENT,
     UPDATE_MOVEMENT,
     READ_MOVEMENT,
+    CONSIGNMENTS,
     REPORTS,
     APPROVAL_WORKFLOWS,
     NOTIFICATIONS

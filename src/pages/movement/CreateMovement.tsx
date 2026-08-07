@@ -52,7 +52,8 @@ const CreateMovement = () => {
             dispatchDate: toIso(data.dispatchDate),
             expectedDeliveryDate: toIso(data.expectedDeliveryDate),
             remarks: data.remarks || null,
-            requiresApproval: data.requiresApproval ?? false,
+            // Deliberately not sent: the server derives this from the movement category. Sending a
+            // client-chosen value is what allowed a cross-location movement to skip approval.
             items: items.map((i) => ({ assetId: i.assetId ?? null, commodityId: i.commodityId ?? null, quantity: i.quantity })),
         };
 

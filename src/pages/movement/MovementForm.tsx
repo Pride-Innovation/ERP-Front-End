@@ -7,8 +7,8 @@ Managing Director
 
 import { useEffect, useMemo, useState } from 'react';
 import {
-    alpha, Autocomplete, Box, Button, Chip, CircularProgress, Divider, FormControlLabel, Grid, IconButton,
-    MenuItem, Paper, Stack, Switch, TextField, ToggleButton, ToggleButtonGroup, Tooltip, Typography,
+    alpha, Autocomplete, Box, Button, Chip, CircularProgress, Divider, Grid, IconButton,
+    MenuItem, Paper, Stack, TextField, ToggleButton, ToggleButtonGroup, Tooltip, Typography,
 } from '@mui/material';
 import HowToRegOutlinedIcon from '@mui/icons-material/HowToRegOutlined';
 import SwapHorizOutlinedIcon from '@mui/icons-material/SwapHorizOutlined';
@@ -441,32 +441,30 @@ const MovementForm = ({ setValue, watch, formState, items, setItems, sendingRequ
                 {/* Section 5: Approval + remarks */}
                 <PageSection
                     title="Approval & Remarks"
-                    subtitle="Optionally route this movement for approval and add any notes."
+                    subtitle="Whether this movement needs approval is set by policy, not by choice."
                     icon={<NotesOutlinedIcon fontSize="small" />}
                     mb={0}
                 >
+                    {/*
+                     * Stated, not chosen. This was a switch defaulting to off, so a cross-location
+                     * movement could be sent with no oversight simply by leaving it alone. The
+                     * backend now derives it from the movement category, and this panel reports the
+                     * same derivation so there is no surprise at submit.
+                     */}
                     <Box sx={{ mb: 2.5, p: 1.75, borderRadius: 2, bgcolor: alpha(P, 0.04), border: `1px solid ${alpha(P, 0.12)}` }}>
-                        <FormControlLabel
-                            control={
-                                <Switch
-                                    checked={!!watch('requiresApproval')}
-                                    onChange={(e) => setValue('requiresApproval', e.target.checked)}
-                                    color="primary"
-                                />
-                            }
-                            label={
-                                <Stack direction="row" spacing={1} alignItems="center">
-                                    <HowToRegOutlinedIcon sx={{ fontSize: 18, color: P }} />
-                                    <Box>
-                                        <Typography variant="body2" sx={{ fontWeight: 700 }}>Requires approval</Typography>
-                                        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                                            Route through your reporting ladder before dispatch (e.g. a BOM fulfilling a request from the branch store → Branch Manager approves).
-                                        </Typography>
-                                    </Box>
-                                </Stack>
-                            }
-                            sx={{ alignItems: 'flex-start', m: 0 }}
-                        />
+                        <Stack direction="row" spacing={1.25} alignItems="flex-start">
+                            <HowToRegOutlinedIcon sx={{ fontSize: 18, color: P, mt: 0.2 }} />
+                            <Box>
+                                <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                                    {isInterLocation ? 'Approval required' : 'No approval required'}
+                                </Typography>
+                                <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                                    {isInterLocation
+                                        ? 'This movement crosses a location boundary, so it climbs your reporting ladder before it can be dispatched. You will not be able to dispatch it until every tier has approved.'
+                                        : 'Source and destination are in the same location, so this movement can be dispatched straight away.'}
+                                </Typography>
+                            </Box>
+                        </Stack>
                     </Box>
                     <TextField fullWidth multiline rows={3} label="Remarks (optional)" sx={fieldSx} value={watch('remarks') ?? ''} onChange={(e) => setValue('remarks', e.target.value)} />
                 </PageSection>

@@ -144,6 +144,16 @@ const Movement = () => {
                 stat={{ value: (count ?? 0).toLocaleString(), label: 'movements', helper: todayLabel }}
                 actions={
                     <Stack direction="row" spacing={1.25}>
+                        {/* The journeys movements ride on. Separate entry point because a consignment
+                            spans several movements and belongs to nobody's individual record. */}
+                        <Button
+                            variant="outlined"
+                            startIcon={<LocalShippingOutlinedIcon />}
+                            onClick={() => navigate(ROUTES.CONSIGNMENTS)}
+                            sx={{ height: 36, px: 2, borderRadius: '8px', textTransform: 'none', fontWeight: 600 }}
+                        >
+                            Consignments
+                        </Button>
                         <Button
                             variant="outlined"
                             startIcon={<BuildOutlinedIcon />}

@@ -7,8 +7,8 @@ Managing Director
 
 import { useEffect, useState } from 'react';
 import {
-    alpha, Alert, Autocomplete, Box, Button, Chip, CircularProgress, Divider,
-    MenuItem, Paper, Popper, Stack, TextField, Typography,
+    alpha, Alert, Autocomplete, Box, Button, Checkbox, Chip, CircularProgress, Divider,
+    FormControlLabel, MenuItem, Paper, Popper, Stack, TextField, Typography,
 } from '@mui/material';
 import BuildOutlinedIcon from '@mui/icons-material/BuildOutlined';
 import SwapHorizOutlinedIcon from '@mui/icons-material/SwapHorizOutlined';
@@ -26,14 +26,18 @@ import { autocompleteSx } from '../../components/forms/Autocomplete';
 import { fetchRowsService } from '../../core/apis/globalService';
 import { IAsset } from '../assets/interface';
 import { IUser } from '../users/interface';
-import { IBranch } from '../settings/branch/interface';
 import { IConsultant, IConsultantsAxiosResponse } from '../settings/consultants/interface';
 import { fetchConsultantsService } from '../settings/consultants/service';
 import { RepairDestination } from '../settings/assetTypes/interface';
 import {
-    fetchAssetsByStoreTypeService, repairTransferService, tempReplacementService,
+    repairTransferService, tempReplacementService,
     returnAfterRepairService, disposeAssetService, uploadStandaloneMovementDocumentService,
+    fetchDisposalCandidatesService, fetchTemporaryPoolAssetsService,
+    previewRepairTransferService, previewReturnAfterRepairService, previewTempReplacementService,
 } from './service';
+import { IDisposalCandidate, IMovementFlowPreview } from './interface';
+import { fetchCouriersService } from '../settings/couriers/service';
+import { ICourier } from '../settings/couriers/interface';
 
 const PRIMARY = '#08796C';
 
@@ -118,18 +122,17 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
     // option sources
     const [assetSearch, setAssetSearch] = useState<IAsset[]>([]);
     const [assetSearchLoading, setAssetSearchLoading] = useState(false);
-    const [itAssets, setItAssets] = useState<IAsset[]>([]);
     const [poolAssets, setPoolAssets] = useState<IAsset[]>([]);
     const [users, setUsers] = useState<IUser[]>([]);
     const [usersLoading, setUsersLoading] = useState(false);
-    const [branches, setBranches] = useState<IBranch[]>([]);
 
     // selections / fields
     const [asset, setAsset] = useState<IAsset | null>(null);
     const [tempAsset, setTempAsset] = useState<IAsset | null>(null);
     const [recipient, setRecipient] = useState<IUser | null>(null);
-    const [destLocation, setDestLocation] = useState<IBranch | null>(null);
-    const [courierService, setCourierService] = useState('');
+    /** Vetted pick or ad-hoc free text, matching the dispatch modal's courier field. */
+    const [courierValue, setCourierValue] = useState<ICourier | string | null>(null);
+    const [couriers, setCouriers] = useState<ICourier[]>([]);
     const [trackingNumber, setTrackingNumber] = useState('');
     const [dispatchDate, setDispatchDate] = useState('');
     const [expectedDeliveryDate, setExpectedDeliveryDate] = useState('');
@@ -141,40 +144,45 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
     const [consultant, setConsultant] = useState<IConsultant | null>(null);
     const [dispatchDocs, setDispatchDocs] = useState<File[]>([]);
 
+    /**
+     * The server's answer for the flow as currently configured: resolved source and destination,
+     * whether a courier is involved, and (for a return) who the asset goes back to. Display-only.
+     */
+    const [preview, setPreview] = useState<IMovementFlowPreview | null>(null);
+    const [previewLoading, setPreviewLoading] = useState(false);
+    /** Unticked when the recipient is keeping the loaner for now. */
+    const [returnLoaner, setReturnLoaner] = useState(true);
+
+    // disposal
+    const [disposalCandidates, setDisposalCandidates] = useState<IDisposalCandidate[]>([]);
+    const [disposalCandidate, setDisposalCandidate] = useState<IDisposalCandidate | null>(null);
+    const [earlyDisposalReason, setEarlyDisposalReason] = useState('');
+    /** Written off before its category's useful life is up, so the server will demand a reason. */
+    const needsEarlyDisposalReason = !!disposalCandidate && !disposalCandidate.pastUsefulLife;
+
     const categoryNotRepairable = flow === 'repair-transfer' && asset?.assetType?.repairable === false;
 
-    const needsItAssets = flow === 'temp-replacement' || flow === 'return-after-repair' || flow === 'disposal';
-    const needsBranches = flow === 'return-after-repair';
-
-    const needsPoolAssets = flow === 'temp-replacement' || flow === 'return-after-repair';
+    const needsPoolAssets = flow === 'temp-replacement';
 
     useEffect(() => {
-        if (needsItAssets && itAssets.length === 0) {
-            (async () => {
-                const r = (await fetchAssetsByStoreTypeService('IT')) as any;
-                if (r?.status === 200) setItAssets(r.data ?? []);
-            })();
-        }
         if (needsPoolAssets && poolAssets.length === 0) {
-            // Pool stock can sit in either the IT store or the Head Office Admin store, depending on
-            // the category's repair routing (e.g. loaner chairs live in Admin, not IT) — fetch both
-            // and keep only assets actually flagged as pool stock and currently unassigned.
+            // Filtered server-side. This used to fetch every IT and Admin asset and narrow them in
+            // the browser, so the pool silently went incomplete once the listing passed one page.
             (async () => {
-                const [itRes, adminRes] = await Promise.all([
-                    fetchAssetsByStoreTypeService('IT') as any,
-                    fetchAssetsByStoreTypeService('ADMIN') as any,
-                ]);
-                const combined: IAsset[] = [
-                    ...(itRes?.status === 200 ? itRes.data ?? [] : []),
-                    ...(adminRes?.status === 200 ? adminRes.data ?? [] : []),
-                ];
-                setPoolAssets(combined.filter((a) => a.temporaryPool === true && !a.assignedTo));
+                const r = (await fetchTemporaryPoolAssetsService()) as any;
+                if (r?.status === 200) setPoolAssets(r.data ?? []);
             })();
         }
-        if (needsBranches && branches.length === 0) {
+        if (flow === 'disposal' && disposalCandidates.length === 0) {
             (async () => {
-                const r = (await fetchRowsService({ pageNumber: 0, pageSize: 200, endPoint: 'branches' })) as any;
-                if (r?.status === 200) setBranches(r.data?.content ?? []);
+                const r = (await fetchDisposalCandidatesService()) as any;
+                if (r?.status === 200) setDisposalCandidates(r.data ?? []);
+            })();
+        }
+        if (couriers.length === 0) {
+            (async () => {
+                const r = (await fetchCouriersService(true)) as any;
+                if (r?.status === 200) setCouriers(r.data ?? []);
             })();
         }
     }, [flow]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -184,6 +192,43 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
         if (flow !== 'repair-transfer') return;
         setRepairDestination(asset?.assetType?.repairDestination ?? 'IT');
     }, [asset, flow]);
+
+    /*
+     * Ask the server what this flow would do as currently configured.
+     *
+     * It answers two questions the form used to guess at. Whether a courier is involved: the old
+     * rule keyed off the asset's holder, but a repair transfer clears the assignment the moment the
+     * branch admin takes custody, so the field being read is empty by design — the real question is
+     * whether the source and destination stores sit in different locations, which only the server
+     * can resolve. And, for a return, who the asset goes back to: same reason, the holder lives on
+     * the repair-transfer movement, not on the asset.
+     */
+    useEffect(() => {
+        if (!flow || flow === 'disposal') { setPreview(null); return; }
+        const assetId = flow === 'temp-replacement' ? tempAsset?.id : asset?.id;
+        const recipientId = recipient?.id;
+        if (assetId == null) { setPreview(null); return; }
+        if (flow === 'temp-replacement' && recipientId == null) { setPreview(null); return; }
+
+        let cancelled = false;
+        setPreviewLoading(true);
+        (async () => {
+            try {
+                const r = (
+                    flow === 'repair-transfer'
+                        ? await previewRepairTransferService(assetId, categoryNotRepairable ? null : repairDestination)
+                        : flow === 'return-after-repair'
+                            ? await previewReturnAfterRepairService(assetId)
+                            : await previewTempReplacementService(assetId, recipientId as number)
+                ) as any;
+                if (cancelled) return;
+                setPreview(r?.status === 200 ? r.data : null);
+            } finally {
+                if (!cancelled) setPreviewLoading(false);
+            }
+        })();
+        return () => { cancelled = true; };
+    }, [flow, asset, tempAsset, recipient, repairDestination, categoryNotRepairable]);
 
     // External routing needs the active consultants directory for the picker.
     useEffect(() => {
@@ -217,19 +262,32 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
     };
 
     const reset = () => {
-        setAsset(null); setTempAsset(null); setRecipient(null); setDestLocation(null);
-        setCourierService(''); setTrackingNumber(''); setDispatchDate(''); setExpectedDeliveryDate(''); setRemarks('');
+        setAsset(null); setTempAsset(null); setRecipient(null);
+        setCourierValue(null); setTrackingNumber(''); setDispatchDate(''); setExpectedDeliveryDate(''); setRemarks('');
         setRepairDestination('IT'); setConsultant(null); setDispatchDocs([]);
+        setDisposalCandidate(null); setEarlyDisposalReason('');
+        setPreview(null); setReturnLoaner(true);
     };
 
     const back = () => { setFlow(null); reset(); };
 
-    const logistics = () => ({
-        courierService: courierService || null,
-        trackingNumber: trackingNumber || null,
-        dispatchDate: dispatchDate ? new Date(dispatchDate).toISOString() : null,
-        expectedDeliveryDate: expectedDeliveryDate ? new Date(expectedDeliveryDate).toISOString() : null,
-    });
+    /**
+     * Logistics are only sent when the movement actually crosses a location boundary. Within one
+     * location there is no journey, so a courier, tracking number and delivery dates would be
+     * recorded against a movement that never travels.
+     */
+    const logistics = () => {
+        if (!preview?.interLocation) {
+            return { courierService: null, trackingNumber: null, dispatchDate: null, expectedDeliveryDate: null };
+        }
+        const courierName = typeof courierValue === 'object' ? courierValue?.name : courierValue;
+        return {
+            courierService: courierName || null,
+            trackingNumber: trackingNumber || null,
+            dispatchDate: dispatchDate ? new Date(dispatchDate).toISOString() : null,
+            expectedDeliveryDate: expectedDeliveryDate ? new Date(expectedDeliveryDate).toISOString() : null,
+        };
+    };
 
     /** Uploads the selected dispatch documents and returns their stored paths (EXTERNAL repairs). */
     const uploadDispatchDocs = async (): Promise<string[] | null> => {
@@ -277,15 +335,27 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
                 if (!tempAsset || !recipient) { toast.warning('Select the temporary asset and recipient.'); setSending(false); return; }
                 response = await tempReplacementService({ tempAssetId: tempAsset.id, recipientUserId: recipient.id, ...logistics(), remarks: remarks || null });
             } else if (flow === 'return-after-repair') {
-                if (!asset || !destLocation) { toast.warning('Select the asset and destination location.'); setSending(false); return; }
+                if (!asset) { toast.warning('Select the repaired asset.'); setSending(false); return; }
+                if (preview?.blockedReason) { toast.warning(preview.blockedReason); setSending(false); return; }
+                // Destination, recipient and loaner are all derived server-side from the asset's
+                // repair transfer, so none of them are sent. Only the decision to hold the loaner
+                // back is the user's to make.
                 response = await returnAfterRepairService({
-                    assetId: asset.id, destLocationId: destLocation.id,
-                    recipientUserId: recipient?.id ?? null, tempAssetId: tempAsset?.id ?? null,
+                    assetId: asset.id,
+                    returnLoaner,
                     ...logistics(), remarks: remarks || null,
                 });
             } else {
-                if (!asset) { toast.warning('Select the asset to dispose.'); setSending(false); return; }
-                response = await disposeAssetService({ assetId: asset.id, remarks: remarks || null });
+                if (!disposalCandidate) { toast.warning('Select the asset to dispose.'); setSending(false); return; }
+                if (needsEarlyDisposalReason && !earlyDisposalReason.trim()) {
+                    toast.warning('This asset is still within its useful life — give a reason for disposing of it early.');
+                    setSending(false); return;
+                }
+                response = await disposeAssetService({
+                    assetId: disposalCandidate.id,
+                    remarks: remarks || null,
+                    earlyDisposalReason: needsEarlyDisposalReason ? earlyDisposalReason.trim() : null,
+                });
             }
 
             if (response?.status === 200 || response?.status === 201) {
@@ -621,7 +691,70 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
             {flow === 'disposal' && (
                 <>
                     <SectionLabel>Asset</SectionLabel>
-                    {assetPicker('Asset to Dispose (in IT store)', itAssets, asset, setAsset)}
+                    {/*
+                     * Own picker rather than the shared assetPicker: these rows carry the server's
+                     * age judgement, which is what decides whether a reason is demanded below. The
+                     * list is IT + Admin stores only, matching what the write endpoint will accept.
+                     */}
+                    <Autocomplete
+                        options={disposalCandidates}
+                        value={disposalCandidate}
+                        fullWidth
+                        getOptionLabel={(a) => `${a.engravedNumber ?? '—'} — ${a.name ?? 'Unnamed asset'}`}
+                        isOptionEqualToValue={(o, v) => o.id === v.id}
+                        onChange={(_, v) => { setDisposalCandidate(v); setEarlyDisposalReason(''); }}
+                        PopperComponent={DropdownPopper}
+                        PaperComponent={DropdownPaper}
+                        noOptionsText="No assets in the IT or Admin stores"
+                        renderOption={(props, a) => (
+                            <li {...props} key={a.id}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: 1 }}>
+                                    <Box sx={{ minWidth: 0 }}>
+                                        <Typography variant="body2" sx={{ fontWeight: 600, color: '#1E293B' }} noWrap>
+                                            {a.engravedNumber ?? '—'} — {a.name ?? 'Unnamed asset'}
+                                        </Typography>
+                                        <Typography variant="caption" sx={{ color: '#64748B' }} noWrap>
+                                            {[a.assetTypeName, a.storeName, a.locationName].filter(Boolean).join(' · ')}
+                                        </Typography>
+                                    </Box>
+                                    <Chip
+                                        size="small"
+                                        label={a.pastUsefulLife ? 'Ready for disposal' : 'In service'}
+                                        sx={{
+                                            flexShrink: 0,
+                                            fontSize: '0.68rem',
+                                            fontWeight: 700,
+                                            bgcolor: a.pastUsefulLife ? alpha('#B91C1C', 0.08) : alpha('#B45309', 0.1),
+                                            color: a.pastUsefulLife ? '#B91C1C' : '#B45309',
+                                        }}
+                                    />
+                                </Box>
+                            </li>
+                        )}
+                        renderInput={(params) => <TextField {...params} label="Asset to Dispose (IT / Admin store)" sx={autocompleteSx} />}
+                    />
+
+                    {needsEarlyDisposalReason && (
+                        <>
+                            <Alert severity="warning" sx={{ borderRadius: 2, '& .MuiAlert-message': { fontSize: '0.82rem' } }}>
+                                This asset has served <strong>{disposalCandidate?.monthsInService} of {disposalCandidate?.usefulLifeMonths ?? '—'} months</strong> of
+                                its useful life. It can still be written off — damage and theft do not wait for the
+                                schedule — but the reason is recorded on the movement.
+                            </Alert>
+                            <TextField
+                                fullWidth
+                                required
+                                multiline
+                                rows={2}
+                                label="Reason for early disposal"
+                                placeholder="e.g. Screen and board damaged beyond economical repair"
+                                value={earlyDisposalReason}
+                                onChange={(e) => setEarlyDisposalReason(e.target.value)}
+                                sx={autocompleteSx}
+                            />
+                        </>
+                    )}
+
                     <Alert severity="info" sx={{ borderRadius: 2, '& .MuiAlert-message': { fontSize: '0.82rem' } }}>
                         The asset moves to the <strong>Disposal store</strong> and its status becomes
                         pending disposal once the movement completes.
@@ -642,38 +775,127 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
             {flow === 'return-after-repair' && (
                 <>
                     <SectionLabel>Repaired asset</SectionLabel>
-                    {assetPicker('Repaired Asset (IT store)', itAssets, asset, setAsset)}
+                    {assetPicker('Repaired Asset (search by engraved number)', assetSearch, asset, setAsset, true)}
 
+                    {/*
+                     * Destination and Assigned To are stated, not chosen. Both come from the holder
+                     * recorded on the asset's repair transfer — the asset's own `assignedTo` was
+                     * cleared when the branch admin took custody, so it cannot answer this. Making
+                     * them editable only ever offered a way to send somebody's laptop to the wrong
+                     * branch.
+                     */}
                     <SectionLabel>Destination</SectionLabel>
-                    {/* Plain CSS grid — MUI Grid's negative-margin spacing shifts fields out of
-                        line with the full-width inputs above it inside a Stack. */}
-                    <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, alignItems: 'start' }}>
-                        <Autocomplete
-                            options={branches} value={destLocation}
-                            fullWidth
-                            getOptionLabel={(b) => b.name}
-                            isOptionEqualToValue={(o, v) => o.id === v.id}
-                            onChange={(_, v) => setDestLocation(v)}
-                            PopperComponent={DropdownPopper}
-                            PaperComponent={DropdownPaper}
-                            renderInput={(params) => <TextField {...params} label="Destination Location" sx={autocompleteSx} />}
-                        />
-                        {userPicker('Reassign To (optional)')}
-                    </Box>
+                    {previewLoading && <Typography variant="caption" sx={{ color: '#64748B' }}>Resolving where this asset belongs…</Typography>}
 
-                    <SectionLabel>Temporary asset</SectionLabel>
-                    {assetPicker('Return Temporary Asset (optional)', poolAssets, tempAsset, setTempAsset)}
+                    {!previewLoading && preview?.blockedReason && (
+                        <Alert severity="error" sx={{ borderRadius: 2, '& .MuiAlert-message': { fontSize: '0.82rem' } }}>
+                            {preview.blockedReason}
+                        </Alert>
+                    )}
+
+                    {!previewLoading && preview && !preview.blockedReason && (
+                        <>
+                            <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, alignItems: 'start' }}>
+                                <TextField
+                                    fullWidth sx={fieldSx} label="Destination"
+                                    value={preview.destinationLocationName ?? '—'}
+                                    InputProps={{ readOnly: true }}
+                                    helperText="From this asset's repair transfer"
+                                />
+                                <TextField
+                                    fullWidth sx={fieldSx} label="Assigned To"
+                                    value={preview.recipientUserName ?? 'Unassigned — returns to branch stock'}
+                                    InputProps={{ readOnly: true }}
+                                    helperText="The holder who sent it for repair"
+                                />
+                            </Box>
+
+                            {preview.returningToBranchUnassigned && (
+                                <Alert severity="info" sx={{ borderRadius: 2, '& .MuiAlert-message': { fontSize: '0.82rem' } }}>
+                                    The previous holder is no longer active, so this asset returns to
+                                    <strong> {preview.destinationLocationName ?? 'its origin branch'}</strong> unassigned and
+                                    flagged as pool stock, available to lend out.
+                                </Alert>
+                            )}
+
+                            {preview.loanerAssetId && (
+                                <>
+                                    <SectionLabel>Temporary asset</SectionLabel>
+                                    <FormControlLabel
+                                        control={<Checkbox checked={returnLoaner} onChange={(e) => setReturnLoaner(e.target.checked)} />}
+                                        label={
+                                            <Box>
+                                                <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                                    Return loaner {preview.loanerAssetLabel}
+                                                </Typography>
+                                                <Typography variant="caption" sx={{ color: '#64748B' }}>
+                                                    Issued to {preview.recipientUserName ?? 'this user'} while the asset was under
+                                                    repair. Untick if they are keeping it for now.
+                                                </Typography>
+                                            </Box>
+                                        }
+                                        sx={{ alignItems: 'flex-start', m: 0 }}
+                                    />
+                                </>
+                            )}
+                        </>
+                    )}
                 </>
             )}
 
-            {/* ── Logistics ── */}
-            {showLogistics && (
+            {/*
+             * ── Logistics ──
+             *
+             * Shown only when the movement actually crosses a location boundary, per the server's
+             * own derivation. A branch-to-Head-Office transfer needs a courier; one that stays
+             * inside Head Office has no journey, so asking for a tracking number and delivery dates
+             * would only invite data that describes nothing.
+             */}
+            {showLogistics && preview && !preview.interLocation && (
+                <Alert severity="info" sx={{ borderRadius: 2, '& .MuiAlert-message': { fontSize: '0.82rem' } }}>
+                    {preview.sourceLocationName
+                        ? <>Both ends of this movement are within <strong>{preview.sourceLocationName}</strong>, so no courier, tracking number or delivery dates are needed.</>
+                        : <>This movement stays within one location, so no courier or delivery details are needed.</>}
+                </Alert>
+            )}
+
+            {showLogistics && preview?.interLocation && (
                 <>
-                    <SectionLabel>Logistics — optional</SectionLabel>
+                    <SectionLabel>Logistics</SectionLabel>
+                    <Typography variant="caption" sx={{ color: '#64748B', mt: -1 }}>
+                        {preview.sourceLocationName} → {preview.destinationLocationName} — this movement leaves its
+                        location, so the courier details are recorded here.
+                    </Typography>
                     {/* Plain CSS grid — MUI Grid's negative-margin spacing shifts fields out of
                         line with the full-width inputs above it inside a Stack. */}
                     <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, alignItems: 'start' }}>
-                        <TextField fullWidth sx={fieldSx} label="Courier" value={courierService} onChange={(e) => setCourierService(e.target.value)} />
+                        {/* Vetted pick or ad-hoc name, matching the dispatch modal — the couriers
+                            registry is the same one used when a movement is dispatched. */}
+                        <Autocomplete
+                            freeSolo
+                            options={couriers}
+                            value={courierValue}
+                            fullWidth
+                            getOptionLabel={(c) => (typeof c === 'string' ? c : c.name)}
+                            isOptionEqualToValue={(o, v) => typeof o !== 'string' && typeof v !== 'string' && o.id === v.id}
+                            onChange={(_, v) => setCourierValue(v)}
+                            onInputChange={(_, v, reason) => { if (reason === 'input') setCourierValue(v); }}
+                            PopperComponent={DropdownPopper}
+                            PaperComponent={DropdownPaper}
+                            renderOption={(props, c) => (
+                                <li {...props} key={typeof c === 'string' ? c : c.id}>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: 1 }}>
+                                        <Typography variant="body2">{typeof c === 'string' ? c : c.name}</Typography>
+                                        {typeof c !== 'string' && c.vetted && (
+                                            <Chip size="small" label="Vetted" sx={{ fontSize: '0.65rem', fontWeight: 700, bgcolor: alpha(PRIMARY, 0.1), color: PRIMARY }} />
+                                        )}
+                                    </Box>
+                                </li>
+                            )}
+                            renderInput={(params) => (
+                                <TextField {...params} label="Courier" placeholder="Pick a vetted courier or type a name" sx={autocompleteSx} />
+                            )}
+                        />
                         <TextField fullWidth sx={fieldSx} label="Tracking #" value={trackingNumber} onChange={(e) => setTrackingNumber(e.target.value)} />
                         <TextField fullWidth sx={fieldSx} type="date" label="Dispatch Date" InputLabelProps={{ shrink: true }} value={dispatchDate} onChange={(e) => setDispatchDate(e.target.value)} />
                         <TextField fullWidth sx={fieldSx} type="date" label="Expected Delivery" InputLabelProps={{ shrink: true }} value={expectedDeliveryDate} onChange={(e) => setExpectedDeliveryDate(e.target.value)} />

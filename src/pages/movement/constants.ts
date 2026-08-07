@@ -99,11 +99,17 @@ export const movementTypeLabels: Record<MovementType, string> = {
 export const movementTypeLabel = (type?: string): string =>
     (type && movementTypeLabels[type as MovementType]) || type || '—';
 
-/** Movement types a user can initiate directly from the create form (store-to-store / to-user). */
+/**
+ * Movement types a user can initiate directly from the create form (store-to-store / to-user).
+ *
+ * ISSUANCE_FULFILLMENT is deliberately absent. It exists to satisfy a request and is created
+ * automatically at issuance approval, carrying that request's id; one made by hand has no request
+ * attached, so the by-request views and the fulfilment logic cannot resolve it. Restocking a branch
+ * or a department with no request behind it is REPLENISHMENT or DEPARTMENT_TRANSFER — both here.
+ */
 export const creatableMovementTypes: { value: MovementType; label: string; description: string }[] = [
     { value: 'REPLENISHMENT', label: 'Replenishment', description: 'Stock a branch from Head Office' },
     { value: 'DEPARTMENT_TRANSFER', label: 'Department Transfer', description: 'Reallocate between departments / users' },
-    { value: 'ISSUANCE_FULFILLMENT', label: 'Issuance Fulfillment', description: 'Fulfil an approved request across locations' },
 ];
 
 export const categoryLabels: Record<MovementCategory, string> = {
@@ -123,17 +129,34 @@ export const storeTypeLabels: Record<StoreType, string> = {
     DISPOSAL: 'Disposal Store',
 };
 
+/**
+ * A movement travelling with others is dispatched, tracked and landed as part of its consignment,
+ * never on its own — the load moves together and its ledger hops apply to everything on board at
+ * once. These helpers therefore hide the per-movement actions the server would refuse anyway.
+ */
+const onLiveConsignment = (m: { consignment?: { status?: string | null } | null }) =>
+    !!m.consignment && m.consignment.status !== 'CANCELLED';
+
 /** Whether the movement is awaiting dispatch (inter-location, approved and not yet shipped). */
-export const canDispatch = (m: { movementCategory?: string; status?: string }) =>
-    m.movementCategory === 'INTER_LOCATION' && m.status === 'INITIATED';
+export const canDispatch = (m: {
+    movementCategory?: string; status?: string; consignment?: { status?: string | null } | null;
+}) => m.movementCategory === 'INTER_LOCATION' && m.status === 'INITIATED' && !onLiveConsignment(m);
 
 /** Marking in-transit is compulsory, not optional — it's the only way out of DISPATCHED. */
-export const canMarkInTransit = (m: { status?: string }) => m.status === 'DISPATCHED';
+export const canMarkInTransit = (m: { status?: string; consignment?: { status?: string | null } | null }) =>
+    m.status === 'DISPATCHED' && !onLiveConsignment(m);
 
-/** Inter-location movements can only be received once actually marked in-transit — the backend
- *  rejects receiving straight from DISPATCHED, since custody must hand off to the courier first. */
-export const canReceive = (m: { movementCategory?: string; status?: string }) =>
-    m.movementCategory === 'INTER_LOCATION' && m.status === 'IN_TRANSIT';
+/**
+ * Inter-location movements can only be received once actually marked in-transit — the backend
+ * rejects receiving straight from DISPATCHED, since custody must hand off to the courier first.
+ *
+ * <p>On a consignment the goods also have to have landed: receiving earlier would draw stock out of
+ * a store they have not reached.
+ */
+export const canReceive = (m: {
+    movementCategory?: string; status?: string; consignment?: { status?: string | null } | null;
+}) => m.movementCategory === 'INTER_LOCATION' && m.status === 'IN_TRANSIT'
+    && (!onLiveConsignment(m) || m.consignment?.status === 'ARRIVED');
 
 /** Intra-location movements complete in one step (once approved / initiated). */
 export const canComplete = (m: { movementCategory?: string; status?: string }) =>

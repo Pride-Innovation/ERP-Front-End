@@ -228,6 +228,67 @@ export const fetchAssetsByStoreTypeService = async (storeType: StoreType) => {
     }
 };
 
+/** Loanable pool stock — flagged temporary-pool, unassigned, filtered server-side. */
+export const fetchTemporaryPoolAssetsService = async () => {
+    try {
+        return await axiosInstance.get('inventory/assets/temporary-pool');
+    } catch (error) {
+        return error;
+    }
+};
+
+// ── Flow previews ──────────────────────────────────────────────────────────
+//
+// Each answers what a repair form should display before submitting — resolved source and
+// destination, and whether the movement crosses a location boundary (which decides whether courier
+// details are asked for). Derived server-side so the form and the write path cannot disagree.
+
+export const previewRepairTransferService = async (
+    assetId: number | string,
+    repairDestination?: string | null
+) => {
+    try {
+        return await axiosInstance.get('movements/repair-transfer/preview', {
+            params: { assetId, ...(repairDestination ? { repairDestination } : {}) },
+        });
+    } catch (error) {
+        return error;
+    }
+};
+
+export const previewReturnAfterRepairService = async (assetId: number | string) => {
+    try {
+        return await axiosInstance.get('movements/return-after-repair/preview', { params: { assetId } });
+    } catch (error) {
+        return error;
+    }
+};
+
+export const previewTempReplacementService = async (
+    tempAssetId: number | string,
+    recipientUserId: number | string
+) => {
+    try {
+        return await axiosInstance.get('movements/temp-replacement/preview', {
+            params: { tempAssetId, recipientUserId },
+        });
+    } catch (error) {
+        return error;
+    }
+};
+
+/**
+ * Assets eligible to be written off — IT and Admin stores only, each carrying the server's own
+ * age judgement so the picker doesn't have to re-derive useful life from raw dates.
+ */
+export const fetchDisposalCandidatesService = async () => {
+    try {
+        return await axiosInstance.get('inventory/assets/disposable');
+    } catch (error) {
+        return error;
+    }
+};
+
 /** Consumable balances, filtered by store / location / department / type. */
 export const fetchStoreBalancesService = async (params?: {
     storeId?: number | string;
