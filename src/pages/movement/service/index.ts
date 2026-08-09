@@ -256,6 +256,14 @@ export const previewRepairTransferService = async (
     }
 };
 
+export const previewDisposalService = async (assetId: number | string) => {
+    try {
+        return await axiosInstance.get('movements/disposal/preview', { params: { assetId } });
+    } catch (error) {
+        return error;
+    }
+};
+
 export const previewReturnAfterRepairService = async (assetId: number | string) => {
     try {
         return await axiosInstance.get('movements/return-after-repair/preview', { params: { assetId } });

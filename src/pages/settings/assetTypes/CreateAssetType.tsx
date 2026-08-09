@@ -33,7 +33,8 @@ const CreateAssetType = ({
             usefulLifeMonths: '',
             tracksAssets: false,
             repairable: true,
-            repairDestination: 'IT',
+            // Left unset so a new category records a routing only when one is deliberately chosen.
+            repairDestination: '',
         },
     });
 

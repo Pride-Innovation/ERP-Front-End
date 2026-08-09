@@ -222,10 +222,19 @@ const AssetTypeForm = ({
                                 fullWidth
                                 size="small"
                                 label="Default Repair Destination"
-                                value={field.value ?? 'IT'}
+                                // '' is the "never configured" state and must survive a save — coercing
+                                // it to 'IT' here silently wrote a routing nobody chose (e.g. Furniture
+                                // to the IT store) the first time a category was edited for any reason.
+                                value={field.value ?? ''}
                                 onChange={field.onChange}
                                 disabled={repairable === false}
+                                helperText={!field.value
+                                    ? 'Not set — repair transfers for this category fall back to the IT store until you choose one.'
+                                    : undefined}
                             >
+                                <MenuItem value="">
+                                    <em>Not set — fall back to the IT store</em>
+                                </MenuItem>
                                 <MenuItem value="IT">IT Store — in-house IT workshop</MenuItem>
                                 <MenuItem value="ADMIN">Admin Store — facilities / administration team</MenuItem>
                                 <MenuItem value="EXTERNAL">External Consultant — outside repair vendor</MenuItem>

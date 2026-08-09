@@ -35,7 +35,9 @@ const UpdateAssetType = ({
             usefulLifeMonths: assetType.usefulLifeMonths != null ? String(assetType.usefulLifeMonths) : '',
             tracksAssets: assetType.tracksAssets === true,
             repairable: assetType.repairable !== false,
-            repairDestination: assetType.repairDestination ?? 'IT',
+            // Keep an unconfigured category unconfigured — defaulting to 'IT' here meant editing a
+            // category for any unrelated reason silently committed IT as its repair routing.
+            repairDestination: assetType.repairDestination ?? '',
         },
     });
 
@@ -53,7 +55,9 @@ const UpdateAssetType = ({
             usefulLifeMonths: assetType.usefulLifeMonths != null ? String(assetType.usefulLifeMonths) : '',
             tracksAssets: assetType.tracksAssets === true,
             repairable: assetType.repairable !== false,
-            repairDestination: assetType.repairDestination ?? 'IT',
+            // Keep an unconfigured category unconfigured — defaulting to 'IT' here meant editing a
+            // category for any unrelated reason silently committed IT as its repair routing.
+            repairDestination: assetType.repairDestination ?? '',
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [assetType.id, reset]);

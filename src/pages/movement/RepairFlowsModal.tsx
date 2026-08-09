@@ -34,10 +34,9 @@ import {
     returnAfterRepairService, disposeAssetService, uploadStandaloneMovementDocumentService,
     fetchDisposalCandidatesService, fetchTemporaryPoolAssetsService,
     previewRepairTransferService, previewReturnAfterRepairService, previewTempReplacementService,
+    previewDisposalService,
 } from './service';
 import { IDisposalCandidate, IMovementFlowPreview } from './interface';
-import { fetchCouriersService } from '../settings/couriers/service';
-import { ICourier } from '../settings/couriers/interface';
 
 const PRIMARY = '#08796C';
 
@@ -130,12 +129,6 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
     const [asset, setAsset] = useState<IAsset | null>(null);
     const [tempAsset, setTempAsset] = useState<IAsset | null>(null);
     const [recipient, setRecipient] = useState<IUser | null>(null);
-    /** Vetted pick or ad-hoc free text, matching the dispatch modal's courier field. */
-    const [courierValue, setCourierValue] = useState<ICourier | string | null>(null);
-    const [couriers, setCouriers] = useState<ICourier[]>([]);
-    const [trackingNumber, setTrackingNumber] = useState('');
-    const [dispatchDate, setDispatchDate] = useState('');
-    const [expectedDeliveryDate, setExpectedDeliveryDate] = useState('');
     const [remarks, setRemarks] = useState('');
 
     // repair routing (repair-transfer only)
@@ -179,12 +172,6 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
                 if (r?.status === 200) setDisposalCandidates(r.data ?? []);
             })();
         }
-        if (couriers.length === 0) {
-            (async () => {
-                const r = (await fetchCouriersService(true)) as any;
-                if (r?.status === 200) setCouriers(r.data ?? []);
-            })();
-        }
     }, [flow]); // eslint-disable-line react-hooks/exhaustive-deps
 
     // The chosen asset's category dictates the default repair routing (overridable below).
@@ -204,8 +191,10 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
      * the repair-transfer movement, not on the asset.
      */
     useEffect(() => {
-        if (!flow || flow === 'disposal') { setPreview(null); return; }
-        const assetId = flow === 'temp-replacement' ? tempAsset?.id : asset?.id;
+        if (!flow) { setPreview(null); return; }
+        const assetId = flow === 'temp-replacement' ? tempAsset?.id
+            : flow === 'disposal' ? disposalCandidate?.id
+                : asset?.id;
         const recipientId = recipient?.id;
         if (assetId == null) { setPreview(null); return; }
         if (flow === 'temp-replacement' && recipientId == null) { setPreview(null); return; }
@@ -219,7 +208,9 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
                         ? await previewRepairTransferService(assetId, categoryNotRepairable ? null : repairDestination)
                         : flow === 'return-after-repair'
                             ? await previewReturnAfterRepairService(assetId)
-                            : await previewTempReplacementService(assetId, recipientId as number)
+                            : flow === 'disposal'
+                                ? await previewDisposalService(assetId)
+                                : await previewTempReplacementService(assetId, recipientId as number)
                 ) as any;
                 if (cancelled) return;
                 setPreview(r?.status === 200 ? r.data : null);
@@ -228,7 +219,7 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
             }
         })();
         return () => { cancelled = true; };
-    }, [flow, asset, tempAsset, recipient, repairDestination, categoryNotRepairable]);
+    }, [flow, asset, tempAsset, recipient, disposalCandidate, repairDestination, categoryNotRepairable]);
 
     // External routing needs the active consultants directory for the picker.
     useEffect(() => {
@@ -262,8 +253,7 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
     };
 
     const reset = () => {
-        setAsset(null); setTempAsset(null); setRecipient(null);
-        setCourierValue(null); setTrackingNumber(''); setDispatchDate(''); setExpectedDeliveryDate(''); setRemarks('');
+        setAsset(null); setTempAsset(null); setRecipient(null); setRemarks('');
         setRepairDestination('IT'); setConsultant(null); setDispatchDocs([]);
         setDisposalCandidate(null); setEarlyDisposalReason('');
         setPreview(null); setReturnLoaner(true);
@@ -271,23 +261,16 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
 
     const back = () => { setFlow(null); reset(); };
 
-    /**
-     * Logistics are only sent when the movement actually crosses a location boundary. Within one
-     * location there is no journey, so a courier, tracking number and delivery dates would be
-     * recorded against a movement that never travels.
+    /*
+     * Courier, tracking number and delivery dates are deliberately not collected here.
+     *
+     * They belong to the dispatch, not to the creation of the movement, and both dispatch paths
+     * overwrite whatever was captured at this point — MovementService#dispatchMovement for a solo
+     * dispatch, ConsignmentService#dispatch when it travels with others. They also cannot form a
+     * valid dispatch on their own: that needs a plate number and a signed dispatch note, neither of
+     * which this form has. Collecting them here only produced a movement that displayed a courier
+     * and a dispatch date while it was still sitting in its approval ladder, undispatched.
      */
-    const logistics = () => {
-        if (!preview?.interLocation) {
-            return { courierService: null, trackingNumber: null, dispatchDate: null, expectedDeliveryDate: null };
-        }
-        const courierName = typeof courierValue === 'object' ? courierValue?.name : courierValue;
-        return {
-            courierService: courierName || null,
-            trackingNumber: trackingNumber || null,
-            dispatchDate: dispatchDate ? new Date(dispatchDate).toISOString() : null,
-            expectedDeliveryDate: expectedDeliveryDate ? new Date(expectedDeliveryDate).toISOString() : null,
-        };
-    };
 
     /** Uploads the selected dispatch documents and returns their stored paths (EXTERNAL repairs). */
     const uploadDispatchDocs = async (): Promise<string[] | null> => {
@@ -328,12 +311,11 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
                     repairDestination: categoryNotRepairable ? null : repairDestination,
                     consultantId: consultantId ?? null,
                     deliveryDocuments: deliveryDocuments ?? null,
-                    ...logistics(),
                     remarks: remarks || null,
                 });
             } else if (flow === 'temp-replacement') {
                 if (!tempAsset || !recipient) { toast.warning('Select the temporary asset and recipient.'); setSending(false); return; }
-                response = await tempReplacementService({ tempAssetId: tempAsset.id, recipientUserId: recipient.id, ...logistics(), remarks: remarks || null });
+                response = await tempReplacementService({ tempAssetId: tempAsset.id, recipientUserId: recipient.id, remarks: remarks || null });
             } else if (flow === 'return-after-repair') {
                 if (!asset) { toast.warning('Select the repaired asset.'); setSending(false); return; }
                 if (preview?.blockedReason) { toast.warning(preview.blockedReason); setSending(false); return; }
@@ -343,7 +325,7 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
                 response = await returnAfterRepairService({
                     assetId: asset.id,
                     returnLoaner,
-                    ...logistics(), remarks: remarks || null,
+                    remarks: remarks || null,
                 });
             } else {
                 if (!disposalCandidate) { toast.warning('Select the asset to dispose.'); setSending(false); return; }
@@ -373,8 +355,15 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
     };
 
     const meta = FLOWS.find((f) => f.key === flow);
-    // A non-repairable divert becomes a disposal on the backend, which carries no logistics leg.
-    const showLogistics = flow !== 'disposal' && !categoryNotRepairable;
+    /*
+     * Whether to say anything about the journey. A branch disposal travels to the Head Office
+     * disposal store, so it is included — it used to be excluded, leaving the one flow that most
+     * often crosses locations as the only one that never mentioned it.
+     *
+     * A non-repairable divert is still excluded: the preview describes the repair routing that is
+     * about to be abandoned, so its source and destination would name the wrong journey.
+     */
+    const showLogistics = !categoryNotRepairable;
 
     const assetPicker = (label: string, options: IAsset[], value: IAsset | null, onChange: (a: IAsset | null) => void, searchable = false) => (
         <Autocomplete
@@ -551,10 +540,22 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
                                 {asset.assetType?.name ?? 'Uncategorised'}
                             </Typography>
                             {!categoryNotRepairable && (
+                                /*
+                                 * Only claim a default when the category actually carries one. This used to
+                                 * render `?? 'IT'`, so an unconfigured category read as a deliberate
+                                 * "Default routing: IT" — and contradicted the field's own helper text below.
+                                 */
                                 <Chip
                                     size="small"
-                                    label={`Default routing: ${asset.assetType?.repairDestination ?? 'IT'}`}
-                                    sx={{ height: 20, fontSize: '0.66rem', fontWeight: 700, bgcolor: alpha(meta!.color, 0.08), color: meta!.color }}
+                                    label={asset.assetType?.repairDestination
+                                        ? `Default routing: ${asset.assetType.repairDestination}`
+                                        : 'No default routing set'}
+                                    sx={{
+                                        height: 20, fontSize: '0.66rem', fontWeight: 700,
+                                        ...(asset.assetType?.repairDestination
+                                            ? { bgcolor: alpha(meta!.color, 0.08), color: meta!.color }
+                                            : { bgcolor: '#F1F5F9', color: '#64748B' }),
+                                    }}
                                 />
                             )}
                         </Stack>
@@ -844,14 +845,15 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
             )}
 
             {/*
-             * ── Logistics ──
+             * ── Journey ──
              *
-             * Shown only when the movement actually crosses a location boundary, per the server's
-             * own derivation. A branch-to-Head-Office transfer needs a courier; one that stays
-             * inside Head Office has no journey, so asking for a tracking number and delivery dates
-             * would only invite data that describes nothing.
+             * Tells the operator whether this movement travels, using the server's own derivation,
+             * without collecting anything. A branch-to-Head-Office transfer needs a courier, but the
+             * courier is chosen at dispatch; one that stays inside Head Office never travels at all.
              */}
-            {showLogistics && preview && !preview.interLocation && (
+            {/* A blocked preview has no journey to describe — its source and destination are the
+                little that could be resolved before the rule stopped it, so neither note applies. */}
+            {showLogistics && preview && !preview.blockedReason && !preview.interLocation && (
                 <Alert severity="info" sx={{ borderRadius: 2, '& .MuiAlert-message': { fontSize: '0.82rem' } }}>
                     {preview.sourceLocationName
                         ? <>Both ends of this movement are within <strong>{preview.sourceLocationName}</strong>, so no courier, tracking number or delivery dates are needed.</>
@@ -859,48 +861,13 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
                 </Alert>
             )}
 
-            {showLogistics && preview?.interLocation && (
-                <>
-                    <SectionLabel>Logistics</SectionLabel>
-                    <Typography variant="caption" sx={{ color: '#64748B', mt: -1 }}>
-                        {preview.sourceLocationName} → {preview.destinationLocationName} — this movement leaves its
-                        location, so the courier details are recorded here.
-                    </Typography>
-                    {/* Plain CSS grid — MUI Grid's negative-margin spacing shifts fields out of
-                        line with the full-width inputs above it inside a Stack. */}
-                    <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, alignItems: 'start' }}>
-                        {/* Vetted pick or ad-hoc name, matching the dispatch modal — the couriers
-                            registry is the same one used when a movement is dispatched. */}
-                        <Autocomplete
-                            freeSolo
-                            options={couriers}
-                            value={courierValue}
-                            fullWidth
-                            getOptionLabel={(c) => (typeof c === 'string' ? c : c.name)}
-                            isOptionEqualToValue={(o, v) => typeof o !== 'string' && typeof v !== 'string' && o.id === v.id}
-                            onChange={(_, v) => setCourierValue(v)}
-                            onInputChange={(_, v, reason) => { if (reason === 'input') setCourierValue(v); }}
-                            PopperComponent={DropdownPopper}
-                            PaperComponent={DropdownPaper}
-                            renderOption={(props, c) => (
-                                <li {...props} key={typeof c === 'string' ? c : c.id}>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: 1 }}>
-                                        <Typography variant="body2">{typeof c === 'string' ? c : c.name}</Typography>
-                                        {typeof c !== 'string' && c.vetted && (
-                                            <Chip size="small" label="Vetted" sx={{ fontSize: '0.65rem', fontWeight: 700, bgcolor: alpha(PRIMARY, 0.1), color: PRIMARY }} />
-                                        )}
-                                    </Box>
-                                </li>
-                            )}
-                            renderInput={(params) => (
-                                <TextField {...params} label="Courier" placeholder="Pick a vetted courier or type a name" sx={autocompleteSx} />
-                            )}
-                        />
-                        <TextField fullWidth sx={fieldSx} label="Tracking #" value={trackingNumber} onChange={(e) => setTrackingNumber(e.target.value)} />
-                        <TextField fullWidth sx={fieldSx} type="date" label="Dispatch Date" InputLabelProps={{ shrink: true }} value={dispatchDate} onChange={(e) => setDispatchDate(e.target.value)} />
-                        <TextField fullWidth sx={fieldSx} type="date" label="Expected Delivery" InputLabelProps={{ shrink: true }} value={expectedDeliveryDate} onChange={(e) => setExpectedDeliveryDate(e.target.value)} />
-                    </Box>
-                </>
+            {showLogistics && preview?.interLocation && !preview.blockedReason && (
+                <Alert severity="info" sx={{ borderRadius: 2, '& .MuiAlert-message': { fontSize: '0.82rem' } }}>
+                    <strong>{preview.sourceLocationName} → {preview.destinationLocationName}</strong> — this movement
+                    leaves its location, so it has to be dispatched. The courier, plate number, tracking number and
+                    signed dispatch note are captured at that point, either on this movement on its own or once for
+                    the whole van if it travels on a consignment.
+                </Alert>
             )}
 
             {/* ── Remarks ── */}
