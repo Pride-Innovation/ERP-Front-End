@@ -5,28 +5,60 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { useEffect, useState } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import {
-    alpha, Alert, Autocomplete, Box, Button, Chip, Divider, Paper, Stack,
-    Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography,
+    alpha, Alert, Autocomplete, Box, Button, Chip, Divider, IconButton, Paper, Stack,
+    Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Tooltip, Typography,
 } from '@mui/material';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import AddIcon from '@mui/icons-material/Add';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import PlaceOutlinedIcon from '@mui/icons-material/PlaceOutlined';
+import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
+import DirectionsCarOutlinedIcon from '@mui/icons-material/DirectionsCarOutlined';
+import QrCode2OutlinedIcon from '@mui/icons-material/QrCode2Outlined';
+import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
+import EventOutlinedIcon from '@mui/icons-material/EventOutlined';
+import WhereToVoteOutlinedIcon from '@mui/icons-material/WhereToVoteOutlined';
+import WarehouseOutlinedIcon from '@mui/icons-material/WarehouseOutlined';
 import { toast } from 'react-toastify';
 import { brand, neutral, border } from '../../utils/tokens';
+import { StatusChip } from '../../components/layout';
+import { dataHeadCellSx, dataBodyCellSx, dataRowSx, dataSurfaceSx } from '../../components/tables/dataTableSx';
 import { fetchRowsService } from '../../core/apis/globalService';
 import { IConsignment, consignmentStatusHelp, consignmentStatusLabels } from './interface';
 import { addMovementToConsignmentService, removeMovementFromConsignmentService } from './service';
 import { IMovement } from '../movement/interface';
-import { movementTypeLabel } from '../movement/constants';
+import { movementTypeLabel, statusLabel, statusTone } from '../movement/constants';
 
-const Fact = ({ label, value }: { label: string; value?: string | null }) => (
+const fmtDate = (d?: string | null) =>
+    d ? new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : null;
+
+const Fact = ({ label, value, icon, mono }: {
+    label: string; value?: string | null; icon?: ReactNode; mono?: boolean;
+}) => (
     <Box>
-        <Typography variant="caption" sx={{ color: neutral[500], textTransform: 'uppercase', letterSpacing: 0.4, fontWeight: 700 }}>
-            {label}
+        <Stack direction="row" alignItems="center" spacing={0.6} sx={{ mb: 0.35 }}>
+            {icon && <Box sx={{ color: neutral[400], display: 'flex', '& .MuiSvgIcon-root': { fontSize: 13 } }}>{icon}</Box>}
+            <Typography
+                variant="caption"
+                sx={{ color: neutral[500], textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 700, fontSize: '0.62rem' }}
+            >
+                {label}
+            </Typography>
+        </Stack>
+        <Typography
+            variant="body2"
+            sx={{
+                color: value ? neutral[800] : neutral[400],
+                fontWeight: 600,
+                fontFamily: mono && value ? 'monospace' : undefined,
+                fontSize: '0.82rem',
+            }}
+        >
+            {value || '—'}
         </Typography>
-        <Typography variant="body2" sx={{ color: neutral[800], fontWeight: 600 }}>{value || '—'}</Typography>
     </Box>
 );
 
@@ -117,11 +149,39 @@ const ConsignmentDetail = ({
 
             <Paper variant="outlined" sx={{ p: 2, borderRadius: 2, borderColor: border.subtle }}>
                 <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr 1fr', sm: 'repeat(4, 1fr)' } }}>
-                    <Fact label="Route" value={`${consignment.sourceLocation?.name ?? '—'} → ${consignment.destLocation?.name ?? '—'}`} />
-                    <Fact label="Courier" value={consignment.courierService ?? consignment.courier?.name} />
-                    <Fact label="Plate" value={consignment.plateNumber} />
-                    <Fact label="Tracking" value={consignment.trackingNumber} />
+                    <Fact
+                        label="Route"
+                        icon={<PlaceOutlinedIcon />}
+                        value={`${consignment.sourceLocation?.name ?? '—'} → ${consignment.destLocation?.name ?? '—'}`}
+                    />
+                    <Fact
+                        label="Courier"
+                        icon={<LocalShippingOutlinedIcon />}
+                        value={consignment.courierService ?? consignment.courier?.name}
+                    />
+                    <Fact label="Plate" icon={<DirectionsCarOutlinedIcon />} value={consignment.plateNumber} mono />
+                    <Fact label="Tracking" icon={<QrCode2OutlinedIcon />} value={consignment.trackingNumber} mono />
                 </Box>
+
+                {/* Dates only appear once there are dates — a draft has no journey to time yet. */}
+                {consignment.status !== 'DRAFT' && (
+                    <>
+                        <Divider sx={{ my: 2, borderColor: border.subtle }} />
+                        <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr 1fr', sm: 'repeat(4, 1fr)' } }}>
+                            <Fact label="Dispatched" icon={<EventOutlinedIcon />} value={fmtDate(consignment.dispatchDate)} />
+                            <Fact label="Expected" icon={<EventOutlinedIcon />} value={fmtDate(consignment.expectedDeliveryDate)} />
+                            <Fact label="Arrived" icon={<WhereToVoteOutlinedIcon />} value={fmtDate(consignment.arrivalDate)} />
+                            <Fact label="Landed in" icon={<WarehouseOutlinedIcon />} value={consignment.landingStore?.name} />
+                        </Box>
+                    </>
+                )}
+
+                {consignment.remarks && (
+                    <>
+                        <Divider sx={{ my: 2, borderColor: border.subtle }} />
+                        <Fact label="Remarks" value={consignment.remarks} />
+                    </>
+                )}
             </Paper>
 
             <Box>
@@ -143,94 +203,177 @@ const ConsignmentDetail = ({
                         Nothing loaded yet. Add the approved movements heading to {consignment.destLocation?.name ?? 'this destination'}.
                     </Typography>
                 ) : (
-                    <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2, borderColor: border.subtle, overflowX: 'auto' }}>
-                        <Table size="small">
-                            <TableHead>
-                                <TableRow sx={{ bgcolor: neutral[50] }}>
-                                    <TableCell sx={{ fontWeight: 700 }}>Movement</TableCell>
-                                    <TableCell sx={{ fontWeight: 700 }}>Type</TableCell>
-                                    <TableCell sx={{ fontWeight: 700 }}>From</TableCell>
-                                    <TableCell sx={{ fontWeight: 700 }}>For</TableCell>
-                                    <TableCell sx={{ fontWeight: 700 }} align="right">Items</TableCell>
-                                    <TableCell sx={{ fontWeight: 700 }}>Status</TableCell>
-                                    <TableCell sx={{ fontWeight: 700 }} align="right">Actions</TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {consignment.movements!.map((m) => (
-                                    <TableRow key={m.id} hover>
-                                        <TableCell sx={{ fontWeight: 700 }}>
-                                            #{m.id}
-                                            {m.requestId ? (
-                                                <Chip size="small" label={`REQ ${m.requestId}`}
-                                                    sx={{ ml: 0.75, fontSize: '0.65rem', fontWeight: 700, bgcolor: alpha(brand[500], 0.1), color: brand[700] }} />
-                                            ) : null}
-                                        </TableCell>
-                                        <TableCell sx={{ color: neutral[700] }}>{movementTypeLabel(m.movementType ?? undefined)}</TableCell>
-                                        <TableCell sx={{ color: neutral[600] }}>{m.sourceStoreName ?? '—'}</TableCell>
-                                        <TableCell sx={{ color: neutral[600] }}>{m.recipientName ?? m.destinationName ?? '—'}</TableCell>
-                                        <TableCell align="right" sx={{ color: neutral[700] }}>{m.itemCount}</TableCell>
-                                        <TableCell>
-                                            {/* After arrival the only distinction that matters is whether this
-                                                one has reached its recipient yet. */}
-                                            {m.status === 'COMPLETED' ? (
-                                                <Chip size="small" label="Handed over"
-                                                    sx={{ fontSize: '0.65rem', fontWeight: 700, bgcolor: alpha('#10B981', 0.12), color: '#047857' }} />
-                                            ) : consignment.status === 'ARRIVED' ? (
-                                                <Chip size="small" label="Awaiting hand-over"
-                                                    sx={{ fontSize: '0.65rem', fontWeight: 700, bgcolor: alpha('#F59E0B', 0.14), color: '#B45309' }} />
-                                            ) : (
-                                                <Typography variant="caption" sx={{ color: neutral[600] }}>{m.status}</Typography>
-                                            )}
-                                        </TableCell>
-                                        <TableCell align="right">
-                                            <Stack direction="row" spacing={0.5} justifyContent="flex-end">
-                                                <Button size="small" onClick={() => onOpenMovement(m.id)} sx={{ minWidth: 0 }}>
-                                                    <OpenInNewIcon fontSize="small" />
-                                                </Button>
-                                                {editable && (
-                                                    <Button size="small" color="error" disabled={busy}
-                                                        onClick={() => remove(m.id)} sx={{ minWidth: 0 }}>
-                                                        <DeleteOutlineIcon fontSize="small" />
-                                                    </Button>
-                                                )}
-                                            </Stack>
-                                        </TableCell>
+                    <Paper elevation={0} sx={dataSurfaceSx}>
+                        <TableContainer>
+                            <Table size="small">
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell sx={{ ...dataHeadCellSx, minWidth: 130 }}>Movement</TableCell>
+                                        <TableCell sx={{ ...dataHeadCellSx, minWidth: 150 }}>Type</TableCell>
+                                        <TableCell sx={{ ...dataHeadCellSx, minWidth: 200 }}>From → For</TableCell>
+                                        <TableCell sx={{ ...dataHeadCellSx, minWidth: 80 }} align="center">Items</TableCell>
+                                        <TableCell sx={{ ...dataHeadCellSx, minWidth: 150 }}>Status</TableCell>
+                                        <TableCell sx={{ ...dataHeadCellSx, minWidth: 90 }} align="right">Actions</TableCell>
                                     </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
+                                </TableHead>
+                                <TableBody>
+                                    {consignment.movements!.map((m, i) => (
+                                        <TableRow key={m.id} hover={false} sx={dataRowSx(i)}>
+                                            <TableCell sx={dataBodyCellSx}>
+                                                <Stack spacing={0.15}>
+                                                    <Typography variant="caption" sx={{ fontWeight: 700, color: brand[600], fontFamily: 'monospace' }}>
+                                                        #{m.id}
+                                                    </Typography>
+                                                    {m.requestId && (
+                                                        <Typography variant="caption" sx={{ color: neutral[400], fontSize: '0.6rem', fontFamily: 'monospace' }}>
+                                                            REQ-{m.requestId}
+                                                        </Typography>
+                                                    )}
+                                                </Stack>
+                                            </TableCell>
+                                            <TableCell sx={dataBodyCellSx}>
+                                                <Typography variant="caption" sx={{ color: neutral[700], fontWeight: 500 }}>
+                                                    {movementTypeLabel(m.movementType ?? undefined)}
+                                                </Typography>
+                                            </TableCell>
+                                            <TableCell sx={dataBodyCellSx}>
+                                                <Stack direction="row" alignItems="center" spacing={0.75} sx={{ minWidth: 0 }}>
+                                                    <Typography variant="caption" sx={{ color: neutral[600] }} noWrap>
+                                                        {m.sourceStoreName ?? '—'}
+                                                    </Typography>
+                                                    <ArrowForwardIcon sx={{ fontSize: 12, color: neutral[300], flexShrink: 0 }} />
+                                                    <Typography variant="caption" sx={{ fontWeight: 600, color: neutral[800] }} noWrap>
+                                                        {m.recipientName ?? m.destinationName ?? '—'}
+                                                    </Typography>
+                                                </Stack>
+                                            </TableCell>
+                                            <TableCell sx={dataBodyCellSx} align="center">
+                                                <Box
+                                                    sx={{
+                                                        display: 'inline-flex', alignItems: 'center', gap: 0.5,
+                                                        px: 0.9, height: 22, borderRadius: '6px',
+                                                        bgcolor: alpha(brand[500], 0.08), color: brand[700],
+                                                        fontSize: '0.7rem', fontWeight: 700,
+                                                    }}
+                                                >
+                                                    <Inventory2OutlinedIcon sx={{ fontSize: 12 }} />
+                                                    {m.itemCount}
+                                                </Box>
+                                            </TableCell>
+                                            <TableCell sx={dataBodyCellSx}>
+                                                {/* After arrival the only distinction that matters is whether this
+                                                    one has reached its recipient yet. */}
+                                                {m.status === 'COMPLETED' ? (
+                                                    <StatusChip label="Handed over" tone="success" />
+                                                ) : consignment.status === 'ARRIVED' ? (
+                                                    <StatusChip label="Awaiting hand-over" tone="pending" />
+                                                ) : (
+                                                    <StatusChip label={statusLabel(m.status ?? undefined)} tone={statusTone(m.status ?? undefined)} />
+                                                )}
+                                            </TableCell>
+                                            <TableCell sx={dataBodyCellSx} align="right">
+                                                <Stack direction="row" spacing={0.25} justifyContent="flex-end">
+                                                    <Tooltip title="Open movement" arrow>
+                                                        <IconButton
+                                                            size="small" onClick={() => onOpenMovement(m.id)}
+                                                            sx={{ width: 26, height: 26, color: brand[600], '&:hover': { bgcolor: alpha(brand[500], 0.1) } }}
+                                                        >
+                                                            <OpenInNewIcon sx={{ fontSize: 15 }} />
+                                                        </IconButton>
+                                                    </Tooltip>
+                                                    {editable && (
+                                                        <Tooltip title="Take off this consignment" arrow>
+                                                            <span>
+                                                                <IconButton
+                                                                    size="small" disabled={busy} onClick={() => remove(m.id)}
+                                                                    sx={{ width: 26, height: 26, color: '#DC2626', '&:hover': { bgcolor: alpha('#DC2626', 0.1) } }}
+                                                                >
+                                                                    <DeleteOutlineIcon sx={{ fontSize: 15 }} />
+                                                                </IconButton>
+                                                            </span>
+                                                        </Tooltip>
+                                                    )}
+                                                </Stack>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                    </Paper>
                 )}
             </Box>
 
             {editable && (
-                <>
-                    <Divider />
-                    <Box>
-                        <Typography variant="subtitle2" sx={{ fontWeight: 700, color: neutral[900], mb: 1 }}>
+                <Paper
+                    variant="outlined"
+                    sx={{ p: 2, borderRadius: 2, borderColor: alpha(brand[500], 0.25), bgcolor: alpha(brand[500], 0.02) }}
+                >
+                    <Stack direction="row" alignItems="center" spacing={0.75} sx={{ mb: 1.25 }}>
+                        <AddIcon sx={{ fontSize: 16, color: brand[600] }} />
+                        <Typography variant="subtitle2" sx={{ fontWeight: 700, color: neutral[900] }}>
                             Load a movement
                         </Typography>
-                        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
-                            <Autocomplete
-                                sx={{ flex: 1 }}
-                                options={loadable}
-                                value={picked}
-                                getOptionLabel={(m) => `#${m.id} — ${movementTypeLabel(m.movementType ?? undefined)}`}
-                                isOptionEqualToValue={(o, v) => o.id === v.id}
-                                onChange={(_, v) => setPicked(v)}
-                                noOptionsText={`No approved movements waiting for ${consignment.destLocation?.name ?? 'this destination'}`}
-                                renderInput={(params) => <TextField {...params} label="Approved movements heading this way" />}
-                            />
-                            <Button
-                                variant="contained" startIcon={<AddIcon />} disabled={!picked || busy} onClick={add}
-                                sx={{ textTransform: 'none', fontWeight: 600, whiteSpace: 'nowrap' }}
-                            >
-                                Load
-                            </Button>
-                        </Stack>
-                    </Box>
-                </>
+                        <Chip
+                            size="small"
+                            label={`${loadable.length} available`}
+                            sx={{
+                                height: 20, fontSize: '0.65rem', fontWeight: 700,
+                                bgcolor: alpha(brand[500], 0.1), color: brand[700],
+                            }}
+                        />
+                    </Stack>
+                    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} alignItems="flex-start">
+                        <Autocomplete
+                            sx={{ flex: 1, width: '100%' }}
+                            size="small"
+                            options={loadable}
+                            value={picked}
+                            getOptionLabel={(m) => `#${m.id} — ${movementTypeLabel(m.movementType ?? undefined)}`}
+                            isOptionEqualToValue={(o, v) => o.id === v.id}
+                            onChange={(_, v) => setPicked(v)}
+                            noOptionsText={`No approved movements waiting for ${consignment.destLocation?.name ?? 'this destination'}`}
+                            renderOption={(props, m) => (
+                                <Box component="li" {...props} key={m.id}>
+                                    <Stack sx={{ minWidth: 0 }}>
+                                        <Typography variant="caption" sx={{ fontWeight: 700, color: neutral[800] }}>
+                                            #{m.id} — {movementTypeLabel(m.movementType ?? undefined)}
+                                        </Typography>
+                                        <Typography variant="caption" sx={{ color: neutral[500], fontSize: '0.65rem' }}>
+                                            {m.sourceStore?.name ?? '—'} → {m.destStore?.name
+                                                ?? (m.recipientUser ? `${m.recipientUser.firstName} ${m.recipientUser.lastName}` : '—')}
+                                            {' · '}{m.items?.length ?? 0} item{(m.items?.length ?? 0) === 1 ? '' : 's'}
+                                        </Typography>
+                                    </Stack>
+                                </Box>
+                            )}
+                            renderInput={(params) => (
+                                <TextField
+                                    {...params}
+                                    placeholder="Approved movements heading this way…"
+                                    sx={{
+                                        '& .MuiOutlinedInput-root': {
+                                            borderRadius: '8px', bgcolor: '#fff', fontSize: '0.8rem',
+                                            '& fieldset': { borderColor: border.subtle },
+                                            '&:hover fieldset': { borderColor: brand[500] },
+                                            '&.Mui-focused fieldset': { borderColor: brand[500] },
+                                        },
+                                    }}
+                                />
+                            )}
+                        />
+                        <Button
+                            variant="contained" startIcon={<AddIcon />} disabled={!picked || busy} onClick={add}
+                            sx={{
+                                height: 40, px: 2.5, borderRadius: '8px', textTransform: 'none',
+                                fontWeight: 600, whiteSpace: 'nowrap',
+                                bgcolor: brand[500], '&:hover': { bgcolor: brand[700] },
+                            }}
+                        >
+                            Load
+                        </Button>
+                    </Stack>
+                </Paper>
             )}
         </Stack>
     );

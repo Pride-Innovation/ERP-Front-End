@@ -8,36 +8,40 @@ Managing Director
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-    alpha, Box, Button, Chip, CircularProgress, Paper, Stack,
-    Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-    Tab, Tabs, Tooltip,
+    alpha, Box, Button, Grid, IconButton, Paper, Stack, Tab, Tabs, Tooltip, Typography,
 } from '@mui/material';
 import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
 import AddIcon from '@mui/icons-material/Add';
 import RefreshIcon from '@mui/icons-material/Refresh';
-import FlightTakeoffOutlinedIcon from '@mui/icons-material/FlightTakeoffOutlined';
+import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 import WhereToVoteOutlinedIcon from '@mui/icons-material/WhereToVoteOutlined';
 import AssignmentTurnedInOutlinedIcon from '@mui/icons-material/AssignmentTurnedInOutlined';
-import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
-import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
+import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined';
+import SwapHorizOutlinedIcon from '@mui/icons-material/SwapHorizOutlined';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { toast } from 'react-toastify';
 import { PageHero, StatTile, EmptyState } from '../../components/layout';
 import { brand, neutral, border, status as statusTokens } from '../../utils/tokens';
 import { ROUTES } from '../../core/routes/routes';
 import ModalComponent from '../../components/modal';
-import {
-    IConsignment, ConsignmentStatus, consignmentStatusLabels, consignmentStatusHelp,
-} from './interface';
+import { IConsignment, ConsignmentStatus } from './interface';
 import {
     fetchConsignmentsService, fetchConsignmentService, markConsignmentInTransitService,
     markConsignmentArrivedService, cancelConsignmentService,
 } from './service';
+import ConsignmentTable, { ConsignmentAction } from './ConsignmentTable';
+import ConsignmentFilters, {
+    ConsignmentFilterValues, matchesConsignmentFilters, deriveConsignmentFilterOptions,
+} from './ConsignmentFilters';
+import {
+    exportConsignmentsPdf, exportConsignmentsExcel, exportConsignmentsCsv,
+} from './exportConsignments';
 import ConsignmentDetail from './ConsignmentDetail';
 import CreateConsignment from './CreateConsignment';
 import DispatchConsignment from './DispatchConsignment';
 import ReceiveConsignment from './ReceiveConsignment';
 
-const STATUS_TABS: Array<{ value: 'all' | ConsignmentStatus; label: string }> = [
+const STATUS_TABS: Array<{ value: TabValue; label: string }> = [
     { value: 'all', label: 'All' },
     { value: 'DRAFT', label: 'Being loaded' },
     { value: 'DISPATCHED', label: 'Dispatched' },
@@ -46,24 +50,27 @@ const STATUS_TABS: Array<{ value: 'all' | ConsignmentStatus; label: string }> = 
     { value: 'CANCELLED', label: 'Cancelled' },
 ];
 
-const statusTone = (s: ConsignmentStatus) => {
-    switch (s) {
-        case 'ARRIVED': return { bg: alpha(statusTokens.success.main, 0.12), fg: statusTokens.success.strong };
-        case 'IN_TRANSIT': return { bg: alpha(statusTokens.info.main, 0.12), fg: statusTokens.info.strong };
-        case 'DISPATCHED': return { bg: alpha(statusTokens.warning.main, 0.14), fg: statusTokens.warning.strong };
-        case 'CANCELLED': return { bg: alpha(statusTokens.danger.main, 0.1), fg: statusTokens.danger.strong };
-        default: return { bg: alpha(brand[500], 0.1), fg: brand[700] };
-    }
-};
+/**
+ * Tab values are the statuses, plus `ON_ROAD` — a tile-only filter spanning both travelling
+ * states, because "where are my vans" is a question the two statuses answer together.
+ */
+type TabValue = 'all' | 'ON_ROAD' | ConsignmentStatus;
 
-const formatDate = (value?: string | null) =>
-    value ? new Date(value).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
+const onRoad = (c: IConsignment) => c.status === 'DISPATCHED' || c.status === 'IN_TRANSIT';
+
+const isOverdue = (c: IConsignment) => {
+    if (c.status !== 'DISPATCHED' && c.status !== 'IN_TRANSIT') return false;
+    if (!c.expectedDeliveryDate) return false;
+    const due = new Date(c.expectedDeliveryDate);
+    return !Number.isNaN(due.getTime()) && due.getTime() < Date.now();
+};
 
 const Consignments = () => {
     const navigate = useNavigate();
     const [rows, setRows] = useState<IConsignment[]>([]);
     const [loading, setLoading] = useState(true);
-    const [tab, setTab] = useState<'all' | ConsignmentStatus>('all');
+    const [tab, setTab] = useState<TabValue>('all');
+    const [filters, setFilters] = useState<ConsignmentFilterValues>({});
     const [busyId, setBusyId] = useState<number | null>(null);
 
     const [detail, setDetail] = useState<IConsignment | null>(null);
@@ -86,16 +93,42 @@ const Consignments = () => {
 
     useEffect(() => { load(); }, [load]);
 
-    const visible = useMemo(
-        () => (tab === 'all' ? rows : rows.filter((r) => r.status === tab)),
-        [rows, tab]
-    );
+    const visible = useMemo(() => {
+        const byTab = tab === 'all'
+            ? rows
+            : (tab === 'ON_ROAD' ? rows.filter(onRoad) : rows.filter((r) => r.status === tab));
+        return byTab.filter((c) => matchesConsignmentFilters(c, filters));
+    }, [rows, tab, filters]);
+
+    const filterOptions = useMemo(() => deriveConsignmentFilterOptions(rows), [rows]);
+
+    /** Exports carry what the screen is showing, not the whole unfiltered list. */
+    const handleExport = (fn: (list: IConsignment[]) => void) => {
+        if (visible.length === 0) {
+            toast.warning('There are no consignments matching the current filters to export.');
+            return;
+        }
+        fn(visible);
+    };
 
     const counts = useMemo(() => ({
         loading: rows.filter((r) => r.status === 'DRAFT').length,
-        moving: rows.filter((r) => r.status === 'DISPATCHED' || r.status === 'IN_TRANSIT').length,
+        moving: rows.filter(onRoad).length,
         arrived: rows.filter((r) => r.status === 'ARRIVED').length,
+        /** Landed but not fully handed over — the queue that actually needs someone today. */
+        overdue: rows.filter(isOverdue).length,
     }), [rows]);
+
+    /** Per-status tallies for the tab badges, counted after the filter panel has had its say. */
+    const filteredRows = useMemo(
+        () => rows.filter((c) => matchesConsignmentFilters(c, filters)),
+        [rows, filters],
+    );
+
+    const tabCounts = useMemo(() => filteredRows.reduce((acc: Record<string, number>, r) => {
+        acc[r.status] = (acc[r.status] ?? 0) + 1;
+        return acc;
+    }, {}), [filteredRows]);
 
     const openDetail = async (id: number) => {
         const res = (await fetchConsignmentService(id)) as any;
@@ -164,184 +197,238 @@ const Consignments = () => {
         }
     };
 
+    /** Single entry point for everything a row's dropdown can raise. */
+    const handleRowAction = (action: ConsignmentAction, c: IConsignment) => {
+        switch (action) {
+            case 'open': openDetail(c.id); break;
+            case 'dispatch': openDispatch(c.id); break;
+            case 'hand-over': openReceive(c.id); break;
+            case 'in-transit':
+                runAction(c.id, markConsignmentInTransitService, 'Consignment is in transit.');
+                break;
+            case 'arrived':
+                runAction(c.id, markConsignmentArrivedService, 'Consignment arrived — stock is in the destination store.');
+                break;
+            case 'cancel':
+                runAction(c.id, (id) => cancelConsignmentService(id), 'Consignment cancelled.');
+                break;
+            default: break;
+        }
+    };
+
+    const todayLabel = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+
     return (
-        <Box sx={{ minHeight: '100vh', pb: 4 }}>
+        // Same page padding as the movement pages, so the whole module aligns.
+        <Box sx={{ minHeight: '100vh', px: { xs: 2, sm: 3 }, py: { xs: 2, sm: 3 }, pb: 4 }}>
             <PageHero
                 title="Consignments"
-                subtitle="One journey, many movements"
+                subtitle="One journey, many movements — the vans the transfers ride on"
                 icon={<LocalShippingOutlinedIcon />}
-                stat={{ value: rows.length.toLocaleString(), label: 'journeys' }}
+                stat={{ value: rows.length.toLocaleString(), label: 'journeys', helper: todayLabel }}
+                actions={
+                    <Stack direction="row" spacing={1.25} alignItems="center">
+                        <Tooltip title="Refresh" arrow>
+                            <IconButton
+                                onClick={load}
+                                sx={{
+                                    width: 36, height: 36, borderRadius: '8px', bgcolor: '#fff',
+                                    border: `1px solid ${border.subtle}`, color: neutral[500],
+                                    '&:hover': { borderColor: brand[500], color: brand[600], bgcolor: alpha(brand[500], 0.04) },
+                                }}
+                            >
+                                <RefreshIcon sx={{ fontSize: 18 }} />
+                            </IconButton>
+                        </Tooltip>
+                        <Button
+                            variant="outlined"
+                            startIcon={<SwapHorizOutlinedIcon />}
+                            onClick={() => navigate(ROUTES.MOVEMENT)}
+                            sx={{ height: 36, px: 2, borderRadius: '8px', textTransform: 'none', fontWeight: 600 }}
+                        >
+                            Movements
+                        </Button>
+                        <Button
+                            variant="contained"
+                            startIcon={<AddIcon />}
+                            onClick={() => setCreateOpen(true)}
+                            sx={{
+                                height: 36, px: 2.5, borderRadius: '8px', textTransform: 'none', fontWeight: 600,
+                                bgcolor: brand[500], '&:hover': { bgcolor: brand[700] },
+                                boxShadow: `0 2px 8px ${alpha(brand[500], 0.3)}`,
+                            }}
+                        >
+                            New Consignment
+                        </Button>
+                    </Stack>
+                }
             />
 
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ mb: 2 }}>
-                <StatTile label="Being loaded" value={counts.loading} />
-                <StatTile label="On the road" value={counts.moving} />
-                <StatTile label="Arrived" value={counts.arrived} />
-            </Stack>
+            {/* Journey overview — click a tile to filter the list to it */}
+            <Grid container spacing={2} sx={{ mb: 3 }}>
+                <Grid item xs={6} sm={6} md={3}>
+                    <StatTile
+                        label="Being loaded"
+                        value={counts.loading}
+                        accent="brand"
+                        icon={<Inventory2OutlinedIcon />}
+                        tooltip="Drafts still accepting movements. Nothing has left the store."
+                        onClick={() => setTab(tab === 'DRAFT' ? 'all' : 'DRAFT')}
+                    />
+                </Grid>
+                <Grid item xs={6} sm={6} md={3}>
+                    <StatTile
+                        label="On the road"
+                        value={counts.moving}
+                        accent="info"
+                        icon={<LocalShippingOutlinedIcon />}
+                        tooltip="Dispatched or in transit — stock sits against the courier."
+                        onClick={() => setTab(tab === 'ON_ROAD' ? 'all' : 'ON_ROAD')}
+                    />
+                </Grid>
+                <Grid item xs={6} sm={6} md={3}>
+                    <StatTile
+                        label="Arrived"
+                        value={counts.arrived}
+                        accent="success"
+                        icon={<WhereToVoteOutlinedIcon />}
+                        tooltip="Landed at the destination store, awaiting hand-over to recipients."
+                        onClick={() => setTab(tab === 'ARRIVED' ? 'all' : 'ARRIVED')}
+                    />
+                </Grid>
+                <Grid item xs={6} sm={6} md={3}>
+                    <StatTile
+                        label="Overdue"
+                        value={counts.overdue}
+                        accent={counts.overdue > 0 ? 'danger' : 'neutral'}
+                        icon={<WarningAmberOutlinedIcon />}
+                        tooltip="On the road past their expected delivery date."
+                        helper={counts.overdue > 0 ? 'Past expected delivery' : 'All on schedule'}
+                    />
+                </Grid>
+            </Grid>
 
-            <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1.5 }}>
+            {/* Hand-over queue — the one thing on this page that is somebody's job right now */}
+            {counts.arrived > 0 && (
+                <Paper
+                    variant="outlined"
+                    sx={{
+                        mb: 2.5, px: 2.5, py: 1.5, borderRadius: 2,
+                        display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap',
+                        borderColor: alpha(statusTokens.success.main, 0.3),
+                        bgcolor: alpha(statusTokens.success.main, 0.04),
+                    }}
+                >
+                    <AssignmentTurnedInOutlinedIcon sx={{ fontSize: 18, color: statusTokens.success.strong }} />
+                    <Typography sx={{ fontSize: '0.82rem', color: neutral[700], flex: 1, minWidth: 200 }}>
+                        <Box component="span" sx={{ fontWeight: 700, color: neutral[900] }}>
+                            {counts.arrived} consignment{counts.arrived === 1 ? '' : 's'}
+                        </Box>
+                        {' '}landed and waiting to be handed over to their recipients.
+                    </Typography>
+                    <Button
+                        size="small"
+                        onClick={() => setTab('ARRIVED')}
+                        endIcon={<ArrowForwardIcon sx={{ fontSize: '16px !important' }} />}
+                        sx={{ textTransform: 'none', fontWeight: 600, fontSize: '0.78rem', color: statusTokens.success.strong }}
+                    >
+                        Show them
+                    </Button>
+                </Paper>
+            )}
+
+            {/* Filters & export bar — same control as the movements page */}
+            <ConsignmentFilters
+                sources={filterOptions.sources}
+                destinations={filterOptions.destinations}
+                couriers={filterOptions.couriers}
+                onApply={setFilters}
+                onExportPdf={() => handleExport(exportConsignmentsPdf)}
+                onExportExcel={() => handleExport(exportConsignmentsExcel)}
+                onExportCsv={() => handleExport(exportConsignmentsCsv)}
+                onRefresh={load}
+            />
+
+            <Paper variant="outlined" sx={{ borderRadius: 2, overflow: 'hidden', borderColor: border.subtle }}>
+                {/* Status tabs, each carrying its own count */}
                 <Tabs
-                    value={tab}
+                    // `false` when the "On the road" tile is driving the filter — no single tab owns it.
+                    value={STATUS_TABS.some((t) => t.value === tab) ? tab : false}
                     onChange={(_, v) => setTab(v)}
                     variant="scrollable"
                     scrollButtons="auto"
-                    sx={{ minHeight: 38, '& .MuiTab-root': { minHeight: 38, textTransform: 'none', fontWeight: 600 } }}
+                    sx={{
+                        px: 1.5, mt: 1.5, borderBottom: `1px solid ${border.subtle}`,
+                        minHeight: 40,
+                        '& .MuiTab-root': {
+                            fontSize: '0.75rem', fontWeight: 600, minWidth: 80, minHeight: 40,
+                            textTransform: 'none', color: neutral[500], py: 0,
+                        },
+                        '& .MuiTabs-indicator': { bgcolor: brand[500], height: 2.5, borderRadius: '2px 2px 0 0' },
+                        '& .MuiTab-root.Mui-selected': { color: brand[600] },
+                    }}
                 >
-                    {STATUS_TABS.map((t) => <Tab key={t.value} value={t.value} label={t.label} />)}
+                    {STATUS_TABS.map((t) => {
+                        const n = t.value === 'all' ? filteredRows.length : (tabCounts[t.value] ?? 0);
+                        const selected = tab === t.value;
+                        return (
+                            <Tab
+                                key={t.value}
+                                value={t.value}
+                                label={(
+                                    <Stack direction="row" alignItems="center" spacing={0.75}>
+                                        <span>{t.label}</span>
+                                        <Box
+                                            sx={{
+                                                minWidth: 18, px: 0.5, height: 18, borderRadius: '9px',
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                fontSize: '0.62rem', fontWeight: 700,
+                                                bgcolor: selected ? alpha(brand[500], 0.12) : neutral[100],
+                                                color: selected ? brand[700] : neutral[500],
+                                            }}
+                                        >
+                                            {n}
+                                        </Box>
+                                    </Stack>
+                                )}
+                            />
+                        );
+                    })}
                 </Tabs>
-                <Stack direction="row" spacing={1}>
-                    <Button
-                        variant="outlined" startIcon={<RefreshIcon />} onClick={load}
-                        sx={{ textTransform: 'none', fontWeight: 600, borderRadius: '999px' }}
-                    >
-                        Refresh
-                    </Button>
-                    <Button
-                        variant="contained" startIcon={<AddIcon />} onClick={() => setCreateOpen(true)}
-                        sx={{ textTransform: 'none', fontWeight: 600, borderRadius: '999px' }}
-                    >
-                        New consignment
-                    </Button>
-                </Stack>
-            </Stack>
 
-            <Paper variant="outlined" sx={{ borderRadius: 2, overflow: 'hidden', borderColor: border.subtle }}>
-                {loading ? (
-                    <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}><CircularProgress size={26} /></Box>
-                ) : visible.length === 0 ? (
-                    <EmptyState
-                        icon={<LocalShippingOutlinedIcon />}
-                        title="No consignments here"
-                        description="A consignment groups the movements travelling together on one courier run. Open one when you are ready to load a van."
-                    />
-                ) : (
-                    <TableContainer sx={{ overflowX: 'auto' }}>
-                        <Table size="small">
-                            <TableHead>
-                                <TableRow sx={{ bgcolor: neutral[50] }}>
-                                    <TableCell sx={{ fontWeight: 700 }}>Reference</TableCell>
-                                    <TableCell sx={{ fontWeight: 700 }}>Route</TableCell>
-                                    <TableCell sx={{ fontWeight: 700 }}>Courier</TableCell>
-                                    <TableCell sx={{ fontWeight: 700 }} align="right">Movements</TableCell>
-                                    <TableCell sx={{ fontWeight: 700 }}>Dispatched</TableCell>
-                                    <TableCell sx={{ fontWeight: 700 }}>Status</TableCell>
-                                    <TableCell sx={{ fontWeight: 700 }} align="right">Actions</TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {visible.map((c) => {
-                                    const tone = statusTone(c.status);
-                                    const busy = busyId === c.id;
-                                    return (
-                                        <TableRow key={c.id} hover>
-                                            <TableCell sx={{ fontWeight: 700, color: neutral[900] }}>
-                                                {c.reference ?? `#${c.id}`}
-                                            </TableCell>
-                                            <TableCell sx={{ color: neutral[700] }}>
-                                                {c.sourceLocation?.name ?? '—'} → {c.destLocation?.name ?? '—'}
-                                            </TableCell>
-                                            <TableCell sx={{ color: neutral[600] }}>
-                                                {c.courierService ?? c.courier?.name ?? '—'}
-                                                {c.plateNumber ? ` · ${c.plateNumber}` : ''}
-                                            </TableCell>
-                                            <TableCell align="right" sx={{ color: neutral[700] }}>{c.movementCount}</TableCell>
-                                            <TableCell sx={{ color: neutral[600] }}>{formatDate(c.dispatchDate)}</TableCell>
-                                            <TableCell>
-                                                <Tooltip title={consignmentStatusHelp[c.status]}>
-                                                    <Chip
-                                                        size="small"
-                                                        label={consignmentStatusLabels[c.status]}
-                                                        sx={{ fontWeight: 700, fontSize: '0.7rem', bgcolor: tone.bg, color: tone.fg }}
-                                                    />
-                                                </Tooltip>
-                                            </TableCell>
-                                            <TableCell align="right">
-                                                <Stack direction="row" spacing={0.5} justifyContent="flex-end">
-                                                    <Tooltip title="Open">
-                                                        <Button
-                                                            size="small" onClick={() => openDetail(c.id)}
-                                                            sx={{ minWidth: 0, textTransform: 'none' }}
-                                                        >
-                                                            <VisibilityOutlinedIcon fontSize="small" />
-                                                        </Button>
-                                                    </Tooltip>
-                                                    {c.status === 'DISPATCHED' && (
-                                                        <Tooltip title="Custody passes to the courier; stock leaves the source stores">
-                                                            <Button
-                                                                size="small" disabled={busy}
-                                                                onClick={() => runAction(c.id, markConsignmentInTransitService, 'Consignment is in transit.')}
-                                                                sx={{ textTransform: 'none', fontWeight: 600 }}
-                                                                startIcon={<FlightTakeoffOutlinedIcon fontSize="small" />}
-                                                            >
-                                                                In transit
-                                                            </Button>
-                                                        </Tooltip>
-                                                    )}
-                                                    {c.status === 'ARRIVED' && (
-                                                        <Tooltip title="Hand the landed items to their recipients">
-                                                            <Button
-                                                                size="small" variant="contained" disabled={busy}
-                                                                onClick={() => openReceive(c.id)}
-                                                                sx={{ textTransform: 'none', fontWeight: 600 }}
-                                                                startIcon={<AssignmentTurnedInOutlinedIcon fontSize="small" />}
-                                                            >
-                                                                Hand over
-                                                            </Button>
-                                                        </Tooltip>
-                                                    )}
-                                                    {c.status === 'IN_TRANSIT' && (
-                                                        <Tooltip title="Stock is credited to the destination store; hand-overs can begin">
-                                                            <Button
-                                                                size="small" disabled={busy}
-                                                                onClick={() => runAction(c.id, markConsignmentArrivedService, 'Consignment arrived — stock is in the destination store.')}
-                                                                sx={{ textTransform: 'none', fontWeight: 600 }}
-                                                                startIcon={<WhereToVoteOutlinedIcon fontSize="small" />}
-                                                            >
-                                                                Arrived
-                                                            </Button>
-                                                        </Tooltip>
-                                                    )}
-                                                    {c.status === 'DRAFT' && (
-                                                        <>
-                                                            <Tooltip title={
-                                                                c.movementCount === 0
-                                                                    ? 'Load at least one movement before dispatching'
-                                                                    : 'Hand the whole load to a courier'
-                                                            }>
-                                                                {/* span so the tooltip still shows while the button is disabled */}
-                                                                <span>
-                                                                    <Button
-                                                                        size="small" variant="contained"
-                                                                        disabled={busy || c.movementCount === 0}
-                                                                        onClick={() => openDispatch(c.id)}
-                                                                        sx={{ textTransform: 'none', fontWeight: 600 }}
-                                                                        startIcon={<LocalShippingOutlinedIcon fontSize="small" />}
-                                                                    >
-                                                                        Dispatch
-                                                                    </Button>
-                                                                </span>
-                                                            </Tooltip>
-                                                            <Tooltip title="Releases its movements to travel another way">
-                                                                <Button
-                                                                    size="small" color="error" disabled={busy}
-                                                                    onClick={() => runAction(c.id, (id) => cancelConsignmentService(id), 'Consignment cancelled.')}
-                                                                    sx={{ textTransform: 'none', fontWeight: 600 }}
-                                                                    startIcon={<CancelOutlinedIcon fontSize="small" />}
-                                                                >
-                                                                    Cancel
-                                                                </Button>
-                                                            </Tooltip>
-                                                        </>
-                                                    )}
-                                                </Stack>
-                                            </TableCell>
-                                        </TableRow>
-                                    );
-                                })}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
-                )}
+                <ConsignmentTable
+                    rows={visible}
+                    loading={loading}
+                    busyId={busyId}
+                    paginationResetKey={`${tab}|${JSON.stringify(filters)}`}
+                    onAction={handleRowAction}
+                    disableSurface
+                    stickyHeader
+                    maxHeight="clamp(320px, calc(100vh - 470px), 1400px)"
+                    empty={(
+                        <EmptyState
+                            variant="inline"
+                            icon={<LocalShippingOutlinedIcon />}
+                            title={tab === 'all'
+                                ? 'No consignments yet'
+                                : `Nothing ${(STATUS_TABS.find((t) => t.value === tab)?.label ?? 'on the road').toLowerCase()}`}
+                            description={tab === 'all'
+                                ? 'A consignment groups the movements travelling together on one courier run. Open one when you are ready to load a van.'
+                                : 'Switch to another tab, or open a new consignment to start loading one.'}
+                            action={tab === 'all' ? (
+                                <Button
+                                    variant="contained" startIcon={<AddIcon />} onClick={() => setCreateOpen(true)}
+                                    sx={{
+                                        textTransform: 'none', borderRadius: '8px', fontWeight: 600,
+                                        bgcolor: brand[500], '&:hover': { bgcolor: brand[700] },
+                                    }}
+                                >
+                                    New Consignment
+                                </Button>
+                            ) : undefined}
+                        />
+                    )}
+                />
             </Paper>
 
             {detailOpen && detail && (

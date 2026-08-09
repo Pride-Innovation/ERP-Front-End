@@ -83,6 +83,9 @@ const StatTile = ({
                 p: 2.25,
                 borderRadius: 2,
                 borderColor: neutral[200],
+                // Fill the stretched grid cell, so a row of tiles stays level even when only
+                // some of them carry a helper line or a trend chip.
+                height: '100%',
                 cursor: interactive ? 'pointer' : 'default',
                 transition: 'box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease',
                 ...(interactive && {
