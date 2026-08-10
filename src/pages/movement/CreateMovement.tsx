@@ -19,6 +19,8 @@ import MovementForm from './MovementForm';
 import { movementSchema } from './schema';
 import { IMovementCreatePayload, IMovementFormData, IMovementItemDraft } from './interface';
 import { createMovementService } from './service';
+import { noApproverError } from './constants';
+import NoApproverDialog from './NoApproverDialog';
 import { ROUTES } from '../../core/routes/routes';
 import { brand } from '../../utils/tokens';
 
@@ -27,6 +29,10 @@ const P = brand[500];
 const CreateMovement = () => {
     const [sendingRequest, setSendingRequest] = useState(false);
     const [items, setItems] = useState<IMovementItemDraft[]>([]);
+    /** The server's "no approver" explanation, while the confirm-and-proceed dialog is open. */
+    const [noApprover, setNoApprover] = useState<string | null>(null);
+    /** The form values to resubmit once the user confirms — the form itself is unchanged. */
+    const [pendingData, setPendingData] = useState<IMovementFormData | null>(null);
     const navigate = useNavigate();
 
     const { register, control, handleSubmit, formState, reset, setValue, watch } = useForm<IMovementFormData>({
@@ -35,7 +41,11 @@ const CreateMovement = () => {
         defaultValues: { destinationKind: 'STORE', movementType: '' },
     });
 
-    const onSubmit = async (data: IMovementFormData) => {
+    /**
+     * @param bypassReason set only on the second attempt, once the server has reported that no
+     *                     approver exists and the user has confirmed they want to continue
+     */
+    const onSubmit = async (data: IMovementFormData, bypassReason?: string) => {
         if (items.length === 0) {
             toast.warning('Add at least one item to move.');
             return;
@@ -55,19 +65,32 @@ const CreateMovement = () => {
             // Deliberately not sent: the server derives this from the movement category. Sending a
             // client-chosen value is what allowed a cross-location movement to skip approval.
             items: items.map((i) => ({ assetId: i.assetId ?? null, commodityId: i.commodityId ?? null, quantity: i.quantity })),
+            ...(bypassReason ? { proceedWithoutApproval: true, bypassReason } : {}),
         };
 
         setSendingRequest(true);
         try {
             const response = (await createMovementService(payload)) as any;
             if (response?.status === 201 || response?.status === 200) {
-                toast.success('Movement created successfully');
+                toast.success(bypassReason
+                    ? 'Movement created without approval — the exception has been recorded.'
+                    : 'Movement created successfully');
+                setNoApprover(null);
                 reset();
                 setItems([]);
                 navigate(ROUTES.MOVEMENT);
-            } else {
-                toast.error(response?.data?.message ?? 'Failed to create movement');
+                return;
             }
+
+            // Not a dead end: the server is reporting that approval is impossible and asking whether
+            // to proceed. Offer that as a deliberate second step.
+            const noApproverMessage = noApproverError(response);
+            if (noApproverMessage) {
+                setPendingData(data);
+                setNoApprover(noApproverMessage);
+                return;
+            }
+            toast.error(response?.response?.data?.detail ?? response?.data?.message ?? 'Failed to create movement');
         } catch {
             toast.error('An unexpected error occurred');
         } finally {
@@ -127,7 +150,7 @@ const CreateMovement = () => {
             </Box>
 
             {/* ── Form ── */}
-            <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate sx={{ width: '100%' }}>
+            <Box component="form" onSubmit={handleSubmit((data) => onSubmit(data))} noValidate sx={{ width: '100%' }}>
                 <MovementForm
                     register={register}
                     control={control}
@@ -140,6 +163,14 @@ const CreateMovement = () => {
                     buttonText="Create Movement"
                 />
             </Box>
+
+            <NoApproverDialog
+                open={!!noApprover}
+                message={noApprover}
+                busy={sendingRequest}
+                handleClose={() => { setNoApprover(null); setPendingData(null); }}
+                onConfirm={(reason) => { if (pendingData) onSubmit(pendingData, reason); }}
+            />
         </Box>
     );
 };

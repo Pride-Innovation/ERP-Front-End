@@ -53,6 +53,12 @@ export interface IMovement {
     status?: MovementStatus;
 
     sourceStore?: IStore | null;
+    /**
+     * The person handing items back, on a RETURN_TO_STORE. Exactly one of this and `sourceStore` is
+     * set — a return leaves from someone's desk, not a shelf — so a view that reads only
+     * `sourceStore` shows no origin at all for those.
+     */
+    sourceUser?: IUser | null;
     destStore?: IStore | null;
     recipientUser?: IUser | null;
 
@@ -126,6 +132,14 @@ export interface IMovementCreatePayload {
      * since those need approval even when they stay within one location.
      */
     requiresApproval?: boolean | null;
+
+    /**
+     * Sent only on a retry, once the server has reported that no approver could be resolved and the
+     * user has confirmed they want to continue. Recorded against the movement and its approval trail
+     * — the exception is documented, not waived.
+     */
+    proceedWithoutApproval?: boolean;
+    bypassReason?: string;
     items: { assetId?: number | string | null; commodityId?: number | string | null; quantity?: number }[];
 }
 

@@ -162,6 +162,21 @@ export const canReceive = (m: {
 export const canComplete = (m: { movementCategory?: string; status?: string }) =>
     m.movementCategory === 'INTRA_LOCATION' && (m.status === 'INITIATED' || m.status === 'RECEIVED');
 
+/**
+ * The server's "no approver could be resolved" refusal, if that is what this response is.
+ *
+ * <p>Keys off `errorCode` rather than the message text, so re-wording the explanation cannot quietly
+ * break the client's ability to offer the override. Reads both shapes because the movement services
+ * `catch (error) { return error }` — a 4xx arrives as an AxiosError, with the body one level deeper.
+ *
+ * @returns the server's explanation to show the user, or null when this is some other outcome
+ */
+export const noApproverError = (res: any): string | null => {
+    const data = res?.response?.data ?? res?.data;
+    if (data?.errorCode !== 'NO_APPROVER') return null;
+    return data.detail ?? data.message ?? 'No approver could be resolved on your reporting line.';
+};
+
 export const canCancel = (m: { status?: string }) =>
     m.status !== 'COMPLETED' && m.status !== 'CANCELLED';
 

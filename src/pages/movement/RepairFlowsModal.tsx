@@ -37,6 +37,8 @@ import {
     previewDisposalService,
 } from './service';
 import { IDisposalCandidate, IMovementFlowPreview } from './interface';
+import { noApproverError } from './constants';
+import NoApproverDialog from './NoApproverDialog';
 
 const PRIMARY = '#08796C';
 
@@ -136,6 +138,9 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
     const [consultants, setConsultants] = useState<IConsultant[]>([]);
     const [consultant, setConsultant] = useState<IConsultant | null>(null);
     const [dispatchDocs, setDispatchDocs] = useState<File[]>([]);
+
+    /** The server's "no approver" explanation, while the confirm-and-proceed dialog is open. */
+    const [noApprover, setNoApprover] = useState<string | null>(null);
 
     /**
      * The server's answer for the flow as currently configured: resolved source and destination,
@@ -287,8 +292,15 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
         return paths;
     };
 
-    const submit = async () => {
+    /**
+     * @param bypassReason set only on the second attempt, after the server has reported that no
+     *                     approver exists and the user has confirmed they want to continue anyway
+     */
+    const submit = async (bypassReason?: string) => {
         if (!flow) return;
+        const bypass = bypassReason
+            ? { proceedWithoutApproval: true, bypassReason }
+            : {};
         setSending(true);
         try {
             let response: any;
@@ -312,10 +324,13 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
                     consultantId: consultantId ?? null,
                     deliveryDocuments: deliveryDocuments ?? null,
                     remarks: remarks || null,
+                    ...bypass,
                 });
             } else if (flow === 'temp-replacement') {
                 if (!tempAsset || !recipient) { toast.warning('Select the temporary asset and recipient.'); setSending(false); return; }
-                response = await tempReplacementService({ tempAssetId: tempAsset.id, recipientUserId: recipient.id, remarks: remarks || null });
+                response = await tempReplacementService({
+                    tempAssetId: tempAsset.id, recipientUserId: recipient.id, remarks: remarks || null, ...bypass,
+                });
             } else if (flow === 'return-after-repair') {
                 if (!asset) { toast.warning('Select the repaired asset.'); setSending(false); return; }
                 if (preview?.blockedReason) { toast.warning(preview.blockedReason); setSending(false); return; }
@@ -326,6 +341,7 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
                     assetId: asset.id,
                     returnLoaner,
                     remarks: remarks || null,
+                    ...bypass,
                 });
             } else {
                 if (!disposalCandidate) { toast.warning('Select the asset to dispose.'); setSending(false); return; }
@@ -337,16 +353,28 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
                     assetId: disposalCandidate.id,
                     remarks: remarks || null,
                     earlyDisposalReason: needsEarlyDisposalReason ? earlyDisposalReason.trim() : null,
+                    ...bypass,
                 });
             }
 
             if (response?.status === 200 || response?.status === 201) {
-                toast.success('Movement created successfully');
+                toast.success(bypassReason
+                    ? 'Movement created without approval — the exception has been recorded.'
+                    : 'Movement created successfully');
+                setNoApprover(null);
                 onDone?.();
                 handleClose();
-            } else {
-                toast.error(response?.data?.message ?? 'Failed to create movement');
+                return;
             }
+
+            // Not a failure yet: the server is telling us approval is impossible and asking whether
+            // to proceed. Offer that as a deliberate second step rather than a dead end.
+            const noApprover = noApproverError(response);
+            if (noApprover) {
+                setNoApprover(noApprover);
+                return;
+            }
+            toast.error(response?.response?.data?.detail ?? response?.data?.message ?? 'Failed to create movement');
         } catch {
             toast.error('An unexpected error occurred');
         } finally {
@@ -895,8 +923,16 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
                 >
                     Cancel
                 </Button>
-                <ButtonComponent sendingRequest={sending} buttonText="Create Movement" buttonColor="primary" variant="contained" type="button" handleClick={submit} />
+                <ButtonComponent sendingRequest={sending} buttonText="Create Movement" buttonColor="primary" variant="contained" type="button" handleClick={() => submit()} />
             </Stack>
+
+            <NoApproverDialog
+                open={!!noApprover}
+                message={noApprover}
+                busy={sending}
+                handleClose={() => setNoApprover(null)}
+                onConfirm={(reason) => submit(reason)}
+            />
         </Stack>
     );
 };
