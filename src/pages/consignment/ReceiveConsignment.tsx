@@ -11,7 +11,10 @@ import {
     TextField, ToggleButton, ToggleButtonGroup, Typography,
 } from '@mui/material';
 import AssignmentTurnedInOutlinedIcon from '@mui/icons-material/AssignmentTurnedInOutlined';
+import ReportProblemOutlinedIcon from '@mui/icons-material/ReportProblemOutlined';
 import { toast } from 'react-toastify';
+import { fieldSx } from '../../components/forms/Inputs';
+import { SectionLabel } from '../../components/forms/modalChrome';
 import { brand, neutral, border, status as statusTokens } from '../../utils/tokens';
 import { movementTypeLabel } from '../movement/constants';
 import { receiveConsignmentService } from './service';
@@ -191,14 +194,47 @@ const ReceiveConsignment = ({
                                                 </ToggleButton>
                                             </ToggleButtonGroup>
 
+                                            {/*
+                                              * A soft amber wash inside a hairline outline — enough to
+                                              * make a flagged line findable in a column of
+                                              * near-identical rows, without the heavier left rule that
+                                              * drew a second frame inside the row's own border.
+                                              */}
                                             {flagged && (
-                                                <TextField
-                                                    fullWidth required size="small" sx={{ mt: 1 }}
-                                                    label="What was wrong?"
-                                                    placeholder="e.g. 1 of 3 reams missing"
-                                                    value={line.remarks}
-                                                    onChange={(e) => update(m.id, { remarks: e.target.value })}
-                                                />
+                                                <Box
+                                                    sx={{
+                                                        mt: 1.25, p: 1.5, borderRadius: 1.5,
+                                                        bgcolor: alpha(statusTokens.warning.main, 0.07),
+                                                        border: `1px solid ${alpha(statusTokens.warning.main, 0.22)}`,
+                                                    }}
+                                                >
+                                                    <Stack direction="row" spacing={0.75} alignItems="center" sx={{ mb: 1 }}>
+                                                        <ReportProblemOutlinedIcon sx={{ fontSize: 14, color: statusTokens.warning.strong }} />
+                                                        <Typography
+                                                            variant="caption"
+                                                            sx={{
+                                                                fontWeight: 700, color: statusTokens.warning.strong,
+                                                                textTransform: 'uppercase', letterSpacing: '0.06em', fontSize: '0.62rem',
+                                                            }}
+                                                        >
+                                                            What was wrong?
+                                                        </Typography>
+                                                    </Stack>
+                                                    <TextField
+                                                        fullWidth required multiline rows={2}
+                                                        placeholder="e.g. 1 of 3 reams missing; carton crushed in transit"
+                                                        value={line.remarks}
+                                                        onChange={(e) => update(m.id, { remarks: e.target.value })}
+                                                        sx={{
+                                                            ...fieldSx,
+                                                            '& .MuiInputBase-input': { padding: 0, fontSize: '0.82rem', lineHeight: 1.5 },
+                                                            '& .MuiOutlinedInput-root': { backgroundColor: '#fff' },
+                                                        }}
+                                                    />
+                                                    <Typography variant="caption" sx={{ color: neutral[500], display: 'block', mt: 0.75, fontSize: '0.7rem' }}>
+                                                        Recorded on the movement — this is what an investigation reads later.
+                                                    </Typography>
+                                                </Box>
                                             )}
                                         </Box>
                                     )}
@@ -209,9 +245,17 @@ const ReceiveConsignment = ({
                 })}
             </Stack>
 
+            <SectionLabel>Notes for this hand-over — optional</SectionLabel>
             <TextField
-                fullWidth multiline rows={2} label="Notes for this hand-over (optional)"
-                value={remarks} onChange={(e) => setRemarks(e.target.value)}
+                fullWidth multiline rows={3}
+                placeholder="Anything that applies to the whole hand-over — who collected, where the goods were signed for…"
+                value={remarks}
+                onChange={(e) => setRemarks(e.target.value)}
+                // fieldSx pads the inner input for single-line height; a multiline root already
+                // carries its own padding, so zero the textarea's to avoid doubling up.
+                sx={{ ...fieldSx, '& .MuiInputBase-input': { padding: 0, fontSize: '0.875rem', lineHeight: 1.5 } }}
+                helperText="Applies to every movement handed over now. A line flagged with a discrepancy keeps its own note."
+                FormHelperTextProps={{ sx: { mx: 0, mt: 0.75, fontSize: '0.7rem', color: neutral[500] } }}
             />
 
             <Stack direction="row" justifyContent="flex-end" spacing={1.5}>

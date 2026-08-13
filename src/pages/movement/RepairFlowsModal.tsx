@@ -8,7 +8,7 @@ Managing Director
 import { useEffect, useState } from 'react';
 import {
     alpha, Alert, Autocomplete, Box, Button, Checkbox, Chip, CircularProgress, Divider,
-    FormControlLabel, MenuItem, Paper, Popper, Stack, TextField, Typography,
+    FormControlLabel, MenuItem, Paper, Stack, TextField, Typography,
 } from '@mui/material';
 import BuildOutlinedIcon from '@mui/icons-material/BuildOutlined';
 import SwapHorizOutlinedIcon from '@mui/icons-material/SwapHorizOutlined';
@@ -23,6 +23,7 @@ import { toast } from 'react-toastify';
 import ButtonComponent from '../../components/forms/Button';
 import { fieldSx } from '../../components/forms/Inputs';
 import { autocompleteSx } from '../../components/forms/Autocomplete';
+import { DropdownPopper, DropdownPaper, SectionLabel } from '../../components/forms/modalChrome';
 import { fetchRowsService } from '../../core/apis/globalService';
 import { IAsset } from '../assets/interface';
 import { IUser } from '../users/interface';
@@ -51,65 +52,6 @@ const FLOWS: { key: Flow; label: string; description: string; icon: JSX.Element;
     { key: 'disposal', label: 'Disposal', description: 'Move an irreparable or written-off asset to the Disposal store.', icon: <DeleteSweepOutlinedIcon />, color: '#B91C1C' },
 ];
 
-/**
- * Dropdown chrome shared by every Autocomplete in this modal — same recipe as the
- * "Create Title" form: elevated rounded paper, comfortable option rows, brand highlight.
- */
-const DropdownPopper = (props: any) => (
-    <Popper
-        {...props}
-        placement="bottom-start"
-        style={{ ...props.style, zIndex: 1500 }}
-        modifiers={[
-            { name: 'preventOverflow', options: { altBoundary: true, rootBoundary: 'document', padding: 8 } },
-            { name: 'flip', options: { altBoundary: true, rootBoundary: 'document', padding: 8 } },
-        ]}
-    />
-);
-
-const DropdownPaper = ({ children, ...props }: any) => (
-    <Paper
-        {...props}
-        elevation={4}
-        sx={{
-            mt: 0.5,
-            borderRadius: '8px',
-            boxShadow: `0 4px 24px ${alpha('#000', 0.12)}`,
-            '& .MuiAutocomplete-listbox': {
-                padding: '4px 0',
-                '& .MuiAutocomplete-option': {
-                    fontSize: '0.875rem',
-                    minHeight: 40,
-                    px: 2,
-                    '&:hover': { backgroundColor: alpha(PRIMARY, 0.06) },
-                    '&[aria-selected="true"]': {
-                        backgroundColor: alpha(PRIMARY, 0.1),
-                        color: PRIMARY,
-                        fontWeight: 500,
-                    },
-                },
-            },
-        }}
-    >
-        {children}
-    </Paper>
-);
-
-/** Uppercase micro-label with a trailing rule — the app's section divider idiom. */
-const SectionLabel = ({ children }: { children: React.ReactNode }) => (
-    <Stack direction="row" alignItems="center" spacing={1.25} sx={{ pt: 0.5 }}>
-        <Typography
-            variant="caption"
-            sx={{
-                fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase',
-                color: '#94A3B8', fontSize: '0.66rem', whiteSpace: 'nowrap',
-            }}
-        >
-            {children}
-        </Typography>
-        <Divider sx={{ flex: 1, borderColor: '#EEF2F7' }} />
-    </Stack>
-);
 
 interface Props {
     handleClose: () => void;
