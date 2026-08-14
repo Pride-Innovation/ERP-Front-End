@@ -40,6 +40,8 @@ import { SvgIconComponent } from '@mui/icons-material';
 
 import { PageHero, StatTile } from '../../components/layout';
 import { ROUTES } from '../../core/routes/routes';
+import usePermissions from '../../core/permissions/usePermissions';
+import { PERMISSIONS } from '../../core/permissions/constants';
 import { fetchBalancesService, fetchBranchOverviewService } from './service';
 import BalancesPanel, { IBalanceView } from './BalancesPanel';
 
@@ -93,9 +95,37 @@ interface IBranchRow {
     low: number;
 }
 
+/**
+ * What share of a branch's stock lines are running low.
+ *
+ * <p>The counts beside it say how much is held; this says whether it is healthy, which is the
+ * question the overview exists to answer. A branch with nothing stocked reads as an empty rail
+ * rather than a green one — no stock is not the same as no problem.
+ */
+const BranchHealthBar = ({ itemLines, low }: { itemLines: number; low: number }) => {
+    if (itemLines <= 0) {
+        return (
+            <Tooltip title="Nothing stocked in this branch's stores" arrow>
+                <Box sx={{ width: 56, height: 4, borderRadius: 2, bgcolor: alpha('#DC2626', 0.18), flexShrink: 0 }} />
+            </Tooltip>
+        );
+    }
+    const lowShare = Math.max(0, Math.min(1, low / itemLines));
+    const healthy = Math.round((1 - lowShare) * 100);
+    return (
+        <Tooltip title={`${itemLines - low} of ${itemLines} line(s) above their reorder level (${healthy}%)`} arrow>
+            <Box sx={{ width: 56, height: 4, borderRadius: 2, bgcolor: alpha('#B45309', 0.25), overflow: 'hidden', flexShrink: 0 }}>
+                <Box sx={{ width: `${healthy}%`, height: '100%', bgcolor: '#08796C', transition: 'width 0.3s ease' }} />
+            </Box>
+        </Tooltip>
+    );
+};
+
 // ── Component ─────────────────────────────────────────────────────────────────
 
 const Store = () => {
+    const { has } = usePermissions();
+    const seesAllBranches = has(PERMISSIONS.VIEW_ALL_BRANCHES);
     const navigate = useNavigate();
 
     // Cross-branch snapshot for the Admin: stocked item lines + low-stock count per branch store.
@@ -314,9 +344,15 @@ const Store = () => {
             <Paper elevation={0} sx={{ mt: 3, borderRadius: 2.5, border: '1px solid #E8EDF3', overflow: 'hidden' }}>
                 <Box sx={{ px: 2.5, py: 1.75, borderBottom: '1px solid #EEF2F7', display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
                     <AccountBalanceOutlinedIcon sx={{ fontSize: 18, color: '#08796C' }} />
-                    <Typography sx={{ fontWeight: 700 }}>Branches Overview</Typography>
+                    <Typography sx={{ fontWeight: 700 }}>
+                        {seesAllBranches ? 'Branches Overview' : 'Your Branch'}
+                    </Typography>
+                    {/* The listing is branch-scoped server-side, so a branch officer sees a single
+                        row. Saying so stops "Branches Overview" reading as the whole estate. */}
                     <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                        Grouped by region — expand a region to see its branch stores. Regions with low-stock alerts open automatically.
+                        {seesAllBranches
+                            ? 'Grouped by region — expand a region to see its branch stores. Regions with low-stock alerts open automatically.'
+                            : 'Stock health for the branch you belong to. Estate-wide figures need cross-branch access.'}
                     </Typography>
                 </Box>
 
@@ -357,11 +393,7 @@ const Store = () => {
                                         {rows.length} branch{rows.length !== 1 ? 'es' : ''}
                                     </Typography>
                                     <Box sx={{ flex: 1 }} />
-                                    <Chip
-                                        label={`${itemLines.toLocaleString()} item lines`}
-                                        size="small"
-                                        sx={{ height: 22, fontWeight: 700, fontSize: '0.68rem', fontVariantNumeric: 'tabular-nums', bgcolor: alpha('#08796C', 0.08), color: '#08796C' }}
-                                    />
+                                    {/* The alert leads: it is the only chip here anyone has to act on. */}
                                     {low > 0 && (
                                         <Chip
                                             icon={<WarningAmberOutlinedIcon sx={{ fontSize: 13 }} />}
@@ -370,6 +402,11 @@ const Store = () => {
                                             sx={{ height: 22, fontWeight: 700, fontSize: '0.68rem', bgcolor: alpha('#B45309', 0.12), color: '#B45309', '& .MuiChip-icon': { color: '#B45309' } }}
                                         />
                                     )}
+                                    <Chip
+                                        label={`${itemLines.toLocaleString()} item lines`}
+                                        size="small"
+                                        sx={{ height: 22, fontWeight: 700, fontSize: '0.68rem', fontVariantNumeric: 'tabular-nums', bgcolor: alpha('#08796C', 0.08), color: '#08796C' }}
+                                    />
                                     <IconButton size="small" sx={{ ml: 0.5 }} aria-label={open ? `Collapse ${region}` : `Expand ${region}`}>
                                         <ExpandMoreIcon sx={{ fontSize: 18, color: '#64748B', transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s ease' }} />
                                     </IconButton>
@@ -400,7 +437,22 @@ const Store = () => {
                                         >
                                             <StorefrontOutlinedIcon sx={{ fontSize: 15, color: '#94A3B8', flexShrink: 0 }} />
                                             <Typography sx={{ fontWeight: 600, fontSize: '0.84rem', color: '#1E293B' }}>{b.name}</Typography>
+                                            {/*
+                                             * Health first. `itemLines` and `totalQuantity` are weak
+                                             * signals — 400 units could be 399 paperclips — while the
+                                             * share of lines running low is the number that decides
+                                             * whether anyone needs to act on this branch today.
+                                             */}
+                                            <BranchHealthBar itemLines={b.itemLines} low={b.low} />
                                             <Box sx={{ flex: 1 }} />
+                                            {b.low > 0 && (
+                                                <Chip
+                                                    icon={<WarningAmberOutlinedIcon sx={{ fontSize: 12 }} />}
+                                                    label={`${b.low} low`}
+                                                    size="small"
+                                                    sx={{ height: 22, fontWeight: 700, fontSize: '0.68rem', bgcolor: alpha('#B45309', 0.12), color: '#B45309', '& .MuiChip-icon': { color: '#B45309' } }}
+                                                />
+                                            )}
                                             <Chip
                                                 label={`${b.totalQuantity.toLocaleString()} unit${b.totalQuantity !== 1 ? 's' : ''} · ${b.itemLines} line${b.itemLines !== 1 ? 's' : ''}`}
                                                 size="small"
@@ -418,14 +470,6 @@ const Store = () => {
                                                         height: 22, fontWeight: 700, fontSize: '0.68rem', fontVariantNumeric: 'tabular-nums',
                                                         bgcolor: alpha('#0369a1', 0.1), color: '#0369a1',
                                                     }}
-                                                />
-                                            )}
-                                            {b.low > 0 && (
-                                                <Chip
-                                                    icon={<WarningAmberOutlinedIcon sx={{ fontSize: 12 }} />}
-                                                    label={`${b.low} low`}
-                                                    size="small"
-                                                    sx={{ height: 22, fontWeight: 700, fontSize: '0.68rem', bgcolor: alpha('#B45309', 0.12), color: '#B45309', '& .MuiChip-icon': { color: '#B45309' } }}
                                                 />
                                             )}
                                             <Button

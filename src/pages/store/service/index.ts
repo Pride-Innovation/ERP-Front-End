@@ -101,10 +101,53 @@ const setBalanceMinLevelService = async (balanceId: string | number, minLevel: n
     }
 }
 
+// ── Stock ledger ───────────────────────────────────────────────────────────
+//
+// The record of how every balance reached its current number. Each write elsewhere in the app —
+// a GRN receipt, an issuance, a movement leg, a stock take — leaves an entry carrying its reason.
+
+/** Every ledger entry for one commodity in one store, newest first. */
+const fetchLedgerHistoryService = async (storeId: number | string, commodityId: number | string) => {
+    try {
+        return await axiosInstance.get('inventory/ledger/history', { params: { storeId, commodityId } });
+    } catch (error) {
+        return error;
+    }
+};
+
+/** Ledger entries, optionally scoped to a store and a date window. */
+const fetchLedgerEntriesService = async (params?: {
+    storeId?: number | string; from?: string; to?: string;
+}) => {
+    try {
+        return await axiosInstance.get('inventory/ledger', { params });
+    } catch (error) {
+        return error;
+    }
+};
+
+/**
+ * Recomputes every balance from its ledger entries and reports where the two disagree.
+ *
+ * <p>A discrepancy means something changed a balance without recording why. Balances that predate
+ * the ledger will appear on the first run — that is the historical position it cannot account for,
+ * not a new fault.
+ */
+const verifyLedgerService = async () => {
+    try {
+        return await axiosInstance.get('inventory/ledger/verify');
+    } catch (error) {
+        return error;
+    }
+};
+
 export {
     fetchStoreDetailsPerBranchService,
     fetchLastIssuedCommodityService,
     fetchBalancesService,
+    fetchLedgerHistoryService,
+    fetchLedgerEntriesService,
+    verifyLedgerService,
     fetchBranchOverviewService,
     fetchLowStockService,
     setBalanceMinLevelService,
