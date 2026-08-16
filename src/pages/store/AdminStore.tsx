@@ -6,7 +6,7 @@ Managing Director
 */
 
 import AdminPanelSettingsOutlinedIcon from '@mui/icons-material/AdminPanelSettingsOutlined';
-import StoreViewPage from './StoreViewPage';
+import StoreViewPage, { STORE_ACCENT } from './StoreViewPage';
 
 const AdminStore = () => (
     <StoreViewPage
@@ -14,7 +14,7 @@ const AdminStore = () => (
         title="Admin Store"
         subtitle="Administrative supplies & office materials"
         Icon={AdminPanelSettingsOutlinedIcon}
-        accentColor="#08796C"
+        accentColor={STORE_ACCENT.admin}
     />
 );
 

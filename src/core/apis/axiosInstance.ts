@@ -140,7 +140,7 @@ axiosInstance.interceptors.response.use(
         }
 
         const data = error.response?.data as
-            | { message?: string; detail?: string; error?: string }
+            | { message?: string; detail?: string; error?: string; errorCode?: string }
             | string
             | undefined;
         // The backend returns some errors as a plain string body (e.g. business-rule
@@ -150,9 +150,35 @@ axiosInstance.interceptors.response.use(
                 ? (data.trim() || undefined)
                 : (data?.message ?? data?.detail ?? data?.error);
         const message = serverMessage ?? error.message ?? 'An unknown error occurred';
+        const errorCode = typeof data === 'string' ? undefined : data?.errorCode;
 
-        toast.error(message);
-        return Promise.reject(new Error(message));
+        /*
+         * A body carrying `errorCode` is claimed by whoever made the call: the code exists precisely
+         * so one specific case can be recognised and presented properly — the movement pages' "no
+         * approver, proceed anyway?" dialog, the login page's blocked / locked / disabled branches.
+         * Toasting here too would pre-empt that dialog with a bare error and stack two messages on
+         * screen. Everything without a code is unclaimed, and still reported here.
+         */
+        if (!errorCode) {
+            toast.error(message);
+        }
+
+        /*
+         * Rejected as the original AxiosError, so `response.data` — and with it `errorCode` —
+         * survives the trip.
+         *
+         * <p>This used to reject `new Error(message)`, which flattened every failure to a bare
+         * string. Services here answer `catch (error) { return error }`, so callers received an
+         * object with no `response` and no `data`: every test for a code silently failed and took
+         * its fallback path instead. That is why `noApproverError` never once returned non-null and
+         * the NoApproverDialog could not open, and why a blocked login reported bad credentials.
+         *
+         * <p>`message` is overwritten rather than left as axios's "Request failed with status code
+         * 400" so the callers that only read `error.message` keep showing the same server text they
+         * always did.
+         */
+        error.message = message;
+        return Promise.reject(error);
     }
 );
 

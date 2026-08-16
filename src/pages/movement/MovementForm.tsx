@@ -7,7 +7,7 @@ Managing Director
 
 import { useEffect, useMemo, useState } from 'react';
 import {
-    alpha, Autocomplete, Box, Button, Chip, CircularProgress, Divider, Grid, IconButton,
+    alpha, Alert, Autocomplete, Box, Button, Chip, CircularProgress, Divider, Grid, IconButton,
     MenuItem, Paper, Stack, TextField, ToggleButton, ToggleButtonGroup, Tooltip, Typography,
 } from '@mui/material';
 import HowToRegOutlinedIcon from '@mui/icons-material/HowToRegOutlined';
@@ -141,6 +141,7 @@ const MovementForm = ({ setValue, watch, formState, items, setItems, sendingRequ
 
     // Derived movement category for UX (backend is authoritative)
     const destLocationId = destinationKind === 'STORE' ? destStore?.locationId : recipientUser?.branch?.id;
+    const destLocationName = destinationKind === 'STORE' ? destStore?.locationName : recipientUser?.branch?.name;
     const isInterLocation = useMemo(
         () => !!sourceStore && destLocationId != null && Number(sourceStore.locationId) !== Number(destLocationId),
         [sourceStore, destLocationId]
@@ -412,29 +413,43 @@ const MovementForm = ({ setValue, watch, formState, items, setItems, sendingRequ
                     )}
                 </PageSection>
 
-                {/* Section 4: Logistics (inter-location only) */}
-                {isInterLocation && (
+                {/*
+                 * Section 4: Journey
+                 *
+                 * States whether this movement travels, without collecting anything — the same shape
+                 * the repair flows settled on.
+                 *
+                 * <p>Courier, tracking number and delivery dates used to be captured here and were
+                 * dead data: the carrier is not known when a movement is written, and both dispatch
+                 * paths overwrite whatever was typed. A solo dispatch resolves the courier from the
+                 * registry and restates `courierService` from its name; a consignment dispatch stamps
+                 * the whole load's courier, plate and dates over every movement on board. A planned
+                 * name could therefore be silently replaced by a different one, leaving no trace it
+                 * had ever been intended. The consignment is where an intended courier belongs — it
+                 * is the journey, and it is authoritative.
+                 */}
+                {sourceStore && destLocationId != null && (
                     <PageSection
-                        title="Logistics"
-                        subtitle="Courier details for this inter-location movement (can also be added at dispatch)."
+                        title="Journey"
+                        subtitle="Whether this movement travels, and where its courier is captured."
                         icon={<LocalShippingOutlinedIcon fontSize="small" />}
                     >
-                        <Box sx={{ p: 2.5, borderRadius: 2, border: `1px solid ${alpha(BLUE, 0.18)}`, bgcolor: alpha(BLUE, 0.02) }}>
-                            <Grid container spacing={2.5}>
-                                <Grid item xs={12} sm={6}>
-                                    <TextField fullWidth label="Courier Service" sx={fieldSx} value={watch('courierService') ?? ''} onChange={(e) => setValue('courierService', e.target.value)} />
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <TextField fullWidth label="Tracking Number" sx={fieldSx} value={watch('trackingNumber') ?? ''} onChange={(e) => setValue('trackingNumber', e.target.value)} />
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <TextField fullWidth type="date" label="Dispatch Date" sx={fieldSx} InputLabelProps={{ shrink: true }} value={watch('dispatchDate') ?? ''} onChange={(e) => setValue('dispatchDate', e.target.value)} />
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <TextField fullWidth type="date" label="Expected Delivery" sx={fieldSx} InputLabelProps={{ shrink: true }} value={watch('expectedDeliveryDate') ?? ''} onChange={(e) => setValue('expectedDeliveryDate', e.target.value)} />
-                                </Grid>
-                            </Grid>
-                        </Box>
+                        <Alert severity="info" sx={{ borderRadius: 2, '& .MuiAlert-message': { fontSize: '0.82rem' } }}>
+                            {isInterLocation ? (
+                                <>
+                                    <strong>{sourceStore.locationName} → {destLocationName}</strong> — this movement
+                                    leaves its location, so it has to be dispatched. The courier, plate number,
+                                    tracking number and signed dispatch note are captured at that point, either on
+                                    this movement on its own or once for the whole van if it travels on a
+                                    consignment.
+                                </>
+                            ) : (
+                                <>
+                                    Both ends of this movement are within <strong>{sourceStore.locationName}</strong>,
+                                    so no courier, tracking number or delivery dates are needed.
+                                </>
+                            )}
+                        </Alert>
                     </PageSection>
                 )}
 

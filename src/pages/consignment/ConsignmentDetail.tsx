@@ -26,11 +26,14 @@ import { toast } from 'react-toastify';
 import { brand, neutral, border } from '../../utils/tokens';
 import { StatusChip } from '../../components/layout';
 import { dataHeadCellSx, dataBodyCellSx, dataRowSx, dataSurfaceSx } from '../../components/tables/dataTableSx';
-import { fetchRowsService } from '../../core/apis/globalService';
+import { fetchRowsService, refusal } from '../../core/apis/globalService';
 import { IConsignment, consignmentStatusHelp, consignmentStatusLabels } from './interface';
 import { addMovementToConsignmentService, removeMovementFromConsignmentService } from './service';
 import { IMovement } from '../movement/interface';
-import { movementTypeLabel, statusLabel, statusTone } from '../movement/constants';
+import {
+    movementTypeLabel, statusLabel, statusTone,
+    movementSourceLocationId, movementDestinationLocationId, sameLocation,
+} from '../movement/constants';
 
 const fmtDate = (d?: string | null) =>
     d ? new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : null;
@@ -96,11 +99,19 @@ const ConsignmentDetail = ({
             setLoadable(all.filter((m) => {
                 if (m.consignment) return false;
                 if (m.movementCategory !== 'INTER_LOCATION') return false;
-                const dest = m.destStore?.location?.id ?? m.recipientUser?.branch?.id;
-                return dest != null && dest === consignment.destLocation?.id;
+                if (!sameLocation(movementDestinationLocationId(m), consignment.destLocation?.id)) return false;
+                /*
+                 * The source has to match too. Leaving it out let the picker offer a movement the
+                 * server then refused with "leaves from a different location than this consignment"
+                 * — reachable for anyone who can see every branch, since their create form lists
+                 * source stores across all of them. A movement with no resolvable origin is left in
+                 * rather than hidden: the server treats a null source as "no objection".
+                 */
+                const source = movementSourceLocationId(m);
+                return source == null || sameLocation(source, consignment.sourceLocation?.id);
             }));
         })();
-    }, [editable, consignment.destLocation?.id, consignment.movementCount]);
+    }, [editable, consignment.destLocation?.id, consignment.sourceLocation?.id, consignment.movementCount]);
 
     const add = async () => {
         if (!picked?.id) return;
@@ -112,7 +123,7 @@ const ConsignmentDetail = ({
                 setPicked(null);
                 await onChanged();
             } else {
-                toast.error(res?.data?.message ?? 'That movement could not be loaded.');
+                toast.error(refusal(res, 'That movement could not be loaded.'));
             }
         } finally {
             setBusy(false);
@@ -127,7 +138,7 @@ const ConsignmentDetail = ({
                 toast.success('Taken off this consignment.');
                 await onChanged();
             } else {
-                toast.error(res?.data?.message ?? 'Could not remove that movement.');
+                toast.error(refusal(res, 'Could not remove that movement.'));
             }
         } finally {
             setBusy(false);

@@ -112,16 +112,18 @@ export interface IMovementItemDraft {
     subLabel?: string;
 }
 
-/** Request body for POST /movements (mirrors MovementDTO). */
+/**
+ * Request body for POST /movements (a subset of MovementDTO).
+ *
+ * <p>Carries no courier, tracking number or delivery dates. `MovementDTO` still accepts them —
+ * the repair flows post their own bodies to their own endpoints — but a movement written from the
+ * create form has no carrier yet, and both dispatch paths overwrite those fields anyway.
+ */
 export interface IMovementCreatePayload {
     movementType: MovementType;
     sourceStoreId: number | string;
     destStoreId?: number | string | null;
     recipientUserId?: number | string | null;
-    courierService?: string | null;
-    trackingNumber?: string | null;
-    dispatchDate?: string | null;
-    expectedDeliveryDate?: string | null;
     deliveryDocuments?: string[];
     requestId?: number | string | null;
     repairId?: number | string | null;
@@ -150,10 +152,6 @@ export interface IMovementFormData {
     destinationKind: 'STORE' | 'USER';
     destStoreId?: number | string | null;
     recipientUserId?: number | string | null;
-    courierService?: string | null;
-    trackingNumber?: string | null;
-    dispatchDate?: string | null;
-    expectedDeliveryDate?: string | null;
     remarks?: string | null;
 }
 

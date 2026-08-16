@@ -6,7 +6,7 @@ Managing Director
 */
 
 import LaptopChromebookOutlinedIcon from '@mui/icons-material/LaptopChromebookOutlined';
-import StoreViewPage from './StoreViewPage';
+import StoreViewPage, { STORE_ACCENT } from './StoreViewPage';
 
 const ITStorePage = () => (
     <StoreViewPage
@@ -14,7 +14,7 @@ const ITStorePage = () => (
         title="IT Store"
         subtitle="Technology equipment & digital assets"
         Icon={LaptopChromebookOutlinedIcon}
-        accentColor="#0369a1"
+        accentColor={STORE_ACCENT.it}
     />
 );
 

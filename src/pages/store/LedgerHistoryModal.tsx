@@ -19,7 +19,7 @@ import { brand, neutral, status as statusTokens } from '../../utils/tokens';
 import { fetchLedgerHistoryService } from './service';
 
 /** One ledger entry, as the backend records it. */
-interface ILedgerEntry {
+export interface ILedgerEntry {
     id: number;
     quantityDelta: number;
     balanceAfter: number;
@@ -37,7 +37,7 @@ interface ILedgerEntry {
  * <p>The enum names are precise but internal — a storekeeper looking for "where did 40 reams go"
  * should not have to know that leaving a store on the way to another is `TRANSFER_OUT`.
  */
-const REASON_META: Record<string, { label: string; tone: string }> = {
+export const REASON_META: Record<string, { label: string; tone: string }> = {
     RECEIPT: { label: 'Goods received', tone: statusTokens.success.strong },
     ISSUANCE: { label: 'Issued to a person', tone: statusTokens.info.strong },
     TRANSFER_OUT: { label: 'Sent to another store', tone: statusTokens.warning.strong },

@@ -49,12 +49,13 @@ import ModalComponent from '../../../components/modal';
 import { PageHero, StatusChip, EmptyState } from '../../../components/layout';
 import { dataHeadCellSx, dataBodyCellSx, dataRowSx, dataSurfaceSx } from '../../../components/tables/dataTableSx';
 import MovementActionModal from '../MovementActionModal';
+import LoadOntoConsignmentModal from '../LoadOntoConsignmentModal';
 import RoutesUtills from '../../../core/routes/utills';
 import { brand, gold, neutral, border, status } from '../../../utils/tokens';
 import {
     movementTypeLabel, statusLabel, statusTone, categoryLabels, receiptStatusLabels,
     canDispatch, canMarkInTransit, canReceive, canComplete, canCancel,
-    canApproveMovement, isPendingApproval,
+    canApproveMovement, isPendingApproval, canLoadOntoConsignment,
 } from '../constants';
 
 interface IApprovalRecord {
@@ -252,6 +253,7 @@ const MovementDetails = () => {
     const [loading, setLoading] = useState(true);
     const [action, setAction] = useState('');
     const [open, setOpen] = useState(false);
+    const [loadingOntoConsignment, setLoadingOntoConsignment] = useState(false);
     const [sendingRequest, setSendingRequest] = useState(false);
 
     const currentUserId = RoutesUtills().getCurrentUser()?.id;
@@ -365,6 +367,17 @@ const MovementDetails = () => {
                                 <Button variant="contained" startIcon={<CheckCircleOutlineIcon />} onClick={() => openAction('approve')} sx={{ ...actionBtnSx, bgcolor: status.success.strong }}>Approve</Button>
                                 <Button variant="outlined" startIcon={<HighlightOffIcon />} onClick={() => openAction('reject')} sx={{ ...outlinedBtnSx, borderColor: status.danger.main, color: status.danger.main }}>Reject</Button>
                             </>
+                        )}
+                        {/*
+                          * Consolidate or drive alone — the two ways an approved inter-location
+                          * movement can leave, offered together. Loading was previously reachable
+                          * only from the consignments page, so the lone Dispatch button quietly made
+                          * a separate van the default for every movement.
+                          */}
+                        {canLoadOntoConsignment(movement) && (
+                            <Tooltip title="Send this with the rest of the load — one courier, one dispatch note">
+                                <Button variant="outlined" startIcon={<Inventory2OutlinedIcon />} onClick={() => setLoadingOntoConsignment(true)} sx={{ ...outlinedBtnSx, borderColor: alpha(BLUE, 0.5), color: BLUE }}>Load onto Consignment</Button>
+                            </Tooltip>
                         )}
                         {canDispatch(movement) && <Button variant="contained" startIcon={<LocalShippingOutlinedIcon />} onClick={() => openAction('dispatch')} sx={{ ...actionBtnSx, bgcolor: BLUE }}>Dispatch</Button>}
                         {canMarkInTransit(movement) && <Button variant="contained" startIcon={<FlightTakeoffOutlinedIcon />} onClick={() => openAction('in-transit')} sx={{ ...actionBtnSx, bgcolor: INDIGO }}>In Transit</Button>}
@@ -783,6 +796,16 @@ const MovementDetails = () => {
                     action={action as any}
                     movement={movement}
                     handleClose={() => setOpen(false)}
+                    sendingRequest={sendingRequest}
+                    setSendingRequest={setSendingRequest}
+                    onDone={load}
+                />
+            </ModalComponent>
+
+            <ModalComponent open={loadingOntoConsignment} handleClose={() => setLoadingOntoConsignment(false)} title="">
+                <LoadOntoConsignmentModal
+                    movement={movement}
+                    handleClose={() => setLoadingOntoConsignment(false)}
                     sendingRequest={sendingRequest}
                     setSendingRequest={setSendingRequest}
                     onDone={load}

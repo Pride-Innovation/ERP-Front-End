@@ -13,12 +13,25 @@ import { IStatus } from "../settings/statuses/interface";
 import { IUser } from "../users/interface";
 
 
+/** The typed container (Admin / IT / Disposal) a balance line sits in. */
+export interface IStoreContainer {
+    id?: number | string;
+    name?: string;
+    storeType?: string;
+    active?: boolean;
+}
+
+/** One commodity's on-hand quantity in one store — the backend's StoreBalance. */
 export interface IStore {
     id?: number | string;
     quantity: number;
+    /** Reorder threshold. 0 (the default) means the line is never flagged low. */
+    minLevel?: number;
     commodity: ICommodity;
-    branch: IBranch
-
+    branch: IBranch;
+    store?: IStoreContainer | null;
+    createDate?: string | null;
+    lastModified?: string | null;
 }
 
 export interface IStoreResponse extends IFetchDataRequest {
@@ -46,22 +59,26 @@ export interface IStoreReportTableData {
  * Show issuance report
  */
 
-interface IIssuance {
+export interface IIssuance {
     id: string | number,
-    comment: string,
+    comment?: string | null,
     requester: IUser
-    status: IStatus
+    issuer?: IUser | null
+    status?: IStatus | null
     createDate: string,
     lastModified: string,
     createdBy: string,
     lastModifiedBy: string
 }
 
+export interface IIssuedCommodity {
+    id: number;
+    issuance: IIssuance;
+    commodity: ICommodity;
+    quantity: number;
+}
+
+/** `null` data when the commodity has never been issued — the endpoint answers 200 either way. */
 export interface ILastIssuedCommodity extends IAxiosResponse {
-    data: {
-        id: number;
-        issuance: IIssuance;
-        commodity: ICommodity;
-        quantity: number
-    }
+    data: IIssuedCommodity | null
 }

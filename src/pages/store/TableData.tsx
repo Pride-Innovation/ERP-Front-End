@@ -93,8 +93,11 @@ const TableData = () => {
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             {/* Details modal */}
             {crudStates.read === currentState && (
-                <ModalComponent width="40%" title="Details" open={open} handleClose={handleClose}>
-                    <StoreDetails />
+                <ModalComponent width="60%" title="Stock Item Details" open={open} handleClose={handleClose}>
+                    {/* StoreUtills() is a plain hook, so calling it inside StoreDetails gave that
+                        component its own `open` state — its Close button closed nothing. The
+                        owner of the modal passes its own handler down. */}
+                    <StoreDetails handleClose={handleClose} />
                 </ModalComponent>
             )}
 

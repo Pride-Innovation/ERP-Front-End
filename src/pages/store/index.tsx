@@ -11,7 +11,6 @@ import {
     Chip,
     Collapse,
     Grid,
-    IconButton,
     Paper,
     Skeleton,
     Stack,
@@ -39,13 +38,18 @@ import FactCheckOutlinedIcon from '@mui/icons-material/FactCheckOutlined';
 import { SvgIconComponent } from '@mui/icons-material';
 
 import { PageHero, StatTile } from '../../components/layout';
+import { brand, neutral, border, status } from '../../utils/tokens';
 import { ROUTES } from '../../core/routes/routes';
 import usePermissions from '../../core/permissions/usePermissions';
 import { PERMISSIONS } from '../../core/permissions/constants';
 import { fetchBalancesService, fetchBranchOverviewService } from './service';
 import BalancesPanel, { IBalanceView } from './BalancesPanel';
+import { STORE_ACCENT } from './StoreViewPage';
 
 // ── Store definitions ─────────────────────────────────────────────────────────
+
+// Store accents come from STORE_ACCENT (see StoreViewPage) so the quick-link pills here and the
+// store pages they open can never drift apart.
 
 type StoreDef = {
     type: string;
@@ -61,7 +65,7 @@ const STORES: StoreDef[] = [
         type: 'admin',
         title: 'Admin Store',
         subtitle: 'Administrative supplies & office materials',
-        accentColor: '#08796C',
+        accentColor: STORE_ACCENT.admin,
         Icon: AdminPanelSettingsOutlinedIcon,
         path: ROUTES.STORE_ADMIN,
     },
@@ -69,7 +73,7 @@ const STORES: StoreDef[] = [
         type: 'it',
         title: 'IT Store',
         subtitle: 'Technology equipment & digital assets',
-        accentColor: '#0369a1',
+        accentColor: STORE_ACCENT.it,
         Icon: LaptopChromebookOutlinedIcon,
         path: ROUTES.STORE_IT,
     },
@@ -77,7 +81,7 @@ const STORES: StoreDef[] = [
         type: 'disposal',
         title: 'Disposal Store',
         subtitle: 'Items awaiting disposal or write-off',
-        accentColor: '#b45309',
+        accentColor: STORE_ACCENT.disposal,
         Icon: DeleteOutlineOutlinedIcon,
         path: ROUTES.STORE_DISPOSAL,
     },
@@ -106,7 +110,7 @@ const BranchHealthBar = ({ itemLines, low }: { itemLines: number; low: number })
     if (itemLines <= 0) {
         return (
             <Tooltip title="Nothing stocked in this branch's stores" arrow>
-                <Box sx={{ width: 56, height: 4, borderRadius: 2, bgcolor: alpha('#DC2626', 0.18), flexShrink: 0 }} />
+                <Box sx={{ width: 56, height: 4, borderRadius: 2, bgcolor: alpha(status.danger.main, 0.18), flexShrink: 0 }} />
             </Tooltip>
         );
     }
@@ -114,8 +118,8 @@ const BranchHealthBar = ({ itemLines, low }: { itemLines: number; low: number })
     const healthy = Math.round((1 - lowShare) * 100);
     return (
         <Tooltip title={`${itemLines - low} of ${itemLines} line(s) above their reorder level (${healthy}%)`} arrow>
-            <Box sx={{ width: 56, height: 4, borderRadius: 2, bgcolor: alpha('#B45309', 0.25), overflow: 'hidden', flexShrink: 0 }}>
-                <Box sx={{ width: `${healthy}%`, height: '100%', bgcolor: '#08796C', transition: 'width 0.3s ease' }} />
+            <Box sx={{ width: 56, height: 4, borderRadius: 2, bgcolor: alpha(status.warning.strong, 0.25), overflow: 'hidden', flexShrink: 0 }}>
+                <Box sx={{ width: `${healthy}%`, height: '100%', bgcolor: brand[500], transition: 'width 0.3s ease' }} />
             </Box>
         </Tooltip>
     );
@@ -233,7 +237,7 @@ const Store = () => {
                             variant="outlined"
                             startIcon={<FactCheckOutlinedIcon />}
                             onClick={() => navigate(ROUTES.STOCK_TAKE)}
-                            sx={{ textTransform: 'none', fontWeight: 600, borderRadius: '8px', borderColor: alpha('#08796C', 0.4), color: '#08796C' }}
+                            sx={{ textTransform: 'none', fontWeight: 600, borderRadius: '8px', borderColor: alpha(brand[500], 0.4), color: brand[500] }}
                         >
                             Stock Take
                         </Button>
@@ -241,7 +245,7 @@ const Store = () => {
                             variant="outlined"
                             startIcon={<BadgeOutlinedIcon />}
                             onClick={() => navigate(ROUTES.MY_ITEMS)}
-                            sx={{ textTransform: 'none', fontWeight: 600, borderRadius: '8px', borderColor: alpha('#08796C', 0.4), color: '#08796C' }}
+                            sx={{ textTransform: 'none', fontWeight: 600, borderRadius: '8px', borderColor: alpha(brand[500], 0.4), color: brand[500] }}
                         >
                             My Items
                         </Button>
@@ -249,7 +253,7 @@ const Store = () => {
                             variant="contained"
                             startIcon={<SwapHorizOutlinedIcon />}
                             onClick={() => navigate(ROUTES.CREATE_MOVEMENT)}
-                            sx={{ bgcolor: '#08796C', textTransform: 'none', fontWeight: 600, borderRadius: '8px', '&:hover': { bgcolor: '#065f54' } }}
+                            sx={{ bgcolor: brand[500], textTransform: 'none', fontWeight: 600, borderRadius: '8px', '&:hover': { bgcolor: brand[700] } }}
                         >
                             Initiate Movement
                         </Button>
@@ -341,9 +345,9 @@ const Store = () => {
             </Grid>
 
             {/* ── Branches overview, grouped by region ── */}
-            <Paper elevation={0} sx={{ mt: 3, borderRadius: 2.5, border: '1px solid #E8EDF3', overflow: 'hidden' }}>
-                <Box sx={{ px: 2.5, py: 1.75, borderBottom: '1px solid #EEF2F7', display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
-                    <AccountBalanceOutlinedIcon sx={{ fontSize: 18, color: '#08796C' }} />
+            <Paper elevation={0} sx={{ mt: 3, borderRadius: 2.5, border: `1px solid ${border.subtle}`, overflow: 'hidden' }}>
+                <Box sx={{ px: 2.5, py: 1.75, borderBottom: `1px solid ${border.subtle}`, display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+                    <AccountBalanceOutlinedIcon sx={{ fontSize: 18, color: brand[500] }} />
                     <Typography sx={{ fontWeight: 700 }}>
                         {seesAllBranches ? 'Branches Overview' : 'Your Branch'}
                     </Typography>
@@ -357,7 +361,7 @@ const Store = () => {
                 </Box>
 
                 {branchesLoading ? (
-                    <Stack spacing={0} divider={<Box sx={{ borderBottom: '1px solid #EEF2F7' }} />}>
+                    <Stack spacing={0} divider={<Box sx={{ borderBottom: `1px solid ${border.subtle}` }} />}>
                         {[0, 1, 2].map((i) => (
                             <Box key={i} sx={{ px: 2.5, py: 1.75, display: 'flex', alignItems: 'center', gap: 1.5 }}>
                                 <Skeleton variant="rounded" width={28} height={28} />
@@ -369,27 +373,41 @@ const Store = () => {
                         ))}
                     </Stack>
                 ) : regionGroups.length > 0 ? (
-                    regionGroups.map(({ region, rows, itemLines, low }, idx) => {
+                    regionGroups.map(({ region, rows, itemLines, totalQuantity, low }, idx) => {
                         const open = expandedRegions.has(region);
                         return (
-                            <Box key={region} sx={{ borderTop: idx > 0 ? '1px solid #EEF2F7' : 'none' }}>
+                            <Box key={region} sx={{ borderTop: idx > 0 ? `1px solid ${border.subtle}` : 'none' }}>
                                 {/* Region header — the whole row toggles */}
                                 <Box
                                     onClick={() => toggleRegion(region)}
+                                    // Matches the keyboard affordances the branch rows below already
+                                    // have. Previously this was a bare clickable div, so a region
+                                    // could only be toggled with a mouse.
+                                    role="button"
+                                    tabIndex={0}
+                                    aria-expanded={open}
+                                    aria-label={`${open ? 'Collapse' : 'Expand'} ${region}`}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter' || e.key === ' ') {
+                                            e.preventDefault();
+                                            toggleRegion(region);
+                                        }
+                                    }}
                                     sx={{
                                         px: 2.5, py: 1.5,
                                         display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap',
                                         cursor: 'pointer', userSelect: 'none',
-                                        bgcolor: open ? alpha('#08796C', 0.025) : 'transparent',
+                                        bgcolor: open ? alpha(brand[500], 0.025) : 'transparent',
                                         transition: 'background-color 0.15s ease',
-                                        '&:hover': { bgcolor: alpha('#08796C', 0.04) },
+                                        '&:hover': { bgcolor: alpha(brand[500], 0.04) },
+                                        '&:focus-visible': { outline: `2px solid ${brand[500]}`, outlineOffset: -2 },
                                     }}
                                 >
-                                    <Box sx={{ width: 28, height: 28, borderRadius: 1, bgcolor: alpha('#08796C', 0.08), color: '#08796C', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                    <Box sx={{ width: 28, height: 28, borderRadius: 1, bgcolor: alpha(brand[500], 0.08), color: brand[500], display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                                         <PublicOutlinedIcon sx={{ fontSize: 15 }} />
                                     </Box>
-                                    <Typography sx={{ fontWeight: 700, fontSize: '0.9rem', color: '#1E293B' }}>{region}</Typography>
-                                    <Typography variant="caption" sx={{ color: '#94A3B8' }}>
+                                    <Typography sx={{ fontWeight: 700, fontSize: '0.9rem', color: neutral[800] }}>{region}</Typography>
+                                    <Typography variant="caption" sx={{ color: neutral[400] }}>
                                         {rows.length} branch{rows.length !== 1 ? 'es' : ''}
                                     </Typography>
                                     <Box sx={{ flex: 1 }} />
@@ -399,17 +417,22 @@ const Store = () => {
                                             icon={<WarningAmberOutlinedIcon sx={{ fontSize: 13 }} />}
                                             label={`${low} low stock`}
                                             size="small"
-                                            sx={{ height: 22, fontWeight: 700, fontSize: '0.68rem', bgcolor: alpha('#B45309', 0.12), color: '#B45309', '& .MuiChip-icon': { color: '#B45309' } }}
+                                            sx={{ height: 22, fontWeight: 700, fontSize: '0.68rem', bgcolor: alpha(status.warning.strong, 0.12), color: status.warning.strong, '& .MuiChip-icon': { color: status.warning.strong } }}
                                         />
                                     )}
+                                    {/* Units lead, matching the hero headline and the branch rows
+                                        below: a line count says nothing about whether the region can
+                                        actually meet a request. */}
                                     <Chip
-                                        label={`${itemLines.toLocaleString()} item lines`}
+                                        label={`${totalQuantity.toLocaleString()} unit${totalQuantity !== 1 ? 's' : ''} · ${itemLines.toLocaleString()} line${itemLines !== 1 ? 's' : ''}`}
                                         size="small"
-                                        sx={{ height: 22, fontWeight: 700, fontSize: '0.68rem', fontVariantNumeric: 'tabular-nums', bgcolor: alpha('#08796C', 0.08), color: '#08796C' }}
+                                        sx={{ height: 22, fontWeight: 700, fontSize: '0.68rem', fontVariantNumeric: 'tabular-nums', bgcolor: alpha(brand[500], 0.08), color: brand[500] }}
                                     />
-                                    <IconButton size="small" sx={{ ml: 0.5 }} aria-label={open ? `Collapse ${region}` : `Expand ${region}`}>
-                                        <ExpandMoreIcon sx={{ fontSize: 18, color: '#64748B', transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s ease' }} />
-                                    </IconButton>
+                                    {/* Purely decorative: the header itself is the control, so this
+                                        must not be a nested <button> or a second tab stop. */}
+                                    <Box aria-hidden sx={{ ml: 0.5, display: 'flex', alignItems: 'center' }}>
+                                        <ExpandMoreIcon sx={{ fontSize: 18, color: neutral[500], transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s ease' }} />
+                                    </Box>
                                 </Box>
 
                                 {/* Branches within the region — lean clickable rows that drill into
@@ -427,16 +450,19 @@ const Store = () => {
                                                 pl: 7, pr: 2.5, py: 1.1,
                                                 display: 'flex', alignItems: 'center', gap: 1.25, flexWrap: 'wrap',
                                                 cursor: 'pointer',
-                                                borderTop: bi === 0 ? '1px solid #EEF2F7' : 'none',
-                                                borderBottom: '1px solid #F4F7FA',
+                                                borderTop: bi === 0 ? `1px solid ${border.subtle}` : 'none',
+                                                // Intentionally lighter than border.subtle: this
+                                                // separates rows *within* a region, so it must sit
+                                                // below the region dividers in the hierarchy.
+                                                borderBottom: `1px solid ${neutral[100]}`,
                                                 transition: 'background-color 0.13s ease',
-                                                '&:hover': { bgcolor: alpha('#08796C', 0.035) },
-                                                '&:hover .branch-row-arrow': { color: '#08796C', transform: 'translateX(2px)' },
-                                                '&:focus-visible': { outline: '2px solid #08796C', outlineOffset: -2 },
+                                                '&:hover': { bgcolor: alpha(brand[500], 0.035) },
+                                                '&:hover .branch-row-arrow': { color: brand[500], transform: 'translateX(2px)' },
+                                                '&:focus-visible': { outline: `2px solid ${brand[500]}`, outlineOffset: -2 },
                                             }}
                                         >
-                                            <StorefrontOutlinedIcon sx={{ fontSize: 15, color: '#94A3B8', flexShrink: 0 }} />
-                                            <Typography sx={{ fontWeight: 600, fontSize: '0.84rem', color: '#1E293B' }}>{b.name}</Typography>
+                                            <StorefrontOutlinedIcon sx={{ fontSize: 15, color: neutral[400], flexShrink: 0 }} />
+                                            <Typography sx={{ fontWeight: 600, fontSize: '0.84rem', color: neutral[800] }}>{b.name}</Typography>
                                             {/*
                                              * Health first. `itemLines` and `totalQuantity` are weak
                                              * signals — 400 units could be 399 paperclips — while the
@@ -450,7 +476,7 @@ const Store = () => {
                                                     icon={<WarningAmberOutlinedIcon sx={{ fontSize: 12 }} />}
                                                     label={`${b.low} low`}
                                                     size="small"
-                                                    sx={{ height: 22, fontWeight: 700, fontSize: '0.68rem', bgcolor: alpha('#B45309', 0.12), color: '#B45309', '& .MuiChip-icon': { color: '#B45309' } }}
+                                                    sx={{ height: 22, fontWeight: 700, fontSize: '0.68rem', bgcolor: alpha(status.warning.strong, 0.12), color: status.warning.strong, '& .MuiChip-icon': { color: status.warning.strong } }}
                                                 />
                                             )}
                                             <Chip
@@ -458,8 +484,8 @@ const Store = () => {
                                                 size="small"
                                                 sx={{
                                                     height: 22, fontWeight: 700, fontSize: '0.68rem', fontVariantNumeric: 'tabular-nums',
-                                                    bgcolor: alpha(b.itemLines === 0 ? '#DC2626' : '#08796C', 0.1),
-                                                    color: b.itemLines === 0 ? '#DC2626' : '#08796C',
+                                                    bgcolor: alpha(b.itemLines === 0 ? status.danger.main : brand[500], 0.1),
+                                                    color: b.itemLines === 0 ? status.danger.main : brand[500],
                                                 }}
                                             />
                                             {b.assetsHeld > 0 && (
@@ -468,21 +494,21 @@ const Store = () => {
                                                     size="small"
                                                     sx={{
                                                         height: 22, fontWeight: 700, fontSize: '0.68rem', fontVariantNumeric: 'tabular-nums',
-                                                        bgcolor: alpha('#0369a1', 0.1), color: '#0369a1',
+                                                        bgcolor: alpha(STORE_ACCENT.it, 0.1), color: STORE_ACCENT.it,
                                                     }}
                                                 />
                                             )}
-                                            <Button
-                                                size="small" variant="text"
-                                                startIcon={<SwapHorizOutlinedIcon sx={{ fontSize: 15 }} />}
-                                                onClick={(e) => { e.stopPropagation(); navigate(ROUTES.CREATE_MOVEMENT); }}
-                                                sx={{ textTransform: 'none', fontWeight: 600, fontSize: '0.72rem', color: '#08796C' }}
-                                            >
-                                                Replenish
-                                            </Button>
+                                            {/* No per-row "Replenish" here. It navigated to the bare
+                                                movement form with no branch context — identical to the
+                                                global action in the hero — so it promised a
+                                                branch-scoped shortcut it could not deliver. A real one
+                                                needs the movement form to accept a source-store
+                                                prefill, which has to resolve branch → store first.
+                                                Keeping the row free of nested controls also keeps this
+                                                `role="link"` valid. */}
                                             <ArrowForwardIosOutlinedIcon
                                                 className="branch-row-arrow"
-                                                sx={{ fontSize: 11, color: '#CBD5E1', flexShrink: 0, transition: 'all 0.15s ease' }}
+                                                sx={{ fontSize: 11, color: neutral[300], flexShrink: 0, transition: 'all 0.15s ease' }}
                                             />
                                         </Box>
                                     ))}

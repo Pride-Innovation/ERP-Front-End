@@ -10,7 +10,6 @@ import {
     Box,
     Typography,
     alpha,
-    Chip,
     Stack,
     Button as MuiButton,
     CircularProgress,
@@ -24,7 +23,7 @@ import {
     TableFooter
 } from "@mui/material"
 import { IInventory, IInventoryAxiosResponse } from "./interface"
-import { ReactNode, useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useForm, Resolver } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { inventorySchema } from "./schema";
@@ -43,8 +42,6 @@ import { ISupplier } from "../settings/suppliers/interface";
 import { RootState } from "../../store";
 import { useNavigate } from "react-router";
 import { ROUTES } from "../../core/routes/routes";
-import PaidOutlinedIcon from '@mui/icons-material/PaidOutlined';
-import SellOutlinedIcon from '@mui/icons-material/SellOutlined';
 import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 import RateReviewOutlinedIcon from '@mui/icons-material/RateReviewOutlined';
 import Inventory2Icon from '@mui/icons-material/Inventory2';
@@ -62,20 +59,8 @@ const PRIMARY_COLOR = brand[500];
 const fmtMoney = (n?: number) =>
     (Number(n) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-/** Compact stat card for the confirmation totals (Total Cost / Total Purchase Price). */
-const TotalCard = ({ icon, label, value, tone }: {
-    icon: ReactNode; label: string; value: string; tone: Record<number, string>;
-}) => (
-    <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', gap: 1.25, p: 1.75, bgcolor: '#fff', border: `1px solid ${border.subtle}`, borderRadius: 2 }}>
-        <Box sx={{ width: 38, height: 38, borderRadius: 1.5, bgcolor: alpha(tone[500], 0.1), color: tone[600], display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, '& .MuiSvgIcon-root': { fontSize: 20 } }}>
-            {icon}
-        </Box>
-        <Box sx={{ minWidth: 0 }}>
-            <Typography sx={{ fontSize: '0.6rem', fontWeight: 700, color: neutral[400], textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</Typography>
-            <Typography sx={{ fontSize: '1.05rem', fontWeight: 800, color: neutral[900], lineHeight: 1.2 }}>{value}</Typography>
-        </Box>
-    </Box>
-);
+/** Currency shown across the review summary. */
+const CURRENCY = 'UGX';
 
 const CreateInventory = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
@@ -164,7 +149,7 @@ const CreateInventory = () => {
     const primaryBtnSx = {
         height: 44,
         px: 3.5,
-        borderRadius: `${radii.pill}px`,
+        borderRadius: '8px',
         textTransform: 'none' as const,
         fontWeight: 700,
         fontSize: '0.9rem',
@@ -240,84 +225,167 @@ const CreateInventory = () => {
     // ── Step 3: Review page — a full, spacious summary shown before submit ──
     const ReviewStep = () => {
         const fmtDate = (d?: string | null) =>
-            d ? new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
-
-        const detailItems = [
-            { label: 'LPO Number', value: formDataToSubmit?.lpoNumber || '—' },
-            { label: 'PO Number', value: formDataToSubmit?.poNumber || '—' },
-            { label: 'Inventory Name', value: formDataToSubmit?.name || '—' },
-            { label: 'Supplier', value: getSupplierName() },
-            { label: 'Order Date', value: fmtDate(formDataToSubmit?.orderDate) },
-            { label: 'Delivery Date', value: fmtDate(formDataToSubmit?.deliveryDate) },
-            { label: 'Invoice Date', value: fmtDate(formDataToSubmit?.invoiceDate) },
-        ];
+            d ? new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '';
 
         const totalOrdered = stockRows.reduce((s, r) => s + (r.orderedQuantity || 0), 0);
         const totalDelivered = stockRows.reduce((s, r) => s + (r.deliveredQuantity || 0), 0);
         const grandTotal = stockRows.reduce((s, r) => s + (Number(r.purchasePrice) || 0) * (r.orderedQuantity || 0), 0);
 
+        const supplierName = getSupplierName();
+        const hasSupplier = supplierName !== 'Not specified';
+
+        // Split into two logical groups — who/what the order is, and when it happens.
+        const references = [
+            { label: 'Inventory name', value: formDataToSubmit?.name },
+            { label: 'LPO number', value: formDataToSubmit?.lpoNumber },
+            { label: 'PO number', value: formDataToSubmit?.poNumber },
+            { label: 'Supplier', value: hasSupplier ? supplierName : '' },
+        ];
+        const schedule = [
+            { label: 'Order date', value: fmtDate(formDataToSubmit?.orderDate) },
+            { label: 'Delivery date', value: fmtDate(formDataToSubmit?.deliveryDate) },
+            { label: 'Invoice date', value: fmtDate(formDataToSubmit?.invoiceDate) },
+        ];
+
+        /** One label/value line. A missing value stays muted so the eye skips straight past it. */
+        const Field = ({ label, value }: { label: string; value?: string | null }) => (
+            <Stack
+                direction="row"
+                alignItems="baseline"
+                justifyContent="space-between"
+                spacing={2}
+                sx={{
+                    py: 1.35,
+                    borderBottom: `1px dashed ${border.subtle}`,
+                    '&:last-of-type': { borderBottom: 'none' },
+                }}
+            >
+                <Typography sx={{ fontSize: '0.8rem', fontWeight: 600, color: neutral[500], whiteSpace: 'nowrap' }}>
+                    {label}
+                </Typography>
+                <Typography
+                    sx={{
+                        fontSize: '0.875rem',
+                        fontWeight: value ? 700 : 500,
+                        color: value ? neutral[900] : neutral[400],
+                        fontStyle: value ? 'normal' : 'italic',
+                        textAlign: 'right',
+                        wordBreak: 'break-word',
+                    }}
+                >
+                    {value || 'Not provided'}
+                </Typography>
+            </Stack>
+        );
+
+        const GroupLabel = ({ children }: { children: string }) => (
+            <Typography sx={{ fontSize: '0.66rem', fontWeight: 800, color: neutral[400], textTransform: 'uppercase', letterSpacing: '0.1em', mb: 0.75 }}>
+                {children}
+            </Typography>
+        );
+
+        const headCellSx = {
+            bgcolor: surface.muted,
+            borderBottom: `1px solid ${border.subtle}`,
+            fontWeight: 700,
+            fontSize: '0.68rem',
+            color: neutral[500],
+            textTransform: 'uppercase',
+            letterSpacing: '0.07em',
+            py: 1.5,
+            whiteSpace: 'nowrap',
+        } as const;
+
         return (
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
-                {/* Order details */}
+                {/* ── Commitment banner — what this entry is, and what it's worth ── */}
                 <Paper elevation={0} sx={{ borderRadius: 2, border: `1px solid ${border.subtle}`, bgcolor: '#fff', overflow: 'hidden' }}>
-                    <Stack direction="row" alignItems="center" spacing={1.25} sx={{ px: { xs: 2, md: 3 }, py: 2, borderBottom: `1px solid ${border.subtle}` }}>
-                        <Box sx={{ width: 36, height: 36, borderRadius: 1.5, bgcolor: alpha(brand[500], 0.09), color: brand[600], display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <BusinessIcon sx={{ fontSize: 20 }} />
+                    <Stack direction={{ xs: 'column', md: 'row' }} alignItems="stretch">
+                        <Box sx={{ flex: 1, minWidth: 0, px: { xs: 2.5, md: 3 }, py: { xs: 2.5, md: 3 } }}>
+                            <Typography sx={{ fontSize: '0.66rem', fontWeight: 800, color: neutral[400], textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                                Stock entry
+                            </Typography>
+                            <Typography sx={{ fontSize: { xs: '1.25rem', md: '1.45rem' }, fontWeight: 800, color: neutral[900], lineHeight: 1.25, mt: 0.75, wordBreak: 'break-word' }}>
+                                {formDataToSubmit?.name || 'Untitled stock'}
+                            </Typography>
+                            <Stack direction="row" spacing={1.25} alignItems="center" flexWrap="wrap" useFlexGap sx={{ mt: 1.5 }}>
+                                <Box sx={{ px: 1, py: 0.4, borderRadius: '6px', bgcolor: alpha(brand[500], 0.08), color: brand[700], fontSize: '0.75rem', fontWeight: 700, fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace' }}>
+                                    LPO {formDataToSubmit?.lpoNumber || '—'}
+                                </Box>
+                                <Typography sx={{ fontSize: '0.82rem', fontWeight: 600, color: hasSupplier ? neutral[700] : neutral[400], fontStyle: hasSupplier ? 'normal' : 'italic' }}>
+                                    {hasSupplier ? supplierName : 'No supplier recorded'}
+                                </Typography>
+                            </Stack>
                         </Box>
-                        <Box>
-                            <Typography sx={{ fontWeight: 700, fontSize: '0.98rem', color: neutral[900] }}>Order Details</Typography>
-                            <Typography variant="caption" sx={{ color: neutral[500] }}>Purchase order & supplier information</Typography>
+
+                        <Box
+                            sx={{
+                                px: { xs: 2.5, md: 3 },
+                                py: { xs: 2.5, md: 3 },
+                                minWidth: { md: 300 },
+                                bgcolor: alpha(brand[500], 0.025),
+                                borderTop: { xs: `1px solid ${border.subtle}`, md: 'none' },
+                                borderLeft: { xs: 'none', md: `1px solid ${border.subtle}` },
+                                display: 'flex',
+                                flexDirection: 'column',
+                                justifyContent: 'center',
+                            }}
+                        >
+                            <Typography sx={{ fontSize: '0.66rem', fontWeight: 800, color: brand[700], textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                                Total value
+                            </Typography>
+                            <Stack direction="row" alignItems="baseline" spacing={0.75} sx={{ mt: 0.75 }}>
+                                <Typography sx={{ fontSize: '0.8rem', fontWeight: 800, color: brand[600] }}>{CURRENCY}</Typography>
+                                <Typography sx={{ fontSize: { xs: '1.5rem', md: '1.7rem' }, fontWeight: 800, color: neutral[900], lineHeight: 1.1, fontVariantNumeric: 'tabular-nums' }}>
+                                    {fmtMoney(grandTotal)}
+                                </Typography>
+                            </Stack>
+                            <Typography sx={{ fontSize: '0.78rem', fontWeight: 600, color: neutral[500], mt: 1 }}>
+                                {stockRows.length} item{stockRows.length === 1 ? '' : 's'} · {totalOrdered} unit{totalOrdered === 1 ? '' : 's'} ordered
+                            </Typography>
                         </Box>
                     </Stack>
-                    <Grid container sx={{ px: { xs: 1, md: 2 }, py: 1 }}>
-                        {detailItems.map((d) => (
-                            <Grid item xs={12} sm={6} md={4} key={d.label}>
-                                <Box sx={{ px: { xs: 1, md: 1.5 }, py: 1.25 }}>
-                                    <Typography sx={{ fontSize: '0.66rem', fontWeight: 700, color: neutral[400], textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                                        {d.label}
-                                    </Typography>
-                                    <Typography sx={{ fontSize: '0.9rem', fontWeight: 600, color: d.value === '—' ? neutral[400] : neutral[900], mt: 0.25 }}>
-                                        {d.value}
-                                    </Typography>
-                                </Box>
-                            </Grid>
-                        ))}
+                </Paper>
+
+                {/* ── Order details — grouped as references vs schedule ── */}
+                <Paper elevation={0} sx={{ borderRadius: 2, border: `1px solid ${border.subtle}`, bgcolor: '#fff', overflow: 'hidden' }}>
+                    <Stack direction="row" alignItems="center" spacing={1.25} sx={{ px: { xs: 2.5, md: 3 }, py: 1.75, borderBottom: `1px solid ${border.subtle}` }}>
+                        <BusinessIcon sx={{ fontSize: 18, color: neutral[400] }} />
+                        <Typography sx={{ fontWeight: 700, fontSize: '0.92rem', color: neutral[900] }}>Order details</Typography>
+                    </Stack>
+                    <Grid container>
+                        <Grid item xs={12} md={6} sx={{ px: { xs: 2.5, md: 3 }, py: 2.25, borderRight: { md: `1px solid ${border.subtle}` }, borderBottom: { xs: `1px solid ${border.subtle}`, md: 'none' } }}>
+                            <GroupLabel>References</GroupLabel>
+                            {references.map((f) => <Field key={f.label} label={f.label} value={f.value} />)}
+                        </Grid>
+                        <Grid item xs={12} md={6} sx={{ px: { xs: 2.5, md: 3 }, py: 2.25 }}>
+                            <GroupLabel>Schedule</GroupLabel>
+                            {schedule.map((f) => <Field key={f.label} label={f.label} value={f.value} />)}
+                        </Grid>
                     </Grid>
                 </Paper>
 
-                {/* Requested items */}
+                {/* ── Items — fulfilment-aware line list ── */}
                 <Paper elevation={0} sx={{ borderRadius: 2, border: `1px solid ${border.subtle}`, bgcolor: '#fff', overflow: 'hidden' }}>
-                    <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ px: { xs: 2, md: 3 }, py: 2, borderBottom: `1px solid ${border.subtle}`, bgcolor: alpha(gold[500], 0.04) }}>
+                    <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={1.25} sx={{ px: { xs: 2.5, md: 3 }, py: 1.75, borderBottom: `1px solid ${border.subtle}` }}>
                         <Stack direction="row" alignItems="center" spacing={1.25}>
-                            <Box sx={{ width: 36, height: 36, borderRadius: 1.5, bgcolor: alpha(gold[500], 0.14), color: gold[700], display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <InventoryIcon sx={{ fontSize: 20 }} />
-                            </Box>
-                            <Box>
-                                <Typography sx={{ fontWeight: 700, fontSize: '0.98rem', color: neutral[900] }}>Requested Items</Typography>
-                                <Typography variant="caption" sx={{ color: neutral[500] }}>Items to be stocked in this delivery</Typography>
-                            </Box>
+                            <InventoryIcon sx={{ fontSize: 18, color: neutral[400] }} />
+                            <Typography sx={{ fontWeight: 700, fontSize: '0.92rem', color: neutral[900] }}>Items</Typography>
                         </Stack>
-                        <Chip size="small" label={`${stockRows.length} item${stockRows.length === 1 ? '' : 's'}`} sx={{ fontWeight: 700, bgcolor: alpha(gold[500], 0.14), color: gold[700] }} />
+                        <Typography sx={{ fontSize: '0.78rem', fontWeight: 700, color: neutral[500] }}>
+                            {totalDelivered} of {totalOrdered} units received
+                        </Typography>
                     </Stack>
 
                     <TableContainer sx={{ overflowX: 'auto' }}>
-                        <Table sx={{ minWidth: 680 }}>
+                        <Table sx={{ minWidth: 760 }}>
                             <TableHead>
-                                <TableRow sx={{
-                                    '& th': {
-                                        bgcolor: alpha(brand[500], 0.04),
-                                        borderBottom: `1px solid ${border.subtle}`,
-                                        fontWeight: 700, fontSize: '0.68rem', color: brand[700],
-                                        textTransform: 'uppercase', letterSpacing: '0.05em',
-                                        py: 1.5, whiteSpace: 'nowrap',
-                                    },
-                                }}>
-                                    <TableCell>Item</TableCell>
-                                    <TableCell align="center">Ordered</TableCell>
-                                    <TableCell align="center">Delivered</TableCell>
-                                    <TableCell align="right">Unit Cost</TableCell>
-                                    <TableCell align="right">Unit Price</TableCell>
-                                    <TableCell align="right">Line Total</TableCell>
+                                <TableRow>
+                                    <TableCell sx={{ ...headCellSx, pl: { xs: 2.5, md: 3 } }}>Item</TableCell>
+                                    <TableCell align="center" sx={headCellSx}>Delivered / Ordered</TableCell>
+                                    <TableCell align="right" sx={headCellSx}>Unit cost</TableCell>
+                                    <TableCell align="right" sx={headCellSx}>Unit price</TableCell>
+                                    <TableCell align="right" sx={{ ...headCellSx, pr: { xs: 2.5, md: 3 } }}>Line total</TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
@@ -326,72 +394,85 @@ const CreateInventory = () => {
                                     const delivered = row.deliveredQuantity || 0;
                                     const purchase = Number(row.purchasePrice) || 0;
                                     const lineTotal = purchase * ordered;
-                                    const deliveredTone = delivered === 0
+                                    const pct = ordered > 0 ? Math.min(100, Math.round((delivered / ordered) * 100)) : 0;
+                                    const tone = delivered === 0
                                         ? statusTokens.danger
                                         : delivered >= ordered ? statusTokens.success : statusTokens.warning;
                                     return (
                                         <TableRow
                                             key={row.id ?? idx}
                                             sx={{
-                                                '&:nth-of-type(odd)': { bgcolor: alpha(neutral[900], 0.015) },
-                                                '&:hover': { bgcolor: alpha(brand[500], 0.04) },
+                                                '&:hover': { bgcolor: surface.muted },
                                                 transition: 'background 0.15s',
-                                                '& td': { borderBottom: `1px solid ${alpha(neutral[900], 0.05)}`, py: 1.85 },
+                                                '& td': { borderBottom: `1px solid ${border.subtle}`, py: 1.85 },
                                             }}
                                         >
                                             {/* Item */}
-                                            <TableCell>
+                                            <TableCell sx={{ pl: { xs: 2.5, md: 3 } }}>
                                                 <Stack direction="row" spacing={1.5} alignItems="center">
-                                                    <Box sx={{ width: 30, height: 30, borderRadius: '9px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.78rem', fontWeight: 800, color: brand[700], bgcolor: alpha(brand[500], 0.1) }}>
+                                                    <Typography sx={{ fontSize: '0.75rem', fontWeight: 700, color: neutral[300], minWidth: 14, fontVariantNumeric: 'tabular-nums' }}>
                                                         {idx + 1}
-                                                    </Box>
+                                                    </Typography>
                                                     <Box sx={{ minWidth: 0 }}>
-                                                        <Typography sx={{ fontSize: '0.88rem', fontWeight: 700, color: neutral[900], lineHeight: 1.3 }}>
+                                                        <Typography sx={{ fontSize: '0.9rem', fontWeight: 700, color: neutral[900], lineHeight: 1.35 }}>
                                                             {row.name || '—'}
                                                         </Typography>
                                                         {row.groupName && (
-                                                            <Typography sx={{ fontSize: '0.72rem', color: neutral[500] }}>{row.groupName}</Typography>
+                                                            <Typography sx={{ fontSize: '0.72rem', color: neutral[500], mt: 0.15 }}>
+                                                                {row.groupName}
+                                                            </Typography>
                                                         )}
                                                     </Box>
                                                 </Stack>
                                             </TableCell>
-                                            {/* Ordered */}
+
+                                            {/* Fulfilment — figure plus a bar, so partial deliveries read at a glance */}
                                             <TableCell align="center">
-                                                <Box component="span" sx={{ display: 'inline-flex', minWidth: 34, justifyContent: 'center', px: 1, py: 0.4, borderRadius: '8px', fontSize: '0.82rem', fontWeight: 700, color: neutral[700], bgcolor: alpha(neutral[900], 0.05) }}>
-                                                    {ordered}
+                                                <Box sx={{ display: 'inline-block', minWidth: 96 }}>
+                                                    <Stack direction="row" spacing={0.5} alignItems="baseline" justifyContent="center">
+                                                        <Typography sx={{ fontSize: '0.95rem', fontWeight: 800, color: tone.strong, fontVariantNumeric: 'tabular-nums' }}>
+                                                            {delivered}
+                                                        </Typography>
+                                                        <Typography sx={{ fontSize: '0.78rem', fontWeight: 600, color: neutral[400], fontVariantNumeric: 'tabular-nums' }}>
+                                                            / {ordered}
+                                                        </Typography>
+                                                    </Stack>
+                                                    <Box sx={{ mt: 0.6, height: 4, borderRadius: 999, bgcolor: alpha(neutral[900], 0.07), overflow: 'hidden' }}>
+                                                        <Box sx={{ height: '100%', width: `${pct}%`, borderRadius: 999, bgcolor: tone.main }} />
+                                                    </Box>
                                                 </Box>
                                             </TableCell>
-                                            {/* Delivered */}
-                                            <TableCell align="center">
-                                                <Box component="span" sx={{ display: 'inline-flex', minWidth: 34, justifyContent: 'center', px: 1, py: 0.4, borderRadius: '8px', fontSize: '0.82rem', fontWeight: 700, color: deliveredTone.strong, bgcolor: deliveredTone.soft }}>
-                                                    {delivered}
-                                                </Box>
+
+                                            <TableCell align="right" sx={{ fontSize: '0.875rem', color: neutral[700], fontVariantNumeric: 'tabular-nums' }}>
+                                                {fmtMoney(Number(row.costPrice) || 0)}
                                             </TableCell>
-                                            {/* Unit cost */}
-                                            <TableCell align="right" sx={{ fontSize: '0.85rem', color: neutral[700], fontVariantNumeric: 'tabular-nums' }}>{fmtMoney(Number(row.costPrice) || 0)}</TableCell>
-                                            {/* Unit price */}
-                                            <TableCell align="right" sx={{ fontSize: '0.85rem', color: neutral[700], fontVariantNumeric: 'tabular-nums' }}>{fmtMoney(purchase)}</TableCell>
-                                            {/* Line total */}
-                                            <TableCell align="right">
-                                                <Box component="span" sx={{ display: 'inline-block', px: 1.25, py: 0.45, borderRadius: '8px', bgcolor: alpha(brand[500], 0.08), color: brand[700], fontWeight: 800, fontSize: '0.85rem', fontVariantNumeric: 'tabular-nums' }}>
-                                                    {fmtMoney(lineTotal)}
-                                                </Box>
+                                            <TableCell align="right" sx={{ fontSize: '0.875rem', color: neutral[700], fontVariantNumeric: 'tabular-nums' }}>
+                                                {fmtMoney(purchase)}
+                                            </TableCell>
+                                            <TableCell align="right" sx={{ pr: { xs: 2.5, md: 3 }, fontSize: '0.9rem', fontWeight: 800, color: neutral[900], fontVariantNumeric: 'tabular-nums' }}>
+                                                {fmtMoney(lineTotal)}
                                             </TableCell>
                                         </TableRow>
                                     );
                                 })}
                             </TableBody>
                             <TableFooter>
-                                <TableRow sx={{ '& td': { borderTop: `2px solid ${border.subtle}`, borderBottom: 'none', py: 1.75, bgcolor: alpha(brand[500], 0.02) } }}>
-                                    <TableCell sx={{ fontWeight: 800, color: neutral[700], fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Total</TableCell>
-                                    <TableCell align="center" sx={{ fontWeight: 800, color: neutral[800], fontSize: '0.85rem' }}>{totalOrdered}</TableCell>
-                                    <TableCell align="center" sx={{ fontWeight: 800, color: neutral[800], fontSize: '0.85rem' }}>{totalDelivered}</TableCell>
+                                <TableRow sx={{ '& td': { borderBottom: 'none', py: 2, bgcolor: alpha(brand[500], 0.03) } }}>
+                                    <TableCell sx={{ pl: { xs: 2.5, md: 3 }, fontWeight: 800, color: neutral[700], fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.07em' }}>
+                                        Total
+                                    </TableCell>
+                                    <TableCell align="center" sx={{ fontWeight: 800, color: neutral[800], fontSize: '0.9rem', fontVariantNumeric: 'tabular-nums' }}>
+                                        {totalDelivered} / {totalOrdered}
+                                    </TableCell>
                                     <TableCell />
                                     <TableCell />
-                                    <TableCell align="right">
-                                        <Typography sx={{ fontWeight: 800, color: brand[700], fontSize: '0.95rem', fontVariantNumeric: 'tabular-nums' }}>
-                                            {fmtMoney(grandTotal)}
-                                        </Typography>
+                                    <TableCell align="right" sx={{ pr: { xs: 2.5, md: 3 } }}>
+                                        <Stack direction="row" alignItems="baseline" spacing={0.6} justifyContent="flex-end">
+                                            <Typography sx={{ fontSize: '0.72rem', fontWeight: 800, color: brand[600] }}>{CURRENCY}</Typography>
+                                            <Typography sx={{ fontWeight: 800, color: brand[700], fontSize: '1.05rem', fontVariantNumeric: 'tabular-nums' }}>
+                                                {fmtMoney(grandTotal)}
+                                            </Typography>
+                                        </Stack>
                                     </TableCell>
                                 </TableRow>
                             </TableFooter>
@@ -399,19 +480,25 @@ const CreateInventory = () => {
                     </TableContainer>
                 </Paper>
 
-                {/* Totals */}
-                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
-                    <TotalCard icon={<PaidOutlinedIcon />} label="Total Cost" value={fmtMoney(totalCostPrice)} tone={brand} />
-                    <TotalCard icon={<SellOutlinedIcon />} label="Total Purchase Price" value={fmtMoney(totalPurchasePrice)} tone={gold} />
-                </Stack>
-
-                {/* Notice */}
-                <Stack direction="row" spacing={1.25} alignItems="flex-start" sx={{ p: 1.75, borderRadius: 2, bgcolor: alpha(gold[500], 0.07), border: `1px solid ${alpha(gold[500], 0.25)}` }}>
-                    <WarningAmberIcon sx={{ fontSize: 18, color: gold[700], mt: 0.1, flexShrink: 0 }} />
-                    <Typography sx={{ fontSize: '0.82rem', color: neutral[700], lineHeight: 1.5 }}>
-                        Please confirm everything above is correct. Once submitted, this stock entry cannot be easily modified.
-                    </Typography>
-                </Stack>
+                {/* ── What happens on submit ── */}
+                <Paper elevation={0} sx={{ borderRadius: 2, border: `1px solid ${alpha(gold[500], 0.35)}`, bgcolor: alpha(gold[500], 0.05), px: { xs: 2.5, md: 3 }, py: 2.25 }}>
+                    <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 1.25 }}>
+                        <WarningAmberIcon sx={{ fontSize: 18, color: gold[700] }} />
+                        <Typography sx={{ fontSize: '0.88rem', fontWeight: 800, color: neutral[900] }}>Before you submit</Typography>
+                    </Stack>
+                    <Stack component="ul" spacing={0.85} sx={{ m: 0, pl: 0, listStyle: 'none' }}>
+                        {[
+                            'A GRN number is issued automatically once the entry is saved.',
+                            'Delivered quantities are credited to the store and registered against tracked asset types.',
+                            'Submitted entries cannot be easily modified — corrections go through a separate flow.',
+                        ].map((line) => (
+                            <Stack key={line} component="li" direction="row" spacing={1.25} alignItems="flex-start">
+                                <Box sx={{ width: 5, height: 5, borderRadius: '50%', bgcolor: gold[600], mt: '7px', flexShrink: 0 }} />
+                                <Typography sx={{ fontSize: '0.84rem', color: neutral[700], lineHeight: 1.55 }}>{line}</Typography>
+                            </Stack>
+                        ))}
+                    </Stack>
+                </Paper>
             </Box>
         );
     };
@@ -421,33 +508,36 @@ const CreateInventory = () => {
             sx={{
                 display: 'flex',
                 flexDirection: 'column',
-                gap: 2.5,
+                gap: 3,
                 width: '100%',
                 maxWidth: 1400,
                 mx: 'auto',
-                px: { xs: 1, sm: 2 },
-                py: { xs: 1.5, sm: 2 },
+                px: { xs: 2, sm: 3, md: 4 },
+                py: { xs: 2.5, sm: 3.5, md: 4 },
+                minHeight: '100vh',
+                bgcolor: '#f8fafc',
             }}
         >
             {/* ── Page header card (matches the Create Request hero) ── */}
             <Box
                 sx={{
-                    borderRadius: `${radii.lg}px`,
+                    borderRadius: 2.5,
                     border: `1px solid ${border.subtle}`,
-                    bgcolor: surface.card,
+                    bgcolor: '#fff',
                     overflow: 'hidden',
-                    boxShadow: elevation.card,
+                    boxShadow: `0 2px 8px ${alpha('#000', 0.06)}`,
                 }}
             >
                 {/* Title row */}
                 <Box sx={{
-                    px: { xs: 2.5, sm: 3.5 },
-                    py: 2.5,
+                    px: { xs: 3, sm: 4, md: 4.5 },
+                    py: 3,
                     display: 'flex',
                     flexDirection: { xs: 'column', md: 'row' },
                     alignItems: { xs: 'flex-start', md: 'center' },
                     justifyContent: 'space-between',
-                    gap: 2,
+                    gap: 3,
+                    background: `linear-gradient(135deg, ${alpha(brand[500], 0.01)} 0%, transparent 100%)`,
                 }}>
                     {/* Left — icon + title */}
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, minWidth: 0 }}>
@@ -542,10 +632,10 @@ const CreateInventory = () => {
 
                 {/* Lifecycle rail — advances with the wizard step */}
                 <Box sx={{
-                    px: { xs: 2.5, sm: 3.5 },
-                    py: 1.5,
+                    px: { xs: 3, sm: 4, md: 4.5 },
+                    py: 2,
                     borderTop: `1px solid ${border.subtle}`,
-                    bgcolor: surface.muted,
+                    bgcolor: alpha(brand[500], 0.015),
                     overflowX: 'auto',
                 }}>
                     <Stack direction="row" alignItems="center" spacing={1} sx={{ width: 'max-content' }}>
@@ -592,7 +682,7 @@ const CreateInventory = () => {
             {/* Navigation is driven by explicit button clicks, not native submit — preventDefault
                 stops an Enter keypress from submitting/validating prematurely. */}
             <form autoComplete="off" onSubmit={(e) => e.preventDefault()}>
-                <Grid container spacing={2}>
+                <Grid container spacing={3}>
                     <Grid item xs={12}>
                         {/* Steps 0 & 1 stay mounted (display-toggled) so RHF + stock rows keep their
                             state as the user moves between steps. */}
@@ -628,16 +718,18 @@ const CreateInventory = () => {
                 <Paper
                     elevation={0}
                     sx={{
-                        mt: 2.5,
-                        p: { xs: 2, md: 2.5 },
-                        borderRadius: 2,
+                        mt: 4,
+                        p: { xs: 3, md: 3.5 },
+                        borderRadius: 2.5,
                         border: `1px solid ${border.subtle}`,
                         bgcolor: '#fff',
+                        boxShadow: `0 2px 8px ${alpha('#000', 0.05)}`,
+                        background: `linear-gradient(135deg, ${alpha(brand[500], 0.008)} 0%, transparent 100%)`,
                     }}
                 >
                     <Stack
                         direction={{ xs: 'column', sm: 'row' }}
-                        spacing={2}
+                        spacing={2.5}
                         justifyContent="space-between"
                         alignItems={{ xs: 'stretch', sm: 'center' }}
                     >
@@ -687,7 +779,7 @@ const CreateInventory = () => {
                                 sx={{
                                     height: 44,
                                     px: 2.75,
-                                    borderRadius: `${radii.pill}px`,
+                                    borderRadius: '8px',
                                     textTransform: 'none',
                                     fontWeight: 600,
                                     borderColor: border.default,

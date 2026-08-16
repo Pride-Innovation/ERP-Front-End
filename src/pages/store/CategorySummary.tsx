@@ -7,10 +7,13 @@ Managing Director
 
 import { useContext, useEffect, useState } from 'react';
 import { Box, Paper, Skeleton, Typography, alpha } from '@mui/material';
-import BusinessCenterOutlinedIcon from '@mui/icons-material/BusinessCenterOutlined';
-import MonitorOutlinedIcon from '@mui/icons-material/MonitorOutlined';
+import LaptopOutlinedIcon from '@mui/icons-material/LaptopOutlined';
 import DirectionsCarOutlinedIcon from '@mui/icons-material/DirectionsCarOutlined';
-import ContentPasteOutlinedIcon from '@mui/icons-material/ContentPasteOutlined';
+import StorageOutlinedIcon from '@mui/icons-material/StorageOutlined';
+import ChairOutlinedIcon from '@mui/icons-material/ChairOutlined';
+import PhotoCameraOutlinedIcon from '@mui/icons-material/PhotoCameraOutlined';
+import PrintOutlinedIcon from '@mui/icons-material/PrintOutlined';
+import ShoppingBagOutlinedIcon from '@mui/icons-material/ShoppingBagOutlined';
 import CategoryOutlinedIcon from '@mui/icons-material/CategoryOutlined';
 import { SvgIconComponent } from '@mui/icons-material';
 import { useSelector } from 'react-redux';
@@ -24,14 +27,37 @@ import { IAssetType } from '../settings/assetTypes/interface';
 /** Icon + accent colour for a category, inferred from its name. */
 export const getCategoryStyle = (name: string): { color: string; Icon: SvgIconComponent } => {
     const lower = (name ?? '').toLowerCase();
-    if (lower.includes('office')) return { color: '#6366f1', Icon: BusinessCenterOutlinedIcon };
-    if (lower.includes('it') || lower.includes('tech') || lower.includes('computer') || lower.includes('laptop'))
-        return { color: '#0ea5e9', Icon: MonitorOutlinedIcon };
-    if (lower.includes('fleet') || lower.includes('vehicle') || lower.includes('car') || lower.includes('transport'))
+
+    // Office & Furniture
+    if (lower.includes('office') || lower.includes('desk') || lower.includes('workstation') || lower.includes('chair') || lower.includes('furniture') || lower.includes('table'))
+        return { color: '#6366f1', Icon: ChairOutlinedIcon };
+
+    // IT & Computers
+    if (lower.includes('it') || lower.includes('tech') || lower.includes('computer') || lower.includes('laptop') || lower.includes('pc') || lower.includes('server') || lower.includes('network'))
+        return { color: '#0ea5e9', Icon: LaptopOutlinedIcon };
+
+    // Vehicles & Fleet
+    if (lower.includes('fleet') || lower.includes('vehicle') || lower.includes('car') || lower.includes('transport') || lower.includes('motorcycle') || lower.includes('truck'))
         return { color: '#f59e0b', Icon: DirectionsCarOutlinedIcon };
-    if (lower.includes('station') || lower.includes('paper') || lower.includes('print'))
-        return { color: '#10b981', Icon: ContentPasteOutlinedIcon };
-    return { color: '#8b5cf6', Icon: CategoryOutlinedIcon };
+
+    // Storage, Server & Infrastructure
+    if (lower.includes('storage') || lower.includes('infrastructure') || lower.includes('data center'))
+        return { color: '#8b5cf6', Icon: StorageOutlinedIcon };
+
+    // Consumables & Supplies
+    if (lower.includes('consumable') || lower.includes('supply') || lower.includes('stationery') || lower.includes('supplies') || lower.includes('office supply'))
+        return { color: '#f97316', Icon: ShoppingBagOutlinedIcon };
+
+    // Printing & Scanning
+    if (lower.includes('printer') || lower.includes('copier') || lower.includes('scanner') || lower.includes('print') || lower.includes('station') || lower.includes('paper'))
+        return { color: '#10b981', Icon: PrintOutlinedIcon };
+
+    // Camera & AV Equipment
+    if (lower.includes('camera') || lower.includes('projector') || lower.includes('av') || lower.includes('audio') || lower.includes('video') || lower.includes('monitor'))
+        return { color: '#06b6d4', Icon: PhotoCameraOutlinedIcon };
+
+    // Fallback
+    return { color: '#6b7280', Icon: CategoryOutlinedIcon };
 };
 
 interface CategorySummaryProps {
@@ -89,6 +115,12 @@ const CategorySummary = ({ accentColor }: CategorySummaryProps) => {
 
     const total = Object.values(counts).reduce((sum, n) => sum + n, 0);
 
+    // Filter asset types to show only those with items in this store
+    const visibleAssetTypes = assetTypes.filter(type => {
+        const count = type.id !== undefined ? counts[type.id] : 0;
+        return count > 0;
+    });
+
     return (
         <Paper
             elevation={0}
@@ -114,48 +146,53 @@ const CategorySummary = ({ accentColor }: CategorySummaryProps) => {
                     gridTemplateColumns: 'repeat(auto-fill, minmax(170px, 1fr))',
                 }}
             >
-                {(assetTypes.length > 0 ? assetTypes : [null, null, null, null]).map((type: IAssetType | null, i: number) => {
-                    if (!type) {
+                {loading && assetTypes.length > 0
+                    ? [null, null, null, null].map((_, i) => (
+                        <Box key={i} sx={{ display: 'flex', alignItems: 'center', gap: 1.25, p: 1.25, borderRadius: 1.5, border: '1px solid #EEF2F7' }}>
+                            <Skeleton variant="rounded" width={32} height={32} />
+                            <Box sx={{ flex: 1 }}>
+                                <Skeleton width={40} height={20} />
+                                <Skeleton width={80} height={14} />
+                            </Box>
+                        </Box>
+                    ))
+                    : visibleAssetTypes.length > 0
+                    ? visibleAssetTypes.map((type: IAssetType) => {
+                        const { color, Icon } = getCategoryStyle(type.name);
+                        const count = type.id !== undefined ? counts[type.id] : 0;
                         return (
-                            <Box key={i} sx={{ display: 'flex', alignItems: 'center', gap: 1.25, p: 1.25, borderRadius: 1.5, border: '1px solid #EEF2F7' }}>
-                                <Skeleton variant="rounded" width={32} height={32} />
-                                <Box sx={{ flex: 1 }}>
-                                    <Skeleton width={40} height={20} />
-                                    <Skeleton width={80} height={14} />
+                            <Box
+                                key={type.id}
+                                sx={{
+                                    display: 'flex', alignItems: 'center', gap: 1.25, p: 1.25, minWidth: 0,
+                                    borderRadius: 1.5, border: `1px solid ${alpha(color, 0.16)}`, bgcolor: alpha(color, 0.03),
+                                }}
+                            >
+                                <Box
+                                    sx={{
+                                        width: 32, height: 32, borderRadius: 1.25, flexShrink: 0,
+                                        bgcolor: alpha(color, 0.1), color,
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    }}
+                                >
+                                    <Icon sx={{ fontSize: 16 }} />
+                                </Box>
+                                <Box sx={{ minWidth: 0 }}>
+                                    <Typography sx={{ fontWeight: 800, fontSize: '1rem', color: '#1E293B', lineHeight: 1.15, fontVariantNumeric: 'tabular-nums' }}>
+                                        {count.toLocaleString()}
+                                    </Typography>
+                                    <Typography variant="caption" sx={{ color: '#64748B', display: 'block' }} noWrap title={type.name}>
+                                        {type.name}
+                                    </Typography>
                                 </Box>
                             </Box>
                         );
-                    }
-                    const { color, Icon } = getCategoryStyle(type.name);
-                    const count = type.id !== undefined ? counts[type.id] : undefined;
-                    return (
-                        <Box
-                            key={type.id}
-                            sx={{
-                                display: 'flex', alignItems: 'center', gap: 1.25, p: 1.25, minWidth: 0,
-                                borderRadius: 1.5, border: `1px solid ${alpha(color, 0.16)}`, bgcolor: alpha(color, 0.03),
-                            }}
-                        >
-                            <Box
-                                sx={{
-                                    width: 32, height: 32, borderRadius: 1.25, flexShrink: 0,
-                                    bgcolor: alpha(color, 0.1), color,
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                }}
-                            >
-                                <Icon sx={{ fontSize: 16 }} />
-                            </Box>
-                            <Box sx={{ minWidth: 0 }}>
-                                <Typography sx={{ fontWeight: 800, fontSize: '1rem', color: '#1E293B', lineHeight: 1.15, fontVariantNumeric: 'tabular-nums' }}>
-                                    {loading ? <Skeleton width={36} sx={{ display: 'inline-block' }} /> : (count ?? 0).toLocaleString()}
-                                </Typography>
-                                <Typography variant="caption" sx={{ color: '#64748B', display: 'block' }} noWrap title={type.name}>
-                                    {type.name}
-                                </Typography>
-                            </Box>
-                        </Box>
-                    );
-                })}
+                    })
+                    : (
+                        <Typography variant="body2" sx={{ color: 'text.secondary', gridColumn: '1 / -1', textAlign: 'center', py: 3 }}>
+                            No items in this store yet
+                        </Typography>
+                    )}
             </Box>
         </Paper>
     );

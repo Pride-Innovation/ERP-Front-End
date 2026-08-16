@@ -33,8 +33,26 @@ import AssetTypeUtills from '../settings/assetTypes/utills';
 import FilterBranchForm from './FilterBranchForm';
 import { ROUTES } from '../../core/routes/routes';
 import { PageHero } from '../../components/layout';
+import { brand, neutral, border, surface, status } from '../../utils/tokens';
 
 export type StoreType = 'admin' | 'it' | 'disposal';
+
+/**
+ * Accent colour per store container — the single source of truth.
+ *
+ * The landing page's quick-link pills and these three pages render the same store identity, so
+ * holding the values in two places let them drift: the landing page moved onto design tokens
+ * while the page wrappers still carried raw hex for the very same colours.
+ *
+ * IT's blue is deliberately not `status.info.main` (#3B82F6). That is a brighter,
+ * notification-grade blue; this is an identity colour, so it keeps its own value until the
+ * palette gains a proper slot for it.
+ */
+export const STORE_ACCENT: Record<StoreType, string> = {
+    admin: brand[500],
+    it: '#0369a1',
+    disposal: status.warning.strong,
+};
 
 interface StoreViewPageProps {
     storeType: StoreType;
@@ -73,7 +91,10 @@ const StoreViewPage = ({ storeType, title, subtitle, Icon, accentColor }: StoreV
     useEffect(() => { if (branchId) { fetchBranchDetails(branchId as number); } }, [branchId]);
 
     return (
-        <Box sx={{ minHeight: '100vh', pb: 4 }}>
+        // Same gutters as the store landing page, My Items and Stock Take. Without these the
+        // three store pages sat on the app shell's padding alone, so stepping in from the
+        // landing page visibly shifted the content outwards.
+        <Box sx={{ minHeight: '100vh', px: { xs: 2, sm: 3 }, py: { xs: 2, sm: 3 }, pb: 4 }}>
             <PageHero
                 title={title}
                 subtitle={subtitle}
@@ -120,7 +141,7 @@ const StoreViewPage = ({ storeType, title, subtitle, Icon, accentColor }: StoreV
                         py: 1.5,
                         border: `1px solid ${alpha(accentColor, 0.18)}`,
                         borderRadius: 2,
-                        bgcolor: '#fff',
+                        bgcolor: surface.card,
                         display: 'flex',
                         alignItems: 'center',
                         gap: 1.5,
@@ -149,7 +170,7 @@ const StoreViewPage = ({ storeType, title, subtitle, Icon, accentColor }: StoreV
                         <Typography
                             variant="caption"
                             sx={{
-                                color: '#94A3B8',
+                                color: neutral[400],
                                 fontWeight: 700,
                                 textTransform: 'uppercase',
                                 letterSpacing: '0.06em',
@@ -164,7 +185,7 @@ const StoreViewPage = ({ storeType, title, subtitle, Icon, accentColor }: StoreV
                         <Stack direction="row" alignItems="center" spacing={1} sx={{ flexWrap: 'wrap' }}>
                             <Typography
                                 variant="body2"
-                                sx={{ fontWeight: 700, color: '#1E293B', lineHeight: 1.2 }}
+                                sx={{ fontWeight: 700, color: neutral[800], lineHeight: 1.2 }}
                                 noWrap
                                 title={currentBranch?.name}
                             >
@@ -178,9 +199,9 @@ const StoreViewPage = ({ storeType, title, subtitle, Icon, accentColor }: StoreV
                                         height: 18,
                                         fontSize: '0.62rem',
                                         fontWeight: 700,
-                                        bgcolor: alpha('#22c55e', 0.1),
-                                        color: '#15803d',
-                                        border: `1px solid ${alpha('#22c55e', 0.25)}`,
+                                        bgcolor: alpha(status.success.main, 0.1),
+                                        color: status.success.strong,
+                                        border: `1px solid ${alpha(status.success.main, 0.25)}`,
                                         '& .MuiChip-label': { px: 0.75 },
                                     }}
                                 />
@@ -243,13 +264,13 @@ const StoreViewPage = ({ storeType, title, subtitle, Icon, accentColor }: StoreV
                     elevation={0}
                     sx={{
                         borderRadius: 2,
-                        border: `1px solid ${alpha('#000', 0.08)}`,
+                        border: `1px solid ${border.subtle}`,
                         p: 4,
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         minHeight: 280,
-                        bgcolor: '#fff',
+                        bgcolor: surface.card,
                     }}
                 >
                     <Loading items="Store Commodity" />

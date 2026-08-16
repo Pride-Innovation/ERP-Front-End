@@ -50,17 +50,13 @@ const CreateMovement = () => {
             toast.warning('Add at least one item to move.');
             return;
         }
-        const toIso = (d?: string | null) => (d ? new Date(d).toISOString() : null);
-
         const payload: IMovementCreatePayload = {
             movementType: data.movementType as IMovementCreatePayload['movementType'],
             sourceStoreId: data.sourceStoreId,
             destStoreId: data.destinationKind === 'STORE' ? data.destStoreId ?? null : null,
             recipientUserId: data.destinationKind === 'USER' ? data.recipientUserId ?? null : null,
-            courierService: data.courierService || null,
-            trackingNumber: data.trackingNumber || null,
-            dispatchDate: toIso(data.dispatchDate),
-            expectedDeliveryDate: toIso(data.expectedDeliveryDate),
+            // Deliberately not sent: courier, tracking number and delivery dates. They belong to the
+            // dispatch, not to the obligation — see the Journey note in MovementForm.
             remarks: data.remarks || null,
             // Deliberately not sent: the server derives this from the movement category. Sending a
             // client-chosen value is what allowed a cross-location movement to skip approval.

@@ -36,55 +36,75 @@ const TotalCard = ({ label, value, accent, icon }: TotalCardProps) => (
         sx={{
             display: 'flex',
             alignItems: 'center',
-            gap: 1.5,
-            px: 2,
-            py: 1.25,
-            borderRadius: 2,
-            border: `1px solid ${border.subtle}`,
+            gap: 2,
+            px: 2.5,
+            py: 1.75,
+            borderRadius: '8px',
+            border: `1.5px solid ${alpha(accent, 0.2)}`,
             bgcolor: '#fff',
-            minWidth: { xs: '100%', md: 230 },
+            minWidth: { xs: '100%', md: 270 },
         }}
     >
         <Box
             sx={{
-                width: 38,
-                height: 38,
-                borderRadius: 1.5,
+                width: 48,
+                height: 48,
+                borderRadius: '8px',
                 flexShrink: 0,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                bgcolor: alpha(accent, 0.1),
+                bgcolor: alpha(accent, 0.08),
                 color: accent,
-                '& .MuiSvgIcon-root': { fontSize: 20 },
+                '& .MuiSvgIcon-root': { fontSize: 24 },
             }}
         >
             {icon}
         </Box>
-        <Box sx={{ minWidth: 0 }}>
+        <Box sx={{ minWidth: 0, flex: 1 }}>
             <Typography
                 sx={{
                     color: neutral[500],
-                    fontWeight: 600,
-                    fontSize: '0.62rem',
-                    letterSpacing: '0.06em',
+                    fontWeight: 700,
+                    fontSize: '0.65rem',
+                    letterSpacing: '0.05em',
                     textTransform: 'uppercase',
                     lineHeight: 1.2,
+                    mb: 0.5,
                 }}
             >
                 {label}
             </Typography>
-            <Typography sx={{ fontWeight: 800, fontSize: '1.05rem', color: neutral[900], lineHeight: 1.25, mt: 0.25 }}>
-                <Box component="span" sx={{ fontSize: '0.7rem', fontWeight: 700, color: neutral[400], mr: 0.5 }}>
+            <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 0.5 }}>
+                <Typography
+                    sx={{
+                        fontSize: '0.75rem',
+                        fontWeight: 700,
+                        color: accent,
+                    }}
+                >
                     {CURRENCY}
-                </Box>
-                {formatNumberWithCommas(value || 0)}
-            </Typography>
+                </Typography>
+                <Typography
+                    sx={{
+                        fontWeight: 800,
+                        fontSize: '1.2rem',
+                        color: neutral[900],
+                        lineHeight: 1.2,
+                    }}
+                >
+                    {formatNumberWithCommas(value || 0)}
+                </Typography>
+            </Box>
         </Box>
     </Paper>
 );
 
-const PriceTotals = () => {
+interface PriceTotalsProps {
+    showPrices?: boolean;
+}
+
+const PriceTotals = ({ showPrices = false }: PriceTotalsProps) => {
     const {
         stockRows,
         setTotalCostPrice,
@@ -102,13 +122,23 @@ const PriceTotals = () => {
      * <p>Quantity is the *ordered* one, not delivered, so the total states the value the order
      * commits to and stays stable as goods arrive in batches. A delivered-based total would drop on
      * a partial delivery and then never recover, since receiving a top-up doesn't recalculate it.
+     *
+     * <p>Purchase Price: If not explicitly set, uses Cost Price as the value. This ensures totals
+     * are always meaningful and match user intent when only one pricing column is visible.
      */
     useEffect(() => {
         const extend = (price: number | string | undefined, qty: number | undefined) =>
             (Number(price) || 0) * (Number(qty) || 0);
 
         setTotalCostPrice(stockRows.reduce((acc, cur) => acc + extend(cur.costPrice, cur.orderedQuantity), 0));
-        setTotalPurchasePrice(stockRows.reduce((acc, cur) => acc + extend(cur.purchasePrice, cur.orderedQuantity), 0));
+
+        // Purchase Price uses Cost Price as fallback if not explicitly set
+        setTotalPurchasePrice(
+            stockRows.reduce((acc, cur) => {
+                const priceToUse = cur.purchasePrice || cur.costPrice;
+                return acc + extend(priceToUse, cur.orderedQuantity);
+            }, 0)
+        );
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [stockRows]);
 
@@ -119,45 +149,75 @@ const PriceTotals = () => {
     return (
         <Stack
             direction={{ xs: 'column', md: 'row' }}
-            spacing={2}
+            spacing={3}
             justifyContent="space-between"
-            alignItems={{ xs: 'stretch', md: 'center' }}
+            alignItems={{ xs: 'stretch', md: 'flex-start' }}
         >
             {/* Left — item count + completeness hint */}
-            <Stack direction="row" spacing={1.5} alignItems="center" flexWrap="wrap" useFlexGap>
-                <Typography variant="body2" sx={{ fontWeight: 600, color: neutral[700] }}>
-                    {stockRows.length} item{stockRows.length !== 1 ? 's' : ''} in this delivery
-                </Typography>
-                <Typography variant="caption" sx={{ color: neutral[500] }}>
-                    Totals are unit price × ordered qty
-                </Typography>
-
-                {hasIncomplete && (
-                    <Stack
-                        direction="row"
-                        spacing={0.5}
-                        alignItems="center"
+            <Stack direction="column" spacing={1.75} flex={1}>
+                <Box>
+                    <Typography
+                        variant="body2"
                         sx={{
-                            px: 1,
-                            py: 0.4,
-                            borderRadius: 1,
-                            bgcolor: status.warning.soft,
-                            color: status.warning.strong,
-                            border: `1px solid ${alpha(status.warning.main, 0.3)}`,
+                            fontWeight: 700,
+                            color: neutral[900],
+                            fontSize: '1.05rem',
+                            mb: 0.5,
                         }}
                     >
-                        <InfoOutlinedIcon sx={{ fontSize: 14 }} />
-                        <Typography variant="caption" sx={{ fontWeight: 600 }}>
-                            Some items are incomplete
-                        </Typography>
-                    </Stack>
+                        {stockRows.length} item{stockRows.length !== 1 ? 's' : ''} in this delivery
+                    </Typography>
+                    <Typography
+                        variant="caption"
+                        sx={{
+                            color: neutral[500],
+                            fontSize: '0.8rem',
+                            fontWeight: 500,
+                        }}
+                    >
+                        Totals are unit price × ordered qty
+                    </Typography>
+                </Box>
+
+                {hasIncomplete && (
+                    <Box
+                        sx={{
+                            display: 'inline-flex',
+                            px: 1.5,
+                            py: 0.75,
+                            borderRadius: '8px',
+                            bgcolor: status.warning.soft,
+                            border: `1.5px solid ${alpha(status.warning.main, 0.3)}`,
+                            width: 'fit-content',
+                        }}
+                    >
+                        <Stack direction="row" spacing={0.75} alignItems="center">
+                            <InfoOutlinedIcon
+                                sx={{
+                                    fontSize: 16,
+                                    color: status.warning.strong,
+                                    flexShrink: 0,
+                                }}
+                            />
+                            <Typography
+                                variant="caption"
+                                sx={{
+                                    fontWeight: 700,
+                                    color: status.warning.strong,
+                                    fontSize: '0.8rem',
+                                }}
+                            >
+                                Some items are incomplete
+                            </Typography>
+                        </Stack>
+                    </Box>
                 )}
             </Stack>
 
             {/* Right — totals */}
             <Stack
                 direction={{ xs: 'column', sm: 'row' }}
-                spacing={1.5}
+                spacing={2}
                 justifyContent={{ xs: 'flex-start', md: 'flex-end' }}
             >
                 <TotalCard
@@ -166,12 +226,14 @@ const PriceTotals = () => {
                     accent={brand[500]}
                     icon={<AccountBalanceWalletOutlinedIcon />}
                 />
-                <TotalCard
-                    label="Total Purchase Value"
-                    value={totalPurchasePrice}
-                    accent={gold[500]}
-                    icon={<ShoppingBasketOutlinedIcon />}
-                />
+                {showPrices && (
+                    <TotalCard
+                        label="Total Purchase Value"
+                        value={totalPurchasePrice}
+                        accent={gold[500]}
+                        icon={<ShoppingBasketOutlinedIcon />}
+                    />
+                )}
             </Stack>
         </Stack>
     );

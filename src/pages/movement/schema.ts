@@ -27,9 +27,8 @@ export const movementSchema = yup.object().shape({
             then: (s) => s.required('Recipient user is required'),
             otherwise: (s) => s.nullable().optional(),
         }),
-    courierService: yup.string().nullable().optional(),
-    trackingNumber: yup.string().nullable().optional(),
-    dispatchDate: yup.string().nullable().optional(),
-    expectedDeliveryDate: yup.string().nullable().optional(),
+    // No courier / tracking / delivery-date rules: the create form does not collect them. They are
+    // captured at dispatch, where the carrier is actually known — see the Journey note in
+    // MovementForm.
     remarks: yup.string().nullable().optional(),
 });

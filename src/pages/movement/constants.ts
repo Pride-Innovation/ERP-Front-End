@@ -142,6 +142,39 @@ export const canDispatch = (m: {
     movementCategory?: string; status?: string; consignment?: { status?: string | null } | null;
 }) => m.movementCategory === 'INTER_LOCATION' && m.status === 'INITIATED' && !onLiveConsignment(m);
 
+/**
+ * A movement can join a van under exactly the conditions that let it be driven on its own: approved,
+ * inter-location, and not already riding on something. The two are alternatives offered at the same
+ * moment — consolidate it with the rest of the load, or dispatch it alone — so they share a rule
+ * rather than restating one that could drift from the other.
+ */
+export const canLoadOntoConsignment = canDispatch;
+
+/**
+ * Where a movement starts and ends, as location ids.
+ *
+ * <p>Either end can be a store or a person — a return leaves someone's desk, a transfer to a user
+ * ends at their branch — so reading only the store side silently loses half the cases. These mirror
+ * {@code ConsignmentService.sourceLocationId} / {@code destinationLocationId}, which is what
+ * actually accepts or refuses a movement when it is loaded onto a consignment.
+ */
+type MovementEnds = {
+    sourceStore?: { location?: { id?: number | string | null } | null } | null;
+    sourceUser?: { branch?: { id?: number | string | null } | null } | null;
+    destStore?: { location?: { id?: number | string | null } | null } | null;
+    recipientUser?: { branch?: { id?: number | string | null } | null } | null;
+};
+
+export const movementSourceLocationId = (m: MovementEnds): number | string | null =>
+    m.sourceStore?.location?.id ?? m.sourceUser?.branch?.id ?? null;
+
+export const movementDestinationLocationId = (m: MovementEnds): number | string | null =>
+    m.destStore?.location?.id ?? m.recipientUser?.branch?.id ?? null;
+
+/** Location ids arrive as numbers or strings depending on the endpoint, so compare them loosely. */
+export const sameLocation = (a?: number | string | null, b?: number | string | null) =>
+    a != null && b != null && String(a) === String(b);
+
 /** Marking in-transit is compulsory, not optional — it's the only way out of DISPATCHED. */
 export const canMarkInTransit = (m: { status?: string; consignment?: { status?: string | null } | null }) =>
     m.status === 'DISPATCHED' && !onLiveConsignment(m);

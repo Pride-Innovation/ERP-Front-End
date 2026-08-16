@@ -5,16 +5,18 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { Dispatch, SetStateAction, useMemo, useState } from 'react';
+import { Dispatch, SetStateAction, useMemo, useState, useEffect } from 'react';
 import {
     alpha, Box, Chip, IconButton, InputAdornment, Paper, Skeleton, Stack, Table, TableBody, TableCell,
-    TableContainer, TableHead, TableRow, TextField, Tooltip, Typography,
+    TableContainer, TableHead, TableRow, TextField, Tooltip, Typography, Select, MenuItem,
 } from '@mui/material';
 import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined';
 import HistoryOutlinedIcon from '@mui/icons-material/HistoryOutlined';
 import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
+import ChevronLeftOutlinedIcon from '@mui/icons-material/ChevronLeftOutlined';
+import ChevronRightOutlinedIcon from '@mui/icons-material/ChevronRightOutlined';
 import { toast } from 'react-toastify';
 import usePermissions from '../../core/permissions/usePermissions';
 import { PERMISSIONS } from '../../core/permissions/constants';
@@ -88,6 +90,9 @@ const BalancesPanel = ({ rows, setRows, loading, lowOnly, onLowOnlyChange }: Bal
     const [saving, setSaving] = useState<number | null>(null);
     /** The line whose ledger history is open. */
     const [historyRow, setHistoryRow] = useState<IBalanceView | null>(null);
+    /** Pagination state */
+    const [currentPage, setCurrentPage] = useState(1);
+    const [rowsPerPage, setRowsPerPage] = useState(15);
 
     /**
      * A line with no reorder level can never be flagged low, whatever happens to its quantity.
@@ -108,6 +113,17 @@ const BalancesPanel = ({ rows, setRows, loading, lowOnly, onLowOnlyChange }: Bal
             return true;
         });
     }, [rows, search, typeFilter, lowOnly, unmonitoredOnly]);
+
+    // Reset to page 1 when filters change
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [search, typeFilter, lowOnly, unmonitoredOnly]);
+
+    // Calculate pagination
+    const totalPages = Math.ceil(filtered.length / rowsPerPage);
+    const startIndex = (currentPage - 1) * rowsPerPage;
+    const endIndex = startIndex + rowsPerPage;
+    const paginatedRows = filtered.slice(startIndex, endIndex);
 
     const lowCount = rows.filter((r) => r.lowStock).length;
     /** Units on hand across whatever the filters are currently showing. */
@@ -237,11 +253,11 @@ const BalancesPanel = ({ rows, setRows, loading, lowOnly, onLowOnlyChange }: Bal
                 )}
                 <Box sx={{ flex: 1 }} />
                 <Typography variant="caption" sx={{ color: neutral[500], fontWeight: 600 }}>
-                    {filtered.length} of {rows.length} line(s) · {visibleUnits.toLocaleString()} unit(s)
+                    {filtered.length > 0 ? `${startIndex + 1}–${Math.min(endIndex, filtered.length)} of ${filtered.length}` : '0 of 0'} line(s) · {visibleUnits.toLocaleString()} unit(s)
                 </Typography>
             </Stack>
 
-            <TableContainer sx={{ maxHeight: 460, overflowX: 'auto' }}>
+            <TableContainer sx={{ overflowX: 'auto' }}>
                 <Table size="small" stickyHeader>
                     <TableHead>
                         <TableRow>
@@ -261,8 +277,8 @@ const BalancesPanel = ({ rows, setRows, loading, lowOnly, onLowOnlyChange }: Bal
                                     <TableCell colSpan={7} sx={dataBodyCellSx}><Skeleton height={22} /></TableCell>
                                 </TableRow>
                             ))
-                        ) : filtered.length > 0 ? (
-                            filtered.map((r, i) => (
+                        ) : paginatedRows.length > 0 ? (
+                            paginatedRows.map((r, i) => (
                                 // Zebra + brand rail on hover, as every other data table in the app.
                                 // A low line is called out by its chip and health bar rather than a
                                 // tinted row, which fought the stripe and made the table read busy.
@@ -350,6 +366,79 @@ const BalancesPanel = ({ rows, setRows, loading, lowOnly, onLowOnlyChange }: Bal
                     </TableBody>
                 </Table>
             </TableContainer>
+
+            {/* Pagination controls */}
+            {!loading && filtered.length > 0 && (
+                <Box sx={{
+                    px: 2.5, py: 1.75, borderTop: `1px solid ${border.subtle}`,
+                    display: 'flex', alignItems: 'center', gap: 2, justifyContent: 'space-between',
+                    bgcolor: neutral[50], flexWrap: 'wrap',
+                }}>
+                    <Stack direction="row" alignItems="center" gap={1.5}>
+                        <Typography variant="caption" sx={{ color: neutral[500], fontWeight: 600, whiteSpace: 'nowrap' }}>
+                            Rows per page:
+                        </Typography>
+                        <Select
+                            size="small"
+                            value={rowsPerPage}
+                            onChange={(e) => {
+                                setRowsPerPage(Number(e.target.value));
+                                setCurrentPage(1);
+                            }}
+                            sx={{
+                                width: 80,
+                                fontSize: '0.8rem',
+                                height: 28,
+                                '& .MuiOutlinedInput-root': { borderRadius: '6px' },
+                            }}
+                        >
+                            <MenuItem value={10}>10</MenuItem>
+                            <MenuItem value={15}>15</MenuItem>
+                            <MenuItem value={20}>20</MenuItem>
+                            <MenuItem value={25}>25</MenuItem>
+                        </Select>
+                    </Stack>
+
+                    <Typography variant="caption" sx={{ color: neutral[500], fontWeight: 600, textAlign: 'center', flex: 1 }}>
+                        Page {currentPage} of {totalPages}
+                    </Typography>
+
+                    <Stack direction="row" alignItems="center" gap={0.5}>
+                        <Tooltip title="Previous page" arrow>
+                            <span>
+                                <IconButton
+                                    size="small"
+                                    disabled={currentPage === 1}
+                                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                                    sx={{
+                                        color: neutral[500],
+                                        '&:hover:not(:disabled)': { color: PRIMARY, bgcolor: alpha(PRIMARY, 0.08) },
+                                        '&:disabled': { color: neutral[200] },
+                                    }}
+                                >
+                                    <ChevronLeftOutlinedIcon sx={{ fontSize: 18 }} />
+                                </IconButton>
+                            </span>
+                        </Tooltip>
+                        <Tooltip title="Next page" arrow>
+                            <span>
+                                <IconButton
+                                    size="small"
+                                    disabled={currentPage === totalPages}
+                                    onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                                    sx={{
+                                        color: neutral[500],
+                                        '&:hover:not(:disabled)': { color: PRIMARY, bgcolor: alpha(PRIMARY, 0.08) },
+                                        '&:disabled': { color: neutral[200] },
+                                    }}
+                                >
+                                    <ChevronRightOutlinedIcon sx={{ fontSize: 18 }} />
+                                </IconButton>
+                            </span>
+                        </Tooltip>
+                    </Stack>
+                </Box>
+            )}
 
             {historyRow && historyRow.storeId != null && historyRow.commodityId != null && (
                 <ModalComponent

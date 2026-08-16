@@ -256,6 +256,7 @@ export function validateStockItems(items: any[]): StockValidationResult {
             errors.push(`${prefix} Cost Price cannot be negative.`);
         }
 
+        // Purchase Price is auto-synced from Cost Price, so it will always have a value
         if (typeof purchasePrice !== 'number') {
             errors.push(`${prefix} Purchase Price is required.`);
         } else if (purchasePrice < 0) {
