@@ -51,10 +51,15 @@ const NoApproverDialog = ({
                 </Alert>
 
                 <Box>
+                    {/*
+                     * No second guess at the cause here. The server now names the specific fault —
+                     * which record is missing a branch, which title reports to nothing, which rung
+                     * nobody in the branch holds — so a generic "this usually means…" alongside it
+                     * either repeats the message or quietly contradicts it.
+                     */}
                     <Typography variant="body2" sx={{ color: neutral[700], mb: 1 }}>
-                        This usually means a reporting line is not set up — no branch on your record, or nobody
-                        holding a supervisory role above you in it. <strong>The better fix is to have an
-                        administrator correct that.</strong>
+                        <strong>The better fix is to have an administrator correct what the message above
+                        names</strong>, so the next movement routes properly instead of needing this again.
                     </Typography>
                     <Typography variant="body2" sx={{ color: neutral[700] }}>
                         You can proceed without approval, but it will be recorded against this movement and
