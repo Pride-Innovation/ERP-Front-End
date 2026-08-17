@@ -92,12 +92,24 @@ const ConsignmentDetail = ({
     useEffect(() => {
         if (!editable) { setLoadable([]); return; }
         (async () => {
+            /*
+             * No status param: GET /movements declares only pageSize and pageNumber, so one was
+             * being sent and silently ignored — Spring drops undeclared request params rather than
+             * complaining. The filtering below is therefore the only thing narrowing this list, and
+             * it has to mirror every rule ConsignmentService#addMovement enforces on write.
+             */
             const r = (await fetchRowsService({
-                pageNumber: 0, pageSize: 200, endPoint: 'movements', params: { status: 'INITIATED' },
+                pageNumber: 0, pageSize: 200, endPoint: 'movements',
             })) as any;
             const all: IMovement[] = r?.status === 200 ? r.data?.content ?? [] : [];
             setLoadable(all.filter((m) => {
                 if (m.consignment) return false;
+                /*
+                 * Approved and not yet travelling. Without this the picker offered DRAFT movements
+                 * still climbing their approval ladder, and COMPLETED ones that had already been
+                 * delivered — both refused on submit with a message the user could do nothing about.
+                 */
+                if (m.status !== 'INITIATED') return false;
                 if (m.movementCategory !== 'INTER_LOCATION') return false;
                 if (!sameLocation(movementDestinationLocationId(m), consignment.destLocation?.id)) return false;
                 /*
@@ -343,7 +355,15 @@ const ConsignmentDetail = ({
                             getOptionLabel={(m) => `#${m.id} — ${movementTypeLabel(m.movementType ?? undefined)}`}
                             isOptionEqualToValue={(o, v) => o.id === v.id}
                             onChange={(_, v) => setPicked(v)}
-                            noOptionsText={`No approved movements waiting for ${consignment.destLocation?.name ?? 'this destination'}`}
+                            // Names all four conditions, because an empty picker is otherwise
+                            // indistinguishable from a broken one — and the usual cause is a
+                            // movement still sitting in DRAFT awaiting its approval.
+                            noOptionsText={
+                                `Nothing to load. A movement appears here once it is approved (Initiated), `
+                                + `runs ${consignment.sourceLocation?.name ?? 'this origin'} → `
+                                + `${consignment.destLocation?.name ?? 'this destination'}, and is not already `
+                                + `on another consignment.`
+                            }
                             renderOption={(props, m) => (
                                 <Box component="li" {...props} key={m.id}>
                                     <Stack sx={{ minWidth: 0 }}>

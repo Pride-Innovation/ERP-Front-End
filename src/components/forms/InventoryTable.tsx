@@ -36,9 +36,36 @@ import InventoryIcon from '@mui/icons-material/Inventory';
 import FilterEngravedNumbers from './filterEngravedNumbers';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import TaskAltOutlinedIcon from '@mui/icons-material/TaskAltOutlined';
+import { StatusChip, StatusTone } from '../layout';
+import {
+    dataHeadCellSx, dataBodyCellSx, dataRowSx, dataSurfaceSx,
+} from '../tables/dataTableSx';
+import { brand, gold, neutral, border, status as statusTokens } from '../../utils/tokens';
 
-const PRIMARY_COLOR = '#08796C';
-const SECONDARY_COLOR = '#BC892C';
+const PRIMARY_COLOR = brand[500];
+const SECONDARY_COLOR = gold[500];
+
+/**
+ * Live fulfilment state for one line, when this table is filling a request.
+ *
+ * <p>Supplied by the page rather than derived here: readiness depends on the request being
+ * fulfilled, which this component knows nothing about.
+ */
+export interface IInventoryLineStatus {
+    label: string;
+    tone: StatusTone;
+    /** What the request asked for, shown against the quantity when the two diverge. */
+    requestedQuantity?: number;
+}
+
+/** Rail colour per readiness tone, so a row can be judged from the margin alone. */
+const TONE_RAIL: Partial<Record<StatusTone, string>> = {
+    success: statusTokens.success.main,
+    danger: statusTokens.danger.main,
+    pending: gold[500],
+    neutral: neutral[300],
+};
 
 const selectSx = {
     fontSize: '0.83rem',
@@ -79,6 +106,13 @@ const tableHeaders = [
         icon: <FeedOutlinedIcon sx={{ fontSize: "14px", mr: "5px" }} />,
         tooltip: 'Asset tracking identifiers',
         conditionalRender: 'issue'
+    },
+    {
+        id: 'status',
+        name: "Status",
+        icon: <TaskAltOutlinedIcon sx={{ fontSize: "14px", mr: "5px" }} />,
+        tooltip: 'Whether this line is ready to be issued',
+        conditionalRender: 'status'
     },
     {
         id: 'remove',
@@ -123,7 +157,16 @@ const NoItemsPlaceholder = ({ message, onAddItem }: { message: string; onAddItem
     </Box>
 );
 
-const InventoryTable = ({ issue, title }: { issue?: boolean, title: string }) => {
+const InventoryTable = ({ issue, title, lineStatus }: {
+    issue?: boolean;
+    title: string;
+    /**
+     * Per-line readiness, when this table is fulfilling a request. Supplying it adds a Status
+     * column and a coloured rail on each row, so the issuer sees what is outstanding on the same
+     * row they act on — rather than cross-referencing a second table of the same lines.
+     */
+    lineStatus?: (row: RowData) => IInventoryLineStatus | null;
+}) => {
     const { fetchAllCommodities } = CommodityUtills();
     const [itemOptions, setItemOptions] = useState<{ name: string; groupName: string, assetTypeId: number | string }[]>([]);
     const { rows, setRows, setAssetType } = useContext(RequestContext);
@@ -210,29 +253,25 @@ const InventoryTable = ({ issue, title }: { issue?: boolean, title: string }) =>
         if (header.conditionalRender === 'issue') {
             return issue;
         }
+        // The Status column exists only when a caller supplies readiness — on the plain request
+        // form there is no request to be ready against.
+        if (header.conditionalRender === 'status') {
+            return !!lineStatus;
+        }
         return true;
     });
 
     return (
-        <Card
-            elevation={0}
-            sx={{
-                borderRadius: '10px',
-                border: '1px solid #E8EDF3',
-                overflow: 'hidden',
-                width: '100%',
-                boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
-            }}
-        >
+        <Card elevation={0} sx={{ ...dataSurfaceSx, width: '100%' }}>
             <Box
                 display="flex"
                 justifyContent="space-between"
                 alignItems="center"
                 sx={{
-                    borderBottom: '1px solid #F1F5F9',
+                    borderBottom: `1px solid ${border.subtle}`,
                     px: { xs: 1.5, sm: 2 },
                     py: 1.25,
-                    bgcolor: '#F8FAFC',
+                    bgcolor: neutral[50],
                 }}
             >
                 <Stack direction="row" spacing={1.25} alignItems="center">
@@ -317,18 +356,7 @@ const InventoryTable = ({ issue, title }: { issue?: boolean, title: string }) =>
                                 <TableCell
                                     key={header.id}
                                     align={header.id === 'quantity' || header.id === 'remove' ? 'center' : 'left'}
-                                    sx={{
-                                        bgcolor: '#F8FAFC',
-                                        color: '#64748B',
-                                        fontWeight: 700,
-                                        fontSize: '0.67rem',
-                                        letterSpacing: '0.06em',
-                                        textTransform: 'uppercase',
-                                        py: 1.25,
-                                        px: { xs: 1, sm: 1.5 },
-                                        borderBottom: '1px solid #E8EDF3',
-                                        whiteSpace: 'nowrap',
-                                    }}
+                                    sx={{ ...dataHeadCellSx, px: { xs: 1, sm: 1.5 } }}
                                 >
                                     <Tooltip title={header.tooltip} arrow placement="top">
                                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
@@ -351,17 +379,22 @@ const InventoryTable = ({ issue, title }: { issue?: boolean, title: string }) =>
                                 </TableCell>
                             </TableRow>
                         ) : (
-                            rows.map((row) => (
+                            rows.map((row, rowIndex) => {
+                                const status = lineStatus?.(row) ?? null;
+                                return (
                                 <TableRow
                                     key={row.id}
                                     sx={{
-                                        bgcolor: recentlyAdded === row.id ? alpha(PRIMARY_COLOR, 0.03) : '#fff',
-                                        transition: 'background-color 0.25s ease',
-                                        '&:hover': { bgcolor: '#F8FAFC' },
+                                        ...dataRowSx(rowIndex),
+                                        // A freshly added row keeps its brief highlight, and a line
+                                        // being fulfilled carries a rail in its readiness colour so
+                                        // the outstanding ones are findable without reading across.
+                                        ...(recentlyAdded === row.id ? { bgcolor: alpha(PRIMARY_COLOR, 0.05) } : {}),
+                                        ...(status ? { boxShadow: `inset 3px 0 0 ${TONE_RAIL[status.tone] ?? neutral[300]}` } : {}),
                                     }}
                                 >
                                     {/* Asset Type */}
-                                    <TableCell sx={{ borderBottom: '1px solid #F1F5F9', px: { xs: 1, sm: 1.5 }, py: 1.25 }}>
+                                    <TableCell sx={{ ...dataBodyCellSx, px: { xs: 1, sm: 1.5 } }}>
                                         <Select
                                             fullWidth
                                             value={row.assetTypeId || ''}
@@ -378,7 +411,7 @@ const InventoryTable = ({ issue, title }: { issue?: boolean, title: string }) =>
                                     </TableCell>
 
                                     {/* Name */}
-                                    <TableCell sx={{ borderBottom: '1px solid #F1F5F9', px: { xs: 1, sm: 1.5 }, py: 1.25 }}>
+                                    <TableCell sx={{ ...dataBodyCellSx, px: { xs: 1, sm: 1.5 } }}>
                                         <Select
                                             fullWidth
                                             value={row.name || ''}
@@ -403,7 +436,7 @@ const InventoryTable = ({ issue, title }: { issue?: boolean, title: string }) =>
                                     </TableCell>
 
                                     {/* Unit of Measure */}
-                                    <TableCell sx={{ borderBottom: '1px solid #F1F5F9', px: { xs: 1, sm: 1.5 }, py: 1.25 }}>
+                                    <TableCell sx={{ ...dataBodyCellSx, px: { xs: 1, sm: 1.5 } }}>
                                         {row.groupName ? (
                                             <Chip
                                                 label={row.groupName}
@@ -425,7 +458,7 @@ const InventoryTable = ({ issue, title }: { issue?: boolean, title: string }) =>
                                     </TableCell>
 
                                     {/* Quantity */}
-                                    <TableCell align="center" sx={{ borderBottom: '1px solid #F1F5F9', px: { xs: 1, sm: 1.5 }, py: 1.25 }}>
+                                    <TableCell align="center" sx={{ ...dataBodyCellSx, px: { xs: 1, sm: 1.5 } }}>
                                         <Box sx={{
                                             display: 'flex',
                                             alignItems: 'center',
@@ -476,8 +509,15 @@ const InventoryTable = ({ issue, title }: { issue?: boolean, title: string }) =>
 
                                     {issue && <FilterEngravedNumbers row={row} />}
 
+                                    {/* Readiness — only when a caller is fulfilling a request. */}
+                                    {status && (
+                                        <TableCell sx={{ ...dataBodyCellSx, px: { xs: 1, sm: 1.5 } }}>
+                                            <StatusChip label={status.label} tone={status.tone} />
+                                        </TableCell>
+                                    )}
+
                                     {/* Actions */}
-                                    <TableCell align="center" sx={{ borderBottom: '1px solid #F1F5F9', px: 1, py: 1.25 }}>
+                                    <TableCell align="center" sx={{ ...dataBodyCellSx, px: 1 }}>
                                         <Tooltip title={rows.length <= 1 ? 'At least one item is required' : 'Remove this item'}>
                                             <span>
                                                 <IconButton
@@ -499,7 +539,8 @@ const InventoryTable = ({ issue, title }: { issue?: boolean, title: string }) =>
                                         </Tooltip>
                                     </TableCell>
                                 </TableRow>
-                            ))
+                                );
+                            })
                         )}
                     </TableBody>
                 </Table>

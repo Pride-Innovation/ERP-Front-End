@@ -5,11 +5,11 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import {
-    alpha, Box, Button, Chip, Grid, Stack, Typography,
+    alpha, Box, Button, Chip, Grid, Stack, Tooltip, Typography,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import SwapHorizOutlinedIcon from '@mui/icons-material/SwapHorizOutlined';
@@ -25,8 +25,6 @@ import { ROUTES } from '../../core/routes/routes';
 import ModalComponent from '../../components/modal';
 import { PageHero, PageSection, StatTile, EmptyState } from '../../components/layout';
 import { brand, neutral } from '../../utils/tokens';
-import RoutesUtills from '../../core/routes/utills';
-import { MovementContext } from '../../context/movement/MovementContext';
 import MovementUtills from './utills';
 import MovementTable from './MovementTable';
 import RepairFlowsModal from './RepairFlowsModal';
@@ -35,6 +33,7 @@ import MovementFilters, {
     MovementFilterValues, matchesMovementFilters, deriveMovementFilterOptions, hasActiveMovementFilters,
 } from './allMovements/MovementFilters';
 import { exportMovementsPdf, exportMovementsExcel, exportMovementsCsv } from './allMovements/exportMovements';
+import RoutesUtills from '../../core/routes/utills';
 import { fetchPendingApprovalMovementsService } from './service';
 import { MovementStatus } from './constants';
 import { IMovement } from './interface';
@@ -42,41 +41,40 @@ import { IMovement } from './interface';
 const Movement = () => {
     const navigate = useNavigate();
     const { movements } = useSelector((state: RootState) => state.MovementStore);
-    const { setCurrentMovement } = useContext(MovementContext);
+
     const {
-        fetchAllMovements, loading, count, modalState, setModalState,
-        open, handleOpen, handleClose, sendingRequest, setSendingRequest,
+        fetchAllMovements, loading, count, modalState,
+        open, handleClose, sendingRequest, setSendingRequest,
         currentMovement,
     } = MovementUtills();
     const [repairOpen, setRepairOpen] = useState(false);
 
-    // Approval inbox: DRAFT movements assigned to the logged-in user, from the dedicated
-    // server-side endpoint (not a client-side filter of the general list).
-    const [pendingApprovals, setPendingApprovals] = useState<IMovement[]>([]);
-    const [approvalsLoading, setApprovalsLoading] = useState(false);
+    /*
+     * The "Pending My Approval" inbox used to sit here as a second table.
+     *
+     * Removed: this page already carries a hero, a five-tile stat strip, a filter bar and the
+     * movements table, and a second table of the same rows pushed the actual list below the fold.
+     * Approvers are told by email and by the in-app bell instead — see
+     * MovementApprovalService#notifyApprover — and act from the movement's own detail page, which is
+     * where the full context lives anyway.
+     *
+     * The endpoint it used (GET /movements/pending-approval/{approverId}) is untouched and still
+     * feeds the dashboard.
+     */
     const currentUserId = RoutesUtills().getCurrentUser()?.id;
+    /** Count only — the rows themselves are read from the movement's own page. */
+    const [pendingCount, setPendingCount] = useState(0);
 
-    const fetchPendingApprovals = async () => {
+    const fetchPendingCount = async () => {
         if (!currentUserId) return;
-        setApprovalsLoading(true);
-        try {
-            const r = (await fetchPendingApprovalMovementsService(currentUserId, { pageSize: 25, pageNumber: 0 })) as any;
-            if (r?.status === 200) setPendingApprovals(r.data?.content ?? []);
-        } finally {
-            setApprovalsLoading(false);
-        }
+        const r = (await fetchPendingApprovalMovementsService(currentUserId, { pageSize: 1, pageNumber: 0 })) as any;
+        if (r?.status === 200) setPendingCount(r.data?.totalElements ?? r.data?.content?.length ?? 0);
     };
 
-    const refresh = () => { fetchAllMovements({ pageSize: 100 }); fetchPendingApprovals(); };
+    const refresh = () => { fetchAllMovements({ pageSize: 100 }); fetchPendingCount(); };
     useEffect(() => { refresh(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     const openMovement = (movement: IMovement) => navigate(`${ROUTES.READ_MOVEMENT}/${movement.id}`);
-
-    const openApprovalAction = (state: 'approve' | 'reject', movement: IMovement) => {
-        setCurrentMovement(movement);
-        setModalState(state);
-        handleOpen();
-    };
 
     const countBy = (s: MovementStatus) => movements.filter((m) => m.status === s).length;
     const inTransit = countBy('DISPATCHED') + countBy('IN_TRANSIT');
@@ -111,7 +109,28 @@ const Movement = () => {
                 icon={<SwapHorizOutlinedIcon />}
                 stat={{ value: (count ?? 0).toLocaleString(), label: 'movements', helper: todayLabel }}
                 actions={
-                    <Stack direction="row" spacing={1.25}>
+                    <Stack direction="row" spacing={1.25} alignItems="center">
+                        {/*
+                         * What replaced the "Pending My Approval" table: the same count, costing one
+                         * chip instead of a second table. Clicking it filters the list below to what
+                         * is awaiting a decision, so the answer stays on this page.
+                         */}
+                        {pendingCount > 0 && (
+                            <Tooltip title={`${pendingCount} movement(s) awaiting your approval — you were emailed for each`}>
+                                <Chip
+                                    icon={<PendingActionsOutlinedIcon sx={{ fontSize: 15 }} />}
+                                    label={`${pendingCount} awaiting you`}
+                                    onClick={() => setFilters((f) => ({ ...f, status: 'DRAFT' }))}
+                                    sx={{
+                                        height: 32, fontWeight: 700, fontSize: '0.76rem', cursor: 'pointer',
+                                        bgcolor: alpha('#F59E0B', 0.14), color: '#B45309',
+                                        border: `1px solid ${alpha('#F59E0B', 0.3)}`,
+                                        '& .MuiChip-icon': { color: '#B45309' },
+                                        '&:hover': { bgcolor: alpha('#F59E0B', 0.22) },
+                                    }}
+                                />
+                            </Tooltip>
+                        )}
                         {/* The journeys movements ride on. Separate entry point because a consignment
                             spans several movements and belongs to nobody's individual record. */}
                         <Button
@@ -194,39 +213,6 @@ const Movement = () => {
                     />
                 </Grid>
             </Grid>
-
-            {/* Approval inbox — movements awaiting the logged-in user's decision */}
-            {(approvalsLoading || pendingApprovals.length > 0) && (
-                <PageSection
-                    title="Pending My Approval"
-                    subtitle="Movements waiting for your decision before they can proceed"
-                    icon={<PendingActionsOutlinedIcon />}
-                    actions={
-                        <Chip
-                            label={pendingApprovals.length}
-                            size="small"
-                            sx={{ height: 22, fontWeight: 800, bgcolor: alpha('#F59E0B', 0.14), color: '#B45309' }}
-                        />
-                    }
-                    mb={4}
-                >
-                    <MovementTable
-                        variant="approvals"
-                        rows={pendingApprovals}
-                        loading={approvalsLoading}
-                        onView={openMovement}
-                        onAction={(action, mov) => openApprovalAction(action as 'approve' | 'reject', mov)}
-                        empty={(
-                            <EmptyState
-                                variant="inline"
-                                title="Nothing awaiting your approval"
-                                description="Movements routed to you for a decision will appear here."
-                                icon={<PendingActionsOutlinedIcon />}
-                            />
-                        )}
-                    />
-                </PageSection>
-            )}
 
             {/* Filters & export bar — same styling as the Reports page */}
             <MovementFilters

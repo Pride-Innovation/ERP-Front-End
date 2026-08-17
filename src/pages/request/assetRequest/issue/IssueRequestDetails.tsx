@@ -18,11 +18,6 @@ import {
     Stack,
     Typography,
     CircularProgress,
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableRow,
     Chip,
     Avatar,
     Button as MuiButton,
@@ -42,11 +37,11 @@ import ReceiptLongOutlinedIcon from '@mui/icons-material/ReceiptLongOutlined';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
 import ListAltOutlinedIcon from '@mui/icons-material/ListAltOutlined';
-import Inventory2Outlined from '@mui/icons-material/Inventory2Outlined';
 import TaskAltOutlinedIcon from '@mui/icons-material/TaskAltOutlined';
 import PendingActionsOutlinedIcon from '@mui/icons-material/PendingActionsOutlined';
 import ContentCopyOutlinedIcon from '@mui/icons-material/ContentCopyOutlined';
-import { StatTile } from "../../../../components/layout";
+import ChatBubbleOutlineOutlinedIcon from '@mui/icons-material/ChatBubbleOutlineOutlined';
+import { StatTile, StatusTone } from "../../../../components/layout";
 import { RowData } from "../../../../components/forms/interface";
 import { IRequest, IRequestAxiosResponse } from "../../interface";
 import { RequestContext } from "../../../../context/request/RequestContext";
@@ -60,12 +55,12 @@ import {
     validateCommodityQuantities,
     validateInventoryItems
 } from "../../../../utils/helpers";
-import InventoryTable from "../../../../components/forms/InventoryTable";
+import InventoryTable, { IInventoryLineStatus } from "../../../../components/forms/InventoryTable";
 import { useNavigate, useParams } from "react-router";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../store";
 import { IIssueAxiosResponse } from "./interface";
-import { brand, gold, neutral, border, surface, status as statusTokens } from "../../../../utils/tokens";
+import { brand, gold, neutral, border, status as statusTokens } from "../../../../utils/tokens";
 import { IAssetType } from "../../../settings/assetTypes/interface";
 import AssetTypeUtills from "../../../settings/assetTypes/utills";
 import CommodityUtills from "../../../settings/commodity/utills";
@@ -77,11 +72,11 @@ type RequestLine = { commodity: ICommodity; quantity: number };
 /** Live per-line fulfilment state, derived from the same rules the submit validators enforce. */
 type LineStatus = 'ready' | 'qty' | 'assets' | 'missing';
 
-const LINE_STATUS_CFG: Record<LineStatus, { label: string; color: string }> = {
-    ready: { label: 'Ready', color: statusTokens.success.strong },
-    qty: { label: 'Qty mismatch', color: statusTokens.danger.main },
-    assets: { label: 'Pick assets', color: gold[700] },
-    missing: { label: 'Not in issue list', color: neutral[500] },
+const LINE_STATUS_CFG: Record<LineStatus, { label: string; tone: StatusTone }> = {
+    ready: { label: 'Ready', tone: 'success' },
+    qty: { label: 'Qty mismatch', tone: 'danger' },
+    assets: { label: 'Pick assets', tone: 'pending' },
+    missing: { label: 'Not requested', tone: 'neutral' },
 };
 
 /** Section card with a tinted icon header band — the widget idiom used across the app. */
@@ -242,6 +237,21 @@ const IssueRequestDetails = () => {
         return 'ready';
     };
 
+    /**
+     * The same judgement, keyed the other way round — by the row being edited rather than the line
+     * being fulfilled — so the issue table can show each line's readiness on the row itself.
+     *
+     * <p>This is what let the separate "Requested Commodities" table go. It listed the same lines
+     * with the same statuses, leaving the issuer to match line 1 there against line 1 here by eye.
+     */
+    const rowStatus = (row: RowData): IInventoryLineStatus | null => {
+        const line = requestCommodities.find((l) => l.commodity.id === row.commodityId);
+        // A row the issuer added that was never requested — flagged, not silently accepted.
+        if (!line) return { ...LINE_STATUS_CFG.missing };
+        const cfg = LINE_STATUS_CFG[lineStatus(line)];
+        return { ...cfg, requestedQuantity: line.quantity };
+    };
+
     const lineStatuses = requestCommodities.map(lineStatus);
     const readyCount = lineStatuses.filter((s) => s === 'ready').length;
     const allReady = requestCommodities.length > 0 && readyCount === requestCommodities.length;
@@ -320,8 +330,10 @@ const IssueRequestDetails = () => {
         : '—';
 
     return (
-        <Box sx={{ bgcolor: surface.page, minHeight: '100vh', px: { xs: 1.5, md: 3 }, py: { xs: 2, md: 3 } }}>
-            <Box sx={{ maxWidth: 1180, mx: 'auto', pb: 6 }}>
+        // Same padding as every other detail page. This was a 1180px centred column, which made it
+        // visibly narrower than the movement and inventory pages it sits beside.
+        <Box sx={{ minHeight: '100vh', px: { xs: 2, sm: 3 }, py: { xs: 2, sm: 3 } }}>
+            <Box sx={{ pb: 6 }}>
 
             {/* ── Hero (light card idiom shared with the asset & inventory detail pages) ── */}
             <Box
@@ -465,33 +477,37 @@ const IssueRequestDetails = () => {
                 </Box>
             </Box>
 
-            {/* ── Stat strip (inventory-detail idiom) ── */}
+            {/*
+              * Two tiles, not four. Ready and the ready percentage are already stated by the hero's
+              * fulfilment dial, its chip, and the sticky bar — the strip was repeating the same fact
+              * a third and fourth time before the reader reached anything actionable.
+              */}
             <Grid container spacing={2} sx={{ mb: 2.5 }}>
-                <Grid item xs={6} md={3}>
-                    <StatTile label="Line Items" value={requestCommodities.length} helper="on this request" accent="info" icon={<ListAltOutlinedIcon />} />
+                <Grid item xs={6} md={6}>
+                    <StatTile label="Line Items" value={requestCommodities.length} helper={`${totalQty} unit(s) requested`} accent="info" icon={<ListAltOutlinedIcon />} />
                 </Grid>
-                <Grid item xs={6} md={3}>
-                    <StatTile label="Total Units" value={totalQty} helper="units requested" accent="gold" icon={<Inventory2Outlined />} />
-                </Grid>
-                <Grid item xs={6} md={3}>
-                    <StatTile label="Ready" value={readyCount} helper="lines good to go" accent="success" icon={<TaskAltOutlinedIcon />} />
-                </Grid>
-                <Grid item xs={6} md={3}>
+                <Grid item xs={6} md={6}>
                     <StatTile
                         label="Outstanding"
                         value={requestCommodities.length - readyCount}
-                        helper={allReady ? 'nothing pending' : 'need attention'}
+                        helper={allReady ? 'nothing pending' : 'line(s) need attention'}
                         accent={allReady ? 'neutral' : 'warning'}
                         icon={<PendingActionsOutlinedIcon />}
                     />
                 </Grid>
             </Grid>
 
-            {/* Requested commodities + live readiness */}
+            {/*
+              * Issue items — pre-filled from the request, with each line's readiness on the row.
+              *
+              * There used to be a "Requested Commodities" table above this one listing the same
+              * lines with the same statuses. Reading it meant matching a line there against the
+              * same line here to act on it; folding the status in removes the cross-reference.
+              */}
             <SectionCard
-                icon={<ReceiptLongOutlinedIcon />}
-                title="Requested Commodities"
-                subtitle="What was approved for this request — with each line's live fulfilment status."
+                icon={<Inventory2OutlinedIcon />}
+                title="Issue Items"
+                subtitle="Pre-filled from the request — pick the specific assets by engraved number, then confirm. This records the assets against the requester and updates the store."
                 headerAction={
                     <Chip
                         size="small"
@@ -507,119 +523,27 @@ const IssueRequestDetails = () => {
                 {loading ? (
                     <Stack alignItems="center" sx={{ py: 4 }}>
                         <CircularProgress size={26} sx={{ color: brand[500] }} />
-                        <Typography variant="caption" sx={{ mt: 1.25, color: neutral[500] }}>Loading commodities…</Typography>
+                        <Typography variant="caption" sx={{ mt: 1.25, color: neutral[500] }}>Loading request lines…</Typography>
                     </Stack>
-                ) : requestCommodities.length > 0 ? (
-                    <Box sx={{ border: `1px solid ${border.subtle}`, borderRadius: 2, overflow: 'hidden' }}>
-                        <Table size="small">
-                            <TableHead>
-                                <TableRow sx={{
-                                    '& th': {
-                                        bgcolor: alpha(brand[500], 0.04),
-                                        fontWeight: 700, fontSize: '0.68rem', textTransform: 'uppercase',
-                                        letterSpacing: '0.05em', color: brand[700],
-                                        borderBottom: `1px solid ${border.subtle}`, py: 1.4, whiteSpace: 'nowrap',
-                                    },
-                                }}>
-                                    <TableCell>Commodity</TableCell>
-                                    <TableCell>Asset Type</TableCell>
-                                    <TableCell align="center">Qty</TableCell>
-                                    <TableCell align="right">Status</TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {requestCommodities.map((item, idx) => {
-                                    const st = LINE_STATUS_CFG[lineStatuses[idx]];
-                                    const isReady = lineStatuses[idx] === 'ready';
-                                    return (
-                                        <TableRow
-                                            key={idx}
-                                            sx={{
-                                                transition: 'background 0.12s',
-                                                // A ready line gets a faint green rail, so scanning the list
-                                                // shows what's outstanding without reading the status column.
-                                                boxShadow: isReady
-                                                    ? `inset 3px 0 0 ${statusTokens.success.main}`
-                                                    : `inset 3px 0 0 ${alpha(st.color, 0.5)}`,
-                                                '&:nth-of-type(odd)': { bgcolor: alpha(neutral[900], 0.015) },
-                                                '&:hover': { bgcolor: alpha(brand[500], 0.04) },
-                                                '& td': {
-                                                    py: 1.6,
-                                                    borderBottom: idx === requestCommodities.length - 1 ? 'none' : `1px solid ${border.subtle}`,
-                                                },
-                                            }}
-                                        >
-                                            <TableCell>
-                                                <Stack direction="row" spacing={1.5} alignItems="center">
-                                                    <Box sx={{
-                                                        width: 28, height: 28, borderRadius: '9px', flexShrink: 0,
-                                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                        fontSize: '0.74rem', fontWeight: 800,
-                                                        color: brand[700], bgcolor: alpha(brand[500], 0.1),
-                                                    }}>
-                                                        {idx + 1}
-                                                    </Box>
-                                                    <Box sx={{ minWidth: 0 }}>
-                                                        <Typography sx={{ fontSize: '0.86rem', fontWeight: 700, color: neutral[900], lineHeight: 1.3 }}>
-                                                            {item.commodity.name}
-                                                        </Typography>
-                                                        {item.commodity.groupName && (
-                                                            <Typography sx={{ fontSize: '0.72rem', color: neutral[500] }}>
-                                                                {item.commodity.groupName}
-                                                            </Typography>
-                                                        )}
-                                                    </Box>
-                                                </Stack>
-                                            </TableCell>
-                                            <TableCell>
-                                                <Chip
-                                                    size="small"
-                                                    label={item.commodity.assetType?.name || '—'}
-                                                    sx={{ height: 22, fontSize: '0.7rem', fontWeight: 600, bgcolor: alpha(brand[500], 0.08), color: brand[700], border: `1px solid ${alpha(brand[500], 0.2)}` }}
-                                                />
-                                            </TableCell>
-                                            <TableCell align="center">
-                                                <Box component="span" sx={{ display: 'inline-flex', minWidth: 32, justifyContent: 'center', px: 1, py: 0.4, borderRadius: '8px', bgcolor: alpha(neutral[900], 0.06), color: neutral[800], fontSize: '0.8rem', fontWeight: 700 }}>
-                                                    {item.quantity}
-                                                </Box>
-                                            </TableCell>
-                                            <TableCell align="right">
-                                                <Chip
-                                                    size="small"
-                                                    label={st.label}
-                                                    sx={{ height: 22, fontSize: '0.68rem', fontWeight: 700, bgcolor: alpha(st.color, 0.1), color: st.color, border: `1px solid ${alpha(st.color, 0.25)}` }}
-                                                />
-                                            </TableCell>
-                                        </TableRow>
-                                    );
-                                })}
-                            </TableBody>
-                        </Table>
-                    </Box>
                 ) : (
-                    <Box sx={{ py: 4, textAlign: 'center', border: `1px dashed ${neutral[250]}`, borderRadius: 2 }}>
-                        <Typography variant="body2" sx={{ color: neutral[500] }}>No commodities found for this request.</Typography>
-                    </Box>
+                    <InventoryTable issue title="Lines to issue" lineStatus={rowStatus} />
                 )}
             </SectionCard>
 
-            {/* Issue items — pre-filled from the request; pick engraved numbers per asset line */}
+            {/* Issuer comment — its own block rather than trailing loose under the table. */}
             <SectionCard
-                icon={<Inventory2OutlinedIcon />}
-                title="Issue Items"
-                subtitle="Lines are pre-filled from the request — pick the specific assets by engraved number, then confirm. This records the assets against the requester and updates the store."
+                icon={<ChatBubbleOutlineOutlinedIcon />}
+                title="Issuer Comment"
+                subtitle="Optional — shown to the approver during issuance approval."
             >
-                <InventoryTable issue title="" />
-
                 <TextField
                     fullWidth
                     multiline
-                    rows={2}
-                    label="Issuer comment (optional)"
-                    placeholder="Any notes for the approver — shown as the issuer comment during issuance approval…"
+                    rows={3}
+                    placeholder="Any notes for the approver — part-issued lines, substitutions, condition of the items…"
                     value={comment}
                     onChange={(e) => setComment(e.target.value)}
-                    sx={{ ...fieldSx, mt: 2.5, '& .MuiInputBase-input': { padding: 0, fontSize: '0.875rem', lineHeight: 1.5 } }}
+                    sx={{ ...fieldSx, '& .MuiInputBase-input': { padding: 0, fontSize: '0.875rem', lineHeight: 1.5 } }}
                 />
             </SectionCard>
 
@@ -666,7 +590,9 @@ const IssueRequestDetails = () => {
                     disabled={sendingRequest || !allReady}
                     startIcon={sendingRequest ? <CircularProgress size={16} sx={{ color: '#fff' }} /> : <CheckCircleOutlineIcon fontSize="small" />}
                     sx={{
-                        height: 44, px: 4, borderRadius: 2, textTransform: 'none', fontWeight: 700,
+                        // 8px, matching the primary action on the inventory wizard. `borderRadius: 2`
+                        // resolves through the theme to ~20px, which read as a pill.
+                        height: 44, px: 3.5, borderRadius: '8px', textTransform: 'none', fontWeight: 700,
                         bgcolor: brand[500], boxShadow: `0 3px 10px ${alpha(brand[500], 0.3)}`,
                         '&:hover': { bgcolor: brand[700], boxShadow: `0 5px 16px ${alpha(brand[500], 0.4)}` },
                         '&.Mui-disabled': { bgcolor: alpha(brand[500], 0.35), color: '#fff' },

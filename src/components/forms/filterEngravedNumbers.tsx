@@ -6,12 +6,19 @@ Managing Director
 */
 
 import {
+    alpha,
     Autocomplete,
+    Box,
+    Chip,
+    Stack,
     TableCell,
     TextField,
-    Chip,
-    useTheme
+    Typography,
 } from '@mui/material';
+import QrCode2OutlinedIcon from '@mui/icons-material/QrCode2Outlined';
+import { DropdownPopper, DropdownPaper } from './modalChrome';
+import { dataBodyCellSx } from '../tables/dataTableSx';
+import { brand, neutral, border, status as statusTokens } from '../../utils/tokens';
 import { RequestContext } from '../../context/request/RequestContext';
 import { useContext, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -25,7 +32,6 @@ import { statusIdByCode } from '../../utils/helpers';
 
 const FilterEngravedNumbers = ({ row }: { row: RowData }) => {
     const { fetchAllAssets } = AssetUtills();
-    const theme = useTheme();
     const {
         assetType,
         assetsEngravedInStore,
@@ -92,8 +98,19 @@ const FilterEngravedNumbers = ({ row }: { row: RowData }) => {
         })
     }
 
+    const selected = row.selectedAssets?.length ?? 0;
+    const required = row.quantity ?? 0;
+    /** Picking is a count-matching job, so the field reports progress against the line's quantity. */
+    const complete = required > 0 && selected === required;
+    const over = selected > required;
+    const progressTone = over ? statusTokens.danger.main
+        : complete ? statusTokens.success.strong
+            : neutral[500];
+
     return (
-        <TableCell sx={{ borderBottom: 'none', px: 2, py: 1 }}>
+        // dataBodyCellSx, like every other cell. This carried `borderBottom: 'none'`, which punched a
+        // gap in each row's rule and made the column look detached from the table it sits in.
+        <TableCell sx={{ ...dataBodyCellSx, px: { xs: 1, sm: 1.5 }, minWidth: 240 }}>
             <Autocomplete
                 multiple
                 id="engraved-numbers"
@@ -107,21 +124,45 @@ const FilterEngravedNumbers = ({ row }: { row: RowData }) => {
                         .filter(asst => asst.commodity?.id === row.commodityId))]
                 }
                 getOptionLabel={(option) => option?.engravedNumber || ''}
+                value={row.selectedAssets ?? []}
                 onChange={(_, newValue) => addEngravedNumberListToRow(newValue)}
                 filterSelectedOptions
                 onInputChange={(_, newInputValue) => setLocalInput(newInputValue)}
+                PopperComponent={DropdownPopper}
+                PaperComponent={DropdownPaper}
+                noOptionsText="No available assets for this item"
+                // Engraved numbers are codes, not words — monospace makes a mistyped character
+                // visible and keeps a column of them aligned.
+                renderOption={(props, option) => (
+                    <li {...props} key={option.id}>
+                        <Stack direction="row" spacing={1} alignItems="center">
+                            <QrCode2OutlinedIcon sx={{ fontSize: 14, color: neutral[400] }} />
+                            <Typography sx={{ fontFamily: 'monospace', fontSize: '0.8rem', fontWeight: 600 }}>
+                                {option.engravedNumber}
+                            </Typography>
+                        </Stack>
+                    </li>
+                )}
                 renderTags={(value, getTagProps) =>
                     value.map((option, index) => (
                         <Chip
-                            variant="filled"
+                            size="small"
                             label={option.engravedNumber}
                             {...getTagProps({ index })}
                             sx={{
-                                backgroundColor: '#08796C',
-                                color: theme.palette.background.paper,
-                                fontWeight: 500,
-                                borderRadius: 1,
-                                fontSize: 12,
+                                height: 22,
+                                borderRadius: '6px',
+                                fontFamily: 'monospace',
+                                fontSize: '0.72rem',
+                                fontWeight: 700,
+                                bgcolor: alpha(brand[500], 0.1),
+                                color: brand[700],
+                                border: `1px solid ${alpha(brand[500], 0.22)}`,
+                                '& .MuiChip-deleteIcon': {
+                                    fontSize: 14,
+                                    color: alpha(brand[700], 0.5),
+                                    '&:hover': { color: brand[700] },
+                                },
                             }}
                         />
                     ))
@@ -129,32 +170,54 @@ const FilterEngravedNumbers = ({ row }: { row: RowData }) => {
                 renderInput={(params) => (
                     <TextField
                         {...params}
-                        placeholder="Select"
-                        variant="standard"
-                        InputProps={{
-                            ...params.InputProps,
-                            disableUnderline: true,
-                        }}
+                        placeholder={selected === 0 ? 'Pick engraved numbers…' : ''}
+                        // Outlined, at the same 7px radius as the selects beside it. It was a
+                        // borderless `standard` input floating in a solid teal block with a ~20px
+                        // radius, which is why it read as belonging to a different form.
                         sx={{
-                            backgroundColor: '#08796C20',
-                            borderRadius: 2,
-                            px: 1.2,
-                            py: 0.8,
-                            '& .MuiInputBase-input': {
-                                color: '#000',
-                                fontWeight: 500,
+                            '& .MuiOutlinedInput-root': {
+                                borderRadius: '7px',
+                                bgcolor: '#fff',
+                                py: '3px !important',
+                                alignItems: 'flex-start',
+                                gap: 0.3,
                             },
+                            '& .MuiOutlinedInput-notchedOutline': { borderColor: border.default },
+                            '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: alpha(brand[500], 0.5) },
+                            '& .Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                borderColor: brand[500],
+                                borderWidth: 1.5,
+                            },
+                            '& input': { fontSize: '0.8rem', fontFamily: 'monospace' },
                             '& input::placeholder': {
-                                color: '#08796C',
+                                color: neutral[400],
                                 opacity: 1,
-                                fontWeight: 500,
-                                fontStyle: "italic",
-                                fontSize: "14px"
+                                fontFamily: 'inherit',
+                                fontSize: '0.78rem',
                             },
                         }}
                     />
                 )}
             />
+
+            {/*
+             * Progress against the line's quantity. The submit gate already requires these to match,
+             * so stating the count here turns a silent validation failure into something the issuer
+             * can see while picking.
+             */}
+            {required > 0 && (
+                <Stack direction="row" spacing={0.5} alignItems="center" sx={{ mt: 0.6, pl: 0.25 }}>
+                    <Box sx={{
+                        width: 6, height: 6, borderRadius: '50%', flexShrink: 0,
+                        bgcolor: progressTone,
+                        transition: 'background-color .2s ease',
+                    }}
+                    />
+                    <Typography sx={{ fontSize: '0.68rem', fontWeight: 700, color: progressTone }}>
+                        {selected} of {required} picked{over ? ' — too many' : ''}
+                    </Typography>
+                </Stack>
+            )}
         </TableCell>
     );
 };
