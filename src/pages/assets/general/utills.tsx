@@ -74,8 +74,16 @@ const GeneralAssetUtills = (typeId: string) => {
         return list.find(asset => asset.id === id) as IOfficeEquipment;
     };
 
-    const handleGeneralAssetTableData = (list: Array<IOfficeEquipment>) => {
-        const tableData: Array<IOfficeEquipmentTableData> = list.map((item, index) => {
+    /**
+     * Maps assets to the shape the table renders.
+     *
+     * <p>Split out from {@link handleGeneralAssetTableData} so the export can reuse it. Without a
+     * pure mapper an export either ships raw entity graphs — nested branch, status and user objects
+     * that render as "[object Object]" in a spreadsheet — or duplicates this mapping and drifts from
+     * what the screen shows.
+     */
+    const buildAssetExportRows = (list: Array<IOfficeEquipment>): Array<IOfficeEquipmentTableData> =>
+        list.map((item, index) => {
             const {
                 branch,
                 assignedTo,
@@ -115,7 +123,9 @@ const GeneralAssetUtills = (typeId: string) => {
                 manufacturer: item.make,
             };
         });
-        setGeneralAssetTableData(tableData);
+
+    const handleGeneralAssetTableData = (list: Array<IOfficeEquipment>) => {
+        setGeneralAssetTableData(buildAssetExportRows(list));
     };
 
     const handleOptionClicked = async (option: string | number, moduleID?: string | number) => {
@@ -161,6 +171,7 @@ const GeneralAssetUtills = (typeId: string) => {
         currentAsset,
         generalAssetTableData,
         handleGeneralAssetTableData,
+        buildAssetExportRows,
         handleOptionClicked,
         currentState,
     };

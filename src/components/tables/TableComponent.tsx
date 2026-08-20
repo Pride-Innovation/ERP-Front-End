@@ -29,7 +29,7 @@ import ChipComponent from '../forms/Chip';
 import PopoverComponent from '../forms/Popover';
 import CustomToolbarWrapper from './TableToolBar';
 import CustomTextFilterOperator from './TableFilters';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import CustomTablePagination from './TablePagination';
 import MailOutlineIcon from '@mui/icons-material/MailOutline';
 import NoAccountsIcon from '@mui/icons-material/NoAccounts';
@@ -111,6 +111,7 @@ const TableComponent = ({
     header,
     handleOptionClicked,
     importData = false,
+    assetTypeId,
     createAction = false,
     exportData = false,
     count = 10,
@@ -129,6 +130,9 @@ const TableComponent = ({
     dateRangePicker = false,
     columnFilters = [],
     onApplyFilters,
+    onPaginationChange,
+    serverSortFields,
+    searchKey,
     tableIcon,
     createPermission,
     onExport,
@@ -149,6 +153,48 @@ const TableComponent = ({
     const { handleTableFilter } = CustomTextFilterOperator({ endPoint, params });
     const { handleTablePagination } = CustomTablePagination({ endPoint, params, selectedStatus, filterParams: activeFilters });
 
+    /**
+     * Whether the owning page has taken over fetching.
+     *
+     * <p>When it has, every request goes through one function that the page controls, so a page's
+     * own derived parameters survive paging and searching. When it has not, the shared
+     * `CustomTablePagination` path is used exactly as before.
+     */
+    const pageOwnsFetch = paginationMode === 'server' && !!onPaginationChange;
+
+    /** The backend column for a row key, or undefined when the server cannot order by it. */
+    const serverColumnFor = (field: string): string | undefined =>
+        (pageOwnsFetch ? serverSortFields?.[field] : undefined);
+
+    /** Whether the sort currently in force is one the server applied. */
+    const sortsOnServer = !!sortField && !!serverColumnFor(sortField);
+
+    /** Refetches at a given page/size, through whichever path this table is using. */
+    const requestPage = (
+        nextPage: number,
+        nextSize: number,
+        sort?: { field: string; dir: SortDir },
+    ) => {
+        if (paginationMode !== 'server') return;
+        if (!pageOwnsFetch) {
+            handleTablePagination({ page: nextPage, pageSize: nextSize } as any);
+            return;
+        }
+
+        // The sort travels with every page request, not just the click that set it — otherwise
+        // page two would come back in the default order.
+        const active = sort ?? (sortField ? { field: sortField, dir: sortDir } : undefined);
+        const column = active ? serverColumnFor(active.field) : undefined;
+
+        onPaginationChange?.({
+            page: nextPage,
+            pageSize: nextSize,
+            ...(column && active
+                ? { sortBy: column, sortDirection: active.dir === 'asc' ? 'ASC' as const : 'DESC' as const }
+                : {}),
+        });
+    };
+
     const handleFiltersApplied = (filters: Record<string, any>) => {
         setActiveFilters(filters);
         setPage(0);
@@ -157,28 +203,70 @@ const TableComponent = ({
 
     const handlePageChange = (_: unknown, newPage: number) => {
         setPage(newPage);
-        if (paginationMode === 'server') handleTablePagination({ page: newPage, pageSize: rowsPerPage } as any);
+        requestPage(newPage, rowsPerPage);
     };
 
     const handleRowsPerPageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const size = parseInt(e.target.value, 10);
         setRowsPerPage(size);
         setPage(0);
-        if (paginationMode === 'server') handleTablePagination({ page: 0, pageSize: size } as any);
+        requestPage(0, size);
     };
 
     const handleSearch = (value: string) => {
         setSearchValue(value);
         setPage(0);
-        if (filterMode === 'server' && value.trim()) {
-            handleTableFilter({ items: [{ field: 'name', operator: 'contains', value: value.trim(), id: 1 }] } as any);
+
+        // The legacy path debounces internally, so it is still driven per keystroke. A page that owns
+        // its fetch is driven from `debouncedSearch` below instead — otherwise every character typed
+        // would be a request.
+        if (filterMode === 'server' && !pageOwnsFetch && value.trim()) {
+            // `searchKey` where the page supplies one; the old hardcoded 'name' otherwise, which most
+            // endpoints do not declare and therefore silently ignore.
+            handleTableFilter({
+                items: [{ field: searchKey ?? 'name', operator: 'contains', value: value.trim(), id: 1 }],
+            } as any);
         }
     };
 
+    /*
+     * Server-side search for pages that own their fetch.
+     *
+     * Routed through the page's own filter handler so the status chip and any active column filters
+     * survive it. The legacy path could not do that: it issued its own request at a fixed page 0 and
+     * size 10, carrying neither.
+     */
+    const searchRef = useRef<string | null>(null);
+    useEffect(() => {
+        if (!pageOwnsFetch || !searchKey) return;
+        // Skips the first run, so mounting does not fire a redundant fetch on top of the page's own.
+        if (searchRef.current === null) { searchRef.current = debouncedSearch; return; }
+        if (searchRef.current === debouncedSearch) return;
+        searchRef.current = debouncedSearch;
+
+        const term = debouncedSearch.trim();
+        const next = { ...activeFilters };
+        if (term) next[searchKey] = term;
+        else delete next[searchKey];
+
+        setPage(0);
+        onApplyFilters?.(next);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [debouncedSearch, pageOwnsFetch, searchKey]);
+
     const handleSort = (field: string) => {
         const isAsc = sortField === field && sortDir === 'asc';
-        setSortDir(isAsc ? 'desc' : 'asc');
+        const dir: SortDir = isAsc ? 'desc' : 'asc';
+        setSortDir(dir);
         setSortField(field);
+
+        // Sorting reorders the whole table, so it starts again from the first page — staying on
+        // page 4 of the old order would show an arbitrary slice of the new one. Columns the server
+        // cannot order by fall through to the client-side sort below, unchanged.
+        if (serverColumnFor(field)) {
+            setPage(0);
+            requestPage(0, rowsPerPage, { field, dir });
+        }
     };
 
     const processedRows = useMemo(() => {
@@ -189,18 +277,31 @@ const TableComponent = ({
                 Object.values(row as object).some(v => String(v ?? '').toLowerCase().includes(q))
             );
         }
-        if (sortField) {
+        // Never sorted here when the server did it — re-sorting the page in hand by a string
+        // comparison would undo the database's ordering and could disagree with it outright.
+        if (sortField && !sortsOnServer) {
             data = [...data].sort((a: any, b: any) => {
                 const result = String(a[sortField] ?? '').localeCompare(String(b[sortField] ?? ''), undefined, { numeric: true });
                 return sortDir === 'asc' ? result : -result;
             });
         }
         return data;
-    }, [rows, filterMode, debouncedSearch, sortField, sortDir]);
+    }, [rows, filterMode, debouncedSearch, sortField, sortDir, sortsOnServer]);
 
     const pagedRows = useMemo(() => {
-        if (paginationMode === 'client') return processedRows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
-        return processedRows;
+        if (paginationMode === 'client') {
+            return processedRows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+        }
+        /*
+         * Server mode: the rows in hand are already the requested page, so the slice starts at 0 —
+         * offsetting by `page` here would empty every page after the first.
+         *
+         * It is capped rather than returned whole because a page's initial fetch does not always ask
+         * for the same size the footer is showing. The assets page fetched fifty rows while the
+         * footer read "1–10 of N", so fifty were rendered under a label describing ten. Capping
+         * keeps the body and the footer telling the same story whatever the page asked for.
+         */
+        return processedRows.slice(0, rowsPerPage);
     }, [processedRows, page, rowsPerPage, paginationMode]);
 
     const totalRows = paginationMode === 'server' ? count : processedRows.length;
@@ -459,6 +560,7 @@ const TableComponent = ({
                 createAction={createAction}
                 exportData={exportData}
                 importData={importData}
+                assetTypeId={assetTypeId}
                 searchAction={searchAction}
                 onSearch={handleSearch}
                 rows={processedRows}

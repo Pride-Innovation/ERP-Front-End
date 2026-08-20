@@ -1,37 +1,30 @@
-import { useState } from 'react';
-import RecentActorsOutlinedIcon from '@mui/icons-material/RecentActorsOutlined';
-import HourglassEmptyOutlinedIcon from '@mui/icons-material/HourglassEmptyOutlined';
+import AssignmentOutlinedIcon from '@mui/icons-material/AssignmentOutlined';
 import CheckCircleOutlinedIcon from '@mui/icons-material/CheckCircleOutlined';
-import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
+import PendingActionsOutlinedIcon from '@mui/icons-material/PendingActionsOutlined';
+import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 import ReportShell, { ReportShellFilters } from '../ReportShell';
 import ReportSummaryCards from '../ReportSummaryCards';
 import ReportDataTable, { ReportColumn, StatusChip } from '../ReportDataTable';
+import useReportData from '../useReportData';
+import { fetchRowsService } from '../../../core/apis/globalService';
 
-const ACCENT = '#D97706';
+const ACCENT = '#7C3AED';
 
 interface RequestRow {
-    id: number;
-    requestorName: string;
+    id: string;
     requestDate: string;
+    requestorName: string;
     department: string;
     branch: string;
     itemRequested: string;
     category: string;
     quantityRequested: number;
     status: string;
+    statusCode: string;
     approvalDate: string;
     approvingOfficer: string;
     remarks: string;
 }
-
-const MOCK_ROWS: RequestRow[] = [
-    { id: 1, requestorName: 'John Okello', requestDate: '2026-01-08', department: 'IT', branch: 'Head Office', itemRequested: 'Laptop', category: 'IT Equipment', quantityRequested: 2, status: 'approved', approvalDate: '2026-01-10', approvingOfficer: 'Grace Amanya', remarks: '' },
-    { id: 2, requestorName: 'Mary Akot', requestDate: '2026-01-15', department: 'Finance', branch: 'Kampala Branch', itemRequested: 'Printer Cartridge', category: 'Stationery', quantityRequested: 5, status: 'issued', approvalDate: '2026-01-16', approvingOfficer: 'Peter Omara', remarks: 'Urgent' },
-    { id: 3, requestorName: 'Samuel Opio', requestDate: '2026-02-01', department: 'HR', branch: 'Gulu Branch', itemRequested: 'Office Chair', category: 'Furniture', quantityRequested: 3, status: 'pending', approvalDate: '', approvingOfficer: '', remarks: '' },
-    { id: 4, requestorName: 'Alice Nansubuga', requestDate: '2026-02-10', department: 'Security', branch: 'Mbarara Branch', itemRequested: 'Radio', category: 'Office Equipment', quantityRequested: 2, status: 'rejected', approvalDate: '2026-02-12', approvingOfficer: 'Grace Amanya', remarks: 'Budget constraints' },
-    { id: 5, requestorName: 'Robert Atim', requestDate: '2026-03-05', department: 'Operations', branch: 'Jinja Branch', itemRequested: 'Vehicle Tyre', category: 'Fleet', quantityRequested: 4, status: 'approved', approvalDate: '2026-03-07', approvingOfficer: 'Peter Omara', remarks: '' },
-    { id: 6, requestorName: 'Jane Achola', requestDate: '2026-03-12', department: 'Admin', branch: 'Head Office', itemRequested: 'Laptop', category: 'IT Equipment', quantityRequested: 1, status: 'pending', approvalDate: '', approvingOfficer: '', remarks: '' },
-];
 
 const COLUMNS: ReportColumn<RequestRow>[] = [
     { id: 'requestDate', label: 'Date', minWidth: 100 },
@@ -47,46 +40,106 @@ const COLUMNS: ReportColumn<RequestRow>[] = [
     { id: 'remarks', label: 'Remarks', minWidth: 130, format: (v) => v || '—' },
 ];
 
-const RequestsReport = () => {
-    const [rows, setRows] = useState<RequestRow[]>(MOCK_ROWS);
+const fmtDate = (v?: string | null) =>
+    (v ? new Date(v).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '');
 
-    const total = rows.length;
-    const pending = rows.filter(r => r.status === 'pending').length;
-    const approved = rows.filter(r => r.status === 'approved' || r.status === 'issued').length;
-    const rejected = rows.filter(r => r.status === 'rejected').length;
+const person = (u: any) =>
+    (u ? `${u.firstName ?? ''} ${u.lastName ?? ''}`.trim() || '—' : '—');
+
+/** One row per requested line — the columns describe an item, and a request holds several. */
+const toRows = (r: any): RequestRow[] => {
+    const lines: any[] = r.commodities ?? r.requestCommodities ?? [];
+    const base = {
+        requestDate: fmtDate(r.timeOfSubmissionOfRequest ?? r.createDate),
+        requestorName: person(r.requester),
+        department: r.requester?.department?.name ?? '—',
+        branch: r.requester?.branch?.name ?? '—',
+        status: r.status?.name ?? '—',
+        statusCode: r.status?.status ?? '',
+        // Only a fully-decided request has an approval date; the field is the last change to it.
+        approvalDate: r.status?.status?.toLowerCase().includes('approved') ? fmtDate(r.lastModified) : '',
+        approvingOfficer: person(r.currentApprover),
+        remarks: r.description ?? '',
+    };
+
+    if (lines.length === 0) {
+        return [{ ...base, id: `req-${r.id}`, itemRequested: r.name ?? '—', category: r.assetType?.name ?? '—', quantityRequested: 0 }];
+    }
+
+    return lines.map((l, i) => ({
+        ...base,
+        id: `req-${r.id}-${l.id ?? i}`,
+        itemRequested: l.commodity?.name ?? l.name ?? '—',
+        category: l.commodity?.assetType?.name ?? r.assetType?.name ?? '—',
+        quantityRequested: Number(l.quantity) || 0,
+    }));
+};
+
+const RequestsReport = () => {
+    const { rows, loading, error, applyFilters, refresh } = useReportData<RequestRow>(
+        async (f: ReportShellFilters) => {
+            const res = (await fetchRowsService({
+                pageNumber: 0,
+                pageSize: 300,
+                endPoint: 'requests',
+                params: {
+                    // /requests filters by status *name*, not id.
+                    status: f.status,
+                    startDate: f.dateFrom,
+                    endDate: f.dateTo,
+                },
+            })) as any;
+
+            if (res?.status !== 200) throw new Error('requests');
+            const flat = ((res.data?.content ?? []) as any[]).flatMap(toRows);
+
+            // Branch, department and category have no query parameters on /requests — they belong to
+            // the requester and to each line's commodity rather than to the request itself.
+            return flat.filter((r) => {
+                if (f.branch && r.branch !== f.branch) return false;
+                if (f.department && r.department !== f.department) return false;
+                if (f.category && r.category !== f.category) return false;
+                return true;
+            });
+        },
+    );
+
+    const requests = new Set(rows.map((r) => r.id.split('-').slice(0, 2).join('-'))).size;
+    const approved = rows.filter((r) => r.statusCode?.toLowerCase().includes('approved')).length;
+    const pending = rows.filter((r) => !r.statusCode?.toLowerCase().includes('approved')
+        && !r.statusCode?.toLowerCase().includes('reject')).length;
+    const totalQty = rows.reduce((sum, r) => sum + r.quantityRequested, 0);
 
     const summaryCards = (
         <ReportSummaryCards cards={[
-            { label: 'Total Requests', value: total, icon: <RecentActorsOutlinedIcon />, color: ACCENT, subLabel: 'All time' },
-            { label: 'Pending Approval', value: pending, icon: <HourglassEmptyOutlinedIcon />, color: '#D97706', subLabel: 'Awaiting action' },
-            { label: 'Approved / Issued', value: approved, icon: <CheckCircleOutlinedIcon />, color: '#15803D', trend: 8, subLabel: 'Fulfilled requests' },
-            { label: 'Rejected', value: rejected, icon: <CancelOutlinedIcon />, color: '#DC2626', subLabel: 'Declined requests' },
+            { label: 'Requested Lines', value: rows.length, icon: <AssignmentOutlinedIcon />, color: ACCENT, subLabel: `${requests} request(s)` },
+            { label: 'Approved', value: approved, icon: <CheckCircleOutlinedIcon />, color: '#15803D', subLabel: 'Cleared their workflow' },
+            { label: 'In Progress', value: pending, icon: <PendingActionsOutlinedIcon />, color: '#D97706', subLabel: 'Awaiting a decision' },
+            { label: 'Units Requested', value: totalQty, icon: <Inventory2OutlinedIcon />, color: '#0369A1', subLabel: 'Across all lines' },
         ]} />
     );
 
-    const handleFilters = (f: ReportShellFilters) => {
-        let filtered = [...MOCK_ROWS];
-        if (f.branch) filtered = filtered.filter(r => r.branch === f.branch);
-        if (f.department) filtered = filtered.filter(r => r.department === f.department);
-        if (f.category) filtered = filtered.filter(r => r.category === f.category);
-        if (f.status) filtered = filtered.filter(r => r.status === f.status);
-        setRows(filtered);
-    };
-
     return (
         <ReportShell
-            title="Requests / Requisitions Report"
-            subtitle="All asset requests with status, approval and fulfilment tracking"
+            title="Requests Report"
+            subtitle="What was asked for, by whom, and where each request got to"
             accentColor={ACCENT}
             filterFields={['dateRange', 'branch', 'department', 'category', 'status']}
-            onApplyFilters={handleFilters}
-            onRefresh={() => setRows(MOCK_ROWS)}
-            onExportPdf={() => alert('PDF export triggered')}
-            onExportExcel={() => alert('Excel export triggered')}
-            onExportCsv={() => alert('CSV export triggered')}
+            onApplyFilters={applyFilters}
+            onRefresh={refresh}
             summaryCards={summaryCards}
+            exportRows={rows}
+            exportColumns={COLUMNS}
         >
-            <ReportDataTable columns={COLUMNS} rows={rows} accentColor={ACCENT} rowKey="id" />
+            <ReportDataTable
+                columns={COLUMNS}
+                rows={rows}
+                accentColor={ACCENT}
+                rowKey="id"
+                loading={loading}
+                error={error}
+                emptyMessage="No requests match these filters."
+            />
         </ReportShell>
     );
 };

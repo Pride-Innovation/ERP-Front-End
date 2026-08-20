@@ -14,6 +14,7 @@ import {
     TableSortLabel,
     Typography,
 } from '@mui/material';
+import ErrorOutlineOutlinedIcon from '@mui/icons-material/ErrorOutlineOutlined';
 import { useState } from 'react';
 
 const PRIMARY = '#08796C';
@@ -31,7 +32,30 @@ interface ReportDataTableProps<T> {
     rows: T[];
     accentColor?: string;
     loading?: boolean;
+    /**
+     * Set when the fetch failed. Shown instead of the table, because "no rows" and "we could not
+     * ask" mean opposite things and an empty grid cannot tell them apart.
+     */
+    error?: string | null;
+    /** What an empty result means for this particular report. */
+    emptyMessage?: string;
     rowKey?: keyof T | ((row: T) => string);
+    /**
+     * Total row count on the server, when the caller is paging server-side.
+     *
+     * Set this together with `page` and `onPageChange` and the table stops slicing and sorting
+     * locally: `rows` is taken to be exactly the page to display. Leave all three unset — every
+     * report does — and it keeps paging and sorting in the browser as before.
+     *
+     * The audit trail needs this because it pages in SQL: it holds twenty-five rows and must still
+     * offer a pager over hundreds of thousands, and sorting the twenty-five it happens to be holding
+     * would produce a sort order that is a lie.
+     */
+    totalCount?: number;
+    page?: number;
+    rowsPerPage?: number;
+    onPageChange?: (page: number) => void;
+    onRowsPerPageChange?: (rowsPerPage: number) => void;
 }
 
 type Order = 'asc' | 'desc';
@@ -50,11 +74,20 @@ function getComparator<T>(order: Order, orderBy: keyof T | string) {
         : (a: T, b: T) => -descendingComparator(a, b, orderBy);
 }
 
-function ReportDataTable<T>({ columns, rows, accentColor = PRIMARY, loading, rowKey }: ReportDataTableProps<T>) {
-    const [page, setPage] = useState(0);
-    const [rowsPerPage, setRowsPerPage] = useState(10);
+function ReportDataTable<T>({
+    columns, rows, accentColor = PRIMARY, loading, error, emptyMessage, rowKey,
+    totalCount, page: controlledPage, rowsPerPage: controlledRowsPerPage,
+    onPageChange, onRowsPerPageChange,
+}: ReportDataTableProps<T>) {
+    const [localPage, setLocalPage] = useState(0);
+    const [localRowsPerPage, setLocalRowsPerPage] = useState(10);
     const [order, setOrder] = useState<Order>('asc');
     const [orderBy, setOrderBy] = useState<keyof T | string>(columns[0]?.id ?? '');
+
+    // The caller owns the paging as soon as it supplies a total.
+    const serverPaged = totalCount !== undefined;
+    const page = serverPaged ? (controlledPage ?? 0) : localPage;
+    const rowsPerPage = serverPaged ? (controlledRowsPerPage ?? 25) : localRowsPerPage;
 
     const handleSort = (col: keyof T | string) => {
         const isAsc = orderBy === col && order === 'asc';
@@ -62,8 +95,24 @@ function ReportDataTable<T>({ columns, rows, accentColor = PRIMARY, loading, row
         setOrderBy(col);
     };
 
-    const sorted = [...rows].sort(getComparator(order, orderBy));
-    const paginated = sorted.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+    /*
+     * Server-paged tables are shown exactly as sent. Sorting or slicing here would only reorder the
+     * page in hand — which reads as a sort of the whole table and is not one — and the server has
+     * already ordered it.
+     */
+    const paginated = serverPaged
+        ? rows
+        : [...rows].sort(getComparator(order, orderBy)).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+
+    const handlePageChange = (next: number) => {
+        if (serverPaged) onPageChange?.(next);
+        else setLocalPage(next);
+    };
+
+    const handleRowsPerPageChange = (next: number) => {
+        if (serverPaged) onRowsPerPageChange?.(next);
+        else { setLocalRowsPerPage(next); setLocalPage(0); }
+    };
 
     const getKey = (row: T, i: number): string => {
         if (!rowKey) return String(i);
@@ -83,7 +132,14 @@ function ReportDataTable<T>({ columns, rows, accentColor = PRIMARY, loading, row
                 </Box>
             )}
 
-            {!loading && (
+            {!loading && error && (
+                <Box sx={{ py: 6, textAlign: 'center' }}>
+                    <ErrorOutlineOutlinedIcon sx={{ fontSize: 30, color: '#DC2626', mb: 1 }} />
+                    <Typography sx={{ color: '#B91C1C', fontSize: '0.85rem', fontWeight: 600 }}>{error}</Typography>
+                </Box>
+            )}
+
+            {!loading && !error && (
                 <>
                     <TableContainer>
                         <Table size="small" stickyHeader>
@@ -114,13 +170,18 @@ function ReportDataTable<T>({ columns, rows, accentColor = PRIMARY, loading, row
                                                 '& .MuiTableSortLabel-icon': { color: `${accentColor} !important` },
                                             }}
                                         >
-                                            <TableSortLabel
-                                                active={orderBy === col.id}
-                                                direction={orderBy === col.id ? order : 'asc'}
-                                                onClick={() => handleSort(col.id)}
-                                            >
-                                                {col.label}
-                                            </TableSortLabel>
+                                            {/* No sort affordance when the server owns the order —
+                                                a control that reorders only the visible page would
+                                                promise more than it does. */}
+                                            {serverPaged ? col.label : (
+                                                <TableSortLabel
+                                                    active={orderBy === col.id}
+                                                    direction={orderBy === col.id ? order : 'asc'}
+                                                    onClick={() => handleSort(col.id)}
+                                                >
+                                                    {col.label}
+                                                </TableSortLabel>
+                                            )}
                                         </TableCell>
                                     ))}
                                 </TableRow>
@@ -130,7 +191,7 @@ function ReportDataTable<T>({ columns, rows, accentColor = PRIMARY, loading, row
                                     <TableRow>
                                         <TableCell colSpan={columns.length} align="center" sx={{ py: 6 }}>
                                             <Typography sx={{ color: '#94A3B8', fontSize: '0.85rem' }}>
-                                                No records found for the selected filters.
+                                                {emptyMessage ?? 'No records found for the selected filters.'}
                                             </Typography>
                                         </TableCell>
                                     </TableRow>
@@ -165,11 +226,11 @@ function ReportDataTable<T>({ columns, rows, accentColor = PRIMARY, loading, row
                     <TablePagination
                         rowsPerPageOptions={[10, 25, 50, 100]}
                         component="div"
-                        count={rows.length}
+                        count={totalCount ?? rows.length}
                         rowsPerPage={rowsPerPage}
                         page={page}
-                        onPageChange={(_, p) => setPage(p)}
-                        onRowsPerPageChange={(e) => { setRowsPerPage(parseInt(e.target.value, 10)); setPage(0); }}
+                        onPageChange={(_, p) => handlePageChange(p)}
+                        onRowsPerPageChange={(e) => handleRowsPerPageChange(parseInt(e.target.value, 10))}
                         sx={{
                             borderTop: '1px solid #EEF2F7',
                             bgcolor: '#FAFBFC',

@@ -1,82 +1,52 @@
-1. Repair Transfer
+Widgets are controlled by permissions.
 
-i. Engraved Number Field
+2. The mechanism.
+- I like the whole idea of the dashboard, but don't you think dashboards should be having a totally different sets of permissions.
+- An officer may have a permission to view assets or read assets, since he or she may need to access the assets routes and view his assets. How will the dashboard resolve this? will he only be able to see only assets records assigned to him on the dashboard, and if that is so, do you determine the user role, and then further filter based on his role what he sees, because even a BOM may need to see his reports, and reports for the entire branch, and this may also be the case for the BM. Please show me a brief structure on how the records are being filtered based on the user role and work station.
 
-- This field should behave like the other autocompletes. Look at the supplier Field on this page (http://localhost:3000/assets-mgt/inventory/create)
-- Please notice that the autocomplete should not show any toast when the filtered or searched results are absent.
+3. The page, top to bottom.
+- When I log in a Super Admin, I see  "All branches & Head Office" as expected.
+- But when i log in a BOM, BM or a Branch user, i should be able to see the branch name, but instead its showing  "Your records". Please also double check the icon being rendered.
+- Please double check if the bands of  Total Assets · In Use · In Store · In Repair render the data accordingly. How is Head office data rendered, and how are branches data rendered, which permissions guard this and which roles are supposed to see this. 
 
-ii. Logistics.
+4. Every widget
 
-- This will also be an autocomplete field just like the one discussed above. Please find the courier under the settings. It has also been used already in the movement initiated after request approvals. One is able to see a list of couriers both vetted and non vetted. 
-- Please notice that the current holder of the asset will determine whether the asset will require a courier or not. That is from a branch to HO. Same location, there will be no need to involve a courier, tracking number, dispatch date and expected delivery since everything is within the same location.
+Work Queue
+- Open Request. -> What does it mean when you say an open request? Let us say an officer makes a request, this request is open to the Requester until the approval processes (even movement if necessary) are completed until the asset finally reaches the requester. Is that how its implemented? Please look that this very carefully and also show movements if necessary.
+- Open Request. -> This shows on the dashboard of the current approver, and disappears when the current approver has approved the request. Is that the case?
+- Please also double check that the total open requests are rendered accordingly to the correct users and also in the correct Branches. 
+- Please also double check the flags implementation also in the backend.
 
-NB: And I also hope that this will automatically go through the approval process. These approvals must be tracked and recorded. 
+My Assets.
+- Please just double check the functionality of the assets assigned to me also in the backend. And also for the drop down, please improve the styling of the assets table like the striped table for reports page and also add some clean designs if necessary to improve the listings of assets assigned to me. Each row should be clickable to go to the assets view details page. 
 
-iii. Remarks.
+My Requests (My Open Requests). 
+- Please double check the data that is being displayed on this section. When an officer makes a request an his immediate supervisor approves, the request should still be visible in this section through out all the approval steps and even movements if there. It should only disappear when the requested item has reached the user. please confirm that. 
 
-- Optional field that will provide a brief description of the item damage. 
+Assets by Category
+- Please double check the functionality of this and please also let me know what the HO super admin sees and also what the BM and the BOM sees. Does the Super admin see the general report for HO and all other branches and do BM and BOM only see their Branches related information. 
 
+Asset Conditions.
+- Please also double check this functionality and clearly state it for me.
 
-Please keep the styling intact, we just have to adjust the functionality. 
-
-
-2. Temporary Replacement
-
-i. Replacement. 
-
-- This should show only items in the temporary asset pool. Please double check and see if the items listed here are and will only come from the temporary pool. This field should also be an autocomplete field.
-
-ii. Recipient User
-
-- This field should also be an auto complete field. so that users can be searched and filtered based on their names. Please double check the functionality.
-
-iii. Logistics 
-
-- This section is optional depending on whether the movement is within the head office or its to another branch.
-
-iv. Remarks.
-
-- This is also optional. 
-
-3. Return After Repair
-
-i. Repaired Asset.
-
-- This should also be an autocomplete. 
-
-ii. Destination.
-
-- Once an asset is selected, this field should be auto-filled with the destination. This is because an asset under repair still has the assigned to user still tracked. Please double check that. This is to ensure that the asset is given to the right user after repair. So its better to have this field just for display and not editable. But the context should be clear.
- - The Reassign To Field should be changed to assigned to and should also be auto filled once the asset is selected. Not also editable.
-
-I hope you understand that the Destination field and the New "Assigned To" fields do not need to be submitted in the DB since the asset already has a relationship with the user and the user also has a relationship with his branch. 
-
-iii. Temporary Asset.
-
-- This field is not necessary because we already have fields handling temporary assets. 
-
-The Logistics and Remarks will remain as already described in the previous sections above. 
+Assets Across All Branches
+- Please check in the settings and confirm that this permission can be assigned to a role.
 
 
-4. Disposal.
+Stocking Trend.
 
-Please note that items in Bot IT and Admin Stores can be disposed off. But ofcourse they should not be new assets. In most cases they should be already having their useful lives exceeded. If you are able to also find out how an asset will be available for disposal depending on the calculating of its depreciation and useful life. 
+- This section completely seems to render wrongly. The categrories lists are not rendering our categories but legacy data. Please double check and please ensure that the graphs is loading accordingly.
+- Please let me know how the values loads for head office, and for branches. I would also suggest that there is also a branch selection that enables admins in head office to select a particular branch to see the reports per branch, and then they should be able to see overall also. This should per branch filter should also be applied to the Positions section.  
 
-NB. Please also provide a movement for this asset if its been disposed off from another branch and it must reach head office. 
-
-
-Please do not alter the styling of these models they are already built to perfection according to the project requirements. The only challenge with these models is the buttons below, one is much bigger than the other and the look funny so please work on that. Other than that everything regarding styling is perfect.   
-
+Request Fullfilment.
+- Request Fulfillment should also borrow the approach for Stocking Trend where i can see per branch, and also overall if i am admin in HO. But branches only see for their branches. Please double the functionality first and let me know how it stands for now. 
 
 
-5. Movements.
-- For Movements initiated after requests, there should be only one movement first of all. You mentioned that a movement is created from HO for example to a destination branch, then when the items reach the branch, another movement is created to the final requester. It would be much better to have a single movement but then I have a decision challenge here and I would like your opinion. This is a real work environment scenario, at one point, there can be only one item being transported from HO to another Branch or just items from one request, But in another scenario, there can be multiple items being transferred by a single courier and these items can be from different requests but to the same destination branch, what do you suggest would be the most ideal movement flow to achieve this. 
+Records.
+- What is the plan for the Records section that you mentioned that it has no widgets. I need this also implemented and properly functional. 
 
 
-6. Manual Create.
+5. What each user group actually sees
+- I highly recommend that apart from the seeders, these permissions must be visible in the roles and permissions section in settings so that some of the permissions can given to other roles also or in a better way to do this. Because there may never be a store keeper but the permissions may be assigned to head office administrators.  
 
-- Please let me know with this manual create form. 
-
-NB. Please just give me a plan for now, No code yet. Give me a solid plan and then we can write the code later. Regarding the above. 
-
-7. Please let me also know how Temporary assets are differentiated from new Assets in the Store. 
+Note:  One of the main reasons why i need you to thoroughly think about dashboard permissions separately is also that you are assuming that the Super Admin should be the only one seeing some of these messages. But to clarify to you is that the dashboard can really get so complicated based of the requirement. A normal officer may not see all these reports and only see things associated with him or her. But there is an admin officer, who should ideally have the visibility to see even reports from other branches and even head office, since admins are suppose to ideally manage this app. They should have visibility to a lot of things in this app and even view all issuance stages of a requests, assets across all branches and so many other information. This makes its a bit complicated. Please note that admins can also make requests and they also have managers. Then there is also another important unit of infra. Its the reason i have created the admin unit and infra unit to distinguish whether a user is an officer but then from Admin unit or Infra unit. Please note that this very important.  

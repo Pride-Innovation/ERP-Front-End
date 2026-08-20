@@ -79,9 +79,14 @@ const CustomTablePagination = ({ endPoint, params, selectedStatus, filterParams 
             }) as IhandleTablePagination;
             const { content } = response.data;
 
-            if (content.length > 0) {
-                handleReduxStoreUpdate(endPoint, content, params);
-            }
+            /*
+             * Dispatched even when empty.
+             *
+             * This used to be guarded by `content.length > 0`, so paging to a page that legitimately
+             * has no rows left the previous page's rows on screen — the table showed stale data and
+             * gave no sign of it. An empty result is a result.
+             */
+            handleReduxStoreUpdate(endPoint, content ?? [], params);
 
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : ErrorMessage;

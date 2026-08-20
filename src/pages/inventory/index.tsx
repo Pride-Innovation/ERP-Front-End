@@ -5,7 +5,7 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Box, Button, Stack } from "@mui/material";
 import { useNavigate } from "react-router";
 import FactCheckOutlinedIcon from '@mui/icons-material/FactCheckOutlined';
@@ -56,6 +56,14 @@ const Inventory = () => {
 
     // Translate the "Stocking Status" column filter (a status code) to the backend's stockStatusId,
     // and pass any other column filters straight through.
+    /** The params currently in force, so turning a page can reissue the same query. */
+    const activeParams = useRef<Record<string, any>>({});
+
+    const runQuery = (params: Record<string, any>) => {
+        activeParams.current = params;
+        fetchInventory(params);
+    };
+
     const applyInventoryFilters = (filters: Record<string, any>) => {
         const { status, ...rest } = filters || {};
         const params: Record<string, any> = { ...rest };
@@ -63,17 +71,20 @@ const Inventory = () => {
             const id = statusIdByCode(statuses, status);
             if (id != null) params.stockStatusId = id;
         }
-        fetchInventory(params);
+        runQuery(params);
     };
 
     useEffect(() => {
         if (tableStartDate && tableEndDate) {
-            const param = {
+            // Merged with whatever is already in force — the date picker narrows the current view
+            // rather than replacing it.
+            runQuery({
+                ...activeParams.current,
                 startDate: tableStartDate ? dayjs(tableStartDate).format('YYYY-MM-DDTHH:mm:ss') : '',
                 endDate: tableEndDate ? dayjs(tableEndDate).format('YYYY-MM-DDTHH:mm:ss') : ''
-            };
-            fetchInventory(param);
+            });
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [tableStartDate, tableEndDate]);
 
     const todayLabel = useMemo(
@@ -156,6 +167,7 @@ const Inventory = () => {
                             { key: 'createdAt', label: 'Date Created', type: 'dateRange' },
                         ]}
                         onApplyFilters={applyInventoryFilters}
+                        onPaginationChange={(model) => fetchInventory(activeParams.current, model)}
                     />
                 </Box>
             )}

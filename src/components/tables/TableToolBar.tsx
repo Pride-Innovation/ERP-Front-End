@@ -57,6 +57,7 @@ const TableToolBar = ({
     onCreationHandler,
     module,
     importData,
+    assetTypeId,
     exportData,
     createAction,
     rows = [],
@@ -278,7 +279,7 @@ const TableToolBar = ({
                             <Divider orientation="vertical" flexItem sx={{ mx: 0.25, borderColor: BORDER, height: 20, alignSelf: 'center' }} />
                         )}
 
-                        {importData && <FileUploadButton title={header.plural} module={module} />}
+                        {importData && <FileUploadButton title={header.plural} module={module} assetTypeId={assetTypeId} />}
                         {exportData && <CustomGridToolbarExport module={module} rows={rows} onExport={onExport} />}
 
                         {/* Create button */}

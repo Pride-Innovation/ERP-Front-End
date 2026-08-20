@@ -69,12 +69,17 @@ const RequestUtills = () => {
     const handleClose = () => setOpen(false);
 
 
-    const fetchAllRequests = async (params?: Record<string, any>) => {
+    const fetchAllRequests = async (
+        params?: Record<string, any>,
+        pageModel?: { page: number; pageSize: number },
+    ) => {
         setLoading(true)
         try {
             const response = await fetchRowsService({
-                pageNumber: 0,
-                pageSize: params?.pageSize ? params?.pageSize : 10,
+                // Paging comes back through here, so the status ids and date range the caller
+                // assembled stay in force past page one.
+                pageNumber: pageModel?.page ?? 0,
+                pageSize: pageModel?.pageSize ?? (params?.pageSize ? params.pageSize : 10),
                 endPoint,
                 params
             }) as IRequestsAxiosResponse;
@@ -223,8 +228,16 @@ const RequestUtills = () => {
         },
     ];
 
-    const handleRequestTableData = (list: Array<IRequest>) => {
-        const data: Array<IRequestTableData> = list.map((request, index) => {
+    /**
+     * Maps requests to the shape the table renders.
+     *
+     * <p>Split out from {@link handleRequestTableData} so the export can reuse it. Without a pure
+     * mapper the export either ships raw entity graphs — nested requester, approver and status
+     * objects that render as "[object Object]" in a spreadsheet — or duplicates this mapping and
+     * drifts from what the screen shows.
+     */
+    const buildRequestExportRows = (list: Array<IRequest>): Array<IRequestTableData> =>
+        list.map((request, index) => {
             const {
                 status,
                 timeOfSubmissionOfRequest,
@@ -254,9 +267,10 @@ const RequestUtills = () => {
                     requesterID: request.requester?.id as number,
                 }
             )
-        })
-        setRequestTableData(data);
+        });
 
+    const handleRequestTableData = (list: Array<IRequest>) => {
+        setRequestTableData(buildRequestExportRows(list));
     }
 
     const determineCurrentRequest = (id: number, itemList: Array<IRequest>): IRequest => {
@@ -339,6 +353,7 @@ const RequestUtills = () => {
             columnHeaders,
             formFields,
             handleRequest: handleRequestTableData,
+            buildRequestExportRows,
             module,
             determineCurrentRequest,
             handleClose,

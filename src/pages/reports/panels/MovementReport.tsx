@@ -1,37 +1,33 @@
-import { useState } from 'react';
-import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
 import SwapHorizOutlinedIcon from '@mui/icons-material/SwapHorizOutlined';
-import CheckCircleOutlinedIcon from '@mui/icons-material/CheckCircleOutlined';
-import HourglassEmptyOutlinedIcon from '@mui/icons-material/HourglassEmptyOutlined';
+import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
+import TaskAltOutlinedIcon from '@mui/icons-material/TaskAltOutlined';
+import PendingActionsOutlinedIcon from '@mui/icons-material/PendingActionsOutlined';
 import ReportShell, { ReportShellFilters } from '../ReportShell';
 import ReportSummaryCards from '../ReportSummaryCards';
 import ReportDataTable, { ReportColumn, StatusChip } from '../ReportDataTable';
+import useReportData from '../useReportData';
+import { fetchRowsService } from '../../../core/apis/globalService';
+import { movementTypeLabel, statusLabel } from '../../movement/constants';
 
-const ACCENT = '#7C3AED';
+const ACCENT = '#0891B2';
 
 interface MovementRow {
-    id: number;
+    id: string;
+    movementDate: string;
+    assetTag: string;
     assetName: string;
     category: string;
     serialNumber: string;
-    assetTag: string;
     fromBranch: string;
     fromDepartment: string;
     toBranch: string;
     toDepartment: string;
-    movementDate: string;
     requestedBy: string;
     approvedBy: string;
     status: string;
+    statusCode: string;
+    movementType: string;
 }
-
-const MOCK_ROWS: MovementRow[] = [
-    { id: 1, assetName: 'HP EliteBook 840', category: 'IT Equipment', serialNumber: 'SN-HPE-001', assetTag: 'TAG-0001', fromBranch: 'Head Office', fromDepartment: 'IT', toBranch: 'Gulu Branch', toDepartment: 'Operations', movementDate: '2026-01-18', requestedBy: 'Samuel Opio', approvedBy: 'Grace Amanya', status: 'completed' },
-    { id: 2, assetName: 'Canon Printer', category: 'Office Equipment', serialNumber: 'SN-CLB-003', assetTag: 'TAG-0003', fromBranch: 'Head Office', fromDepartment: 'Finance', toBranch: 'Mbarara Branch', toDepartment: 'Finance', movementDate: '2026-01-25', requestedBy: 'Alice Nansubuga', approvedBy: 'Peter Omara', status: 'completed' },
-    { id: 3, assetName: 'Motorola Radio', category: 'Office Equipment', serialNumber: 'SN-MR-005', assetTag: 'TAG-0005', fromBranch: 'Kampala Branch', fromDepartment: 'Security', toBranch: 'Jinja Branch', toDepartment: 'Security', movementDate: '2026-02-08', requestedBy: 'Robert Atim', approvedBy: '', status: 'pending' },
-    { id: 4, assetName: 'Dell Monitor', category: 'IT Equipment', serialNumber: 'SN-DM-004', assetTag: 'TAG-0004', fromBranch: 'Head Office', fromDepartment: 'Finance', toBranch: 'Head Office', toDepartment: 'Admin', movementDate: '2026-03-02', requestedBy: 'Jane Achola', approvedBy: 'Grace Amanya', status: 'completed' },
-    { id: 5, assetName: 'Toyota Hilux', category: 'Fleet', serialNumber: 'SN-TH-002', assetTag: 'TAG-0002', fromBranch: 'Gulu Branch', fromDepartment: 'Operations', toBranch: 'Kampala Branch', toDepartment: 'Operations', movementDate: '2026-03-15', requestedBy: 'Mary Akot', approvedBy: '', status: 'pending' },
-];
 
 const COLUMNS: ReportColumn<MovementRow>[] = [
     { id: 'movementDate', label: 'Date', minWidth: 100 },
@@ -48,45 +44,119 @@ const COLUMNS: ReportColumn<MovementRow>[] = [
     { id: 'status', label: 'Status', minWidth: 100, format: (v) => <StatusChip value={v} /> },
 ];
 
-const MovementReport = () => {
-    const [rows, setRows] = useState<MovementRow[]>(MOCK_ROWS);
+const fmtDate = (v?: string | null) =>
+    (v ? new Date(v).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—');
 
-    const total = rows.length;
-    const completed = rows.filter(r => r.status === 'completed').length;
-    const pending = rows.filter(r => r.status === 'pending').length;
-    const branches = new Set(rows.map(r => r.fromBranch)).size;
+const person = (u: any) => (u ? `${u.firstName ?? ''} ${u.lastName ?? ''}`.trim() || '—' : '—');
+
+/**
+ * One row per item moved.
+ *
+ * <p>The columns name a tag, a serial and an asset — that is an item, and a movement carries
+ * several. A consumable line has no tag, so it is shown by commodity name with dashes for the
+ * asset-only fields rather than being dropped: it moved, and the report is of movements.
+ */
+const toRows = (m: any): MovementRow[] => {
+    const items: any[] = m.items ?? [];
+    const base = {
+        movementDate: fmtDate(m.dispatchDate ?? m.createDate),
+        fromBranch: m.sourceStore?.location?.name ?? m.sourceUser?.branch?.name ?? '—',
+        fromDepartment: m.sourceStore?.department?.name ?? '—',
+        toBranch: m.destStore?.location?.name ?? m.recipientUser?.branch?.name ?? '—',
+        toDepartment: m.destStore?.department?.name ?? m.recipientUser?.department?.name ?? '—',
+        requestedBy: person(m.request?.requester ?? m.initiator),
+        approvedBy: person(m.currentApprover),
+        status: statusLabel(m.status),
+        statusCode: m.status ?? '',
+        movementType: movementTypeLabel(m.movementType),
+    };
+
+    if (items.length === 0) {
+        return [{ ...base, id: `mov-${m.id}`, assetTag: '—', assetName: base.movementType, category: '—', serialNumber: '—' }];
+    }
+
+    return items.map((it, i) => ({
+        ...base,
+        id: `mov-${m.id}-${it.id ?? i}`,
+        assetTag: it.asset?.engravedNumber ?? '—',
+        assetName: it.asset?.assetName ?? it.commodity?.name ?? '—',
+        category: it.asset?.assetType?.name ?? it.commodity?.assetType?.name ?? '—',
+        serialNumber: it.asset?.serialNumber ?? it.serialNumber ?? '—',
+    }));
+};
+
+const MovementReport = () => {
+    const { rows, loading, error, applyFilters, refresh } = useReportData<MovementRow>(
+        async (f: ReportShellFilters) => {
+            /*
+             * Everything is narrowed in the browser: GET /movements declares only pageSize and
+             * pageNumber, so there is nothing to filter with server-side. Fine at present volume,
+             * but it loads a page and narrows it — this is the report to revisit first if the
+             * movement table grows into the tens of thousands.
+             */
+            const res = (await fetchRowsService({
+                pageNumber: 0, pageSize: 500, endPoint: 'movements',
+            })) as any;
+
+            if (res?.status !== 200) throw new Error('movements');
+            const flat = ((res.data?.content ?? []) as any[]).flatMap(toRows);
+
+            const from = f.dateFrom ? new Date(f.dateFrom).getTime() : null;
+            const to = f.dateTo ? new Date(f.dateTo).getTime() : null;
+
+            return flat.filter((r) => {
+                // A movement counts as touching a branch at either end, matching how the movements
+                // listing itself scopes them.
+                if (f.branch && r.fromBranch !== f.branch && r.toBranch !== f.branch) return false;
+                if (f.department && r.fromDepartment !== f.department && r.toDepartment !== f.department) return false;
+                if (f.category && r.category !== f.category) return false;
+                if (f.status && r.status !== f.status) return false;
+                if (from || to) {
+                    const t = new Date(r.movementDate).getTime();
+                    if (Number.isNaN(t)) return true; // undated rows are kept rather than hidden
+                    if (from && t < from) return false;
+                    if (to && t > to) return false;
+                }
+                return true;
+            });
+        },
+    );
+
+    const movements = new Set(rows.map((r) => r.id.split('-').slice(0, 2).join('-'))).size;
+    const inTransit = rows.filter((r) => r.statusCode === 'DISPATCHED' || r.statusCode === 'IN_TRANSIT').length;
+    const completed = rows.filter((r) => r.statusCode === 'COMPLETED').length;
+    const awaiting = rows.filter((r) => r.statusCode === 'DRAFT' || r.statusCode === 'INITIATED').length;
 
     const summaryCards = (
         <ReportSummaryCards cards={[
-            { label: 'Total Movements', value: total, icon: <LocalShippingOutlinedIcon />, color: ACCENT, subLabel: 'All transfers' },
-            { label: 'Completed', value: completed, icon: <CheckCircleOutlinedIcon />, color: '#15803D', trend: 3, subLabel: 'Confirmed transfers' },
-            { label: 'Pending Approval', value: pending, icon: <HourglassEmptyOutlinedIcon />, color: '#D97706', subLabel: 'Awaiting action' },
-            { label: 'Branches Involved', value: branches, icon: <SwapHorizOutlinedIcon />, color: '#0369A1', subLabel: 'Unique locations' },
+            { label: 'Items Moved', value: rows.length, icon: <SwapHorizOutlinedIcon />, color: ACCENT, subLabel: `${movements} movement(s)` },
+            { label: 'On The Road', value: inTransit, icon: <LocalShippingOutlinedIcon />, color: '#D97706', subLabel: 'Dispatched or in transit' },
+            { label: 'Completed', value: completed, icon: <TaskAltOutlinedIcon />, color: '#15803D', subLabel: 'Handed over' },
+            { label: 'Awaiting Dispatch', value: awaiting, icon: <PendingActionsOutlinedIcon />, color: '#7C3AED', subLabel: 'Draft or initiated' },
         ]} />
     );
 
-    const handleFilters = (f: ReportShellFilters) => {
-        let filtered = [...MOCK_ROWS];
-        if (f.branch) filtered = filtered.filter(r => r.fromBranch === f.branch || r.toBranch === f.branch);
-        if (f.category) filtered = filtered.filter(r => r.category === f.category);
-        if (f.status) filtered = filtered.filter(r => r.status === f.status);
-        setRows(filtered);
-    };
-
     return (
         <ReportShell
-            title="Asset Movement Report"
-            subtitle="Transfers and location changes across all branches and departments"
+            title="Movement Report"
+            subtitle="Every item that changed hands, where it went and how far it has got"
             accentColor={ACCENT}
-            filterFields={['dateRange', 'branch', 'category', 'status']}
-            onApplyFilters={handleFilters}
-            onRefresh={() => setRows(MOCK_ROWS)}
-            onExportPdf={() => alert('PDF export triggered')}
-            onExportExcel={() => alert('Excel export triggered')}
-            onExportCsv={() => alert('CSV export triggered')}
+            filterFields={['dateRange', 'branch', 'department', 'category', 'status']}
+            onApplyFilters={applyFilters}
+            onRefresh={refresh}
             summaryCards={summaryCards}
+            exportRows={rows}
+            exportColumns={COLUMNS}
         >
-            <ReportDataTable columns={COLUMNS} rows={rows} accentColor={ACCENT} rowKey="id" />
+            <ReportDataTable
+                columns={COLUMNS}
+                rows={rows}
+                accentColor={ACCENT}
+                rowKey="id"
+                loading={loading}
+                error={error}
+                emptyMessage="No movements match these filters."
+            />
         </ReportShell>
     );
 };

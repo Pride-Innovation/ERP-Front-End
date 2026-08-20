@@ -24,15 +24,32 @@ import DataObjectOutlinedIcon from '@mui/icons-material/DataObjectOutlined';
 import TuneOutlinedIcon from '@mui/icons-material/TuneOutlined';
 import ScheduleSendOutlinedIcon from '@mui/icons-material/ScheduleSendOutlined';
 import dayjs from 'dayjs';
+import useReportLookups, { LookupOption } from './useReportLookups';
+import { ReportColumn } from './ReportDataTable';
+import { exportReportPdf, exportReportExcel, exportReportCsv } from './exportReport';
 
 const PRIMARY = '#08796C';
 
+/**
+ * What the filter bar emits.
+ *
+ * <p>Ids and labels travel together on purpose. Every backend filter takes an id
+ * (`assetTypeId`, `assetStatusId`, `locationId`), while the heading of an exported report and any
+ * client-side matching want the name. Emitting only labels — as this did — meant nothing the bar
+ * produced could be sent to a server-side query.
+ */
 export interface ReportShellFilters {
     dateFrom?: string;
     dateTo?: string;
+    branchId?: number | string;
     branch?: string;
+    departmentId?: number | string;
     department?: string;
+    categoryId?: number | string;
     category?: string;
+    statusId?: number | string;
+    /** The status's stable camelCase code — what client-side matching compares against. */
+    statusCode?: string;
     status?: string;
     schedule?: string;
 }
@@ -43,11 +60,19 @@ interface ReportShellProps {
     accentColor: string;
     filterFields?: Array<'dateRange' | 'branch' | 'department' | 'category' | 'status'>;
     onApplyFilters?: (f: ReportShellFilters) => void;
+    /** Override the built-in export for a report that needs a bespoke document. */
     onExportPdf?: () => void;
     onExportExcel?: () => void;
     onExportCsv?: () => void;
     onRefresh?: () => void;
     summaryCards?: React.ReactNode;
+    /**
+     * The rows and columns currently on screen. Given these, the shell exports on the panel's
+     * behalf — so every report writes the same branded PDF and the same spreadsheet, and an export
+     * always matches what the reader is looking at, filters included.
+     */
+    exportRows?: any[];
+    exportColumns?: ReportColumn<any>[];
     children: React.ReactNode;
 }
 
@@ -66,10 +91,9 @@ const SCHEDULES = [
     { label: 'Monthly', value: 'monthly' },
 ];
 
-const BRANCHES = ['Head Office', 'Kampala Branch', 'Gulu Branch', 'Mbarara Branch', 'Jinja Branch'];
-const DEPARTMENTS = ['IT', 'Admin', 'Finance', 'HR', 'Operations', 'Security'];
-const CATEGORIES = ['IT Equipment', 'Fleet', 'Office Equipment', 'Stationery', 'Furniture'];
-const STATUSES = ['active', 'inStore', 'inRepair', 'disposed', 'issued', 'pending', 'approved', 'rejected'];
+// Branch / department / category / status options now come from the live directories via
+// useReportLookups. They used to be four hardcoded arrays of names here — a fixed five branches
+// that bore no relation to the bank's actual estate, and labels that could not be used to query.
 
 const getDateRange = (preset: string): { from: string; to: string } => {
     const now = dayjs();
@@ -111,6 +135,8 @@ const ReportShell = ({
     onExportCsv,
     onRefresh,
     summaryCards,
+    exportRows,
+    exportColumns,
     children,
 }: ReportShellProps) => {
     const [showFilters, setShowFilters] = useState(true);
@@ -124,17 +150,58 @@ const ReportShell = ({
     const [schedule, setSchedule] = useState('');
     const [showSchedule, setShowSchedule] = useState(false);
 
+    /** Live branch / department / category / status directories for the four dropdowns. */
+    const lookups = useReportLookups();
+
+    /** Resolves a selected id back to its directory entry, so the emitted filter carries both. */
+    const pick = (options: LookupOption[], id: string) => options.find((o) => String(o.id) === String(id));
+
     const handleApply = () => {
         const range = datePreset !== 'custom' ? getDateRange(datePreset) : { from: customFrom, to: customTo };
+        const b = pick(lookups.branches, branch);
+        const d = pick(lookups.departments, department);
+        const c = pick(lookups.categories, category);
+        const s = pick(lookups.statuses, status);
+
         onApplyFilters?.({
             dateFrom: range.from,
             dateTo: range.to,
-            branch: branch || undefined,
-            department: department || undefined,
-            category: category || undefined,
-            status: status || undefined,
+            branchId: b?.id,
+            branch: b?.label,
+            departmentId: d?.id,
+            department: d?.label,
+            categoryId: c?.id,
+            category: c?.label,
+            statusId: s?.id,
+            statusCode: s?.code,
+            status: s?.label,
             schedule: schedule || undefined,
         });
+    };
+
+    /**
+     * Exports what is on screen. Reads the current filter controls rather than the last applied
+     * set, so an export taken before pressing Apply still describes itself accurately.
+     */
+    const runExport = (kind: 'pdf' | 'excel' | 'csv') => {
+        if (!exportRows || !exportColumns) return;
+        const range = datePreset !== 'custom' ? getDateRange(datePreset) : { from: customFrom, to: customTo };
+        const input = {
+            title,
+            columns: exportColumns,
+            rows: exportRows,
+            filters: {
+                dateFrom: range.from,
+                dateTo: range.to,
+                branch: pick(lookups.branches, branch)?.label,
+                department: pick(lookups.departments, department)?.label,
+                category: pick(lookups.categories, category)?.label,
+                status: pick(lookups.statuses, status)?.label,
+            },
+        };
+        if (kind === 'pdf') exportReportPdf(input);
+        else if (kind === 'excel') exportReportExcel(input);
+        else exportReportCsv(input);
     };
 
     const handleClear = () => {
@@ -233,7 +300,7 @@ const ReportShell = ({
                                     <FormControl fullWidth size="small" sx={PILL_INPUT_SX}>
                                         <Select value={branch} onChange={e => setBranch(e.target.value)} displayEmpty>
                                             <MenuItem value=""><em style={{ fontSize: '0.8rem', fontStyle: 'normal', color: '#94A3B8' }}>All Branches</em></MenuItem>
-                                            {BRANCHES.map(b => <MenuItem key={b} value={b} sx={{ fontSize: '0.8rem' }}>{b}</MenuItem>)}
+                                            {lookups.branches.map(b => <MenuItem key={b.id} value={String(b.id)} sx={{ fontSize: '0.8rem' }}>{b.label}</MenuItem>)}
                                         </Select>
                                     </FormControl>
                                 </Grid>
@@ -246,7 +313,7 @@ const ReportShell = ({
                                     <FormControl fullWidth size="small" sx={PILL_INPUT_SX}>
                                         <Select value={department} onChange={e => setDepartment(e.target.value)} displayEmpty>
                                             <MenuItem value=""><em style={{ fontSize: '0.8rem', fontStyle: 'normal', color: '#94A3B8' }}>All Departments</em></MenuItem>
-                                            {DEPARTMENTS.map(d => <MenuItem key={d} value={d} sx={{ fontSize: '0.8rem' }}>{d}</MenuItem>)}
+                                            {lookups.departments.map(d => <MenuItem key={d.id} value={String(d.id)} sx={{ fontSize: '0.8rem' }}>{d.label}</MenuItem>)}
                                         </Select>
                                     </FormControl>
                                 </Grid>
@@ -259,7 +326,7 @@ const ReportShell = ({
                                     <FormControl fullWidth size="small" sx={PILL_INPUT_SX}>
                                         <Select value={category} onChange={e => setCategory(e.target.value)} displayEmpty>
                                             <MenuItem value=""><em style={{ fontSize: '0.8rem', fontStyle: 'normal', color: '#94A3B8' }}>All Categories</em></MenuItem>
-                                            {CATEGORIES.map(c => <MenuItem key={c} value={c} sx={{ fontSize: '0.8rem' }}>{c}</MenuItem>)}
+                                            {lookups.categories.map(c => <MenuItem key={c.id} value={String(c.id)} sx={{ fontSize: '0.8rem' }}>{c.label}</MenuItem>)}
                                         </Select>
                                     </FormControl>
                                 </Grid>
@@ -272,7 +339,7 @@ const ReportShell = ({
                                     <FormControl fullWidth size="small" sx={PILL_INPUT_SX}>
                                         <Select value={status} onChange={e => setStatus(e.target.value)} displayEmpty>
                                             <MenuItem value=""><em style={{ fontSize: '0.8rem', fontStyle: 'normal', color: '#94A3B8' }}>All Statuses</em></MenuItem>
-                                            {STATUSES.map(s => <MenuItem key={s} value={s} sx={{ fontSize: '0.8rem', textTransform: 'capitalize' }}>{s}</MenuItem>)}
+                                            {lookups.statuses.map(s => <MenuItem key={s.id} value={String(s.id)} sx={{ fontSize: '0.8rem' }}>{s.label}</MenuItem>)}
                                         </Select>
                                     </FormControl>
                                 </Grid>
@@ -335,7 +402,7 @@ const ReportShell = ({
                 <Tooltip title="Export PDF">
                     <Button
                         size="small" variant="outlined" startIcon={<PictureAsPdfOutlinedIcon sx={{ fontSize: '14px !important' }} />}
-                        onClick={onExportPdf}
+                        onClick={onExportPdf ?? (() => runExport('pdf'))}
                         sx={{
                             height: 32, px: 1.5, borderRadius: '8px', fontSize: '0.75rem', fontWeight: 600,
                             textTransform: 'none', borderColor: '#E2E8F0', color: '#DC2626',
@@ -349,7 +416,7 @@ const ReportShell = ({
                 <Tooltip title="Export Excel">
                     <Button
                         size="small" variant="outlined" startIcon={<TableChartOutlinedIcon sx={{ fontSize: '14px !important' }} />}
-                        onClick={onExportExcel}
+                        onClick={onExportExcel ?? (() => runExport('excel'))}
                         sx={{
                             height: 32, px: 1.5, borderRadius: '8px', fontSize: '0.75rem', fontWeight: 600,
                             textTransform: 'none', borderColor: '#E2E8F0', color: '#15803D',
@@ -363,7 +430,7 @@ const ReportShell = ({
                 <Tooltip title="Export CSV">
                     <Button
                         size="small" variant="outlined" startIcon={<DataObjectOutlinedIcon sx={{ fontSize: '14px !important' }} />}
-                        onClick={onExportCsv}
+                        onClick={onExportCsv ?? (() => runExport('csv'))}
                         sx={{
                             height: 32, px: 1.5, borderRadius: '8px', fontSize: '0.75rem', fontWeight: 600,
                             textTransform: 'none', borderColor: '#E2E8F0', color: '#0369A1',

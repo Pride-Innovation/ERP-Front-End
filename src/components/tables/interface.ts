@@ -64,6 +64,13 @@ export interface ITableComponent {
     handleOptionClicked?: (option: number | string, moduleID?: string | number) => void;
     createAction?: boolean;
     importData?: boolean;
+    /**
+     * The asset category this table is showing, when it is showing one.
+     *
+     * Passed through to the import button so the asset template can be built from that category's
+     * field configuration. Ignored by every other module.
+     */
+    assetTypeId?: number;
     exportData?: boolean;
     count?: number;
     loading?: boolean;
@@ -82,6 +89,47 @@ export interface ITableComponent {
     /** Column-level filter definitions; each triggers a backend call on Apply */
     columnFilters?: IColumnFilter[];
     onApplyFilters?: (filters: Record<string, any>) => void;
+    /**
+     * Called whenever the page or page size changes, so the owning page can refetch with its own
+     * parameters.
+     *
+     * <p>Supply this and the table stops using the shared `CustomTablePagination` path. That path
+     * rebuilds request params from scratch and cannot see anything the page derived for itself — a
+     * date range held in context, a "due for disposal" flag — so those were silently dropped the
+     * moment anyone turned a page. A page that owns its fetch cannot have that problem.
+     *
+     * <p>Omit it and the previous behaviour is unchanged, so client-paginated tables and pages not
+     * yet migrated are unaffected.
+     */
+    onPaginationChange?: (model: {
+        page: number;
+        pageSize: number;
+        /** Set only when `serverSort` is on; the column and direction to order by. */
+        sortBy?: string;
+        sortDirection?: 'ASC' | 'DESC';
+    }) => void;
+    /**
+     * Row keys the server can order by, mapped to the backend column that does it.
+     *
+     * <p>Client-side sorting reorders the rows currently in hand. On a server-paginated table that
+     * is one page, so "sort by Asset Name" rearranged ten rows and presented the result as a sort of
+     * the whole table. A key listed here refetches instead, carrying the column and direction
+     * through `onPaginationChange`.
+     *
+     * <p>A map rather than a flag because not every column has a server equivalent — "Location" and
+     * "Assigned To" are derived from associations the sort cannot reach. Those keep sorting the
+     * visible page, which is at least what the user can see, instead of quietly ordering by
+     * something else. Omit the prop entirely and nothing changes.
+     */
+    serverSortFields?: Record<string, string>;
+    /**
+     * Field name the search box filters on for this module, e.g. `assetName`.
+     *
+     * <p>Server-side search previously hardcoded `name` for every module, which most endpoints do
+     * not declare — Spring drops undeclared parameters silently, so searching simply did nothing on
+     * those screens. Without this the search box stays client-side.
+     */
+    searchKey?: string;
     /** Optional icon shown in the toolbar header. Defaults to FilterAltOutlinedIcon. */
     tableIcon?: React.ReactNode;
     /** Permission name required to render the create button. Hides the button when missing. */
@@ -107,6 +155,8 @@ export interface ITableToolBar {
     module: string;
     createAction: boolean;
     importData: boolean;
+    /** Asset category on show, so the import button can build that category's template. */
+    assetTypeId?: number;
     exportData: boolean;
     searchAction: boolean;
     onSearch?: (value: string) => void;
@@ -129,6 +179,8 @@ export interface CustomToolbarWrapperProps {
     module: string;
     createAction: boolean;
     importData: boolean;
+    /** Asset category on show, so the import button can build that category's template. */
+    assetTypeId?: number;
     exportData: boolean;
     searchAction: boolean;
     onSearch?: (value: string) => void;

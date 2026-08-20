@@ -324,3 +324,48 @@ export interface IRepairsTableData {
     technician: string;
     repairReason: string;
 }
+
+// ─────────────────────────────────────────────────────────────────────────
+// Bulk import
+// ─────────────────────────────────────────────────────────────────────────
+
+/**
+ * Dropdown sources, field configuration and row limits for an import template.
+ *
+ * Assembled server-side so the template's dropdowns and the importer's validation are the same sets,
+ * and so the limits track the server's own configuration rather than being duplicated here.
+ */
+export interface IAssetImportTemplate {
+    assetTypeId: number;
+    assetTypeName: string;
+    /** Field name → 'required' | 'optional' | 'hidden'. The same map that drives the create form. */
+    fieldConfig: Record<string, string> | null;
+    branches: string[];
+    suppliers: string[];
+    commodities: string[];
+    statuses: string[];
+    /** "PBL0001 — Jane Doe". */
+    staff: string[];
+    /** Rows per request; a file is chunked into batches of this size. */
+    batchSize: number;
+    /** Rows per file, checked before anything is uploaded. */
+    maxRows: number;
+}
+
+/** One row the importer refused, with the reason. */
+export interface IAssetImportRowError {
+    row: number;
+    assetName?: string | null;
+    engravedNumber?: string | null;
+    serialNumber?: string | null;
+    error: string;
+}
+
+/** The outcome of a whole file, accumulated across its batches. */
+export interface IAssetImportResult {
+    success: boolean;
+    total: number;
+    inserted: number;
+    failed: number;
+    errors: IAssetImportRowError[];
+}

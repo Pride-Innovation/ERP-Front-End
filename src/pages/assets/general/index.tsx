@@ -1,11 +1,13 @@
 import {
     useContext,
     useEffect,
+    useRef,
     useState
 } from "react";
 import { useNavigate, useParams } from "react-router";
-import { alpha, Box, Chip, Paper, Stack, Typography } from "@mui/material";
+import { alpha, Box, Chip, LinearProgress, Paper, Stack, Typography } from "@mui/material";
 import CategoryOutlinedIcon from '@mui/icons-material/CategoryOutlined';
+import { toast } from "react-toastify";
 
 import GeneralAssetUtills from "./utills";
 import TableComponent from "../../../components/tables/TableComponent";
@@ -33,6 +35,28 @@ import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
 import { AssetContext } from "../../../context/asset";
 import { PERMISSIONS } from "../../../core/permissions/constants";
 import StatusUtills from "../../settings/statuses/Utills";
+import TableUtills from "../../../components/tables/utills";
+import { FileContext } from "../../../context/file/FileContext";
+import { IAssetImportResult } from "../interface";
+import { bulkImportAssetsService, fetchAssetImportTemplateService } from "../service/importService";
+import { assetImportHeaders } from "../assetImportTemplate";
+import AssetBulkImportResult from "../AssetBulkImportResult";
+import { fetchAllBranches, ReferenceOption } from "../../users/service/referenceData";
+
+/**
+ * Statuses an asset can actually be in.
+ *
+ * The status table is shared with requests, stock and the approval ladders, so listing all of it in
+ * an asset filter would offer things like "BOM Approved" that no asset ever holds. These are the
+ * codes the status chips above the table already use.
+ */
+const ASSET_STATUS_CODES = [
+    'requireUpdate', 'issuanceAvailable', 'sentToStore', 'assetAssigned', 'assetIssued',
+    'receiptAcknowledged', 'inMaintenance', 'inTransit', 'pendingDisposal',
+];
+
+/** Matches the table footer's default, so the first fetch and the footer agree. */
+const DEFAULT_PAGE_SIZE = 10;
 
 const GeneralAssets = () => {
     const { typeId } = useParams<{ typeId: string }>();
@@ -48,6 +72,16 @@ const GeneralAssets = () => {
     const { setOptions } = useContext(AssetContext);
     const { statuses } = useSelector((state: RootState) => state.StatusesStore);
     const { fetchAllStatuses } = StatusUtills();
+    const { fileData, setFileData } = useContext(FileContext);
+
+    /** Branches for the Location filter; fetched once. */
+    const [branches, setBranches] = useState<ReferenceOption[]>([]);
+
+    // ── Bulk import ──────────────────────────────────────────────────────────
+    const [importResult, setImportResult] = useState<IAssetImportResult | null>(null);
+    const [importRows, setImportRows] = useState<any[]>([]);
+    const [importHeaders, setImportHeaders] = useState<string[]>([]);
+    const [importProgress, setImportProgress] = useState<{ done: number; total: number } | null>(null);
 
     const {
         columnHeaders,
@@ -58,27 +92,67 @@ const GeneralAssets = () => {
         module,
         currentAsset,
         handleGeneralAssetTableData,
+        buildAssetExportRows,
         generalAssetTableData,
         currentState
     } = GeneralAssetUtills(typeId || "");
 
-    const fetchResources = async (status?: string, extraParams?: Record<string, any>) => {
+    // Branded Cover + Data workbook, and the reports-style PDF.
+    const { generateExcelFromRows, generatePDFFromRows } = TableUtills({ moduleName: currentAssetType.name });
+
+    /**
+     * Loads the table.
+     *
+     * <p>Every key here has to be a parameter `GET /assets` declares. Spring silently discards any it
+     * does not, which is why the status chips appeared to work and did nothing: they sent
+     * `status=issuanceAvailable`, and the endpoint takes `assetStatusId`. The same applied to the
+     * toolbar's date range, which sent `createdAtFrom`/`createdAtTo` against an endpoint expecting
+     * `startDate`/`endDate`.
+     */
+    const fetchResources = async (
+        status?: string,
+        extraParams?: Record<string, any>,
+        pageModel?: { page: number; pageSize: number; sortBy?: string; sortDirection?: 'ASC' | 'DESC' },
+    ) => {
         setLoading(true);
-        const dateRange = extraParams?.createdAt;
-        // "Due for disposal" is a derived state, not a stored status — send it as its own flag
-        // rather than a `status` filter the backend wouldn't recognise.
+
+        // "Due for disposal" is derived from useful life, not a stored status, so it travels as its
+        // own flag.
         const isDueForDisposal = status === 'dueForDisposal';
+        const statusId = (status && status !== 'all' && !isDueForDisposal)
+            ? statuses.find((s) => s.status === status)?.id
+            : undefined;
+
+        const { dateReceivedFrom, dateReceivedTo, ...rest } = extraParams ?? {};
+        const startDate = dateReceivedFrom ?? (tableStartDate ? new Date(tableStartDate).toISOString() : undefined);
+        const endDate = dateReceivedTo ?? (tableEndDate ? new Date(tableEndDate).toISOString() : undefined);
+
         const params = {
             assetTypeId: currentAssetType.id,
-            ...(isDueForDisposal ? { dueForDisposal: true } : (status && status !== 'all' ? { status } : {})),
-            ...(dateRange ? { createdAt: dateRange } : (tableStartDate && tableEndDate ? { createdAt: `${tableStartDate},${tableEndDate}` } : {})),
-            ...(extraParams ? { ...extraParams, createdAt: undefined } : {})
+            ...(isDueForDisposal ? { dueForDisposal: true } : {}),
+            ...(statusId ? { assetStatusId: statusId } : {}),
+            ...(startDate ? { startDate } : {}),
+            ...(endDate ? { endDate } : {}),
+            // Sorting happens in the database, so it covers the whole register rather than the ten
+            // rows on screen. Unset means the endpoint's own default: newest first.
+            ...(pageModel?.sortBy ? { sortBy: pageModel.sortBy } : {}),
+            ...(pageModel?.sortDirection ? { sortDirection: pageModel.sortDirection } : {}),
+            ...rest,
         };
 
         try {
             const response = await fetchRowsService({
-                pageNumber: 0,
-                pageSize: 50,
+                /*
+                 * One page's worth, matching the footer.
+                 *
+                 * This asked for fifty while the table's footer showed ten, so fifty rows rendered
+                 * under a label reading "1–10 of N". Paging is now handled by refetching through
+                 * this same function, which is what keeps the date range and the "due for disposal"
+                 * flag alive past page one — the shared pagination path rebuilt params from scratch
+                 * and could not see either.
+                 */
+                pageNumber: pageModel?.page ?? 0,
+                pageSize: pageModel?.pageSize ?? DEFAULT_PAGE_SIZE,
                 endPoint,
                 params
             }) as IOfficeEquipmentsAxiosResponse;
@@ -90,6 +164,114 @@ const GeneralAssets = () => {
             console.log(error);
         }
         setLoading(false);
+    };
+
+    /**
+     * Hard cap on a filter-aware export.
+     *
+     * A register can run to tens of thousands of rows; building a PDF of all of them locks the tab
+     * and produces a document nobody will read. Anything larger should be narrowed first.
+     */
+    const EXPORT_MAX_ROWS = 10_000;
+
+    /**
+     * The filters and status currently in force.
+     *
+     * Held so that turning a page can reissue exactly the query the user is looking at. Without it,
+     * paging would have to rebuild the request and would lose whatever the page derived for itself.
+     */
+    const activeQuery = useRef<{ status?: string; filters?: Record<string, any> }>({});
+
+    const runQuery = (status?: string, filters?: Record<string, any>) => {
+        activeQuery.current = { status, filters };
+        fetchResources(status, filters);
+    };
+
+    /** Names the slice being exported, so the PDF strip and the Excel cover say what it is. */
+    const buildFilterSummary = (): Array<{ label: string; value: string }> => {
+        const out: Array<{ label: string; value: string }> = [];
+        const f = activeQuery.current.filters ?? {};
+        const status = activeQuery.current.status;
+
+        out.push({ label: 'Category', value: currentAssetType.name ?? '—' });
+        if (status && status !== 'all') {
+            const name = status === 'dueForDisposal'
+                ? 'Due for Disposal'
+                : statuses.find((s) => s.status === status)?.name ?? status;
+            out.push({ label: 'Status', value: name });
+        }
+        if (f.assetName) out.push({ label: 'Asset Name', value: String(f.assetName) });
+        if (f.engravedNumber) out.push({ label: 'Engraved No', value: String(f.engravedNumber) });
+        if (f.serialNumber) out.push({ label: 'Serial No', value: String(f.serialNumber) });
+        if (f.model) out.push({ label: 'Model', value: String(f.model) });
+        if (f.location) out.push({ label: 'Location', value: String(f.location) });
+        if (f.assignedTo) out.push({ label: 'Assigned To', value: String(f.assignedTo) });
+        if (f.assetStatusId != null) {
+            const s = statuses.find((x) => x.id === Number(f.assetStatusId));
+            out.push({ label: 'Status', value: s?.name ?? `#${f.assetStatusId}` });
+        }
+        if (f.dateReceivedFrom || f.dateReceivedTo) {
+            const d = (v?: string) => (v ? new Date(v).toLocaleDateString('en-GB') : '…');
+            out.push({ label: 'Date Added', value: `${d(f.dateReceivedFrom)} – ${d(f.dateReceivedTo)}` });
+        }
+        return out;
+    };
+
+    /**
+     * Exports what the filters describe, not what is on screen.
+     *
+     * <p>There was no `onExport` here at all, so the toolbar fell through to the shared default —
+     * which resolves this page's module name to something `formatExportData` has never heard of and
+     * fetched `/General Asset`. Export on this page did not work.
+     *
+     * <p>Rows are refetched rather than taken from the table, because the table holds one page: an
+     * export of a filter matching four hundred assets would otherwise be a file of ten.
+     */
+    const handleExport = async (format: 'pdf' | 'excel') => {
+        // Titled by category, not by the generic module name the toolbar would otherwise use.
+        const meta = { filters: buildFilterSummary(), title: currentAssetType.name || 'Assets' };
+        try {
+            const { status, filters } = activeQuery.current;
+            const isDueForDisposal = status === 'dueForDisposal';
+            const statusId = (status && status !== 'all' && !isDueForDisposal)
+                ? statuses.find((s) => s.status === status)?.id
+                : undefined;
+
+            const { dateReceivedFrom, dateReceivedTo, ...rest } = filters ?? {};
+            const response = await fetchRowsService({
+                pageNumber: 0,
+                pageSize: EXPORT_MAX_ROWS,
+                endPoint,
+                params: {
+                    assetTypeId: currentAssetType.id,
+                    ...(isDueForDisposal ? { dueForDisposal: true } : {}),
+                    ...(statusId ? { assetStatusId: statusId } : {}),
+                    ...(dateReceivedFrom ? { startDate: dateReceivedFrom } : {}),
+                    ...(dateReceivedTo ? { endDate: dateReceivedTo } : {}),
+                    ...rest,
+                },
+            }) as IOfficeEquipmentsAxiosResponse;
+
+            const content = response?.data?.content ?? [];
+            if (content.length === 0) {
+                toast.info('No assets match the current filters.');
+                return;
+            }
+            if (content.length >= EXPORT_MAX_ROWS) {
+                toast.warning(
+                    `Export capped at ${EXPORT_MAX_ROWS.toLocaleString()} rows — narrow the filters for the full set.`
+                );
+            }
+
+            // Reuses the table's own mapper, so the export carries the same resolved location,
+            // holder name and formatted date the screen shows rather than raw entity graphs.
+            const rows = buildAssetExportRows(content);
+            if (format === 'excel') generateExcelFromRows(rows, meta);
+            else await generatePDFFromRows(rows, meta);
+        } catch (error) {
+            console.error('Asset export failed', error);
+            toast.error('Could not build the export. Please try again.');
+        }
     };
 
     // Find and set the current asset type from URL param
@@ -113,8 +295,9 @@ const GeneralAssets = () => {
 
     useEffect(() => {
         if (currentAssetType.id) {
-            fetchResources();
+            runQuery();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentAssetType]);
 
     // Rebuild the table rows whenever the loaded assets change — including when the
@@ -134,10 +317,10 @@ const GeneralAssets = () => {
             || status === 'assetIssued'
             || status === 'dueForDisposal'
         ) {
-            fetchResources(status);
+            runQuery(status, activeQuery.current.filters);
             setSelectedStatus(status);
         } else {
-            fetchResources('all');
+            runQuery('all', activeQuery.current.filters);
             setSelectedStatus('all');
         }
     };
@@ -161,13 +344,84 @@ const GeneralAssets = () => {
     // Statuses power the status filter (resolved by code).
     useEffect(() => {
         if (!statuses.length) fetchAllStatuses();
+        fetchAllBranches()
+            .then(setBranches)
+            .catch((e) => console.warn('Failed to load branches for the location filter', e));
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    /**
+     * Imports a parsed spreadsheet into the category currently on screen.
+     *
+     * <p>The row cap is the server's, read from the template endpoint rather than hard-coded here —
+     * the limits follow from the server's multipart size and the client's request timeout, so
+     * duplicating them in the browser would leave two numbers to keep in step.
+     *
+     * <p>Rows go up in batches. A single request carrying a whole file exceeds the 2MB multipart
+     * limit and the 60-second timeout somewhere past two thousand rows, and fails after committing
+     * an unknown number of them — the outcome that is hardest to recover from.
+     */
+    const importAssets = async (rows: any[]) => {
+        if (!currentAssetType.id) return;
+        try {
+            const meta = await fetchAssetImportTemplateService(Number(currentAssetType.id));
+
+            if (rows.length > meta.maxRows) {
+                toast.error(
+                    `This file has ${rows.length.toLocaleString()} rows. `
+                    + `Please split it into files of ${meta.maxRows.toLocaleString()} rows or fewer.`
+                );
+                return;
+            }
+
+            setImportRows(rows);
+            setImportHeaders(assetImportHeaders(meta.fieldConfig));
+            setImportProgress({ done: 0, total: rows.length });
+
+            const result = await bulkImportAssetsService(
+                rows,
+                Number(currentAssetType.id),
+                meta.batchSize,
+                (done, total) => setImportProgress({ done, total }),
+            );
+
+            setImportResult(result);
+
+            if (result.inserted > 0) {
+                toast.success(
+                    result.failed === 0
+                        ? `Imported ${result.inserted} asset${result.inserted === 1 ? '' : 's'} successfully.`
+                        : `Imported ${result.inserted} of ${result.total} rows. ${result.failed} failed — see details.`
+                );
+                runQuery(selectedStatus, activeQuery.current.filters);
+            } else {
+                toast.error('No assets were created. See details.');
+            }
+        } catch (error) {
+            console.error('Asset import failed', error);
+            toast.error('The import could not be started. Please try again.');
+        } finally {
+            setImportProgress(null);
+            // Cleared so re-uploading the same file runs the import again rather than being ignored
+            // as an unchanged context value.
+            setFileData({} as any);
+        }
+    };
+
+    useEffect(() => {
+        if (fileData?.jsonData?.length > 0 && fileData?.module === module) {
+            importAssets(fileData.jsonData as unknown as any[]);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [fileData]);
+
     useEffect(() => {
         if (tableStartDate && tableEndDate) {
-            fetchResources();
+            // Keeps the status chip and any filters in force — the toolbar's date picker narrows the
+            // current view rather than replacing it.
+            runQuery(selectedStatus, activeQuery.current.filters);
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [tableStartDate, tableEndDate]);
 
     const assetType = assetTypes.find(t => String(t.id) === typeId);
@@ -188,6 +442,48 @@ const GeneralAssets = () => {
 
     const renderModals = () => (
         <>
+            {/*
+              * Progress, not a spinner. A file goes up in batches and a large one takes a while;
+              * a spinner would leave the user unable to tell a slow import from a stuck one.
+              */}
+            {importProgress && (
+                <ModalComponent width="34%" title="Importing assets" open handleClose={() => { }}>
+                    <Box sx={{ pt: 1 }}>
+                        <Typography sx={{ fontSize: '0.86rem', color: '#475569', mb: 1.5 }}>
+                            Importing {importProgress.done.toLocaleString()} of{' '}
+                            {importProgress.total.toLocaleString()} rows…
+                        </Typography>
+                        <LinearProgress
+                            variant="determinate"
+                            value={importProgress.total ? (importProgress.done / importProgress.total) * 100 : 0}
+                            sx={{
+                                height: 8, borderRadius: 4, bgcolor: alpha(PRIMARY, 0.12),
+                                '& .MuiLinearProgress-bar': { bgcolor: PRIMARY, borderRadius: 4 },
+                            }}
+                        />
+                        <Typography sx={{ fontSize: '0.75rem', color: '#94A3B8', mt: 1.5 }}>
+                            Rows are saved as they go, so nothing already imported is lost if this stops.
+                        </Typography>
+                    </Box>
+                </ModalComponent>
+            )}
+
+            {importResult && (
+                <ModalComponent
+                    width="62%"
+                    title="Import Summary"
+                    open
+                    handleClose={() => setImportResult(null)}
+                >
+                    <AssetBulkImportResult
+                        result={importResult}
+                        sourceRows={importRows}
+                        headers={importHeaders}
+                        handleClose={() => setImportResult(null)}
+                    />
+                </ModalComponent>
+            )}
+
             {crudStates.dispose === currentState
                 && <ModalComponent width={"40%"} title={`Dispose ${assetType?.name || 'Asset'}`} open={open} handleClose={handleClose}>
                     <Dispose
@@ -359,9 +655,13 @@ const GeneralAssets = () => {
                     loading={loading}
                     count={assetCount}
                     exportData
+                    onExport={handleExport}
                     createAction
                     createPermission={PERMISSIONS.CREATE_ASSET}
                     importData
+                    // Lets the import button build this category's template from its own field
+                    // configuration, rather than a static header list that had no entry for assets.
+                    assetTypeId={Number(currentAssetType.id)}
                     header={header}
                     module={module}
                     rows={generalAssetTableData || []}
@@ -377,21 +677,62 @@ const GeneralAssets = () => {
                     selectedStatus={selectedStatus}
                     dateRangePicker
                     filterOptions
+                    /*
+                     * Filter keys must be the parameter names GET /assets actually declares —
+                     * Spring drops anything else without a word, so a filter naming the wrong key
+                     * looks like it works and silently returns the unfiltered list.
+                     *
+                     * Three of these were doing exactly that: `engravedNo` (the endpoint declares
+                     * `engravedNumber`), a `createdAt` date range (it declares `startDate` and
+                     * `endDate`), and a Status dropdown still offering Active/Disabled/Locked —
+                     * user account states, copied from the users page and never adapted.
+                     */
                     columnFilters={[
                         { key: 'assetName', label: 'Asset Name', type: 'text' },
-                        { key: 'engravedNo', label: 'Engraved No', type: 'text' },
-                        { key: 'location', label: 'Location', type: 'text' },
+                        { key: 'engravedNumber', label: 'Engraved No', type: 'text' },
+                        { key: 'serialNumber', label: 'Serial No', type: 'text' },
+                        { key: 'model', label: 'Model', type: 'text' },
+                        {
+                            key: 'location', label: 'Location', type: 'select',
+                            options: branches.map((b) => ({ value: b.label, label: b.label })),
+                        },
                         { key: 'assignedTo', label: 'Assigned To', type: 'text' },
                         {
-                            key: 'status', label: 'Status', type: 'select', options: [
-                                { value: 'active', label: 'Active' },
-                                { value: 'disabled', label: 'Disabled' },
-                                { value: 'locked', label: 'Locked' },
-                            ]
+                            key: 'assetStatusId', label: 'Status', type: 'select',
+                            options: statuses
+                                .filter((s) => s.id != null && ASSET_STATUS_CODES.includes(s.status ?? ''))
+                                .map((s) => ({ value: s.id as number, label: s.name })),
                         },
-                        { key: 'createdAt', label: 'Date Received', type: 'dateRange' },
+                        // "Date Added", not "Date Received": startDate/endDate filter on the
+                        // record's createDate. The asset's own dateReceipt is a free-text column
+                        // holding several date formats, so it cannot be range-queried in SQL — and
+                        // labelling this one "Date Received" would quietly answer a different
+                        // question from the one asked.
+                        { key: 'dateReceived', label: 'Date Added', type: 'dateRange' },
                     ]}
-                    onApplyFilters={(filters) => fetchResources(selectedStatus, filters)}
+                    onApplyFilters={(filters) => runQuery(selectedStatus, filters)}
+                    // Paging refetches through this page's own function, so the status chip, the
+                    // date range and the "due for disposal" flag all survive past page one.
+                    onPaginationChange={(model) =>
+                        fetchResources(activeQuery.current.status, activeQuery.current.filters, model)}
+                    /*
+                     * Row key → the Asset column that orders it. Only columns the register can
+                     * actually be ordered by are listed: Location and Assigned To are derived from
+                     * associations the sort cannot reach, and Status resolves through a join, so
+                     * those keep sorting the visible page rather than pretending to sort the table.
+                     */
+                    serverSortFields={{
+                        assetName: 'assetName',
+                        engravedNumber: 'engravedNumber',
+                        serialNumber: 'serialNumber',
+                        make: 'make',
+                        manufacturer: 'make',
+                        model: 'model',
+                        dateReceived: 'dateReceipt',
+                    }}
+                    // GET /assets declares assetName; the toolbar's search previously sent `name`,
+                    // which Spring discarded without a word.
+                    searchKey="assetName"
                 />
                 </Paper>
             }

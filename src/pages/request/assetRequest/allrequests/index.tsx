@@ -8,6 +8,7 @@ Managing Director
 import {
     useContext,
     useEffect,
+    useRef,
     useState
 } from "react";
 import { useNavigate } from "react-router";
@@ -20,6 +21,10 @@ import { ROUTES } from "../../../../core/routes/routes";
 import ModalComponent from "../../../../components/modal";
 import TableComponent from "../../../../components/tables/TableComponent";
 import RequestUtills from "../utills";
+import TableUtills from "../../../../components/tables/utills";
+import { fetchRowsService } from "../../../../core/apis/globalService";
+import { IRequest } from "../../interface";
+import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../store";
 import RejectRequest from "../RejectRequest";
@@ -41,6 +46,38 @@ import AcknowledgeRequest from "../AcknowledgeRequest";
 import AcknowledgeReceipt from "../AcknowledgeReceipt";
 import ApproveIssuance from "../ApproveIssuance";
 
+
+/**
+ * Statuses a request can actually be in.
+ *
+ * The status table is shared with assets, stock and the approval ladders, so listing all of it here
+ * would offer things like "In Maintenance" that no request ever holds.
+ */
+const REQUEST_STATUS_CODES = [
+    'requestCreated', 'requestApproved', 'managerApproved', 'hodApproved', 'bomApproved',
+    'branchManagerApproved', 'supervisorApproved', 'requestAcknowledged', 'requestRejected',
+    'issued', 'issuanceApproved', 'requestIssued', 'receiptAcknowledged',
+];
+
+/** Hard cap on a filter-aware export; anything larger should be narrowed first. */
+const EXPORT_MAX_ROWS = 10_000;
+
+/**
+ * Translates the toolbar's flat filter object into the parameters `GET /requests` declares.
+ *
+ * <p>The date range arrives as `requestDateFrom` / `requestDateTo` — the toolbar names those after
+ * the column key — and the endpoint wants `startDate` / `endDate`. `statusIds` arrives as a single
+ * id from the dropdown and the endpoint takes a list.
+ */
+const toRequestParams = (filters: Record<string, any>): Record<string, any> => {
+    const { requestDateFrom, requestDateTo, statusIds, ...rest } = filters ?? {};
+    return {
+        ...rest,
+        ...(statusIds ? { statusIds: String(statusIds) } : {}),
+        ...(requestDateFrom ? { startDate: requestDateFrom } : {}),
+        ...(requestDateTo ? { endDate: requestDateTo } : {}),
+    };
+};
 
 const Request = () => {
     const { requestTableData, setOptions } = useContext(RequestContext);
@@ -79,15 +116,94 @@ const Request = () => {
         handleOptionClicked,
         count,
         handleRequest,
+        buildRequestExportRows,
         loading,
         currentRequest,
     } = RequestUtills();
+
+    // Branded Cover + Data workbook, and the reports-style PDF.
+    const { generateExcelFromRows, generatePDFFromRows } = TableUtills({ moduleName: 'request' });
+
+    /**
+     * The params currently in force, so turning a page can reissue the same query.
+     *
+     * Every fetch on this page goes through {@link runQuery} for that reason: paging previously
+     * rebuilt its request through the shared pagination path, which knew nothing of the status ids
+     * or the date range assembled here and quietly dropped both past page one.
+     */
+    const activeParams = useRef<Record<string, any>>({});
+
+    const runQuery = (params: Record<string, any>) => {
+        activeParams.current = params;
+        fetchAllRequests(params);
+    };
+
+    /** Names the slice being exported, so the PDF strip and the Excel cover say what it is. */
+    const buildFilterSummary = (): Array<{ label: string; value: string }> => {
+        const out: Array<{ label: string; value: string }> = [];
+        const f = activeParams.current ?? {};
+
+        if (f.name) out.push({ label: 'Request Title', value: String(f.name) });
+        if (f.requestedBy) out.push({ label: 'Requested By', value: String(f.requestedBy) });
+        if (f.approver) out.push({ label: 'Approver', value: String(f.approver) });
+        if (f.priority) out.push({ label: 'Priority', value: String(f.priority) });
+        if (f.statusIds) {
+            // A single id from the dropdown, or the comma-separated group a status chip sets.
+            const names = String(f.statusIds).split(',')
+                .map((id) => statuses.find((s) => s.id === Number(id))?.name)
+                .filter(Boolean);
+            if (names.length) out.push({ label: 'Status', value: names.join(', ') });
+        }
+        if (f.startDate || f.endDate) {
+            const d = (v?: string) => (v ? new Date(v).toLocaleDateString('en-GB') : '…');
+            out.push({ label: 'Requested', value: `${d(f.startDate)} – ${d(f.endDate)}` });
+        }
+        return out;
+    };
+
+    /**
+     * Exports what the filters describe, not the page on screen.
+     *
+     * <p>Rows are refetched because the table holds one page: exporting it would turn a filter
+     * matching four hundred requests into a file of ten. The same reason the users page does it.
+     */
+    const handleExport = async (format: 'pdf' | 'excel') => {
+        const meta = { filters: buildFilterSummary(), title: 'Asset Requests' };
+        try {
+            const response: any = await fetchRowsService({
+                pageNumber: 0,
+                pageSize: EXPORT_MAX_ROWS,
+                endPoint,
+                params: activeParams.current,
+            });
+
+            const content: IRequest[] = response?.data?.content ?? [];
+            if (content.length === 0) {
+                toast.info('No requests match the current filters.');
+                return;
+            }
+            if (content.length >= EXPORT_MAX_ROWS) {
+                toast.warning(
+                    `Export capped at ${EXPORT_MAX_ROWS.toLocaleString()} rows — narrow the filters for the full set.`
+                );
+            }
+
+            // The table's own mapper, so the export carries resolved requester and approver names
+            // and a formatted date rather than nested entity graphs.
+            const rows = buildRequestExportRows(content);
+            if (format === 'excel') generateExcelFromRows(rows, meta);
+            else await generatePDFFromRows(rows, meta);
+        } catch (error) {
+            console.error('Request export failed', error);
+            toast.error('Could not build the export. Please try again.');
+        }
+    };
 
     // Close the modal and re-fetch so the list shows the request's updated
     // state after an action (status/approver change) instead of going stale.
     const handleClose = () => {
         closeModal();
-        fetchAllRequests({
+        runQuery({
             statusIds,
             status: "CREATED",
             startDate: tableStartDate ? dayjs(tableStartDate).format('YYYY-MM-DDTHH:mm:ss') : '',
@@ -101,7 +217,7 @@ const Request = () => {
     useEffect(() => {
         if (allRequestCsv && selectedStatus === 'all') {
             setStatusIds(allRequestCsv);
-            fetchAllRequests({
+            runQuery({
                 statusIds: allRequestCsv,
                 status: "CREATED",
                 startDate: tableStartDate ? dayjs(tableStartDate).format('YYYY-MM-DDTHH:mm:ss') : '',
@@ -121,7 +237,7 @@ const Request = () => {
                 endDate: tableEndDate ? dayjs(tableEndDate).format('YYYY-MM-DDTHH:mm:ss') : ''
             }; // Fetching requests with status Asset Request Created ID
 
-            fetchAllRequests(params);
+            runQuery(params);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [tableStartDate, tableEndDate]);
@@ -231,7 +347,7 @@ const Request = () => {
         const group = groups[status];
         if (!group) {
             // Default (all) case
-            fetchAllRequests({ statusIds: allRequestCsv, status: "CREATED" });
+            runQuery({ statusIds: allRequestCsv, status: "CREATED" });
             setStatusIds(allRequestCsv);
             setSelectedStatus('all');
             return;
@@ -239,7 +355,7 @@ const Request = () => {
 
         const statusId = statusIdsByCodes(statuses, group.codes);
         if (!statusId) return; // status catalogue not loaded yet
-        fetchAllRequests({ status: group.status, statusIds: statusId });
+        runQuery({ status: group.status, statusIds: statusId });
         setSelectedStatus(status);
         setStatusIds(statusId);
     };
@@ -344,6 +460,7 @@ const Request = () => {
                 loading={loading}
                 count={count}
                 exportData
+                onExport={handleExport}
                 createAction
                 createPermission={PERMISSIONS.CREATE_REQUEST}
                 module={module}
@@ -365,20 +482,47 @@ const Request = () => {
                 selectedStatus={selectedStatus}
                 dateRangePicker
 
+                /*
+                 * Keys must be parameters GET /requests declares — Spring drops the rest silently,
+                 * so a wrong key looks like a working filter that returns everything.
+                 *
+                 * Three were doing that: `assetName` (the endpoint takes `name`), `requestedFrom`
+                 * (not a parameter at all), and a `createdAt` range against an endpoint expecting
+                 * `startDate`/`endDate`. The Status dropdown offered Active/Disabled/Locked — user
+                 * account states, copied from the users page and never adapted.
+                 */
                 columnFilters={[
-                    { key: 'assetName', label: 'Asset Name', type: 'text' },
+                    { key: 'name', label: 'Request Title', type: 'text' },
                     { key: 'requestedBy', label: 'Requested By', type: 'text' },
-                    { key: 'requestedFrom', label: 'Requested From', type: 'text' },
+                    { key: 'approver', label: 'Approver', type: 'text' },
                     {
-                        key: 'status', label: 'Status', type: 'select', options: [
-                            { value: 'active', label: 'Active' },
-                            { value: 'disabled', label: 'Disabled' },
-                            { value: 'locked', label: 'Locked' },
+                        key: 'priority', label: 'Priority', type: 'select', options: [
+                            { value: 'high', label: 'High' },
+                            { value: 'medium', label: 'Medium' },
+                            { value: 'low', label: 'Low' },
                         ]
                     },
-                    { key: 'createdAt', label: 'Request Created', type: 'dateRange' },
+                    {
+                        key: 'statusIds', label: 'Status', type: 'select',
+                        options: statuses
+                            .filter((s) => s.id != null && REQUEST_STATUS_CODES.includes(s.status ?? ''))
+                            .map((s) => ({ value: s.id as number, label: s.name })),
+                    },
+                    { key: 'requestDate', label: 'Request Created', type: 'dateRange' },
                 ]}
-                onApplyFilters={(filters) => fetchAllRequests(filters)}
+                onApplyFilters={(filters) => runQuery(toRequestParams(filters))}
+                onPaginationChange={(model) => fetchAllRequests(activeParams.current, model)}
+                searchKey="name"
+                /*
+                 * Only columns the Request table can be ordered by. Requested By, Approver and
+                 * Status resolve through associations the sort cannot reach, so those keep sorting
+                 * the visible page rather than pretending to sort the whole list.
+                 */
+                serverSortFields={{
+                    name: 'name',
+                    priority: 'priority',
+                    requestDate: 'createDate',
+                }}
             />
         </Box>
     );

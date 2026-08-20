@@ -93,22 +93,29 @@ const Users = () => {
     return () => { cancelled = true; };
   }, []);
 
+  /**
+   * Runs a query and remembers it, so turning a page can reissue the same one.
+   *
+   * Without this, paging rebuilt its request from scratch through the shared pagination path and
+   * lost whatever the page had derived — here, the status chip's boolean flags.
+   */
+  const runQuery = (params: Record<string, any>) => {
+    setActiveFilters(params);
+    fetchAllUsers(params);
+  };
+
   const handleStatusChange = (status: string) => {
-    let params = {};
     if (status === 'locked') {
-      params = { blocked: true };
-      fetchAllUsers(params);
+      runQuery({ blocked: true });
       setSelectedStatus(status);
     } else if (status === 'active') {
-      params = { isEnabled: true, blocked: false, isAccountNonLocked: true };
-      fetchAllUsers(params);
+      runQuery({ isEnabled: true, blocked: false, isAccountNonLocked: true });
       setSelectedStatus(status);
     } else if (status === 'disabled') {
-      params = { isEnabled: false };
-      fetchAllUsers(params);
+      runQuery({ isEnabled: false });
       setSelectedStatus(status);
     } else {
-      fetchAllUsers();
+      runQuery({});
       setSelectedStatus('all');
     }
   };
@@ -133,8 +140,7 @@ const Users = () => {
         params.isAccountNonLocked = false;
       }
     }
-    setActiveFilters(params);
-    fetchAllUsers(params);
+    runQuery(params);
   };
 
   const bulkInsertUsers = async (users: Array<IBulkUserData>) => {
@@ -409,6 +415,10 @@ const Users = () => {
               { key: 'createdAt', label: 'Date Created', type: 'dateRange' },
             ]}
             onApplyFilters={handleApplyFilters}
+            // Paging reissues the query in force, so the status chip's flags and any column filters
+            // survive past page one.
+            onPaginationChange={({ page, pageSize }) => fetchAllUsers(activeFilters, page, pageSize)}
+            searchKey="name"
             tableIcon={<PeopleOutlinedIcon sx={{ fontSize: 18, color: '#08796C' }} />}
           />
         </Box>

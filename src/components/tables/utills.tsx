@@ -20,6 +20,7 @@ import {
 } from "../../utils/constants";
 import { MenuItem, useTheme } from "@mui/material";
 import { exportPDF } from "../../utils/pdf";
+import { exportListPdf } from "../../utils/pdf/listPdf";
 import { useContext, useEffect, useState } from "react";
 import { FileContext } from "../../context/file/FileContext";
 import RoutesUtills from "../../core/routes/utills";
@@ -147,21 +148,41 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
         }
     };
 
-    type ExportMeta = { filters?: Array<{ label: string; value: string }> };
+    type ExportMeta = {
+        filters?: Array<{ label: string; value: string }>;
+        /**
+         * Overrides the document title and filename.
+         *
+         * <p>Both otherwise come from `FileContext`, which the toolbar sets to the table's `module`
+         * — "General Asset" for every asset category. That name drives the row-action filtering and
+         * cannot be changed, so a caller that knows the real subject ("IT Equipment") says so here
+         * rather than exporting three different registers under one title.
+         */
+        title?: string;
+    };
 
     /**
      * Generate PDF directly from an array of rows (no DataGrid API needed).
      * `meta.filters` is rendered as a strip under the header so the reader
      * knows which slice of the data the export represents.
      */
-    const generatePDFFromRows = (rowsData: any[], meta?: ExportMeta) => {
+    const generatePDFFromRows = async (rowsData: any[], meta?: ExportMeta) => {
         try {
             if (!rowsData || rowsData.length === 0) {
                 toast.error(`No data available for export`);
                 return;
             }
             const { columns, rows } = determineRowsandColumns(rowsData);
-            exportPDF(columns, rows, fileName || moduleName || 'export', meta);
+            /*
+             * The reports' PDF, not the older list one.
+             *
+             * `utils/pdf.js` painted a hundred-point solid header block on every page, repeated no
+             * column headings past page one, showed no filter summary and numbered nothing — so a
+             * printed register gave the reader no way to tell what it was a register of, or which
+             * page they were holding. exportListPdf uses the same docKit furniture as the reports,
+             * the GRN and the dispatch notes, so every document the bank prints now looks alike.
+             */
+            await exportListPdf(columns, rows, meta?.title || fileName || moduleName || 'export', meta);
         } catch (error) {
             console.error('Error generating PDF:', error);
             toast.error('Failed to generate PDF: ' + (error instanceof Error ? error.message : 'Unknown error'));
@@ -179,7 +200,7 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
                 return;
             }
             const { columns, rows } = determineRowsandColumns(rowsData);
-            exportExcel(columns, rows, fileName || moduleName || 'export', meta);
+            exportExcel(columns, rows, meta?.title || fileName || moduleName || 'export', meta);
         } catch (error) {
             console.error('Error generating Excel:', error);
             toast.error('Failed to generate Excel: ' + (error instanceof Error ? error.message : 'Unknown error'));

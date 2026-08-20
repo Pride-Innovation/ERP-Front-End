@@ -120,6 +120,13 @@ export interface IAutocompleteComponent {
 export interface IFileUploadButton {
     title: string;
     module: string;
+    /**
+     * The asset category an import belongs to.
+     *
+     * Required for the asset template, whose columns, required markers and dropdowns all come from
+     * that category's own field configuration. Absent for every other module.
+     */
+    assetTypeId?: number;
 }
 
 export interface ICheckboxComponent {

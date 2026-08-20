@@ -101,12 +101,17 @@ const InventoryUtills = () => {
         },
     };
 
-    const fetchInventory = async (params?: Record<string, any>) => {
+    const fetchInventory = async (
+        params?: Record<string, any>,
+        pageModel?: { page: number; pageSize: number },
+    ) => {
         setLoading(true)
         try {
             const response = await fetchRowsService({
-                pageNumber: 0,
-                pageSize: 10,
+                // Paging comes back through here so the page's own derived params — the resolved
+                // stocking-status id, the toolbar's date range — survive past page one.
+                pageNumber: pageModel?.page ?? 0,
+                pageSize: pageModel?.pageSize ?? 10,
                 endPoint,
                 params
             }) as IInventoriesAxiosResponse;

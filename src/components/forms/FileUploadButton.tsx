@@ -16,6 +16,16 @@ import * as XLSX from 'xlsx';
 import { toast } from "react-toastify";
 import { importTemplates } from "./importTemplates";
 import { downloadUserImportTemplate } from "../../pages/users/userImportTemplate";
+import { downloadAssetImportTemplate } from "../../pages/assets/assetImportTemplate";
+
+/**
+ * Rows past which the browser refuses to even map the sheet.
+ *
+ * Well above any module's stated cap on purpose: this exists so a mistakenly-chosen 200,000-row
+ * export fails with a sentence instead of freezing the tab. The real limits are module policy and
+ * are checked against the server's own configuration.
+ */
+const ABSOLUTE_ROW_CEILING = 20_000;
 
 const toCamelCase = (str: string): string => {
     const cleanStr = str.replace(/[^\w\s]/g, ' ');
@@ -35,7 +45,7 @@ const toCamelCase = (str: string): string => {
     return result;
 };
 
-const FileUploadButton = ({ title, module }: IFileUploadButton) => {
+const FileUploadButton = ({ title, module, assetTypeId }: IFileUploadButton) => {
     const inputRef = useRef<HTMLInputElement>(null);
     const { setFileData } = useContext(FileContext);
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -60,6 +70,24 @@ const FileUploadButton = ({ title, module }: IFileUploadButton) => {
             } catch (e) {
                 console.error('Template download failed', e);
                 toast.error('Failed to generate the user import template.');
+            }
+            return;
+        }
+
+        // Assets, like users, need a generated template: the columns and which are required come
+        // from the category's field configuration, and the dropdowns from live reference data. The
+        // static header list below could give neither, and had no 'General Asset' entry at all —
+        // so this menu item used to fail with "No template available" on the assets page.
+        if (module === 'General Asset') {
+            if (!assetTypeId) {
+                toast.error('Open an asset category before downloading its import template.');
+                return;
+            }
+            try {
+                await downloadAssetImportTemplate(assetTypeId);
+            } catch (e) {
+                console.error('Template download failed', e);
+                toast.error('Failed to generate the asset import template.');
             }
             return;
         }
@@ -117,6 +145,21 @@ const FileUploadButton = ({ title, module }: IFileUploadButton) => {
 
                 if (rawJson.length === 0) {
                     toast.warning("No data found in the Excel file");
+                    return;
+                }
+
+                /*
+                 * A backstop, not the policy limit.
+                 *
+                 * Each module states its own row cap and enforces it against the server's
+                 * configuration — see the asset import handler. This only stops a file so large that
+                 * mapping it here would lock the browser before anything could report on it.
+                 */
+                if (rawJson.length > ABSOLUTE_ROW_CEILING) {
+                    toast.error(
+                        `This file has ${rawJson.length.toLocaleString()} rows, which is too many to `
+                        + 'process in the browser. Please split it into smaller files.'
+                    );
                     return;
                 }
 
