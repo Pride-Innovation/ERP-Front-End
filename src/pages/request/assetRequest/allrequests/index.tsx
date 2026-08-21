@@ -21,6 +21,14 @@ import { ROUTES } from "../../../../core/routes/routes";
 import ModalComponent from "../../../../components/modal";
 import TableComponent from "../../../../components/tables/TableComponent";
 import RequestUtills from "../utills";
+import {
+    REQUEST_EXPORT_MAX_ROWS as EXPORT_MAX_ROWS,
+    REQUEST_SEARCH_KEY,
+    REQUEST_SORT_FIELDS,
+    buildRequestColumnFilters,
+    buildRequestFilterSummary,
+    toRequestParams,
+} from "../requestTableConfig";
 import TableUtills from "../../../../components/tables/utills";
 import { fetchRowsService } from "../../../../core/apis/globalService";
 import { IRequest } from "../../interface";
@@ -46,38 +54,6 @@ import AcknowledgeRequest from "../AcknowledgeRequest";
 import AcknowledgeReceipt from "../AcknowledgeReceipt";
 import ApproveIssuance from "../ApproveIssuance";
 
-
-/**
- * Statuses a request can actually be in.
- *
- * The status table is shared with assets, stock and the approval ladders, so listing all of it here
- * would offer things like "In Maintenance" that no request ever holds.
- */
-const REQUEST_STATUS_CODES = [
-    'requestCreated', 'requestApproved', 'managerApproved', 'hodApproved', 'bomApproved',
-    'branchManagerApproved', 'supervisorApproved', 'requestAcknowledged', 'requestRejected',
-    'issued', 'issuanceApproved', 'requestIssued', 'receiptAcknowledged',
-];
-
-/** Hard cap on a filter-aware export; anything larger should be narrowed first. */
-const EXPORT_MAX_ROWS = 10_000;
-
-/**
- * Translates the toolbar's flat filter object into the parameters `GET /requests` declares.
- *
- * <p>The date range arrives as `requestDateFrom` / `requestDateTo` — the toolbar names those after
- * the column key — and the endpoint wants `startDate` / `endDate`. `statusIds` arrives as a single
- * id from the dropdown and the endpoint takes a list.
- */
-const toRequestParams = (filters: Record<string, any>): Record<string, any> => {
-    const { requestDateFrom, requestDateTo, statusIds, ...rest } = filters ?? {};
-    return {
-        ...rest,
-        ...(statusIds ? { statusIds: String(statusIds) } : {}),
-        ...(requestDateFrom ? { startDate: requestDateFrom } : {}),
-        ...(requestDateTo ? { endDate: requestDateTo } : {}),
-    };
-};
 
 const Request = () => {
     const { requestTableData, setOptions } = useContext(RequestContext);
@@ -138,29 +114,6 @@ const Request = () => {
         fetchAllRequests(params);
     };
 
-    /** Names the slice being exported, so the PDF strip and the Excel cover say what it is. */
-    const buildFilterSummary = (): Array<{ label: string; value: string }> => {
-        const out: Array<{ label: string; value: string }> = [];
-        const f = activeParams.current ?? {};
-
-        if (f.name) out.push({ label: 'Request Title', value: String(f.name) });
-        if (f.requestedBy) out.push({ label: 'Requested By', value: String(f.requestedBy) });
-        if (f.approver) out.push({ label: 'Approver', value: String(f.approver) });
-        if (f.priority) out.push({ label: 'Priority', value: String(f.priority) });
-        if (f.statusIds) {
-            // A single id from the dropdown, or the comma-separated group a status chip sets.
-            const names = String(f.statusIds).split(',')
-                .map((id) => statuses.find((s) => s.id === Number(id))?.name)
-                .filter(Boolean);
-            if (names.length) out.push({ label: 'Status', value: names.join(', ') });
-        }
-        if (f.startDate || f.endDate) {
-            const d = (v?: string) => (v ? new Date(v).toLocaleDateString('en-GB') : '…');
-            out.push({ label: 'Requested', value: `${d(f.startDate)} – ${d(f.endDate)}` });
-        }
-        return out;
-    };
-
     /**
      * Exports what the filters describe, not the page on screen.
      *
@@ -168,7 +121,10 @@ const Request = () => {
      * matching four hundred requests into a file of ten. The same reason the users page does it.
      */
     const handleExport = async (format: 'pdf' | 'excel') => {
-        const meta = { filters: buildFilterSummary(), title: 'Asset Requests' };
+        const meta = {
+            filters: buildRequestFilterSummary(activeParams.current, statuses, 'All'),
+            title: 'Asset Requests',
+        };
         try {
             const response: any = await fetchRowsService({
                 pageNumber: 0,
@@ -491,38 +447,19 @@ const Request = () => {
                  * `startDate`/`endDate`. The Status dropdown offered Active/Disabled/Locked — user
                  * account states, copied from the users page and never adapted.
                  */
-                columnFilters={[
-                    { key: 'name', label: 'Request Title', type: 'text' },
-                    { key: 'requestedBy', label: 'Requested By', type: 'text' },
-                    { key: 'approver', label: 'Approver', type: 'text' },
-                    {
-                        key: 'priority', label: 'Priority', type: 'select', options: [
-                            { value: 'high', label: 'High' },
-                            { value: 'medium', label: 'Medium' },
-                            { value: 'low', label: 'Low' },
-                        ]
-                    },
-                    {
-                        key: 'statusIds', label: 'Status', type: 'select',
-                        options: statuses
-                            .filter((s) => s.id != null && REQUEST_STATUS_CODES.includes(s.status ?? ''))
-                            .map((s) => ({ value: s.id as number, label: s.name })),
-                    },
-                    { key: 'requestDate', label: 'Request Created', type: 'dateRange' },
-                ]}
-                onApplyFilters={(filters) => runQuery(toRequestParams(filters))}
-                onPaginationChange={(model) => fetchAllRequests(activeParams.current, model)}
-                searchKey="name"
+                columnFilters={buildRequestColumnFilters(statuses)}
                 /*
-                 * Only columns the Request table can be ordered by. Requested By, Approver and
-                 * Status resolve through associations the sort cannot reach, so those keep sorting
-                 * the visible page rather than pretending to sort the whole list.
+                 * Merged over the tab's base parameters rather than replacing them, so the status
+                 * chip above the table survives a filter being applied.
                  */
-                serverSortFields={{
-                    name: 'name',
-                    priority: 'priority',
-                    requestDate: 'createDate',
-                }}
+                onApplyFilters={(filters) =>
+                    runQuery(toRequestParams(
+                        { statusIds: statusIds || allRequestCsv, status: "CREATED" },
+                        filters,
+                    ))}
+                onPaginationChange={(model) => fetchAllRequests(activeParams.current, model)}
+                searchKey={REQUEST_SEARCH_KEY}
+                serverSortFields={REQUEST_SORT_FIELDS}
             />
         </Box>
     );

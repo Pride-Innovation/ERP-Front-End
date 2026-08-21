@@ -5,7 +5,7 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useRef } from "react";
 import TableComponent from "../../../../components/tables/TableComponent";
 import { Box } from "@mui/material";
 import RequestUtills from "../utills";
@@ -18,15 +18,37 @@ import { crudStates } from "../../../../utils/constants";
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import ModalComponent from "../../../../components/modal";
 import DeleteRequest from "../../DeleteRequest";
+import StatusUtills from "../../../settings/statuses/Utills";
+import { statusIdsByCodes } from "../../../../utils/helpers";
+import {
+    REQUEST_SEARCH_KEY,
+    REQUEST_SORT_FIELDS,
+    buildRequestColumnFilters,
+    toRequestParams,
+} from "../requestTableConfig";
+import useRequestExport from "../useRequestExport";
 
 const RejectedRequest = () => {
     const { requests } = useSelector((state: RootState) => state.AssetsRequestsStore)
+    const { statuses } = useSelector((state: RootState) => state.StatusesStore);
+    const { fetchAllStatuses } = StatusUtills();
     const { requestTableData, setOptions, setRequestStatusIds } = useContext(RequestContext);
-    const statusIds = "2";
+    const { exportRequests } = useRequestExport('Rejected');
+
+    /*
+     * Resolved from the status code, not hardcoded.
+     *
+     * This was the literal string "2", which relied on the status table having been seeded into an
+     * empty database in a particular order. Any environment seeded differently — or any future
+     * insert ahead of it — pointed this tab at the wrong status with nothing to indicate it.
+     */
+    const statusIds = statusIdsByCodes(statuses, ['requestRejected']);
+
+    useEffect(() => { fetchAllStatuses(); }, []);
 
     useEffect(() => {
-        setRequestStatusIds(statusIds.split(',').map(id => parseInt(id, 10)));
-    }, []);
+        if (statusIds) setRequestStatusIds(statusIds.split(',').map((id) => parseInt(id, 10)));
+    }, [statusIds]);
 
     const {
         handleOptionClicked,
@@ -44,15 +66,24 @@ const RejectedRequest = () => {
         setSendingRequest
     } = RequestUtills()
 
+    /** The parameters in force, so paging and exporting reissue the query on screen. */
+    const activeParams = useRef<Record<string, any>>({});
+
+    const runQuery = (next: Record<string, any>) => {
+        activeParams.current = next;
+        fetchAllRequests(next);
+    };
+
     useEffect(() => {
         /**
-         * This should contain the Status ID for Rejected Requests
+         * The status id for rejected requests, resolved by code.
          */
-        const params = { statusIds: 2, status: "REJECTED" }
-        fetchAllRequests(params);
-
-        // setFileData({ file: "", module: "", jsonData: [] });
-    }, []);
+        // Depends on statusIds, which resolves only once the status catalogue has loaded — an
+        // empty dependency list here would fire once with nothing and never fetch again.
+        if (!statusIds) return;
+        runQuery({ statusIds, status: "REJECTED" });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [statusIds]);
 
     useEffect(() => { handleRequest(requests) }, [requests]);
 
@@ -93,22 +124,20 @@ const RejectedRequest = () => {
                     rows={requestTableData}
                     columnHeaders={columnHeaders}
                     handleOptionClicked={handleOptionClicked}
-                    params={{ statusIds: 2 }}
+                    params={{ statusIds, status: "REJECTED" }}
                     refresh
-                    columnFilters={[
-                        { key: 'assetName', label: 'Asset Name', type: 'text' },
-                        { key: 'requestedBy', label: 'Requested By', type: 'text' },
-                        { key: 'requestedFrom', label: 'Requested From', type: 'text' },
-                        {
-                            key: 'status', label: 'Status', type: 'select', options: [
-                                { value: 'active', label: 'Active' },
-                                { value: 'disabled', label: 'Disabled' },
-                                { value: 'locked', label: 'Locked' },
-                            ]
-                        },
-                        { key: 'createdAt', label: 'Request Created', type: 'dateRange' },
-                    ]}
-                    onApplyFilters={(filters) => fetchAllRequests(filters)}
+                    columnFilters={buildRequestColumnFilters(statuses)}
+                    /*
+                     * Merged over this tab's own parameters. It previously passed the filters alone,
+                     * which dropped `statusIds` — so filtering the Rejected tab listed every request
+                     * in the system under a heading that said Rejected.
+                     */
+                    onApplyFilters={(filters) =>
+                        runQuery(toRequestParams({ statusIds, status: "REJECTED" }, filters))}
+                    onPaginationChange={(model) => fetchAllRequests(activeParams.current, model)}
+                    onExport={(format) => exportRequests(format, activeParams.current)}
+                    searchKey={REQUEST_SEARCH_KEY}
+                    serverSortFields={REQUEST_SORT_FIELDS}
                 />
             }
         </Box>

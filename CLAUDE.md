@@ -1,52 +1,138 @@
-Widgets are controlled by permissions.
+# Pride Bank ERP — working context
 
-2. The mechanism.
-- I like the whole idea of the dashboard, but don't you think dashboards should be having a totally different sets of permissions.
-- An officer may have a permission to view assets or read assets, since he or she may need to access the assets routes and view his assets. How will the dashboard resolve this? will he only be able to see only assets records assigned to him on the dashboard, and if that is so, do you determine the user role, and then further filter based on his role what he sees, because even a BOM may need to see his reports, and reports for the entire branch, and this may also be the case for the BM. Please show me a brief structure on how the records are being filtered based on the user role and work station.
+Two repos, worked on together:
 
-3. The page, top to bottom.
-- When I log in a Super Admin, I see  "All branches & Head Office" as expected.
-- But when i log in a BOM, BM or a Branch user, i should be able to see the branch name, but instead its showing  "Your records". Please also double check the icon being rendered.
-- Please double check if the bands of  Total Assets · In Use · In Store · In Repair render the data accordingly. How is Head office data rendered, and how are branches data rendered, which permissions guard this and which roles are supposed to see this. 
+- **Frontend** — `ERP-Front-End` (React 18 + TypeScript + MUI v5, CRA)
+- **Backend** — `ERP-Back-End` (Spring Boot 3.2, Hibernate 6.3 + Envers, Flyway, MySQL)
 
-4. Every widget
+Verify with `npx tsc --noEmit -p tsconfig.json`, `npx eslint src/... --ext .ts,.tsx`, and
+`./mvnw.cmd -o test` (77 tests at time of writing, all green).
 
-Work Queue
-- Open Request. -> What does it mean when you say an open request? Let us say an officer makes a request, this request is open to the Requester until the approval processes (even movement if necessary) are completed until the asset finally reaches the requester. Is that how its implemented? Please look that this very carefully and also show movements if necessary.
-- Open Request. -> This shows on the dashboard of the current approver, and disappears when the current approver has approved the request. Is that the case?
-- Please also double check that the total open requests are rendered accordingly to the correct users and also in the correct Branches. 
-- Please also double check the flags implementation also in the backend.
+---
 
-My Assets.
-- Please just double check the functionality of the assets assigned to me also in the backend. And also for the drop down, please improve the styling of the assets table like the striped table for reports page and also add some clean designs if necessary to improve the listings of assets assigned to me. Each row should be clickable to go to the assets view details page. 
+## Traps this codebase has already been bitten by
 
-My Requests (My Open Requests). 
-- Please double check the data that is being displayed on this section. When an officer makes a request an his immediate supervisor approves, the request should still be visible in this section through out all the approval steps and even movements if there. It should only disappear when the requested item has reached the user. please confirm that. 
+Read these before writing a query or a filter. Each one cost real debugging time and each is
+represented by a regression test.
 
-Assets by Category
-- Please double check the functionality of this and please also let me know what the HO super admin sees and also what the BM and the BOM sees. Does the Super admin see the general report for HO and all other branches and do BM and BOM only see their Branches related information. 
+**1. JPQL dotted paths generate INNER JOINs.**
+`a.branch.id = :id` silently inner-joins `branch`. Through a *nullable* association that filters
+rows out in the FROM clause **before** any `OR` or `IS NULL` check is evaluated. This has now
+caused four separate bugs: an empty branch-scoped movement listing, an asset location filter that
+excluded every unassigned asset, an approver inbox that excluded every request routed to one named
+person, and a national roll-up that dropped branchless assets. **Always use an explicit
+`LEFT JOIN`,** and reuse the join rather than calling `join()` twice (a second call duplicates it
+and inflates both rows and counts).
 
-Asset Conditions.
-- Please also double check this functionality and clearly state it for me.
+**2. Spring silently drops undeclared `@RequestParam`s.**
+A frontend filter naming a parameter the endpoint does not declare looks like it works and returns
+the unfiltered list. This is why the assets, requests and store filters were all partly inert.
+**Check the controller signature before adding a filter key.**
 
-Assets Across All Branches
-- Please check in the settings and confirm that this permission can be assigned to a role.
+**3. Pagination without a tie-break repeats and drops rows.**
+Ordering on a single non-unique column leaves ties, and MySQL may order them differently per query,
+so with OFFSET/LIMIT the same row appears on two pages and another on none. **Always append `id`
+as a secondary sort.** `AssetSearchDao` and `RequestSearchDao` both do now.
 
+**4. Never hardcode a status id.** Resolve by code (`statusIdsByCodes`, `statusService.findByStatusCode`).
+Ids depend on seed order; two environments will disagree. Fixed in the dashboard queue and the
+Rejected tab, both of which used literals.
 
-Stocking Trend.
+**5. Envers `_aud` tables need every new column.** A new column on an `@Audited` entity without the
+matching `_aud` column fails every write at runtime. Add both in the migration.
 
-- This section completely seems to render wrongly. The categrories lists are not rendering our categories but legacy data. Please double check and please ensure that the graphs is loading accordingly.
-- Please let me know how the values loads for head office, and for branches. I would also suggest that there is also a branch selection that enables admins in head office to select a particular branch to see the reports per branch, and then they should be able to see overall also. This should per branch filter should also be applied to the Positions section.  
+**6. Frontend services `catch (error) { return error }`** rather than throwing, so a failure arrives
+as a value with no `status`. Treat anything that is not 200 as failed.
 
-Request Fullfilment.
-- Request Fulfillment should also borrow the approach for Stocking Trend where i can see per branch, and also overall if i am admin in HO. But branches only see for their branches. Please double the functionality first and let me know how it stands for now. 
+---
 
+## Permission model
 
-Records.
-- What is the plan for the Records section that you mentioned that it has no widgets. I need this also implemented and properly functional. 
+Effective permissions = `title.role.permissions ∪ additionalRoles[].permissions`. A user whose role
+set contains `SUPER_ADMIN` bypasses every check.
 
+**Two axes, deliberately separate:**
 
-5. What each user group actually sees
-- I highly recommend that apart from the seeders, these permissions must be visible in the roles and permissions section in settings so that some of the permissions can given to other roles also or in a better way to do this. Because there may never be a store keeper but the permissions may be assigned to head office administrators.  
+- **Route/action permissions** (`READ_ASSET`, `CREATE_REQUEST`, `APPROVE_STOCK_TAKE`, …) — may you
+  open this page or perform this action.
+- **Dashboard permissions** (`DASH_VIEW_*` subject, `DASH_SCOPE_*` scope) — what you see summarised
+  and how far. Separate because `READ_ASSET` answers "may you open your own asset's detail page",
+  and borrowing it to decide "how much of the estate do you see summarised" gave a branch officer
+  the whole branch's totals.
 
-Note:  One of the main reasons why i need you to thoroughly think about dashboard permissions separately is also that you are assuming that the Super Admin should be the only one seeing some of these messages. But to clarify to you is that the dashboard can really get so complicated based of the requirement. A normal officer may not see all these reports and only see things associated with him or her. But there is an admin officer, who should ideally have the visibility to see even reports from other branches and even head office, since admins are suppose to ideally manage this app. They should have visibility to a lot of things in this app and even view all issuance stages of a requests, assets across all branches and so many other information. This makes its a bit complicated. Please note that admins can also make requests and they also have managers. Then there is also another important unit of infra. Its the reason i have created the admin unit and infra unit to distinguish whether a user is an officer but then from Admin unit or Infra unit. Please note that this very important.  
+**Scope is a ladder** (`SELF` < `BRANCH` < `ALL`); the widest granted wins. `DashboardScopeService`
+is the single resolver — `effectiveScope()`, `resolveBranch()`, `resolveOwner()`, `canView()`.
+
+**Migration safety:** a user holding none of an axis falls back to the pre-existing signals
+(`VIEW_ALL_BRANCHES` → ALL; an org-read permission plus a duty station → BRANCH; else SELF). The
+frontend `personas.ts` mirrors those rules line for line — **if they drift, the page renders a widget
+whose endpoint then refuses it.**
+
+Permissions are granted in **Settings → Roles**, in three labelled groups: *Action permissions*,
+*Dashboard — what they see*, *Dashboard — how far they see*.
+
+---
+
+## Dashboard — done
+
+One page, one widget registry, no dashboard-per-role. Widgets declare a `band` and a
+`qualifies(capabilities)` predicate; empty bands do not render. Bands run **Needs Action → Mine →
+Position → Trend → Records** for everyone, so the page has the same shape whoever is looking.
+
+| Widget | Band | Needs |
+|---|---|---|
+| Awaiting My Decision | act | `DASH_VIEW_REQUESTS` |
+| My Assets | mine | always |
+| My Open Requests | mine | `DASH_VIEW_REQUESTS` |
+| Assets by Category | position | `DASH_VIEW_ASSETS` |
+| Asset Condition | position | `DASH_VIEW_ASSETS` |
+| Assets Across All Branches | position | scope = ALL |
+| Stocking Trend | trend | `DASH_VIEW_STOCK` |
+| Request Fulfilment | trend | `DASH_VIEW_REQUESTS` |
+| Recent Activity | records | assets or requests |
+
+A **branch selector** appears only at ALL scope and moves the whole page at once (three widgets
+wanted a branch filter; per-widget controls could disagree with each other).
+
+**Request lifecycle, as specified:** "Awaiting My Decision" is exactly what the workflow routed to
+you and disappears the moment you act. "My Open Requests" survives every approval tier, issuance and
+the movement carrying the item, and leaves only on receipt acknowledgement. Open is defined by
+*exclusion* of the two terminal states (`requestRejected`, `receiptAcknowledged`) so adding an
+approval step never requires editing a list.
+
+---
+
+## Audit trail — done
+
+`audit_event` (V17), append-only, deliberately **not** Envers-mirrored. `AuditService.record(...)`
+joins the caller's transaction so the trail matches what committed; auth events use `REQUIRES_NEW` so
+a *failed* login is still recorded. Envers stays underneath as the field-level forensic record — it
+has no actor, no IP, and cannot see a login at all.
+
+Instrumented: auth (incl. failed logins, auto-block, password reset), Movement, Consignment, Assets,
+Disposal, Maintenance, Requests, Inventory, Users. **Ordinary page views are not audited** — they
+would be ~95% of rows; exports are, because that is data leaving the building.
+
+---
+
+## Still open
+
+**1. Permissions gating across the app** — the next piece of work. See
+`docs/PERMISSIONS-PLAN.md`.
+
+**2. `determineUserRole()` is deprecated, not gone.** It maps `title.role.name` onto hardcoded
+labels, ignores `additionalRoles`, and knows nothing about duty station. Every caller now consults an
+explicitly granted dashboard scope **first** and reaches the switch only for roles nobody has
+configured. Once every role in an estate carries a scope, it and `legacyRequestersList` can be
+deleted. Its dangerous `default -> emptyList()` (= *no restriction*, so unnamed roles saw everything)
+is already closed.
+
+**3. Asset Condition has no "Disposed" segment gap** — resolved; the projection now returns it and
+the four counts partition the total exactly. Note the bug this surfaced: `assigned` was "any status
+that is not in-maintenance and not require-update", which counted **written-off assets as In Use**.
+
+**4. Store page Status filter** still offers Active/Disabled/Locked (user-account states). Needs the
+same treatment as assets and requests once `GET /store`'s parameters are confirmed.
+
+**5. `utils/pdf.js`** still serves the two DataGrid-based exporters. List pages now use
+`utils/pdf/listPdf.ts` (reports-quality). Migrate the rest once the new PDF is confirmed good.

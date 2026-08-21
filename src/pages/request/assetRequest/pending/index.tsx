@@ -8,7 +8,7 @@ Managing Director
 import TableComponent from "../../../../components/tables/TableComponent";
 import { Box } from "@mui/material";
 import RequestUtills from "../utills";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../store";
 import { RequestContext } from "../../../../context/request/RequestContext";
@@ -28,8 +28,16 @@ import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import usePermissions from "../../../../core/permissions/usePermissions";
 import { PERMISSIONS } from "../../../../core/permissions/constants";
 import RoutesUtills from "../../../../core/routes/utills";
+import {
+    REQUEST_SEARCH_KEY,
+    REQUEST_SORT_FIELDS,
+    buildRequestColumnFilters,
+    toRequestParams,
+} from "../requestTableConfig";
+import useRequestExport from "../useRequestExport";
 
 const PendingRequest = () => {
+    const { exportRequests } = useRequestExport('Pending');
     const { requests } = useSelector((state: RootState) => state.AssetsRequestsStore)
     const { statuses } = useSelector((state: RootState) => state.StatusesStore);
     const { fetchAllStatuses } = StatusUtills();
@@ -69,19 +77,31 @@ const PendingRequest = () => {
         ...(currentUser?.id ? { currentApproverId: currentUser.id } : {})
     };
 
+    /**
+     * The parameters currently in force.
+     *
+     * Held so that paging and exporting reissue exactly the query on screen. Without it both rebuilt
+     * their own request and lost this tab's approver scoping and status ids.
+     */
+    const activeParams = useRef<Record<string, any>>(params);
+
+    const runQuery = (next: Record<string, any>) => {
+        activeParams.current = next;
+        fetchAllRequests(next);
+    };
+
     // Close the modal and re-fetch from the server so the list reflects the
     // request's new state (e.g. it leaves this approver's queue once actioned).
     const handleClose = () => {
         closeModal();
-        fetchAllRequests(params);
+        runQuery(activeParams.current);
     };
 
     useEffect(() => { fetchAllStatuses(); }, []);
 
     useEffect(() => {
-        fetchAllRequests(params);
-
-        // setFileData({ file: "", module: "", jsonData: [] });
+        runQuery(params);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
 
@@ -171,7 +191,7 @@ const PendingRequest = () => {
                 const inProgressIds = statusIdsByCodes(statuses, PENDING_REQUEST_CODES);
                 if (!inProgressIds) return; // status catalogue not loaded yet
                 const param = { status: "PENDING", statusIds: inProgressIds, ...approverParam };
-                fetchAllRequests(param);
+                runQuery(param);
                 setSelectedStatus(status);
                 setStatusIds(inProgressIds);
                 break;
@@ -180,14 +200,14 @@ const PendingRequest = () => {
                 const acknowledgedIds = statusIdsByCodes(statuses, ['unitAcknowledged']);
                 if (!acknowledgedIds) return; // status catalogue not loaded yet
                 const param = { status: "PENDING", statusIds: acknowledgedIds, ...approverParam };
-                fetchAllRequests(param);
+                runQuery(param);
                 setSelectedStatus(status);
                 setStatusIds(acknowledgedIds);
                 break;
             }
             default:
                 setStatusIds('');
-                fetchAllRequests({ status: "PENDING", ...approverParam });
+                runQuery({ status: "PENDING", ...approverParam });
                 setSelectedStatus('all');
                 break;
         }
@@ -258,20 +278,20 @@ const PendingRequest = () => {
                     status
                     onStatusChange={handleStatusChange}
                     selectedStatus={selectedStatus}
-                    columnFilters={[
-                        { key: 'assetName', label: 'Asset Name', type: 'text' },
-                        { key: 'requestedBy', label: 'Requested By', type: 'text' },
-                        { key: 'requestedFrom', label: 'Requested From', type: 'text' },
-                        {
-                            key: 'status', label: 'Status', type: 'select', options: [
-                                { value: 'active', label: 'Active' },
-                                { value: 'disabled', label: 'Disabled' },
-                                { value: 'locked', label: 'Locked' },
-                            ]
-                        },
-                        { key: 'createdAt', label: 'Request Created', type: 'dateRange' },
-                    ]}
-                    onApplyFilters={(filters) => fetchAllRequests({ ...filters, ...approverParam })}
+                    columnFilters={buildRequestColumnFilters(statuses)}
+                    /*
+                     * Merged over this tab's own parameters, never replacing them.
+                     *
+                     * This previously spread only the filters and the approver param, dropping the
+                     * tab's `statusIds` — so applying any filter on Pending widened it to every
+                     * request in the system under a heading that said Pending.
+                     */
+                    onApplyFilters={(filters) =>
+                        runQuery(toRequestParams({ ...params, ...approverParam }, filters))}
+                    onPaginationChange={(model) => fetchAllRequests(activeParams.current, model)}
+                    onExport={(format) => exportRequests(format, activeParams.current)}
+                    searchKey={REQUEST_SEARCH_KEY}
+                    serverSortFields={REQUEST_SORT_FIELDS}
                 />
             }
         </Box>

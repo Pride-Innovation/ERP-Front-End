@@ -8,7 +8,7 @@ Managing Director
 import TableComponent from "../../../../components/tables/TableComponent";
 import { Box } from "@mui/material";
 import RequestUtills from "../utills";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../store";
 import { RequestContext } from "../../../../context/request/RequestContext";
@@ -23,6 +23,13 @@ import usePermissions from "../../../../core/permissions/usePermissions";
 import { PERMISSIONS } from "../../../../core/permissions/constants";
 import StatusUtills from "../../../settings/statuses/Utills";
 import { statusIdByCode } from "../../../../utils/helpers";
+import {
+    REQUEST_SEARCH_KEY,
+    REQUEST_SORT_FIELDS,
+    buildRequestColumnFilters,
+    toRequestParams,
+} from "../requestTableConfig";
+import useRequestExport from "../useRequestExport";
 
 const IssuedRequest = () => {
     const { requests } = useSelector((state: RootState) => state.AssetsRequestsStore)
@@ -41,6 +48,15 @@ const IssuedRequest = () => {
         .join(',');
 
     const [statusIds, setStatusIds] = useState<string>('');
+    const { exportRequests } = useRequestExport('Issued');
+
+    /** The parameters in force, so paging and exporting reissue the query on screen. */
+    const activeParams = useRef<Record<string, any>>({});
+
+    const runQuery = (next: Record<string, any>) => {
+        activeParams.current = next;
+        fetchAllRequests(next);
+    };
 
     useEffect(() => { fetchAllStatuses(); }, []);
 
@@ -72,7 +88,7 @@ const IssuedRequest = () => {
     useEffect(() => {
         if (issuedGroupCsv && selectedStatus === 'all') {
             setStatusIds(issuedGroupCsv);
-            fetchAllRequests({ statusIds: issuedGroupCsv, status: "ISSUED" });
+            runQuery({ statusIds: issuedGroupCsv, status: "ISSUED" });
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [issuedGroupCsv]);
@@ -133,7 +149,7 @@ const IssuedRequest = () => {
         const code = codeByOption[status];
         if (!code) {
             // Default (all) case — the whole issued group.
-            fetchAllRequests({ statusIds: issuedGroupCsv, status: "ISSUED" });
+            runQuery({ statusIds: issuedGroupCsv, status: "ISSUED" });
             setStatusIds(issuedGroupCsv);
             setSelectedStatus('all');
             return;
@@ -143,7 +159,7 @@ const IssuedRequest = () => {
         if (resolved == null) return; // status catalogue not loaded yet
         const statusId = String(resolved);
 
-        fetchAllRequests({ status: "ISSUED", statusIds: statusId });
+        runQuery({ status: "ISSUED", statusIds: statusId });
         setSelectedStatus(status);
         setStatusIds(statusId);
     }
@@ -201,20 +217,18 @@ const IssuedRequest = () => {
                         onStatusChange={handleStatusChange}
                         selectedStatus={selectedStatus}
                         filterOptions
-                        columnFilters={[
-                            { key: 'assetName', label: 'Asset Name', type: 'text' },
-                            { key: 'requestedBy', label: 'Requested By', type: 'text' },
-                            { key: 'requestedFrom', label: 'Requested From', type: 'text' },
-                            {
-                                key: 'status', label: 'Status', type: 'select', options: [
-                                    { value: 'active', label: 'Active' },
-                                    { value: 'disabled', label: 'Disabled' },
-                                    { value: 'locked', label: 'Locked' },
-                                ]
-                            },
-                            { key: 'createdAt', label: 'Request Created', type: 'dateRange' },
-                        ]}
-                        onApplyFilters={(filters) => fetchAllRequests(filters)}
+                        columnFilters={buildRequestColumnFilters(statuses)}
+                        /*
+                         * Merged over this tab's own parameters. It previously passed the filters
+                         * alone, dropping `statusIds` — so filtering the Issued tab listed every
+                         * request in the system under a heading that said Issued.
+                         */
+                        onApplyFilters={(filters) =>
+                            runQuery(toRequestParams({ statusIds, status: "ISSUED" }, filters))}
+                        onPaginationChange={(model) => fetchAllRequests(activeParams.current, model)}
+                        onExport={(format) => exportRequests(format, activeParams.current)}
+                        searchKey={REQUEST_SEARCH_KEY}
+                        serverSortFields={REQUEST_SORT_FIELDS}
                     />
                 }
         </Box>
