@@ -11,6 +11,7 @@ import MonitorHeartOutlinedIcon from '@mui/icons-material/MonitorHeartOutlined';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 import BuildOutlinedIcon from '@mui/icons-material/BuildOutlined';
+import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
 import { neutral } from '../../../utils/tokens';
 import { CONDITION_COLOURS } from '../chartTheme';
 import { IAssetTypeStats } from '../interface';
@@ -29,8 +30,11 @@ interface IAssetConditionProps {
  * of 620 assets and four invented segments, presented on screen as if they were the bank's
  * real figures. Every number here now comes from `/assets/statistics`.
  *
- * The old widget also showed a "Disposed" segment. That field is not in the statistics
- * projection, so it is gone rather than guessed at; surfacing it needs a backend change.
+ * Disposed is now a real segment. It was dropped when this widget was rebuilt because the
+ * statistics projection did not return the field — and its absence turned out to be worse than
+ * cosmetic: the server folded disposed assets into `assigned`, so the In Use figure counted items
+ * the bank had already written off. The projection now returns it and the four counts partition the
+ * total exactly.
  *
  * Form: a utilisation meter over three labelled counts. It was a stacked bar until "Assets by
  * Category" began showing the same three states per category — at which point this was the
@@ -50,8 +54,9 @@ const AssetCondition = ({ stats, scope }: IAssetConditionProps) => {
                 inUse: acc.inUse + (Number(row.assigned) || 0),
                 inStore: acc.inStore + (Number(row.unassigned) || 0),
                 inRepair: acc.inRepair + (Number(row.inMaintenance) || 0),
+                disposed: acc.disposed + (Number(row.disposed) || 0),
             }),
-            { inUse: 0, inStore: 0, inRepair: 0 },
+            { inUse: 0, inStore: 0, inRepair: 0, disposed: 0 },
         );
 
         return [
@@ -79,18 +84,35 @@ const AssetCondition = ({ stats, scope }: IAssetConditionProps) => {
                 icon: <BuildOutlinedIcon sx={{ fontSize: 15 }} />,
                 hint: 'Out of service for maintenance.',
             },
+            {
+                key: 'disposed',
+                label: 'Disposed',
+                value: totals.disposed,
+                colour: CONDITION_COLOURS.disposed,
+                icon: <DeleteOutlineOutlinedIcon sx={{ fontSize: 15 }} />,
+                hint: 'Written off. Still on the register, but no longer in service.',
+            },
         ];
     }, [data]);
 
     const total = segments.reduce((sum, segment) => sum + segment.value, 0);
-    const utilisation = total > 0 ? Math.round((segments[0].value / total) * 100) : 0;
+    /*
+     * Utilisation is measured against the live estate, not the register.
+     *
+     * Including disposed assets in the denominator would make the figure fall every time something
+     * was written off — which reads as the bank using its equipment less, when the opposite is
+     * true. The meter answers "of what we still have, how much is deployed".
+     */
+    const disposed = segments.find((segment) => segment.key === 'disposed')?.value ?? 0;
+    const live = total - disposed;
+    const utilisation = live > 0 ? Math.round((segments[0].value / live) * 100) : 0;
 
     return (
         <WidgetCard
             title="Asset Condition"
             subtitle={scope}
             icon={<MonitorHeartOutlinedIcon />}
-            helpText="The share of the register that is deployed, idle in a store, or out for repair. Derived from each asset's current status."
+            helpText="How the estate splits between deployed, idle in a store, out for repair, and written off. The headline percentage is measured against what is still in service, so disposing of an asset does not make utilisation appear to fall."
             loading={loading}
             failed={failed}
             onRetry={reload}
@@ -107,7 +129,8 @@ const AssetCondition = ({ stats, scope }: IAssetConditionProps) => {
                 </Typography>
             </Stack>
             <Typography variant="caption" sx={{ color: neutral[500], mt: 0.5, display: 'block' }}>
-                {total.toLocaleString()} assets in total
+                {live.toLocaleString()} in service
+                {disposed > 0 && ` · ${disposed.toLocaleString()} disposed`}
             </Typography>
 
             {/* A meter, not a stacked bar. The three-way split now sits per category in "Assets by
@@ -118,7 +141,7 @@ const AssetCondition = ({ stats, scope }: IAssetConditionProps) => {
             <Tooltip
                 arrow
                 placement="top"
-                title={`${segments[0].value.toLocaleString()} of ${total.toLocaleString()} assets are assigned and in service`}
+                title={`${segments[0].value.toLocaleString()} of ${live.toLocaleString()} assets still in service are assigned`}
             >
                 <Box
                     role="meter"
@@ -181,7 +204,11 @@ const AssetCondition = ({ stats, scope }: IAssetConditionProps) => {
                             variant="caption"
                             sx={{ color: neutral[500], width: 40, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}
                         >
-                            {total > 0 ? `${Math.round((segment.value / total) * 100)}%` : '—'}
+                            {/* Disposed is a share of the whole register; the live states are a
+                                share of what is still in service, matching the meter above. */}
+                            {segment.key === 'disposed'
+                                ? (total > 0 ? `${Math.round((segment.value / total) * 100)}%` : '—')
+                                : (live > 0 ? `${Math.round((segment.value / live) * 100)}%` : '—')}
                         </Typography>
                     </Stack>
                 ))}

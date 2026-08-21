@@ -51,7 +51,7 @@ const KpiBand = ({ stats, scope }: IKpiBandProps) => {
             helper,
             icon: <DevicesOutlinedIcon />,
             accent: 'brand' as const,
-            tooltip: 'Every asset on the register, whatever its current state.',
+            tooltip: 'Every asset on the register, including those written off.',
         },
         {
             label: 'In Use',
@@ -59,7 +59,8 @@ const KpiBand = ({ stats, scope }: IKpiBandProps) => {
             helper: failed ? 'Unavailable' : 'Assigned to a holder',
             icon: <CheckCircleOutlineIcon />,
             accent: 'success' as const,
-            tooltip: 'Assets currently assigned to a person or location.',
+            tooltip: 'Assets assigned to a person or location and still in service. Disposed assets '
+                + 'used to be counted here; they no longer are.',
         },
         {
             label: 'In Store',

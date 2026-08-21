@@ -353,6 +353,13 @@ export interface StatusColorConfig extends ChipColorConfig {
 
 export interface IPersonalAssetReport {
     type: string;
+    /**
+     * The category's id.
+     *
+     * Needed because the asset detail route is per-category — `/assets/general/{typeId}/view/{id}`
+     * — so a payload carrying only the category name cannot produce a working link.
+     */
+    typeId: number | null;
     totalItems: number;
     assets: {
         id: number;
@@ -360,6 +367,8 @@ export interface IPersonalAssetReport {
         engravingNumber: string;
         status: string;
         serialNumber: string;
+        /** The branch holding it, for a person whose items span more than one. */
+        location?: string | null;
     }[];
 }
 

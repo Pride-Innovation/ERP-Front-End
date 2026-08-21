@@ -14,6 +14,7 @@ import {
 import { IAxiosResponse, IFetchDataRequest } from "../../core/apis/interface";
 import { ITitle } from "../settings/titles/interface";
 import { IBranch } from "../settings/branch/interface";
+import { IRole } from "../settings/interface";
 import { IDepartment } from "../settings/departments/interface";
 import { Dispatch, SetStateAction } from "react";
 
@@ -41,6 +42,15 @@ export interface IUser {
     lastModified?: string | null
     accountNonLocked?: boolean | null;
     blocked?: boolean | null;
+    /**
+     * Roles granted on top of the one the title carries.
+     *
+     * Effective permissions are `title.role.permissions` united with these, which is how one person
+     * holds several capabilities at once. The login response omitted them until now, so the browser
+     * only ever saw the first half and every permission granted this way was invisible to every
+     * guard in the app.
+     */
+    additionalRoles?: Array<IRole> | null;
 }
 
 export interface IUserTableData {

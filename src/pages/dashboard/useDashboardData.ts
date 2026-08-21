@@ -13,7 +13,8 @@ import {
     fetchGlobalAssetReportService,
     fetchMonthlyStockingReportService,
     fetchMyAssetsService,
-    fetchPendingRequestsService,
+    fetchAwaitingMyDecisionService,
+    fetchOpenRequestsService,
     fetchRequestVolumeService,
 } from './service';
 import {
@@ -31,6 +32,8 @@ import {
     IRequestVolumePoint,
 } from './interface';
 import { IPersonalAssetReport, IPersonalAssetReportAxiosResponse, IRequest, IRequestsAxiosResponse } from '../request/interface';
+import { IAuditTrail } from '../trails/interface';
+import { fetchAuditTrailsService } from '../trails/service';
 
 /**
  * Every dashboard fetch resolves into this shape, so a widget renders one of three states —
@@ -57,6 +60,13 @@ function useEndpoint<T>(
     extract: (response: any) => T,
     fallback: T,
     enabled = true,
+    /**
+     * Anything that should cause a refetch when it changes — the selected branch, in practice.
+     *
+     * A plain value rather than a dependency array so the effect below keeps a fixed dependency
+     * count, which is what lets the exhaustive-deps rule stay disabled here safely.
+     */
+    dependency: string | number | null = null,
 ): IAsyncData<T> {
     const [data, setData] = useState<T>(fallback);
     const [loading, setLoading] = useState<boolean>(enabled);
@@ -90,25 +100,29 @@ function useEndpoint<T>(
 
         return () => { cancelled = true; };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [enabled, nonce]);
+    }, [enabled, nonce, dependency]);
 
     return { data, loading, failed, reload };
 }
 
 /**
- * Per-category asset counts for the caller's branch.
+ * Per-category asset counts, scoped server-side by DashboardScopeService.
  *
- * Note the server-side limitation: `/assets/statistics` resolves the branch from the signed-in
- * user and ignores VIEW_ALL_BRANCHES, so a Head Office user gets their own branch here, not a
- * national roll-up. The Head Office widgets therefore read from `useGlobalAssetReport` instead,
- * and this hook's output is always labelled with the branch it belongs to.
+ * The limitation this note used to describe is gone: the endpoint no longer resolves the branch
+ * from the signed-in user and ignore VIEW_ALL_BRANCHES, so a viewer at ALL scope now gets a genuine
+ * national roll-up here rather than Head Office's own assets under a national label. Pass a
+ * `branchId` to focus one station.
  */
-export const useBranchAssetStats = (enabled = true): IAsyncData<IAssetTypeStats[]> =>
+export const useBranchAssetStats = (
+    enabled = true,
+    branchId: number | null = null,
+): IAsyncData<IAssetTypeStats[]> =>
     useEndpoint<IAssetTypeStats[]>(
-        fetchBranchAssetStatisticsService,
+        () => fetchBranchAssetStatisticsService(branchId),
         (response: IAssetTypeStatsAxiosResponse) => response.data ?? [],
         [],
         enabled,
+        branchId,
     );
 
 /** Per-category totals across every branch. */
@@ -130,21 +144,29 @@ export const useAssetsByBranch = (enabled = true): IAsyncData<IBranchAssetCell[]
     );
 
 /** Last six months of stocking quantities, keyed by category. */
-export const useMonthlyStocking = (enabled = true): IAsyncData<IMonthlyStockRow[]> =>
+export const useMonthlyStocking = (
+    enabled = true,
+    branchId: number | null = null,
+): IAsyncData<IMonthlyStockRow[]> =>
     useEndpoint<IMonthlyStockRow[]>(
-        fetchMonthlyStockingReportService,
+        () => fetchMonthlyStockingReportService(branchId),
         (response: IMonthlyStockAxiosResponse) => response.data ?? [],
         [],
         enabled,
+        branchId,
     );
 
 /** Requested vs delivered per category, current year. */
-export const useRequestFulfilment = (enabled = true): IAsyncData<IRequestFulfilment[]> =>
+export const useRequestFulfilment = (
+    enabled = true,
+    branchId: number | null = null,
+): IAsyncData<IRequestFulfilment[]> =>
     useEndpoint<IRequestFulfilment[]>(
-        fetchCurrentYearRequestSummaryService,
+        () => fetchCurrentYearRequestSummaryService(branchId),
         (response: IRequestFulfilmentAxiosResponse) => response.data ?? [],
         [],
         enabled,
+        branchId,
     );
 
 /** Monthly request volume over the trailing year. */
@@ -156,11 +178,40 @@ export const useRequestVolume = (enabled = true): IAsyncData<IRequestVolumePoint
         enabled,
     );
 
-/** The open request queue. */
-export const usePendingRequests = (pageSize = 25, enabled = true): IAsyncData<IRequest[]> =>
+/** Requests waiting on this person's own decision. Not scoped — see the endpoint's note. */
+export const useAwaitingMyDecision = (pageSize = 25, enabled = true): IAsyncData<IRequest[]> =>
     useEndpoint<IRequest[]>(
-        () => fetchPendingRequestsService(pageSize),
+        () => fetchAwaitingMyDecisionService(pageSize),
         (response: IRequestsAxiosResponse) => response.data?.content ?? [],
+        [],
+        enabled,
+    );
+
+/** Open requests within the viewer's scope, refetched when the branch selector moves. */
+export const useOpenRequests = (
+    pageSize = 25,
+    enabled = true,
+    branchId: number | null = null,
+): IAsyncData<IRequest[]> =>
+    useEndpoint<IRequest[]>(
+        () => fetchOpenRequestsService(pageSize, branchId),
+        (response: IRequestsAxiosResponse) => response.data?.content ?? [],
+        [],
+        enabled,
+        branchId,
+    );
+
+/**
+ * The most recent recorded activity, for the Records band.
+ *
+ * Reads the audit trail rather than any one module's listing: "the underlying items" cuts across
+ * all of them, and the trail already records an actor and a timestamp for every one.
+ */
+export const useRecentActivity = (limit = 8, enabled = true): IAsyncData<IAuditTrail[]> =>
+    useEndpoint<IAuditTrail[]>(
+        () => fetchAuditTrailsService({ pageSize: limit, pageNumber: 0, background: true })
+            .then((page) => ({ status: 200, data: page })),
+        (response: { data: { rows: IAuditTrail[] } }) => response.data?.rows ?? [],
         [],
         enabled,
     );

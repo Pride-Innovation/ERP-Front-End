@@ -77,6 +77,25 @@ export const PERMISSIONS = {
      * enforces the same rule server-side; this constant only decides what the UI offers.
      */
     VIEW_ALL_BRANCHES: 'VIEW_ALL_BRANCHES',
+
+    /*
+     * Dashboard — subject and scope.
+     *
+     * Deliberately separate from the READ_* permissions above. READ_ASSET answers "may you open the
+     * assets page"; the dashboard needs a different answer — "how much of the estate may you see
+     * summarised". Borrowing one for the other is what made a branch officer's KPI band show the
+     * whole branch's totals when all he needed was access to his own asset's detail page.
+     *
+     * Must match pride.bank.erp.helper.Constants on the backend.
+     */
+    DASH_VIEW_ASSETS: 'DASH_VIEW_ASSETS',
+    DASH_VIEW_REQUESTS: 'DASH_VIEW_REQUESTS',
+    DASH_VIEW_STOCK: 'DASH_VIEW_STOCK',
+    DASH_VIEW_MOVEMENTS: 'DASH_VIEW_MOVEMENTS',
+    /** Scope is a ladder — the highest held wins. See DashboardScope on the backend. */
+    DASH_SCOPE_SELF: 'DASH_SCOPE_SELF',
+    DASH_SCOPE_BRANCH: 'DASH_SCOPE_BRANCH',
+    DASH_SCOPE_ALL: 'DASH_SCOPE_ALL',
 } as const;
 
 export type PermissionName = typeof PERMISSIONS[keyof typeof PERMISSIONS];

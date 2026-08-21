@@ -7,6 +7,7 @@ Managing Director
 
 import { Fragment, useState } from 'react';
 import {
+    alpha,
     Box,
     Collapse,
     IconButton,
@@ -21,7 +22,10 @@ import {
 import DevicesOutlinedIcon from '@mui/icons-material/DevicesOutlined';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
-import { border, neutral, surface } from '../../../utils/tokens';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import { useNavigate } from 'react-router';
+import { ROUTES } from '../../../core/routes/routes';
+import { border, brand, neutral, surface } from '../../../utils/tokens';
 import { StatusChip } from '../../../components/layout';
 import { StatusTone } from '../../../components/layout/StatusChip';
 import { IPersonalAssetReport } from '../../request/interface';
@@ -50,6 +54,18 @@ const statusTone = (status?: string | null): StatusTone => {
 const MyAssets = ({ assets }: IMyAssetsProps) => {
     const { data, loading, failed, reload } = assets;
     const [expanded, setExpanded] = useState<string | null>(null);
+    const navigate = useNavigate();
+
+    /**
+     * Opens an asset's detail page.
+     *
+     * The route is per-category, which is why the payload had to start carrying the category id:
+     * without it there is no URL to build and the row cannot be a link at all.
+     */
+    const openAsset = (typeId: number | null, assetId: number) => {
+        if (typeId == null) return;
+        navigate(ROUTES.LIST_GENERAL_ASSETS + "/" + typeId + "/view/" + assetId);
+    };
 
     const total = data.reduce((sum, group) => sum + (Number(group.totalItems) || 0), 0);
 
@@ -135,30 +151,64 @@ const MyAssets = ({ assets }: IMyAssetsProps) => {
                                     <TableRow>
                                         <TableCell colSpan={4} sx={{ p: 0, borderBottom: isOpen ? `1px solid ${border.subtle}` : 'none' }}>
                                             <Collapse in={isOpen} timeout="auto" unmountOnExit>
-                                                <Stack spacing={0} sx={{ bgcolor: surface.muted, px: 2.5, py: 1.5 }}>
-                                                    {group.assets.map((asset) => (
-                                                        <Stack
-                                                            key={asset.id}
-                                                            direction="row"
-                                                            alignItems="center"
-                                                            spacing={1.5}
-                                                            sx={{ py: 0.75 }}
-                                                        >
-                                                            <Box sx={{ minWidth: 0, flexGrow: 1 }}>
-                                                                <Typography variant="body2" sx={{ color: neutral[800] }} noWrap>
-                                                                    {asset.name}
-                                                                </Typography>
-                                                                <Typography variant="caption" sx={{ color: neutral[500] }}>
-                                                                    {asset.engravingNumber || asset.serialNumber || 'No tag recorded'}
-                                                                </Typography>
-                                                            </Box>
-                                                            <StatusChip
-                                                                label={asset.status || 'Unknown'}
-                                                                tone={statusTone(asset.status)}
-                                                            />
-                                                        </Stack>
-                                                    ))}
-                                                </Stack>
+                                                {/*
+                                                  * A striped listing, matching the reports tables.
+                                                  *
+                                                  * It was a flat stack with no separation and no way
+                                                  * in — the tag was printed but the item could not be
+                                                  * opened, which is the first thing anyone wants from
+                                                  * a list of what they are accountable for.
+                                                  */}
+                                                <Box sx={{ bgcolor: surface.muted, px: 1.25, py: 1 }}>
+                                                    {group.assets.map((asset, index) => {
+                                                        const canOpen = group.typeId != null;
+                                                        return (
+                                                            <Stack
+                                                                key={asset.id}
+                                                                direction="row"
+                                                                alignItems="center"
+                                                                spacing={1.5}
+                                                                onClick={canOpen ? () => openAsset(group.typeId, asset.id) : undefined}
+                                                                sx={{
+                                                                    py: 0.9,
+                                                                    px: 1.25,
+                                                                    borderRadius: "7px",
+                                                                    cursor: canOpen ? "pointer" : "default",
+                                                                    bgcolor: index % 2 === 1 ? alpha(neutral[300], 0.14) : "transparent",
+                                                                    transition: "background-color 0.12s",
+                                                                    "&:hover": canOpen ? { bgcolor: alpha(brand[500], 0.07) } : undefined,
+                                                                    "&:hover .row-chevron": { opacity: 1 },
+                                                                }}
+                                                            >
+                                                                <Box sx={{ minWidth: 0, flexGrow: 1 }}>
+                                                                    <Typography variant="body2" sx={{ color: neutral[800] }} noWrap>
+                                                                        {asset.name}
+                                                                    </Typography>
+                                                                    <Stack direction="row" spacing={0.75} alignItems="center">
+                                                                        <Typography variant="caption" sx={{ color: neutral[500], fontFamily: "monospace" }}>
+                                                                            {asset.engravingNumber || asset.serialNumber || "No tag recorded"}
+                                                                        </Typography>
+                                                                        {asset.location && (
+                                                                            <>
+                                                                                <Box sx={{ width: 3, height: 3, borderRadius: "50%", bgcolor: neutral[300] }} />
+                                                                                <Typography variant="caption" sx={{ color: neutral[400] }}>
+                                                                                    {asset.location}
+                                                                                </Typography>
+                                                                            </>
+                                                                        )}
+                                                                    </Stack>
+                                                                </Box>
+                                                                <StatusChip label={asset.status || "Unknown"} tone={statusTone(asset.status)} />
+                                                                {canOpen && (
+                                                                    <ChevronRightIcon
+                                                                        className="row-chevron"
+                                                                        sx={{ fontSize: 17, color: neutral[400], opacity: 0, transition: "opacity 0.12s", flexShrink: 0 }}
+                                                                    />
+                                                                )}
+                                                            </Stack>
+                                                        );
+                                                    })}
+                                                </Box>
                                             </Collapse>
                                         </TableCell>
                                     </TableRow>

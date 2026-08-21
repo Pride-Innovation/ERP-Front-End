@@ -24,7 +24,7 @@ import { border, neutral, surface } from '../../utils/tokens';
 export const CHART_TEAL = '#0A8A79';
 
 /**
- * Asset condition — a three-state part-to-whole.
+ * Asset condition — a four-state part-to-whole.
  *
  * Validated as a set: all-pairs CVD ΔE 12.4 (deutan), normal-vision ΔE 20.5, all contrast
  * ratios >= 3:1. The teal↔blue tritan separation lands at 7.3, inside the 6–8 floor band,
@@ -35,6 +35,19 @@ export const CONDITION_COLOURS = {
     inUse: CHART_TEAL,
     inStore: '#3B82F6',
     inRepair: '#B45309',
+    /*
+     * Disposed is deliberately achromatic.
+     *
+     * A fourth saturated hue would have to be re-validated for CVD separation against all three
+     * above, and the teal-blue pair is already sitting at the 7.3 tritan floor — there is no room
+     * left in that band. Grey sidesteps the problem entirely and is separable from every chromatic
+     * mark under any deficiency.
+     *
+     * It also says the right thing. The other three are live states an asset moves between;
+     * disposed is the end of its life. Encoding "no longer active" as "no colour" is the meaning
+     * the reader already expects, not a compromise.
+     */
+    disposed: '#94A3B8',
 } as const;
 
 /** Requested vs delivered. Validated all-pairs: CVD ΔE 12.4, normal ΔE 22.6, contrast >= 3:1. */

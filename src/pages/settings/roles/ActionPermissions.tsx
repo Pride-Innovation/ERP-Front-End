@@ -28,9 +28,21 @@ import { useDispatch } from 'react-redux';
 import { IPermission, IRole, IRoleAxiosResponse } from '../interface';
 import { assignPermissionToRoleService, removePermissionFromRoleService } from './service';
 import { updateRole } from './slice';
+import DevicesOutlinedIcon from '@mui/icons-material/DevicesOutlined';
+import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
+import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
+import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined';
+import PublicOutlinedIcon from '@mui/icons-material/PublicOutlined';
 import { AppDispatch } from '../../../store';
 
-// ── Metadata for each action permission ──────────────────────────────────────
+/*
+ * Metadata for each grantable permission, in the order they are shown.
+ *
+ * `group` splits the list into labelled sections. Without it the dashboard permissions would sit
+ * among the action ones as seven more identical rows, and the two answer quite different questions:
+ * an action permission says what you may *do*, a dashboard permission says what you may *see and
+ * how far*. They are configured by different people for different reasons.
+ */
 const ACTION_PERMISSIONS = [
     {
         name: 'APPROVE_REQUEST',
@@ -72,6 +84,84 @@ const ACTION_PERMISSIONS = [
         color: '#00695C',
         bg: '#E0F2F1',
     },
+
+    // ── Dashboard: subject ───────────────────────────────────────────────────
+    // Which widgets exist for the holder. Separate from READ_ASSET and friends,
+    // which govern whether a page opens at all.
+    {
+        group: 'Dashboard — what they see',
+        name: 'DASH_VIEW_ASSETS',
+        label: 'Dashboard: Assets',
+        description: 'Shows the asset headline figures, assets by category and asset condition',
+        icon: <DevicesOutlinedIcon sx={{ fontSize: 17 }} />,
+        color: '#00695C',
+        bg: '#E0F2F1',
+    },
+    {
+        group: 'Dashboard — what they see',
+        name: 'DASH_VIEW_REQUESTS',
+        label: 'Dashboard: Requests',
+        description: 'Shows the work queue, their open requests and request fulfilment',
+        icon: <AssignmentTurnedInOutlinedIcon sx={{ fontSize: 17 }} />,
+        color: '#6A1B9A',
+        bg: '#F3E5F5',
+    },
+    {
+        group: 'Dashboard — what they see',
+        name: 'DASH_VIEW_STOCK',
+        label: 'Dashboard: Stock',
+        description: 'Shows the stocking trend',
+        icon: <Inventory2OutlinedIcon sx={{ fontSize: 17 }} />,
+        color: '#0277BD',
+        bg: '#E1F5FE',
+    },
+    {
+        group: 'Dashboard — what they see',
+        name: 'DASH_VIEW_MOVEMENTS',
+        label: 'Dashboard: Movements',
+        description: 'Shows transfers and consignments currently in flight',
+        icon: <LocalShippingOutlinedIcon sx={{ fontSize: 17 }} />,
+        color: '#0277BD',
+        bg: '#E1F5FE',
+    },
+
+    // ── Dashboard: scope ─────────────────────────────────────────────────────
+    // How far those widgets reach. A ladder — the widest granted wins, so giving
+    // Branch to someone who already has Own records simply widens them.
+    {
+        group: 'Dashboard — how far they see',
+        name: 'DASH_SCOPE_SELF',
+        label: 'Scope: Own records only',
+        description: 'Figures count only what this person holds and what they asked for',
+        icon: <PersonOutlineOutlinedIcon sx={{ fontSize: 17 }} />,
+        color: '#455A64',
+        bg: '#ECEFF1',
+    },
+    {
+        group: 'Dashboard — how far they see',
+        name: 'DASH_SCOPE_BRANCH',
+        label: 'Scope: Their branch',
+        description: 'Figures cover everything at the duty station they belong to',
+        icon: <AccountTreeOutlinedIcon sx={{ fontSize: 17 }} />,
+        color: '#0277BD',
+        bg: '#E1F5FE',
+    },
+    {
+        group: 'Dashboard — how far they see',
+        name: 'DASH_SCOPE_ALL',
+        label: 'Scope: All branches',
+        description: 'Figures cover every branch and Head Office, with a branch selector to focus one',
+        icon: <PublicOutlinedIcon sx={{ fontSize: 17 }} />,
+        color: '#2E7D32',
+        bg: '#E8F5E9',
+    },
+] as const;
+
+/** Section headings, in render order. Entries with no `group` fall under the first. */
+const PERMISSION_GROUPS = [
+    'Action permissions',
+    'Dashboard — what they see',
+    'Dashboard — how far they see',
 ] as const;
 
 interface ActionPermissionsProps {
@@ -200,12 +290,48 @@ const ActionPermissions: React.FC<ActionPermissionsProps> = ({ role, allPermissi
                 </Typography>
             </Box>
 
-            {/* Permission rows */}
+            {/* Permission rows, split into labelled groups */}
             <Box>
-                {ACTION_PERMISSIONS.map((ap, index) => {
+                {PERMISSION_GROUPS.flatMap((groupName, groupIndex) => {
+                    // Entries carrying no `group` belong to the first section, so the original
+                    // action permissions keep their place without every one needing a label.
+                    const inGroup = ACTION_PERMISSIONS.filter((ap) =>
+                        ((ap as { group?: string }).group ?? PERMISSION_GROUPS[0]) === groupName);
+                    if (inGroup.length === 0) return [];
+
+                    const heading = (
+                        <Box
+                            key={`group-${groupName}`}
+                            sx={{
+                                px: 3,
+                                py: 1,
+                                mt: groupIndex === 0 ? 0 : 0.5,
+                                bgcolor: alpha(theme.palette.primary.main, 0.04),
+                                borderTop: groupIndex === 0
+                                    ? 'none'
+                                    : `1px solid ${alpha(theme.palette.divider, 0.12)}`,
+                                borderBottom: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
+                            }}
+                        >
+                            <Typography
+                                variant="caption"
+                                sx={{
+                                    fontWeight: 700,
+                                    color: theme.palette.primary.main,
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '0.06em',
+                                    fontSize: '0.68rem',
+                                }}
+                            >
+                                {groupName}
+                            </Typography>
+                        </Box>
+                    );
+
+                    return [heading, ...inGroup.map((ap, index) => {
                     const granted = isGranted(ap.name);
                     const isSaving = saving === ap.name;
-                    const isLast = index === ACTION_PERMISSIONS.length - 1;
+                    const isLast = index === inGroup.length - 1;
 
                     return (
                         <Box
@@ -310,6 +436,7 @@ const ActionPermissions: React.FC<ActionPermissionsProps> = ({ role, allPermissi
                             </Tooltip>
                         </Box>
                     );
+                    })];
                 })}
             </Box>
         </>

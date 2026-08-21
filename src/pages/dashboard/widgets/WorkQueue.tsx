@@ -32,7 +32,13 @@ import WidgetCard from './WidgetCard';
 
 interface IWorkQueueProps {
     requests: IAsyncData<IRequest[]>;
-    scope: string;
+    /*
+     * No `scope`: this queue is not a scoped listing.
+     *
+     * It shows what the workflow routed to this person, which is a fact about the workflow rather
+     * than a question of breadth — widening it by branch would show an approver work that is not
+     * theirs to do. The scoped view of requests is the "Open Requests" widget beside it.
+     */
     /** Max rows shown before the "view all" link takes over. */
     limit?: number;
 }
@@ -121,7 +127,7 @@ const cellSx = {
  *   - A left accent bar marks rows past the stale threshold, so the queue can be triaged by
  *     scanning down the edge rather than reading every age.
  */
-const WorkQueue = ({ requests, scope, limit = 8 }: IWorkQueueProps) => {
+const WorkQueue = ({ requests, limit = 8 }: IWorkQueueProps) => {
     const { data, loading, failed, reload } = requests;
     const navigate = useNavigate();
 
@@ -139,16 +145,16 @@ const WorkQueue = ({ requests, scope, limit = 8 }: IWorkQueueProps) => {
 
     return (
         <WidgetCard
-            title="Work Queue"
-            subtitle={`${rows.length} open ${rows.length === 1 ? 'request' : 'requests'} · ${scope}`}
+            title="Awaiting My Decision"
+            subtitle={`${rows.length} ${rows.length === 1 ? 'request' : 'requests'} waiting on you`}
             icon={<PendingActionsOutlinedIcon />}
-            helpText={`Requests still awaiting a decision, oldest first. Anything older than ${STALE_AFTER_DAYS} days is flagged; past ${OVERDUE_AFTER_DAYS} days it is marked overdue.`}
+            helpText={`Requests the workflow has routed to you — assigned to you personally, or to a unit you belong to. Oldest first. Anything older than ${STALE_AFTER_DAYS} days is flagged; past ${OVERDUE_AFTER_DAYS} days it is marked overdue. A request leaves this list as soon as you act on it.`}
             loading={loading}
             failed={failed}
             onRetry={reload}
             empty={rows.length === 0}
-            emptyTitle="Nothing waiting"
-            emptyDescription="There are no open requests in this queue."
+            emptyTitle="Nothing waiting on you"
+            emptyDescription="Requests routed to you for a decision will appear here."
             actions={
                 <Stack direction="row" spacing={1} alignItems="center">
                     {staleCount > 0 && (

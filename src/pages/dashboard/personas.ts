@@ -12,55 +12,69 @@ import RoutesUtills from '../../core/routes/utills';
 import { IUser } from '../users/interface';
 
 /**
- * What the dashboard may show, derived from the signed-in user's effective permissions.
+ * What the dashboard may show, on two independent axes.
  *
- * Deliberately *not* a single "which dashboard am I" role name. A person holds one title but
- * many capabilities: a Branch Operations Manager who also approves requests is both a branch
- * lead and an approver, and should see both sets of widgets. Matching on `title.role.name`
- * cannot express that, and the previous implementation compared against title-shaped strings
- * ("Branch Manager") that no seeded role ever carried — so every non-super-admin fell through
- * to the personal dashboard.
+ * <p><b>Subject</b> decides which widgets appear at all. <b>Scope</b> decides how far each one
+ * reaches. They are separate because they answer separate questions, and the previous model
+ * collapsed them into one: it read the route permissions (READ_ASSET and friends), which say
+ * whether you may open a page, and used them to decide how much of the estate to summarise. So a
+ * branch officer who needed READ_ASSET to open his own asset's detail page got a KPI band counting
+ * the whole branch.
  *
- * Granting or revoking a permission is therefore the only thing needed to change what a user
- * sees. No code change, no new role name.
+ * <p>The axes are also why this is not a single "which dashboard am I" role name. One person holds
+ * one title but many capabilities: a Branch Operations Manager who also approves requests is both a
+ * branch lead and an approver, and should see both sets of widgets. And "Officer" is not one thing
+ * — an officer in the Admin Unit legitimately needs cross-branch visibility that a branch officer
+ * must never have. A role name cannot express either; role plus explicit scope can.
  */
+
+/** How far the page may see. A ladder — the widest one held wins. */
+export type DashboardScope = 'SELF' | 'BRANCH' | 'ALL';
+
+const SCOPE_RANK: Record<DashboardScope, number> = { SELF: 0, BRANCH: 1, ALL: 2 };
+
+export const scopeAtLeast = (scope: DashboardScope, minimum: DashboardScope): boolean =>
+    SCOPE_RANK[scope] >= SCOPE_RANK[minimum];
+
 export interface IDashboardCapabilities {
-    /** Sees every branch plus Head Office. Otherwise the page is pinned to `branchName`. */
+    // ── Subject: which widgets exist for this viewer ─────────────────────────
+    /** Asset widgets: KPI band, Assets by Category, Asset Condition, branch heatmap. */
+    viewsAssets: boolean;
+    /** Request widgets: work queue, my requests, request fulfilment. */
+    viewsRequests: boolean;
+    /** Stock widgets: the stocking trend. */
+    viewsStock: boolean;
+    /** Movement widgets. */
+    viewsMovements: boolean;
+
+    // ── Scope: how far each of them reaches ──────────────────────────────────
+    scope: DashboardScope;
+    /** Convenience: the page offers a branch selector and can show a national roll-up. */
     viewAllBranches: boolean;
-    /** Approves or rejects requests — gets the approval queue and turnaround widgets. */
-    approves: boolean;
-    /** Runs a store: issues items, watches stock levels, reconciles counts. */
-    fulfils: boolean;
-    /** Reads the asset register (their branch's, or every branch's when `viewAllBranches`). */
-    readsAssets: boolean;
-    /** Reads stock/store data. */
-    readsStore: boolean;
-    /** Reads requests beyond their own. */
-    readsRequests: boolean;
-    /** Reads inventory (GRNs, orders). */
-    readsInventory: boolean;
+
     /**
-     * Sees their own assets and their own requests — the personal band.
+     * Their own assets and their own requests.
      *
-     * True for anyone signed in, and deliberately NOT gated on READ_ASSET: that permission
-     * governs the branch-wide register, and requiring it to see the handful of items you are
-     * personally accountable for would mean only administrators could check what they hold.
-     * The endpoints behind this band derive identity from the token, so they cannot return
-     * anyone else's records.
+     * True for anyone signed in, at every scope. The endpoints behind this band derive identity
+     * from the token and cannot return anyone else's records, and requiring a permission to see the
+     * handful of items you are personally accountable for would mean only administrators could
+     * check what they hold.
      */
     readsOwnRecords: boolean;
-    /** The branch the page is scoped to when `viewAllBranches` is false. */
+
+    /** The branch the page is pinned to below ALL scope. */
     branchName: string | null;
-    /** Branch id for scoping data calls; null when unscoped or unknown. */
     branchId: number | null;
-    /** First name for the greeting. */
+    /** The unit (Admin / Infra) the viewer belongs to, where they have one. */
+    unitName: string | null;
     firstName: string;
 }
 
-/** The label shown in the hero, describing the reach of what's on screen. */
+/** The label shown in the hero, describing the reach of what is on screen. */
 export const scopeLabel = (capabilities: IDashboardCapabilities): string => {
-    if (capabilities.viewAllBranches) return 'All branches & Head Office';
+    if (capabilities.scope === 'ALL') return 'All branches & Head Office';
     if (capabilities.branchName) return capabilities.branchName;
+    // SELF, or a user with no duty station on record.
     return 'Your records';
 };
 
@@ -71,24 +85,65 @@ const useDashboardCapabilities = (): IDashboardCapabilities => {
 
     const branchId = typeof user?.branch?.id === 'number' ? user.branch.id : null;
     const branchName = user?.branch?.name ?? null;
+    const unitName = (user?.unit && typeof user.unit === 'object' ? user.unit.name : null) ?? null;
     const firstName = user?.firstName ?? '';
 
-    // `has`/`hasAny` are stable derivations of the same session user, so the identity of the
-    // permission set is what matters here — recompute only when the underlying user changes.
-    return useMemo(() => ({
-        viewAllBranches: has(PERMISSIONS.VIEW_ALL_BRANCHES),
-        approves: hasAny([PERMISSIONS.APPROVE_REQUEST, PERMISSIONS.REJECT_REQUEST]),
-        fulfils: hasAny([PERMISSIONS.ISSUE_ITEMS, PERMISSIONS.APPROVE_ISSUANCE]),
-        readsAssets: has(PERMISSIONS.READ_ASSET),
-        readsStore: has(PERMISSIONS.READ_STORE),
-        readsRequests: has(PERMISSIONS.READ_REQUEST),
-        readsInventory: has(PERMISSIONS.READ_INVENTORY),
-        readsOwnRecords: true,
-        branchName,
-        branchId,
-        firstName,
+    return useMemo(() => {
+        /*
+         * Migration without a blackout.
+         *
+         * Gating on the new permissions alone would empty every dashboard in the bank the moment
+         * this ships, because no role holds them yet. So when a viewer holds none of an axis, that
+         * axis falls back to the signals that governed them before. The rules here mirror
+         * DashboardScopeService on the backend exactly — if they drifted, the page would render a
+         * widget whose endpoint then refused it.
+         */
+        const anySubjectConfigured = hasAny([
+            PERMISSIONS.DASH_VIEW_ASSETS,
+            PERMISSIONS.DASH_VIEW_REQUESTS,
+            PERMISSIONS.DASH_VIEW_STOCK,
+            PERMISSIONS.DASH_VIEW_MOVEMENTS,
+        ]);
+
+        const subject = (dashPermission: string, legacyPermission: string): boolean => {
+            if (has(dashPermission)) return true;
+            return !anySubjectConfigured && has(legacyPermission);
+        };
+
+        const resolveScope = (): DashboardScope => {
+            if (has(PERMISSIONS.DASH_SCOPE_ALL)) return 'ALL';
+            if (has(PERMISSIONS.DASH_SCOPE_BRANCH)) return 'BRANCH';
+            if (has(PERMISSIONS.DASH_SCOPE_SELF)) return 'SELF';
+
+            // Legacy fallback, matching the backend.
+            if (has(PERMISSIONS.VIEW_ALL_BRANCHES)) return 'ALL';
+            const readsOrgData = hasAny([
+                PERMISSIONS.READ_ASSET,
+                PERMISSIONS.READ_REQUEST,
+                PERMISSIONS.READ_STORE,
+                PERMISSIONS.READ_INVENTORY,
+            ]);
+            return (readsOrgData && branchId !== null) ? 'BRANCH' : 'SELF';
+        };
+
+        const scope = resolveScope();
+
+        return {
+            viewsAssets: subject(PERMISSIONS.DASH_VIEW_ASSETS, PERMISSIONS.READ_ASSET),
+            viewsRequests: subject(PERMISSIONS.DASH_VIEW_REQUESTS, PERMISSIONS.READ_REQUEST),
+            viewsStock: subject(PERMISSIONS.DASH_VIEW_STOCK, PERMISSIONS.READ_STORE)
+                || subject(PERMISSIONS.DASH_VIEW_STOCK, PERMISSIONS.READ_INVENTORY),
+            viewsMovements: subject(PERMISSIONS.DASH_VIEW_MOVEMENTS, PERMISSIONS.READ_ASSET),
+            scope,
+            viewAllBranches: scope === 'ALL',
+            readsOwnRecords: true,
+            branchName,
+            branchId,
+            unitName,
+            firstName,
+        };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }), [branchId, branchName, firstName]);
+    }, [branchId, branchName, unitName, firstName]);
 };
 
 export default useDashboardCapabilities;

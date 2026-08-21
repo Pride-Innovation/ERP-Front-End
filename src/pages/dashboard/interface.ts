@@ -10,10 +10,19 @@ import { IAxiosResponse } from "../../core/apis/interface";
 /** Per-category asset counts, as returned by `/assets/statistics`. */
 export interface IAssetTypeStats {
     assetType: string;
+    /** Every asset in this category, disposed ones included. */
     total: number;
     assigned: number;
     unassigned: number;
     inMaintenance: number;
+    /**
+     * Assets written off.
+     *
+     * Added because the server previously folded these into `assigned` — the bucket was defined as
+     * "any status that is not in-maintenance and not require-update", so the dashboard's In Use
+     * figure counted items the bank had already disposed of. The four counts now partition `total`.
+     */
+    disposed: number;
 }
 
 export interface IAssetTypeStatsAxiosResponse extends IAxiosResponse {

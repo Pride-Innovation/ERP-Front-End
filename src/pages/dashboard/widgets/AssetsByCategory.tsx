@@ -52,9 +52,10 @@ const AssetsByCategory = ({ stats, scope }: IAssetsByCategoryProps) => {
             inUse: acc.inUse + (Number(row.assigned) || 0),
             inStore: acc.inStore + (Number(row.unassigned) || 0),
             inRepair: acc.inRepair + (Number(row.inMaintenance) || 0),
+            disposed: acc.disposed + (Number(row.disposed) || 0),
             all: acc.all + (Number(row.total) || 0),
         }),
-        { inUse: 0, inStore: 0, inRepair: 0, all: 0 },
+        { inUse: 0, inStore: 0, inRepair: 0, disposed: 0, all: 0 },
     );
 
     // Grows with the category count so bars keep a comfortable thickness instead of
@@ -83,7 +84,10 @@ const AssetsByCategory = ({ stats, scope }: IAssetsByCategoryProps) => {
         datasets: [
             segment('In Use', CONDITION_COLOURS.inUse, (row) => Number(row.assigned) || 0, true),
             segment('In Store', CONDITION_COLOURS.inStore, (row) => Number(row.unassigned) || 0, true),
-            segment('In Repair', CONDITION_COLOURS.inRepair, (row) => Number(row.inMaintenance) || 0, false),
+            segment('In Repair', CONDITION_COLOURS.inRepair, (row) => Number(row.inMaintenance) || 0, true),
+            // Last in the stack: an end-state belongs at the far end of the bar, and its grey reads
+            // as a tail rather than competing with the live states beside it.
+            segment('Disposed', CONDITION_COLOURS.disposed, (row) => Number(row.disposed) || 0, false),
         ],
     };
 
@@ -125,6 +129,11 @@ const AssetsByCategory = ({ stats, scope }: IAssetsByCategoryProps) => {
         { label: 'In Use', colour: CONDITION_COLOURS.inUse, value: totals.inUse },
         { label: 'In Store', colour: CONDITION_COLOURS.inStore, value: totals.inStore },
         { label: 'In Repair', colour: CONDITION_COLOURS.inRepair, value: totals.inRepair },
+        // Only shown where there is something to show — an all-zero swatch is noise on a legend
+        // that already carries three entries.
+        ...(totals.disposed > 0
+            ? [{ label: 'Disposed', colour: CONDITION_COLOURS.disposed, value: totals.disposed }]
+            : []),
     ];
 
     return (
@@ -132,7 +141,7 @@ const AssetsByCategory = ({ stats, scope }: IAssetsByCategoryProps) => {
             title="Assets by Category"
             subtitle={scope}
             icon={<CategoryOutlinedIcon />}
-            helpText="Every asset on the register grouped by category, and within each category by condition. Categories come from Settings → Asset Categories, so a new category appears here automatically."
+            helpText="Every asset on the register grouped by category, and within each category by condition — in use, in store, out for repair, or written off. Categories come from Settings → Asset Categories, so a new category appears here automatically."
             loading={loading}
             failed={failed}
             onRetry={reload}

@@ -8,13 +8,18 @@ Managing Director
 import axiosInstance from "../../../core/apis/axiosInstance";
 
 /**
- * Per-category asset counts for the caller's branch (total / assigned / unassigned / in maintenance).
- * Server-side this is currently pinned to the caller's own branch regardless of VIEW_ALL_BRANCHES —
- * see the note in useDashboardData about what that means for the Head Office view.
+ * Per-category asset counts (total / assigned / unassigned / in maintenance), scoped server-side.
+ *
+ * `branchId` focuses the dashboard's branch selector and is only meaningful to a viewer whose scope
+ * is ALL. Omitting it asks for that viewer's default: the national roll-up at ALL scope, their own
+ * branch at BRANCH, their own records at SELF. Naming someone else's branch without ALL is refused
+ * by the server rather than quietly rewritten.
  */
-export const fetchBranchAssetStatisticsService = async () => {
+export const fetchBranchAssetStatisticsService = async (branchId?: number | null) => {
     try {
-        return await axiosInstance.get('/assets/statistics');
+        return await axiosInstance.get('/assets/statistics', {
+            params: branchId ? { branchId } : undefined,
+        });
     } catch (error) {
         return error;
     }
@@ -45,18 +50,22 @@ export const fetchAssetsByBranchService = async () => {
 };
 
 /** Last six months of stocking quantities, keyed by category. */
-export const fetchMonthlyStockingReportService = async () => {
+export const fetchMonthlyStockingReportService = async (branchId?: number | null) => {
     try {
-        return await axiosInstance.get('monthly-asset-stock');
+        return await axiosInstance.get('monthly-asset-stock', {
+            params: branchId ? { branchId } : undefined,
+        });
     } catch (error) {
         return error;
     }
 };
 
 /** Requested vs delivered per category for the current year. */
-export const fetchCurrentYearRequestSummaryService = async () => {
+export const fetchCurrentYearRequestSummaryService = async (branchId?: number | null) => {
     try {
-        return await axiosInstance.get('/current-year-summary');
+        return await axiosInstance.get('/current-year-summary', {
+            params: branchId ? { branchId } : undefined,
+        });
     } catch (error) {
         return error;
     }
@@ -71,10 +80,34 @@ export const fetchRequestVolumeService = async () => {
     }
 };
 
-/** The open request queue. `pageSize` is deliberately caller-controlled — the work queue wants more than the default 3. */
-export const fetchPendingRequestsService = async (pageSize = 25) => {
+/**
+ * Requests waiting on the signed-in user's decision.
+ *
+ * <p>Replaces `/latest-pending-request` for the work queue. That endpoint answered a different
+ * question: it filtered by status id and by a hardcoded switch on the user's role name, showing
+ * Officers newly-created requests and everyone else approved ones, with no notion of who was
+ * actually being waited on. This one is exactly what the workflow engine routed to this person, so
+ * a request leaves the list the moment they act on it.
+ */
+export const fetchAwaitingMyDecisionService = async (pageSize = 25) => {
     try {
-        return await axiosInstance.get(`/latest-pending-request?pageSize=${pageSize}`);
+        return await axiosInstance.get('requests/awaiting-me', { params: { pageSize } });
+    } catch (error) {
+        return error;
+    }
+};
+
+/**
+ * Open requests within the viewer's scope — raised and not yet finished.
+ *
+ * <p>Open means every stage between raising and receipt: all approval tiers, the issuance, and the
+ * movement carrying the item. A request drops off only when the requester acknowledges receiving it.
+ */
+export const fetchOpenRequestsService = async (pageSize = 25, branchId?: number | null) => {
+    try {
+        return await axiosInstance.get('requests/open', {
+            params: { pageSize, ...(branchId ? { branchId } : {}) },
+        });
     } catch (error) {
         return error;
     }

@@ -125,13 +125,13 @@ const MyRequests = ({ requests, currentUserId, limit = 5 }: IMyRequestsProps) =>
             title="My Open Requests"
             subtitle={`${mine.length} ${mine.length === 1 ? 'request' : 'requests'} in progress`}
             icon={<ReceiptLongOutlinedIcon />}
-            helpText="Requests you raised that have not been closed out, how far each has got, and the person it is currently waiting on."
+            helpText="Requests you raised that have not reached you yet. One stays here through every approval step, through issuance, and while the item is in transit — it leaves only when you acknowledge receiving it."
             loading={loading}
             failed={failed}
             onRetry={reload}
             empty={mine.length === 0}
             emptyTitle="No open requests"
-            emptyDescription="Requests you raise will appear here until they are issued or closed."
+            emptyDescription="Requests you raise stay here until the item reaches you."
             actions={
                 <Button
                     size="small"
