@@ -6,6 +6,8 @@ Managing Director
 */
 
 import { useEffect, useState } from 'react';
+import { RequirePermission } from '../../core/permissions';
+import { PERMISSIONS } from '../../core/permissions/constants';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import {
@@ -149,18 +151,20 @@ const Movement = () => {
                         >
                             Repair / Disposal
                         </Button>
-                        <Button
-                            variant="contained"
-                            startIcon={<AddIcon />}
-                            onClick={() => navigate(ROUTES.CREATE_MOVEMENT)}
-                            sx={{
-                                height: 36, px: 2.5, borderRadius: '8px', textTransform: 'none', fontWeight: 600,
-                                bgcolor: brand[500], '&:hover': { bgcolor: brand[700] },
-                                boxShadow: `0 2px 8px ${alpha(brand[500], 0.3)}`,
-                            }}
-                        >
-                            New Movement
-                        </Button>
+                        <RequirePermission permission={PERMISSIONS.CREATE_MOVEMENT}>
+                            <Button
+                                variant="contained"
+                                startIcon={<AddIcon />}
+                                onClick={() => navigate(ROUTES.CREATE_MOVEMENT)}
+                                sx={{
+                                    height: 36, px: 2.5, borderRadius: '8px', textTransform: 'none', fontWeight: 600,
+                                    bgcolor: brand[500], '&:hover': { bgcolor: brand[700] },
+                                    boxShadow: `0 2px 8px ${alpha(brand[500], 0.3)}`,
+                                }}
+                            >
+                                New Movement
+                            </Button>
+                        </RequirePermission>
                     </Stack>
                 }
             />
@@ -268,10 +272,12 @@ const Movement = () => {
                                 : 'Create a movement or initiate a repair / disposal to see it here.'}
                             icon={<SwapHorizOutlinedIcon />}
                             action={filtersActive ? undefined : (
-                                <Button variant="contained" startIcon={<AddIcon />} onClick={() => navigate(ROUTES.CREATE_MOVEMENT)}
-                                    sx={{ textTransform: 'none', borderRadius: '8px', bgcolor: brand[500], '&:hover': { bgcolor: brand[700] } }}>
-                                    New Movement
-                                </Button>
+                                <RequirePermission permission={PERMISSIONS.CREATE_MOVEMENT}>
+                                    <Button variant="contained" startIcon={<AddIcon />} onClick={() => navigate(ROUTES.CREATE_MOVEMENT)}
+                                        sx={{ textTransform: 'none', borderRadius: '8px', bgcolor: brand[500], '&:hover': { bgcolor: brand[700] } }}>
+                                        New Movement
+                                    </Button>
+                                </RequirePermission>
                             )}
                         />
                     )}

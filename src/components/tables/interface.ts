@@ -135,6 +135,16 @@ export interface ITableComponent {
     /** Permission name required to render the create button. Hides the button when missing. */
     createPermission?: string;
     /**
+     * Permission names required to render the export and import buttons.
+     *
+     * Both were unconditional. Export in particular is not a lesser form of read: the on-screen
+     * table is paginated and filtered, while the export pulls the whole matching set into a file
+     * that leaves the building — which is why exports are audited and page views are not.
+     * Omit either and that button keeps its previous always-visible behaviour.
+     */
+    exportPermission?: string;
+    importPermission?: string;
+    /**
      * When provided, the export menu invokes this instead of serializing the
      * visible rows. Lets pages fetch the full filtered set before exporting.
      */
@@ -170,6 +180,8 @@ export interface ITableToolBar {
     onApplyFilters?: (filters: Record<string, any>) => void;
     tableIcon?: React.ReactNode;
     createPermission?: string;
+    exportPermission?: string;
+    importPermission?: string;
     onExport?: OnExportHandler;
 }
 
@@ -194,6 +206,8 @@ export interface CustomToolbarWrapperProps {
     onApplyFilters?: (filters: Record<string, any>) => void;
     tableIcon?: React.ReactNode;
     createPermission?: string;
+    exportPermission?: string;
+    importPermission?: string;
     onExport?: OnExportHandler;
 }
 

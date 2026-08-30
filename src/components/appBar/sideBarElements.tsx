@@ -90,7 +90,9 @@ const SideBarElements = () => {
             icon: <LocalShippingOutlinedIcon />,
             group: "Operations",
             subroutes: [],
-            access: has(PERMISSIONS.READ_ASSET)
+            // Must match the route guard in subroutes/movement — a link the route then rejects is
+            // worse than no link.
+            access: has(PERMISSIONS.READ_MOVEMENT)
         },
         {
             id: 9,

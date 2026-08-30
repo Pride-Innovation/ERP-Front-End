@@ -6,6 +6,8 @@ Managing Director
 */
 
 import { ReactNode, useEffect, useMemo, useState } from 'react';
+import { PERMISSIONS } from '../../core/permissions/constants';
+import usePermissions from '../../core/permissions/usePermissions';
 import {
     alpha, Box, CircularProgress, FormControl, ListItemIcon, ListItemText, MenuItem, Paper,
     Select, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination,
@@ -301,10 +303,22 @@ interface RowAction {
 }
 
 /**
+ * The permission each journey action answers to, mirroring the `@PreAuthorize` on the endpoint
+ * behind it. `open` is a navigation, not a write, so it rides on the page's own READ_MOVEMENT guard.
+ */
+const ACTION_PERMISSION: Partial<Record<ConsignmentAction, string>> = {
+    'dispatch': PERMISSIONS.DISPATCH_MOVEMENT,
+    'in-transit': PERMISSIONS.DISPATCH_MOVEMENT,
+    'arrived': PERMISSIONS.RECEIVE_MOVEMENT,
+    'hand-over': PERMISSIONS.RECEIVE_MOVEMENT,
+    'cancel': PERMISSIONS.CANCEL_MOVEMENT,
+};
+
+/**
  * What a journey can do next. Mirrors the server's own state machine: a consignment moves
  * DRAFT → DISPATCHED → IN_TRANSIT → ARRIVED, and only a draft may be abandoned.
  */
-const rowActions = (c: IConsignment): RowAction[] => {
+const rowActionsForState = (c: IConsignment): RowAction[] => {
     switch (c.status) {
         case 'DRAFT':
             return [
@@ -348,6 +362,19 @@ const rowActions = (c: IConsignment): RowAction[] => {
             return [];
     }
 };
+
+/**
+ * The state machine's answer, narrowed to what this user may actually press.
+ *
+ * <p>Actions the user lacks are dropped rather than shown with a `disabledReason`. That field is
+ * for a blocker the user can clear themselves — "load at least one movement first" is advice;
+ * "you do not hold DISPATCH_MOVEMENT" is not, and offering it greyed out only invites a support
+ * call. The permissions themselves are granted in Settings → Roles.
+ */
+const rowActions = (
+    c: IConsignment,
+    permitted: (a: ConsignmentAction) => boolean,
+): RowAction[] => rowActionsForState(c).filter(a => permitted(a.action));
 
 const RowActionsSelect = ({ actions, busy, onPick }: {
     actions: RowAction[];
@@ -441,6 +468,17 @@ const ConsignmentTable = ({
     rows, loading, busyId, empty, onAction, paginationResetKey, disableSurface,
     stickyHeader, maxHeight,
 }: IConsignmentTableProps) => {
+    const { has } = usePermissions();
+    // Resolved once per render, not per row — the answer cannot differ between rows.
+    const permitted = useMemo(() => {
+        const granted = new Set(
+            (Object.keys(ACTION_PERMISSION) as ConsignmentAction[])
+                .filter(a => has(ACTION_PERMISSION[a] as string)),
+        );
+        return (action: ConsignmentAction) => !ACTION_PERMISSION[action] || granted.has(action);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [rows]);
+
     const [orderBy, setOrderBy] = useState<ColumnId>('reference');
     const [order, setOrder] = useState<Order>('desc');
     const [page, setPage] = useState(0);
@@ -483,7 +521,7 @@ const ConsignmentTable = ({
                     // Row click opens the journey, so the dropdown must not fire it twice.
                     <Stack direction="row" justifyContent="flex-end" onClick={(e) => e.stopPropagation()}>
                         <RowActionsSelect
-                            actions={rowActions(c)}
+                            actions={rowActions(c, permitted)}
                             busy={busyId === c.id}
                             onPick={(action) => onAction(action, c)}
                         />

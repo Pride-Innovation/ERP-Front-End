@@ -11,6 +11,8 @@ import {
     MenuItem, Paper, Select, Stack, Table, TableBody, TableCell, TableContainer, TableHead,
     TablePagination, TableRow, TableSortLabel, Tooltip, Typography,
 } from '@mui/material';
+import { PERMISSIONS } from '../../core/permissions/constants';
+import usePermissions from '../../core/permissions/usePermissions';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
@@ -311,15 +313,40 @@ const APPROVE: RowAction = { action: 'approve', title: 'Approve', color: '#15803
 const REJECT: RowAction = { action: 'reject', title: 'Reject', color: '#B91C1C', icon: <HighlightOffIcon sx={{ fontSize: 15 }} />, destructive: true };
 
 /**
+ * The permission each lifecycle action answers to, mirroring the `@PreAuthorize` on the endpoint
+ * behind it.
+ *
+ * Dispatch and receive are not CREATE_MOVEMENT: raising a transfer and handing custody over are
+ * different duties. Complete shares RECEIVE_MOVEMENT because it is the intra-location equivalent of
+ * receiving — it lands the goods and applies the inventory effect.
+ */
+const ACTION_PERMISSION: Record<MovementAction, string> = {
+    'approve': PERMISSIONS.APPROVE_MOVEMENT,
+    'reject': PERMISSIONS.APPROVE_MOVEMENT,
+    'dispatch': PERMISSIONS.DISPATCH_MOVEMENT,
+    'in-transit': PERMISSIONS.DISPATCH_MOVEMENT,
+    'receive': PERMISSIONS.RECEIVE_MOVEMENT,
+    'complete': PERMISSIONS.RECEIVE_MOVEMENT,
+    'cancel': PERMISSIONS.CANCEL_MOVEMENT,
+};
+
+/**
  * Which lifecycle buttons a row earns. The `can*` predicates are the same ones the backend
  * enforces, so a hidden button is one the server would have refused anyway.
+ *
+ * <p>`permitted` applies the second half of that promise. The `can*` rules answer "is this movement
+ * in a state where the action is possible"; they say nothing about whether *this user* may perform
+ * it, and until the movement endpoints were guarded there was no answer to give. Both must hold.
  */
 const rowActions = (
     mov: IMovement,
     variant: 'recent' | 'approvals' | 'lifecycle',
+    permitted: (action: MovementAction) => boolean,
     currentUserId?: number | string,
 ): RowAction[] => {
-    if (variant === 'approvals') return [APPROVE, REJECT];
+    // Filtered here too: an approvals-variant table lists what is awaiting a decision, but being
+    // shown the queue is not the same as being allowed to decide.
+    if (variant === 'approvals') return [APPROVE, REJECT].filter(a => permitted(a.action));
     if (variant !== 'lifecycle') return [];
 
     const actions: RowAction[] = [];
@@ -329,7 +356,7 @@ const rowActions = (
     if (canReceive(mov)) actions.push({ action: 'receive', title: 'Receive', color: '#047857', icon: <AssignmentTurnedInOutlinedIcon sx={{ fontSize: 15 }} /> });
     if (canComplete(mov)) actions.push({ action: 'complete', title: 'Complete', color: '#15803D', icon: <TaskAltOutlinedIcon sx={{ fontSize: 15 }} /> });
     if (canCancel(mov)) actions.push({ action: 'cancel', title: 'Cancel', color: '#DC2626', icon: <CancelOutlinedIcon sx={{ fontSize: 15 }} />, destructive: true });
-    return actions;
+    return actions.filter(a => permitted(a.action));
 };
 
 const ActionButton = ({ title, color, onClick, children }: {
@@ -468,6 +495,17 @@ const MovementTable = ({
     rows, loading, variant = 'recent', empty, onView, onAction, currentUserId, actionsAs = 'icons',
     footer, paginateOver, paginationResetKey, initialSort, disableSurface, stickyHeader, maxHeight,
 }: IMovementTableProps) => {
+    const { has } = usePermissions();
+    // Resolved once per render rather than per row — `has` is cheap, but a lifecycle table asks
+    // seven questions a row and the answer cannot change between rows.
+    const permitted = useMemo(() => {
+        const granted = new Set(
+            (Object.keys(ACTION_PERMISSION) as MovementAction[]).filter(a => has(ACTION_PERMISSION[a])),
+        );
+        return (action: MovementAction) => granted.has(action);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [rows]);
+
     const columns = (variant === 'approvals' ? APPROVAL_COLUMNS : RECENT_COLUMNS)
         .map((id) => (id === 'actions' && variant === 'lifecycle'
             ? { ...COLUMNS.actions, minWidth: actionsAs === 'menu' ? 120 : 210 }
@@ -512,7 +550,7 @@ const MovementTable = ({
             case 'status': return <StatusCell mov={mov} />;
             case 'date': return <DateCell mov={mov} />;
             case 'actions': {
-                const actions = rowActions(mov, variant, currentUserId);
+                const actions = rowActions(mov, variant, permitted, currentUserId);
                 return (
                     // Row click opens the movement, so the controls must not fire it twice.
                     <Stack direction="row" spacing={0.25} justifyContent="flex-end" onClick={(e) => e.stopPropagation()}>

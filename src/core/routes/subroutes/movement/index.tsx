@@ -19,13 +19,21 @@ const MovementLayout = () => (
 const MovementRoutes = () => {
     return (
         <Route element={<MovementLayout />}>
-            <Route element={<PrivateRoute permission={PERMISSIONS.READ_ASSET} />}>
+            {/*
+              * Movements answer to their own permissions, not to the asset ones.
+              *
+              * READ_ASSET opens the asset register; it says nothing about whether you may see stock
+              * moving between buildings, and CREATE_ASSET — the right to register an asset — was
+              * standing in for the right to raise a transfer. The two modules are configured for
+              * different people.
+              */}
+            <Route element={<PrivateRoute permission={PERMISSIONS.READ_MOVEMENT} />}>
                 <Route path={ROUTES.MOVEMENT} element={<Movement />} />
                 <Route path={`${ROUTES.MOVEMENT}/all`} element={<AllMovements />} />
                 <Route path={ROUTES.CONSIGNMENTS} element={<Consignments />} />
                 <Route path={`${ROUTES.READ_MOVEMENT}/:id`} element={<MovementDetails />} />
             </Route>
-            <Route element={<PrivateRoute permission={PERMISSIONS.CREATE_ASSET} />}>
+            <Route element={<PrivateRoute permission={PERMISSIONS.CREATE_MOVEMENT} />}>
                 <Route path={ROUTES.CREATE_MOVEMENT} element={<CreateMovement />} />
             </Route>
         </Route>

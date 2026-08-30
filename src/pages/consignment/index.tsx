@@ -6,6 +6,8 @@ Managing Director
 */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { RequirePermission } from '../../core/permissions';
+import { PERMISSIONS } from '../../core/permissions/constants';
 import { useNavigate } from 'react-router-dom';
 import {
     alpha, Box, Button, Grid, IconButton, Paper, Stack, Tab, Tabs, Tooltip, Typography,
@@ -248,18 +250,20 @@ const Consignments = () => {
                         >
                             Movements
                         </Button>
-                        <Button
-                            variant="contained"
-                            startIcon={<AddIcon />}
-                            onClick={() => setCreateOpen(true)}
-                            sx={{
-                                height: 36, px: 2.5, borderRadius: '8px', textTransform: 'none', fontWeight: 600,
-                                bgcolor: brand[500], '&:hover': { bgcolor: brand[700] },
-                                boxShadow: `0 2px 8px ${alpha(brand[500], 0.3)}`,
-                            }}
-                        >
-                            New Consignment
-                        </Button>
+                        <RequirePermission permission={PERMISSIONS.CREATE_MOVEMENT}>
+                            <Button
+                                variant="contained"
+                                startIcon={<AddIcon />}
+                                onClick={() => setCreateOpen(true)}
+                                sx={{
+                                    height: 36, px: 2.5, borderRadius: '8px', textTransform: 'none', fontWeight: 600,
+                                    bgcolor: brand[500], '&:hover': { bgcolor: brand[700] },
+                                    boxShadow: `0 2px 8px ${alpha(brand[500], 0.3)}`,
+                                }}
+                            >
+                                New Consignment
+                            </Button>
+                        </RequirePermission>
                     </Stack>
                 }
             />
@@ -416,6 +420,7 @@ const Consignments = () => {
                                 ? 'A consignment groups the movements travelling together on one courier run. Open one when you are ready to load a van.'
                                 : 'Switch to another tab, or open a new consignment to start loading one.'}
                             action={tab === 'all' ? (
+                                <RequirePermission permission={PERMISSIONS.CREATE_MOVEMENT}>
                                 <Button
                                     variant="contained" startIcon={<AddIcon />} onClick={() => setCreateOpen(true)}
                                     sx={{
@@ -425,6 +430,7 @@ const Consignments = () => {
                                 >
                                     New Consignment
                                 </Button>
+                                </RequirePermission>
                             ) : undefined}
                         />
                     )}

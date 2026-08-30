@@ -66,12 +66,18 @@ const TableToolBar = ({
     onApplyFilters,
     tableIcon,
     createPermission,
+    exportPermission,
+    importPermission,
     onExport,
 }: ITableToolBar) => {
     const { setFileName } = useContext(FileContext);
     useEffect(() => { setFileName(module) }, [module]);
     const { has } = usePermissions();
     const canCreate = !createPermission || has(createPermission);
+    // Same shape as canCreate: no permission named means the caller has not opted this table in,
+    // so the button behaves exactly as it did before.
+    const canExport = !exportPermission || has(exportPermission);
+    const canImport = !importPermission || has(importPermission);
 
     // ── Column filter panel ───────────────────────────────────────────────────
     const [showFilterPanel, setShowFilterPanel] = useState(false);
@@ -182,7 +188,10 @@ const TableToolBar = ({
         '& input::placeholder': { color: MUTED, opacity: 1 },
     });
 
-    const hasActions = importData || exportData || createAction || refresh || columnFilters.length > 0;
+    const showImport = importData && canImport;
+    const showExport = exportData && canExport;
+    const showCreate = createAction && canCreate;
+    const hasActions = showImport || showExport || showCreate || refresh || columnFilters.length > 0;
 
     return (
         <Box sx={{ width: '100%', bgcolor: '#fff' }}>
@@ -275,15 +284,15 @@ const TableToolBar = ({
                         )}
 
                         {/* Visual divider before import/export/create */}
-                        {(importData || exportData || createAction) && (refresh || columnFilters.length > 0) && (
+                        {(showImport || showExport || showCreate) && (refresh || columnFilters.length > 0) && (
                             <Divider orientation="vertical" flexItem sx={{ mx: 0.25, borderColor: BORDER, height: 20, alignSelf: 'center' }} />
                         )}
 
-                        {importData && <FileUploadButton title={header.plural} module={module} assetTypeId={assetTypeId} />}
-                        {exportData && <CustomGridToolbarExport module={module} rows={rows} onExport={onExport} />}
+                        {showImport && <FileUploadButton title={header.plural} module={module} assetTypeId={assetTypeId} />}
+                        {showExport && <CustomGridToolbarExport module={module} rows={rows} onExport={onExport} />}
 
                         {/* Create button */}
-                        {createAction && canCreate && (
+                        {showCreate && (
                             <Button
                                 onClick={() => onCreationHandler()}
                                 variant="contained"

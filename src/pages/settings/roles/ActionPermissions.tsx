@@ -5,7 +5,7 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
     Box,
     Chip,
@@ -27,13 +27,39 @@ import { useDispatch } from 'react-redux';
 
 import { IPermission, IRole, IRoleAxiosResponse } from '../interface';
 import { assignPermissionToRoleService, removePermissionFromRoleService } from './service';
+import { MODULE_CRUD_PERMISSION_NAMES } from './utills';
 import { updateRole } from './slice';
 import DevicesOutlinedIcon from '@mui/icons-material/DevicesOutlined';
 import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
 import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined';
 import PublicOutlinedIcon from '@mui/icons-material/PublicOutlined';
+import AssignmentIndOutlinedIcon from '@mui/icons-material/AssignmentIndOutlined';
+import BuildOutlinedIcon from '@mui/icons-material/BuildOutlined';
+import WarehouseOutlinedIcon from '@mui/icons-material/WarehouseOutlined';
+import DeleteSweepOutlinedIcon from '@mui/icons-material/DeleteSweepOutlined';
+import UploadFileOutlinedIcon from '@mui/icons-material/UploadFileOutlined';
+import DownloadOutlinedIcon from '@mui/icons-material/DownloadOutlined';
+import FactCheckOutlinedIcon from '@mui/icons-material/FactCheckOutlined';
+import PlaylistAddCheckOutlinedIcon from '@mui/icons-material/PlaylistAddCheckOutlined';
+import KeyOutlinedIcon from '@mui/icons-material/KeyOutlined';
+import AddCircleOutlineOutlinedIcon from '@mui/icons-material/AddCircleOutlineOutlined';
+import FlightTakeoffOutlinedIcon from '@mui/icons-material/FlightTakeoffOutlined';
+import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
+import GavelOutlinedIcon from '@mui/icons-material/GavelOutlined';
 import { AppDispatch } from '../../../store';
+
+/** One grantable permission as this page presents it. */
+interface IPermissionMeta {
+    /** Section this row is filed under. Omitted entries fall under the first group. */
+    group?: string;
+    name: string;
+    label: string;
+    description: string;
+    icon: React.ReactNode;
+    color: string;
+    bg: string;
+}
 
 /*
  * Metadata for each grantable permission, in the order they are shown.
@@ -42,8 +68,13 @@ import { AppDispatch } from '../../../store';
  * among the action ones as seven more identical rows, and the two answer quite different questions:
  * an action permission says what you may *do*, a dashboard permission says what you may *see and
  * how far*. They are configured by different people for different reasons.
+ *
+ * This list is curated for wording and grouping — it is NOT the list of what can be granted. Any
+ * permission the backend seeds that appears neither here nor in the module CRUD grid above is
+ * rendered under "Other permissions" from the live /permissions response, so a permission can never
+ * again exist in the database, be enforced by the API, and have no control anywhere in Settings.
  */
-const ACTION_PERMISSIONS = [
+const ACTION_PERMISSIONS: IPermissionMeta[] = [
     {
         name: 'APPROVE_REQUEST',
         label: 'Approve Request',
@@ -83,6 +114,169 @@ const ACTION_PERMISSIONS = [
         icon: <VerifiedOutlinedIcon sx={{ fontSize: 17 }} />,
         color: '#00695C',
         bg: '#E0F2F1',
+    },
+
+    // ── Asset lifecycle actions ──────────────────────────────────────────────
+    // The row menu on the asset register. Split out of the Asset module's Create and Update boxes
+    // above because the API matched on the HTTP verb: every POST under /assets/** answered to
+    // CREATE_ASSET, so whoever could register an asset could also reassign one to another officer
+    // and import a spreadsheet of several thousand; whoever could correct a model number could hand
+    // the asset into a store.
+    {
+        group: 'Asset actions',
+        name: 'REASSIGN_ASSET',
+        label: 'Reassign Asset',
+        description: 'Can transfer an asset from one officer to another',
+        icon: <AssignmentIndOutlinedIcon sx={{ fontSize: 17 }} />,
+        color: '#6A1B9A',
+        bg: '#F3E5F5',
+    },
+    {
+        group: 'Asset actions',
+        name: 'REPAIR_ASSET',
+        label: 'Repair Asset',
+        description: 'Can book an asset in for repair and close the repair off',
+        icon: <BuildOutlinedIcon sx={{ fontSize: 17 }} />,
+        color: '#0277BD',
+        bg: '#E1F5FE',
+    },
+    {
+        group: 'Asset actions',
+        name: 'RECEIVE_ASSET_IN_STORE',
+        label: 'Receive Asset into Store',
+        description: 'Can hand an asset back into a store and mark it as replacement pool stock',
+        icon: <WarehouseOutlinedIcon sx={{ fontSize: 17 }} />,
+        color: '#00695C',
+        bg: '#E0F2F1',
+    },
+    {
+        group: 'Asset actions',
+        name: 'DISPOSE_ASSET',
+        label: 'Dispose Asset',
+        description: 'Can write an asset off and move it to the Disposal store. Takes it off the register for good',
+        icon: <DeleteSweepOutlinedIcon sx={{ fontSize: 17 }} />,
+        color: '#C62828',
+        bg: '#FFEBEE',
+    },
+    {
+        group: 'Asset actions',
+        name: 'IMPORT_ASSET',
+        label: 'Import Assets',
+        description: 'Can register assets in bulk from a spreadsheet, and download the import template',
+        icon: <UploadFileOutlinedIcon sx={{ fontSize: 17 }} />,
+        color: '#455A64',
+        bg: '#ECEFF1',
+    },
+    {
+        group: 'Asset actions',
+        name: 'EXPORT_ASSET',
+        label: 'Export Assets',
+        description: 'Can extract the whole register to a file. Separate from Read because this is data leaving the building — and it is audited',
+        icon: <DownloadOutlinedIcon sx={{ fontSize: 17 }} />,
+        color: '#B26A00',
+        bg: '#FFF3E0',
+    },
+
+    // ── Movements ────────────────────────────────────────────────────────────
+    // The module that physically moves stock between buildings. Every one of these endpoints was
+    // open to any signed-in user until 2026-08-27. Dispatch and receive stay apart from create
+    // because raising a transfer and handing custody over are different duties.
+    {
+        group: 'Movements & consignments',
+        name: 'READ_MOVEMENT',
+        label: 'View Movements',
+        description: 'Can open the movements and consignments pages and see stock in flight',
+        icon: <LocalShippingOutlinedIcon sx={{ fontSize: 17 }} />,
+        color: '#0277BD',
+        bg: '#E1F5FE',
+    },
+    {
+        group: 'Movements & consignments',
+        name: 'CREATE_MOVEMENT',
+        label: 'Raise Movement',
+        description: 'Can raise a transfer, repair transfer, temporary replacement or return, and assemble a consignment',
+        icon: <AddCircleOutlineOutlinedIcon sx={{ fontSize: 17 }} />,
+        color: '#00695C',
+        bg: '#E0F2F1',
+    },
+    {
+        group: 'Movements & consignments',
+        name: 'DISPATCH_MOVEMENT',
+        label: 'Dispatch Movement',
+        description: 'Can send stock out of a building and mark it in transit — custody leaving the premises',
+        icon: <FlightTakeoffOutlinedIcon sx={{ fontSize: 17 }} />,
+        color: '#4338CA',
+        bg: '#E8EAF6',
+    },
+    {
+        group: 'Movements & consignments',
+        name: 'RECEIVE_MOVEMENT',
+        label: 'Receive Movement',
+        description: 'Can receive stock at its destination, mark a consignment arrived, and complete an internal movement',
+        icon: <AssignmentTurnedInOutlinedIcon sx={{ fontSize: 17 }} />,
+        color: '#047857',
+        bg: '#E8F5E9',
+    },
+    {
+        group: 'Movements & consignments',
+        name: 'CANCEL_MOVEMENT',
+        label: 'Cancel Movement',
+        description: 'Can cancel a movement or a consignment in flight',
+        icon: <CancelOutlinedIcon sx={{ fontSize: 17 }} />,
+        color: '#C62828',
+        bg: '#FFEBEE',
+    },
+    {
+        group: 'Movements & consignments',
+        name: 'APPROVE_MOVEMENT',
+        label: 'Approve Movement',
+        description: 'Can approve or reject a movement — and authorise proceeding with no approval at all when no approver can be found. That bypass is audited as CRITICAL',
+        icon: <GavelOutlinedIcon sx={{ fontSize: 17 }} />,
+        color: '#6A1B9A',
+        bg: '#F3E5F5',
+    },
+
+    // ── Stock take ───────────────────────────────────────────────────────────
+    // Seeded from the first stock-take release but never shown here, so the only way to grant one
+    // was directly against the database. Counting is a designated duty and the person who counts
+    // must not be the person who signs off their own variances — keep Perform and Approve apart.
+    {
+        group: 'Stock take',
+        name: 'READ_STOCK_TAKE',
+        label: 'View Stock Takes',
+        description: 'Can open stock take sheets and their variance reports',
+        icon: <FactCheckOutlinedIcon sx={{ fontSize: 17 }} />,
+        color: '#0277BD',
+        bg: '#E1F5FE',
+    },
+    {
+        group: 'Stock take',
+        name: 'PERFORM_STOCK_TAKE',
+        label: 'Perform Stock Take',
+        description: 'Can record physical counts against a stock take sheet',
+        icon: <PlaylistAddCheckOutlinedIcon sx={{ fontSize: 17 }} />,
+        color: '#00695C',
+        bg: '#E0F2F1',
+    },
+    {
+        group: 'Stock take',
+        name: 'APPROVE_STOCK_TAKE',
+        label: 'Approve Stock Take',
+        description: 'Can sign off counted variances. Do not give this to the same person who counts',
+        icon: <VerifiedOutlinedIcon sx={{ fontSize: 17 }} />,
+        color: '#2E7D32',
+        bg: '#E8F5E9',
+    },
+
+    // ── Cross-branch visibility ──────────────────────────────────────────────
+    {
+        group: 'Cross-branch visibility',
+        name: 'VIEW_ALL_BRANCHES',
+        label: 'View All Branches',
+        description: 'Lifts the "your duty station only" restriction across the app, and opens the national asset reports',
+        icon: <PublicOutlinedIcon sx={{ fontSize: 17 }} />,
+        color: '#2E7D32',
+        bg: '#E8F5E9',
     },
 
     // ── Dashboard: subject ───────────────────────────────────────────────────
@@ -155,14 +349,33 @@ const ACTION_PERMISSIONS = [
         color: '#2E7D32',
         bg: '#E8F5E9',
     },
-] as const;
+];
+
+/** Heading the leftover permissions are filed under. Rendered only when there are any. */
+const OTHER_GROUP = 'Other permissions';
 
 /** Section headings, in render order. Entries with no `group` fall under the first. */
 const PERMISSION_GROUPS = [
     'Action permissions',
+    'Asset actions',
+    'Movements & consignments',
+    'Stock take',
+    'Cross-branch visibility',
     'Dashboard — what they see',
     'Dashboard — how far they see',
+    OTHER_GROUP,
 ] as const;
+
+/** `VIEW_ALL_BRANCHES` -> `View all branches`. Used for permissions this page has no wording for. */
+const humanisePermissionName = (name: string): string => {
+    const words = name.split('_').filter(Boolean);
+    if (words.length === 0) return name;
+    const [first, ...rest] = words;
+    return [
+        first.charAt(0).toUpperCase() + first.slice(1).toLowerCase(),
+        ...rest.map(word => word.toLowerCase()),
+    ].join(' ');
+};
 
 interface ActionPermissionsProps {
     role: IRole;
@@ -231,7 +444,40 @@ const ActionPermissions: React.FC<ActionPermissionsProps> = ({ role, allPermissi
         }
     };
 
-    const grantedCount = ACTION_PERMISSIONS.filter(ap => isGranted(ap.name)).length;
+    /*
+     * Everything seeded that neither the module CRUD grid above nor the curated list covers.
+     *
+     * Built from the live /permissions response rather than a hardcoded list, so a permission added
+     * to the backend seed shows up here on the next page load with no frontend release. Before this
+     * the page rendered a fixed twelve rows: VIEW_ALL_BRANCHES and the three stock-take permissions
+     * were seeded and enforced but had no control anywhere in Settings, and the only way to grant
+     * one was an UPDATE against the database.
+     */
+    const extraPermissions: IPermissionMeta[] = useMemo(() => {
+        const curated = new Set(ACTION_PERMISSIONS.map(ap => ap.name));
+        return (allPermissions ?? [])
+            .filter(p => p?.name
+                && !curated.has(p.name)
+                && !MODULE_CRUD_PERMISSION_NAMES.has(p.name))
+            .map(p => ({
+                group: OTHER_GROUP,
+                name: p.name,
+                label: humanisePermissionName(p.name),
+                description: `Granted as ${p.name}`,
+                icon: <KeyOutlinedIcon sx={{ fontSize: 17 }} />,
+                color: '#455A64',
+                bg: '#ECEFF1',
+            }))
+            .sort((a, b) => a.label.localeCompare(b.label));
+    }, [allPermissions]);
+
+    /** Curated rows first, then whatever else the backend knows about. */
+    const permissionCatalogue = useMemo(
+        () => [...ACTION_PERMISSIONS, ...extraPermissions],
+        [extraPermissions],
+    );
+
+    const grantedCount = permissionCatalogue.filter(ap => isGranted(ap.name)).length;
 
     return (
         <>
@@ -257,7 +503,7 @@ const ActionPermissions: React.FC<ActionPermissionsProps> = ({ role, allPermissi
                 </Box>
                 <Chip
                     size="small"
-                    label={`${grantedCount} / ${ACTION_PERMISSIONS.length} granted`}
+                    label={`${grantedCount} / ${permissionCatalogue.length} granted`}
                     sx={{
                         bgcolor: grantedCount > 0
                             ? alpha(theme.palette.primary.main, 0.1)
@@ -295,8 +541,8 @@ const ActionPermissions: React.FC<ActionPermissionsProps> = ({ role, allPermissi
                 {PERMISSION_GROUPS.flatMap((groupName, groupIndex) => {
                     // Entries carrying no `group` belong to the first section, so the original
                     // action permissions keep their place without every one needing a label.
-                    const inGroup = ACTION_PERMISSIONS.filter((ap) =>
-                        ((ap as { group?: string }).group ?? PERMISSION_GROUPS[0]) === groupName);
+                    const inGroup = permissionCatalogue.filter((ap) =>
+                        (ap.group ?? PERMISSION_GROUPS[0]) === groupName);
                     if (inGroup.length === 0) return [];
 
                     const heading = (

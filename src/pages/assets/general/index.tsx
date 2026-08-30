@@ -1,6 +1,7 @@
 import {
     useContext,
     useEffect,
+    useMemo,
     useRef,
     useState
 } from "react";
@@ -34,6 +35,7 @@ import BuildOutlinedIcon from '@mui/icons-material/BuildOutlined';
 import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
 import { AssetContext } from "../../../context/asset";
 import { PERMISSIONS } from "../../../core/permissions/constants";
+import usePermissions from "../../../core/permissions/usePermissions";
 import StatusUtills from "../../settings/statuses/Utills";
 import TableUtills from "../../../components/tables/utills";
 import { FileContext } from "../../../context/file/FileContext";
@@ -73,6 +75,25 @@ const GeneralAssets = () => {
     const { statuses } = useSelector((state: RootState) => state.StatusesStore);
     const { fetchAllStatuses } = StatusUtills();
     const { fileData, setFileData } = useContext(FileContext);
+
+    /*
+     * What this user may do to an asset. Resolved once here as plain booleans so the row menu, the
+     * effect that builds it and the toolbar all read the same answer, and so the effect has stable
+     * dependencies — `has` is a new function on every render.
+     */
+    const { has } = usePermissions();
+    const canUpdateAsset = has(PERMISSIONS.UPDATE_ASSET);
+    const canReassignAsset = has(PERMISSIONS.REASSIGN_ASSET);
+    const canRepairAsset = has(PERMISSIONS.REPAIR_ASSET);
+    const canReceiveAssetInStore = has(PERMISSIONS.RECEIVE_ASSET_IN_STORE);
+    const canDisposeAsset = has(PERMISSIONS.DISPOSE_ASSET);
+    const grantedActions = useMemo(() => new Set<string>([
+        ...(canUpdateAsset ? [PERMISSIONS.UPDATE_ASSET] : []),
+        ...(canReassignAsset ? [PERMISSIONS.REASSIGN_ASSET] : []),
+        ...(canRepairAsset ? [PERMISSIONS.REPAIR_ASSET] : []),
+        ...(canReceiveAssetInStore ? [PERMISSIONS.RECEIVE_ASSET_IN_STORE] : []),
+        ...(canDisposeAsset ? [PERMISSIONS.DISPOSE_ASSET] : []),
+    ]), [canUpdateAsset, canReassignAsset, canRepairAsset, canReceiveAssetInStore, canDisposeAsset]);
 
     /** Branches for the Location filter; fetched once. */
     const [branches, setBranches] = useState<ReferenceOption[]>([]);
@@ -325,21 +346,48 @@ const GeneralAssets = () => {
         }
     };
 
+    /*
+     * The row menu, filtered to what the signed-in user may actually do.
+     *
+     * Filtered here, at the source, rather than in the table's own `handleOptionsFilter`: that one
+     * keys off hardcoded module names ("IT Equipment", "Office Equipment", "Fleet"), and categories
+     * have been configurable since the single /assets/general/:typeId route landed, so a category
+     * added in Settings would match none of them and fall through unfiltered. Permission is not a
+     * per-category question, so it does not belong in a per-category branch.
+     *
+     * Each entry names the permission its endpoint demands, so this list and the security rules can
+     * be read against each other:
+     *   Update            PUT    /assets/{id}            UPDATE_ASSET
+     *   Reassign          POST   /assets/reassign/{id}   REASSIGN_ASSET
+     *   Repair            POST   /assets/repairs/{id}    REPAIR_ASSET
+     *   Receive into Store PUT   /assets/store/{id}      RECEIVE_ASSET_IN_STORE
+     *   Dispose           POST   /movements/disposal     DISPOSE_ASSET
+     * "View Details" is ungated — the route behind it already requires READ_ASSET, without which
+     * this page does not open at all.
+     */
     const handleOptionChanged = () => {
         const options = [
             { value: crudStates.read, label: "View Details", icon: <RemoveRedEyeIcon fontSize='small' />, divider: true },
-            { value: crudStates.update, label: "Update", icon: <ModeEditIcon fontSize='small' color='info' /> },
-            { value: crudStates.reassign, label: "Reassign", icon: <AssignmentIndOutlinedIcon fontSize='small' color='secondary' /> },
-            { value: crudStates.repair, label: "Repair", icon: <BuildOutlinedIcon fontSize='small' color='primary' /> },
-            { value: crudStates.inStore, label: "Receive into Store", icon: <HomeOutlinedIcon fontSize='small' color='action' /> },
-            { value: crudStates.dispose, label: "Dispose", icon: <InfoIcon fontSize='small' color='error' /> },
+            { value: crudStates.update, label: "Update", icon: <ModeEditIcon fontSize='small' color='info' />, permission: PERMISSIONS.UPDATE_ASSET },
+            { value: crudStates.reassign, label: "Reassign", icon: <AssignmentIndOutlinedIcon fontSize='small' color='secondary' />, permission: PERMISSIONS.REASSIGN_ASSET },
+            { value: crudStates.repair, label: "Repair", icon: <BuildOutlinedIcon fontSize='small' color='primary' />, permission: PERMISSIONS.REPAIR_ASSET },
+            { value: crudStates.inStore, label: "Receive into Store", icon: <HomeOutlinedIcon fontSize='small' color='action' />, permission: PERMISSIONS.RECEIVE_ASSET_IN_STORE },
+            { value: crudStates.dispose, label: "Dispose", icon: <InfoIcon fontSize='small' color='error' />, permission: PERMISSIONS.DISPOSE_ASSET },
         ];
-        setOptions(options);
+        setOptions(
+            options
+                .filter(option => !option.permission || grantedActions.has(option.permission))
+                .map(({ permission, ...option }) => option),
+        );
     };
 
+    // Depends on the resolved booleans, not on `has` itself: usePermissions returns a fresh
+    // function on every render, so listing it here would rebuild the options, set state, and
+    // re-render without end.
     useEffect(() => {
         handleOptionChanged();
-    }, []);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [canUpdateAsset, canReassignAsset, canRepairAsset, canReceiveAssetInStore, canDisposeAsset]);
 
     // Statuses power the status filter (resolved by code).
     useEffect(() => {
@@ -655,10 +703,12 @@ const GeneralAssets = () => {
                     loading={loading}
                     count={assetCount}
                     exportData
+                    exportPermission={PERMISSIONS.EXPORT_ASSET}
                     onExport={handleExport}
                     createAction
                     createPermission={PERMISSIONS.CREATE_ASSET}
                     importData
+                    importPermission={PERMISSIONS.IMPORT_ASSET}
                     // Lets the import button build this category's template from its own field
                     // configuration, rather than a static header list that had no entry for assets.
                     assetTypeId={Number(currentAssetType.id)}

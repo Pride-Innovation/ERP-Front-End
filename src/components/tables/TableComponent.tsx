@@ -135,6 +135,8 @@ const TableComponent = ({
     searchKey,
     tableIcon,
     createPermission,
+    exportPermission,
+    importPermission,
     onExport,
     flat = false,
 }: ITableComponent) => {
@@ -573,6 +575,8 @@ const TableComponent = ({
                 onApplyFilters={handleFiltersApplied}
                 tableIcon={tableIcon}
                 createPermission={createPermission}
+                exportPermission={exportPermission}
+                importPermission={importPermission}
                 onExport={onExport}
             />
 

@@ -64,6 +64,43 @@ export const PERMISSIONS = {
     UPDATE_ASSET: 'UPDATE_ASSET',
     DELETE_ASSET: 'DELETE_ASSET',
 
+    /*
+     * Asset lifecycle actions — the row menu on the asset register.
+     *
+     * Separate from CREATE_ASSET / UPDATE_ASSET because the backend route rules match on the HTTP
+     * verb, which folded reassign, repair and bulk import into "create" and receive-into-store into
+     * "update". Anyone who could correct a model number could also hand the asset into a store.
+     */
+    REASSIGN_ASSET: 'REASSIGN_ASSET',
+    REPAIR_ASSET: 'REPAIR_ASSET',
+    RECEIVE_ASSET_IN_STORE: 'RECEIVE_ASSET_IN_STORE',
+    DISPOSE_ASSET: 'DISPOSE_ASSET',
+    IMPORT_ASSET: 'IMPORT_ASSET',
+    EXPORT_ASSET: 'EXPORT_ASSET',
+
+    /*
+     * Stock take. Present in the backend seed but absent here, so nothing in the UI could ask about
+     * them — counting is a designated duty and the counter must not approve their own variances.
+     */
+    READ_STOCK_TAKE: 'READ_STOCK_TAKE',
+    PERFORM_STOCK_TAKE: 'PERFORM_STOCK_TAKE',
+    APPROVE_STOCK_TAKE: 'APPROVE_STOCK_TAKE',
+
+    /*
+     * Movements and consignments — the module that physically moves stock between buildings.
+     *
+     * Dispatch and receive are separate from create on purpose: raising a transfer and handing
+     * custody over are different acts by different people. APPROVE_MOVEMENT also authorises the
+     * approval *bypass*, which is a flag on the create payload rather than an endpoint — see the
+     * backend's MovementApprovalService.
+     */
+    READ_MOVEMENT: 'READ_MOVEMENT',
+    CREATE_MOVEMENT: 'CREATE_MOVEMENT',
+    DISPATCH_MOVEMENT: 'DISPATCH_MOVEMENT',
+    RECEIVE_MOVEMENT: 'RECEIVE_MOVEMENT',
+    CANCEL_MOVEMENT: 'CANCEL_MOVEMENT',
+    APPROVE_MOVEMENT: 'APPROVE_MOVEMENT',
+
     APPROVE_REQUEST: 'APPROVE_REQUEST',
     REJECT_REQUEST: 'REJECT_REQUEST',
     ISSUE_ITEMS: 'ISSUE_ITEMS',
