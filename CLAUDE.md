@@ -381,3 +381,67 @@ ones, since those are what stop a later tightening from stranding real work.
 *Note for whoever adds a permission next:* `initializeSuperAdminRole` reconciles only against the
 list `initializePermissions()` returns. A permission created anywhere else exists in the table but
 never reaches the super administrator — silently, forever. Declare it in that list.
+
+---
+
+## Next up: scoping the store module (planned, not started)
+
+Assets, requests, movements, inventory (`/stocks`) and the staff directory are scoped. **Stores are
+not, fully.** This is the plan, written down because the module has a trap that the other four did
+not.
+
+### The trap: stores are not uniformly branch-owned
+
+Scoping by `Store.location` is the wrong instinct and would break the bank:
+
+| Type | Count | `location` | Who needs it |
+|---|---|---|---|
+| `ADMIN` | one per branch | that branch | that branch — genuinely branch-owned |
+| `IT` | **one, bank-wide** | Head Office | **every branch** — repairs route here |
+| `DISPOSAL` | **one, bank-wide** | Head Office | **every branch** — write-offs route here |
+| `COURIER` | one per courier | Head Office by convention | movements in transit |
+
+`StoreSeeder` asserts the IT and Disposal singletons on startup. Scope those by location and every
+branch loses sight of them, taking the repair and disposal flows with them.
+
+**The escape:** `StoreBalance` carries its **own `branch`** alongside its `store`. A Gulu asset
+sitting in the bank-wide IT store still has `branch = Gulu` on its balance line. So — **scope the
+balances by `branch`; do not scope the store directory by `location`.**
+
+### Already done
+
+`BranchScopeService` is a façade over `AccessScopeService.INVENTORY`, so `/inventory/balances`,
+`/inventory/stores`, `GET /store` and `GET /store/{branchId}` are scoped, and `POST /stores` answers
+to `requireCanChange`.
+
+### Not done
+
+1. **`PUT /stores/{id}/active` and `PUT /stores/{id}/name`** — permission-gated only. A branch officer
+   holding `UPDATE_STORE` can rename or **deactivate another branch's store, or the bank-wide IT
+   store**, by id. Guard by the store's location, *plus* an explicit rule that only Head Office may
+   touch the IT and Disposal singletons — one branch deactivating one would break every other branch.
+2. **Stock take — entirely unscoped.** Six endpoints, permission-gated, no branch check anywhere. A
+   `StockCount` knows its `store`, so a Gulu officer can open, edit lines on, submit and **approve**
+   Kampala's count. Approve is the sharp one: it writes counted quantities into live balances.
+3. **`/stationery-report` and `/stationery-report/branch`** — unchecked; likely aggregate across the
+   estate.
+
+### Three decisions still open — ask before implementing
+
+**A. In the bank-wide IT and Disposal stores, does a branch user see everything or only their own
+branch's items?** Recommendation: **only their own**, via the balance's `branch`. But it means those
+pages show different totals to different people, which genuinely changes what they mean. This is the
+main call.
+
+**B. Who approves a stock take — the counting branch, or Head Office?** Branch-scoped, a BOM approves
+their own count. Head-Office-only would be `MANAGE_ALL_BRANCH_INVENTORY` and a different rule.
+
+**C. Branch filter on the store page?** Same treatment as inventory — a `branchId` resolved through
+`AccessScopeService`, refused below ALL scope, and the control rendered only at ALL.
+
+### Follow the existing shape
+
+`AccessScopeService.INVENTORY` and its `VIEW_ALL_BRANCH_INVENTORY` / `MANAGE_ALL_BRANCH_INVENTORY`
+multipliers already exist — **no new permissions are needed.** Floor at BRANCH, never SELF: a store
+belongs to a branch and to no individual, so SELF would show a storekeeper an empty page. And use
+explicit `LEFT JOIN`s for every optional filter (trap #1).
