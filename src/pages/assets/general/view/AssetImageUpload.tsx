@@ -27,6 +27,17 @@ import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 // Brand colors
 const PRIMARY_COLOR = '#08796C';
 
+/**
+ * One corner radius for the whole panel.
+ *
+ * This component previously used four: the dropzone at 16px, the icon tile at 10px, the button at
+ * 12px and the file-type chip at 40px — inside a box roughly 230px tall. Nothing was wrong with any
+ * one of them, but together they gave the panel no single shape, which is most of why it read as
+ * unfinished. The pill on the file-type chip stays a pill, because a pill is a category of its own
+ * rather than a fifth radius.
+ */
+const RADIUS = '10px';
+
 interface AssetImageUploadProps {
     currentImage: string | null;
     assetName: string;
@@ -175,22 +186,26 @@ const AssetImageUpload = ({
                     <Paper
                         elevation={0}
                         sx={{
-                            width: 50,
-                            height: 50,
-                            borderRadius: '10px',
+                            width: 56,
+                            height: 56,
+                            // Same radius family as the container, so the two read as one object
+                            // rather than as a rounded tile sitting in a differently-rounded box.
+                            borderRadius: RADIUS,
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            bgcolor: alpha(PRIMARY_COLOR, 0.1),
+                            bgcolor: alpha(PRIMARY_COLOR, 0.08),
                             color: PRIMARY_COLOR,
-                            mb: 3,
-                            border: `2px solid ${alpha(PRIMARY_COLOR, 0.2)}`
+                            mb: 2.5,
+                            // 1px, not 2px: on a 56px tile a 2px edge is the loudest thing on a
+                            // panel whose job is to be empty and quiet.
+                            border: `1px solid ${alpha(PRIMARY_COLOR, 0.18)}`,
                         }}
                     >
                         {assetType === 'IT Equipment' ? (
-                            <DevicesOtherIcon sx={{ fontSize: 40 }} />
+                            <DevicesOtherIcon sx={{ fontSize: 26 }} />
                         ) : (
-                            <PhotoCameraIcon sx={{ fontSize: 40 }} />
+                            <PhotoCameraIcon sx={{ fontSize: 26 }} />
                         )}
                     </Paper>
                     <Button
@@ -204,24 +219,35 @@ const AssetImageUpload = ({
                             }
                         }}
                         sx={{
-                            mb: 2,
-                            px: 2,
-                            py: 1,
-                            borderRadius: 1.5,
+                            mb: 1.75,
+                            px: 2.25,
+                            py: 0.85,
+                            borderRadius: RADIUS,
+                            /*
+                             * One treatment, not three. This carried a gradient AND a border AND a
+                             * shadow, which on a small button reads as three competing edges. A flat
+                             * brand fill with one soft shadow is enough, and it stops the button
+                             * fighting the panel it sits inside.
+                             */
                             backgroundColor: PRIMARY_COLOR,
-                            backgroundImage: `linear-gradient(135deg, ${PRIMARY_COLOR}, ${alpha(PRIMARY_COLOR, 0.85)})`,
-                            color: 'white',
-                            fontWeight: 500,
+                            color: '#fff',
+                            fontWeight: 600,
                             textTransform: 'none',
-                            fontSize: '0.95rem',
-                            border: `1px solid ${alpha(PRIMARY_COLOR, 0.2)}`,
-                            boxShadow: `0 2px 6px ${alpha(PRIMARY_COLOR, 0.25)}`,
+                            fontSize: '0.875rem',
+                            letterSpacing: '0.01em',
+                            boxShadow: `0 1px 2px ${alpha(PRIMARY_COLOR, 0.24)}`,
                             '&:hover': !readOnly ? {
-                                backgroundColor: alpha(PRIMARY_COLOR, 0.9),
-                                boxShadow: `0 3px 8px ${alpha(PRIMARY_COLOR, 0.3)}`,
+                                backgroundColor: '#065E53',
+                                boxShadow: `0 2px 8px ${alpha(PRIMARY_COLOR, 0.3)}`,
                             } : {},
+                            // Read-only says "there is nothing here", so it should not look pressable.
+                            ...(readOnly && {
+                                backgroundColor: alpha('#000', 0.05),
+                                color: alpha('#000', 0.45),
+                                boxShadow: 'none',
+                            }),
                             cursor: readOnly ? 'default' : 'pointer',
-                            pointerEvents: readOnly ? 'none' : 'auto'
+                            pointerEvents: readOnly ? 'none' : 'auto',
                         }}
                     >
                         {readOnly ? 'No Image Available' : 'Add Image'}
@@ -231,26 +257,36 @@ const AssetImageUpload = ({
                             <Typography
                                 variant="caption"
                                 sx={{
-                                    color: 'text.secondary',
+                                    color: alpha('#000', 0.55),
                                     fontWeight: 500,
                                     display: 'flex',
                                     alignItems: 'center',
-                                    mb: 1
+                                    gap: 0.5,
+                                    mb: 1.25,
+                                    lineHeight: 1.4,
                                 }}
                             >
-                                <CloudUploadIcon fontSize="small" sx={{ mr: 0.5, fontSize: 16 }} />
+                                <CloudUploadIcon sx={{ fontSize: 15, color: alpha(PRIMARY_COLOR, 0.6) }} />
                                 Drag & drop an image here or click to upload
                             </Typography>
 
                             <Typography
                                 variant="caption"
                                 sx={{
-                                    color: alpha('#000', 0.4),
-                                    p: 0.75,
-                                    px: 1.5,
-                                    borderRadius: 5,
-                                    bgcolor: alpha('#000', 0.05),
-                                    border: `1px dashed ${alpha('#000', 0.1)}`
+                                    color: alpha('#000', 0.45),
+                                    py: 0.4,
+                                    px: 1.25,
+                                    /*
+                                     * A pill, and solid. It was a dashed pill directly under a
+                                     * dashed dropzone edge — two dashed outlines a few pixels apart,
+                                     * which is most of why the panel looked unresolved. Dashed now
+                                     * means one thing here: the drop target.
+                                     */
+                                    borderRadius: 999,
+                                    bgcolor: alpha('#000', 0.04),
+                                    border: `1px solid ${alpha('#000', 0.07)}`,
+                                    fontSize: '0.7rem',
+                                    letterSpacing: '0.01em',
                                 }}
                             >
                                 JPEG, PNG, WebP (max 5MB)
@@ -274,8 +310,12 @@ const AssetImageUpload = ({
                             left: 0,
                             right: 0,
                             zIndex: 2,
-                            borderTopLeftRadius: 8,
-                            borderTopRightRadius: 8,
+                            // Matches the container it sits on top of; at 8 against a 16px box it
+                            // left a visible sliver of the panel showing at each top corner.
+                            borderTopLeftRadius: RADIUS,
+                            borderTopRightRadius: RADIUS,
+                            borderBottomLeftRadius: 0,
+                            borderBottomRightRadius: 0,
                         }}
                         onClose={() => setError(null)}
                     >
@@ -293,19 +333,34 @@ const AssetImageUpload = ({
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    bgcolor: isDragging ? alpha(PRIMARY_COLOR, 0.1) : alpha('#f5f5f5', 0.5),
-                    borderRadius: 2,
                     position: 'relative',
                     overflow: 'hidden',
-                    borderBottom: `1px solid ${alpha('#000', 0.06)}`,
+                    borderRadius: RADIUS,
+                    /*
+                     * A complete border, not a lone `borderBottom`.
+                     *
+                     * A bottom-only edge on a rounded box stops short of both corners, so the box
+                     * reads as unfinished — which is exactly what it looked like. Dashed while empty
+                     * because that is the convention for "drop something here"; solid once an image
+                     * is in place, since there is nothing left to invite.
+                     */
+                    border: showImage
+                        ? `1px solid ${alpha('#000', 0.09)}`
+                        : `1.5px dashed ${alpha(PRIMARY_COLOR, 0.28)}`,
+                    backgroundColor: isDragging ? alpha(PRIMARY_COLOR, 0.06) : '#FFFFFF',
                     cursor: readOnly ? 'default' : 'pointer',
-                    transition: 'all 0.2s ease',
-                    ...(isDragging && {
-                        borderColor: PRIMARY_COLOR,
-                        boxShadow: `0 0 0 2px ${alpha(PRIMARY_COLOR, 0.3)}`
+                    transition: 'border-color .18s ease, background-color .18s ease, box-shadow .18s ease',
+                    ...(!readOnly && !showImage && {
+                        '&:hover': {
+                            borderColor: alpha(PRIMARY_COLOR, 0.55),
+                            backgroundColor: alpha(PRIMARY_COLOR, 0.02),
+                        },
                     }),
-                    // Keep the styling without the background image
-                    backgroundColor: '#ffffff', // Light background for better visibility
+                    ...(isDragging && {
+                        borderStyle: 'solid',
+                        borderColor: PRIMARY_COLOR,
+                        boxShadow: `0 0 0 3px ${alpha(PRIMARY_COLOR, 0.16)}`,
+                    }),
                 }}
                 onDragEnter={handleDragEnter}
                 onDragLeave={handleDragLeave}
@@ -366,17 +421,18 @@ const AssetImageUpload = ({
                             left: 0,
                             right: 0,
                             bottom: 0,
-                            bgcolor: alpha(PRIMARY_COLOR, 0.9),
+                            bgcolor: alpha(PRIMARY_COLOR, 0.92),
                             display: 'flex',
                             flexDirection: 'column',
                             alignItems: 'center',
                             justifyContent: 'center',
                             color: 'white',
-                            zIndex: 2
+                            borderRadius: RADIUS,
+                            zIndex: 2,
                         }}
                     >
-                        <CloudUploadIcon sx={{ fontSize: 48, mb: 2 }} />
-                        <Typography variant="h6">Drop to upload</Typography>
+                        <CloudUploadIcon sx={{ fontSize: 36, mb: 1.25 }} />
+                        <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>Drop to upload</Typography>
                     </Box>
                 )}
 
@@ -388,7 +444,8 @@ const AssetImageUpload = ({
                             left: 0,
                             right: 0,
                             bottom: 0,
-                            bgcolor: 'rgba(0,0,0,0.5)',
+                            bgcolor: 'rgba(0,0,0,0.55)',
+                            borderRadius: RADIUS,
                             display: 'flex',
                             flexDirection: 'column',
                             alignItems: 'center',
@@ -401,7 +458,10 @@ const AssetImageUpload = ({
                             zIndex: 1
                         }}
                     >
-                        <Typography variant="body1" sx={{ color: 'white', mb: 2 }}>
+                        <Typography
+                            variant="body2"
+                            sx={{ color: '#fff', fontWeight: 600, mb: 1.5, letterSpacing: '0.01em' }}
+                        >
                             Change image
                         </Typography>
                         <Box>
@@ -409,9 +469,12 @@ const AssetImageUpload = ({
                                 <IconButton
                                     color="primary"
                                     sx={{
-                                        bgcolor: 'white',
-                                        '&:hover': { bgcolor: "wheat" },
-                                        mr: 1
+                                        bgcolor: '#fff',
+                                        // Was `wheat` — a placeholder tan that matched nothing else
+                                        // on the page. The icon already carries the meaning, so the
+                                        // hover only needs to acknowledge the pointer.
+                                        '&:hover': { bgcolor: alpha(PRIMARY_COLOR, 0.12) },
+                                        mr: 1,
                                     }}
                                     onClick={() => fileInputRef.current?.click()}
                                 >
@@ -423,8 +486,8 @@ const AssetImageUpload = ({
                                 <IconButton
                                     color="error"
                                     sx={{
-                                        bgcolor: 'white',
-                                        '&:hover': { bgcolor: "wheat" }
+                                        bgcolor: '#fff',
+                                        '&:hover': { bgcolor: alpha('#D32F2F', 0.12) },
                                     }}
                                     onClick={handleRemoveImage}
                                 >

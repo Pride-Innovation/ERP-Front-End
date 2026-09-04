@@ -19,6 +19,7 @@ import {
 import { CustomToolbarWrapperProps, ITableToolBar } from './interface';
 import FileUploadButton from '../forms/FileUploadButton';
 import CustomGridToolbarExport from './CustomGridToolbarExport';
+import AsyncFilterSelect from './AsyncFilterSelect';
 import { useContext, useEffect, useState } from 'react';
 import { FileContext } from '../../context/file/FileContext';
 import dayjs, { Dayjs } from 'dayjs';
@@ -85,7 +86,19 @@ const TableToolBar = ({
     const [appliedFilters, setAppliedFilters] = useState<Record<string, any>>({});
     const [drStates, setDrStates] = useState<Record<string, { preset: string; from: Dayjs | null; to: Dayjs | null }>>({});
 
-    const activeFilterCount = Object.values(appliedFilters).filter(v => {
+    /*
+     * Counts only what the user can see as a chip.
+     *
+     * Keyed off the column definitions rather than off every entry in `appliedFilters`, because that
+     * object also carries the display-name companion an `asyncSelect` keeps beside its id
+     * (`supplierId__label`). Those have no column of their own, so the chip row skips them — and the
+     * badge counted them, saying "2 filters" over a single chip.
+     *
+     * A date range counts only once it has a date. Choosing "Custom" and picking nothing is not yet
+     * a filter.
+     */
+    const activeFilterCount = Object.entries(appliedFilters).filter(([key, v]) => {
+        if (!columnFilters.some(c => c.key === key)) return false;
         if (!v) return false;
         if (typeof v === 'object' && !Array.isArray(v)) return v.from || v.to;
         return true;
@@ -171,6 +184,36 @@ const TableToolBar = ({
         setDrStates(prev => ({ ...prev, [key]: { preset, from: range?.from ?? null, to: range?.to ?? null } }));
         setFilterValues(prev => ({ ...prev, [key]: { preset } }));
     };
+
+    /**
+     * The two fields of a custom date range.
+     *
+     * <p>Ordinary **outlined** fields, laid out as two controls with an arrow between them. The
+     * previous version tried to make them look like one control: `variant="standard"` with the
+     * underline disabled, crammed into a hand-built bordered box with a divider. MUI renders a
+     * standard-variant picker with its own padding and baseline, so inside that flex box the value
+     * sat outside the visible area — the fields showed a calendar icon over an empty grey strip, and
+     * the second button escaped the border entirely.
+     *
+     * <p>Two plain fields side by side are less clever and actually legible. Width is fixed rather
+     * than fluid so `DD/MM/YYYY` and the calendar button both fit without the value being trimmed.
+     */
+    const rangeFieldSx = (hasVal: boolean) => ({
+        width: 158,
+        '& .MuiOutlinedInput-root': {
+            height: 34,
+            borderRadius: '8px',
+            fontSize: '0.78rem',
+            bgcolor: hasVal ? alpha(PRIMARY, 0.04) : '#fff',
+            fontWeight: hasVal ? 600 : 400,
+            color: hasVal ? PRIMARY : MUTED,
+            transition: 'background-color 0.15s, border-color 0.15s',
+            '& fieldset': { borderColor: hasVal ? P16 : BORDER },
+            '&:hover fieldset': { borderColor: alpha(PRIMARY, 0.4) },
+            '&.Mui-focused fieldset': { borderColor: PRIMARY, borderWidth: 1.5 },
+        },
+        '& .MuiOutlinedInput-input': { py: 0, pl: 1.25 },
+    });
 
     // ─── Shared input sx ──────────────────────────────────────────────────────
     const inputSx = (hasVal: boolean) => ({
@@ -461,60 +504,116 @@ const TableToolBar = ({
                                                         </Select>
                                                     </Box>
 
-                                                    {/* Computed range badge */}
-                                                    {dr.preset && dr.preset !== 'custom' && dr.from && dr.to && (
+                                                    {/*
+                                                      * The dates the filter will actually use.
+                                                      *
+                                                      * Shown for a custom range too, not just for the
+                                                      * presets. It used to be excluded, so choosing
+                                                      * "Custom" replaced a plain statement of the
+                                                      * range with two half-legible inputs and no
+                                                      * confirmation of what had been selected — which
+                                                      * is precisely when a reader most wants one.
+                                                      */}
+                                                    {(dr.from || dr.to) && (
                                                         <Box sx={{
                                                             display: 'flex', alignItems: 'center', gap: 0.5,
                                                             bgcolor: P8, px: 1.1, height: 26,
                                                             borderRadius: '6px', border: `1px solid ${P16}`,
                                                         }}>
                                                             <Typography sx={{ fontSize: '0.7rem', color: PRIMARY, fontWeight: 700, whiteSpace: 'nowrap' }}>
-                                                                {dr.from.format('DD MMM')} → {dr.to.format('DD MMM YY')}
+                                                                {/*
+                                                                  * Shown from the first date, not only
+                                                                  * once both are set. Picking a start
+                                                                  * date used to change nothing on
+                                                                  * screen, so the control looked
+                                                                  * unresponsive at exactly the moment
+                                                                  * it had just accepted input. The
+                                                                  * ellipsis says the range is still
+                                                                  * open rather than empty.
+                                                                  */}
+                                                                {dr.from ? dr.from.format('DD MMM') : 'Any'}
+                                                                {' → '}
+                                                                {dr.to ? dr.to.format('DD MMM YY') : 'Any'}
                                                             </Typography>
                                                         </Box>
                                                     )}
 
-                                                    {/* Custom date pickers */}
+                                                    {/*
+                                                      * Custom date pickers.
+                                                      *
+                                                      * The two faults these had:
+                                                      *
+                                                      * The fields were 110px wide inside a container
+                                                      * with `overflow: hidden`. A date plus the
+                                                      * calendar button needs about 150px, so the
+                                                      * value was cut off mid-way and the second
+                                                      * picker's button was clipped away entirely —
+                                                      * the range looked broken because you could not
+                                                      * read what you had chosen.
+                                                      *
+                                                      * And the format was left to the locale, so it
+                                                      * rendered MM/DD/YYYY while every date the rest
+                                                      * of this application prints reads day-first.
+                                                      * Ambiguous on any day before the 13th, and
+                                                      * silently so.
+                                                      */}
                                                     {dr.preset === 'custom' && (
                                                         <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                                            <Box sx={{
-                                                                display: 'flex', alignItems: 'center', height: 34,
-                                                                border: `1px solid ${(dr.from || dr.to) ? P16 : BORDER}`,
-                                                                borderRadius: '8px', overflow: 'hidden', bgcolor: '#fff',
-                                                                '&:focus-within': { borderColor: PRIMARY },
-                                                                transition: 'border-color 0.15s',
-                                                            }}>
+                                                            <Stack direction="row" alignItems="center" gap={0.75}>
                                                                 <DatePicker
                                                                     value={dr.from}
+                                                                    format="DD/MM/YYYY"
+                                                                    maxDate={dr.to ?? undefined}
                                                                     onChange={d => setDrStates(prev => ({ ...prev, [col.key]: { ...prev[col.key], from: d } }))}
                                                                     slotProps={{
-                                                                        textField: {
-                                                                            size: 'small', variant: 'standard', placeholder: 'From',
-                                                                            InputProps: { disableUnderline: true },
-                                                                            sx: { width: 110, px: 1.25, '& .MuiInputBase-input': { fontSize: '0.76rem' } },
-                                                                        },
-                                                                        openPickerButton: { size: 'small', sx: { color: PRIMARY, p: '2px' } },
+                                                                        textField: { size: 'small', placeholder: 'From', sx: rangeFieldSx(!!dr.from) },
+                                                                        openPickerButton: { size: 'small', sx: { color: dr.from ? PRIMARY : MUTED, mr: -0.5 } },
                                                                     }}
                                                                 />
-                                                                <Box sx={{ width: 1, height: 18, bgcolor: BORDER, flexShrink: 0 }} />
+                                                                <Typography sx={{ fontSize: '0.8rem', color: MUTED, fontWeight: 600, flexShrink: 0 }}>
+                                                                    →
+                                                                </Typography>
                                                                 <DatePicker
                                                                     value={dr.to}
+                                                                    format="DD/MM/YYYY"
+                                                                    // Bounded from both sides, so a range cannot be
+                                                                    // built backwards and then silently return nothing.
                                                                     minDate={dr.from ?? undefined}
                                                                     onChange={d => setDrStates(prev => ({ ...prev, [col.key]: { ...prev[col.key], to: d } }))}
                                                                     slotProps={{
-                                                                        textField: {
-                                                                            size: 'small', variant: 'standard', placeholder: 'To',
-                                                                            InputProps: { disableUnderline: true },
-                                                                            sx: { width: 110, px: 1.25, '& .MuiInputBase-input': { fontSize: '0.76rem' } },
-                                                                        },
-                                                                        openPickerButton: { size: 'small', sx: { color: PRIMARY, p: '2px' } },
+                                                                        textField: { size: 'small', placeholder: 'To', sx: rangeFieldSx(!!dr.to) },
+                                                                        openPickerButton: { size: 'small', sx: { color: dr.to ? PRIMARY : MUTED, mr: -0.5 } },
                                                                     }}
                                                                 />
-                                                            </Box>
+                                                            </Stack>
                                                         </LocalizationProvider>
                                                     )}
                                                 </Stack>
                                             </Box>
+                                        );
+                                    }
+
+                                    // ── Async select (server-paginated) ─────
+                                    if (col.type === 'asyncSelect' && col.fetchOptions) {
+                                        return (
+                                            <AsyncFilterSelect
+                                                key={col.key}
+                                                label={col.label}
+                                                placeholder={col.placeholder}
+                                                value={filterValues[col.key] ?? ''}
+                                                onChange={(v, opt) => setFilterValues(prev => ({
+                                                    ...prev,
+                                                    [col.key]: v,
+                                                    // The chip above the table names a person, not
+                                                    // an id. Carried beside the value so the filter
+                                                    // summary and the export header read the same.
+                                                    [`${col.key}__label`]: opt ? opt.label : '',
+                                                }))}
+                                                fetchOptions={col.fetchOptions}
+                                                primary={PRIMARY}
+                                                muted={MUTED}
+                                                border={BORDER}
+                                            />
                                         );
                                     }
 

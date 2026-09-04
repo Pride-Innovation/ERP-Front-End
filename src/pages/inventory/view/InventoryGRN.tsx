@@ -1,4 +1,5 @@
 import { useContext, useEffect, useState } from "react";
+import { PERMISSIONS } from '../../../core/permissions/constants';
 import { IGRNReport } from "../interface";
 import GrnReportUtills from "./grnReportUtills";
 import {
@@ -75,7 +76,8 @@ const InventoryGRN = ({ grnList, onUploaded }: { grnList: IGRNReport[]; onUpload
         setOptions([
             { value: crudStates.read, label: "View GRN", icon: <VisibilityOutlinedIcon fontSize='small' color='primary' /> },
             { value: crudStates.download, label: "Generate GRN", icon: <ArrowCircleDownOutlinedIcon fontSize='small' color='inherit' /> },
-            { value: crudStates.upload, label: "Upload Signed GRN", icon: <EditCalendarOutlinedIcon fontSize='small' color='secondary' /> },
+            // Writing a signed GRN back against a stock receipt is a change to the receipt.
+            { value: crudStates.upload, label: "Upload Signed GRN", icon: <EditCalendarOutlinedIcon fontSize='small' color='secondary' />, permission: PERMISSIONS.UPDATE_INVENTORY },
         ]);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentGRN]);

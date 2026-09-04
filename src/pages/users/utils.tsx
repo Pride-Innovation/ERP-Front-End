@@ -6,6 +6,7 @@ Managing Director
 */
 
 import { usersMock } from '../../mocks/users';
+import { PERMISSIONS } from '../../core/permissions/constants';
 import { useContext, useEffect, useState } from 'react';
 import { getTableHeaders } from '../../components/tables/getTableHeaders';
 import { IOptions, ITableHeader } from '../../components/tables/interface';
@@ -139,12 +140,29 @@ const UserUtils = () => {
         action: {
             label: "options",
             options: [
+                /*
+                 * Each entry names the permission its endpoint demands, so this list and the
+                 * security rules can be read against each other:
+                 *   View Details  GET  /users               READ_USER   (page is gated on it already)
+                 *   Update        PUT  /users/{id}          UPDATE_USER
+                 *   Enable        POST /users/{id}/enable   CREATE_USER
+                 *   Unblock       POST /users/{id}/unblock  CREATE_USER
+                 *   Disable       POST /users/{id}/disable  CREATE_USER
+                 *   Block         POST /users/{id}/block    CREATE_USER
+                 *
+                 * The four account actions answer to CREATE_USER because they are POSTs under
+                 * /users/**, which the matcher maps to the create permission. That reads oddly —
+                 * blocking an account is a change to a person who already exists, not a creation —
+                 * but the endpoint is the authority and this list mirrors it rather than guessing.
+                 * Worth correcting on the backend; correcting it here alone would hide a control
+                 * from someone the API would in fact let through.
+                 */
                 { value: crudStates.read, label: "View Details", icon: <RemoveRedEyeIcon fontSize='small' />, divider: true },
-                { value: crudStates.update, label: "Update", icon: <ModeEditIcon fontSize='small' color='info' /> },
-                { value: crudStates.enable, label: "Enable", icon: <VpnKeyOutlinedIcon fontSize='small' color='success' /> },
-                { value: crudStates.unblock, label: "Unblock", icon: <LockPersonOutlinedIcon fontSize='small' color='warning' /> },
-                { value: crudStates.disable, label: "Disable Account", icon: <InfoIcon fontSize='small' />, danger: true },
-                { value: crudStates.block, label: "Block Account", icon: <BlockIcon fontSize='small' />, danger: true },
+                { value: crudStates.update, label: "Update", icon: <ModeEditIcon fontSize='small' color='info' />, permission: PERMISSIONS.UPDATE_USER },
+                { value: crudStates.enable, label: "Enable", icon: <VpnKeyOutlinedIcon fontSize='small' color='success' />, permission: PERMISSIONS.CREATE_USER },
+                { value: crudStates.unblock, label: "Unblock", icon: <LockPersonOutlinedIcon fontSize='small' color='warning' />, permission: PERMISSIONS.CREATE_USER },
+                { value: crudStates.disable, label: "Disable Account", icon: <InfoIcon fontSize='small' />, danger: true, permission: PERMISSIONS.CREATE_USER },
+                { value: crudStates.block, label: "Block Account", icon: <BlockIcon fontSize='small' />, danger: true, permission: PERMISSIONS.CREATE_USER },
             ]
         },
     };

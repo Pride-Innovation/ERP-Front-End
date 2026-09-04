@@ -7,6 +7,15 @@ Managing Director
 
 import { IAxiosResponse, IFetchDataRequest } from "../../../core/apis/interface";
 
+/** A role a unit confers, with the permissions it carries flattened onto it. */
+export interface IUnitRole {
+    id: number;
+    name: string;
+    description?: string | null;
+    /** Permission names. Sent with the role so the confirmation dialog needs no second call. */
+    permissions?: Array<string> | null;
+}
+
 export interface IUnit {
     id?: number;
     name: string;
@@ -16,6 +25,14 @@ export interface IUnit {
         name: string;
         shortCode?: string | null;
     } | null;
+    /**
+     * The roles membership of this unit confers.
+     *
+     * A unit was a group mailbox with a department and nothing more; this is what changed. Everyone
+     * in the unit inherits every permission behind every role here, without anything being done to
+     * their own account — which is why the screen that edits it asks for confirmation first.
+     */
+    roles?: Array<IUnitRole> | null;
 }
 
 export interface IUnitResponse extends IFetchDataRequest {

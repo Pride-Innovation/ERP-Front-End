@@ -20,6 +20,8 @@ export const crudStates: {
     read: string;
     delete: string;
     dispose: string;
+    /** Puts a soft-deleted record back into its register. */
+    restore: string;
     deactivate: string;
     disable: string;
     unblock: string;
@@ -46,6 +48,7 @@ export const crudStates: {
     read: "read",
     delete: "delete",
     dispose: "dispose",
+    restore: "restore",
     deactivate: "deactivate",
     disable: "disable",
     unblock: "unblock",

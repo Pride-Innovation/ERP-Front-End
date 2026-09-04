@@ -113,6 +113,19 @@ export const PERMISSIONS = {
      * view get it and branch staff do not. Mirrors the backend's BranchScopeService, which
      * enforces the same rule server-side; this constant only decides what the UI offers.
      */
+    /*
+     * An asset's trail, carved out of READ_ASSET.
+     *
+     * Seeing what an asset is, and seeing everyone who has ever held it, are separate disclosures —
+     * the second says where a named member of staff was working and what they were issued. Reading
+     * the maintenance record is likewise a different duty from performing the repair.
+     *
+     * Both are narrowing: the asset's branch scope still applies on top, so holding one grants the
+     * trail of assets already in reach, never more.
+     */
+    READ_ASSIGNMENT_HISTORY: 'READ_ASSIGNMENT_HISTORY',
+    READ_REPAIR_HISTORY: 'READ_REPAIR_HISTORY',
+
     VIEW_ALL_BRANCHES: 'VIEW_ALL_BRANCHES',
 
     /*
@@ -133,6 +146,28 @@ export const PERMISSIONS = {
     DASH_SCOPE_SELF: 'DASH_SCOPE_SELF',
     DASH_SCOPE_BRANCH: 'DASH_SCOPE_BRANCH',
     DASH_SCOPE_ALL: 'DASH_SCOPE_ALL',
+
+    /*
+     * Cross-branch multipliers.
+     *
+     * These widen a permission the holder already has; alone they grant nothing. VIEW_ALL_BRANCH_ASSETS
+     * does not let anyone open the assets page — READ_ASSET does that — it changes how much of the
+     * register they see once they are on it. Written this way so that granting one cannot accidentally
+     * open a door, only widen a door already open.
+     *
+     * This is what a unit confers. Membership of Admin or Infra grants the unit's roles, which is how
+     * an Admin Unit officer comes to outrank a branch officer holding the same title.
+     *
+     * Must match pride.bank.erp.helper.Constants on the backend.
+     */
+    VIEW_ALL_BRANCH_ASSETS: 'VIEW_ALL_BRANCH_ASSETS',
+    MANAGE_ALL_BRANCH_ASSETS: 'MANAGE_ALL_BRANCH_ASSETS',
+    VIEW_ALL_BRANCH_REQUESTS: 'VIEW_ALL_BRANCH_REQUESTS',
+    MANAGE_ALL_BRANCH_REQUESTS: 'MANAGE_ALL_BRANCH_REQUESTS',
+    VIEW_ALL_BRANCH_MOVEMENTS: 'VIEW_ALL_BRANCH_MOVEMENTS',
+    MANAGE_ALL_BRANCH_MOVEMENTS: 'MANAGE_ALL_BRANCH_MOVEMENTS',
+    VIEW_ALL_BRANCH_INVENTORY: 'VIEW_ALL_BRANCH_INVENTORY',
+    MANAGE_ALL_BRANCH_INVENTORY: 'MANAGE_ALL_BRANCH_INVENTORY',
 } as const;
 
 export type PermissionName = typeof PERMISSIONS[keyof typeof PERMISSIONS];
@@ -140,3 +175,58 @@ export type PermissionName = typeof PERMISSIONS[keyof typeof PERMISSIONS];
 // Role that bypasses every permission check. Must match the backend seed
 // (pride.bank.erp.helper.Constants.SUPER_ADMIN).
 export const SUPER_ADMIN_ROLE = 'SUPER_ADMIN';
+
+/**
+ * What a permission actually lets someone do, in the words an administrator would use.
+ *
+ * <p>For the confirmation dialog that runs before a unit's roles are changed. A list of names like
+ * MANAGE_ALL_BRANCH_ASSETS tells whoever is granting it nothing about the consequence — that
+ * everyone in the unit can now edit and delete any branch's asset — and the whole reason the dialog
+ * exists is that this grant is invisible from the accounts it affects.
+ *
+ * <p>Only the permissions whose consequences are easy to misjudge are described. Anything absent
+ * falls back to its own name, which is honest: better a bare name than a friendly gloss that
+ * quietly understates what is being handed over.
+ */
+export const PERMISSION_CONSEQUENCES: Record<string, string> = {
+    VIEW_ALL_BRANCH_ASSETS: 'See assets at every branch and Head Office, not just their own',
+    MANAGE_ALL_BRANCH_ASSETS: 'Create, edit and reassign assets at every branch',
+    VIEW_ALL_BRANCH_REQUESTS: 'See every branch’s requests from the moment they are raised',
+    MANAGE_ALL_BRANCH_REQUESTS: 'Act on and edit requests belonging to any branch',
+    VIEW_ALL_BRANCH_MOVEMENTS: 'See stock movements and consignments at every branch',
+    MANAGE_ALL_BRANCH_MOVEMENTS: 'Create, dispatch and receive movements for any branch',
+    VIEW_ALL_BRANCH_INVENTORY: 'See stock balances and store contents at every branch',
+    MANAGE_ALL_BRANCH_INVENTORY: 'Adjust stock and store records at any branch',
+    VIEW_ALL_BRANCHES: 'Lift the “your branch only” restriction across the application',
+    DASH_SCOPE_ALL: 'Dashboard figures cover the whole bank',
+    DASH_SCOPE_BRANCH: 'Dashboard figures cover their whole branch',
+    DASH_SCOPE_SELF: 'Dashboard figures cover only their own records',
+    DELETE_ASSET: 'Delete asset records',
+    READ_ASSIGNMENT_HISTORY: 'See who has held an asset, and when',
+    READ_REPAIR_HISTORY: 'See an asset’s repair and maintenance record',
+    DELETE_USER: 'Delete user accounts',
+    DELETE_ROLE: 'Delete roles',
+    UPDATE_ROLE: 'Change what every role in the bank grants',
+    DISPOSE_ASSET: 'Write assets off',
+    EXPORT_ASSET: 'Export the whole asset register to a file',
+};
+
+/**
+ * Permissions that widen someone’s reach past their own branch.
+ *
+ * <p>Called out separately in the confirmation dialog because they are the ones that surprise
+ * people: they are invisible on the affected user’s own account, and branch isolation is what
+ * everyone assumes is in force unless told otherwise.
+ */
+export const CROSS_BRANCH_PERMISSIONS: ReadonlyArray<string> = [
+    PERMISSIONS.VIEW_ALL_BRANCH_ASSETS,
+    PERMISSIONS.MANAGE_ALL_BRANCH_ASSETS,
+    PERMISSIONS.VIEW_ALL_BRANCH_REQUESTS,
+    PERMISSIONS.MANAGE_ALL_BRANCH_REQUESTS,
+    PERMISSIONS.VIEW_ALL_BRANCH_MOVEMENTS,
+    PERMISSIONS.MANAGE_ALL_BRANCH_MOVEMENTS,
+    PERMISSIONS.VIEW_ALL_BRANCH_INVENTORY,
+    PERMISSIONS.MANAGE_ALL_BRANCH_INVENTORY,
+    PERMISSIONS.VIEW_ALL_BRANCHES,
+    PERMISSIONS.DASH_SCOPE_ALL,
+];

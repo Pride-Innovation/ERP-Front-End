@@ -141,6 +141,21 @@ const GeneralAssetUtills = (typeId: string) => {
                 setCurrentState(crudStates.dispose);
                 handleOpen();
                 break;
+            case crudStates.restore:
+                // Routed through the page like every other action, because that is where the
+                // listing refresh lives — the alternative was threading a refresh callback into
+                // this file for one case.
+                setCurrentAsset(determineCurrentAsset(moduleID as number, generalAssets));
+                setCurrentState(crudStates.restore);
+                handleOpen();
+                break;
+            case crudStates.delete:
+                // Opens a confirm dialog rather than deleting on click: soft or not, a record
+                // leaving the register should take two deliberate actions.
+                setCurrentAsset(determineCurrentAsset(moduleID as number, generalAssets));
+                setCurrentState(crudStates.delete);
+                handleOpen();
+                break;
             case crudStates.reassign:
                 setCurrentAsset(determineCurrentAsset(moduleID as number, generalAssets));
                 setCurrentState(crudStates.reassign);

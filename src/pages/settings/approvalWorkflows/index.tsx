@@ -1,3 +1,5 @@
+import { PERMISSIONS } from '../../../core/permissions/constants';
+import { RequirePermission } from '../../../core/permissions';
 /*
 13.9 Pride's Standard Copyright Notice:
 Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
@@ -550,10 +552,14 @@ const ApprovalWorkflows: React.FC = () => {
                         </Typography>
                     </Box>
                 </Stack>
-                <Button variant="contained" startIcon={<AddIcon />} onClick={openCreate}
-                    sx={{ bgcolor: TEAL, '&:hover': { bgcolor: '#03413A' }, borderRadius: 2 }}>
-                    New Workflow
-                </Button>
+                {/* Approval routing decides who approves what, so it answers to the settings
+                    permission — matching the @PreAuthorize now on the endpoints. */}
+                <RequirePermission permission={PERMISSIONS.UPDATE_SETTING}>
+                    <Button variant="contained" startIcon={<AddIcon />} onClick={openCreate}
+                        sx={{ bgcolor: TEAL, '&:hover': { bgcolor: '#03413A' }, borderRadius: 2 }}>
+                        New Workflow
+                    </Button>
+                </RequirePermission>
             </Stack>
 
             {/* List */}

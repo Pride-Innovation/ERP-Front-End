@@ -42,6 +42,24 @@ const updateUnitService = async (body: Object, id: string | number) => {
     }
 };
 
+/**
+ * Replaces the roles a unit confers.
+ *
+ * <p>A replacement, not an add/remove pair: send the complete list you want, and an empty list to
+ * revoke everything. That makes revoking the same operation as granting, so there is no second call
+ * anyone can forget and no way to be left holding a role nobody remembers assigning.
+ *
+ * <p>Guarded by UPDATE_ROLE on the backend — it changes who holds what, so it belongs to whoever is
+ * trusted to edit roles rather than whoever may rename a unit.
+ */
+const setUnitRolesService = async (id: string | number, roleIds: Array<number>) => {
+    try {
+        return await axiosInstance.put(`units/${id}/roles`, { roleIds });
+    } catch (error) {
+        return error;
+    }
+};
+
 const deleteUnitService = async (id: string | number) => {
     try {
         return await axiosInstance.delete(`units/${id}`);
@@ -55,5 +73,6 @@ export {
     fetchUnitsService,
     createUnitService,
     updateUnitService,
+    setUnitRolesService,
     deleteUnitService,
 };

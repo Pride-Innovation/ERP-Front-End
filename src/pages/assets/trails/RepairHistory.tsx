@@ -6,6 +6,7 @@ Managing Director
 */
 
 import { useContext, useEffect } from "react";
+import { PERMISSIONS } from '../../../core/permissions/constants';
 import { crudStates } from "../../../utils/constants";
 import { Box } from "@mui/material";
 import ModalComponent from "../../../components/modal";
@@ -48,7 +49,8 @@ const RepairHistory = ({ id }: { id: string | number }) => {
         if (repairsTableData.length > 0) {
             const newOptions = [
                 { value: crudStates.read, label: "Description", icon: <DescriptionOutlinedIcon fontSize='small' color='secondary' /> },
-                { value: crudStates.update, label: "Complete Repair", icon: <HandymanOutlinedIcon fontSize='small' color='info' /> },
+                // PUT /assets/repairs/{id} — closing a repair answers to REPAIR_ASSET, not UPDATE_ASSET.
+                { value: crudStates.update, label: "Complete Repair", icon: <HandymanOutlinedIcon fontSize='small' color='info' />, permission: PERMISSIONS.REPAIR_ASSET },
                 { value: crudStates.upload, label: "Attachments", icon: <AttachmentOutlinedIcon fontSize='small' color='inherit' /> },
             ]
 

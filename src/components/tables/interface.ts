@@ -15,10 +15,28 @@ export interface IOptions {
     divider?: boolean;
     /** Style this option as destructive (red) regardless of its label — e.g. Block / Disable Account. */
     danger?: boolean;
+    /**
+     * The permission the endpoint behind this option demands.
+     *
+     * When set, the option is hidden from anyone who does not hold it — filtered centrally in
+     * `TableUtills.handleOptionsFilter`, so a page only has to name the permission rather than
+     * repeat the filtering. Leave unset for an option whose route is already gated by the page
+     * itself (a "View Details" on a page you cannot open without the read permission).
+     *
+     * Presentation only. The endpoint enforces it regardless; this stops the app offering an action
+     * that would come back 403, which reads as a broken button rather than a permission boundary.
+     */
+    permission?: string;
 }
 
 // ─── Column filter definitions ────────────────────────────────────────────────
-export type FilterType = 'text' | 'select' | 'dateRange';
+export type FilterType = 'text' | 'select' | 'dateRange' | 'asyncSelect';
+
+/** One page of options for an `asyncSelect` filter. */
+export interface IFilterOptionPage {
+    options: Array<{ value: string | number; label: string }>;
+    totalElements: number;
+}
 
 export interface IColumnFilter {
     key: string;
@@ -27,6 +45,18 @@ export interface IColumnFilter {
     /** Required when type === 'select' */
     options?: Array<{ value: string | number; label: string }>;
     placeholder?: string;
+    /**
+     * Required when type === 'asyncSelect'. Fetches one debounced, server-paginated page.
+     *
+     * <p>For filters whose options are a table rather than a list — people, suppliers, commodities.
+     * A `select` would have to load every row up front, which is both slow and wrong once the set
+     * outgrows a dropdown; and a plain `text` filter makes the user guess at spellings and matches
+     * on a name rather than an id.
+     *
+     * <p>The value the filter carries is the option's `value` (an id), so the page should send the
+     * id-shaped parameter — `assignedToId`, not `assignedTo`.
+     */
+    fetchOptions?: (query: string, page: number, pageSize: number) => Promise<IFilterOptionPage>;
 }
 
 /** Supported export formats. */

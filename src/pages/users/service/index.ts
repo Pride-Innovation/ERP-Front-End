@@ -8,6 +8,22 @@ Managing Director
 import axiosInstance from "../../../core/apis/axiosInstance";
 import { IUserAxiosResponse } from "../interface";
 
+/**
+ * A paginated page of the staff directory.
+ *
+ * <p>Branch-scoped on the server: a branch user's request comes back with their own duty station
+ * whatever they ask for, and Head Office sees everyone. There is deliberately no `branchId` here —
+ * passing one from the client would be a suggestion rather than a rule, and the endpoint ignores it
+ * below ALL scope.
+ */
+const fetchUsersService = async (params?: Record<string, any>) => {
+  try {
+    return await axiosInstance.get("users", { params });
+  } catch (error) {
+    return error;
+  }
+};
+
 const createUSerService = async (body: object) => {
   try {
     const response = await axiosInstance.post("users", body);
@@ -100,6 +116,7 @@ const bulkInsertUsersService = async (data: object) => {
 
 export {
   createUSerService,
+  fetchUsersService,
   fetchSingleUserService,
   deleteUserService,
   searchUserService,

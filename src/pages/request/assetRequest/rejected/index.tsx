@@ -6,6 +6,7 @@ Managing Director
 */
 
 import { useContext, useEffect, useRef } from "react";
+import { PERMISSIONS } from '../../../../core/permissions/constants';
 import TableComponent from "../../../../components/tables/TableComponent";
 import { Box } from "@mui/material";
 import RequestUtills from "../utills";
@@ -89,8 +90,14 @@ const RejectedRequest = () => {
 
     useEffect(() => {
         setOptions([
-            { value: crudStates.delete, label: "Delete", icon: <InfoIcon fontSize='small' color='error' /> },
-            { value: crudStates.update, label: "Update", icon: <ModeEditIcon fontSize='small' color='info' /> },
+            /*
+              * The other request tabs gated these and this one did not, so a rejected request
+              * offered Delete and Update to anyone who could open the tab. Endpoints:
+              *   Delete  DELETE /requests/{id}  DELETE_REQUEST
+              *   Update  PUT    /requests/{id}  UPDATE_REQUEST
+              */
+            { value: crudStates.delete, label: "Delete", icon: <InfoIcon fontSize='small' color='error' />, permission: PERMISSIONS.DELETE_REQUEST },
+            { value: crudStates.update, label: "Update", icon: <ModeEditIcon fontSize='small' color='info' />, permission: PERMISSIONS.UPDATE_REQUEST },
             { value: crudStates.read, label: "View Details", icon: <RemoveRedEyeIcon fontSize='small' color='inherit' /> },
         ])
     }, []);

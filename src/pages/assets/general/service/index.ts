@@ -130,7 +130,51 @@ const bulkInsertAssetsService = async (data: object) => {
     }
 };
 
+/**
+ * Soft-deletes an asset — it leaves every listing but the row is kept.
+ *
+ * <p>Not disposal. Disposal is a business event under /movements: an asset reaching the end of its
+ * life, written off and still counted in the register. This says the record should not have existed.
+ */
+const deleteAssetService = async (id: string | number, reason?: string) => {
+    try {
+        return await axiosInstance.delete(`assets/${id}`, {
+            params: reason ? { reason } : undefined,
+        });
+    } catch (error) {
+        return error;
+    }
+};
+
+/**
+ * How many deleted assets of this category the caller could restore.
+ *
+ * <p>Asked so the page can hide the deleted view when there is nothing in it. Branch-scoped on the
+ * server, so the number always matches what the view would show.
+ */
+const countDeletedAssetsService = async (assetTypeId?: number | string) => {
+    try {
+        return await axiosInstance.get('assets/deleted-count', {
+            params: assetTypeId ? { assetTypeId } : undefined,
+        });
+    } catch (error) {
+        return error;
+    }
+};
+
+/** Puts a soft-deleted asset back into the register. */
+const restoreAssetService = async (id: string | number) => {
+    try {
+        return await axiosInstance.put(`assets/${id}/restore`);
+    } catch (error) {
+        return error;
+    }
+};
+
 export {
+    countDeletedAssetsService,
+    deleteAssetService,
+    restoreAssetService,
     // Category-neutral exports — prefer these for new code.
     createAssetService,
     getAssetByIdService,

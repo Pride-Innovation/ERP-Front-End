@@ -22,6 +22,26 @@ import StoreDetails from './StoreDetails';
 import { Box } from '@mui/material';
 
 
+/**
+ * The stock level of one balance line, by its own reorder threshold.
+ *
+ * <p>Mirrors the backend rule exactly — `minLevel > 0 && quantity <= minLevel` — which is what
+ * `/inventory/low-stock`, the branch overview and the "Reorder at" column on the Balances panel all
+ * use. This column previously invented its own bands in the browser (under 5 low, 5-10 warning, over
+ * 10 in stock) and ignored `minLevel` entirely, so a commodity with a threshold of 50 and 30 on hand
+ * read "in stock" here while the low-stock monitor correctly flagged it. Two screens, two answers,
+ * same commodity.
+ *
+ * <p>"Not monitored" is a real answer rather than a blank: a line with no threshold set is never
+ * flagged however little of it is on hand, and saying so is what prompts somebody to set one.
+ */
+const stockLevelOf = (quantity: number, minLevel?: number | null): string => {
+    if (!minLevel || minLevel <= 0) return 'not monitored';
+    if (quantity <= minLevel / 2) return 'low';
+    if (quantity <= minLevel) return 'warning';
+    return 'in stock';
+};
+
 const TableData = () => {
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
     const { stores } = useSelector((state: RootState) => state.StoreStore);
@@ -51,8 +71,7 @@ const TableData = () => {
         ...data,
         quantity: StoreMocks[0].quantity,
         branch: StoreMocks[0].branch.name,
-        status: StoreMocks[0].quantity < 5 ? 'low' :
-            StoreMocks[0].quantity > 5 && StoreMocks[0].quantity < 10 ? 'warning' : 'in stock',
+        status: stockLevelOf(StoreMocks[0].quantity, StoreMocks[0].minLevel),
         action: {
             label: "Options",
             options: [
@@ -71,8 +90,7 @@ const TableData = () => {
                 unitOfMeasure: str.commodity.groupName,
                 quantity: str.quantity,
                 branch: str.branch.name,
-                status: str.quantity < 5 ? 'low' :
-                    str.quantity > 5 && str.quantity < 10 ? 'warning' : 'in stock',
+                status: stockLevelOf(str.quantity, str.minLevel),
             });
         });
         setStoreReportTableData(data);
@@ -124,16 +142,33 @@ const TableData = () => {
                 paginationMode="server"
                 onStatusChange={handleStatusChange}
                 status
+                /*
+                 * Only filters GET /store actually declares.
+                 *
+                 * Spring drops a parameter no endpoint names without complaining, so a filter the
+                 * page sends to a signature that does not list it looks like it worked and quietly
+                 * returns the unfiltered list. All three boxes here were in that state:
+                 *
+                 *  - Stock Name  — now real; the endpoint declares `stockName` and matches on the
+                 *                  commodity's name, partial and case-insensitive.
+                 *  - Status      — removed. It offered Active / Disabled / Locked, which are
+                 *                  user-account states, while the column beside it shows a stock
+                 *                  level (low / warning / in stock) derived here from quantity. Two
+                 *                  unrelated vocabularies, and neither reached the server.
+                 *  - Stock Date  — removed. `createdAt` was never a parameter of this endpoint.
+                 *
+                 * A stock-level filter would need the thresholds moved to the server rather than
+                 * being computed in this file; worth doing, but not by guessing what they should be.
+                 */
                 columnFilters={[
                     { key: 'stockName', label: 'Stock Name', type: 'text' },
                     {
-                        key: 'status', label: 'Status', type: 'select', options: [
-                            { value: 'active', label: 'Active' },
-                            { value: 'disabled', label: 'Disabled' },
-                            { value: 'locked', label: 'Locked' },
+                        key: 'stockLevel', label: 'Stock Level', type: 'select', options: [
+                            { value: 'low', label: 'At or below reorder level' },
+                            { value: 'adequate', label: 'Above reorder level' },
+                            { value: 'unmonitored', label: 'No reorder level set' },
                         ]
                     },
-                    { key: 'createdAt', label: 'Stock Date', type: 'dateRange' },
                 ]}
                 // onApplyFilters={(filters) => fetchAllRequests(filters)}
             />

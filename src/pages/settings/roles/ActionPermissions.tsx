@@ -36,6 +36,7 @@ import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined';
 import PublicOutlinedIcon from '@mui/icons-material/PublicOutlined';
 import AssignmentIndOutlinedIcon from '@mui/icons-material/AssignmentIndOutlined';
 import BuildOutlinedIcon from '@mui/icons-material/BuildOutlined';
+import HistoryOutlinedIcon from '@mui/icons-material/HistoryOutlined';
 import WarehouseOutlinedIcon from '@mui/icons-material/WarehouseOutlined';
 import DeleteSweepOutlinedIcon from '@mui/icons-material/DeleteSweepOutlined';
 import UploadFileOutlinedIcon from '@mui/icons-material/UploadFileOutlined';
@@ -122,6 +123,32 @@ const ACTION_PERMISSIONS: IPermissionMeta[] = [
     // CREATE_ASSET, so whoever could register an asset could also reassign one to another officer
     // and import a spreadsheet of several thousand; whoever could correct a model number could hand
     // the asset into a store.
+    /*
+     * An asset's trail. Carved out of READ_ASSET, so they read as narrowing rather than granting:
+     * the asset's branch scope still applies on top, and holding one gives the trail of assets the
+     * person can already see.
+     *
+     * Every role that held READ_ASSET at the moment of the split was backfilled with both, once, so
+     * nobody lost a tab they had the day before. Revoke either here and it stays revoked.
+     */
+    {
+        group: 'Asset actions',
+        name: 'READ_ASSIGNMENT_HISTORY',
+        label: 'Read Assignment History',
+        description: 'Can see who has held an asset and when — its chain of custody',
+        icon: <HistoryOutlinedIcon sx={{ fontSize: 17 }} />,
+        color: '#00695C',
+        bg: '#E0F2F1',
+    },
+    {
+        group: 'Asset actions',
+        name: 'READ_REPAIR_HISTORY',
+        label: 'Read Repair History',
+        description: 'Can see an asset’s maintenance record — separate from performing repairs',
+        icon: <BuildOutlinedIcon sx={{ fontSize: 17 }} />,
+        color: '#4E342E',
+        bg: '#EFEBE9',
+    },
     {
         group: 'Asset actions',
         name: 'REASSIGN_ASSET',
@@ -277,6 +304,95 @@ const ACTION_PERMISSIONS: IPermissionMeta[] = [
         icon: <PublicOutlinedIcon sx={{ fontSize: 17 }} />,
         color: '#2E7D32',
         bg: '#E8F5E9',
+    },
+
+    /*
+     * The cross-branch multipliers.
+     *
+     * These WIDEN a permission the holder already has and grant nothing alone: someone with
+     * "See assets at every branch" but without Read Asset still cannot open the assets page. Worth
+     * saying in each description, because the names read like grants and an administrator reasonably
+     * assumes ticking one hands over access.
+     *
+     * Listed here rather than left to fall into "Other permissions", where they were grantable but
+     * unexplained — the leftover bucket is the wrong place for the eight most consequential boxes on
+     * the page. Manage entries are red: they are the ones that let someone change records belonging
+     * to a branch that is not theirs.
+     *
+     * This is also what a unit confers, so most estates will grant these to a unit's role in
+     * Settings -> Units rather than to a person's title.
+     */
+    {
+        group: 'Cross-branch visibility',
+        name: 'VIEW_ALL_BRANCH_ASSETS',
+        label: 'See assets at every branch',
+        description: 'Widens the asset register beyond their own branch. Grants no access on its own — they still need Read Asset',
+        icon: <DevicesOutlinedIcon sx={{ fontSize: 17 }} />,
+        color: '#2E7D32',
+        bg: '#E8F5E9',
+    },
+    {
+        group: 'Cross-branch visibility',
+        name: 'MANAGE_ALL_BRANCH_ASSETS',
+        label: 'Edit assets at any branch',
+        description: 'Lets their existing asset permissions act on another branch’s assets — editing, reassigning, disposing',
+        icon: <DevicesOutlinedIcon sx={{ fontSize: 17 }} />,
+        color: '#C62828',
+        bg: '#FFEBEE',
+    },
+    {
+        group: 'Cross-branch visibility',
+        name: 'VIEW_ALL_BRANCH_REQUESTS',
+        label: 'See requests from every branch',
+        description: 'Every branch’s requests from the moment they are raised. Not needed to act on one routed to their unit',
+        icon: <AssignmentIndOutlinedIcon sx={{ fontSize: 17 }} />,
+        color: '#2E7D32',
+        bg: '#E8F5E9',
+    },
+    {
+        group: 'Cross-branch visibility',
+        name: 'MANAGE_ALL_BRANCH_REQUESTS',
+        label: 'Act on any branch’s requests',
+        description: 'Also lets them act on a workflow step that was routed to somebody else — the approval override',
+        icon: <AssignmentIndOutlinedIcon sx={{ fontSize: 17 }} />,
+        color: '#C62828',
+        bg: '#FFEBEE',
+    },
+    {
+        group: 'Cross-branch visibility',
+        name: 'VIEW_ALL_BRANCH_MOVEMENTS',
+        label: 'See movements at every branch',
+        description: 'Stock movements and consignments wherever they start or end',
+        icon: <LocalShippingOutlinedIcon sx={{ fontSize: 17 }} />,
+        color: '#2E7D32',
+        bg: '#E8F5E9',
+    },
+    {
+        group: 'Cross-branch visibility',
+        name: 'MANAGE_ALL_BRANCH_MOVEMENTS',
+        label: 'Act on any branch’s movements',
+        description: 'Dispatch, receive, complete or cancel a movement that touches no branch of theirs',
+        icon: <LocalShippingOutlinedIcon sx={{ fontSize: 17 }} />,
+        color: '#C62828',
+        bg: '#FFEBEE',
+    },
+    {
+        group: 'Cross-branch visibility',
+        name: 'VIEW_ALL_BRANCH_INVENTORY',
+        label: 'See stock at every branch',
+        description: 'Stock balances and store contents across the estate',
+        icon: <WarehouseOutlinedIcon sx={{ fontSize: 17 }} />,
+        color: '#2E7D32',
+        bg: '#E8F5E9',
+    },
+    {
+        group: 'Cross-branch visibility',
+        name: 'MANAGE_ALL_BRANCH_INVENTORY',
+        label: 'Change stock at any branch',
+        description: 'Adjust stock and create or edit stores belonging to another branch',
+        icon: <WarehouseOutlinedIcon sx={{ fontSize: 17 }} />,
+        color: '#C62828',
+        bg: '#FFEBEE',
     },
 
     // ── Dashboard: subject ───────────────────────────────────────────────────

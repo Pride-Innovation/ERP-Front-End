@@ -1,3 +1,5 @@
+import { RequirePermission } from '../../../core/permissions';
+import { PERMISSIONS } from '../../../core/permissions/constants';
 /*
 13.9 Pride's Standard Copyright Notice:
 Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify,
@@ -123,6 +125,9 @@ const AllMovements = () => {
                                 <RefreshIcon sx={{ fontSize: 18 }} />
                             </IconButton>
                         </Tooltip>
+                        {/* POST /movements is guarded by CREATE_MOVEMENT; offering the button to
+                            someone without it sends them to a form whose save then fails. */}
+                        <RequirePermission permission={PERMISSIONS.CREATE_MOVEMENT}>
                         <Button
                             variant="contained"
                             startIcon={<AddIcon />}
@@ -135,6 +140,7 @@ const AllMovements = () => {
                         >
                             New Movement
                         </Button>
+                        </RequirePermission>
                     </Stack>
                 }
             />

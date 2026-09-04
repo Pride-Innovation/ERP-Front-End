@@ -65,27 +65,43 @@ export interface IDashboardCapabilities {
     /** The branch the page is pinned to below ALL scope. */
     branchName: string | null;
     branchId: number | null;
-    /** The unit (Admin / Infra) the viewer belongs to, where they have one. */
-    unitName: string | null;
+    /**
+     * The unit whose membership is what widened this viewer's reach, where that is the reason.
+     *
+     * <p>Null when the unit confers nothing, or when the viewer would see just as much without it.
+     * It is not "which unit are you in" — it is "is your unit the answer to why you see this much",
+     * which is the only question the label needs answered.
+     */
+    scopeViaUnit: string | null;
     firstName: string;
 }
 
-/** The label shown in the hero, describing the reach of what is on screen. */
+/**
+ * The label shown in the hero, describing the reach of what is on screen.
+ *
+ * <p>Names the unit when the unit is the reason for the reach. Someone whose figures cover the whole
+ * bank because they belong to Admin Unit has no other way of learning that: nothing on their user
+ * record changed when the unit was granted its roles, they were not notified, and the permission
+ * appears on their account indistinguishable from one their title gave them. "All branches & Head
+ * Office" leaves them to guess; naming the unit tells them what to ask about if it looks wrong — and
+ * tells them what they would lose on leaving it.
+ */
 export const scopeLabel = (capabilities: IDashboardCapabilities): string => {
-    if (capabilities.scope === 'ALL') return 'All branches & Head Office';
-    if (capabilities.branchName) return capabilities.branchName;
+    const via = capabilities.scopeViaUnit ? ` · via ${capabilities.scopeViaUnit}` : '';
+    if (capabilities.scope === 'ALL') return `All branches & Head Office${via}`;
+    if (capabilities.branchName) return `${capabilities.branchName}${via}`;
     // SELF, or a user with no duty station on record.
     return 'Your records';
 };
 
 const useDashboardCapabilities = (): IDashboardCapabilities => {
-    const { has, hasAny } = usePermissions();
+    const { has, hasAny, onlyViaUnit, unitName: conferringUnitName } = usePermissions();
     const { getCurrentUser } = RoutesUtills();
     const user = getCurrentUser() as IUser;
 
     const branchId = typeof user?.branch?.id === 'number' ? user.branch.id : null;
     const branchName = user?.branch?.name ?? null;
-    const unitName = (user?.unit && typeof user.unit === 'object' ? user.unit.name : null) ?? null;
+    const unitFromMembership = conferringUnitName();
     const firstName = user?.firstName ?? '';
 
     return useMemo(() => {
@@ -128,6 +144,18 @@ const useDashboardCapabilities = (): IDashboardCapabilities => {
 
         const scope = resolveScope();
 
+        /*
+         * Attribute the reach to the unit only when the unit is actually the reason for it.
+         *
+         * Someone in Admin Unit whose own title already carries DASH_SCOPE_ALL sees exactly as much
+         * either way, and telling them their unit is why would be false — and would have them chasing
+         * the wrong membership when they wondered about their access.
+         */
+        const scopePermission = scope === 'ALL' ? PERMISSIONS.DASH_SCOPE_ALL
+            : scope === 'BRANCH' ? PERMISSIONS.DASH_SCOPE_BRANCH
+                : null;
+        const widenedByUnit = scopePermission !== null && onlyViaUnit(scopePermission);
+
         return {
             viewsAssets: subject(PERMISSIONS.DASH_VIEW_ASSETS, PERMISSIONS.READ_ASSET),
             viewsRequests: subject(PERMISSIONS.DASH_VIEW_REQUESTS, PERMISSIONS.READ_REQUEST),
@@ -139,11 +167,11 @@ const useDashboardCapabilities = (): IDashboardCapabilities => {
             readsOwnRecords: true,
             branchName,
             branchId,
-            unitName,
+            scopeViaUnit: widenedByUnit ? unitFromMembership : null,
             firstName,
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [branchId, branchName, unitName, firstName]);
+    }, [branchId, branchName, unitFromMembership, firstName]);
 };
 
 export default useDashboardCapabilities;

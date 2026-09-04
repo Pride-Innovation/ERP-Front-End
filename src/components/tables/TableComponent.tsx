@@ -56,6 +56,17 @@ const EMPTY_COL = '—';
 // ─── Status colour map ────────────────────────────────────────────────────────
 const getStatusMeta = (raw: string): { bg: string; text: string; border: string; dot: string } => {
     const s = (raw ?? '').toLowerCase();
+    /*
+     * Stock levels, matched first and exactly.
+     *
+     * These come from a line's own reorder threshold, not from a workflow status, so they must not
+     * be caught by the substring rules below — and without their own branch they all fell through to
+     * the default purple, which said nothing about whether stock needed reordering. "Not monitored"
+     * is grey on purpose: it is the absence of a threshold, not a health judgement.
+     */
+    if (s === 'low') return { bg: alpha('#dc2626', 0.08), text: '#b91c1c', border: alpha('#dc2626', 0.18), dot: '#dc2626' };
+    if (s === 'warning') return { bg: alpha('#d97706', 0.08), text: '#b45309', border: alpha('#d97706', 0.18), dot: '#d97706' };
+    if (s === 'not monitored') return { bg: alpha('#64748b', 0.08), text: '#475569', border: alpha('#64748b', 0.18), dot: '#94a3b8' };
     if (s.includes('approved') || s === 'active' || s.includes('complet') || s === 'in stock' || s === 'instore')
         return { bg: alpha('#16a34a', 0.08), text: '#15803d', border: alpha('#16a34a', 0.18), dot: '#16a34a' };
     if (s.includes('pending') || s.includes('created') || s === 'inactive' || s.includes('process') || s === 'requireupdate')
@@ -198,7 +209,21 @@ const TableComponent = ({
     };
 
     const handleFiltersApplied = (filters: Record<string, any>) => {
-        setActiveFilters(filters);
+        /*
+         * Two audiences, and they want different things.
+         *
+         * `activeFilters` is merged straight into the request on every page change, so it must carry
+         * only real parameters. An `asyncSelect` keeps the chosen option's display name beside its id
+         * (`supplierId` + `supplierId__label`) so the page can name it in the filter summary — but
+         * that companion is not a parameter, and Spring drops an undeclared one without complaining.
+         * It would ride along on every paged request looking like it did something.
+         *
+         * The page gets the whole object, labels included, because that is what the summary and the
+         * printed export header read.
+         */
+        setActiveFilters(
+            Object.fromEntries(Object.entries(filters).filter(([key]) => !key.endsWith('__label'))),
+        );
         setPage(0);
         onApplyFilters?.(filters);
     };

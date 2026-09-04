@@ -6,6 +6,7 @@ Managing Director
 */
 
 import { useContext, useEffect, useState } from "react";
+import { PERMISSIONS } from '../../core/permissions/constants';
 import { AppDispatch, RootState } from "../../store";
 import { IOptions, ITableHeader } from "../../components/tables/interface";
 import { useSelector } from "react-redux";
@@ -94,9 +95,15 @@ const InventoryUtills = () => {
                 // Receiving and correcting are different jobs with different consequences, so they
                 // are different menu items. "Update" on its own read as the way to complete a
                 // partial delivery, which it never was.
-                { value: crudStates.receiveDelivery, label: "Receive Delivery", icon: <LocalShippingOutlinedIcon fontSize='small' color='primary' /> },
-                { value: crudStates.update, label: "Correct Details", icon: <ModeEditIcon fontSize='small' color='info' /> },
-                { value: crudStates.delete, label: "Delete", icon: <InfoIcon fontSize='small' color='error' /> }
+                /*
+                  * Endpoints, so this list and the security rules can be read against each other:
+                  *   Receive Delivery  PUT    /stocks/**  UPDATE_INVENTORY
+                  *   Correct Details   PUT    /stocks/**  UPDATE_INVENTORY
+                  *   Delete            DELETE /stocks/**  DELETE_INVENTORY
+                  */
+                { value: crudStates.receiveDelivery, label: "Receive Delivery", icon: <LocalShippingOutlinedIcon fontSize='small' color='primary' />, permission: PERMISSIONS.UPDATE_INVENTORY },
+                { value: crudStates.update, label: "Correct Details", icon: <ModeEditIcon fontSize='small' color='info' />, permission: PERMISSIONS.UPDATE_INVENTORY },
+                { value: crudStates.delete, label: "Delete", icon: <InfoIcon fontSize='small' color='error' />, permission: PERMISSIONS.DELETE_INVENTORY }
             ]
         },
     };
@@ -115,13 +122,37 @@ const InventoryUtills = () => {
                 endPoint,
                 params
             }) as IInventoriesAxiosResponse;
+
             if (response.status === 200) {
                 dispatch(loadAllInventory(response.data.content));
                 setCount(response.data.totalElements);
                 setInventoryCount(response.data.totalElements);
+            } else {
+                /*
+                 * The request failed, and the rows on screen must not survive it.
+                 *
+                 * Services here answer `catch (error) { return error }`, so a 4xx arrives as a value
+                 * with no `status` rather than as a throw — the check above simply fails and, before
+                 * this branch existed, the function returned having changed nothing. The previous
+                 * filter's rows stayed on screen under the new filter's chips, with the record count
+                 * still describing them. It looked like a successful match.
+                 *
+                 * Clearing is the lesser of two imperfect answers: an empty table after a failure is
+                 * not strictly accurate either — we do not know that nothing matched — but the axios
+                 * interceptor has already raised the error, and stale rows outlive that message
+                 * while quietly claiming to be the result.
+                 */
+                dispatch(loadAllInventory([]));
+                setCount(0);
+                setInventoryCount(0);
             }
         } catch (error) {
-            console.log(error)
+            // A genuine throw, rather than the error-as-value above. Same reasoning: do not leave
+            // the previous result standing in for one we never received.
+            dispatch(loadAllInventory([]));
+            setCount(0);
+            setInventoryCount(0);
+            console.error('Failed to load inventory', error);
         }
         setLoading(false)
     }
@@ -173,10 +204,20 @@ const InventoryUtills = () => {
         setStocksTableData(data);
     }
 
+    /*
+     * Rebuilt on every change, including when the result is empty.
+     *
+     * The guard that used to sit here — `if (inventory?.length > 0)` — meant a filter matching
+     * nothing never reached the mapper, so the table kept the previous rows while the record count
+     * beside it correctly dropped to zero. The page said "0 records" over a full table, and the rows
+     * on screen belonged to the *previous* filter: not an empty state, a wrong one.
+     *
+     * The assets page carries the same comment for the same reason. An empty list is a result, not
+     * an absence of one, and it has to be rendered as such.
+     */
     useEffect(() => {
-        if (inventory?.length > 0) {
-            handleInventoryTableData(inventory)
-        }
+        handleInventoryTableData(inventory ?? []);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [inventory]);
 
 

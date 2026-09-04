@@ -44,6 +44,8 @@ import { RootState } from '../../../../store';
 import { brand, neutral, border, surface, status as statusTokens } from '../../../../utils/tokens';
 import { toast } from 'react-toastify';
 import usePermissions from '../../../../core/permissions/usePermissions';
+import useAccessScope from '../../../../core/permissions/useAccessScope';
+import { heroPrimarySx, heroSecondarySx } from '../../../../components/buttons/heroActionStyles';
 import { PERMISSIONS } from '../../../../core/permissions/constants';
 
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -186,7 +188,25 @@ const GeneralAssetDetails = () => {
     const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore);
     const assetType = assetTypes.find(t => String(t.id) === typeId);
     const { has } = usePermissions();
-    const canUpdateAsset = has(PERMISSIONS.UPDATE_ASSET);
+    const { canActOn } = useAccessScope();
+
+    /*
+     * Holding the permission is only half the question.
+     *
+     * The endpoint checks the permission *and* the record: at SELF scope UPDATE_ASSET does not make
+     * a colleague's asset yours, and someone holding VIEW_ALL_BRANCH_ASSETS without the matching
+     * MANAGE multiplier can open another branch's asset but not change it. Testing only `has(...)`
+     * put an Edit button in front of both of them, and the click went to /restricted-access.
+     *
+     * `asset` is null until the fetch resolves, so these are computed from it rather than at the top
+     * of the component.
+     */
+    const scopedRecord = {
+        branchId: asset?.branch?.id ?? null,
+        ownerId: asset?.assignedTo?.id ?? null,
+    };
+    const canUpdateAsset = !!asset && canActOn(PERMISSIONS.UPDATE_ASSET, 'ASSETS', scopedRecord);
+    const canReassignAsset = !!asset && canActOn(PERMISSIONS.REASSIGN_ASSET, 'ASSETS', scopedRecord);
 
     const fetchAsset = async () => {
         setLoading(true);
@@ -234,11 +254,25 @@ const GeneralAssetDetails = () => {
 
     const hasTechnical = !!(asset.ram || asset.cpuSpeed || asset.hardDiskSize || asset.macAddress || asset.ipAddress || asset.interfaceType);
 
-    const TABS = [
-        { label: 'Details', icon: <ListAltOutlinedIcon fontSize="small" /> },
-        { label: 'Assignment History', icon: <HistoryOutlinedIcon fontSize="small" /> },
-        { label: 'Repair History', icon: <BuildOutlinedIcon fontSize="small" /> },
+    /*
+     * Tabs the viewer may actually open.
+     *
+     * Each history tab has its own permission now, carved out of READ_ASSET — which is what opens
+     * this page. Someone with the page but not the trail would otherwise see a tab that always
+     * failed, so the tab is not offered at all.
+     *
+     * Identified by `key` rather than by position: filtering the array shifts every index after the
+     * one removed, and the panel below used to switch on the raw index. Keyed, hiding a tab cannot
+     * quietly show the wrong panel.
+     */
+    const ALL_TABS = [
+        { key: 'details', label: 'Details', icon: <ListAltOutlinedIcon fontSize="small" />, permission: null },
+        { key: 'assignment', label: 'Assignment History', icon: <HistoryOutlinedIcon fontSize="small" />, permission: PERMISSIONS.READ_ASSIGNMENT_HISTORY },
+        { key: 'repairs', label: 'Repair History', icon: <BuildOutlinedIcon fontSize="small" />, permission: PERMISSIONS.READ_REPAIR_HISTORY },
     ];
+    const TABS = ALL_TABS.filter(t => !t.permission || has(t.permission));
+    // Guards the case where the selected tab is one the viewer has just lost access to.
+    const activeTab = TABS[tab] ?? TABS[0];
 
     if (loading) {
         return (
@@ -321,17 +355,30 @@ const GeneralAssetDetails = () => {
                                 </Box>
                             </Stack>
 
-                            <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-                                <MuiButton variant="outlined" size="small" startIcon={<EditOutlinedIcon fontSize="small" />}
-                                    onClick={() => navigate(`${ROUTES.LIST_GENERAL_ASSETS}/${typeId}/update/${asset.id}`)}
-                                    sx={{ textTransform: 'none', fontWeight: 700, borderRadius: '10px', borderColor: alpha(brand[500], 0.4), color: brand[600], '&:hover': { borderColor: brand[500], bgcolor: alpha(brand[500], 0.05) } }}>
-                                    Edit
-                                </MuiButton>
-                                {asset?.assetStatus?.status === 'inStore' && (
-                                    <MuiButton variant="contained" size="small" disableElevation startIcon={<AssignmentIndOutlinedIcon fontSize="small" />}
+                            <Stack direction="row" spacing={1.25} flexWrap="wrap" useFlexGap alignItems="center" sx={{ flexShrink: 0 }}>
+                                {canUpdateAsset && (
+                                    <MuiButton
+                                        variant="text"
+                                        disableElevation
+                                        startIcon={<EditOutlinedIcon sx={{ fontSize: 18 }} />}
+                                        onClick={() => navigate(`${ROUTES.LIST_GENERAL_ASSETS}/${typeId}/update/${asset.id}`)}
+                                        sx={heroSecondarySx}
+                                    >
+                                        {/* "Edit" alone gave a 60px button beside a 56px tile. Naming
+                                            the object is both better proportioned and clearer about
+                                            what is being edited. */}
+                                        Edit Asset
+                                    </MuiButton>
+                                )}
+                                {canReassignAsset && asset?.assetStatus?.status === 'inStore' && (
+                                    <MuiButton
+                                        variant="text"
+                                        disableElevation
+                                        startIcon={<AssignmentIndOutlinedIcon sx={{ fontSize: 18 }} />}
                                         onClick={() => { setCurrentState(crudStates.reassign); setOpen(true); }}
-                                        sx={{ textTransform: 'none', fontWeight: 700, borderRadius: '10px', bgcolor: brand[600], '&:hover': { bgcolor: brand[700] } }}>
-                                        Assign
+                                        sx={heroPrimarySx}
+                                    >
+                                        Assign to Officer
                                     </MuiButton>
                                 )}
                             </Stack>
@@ -390,14 +437,14 @@ const GeneralAssetDetails = () => {
                                     '& .MuiTabs-indicator': { bgcolor: brand[500], height: 3, borderRadius: '3px 3px 0 0' },
                                 }}
                             >
-                                {TABS.map((t, i) => <Tab key={i} label={t.label} icon={t.icon} iconPosition="start" />)}
+                                {TABS.map((t) => <Tab key={t.key} label={t.label} icon={t.icon} iconPosition="start" />)}
                             </Tabs>
 
                             {/* Details gets generous padding; the history tabs render a `flat`
                                 table (no card chrome), so they sit flush at p:0 — the panel's own
                                 border is the single frame. */}
-                            <Box sx={{ p: tab === 0 ? { xs: 2, md: 3 } : 0 }}>
-                                {tab === 0 && (
+                            <Box sx={{ p: activeTab?.key === 'details' ? { xs: 2, md: 3 } : 0 }}>
+                                {activeTab?.key === 'details' && (
                                     <>
                                         <Section title="Identity" icon={<BadgeOutlinedIcon />}>
                                             <Grid item xs={12} sm={6}><Field label="Asset Name" value={asset.assetName || null} /></Grid>
@@ -449,8 +496,8 @@ const GeneralAssetDetails = () => {
                                         )}
                                     </>
                                 )}
-                                {tab === 1 && <AssignmentHistory id={id as string} />}
-                                {tab === 2 && <RepairHistory id={id as string} />}
+                                {activeTab?.key === 'assignment' && <AssignmentHistory id={id as string} />}
+                                {activeTab?.key === 'repairs' && <RepairHistory id={id as string} />}
                             </Box>
                         </Paper>
                     </Grid>

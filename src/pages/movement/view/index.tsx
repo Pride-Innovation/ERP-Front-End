@@ -1,3 +1,5 @@
+import useAccessScope from '../../../core/permissions/useAccessScope';
+import { PERMISSIONS } from '../../../core/permissions/constants';
 /*
 13.9 Pride's Standard Copyright Notice:
 Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify,
@@ -249,6 +251,29 @@ const MovementDetails = () => {
     const navigate = useNavigate();
 
     const [movement, setMovement] = useState<IMovement | null>(null);
+
+    const { canActOnAnyOf } = useAccessScope();
+
+    /*
+     * Each lifecycle button needs two things, and this page checked only the first.
+     *
+     * The predicates above — canDispatch, canReceive, canComplete, canCancel — are business state:
+     * is this an inter-location movement, has it been dispatched yet, is it on a live consignment.
+     * None of them asks whether the viewer holds DISPATCH_MOVEMENT, or whether the movement touches
+     * a branch they may act on. So the page offered all four to anyone who could open it, and the
+     * click came back 403.
+     *
+     * A movement has up to four ends and the caller is in reach if any one is theirs — the same rule
+     * the movements listing and the backend guard both use. Absent ends are ordinary rather than a
+     * fault: a return has no source store, an issuance no source user.
+     */
+    const mayAct = (permission: string): boolean =>
+        !!movement && canActOnAnyOf(permission, 'MOVEMENTS', [
+            movement.sourceStore?.location?.id,
+            movement.destStore?.location?.id,
+            movement.sourceUser?.branch?.id,
+            movement.recipientUser?.branch?.id,
+        ]);
     const [approvals, setApprovals] = useState<IApprovalRecord[]>([]);
     const [loading, setLoading] = useState(true);
     const [action, setAction] = useState('');
@@ -379,11 +404,11 @@ const MovementDetails = () => {
                                 <Button variant="outlined" startIcon={<Inventory2OutlinedIcon />} onClick={() => setLoadingOntoConsignment(true)} sx={{ ...outlinedBtnSx, borderColor: alpha(BLUE, 0.5), color: BLUE }}>Load onto Consignment</Button>
                             </Tooltip>
                         )}
-                        {canDispatch(movement) && <Button variant="contained" startIcon={<LocalShippingOutlinedIcon />} onClick={() => openAction('dispatch')} sx={{ ...actionBtnSx, bgcolor: BLUE }}>Dispatch</Button>}
-                        {canMarkInTransit(movement) && <Button variant="contained" startIcon={<FlightTakeoffOutlinedIcon />} onClick={() => openAction('in-transit')} sx={{ ...actionBtnSx, bgcolor: INDIGO }}>In Transit</Button>}
-                        {canReceive(movement) && <Button variant="contained" startIcon={<AssignmentTurnedInOutlinedIcon />} onClick={() => openAction('receive')} sx={{ ...actionBtnSx, bgcolor: status.success.strong }}>Receive</Button>}
-                        {canComplete(movement) && <Button variant="contained" startIcon={<TaskAltOutlinedIcon />} onClick={() => openAction('complete')} sx={{ ...actionBtnSx, bgcolor: status.success.strong }}>Complete</Button>}
-                        {canCancel(movement) && <Button variant="outlined" startIcon={<CancelOutlinedIcon />} onClick={() => openAction('cancel')} sx={{ ...outlinedBtnSx, borderColor: status.danger.main, color: status.danger.main }}>Cancel</Button>}
+                        {canDispatch(movement) && mayAct(PERMISSIONS.DISPATCH_MOVEMENT) && <Button variant="contained" startIcon={<LocalShippingOutlinedIcon />} onClick={() => openAction('dispatch')} sx={{ ...actionBtnSx, bgcolor: BLUE }}>Dispatch</Button>}
+                        {canMarkInTransit(movement) && mayAct(PERMISSIONS.DISPATCH_MOVEMENT) && <Button variant="contained" startIcon={<FlightTakeoffOutlinedIcon />} onClick={() => openAction('in-transit')} sx={{ ...actionBtnSx, bgcolor: INDIGO }}>In Transit</Button>}
+                        {canReceive(movement) && mayAct(PERMISSIONS.RECEIVE_MOVEMENT) && <Button variant="contained" startIcon={<AssignmentTurnedInOutlinedIcon />} onClick={() => openAction('receive')} sx={{ ...actionBtnSx, bgcolor: status.success.strong }}>Receive</Button>}
+                        {canComplete(movement) && mayAct(PERMISSIONS.RECEIVE_MOVEMENT) && <Button variant="contained" startIcon={<TaskAltOutlinedIcon />} onClick={() => openAction('complete')} sx={{ ...actionBtnSx, bgcolor: status.success.strong }}>Complete</Button>}
+                        {canCancel(movement) && mayAct(PERMISSIONS.CANCEL_MOVEMENT) && <Button variant="outlined" startIcon={<CancelOutlinedIcon />} onClick={() => openAction('cancel')} sx={{ ...outlinedBtnSx, borderColor: status.danger.main, color: status.danger.main }}>Cancel</Button>}
                     </Stack>
                 }
             />

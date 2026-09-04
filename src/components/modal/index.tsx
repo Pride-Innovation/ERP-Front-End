@@ -9,7 +9,7 @@ import Box from '@mui/material/Box';
 import Modal from '@mui/material/Modal';
 import { IModalComponent } from './interface';
 import { TypographyComponent } from '../headers/TypographyComponent';
-import { alpha, Divider, useTheme } from '@mui/material';
+import { alpha, useTheme } from '@mui/material';
 
 export default function ModalComponent({
     children,

@@ -33,18 +33,21 @@ import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined';
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
 import WarningAmberRoundedIcon from '@mui/icons-material/WarningAmberRounded';
+import AdminPanelSettingsOutlinedIcon from '@mui/icons-material/AdminPanelSettingsOutlined';
+import PublicOutlinedIcon from '@mui/icons-material/PublicOutlined';
 import { toast } from 'react-toastify';
 
 import { PageHero } from '../../../components/layout';
 import ModalComponent from '../../../components/modal';
 import Loading from '../../../components/loading';
 import { RequirePermission } from '../../../core/permissions';
-import { PERMISSIONS } from '../../../core/permissions/constants';
+import { CROSS_BRANCH_PERMISSIONS, PERMISSIONS } from '../../../core/permissions/constants';
 import { useDebounce } from '../../../hooks/useDebounce';
 import { brand, neutral, border } from '../../../utils/tokens';
 import { IUnit, IUnitsAxiosResponse } from './interface';
 import { unitSchema } from './schema';
 import UnitForm from './UnitForm';
+import UnitRolesDialog from './UnitRolesDialog';
 import {
     fetchUnitsService,
     createUnitService,
@@ -54,6 +57,16 @@ import {
 
 const PRIMARY = brand[500];
 const PAGE_SIZE = 9;
+
+/**
+ * Whether membership of this unit reaches past its own branch.
+ *
+ * Surfaced on the card because branch isolation is what everyone assumes is in force, and a unit
+ * that quietly lifts it should not look identical to one that does not.
+ */
+const confersCrossBranch = (unit: IUnit): boolean =>
+    (unit.roles ?? []).some((role) =>
+        (role.permissions ?? []).some((p) => CROSS_BRANCH_PERMISSIONS.includes(p)));
 
 interface IUnitFormValues {
     name: string;
@@ -69,7 +82,7 @@ const Units = () => {
     const [totalElements, setTotalElements] = useState(0);
     const [pageNumber, setPageNumber] = useState(0);
     const [searchTerm, setSearchTerm] = useState('');
-    const [modal, setModal] = useState<'create' | 'update' | 'delete' | ''>('');
+    const [modal, setModal] = useState<'create' | 'update' | 'delete' | 'roles' | ''>('');
     const [current, setCurrent] = useState<IUnit | null>(null);
 
     const debouncedSearch = useDebounce<string>(searchTerm, 500);
@@ -174,6 +187,13 @@ const Units = () => {
                 </ModalComponent>
             )}
 
+            {/* Roles modal — what membership of this unit confers */}
+            {modal === 'roles' && current && (
+                <ModalComponent width="50%" title={`Roles — ${current.name}`} open handleClose={closeModal}>
+                    <UnitRolesDialog unit={current} handleClose={closeModal} onSaved={fetchUnits} />
+                </ModalComponent>
+            )}
+
             {/* Delete modal */}
             {modal === 'delete' && (
                 <ModalComponent width="40%" title="Delete Unit" open handleClose={closeModal}>
@@ -264,6 +284,11 @@ const Units = () => {
                                                     <IconButton size="small" onClick={() => openUpdate(unit)} sx={{ color: PRIMARY }}><EditOutlinedIcon fontSize="small" /></IconButton>
                                                 </Tooltip>
                                             </RequirePermission>
+                                            <RequirePermission permission={PERMISSIONS.UPDATE_ROLE}>
+                                                <Tooltip title="Roles this unit confers" arrow>
+                                                    <IconButton size="small" onClick={() => { setCurrent(unit); setModal('roles'); }} sx={{ color: PRIMARY }}><AdminPanelSettingsOutlinedIcon fontSize="small" /></IconButton>
+                                                </Tooltip>
+                                            </RequirePermission>
                                             <RequirePermission permission={PERMISSIONS.DELETE_SETTING}>
                                                 <Tooltip title="Delete unit" arrow>
                                                     <IconButton size="small" onClick={() => { setCurrent(unit); setModal('delete'); }} sx={{ color: '#D32F2F' }}><DeleteOutlineIcon fontSize="small" /></IconButton>
@@ -272,9 +297,30 @@ const Units = () => {
                                         </Stack>
                                     </Stack>
                                     <Divider sx={{ my: 1.5 }} />
-                                    <Chip size="small" icon={<AccountTreeOutlinedIcon sx={{ fontSize: 14 }} />}
-                                        label={unit.department?.name || 'No department'}
-                                        sx={{ height: 24, fontWeight: 600, fontSize: '0.72rem', bgcolor: alpha(PRIMARY, 0.07), color: brand[700], '& .MuiChip-icon': { color: brand[600] } }} />
+                                    <Stack direction="row" spacing={0.75} flexWrap="wrap" useFlexGap>
+                                        <Chip size="small" icon={<AccountTreeOutlinedIcon sx={{ fontSize: 14 }} />}
+                                            label={unit.department?.name || 'No department'}
+                                            sx={{ height: 24, fontWeight: 600, fontSize: '0.72rem', bgcolor: alpha(PRIMARY, 0.07), color: brand[700], '& .MuiChip-icon': { color: brand[600] } }} />
+                                        {/*
+                                          * What the unit grants, on the card rather than one click in.
+                                          * A unit that confers cross-branch reach is the most consequential
+                                          * object in Settings and used to look identical to one that
+                                          * confers nothing.
+                                          */}
+                                        {(unit.roles?.length ?? 0) > 0 && (
+                                            <Chip size="small"
+                                                icon={confersCrossBranch(unit) ? <PublicOutlinedIcon sx={{ fontSize: 14 }} /> : <AdminPanelSettingsOutlinedIcon sx={{ fontSize: 14 }} />}
+                                                label={confersCrossBranch(unit)
+                                                    ? `${unit.roles?.length} role${(unit.roles?.length ?? 0) === 1 ? '' : 's'} · cross-branch`
+                                                    : `${unit.roles?.length} role${(unit.roles?.length ?? 0) === 1 ? '' : 's'}`}
+                                                sx={{
+                                                    height: 24, fontWeight: 600, fontSize: '0.72rem',
+                                                    bgcolor: alpha(confersCrossBranch(unit) ? '#D32F2F' : neutral[500], 0.08),
+                                                    color: confersCrossBranch(unit) ? '#D32F2F' : neutral[700],
+                                                    '& .MuiChip-icon': { color: confersCrossBranch(unit) ? '#D32F2F' : neutral[600] },
+                                                }} />
+                                        )}
+                                    </Stack>
                                 </Paper>
                             ))}
                         </Box>

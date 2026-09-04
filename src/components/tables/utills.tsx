@@ -19,11 +19,11 @@ import {
     requestStatus
 } from "../../utils/constants";
 import { MenuItem, useTheme } from "@mui/material";
-import { exportPDF } from "../../utils/pdf";
 import { exportListPdf } from "../../utils/pdf/listPdf";
 import { useContext, useEffect, useState } from "react";
 import { FileContext } from "../../context/file/FileContext";
 import RoutesUtills from "../../core/routes/utills";
+import usePermissions from "../../core/permissions/usePermissions";
 import formatExportData, { ModuleTypeMap } from "./formatExportData";
 import { toast } from "react-toastify";
 import { exportExcel } from "../../utils/excel";
@@ -45,6 +45,8 @@ const APPROVAL_STATUSES = new Set([
 const isApprovalStatus = (s?: string) => !!s && APPROVAL_STATUSES.has(s);
 
 const TableUtills = ({ moduleName }: { moduleName?: string }) => {
+    // Row options carrying a `permission` are hidden from anyone who does not hold it.
+    const { has } = usePermissions();
     const { fileName } = useContext(FileContext);
     const { getCurrentUser } = RoutesUtills();
     const { requestStatusIds } = useContext(RequestContext);
@@ -259,8 +261,29 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
                 return;
             }
 
-            // Export to PDF
-            exportPDF(exportData.columns, exportData.data, fileName || moduleName || 'export');
+            /*
+             * The same exporter as the row-based path above.
+             *
+             * These two paths differ only in where the rows come from — this one from the DataGrid
+             * or a fresh API call, the other from an array the page already holds — and there was
+             * never a reason for them to produce different-looking documents. While this called the
+             * older `utils/pdf.js`, the register you got depended on which screen you exported from:
+             * one with repeating column headings, a filter summary and page numbers, one without.
+             *
+             * The date range travels as `meta` so a printed sheet says which slice of the data it is,
+             * which is the whole point of the newer exporter and what the old one could not show.
+             */
+            const exportFilters = [
+                tableStartDate ? { label: 'From', value: dayjs(tableStartDate).format('DD MMM YYYY') } : null,
+                tableEndDate ? { label: 'To', value: dayjs(tableEndDate).format('DD MMM YYYY') } : null,
+            ].filter(Boolean) as Array<{ label: string; value: string }>;
+
+            await exportListPdf(
+                exportData.columns,
+                exportData.data,
+                fileName || moduleName || 'export',
+                exportFilters.length ? { filters: exportFilters } : undefined,
+            );
 
         } catch (error) {
             console.error('Error generating PDF:', error);
@@ -373,7 +396,36 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
      * For this purpose we need to ensure that each request owner has to be tracked and not able to approve or reject their own request.
      * This is to ensure that the request is approved by a different person than the one who created it.
      */
+    /**
+     * The row menu, filtered to what the signed-in user may actually do.
+     *
+     * <p>Two independent questions, and both must pass. {@link resolveStateOptions} below answers
+     * "does this action make sense for this row right now" — is it already approved, are you the
+     * requester, has it been issued. This answers "may this person perform it at all".
+     *
+     * <p>Central rather than per page. Before this only the assets page filtered its row menu, so
+     * every other table offered Approve, Delete and Issue to anyone who could open the page; the
+     * click then came back 403, which reads as a broken button rather than as a boundary. A page now
+     * names the permission on the option and this does the rest — which also means a table added
+     * later is gated by default instead of by remembering.
+     *
+     * <p>Presentation only. The endpoint enforces the same rule regardless, and it is the authority;
+     * this exists so the app does not offer what it will then refuse.
+     */
     const handleOptionsFilter = (
+        column: any,
+        filter?: boolean,
+        row?: any,
+        module?: string,
+        optionsfilterParams?: Record<string, any>
+    ) => {
+        const stateAllowed = resolveStateOptions(column, filter, row, module, optionsfilterParams);
+        return (stateAllowed ?? []).filter(
+            (option: any) => !option?.permission || has(option.permission));
+    };
+
+    /** The pre-existing business-state rules. Unchanged; permission filtering wraps it above. */
+    const resolveStateOptions = (
         column: any,
         filter?: boolean,
         row?: any,
@@ -805,6 +857,18 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
             value: "dueForDisposal",
             color: theme.palette.error.dark
         }
+        /*
+         * The soft-deleted view is NOT here.
+         *
+         * This list only reaches a page whose module name is one of three hardcoded categories, and
+         * asset categories have been configurable since the single /assets/general/:typeId route
+         * landed — so anything created in Settings falls to the `default` case and gets no status
+         * filter at all. An entry added here is invisible to most of the estate.
+         *
+         * The assets page renders its own control for it, next to the export actions, which is also
+         * where it belongs: whether you may see deleted records is a permission question, not a
+         * per-category one.
+         */
     ];
 
     const userFilterStatuses: { label: string, value: string, color: string }[] = [

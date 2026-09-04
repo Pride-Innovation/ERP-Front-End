@@ -1,4 +1,13 @@
+import { countDeletedAssetsService } from './service';
+import { fetchUsersService } from '../../users/service';
+import useAccessScope from '../../../core/permissions/useAccessScope';
+import DeleteAsset from './DeleteAsset';
+import RestoreAsset from './RestoreAsset';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import RestoreOutlinedIcon from '@mui/icons-material/RestoreOutlined';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import {
+    useCallback,
     useContext,
     useEffect,
     useMemo,
@@ -60,6 +69,18 @@ const ASSET_STATUS_CODES = [
 /** Matches the table footer's default, so the first fetch and the footer agree. */
 const DEFAULT_PAGE_SIZE = 10;
 
+/**
+ * Drops the display-only companions an `asyncSelect` filter carries.
+ *
+ * <p>That filter stores two things per key: `assignedToId` (what the endpoint wants) and
+ * `assignedToId__label` (the person's name, for the filter summary and the printed export header).
+ * Only the first belongs on the wire. Spring drops an undeclared parameter without complaint, so
+ * leaving it in would be harmless today and indistinguishable from a filter that works tomorrow —
+ * which is trap #2 in CLAUDE.md, and worth not walking into on purpose.
+ */
+const stripDisplayLabels = (params: Record<string, any>): Record<string, any> =>
+    Object.fromEntries(Object.entries(params).filter(([key]) => !key.endsWith('__label')));
+
 const GeneralAssets = () => {
     const { typeId } = useParams<{ typeId: string }>();
     const [loading, setLoading] = useState<boolean>(false);
@@ -82,17 +103,79 @@ const GeneralAssets = () => {
      * dependencies — `has` is a new function on every render.
      */
     const { has } = usePermissions();
+    const { scopeFor } = useAccessScope();
     const canUpdateAsset = has(PERMISSIONS.UPDATE_ASSET);
     const canReassignAsset = has(PERMISSIONS.REASSIGN_ASSET);
     const canRepairAsset = has(PERMISSIONS.REPAIR_ASSET);
     const canReceiveAssetInStore = has(PERMISSIONS.RECEIVE_ASSET_IN_STORE);
     const canDisposeAsset = has(PERMISSIONS.DISPOSE_ASSET);
+    const canDeleteAsset = has(PERMISSIONS.DELETE_ASSET);
+    /** True while the page is showing soft-deleted records rather than the live register. */
+    const viewingDeleted = selectedStatus === 'deleted';
+
+    /*
+     * How many deleted records of this category are within reach, so the page can hide the view
+     * entirely when there is nothing in it. Branch-scoped on the server, so the number matches what
+     * the view would actually show rather than promising records belonging to another branch.
+     */
+    const [deletedCount, setDeletedCount] = useState<number>(0);
+
+    const refreshDeletedCount = useCallback(async () => {
+        if (!canDeleteAsset || !currentAssetType?.id) return;
+        const res: any = await countDeletedAssetsService(currentAssetType.id);
+        // Fails closed: a count we could not read leaves the control hidden rather than offering a
+        // view that may be empty.
+        setDeletedCount(res?.status === 200 ? Number(res.data) || 0 : 0);
+    }, [canDeleteAsset, currentAssetType?.id]);
+
+    useEffect(() => { refreshDeletedCount(); }, [refreshDeletedCount]);
+
+    /*
+     * Shown when there is something to restore — or whenever the deleted view is open, whatever the
+     * count says. Without that second clause, restoring the last deleted record takes the count to
+     * zero, the control disappears, and you are stranded in a view with no way back to the register.
+     */
+    const showDeletedToggle = canDeleteAsset && (deletedCount > 0 || viewingDeleted);
+
+    /*
+     * How far this viewer's asset listing reaches, which decides whether an "Assigned To" filter can
+     * mean anything. At SELF the listing is already only what they hold, so the filter is offered to
+     * BRANCH and ALL only — see the columnFilters block below.
+     */
+    const assetScope = scopeFor('ASSETS', 'VIEW');
+
+    /**
+     * The staff directory behind the Assigned To filter, one debounced page at a time.
+     *
+     * <p>Scoped on the server, not here: a branch user's request comes back with their own duty
+     * station whatever they ask for, and Head Office sees everyone. Passing a branch from the client
+     * would be a suggestion rather than a rule.
+     */
+    const fetchAssigneeOptions = useCallback(async (query: string, page: number, pageSize: number) => {
+        const res: any = await fetchUsersService({
+            name: query?.trim() || undefined,
+            pageNumber: page,
+            pageSize,
+        });
+        if (res?.status !== 200) return { options: [], totalElements: 0 };
+
+        const content = res.data?.content ?? [];
+        return {
+            options: content.map((u: any) => ({
+                value: u.id,
+                // Surname first, matching how the table's own "Assigned To" column reads.
+                label: [u.lastName, u.firstName].filter(Boolean).join(' ') || u.email || `User ${u.id}`,
+            })),
+            totalElements: res.data?.totalElements ?? content.length,
+        };
+    }, []);
     const grantedActions = useMemo(() => new Set<string>([
         ...(canUpdateAsset ? [PERMISSIONS.UPDATE_ASSET] : []),
         ...(canReassignAsset ? [PERMISSIONS.REASSIGN_ASSET] : []),
         ...(canRepairAsset ? [PERMISSIONS.REPAIR_ASSET] : []),
         ...(canReceiveAssetInStore ? [PERMISSIONS.RECEIVE_ASSET_IN_STORE] : []),
         ...(canDisposeAsset ? [PERMISSIONS.DISPOSE_ASSET] : []),
+        ...(canDeleteAsset ? [PERMISSIONS.DELETE_ASSET] : []),
     ]), [canUpdateAsset, canReassignAsset, canRepairAsset, canReceiveAssetInStore, canDisposeAsset]);
 
     /** Branches for the Location filter; fetched once. */
@@ -140,17 +223,24 @@ const GeneralAssets = () => {
         // "Due for disposal" is derived from useful life, not a stored status, so it travels as its
         // own flag.
         const isDueForDisposal = status === 'dueForDisposal';
-        const statusId = (status && status !== 'all' && !isDueForDisposal)
+        // The soft-deleted register. A separate view, not a widening of this one: the endpoint
+        // returns deleted records and nothing else.
+        const isDeletedView = status === 'deleted';
+        const statusId = (status && status !== 'all' && !isDueForDisposal && !isDeletedView)
             ? statuses.find((s) => s.status === status)?.id
             : undefined;
 
-        const { dateReceivedFrom, dateReceivedTo, ...rest } = extraParams ?? {};
+        // `__label` keys are the display name an asyncSelect filter keeps beside its id, for the
+        // filter summary and the export header. They are not parameters — Spring would drop them
+        // silently, which is exactly the kind of thing that later reads as a working filter.
+        const { dateReceivedFrom, dateReceivedTo, ...rest } = stripDisplayLabels(extraParams ?? {});
         const startDate = dateReceivedFrom ?? (tableStartDate ? new Date(tableStartDate).toISOString() : undefined);
         const endDate = dateReceivedTo ?? (tableEndDate ? new Date(tableEndDate).toISOString() : undefined);
 
         const params = {
             assetTypeId: currentAssetType.id,
             ...(isDueForDisposal ? { dueForDisposal: true } : {}),
+            ...(isDeletedView ? { includeDeleted: true } : {}),
             ...(statusId ? { assetStatusId: statusId } : {}),
             ...(startDate ? { startDate } : {}),
             ...(endDate ? { endDate } : {}),
@@ -180,9 +270,26 @@ const GeneralAssets = () => {
             if (response.status === 200) {
                 dispatch(loadAllGeneralAssets(response.data.content));
                 setAssetCount(response.data.totalElements);
+            } else {
+                /*
+                 * A failed request must not leave the previous rows standing.
+                 *
+                 * Services answer `catch (error) { return error }`, so a 4xx arrives as a value with
+                 * no `status` — the check above just fails, and without this branch the function
+                 * returned having changed nothing. The old filter's assets stayed on screen beneath
+                 * the new filter's chips, with the count still describing them, looking for all the
+                 * world like a successful result.
+                 *
+                 * The axios interceptor has already reported the error; this stops the wrong rows
+                 * outliving that message.
+                 */
+                dispatch(loadAllGeneralAssets([]));
+                setAssetCount(0);
             }
         } catch (error) {
-            console.log(error);
+            dispatch(loadAllGeneralAssets([]));
+            setAssetCount(0);
+            console.error('Failed to load assets', error);
         }
         setLoading(false);
     };
@@ -226,7 +333,11 @@ const GeneralAssets = () => {
         if (f.serialNumber) out.push({ label: 'Serial No', value: String(f.serialNumber) });
         if (f.model) out.push({ label: 'Model', value: String(f.model) });
         if (f.location) out.push({ label: 'Location', value: String(f.location) });
-        if (f.assignedTo) out.push({ label: 'Assigned To', value: String(f.assignedTo) });
+        // The filter carries an id; the summary and the printed export header name the person. The
+        // toolbar keeps the label alongside the value for exactly this.
+        if (f.assignedToId) {
+            out.push({ label: 'Assigned To', value: String(f.assignedToId__label || f.assignedToId) });
+        }
         if (f.assetStatusId != null) {
             const s = statuses.find((x) => x.id === Number(f.assetStatusId));
             out.push({ label: 'Status', value: s?.name ?? `#${f.assetStatusId}` });
@@ -258,7 +369,7 @@ const GeneralAssets = () => {
                 ? statuses.find((s) => s.status === status)?.id
                 : undefined;
 
-            const { dateReceivedFrom, dateReceivedTo, ...rest } = filters ?? {};
+            const { dateReceivedFrom, dateReceivedTo, ...rest } = stripDisplayLabels(filters ?? {});
             const response = await fetchRowsService({
                 pageNumber: 0,
                 pageSize: EXPORT_MAX_ROWS,
@@ -362,6 +473,7 @@ const GeneralAssets = () => {
      *   Repair            POST   /assets/repairs/{id}    REPAIR_ASSET
      *   Receive into Store PUT   /assets/store/{id}      RECEIVE_ASSET_IN_STORE
      *   Dispose           POST   /movements/disposal     DISPOSE_ASSET
+     *   Delete Record     DELETE /assets/{id}            DELETE_ASSET
      * "View Details" is ungated — the route behind it already requires READ_ASSET, without which
      * this page does not open at all.
      */
@@ -373,7 +485,31 @@ const GeneralAssets = () => {
             { value: crudStates.repair, label: "Repair", icon: <BuildOutlinedIcon fontSize='small' color='primary' />, permission: PERMISSIONS.REPAIR_ASSET },
             { value: crudStates.inStore, label: "Receive into Store", icon: <HomeOutlinedIcon fontSize='small' color='action' />, permission: PERMISSIONS.RECEIVE_ASSET_IN_STORE },
             { value: crudStates.dispose, label: "Dispose", icon: <InfoIcon fontSize='small' color='error' />, permission: PERMISSIONS.DISPOSE_ASSET },
+            /*
+             * Delete is not Dispose, and the labels say so.
+             *
+             * Dispose is a business event — the asset reached the end of its life, is written off
+             * through a movement, and stays in the register counted as disposed. Delete says the
+             * record should not have existed: a duplicate, a mis-keyed import row. It is soft, so
+             * the row survives with its history and can be restored.
+             */
+            { value: crudStates.delete, label: "Delete Record", icon: <DeleteOutlineIcon fontSize='small' color='error' />, permission: PERMISSIONS.DELETE_ASSET },
         ];
+        /*
+         * In the deleted view the live actions are meaningless — the record is out of the register,
+         * so there is nothing to reassign, repair or dispose of. Restore is the only thing that
+         * makes sense there, and it is the only place it makes sense.
+         */
+        // `selectedStatus`, not `activeQuery.current` — the effect below depends on the state, and
+        // a ref read here would lag it by a render, briefly offering live actions on deleted rows.
+        if (viewingDeleted) {
+            setOptions([
+                { value: crudStates.read, label: "View Details", icon: <RemoveRedEyeIcon fontSize='small' />, divider: true },
+                { value: crudStates.restore, label: "Restore to Register", icon: <RestoreOutlinedIcon fontSize='small' color='success' /> },
+            ]);
+            return;
+        }
+
         setOptions(
             options
                 .filter(option => !option.permission || grantedActions.has(option.permission))
@@ -387,7 +523,8 @@ const GeneralAssets = () => {
     useEffect(() => {
         handleOptionChanged();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [canUpdateAsset, canReassignAsset, canRepairAsset, canReceiveAssetInStore, canDisposeAsset]);
+    }, [canUpdateAsset, canReassignAsset, canRepairAsset, canReceiveAssetInStore, canDisposeAsset,
+        canDeleteAsset, selectedStatus]);
 
     // Statuses power the status filter (resolved by code).
     useEffect(() => {
@@ -544,6 +681,24 @@ const GeneralAssets = () => {
                     />
                 </ModalComponent>
             }
+            {crudStates.delete === currentState
+                && <ModalComponent width={"42%"} title={`Delete ${assetType?.name || 'Asset'} Record`} open={open} handleClose={handleClose}>
+                    <DeleteAsset
+                        asset={currentAsset}
+                        handleClose={handleClose}
+                        onDeleted={() => { runQuery(selectedStatus, activeQuery.current.filters); refreshDeletedCount(); }}
+                    />
+                </ModalComponent>
+            }
+            {crudStates.restore === currentState
+                && <ModalComponent width={"38%"} title="Restore Asset Record" open={open} handleClose={handleClose}>
+                    <RestoreAsset
+                        asset={currentAsset}
+                        handleClose={handleClose}
+                        onRestored={() => { runQuery(selectedStatus, activeQuery.current.filters); refreshDeletedCount(); }}
+                    />
+                </ModalComponent>
+            }
             {crudStates.reassign === currentState
                 && <ModalComponent width={"40%"} title={`Reassign ${assetType?.name || 'Asset'}`} open={open} handleClose={handleClose}>
                     <Reassign
@@ -665,23 +820,73 @@ const GeneralAssets = () => {
                             </Typography>
                         )}
                     </Box>
-                    {categoryFacts.length > 0 && (
-                        <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 0.75, flexShrink: 0 }}>
-                            {categoryFacts.map((fact) => (
+                    <Stack direction="row" alignItems="center" sx={{ flexWrap: 'wrap', gap: 0.75, flexShrink: 0 }}>
+                        {categoryFacts.map((fact) => (
+                            <Chip
+                                key={fact}
+                                label={fact}
+                                size="small"
+                                sx={{
+                                    height: 22, fontSize: '0.68rem', fontWeight: 600,
+                                    bgcolor: alpha(PRIMARY, 0.06), color: PRIMARY,
+                                    border: `1px solid ${alpha(PRIMARY, 0.14)}`,
+                                    '& .MuiChip-label': { px: 1 },
+                                }}
+                            />
+                        ))}
+
+                        {/*
+                          * The soft-deleted register, as a chip among the category's own facts.
+                          *
+                          * It lives here rather than in the status filter because that list only
+                          * reaches three hardcoded category names, and categories have been
+                          * configurable since the single /assets/general/:typeId route landed — an
+                          * entry there is invisible for anything created in Settings.
+                          *
+                          * A chip rather than a button: it sits in a row of chips, and a standalone
+                          * button above the table cost a whole band of vertical space to say one
+                          * word. Offered only to whoever may delete, since that is the same person
+                          * who needs to put a record back.
+                          */}
+                        {showDeletedToggle && (
+                            <>
+                                <Box sx={{ width: '1px', height: 18, bgcolor: '#E2E8F0', mx: 0.5 }} />
                                 <Chip
-                                    key={fact}
-                                    label={fact}
+                                    clickable
                                     size="small"
+                                    icon={viewingDeleted
+                                        ? <ArrowBackIcon sx={{ fontSize: 14 }} />
+                                        : <RestoreOutlinedIcon sx={{ fontSize: 14 }} />}
+                                    label={viewingDeleted
+                                        ? 'Back to register'
+                                        : `Deleted records (${deletedCount})`}
+                                    onClick={() => {
+                                        const next = viewingDeleted ? 'all' : 'deleted';
+                                        setSelectedStatus(next);
+                                        runQuery(next, activeQuery.current.filters);
+                                    }}
                                     sx={{
                                         height: 22, fontSize: '0.68rem', fontWeight: 600,
-                                        bgcolor: alpha(PRIMARY, 0.06), color: PRIMARY,
-                                        border: `1px solid ${alpha(PRIMARY, 0.14)}`,
+                                        transition: 'background-color .15s ease, border-color .15s ease',
+                                        // Filled while the view is active, so the page always says
+                                        // which register you are looking at.
+                                        bgcolor: viewingDeleted ? alpha('#B3261E', 0.1) : 'transparent',
+                                        color: viewingDeleted ? '#B3261E' : '#64748B',
+                                        border: `1px solid ${viewingDeleted ? alpha('#B3261E', 0.28) : '#E2E8F0'}`,
                                         '& .MuiChip-label': { px: 1 },
+                                        '& .MuiChip-icon': {
+                                            ml: 0.75, mr: -0.25,
+                                            color: viewingDeleted ? '#B3261E' : '#94A3B8',
+                                        },
+                                        '&:hover': {
+                                            bgcolor: viewingDeleted ? alpha('#B3261E', 0.16) : alpha('#0F172A', 0.04),
+                                            borderColor: viewingDeleted ? alpha('#B3261E', 0.4) : '#CBD5E1',
+                                        },
                                     }}
                                 />
-                            ))}
-                        </Stack>
-                    )}
+                            </>
+                        )}
+                    </Stack>
                 </Paper>
             )}
 
@@ -746,7 +951,28 @@ const GeneralAssets = () => {
                             key: 'location', label: 'Location', type: 'select',
                             options: branches.map((b) => ({ value: b.label, label: b.label })),
                         },
-                        { key: 'assignedTo', label: 'Assigned To', type: 'text' },
+                        /*
+                         * Assigned To — a person picked from the directory, not a name typed in.
+                         *
+                         * It was a text box matching partially across first, last and other name,
+                         * so two people called Okello were one filter and a misremembered spelling
+                         * returned nothing with no hint why. It now carries `assignedToId`, which
+                         * the search DAO has always supported and nothing used.
+                         *
+                         * Hidden entirely at SELF scope. An officer's listing is already only what
+                         * is in their own hands, so filtering it by holder can only ever return
+                         * everything or nothing — a control that cannot change the answer.
+                         *
+                         * The directory behind it is branch-scoped on the server: a branch user
+                         * sees their own duty station, Head Office and the units see everyone.
+                         */
+                        ...(assetScope === 'SELF' ? [] : [{
+                            key: 'assignedToId',
+                            label: 'Assigned To',
+                            type: 'asyncSelect' as const,
+                            placeholder: 'Search staff…',
+                            fetchOptions: fetchAssigneeOptions,
+                        }]),
                         {
                             key: 'assetStatusId', label: 'Status', type: 'select',
                             options: statuses

@@ -6,6 +6,7 @@ Managing Director
 */
 
 import { useNavigate, useParams } from "react-router";
+import { heroSecondarySx } from '../../../components/buttons/heroActionStyles';
 import { useContext, useEffect, useMemo, useState } from "react";
 import {
     Box,
@@ -246,13 +247,21 @@ const InventoryDetails = () => {
 
                             {/* Actions */}
                             <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                                {/*
+                                  * Shares the hero-action treatment with the asset detail page.
+                                  *
+                                  * It was the same `size="small"` outlined button that made "Edit
+                                  * Asset" disappear over there — a hairline border on white, beside a
+                                  * heavy title and a row of brand chips. Same card idiom, same fix,
+                                  * and now the same source so the two cannot drift apart.
+                                  */}
                                 <MuiButton
-                                    variant="outlined"
-                                    size="small"
-                                    startIcon={<FileDownloadOutlinedIcon fontSize="small" />}
+                                    variant="text"
+                                    disableElevation
+                                    startIcon={<FileDownloadOutlinedIcon sx={{ fontSize: 18 }} />}
                                     onClick={() => { void generateGrnPdf(currentInventory); }}
                                     disabled={!currentInventory?.id}
-                                    sx={{ textTransform: 'none', fontWeight: 700, borderRadius: '10px', borderColor: alpha(brand[500], 0.4), color: brand[600], '&:hover': { borderColor: brand[500], bgcolor: alpha(brand[500], 0.05) } }}
+                                    sx={heroSecondarySx}
                                 >
                                     Generate GRN
                                 </MuiButton>
