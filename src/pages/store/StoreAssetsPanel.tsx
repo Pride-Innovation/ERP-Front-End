@@ -50,6 +50,17 @@ interface Props {
  *
  * <p>Scoped by store container, not by store type: there are 50-odd ADMIN stores, so a type-wide
  * query would show every branch's assets on every branch's page.
+ *
+ * <h2>Except for the two stores that have no branch</h2>
+ * The IT and Disposal stores are singletons for the whole bank and they stand at Head Office. Asking
+ * for them by the viewer's own location — which is what this did — can only ever match for a Head
+ * Office user, so every branch user got no store back and an empty panel, on exactly the two pages
+ * where their repairs and write-offs live.
+ *
+ * <p>They are therefore looked up by <em>type</em> alone. That does not widen anything: the contents
+ * endpoint scopes per viewer, returning a branch only what it owns or sent, and everything to a
+ * caller with cross-branch reach. So the IT storekeeper at Head Office sees the whole bench, which is
+ * the room they actually manage, and Gulu sees its own laptop on it.
  */
 const StoreAssetsPanel = ({ branchId, storeType, accentColor }: Props) => {
     const [assets, setAssets] = useState<IAsset[]>([]);
@@ -58,8 +69,15 @@ const StoreAssetsPanel = ({ branchId, storeType, accentColor }: Props) => {
     const [query, setQuery] = useState('');
     const navigate = useNavigate();
 
+    /*
+     * One per bank, at Head Office — so the viewer's branch is not part of finding them.
+     * Everything else is one store per branch and must be pinned to a location.
+     */
+    const bankWide = storeType === 'IT' || storeType === 'DISPOSAL';
+
     useEffect(() => {
-        if (!branchId) return;
+        // A branch-owned store cannot be identified without a branch; a bank-wide one needs none.
+        if (!bankWide && !branchId) return;
 
         let cancelled = false;
         (async () => {
@@ -67,7 +85,7 @@ const StoreAssetsPanel = ({ branchId, storeType, accentColor }: Props) => {
             setError(null);
             try {
                 const storesRes = await axiosInstance.get('inventory/stores', {
-                    params: { locationId: branchId, storeType },
+                    params: bankWide ? { storeType } : { locationId: branchId, storeType },
                 });
                 const store = ((storesRes.data as Array<{ id: number }>) ?? [])[0];
                 if (!store) {
@@ -84,7 +102,7 @@ const StoreAssetsPanel = ({ branchId, storeType, accentColor }: Props) => {
         })();
 
         return () => { cancelled = true; };
-    }, [branchId, storeType]);
+    }, [branchId, storeType, bankWide]);
 
     const rows = useMemo(() => {
         const q = query.trim().toLowerCase();

@@ -20,8 +20,7 @@ import { useSelector } from 'react-redux';
 
 import { RootState } from '../../store';
 import { StoreContext } from '../../context/store';
-import { fetchRowsService } from '../../core/apis/globalService';
-import { IStoresAxiosResponse } from './interface';
+import axiosInstance from '../../core/apis/axiosInstance';
 import { IAssetType } from '../settings/assetTypes/interface';
 
 /** Icon + accent colour for a category, inferred from its name. */
@@ -75,42 +74,69 @@ const CategorySummary = ({ accentColor }: CategorySummaryProps) => {
 
     const [counts, setCounts] = useState<Record<string | number, number>>({});
     const [loading, setLoading] = useState(false);
+    /**
+     * Set when the counts could not be read at all — as opposed to read and found to be nothing.
+     *
+     * <p>The distinction is the whole point. Without it this panel answered a refusal with
+     * <em>"0 item lines in this store"</em> and <em>"No items in this store yet"</em>: two confident
+     * statements about a store it had just been refused sight of. A branch following a bookmarked
+     * `?branchId=` into Head Office was told Head Office's store was empty.
+     *
+     * <p>That is the failure this codebase keeps meeting from different directions — a boundary
+     * rendering as a fact. A panel that does not know must say it does not know.
+     */
+    const [unavailable, setUnavailable] = useState(false);
 
+    /**
+     * One request for the whole strip.
+     *
+     * <h2>It used to be one request per category</h2>
+     * This asked `GET /store` once for every asset type, with `pageSize: 1`, purely to read
+     * `totalElements` off each reply — **twelve round trips on live data to draw one row of tiles**,
+     * and twelve refusals when the branch is outside the viewer's reach. `GET /store/category-counts`
+     * answers the same question with one `GROUP BY`, under the same branch guard, and
+     * `StoreCategoryCountTest` pins that the two agree per category and in total.
+     *
+     * <p>`storeType` is awaited rather than treated as optional: it is stamped by `StoreViewPage`,
+     * the only host of this panel, and starting without it would flash branch-wide counts before
+     * correcting them.
+     *
+     * <p>Cancelled on the way out, like `StoreAssetsPanel`. Changing branch twice quickly otherwise
+     * lets the first reply land second and leaves the tiles describing a branch the page has left.
+     */
     useEffect(() => {
-        // storeType is stamped by StoreViewPage (the only host of this panel); waiting for it
-        // avoids a first unscoped probe that would flash branch-wide counts before correcting.
         if (!branchId || !storeType || assetTypes.length === 0) return;
+
+        let cancelled = false;
         (async () => {
             setLoading(true);
             try {
-                const results = await Promise.all(
-                    assetTypes.map(async (type: IAssetType) => {
-                        const response = await fetchRowsService({
-                            pageNumber: 0,
-                            pageSize: 1,
-                            endPoint: 'store',
-                            params: {
-                                branchId,
-                                assetTypeId: type.id,
-                                // Scope the counts to this page's store container (ADMIN / IT /
-                                // DISPOSAL) — without it every store page shows branch-wide totals.
-                                ...(storeType ? { storeType: storeType.toUpperCase() } : {}),
-                            },
-                        }) as IStoresAxiosResponse;
-                        return {
-                            id: type.id,
-                            count: response?.status === 200 ? response.data.totalElements : 0,
-                        };
-                    })
-                );
-                const next: Record<string | number, number> = {};
-                results.forEach(r => { if (r.id !== undefined) next[r.id] = r.count; });
-                setCounts(next);
+                const { data } = await axiosInstance.get('store/category-counts', {
+                    params: { branchId, storeType: storeType.toUpperCase() },
+                });
+                if (!cancelled) {
+                    setCounts((data as Record<string | number, number>) ?? {});
+                    setUnavailable(false);
+                }
             } catch (e) {
-                console.log(e);
+                /*
+                 * Marked unknown, not empty.
+                 *
+                 * No banner of its own: the listing below already names the refusal once, and the
+                 * page carries it at the top. Two notices for one boundary crowd the screen. What
+                 * this owes the reader is that its own tiles stop asserting a total it does not
+                 * have.
+                 */
+                if (!cancelled) {
+                    setCounts({});
+                    setUnavailable(true);
+                }
+            } finally {
+                if (!cancelled) setLoading(false);
             }
-            setLoading(false);
         })();
+
+        return () => { cancelled = true; };
     }, [branchId, assetTypes, storeType]);
 
     const total = Object.values(counts).reduce((sum, n) => sum + n, 0);
@@ -134,7 +160,12 @@ const CategorySummary = ({ accentColor }: CategorySummaryProps) => {
                     Inventory by category
                 </Typography>
                 <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 600 }}>
-                    {loading ? <Skeleton width={70} sx={{ display: 'inline-block' }} /> : `${total.toLocaleString()} item line${total === 1 ? '' : 's'} in this store`}
+                    {loading
+                        ? <Skeleton width={70} sx={{ display: 'inline-block' }} />
+                        : unavailable
+                            // A dash, because "0 item lines" would be an answer, and there isn't one.
+                            ? '—'
+                            : `${total.toLocaleString()} item line${total === 1 ? '' : 's'} in this store`}
                 </Typography>
             </Box>
 
@@ -156,6 +187,12 @@ const CategorySummary = ({ accentColor }: CategorySummaryProps) => {
                             </Box>
                         </Box>
                     ))
+                    : unavailable
+                    ? (
+                        <Typography variant="body2" sx={{ color: 'text.secondary', gridColumn: '1 / -1', textAlign: 'center', py: 3 }}>
+                            Category totals are not available for this branch.
+                        </Typography>
+                    )
                     : visibleAssetTypes.length > 0
                     ? visibleAssetTypes.map((type: IAssetType) => {
                         const { color, Icon } = getCategoryStyle(type.name);

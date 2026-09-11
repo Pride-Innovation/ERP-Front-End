@@ -153,8 +153,31 @@ export const useAccessScope = () => {
     const canManageAnyOf = (
         subject: ScopeSubject,
         branchIds: Array<string | number | null | undefined>,
+        /**
+         * The people named on the record, for subjects where SELF means "I am party to this".
+         *
+         * <p>A movement has no owner column: it has four ends and several person links, so at SELF
+         * "mine" is whoever raised it, sent it, is receiving it, signed for it, or asked for the item
+         * it carries. Mirrors `AccessScopeService.anyInReach` and `MovementSearchDao`'s SELF
+         * predicate — if these three drift, the table offers a button the server refuses, or hides
+         * one the user is entitled to.
+         *
+         * <p>Omit for subjects that scope by branch alone; the behaviour is then unchanged.
+         */
+        ownerIds?: Array<string | number | null | undefined>,
     ): boolean => {
         const scope = scopeFor(subject, 'MANAGE');
+        const owners = (ownerIds ?? []).map(asId).filter((id): id is number => id !== null);
+
+        /*
+         * At SELF, being named on the record is the whole question — a record that names people and
+         * not me is not mine, and falling through to the branch comparison would widen SELF back into
+         * BRANCH.
+         */
+        if (scope === 'SELF' && owners.length > 0) {
+            return currentUserId !== null && owners.includes(currentUserId);
+        }
+
         const known = branchIds.map(asId).filter((id): id is number => id !== null);
         if (known.length === 0) return permits(scope, {});
         return known.some((branchId) => permits(scope, { branchId }));
@@ -168,7 +191,8 @@ export const useAccessScope = () => {
         permission: string,
         subject: ScopeSubject,
         branchIds: Array<string | number | null | undefined>,
-    ): boolean => has(permission) && canManageAnyOf(subject, branchIds);
+        ownerIds?: Array<string | number | null | undefined>,
+    ): boolean => has(permission) && canManageAnyOf(subject, branchIds, ownerIds);
 
     /**
      * The common case: hold the permission **and** have the record in reach.

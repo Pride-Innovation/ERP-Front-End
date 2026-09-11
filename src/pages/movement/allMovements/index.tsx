@@ -7,7 +7,7 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { useContext, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     alpha, Box, Button, Grid, IconButton, Paper, Stack, Tab, Tabs, Tooltip,
@@ -20,6 +20,11 @@ import SwapHorizOutlinedIcon from '@mui/icons-material/SwapHorizOutlined';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import PendingActionsOutlinedIcon from '@mui/icons-material/PendingActionsOutlined';
 import { useSelector } from 'react-redux';
+import {
+    fetchMovementStatusCountsService, fetchMovementFilterOptionsService,
+} from '../service';
+import { fetchRowsService } from '../../../core/apis/globalService';
+
 import { toast } from 'react-toastify';
 import { RootState } from '../../../store';
 import { MovementContext } from '../../../context/movement/MovementContext';
@@ -31,11 +36,19 @@ import MovementUtills from '../utills';
 import MovementTable from '../MovementTable';
 import MovementActionModal from '../MovementActionModal';
 import MovementFilters, {
-    MovementFilterValues, matchesMovementFilters, deriveMovementFilterOptions,
+    MovementFilterValues,
 } from './MovementFilters';
 import { exportMovementsPdf, exportMovementsExcel, exportMovementsCsv } from './exportMovements';
 import { IMovement } from '../interface';
 import RoutesUtills from '../../../core/routes/utills';
+/**
+ * How many rows one export may pull.
+ *
+ * <p>High enough that every realistic filtered view fits in one file, bounded so a careless export
+ * of the whole register cannot pull the table into the browser's memory. The user is told when the
+ * cap bites, because a silently truncated export is worse than a refused one.
+ */
+const EXPORT_LIMIT = 5000;
 
 const STATUS_TABS: Array<{ value: string; label: string }> = [
     { value: 'all', label: 'All' },
@@ -61,29 +74,140 @@ const AllMovements = () => {
     const [statusTab, setStatusTab] = useState('all');
     const [filters, setFilters] = useState<MovementFilterValues>({});
 
-    const refresh = () => fetchAllMovements({ pageSize: 100 });
-    useEffect(() => { refresh(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    /*
+     * Everything below is asked of the server now.
+     *
+     * This page fetched the first hundred movements once and did the rest in the browser — eleven
+     * filters, the sort, the paging, three exports and five tiles. Past a hundred rows the register
+     * stopped: a movement matching a filter exactly came back as "no results", which reads exactly
+     * like "there is no such movement", and the tiles under-reported against the total printed
+     * above them. `GET /movements` now declares every filter, so there is something to ask.
+     */
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(15);
+    const [sort, setSort] = useState<{ column: string; order: 'asc' | 'desc' }>(
+        { column: 'date', order: 'desc' },
+    );
 
-    const filtered = movements.filter((m) => {
-        const matchesStatus = statusTab === 'all' || m.status === statusTab;
-        return matchesStatus && matchesMovementFilters(m, filters);
+    /** The column ids the table sorts by, translated to entity fields the query understands. */
+    const SORT_FIELDS: Record<string, string> = {
+        ref: 'id', date: 'createDate', status: 'status', type: 'movementType',
+    };
+
+    /** Filters + status tab as the endpoint's parameters. Blank values are left out entirely. */
+    const queryParams = useMemo(() => {
+        const params: Record<string, any> = {};
+        Object.entries(filters).forEach(([key, value]) => {
+            if (value) params[key] = value;
+        });
+        // The tab is the same `status` filter; the tab wins because the panel cannot show it.
+        if (statusTab !== 'all') params.status = statusTab;
+        return params;
+    }, [filters, statusTab]);
+
+    /**
+     * The filters as a printed strip, so a sheet says which slice of the register it is.
+     *
+     * <p>The old exporter printed none, so two exports taken minutes apart under different filters
+     * were indistinguishable once saved — and an export is precisely the artefact that outlives the
+     * screen that produced it.
+     */
+    const exportFilterStrip = useMemo(() => {
+        const labels: Record<string, string> = {
+            dateFrom: 'From', dateTo: 'To', movementType: 'Type', movementCategory: 'Category',
+            status: 'Status', source: 'Source', destination: 'Destination', courier: 'Courier',
+            trackingNumber: 'Tracking No', receiptStatus: 'Receipt', initiator: 'Initiated by',
+        };
+        return Object.entries(queryParams)
+            .filter(([, value]) => Boolean(value))
+            .map(([key, value]) => ({ label: labels[key] ?? key, value: String(value) }));
+    }, [queryParams]);
+
+    /** The panel's filters without the tab — what the tab labels and the tiles are counted over. */
+    const countParams = useMemo(() => {
+        const params: Record<string, any> = {};
+        Object.entries(filters).forEach(([key, value]) => {
+            if (value) params[key] = value;
+        });
+        return params;
+    }, [filters]);
+
+
+    const [statusCounts, setStatusCounts] = useState<Record<string, number>>({});
+
+    /** Every match across all statuses — what the "All" tab means now that a page is not the set. */
+    const totalAcrossStatuses = useMemo(
+        () => Object.values(statusCounts).reduce((sum, n) => sum + n, 0),
+        [statusCounts],
+    );
+    const [filterOptions, setFilterOptions] = useState({
+        sources: [] as string[], destinations: [] as string[],
+        couriers: [] as string[], initiators: [] as string[],
     });
 
-    const filterOptions = deriveMovementFilterOptions(movements);
+    const load = useCallback(() => {
+        fetchAllMovements({
+            ...queryParams,
+            pageNumber: page,
+            pageSize: rowsPerPage,
+            sortBy: SORT_FIELDS[sort.column] ?? 'createDate',
+            sortDirection: sort.order,
+        });
+        /*
+         * Counts follow the panel's filters and neither the paging nor the status tab.
+         *
+         * Not the paging, because the tiles describe the whole matching set rather than the page in
+         * front of the user, and must not move as they page. Not the tab, because each tab is
+         * labelled with its own count — narrowing by the selected tab would leave every other tab
+         * reading zero, and the one you are on reading the total.
+         */
+        fetchMovementStatusCountsService(countParams).then((r: any) => {
+            setStatusCounts(r?.status === 200 ? (r.data ?? {}) : {});
+        });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [queryParams, countParams, page, rowsPerPage, sort]);
 
-    const handleExport = (fn: (rows: IMovement[]) => void) => {
-        if (filtered.length === 0) {
+    useEffect(() => { load(); }, [load]);
+
+    // Options come from the whole scoped register, once — deliberately not narrowed by the current
+    // filters, or choosing a source would empty the destination list and the panel could never be
+    // widened again.
+    useEffect(() => {
+        fetchMovementFilterOptionsService().then((r: any) => {
+            if (r?.status === 200 && r.data) setFilterOptions(r.data);
+        });
+    }, []);
+
+    const refresh = () => load();
+
+    // Already filtered, sorted and paged by the query that produced them.
+    const filtered = movements;
+
+    /**
+     * Exports cover every match, not the page on screen.
+     *
+     * <p>They ran over the loaded rows, so an export was silently a partial one — the worst kind,
+     * because the file looks complete. Fetched fresh under the same filters with the paging removed.
+     */
+    const handleExport = async (fn: (rows: IMovement[]) => void) => {
+        const res: any = await fetchRowsService({
+            endPoint: 'movements',
+            pageNumber: 0,
+            pageSize: EXPORT_LIMIT,
+            params: queryParams,
+        });
+        const rows: IMovement[] = res?.status === 200 ? (res.data?.content ?? []) : [];
+
+        if (rows.length === 0) {
             toast.warning('There are no movements matching the current filters to export.');
             return;
         }
-        fn(filtered);
+        if ((res.data?.totalElements ?? 0) > rows.length) {
+            toast.info(`Exporting the first ${rows.length.toLocaleString()} of `
+                + `${res.data.totalElements.toLocaleString()} matches. Narrow the filters for the rest.`);
+        }
+        fn(rows);
     };
-
-    const statusCounts = movements.reduce((acc: Record<string, number>, m) => {
-        const s = m.status ?? '';
-        acc[s] = (acc[s] ?? 0) + 1;
-        return acc;
-    }, {});
 
     const summaryTiles: Array<{ status: string; label: string; icon: JSX.Element; accent: 'warning' | 'gold' | 'info' | 'brand' | 'success' }> = [
         { status: 'DRAFT', label: 'Awaiting Approval', icon: <PendingActionsOutlinedIcon />, accent: 'warning' },
@@ -166,7 +290,7 @@ const AllMovements = () => {
                 couriers={filterOptions.couriers}
                 initiators={filterOptions.initiators}
                 onApply={setFilters}
-                onExportPdf={() => handleExport(exportMovementsPdf)}
+                onExportPdf={() => handleExport((rows) => exportMovementsPdf(rows, { filters: exportFilterStrip }))}
                 onExportExcel={() => handleExport(exportMovementsExcel)}
                 onExportCsv={() => handleExport(exportMovementsCsv)}
                 onRefresh={refresh}
@@ -192,7 +316,9 @@ const AllMovements = () => {
                     }}
                 >
                     {STATUS_TABS.map((t) => {
-                        const n = t.value === 'all' ? movements.length : (statusCounts[t.value] ?? 0);
+                        // `movements.length` used to be the whole set and is now one page, so the
+                        // All tab would have counted 15 however large the register is.
+                        const n = t.value === 'all' ? totalAcrossStatuses : (statusCounts[t.value] ?? 0);
                         const selected = statusTab === t.value;
                         return (
                             <Tab
@@ -233,6 +359,14 @@ const AllMovements = () => {
                     maxHeight="clamp(320px, calc(100vh - 370px), 1400px)"
                     paginateOver={0}
                     paginationResetKey={`${statusTab}|${JSON.stringify(filters)}`}
+                    server={{
+                        page,
+                        rowsPerPage,
+                        total: count ?? 0,
+                        onPageChange: setPage,
+                        onRowsPerPageChange: (size) => { setRowsPerPage(size); setPage(0); },
+                        onSortChange: (column, order) => { setSort({ column, order }); setPage(0); },
+                    }}
                     empty={(
                         <EmptyState
                             variant="inline"

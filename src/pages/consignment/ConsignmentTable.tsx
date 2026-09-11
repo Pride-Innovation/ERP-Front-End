@@ -456,6 +456,23 @@ export interface IConsignmentTableProps {
     onAction: (action: ConsignmentAction, consignment: IConsignment) => void;
     /** Change to send pagination back to page 1 — e.g. when the status tab changes. */
     paginationResetKey?: string | number;
+    /**
+     * Hands paging and sorting to the caller, for a table backed by a filtered server query.
+     *
+     * <p>Without it the table sorts and pages whatever array it was given — right for a short list,
+     * wrong for a register: the page held the first hundred journeys and paginated those, so
+     * consignment #101 was unreachable and the filter panel could not find it. When present, `rows`
+     * is taken as already sorted and already the page to show, and `total` is the size of the whole
+     * matching set rather than of the array.
+     */
+    server?: {
+        page: number;
+        rowsPerPage: number;
+        total: number;
+        onPageChange: (page: number) => void;
+        onRowsPerPageChange: (rowsPerPage: number) => void;
+        onSortChange: (column: ColumnId, order: Order) => void;
+    };
     /** Omit the surrounding Paper when the caller already provides one. */
     disableSurface?: boolean;
     /** Pin the head while the body scrolls. Pair with `maxHeight`. */
@@ -466,7 +483,7 @@ export interface IConsignmentTableProps {
 
 const ConsignmentTable = ({
     rows, loading, busyId, empty, onAction, paginationResetKey, disableSurface,
-    stickyHeader, maxHeight,
+    stickyHeader, maxHeight, server,
 }: IConsignmentTableProps) => {
     const { has } = usePermissions();
     // Resolved once per render, not per row — the answer cannot differ between rows.
@@ -487,12 +504,18 @@ const ConsignmentTable = ({
     useEffect(() => { setPage(0); }, [paginationResetKey]);
 
     const handleSort = (id: ColumnId) => {
-        setOrder(orderBy === id && order === 'asc' ? 'desc' : 'asc');
+        const next: Order = orderBy === id && order === 'asc' ? 'desc' : 'asc';
+        setOrder(next);
         setOrderBy(id);
         setPage(0);
+        // Server-backed: re-ask rather than reorder the page in front of us, which would sort one
+        // page of a larger set and present it as the whole ordering.
+        server?.onSortChange(id, next);
     };
 
     const sorted = useMemo(() => {
+        // Already ordered by the query that produced them.
+        if (server) return rows;
         const sortValue = COLUMNS.find((c) => c.id === orderBy)?.sortValue;
         if (!sortValue) return rows;
         return [...rows].sort((a, b) => {
@@ -501,9 +524,12 @@ const ConsignmentTable = ({
             if (av === bv) return 0;
             return (av > bv ? 1 : -1) * (order === 'asc' ? 1 : -1);
         });
-    }, [rows, orderBy, order]);
+    }, [rows, orderBy, order, server]);
 
-    const paginated = sorted.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+    // Server-backed tables are handed exactly the page to render; slicing again would page a page.
+    const paginated = server
+        ? sorted
+        : sorted.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
     // Always shown once there is anything to page through, so the card ends on the same
     // footer strip the movements table does rather than a bare table edge.
     const showPagination = !loading && sorted.length > 0;
@@ -590,11 +616,16 @@ const ConsignmentTable = ({
             {showPagination && (
                 <TablePagination
                     component="div"
-                    count={sorted.length}
-                    page={page}
-                    onPageChange={(_, p) => setPage(p)}
-                    rowsPerPage={rowsPerPage}
-                    onRowsPerPageChange={(e) => { setRowsPerPage(parseInt(e.target.value, 10)); setPage(0); }}
+                    count={server ? server.total : sorted.length}
+                    page={server ? server.page : page}
+                    onPageChange={(_, p) => (server ? server.onPageChange(p) : setPage(p))}
+                    rowsPerPage={server ? server.rowsPerPage : rowsPerPage}
+                    onRowsPerPageChange={(e) => {
+                        const size = parseInt(e.target.value, 10);
+                        if (server) { server.onRowsPerPageChange(size); return; }
+                        setRowsPerPage(size);
+                        setPage(0);
+                    }}
                     rowsPerPageOptions={[15, 25, 50, 100]}
                     sx={dataPaginationSx}
                 />

@@ -27,7 +27,15 @@ import { brand } from '../../utils/tokens';
  * 1px brand borders (the icon tile, the chips, the breadcrumb control), so the actions speak the
  * same way instead of introducing a fourth vocabulary.
  */
-const HERO_ACTION_BASE = {
+/**
+ * The geometry every hero action shares, exported so a semantically-coloured one can be built on it.
+ *
+ * <p>Approve and Reject cannot take {@link heroPrimarySx}: green and red are carrying meaning there,
+ * not decoration. But they sit in the same row as the brand actions, so they must share the
+ * proportions or the row ends up at two different heights — which is the drift this module exists to
+ * prevent, arriving by the back door.
+ */
+export const heroActionBase = {
     height: 44,
     px: 2.5,
     borderRadius: '12px',
@@ -54,7 +62,7 @@ const HERO_ACTION_BASE = {
  * its own border on top.
  */
 export const heroSecondarySx = {
-    ...HERO_ACTION_BASE,
+    ...heroActionBase,
     color: brand[700],
     bgcolor: alpha(brand[500], 0.08),
     border: `1px solid ${alpha(brand[500], 0.22)}`,
@@ -81,7 +89,7 @@ export const heroSecondarySx = {
  * card's own shadow, so the button reads as a raised surface rather than a flat rectangle.
  */
 export const heroPrimarySx = {
-    ...HERO_ACTION_BASE,
+    ...heroActionBase,
     color: '#fff',
     bgcolor: brand[600],
     border: `1px solid ${alpha('#000', 0.06)}`,
@@ -98,4 +106,4 @@ export const heroPrimarySx = {
     },
 };
 
-export default { heroSecondarySx, heroPrimarySx };
+export default { heroActionBase, heroSecondarySx, heroPrimarySx };

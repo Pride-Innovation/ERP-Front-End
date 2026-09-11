@@ -15,7 +15,6 @@ import {
 import {
     assetStatus,
     assetTypesStatusConstants,
-    crudStates,
     requestStatus
 } from "../../utils/constants";
 import { MenuItem, useTheme } from "@mui/material";
@@ -31,18 +30,10 @@ import { FormContext } from "../../context/form";
 import dayjs from "dayjs";
 import { camelCaseToWords } from "../../utils/helpers";
 import { RequestContext } from "../../context/request/RequestContext";
-
-// All statuses that represent an in-progress approval stage.
-// Any request whose status is in this set should be treated the same
-// as the old generic "requestApproved" for option-filtering purposes.
-const APPROVAL_STATUSES = new Set([
-    'requestApproved',
-    'managerApproved',
-    'hodApproved',
-    'bomApproved',
-    'branchManagerApproved',
-]);
-const isApprovalStatus = (s?: string) => !!s && APPROVAL_STATUSES.has(s);
+import {
+    filterRequestRowOptions,
+    isRequestRow,
+} from "../../pages/request/assetRequest/rowActions";
 
 const TableUtills = ({ moduleName }: { moduleName?: string }) => {
     // Row options carrying a `permission` are hidden from anyone who does not hold it.
@@ -419,12 +410,41 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
         module?: string,
         optionsfilterParams?: Record<string, any>
     ) => {
+        /*
+         * Requests answer to one rule, shared with their detail page.
+         *
+         * `actionRules` decides the detail page's buttons from the request's workflow step and the
+         * viewer's relationship to it. The menu used to decide the same thing from the tab and the
+         * row's status, and the two disagreed: the menu offered Approve on rows routed to somebody
+         * else, and on rows whose workflow had already moved past approval. See
+         * `filterRequestRowOptions` for what each of those cost.
+         *
+         * The `filter` flag is not consulted here. It said "narrow this menu by business state",
+         * and the Rejected tab never set it — so that tab showed Update and Delete on other
+         * people's requests, which the backend refuses. Narrowing is not optional for a request.
+         *
+         * <p>Nor is the module: the transport-request module calls itself `"request"` as well, and
+         * these rules would have emptied its menu. The row says what it is.
+         */
+        if (isRequestRow(row)) {
+            const user = getCurrentUser();
+            const allowed = filterRequestRowOptions(
+                column?.actionData?.options || [],
+                row,
+                { id: user?.id, unitId: user?.unit?.id, has },
+            );
+            return allowed.filter((option: any) => !option?.permission || has(option.permission));
+        }
+
         const stateAllowed = resolveStateOptions(column, filter, row, module, optionsfilterParams);
         return (stateAllowed ?? []).filter(
             (option: any) => !option?.permission || has(option.permission));
     };
 
-    /** The pre-existing business-state rules. Unchanged; permission filtering wraps it above. */
+    /**
+     * Business-state rules for the modules that still key on the row's own status — assets,
+     * repairs, GRN. Requests are handled above and no longer reach here.
+     */
     const resolveStateOptions = (
         column: any,
         filter?: boolean,
@@ -433,11 +453,7 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
         optionsfilterParams?: Record<string, any>
     ) => {
         const options = column?.actionData?.options || [];
-        const currentUserId = getCurrentUser()?.id || 0;
 
-        const isRequestModule = module === 'request';
-        const isPendingRequestModule = module === 'pending requests';
-        const isIssuedRequestModule = module === 'issued requests';
         const isITEquipmentModule = module === 'IT Equipment';
         const isOfficeEquipmentModule = module === 'Office Equipment';
         const isFleetEquipmentModule = module === 'Fleet';
@@ -445,282 +461,6 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
         const isGRNDocumentsModule = module === 'GRN documents';
 
         const isFilterEnabled = Boolean(filter);
-
-        // Handle Request module filtering (existing logic)
-        if ((isRequestModule || isPendingRequestModule || isIssuedRequestModule) && isFilterEnabled) {
-            const isRequester = row?.requesterID === currentUserId;
-            const status = optionsfilterParams?.status?.toUpperCase() || "";
-
-            if (isRequester) {
-
-                if (status === "CREATED" && row?.status === "requestCreated") {
-                    return options.filter(
-                        (option: any) =>
-                            option.value !== crudStates.approve &&
-                            option.value !== crudStates.reject &&
-                            option.value !== crudStates.acknowledgeReceipt &&
-                            option.value !== crudStates.approveIssuance &&
-                            option.value !== crudStates.issue &&
-                            option.value !== crudStates.acknowledgeRequest &&
-                            option.value !== crudStates.delete &&
-                            option.value !== crudStates.update
-                    );
-                }
-
-                if (status === "CREATED" && row?.status === "requestIssued") {
-                    return options.filter(
-                        (option: any) =>
-                            option.value !== crudStates.approve &&
-                            option.value !== crudStates.reject &&
-                            option.value !== crudStates.update &&
-                            option.value !== crudStates.delete &&
-                            option.value !== crudStates.approveIssuance &&
-                            option.value !== crudStates.issue &&
-                            option.value !== crudStates.acknowledgeRequest &&
-                            option.value !== crudStates.acknowledgeReceipt
-                    )
-                }
-
-                if (status === "CREATED" && row?.status === "requestAcknowledged") {
-                    return options.filter(
-                        (option: any) =>
-                            option.value !== crudStates.approve &&
-                            option.value !== crudStates.reject &&
-                            option.value !== crudStates.update &&
-                            option.value !== crudStates.delete &&
-                            option.value !== crudStates.approveIssuance &&
-                            option.value !== crudStates.issue &&
-                            option.value !== crudStates.acknowledgeRequest &&
-                            option.value !== crudStates.acknowledgeReceipt
-                    )
-                }
-
-                if (status === "CREATED" && row?.status === "requestRejected") {
-                    return options.filter(
-                        (option: any) =>
-                            option.value !== crudStates.approve &&
-                            option.value !== crudStates.reject &&
-                            option.value !== crudStates.approveIssuance &&
-                            option.value !== crudStates.issue &&
-                            option.value !== crudStates.acknowledgeRequest &&
-                            option.value !== crudStates.acknowledgeReceipt
-                    )
-                }
-
-                if (status === "CREATED" && isApprovalStatus(row?.status)) {
-                    return options.filter(
-                        (option: any) =>
-                            option.value !== crudStates.approve &&
-                            option.value !== crudStates.reject &&
-                            option.value !== crudStates.update &&
-                            option.value !== crudStates.delete &&
-                            option.value !== crudStates.approveIssuance &&
-                            option.value !== crudStates.issue &&
-                            option.value !== crudStates.acknowledgeRequest &&
-                            option.value !== crudStates.acknowledgeReceipt
-                    )
-                }
-
-                if (status === "CREATED" && row?.status === "receiptAcknowledged") {
-                    return options.filter(
-                        (option: any) =>
-                            option.value !== crudStates.approve &&
-                            option.value !== crudStates.reject &&
-                            option.value !== crudStates.update &&
-                            option.value !== crudStates.delete &&
-                            option.value !== crudStates.approveIssuance &&
-                            option.value !== crudStates.issue &&
-                            option.value !== crudStates.acknowledgeRequest &&
-                            option.value !== crudStates.acknowledgeReceipt
-                    )
-                }
-
-                if (status === "CREATED" && row?.status === "issuanceApproved") {
-                    return options.filter(
-                        (option: any) =>
-                            option.value !== crudStates.approve &&
-                            option.value !== crudStates.reject &&
-                            option.value !== crudStates.approveIssuance &&
-                            option.value !== crudStates.issue &&
-                            option.value !== crudStates.acknowledgeRequest &&
-                            option.value !== crudStates.update &&
-                            option.value !== crudStates.delete
-                    )
-                }
-
-                if (status === "PENDING") {
-                    return options.filter(
-                        (option: any) =>
-                            option.value !== crudStates.issue &&
-                            option.value !== crudStates.acknowledgeRequest
-                    );
-                }
-
-
-                if (status === "ISSUED" && row?.status === "requestIssued") {
-                    return options.filter(
-                        (option: any) =>
-                            option.value !== crudStates.acknowledgeReceipt &&
-                            option.value !== crudStates.approveIssuance
-                    )
-                }
-
-                if (status === "ISSUED" && row?.status === "receiptAcknowledged") {
-                    return options.filter(
-                        (option: any) =>
-                            option.value !== crudStates.approveIssuance &&
-                            option.value !== crudStates.acknowledgeReceipt
-                    )
-                }
-
-                if (status === "ISSUED" && row?.status === "issuanceApproved") {
-                    return options.filter(
-                        (option: any) =>
-                            option.value !== crudStates.approveIssuance
-                    )
-                }
-
-            } else if (!isRequester) {
-
-                console.log(status, "Status in Option Filter", row?.status, "Row Status in Option Filter");
-                if (status === "CREATED" && row?.status === "requestCreated") {
-                    return options.filter(
-                        (option: any) =>
-                            option.value !== crudStates.update &&
-                            option.value !== crudStates.delete &&
-                            option.value !== crudStates.acknowledgeReceipt &&
-                            option.value !== crudStates.approveIssuance &&
-                            option.value !== crudStates.issue &&
-                            option.value !== crudStates.acknowledgeRequest
-                    );
-                }
-
-                if (status === "CREATED" && isApprovalStatus(row?.status)) {
-                    return options.filter(
-                        (option: any) =>
-                            option.value !== crudStates.approve &&
-                            option.value !== crudStates.reject &&
-                            option.value !== crudStates.update &&
-                            option.value !== crudStates.delete &&
-                            option.value !== crudStates.approveIssuance &&
-                            option.value !== crudStates.issue &&
-                            option.value !== crudStates.acknowledgeReceipt
-                    )
-                }
-
-                if (status === "CREATED" && row?.status === "requestAcknowledged") {
-                    return options.filter(
-                        (option: any) =>
-                            option.value !== crudStates.approve &&
-                            option.value !== crudStates.reject &&
-                            option.value !== crudStates.update &&
-                            option.value !== crudStates.delete &&
-                            option.value !== crudStates.approveIssuance &&
-                            option.value !== crudStates.acknowledgeRequest &&
-                            option.value !== crudStates.acknowledgeReceipt
-                    )
-                }
-
-                if (status === "CREATED" && row?.status === "requestIssued") {
-                    console.log("Information detected")
-                    return options.filter(
-                        (option: any) =>
-                            option.value !== crudStates.approve &&
-                            option.value !== crudStates.reject &&
-                            option.value !== crudStates.update &&
-                            option.value !== crudStates.delete &&
-                            option.value !== crudStates.acknowledgeReceipt &&
-                            option.value !== crudStates.acknowledgeRequest &&
-                            option.value !== crudStates.issue
-
-                    )
-                }
-
-                if (status === "CREATED" && row?.status === "requestRejected") {
-                    return options.filter(
-                        (option: any) =>
-                            option.value !== crudStates.approve &&
-                            option.value !== crudStates.reject &&
-                            option.value !== crudStates.approveIssuance &&
-                            option.value !== crudStates.issue &&
-                            option.value !== crudStates.acknowledgeRequest &&
-                            option.value !== crudStates.acknowledgeReceipt &&
-                            option.value !== crudStates.update &&
-                            option.value !== crudStates.delete
-                    )
-                }
-
-                if (status === "CREATED" && row?.status === "issuanceApproved") {
-                    return options.filter(
-                        (option: any) =>
-                            option.value !== crudStates.approve &&
-                            option.value !== crudStates.reject &&
-                            option.value !== crudStates.approveIssuance &&
-                            option.value !== crudStates.issue &&
-                            option.value !== crudStates.acknowledgeRequest &&
-                            option.value !== crudStates.acknowledgeReceipt &&
-                            option.value !== crudStates.update &&
-                            option.value !== crudStates.delete
-                    )
-                }
-
-
-                if (status === "PENDING" && row?.status === "requestAcknowledged") {
-                    return options.filter(
-                        (option: any) => option.value !== 'acknowledgeRequest' && option.value !== crudStates.approveIssuance
-                    );
-                }
-
-                if (status === "PENDING" && isApprovalStatus(row?.status)) {
-                    return options.filter(
-                        (option: any) => option.value !== 'issue' && option.value !== crudStates.approveIssuance
-                    );
-                }
-
-                // A pending item whose request has reached "issued" is waiting on the
-                // issuer's-manager sign-off (approverSubject=ISSUER), not a ladder approval —
-                // it must go through Approve Issuance (POST /approve-issuance), the only path
-                // that creates the fulfilment movement. "Approve Request" would silently advance
-                // the step without ever triggering it.
-                if (status === "PENDING" && row?.status === "issued") {
-                    return options.filter(
-                        (option: any) => option.value !== crudStates.approve
-                    );
-                }
-
-                if (status === "ISSUED" && row?.status === "requestIssued") {
-                    return options.filter(
-                        (option: any) => option.value !== crudStates.acknowledgeReceipt
-                    )
-                }
-
-                if (status === "ISSUED" && row?.status === "receiptAcknowledged") {
-                    return options.filter(
-                        (option: any) =>
-                            option.value !== crudStates.approveIssuance &&
-                            option.value !== crudStates.acknowledgeReceipt
-                    )
-                }
-
-                if (status === "ISSUED" && row?.status === "issuanceApproved") {
-                    return options.filter(
-                        (option: any) =>
-                            option.value !== crudStates.approveIssuance &&
-                            option.value !== crudStates.acknowledgeReceipt
-                    )
-                }
-            }
-
-            // Default: strip destructive actions and Approve Issuance — the latter is only
-            // ever shown on the explicit "issued" branch above so it can't leak onto a normal
-            // ladder-approval row.
-            return options.filter(
-                (option: any) =>
-                    option.value !== 'delete' &&
-                    option.value !== 'update' &&
-                    option.value !== crudStates.approveIssuance
-            );
-        }
 
         // Handle IT Equipment, Fleet Equipment and Office Equipment module filtering (same logic for both)
         if ((isITEquipmentModule || isOfficeEquipmentModule || isFleetEquipmentModule) && isFilterEnabled) {
@@ -954,30 +694,6 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
         },
     ]
 
-    const storeFilterStatuses: { label: string, value: string, color: string }[] = [
-        {
-            label: "Office Equipment",
-            value: "officeEquipment",
-            color: theme.palette.success.main
-        },
-        {
-            label: "IT Equipment",
-            value: "itEquipment",
-            color: theme.palette.error.main
-        },
-        {
-            label: "Fleet",
-            value: "fleet",
-            color: theme.palette.warning.main
-        },
-        {
-            label: "Stationery",
-            value: "stationery",
-            color: theme.palette.info.main
-        }
-    ];
-
-
     const determineFilterStatuses = () => {
         switch (moduleName) {
             case assetTypesStatusConstants.itEquipment:
@@ -994,8 +710,6 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
                 return setFilterStatuses(requestsPendingFilterStatuses);
             case "inventory":
                 return setFilterStatuses(inventoryFilterStatuses);
-            case "stores":
-                return setFilterStatuses(storeFilterStatuses);
             default:
                 return [] as Array<{ label: string, value: string, color: string }>;
         }

@@ -61,7 +61,17 @@ const WorkflowRoutesPanel = () => {
     // Show only the routes that can apply to this requester's location.
     const applicable = useMemo(() => {
         const user = getCurrentUser() as any;
-        const branch = user?.title?.branch ?? user?.branch;
+        /*
+         * The duty station first, the title's branch only as a fallback.
+         *
+         * A title is an organisation-wide job description — "Branch Manager" is the same title at
+         * every branch — so it commonly carries no branch, and where it carries one it need not be
+         * where the person actually works. `user.branch` is the duty station and is what the backend
+         * and `useAccessScope` both read. Reading them in the other order picks the wrong routes for
+         * anyone whose title happens to name a branch; the store page had the same inversion and it
+         * sent people to a page they had no access to.
+         */
+        const branch = user?.branch ?? user?.title?.branch;
         const isHeadOffice = Boolean(branch?.headOffice ?? branch?.isHeadOffice);
         const scope = isHeadOffice ? 'HEAD_OFFICE' : 'BRANCH';
         return workflows

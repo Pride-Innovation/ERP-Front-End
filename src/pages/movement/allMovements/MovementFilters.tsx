@@ -116,19 +116,34 @@ const DATE_PRESETS = [
     { label: 'Custom', value: 'custom' },
 ];
 
+/**
+ * A local timestamp the backend reads as written.
+ *
+ * <h2>Why not toISOString()</h2>
+ * These ranges were sent as {@code toISOString()}, which is UTC with a trailing {@code Z}. Spring
+ * binds that to a {@code LocalDateTime} without complaining and **discards the offset**, so the
+ * instant is re-read as a wall-clock time. On a +03:00 server that silently shifts every range three
+ * hours: picking "today" searched from **9pm the previous day**, quietly including movements from
+ * last night and excluding the last three hours of today.
+ *
+ * <p>No error, no empty result — just a slightly wrong answer, which is why it needed looking for
+ * rather than waiting to be reported. The rest of the app already sends local time in this shape.
+ */
+const wireFormat = (d: dayjs.Dayjs): string => d.format('YYYY-MM-DDTHH:mm:ss');
+
 const getDateRange = (preset: string): { from: string; to: string } => {
     const now = dayjs();
     switch (preset) {
-        case 'today': return { from: now.startOf('day').toISOString(), to: now.endOf('day').toISOString() };
-        case 'week': return { from: now.startOf('week').toISOString(), to: now.endOf('week').toISOString() };
-        case 'month': return { from: now.startOf('month').toISOString(), to: now.endOf('month').toISOString() };
+        case 'today': return { from: wireFormat(now.startOf('day')), to: wireFormat(now.endOf('day')) };
+        case 'week': return { from: wireFormat(now.startOf('week')), to: wireFormat(now.endOf('week')) };
+        case 'month': return { from: wireFormat(now.startOf('month')), to: wireFormat(now.endOf('month')) };
         case 'quarter': {
             const month = now.month();
             const quarterStart = now.month(Math.floor(month / 3) * 3).startOf('month');
             const quarterEnd = quarterStart.add(2, 'month').endOf('month');
-            return { from: quarterStart.toISOString(), to: quarterEnd.toISOString() };
+            return { from: wireFormat(quarterStart), to: wireFormat(quarterEnd) };
         }
-        case 'year': return { from: now.startOf('year').toISOString(), to: now.endOf('year').toISOString() };
+        case 'year': return { from: wireFormat(now.startOf('year')), to: wireFormat(now.endOf('year')) };
         default: return { from: '', to: '' };
     }
 };
@@ -190,7 +205,10 @@ const MovementFilters = ({
 
     const handleApply = () => {
         const range = datePreset === 'custom'
-            ? { from: customFrom ? dayjs(customFrom).startOf('day').toISOString() : '', to: customTo ? dayjs(customTo).endOf('day').toISOString() : '' }
+            ? {
+                from: customFrom ? wireFormat(dayjs(customFrom).startOf('day')) : '',
+                to: customTo ? wireFormat(dayjs(customTo).endOf('day')) : '',
+            }
             : getDateRange(datePreset);
         onApply({
             dateFrom: range.from || undefined,

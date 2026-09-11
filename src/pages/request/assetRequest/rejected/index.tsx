@@ -27,9 +27,17 @@ import {
     buildRequestColumnFilters,
     toRequestParams,
 } from "../requestTableConfig";
+import useStaffOptions from "../useStaffOptions";
 import useRequestExport from "../useRequestExport";
 
 const RejectedRequest = () => {
+    /*
+     * The staff directory behind the "Requested By" and "Approver" pickers.
+     *
+     * Branch-scoped on the server, so the list offered matches what this listing can actually return.
+     */
+    const fetchStaffOptions = useStaffOptions();
+
     const { requests } = useSelector((state: RootState) => state.AssetsRequestsStore)
     const { statuses } = useSelector((state: RootState) => state.StatusesStore);
     const { fetchAllStatuses } = StatusUtills();
@@ -133,7 +141,7 @@ const RejectedRequest = () => {
                     handleOptionClicked={handleOptionClicked}
                     params={{ statusIds, status: "REJECTED" }}
                     refresh
-                    columnFilters={buildRequestColumnFilters(statuses)}
+                    columnFilters={buildRequestColumnFilters(statuses, fetchStaffOptions)}
                     /*
                      * Merged over this tab's own parameters. It previously passed the filters alone,
                      * which dropped `statusIds` — so filtering the Rejected tab listed every request

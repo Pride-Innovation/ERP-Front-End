@@ -149,6 +149,35 @@ export const uploadStandaloneMovementDocumentService = async (file: File) => {
     }
 };
 
+/**
+ * Status totals for the current filters, over the whole matching set.
+ *
+ * <p>The tiles used to be counted from the rows the browser held while the heading beside them
+ * showed the true total, so past the fetch size the two silently disagreed and every tile
+ * under-reported. Both numbers now come from the server.
+ */
+export const fetchMovementStatusCountsService = async (params?: Record<string, any>) => {
+    try {
+        return await axiosInstance.get('movements/status-counts', { params });
+    } catch (error) {
+        return error;
+    }
+};
+
+/**
+ * The values the filter dropdowns should offer, from the whole scoped register.
+ *
+ * <p>They were derived in the browser from the loaded rows, so the panel could not offer a value it
+ * would have matched — it only knew about movements already on the page.
+ */
+export const fetchMovementFilterOptionsService = async () => {
+    try {
+        return await axiosInstance.get('movements/filter-options');
+    } catch (error) {
+        return error;
+    }
+};
+
 /** The current user's movement-approval inbox: DRAFT movements assigned to them. */
 export const fetchPendingApprovalMovementsService = async (
     approverId: string | number,

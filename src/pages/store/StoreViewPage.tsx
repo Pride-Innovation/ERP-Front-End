@@ -6,6 +6,7 @@ Managing Director
 */
 
 import {
+    Alert,
     Box,
     Button,
     Chip,
@@ -20,20 +21,20 @@ import TuneOutlinedIcon from '@mui/icons-material/TuneOutlined';
 import StorefrontOutlinedIcon from '@mui/icons-material/StorefrontOutlined';
 import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
 import { SvgIconComponent } from '@mui/icons-material';
-import { useContext, useEffect } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import StoreUtills from './utillls';
-import Loading from '../../components/loading';
 import { StoreContext } from '../../context/store';
 import BranchStoreReport from './BranchStoreReport';
 import StoreAssetsPanel from './StoreAssetsPanel';
 import CategorySummary from './CategorySummary';
 import AssetTypeUtills from '../settings/assetTypes/utills';
 import FilterBranchForm from './FilterBranchForm';
+import useAccessScope from '../../core/permissions/useAccessScope';
 import { ROUTES } from '../../core/routes/routes';
 import { PageHero } from '../../components/layout';
-import { brand, neutral, border, surface, status } from '../../utils/tokens';
+import { brand, neutral, surface, status } from '../../utils/tokens';
 
 export type StoreType = 'admin' | 'it' | 'disposal';
 
@@ -63,14 +64,31 @@ interface StoreViewPageProps {
 }
 
 const StoreViewPage = ({ storeType, title, subtitle, Icon, accentColor }: StoreViewPageProps) => {
-    const { branchId, currentBranch, setStoreType } = useContext(StoreContext);
+    const { branchId, currentBranch, setStoreType, storeError, resetStoreView } = useContext(StoreContext);
+
+    /** Set when a `?branchId=` was asked for that this viewer may not see. */
+    const [refusedBranch, setRefusedBranch] = useState(false);
+
+    /*
+     * Whether this viewer can actually reach more than one branch.
+     *
+     * The picker below is offered only at ALL scope. `GET /store` resolves the branch through
+     * `AccessScopeService` and refuses one the caller may not see, so below ALL every option but the
+     * viewer's own came back 403 — a control whose every choice is an error reads as a broken page
+     * rather than as a boundary. Nothing is lost by hiding it: the branch is already named in the
+     * header beside it.
+     *
+     * Mirrors the inventory page, and `useAccessScope` mirrors `AccessScopeService` — if the two
+     * drift, this either hides a control someone is entitled to or offers one the server refuses.
+     */
+    const { scopeFor, canView } = useAccessScope();
+    const seesEveryBranch = scopeFor('INVENTORY', 'VIEW') === 'ALL';
     const { fetchAllAssetTypes } = AssetTypeUtills();
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const {
         setCurrentUserBranch,
         fetchBranchDetails,
-        sendingRequest,
     } = StoreUtills();
 
     // Scope every balance query on this page to the store container it represents
@@ -80,13 +98,50 @@ const StoreViewPage = ({ storeType, title, subtitle, Icon, accentColor }: StoreV
         return () => setStoreType('');
     }, [storeType]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    // A ?branchId= query param (from the store landing page's branch drill-down) overrides
-    // the default scope (the user's own branch / Head Office).
+    /**
+     * Which branch this page opens on, and whether the viewer is allowed to ask for it.
+     *
+     * <h2>The URL is an input like any other</h2>
+     * `?branchId=` comes from the landing page's drill-down, which is itself scoped — below ALL it
+     * lists only the viewer's own branch. But a URL is also typed, bookmarked and shared, so a
+     * branch user can arrive asking for Head Office's Admin store.
+     *
+     * <p>The server refuses that (`GET /store` calls `branchScope.requireAccessTo`, which refuses
+     * rather than substituting), so nothing leaks. What went wrong was everything after the refusal:
+     * the failure was swallowed, the table kept the **previous** branch's rows, and the header card
+     * read "Current branch: Head Office" — because `GET /branches/{id}` is deliberately open to any
+     * login and answered happily. The page asserted you were looking at a store it had just been
+     * refused.
+     *
+     * <p>So the branch is checked here, against the same rule the server applies, before any of the
+     * page's requests are built. Out of reach falls back to the viewer's own branch and says so,
+     * instead of firing a page-load's worth of requests that will all be refused.
+     *
+     * <p>The reset matters as much: this context is mounted at the application root and survives
+     * navigation, so without it the previous visit's rows, tabs and counts are what the new page
+     * renders while it waits.
+     */
     useEffect(() => {
-        const qp = searchParams.get('branchId');
-        setCurrentUserBranch(qp ? Number(qp) : undefined);
+        resetStoreView();
+
+        const asked = searchParams.get('branchId');
+        if (!asked) {
+            setRefusedBranch(false);
+            setCurrentUserBranch(undefined);
+            return;
+        }
+
+        const wanted = Number(asked);
+        if (!Number.isFinite(wanted) || !canView('INVENTORY', { branchId: wanted })) {
+            setRefusedBranch(true);
+            setCurrentUserBranch(undefined);
+            return;
+        }
+
+        setRefusedBranch(false);
+        setCurrentUserBranch(wanted);
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [searchParams]);
     useEffect(() => { fetchAllAssetTypes(); }, []);
     useEffect(() => { if (branchId) { fetchBranchDetails(branchId as number); } }, [branchId]);
 
@@ -230,7 +285,10 @@ const StoreViewPage = ({ storeType, title, subtitle, Icon, accentColor }: StoreV
                     </Box>
                 </Paper>
 
-                {/* Filter by branch */}
+                {/* Filter by branch — only for someone who can reach more than one. The label goes
+                    with it: a lone "Branch" caption over nothing reads as a control that failed to
+                    load. */}
+                {seesEveryBranch && (
                 <Stack direction="row" alignItems="center" spacing={1.25} sx={{ flexShrink: 0 }}>
                     <Stack direction="row" alignItems="center" spacing={0.5}>
                         <TuneOutlinedIcon sx={{ fontSize: 15, color: 'text.secondary' }} />
@@ -252,42 +310,50 @@ const StoreViewPage = ({ storeType, title, subtitle, Icon, accentColor }: StoreV
                         <FilterBranchForm />
                     </Box>
                 </Stack>
+                )}
             </Stack>
+
+            {refusedBranch && (
+                <Alert severity="info" sx={{ mb: 2 }}>
+                    That branch is outside what you can see, so this page has opened your own branch
+                    instead.
+                </Alert>
+            )}
+
+            {/* A refusal or a failed load, said plainly. It used to reach a console.log, which left
+                the previous branch's rows standing as though they were this branch's. */}
+            {storeError && (
+                <Alert severity="warning" sx={{ mb: 2 }}>
+                    {storeError}
+                </Alert>
+            )}
 
             {/* Items per category for the selected branch — moved here from the
                 store landing page so that page stays a lightweight overview. */}
             <CategorySummary accentColor={accentColor} />
 
-            {/* Main content */}
-            {sendingRequest ? (
-                <Paper
-                    elevation={0}
-                    sx={{
-                        borderRadius: 2,
-                        border: `1px solid ${border.subtle}`,
-                        p: 4,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        minHeight: 280,
-                        bgcolor: surface.card,
-                    }}
-                >
-                    <Loading items="Store Commodity" />
-                </Paper>
-            ) : (
-                <Stack spacing={3}>
-                    {/* Consumables live as StoreBalance rows; assets hang off Asset.currentStore.
-                        The IT and Disposal stores hold only assets, so showing them the balance
-                        table alone made them look permanently empty. Admin stores hold both. */}
-                    {storeType === 'admin' && <BranchStoreReport accentColor={accentColor} />}
-                    <StoreAssetsPanel
-                        branchId={branchId as number | null}
-                        storeType={storeType.toUpperCase()}
-                        accentColor={accentColor}
-                    />
-                </Stack>
-            )}
+            {/*
+              * Main content, always mounted.
+              *
+              * <p>This used to swap the whole block for a spinner while `sendingRequest` was true.
+              * That was unreachable code — the flag belonged to a `StoreUtills()` instance that never
+              * fetched anything — and making the flag real (it is shared state now) would have turned
+              * it into an <b>infinite loop</b>: unmounting `BranchStoreReport` mid-fetch destroys the
+              * component whose effect started it, and remounting it when the fetch ends starts
+              * another. A table that is reloading should say so in place; it should not take the page
+              * with it, and the grid already has `loading` for exactly this.
+              */}
+            <Stack spacing={3}>
+                {/* Consumables live as StoreBalance rows; assets hang off Asset.currentStore.
+                    The IT and Disposal stores hold only assets, so showing them the balance
+                    table alone made them look permanently empty. Admin stores hold both. */}
+                {storeType === 'admin' && <BranchStoreReport accentColor={accentColor} />}
+                <StoreAssetsPanel
+                    branchId={branchId as number | null}
+                    storeType={storeType.toUpperCase()}
+                    accentColor={accentColor}
+                />
+            </Stack>
         </Box>
     );
 };

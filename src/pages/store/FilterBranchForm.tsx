@@ -5,7 +5,7 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import BranchUtills from '../settings/branch/utills';
 import { IOptions } from '../../components/tables/interface';
 import { useSelector } from 'react-redux';
@@ -13,7 +13,6 @@ import { RootState } from '../../store';
 import { Autocomplete, TextField, Paper, alpha } from '@mui/material';
 import CircularProgress from '@mui/material/CircularProgress';
 import StoreUtills from './utillls';
-import { StoreContext } from '../../context/store';
 import { autocompleteSx, PRIMARY_COLOR } from '../../components/forms/Autocomplete';
 import { useDebounce } from '../../hooks/useDebounce';
 
@@ -24,8 +23,7 @@ const FilterBranchForm = () => {
     const [selectedBranch, setSelectedBranch] = useState<IOptions | null>(null);
     const [inputText, setInputText] = useState('');
     const debouncedInput = useDebounce(inputText, 500);
-    const { setCurrentUserBranch, fetchStoresCommoditiesPerBranchPerAsset } = StoreUtills();
-    const { branchId } = useContext(StoreContext);
+    const { setCurrentUserBranch } = StoreUtills();
 
     const handleOpen = () => setOpen(true);
 
@@ -61,12 +59,6 @@ const FilterBranchForm = () => {
             setCurrentUserBranch(selectedBranch.value as number);
         }
     }, [selectedBranch]);
-
-    useEffect(() => {
-        if (branchId) {
-            fetchStoresCommoditiesPerBranchPerAsset();
-        }
-    }, [branchId]);
 
     const CustomPaper = ({ children, ...props }: any) => (
         <Paper

@@ -46,7 +46,7 @@ const TableData = () => {
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
     const { stores } = useSelector((state: RootState) => state.StoreStore);
     const {
-        count, setStoreReportTableData, storeReportTableData, setSelectedStatus,
+        count, setStoreReportTableData, storeReportTableData,
         branchId, currentAssetType, storeType,
     } = useContext(StoreContext);
 
@@ -99,22 +99,15 @@ const TableData = () => {
     useEffect(() => { handleReportsTableData(stores); }, [stores]);
     useEffect(() => { setColumnHeaders(getTableHeaders(rowData)); }, []);
 
-    const handleStatusChange = (status: string) => {
-        if (['officeEquipment', 'itEquipment', 'fleet', 'stationery'].includes(status)) {
-            setSelectedStatus(status);
-        } else {
-            setSelectedStatus('officeEquipment');
-        }
-    };
-
     return (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             {/* Details modal */}
             {crudStates.read === currentState && (
                 <ModalComponent width="60%" title="Stock Item Details" open={open} handleClose={handleClose}>
-                    {/* StoreUtills() is a plain hook, so calling it inside StoreDetails gave that
-                        component its own `open` state — its Close button closed nothing. The
-                        owner of the modal passes its own handler down. */}
+                    {/* The modal's open state lives in StoreContext now, so every caller of
+                        StoreUtills() sees the same dialog. The handler is still passed down rather
+                        than re-derived: the component that owns a dialog should be the one that
+                        closes it. */}
                     <StoreDetails handleClose={handleClose} />
                 </ModalComponent>
             )}
@@ -140,8 +133,21 @@ const TableData = () => {
                 handleOptionClicked={handleOptionClicked}
                 searchAction={false}
                 paginationMode="server"
-                onStatusChange={handleStatusChange}
-                status
+                /*
+                 * No status bar here, deliberately.
+                 *
+                 * It rendered four chips — Office Equipment, IT Equipment, Fleet, Stationery — that
+                 * were a **second category selector** sitting inside a table whose tabs already
+                 * select the category. Worse, it was wrong: each chip wrote a code into
+                 * `StoreContext.selectedStatus`, which `TabComponent` turned into a tab *index*
+                 * through a map of four positions. The catalogue has twelve categories ordered by
+                 * name, so clicking "Stationery" opened **Computers** and "Fleet" opened
+                 * **Equipment**. Its default, `officeEquipment`, is why every visit landed on index
+                 * 0 — *Building & Construction* — whatever you had been looking at.
+                 *
+                 * Two controls for one choice, one of them stale by construction. The tabs are the
+                 * category selector; this was removed rather than repaired.
+                 */
                 /*
                  * Only filters GET /store actually declares.
                  *

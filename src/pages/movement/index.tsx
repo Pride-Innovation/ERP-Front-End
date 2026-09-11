@@ -5,8 +5,9 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { RequirePermission } from '../../core/permissions';
+import usePermissions from '../../core/permissions/usePermissions';
 import { PERMISSIONS } from '../../core/permissions/constants';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
@@ -32,13 +33,23 @@ import MovementTable from './MovementTable';
 import RepairFlowsModal from './RepairFlowsModal';
 import MovementActionModal from './MovementActionModal';
 import MovementFilters, {
-    MovementFilterValues, matchesMovementFilters, deriveMovementFilterOptions, hasActiveMovementFilters,
+    MovementFilterValues, hasActiveMovementFilters,
 } from './allMovements/MovementFilters';
 import { exportMovementsPdf, exportMovementsExcel, exportMovementsCsv } from './allMovements/exportMovements';
 import RoutesUtills from '../../core/routes/utills';
-import { fetchPendingApprovalMovementsService } from './service';
+import {
+    fetchPendingApprovalMovementsService, fetchMovementStatusCountsService,
+    fetchMovementFilterOptionsService,
+} from './service';
+import { fetchRowsService } from '../../core/apis/globalService';
+
 import { MovementStatus } from './constants';
 import { IMovement } from './interface';
+/** How many rows the digest pulls when filters are on — enough to be useful, not a register dump. */
+const DIGEST_SIZE = 50;
+
+/** Cap on one export, so a careless export of everything cannot pull the table into the browser. */
+const EXPORT_LIMIT = 5000;
 
 const Movement = () => {
     const navigate = useNavigate();
@@ -67,37 +78,132 @@ const Movement = () => {
     /** Count only — the rows themselves are read from the movement's own page. */
     const [pendingCount, setPendingCount] = useState(0);
 
+    /**
+     * Only an approver has an approval inbox.
+     *
+     * <p>`GET /movements/pending-approval/{id}` requires APPROVE_MOVEMENT, and this ran for everyone
+     * who opened the page — so on live data six of the twelve accounts that can read movements got a
+     * 403 on every page load, for a chip they were never going to be shown. The endpoint was right;
+     * the page simply was not asking whether it had any business calling it.
+     *
+     * <p>The old `pendingCount > 0` test guarded the chip but not the request, which is the wrong end:
+     * by then the call has already failed.
+     */
+    const { has } = usePermissions();
+    const mayApproveMovements = has(PERMISSIONS.APPROVE_MOVEMENT);
+
     const fetchPendingCount = async () => {
-        if (!currentUserId) return;
+        if (!currentUserId || !mayApproveMovements) return;
         const r = (await fetchPendingApprovalMovementsService(currentUserId, { pageSize: 1, pageNumber: 0 })) as any;
         if (r?.status === 200) setPendingCount(r.data?.totalElements ?? r.data?.content?.length ?? 0);
     };
 
-    const refresh = () => { fetchAllMovements({ pageSize: 100 }); fetchPendingCount(); };
-    useEffect(() => { refresh(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    const [filters, setFilters] = useState<MovementFilterValues>({});
+    const filtersActive = hasActiveMovementFilters(filters);
+
+    /** The panel's filters as endpoint parameters; blank values are left out entirely. */
+    const queryParams = useMemo(() => {
+        const params: Record<string, any> = {};
+        Object.entries(filters).forEach(([key, value]) => {
+            if (value) params[key] = value;
+        });
+        return params;
+    }, [filters]);
+
+    /**
+     * The filters as a printed strip, so a sheet says which slice of the register it is.
+     *
+     * <p>The old exporter printed none, so two exports taken minutes apart under different filters
+     * were indistinguishable once saved — and an export is precisely the artefact that outlives the
+     * screen that produced it.
+     */
+    const exportFilterStrip = useMemo(() => {
+        const labels: Record<string, string> = {
+            dateFrom: 'From', dateTo: 'To', movementType: 'Type', movementCategory: 'Category',
+            status: 'Status', source: 'Source', destination: 'Destination', courier: 'Courier',
+            trackingNumber: 'Tracking No', receiptStatus: 'Receipt', initiator: 'Initiated by',
+        };
+        return Object.entries(queryParams)
+            .filter(([, value]) => Boolean(value))
+            .map(([key, value]) => ({ label: labels[key] ?? key, value: String(value) }));
+    }, [queryParams]);
+
+    /*
+     * A digest, but of the register rather than of the first hundred rows.
+     *
+     * This page fetched 100 movements and did the filtering, the counting and the exports over them.
+     * The heading showed the true total while the five tiles counted the loaded rows, so past a
+     * hundred the tiles stopped summing to the number printed directly above them — and a filter
+     * that matched only later movements reported "no results". Both now come from the server.
+     *
+     * Unfiltered this is a recent-eight digest; with filters on it becomes a real, if capped,
+     * result list, and "View all" is a page away for anything longer.
+     */
+    const [statusCounts, setStatusCounts] = useState<Record<string, number>>({});
+    const [filterOptions, setFilterOptions] = useState({
+        sources: [] as string[], destinations: [] as string[],
+        couriers: [] as string[], initiators: [] as string[],
+    });
+
+    const load = useCallback(() => {
+        fetchAllMovements({
+            ...queryParams,
+            pageNumber: 0,
+            pageSize: DIGEST_SIZE,
+            sortBy: 'createDate',
+            sortDirection: 'desc',
+        });
+        fetchMovementStatusCountsService(queryParams).then((r: any) => {
+            setStatusCounts(r?.status === 200 ? (r.data ?? {}) : {});
+        });
+        fetchPendingCount();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [queryParams]);
+
+    const refresh = () => load();
+    useEffect(() => { load(); }, [load]);
+
+    // From the whole scoped register, not from the rows on screen, so the panel cannot fail to offer
+    // a value it would have matched.
+    useEffect(() => {
+        fetchMovementFilterOptionsService().then((r: any) => {
+            if (r?.status === 200 && r.data) setFilterOptions(r.data);
+        });
+    }, []);
 
     const openMovement = (movement: IMovement) => navigate(`${ROUTES.READ_MOVEMENT}/${movement.id}`);
 
-    const countBy = (s: MovementStatus) => movements.filter((m) => m.status === s).length;
+    const countBy = (s: MovementStatus) => statusCounts[s] ?? 0;
     const inTransit = countBy('DISPATCHED') + countBy('IN_TRANSIT');
 
-    const [filters, setFilters] = useState<MovementFilterValues>({});
-    const filtersActive = hasActiveMovementFilters(filters);
-    const filterOptions = deriveMovementFilterOptions(movements);
+    // Already filtered and ordered by the query; capped at eight only when nothing is filtered.
+    const filteredMovements = movements;
+    const recent = filtersActive ? filteredMovements : filteredMovements.slice(0, 8);
 
-    const filteredMovements = movements.filter((m) => matchesMovementFilters(m, filters));
+    /**
+     * Exports cover every match, not the handful on screen.
+     *
+     * <p>They ran over the loaded rows, so an export from this page was silently partial — the worst
+     * kind, because the file looks complete.
+     */
+    const handleExport = async (fn: (rows: IMovement[]) => void) => {
+        const res: any = await fetchRowsService({
+            endPoint: 'movements',
+            pageNumber: 0,
+            pageSize: EXPORT_LIMIT,
+            params: queryParams,
+        });
+        const rows: IMovement[] = res?.status === 200 ? (res.data?.content ?? []) : [];
 
-    // Latest-first; capped at 8 as a "recent" digest, but a filtered view shows every match.
-    const recent = [...filteredMovements]
-        .sort((a, b) => new Date(b.createDate ?? 0).getTime() - new Date(a.createDate ?? 0).getTime())
-        .slice(0, filtersActive ? filteredMovements.length : 8);
-
-    const handleExport = (fn: (rows: IMovement[]) => void) => {
-        if (filteredMovements.length === 0) {
+        if (rows.length === 0) {
             toast.warning('There are no movements matching the current filters to export.');
             return;
         }
-        fn(filteredMovements);
+        if ((res.data?.totalElements ?? 0) > rows.length) {
+            toast.info(`Exporting the first ${rows.length.toLocaleString()} of `
+                + `${res.data.totalElements.toLocaleString()} matches. Narrow the filters for the rest.`);
+        }
+        fn(rows);
     };
 
     const todayLabel = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
@@ -225,7 +331,7 @@ const Movement = () => {
                 couriers={filterOptions.couriers}
                 initiators={filterOptions.initiators}
                 onApply={setFilters}
-                onExportPdf={() => handleExport(exportMovementsPdf)}
+                onExportPdf={() => handleExport((rows) => exportMovementsPdf(rows, { filters: exportFilterStrip }))}
                 onExportExcel={() => handleExport(exportMovementsExcel)}
                 onExportCsv={() => handleExport(exportMovementsCsv)}
                 onRefresh={refresh}

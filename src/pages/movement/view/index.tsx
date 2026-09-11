@@ -273,6 +273,14 @@ const MovementDetails = () => {
             movement.destStore?.location?.id,
             movement.sourceUser?.branch?.id,
             movement.recipientUser?.branch?.id,
+        ], [
+            // The people party to it — what SELF means for a movement, mirroring
+            // MovementService.peoplePartyTo and the DAO's SELF predicate.
+            movement.initiator?.id,
+            movement.sourceUser?.id,
+            movement.recipientUser?.id,
+            movement.receivingOfficer?.id,
+            movement.request?.requesterId,
         ]);
     const [approvals, setApprovals] = useState<IApprovalRecord[]>([]);
     const [loading, setLoading] = useState(true);

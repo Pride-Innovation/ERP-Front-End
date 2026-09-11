@@ -57,9 +57,31 @@ const MovementUtills = () => {
             if (response.status === 200) {
                 dispatch(loadAllMovements(response.data.content));
                 setCount(response.data.totalElements);
+            } else {
+                /*
+                 * The request failed, and the rows on screen must not outlive it.
+                 *
+                 * Services here answer `catch (error) { return error }`, so a 4xx arrives as a value
+                 * with no `status` rather than as a throw — the check above simply fails and, before
+                 * this branch existed, the function returned having changed nothing. The previous
+                 * result stayed on screen: the table, the five status tiles counted from it, and the
+                 * record count beside them, all describing a response that never arrived. A stale
+                 * table is indistinguishable from a fresh one, which is what makes this worth a
+                 * branch rather than a shrug.
+                 *
+                 * Clearing is the lesser of two imperfect answers — we do not know that there are no
+                 * movements — but the axios interceptor has already raised the error, and stale rows
+                 * outlive that message while quietly claiming to be the result.
+                 */
+                dispatch(loadAllMovements([]));
+                setCount(0);
             }
         } catch (error) {
-            console.error(error);
+            // A genuine throw rather than the error-as-value above. Same reasoning: do not leave the
+            // previous result standing in for one we never received.
+            dispatch(loadAllMovements([]));
+            setCount(0);
+            console.error('Failed to load movements', error);
         }
         setLoading(false);
     };

@@ -81,7 +81,11 @@ const UpdateRequest = () => {
 
                 // The route is reachable by typing the URL, so re-check here rather than trusting
                 // that the caller only linked here from an Edit button it had already gated.
-                if (!canEditRequest(data, { id: getCurrentUser()?.id, has })) {
+                if (!canEditRequest(data, {
+                    id: getCurrentUser()?.id,
+                    unitId: getCurrentUser()?.unit?.id,
+                    has,
+                })) {
                     toast.error("This request can no longer be edited.");
                     navigate(ROUTES.REQUEST);
                     return;

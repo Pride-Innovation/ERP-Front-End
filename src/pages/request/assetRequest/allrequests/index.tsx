@@ -29,6 +29,7 @@ import {
     buildRequestFilterSummary,
     toRequestParams,
 } from "../requestTableConfig";
+import useStaffOptions from "../useStaffOptions";
 import TableUtills from "../../../../components/tables/utills";
 import { fetchRowsService } from "../../../../core/apis/globalService";
 import { IRequest } from "../../interface";
@@ -56,6 +57,13 @@ import ApproveIssuance from "../ApproveIssuance";
 
 
 const Request = () => {
+    /*
+     * The staff directory behind the "Requested By" and "Approver" pickers.
+     *
+     * Branch-scoped on the server, so the list offered matches what this listing can actually return.
+     */
+    const fetchStaffOptions = useStaffOptions();
+
     const { requestTableData, setOptions } = useContext(RequestContext);
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
     const { requests } = useSelector((state: RootState) => state.AssetsRequestsStore);
@@ -429,10 +437,6 @@ const Request = () => {
                 filterMode="server"
                 params={{ statusIds: statusIds }}
                 refresh
-                filterOptions
-                optionsfilterParams={{
-                    status: "CREATED"
-                }}
                 status
                 onStatusChange={handleStatusChange}
                 selectedStatus={selectedStatus}
@@ -447,7 +451,7 @@ const Request = () => {
                  * `startDate`/`endDate`. The Status dropdown offered Active/Disabled/Locked — user
                  * account states, copied from the users page and never adapted.
                  */
-                columnFilters={buildRequestColumnFilters(statuses)}
+                columnFilters={buildRequestColumnFilters(statuses, fetchStaffOptions)}
                 /*
                  * Merged over the tab's base parameters rather than replacing them, so the status
                  * chip above the table survives a filter being applied.

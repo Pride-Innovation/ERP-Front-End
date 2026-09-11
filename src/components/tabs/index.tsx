@@ -11,8 +11,6 @@ import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 import { ITabComponent } from './interface';
 import { alpha } from '@mui/material';
-import { useContext } from 'react';
-import { StoreContext } from '../../context/store';
 import { brand, neutral, border } from '../../utils/tokens';
 
 interface TabPanelProps {
@@ -51,17 +49,27 @@ function a11yProps(index: number) {
     };
 }
 
-/** Legacy store-category → tab index map, retained for backward compatibility. */
-const LEGACY_STATUS_TAB: Record<string, number> = {
-    officeEquipment: 0,
-    itEquipment: 1,
-    stationery: 2,
-    fleet: 3,
-};
-
 /**
  * TabComponent provides a tabbed interface with a clickable tab bar and
  * per-tab content panels.
+ *
+ * <h2>It no longer maps categories to positions</h2>
+ * This held a `LEGACY_STATUS_TAB` table — `{officeEquipment: 0, itEquipment: 1, stationery: 2,
+ * fleet: 3}` — read from `StoreContext.selectedStatus`, and moved the tab whenever that changed.
+ * Two things had made it wrong and neither was visible from here:
+ *
+ * <ul>
+ *   <li>`GET /asset-types` sorts **by name**, and the bank has **twelve** categories, not four. So
+ *       index 0 is *Building & Construction*, 1 is *Cleaning & Hygiene*, 2 is *Computers* and 3 is
+ *       *Equipment* — every entry in the table pointed at the wrong category. Asking for Stationery
+ *       (really index 10) opened Computers.</li>
+ *   <li>`selectedStatus` defaulted to `'officeEquipment'`, so the store page landed on index 0 on
+ *       every visit whatever you had been looking at.</li>
+ * </ul>
+ *
+ * <p>A positional map onto a server-ordered list cannot be kept correct — renaming a category
+ * reorders it, and adding one shifts everything below. The store report now identifies its tab by
+ * the category's **id** and passes the index in, so there is one fact instead of two.
  */
 const TabComponent = ({
     headers,
@@ -69,14 +77,18 @@ const TabComponent = ({
     sx,
     tabPadding,
     defaultTab = 0,
+    activeTab,
     variant = 'scrollable',
     scrollButtons = 'auto',
 }: ITabComponent) => {
-    const [value, setValue] = React.useState(defaultTab);
-    const { selectedStatus } = useContext(StoreContext);
+    const [internalValue, setInternalValue] = React.useState(defaultTab);
+    const controlled = activeTab !== undefined;
+    const value = controlled ? activeTab : internalValue;
 
     const handleChange = (_event: React.SyntheticEvent | null, newValue: number) => {
-        setValue(newValue);
+        // A controlled caller owns the selection; moving it here as well would give the two copies
+        // a chance to disagree, which is the whole fault this component used to have.
+        if (!controlled) setInternalValue(newValue);
         handleTabChange?.(newValue);
     };
 
@@ -86,24 +98,15 @@ const TabComponent = ({
     // user's later selection.
     const initialised = React.useRef(false);
     React.useEffect(() => {
+        // A controlled caller has already decided which tab is active and loaded it; firing the
+        // default here would override that with index 0.
+        if (controlled) return;
         if (!initialised.current && headers.length > 0) {
             initialised.current = true;
             handleChange(null, defaultTab);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [headers.length]);
-
-    // Backward-compat: some store views drive the active tab from a category
-    // status held in StoreContext. Only switch when it maps to a real tab so
-    // it never clobbers the default tab or a user's manual selection.
-    React.useEffect(() => {
-        if (headers.length === 0) return;
-        const target = LEGACY_STATUS_TAB[selectedStatus as string];
-        if (target !== undefined && target < headers.length) {
-            handleChange(null, target);
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [selectedStatus]);
 
     return (
         <Box sx={{ width: '100%', ...(sx || {}) }}>

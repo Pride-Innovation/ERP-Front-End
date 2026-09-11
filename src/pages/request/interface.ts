@@ -54,6 +54,23 @@ export interface IRequest {
     requester?: IUser | null
     requestReports?: Array<IRequestReport>,
     currentApprover?: IUser | null,
+    /**
+     * The unit a group step is routed to, when it is routed to a unit rather than a person.
+     *
+     * <p>The engine admits a member of this unit as a valid actor, and the inbox listing already
+     * matches on it — so without it the page shows such a request as awaiting the viewer and then
+     * offers no button.
+     */
+    currentUnit?: { id?: string | number | null; name?: string } | null,
+    /**
+     * What the workflow is waiting for: REQUEST_APPROVAL, ACKNOWLEDGE_REQUEST, ISSUANCE,
+     * ACKNOWLEDGE_RECEIPT — or null for a finished, rejected or pre-engine request.
+     *
+     * <p>This is what decides which action to offer. Status cannot: `unitAcknowledged` sits among the
+     * approval codes while the workflow has already moved to issuance, so a menu built from status
+     * offers Approve on a request nobody can approve.
+     */
+    currentStepType?: string | null,
     commodities?: Array<{
         commodity: ICommodity,
         quantity: number
@@ -75,6 +92,18 @@ export interface IRequestTableData {
     currentApprover?: string;
     requestedFrom?: string;
     requesterID?: number | null;
+    /*
+     * Carried for the row menu, never displayed.
+     *
+     * The menu decides what to offer from the same rules the detail page uses, and those ask who
+     * the step is routed to and what kind of step it is. Ids and the step type rather than the
+     * objects, so nothing here can be mistaken for something to render.
+     */
+    currentApproverId?: number | string | null;
+    currentUnitId?: number | string | null;
+    currentStepType?: string | null;
+    /** Marks the row as an asset request, which is what selects its menu rules. */
+    rowKind?: string;
 }
 
 

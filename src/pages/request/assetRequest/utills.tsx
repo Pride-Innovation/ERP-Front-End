@@ -36,6 +36,8 @@ import {
     findAcknowledgeRequestReceiptByRequestIdService,
     findIssuanceApprovalRecordByRequestIdService
 } from './service';
+import { requestApproverLabel } from "../approverLabel";
+import { REQUEST_ROW_KIND } from "./rowActions";
 
 const RequestUtills = () => {
     const endPoint = 'requests';
@@ -75,13 +77,31 @@ const RequestUtills = () => {
     ) => {
         setLoading(true)
         try {
+            /*
+             * The display labels stay behind.
+             *
+             * An `asyncSelect` filter carries two things per key — `requesterId`, which the endpoint
+             * declares, and `requesterId__label`, the chosen person's name, which the filter chips and
+             * the printed export header read. Only the first belongs on the wire. Spring would drop
+             * the other silently, which is precisely why it should not be sent: an undeclared
+             * parameter that looks like a real one is how a filter comes to appear functional while
+             * doing nothing.
+             *
+             * Stripped here rather than in `toRequestParams` because the summary is built from those
+             * same params, and it needs the names.
+             */
+            const wireParams = params
+                ? Object.fromEntries(
+                    Object.entries(params).filter(([key]) => !key.endsWith('__label')))
+                : params;
+
             const response = await fetchRowsService({
                 // Paging comes back through here, so the status ids and date range the caller
                 // assembled stay in force past page one.
                 pageNumber: pageModel?.page ?? 0,
                 pageSize: pageModel?.pageSize ?? (params?.pageSize ? params.pageSize : 10),
                 endPoint,
-                params
+                params: wireParams
             }) as IRequestsAxiosResponse;
             if (response.status === 200) {
                 dispatch(loadAllRequests(response.data.content));
@@ -259,9 +279,9 @@ const RequestUtills = () => {
                     requestedBy: request.requester
                         ? `${request.requester.firstName ?? ''} ${request.requester.lastName ?? ''}`.trim() || null
                         : null,
-                    approver: request.currentApprover
-                        ? `${request.currentApprover.firstName ?? ''} ${request.currentApprover.lastName ?? ''}`.trim() || null
-                        : null,
+                    // Names the unit when the step is routed to one, so a request with Admin does
+                    // not read as unassigned in a column headed "Approver".
+                    approver: requestApproverLabel(request),
                     requestedFrom: request.requester?.branch?.name,
                     status: request.status?.status,
                     requesterID: request.requester?.id as number,
@@ -269,8 +289,31 @@ const RequestUtills = () => {
             )
         });
 
+    /**
+     * The same rows, plus what the row menu needs to decide which actions to offer.
+     *
+     * <h2>Why this is not folded into the mapper above</h2>
+     * The exporters derive their columns from the keys of the first row
+     * (`TableUtills.determineRowsandColumns`), so a field added for the menu becomes a column in
+     * the spreadsheet and the PDF. The table has no such problem: its columns come from
+     * `getTableHeaders(rowData)`, a fixed shape, so extra keys on a row are carried and not shown.
+     *
+     * <p>So the menu's inputs ride on the table rows only. The menu asks the same three questions
+     * the detail page asks — may you, is it your turn, and is the workflow at that stage — and it
+     * previously had only the status and the requester's id to answer them with, which is why it
+     * could not tell whose turn it was.
+     */
+    const buildRequestRows = (list: Array<IRequest>): Array<IRequestTableData> =>
+        buildRequestExportRows(list).map((row, index) => ({
+            ...row,
+            rowKind: REQUEST_ROW_KIND,
+            currentApproverId: list[index]?.currentApprover?.id ?? null,
+            currentUnitId: list[index]?.currentUnit?.id ?? null,
+            currentStepType: list[index]?.currentStepType ?? null,
+        }));
+
     const handleRequestTableData = (list: Array<IRequest>) => {
-        setRequestTableData(buildRequestExportRows(list));
+        setRequestTableData(buildRequestRows(list));
     }
 
     const determineCurrentRequest = (id: number, itemList: Array<IRequest>): IRequest => {

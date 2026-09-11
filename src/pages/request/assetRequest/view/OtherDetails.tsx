@@ -23,6 +23,7 @@ import AccessTimeOutlinedIcon from '@mui/icons-material/AccessTimeOutlined';
 import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
 import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined';
 import { brand, border } from '../../../../utils/tokens';
+import { requestApproverLabel } from '../../approverLabel';
 
 const TEAL = '#08796C';
 
@@ -161,16 +162,25 @@ const OtherDetails = ({
                         />
                     )}
 
-                    {request.currentApprover && (
+                    {/*
+                      * Rendered for a unit-routed step too, which used to disappear entirely: the row
+                      * was conditional on `currentApprover`, so a request with Admin simply had no
+                      * "Current Approver" line at all and the reader could not tell whether that meant
+                      * nobody or nobody-had-checked.
+                      *
+                      * The secondary line stays a person's posting; a unit has no title or department
+                      * to qualify it with, and inventing one would be worse than leaving it blank.
+                      */}
+                    {requestApproverLabel(request) && (
                         <InfoRow
                             icon={<SupervisedUserCircleOutlinedIcon />}
                             label="Current Approver"
-                            value={`${request.currentApprover.firstName} ${request.currentApprover.lastName}`}
-                            secondary={[
+                            value={requestApproverLabel(request) as string}
+                            secondary={request.currentApprover ? [
                                 request.currentApprover.title?.name,
                                 request.currentApprover.department?.name,
                                 request.currentApprover.branch?.name,
-                            ].filter(Boolean).join(' · ')}
+                            ].filter(Boolean).join(' · ') : undefined}
                         />
                     )}
 

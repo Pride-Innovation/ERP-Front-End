@@ -91,7 +91,13 @@ export interface IMovement {
     completionDate?: string | null;
     inventorySettled?: boolean;
 
-    request?: { id: number | string } | null;
+    /**
+     * The request this movement fulfils, if any.
+     *
+     * <p>`requesterId` is carried because being the requester is one of the ways a person is party to
+     * a movement, and so one of the ways it is theirs at SELF scope.
+     */
+    request?: { id: number | string; requesterId?: number | string | null } | null;
     repair?: { id: number | string } | null;
 
     items?: IMovementItem[];

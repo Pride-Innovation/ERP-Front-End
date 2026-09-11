@@ -50,8 +50,20 @@ export interface ITabComponent {
     /** Padding for the tab content panels */
     tabPadding?: number | string;
     
-    /** The initially active tab index */
+    /** The initially active tab index, for a caller that does not track the selection itself */
     defaultTab?: number;
+
+    /**
+     * The active tab index, when the caller owns the selection.
+     *
+     * <p>Supply it and the component becomes controlled: it renders what it is told and never moves
+     * on its own. The store report needs that, because the tab and the category being fetched are
+     * two facts that must not be allowed to disagree — and they did, silently, for as long as this
+     * component chose its own index.
+     *
+     * <p>Omit it and the previous uncontrolled behaviour is unchanged.
+     */
+    activeTab?: number;
     
     /** How tabs should be displayed */
     variant?: 'standard' | 'scrollable' | 'fullWidth';

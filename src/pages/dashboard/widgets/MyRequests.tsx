@@ -18,6 +18,7 @@ import { ROUTES } from '../../../core/routes/routes';
 import { ISSUED_REQUEST_CODES, PENDING_REQUEST_CODES } from '../../../utils/constants';
 import { camelCaseToWords } from '../../../utils/helpers';
 import { IRequest } from '../../request/interface';
+import { requestApproverLabel } from '../../request/approverLabel';
 import { IAsyncData } from '../useDashboardData';
 import WidgetCard from './WidgetCard';
 
@@ -76,9 +77,6 @@ const waitingLabel = (days: number | null): string => {
     if (days === 0) return 'raised today';
     return `${days} ${days === 1 ? 'day' : 'days'} ago`;
 };
-
-const personName = (person?: { firstName?: string; lastName?: string } | null): string =>
-    [person?.firstName, person?.lastName].filter(Boolean).join(' ').trim();
 
 /** Prefers the backend's human label, falling back to a de-camel-cased code. Never shows a raw code. */
 const statusLabel = (request: IRequest): string =>
@@ -144,7 +142,9 @@ const MyRequests = ({ requests, currentUserId, limit = 5 }: IMyRequestsProps) =>
         >
             <Stack divider={<Box sx={{ borderBottom: `1px solid ${border.subtle}` }} />}>
                 {shown.map(({ request, days }) => {
-                    const approver = personName(request.currentApprover);
+                    // Falls back to the unit whose turn it is — an acknowledgement step is routed
+                    // to Admin or Infra by category and carries no individual approver at all.
+                    const approver = requestApproverLabel(request);
                     const stage = stageOf(request.status?.status);
                     const trackColour = stage.rejected ? statusTokens.danger.main : brand[500];
 

@@ -5,8 +5,18 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { IColumnFilter } from '../../../components/tables/interface';
+import { IColumnFilter, IFilterOptionPage } from '../../../components/tables/interface';
 import { IStatus } from '../../settings/statuses/interface';
+
+/**
+ * Fetches one debounced, server-paginated page of people for the two staff pickers.
+ *
+ * <p>Named here rather than inlined because all four tabs pass the same function, and the directory
+ * behind it is branch-scoped on the server — which is what keeps the picker from offering somebody
+ * the listing would never return.
+ */
+export type AsyncOptionsFetcher =
+    (query: string, page: number, pageSize: number) => Promise<IFilterOptionPage>;
 
 /**
  * One definition of the request tables' filters, sort and parameter mapping.
@@ -49,10 +59,41 @@ export const REQUEST_SEARCH_KEY = 'name';
  * @param statuses the status catalogue, used to offer real request statuses rather than a
  *                 hardcoded list that goes stale the moment someone adds one
  */
-export const buildRequestColumnFilters = (statuses: IStatus[]): IColumnFilter[] => [
+export const buildRequestColumnFilters = (
+    statuses: IStatus[],
+    fetchUserOptions: AsyncOptionsFetcher,
+): IColumnFilter[] => [
     { key: 'name', label: 'Request Title', type: 'text' },
-    { key: 'requestedBy', label: 'Requested By', type: 'text' },
-    { key: 'approver', label: 'Approver', type: 'text' },
+    /*
+     * Requested By and Approver — people picked from the directory, not names typed in.
+     *
+     * They were text boxes matching partially across first, last and other name, so two people called
+     * Okello were one filter and a misremembered spelling returned nothing with no hint why. Both now
+     * carry an id.
+     *
+     * The directory behind them is branch-scoped on the server — the same `GET /users` the assets
+     * page's Assigned To filter uses — so a branch user is offered their own duty station's staff and
+     * Head Office and the units see everyone. Nothing here widens what the listing returns: these
+     * narrow within whatever scope the caller already has.
+     *
+     * `approverId`, not `currentApproverId`: the latter tells the backend "this is my approval inbox"
+     * and suppresses the requester scope, which would turn this dropdown into a way of switching
+     * scoping off.
+     */
+    {
+        key: 'requesterId',
+        label: 'Requested By',
+        type: 'asyncSelect',
+        placeholder: 'Search staff…',
+        fetchOptions: fetchUserOptions,
+    },
+    {
+        key: 'approverId',
+        label: 'Approver',
+        type: 'asyncSelect',
+        placeholder: 'Search staff…',
+        fetchOptions: fetchUserOptions,
+    },
     {
         key: 'priority', label: 'Priority', type: 'select', options: [
             { value: 'high', label: 'High' },
@@ -111,8 +152,14 @@ export const buildRequestFilterSummary = (
     const out: Array<{ label: string; value: string }> = [{ label: 'View', value: tabLabel }];
 
     if (params.name) out.push({ label: 'Request Title', value: String(params.name) });
-    if (params.requestedBy) out.push({ label: 'Requested By', value: String(params.requestedBy) });
-    if (params.approver) out.push({ label: 'Approver', value: String(params.approver) });
+    // The picker keeps the chosen person's name beside their id so the printed strip names a
+    // person rather than an id nobody can read back.
+    if (params.requesterId) {
+        out.push({ label: 'Requested By', value: String(params.requesterId__label || params.requesterId) });
+    }
+    if (params.approverId) {
+        out.push({ label: 'Approver', value: String(params.approverId__label || params.approverId) });
+    }
     if (params.priority) out.push({ label: 'Priority', value: String(params.priority) });
     if (params.statusIds) {
         const names = String(params.statusIds).split(',')

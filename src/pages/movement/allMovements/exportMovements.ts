@@ -5,13 +5,31 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
-import * as XLSX from 'xlsx';
 import { IMovement } from '../interface';
 import { movementTypeLabel, statusLabel, categoryLabels, receiptStatusLabels } from '../constants';
+import { exportListPdf, ListPdfColumn, ListPdfMeta } from '../../../utils/pdf/listPdf';
+import { exportListExcel, exportListCsv } from '../../../utils/exports/listSheet';
 
-const PRIMARY = '#08796C';
+/**
+ * The movements register, as a document.
+ *
+ * <h2>Why this file is now thin</h2>
+ * It used to build its own jsPDF document: a solid teal header strip, no logo, no filter strip, no
+ * page numbers, and its own CSV escaper and sheet naming beside it. That is the fourth bespoke
+ * exporter this codebase has had, and the reason {@code utils/pdf.js} was deleted — a register
+ * printed from this page and the same data printed from Reports came out as visibly different
+ * documents, so which screen you exported from changed what the file looked like.
+ *
+ * <p>The list pages reach {@code exportListPdf} through {@code TableUtills}. This page renders its
+ * own {@code MovementTable} rather than {@code TableComponent}, so it never passed through there and
+ * quietly kept its own. It now calls the same exporters directly.
+ *
+ * <p>What is left here is the only genuinely movement-specific thing: which columns a movement has
+ * and how each reads. Defining them once means a column added for the PDF cannot be missing from the
+ * spreadsheet.
+ */
+
+const DOCUMENT_TITLE = 'Movements';
 
 const fmtDate = (d?: string | null) =>
     d ? new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '';
@@ -19,98 +37,49 @@ const fmtDate = (d?: string | null) =>
 const destLabel = (m: IMovement) =>
     m.destStore?.name ?? (m.recipientUser ? `${m.recipientUser.firstName} ${m.recipientUser.lastName}` : '');
 
-/** One flat, human-readable row per movement — shared by all three export formats. */
-const buildRows = (movements: IMovement[]) => movements.map((m) => ({
-    'Ref': `#${m.id ?? ''}`,
-    'Type': movementTypeLabel(m.movementType),
-    'Category': m.movementCategory ? categoryLabels[m.movementCategory] : '',
-    'Source': m.sourceStore?.name ?? '',
-    'Destination': destLabel(m),
-    'Items': m.items?.length ?? 0,
-    'Status': statusLabel(m.status),
-    'Courier': m.courier?.name ?? m.courierService ?? '',
-    'Plate No': m.plateNumber ?? '',
-    'Tracking No': m.trackingNumber ?? '',
-    'Dispatch Date': fmtDate(m.dispatchDate),
-    'Expected Delivery': fmtDate(m.expectedDeliveryDate),
-    'Receipt Status': m.receiptStatus ? receiptStatusLabels[m.receiptStatus] : '',
-    'Initiated By': m.initiator ? `${m.initiator.firstName} ${m.initiator.lastName}` : '',
-    'Created': fmtDate(m.createDate),
+/** The register's columns, in the order they are read. */
+const COLUMNS: ListPdfColumn[] = [
+    { title: 'Ref', dataKey: 'ref' },
+    { title: 'Type', dataKey: 'type' },
+    { title: 'Category', dataKey: 'category' },
+    { title: 'Source', dataKey: 'source' },
+    { title: 'Destination', dataKey: 'destination' },
+    { title: 'Items', dataKey: 'items' },
+    { title: 'Status', dataKey: 'status' },
+    { title: 'Courier', dataKey: 'courier' },
+    { title: 'Plate No', dataKey: 'plateNumber' },
+    { title: 'Tracking No', dataKey: 'trackingNumber' },
+    { title: 'Dispatch Date', dataKey: 'dispatchDate' },
+    { title: 'Expected Delivery', dataKey: 'expectedDelivery' },
+    { title: 'Receipt Status', dataKey: 'receiptStatus' },
+    { title: 'Initiated By', dataKey: 'initiatedBy' },
+    { title: 'Created', dataKey: 'created' },
+];
+
+/** One flat, display-ready row per movement — shared by all three formats. */
+const buildRows = (movements: IMovement[]): Array<Record<string, any>> => movements.map((m) => ({
+    ref: `#${m.id ?? ''}`,
+    type: movementTypeLabel(m.movementType),
+    category: m.movementCategory ? categoryLabels[m.movementCategory] : '',
+    source: m.sourceStore?.name ?? '',
+    destination: destLabel(m),
+    items: m.items?.length ?? 0,
+    status: statusLabel(m.status),
+    courier: m.courier?.name ?? m.courierService ?? '',
+    plateNumber: m.plateNumber ?? '',
+    trackingNumber: m.trackingNumber ?? '',
+    dispatchDate: fmtDate(m.dispatchDate),
+    expectedDelivery: fmtDate(m.expectedDeliveryDate),
+    receiptStatus: m.receiptStatus ? receiptStatusLabels[m.receiptStatus] : '',
+    initiatedBy: m.initiator ? `${m.initiator.firstName} ${m.initiator.lastName}` : '',
+    created: fmtDate(m.createDate),
 }));
 
-const stamp = () => new Date().toISOString().slice(0, 10);
+export const exportMovementsPdf = (movements: IMovement[], meta?: ListPdfMeta) =>
+    exportListPdf(COLUMNS, buildRows(movements), DOCUMENT_TITLE, meta);
 
-const downloadBlob = (blob: Blob, filename: string) => {
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-};
+export const exportMovementsExcel = (movements: IMovement[]) =>
+    exportListExcel(COLUMNS, buildRows(movements), DOCUMENT_TITLE);
 
-export const exportMovementsCsv = (movements: IMovement[]) => {
-    const rows = buildRows(movements);
-    const headers = Object.keys(rows[0] ?? { Ref: '' });
-    const escape = (v: unknown) => {
-        const s = String(v ?? '');
-        return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-    };
-    const csv = [
-        headers.join(','),
-        ...rows.map((r) => headers.map((h) => escape((r as Record<string, unknown>)[h])).join(',')),
-    ].join('\n');
-    // Leading BOM so Excel opens the UTF-8 CSV with correct characters.
-    downloadBlob(new Blob([`﻿${csv}`], { type: 'text/csv;charset=utf-8' }), `movements-${stamp()}.csv`);
-};
-
-export const exportMovementsExcel = (movements: IMovement[]) => {
-    const rows = buildRows(movements);
-    const sheet = XLSX.utils.json_to_sheet(rows);
-    // Reasonable column widths so the sheet opens readable without manual resizing.
-    sheet['!cols'] = Object.keys(rows[0] ?? {}).map((h) => ({ wch: Math.max(h.length + 2, 14) }));
-    const book = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(book, sheet, 'Movements');
-    XLSX.writeFile(book, `movements-${stamp()}.xlsx`);
-};
-
-export const exportMovementsPdf = (movements: IMovement[]) => {
-    const rows = buildRows(movements);
-    const doc = new jsPDF({ unit: 'pt', format: 'a4', orientation: 'landscape' });
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const margin = 40;
-
-    // Brand header strip — same treatment as the release note PDF.
-    doc.setFillColor(PRIMARY);
-    doc.rect(0, 0, pageWidth, 60, 'F');
-    doc.setTextColor('#FFFFFF');
-    doc.setFontSize(18);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Pride Bank Limited', margin, 28);
-    doc.setFontSize(11);
-    doc.setFont('helvetica', 'normal');
-    doc.text('Movements Report', margin, 46);
-
-    const generatedLabel = new Date().toLocaleString('en-GB', {
-        day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
-    });
-    doc.setFontSize(9);
-    doc.text(`Generated: ${generatedLabel}  ·  ${rows.length} movement(s)`, pageWidth - margin, 46, { align: 'right' });
-
-    const headers = Object.keys(rows[0] ?? { Ref: '' });
-    autoTable(doc, {
-        startY: 80,
-        head: [headers],
-        body: rows.length > 0
-            ? rows.map((r) => headers.map((h) => String((r as Record<string, unknown>)[h] ?? '')))
-            : [['—', 'No movements matched the current filters', ...headers.slice(2).map(() => '')]],
-        theme: 'grid',
-        styles: { fontSize: 7, cellPadding: 4, lineColor: '#D1D5DB', textColor: '#1E293B', overflow: 'linebreak' },
-        headStyles: { fillColor: PRIMARY, textColor: '#FFFFFF', fontStyle: 'bold', halign: 'left', fontSize: 7 },
-        margin: { left: margin, right: margin },
-    });
-
-    doc.save(`movements-${stamp()}.pdf`);
-};
+export const exportMovementsCsv = (movements: IMovement[]) =>
+    exportListCsv(COLUMNS, buildRows(movements), DOCUMENT_TITLE);

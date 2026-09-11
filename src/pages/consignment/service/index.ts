@@ -6,7 +6,7 @@ Managing Director
 */
 
 import axiosInstance from '../../../core/apis/axiosInstance';
-import { IConsignmentCreatePayload, IConsignmentDispatchPayload, ConsignmentStatus } from '../interface';
+import { IConsignmentCreatePayload, IConsignmentDispatchPayload } from '../interface';
 
 const ENDPOINT = 'consignments';
 
@@ -18,12 +18,38 @@ export const createConsignmentService = async (body: IConsignmentCreatePayload) 
     }
 };
 
-export const fetchConsignmentsService = async (params?: {
-    pageNumber?: number;
-    pageSize?: number;
-    status?: ConsignmentStatus;
-    branchId?: number | string;
-}) => {
+/**
+ * The consignments register, filtered by the server.
+ *
+ * <p>The parameter list was `status` and `branchId`, and the endpoint applied them in a ternary so
+ * one silently discarded the other. `branchId` is gone: the scope is resolved from the caller's
+ * permissions, not asked for — it used to be taken straight from the client, so a branch user could
+ * read another branch's journeys by naming it.
+ */
+/**
+ * Status totals for the current filters, over the whole matching set.
+ *
+ * <p>The tabs counted the rows the browser held, so past the fetch size they described a slice while
+ * claiming to describe the register.
+ */
+export const fetchConsignmentStatusCountsService = async (params?: Record<string, any>) => {
+    try {
+        return await axiosInstance.get('consignments/status-counts', { params });
+    } catch (error) {
+        return error;
+    }
+};
+
+/** The dropdown values, from the whole scoped register rather than the loaded page. */
+export const fetchConsignmentFilterOptionsService = async () => {
+    try {
+        return await axiosInstance.get('consignments/filter-options');
+    } catch (error) {
+        return error;
+    }
+};
+
+export const fetchConsignmentsService = async (params?: Record<string, any>) => {
     try {
         return await axiosInstance.get(ENDPOINT, { params });
     } catch (error) {

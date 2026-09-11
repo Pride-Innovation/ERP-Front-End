@@ -197,7 +197,13 @@ const SideBar = ({ drawerOpen }: SideBarProps) => {
                 <Box sx={{ borderTop: `1px solid ${border.subtle}`, p: drawerOpen ? 1.25 : 0.75 }}>
                     <Tooltip title={drawerOpen ? '' : `${currentUser?.firstName ?? ''} ${currentUser?.lastName ?? ''} — Profile`} placement="right" arrow>
                         <Box
-                            onClick={() => navigate(ROUTES.PROFILE)}
+                            /*
+                             * The profile route is registered as `/profile/:id`, so the id is not
+                             * optional — without it this matched no route at all and the click went
+                             * nowhere. The avatar menu and the users table both already append it;
+                             * this was the one caller that did not.
+                             */
+                            onClick={() => navigate(`${ROUTES.PROFILE}/${currentUser?.id}`)}
                             sx={{
                                 display: 'flex',
                                 alignItems: 'center',

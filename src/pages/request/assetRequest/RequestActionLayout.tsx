@@ -29,6 +29,7 @@ import NotesOutlinedIcon from '@mui/icons-material/NotesOutlined';
 import DescriptionText from './DescriptionText';
 import { fieldSx } from '../../../components/forms/Inputs';
 import { ICommodity } from '../../settings/commodity/interface';
+import { requestApproverLabel } from '../approverLabel';
 
 /**
  * Shared presentation for the request-stage action modals (Acknowledge / Approve / Reject).
@@ -51,6 +52,13 @@ interface IRequestLite {
     createDate?: unknown;
     requester?: { firstName?: string; lastName?: string } | null;
     currentApprover?: { firstName?: string; lastName?: string } | null;
+    /**
+     * The unit a group step is routed to.
+     *
+     * <p>Carried because an acknowledgement step names a unit and no individual, so without it the
+     * modal's summary strip says the request is with nobody while asking you to act on it.
+     */
+    currentUnit?: { id?: string | number | null; name?: string } | null;
 }
 
 interface RequestActionLayoutProps {
@@ -186,7 +194,9 @@ const RequestActionLayout = ({
     handleClose,
 }: RequestActionLayoutProps) => {
     const requesterName = personName(request.requester);
-    const approverName = personName(request.currentApprover);
+    // The unit when the step is routed to one; the modal is often opened *by* a member of that
+    // unit, so naming it is more useful than an empty line.
+    const approverName = requestApproverLabel(request);
     const submitted = formatDate(request.createDate);
 
     return (

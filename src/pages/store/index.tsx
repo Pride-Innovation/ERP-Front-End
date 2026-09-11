@@ -233,6 +233,16 @@ const Store = () => {
                 icon={<StorefrontOutlinedIcon />}
                 actions={
                     <Stack direction="row" spacing={1}>
+                        {/*
+                          * Offered only to someone the stock-take endpoints will admit.
+                          *
+                          * This was ungated while both its endpoints require READ_STOCK_TAKE, so
+                          * anyone who could open the store page was invited to a screen that then
+                          * answered "Access Denied" over "Could not load stock takes." Holding
+                          * READ_STORE says you may see what a store holds; reading a count is a
+                          * narrower thing and has its own permission.
+                          */}
+                        {has(PERMISSIONS.READ_STOCK_TAKE) && (
                         <Button
                             variant="outlined"
                             startIcon={<FactCheckOutlinedIcon />}
@@ -241,6 +251,7 @@ const Store = () => {
                         >
                             Stock Take
                         </Button>
+                        )}
                         <Button
                             variant="outlined"
                             startIcon={<BadgeOutlinedIcon />}

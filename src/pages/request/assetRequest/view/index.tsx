@@ -69,12 +69,44 @@ import { generateApprovalPdf } from "./generateApprovalPdf";
 import RoutesUtills from "../../../../core/routes/utills";
 import { ROUTES } from "../../../../core/routes/routes";
 import usePermissions from "../../../../core/permissions/usePermissions";
-import { canApproveRequest, canEditRequest, canRejectRequest } from "../actionRules";
+import {
+    canAcknowledgeReceipt, canAcknowledgeRequest, canApproveIssuance, canApproveRequest,
+    canEditRequest, canIssueItems, canRejectRequest,
+} from "../actionRules";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../../store";
+import { requestApproverLabel } from "../../approverLabel";
+import StatusUtills from "../../../settings/statuses/Utills";
+import ThumbUpOffAltIcon from "@mui/icons-material/ThumbUpOffAlt";
+import ExitToAppIcon from "@mui/icons-material/ExitToApp";
+import TaskAltIcon from "@mui/icons-material/TaskAlt";
+import AcknowledgeRequest from "../AcknowledgeRequest";
+import AcknowledgeReceipt from "../AcknowledgeReceipt";
+import ApproveIssuance from "../ApproveIssuance";
+import { heroActionBase, heroSecondarySx } from "../../../../components/buttons/heroActionStyles";
+
 
 import { IRequest, IRequestAxiosResponse } from "../../interface";
 import { ICommodity } from "../../../settings/commodity/interface";
 import { brand, neutral, border, surface } from "../../../../utils/tokens";
 import { camelCaseToWords } from "../../../../utils/helpers";
+
+/**
+ * Approve and Reject: the hero's proportions, their own meaning.
+ *
+ * <p>These cannot take `heroPrimarySx` — green and red are carrying meaning here, not decoration, and
+ * repainting them brand teal would say the two decisions are interchangeable. What they must share is
+ * the geometry: they sit in the same row as Print Approvals and Edit, so at `size="small"` the row
+ * would run at two different heights.
+ */
+const decisionSx = (bg: string, hover: string) => ({
+    ...heroActionBase,
+    bgcolor: bg,
+    color: '#fff',
+    border: '1px solid transparent',
+    boxShadow: 'none',
+    '&:hover': { bgcolor: hover, transform: 'translateY(-1px)' },
+});
 
 const TEAL = '#08796C';
 
@@ -271,6 +303,9 @@ const RequestDetails = () => {
     const [isAttachmentViewerOpen, setIsAttachmentViewerOpen] = useState(false);
     const [approveModalOpen, setApproveModalOpen] = useState(false);
     const [rejectModalOpen, setRejectModalOpen] = useState(false);
+    const [acknowledgeRequestOpen, setAcknowledgeRequestOpen] = useState(false);
+    const [approveIssuanceOpen, setApproveIssuanceOpen] = useState(false);
+    const [acknowledgeReceiptOpen, setAcknowledgeReceiptOpen] = useState(false);
     const [sendingAction, setSendingAction] = useState(false);
     const [stepLogs, setStepLogs] = useState<IStepLog[]>([]);
     const [stepLogsLoaded, setStepLogsLoaded] = useState(false);
@@ -316,6 +351,19 @@ const RequestDetails = () => {
 
     useEffect(() => { if (id) { fetchRequestDetails(); fetchStepLogs(); } }, [id]);
 
+    /*
+     * The status catalogue, because the lifecycle modals resolve their target status by code.
+     *
+     * `AcknowledgeRequest`, `ApproveIssuance` and `AcknowledgeReceipt` each read `StatusesStore` and
+     * call `statusIdByCode(...)` — correctly, since ids depend on seed order. On the list page the
+     * parent already loads it for the tabs; this page never did, because until now it had no action
+     * that needed a status. Without it the lookup returns undefined and the acknowledgement posts a
+     * null statusId — a failure no typecheck can see.
+     */
+    const { fetchAllStatuses } = StatusUtills();
+    const { statuses } = useSelector((state: RootState) => state.StatusesStore);
+    useEffect(() => { if (statuses.length === 0) fetchAllStatuses(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
     useEffect(() => {
         if (request.id) {
             findAcknowledgeIssuanceReceiptByRequestId(request.id as number);
@@ -325,10 +373,26 @@ const RequestDetails = () => {
         }
     }, [request]);
 
-    const actor = { id: currentUser?.id, has };
+    const actor = { id: currentUser?.id, unitId: currentUser?.unit?.id, has };
     const canEdit = canEditRequest(request, actor);
     const canApprove = canApproveRequest(request, actor);
     const canReject = canRejectRequest(request, actor);
+
+    /*
+     * The rest of the lifecycle, driven by the workflow's current step.
+     *
+     * A request runs on past approval — acknowledged by Infra or Admin, issued, the issuance signed
+     * off, and finally receipted by the requester. This page offered none of those, so whoever's turn
+     * it was at any of them opened the request, read it, and had to go back to the list to act.
+     *
+     * Each rule reads `request.currentStepType` — what the workflow says is due — rather than
+     * guessing from the status. The list menu now reads the same field, so the two screens cannot
+     * offer different actions for the same request.
+     */
+    const canAckRequest = canAcknowledgeRequest(request, actor);
+    const canIssue = canIssueItems(request, actor);
+    const canApproveIssue = canApproveIssuance(request, actor);
+    const canAckReceipt = canAcknowledgeReceipt(request, actor);
 
     const printable = printEligibility(request, stepLogs, stepLogsLoaded);
 
@@ -448,21 +512,12 @@ const RequestDetails = () => {
                                     exactly the rows where it matters. */}
                                 <Box component="span" sx={{ display: 'inline-flex' }}>
                                     <MuiButton
-                                        variant="outlined"
-                                        size="small"
+                                        variant="text"
+                                        disableElevation
                                         disabled={!printable.allowed || printing}
-                                        startIcon={<PictureAsPdfOutlinedIcon fontSize="small" />}
+                                        startIcon={<PictureAsPdfOutlinedIcon sx={{ fontSize: 18 }} />}
                                         onClick={handlePrintApprovals}
-                                        sx={{
-                                            color: brand[600],
-                                            borderColor: alpha(brand[500], 0.35),
-                                            borderRadius: '10px',
-                                            textTransform: 'none',
-                                            fontSize: '0.8rem',
-                                            fontWeight: 700,
-                                            '&:hover': { borderColor: brand[500], bgcolor: alpha(brand[50], 0.7) },
-                                            '&.Mui-disabled': { color: neutral[400], borderColor: neutral[200] },
-                                        }}
+                                        sx={heroSecondarySx}
                                     >
                                         {printing ? 'Preparing…' : 'Print Approvals'}
                                     </MuiButton>
@@ -474,21 +529,15 @@ const RequestDetails = () => {
                                 reads as a fault rather than as "not yours to edit". */}
                             {canEdit && (
                                 <MuiButton
-                                    variant="outlined"
-                                    size="small"
-                                    startIcon={<EditOutlinedIcon fontSize="small" />}
+                                    variant="text"
+                                    disableElevation
+                                    startIcon={<EditOutlinedIcon sx={{ fontSize: 18 }} />}
                                     onClick={() => navigate(`${ROUTES.UPDATE_REQUEST}/${request.id}`)}
-                                    sx={{
-                                        color: brand[600],
-                                        borderColor: alpha(brand[500], 0.35),
-                                        borderRadius: '10px',
-                                        textTransform: 'none',
-                                        fontSize: '0.8rem',
-                                        fontWeight: 700,
-                                        '&:hover': { borderColor: brand[500], bgcolor: alpha(brand[50], 0.7) },
-                                    }}
+                                    sx={heroSecondarySx}
                                 >
-                                    Edit
+                                    {/* Names the object, like "Edit Asset" — "Edit" alone gives a
+                                        60px control beside a 56px icon tile. */}
+                                    Edit Request
                                 </MuiButton>
                             )}
 
@@ -497,19 +546,63 @@ const RequestDetails = () => {
                                     variant="contained"
                                     size="small"
                                     disableElevation
-                                    startIcon={<ApproveIcon fontSize="small" />}
+                                    startIcon={<ApproveIcon sx={{ fontSize: 18 }} />}
                                     onClick={() => setApproveModalOpen(true)}
-                                    sx={{
-                                        bgcolor: '#2E7D32',
-                                        color: '#fff',
-                                        borderRadius: '10px',
-                                        textTransform: 'none',
-                                        fontSize: '0.8rem',
-                                        fontWeight: 700,
-                                        '&:hover': { bgcolor: '#1B5E20' },
-                                    }}
+                                    sx={decisionSx('#2E7D32', '#1B5E20')}
                                 >
                                     Approve
+                                </MuiButton>
+                            )}
+
+                            {/*
+                              * The later stages. Only one of these can be live at a time — they are
+                              * keyed off the single pending step — so the row never crowds.
+                              */}
+                            {canAckRequest && (
+                                <MuiButton
+                                    variant="contained"
+                                    disableElevation
+                                    startIcon={<ThumbUpOffAltIcon sx={{ fontSize: 18 }} />}
+                                    onClick={() => setAcknowledgeRequestOpen(true)}
+                                    sx={decisionSx('#0277BD', '#01579B')}
+                                >
+                                    Acknowledge Request
+                                </MuiButton>
+                            )}
+
+                            {canIssue && (
+                                <MuiButton
+                                    variant="contained"
+                                    disableElevation
+                                    startIcon={<ExitToAppIcon sx={{ fontSize: 18 }} />}
+                                    onClick={() => navigate(`${ROUTES.ISSUE_REQUEST}/${request.id}`)}
+                                    sx={decisionSx('#6A1B9A', '#4A148C')}
+                                >
+                                    Issue Items
+                                </MuiButton>
+                            )}
+
+                            {canApproveIssue && (
+                                <MuiButton
+                                    variant="contained"
+                                    disableElevation
+                                    startIcon={<ThumbUpOffAltIcon sx={{ fontSize: 18 }} />}
+                                    onClick={() => setApproveIssuanceOpen(true)}
+                                    sx={decisionSx('#2E7D32', '#1B5E20')}
+                                >
+                                    Approve Issuance
+                                </MuiButton>
+                            )}
+
+                            {canAckReceipt && (
+                                <MuiButton
+                                    variant="contained"
+                                    disableElevation
+                                    startIcon={<TaskAltIcon sx={{ fontSize: 18 }} />}
+                                    onClick={() => setAcknowledgeReceiptOpen(true)}
+                                    sx={decisionSx('#2E7D32', '#1B5E20')}
+                                >
+                                    Acknowledge Receipt
                                 </MuiButton>
                             )}
 
@@ -518,17 +611,9 @@ const RequestDetails = () => {
                                     variant="contained"
                                     size="small"
                                     disableElevation
-                                    startIcon={<RejectIcon fontSize="small" />}
+                                    startIcon={<RejectIcon sx={{ fontSize: 18 }} />}
                                     onClick={() => setRejectModalOpen(true)}
-                                    sx={{
-                                        bgcolor: '#C62828',
-                                        color: '#fff',
-                                        borderRadius: '10px',
-                                        textTransform: 'none',
-                                        fontSize: '0.8rem',
-                                        fontWeight: 700,
-                                        '&:hover': { bgcolor: '#B71C1C' },
-                                    }}
+                                    sx={decisionSx('#C62828', '#B71C1C')}
                                 >
                                     Reject
                                 </MuiButton>
@@ -556,7 +641,10 @@ const RequestDetails = () => {
                 {/* At-a-glance strip — key facts as light tiles across the base of the hero */}
                 <Box sx={{ position: 'relative', display: 'flex', flexWrap: 'wrap', bgcolor: alpha(brand[500], 0.03), borderTop: `1px solid ${border.subtle}` }}>
                     <HeroFact first label="Branch / Location" value={request.requester?.branch?.name || null} />
-                    <HeroFact label="Current Approver" value={request.currentApprover ? `${request.currentApprover.firstName ?? ''} ${request.currentApprover.lastName ?? ''}`.trim() : null} />
+                    {/* Names the unit when the step is routed to one — see requestApproverLabel.
+                        Reading "Not specified" for a request genuinely sitting with Admin says the
+                        workflow has stalled, which is the opposite of the truth. */}
+                    <HeroFact label="Current Approver" value={requestApproverLabel(request)} />
                     <HeroFact label="Submitted" value={request.createDate ? moment(request.createDate).format('D MMM YYYY') : null} />
                     <HeroFact label="Requested Items" value={request.commodities?.length ? `${request.commodities.length} ${request.commodities.length === 1 ? 'item' : 'items'}` : null} />
                 </Box>
@@ -749,8 +837,44 @@ const RequestDetails = () => {
                     request={request}
                     sendingRequest={sendingAction}
                     setSendingRequest={setSendingAction}
-                    handleClose={() => { setApproveModalOpen(false); fetchRequestDetails(); }}
+                    handleClose={() => { setApproveModalOpen(false); fetchRequestDetails(); fetchStepLogs(); }}
                     buttonText="Approve"
+                />
+            </ModalComponent>
+
+            {/* Acknowledge Request — Infra or Admin confirming they have it, before issuance */}
+            <ModalComponent width="70%" title="Acknowledge Request" open={acknowledgeRequestOpen}
+                handleClose={() => setAcknowledgeRequestOpen(false)}>
+                <AcknowledgeRequest
+                    request={request}
+                    sendingRequest={sendingAction}
+                    setSendingRequest={setSendingAction}
+                    handleClose={() => { setAcknowledgeRequestOpen(false); fetchRequestDetails(); fetchStepLogs(); }}
+                    buttonText="Acknowledge"
+                />
+            </ModalComponent>
+
+            {/* Approve Issuance — signing off what was handed over */}
+            <ModalComponent width="60%" title="Approve Issuance" open={approveIssuanceOpen}
+                handleClose={() => setApproveIssuanceOpen(false)}>
+                <ApproveIssuance
+                    request={request}
+                    sendingRequest={sendingAction}
+                    setSendingRequest={setSendingAction}
+                    handleClose={() => { setApproveIssuanceOpen(false); fetchRequestDetails(); fetchStepLogs(); }}
+                    buttonText="Approve"
+                />
+            </ModalComponent>
+
+            {/* Acknowledge Receipt — the requester confirming what actually arrived */}
+            <ModalComponent width="60%" title="Acknowledge Receipt" open={acknowledgeReceiptOpen}
+                handleClose={() => setAcknowledgeReceiptOpen(false)}>
+                <AcknowledgeReceipt
+                    request={request}
+                    sendingRequest={sendingAction}
+                    setSendingRequest={setSendingAction}
+                    handleClose={() => { setAcknowledgeReceiptOpen(false); fetchRequestDetails(); fetchStepLogs(); }}
+                    buttonText="Acknowledge"
                 />
             </ModalComponent>
 
@@ -760,7 +884,7 @@ const RequestDetails = () => {
                     request={request}
                     sendingRequest={sendingAction}
                     setSendingRequest={setSendingAction}
-                    handleClose={() => { setRejectModalOpen(false); fetchRequestDetails(); }}
+                    handleClose={() => { setRejectModalOpen(false); fetchRequestDetails(); fetchStepLogs(); }}
                     buttonText="Reject"
                 />
             </ModalComponent>

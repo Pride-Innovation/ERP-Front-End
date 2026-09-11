@@ -5,14 +5,14 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { ReactNode, useEffect, useMemo, useState } from 'react';
+import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import {
     alpha, Box, CircularProgress, FormControl, IconButton, ListItemIcon, ListItemText,
     MenuItem, Paper, Select, Stack, Table, TableBody, TableCell, TableContainer, TableHead,
     TablePagination, TableRow, TableSortLabel, Tooltip, Typography,
 } from '@mui/material';
 import { PERMISSIONS } from '../../core/permissions/constants';
-import usePermissions from '../../core/permissions/usePermissions';
+import useAccessScope from '../../core/permissions/useAccessScope';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
@@ -341,12 +341,12 @@ const ACTION_PERMISSION: Record<MovementAction, string> = {
 const rowActions = (
     mov: IMovement,
     variant: 'recent' | 'approvals' | 'lifecycle',
-    permitted: (action: MovementAction) => boolean,
+    permitted: (action: MovementAction, movement: IMovement) => boolean,
     currentUserId?: number | string,
 ): RowAction[] => {
     // Filtered here too: an approvals-variant table lists what is awaiting a decision, but being
     // shown the queue is not the same as being allowed to decide.
-    if (variant === 'approvals') return [APPROVE, REJECT].filter(a => permitted(a.action));
+    if (variant === 'approvals') return [APPROVE, REJECT].filter(a => permitted(a.action, mov));
     if (variant !== 'lifecycle') return [];
 
     const actions: RowAction[] = [];
@@ -356,7 +356,7 @@ const rowActions = (
     if (canReceive(mov)) actions.push({ action: 'receive', title: 'Receive', color: '#047857', icon: <AssignmentTurnedInOutlinedIcon sx={{ fontSize: 15 }} /> });
     if (canComplete(mov)) actions.push({ action: 'complete', title: 'Complete', color: '#15803D', icon: <TaskAltOutlinedIcon sx={{ fontSize: 15 }} /> });
     if (canCancel(mov)) actions.push({ action: 'cancel', title: 'Cancel', color: '#DC2626', icon: <CancelOutlinedIcon sx={{ fontSize: 15 }} />, destructive: true });
-    return actions.filter(a => permitted(a.action));
+    return actions.filter(a => permitted(a.action, mov));
 };
 
 const ActionButton = ({ title, color, onClick, children }: {
@@ -489,22 +489,70 @@ export interface IMovementTableProps {
     stickyHeader?: boolean;
     /** Caps the scroll area; only meaningful with `stickyHeader`. */
     maxHeight?: number | string;
+    /**
+     * Hands paging and sorting to the caller, for a table backed by a filtered server query.
+     *
+     * <p>Without this the table sorts and pages whatever array it was given, which is right for the
+     * eight-row digest and wrong for the register: the page held the first hundred movements and
+     * paginated those, so movement #101 was unreachable and the filter bar could not find it. When
+     * present, `rows` is taken as already sorted and already the page to show, and `total` is the
+     * size of the whole matching set rather than of the array.
+     */
+    server?: {
+        page: number;
+        rowsPerPage: number;
+        total: number;
+        onPageChange: (page: number) => void;
+        onRowsPerPageChange: (rowsPerPage: number) => void;
+        /** The column and direction to ask the server for. */
+        onSortChange: (column: ColumnId, order: Order) => void;
+    };
 }
 
 const MovementTable = ({
     rows, loading, variant = 'recent', empty, onView, onAction, currentUserId, actionsAs = 'icons',
     footer, paginateOver, paginationResetKey, initialSort, disableSurface, stickyHeader, maxHeight,
+    server,
 }: IMovementTableProps) => {
-    const { has } = usePermissions();
-    // Resolved once per render rather than per row — `has` is cheap, but a lifecycle table asks
-    // seven questions a row and the answer cannot change between rows.
-    const permitted = useMemo(() => {
-        const granted = new Set(
-            (Object.keys(ACTION_PERMISSION) as MovementAction[]).filter(a => has(ACTION_PERMISSION[a])),
-        );
-        return (action: MovementAction) => granted.has(action);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [rows]);
+    const { canActOnAnyOf } = useAccessScope();
+
+    /*
+     * Two questions per button, and the second one is per row.
+     *
+     * This resolved the permission once for the whole table, on the reasoning that "the answer
+     * cannot change between rows". That is true of the permission and false of the *scope*: each
+     * movement touches its own set of branches, so whether the viewer may act on it is a property of
+     * the row, not of the table.
+     *
+     * It mattered because the listing resolves VIEW scope while the endpoints guard with
+     * `requireCanManageAny` — MANAGE. `DASH_SCOPE_ALL` widens VIEW to ALL but deliberately never
+     * MANAGE, so someone holding it without `MANAGE_ALL_BRANCH_MOVEMENTS` sees every branch's
+     * movements and was offered Dispatch, Receive, Complete and Cancel on all of them. The click
+     * came back 403, which reads as a broken button rather than as a boundary.
+     *
+     * `canActOnAnyOf` asks both halves at once and is the same call the detail page makes, so the
+     * two screens cannot drift into offering different buttons for the same movement. A movement has
+     * up to four ends and the caller is in reach if any one is theirs; absent ends are ordinary
+     * rather than a fault — a return has no source store, an issuance no source user.
+     */
+    const permitted = useCallback(
+        (action: MovementAction, mov: IMovement) =>
+            canActOnAnyOf(ACTION_PERMISSION[action], 'MOVEMENTS', [
+                mov.sourceStore?.location?.id,
+                mov.destStore?.location?.id,
+                mov.sourceUser?.branch?.id,
+                mov.recipientUser?.branch?.id,
+                    ], [
+                        // The people party to it — what SELF means for a movement, mirroring
+                        // MovementService.peoplePartyTo and the DAO's SELF predicate.
+                        mov.initiator?.id,
+                        mov.sourceUser?.id,
+                        mov.recipientUser?.id,
+                        mov.receivingOfficer?.id,
+                        mov.request?.requesterId,
+                    ]),
+        [canActOnAnyOf],
+    );
 
     const columns = (variant === 'approvals' ? APPROVAL_COLUMNS : RECENT_COLUMNS)
         .map((id) => (id === 'actions' && variant === 'lifecycle'
@@ -520,12 +568,18 @@ const MovementTable = ({
     useEffect(() => { setPage(0); }, [paginationResetKey]);
 
     const handleSort = (id: ColumnId) => {
-        setOrder(orderBy === id && order === 'asc' ? 'desc' : 'asc');
+        const next: Order = orderBy === id && order === 'asc' ? 'desc' : 'asc';
+        setOrder(next);
         setOrderBy(id);
         setPage(0);
+        // Server-backed: re-ask rather than reorder the page in front of us, which would sort one
+        // page of a larger set and present it as the whole ordering.
+        server?.onSortChange(id, next);
     };
 
     const sorted = useMemo(() => {
+        // Already ordered by the query that produced them.
+        if (server) return rows;
         const sortValue = COLUMNS[orderBy].sortValue;
         if (!sortValue) return rows;
         return [...rows].sort((a, b) => {
@@ -534,12 +588,21 @@ const MovementTable = ({
             if (av === bv) return 0;
             return (av > bv ? 1 : -1) * (order === 'asc' ? 1 : -1);
         });
-    }, [rows, orderBy, order]);
+    }, [rows, orderBy, order, server]);
 
-    const paginated = paginateOver != null && sorted.length > paginateOver
-        ? sorted.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-        : sorted;
-    const showPagination = paginateOver != null && sorted.length > paginateOver;
+    /*
+     * Server-backed tables are handed exactly the page to render; slicing again would page a page.
+     * The pager is shown whenever the whole matching set is larger than what is in front of us —
+     * from `total`, not from `rows.length`, which is the distinction the old code could not make.
+     */
+    const paginated = server
+        ? sorted
+        : (paginateOver != null && sorted.length > paginateOver
+            ? sorted.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+            : sorted);
+    const showPagination = server
+        ? server.total > server.rowsPerPage
+        : (paginateOver != null && sorted.length > paginateOver);
 
     const renderCell = (col: MovementColumn, mov: IMovement) => {
         switch (col.id) {
@@ -644,11 +707,16 @@ const MovementTable = ({
             {showPagination && (
                 <TablePagination
                     component="div"
-                    count={sorted.length}
-                    page={page}
-                    onPageChange={(_, p) => setPage(p)}
-                    rowsPerPage={rowsPerPage}
-                    onRowsPerPageChange={(e) => { setRowsPerPage(parseInt(e.target.value, 10)); setPage(0); }}
+                    count={server ? server.total : sorted.length}
+                    page={server ? server.page : page}
+                    onPageChange={(_, p) => (server ? server.onPageChange(p) : setPage(p))}
+                    rowsPerPage={server ? server.rowsPerPage : rowsPerPage}
+                    onRowsPerPageChange={(e) => {
+                        const size = parseInt(e.target.value, 10);
+                        if (server) { server.onRowsPerPageChange(size); return; }
+                        setRowsPerPage(size);
+                        setPage(0);
+                    }}
                     rowsPerPageOptions={[15, 25, 50, 100]}
                     sx={dataPaginationSx}
                 />

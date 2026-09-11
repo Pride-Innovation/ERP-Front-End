@@ -29,11 +29,12 @@ import ModalComponent from '../../components/modal';
 import { IConsignment, ConsignmentStatus } from './interface';
 import {
     fetchConsignmentsService, fetchConsignmentService, markConsignmentInTransitService,
+    fetchConsignmentStatusCountsService, fetchConsignmentFilterOptionsService,
     markConsignmentArrivedService, cancelConsignmentService,
 } from './service';
 import ConsignmentTable, { ConsignmentAction } from './ConsignmentTable';
 import ConsignmentFilters, {
-    ConsignmentFilterValues, matchesConsignmentFilters, deriveConsignmentFilterOptions,
+    ConsignmentFilterValues,
 } from './ConsignmentFilters';
 import {
     exportConsignmentsPdf, exportConsignmentsExcel, exportConsignmentsCsv,
@@ -42,6 +43,15 @@ import ConsignmentDetail from './ConsignmentDetail';
 import CreateConsignment from './CreateConsignment';
 import DispatchConsignment from './DispatchConsignment';
 import ReceiveConsignment from './ReceiveConsignment';
+
+/**
+ * How many rows one export may pull.
+ *
+ * <p>High enough that every realistic filtered view fits in one file, bounded so a careless export
+ * of the whole register cannot pull it into the browser's memory. The user is told when the cap
+ * bites, because a silently truncated export is worse than a refused one.
+ */
+const EXPORT_LIMIT = 5000;
 
 const STATUS_TABS: Array<{ value: TabValue; label: string }> = [
     { value: 'all', label: 'All' },
@@ -57,15 +67,6 @@ const STATUS_TABS: Array<{ value: TabValue; label: string }> = [
  * states, because "where are my vans" is a question the two statuses answer together.
  */
 type TabValue = 'all' | 'ON_ROAD' | ConsignmentStatus;
-
-const onRoad = (c: IConsignment) => c.status === 'DISPATCHED' || c.status === 'IN_TRANSIT';
-
-const isOverdue = (c: IConsignment) => {
-    if (c.status !== 'DISPATCHED' && c.status !== 'IN_TRANSIT') return false;
-    if (!c.expectedDeliveryDate) return false;
-    const due = new Date(c.expectedDeliveryDate);
-    return !Number.isNaN(due.getTime()) && due.getTime() < Date.now();
-};
 
 const Consignments = () => {
     const navigate = useNavigate();
@@ -83,54 +84,152 @@ const Consignments = () => {
     /** The landed consignment being handed over to its recipients. */
     const [receiving, setReceiving] = useState<IConsignment | null>(null);
 
+    /*
+     * Everything below is asked of the server now.
+     *
+     * The page fetched the first hundred journeys once and did the rest in the browser: ten filters,
+     * the tabs, their counts, the dropdown options and three exports. Past a hundred a journey
+     * matching a filter exactly came back as "no results" — which reads exactly like "there is no
+     * such consignment" — and the tab badges described a slice while claiming to describe the
+     * register. The endpoint meanwhile declared two parameters and applied them in a ternary, so
+     * choosing a status silently discarded the branch, and choosing neither returned the whole bank.
+     */
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(15);
+    const [total, setTotal] = useState(0);
+    const [sort, setSort] = useState<{ column: string; order: 'asc' | 'desc' }>(
+        { column: 'reference', order: 'desc' },
+    );
+
+    /** The table's column ids, translated to entity fields the query understands. */
+    const SORT_FIELDS: Record<string, string> = {
+        reference: 'id', schedule: 'dispatchDate', status: 'status',
+    };
+    const [statusCounts, setStatusCounts] = useState<Record<string, number>>({});
+    /*
+     * Counted separately because "overdue" is not a status.
+     *
+     * It is a journey on the road past its expected date, so it cuts across DISPATCHED and
+     * IN_TRANSIT and cannot come out of the status tally. One extra count rather than a guess from
+     * the loaded page, which is what it was.
+     */
+    const [overdueCount, setOverdueCount] = useState(0);
+    const [filterOptions, setFilterOptions] = useState({
+        sources: [] as string[], destinations: [] as string[], couriers: [] as string[],
+    });
+
+    /** The panel's filters as endpoint parameters; blank values are left out entirely. */
+    const filterParams = useMemo(() => {
+        const params: Record<string, any> = {};
+        Object.entries(filters).forEach(([key, value]) => {
+            if (value) params[key] = value;
+        });
+        return params;
+    }, [filters]);
+
+    /**
+     * The tab as a status filter.
+     *
+     * <p>"On the road" spans two statuses, which is why the endpoint takes a list rather than one
+     * value — comma-joined, because that is what Spring binds to a `List<Enum>` without ceremony.
+     */
+    const tabParams = useMemo(() => {
+        if (tab === 'all') return {};
+        if (tab === 'ON_ROAD') return { status: 'DISPATCHED,IN_TRANSIT' };
+        return { status: tab };
+    }, [tab]);
+
     const load = useCallback(async () => {
         setLoading(true);
         try {
-            const res = (await fetchConsignmentsService({ pageSize: 100 })) as any;
-            if (res?.status === 200) setRows(res.data?.content ?? []);
+            const res = (await fetchConsignmentsService({
+                ...filterParams,
+                ...tabParams,
+                pageNumber: page,
+                pageSize: rowsPerPage,
+                sortBy: SORT_FIELDS[sort.column] ?? 'id',
+                sortDirection: sort.order,
+            })) as any;
+
+            if (res?.status === 200) {
+                setRows(res.data?.content ?? []);
+                setTotal(res.data?.totalElements ?? 0);
+            } else {
+                // Services answer `catch (error) { return error }`, so a failure arrives as a value
+                // with no status. Left alone, the previous journeys stayed on screen under the new
+                // filter's chips, looking like a successful match.
+                setRows([]);
+                setTotal(0);
+            }
+
+            // Counted without the tab, so each tab badge shows its own total rather than every tab
+            // but the selected one reading zero.
+            const counted: any = await fetchConsignmentStatusCountsService(filterParams);
+            setStatusCounts(counted?.status === 200 ? (counted.data ?? {}) : {});
+
+            // One row asked for, only the total read — the cheapest way to count a predicate the
+            // status tally cannot express.
+            const late: any = await fetchConsignmentsService({
+                ...filterParams, timeliness: 'overdue', pageNumber: 0, pageSize: 1,
+            });
+            setOverdueCount(late?.status === 200 ? (late.data?.totalElements ?? 0) : 0);
         } finally {
             setLoading(false);
         }
-    }, []);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [filterParams, tabParams, page, rowsPerPage, sort]);
 
     useEffect(() => { load(); }, [load]);
 
-    const visible = useMemo(() => {
-        const byTab = tab === 'all'
-            ? rows
-            : (tab === 'ON_ROAD' ? rows.filter(onRoad) : rows.filter((r) => r.status === tab));
-        return byTab.filter((c) => matchesConsignmentFilters(c, filters));
-    }, [rows, tab, filters]);
+    // From the whole scoped register, and deliberately not narrowed by the active filters: choosing
+    // a source would empty the destination list and the panel could never be widened again.
+    useEffect(() => {
+        fetchConsignmentFilterOptionsService().then((r: any) => {
+            if (r?.status === 200 && r.data) setFilterOptions(r.data);
+        });
+    }, []);
 
-    const filterOptions = useMemo(() => deriveConsignmentFilterOptions(rows), [rows]);
+    // Already filtered, tabbed, ordered and paged by the query that produced them.
+    const visible = rows;
 
-    /** Exports carry what the screen is showing, not the whole unfiltered list. */
-    const handleExport = (fn: (list: IConsignment[]) => void) => {
-        if (visible.length === 0) {
+    /**
+     * Exports cover every match, not the page on screen.
+     *
+     * <p>They ran over the loaded rows, so an export was silently partial — the worst kind, because
+     * the file looks complete.
+     */
+    const handleExport = async (fn: (list: IConsignment[]) => void) => {
+        const res: any = await fetchConsignmentsService({
+            ...filterParams, ...tabParams, pageNumber: 0, pageSize: EXPORT_LIMIT,
+        });
+        const list: IConsignment[] = res?.status === 200 ? (res.data?.content ?? []) : [];
+
+        if (list.length === 0) {
             toast.warning('There are no consignments matching the current filters to export.');
             return;
         }
-        fn(visible);
+        if ((res.data?.totalElements ?? 0) > list.length) {
+            toast.info(`Exporting the first ${list.length.toLocaleString()} of `
+                + `${res.data.totalElements.toLocaleString()} matches. Narrow the filters for the rest.`);
+        }
+        fn(list);
     };
 
+    /** The hero tallies, over the whole filtered register rather than the page. */
     const counts = useMemo(() => ({
-        loading: rows.filter((r) => r.status === 'DRAFT').length,
-        moving: rows.filter(onRoad).length,
-        arrived: rows.filter((r) => r.status === 'ARRIVED').length,
-        /** Landed but not fully handed over — the queue that actually needs someone today. */
-        overdue: rows.filter(isOverdue).length,
-    }), [rows]);
+        loading: statusCounts.DRAFT ?? 0,
+        moving: (statusCounts.DISPATCHED ?? 0) + (statusCounts.IN_TRANSIT ?? 0),
+        arrived: statusCounts.ARRIVED ?? 0,
+        overdue: overdueCount,
+    }), [statusCounts, overdueCount]);
 
-    /** Per-status tallies for the tab badges, counted after the filter panel has had its say. */
-    const filteredRows = useMemo(
-        () => rows.filter((c) => matchesConsignmentFilters(c, filters)),
-        [rows, filters],
+    const tabCounts = statusCounts;
+
+    /** Every match across all statuses — what the "All" tab means now that a page is not the set. */
+    const totalAcrossStatuses = useMemo(
+        () => Object.values(statusCounts).reduce((sum, n) => sum + n, 0),
+        [statusCounts],
     );
-
-    const tabCounts = useMemo(() => filteredRows.reduce((acc: Record<string, number>, r) => {
-        acc[r.status] = (acc[r.status] ?? 0) + 1;
-        return acc;
-    }, {}), [filteredRows]);
 
     const openDetail = async (id: number) => {
         const res = (await fetchConsignmentService(id)) as any;
@@ -373,7 +472,7 @@ const Consignments = () => {
                     }}
                 >
                     {STATUS_TABS.map((t) => {
-                        const n = t.value === 'all' ? filteredRows.length : (tabCounts[t.value] ?? 0);
+                        const n = t.value === 'all' ? totalAcrossStatuses : (tabCounts[t.value] ?? 0);
                         const selected = tab === t.value;
                         return (
                             <Tab
@@ -405,6 +504,14 @@ const Consignments = () => {
                     loading={loading}
                     busyId={busyId}
                     paginationResetKey={`${tab}|${JSON.stringify(filters)}`}
+                    server={{
+                        page,
+                        rowsPerPage,
+                        total,
+                        onPageChange: setPage,
+                        onRowsPerPageChange: (size) => { setRowsPerPage(size); setPage(0); },
+                        onSortChange: (column, order) => { setSort({ column, order }); setPage(0); },
+                    }}
                     onAction={handleRowAction}
                     disableSurface
                     stickyHeader

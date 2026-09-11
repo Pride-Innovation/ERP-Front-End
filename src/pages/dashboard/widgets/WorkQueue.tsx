@@ -27,6 +27,7 @@ import { border, brand, neutral, status, surface } from '../../../utils/tokens';
 import { StatusChip } from '../../../components/layout';
 import { ROUTES } from '../../../core/routes/routes';
 import { IRequest } from '../../request/interface';
+import { requestApproverLabel } from '../../request/approverLabel';
 import { IAsyncData } from '../useDashboardData';
 import WidgetCard from './WidgetCard';
 
@@ -328,14 +329,17 @@ const WorkQueue = ({ requests, limit = 8 }: IWorkQueueProps) => {
                                         <Typography
                                             variant="body2"
                                             sx={{
-                                                color: request.currentApprover ? neutral[700] : neutral[400],
-                                                fontStyle: request.currentApprover ? 'normal' : 'italic',
+                                                // Greyed and italic only when nobody genuinely has it.
+                                                // A unit-routed step has a real holder, so it reads as
+                                                // ordinary text like a named approver does.
+                                                color: requestApproverLabel(request) ? neutral[700] : neutral[400],
+                                                fontStyle: requestApproverLabel(request) ? 'normal' : 'italic',
                                                 maxWidth: 150,
                                             }}
                                             noWrap
-                                            title={personName(request.currentApprover)}
+                                            title={requestApproverLabel(request) ?? personName(null)}
                                         >
-                                            {personName(request.currentApprover)}
+                                            {requestApproverLabel(request) ?? personName(null)}
                                         </Typography>
                                     </TableCell>
 

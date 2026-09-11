@@ -17,6 +17,7 @@ import { camelCaseToWords } from '../../../../utils/helpers';
 import { ICommodity } from '../../../settings/commodity/interface';
 import { IRequest } from '../../interface';
 import { IStepLog, decidedSteps, isHeadOfficeRequest } from './approvalTrail';
+import { requestApproverLabel } from '../../approverLabel';
 
 /** Step decision → [label, background, foreground] for the trail table's decision column. */
 const DECISION_META: Record<string, [string, string, string]> = {
@@ -117,8 +118,17 @@ export const generateApprovalPdf = async (
 
     partyPanel(doc, margin, panelY, panelW, panelH, 'REQUESTED BY', TEAL,
         personName(request.requester ?? request.createdBy), requesterSub);
+    /*
+     * "CURRENTLY WITH" names the unit when the step is routed to one.
+     *
+     * This panel is the whole point of the certificate — it says who holds the request now — and it
+     * printed "No outstanding approver" for one sitting with Admin awaiting acknowledgement. On a
+     * signed document that is not just unhelpful, it is wrong: somebody does hold it.
+     */
+    const heldBy = requestApproverLabel(request);
     partyPanel(doc, margin + panelW + gap, panelY, panelW, panelH, 'CURRENTLY WITH', GOLD,
-        personName(request.currentApprover), request.currentApprover ? 'Pending action' : 'No outstanding approver');
+        heldBy ?? personName(request.currentApprover),
+        heldBy ? 'Pending action' : 'No outstanding approver');
 
     // Forward arrow between the panels, pointing at whoever holds it now.
     const acx = margin + panelW + gap / 2;
