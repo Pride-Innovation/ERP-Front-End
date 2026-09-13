@@ -112,21 +112,32 @@ const AssetUtills = () => {
         }
     }
 
+    /**
+     * Loads assets into the shared engraved-number pool the issuance picker renders from.
+     *
+     * <p>Callers filter by commodity/status and rely on getting *every* match, not a page of them:
+     * the pool feeds an Autocomplete with no paging control behind it. At the old pageSize of 10 an
+     * issuer simply could not see the 11th available monitor except by typing its engraved number.
+     */
     const fetchAllAssets = async (params?: Record<string, any>) => {
         setLoading(true)
         try {
             const response = await fetchRowsService({
                 pageNumber: 0,
-                pageSize: 10,
+                pageSize: 200,
                 endPoint,
                 params
             }) as IAssetsAxiosResponse
 
             if (response.status === 200) {
                 setAssetsEngravedInStore(prev => {
-                    const merged = [...response.data.content, ...prev];
-                    const uniqueByName = Array.from(new Map(merged.map(item => [item.engravedNumber, item])).values());
-                    return uniqueByName;
+                    // Fresh rows last, so they win the de-dupe. The spread used to be the other way
+                    // round, which let a cached asset outrank the server's current view of it — an
+                    // asset issued a moment ago kept its stale "Available for Issuance" copy and
+                    // went on being offered.
+                    const merged = [...prev, ...response.data.content];
+                    const uniqueByEngravedNumber = new Map(merged.map(item => [item.engravedNumber, item]));
+                    return Array.from(uniqueByEngravedNumber.values());
                 });
                 dispatch(listAllAssets(response.data.content));
             }

@@ -10,7 +10,7 @@ import { RequirePermission } from '../../core/permissions';
 import { PERMISSIONS } from '../../core/permissions/constants';
 import { useNavigate } from 'react-router-dom';
 import {
-    alpha, Box, Button, Grid, IconButton, Paper, Stack, Tab, Tabs, Tooltip, Typography,
+    alpha, Box, Button, Chip, Grid, IconButton, Paper, Stack, Tab, Tabs, Tooltip, Typography,
 } from '@mui/material';
 import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
 import AddIcon from '@mui/icons-material/Add';
@@ -26,7 +26,7 @@ import { PageHero, StatTile, EmptyState } from '../../components/layout';
 import { brand, neutral, border, status as statusTokens } from '../../utils/tokens';
 import { ROUTES } from '../../core/routes/routes';
 import ModalComponent from '../../components/modal';
-import { IConsignment, ConsignmentStatus } from './interface';
+import { IConsignment, ConsignmentStatus, consignmentStatusLabels } from './interface';
 import {
     fetchConsignmentsService, fetchConsignmentService, markConsignmentInTransitService,
     fetchConsignmentStatusCountsService, fetchConsignmentFilterOptionsService,
@@ -547,9 +547,27 @@ const Consignments = () => {
             {detailOpen && detail && (
                 <ModalComponent
                     title={`Consignment ${detail.reference ?? `#${detail.id}`}`}
+                    icon={<LocalShippingOutlinedIcon />}
+                    // The route is what identifies a consignment in conversation; the reference
+                    // alone makes the reader open the body to find out which journey this is.
+                    subtitle={`${detail.sourceLocation?.name ?? '—'} → ${detail.destLocation?.name ?? '—'}`
+                        + ` · ${detail.movementCount} movement${detail.movementCount === 1 ? '' : 's'}`}
+                    headerAction={(
+                        <Chip
+                            size="small"
+                            label={consignmentStatusLabels[detail.status]}
+                            sx={{
+                                height: 22, fontSize: '0.68rem', fontWeight: 700,
+                                bgcolor: alpha(brand[500], 0.1), color: brand[700],
+                            }}
+                        />
+                    )}
                     open={detailOpen}
                     handleClose={() => setDetailOpen(false)}
+                    // Wide enough that the journey cards keep their one-line shape, capped so the
+                    // facts grid above them doesn't stretch into four lonely columns on a big screen.
                     width="60%"
+                    maxWidth={980}
                 >
                     <ConsignmentDetail
                         consignment={detail}

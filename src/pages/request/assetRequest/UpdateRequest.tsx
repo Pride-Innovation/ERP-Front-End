@@ -49,10 +49,9 @@ const UpdateRequest = () => {
         filePath: null
     });
 
-    // Load the full commodity catalogue (not the default 9-row page) so every
-    // saved item has a matching option in the "Name" dropdown — otherwise items
-    // outside the first page render blank.
-    useEffect(() => { fetchAllCommodities({ pageSize: 1000 }) }, []);
+    // Load the full commodity catalogue so every saved item has a matching option in
+    // the "Name" dropdown — otherwise items outside the fetched page render blank.
+    useEffect(() => { fetchAllCommodities() }, []);
 
     // Helper function to determine file type from extension
     const getFileType = (fileName: string): 'pdf' | 'word' | 'excel' | 'image' | 'other' => {

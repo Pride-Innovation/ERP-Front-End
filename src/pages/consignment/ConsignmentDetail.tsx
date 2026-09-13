@@ -7,8 +7,8 @@ Managing Director
 
 import { ReactNode, useEffect, useState } from 'react';
 import {
-    alpha, Alert, Autocomplete, Box, Button, Chip, Divider, IconButton, Paper, Stack,
-    Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Tooltip, Typography,
+    alpha, Autocomplete, Box, Button, Chip, IconButton, Paper, Stack,
+    TextField, Tooltip, Typography,
 } from '@mui/material';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import AddIcon from '@mui/icons-material/Add';
@@ -22,10 +22,10 @@ import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 import EventOutlinedIcon from '@mui/icons-material/EventOutlined';
 import WhereToVoteOutlinedIcon from '@mui/icons-material/WhereToVoteOutlined';
 import WarehouseOutlinedIcon from '@mui/icons-material/WarehouseOutlined';
+import NotesOutlinedIcon from '@mui/icons-material/NotesOutlined';
 import { toast } from 'react-toastify';
-import { brand, neutral, border } from '../../utils/tokens';
+import { brand, gold, neutral, border, radii, surface, status as statusTokens } from '../../utils/tokens';
 import { StatusChip } from '../../components/layout';
-import { dataHeadCellSx, dataBodyCellSx, dataRowSx, dataSurfaceSx } from '../../components/tables/dataTableSx';
 import { fetchRowsService, refusal } from '../../core/apis/globalService';
 import { IConsignment, consignmentStatusHelp, consignmentStatusLabels } from './interface';
 import { addMovementToConsignmentService, removeMovementFromConsignmentService } from './service';
@@ -38,6 +38,64 @@ import {
 const fmtDate = (d?: string | null) =>
     d ? new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : null;
 
+/** Tone the whole dialog leans on, so the banner, rail and hero agree on one colour. */
+const STATUS_ACCENT: Record<string, string> = {
+    DRAFT: neutral[400],
+    DISPATCHED: statusTokens.info.main,
+    IN_TRANSIT: gold[500],
+    ARRIVED: statusTokens.success.main,
+    CANCELLED: statusTokens.danger.main,
+};
+
+/**
+ * A titled panel with a tinted header band.
+ *
+ * <p>The dialog was a stack of undifferentiated white boxes; banding each section's head gives the
+ * eye somewhere to land and makes the reading order obvious without adding a single divider.
+ */
+const Section = ({ title, icon, action, children, dense }: {
+    title: string; icon: ReactNode; action?: ReactNode; children: ReactNode; dense?: boolean;
+}) => (
+    <Paper
+        elevation={0}
+        sx={{
+            borderRadius: `${radii.lg}px`,
+            border: `1px solid ${border.subtle}`,
+            overflow: 'hidden',
+            bgcolor: surface.card,
+        }}
+    >
+        <Stack
+            direction="row"
+            alignItems="center"
+            spacing={1}
+            sx={{
+                px: 2,
+                py: 1.25,
+                bgcolor: alpha(brand[500], 0.05),
+                borderBottom: `1px solid ${alpha(brand[500], 0.12)}`,
+            }}
+        >
+            <Box sx={{ display: 'flex', color: brand[600], '& .MuiSvgIcon-root': { fontSize: 16 } }}>{icon}</Box>
+            <Typography
+                sx={{
+                    flex: 1,
+                    fontWeight: 700,
+                    fontSize: '0.72rem',
+                    letterSpacing: '0.07em',
+                    textTransform: 'uppercase',
+                    color: brand[700],
+                }}
+            >
+                {title}
+            </Typography>
+            {action}
+        </Stack>
+        <Box sx={{ p: dense ? 1.25 : 2 }}>{children}</Box>
+    </Paper>
+);
+
+/** Label above value. Used inside the facts grid. */
 const Fact = ({ label, value, icon, mono }: {
     label: string; value?: string | null; icon?: ReactNode; mono?: boolean;
 }) => (
@@ -61,6 +119,108 @@ const Fact = ({ label, value, icon, mono }: {
             }}
         >
             {value || '—'}
+        </Typography>
+    </Box>
+);
+
+/**
+ * The journey itself, drawn rather than written.
+ *
+ * <p>Origin and destination were a single "A → B" string in a four-up fact grid, which is where the
+ * one thing every reader opens this dialog for went to hide. Here it is the first thing on the page,
+ * with the courier riding the dashed line between the two ends.
+ */
+const RouteHero = ({ from, to, courier, accent }: {
+    from?: string | null; to?: string | null; courier?: string | null; accent: string;
+}) => (
+    <Paper
+        elevation={0}
+        sx={{
+            p: { xs: 1.75, sm: 2.25 },
+            borderRadius: `${radii.lg}px`,
+            border: `1px solid ${border.subtle}`,
+            background: `linear-gradient(135deg, ${alpha(brand[500], 0.05)} 0%, ${alpha(gold[500], 0.04)} 100%)`,
+        }}
+    >
+        <Box
+            sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: { xs: 1, sm: 2 },
+                // Wraps rather than squeezes: two long branch names on a narrow dialog stack
+                // instead of crushing the connector to nothing.
+                flexWrap: { xs: 'wrap', sm: 'nowrap' },
+            }}
+        >
+            <Endpoint label="From" name={from} icon={<WarehouseOutlinedIcon />} />
+
+            {/* Connector — dashed road with the courier sitting on it. */}
+            <Box sx={{ flex: '1 1 80px', minWidth: 60, position: 'relative', px: 0.5 }}>
+                <Box sx={{ borderTop: `2px dashed ${alpha(accent, 0.45)}`, mt: courier ? 1.25 : 0 }} />
+                <Box
+                    sx={{
+                        position: 'absolute',
+                        top: courier ? 0 : '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        width: 26,
+                        height: 26,
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        bgcolor: '#fff',
+                        border: `1px solid ${alpha(accent, 0.4)}`,
+                        color: accent,
+                    }}
+                >
+                    <LocalShippingOutlinedIcon sx={{ fontSize: 14 }} />
+                </Box>
+                {courier && (
+                    <Typography
+                        sx={{
+                            mt: 0.75,
+                            textAlign: 'center',
+                            fontSize: '0.65rem',
+                            fontWeight: 700,
+                            color: neutral[500],
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                        }}
+                    >
+                        {courier}
+                    </Typography>
+                )}
+            </Box>
+
+            <Endpoint label="To" name={to} icon={<PlaceOutlinedIcon />} align="right" />
+        </Box>
+    </Paper>
+);
+
+/** One end of the route strip. */
+const Endpoint = ({ label, name, icon, align = 'left' }: {
+    label: string; name?: string | null; icon: ReactNode; align?: 'left' | 'right';
+}) => (
+    <Box sx={{ flex: '1 1 0', minWidth: 0, textAlign: align }}>
+        <Stack
+            direction="row"
+            alignItems="center"
+            spacing={0.5}
+            sx={{ justifyContent: align === 'right' ? 'flex-end' : 'flex-start', mb: 0.35 }}
+        >
+            <Box sx={{ display: 'flex', color: neutral[400], '& .MuiSvgIcon-root': { fontSize: 13 } }}>{icon}</Box>
+            <Typography
+                sx={{ fontSize: '0.6rem', fontWeight: 800, letterSpacing: '0.09em', textTransform: 'uppercase', color: neutral[500] }}
+            >
+                {label}
+            </Typography>
+        </Stack>
+        <Typography
+            sx={{ fontSize: '0.86rem', fontWeight: 700, color: neutral[900], lineHeight: 1.3, wordBreak: 'break-word' }}
+        >
+            {name ?? '—'}
         </Typography>
     </Box>
 );
@@ -157,186 +317,234 @@ const ConsignmentDetail = ({
         }
     };
 
-    return (
-        <Stack spacing={2.5}>
-            <Alert
-                severity={consignment.status === 'ARRIVED' ? 'success' : 'info'}
-                sx={{ borderRadius: 2, '& .MuiAlert-message': { fontSize: '0.82rem' } }}
-            >
-                <strong>{consignmentStatusLabels[consignment.status]}.</strong>{' '}
-                {consignmentStatusHelp[consignment.status]}
-                {consignment.status === 'ARRIVED' && consignment.landingStore?.name && (
-                    <> Goods are in <strong>{consignment.landingStore.name}</strong>; each movement is handed over separately.</>
-                )}
-            </Alert>
+    const accent = STATUS_ACCENT[consignment.status] ?? brand[500];
 
-            <Paper variant="outlined" sx={{ p: 2, borderRadius: 2, borderColor: border.subtle }}>
-                <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr 1fr', sm: 'repeat(4, 1fr)' } }}>
-                    <Fact
-                        label="Route"
-                        icon={<PlaceOutlinedIcon />}
-                        value={`${consignment.sourceLocation?.name ?? '—'} → ${consignment.destLocation?.name ?? '—'}`}
-                    />
-                    <Fact
-                        label="Courier"
-                        icon={<LocalShippingOutlinedIcon />}
-                        value={consignment.courierService ?? consignment.courier?.name}
-                    />
+    return (
+        <Stack spacing={2}>
+            {/* Where this consignment stands, in its own colour. Replaces the stock MUI Alert,
+                which only ever spoke in blue or green and ignored the four states in between. */}
+            <Box
+                sx={{
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: 1.25,
+                    p: 1.5,
+                    borderRadius: `${radii.lg}px`,
+                    bgcolor: alpha(accent, 0.07),
+                    border: `1px solid ${alpha(accent, 0.25)}`,
+                }}
+            >
+                <Box
+                    sx={{
+                        flexShrink: 0, width: 28, height: 28, borderRadius: '50%',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        bgcolor: alpha(accent, 0.15), color: accent,
+                    }}
+                >
+                    <LocalShippingOutlinedIcon sx={{ fontSize: 15 }} />
+                </Box>
+                <Box sx={{ minWidth: 0 }}>
+                    <Typography sx={{ fontSize: '0.82rem', fontWeight: 800, color: neutral[900], lineHeight: 1.4 }}>
+                        {consignmentStatusLabels[consignment.status]}
+                    </Typography>
+                    <Typography sx={{ fontSize: '0.78rem', color: neutral[600], lineHeight: 1.5 }}>
+                        {consignmentStatusHelp[consignment.status]}
+                        {consignment.status === 'ARRIVED' && consignment.landingStore?.name && (
+                            <> Goods are in <strong>{consignment.landingStore.name}</strong>; each movement is handed over separately.</>
+                        )}
+                    </Typography>
+                </Box>
+            </Box>
+
+            <RouteHero
+                from={consignment.sourceLocation?.name}
+                to={consignment.destLocation?.name}
+                courier={consignment.courierService ?? consignment.courier?.name}
+                accent={accent}
+            />
+
+            <Section title="Consignment details" icon={<LocalShippingOutlinedIcon />}>
+                <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr 1fr', sm: 'repeat(3, 1fr)' } }}>
+                    <Fact label="Courier" icon={<LocalShippingOutlinedIcon />} value={consignment.courierService ?? consignment.courier?.name} />
                     <Fact label="Plate" icon={<DirectionsCarOutlinedIcon />} value={consignment.plateNumber} mono />
                     <Fact label="Tracking" icon={<QrCode2OutlinedIcon />} value={consignment.trackingNumber} mono />
-                </Box>
 
-                {/* Dates only appear once there are dates — a draft has no journey to time yet. */}
-                {consignment.status !== 'DRAFT' && (
-                    <>
-                        <Divider sx={{ my: 2, borderColor: border.subtle }} />
-                        <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr 1fr', sm: 'repeat(4, 1fr)' } }}>
+                    {/* Dates only appear once there are dates — a draft has no journey to time yet. */}
+                    {consignment.status !== 'DRAFT' && (
+                        <>
                             <Fact label="Dispatched" icon={<EventOutlinedIcon />} value={fmtDate(consignment.dispatchDate)} />
                             <Fact label="Expected" icon={<EventOutlinedIcon />} value={fmtDate(consignment.expectedDeliveryDate)} />
                             <Fact label="Arrived" icon={<WhereToVoteOutlinedIcon />} value={fmtDate(consignment.arrivalDate)} />
                             <Fact label="Landed in" icon={<WarehouseOutlinedIcon />} value={consignment.landingStore?.name} />
-                        </Box>
-                    </>
-                )}
+                        </>
+                    )}
+                </Box>
 
                 {consignment.remarks && (
-                    <>
-                        <Divider sx={{ my: 2, borderColor: border.subtle }} />
-                        <Fact label="Remarks" value={consignment.remarks} />
-                    </>
+                    <Box
+                        sx={{
+                            mt: 2, p: 1.5, borderRadius: `${radii.md}px`,
+                            border: `1px dashed ${alpha(gold[500], 0.5)}`,
+                            bgcolor: alpha(gold[500], 0.04),
+                            display: 'flex', alignItems: 'flex-start', gap: 1,
+                        }}
+                    >
+                        <NotesOutlinedIcon sx={{ fontSize: 15, color: statusTokens.warning.strong, mt: '1px', flexShrink: 0 }} />
+                        <Typography sx={{ fontSize: '0.78rem', color: neutral[700], lineHeight: 1.5 }}>
+                            <strong>Remarks:</strong> {consignment.remarks}
+                        </Typography>
+                    </Box>
                 )}
-            </Paper>
+            </Section>
 
-            <Box>
-                <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 700, color: neutral[900] }}>
-                        On this journey ({consignment.movementCount})
-                    </Typography>
-                    {consignment.status === 'ARRIVED' && outstandingCount > 0 && (
-                        <Chip
-                            size="small"
-                            label={`${outstandingCount} awaiting hand-over`}
-                            sx={{ fontWeight: 700, fontSize: '0.68rem', bgcolor: alpha('#F59E0B', 0.14), color: '#B45309' }}
-                        />
-                    )}
-                </Stack>
-
+            <Section
+                title={`On this journey (${consignment.movementCount})`}
+                icon={<Inventory2OutlinedIcon />}
+                dense
+                action={consignment.status === 'ARRIVED' && outstandingCount > 0 ? (
+                    <Chip
+                        size="small"
+                        label={`${outstandingCount} awaiting hand-over`}
+                        sx={{ height: 20, fontWeight: 700, fontSize: '0.65rem', bgcolor: alpha(gold[500], 0.16), color: statusTokens.warning.strong }}
+                    />
+                ) : undefined}
+            >
                 {(consignment.movements?.length ?? 0) === 0 ? (
-                    <Typography variant="body2" sx={{ color: neutral[500] }}>
-                        Nothing loaded yet. Add the approved movements heading to {consignment.destLocation?.name ?? 'this destination'}.
-                    </Typography>
+                    <Box sx={{ py: 3, textAlign: 'center' }}>
+                        <Inventory2OutlinedIcon sx={{ fontSize: 26, color: neutral[300], mb: 0.5 }} />
+                        <Typography variant="body2" sx={{ color: neutral[500], fontSize: '0.8rem' }}>
+                            Nothing loaded yet. Add the approved movements heading to{' '}
+                            {consignment.destLocation?.name ?? 'this destination'}.
+                        </Typography>
+                    </Box>
                 ) : (
-                    <Paper elevation={0} sx={dataSurfaceSx}>
-                        <TableContainer>
-                            <Table size="small">
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell sx={{ ...dataHeadCellSx, minWidth: 130 }}>Movement</TableCell>
-                                        <TableCell sx={{ ...dataHeadCellSx, minWidth: 150 }}>Type</TableCell>
-                                        <TableCell sx={{ ...dataHeadCellSx, minWidth: 200 }}>From → For</TableCell>
-                                        <TableCell sx={{ ...dataHeadCellSx, minWidth: 80 }} align="center">Items</TableCell>
-                                        <TableCell sx={{ ...dataHeadCellSx, minWidth: 150 }}>Status</TableCell>
-                                        <TableCell sx={{ ...dataHeadCellSx, minWidth: 90 }} align="right">Actions</TableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {consignment.movements!.map((m, i) => (
-                                        <TableRow key={m.id} hover={false} sx={dataRowSx(i)}>
-                                            <TableCell sx={dataBodyCellSx}>
-                                                <Stack spacing={0.15}>
-                                                    <Typography variant="caption" sx={{ fontWeight: 700, color: brand[600], fontFamily: 'monospace' }}>
-                                                        #{m.id}
-                                                    </Typography>
-                                                    {m.requestId && (
-                                                        <Typography variant="caption" sx={{ color: neutral[400], fontSize: '0.6rem', fontFamily: 'monospace' }}>
-                                                            REQ-{m.requestId}
-                                                        </Typography>
-                                                    )}
-                                                </Stack>
-                                            </TableCell>
-                                            <TableCell sx={dataBodyCellSx}>
-                                                <Typography variant="caption" sx={{ color: neutral[700], fontWeight: 500 }}>
-                                                    {movementTypeLabel(m.movementType ?? undefined)}
+                    /*
+                     * A stacked list, not a table.
+                     *
+                     * Six columns of minimum widths added up to ~800px, wider than this dialog's
+                     * body, so the table scrolled sideways. Each movement is now one card that
+                     * reflows: the identity/route block flexes and the status-and-actions cluster
+                     * drops beneath it when the dialog is narrow, so nothing ever overflows.
+                     */
+                    <Stack spacing={0.75}>
+                        {consignment.movements!.map((m) => {
+                            const handedOver = m.status === 'COMPLETED';
+                            const awaiting = !handedOver && consignment.status === 'ARRIVED';
+
+                            return (
+                                <Box
+                                    key={m.id}
+                                    sx={{
+                                        display: 'flex',
+                                        flexWrap: 'wrap',
+                                        alignItems: 'center',
+                                        gap: 1.25,
+                                        px: 1.5,
+                                        py: 1.25,
+                                        borderRadius: `${radii.md}px`,
+                                        bgcolor: surface.card,
+                                        border: `1px solid ${border.subtle}`,
+                                        transition: 'border-color 0.15s, background-color 0.15s',
+                                        '&:hover': {
+                                            borderColor: alpha(brand[500], 0.4),
+                                            bgcolor: alpha(brand[500], 0.025),
+                                        },
+                                    }}
+                                >
+                                    {/* Identity and route — flexes, and wraps internally before it clips. */}
+                                    <Box sx={{ flex: '1 1 240px', minWidth: 0 }}>
+                                        <Stack direction="row" alignItems="center" spacing={0.75} sx={{ flexWrap: 'wrap', rowGap: 0.25 }}>
+                                            <Typography sx={{ fontWeight: 700, color: brand[600], fontFamily: 'monospace', fontSize: '0.78rem' }}>
+                                                #{m.id}
+                                            </Typography>
+                                            {m.requestId && (
+                                                <Typography sx={{ color: neutral[400], fontSize: '0.63rem', fontFamily: 'monospace' }}>
+                                                    REQ-{m.requestId}
                                                 </Typography>
-                                            </TableCell>
-                                            <TableCell sx={dataBodyCellSx}>
-                                                <Stack direction="row" alignItems="center" spacing={0.75} sx={{ minWidth: 0 }}>
-                                                    <Typography variant="caption" sx={{ color: neutral[600] }} noWrap>
-                                                        {m.sourceStoreName ?? '—'}
-                                                    </Typography>
-                                                    <ArrowForwardIcon sx={{ fontSize: 12, color: neutral[300], flexShrink: 0 }} />
-                                                    <Typography variant="caption" sx={{ fontWeight: 600, color: neutral[800] }} noWrap>
-                                                        {m.recipientName ?? m.destinationName ?? '—'}
-                                                    </Typography>
-                                                </Stack>
-                                            </TableCell>
-                                            <TableCell sx={dataBodyCellSx} align="center">
-                                                <Box
-                                                    sx={{
-                                                        display: 'inline-flex', alignItems: 'center', gap: 0.5,
-                                                        px: 0.9, height: 22, borderRadius: '6px',
-                                                        bgcolor: alpha(brand[500], 0.08), color: brand[700],
-                                                        fontSize: '0.7rem', fontWeight: 700,
-                                                    }}
+                                            )}
+                                            <Box sx={{ width: '3px', height: '3px', borderRadius: '50%', bgcolor: neutral[300] }} />
+                                            <Typography sx={{ color: neutral[600], fontWeight: 500, fontSize: '0.76rem' }}>
+                                                {movementTypeLabel(m.movementType ?? undefined)}
+                                            </Typography>
+                                        </Stack>
+
+                                        <Stack
+                                            direction="row"
+                                            alignItems="center"
+                                            spacing={0.6}
+                                            sx={{ mt: 0.35, flexWrap: 'wrap', rowGap: 0.2 }}
+                                        >
+                                            <Typography sx={{ color: neutral[500], fontSize: '0.73rem' }}>
+                                                {m.sourceStoreName ?? '—'}
+                                            </Typography>
+                                            <ArrowForwardIcon sx={{ fontSize: 11, color: neutral[300], flexShrink: 0 }} />
+                                            <Typography sx={{ fontWeight: 600, color: neutral[800], fontSize: '0.73rem' }}>
+                                                {m.recipientName ?? m.destinationName ?? '—'}
+                                            </Typography>
+                                        </Stack>
+                                    </Box>
+
+                                    {/* Count, status, actions — one cluster, so it drops as a unit. */}
+                                    <Stack direction="row" alignItems="center" spacing={1} sx={{ flexShrink: 0, ml: 'auto' }}>
+                                        <Tooltip title={`${m.itemCount} item${m.itemCount === 1 ? '' : 's'}`} arrow>
+                                            <Box
+                                                sx={{
+                                                    display: 'inline-flex', alignItems: 'center', gap: 0.4,
+                                                    px: 0.9, height: 22, borderRadius: '6px',
+                                                    bgcolor: alpha(brand[500], 0.08), color: brand[700],
+                                                    fontSize: '0.7rem', fontWeight: 700,
+                                                }}
+                                            >
+                                                <Inventory2OutlinedIcon sx={{ fontSize: 12 }} />
+                                                {m.itemCount}
+                                            </Box>
+                                        </Tooltip>
+
+                                        {/* After arrival the only distinction that matters is whether this
+                                            one has reached its recipient yet. */}
+                                        {handedOver ? (
+                                            <StatusChip label="Handed over" tone="success" />
+                                        ) : awaiting ? (
+                                            <StatusChip label="Awaiting hand-over" tone="pending" />
+                                        ) : (
+                                            <StatusChip label={statusLabel(m.status ?? undefined)} tone={statusTone(m.status ?? undefined)} />
+                                        )}
+
+                                        <Stack direction="row" spacing={0.25}>
+                                            <Tooltip title="Open movement" arrow>
+                                                <IconButton
+                                                    size="small" onClick={() => onOpenMovement(m.id)}
+                                                    sx={{ width: 26, height: 26, color: brand[600], '&:hover': { bgcolor: alpha(brand[500], 0.1) } }}
                                                 >
-                                                    <Inventory2OutlinedIcon sx={{ fontSize: 12 }} />
-                                                    {m.itemCount}
-                                                </Box>
-                                            </TableCell>
-                                            <TableCell sx={dataBodyCellSx}>
-                                                {/* After arrival the only distinction that matters is whether this
-                                                    one has reached its recipient yet. */}
-                                                {m.status === 'COMPLETED' ? (
-                                                    <StatusChip label="Handed over" tone="success" />
-                                                ) : consignment.status === 'ARRIVED' ? (
-                                                    <StatusChip label="Awaiting hand-over" tone="pending" />
-                                                ) : (
-                                                    <StatusChip label={statusLabel(m.status ?? undefined)} tone={statusTone(m.status ?? undefined)} />
-                                                )}
-                                            </TableCell>
-                                            <TableCell sx={dataBodyCellSx} align="right">
-                                                <Stack direction="row" spacing={0.25} justifyContent="flex-end">
-                                                    <Tooltip title="Open movement" arrow>
+                                                    <OpenInNewIcon sx={{ fontSize: 15 }} />
+                                                </IconButton>
+                                            </Tooltip>
+                                            {editable && (
+                                                <Tooltip title="Take off this consignment" arrow>
+                                                    <span>
                                                         <IconButton
-                                                            size="small" onClick={() => onOpenMovement(m.id)}
-                                                            sx={{ width: 26, height: 26, color: brand[600], '&:hover': { bgcolor: alpha(brand[500], 0.1) } }}
+                                                            size="small" disabled={busy} onClick={() => remove(m.id)}
+                                                            sx={{ width: 26, height: 26, color: '#DC2626', '&:hover': { bgcolor: alpha('#DC2626', 0.1) } }}
                                                         >
-                                                            <OpenInNewIcon sx={{ fontSize: 15 }} />
+                                                            <DeleteOutlineIcon sx={{ fontSize: 15 }} />
                                                         </IconButton>
-                                                    </Tooltip>
-                                                    {editable && (
-                                                        <Tooltip title="Take off this consignment" arrow>
-                                                            <span>
-                                                                <IconButton
-                                                                    size="small" disabled={busy} onClick={() => remove(m.id)}
-                                                                    sx={{ width: 26, height: 26, color: '#DC2626', '&:hover': { bgcolor: alpha('#DC2626', 0.1) } }}
-                                                                >
-                                                                    <DeleteOutlineIcon sx={{ fontSize: 15 }} />
-                                                                </IconButton>
-                                                            </span>
-                                                        </Tooltip>
-                                                    )}
-                                                </Stack>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
-                    </Paper>
+                                                    </span>
+                                                </Tooltip>
+                                            )}
+                                        </Stack>
+                                    </Stack>
+                                </Box>
+                            );
+                        })}
+                    </Stack>
                 )}
-            </Box>
+            </Section>
 
             {editable && (
-                <Paper
-                    variant="outlined"
-                    sx={{ p: 2, borderRadius: 2, borderColor: alpha(brand[500], 0.25), bgcolor: alpha(brand[500], 0.02) }}
-                >
-                    <Stack direction="row" alignItems="center" spacing={0.75} sx={{ mb: 1.25 }}>
-                        <AddIcon sx={{ fontSize: 16, color: brand[600] }} />
-                        <Typography variant="subtitle2" sx={{ fontWeight: 700, color: neutral[900] }}>
-                            Load a movement
-                        </Typography>
+                <Section
+                    title="Load a movement"
+                    icon={<AddIcon />}
+                    action={(
                         <Chip
                             size="small"
                             label={`${loadable.length} available`}
@@ -345,7 +553,8 @@ const ConsignmentDetail = ({
                                 bgcolor: alpha(brand[500], 0.1), color: brand[700],
                             }}
                         />
-                    </Stack>
+                    )}
+                >
                     <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} alignItems="flex-start">
                         <Autocomplete
                             sx={{ flex: 1, width: '100%' }}
@@ -404,7 +613,7 @@ const ConsignmentDetail = ({
                             Load
                         </Button>
                     </Stack>
-                </Paper>
+                </Section>
             )}
         </Stack>
     );

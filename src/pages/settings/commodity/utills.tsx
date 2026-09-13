@@ -35,9 +35,22 @@ const CommodityUtills = () => {
     const handleClose = () => setOpen(false);
     useEffect(() => { fetchAllAssetTypes() }, []);
 
+    /**
+     * Default page size is sized for the *dropdown* callers, not for a paged list.
+     * Every caller that actually pages (Settings -> Commodities) passes its own
+     * pageNumber/pageSize, so this default only ever serves selects that need the
+     * whole set at once. It used to be 9, which silently truncated every commodity
+     * dropdown in the app to the first nine rows by id -- "Accessories e.g. Mouse,
+     * Keyboard, External connectors etc." is the 15th Computers commodity and so
+     * could never be picked on the create-request form.
+     *
+     * 500 comfortably clears the ~90 seeded commodities and any realistic estate. If a
+     * catalogue ever outgrows it these selects need a searchable/async control, not a
+     * bigger number — a plain Select with 500 rows is already at its usable limit.
+     */
     const fetchAllCommodities = async ({
         pageNumber = 0,
-        pageSize = 9,
+        pageSize = 500,
         name,
         groupName,
         assetTypeId,

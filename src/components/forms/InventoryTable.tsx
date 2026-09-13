@@ -75,6 +75,36 @@ const selectSx = {
     '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: PRIMARY_COLOR, borderWidth: 1.5 },
 };
 
+/**
+ * Commodity names run long ("Accessories e.g. Mouse, Keyboard, External connectors etc."),
+ * and an uncapped menu stretches to the widest one — overflowing the viewport on a laptop.
+ * Cap the popup and ellipsize each row; the full name stays readable via the tooltip.
+ */
+const menuProps = {
+    PaperProps: {
+        sx: {
+            maxWidth: 380,
+            maxHeight: 320,
+        },
+    },
+};
+
+/** One line, clipped with an ellipsis — used for both menu rows and the closed field. */
+const truncatedTextSx = {
+    display: 'block',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+};
+
+/** One selectable row in the item "Name" menu, carrying everything a pick needs to fill a row. */
+interface IItemOption {
+    name: string;
+    groupName: string;
+    assetTypeId: number | string;
+    commodityId: number;
+}
+
 const tableHeaders = [
     {
         id: 'assetType',
@@ -168,11 +198,20 @@ const InventoryTable = ({ issue, title, lineStatus }: {
     lineStatus?: (row: RowData) => IInventoryLineStatus | null;
 }) => {
     const { fetchAllCommodities } = CommodityUtills();
-    const [itemOptions, setItemOptions] = useState<{ name: string; groupName: string, assetTypeId: number | string }[]>([]);
+    const [itemOptions, setItemOptions] = useState<IItemOption[]>([]);
     const { rows, setRows, setAssetType } = useContext(RequestContext);
     const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore);
     const { commodities } = useSelector((state: RootState) => state.CommodityStore);
     const [recentlyAdded, setRecentlyAdded] = useState<number | null>(null);
+
+    /**
+     * The commodity options belonging to one category. Ids arrive as a number from the store but
+     * are held as a string on the row, so compare them stringified rather than with `===`.
+     */
+    const optionsForAssetType = (assetTypeId: RowData['assetTypeId']) => {
+        if (assetTypeId === undefined || assetTypeId === null || assetTypeId === '') return [];
+        return itemOptions.filter(option => String(option.assetTypeId) === String(assetTypeId));
+    };
 
     const handleInputChange = (id: number, field: keyof RowData, value: any) => {
         if (field === 'quantity' && value < 0) {
@@ -199,19 +238,28 @@ const InventoryTable = ({ issue, title, lineStatus }: {
     };
 
     const handleNameChange = (id: number, value: string) => {
-        const selectedItem = commodities.find(item => item.name === value);
+        const row = rows.find(r => r.id === id);
+        // Resolve against the very list the menu was rendered from, scoped to this row's
+        // category. Looking the name up in the global `commodities` store instead meant a
+        // name shared by two categories resolved to whichever was fetched first, and a name
+        // no longer in the store resolved to nothing — and the old `if (!selectedItem) return`
+        // then made the click a silent no-op with no feedback at all.
+        const selectedItem = optionsForAssetType(row?.assetTypeId).find(item => item.name === value);
 
-        if (!selectedItem) return;
+        if (!selectedItem) {
+            console.warn(`No commodity option matched "${value}" for asset type ${row?.assetTypeId}`);
+            return;
+        }
 
-        const updatedRows = rows.map(row =>
-            row.id === id
+        const updatedRows = rows.map(r =>
+            r.id === id
                 ? {
-                    ...row,
+                    ...r,
                     name: value,
                     groupName: selectedItem.groupName,
-                    commodityId: selectedItem.id as number,
+                    commodityId: selectedItem.commodityId,
                 }
-                : row
+                : r
         );
         setRows(updatedRows);
     };
@@ -238,13 +286,18 @@ const InventoryTable = ({ issue, title, lineStatus }: {
             const options = commodities.map((item: any) => ({
                 name: item.name,
                 groupName: item.groupName,
-                assetTypeId: item?.assetType?.id
+                assetTypeId: item?.assetType?.id,
+                commodityId: item.id as number,
             }));
 
             setItemOptions(prev => {
-                const merged = [...options, ...prev];
-                const uniqueByName = Array.from(new Map(merged.map(item => [item.name, item])).values());
-                return uniqueByName;
+                // Key on category *and* name. Keying on name alone collapsed a name that exists
+                // under two categories into a single entry, which then carried one category's id
+                // and vanished from the other's menu. Fresh options are appended last so they win
+                // over the stale copy of the same key.
+                const merged = [...prev, ...options];
+                const uniqueByKey = new Map(merged.map(item => [`${item.assetTypeId}::${item.name}`, item]));
+                return Array.from(uniqueByKey.values());
             });
         }
     }, [commodities]);
@@ -402,10 +455,13 @@ const InventoryTable = ({ issue, title, lineStatus }: {
                                             displayEmpty
                                             size="small"
                                             sx={selectSx}
+                                            MenuProps={menuProps}
                                         >
                                             <MenuItem value="" disabled><em>Select Type</em></MenuItem>
                                             {assetTypes.map((assetTyp) => (
-                                                <MenuItem key={assetTyp.id} value={assetTyp.id}>{assetTyp.name}</MenuItem>
+                                                <MenuItem key={assetTyp.id} value={assetTyp.id} sx={truncatedTextSx} title={assetTyp.name}>
+                                                    {assetTyp.name}
+                                                </MenuItem>
                                             ))}
                                         </Select>
                                     </TableCell>
@@ -423,15 +479,39 @@ const InventoryTable = ({ issue, title, lineStatus }: {
                                                 ...selectSx,
                                                 '&.Mui-disabled': { bgcolor: '#F8FAFC' },
                                             }}
+                                            MenuProps={menuProps}
+                                            /* renderValue keeps the closed field a single ellipsised line and
+                                               hangs the full name off a tooltip, so a long commodity name stays
+                                               readable without widening the column. */
+                                            renderValue={(selected) => {
+                                                const picked = selected as string;
+                                                if (!picked) {
+                                                    return (
+                                                        <Box component="em" sx={{ color: neutral[400] }}>
+                                                            {row.assetTypeId ? 'Select Item' : 'Select type first'}
+                                                        </Box>
+                                                    );
+                                                }
+                                                return (
+                                                    <Tooltip title={picked} placement="top-start">
+                                                        <Box component="span" sx={truncatedTextSx}>{picked}</Box>
+                                                    </Tooltip>
+                                                );
+                                            }}
                                         >
                                             <MenuItem value="" disabled>
                                                 <em>{row.assetTypeId ? 'Select Item' : 'Select type first'}</em>
                                             </MenuItem>
-                                            {itemOptions
-                                                .filter((ele) => ele.assetTypeId === row.assetTypeId)
-                                                .map((item) => (
-                                                    <MenuItem key={item.name} value={item.name}>{item.name}</MenuItem>
-                                                ))}
+                                            {optionsForAssetType(row.assetTypeId).map((item) => (
+                                                <MenuItem
+                                                    key={item.commodityId ?? item.name}
+                                                    value={item.name}
+                                                    sx={truncatedTextSx}
+                                                    title={item.name}
+                                                >
+                                                    {item.name}
+                                                </MenuItem>
+                                            ))}
                                         </Select>
                                     </TableCell>
 

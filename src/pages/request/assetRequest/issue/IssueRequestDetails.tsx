@@ -7,6 +7,7 @@ Managing Director
 
 import {
     ReactNode,
+    useCallback,
     useContext,
     useEffect,
     useRef,
@@ -50,6 +51,7 @@ import {
     findAssetRequestByIDService,
     issueCommodities
 } from "../service";
+import { refusal } from "../../../../core/apis/globalService";
 import {
     validateAssetsOfItems,
     validateCommodityQuantities,
@@ -158,7 +160,22 @@ const HeroFact = ({
 const IssueRequestDetails = () => {
     const [loading, setLoading] = useState(true);
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
-    const { rows, setRows, setAssetType } = useContext(RequestContext);
+    const { rows, setRows, setAssetType, setAssetsEngravedInStore } = useContext(RequestContext);
+
+    /**
+     * Empty the shared engraved-number pool.
+     *
+     * <p>`assetsEngravedInStore` hangs off the app-root RequestContext, so it outlives this page and
+     * every navigation in the session, and `fetchAllAssets` only ever appends to it. Without this
+     * reset an asset issued on one request stayed in the pool and was still offered on the next
+     * request's picker — the server refused it, correctly, but only after the issuer had picked it.
+     * Clearing on mount means each issuance starts from what the server says is available now.
+     */
+    const resetAssetPool = useCallback(
+        () => setAssetsEngravedInStore([]),
+        [setAssetsEngravedInStore],
+    );
+
     const [request, setRequest] = useState<IRequest>({} as IRequest)
     const [comment, setComment] = useState('');
     const { id } = useParams<{ id: string }>();
@@ -185,6 +202,11 @@ const IssueRequestDetails = () => {
         if (seededRef.current) return;
         seededRef.current = true;
 
+        // Before the rows — and therefore the engraved-number pickers — exist. Resetting here
+        // rather than in a mount effect keeps the ordering explicit: child effects run before
+        // parent ones, so a mount effect would race the very fetches it is meant to precede.
+        resetAssetPool();
+
         const seeded: RowData[] = lines.map((l, i) => ({
             id: Date.now() + i,
             name: l.commodity.name,
@@ -202,7 +224,7 @@ const IssueRequestDetails = () => {
         // Load the commodity options for every seeded category so the item dropdowns render.
         const typeIds = Array.from(new Set(seeded.map((r) => r.assetTypeId).filter(Boolean)));
         for (const tid of typeIds) {
-            await fetchAllCommodities({ assetTypeId: tid as unknown as number, pageSize: 100 });
+            await fetchAllCommodities({ assetTypeId: tid as unknown as number });
         }
     };
 
@@ -300,8 +322,22 @@ const IssueRequestDetails = () => {
                     navigate(ROUTES.REQUEST);
                     return;
                 }
+
+                // Anything that is not a 201 is a refusal. `issueCommodities` answers
+                // `catch (error) { return error }`, so a 400 never throws — it arrives here as a
+                // value with no status, and the old code fell straight through the `catch` and
+                // off the end of the function without a single toast. The issuer clicked "Issue",
+                // nothing moved, and the server's reason (e.g. "Dell Monitor [id=42] — already
+                // issued and awaiting delivery") was discarded. Surface it instead.
+                toast.error(refusal(response, "Failed to issue this request. Please try again."));
+
+                // The refusal is usually "this asset is no longer available" — someone else issued
+                // it, or this picker was showing a stale entry. Re-read the pool so the list the
+                // issuer retries from is the current one.
+                resetAssetPool();
             } catch (error) {
-                console.error(error)
+                console.error(error);
+                toast.error(refusal(error, "Failed to issue this request. Please try again."));
             }
 
         } else {
