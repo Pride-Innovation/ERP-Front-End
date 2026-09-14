@@ -160,20 +160,25 @@ const HeroFact = ({
 const IssueRequestDetails = () => {
     const [loading, setLoading] = useState(true);
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
-    const { rows, setRows, setAssetType, setAssetsEngravedInStore } = useContext(RequestContext);
+    const { rows, setRows, setAssetType, setIssuableAssets } = useContext(RequestContext);
 
     /**
-     * Empty the shared engraved-number pool.
+     * Empty the issuable-asset pool.
      *
-     * <p>`assetsEngravedInStore` hangs off the app-root RequestContext, so it outlives this page and
-     * every navigation in the session, and `fetchAllAssets` only ever appends to it. Without this
-     * reset an asset issued on one request stayed in the pool and was still offered on the next
-     * request's picker — the server refused it, correctly, but only after the issuer had picked it.
-     * Clearing on mount means each issuance starts from what the server says is available now.
+     * <p>`issuableAssets` hangs off the app-root RequestContext, so it outlives this page and every
+     * navigation in the session. Without this reset an asset issued on one request stayed in the
+     * pool and was still offered on the next request's picker — the server refused it, correctly,
+     * but only after the issuer had picked it.
+     *
+     * <p>Clearing is now enough on its own, where it used not to be: each picker re-reads its
+     * commodity when its dropdown opens, so an emptied pool refills from the server at the moment
+     * somebody looks. That is what makes the reset after a refusal below do what its comment always
+     * claimed — it cleared the stale entry and then nothing re-read it, leaving the list empty until
+     * a row happened to change.
      */
     const resetAssetPool = useCallback(
-        () => setAssetsEngravedInStore([]),
-        [setAssetsEngravedInStore],
+        () => setIssuableAssets({}),
+        [setIssuableAssets],
     );
 
     const [request, setRequest] = useState<IRequest>({} as IRequest)

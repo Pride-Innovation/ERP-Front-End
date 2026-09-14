@@ -19,7 +19,7 @@ import UserUtils from "../users/utils";
 import BranchUtills from "../settings/branch/utills";
 import SupplierUtills from "../settings/suppliers/Utills";
 import { fetchRowsService } from "../../core/apis/globalService";
-import { IAssetsAxiosResponse } from "./interface";
+import { IAsset, IAssetsAxiosResponse } from "./interface";
 import { useDispatch } from "react-redux";
 import { listAllAssets } from "./slice";
 import { RequestContext } from "../../context/request/RequestContext";
@@ -33,7 +33,7 @@ const AssetUtills = () => {
     const [loading, setLoading] = useState<boolean>(false);
     const endPoint: string = "assets";
     const dispatch = useDispatch<AppDispatch>();
-    const { setAssetsEngravedInStore } = useContext(RequestContext);
+    const { setIssuableAssets } = useContext(RequestContext);
 
     const { fetchInventory } = InventoryUtills();
     const { fetchAllUsers } = UserUtils();
@@ -130,16 +130,40 @@ const AssetUtills = () => {
             }) as IAssetsAxiosResponse
 
             if (response.status === 200) {
-                setAssetsEngravedInStore(prev => {
-                    // Fresh rows last, so they win the de-dupe. The spread used to be the other way
-                    // round, which let a cached asset outrank the server's current view of it — an
-                    // asset issued a moment ago kept its stale "Available for Issuance" copy and
-                    // went on being offered.
-                    const merged = [...prev, ...response.data.content];
-                    const uniqueByEngravedNumber = new Map(merged.map(item => [item.engravedNumber, item]));
-                    return Array.from(uniqueByEngravedNumber.values());
-                });
-                dispatch(listAllAssets(response.data.content));
+                const fresh = response.data.content;
+                const commodityId = params?.commodityId as number | undefined;
+
+                /*
+                 * A commodity's bucket is replaced by the query that covers it, not merged into.
+                 *
+                 * These queries all carry `assetStatusId = Available for Issuance`, so an asset that
+                 * has been issued since the last look does not come back — and under the old
+                 * append-only merge it therefore stayed forever, because nothing can overwrite a row
+                 * that is no longer in any result. Replacing is the only operation that can remove
+                 * it.
+                 *
+                 * A *search* is the one exception: it is narrowed by engraved number, so its result
+                 * is a slice of the commodity rather than the whole of it, and treating that slice
+                 * as the new truth would discard everything the user had not typed. Those merge, and
+                 * the fresh copy still wins per id.
+                 *
+                 * Keyed by `id`, not `engravedNumber`: the id is the identity the server enforces
+                 * on, and two assets awaiting completion both carry a blank engraved number, which
+                 * collapsed them into one entry.
+                 */
+                if (commodityId != null) {
+                    const isSearch = Boolean(params?.engravedNumber);
+                    setIssuableAssets(prev => {
+                        const base = isSearch ? (prev[commodityId] ?? []) : [];
+                        const byId = new Map<number, IAsset>();
+                        [...base, ...fresh].forEach(asset => {
+                            if (asset?.id != null) byId.set(asset.id as number, asset);
+                        });
+                        return { ...prev, [commodityId]: Array.from(byId.values()) };
+                    });
+                }
+
+                dispatch(listAllAssets(fresh));
             }
         } catch (error) {
             console.log(error)

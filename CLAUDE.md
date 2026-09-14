@@ -841,6 +841,72 @@ holder of `READ_REQUEST` could read every request in the bank by id.
 (`READ`/`CREATE`/`UPDATE_REQUEST`, `ISSUE_ITEMS`), and `canEditRequest` requires `isRequester` — stricter
 than the backend guard, which is the safe direction.
 
+### The engraved-number picker re-offered what you had just picked
+
+Three faults in a closed loop, and the loop is why it looked so obviously broken.
+
+**1. The Autocomplete had no identity rule.** `filterSelectedOptions` was set but
+`isOptionEqualToValue` was not, so MUI compared options to the selected value by **reference**.
+
+**2. Every fetch replaced the option objects.** `fetchAllAssets` rebuilt the pool wholesale, so the
+asset you had picked was still there — as a *different object with the same id*, which reference
+equality cannot match. (MUI says so out loud: *"The value provided to Autocomplete is invalid"*.)
+
+**3. Picking an item triggered a fetch.** `addEngravedNumberListToRow` calls `setRows`, which mints a
+new `row` object, and the picker's effect was keyed on `[row, …]`. So **selecting an asset refetched
+the pool, replaced its identity, and put it straight back in the dropdown.**
+
+The effect is now keyed on the values the query is actually built from (`commodityId`, `assetTypeId`,
+`groupName`), so a selection no longer refetches, and the identity rule closes the other half.
+
+*The general shape:* **an effect keyed on an object re-runs whenever anything in that object
+changes** — including the field the effect's own output writes. Key on the values the work depends
+on, not on the container they arrive in.
+
+**Assets taken on another line are now hidden too.** `filterSelectedOptions` only hides what *this*
+picker holds, so two lines of the same commodity each offered the whole pool. It was caught —
+`validateAssetsOfItems` de-dupes across rows, and `validateAssetsReadyForIssuance` refuses repeats
+within one payload — but only at submit, after the issuer had built the whole issuance around a
+choice that was never available.
+
+**The pool is bucketed by commodity and replaced, not accumulated.** It was one flat array that
+`fetchAllAssets` only ever appended to. Every query filters to "Available for Issuance", so the
+moment an asset is issued it stops coming back — **and an entry that never returns can never be
+overwritten.** It simply stayed and went on being offered. The de-dupe there was written to fix
+exactly that and could not: a row that has left the result set wins nothing by being merged last.
+Bucketing is what makes replacement possible, since a single array cannot be replaced by a query
+covering one commodity — the flat shape is what forced the pool to be additive, and additive is what
+made it stale. Keyed on `id` rather than `engravedNumber`, which two assets awaiting completion both
+leave blank.
+
+A *search* still merges rather than replaces: it is narrowed by engraved number, so its result is a
+slice of the commodity and treating it as the new truth would discard everything the user had not
+typed.
+
+**And the list is re-read when the dropdown opens.** Someone else can issue an asset while the form
+sits open. Asking again at the moment of choosing is also what finally makes the post-refusal
+`resetAssetPool()` do what its comment claimed — it used to clear the stale entry and then nothing
+re-read it, leaving the dropdown empty until a row happened to change.
+
+**What was already right, and worth not re-litigating:** the server is the authority and it holds.
+`validateAssetsReadyForIssuance` refuses anything not "Available for Issuance" and names the reason
+("already issued and awaiting delivery"), refuses repeats inside one payload, and `applyAssetIssuance`
+stamps **Issued** for same- *and* cross-location issuance — so an asset leaves the pool when it is
+issued, not when it is received. None of the above could cause a double issuance; it made the picker
+promise things the server would then refuse.
+
+**Four live rows predate that last fix and still read wrong.** Measured: assets 252, 403 and 405 sit
+in the courier store *"Safe Boda — In Transit"* on movement 3 (`ISSUANCE_FULFILLMENT`, still
+`IN_TRANSIT`, request 14) yet carry status `issuanceAvailable`; 453 is the same story from request 15.
+Asset 403 was issued **twice** — requests 14 and 15 — which is precisely what the old cross-location
+behaviour allowed. The current code cannot reproduce it, but **the guard trusts the status and the
+status is lying**, so those four will still be offered and still be accepted. That is a data repair,
+not a code change, and it is left for a decision rather than done quietly.
+
+The call-site comment in `IssuanceService` still described the old behaviour — "cross-location assets
+are left untouched here" — while the method beside it did the opposite. Corrected, because that is
+the comment someone reads before "restoring" the behaviour that caused this.
+
 ## Password reset worked exactly once per user
 
 `PasswordReset` maps `user` as `@OneToOne`, so Hibernate makes `user_id` **unique**. `saveNewPassword`

@@ -20,7 +20,7 @@ import { DropdownPopper, DropdownPaper } from './modalChrome';
 import { dataBodyCellSx } from '../tables/dataTableSx';
 import { brand, neutral, border, status as statusTokens } from '../../utils/tokens';
 import { RequestContext } from '../../context/request/RequestContext';
-import { useContext, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { RowData } from './interface';
 import AssetUtills from '../../pages/assets/Utills';
@@ -34,7 +34,7 @@ const FilterEngravedNumbers = ({ row }: { row: RowData }) => {
     const { fetchAllAssets } = AssetUtills();
     const {
         assetType,
-        assetsEngravedInStore,
+        issuableAssets,
         rows,
         setRows
     } = useContext(RequestContext);
@@ -53,39 +53,74 @@ const FilterEngravedNumbers = ({ row }: { row: RowData }) => {
     const [inputValue, setInputValue] = useState<string>('');
     const debouncedInput = useDebounce(localInput, 500);
 
-    useEffect(() => {
-        if (row.groupName.length > 0 && assetType.name.length > 0 && issuanceAvailableId) {
-            const params = {
-                assetTypeId: row.assetTypeId,
-                assetStatusId: issuanceAvailableId, // Available for Issuance
-                commodityId: row.commodityId
-            }
-            fetchAllAssets(params)
-        }
+    const { assetTypeId, commodityId, groupName } = row;
+    const canLoad = groupName.length > 0 && assetType.name.length > 0 && Boolean(issuanceAvailableId);
+
+    /** The one query this picker makes; `engravedNumber` narrows it to a server-side search. */
+    const loadIssuable = useCallback((engravedNumber?: string) => {
+        if (!canLoad) return;
+        fetchAllAssets({
+            assetTypeId,
+            assetStatusId: issuanceAvailableId, // Available for Issuance
+            commodityId,
+            ...(engravedNumber ? { engravedNumber } : {}),
+        });
+        // `fetchAllAssets` comes from a hook and is a new function every render, so it cannot be a
+        // dependency without making this one too.
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [row, issuanceAvailableId]);
+    }, [canLoad, assetTypeId, commodityId, issuanceAvailableId]);
+
+    /*
+     * Keyed on the values the query is built from — not on `row`.
+     *
+     * `row` is a fresh object whenever `setRows` runs, and picking an engraved number calls
+     * `setRows`. So this effect refired on every selection, refetched, and handed the Autocomplete a
+     * brand-new object for the asset that had just been chosen — which, under reference equality,
+     * `filterSelectedOptions` could no longer recognise as selected. **Choosing an item put it
+     * straight back in the list.** The identity rule below closes the other half of that loop.
+     */
+    useEffect(() => {
+        loadIssuable();
+    }, [loadIssuable]);
 
     useEffect(() => {
         setInputValue(debouncedInput);
     }, [debouncedInput, setInputValue]);
 
-
     useEffect(() => {
-        if (row.groupName.length > 0 &&
-            assetType.name.length > 0 &&
-            inputValue.length > 0 &&
-            issuanceAvailableId
-        ) {
-            const params = {
-                assetTypeId: row.assetTypeId,
-                assetStatusId: issuanceAvailableId, // Available for Issuance
-                commodityId: row.commodityId,
-                engravedNumber: inputValue
-            }
-            fetchAllAssets(params)
-        }
+        if (inputValue.length > 0) loadIssuable(inputValue);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [inputValue]);
+
+    /**
+     * Engraved numbers already spoken for on *other* lines of this issuance.
+     *
+     * <p>`filterSelectedOptions` only hides what this picker itself holds, so two lines of the same
+     * commodity each offered the whole pool and the same asset could be picked on both. It was
+     * caught — `validateAssetsOfItems` de-dupes across rows and the server refuses repeats within
+     * one payload — but only at submit, which is the wrong end: the issuer had already built the
+     * whole issuance around a choice that was never available.
+     */
+    const takenOnOtherRows = useMemo(() => {
+        const ids = new Set<number>();
+        rows.forEach(other => {
+            if (other.id === row.id) return;
+            other.selectedAssets?.forEach(asset => {
+                if (asset?.id != null) ids.add(asset.id as number);
+            });
+        });
+        return ids;
+    }, [rows, row.id]);
+
+    /*
+     * The bucket is already this commodity's, so no client-side commodity filter is needed — that
+     * check existed only because every picker shared one flat pool.
+     */
+    const options = useMemo(
+        () => (issuableAssets[commodityId as number] ?? [])
+            .filter(asset => !takenOnOtherRows.has(asset.id as number)),
+        [issuableAssets, commodityId, takenOnOtherRows],
+    );
 
     const addEngravedNumberListToRow = (list: IAsset[]) => {
         const currentRow = rows.find(rw => rw.id === row.id) as RowData;
@@ -115,18 +150,26 @@ const FilterEngravedNumbers = ({ row }: { row: RowData }) => {
                 multiple
                 id="engraved-numbers"
                 size="small"
-                options={
-                    /**
-                     * Filter assets based on the asset type
-                     * to display engraved number for that particular asset type.
-                     */
-                    [...(assetsEngravedInStore
-                        .filter(asst => asst.commodity?.id === row.commodityId))]
-                }
+                options={options}
                 getOptionLabel={(option) => option?.engravedNumber || ''}
                 value={row.selectedAssets ?? []}
                 onChange={(_, newValue) => addEngravedNumberListToRow(newValue)}
                 filterSelectedOptions
+                /*
+                 * Without this, MUI compares options to the selected value by **reference**, and the
+                 * option objects are replaced wholesale every time the pool is refetched. A picked
+                 * asset then no longer matched its own entry in the list, so `filterSelectedOptions`
+                 * stopped hiding it and it reappeared in the dropdown — and MUI logged "The value
+                 * provided to Autocomplete is invalid" for the same reason.
+                 */
+                isOptionEqualToValue={(option, value) => option.id === value.id}
+                /*
+                 * Availability is re-read at the moment of choosing, rather than trusted from
+                 * whenever the page happened to load. Somebody else can issue an asset while this
+                 * form sits open, and the server will refuse it; asking again on open is what keeps
+                 * the list from promising something that has since gone.
+                 */
+                onOpen={() => loadIssuable()}
                 onInputChange={(_, newInputValue) => setLocalInput(newInputValue)}
                 PopperComponent={DropdownPopper}
                 PaperComponent={DropdownPaper}
