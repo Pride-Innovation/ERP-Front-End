@@ -106,7 +106,7 @@ const Request = () => {
     } = RequestUtills();
 
     // Branded Cover + Data workbook, and the reports-style PDF.
-    const { generateExcelFromRows, generatePDFFromRows } = TableUtills({ moduleName: 'request' });
+    const { generateExcelFromRows, generatePDFFromRows } = TableUtills({ moduleName: 'request', tableKey: 'assetRequests' });
 
     /**
      * The params currently in force, so turning a page can reissue the same query.
@@ -420,6 +420,7 @@ const Request = () => {
         <Box width={'100%'}>
             {renderModals()}
             <TableComponent
+                tableKey="assetRequests"
                 endPoint={endPoint}
                 loading={loading}
                 count={count}

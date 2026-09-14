@@ -119,6 +119,7 @@ const TableComponent = ({
     rows,
     onCreationHandler,
     module,
+    tableKey,
     header,
     handleOptionClicked,
     importData = false,
@@ -584,6 +585,7 @@ const TableComponent = ({
                 header={header}
                 onCreationHandler={() => onCreationHandler?.()}
                 module={module as string}
+                tableKey={tableKey}
                 createAction={createAction}
                 exportData={exportData}
                 importData={importData}

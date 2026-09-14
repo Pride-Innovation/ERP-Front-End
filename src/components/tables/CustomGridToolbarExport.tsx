@@ -11,8 +11,11 @@ import TableChartOutlinedIcon from '@mui/icons-material/TableChartOutlined';
 import PictureAsPdfOutlinedIcon from '@mui/icons-material/PictureAsPdfOutlined';
 import KeyboardArrowDownOutlinedIcon from '@mui/icons-material/KeyboardArrowDownOutlined';
 import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
+import ViewColumnOutlinedIcon from '@mui/icons-material/ViewColumnOutlined';
 import TableUtills from './utills';
 import { OnExportHandler } from './interface';
+import ExportColumnsDialog from './ExportColumnsDialog';
+import { findExportTable } from '../../utils/exports/exportTables';
 
 // const PRIMARY = '#08796C';
 const GREEN   = '#15803d';
@@ -21,13 +24,27 @@ interface CustomGridToolbarExportProps {
     module?: string;
     rows?: any[];
     onExport?: OnExportHandler;
+    /**
+     * The table's stable identity in the export registry.
+     *
+     * <p>Not the `module` string beside it: that one names the asset *category* on the assets page
+     * (so one table has twelve of them) and is shared by two unrelated request tables. Absent, the
+     * export behaves exactly as it always has.
+     */
+    tableKey?: string;
 }
 
-const CustomGridToolbarExport = ({ module, rows = [], onExport }: CustomGridToolbarExportProps) => {
+const CustomGridToolbarExport = ({
+    module, rows = [], onExport, tableKey,
+}: CustomGridToolbarExportProps) => {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [busy, setBusy] = useState(false);
+    const [picking, setPicking] = useState(false);
     const open = Boolean(anchorEl);
-    const { generatePDFFromRows, generateExcelFromRows } = TableUtills({ moduleName: module });
+    const { generatePDFFromRows, generateExcelFromRows } = TableUtills({ moduleName: module, tableKey });
+
+    // Only offered for a table the registry knows — elsewhere there is nothing to choose between.
+    const configurable = Boolean(tableKey && findExportTable(tableKey));
 
     const handleOpen = (e: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(e.currentTarget);
     const handleClose = () => setAnchorEl(null);
@@ -39,8 +56,8 @@ const CustomGridToolbarExport = ({ module, rows = [], onExport }: CustomGridTool
             finally { setBusy(false); }
             return;
         }
-        if (format === 'excel') generateExcelFromRows(rows);
-        else generatePDFFromRows(rows);
+        if (format === 'excel') await generateExcelFromRows(rows);
+        else await generatePDFFromRows(rows);
     };
 
     return (
@@ -138,7 +155,46 @@ const CustomGridToolbarExport = ({ module, rows = [], onExport }: CustomGridTool
                         />
                     </MenuItem>
                 </Box>
+
+                {/*
+                 * Choosing columns sits under the two formats rather than in front of them: the
+                 * common case is "give me the file", and putting a dialog in that path would tax
+                 * every export for the sake of the occasional tidy-up. It is a setting you visit
+                 * once and it is remembered.
+                 */}
+                {configurable && (
+                    <>
+                        <Divider sx={{ borderColor: '#F1F5F9', mx: 1 }} />
+                        <Box sx={{ p: 0.5 }}>
+                            <MenuItem
+                                onClick={() => { handleClose(); setPicking(true); }}
+                                sx={{
+                                    borderRadius: '7px', py: 0.85, px: 1.25, gap: 1,
+                                    '&:hover': { bgcolor: alpha('#475569', 0.05) },
+                                }}
+                            >
+                                <ListItemIcon sx={{ minWidth: 30 }}>
+                                    <ViewColumnOutlinedIcon sx={{ fontSize: 17, color: '#64748B' }} />
+                                </ListItemIcon>
+                                <ListItemText
+                                    primary="Choose columns…"
+                                    secondary="Applies to your downloads"
+                                    primaryTypographyProps={{ fontSize: '0.83rem', fontWeight: 600, color: '#1E293B' }}
+                                    secondaryTypographyProps={{ fontSize: '0.72rem', color: '#94A3B8' }}
+                                />
+                            </MenuItem>
+                        </Box>
+                    </>
+                )}
             </Menu>
+
+            {configurable && (
+                <ExportColumnsDialog
+                    tableKey={tableKey as string}
+                    open={picking}
+                    onClose={() => setPicking(false)}
+                />
+            )}
         </Box>
     );
 };

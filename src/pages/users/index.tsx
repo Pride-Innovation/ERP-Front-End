@@ -75,7 +75,7 @@ const Users = () => {
     transformUsersForExport,
   } = UserUtils();
 
-  const { generateExcelFromRows, generatePDFFromRows } = TableUtills({ moduleName: 'user' });
+  const { generateExcelFromRows, generatePDFFromRows } = TableUtills({ moduleName: 'user', tableKey: 'users' });
 
   useEffect(() => { fetchAllUsers() }, []);
 
@@ -376,6 +376,7 @@ const Users = () => {
       {columnHeaders.length > 0 && (
         <Box sx={{ px: { xs: 0, md: 0 } }}>
           <TableComponent
+                tableKey="users"
             endPoint={endPoint}
             loading={loading}
             count={count}

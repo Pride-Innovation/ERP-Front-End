@@ -228,6 +228,43 @@ export function drawSignatureCards(
  *
  * <p>Pass the same index list used for the right-aligned {@code columnStyles} so the two can't drift.
  */
+/**
+ * Body and heading styles for a printed register.
+ *
+ * <h2>Why this is shared rather than written twice</h2>
+ * The list exporter and the reports exporter carried byte-identical style objects, deliberately, so
+ * that a register printed from Reports and the same data printed from its own page came out looking
+ * like one document. Two identical literals stay identical only until somebody adjusts one of them —
+ * which is exactly what happened the first time these documents were unified, and what this stops
+ * happening again.
+ *
+ * <p>`cellPadding` is the row height. autoTable sizes a row from its content plus this padding, so
+ * the vertical figure is the whole of what makes a register feel airy or cramped. It reads 9pt top
+ * and bottom rather than the 5 it started at — at 7.5pt type, five points above and below left the
+ * lines almost touching their rules, and a register is read by running a finger down a column.
+ *
+ * <p>The horizontal figure is deliberately left at 5. Widening it would eat the text width every
+ * column has to share, and on a register that already runs to eight or ten columns that buys
+ * whitespace by causing headings to wrap — which is the opposite of legible.
+ */
+export const listTableStyles = {
+    fontSize: 7.5,
+    cellPadding: { top: 9, right: 5, bottom: 9, left: 5 },
+    textColor: INK,
+    overflow: 'linebreak' as const,
+};
+
+/** Heading band for the same tables. Kept beside the body styles so the two cannot drift. */
+export const listTableHeadStyles = {
+    fillColor: TEAL_50,
+    textColor: TEAL_DARK,
+    fontStyle: 'bold' as const,
+    fontSize: 7,
+    // A touch tighter than the body: the heading is one line by design, and matching the body's
+    // padding made the band look like an empty first row.
+    cellPadding: { top: 7, right: 5, bottom: 7, left: 5 },
+};
+
 export const rightAlignHeaders = (columns: number[]) => (data: {
     section: string;
     column: { index: number };

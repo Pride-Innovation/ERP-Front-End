@@ -155,6 +155,7 @@ const RequestReports = ({ requestReports }: {
                         </Grid>
                     </ModalComponent>}
                 <TableComponent
+                tableKey="requestApprovals"
                     endPoint=""
                     loading={false}
                     count={100}

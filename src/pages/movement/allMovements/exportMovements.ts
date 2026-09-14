@@ -9,6 +9,12 @@ import { IMovement } from '../interface';
 import { movementTypeLabel, statusLabel, categoryLabels, receiptStatusLabels } from '../constants';
 import { exportListPdf, ListPdfColumn, ListPdfMeta } from '../../../utils/pdf/listPdf';
 import { exportListExcel, exportListCsv } from '../../../utils/exports/listSheet';
+import {
+    applyExportColumns,
+    loadExportColumnConfig,
+    readViewerChoice,
+    resolveExportColumns,
+} from '../../../utils/exports/exportColumns';
 
 /**
  * The movements register, as a document.
@@ -75,11 +81,28 @@ const buildRows = (movements: IMovement[]): Array<Record<string, any>> => moveme
     created: fmtDate(m.createDate),
 }));
 
-export const exportMovementsPdf = (movements: IMovement[], meta?: ListPdfMeta) =>
-    exportListPdf(COLUMNS, buildRows(movements), DOCUMENT_TITLE, meta);
 
-export const exportMovementsExcel = (movements: IMovement[]) =>
-    exportListExcel(COLUMNS, buildRows(movements), DOCUMENT_TITLE);
+/**
+ * The columns this register should print, narrowed by the configuration and the viewer's choice.
+ *
+ * <p>This page builds its own file rather than going through `TableComponent`, so it does its own
+ * narrowing — but through the same resolver, against the same stored configuration. Two register
+ * pages deciding their columns differently is exactly how the bespoke exporters drifted apart
+ * before they were unified.
+ */
+const narrowed = async () => {
+    const config = await loadExportColumnConfig();
+    return applyExportColumns(
+        COLUMNS,
+        resolveExportColumns('movements', config, readViewerChoice('movements')),
+    );
+};
 
-export const exportMovementsCsv = (movements: IMovement[]) =>
-    exportListCsv(COLUMNS, buildRows(movements), DOCUMENT_TITLE);
+export const exportMovementsPdf = async (movements: IMovement[], meta?: ListPdfMeta) =>
+    exportListPdf(await narrowed(), buildRows(movements), DOCUMENT_TITLE, meta);
+
+export const exportMovementsExcel = async (movements: IMovement[]) =>
+    exportListExcel(await narrowed(), buildRows(movements), DOCUMENT_TITLE);
+
+export const exportMovementsCsv = async (movements: IMovement[]) =>
+    exportListCsv(await narrowed(), buildRows(movements), DOCUMENT_TITLE);

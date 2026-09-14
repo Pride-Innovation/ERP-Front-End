@@ -18,6 +18,7 @@ import AssetTypes from "../../../../pages/settings/assetTypes"
 import Units from "../../../../pages/settings/units"
 import Consultants from "../../../../pages/settings/consultants"
 import Couriers from "../../../../pages/settings/couriers"
+import ExportColumns from "../../../../pages/settings/exportColumns"
 
 const SettingsSubRoutes = () => {
     return (
@@ -33,6 +34,7 @@ const SettingsSubRoutes = () => {
             <Route path={ROUTES.ASSET_TYPES} element={<AssetTypes />} />
             <Route path={ROUTES.CONSULTANTS} element={<Consultants />} />
             <Route path={ROUTES.COURIERS} element={<Couriers />} />
+            <Route path={ROUTES.EXPORT_COLUMNS} element={<ExportColumns />} />
         </Route>
     )
 }

@@ -8,6 +8,12 @@ Managing Director
 import { IConsignment, consignmentStatusLabels } from './interface';
 import { exportListPdf, ListPdfColumn, ListPdfMeta } from '../../utils/pdf/listPdf';
 import { exportListExcel, exportListCsv } from '../../utils/exports/listSheet';
+import {
+    applyExportColumns,
+    loadExportColumnConfig,
+    readViewerChoice,
+    resolveExportColumns,
+} from '../../utils/exports/exportColumns';
 
 /**
  * The consignments register, as a document.
@@ -75,11 +81,28 @@ const buildRows = (consignments: IConsignment[]): Array<Record<string, any>> =>
         remarks: c.remarks ?? '',
     }));
 
-export const exportConsignmentsPdf = (consignments: IConsignment[], meta?: ListPdfMeta) =>
-    exportListPdf(COLUMNS, buildRows(consignments), DOCUMENT_TITLE, meta);
 
-export const exportConsignmentsExcel = (consignments: IConsignment[]) =>
-    exportListExcel(COLUMNS, buildRows(consignments), DOCUMENT_TITLE);
+/**
+ * The columns this register should print, narrowed by the configuration and the viewer's choice.
+ *
+ * <p>This page builds its own file rather than going through `TableComponent`, so it does its own
+ * narrowing — but through the same resolver, against the same stored configuration. Two register
+ * pages deciding their columns differently is exactly how the bespoke exporters drifted apart
+ * before they were unified.
+ */
+const narrowed = async () => {
+    const config = await loadExportColumnConfig();
+    return applyExportColumns(
+        COLUMNS,
+        resolveExportColumns('consignments', config, readViewerChoice('consignments')),
+    );
+};
 
-export const exportConsignmentsCsv = (consignments: IConsignment[]) =>
-    exportListCsv(COLUMNS, buildRows(consignments), DOCUMENT_TITLE);
+export const exportConsignmentsPdf = async (consignments: IConsignment[], meta?: ListPdfMeta) =>
+    exportListPdf(await narrowed(), buildRows(consignments), DOCUMENT_TITLE, meta);
+
+export const exportConsignmentsExcel = async (consignments: IConsignment[]) =>
+    exportListExcel(await narrowed(), buildRows(consignments), DOCUMENT_TITLE);
+
+export const exportConsignmentsCsv = async (consignments: IConsignment[]) =>
+    exportListCsv(await narrowed(), buildRows(consignments), DOCUMENT_TITLE);

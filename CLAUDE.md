@@ -310,6 +310,18 @@ The PDF now carries the **active filters** as its strip. Without one, two export
 under different filters are indistinguishable once saved, and an export is precisely the artefact
 that outlives the screen that made it.
 
+**Row height is `cellPadding`, and it lives in one place now.** autoTable sizes a row from its
+content plus its padding, so the vertical figure is the whole of what makes a register feel airy or
+cramped — it is 9pt top and bottom, up from the 5 it shipped with, which at 7.5pt type left the lines
+almost touching their rules. The horizontal figure stays at 5 deliberately: widening it eats the text
+width every column shares, and on a register running to eight or ten columns that buys whitespace by
+making headings wrap.
+
+`listTableStyles` / `listTableHeadStyles` are in `docKit` because the list exporter and the reports
+exporter carried **byte-identical style objects** — deliberately, so the same data printed from
+either came out looking like one document. Two identical literals stay identical only until somebody
+adjusts one of them, which is what had already happened once before these documents were unified.
+
 *Not* changed: `generateReleaseNote.ts` still builds its own document, correctly — it is a
 single-document release note and already shares the GRN and dispatch-note furniture through
 `docKit`. It was the register export alone that had drifted.
@@ -906,6 +918,130 @@ not a code change, and it is left for a decision rather than done quietly.
 The call-site comment in `IssuanceService` still described the old behaviour — "cross-location assets
 are left untouched here" — while the method beside it did the opposite. Corrected, because that is
 the comment someone reads before "restoring" the behaviour that caused this.
+
+## Export columns are configurable — done
+
+A register running to fifteen columns prints as an unreadable wall. Somebody holding
+**`UPDATE_EXPORT_COLUMNS`** now decides which columns each table puts in its PDF / Excel, in
+Settings → *Export Columns*, and every download follows. Each user can narrow their own copy further
+from the export menu's **Choose columns…**, and that stays in their browser.
+
+**Tidiness, not confidentiality, and the page says so at the top.** Every column stays on screen for
+anyone who can open the table, and the file is still built in the browser from rows it already holds
+— so this cannot withhold anything from anybody, and reading it as an access control would put a
+confidentiality expectation on a control that cannot carry one. Genuinely withholding a column means
+not sending it in the API response, which is a different and larger piece of work.
+
+**Why there is a backend at all, for a "frontend" feature.** Because one person sets it for everyone.
+A per-viewer choice needs no server — but then the permission-holder would tick columns and nobody
+else's export would change, and the permission would be decorative. The shared default needs
+somewhere shared; the personal narrowing on top genuinely is local and lives in `localStorage`.
+
+### The registry, and why `module` could not be the key
+
+`exportTables.ts` gives each table a **stable key**. The obvious identity was the `module` string
+every table already passes, and it cannot do the job:
+
+- The assets page passes **the asset category's name** (`moduleName={currentAssetType.name}`), so one
+  table arrives under **twelve** identities. Configure "Computers" and "Furniture" stays unconfigured.
+- **Both** the asset-request tabs and the fleet-requisition tabs pass `"request"` — two unrelated
+  tables under one name. The same collision that nearly emptied the transport row menu.
+
+So a config keyed on `module` would fragment one table across twelve rows and merge two others into
+one. These keys are chosen once and never derived.
+
+**The columns are listed by hand because they cannot be discovered honestly.** Rows are built by
+spreading the entity (`...fielsdata`) and the row interfaces end in `[key: string]: any`, so a
+table's columns are whatever its mapper happened to leave behind — which is why the requests export
+has been shipping a **"Requester ID"** column that exists only so the row menu can tell whose request
+it is. Listing them *is* the curation.
+
+*One entry caught while writing it:* the assets mapper destructures `purchaseCost` and
+`costOfTheAsset` **out** of the row before spreading the rest, so neither can ever reach a file.
+Listing them would have put two ticks in Settings that quietly did nothing — worse than their
+absence, because somebody would tick them, check the file and conclude the feature was broken.
+
+### Absence is the widest answer here, deliberately
+
+A table with **no** saved configuration exports its defaults, not nothing. This ships against
+twenty-odd tables nobody has configured, and the alternative is that every export in the bank comes
+out blank on the day it deploys.
+
+That only works because *absent* and *empty* are different states, so the service **refuses to store
+an empty set** — a table configured to export nothing produces an empty file, which reads as a broken
+report rather than a setting. This is the same shape as the "allowed ids" trap recorded above, where
+an empty list silently meant *no restriction*; what matters is that the meaning of emptiness was
+decided and written down as a test rather than stumbled into.
+
+Three more fallbacks follow the same rule, each avoiding an empty file:
+
+| When | Answer |
+|---|---|
+| the config endpoint is unreachable | export the defaults, don't block the download |
+| a viewer's stored choice matches nothing any more | treat it as no choice |
+| a registry key and a row key have drifted apart | export every column — untidy beats empty |
+
+A viewer's choice is **intersected, never unioned**: a column dropped from the configuration does not
+survive in someone's browser, or the one thing the permission is for would be overridden by everyone
+locally.
+
+### Where it plugs in
+
+`TableUtills.narrowColumns` is the single choke point for the shared path — all seventeen
+`TableComponent` tables plus the assets and requests pages, which call those exporters directly. The
+movements and consignments registers build their own files and narrow through the **same resolver**,
+because two register pages deciding columns differently is exactly how the bespoke exporters drifted
+apart before they were unified. A table without a `tableKey` keeps today's behaviour exactly, which
+is what let this land without a flag day.
+
+**`GET /export-columns` is open to any signed-in user, and must stay that way.** Every export
+consults it, so gating the read on the permission that *changes* it would 403 the download for
+everyone who is not an administrator — the fourth instance of *the route's permission and the
+endpoint's permission must be the same permission*. It is in
+`EndpointGuardCoverageTest.DELIBERATELY_AUTHENTICATED_ONLY` with that reason; the write is guarded.
+
+`UPDATE_EXPORT_COLUMNS` is declared inside `initializePermissions()` — a permission created anywhere
+else exists in the table and never reaches the super administrator, silently. Being in that list also
+puts it in Settings → Roles → *Action permissions*, so granting it needed no new screen.
+
+### A page can miss its key silently, so a test now says it cannot
+
+Shipped with two export handlers unkeyed, and the way it hid is worth keeping.
+
+Narrowing runs inside `TableUtills` and only when the caller passes a `tableKey`. Miss it and nothing
+fails and nothing warns — the export just keeps its old behaviour and prints **every key the row
+carries**. On the requests page that was twenty columns: eight of them objects or arrays
+(`commodities`, `currentUnit`, `attributes`, …) which a spreadsheet renders as `[object Object]`,
+three internal routing flags, and `requesterID`, which exists only so the row menu can tell whose
+request it is.
+
+**It survived review because the same page had a second, correctly-keyed export path.**
+`useRequestExport` was wired and worked; the All Requests tab builds its own file and was not. So the
+feature demonstrably worked — just not from the tab people actually use. A silent fallback plus a
+partial wiring is the combination that clicking around does not find.
+
+`exportWiring.test.ts` walks the source: every caller of `generatePDFFromRows` /
+`generateExcelFromRows` must pass a `tableKey`, and every key named anywhere must exist in the
+registry — a typo resolves to "unregistered", which falls back to exporting everything, the same
+silent wrong answer as omitting it. Verified by breaking it deliberately and watching it fail.
+
+*The general shape:* **a fallback that means "behave as before" makes a missing wire invisible.**
+That is the right fallback here — it is what let this land across twenty tables without a flag day —
+so the safety has to come from a test that the wire exists, not from the runtime noticing.
+
+### What the file actually gets to offer
+
+The registry lists what a table *can* export, and for requests that is deliberately narrower than
+what the row carries. Objects and arrays are excluded because they cannot print; routing flags and
+the menu's `requesterID` because nobody reads them. `id` is offered as *Request no.* — it is the
+reference people quote — along with Description, Created and Current stage, all off until asked for.
+
+Ten columns to choose from, seven on by default, against the twenty the unnarrowed file was printing
+— which is why its headings were breaking mid-word even in landscape.
+
+**Still open:** the movements and consignments registers honour the configuration but have no
+*Choose columns…* entry of their own, because they render their own toolbars rather than
+`TableComponent`'s. Their users get the shared default, not a personal narrowing.
 
 ## Password reset worked exactly once per user
 

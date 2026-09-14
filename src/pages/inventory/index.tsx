@@ -223,6 +223,7 @@ const Inventory = () => {
             {columnHeaders.length > 0 && (
                 <Box sx={{ px: { xs: 0, md: 0 } }}>
                     <TableComponent
+                tableKey="inventoryOrders"
                         createAction
                         createPermission={PERMISSIONS.CREATE_INVENTORY}
                         loading={loading}

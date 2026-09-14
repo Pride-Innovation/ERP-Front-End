@@ -34,8 +34,14 @@ import {
     filterRequestRowOptions,
     isRequestRow,
 } from "../../pages/request/assetRequest/rowActions";
+import {
+    applyExportColumns,
+    loadExportColumnConfig,
+    readViewerChoice,
+    resolveExportColumns,
+} from "../../utils/exports/exportColumns";
 
-const TableUtills = ({ moduleName }: { moduleName?: string }) => {
+const TableUtills = ({ moduleName, tableKey }: { moduleName?: string; tableKey?: string }) => {
     // Row options carrying a `permission` are hidden from anyone who does not hold it.
     const { has } = usePermissions();
     const { fileName } = useContext(FileContext);
@@ -155,6 +161,28 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
     };
 
     /**
+     * Narrows a table's columns to those configured for export, then to the viewer's own choice.
+     *
+     * <h2>Why here, and only here</h2>
+     * Every table that exports through `TableComponent` — seventeen of them, plus the assets and
+     * requests pages, which call these two functions directly — builds its columns in
+     * `determineRowsandColumns` from the keys of the first row. That makes this the one place the
+     * whole shared path passes through, so a page gets the feature by naming its `tableKey` and
+     * nothing else.
+     *
+     * <p>A table with no `tableKey`, or one not in the registry, keeps exactly today's behaviour.
+     * That is what lets this arrive against twenty-odd existing tables without a flag day.
+     */
+    const narrowColumns = async <T extends { dataKey: string }>(columns: T[]): Promise<T[]> => {
+        if (!tableKey) return columns;
+        const config = await loadExportColumnConfig();
+        return applyExportColumns(
+            columns,
+            resolveExportColumns(tableKey, config, readViewerChoice(tableKey)),
+        );
+    };
+
+    /**
      * Generate PDF directly from an array of rows (no DataGrid API needed).
      * `meta.filters` is rendered as a strip under the header so the reader
      * knows which slice of the data the export represents.
@@ -165,7 +193,8 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
                 toast.error(`No data available for export`);
                 return;
             }
-            const { columns, rows } = determineRowsandColumns(rowsData);
+            const { columns: allColumns, rows } = determineRowsandColumns(rowsData);
+            const columns = await narrowColumns(allColumns);
             /*
              * The reports' PDF, not the older list one.
              *
@@ -186,13 +215,14 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
      * Generate Excel directly from an array of rows (no DataGrid API needed).
      * `meta.filters` is rendered on the cover sheet.
      */
-    const generateExcelFromRows = (rowsData: any[], meta?: ExportMeta) => {
+    const generateExcelFromRows = async (rowsData: any[], meta?: ExportMeta) => {
         try {
             if (!rowsData || rowsData.length === 0) {
                 toast.error(`No data available for export`);
                 return;
             }
-            const { columns, rows } = determineRowsandColumns(rowsData);
+            const { columns: allColumns, rows } = determineRowsandColumns(rowsData);
+            const columns = await narrowColumns(allColumns);
             exportExcel(columns, rows, meta?.title || fileName || moduleName || 'export', meta);
         } catch (error) {
             console.error('Error generating Excel:', error);

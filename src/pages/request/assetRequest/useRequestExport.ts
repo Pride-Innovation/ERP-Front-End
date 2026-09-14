@@ -36,7 +36,7 @@ const useRequestExport = (tabLabel: string) => {
     const { endPoint, buildRequestExportRows } = RequestUtills();
     const { statuses } = useSelector((state: RootState) => state.StatusesStore);
     // The branded Cover + Data workbook, and the reports-style PDF.
-    const { generateExcelFromRows, generatePDFFromRows } = TableUtills({ moduleName: 'request' });
+    const { generateExcelFromRows, generatePDFFromRows } = TableUtills({ moduleName: 'request', tableKey: 'assetRequests' });
 
     /**
      * @param format  which file to produce
@@ -75,7 +75,7 @@ const useRequestExport = (tabLabel: string) => {
             // The table's own mapper, so the export carries resolved requester and approver names
             // and a formatted date rather than nested entity graphs.
             const rows = buildRequestExportRows(content);
-            if (format === 'excel') generateExcelFromRows(rows, meta);
+            if (format === 'excel') await generateExcelFromRows(rows, meta);
             else await generatePDFFromRows(rows, meta);
         } catch (error) {
             console.error('Request export failed', error);

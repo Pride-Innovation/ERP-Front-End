@@ -110,6 +110,14 @@ export interface ITableComponent {
     searchAction?: boolean;
     params?: Record<string, any>
     refresh?: boolean;
+    /**
+     * The table's stable identity in the export registry (`utils/exports/exportTables.ts`).
+     *
+     * <p>Deliberately separate from `module`. That string cannot identify a table — the assets page
+     * passes the asset *category* name, so one table has twelve of them, and both the asset-request
+     * and fleet-requisition tabs pass "request". Omit it and the export behaves exactly as before.
+     */
+    tableKey?: string;
     filterOptions?: boolean;
     optionsfilterParams?: Record<string, any>
     status?: boolean;
@@ -193,6 +201,8 @@ export interface ITableToolBar {
     },
     onCreationHandler: () => void;
     module: string;
+    /** Stable export-registry identity; see the note on `ITableComponent.tableKey`. */
+    tableKey?: string;
     createAction: boolean;
     importData: boolean;
     /** Asset category on show, so the import button can build that category's template. */
@@ -219,6 +229,8 @@ export interface CustomToolbarWrapperProps {
     header: { plural: string; singular: string };
     onCreationHandler: () => void;
     module: string;
+    /** Stable export-registry identity; see the note on `ITableComponent.tableKey`. */
+    tableKey?: string;
     createAction: boolean;
     importData: boolean;
     /** Asset category on show, so the import button can build that category's template. */

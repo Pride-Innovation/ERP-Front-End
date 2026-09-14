@@ -18,6 +18,7 @@ import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 import GroupWorkOutlinedIcon from '@mui/icons-material/GroupWorkOutlined';
 import EngineeringOutlinedIcon from '@mui/icons-material/EngineeringOutlined';
 import DeliveryDiningOutlinedIcon from '@mui/icons-material/DeliveryDiningOutlined';
+import ViewColumnOutlinedIcon from '@mui/icons-material/ViewColumnOutlined';
 
 const SettingsUtills = () => {
 
@@ -87,6 +88,12 @@ const SettingsUtills = () => {
             text: "Couriers",
             path: ROUTES.COURIERS,
             icon: <DeliveryDiningOutlinedIcon />
+        },
+        {
+            id: 12,
+            text: "Export Columns",
+            path: ROUTES.EXPORT_COLUMNS,
+            icon: <ViewColumnOutlinedIcon />
         },
     ]
 

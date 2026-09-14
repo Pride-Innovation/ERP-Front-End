@@ -57,6 +57,7 @@ const TableToolBar = ({
     header,
     onCreationHandler,
     module,
+    tableKey,
     importData,
     assetTypeId,
     exportData,
@@ -332,7 +333,7 @@ const TableToolBar = ({
                         )}
 
                         {showImport && <FileUploadButton title={header.plural} module={module} assetTypeId={assetTypeId} />}
-                        {showExport && <CustomGridToolbarExport module={module} rows={rows} onExport={onExport} />}
+                        {showExport && <CustomGridToolbarExport module={module} tableKey={tableKey} rows={rows} onExport={onExport} />}
 
                         {/* Create button */}
                         {showCreate && (

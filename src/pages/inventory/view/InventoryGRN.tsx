@@ -164,6 +164,7 @@ const InventoryGRN = ({ grnList, onUploaded }: { grnList: IGRNReport[]; onUpload
 
             {grnList?.length > 0 ? (
                 <TableComponent
+                tableKey="grnDocuments"
                     endPoint={endPoint}
                     loading={false}
                     exportData

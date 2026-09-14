@@ -80,6 +80,7 @@ const UNITS: string = `${ASSETS_MANAGEMENT}/settings/units`;
 const ASSET_TYPES: string = `${ASSETS_MANAGEMENT}/settings/asset-categories`;
 const CONSULTANTS: string = `${ASSETS_MANAGEMENT}/settings/consultants`;
 const COURIERS: string = `${ASSETS_MANAGEMENT}/settings/couriers`;
+const EXPORT_COLUMNS: string = `${ASSETS_MANAGEMENT}/settings/export-columns`;
 
 const APPROVAL_WORKFLOWS: string = `${ASSETS_MANAGEMENT}/approval-workflows`;
 
@@ -137,6 +138,7 @@ export const ROUTES = {
     ASSET_TYPES,
     CONSULTANTS,
     COURIERS,
+    EXPORT_COLUMNS,
     CREATE_INVENTORY,
     UPDATE_INVENTORY,
     READ_INVENTORY,

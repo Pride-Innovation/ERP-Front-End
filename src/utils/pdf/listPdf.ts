@@ -9,7 +9,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import LogoSrc from '../../statics/images/pride_logo_horizontal.png';
 import {
-    BORDER, INK, MUTED, TEAL_50, TEAL_DARK, WASH,
+    BORDER, MUTED, WASH, listTableStyles, listTableHeadStyles,
     drawDocHeader, drawFooter, loadImage,
 } from './docKit';
 
@@ -95,13 +95,8 @@ export const exportListPdf = async (
         // Repeated on every page: a register runs to many pages and a table whose headings appear
         // only once is unreadable from page two onwards.
         showHead: 'everyPage',
-        styles: {
-            fontSize: 7.5,
-            cellPadding: { top: 5, right: 5, bottom: 5, left: 5 },
-            textColor: INK,
-            overflow: 'linebreak',
-        },
-        headStyles: { fillColor: TEAL_50, textColor: TEAL_DARK, fontStyle: 'bold', fontSize: 7 },
+        styles: listTableStyles,
+        headStyles: listTableHeadStyles,
         alternateRowStyles: { fillColor: WASH },
         margin: { top: 96, left: margin, right: margin, bottom: 40 },
         didDrawCell: (data) => {

@@ -205,6 +205,7 @@ const IssuedRequest = () => {
             {renderModals()}
             {columnHeaders.length > 0 &&
                     <TableComponent
+                tableKey="assetRequests"
                         endPoint={endPoint}
                         loading={loading}
                         count={count}

@@ -10,7 +10,7 @@ import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import LogoSrc from '../../statics/images/pride_logo_horizontal.png';
 import {
-    BORDER, INK, MUTED, TEAL_50, TEAL_DARK, WASH,
+    BORDER, MUTED, WASH, listTableStyles, listTableHeadStyles,
     drawDocHeader, drawFooter, loadImage, rightAlignHeaders,
 } from '../../utils/pdf/docKit';
 import { ReportColumn } from './ReportDataTable';
@@ -88,8 +88,8 @@ export const exportReportPdf = async <T,>({ title, columns, rows, filters }: Rep
         body: rows.map((r) => columns.map((c) => cellText(r, c))),
         theme: 'plain',
         showHead: 'everyPage',
-        styles: { fontSize: 7.5, cellPadding: { top: 5, right: 5, bottom: 5, left: 5 }, textColor: INK, overflow: 'linebreak' },
-        headStyles: { fillColor: TEAL_50, textColor: TEAL_DARK, fontStyle: 'bold', fontSize: 7 },
+        styles: listTableStyles,
+        headStyles: listTableHeadStyles,
         alternateRowStyles: { fillColor: WASH },
         // Headings of right-aligned columns must follow their figures; autoTable applies
         // columnStyles to the body only, so alignment is set per cell instead.

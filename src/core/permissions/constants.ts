@@ -47,6 +47,15 @@ export const PERMISSIONS = {
     READ_SETTING: 'READ_SETTING',
     CREATE_SETTING: 'CREATE_SETTING',
     UPDATE_SETTING: 'UPDATE_SETTING',
+    /**
+     * Decides which columns each table puts into its exported PDF / Excel.
+     *
+     * <p>A formatting right, not a disclosure one — every column stays visible on screen to anyone
+     * who can open the table, and the file is still built in the browser. Separate from
+     * UPDATE_SETTING because tidying reports is an everyday editorial job, while that one reaches
+     * branches, titles, units and the approval workflows.
+     */
+    UPDATE_EXPORT_COLUMNS: 'UPDATE_EXPORT_COLUMNS',
     DELETE_SETTING: 'DELETE_SETTING',
 
     READ_AUDIT: 'READ_AUDIT',

@@ -114,6 +114,7 @@ const TableData = () => {
 
             {/* Data table */}
             <TableComponent
+                tableKey="storeBalances"
                 endPoint="store"
                 // Server pagination must carry the same scope as the initial fetch —
                 // branch, asset category, and the page's store container.

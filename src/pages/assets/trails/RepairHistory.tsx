@@ -90,6 +90,7 @@ const RepairHistory = ({ id }: { id: string | number }) => {
                 }
                 {columnHeaders.length > 0 &&
                     <TableComponent
+                tableKey="repairHistory"
                         endPoint={endPoint}
                         loading={loading}
                         exportData

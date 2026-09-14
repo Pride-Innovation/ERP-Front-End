@@ -42,6 +42,7 @@ const AssignmentHistory = ({ id }: { id: string | number }) => {
             }
             {columnHeaders.length > 0 &&
                 <TableComponent
+                tableKey="assignmentHistory"
                     endPoint={endPoint}
                     loading={loading}
                     exportData

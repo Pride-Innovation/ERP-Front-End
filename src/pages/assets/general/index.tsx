@@ -202,7 +202,7 @@ const GeneralAssets = () => {
     } = GeneralAssetUtills(typeId || "");
 
     // Branded Cover + Data workbook, and the reports-style PDF.
-    const { generateExcelFromRows, generatePDFFromRows } = TableUtills({ moduleName: currentAssetType.name });
+    const { generateExcelFromRows, generatePDFFromRows } = TableUtills({ moduleName: currentAssetType.name, tableKey: 'assets' });
 
     /**
      * Loads the table.
@@ -398,7 +398,7 @@ const GeneralAssets = () => {
             // Reuses the table's own mapper, so the export carries the same resolved location,
             // holder name and formatted date the screen shows rather than raw entity graphs.
             const rows = buildAssetExportRows(content);
-            if (format === 'excel') generateExcelFromRows(rows, meta);
+            if (format === 'excel') await generateExcelFromRows(rows, meta);
             else await generatePDFFromRows(rows, meta);
         } catch (error) {
             console.error('Asset export failed', error);
@@ -904,6 +904,7 @@ const GeneralAssets = () => {
                     }}
                 >
                 <TableComponent
+                tableKey="assets"
                     endPoint={endPoint}
                     loading={loading}
                     count={assetCount}
