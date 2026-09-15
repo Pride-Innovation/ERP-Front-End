@@ -13,6 +13,7 @@ import { IOptions, ITableHeader } from '../../components/tables/interface';
 import InfoIcon from '@mui/icons-material/Info';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import { IUsersAxiosResponse, IUser, IUserTableData } from './interface';
+import { fetchStaffOptionsService } from './service/staffPicker';
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import { crudStates } from '../../utils/constants';
 import { IFormData } from '../assets/interface';
@@ -76,6 +77,39 @@ const UserUtils = () => {
         }
     }, [selectedItemDetails]);
 
+
+    /**
+     * Loads the **staff picker** into the same store `fetchAllUsers` fills.
+     *
+     * <h2>Why a second loader rather than a flag</h2>
+     * These are two different questions that happen to want the same store. `fetchAllUsers` reads the
+     * staff directory and answers to `READ_USER`, which is right for the Users page. A dropdown
+     * asking "who should this be assigned to" is not administering the directory, and requiring that
+     * permission is what made the assets, movement and request screens unusable for an officer.
+     *
+     * <p>It dispatches `loadUsers` unchanged, so every component reading `users` from the store keeps
+     * working — the shape is a subset (id, names, email, title), which is all any of them read.
+     *
+     * <p>The scope is identical to the directory's, so nobody is offered a person they were not
+     * offered before.
+     */
+    const fetchStaffOptions = async (params?: Record<string, any>, pageNumber = 0, pageSize = 10) => {
+        setLoading(true);
+        try {
+            const { content, totalElements } = await fetchStaffOptionsService({
+                name: params?.name,
+                pageNumber,
+                pageSize,
+            });
+            setTotalUsers(totalElements);
+            dispatch(loadUsers(content as any));
+            setCount(totalElements);
+        } catch (error) {
+            // An empty dropdown is visible where it is used; the reason belongs in the console.
+            console.warn('Could not load staff options', error);
+        }
+        setLoading(false);
+    };
 
     const fetchAllUsers = async (params?: Record<string, any>, pageNumber = 0, pageSize = 10) => {
         setLoading(true)
@@ -159,10 +193,19 @@ const UserUtils = () => {
                  */
                 { value: crudStates.read, label: "View Details", icon: <RemoveRedEyeIcon fontSize='small' />, divider: true },
                 { value: crudStates.update, label: "Update", icon: <ModeEditIcon fontSize='small' color='info' />, permission: PERMISSIONS.UPDATE_USER },
-                { value: crudStates.enable, label: "Enable", icon: <VpnKeyOutlinedIcon fontSize='small' color='success' />, permission: PERMISSIONS.CREATE_USER },
-                { value: crudStates.unblock, label: "Unblock", icon: <LockPersonOutlinedIcon fontSize='small' color='warning' />, permission: PERMISSIONS.CREATE_USER },
-                { value: crudStates.disable, label: "Disable Account", icon: <InfoIcon fontSize='small' />, danger: true, permission: PERMISSIONS.CREATE_USER },
-                { value: crudStates.block, label: "Block Account", icon: <BlockIcon fontSize='small' />, danger: true, permission: PERMISSIONS.CREATE_USER },
+                /*
+                  * These four answer to MANAGE_USER_ACCESS now, not CREATE_USER.
+                  *
+                  * They only ever asked for the create permission because they are POSTs under
+                  * `/users/**` and inherited its matcher — nobody decided that suspending an
+                  * account and minting one were the same right. The front end mirrors the server's
+                  * rule rather than guessing at it; if these two drift, the menu offers a button
+                  * the endpoint refuses.
+                  */
+                { value: crudStates.enable, label: "Enable", icon: <VpnKeyOutlinedIcon fontSize='small' color='success' />, permission: PERMISSIONS.MANAGE_USER_ACCESS },
+                { value: crudStates.unblock, label: "Unblock", icon: <LockPersonOutlinedIcon fontSize='small' color='warning' />, permission: PERMISSIONS.MANAGE_USER_ACCESS },
+                { value: crudStates.disable, label: "Disable Account", icon: <InfoIcon fontSize='small' />, danger: true, permission: PERMISSIONS.MANAGE_USER_ACCESS },
+                { value: crudStates.block, label: "Block Account", icon: <BlockIcon fontSize='small' />, danger: true, permission: PERMISSIONS.MANAGE_USER_ACCESS },
             ]
         },
     };
@@ -380,6 +423,7 @@ const UserUtils = () => {
         handleClose,
         userFields: generateUserFields(),
         fetchAllUsers,
+        fetchStaffOptions,
         handleOptionClicked,
         usersTableData,
         loading,

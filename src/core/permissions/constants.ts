@@ -56,6 +56,14 @@ export const PERMISSIONS = {
      * branches, titles, units and the approval workflows.
      */
     UPDATE_EXPORT_COLUMNS: 'UPDATE_EXPORT_COLUMNS',
+    /**
+     * Enabling, disabling, blocking and unblocking an account, and returning somebody from leave.
+     *
+     * <p>Carved out of `CREATE_USER`, which these inherited only because they are POSTs under
+     * `/users/**`. Creating a member of staff and suspending one are different decisions, and the
+     * second should be grantable without the first.
+     */
+    MANAGE_USER_ACCESS: 'MANAGE_USER_ACCESS',
     DELETE_SETTING: 'DELETE_SETTING',
 
     READ_AUDIT: 'READ_AUDIT',

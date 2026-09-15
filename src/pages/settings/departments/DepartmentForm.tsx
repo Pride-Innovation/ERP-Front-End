@@ -41,7 +41,7 @@ const DepartmentForm = ({
 }: IDepartmentForm & { update?: boolean }) => {
     const { formFields } = DepartmentUtills();
     const { fetchAllBranches } = BranchUtills();
-    const { fetchAllUsers } = UserUtils();
+    const { fetchStaffOptions } = UserUtils();
     const theme = useTheme();
 
     // Get data from Redux to check if already loaded
@@ -55,7 +55,7 @@ const DepartmentForm = ({
         const fetchData = async () => {
             if (isMounted) {
                 if (!users || users.length === 0) {
-                    await fetchAllUsers();
+                    await fetchStaffOptions();
                 }
                 if (!branches || branches.length === 0) {
                     await fetchAllBranches();

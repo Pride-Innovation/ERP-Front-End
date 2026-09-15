@@ -132,7 +132,12 @@ const MovementForm = ({ setValue, watch, formState, items, setItems, sendingRequ
     const fetchUsers = async (query = '') => {
         setUserLoading(true);
         try {
-            const r = (await fetchRowsService({ pageNumber: 0, pageSize: 10, endPoint: 'users', params: query ? { name: query } : {} })) as any;
+            // The staff picker, not the directory: this dropdown required READ_USER purely because
+            // it read `GET /users`, and creating a movement is not administering staff.
+            const r = (await fetchRowsService({
+                pageNumber: 0, pageSize: 10, endPoint: 'users/picker',
+                params: query ? { name: query } : {},
+            })) as any;
             if (r?.status === 200) setUserOptions(r.data?.content ?? []);
         } finally {
             setUserLoading(false);

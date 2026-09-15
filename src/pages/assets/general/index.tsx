@@ -1,5 +1,5 @@
 import { countDeletedAssetsService } from './service';
-import { fetchUsersService } from '../../users/service';
+import { fetchStaffOptionsService, staffOptionLabel } from '../../users/service/staffPicker';
 import useAccessScope from '../../../core/permissions/useAccessScope';
 import DeleteAsset from './DeleteAsset';
 import RestoreAsset from './RestoreAsset';
@@ -145,29 +145,28 @@ const GeneralAssets = () => {
     const assetScope = scopeFor('ASSETS', 'VIEW');
 
     /**
-     * The staff directory behind the Assigned To filter, one debounced page at a time.
+     * The staff picker behind the Assigned To filter, one debounced page at a time.
      *
      * <p>Scoped on the server, not here: a branch user's request comes back with their own duty
      * station whatever they ask for, and Head Office sees everyone. Passing a branch from the client
      * would be a suggestion rather than a rule.
+     *
+     * <p>It read the **staff directory** until now, so filtering the asset register by holder
+     * required `READ_USER` — an administrative permission for a dropdown on a page an officer uses
+     * daily. `GET /users/picker` applies the same scope and asks only that you are signed in.
      */
     const fetchAssigneeOptions = useCallback(async (query: string, page: number, pageSize: number) => {
-        const res: any = await fetchUsersService({
-            name: query?.trim() || undefined,
-            pageNumber: page,
-            pageSize,
-        });
-        if (res?.status !== 200) return { options: [], totalElements: 0 };
-
-        const content = res.data?.content ?? [];
-        return {
-            options: content.map((u: any) => ({
-                value: u.id,
-                // Surname first, matching how the table's own "Assigned To" column reads.
-                label: [u.lastName, u.firstName].filter(Boolean).join(' ') || u.email || `User ${u.id}`,
-            })),
-            totalElements: res.data?.totalElements ?? content.length,
-        };
+        try {
+            const { content, totalElements } = await fetchStaffOptionsService({
+                name: query, pageNumber: page, pageSize,
+            });
+            return {
+                options: content.map((u) => ({ value: u.id, label: staffOptionLabel(u) })),
+                totalElements,
+            };
+        } catch {
+            return { options: [], totalElements: 0 };
+        }
     }, []);
     const grantedActions = useMemo(() => new Set<string>([
         ...(canUpdateAsset ? [PERMISSIONS.UPDATE_ASSET] : []),

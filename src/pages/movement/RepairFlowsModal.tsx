@@ -192,7 +192,10 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
         if (!q) return;
         setUsersLoading(true);
         try {
-            const r = (await fetchRowsService({ pageNumber: 0, pageSize: 10, endPoint: 'users', params: { name: q } })) as any;
+            // The staff picker, not the directory — see MovementForm.
+            const r = (await fetchRowsService({
+                pageNumber: 0, pageSize: 10, endPoint: 'users/picker', params: { name: q },
+            })) as any;
             if (r?.status === 200) setUsers(r.data?.content ?? []);
         } finally {
             setUsersLoading(false);

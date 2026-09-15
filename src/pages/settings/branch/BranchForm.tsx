@@ -123,7 +123,7 @@ const BranchForm = ({
     update = false,
 }: IBranchForm) => {
     const { formFields } = BranchUtills();
-    const { fetchAllUsers } = UserUtils();
+    const { fetchStaffOptions } = UserUtils();
     const { fetchAllRegions } = RegionUtills();
     const { fetchAllDistricts } = DistrictUtills();
     const [loading, setLoading] = useState(true);
@@ -134,7 +134,7 @@ const BranchForm = ({
         setLoading(true);
         try {
             await Promise.all([
-                fetchAllUsers(),
+                fetchStaffOptions(),
                 fetchAllRegions(),
                 fetchAllDistricts()
             ]);
@@ -144,7 +144,7 @@ const BranchForm = ({
             console.error("Error loading form data:", error);
             setLoading(false);
         }
-    }, [fetchAllUsers, fetchAllRegions, fetchAllDistricts]);
+    }, [fetchStaffOptions, fetchAllRegions, fetchAllDistricts]);
 
     // Only fetch data once and prevent re-renders
     useEffect(() => {

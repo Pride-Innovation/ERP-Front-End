@@ -40,7 +40,7 @@ const OfficeEquipmentForm = ({
     const { formFields, determineOfficeAssetType } = OfficeEquipmentUtills();
     const { fetchAllBranches } = BranchUtills();
     const { fetchAllStatuses } = StatusUtills();
-    const { fetchAllUsers } = UserUtils();
+    const { fetchStaffOptions } = UserUtils();
     const { fetchAllAssetTypes } = AssetTypeUtills();
     const { fetchAllSuppliers } = SupplierUtills();
     const { fetchAllCommodities } = CommodityUtills();
@@ -54,7 +54,7 @@ const OfficeEquipmentForm = ({
                 await Promise.all([
                     fetchAllBranches(branchParams),
                     fetchAllStatuses(),
-                    fetchAllUsers(userParams),
+                    fetchStaffOptions(userParams),
                     fetchAllAssetTypes(),
                     fetchAllSuppliers(supplierParams),
                     fetchInventory(lpoParams)

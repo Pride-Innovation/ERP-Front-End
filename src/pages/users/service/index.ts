@@ -60,6 +60,25 @@ const unBlockUserService = async (id: string | number) => {
   }
 }
 
+/**
+ * Your own record, from the JWT.
+ *
+ * <p>Separate from `fetchSingleUserService` because they are different questions with different
+ * rules. That one reads the **staff directory** and needs `READ_USER`; this one takes no id and can
+ * only ever return the caller, so it needs nothing beyond being signed in.
+ *
+ * <p>Using the directory endpoint for the profile page is what made seeing your own profile require
+ * `READ_USER` — which showed the Users page, which loads roles, which needs `READ_ROLE`. A chain of
+ * administrative permissions, entered through a page about yourself.
+ */
+const fetchOwnProfileService = async () => {
+  try {
+    return await axiosInstance.get('users/me');
+  } catch (error) {
+    return error;
+  }
+};
+
 const fetchSingleUserService = async (id: string | number) => {
   try {
     const response = await axiosInstance.get(`users/${id}`);
@@ -117,6 +136,7 @@ const bulkInsertUsersService = async (data: object) => {
 export {
   createUSerService,
   fetchUsersService,
+  fetchOwnProfileService,
   fetchSingleUserService,
   deleteUserService,
   searchUserService,

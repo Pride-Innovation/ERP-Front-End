@@ -109,7 +109,7 @@ const Repair = ({
         usersOptions: []
     });
     const { users } = useSelector((state: RootState) => state.UserStore);
-    const { fetchAllUsers } = UserUtils();
+    const { fetchStaffOptions } = UserUtils();
     const [localInput, setLocalInput] = useState<string>('');
     const debouncedInput = useDebounce(localInput, 500);
 
@@ -125,7 +125,7 @@ const Repair = ({
         if (optionsObject.usersOptions.length === 0) {
             try {
                 setLoading(true);
-                await fetchAllUsers();
+                await fetchStaffOptions();
             } catch (error) {
                 console.error("Error fetching initial users:", error);
             } finally {

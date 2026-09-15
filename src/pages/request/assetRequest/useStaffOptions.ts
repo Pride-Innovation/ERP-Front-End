@@ -6,7 +6,7 @@ Managing Director
 */
 
 import { useCallback } from 'react';
-import { fetchUsersService } from '../../users/service';
+import { fetchStaffOptionsService, staffOptionLabel } from '../../users/service/staffPicker';
 import { IFilterOptionPage } from '../../../components/tables/interface';
 
 /**
@@ -17,34 +17,34 @@ import { IFilterOptionPage } from '../../../components/tables/interface';
  * offer the same list from the same place. Written once, memoised per page, and handed to
  * `buildRequestColumnFilters`.
  *
- * <h2>Scoping</h2>
- * This is the same `GET /users` the assets page's "Assigned To" filter uses, and it is **branch-scoped
- * on the server**: a branch user is offered their own duty station's staff, while Head Office and the
- * units see everyone. That matters more than it looks — a picker that offered people the listing
- * would never return reads as a filter that silently finds nothing, and the user has no way to tell
- * an empty result from a wrong guess.
+ * <h2>Scoping, and the permission it used to demand</h2>
+ * This read `GET /users` — the **staff directory** — so filtering a request list by requester
+ * required `READ_USER`, which also opens the Users page and needs `READ_ROLE` behind it. An officer
+ * could not use the filters on their own requests without administrative rights.
+ *
+ * <p>It reads `GET /users/picker` now, which applies **the same branch scope** and answers to
+ * authentication alone. Nothing about who appears in the list changed: a branch user is offered their
+ * own duty station's staff, Head Office and the units see everyone. That scoping matters more than it
+ * looks — a picker offering people the listing would never return reads as a filter that silently
+ * finds nothing, and the user cannot tell that from a wrong guess.
  *
  * <p>Nothing here widens what the listing returns. Both filters narrow within whatever scope the
  * caller already has, which is why the request scope predicate still applies alongside them.
  */
 const useStaffOptions = () => useCallback(
     async (query: string, page: number, pageSize: number): Promise<IFilterOptionPage> => {
-        const res: any = await fetchUsersService({
-            name: query?.trim() || undefined,
-            pageNumber: page,
-            pageSize,
-        });
-        if (res?.status !== 200) return { options: [], totalElements: 0 };
-
-        const content = res.data?.content ?? [];
-        return {
-            options: content.map((u: any) => ({
-                value: u.id,
-                // Surname first, matching how the request table's own columns read.
-                label: [u.lastName, u.firstName].filter(Boolean).join(' ') || u.email || `User ${u.id}`,
-            })),
-            totalElements: res.data?.totalElements ?? content.length,
-        };
+        try {
+            const { content, totalElements } = await fetchStaffOptionsService({
+                name: query, pageNumber: page, pageSize,
+            });
+            return {
+                options: content.map((u) => ({ value: u.id, label: staffOptionLabel(u) })),
+                totalElements,
+            };
+        } catch {
+            // An empty picker is visible in the filter bar; a toast over a dropdown is not.
+            return { options: [], totalElements: 0 };
+        }
     },
     [],
 );

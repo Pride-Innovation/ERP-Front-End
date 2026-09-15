@@ -28,6 +28,8 @@ import moment from "moment";
 import { useEffect, useState } from "react";
 import { IUser, IUserAxiosResponse } from "../users/interface";
 import { fetchSingleUserService } from "../users/service";
+import usePermissions from "../../core/permissions/usePermissions";
+import { PERMISSIONS } from "../../core/permissions/constants";
 import InfoItem from "./InfoItem";
 
 // Brand colors
@@ -51,7 +53,25 @@ const AccountInfoCard = ({ user }: AccountInfoCardProps) => {
     const createdById = typeof user?.createdBy === 'number' ? user.createdBy : null;
     const modifiedById = typeof user?.lastModifiedBy === 'number' ? user.lastModifiedBy : null;
 
+    /** Resolving another person's name is a directory read; without it the id is shown instead. */
+    const { has } = usePermissions();
+    const canReadUsers = has(PERMISSIONS.READ_USER);
+
+    /*
+     * Only asked for by somebody who may read the directory.
+     *
+     * These resolve "Created by" and "Last modified by" — other people's records, reached through
+     * `GET /users/{id}`, which answers to `READ_USER`. On an officer's own profile the creator is
+     * typically an administrator, so this fired a **403 per profile load** for a name that is not
+     * theirs to see.
+     *
+     * The fallback was already correct: it prints `User #1` when the lookup fails, and the comment
+     * below says so. What was wrong is that it asked at all — a page must hold what its calls
+     * require, and the check belongs on the call rather than on what the call renders.
+     */
     useEffect(() => {
+        if (!canReadUsers) return;
+
         const pending = [createdById, modifiedById]
             .filter((id): id is number => id !== null && !(id in actorNames))
             .filter((id, index, ids) => ids.indexOf(id) === index);
@@ -75,7 +95,7 @@ const AccountInfoCard = ({ user }: AccountInfoCardProps) => {
 
         return () => { cancelled = true; };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [createdById, modifiedById]);
+    }, [createdById, modifiedById, canReadUsers]);
 
     const actorName = (id: number | null) => (id === null ? '' : actorNames[id] || `User #${id}`);
 

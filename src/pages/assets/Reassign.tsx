@@ -46,7 +46,7 @@ const Reassign = ({
     });
     const [selectedUser, setSelectedUser] = useState<IOptions | null>(null);
     const { users } = useSelector((state: RootState) => state.UserStore);
-    const { fetchAllUsers } = UserUtils();
+    const { fetchStaffOptions } = UserUtils();
     const dispatch = useDispatch<AppDispatch>();
 
     const [localInput, setLocalInput] = useState<string>('');
@@ -66,7 +66,7 @@ const Reassign = ({
         if (optionsObject.usersOptions.length === 0) {
             try {
                 setLoading(true);
-                await fetchAllUsers();
+                await fetchStaffOptions();
             } catch (error) {
                 console.error("Error fetching initial users:", error);
             } finally {

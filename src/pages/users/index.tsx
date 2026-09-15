@@ -7,6 +7,7 @@ Managing Director
 
 import { Box } from '@mui/material';
 import TableComponent from '../../components/tables/TableComponent';
+import useAccessScope from '../../core/permissions/useAccessScope';
 import UserUtils from './utils';
 import { UserContext } from '../../context/user/UserContext';
 import { useContext, useEffect, useMemo, useState } from 'react';
@@ -23,6 +24,7 @@ import { bulkInsertUsersService } from './service';
 import BulkImportResult, { IBulkImportResult } from './BulkImportResult';
 import PeopleOutlinedIcon from '@mui/icons-material/PeopleOutlined';
 import { PERMISSIONS } from '../../core/permissions/constants';
+import usePermissions from '../../core/permissions/usePermissions';
 import { PageHero } from '../../components/layout';
 import {
   fetchAllBranches,
@@ -42,6 +44,18 @@ import TableUtills from '../../components/tables/utills';
 const EXPORT_MAX_ROWS = 10_000;
 
 const Users = () => {
+  /*
+   * Whether this viewer reaches beyond their own duty station — the same question the server asks
+   * before it narrows the directory. If the two drift, the page either hides a control somebody is
+   * entitled to or offers one that answers differently than it reads.
+   */
+  const { scopeFor } = useAccessScope();
+  const seesEveryBranch = scopeFor('ASSETS', 'VIEW') === 'ALL';
+
+  /** Whether the Role filter can be offered at all — `GET /roles` answers to `READ_ROLE`. */
+  const { has } = usePermissions();
+  const canReadRoles = has(PERMISSIONS.READ_ROLE);
+
   const header = { plural: 'Users', singular: 'User' };
   const [sendingRequest, setSendingRequest] = useState<boolean>(false);
   const { user, totalUsers } = useContext(UserContext);
@@ -79,19 +93,46 @@ const Users = () => {
 
   useEffect(() => { fetchAllUsers() }, []);
 
+  /*
+   * Four independent lookups, settled independently.
+   *
+   * This was `Promise.all`, which rejects on the **first** failure — so a 403 on `/roles` meant
+   * titles, branches and departments were never set either, and every filter on the page came up
+   * empty with nothing but a `console.warn` to say why. One refused call emptied four dropdowns.
+   *
+   * `/roles` is the one that refuses in practice: it needs `READ_ROLE`, which somebody granted
+   * `READ_USER` to browse the directory has no reason to hold. The Role filter is simply not offered
+   * to them now — see `columnFilters` — but the settle-independently change stands on its own: these
+   * four have nothing to do with each other, and one being unavailable should cost only itself.
+   */
   useEffect(() => {
     let cancelled = false;
-    Promise.all([fetchAllTitles(), fetchAllBranches(), fetchAllDepartments(), fetchAllRoles()])
-      .then(([t, b, d, r]) => {
-        if (cancelled) return;
-        setTitles(t);
-        setBranches(b);
-        setDepartments(d);
-        setRoles(r);
-      })
-      .catch((e) => console.warn('Failed to load reference data for filters', e));
+
+    const load = async <T,>(
+      fetcher: () => Promise<T[]>,
+      apply: (value: T[]) => void,
+      what: string,
+    ) => {
+      try {
+        const value = await fetcher();
+        if (!cancelled) apply(value);
+      } catch (e) {
+        // Not fatal, and not silent either: the filter it feeds is simply absent, and the reason is
+        // in the console for whoever is wondering which permission is missing.
+        console.warn(`Could not load ${what} for the filters`, e);
+      }
+    };
+
+    load(fetchAllTitles, setTitles, 'titles');
+    load(fetchAllBranches, setBranches, 'branches');
+    load(fetchAllDepartments, setDepartments, 'departments');
+    // Only asked for when the viewer may read roles — otherwise this is a guaranteed 403 for a
+    // filter they will not be shown.
+    if (canReadRoles) load(fetchAllRoles, setRoles, 'roles');
+
     return () => { cancelled = true; };
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canReadRoles]);
 
   /**
    * Runs a query and remembers it, so turning a page can reissue the same one.
@@ -403,9 +444,33 @@ const Users = () => {
               { key: 'email', label: 'Email', type: 'text' },
               { key: 'staffNumber', label: 'Staff Number', type: 'text' },
               { key: 'titleId', label: 'Title', type: 'select', options: titles },
-              { key: 'branchId', label: 'Duty Station', type: 'select', options: branches },
+              /*
+               * Offered only to somebody who can actually look beyond their own branch.
+               *
+               * `GET /users` *silently substitutes* the caller's own branch below ALL scope — the
+               * right behaviour for a directory, where an unasked-for branch parameter is routine.
+               * But the control did not know that, so picking "Head Office" returned **your own
+               * branch's staff under a Head Office label**: a filter that appears to work and
+               * quietly answers a different question, which is worse than one that refuses.
+               *
+               * The store page's branch picker was gated for the same reason.
+               */
+              ...(seesEveryBranch
+                ? [{ key: 'branchId', label: 'Duty Station', type: 'select' as const, options: branches }]
+                : []),
               { key: 'departmentId', label: 'Department', type: 'select', options: departments },
-              { key: 'roleId', label: 'Role', type: 'select', options: roles },
+              /*
+               * Offered only to somebody who may read roles.
+               *
+               * `GET /roles` needs `READ_ROLE`, and a person granted `READ_USER` to browse the staff
+               * directory has no reason to hold it — so this filter was a guaranteed 403 and, because
+               * the four lookups shared a `Promise.all`, it took the other three dropdowns down with
+               * it. A page should not require a second administrative permission to render its own
+               * filters.
+               */
+              ...(canReadRoles
+                ? [{ key: 'roleId', label: 'Role', type: 'select' as const, options: roles }]
+                : []),
               {
                 key: 'gender', label: 'Gender', type: 'select', options: [
                   { value: 'male', label: 'Male' },

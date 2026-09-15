@@ -919,6 +919,247 @@ The call-site comment in `IssuanceService` still described the old behaviour —
 are left untouched here" — while the method beside it did the opposite. Corrected, because that is
 the comment someone reads before "restoring" the behaviour that caused this.
 
+## The user model
+
+The directory listing was scoped. Everything else about a user record was not, and three of the
+account actions answered to a permission nobody had chosen for them.
+
+### 22 of 27 people could not change their own password
+
+`POST users/change-password` resolves the account from the JWT — it can only ever touch the caller's
+own record — and it sits under `/users/**`, so the POST matcher demanded **`CREATE_USER`**. Measured:
+**5 accounts hold it.** Everyone else's only route to a new password was the forgotten-password link.
+
+It now has its own matcher at `authenticated()`, placed **before** the generic rule, because the
+first match wins — the same ordering that once left a reject-only role unable to reject. It is in
+`EndpointGuardCoverageTest.DELIBERATELY_AUTHENTICATED_ONLY` with that reasoning, and the change is
+**audited**: block, enable and disable all wrote a row; the one event where "who, and when" is asked
+most often wrote none.
+
+### The account actions were a side effect of the URL space
+
+Enable, disable, block, unblock and return-from-leave inherited `CREATE_USER` because they are POSTs
+under `/users/**`. Nobody decided that minting an account and suspending one were the same right —
+the second is the one taken in a hurry, the moment somebody leaves, and should be grantable without
+the first. They answer to **`MANAGE_USER_ACCESS`** now.
+
+**Backfilled once, or it would have repeated the Stock Take failure exactly.** A new permission is
+held by nobody, so shipping the split alone would have taken all five actions away from every role at
+once. `UserAccessPermissionSeeder` grants it to every role already holding `CREATE_USER`, using the
+permission row's own absence as the marker — so it runs on one startup and never again, and a
+permission revoked in Settings stays revoked. It runs **before** `initializePermissions()`, which
+would otherwise create the row itself and erase the marker.
+
+### Nothing stopped an administrator locking the bank out
+
+No guard prevented disabling or blocking **your own** account — the next request fails
+authentication and the person who could undo it is the person who just did it. Worse and quieter:
+disabling the **last** account that can manage access leaves nobody able to re-enable anyone.
+
+`requireNotLastWayIn` refuses both. The tally counts only accounts that are **actually usable** —
+one that is itself disabled or blocked cannot rescue anybody, and including it would let the real
+last holder be switched off while the count still read two.
+
+### The listing was scoped and everything reached by id was not
+
+`findUser` is a bare `findById`, so the single read, the update, both image actions and all five
+account actions worked on any account in the bank. A branch officer could not *find* a Head Office
+colleague through the directory and could block them by knowing their id — the same gap assets had
+before `requireAssetInScope`.
+
+`requireUserInScope` **refuses rather than substituting**, unlike the listing. A directory is a
+browsing surface where an unasked-for branch parameter is routine; naming a *person* is a specific
+claim about a specific record, and quietly acting on somebody else's would be worse than saying no.
+A caller with no branch on record is refused, because `currentUserBranchId` returns null for two
+opposite callers and downstream a null reads as *no restriction*.
+
+**`GET /users/search` was the way around all of it.** It went straight to the repository with no
+branch check, and **24 of 27 accounts hold `READ_USER`** — so the whole of what the listing was
+narrowed to protect was one endpoint away, by typing part of a name. Now scoped through the same
+`resolveVisibleBranch`, with the branch predicate written as an explicit **LEFT JOIN** (trap #1) and
+the text clause parenthesised — `AND` binds tighter than `OR`, so without the brackets the branch
+would have applied to the staff-number clause alone and a first-name search would have returned the
+bank.
+
+*The general shape:* **scoping a listing and leaving its search open is the easiest version of this
+mistake to make**, because the two look like separate features and are the same disclosure.
+
+### People are not assets
+
+`resolveVisibleBranch` asked `ScopeSubject.ASSETS` — there was no people axis — so granting somebody
+cross-branch reach over the *asset register* silently handed them every member of staff's duty
+station, department, title and reporting line. Two different disclosures answered by one grant, which
+is exactly what separate subjects exist to prevent.
+
+`ScopeSubject.PEOPLE` exists now, with `VIEW_ALL_BRANCH_PEOPLE` / `MANAGE_ALL_BRANCH_PEOPLE`.
+**Nobody holds them on the day they ship**, so the resolver ORs the old signal: PEOPLE at ALL *or*
+ASSETS at ALL. The new axis can therefore only ever *widen* — asking for it alone would have narrowed
+Head Office and the units to their own branch overnight and broken every staff picker and
+cross-branch asset assignment with it, which reads as a fault rather than a policy change.
+
+**Remove the fallback once the multipliers are granted, and not before** — the separation buys
+nothing while ASSETS still answers for PEOPLE.
+
+*And the page mirrored the old behaviour without knowing it.* The Duty Station filter was shown to
+everyone, while the server silently substitutes your own branch below ALL — so picking "Head Office"
+returned **your branch's staff under a Head Office label**. A filter that appears to work and quietly
+answers a different question is worse than one that refuses; it is gated on reach now, as the store
+page's branch picker already was.
+
+### The model itself
+
+**`staff_number` had no unique constraint** (V23). The service checked `existsByStaffNumber` on create
+and `...AndIdNot` on update — both correct, both service-level only, so two concurrent creations each
+read "no such number", each passed, and both committed. Email had the constraint from the start,
+which is what makes the omission read as an oversight. Verified before writing the migration: 27
+accounts, 27 distinct staff numbers, none blank. NULL stays allowed — MySQL treats NULLs as distinct,
+so an import may land a row before the number is known.
+
+**There was no password policy at all.** `changePassword` checked that the old one matched and that
+the new one differed; a single character passed. The reset flow checked **nothing**. `PasswordPolicy`
+is now enforced on both, because a rule on one of two paths is not a rule — and they were separate
+code in separate packages with no shared notion of validity, which is how the two come to disagree.
+It reports **every** failure at once, or a person discovers the rules one attempt at a time.
+
+### The profile page, and two faults the scoping made reachable
+
+**A refused profile rendered the previously-viewed person.** `getUserDetails` swallowed its failures
+into a `console.log` and had no non-200 branch, and `UserContext` is mounted at the **app root** — so
+`user` survives navigation. Together: opening a profile the server refuses left the last person's
+name, email, staff number and duty station on screen **under somebody else's id**.
+
+Latent until user records were scoped by branch, which is what made a 403 reachable — so it was this
+change's job to handle. The page now clears the context before every fetch and shows the refusal.
+*A boundary must not render as a fact*, and the fact this rendered was another person's record.
+
+**Password changes failed silently, and the modal closed as if they had worked.** The handler caught
+everything into a console line and closed the dialog in `finally`, so a wrong old password looked
+exactly like success. Harmless-ish while the only failure was a typo; actively misleading the moment
+a **password policy** existed, because "too short" became a refusal ordinary users meet. Both the
+non-201 path and the catch now surface it, and the dialog stays open.
+
+The client-side rules mirror `PasswordPolicy` too — the yup schema required only *non-empty*, which
+is looser than the server and turns every rejection into a surprise. The server stays the authority;
+this is so the rule is visible while typing.
+
+**Your own profile picture needed `UPDATE_USER`** — 5 of 27 accounts. Both image PUTs sit under
+`/users/**` and inherited the administrative permission from where they happen to be in the URL
+space, exactly as the password endpoint did. They answer to `authenticated()` now and stay scoped by
+`requireUserInScope`, so this is not a way to change a colleague's.
+
+*What was already right:* every action on the page is gated on `isCurrentUser`, so Change Password,
+Update Availability and Update Image appear only on your own profile — which matters, because the
+password endpoint acts on the JWT holder regardless of the id in the URL. And the Users page's row
+menu links to `/profile/{id}` for colleagues, which stays consistent: that listing is branch-scoped,
+so the rows you can click are already within reach.
+
+### A permission chain, entered through a page about yourself
+
+Your own profile required **`READ_USER`**, and that set off a chain nobody designed:
+
+1. The profile page read `GET /users/{id}` — the **staff directory** endpoint — so seeing yourself
+   needed the permission for browsing everyone.
+2. `READ_USER` is also what puts **Users** in the sidebar, so granting it hands an officer an
+   administrative page they have no business on.
+3. The Users page loads roles for one of its filters, and `GET /roles` needs **`READ_ROLE`** — so it
+   403s until that is granted too.
+
+Three permissions deep to look at your own record. That is not a policy; it is an accident of which
+endpoint a page happened to call.
+
+**And step 3 was worse than it appeared.** The four reference lookups shared a `Promise.all`, which
+rejects on the *first* failure — so the 403 on `/roles` meant titles, branches and departments were
+never set either. **One refused call emptied all four dropdowns**, with a `console.warn` as the only
+trace.
+
+Broken at the first link. **`GET /users/me`** resolves the account from the JWT, takes no id, and so
+can only ever return the caller — it answers to authentication alone, exactly as `change-password`
+and the profile picture now do. `READ_USER` goes back to meaning *may you browse the directory*, and
+an officer needs nothing at all to see their own profile.
+
+The other two links are closed as well, because the chain should not reassemble: the lookups settle
+independently (one being unavailable costs only itself), and the Role filter is not offered — nor
+fetched — to somebody without `READ_ROLE`, the same gating the Duty Station filter has.
+
+**Going on leave needed it too, and that one was load-bearing.** The leave form's *"who will act in
+your absence"* picker loaded the **staff directory** to fill one dropdown, so an officer could not
+apply for leave without `READ_USER`. `GET /users/colleagues` replaces it: authentication alone, no
+parameters, your own branch minus yourself, and a three-field `ColleagueDTO` rather than the whole
+record — somebody you might hand your work to is somebody you already work beside.
+
+*It was also silently truncated.* The old call asked for **`pageSize=10`**, so the picker could only
+ever offer the first ten people in the bank. The new one is unpaged: a branch is tens of people, and
+a picker that cannot name most of them is worse than one that is slow.
+
+**And the profile page fetched the directory twice.** `AccountInfoCard` resolves *"Created by"* and
+*"Last modified by"* through `GET /users/{id}` — other people's records. On an officer's own profile
+the creator is typically an administrator, so it fired a **403 per profile load**. Its fallback was
+already right (it prints `User #1`); what was wrong is that it asked at all. Gated on `READ_USER`
+now — the check belongs on the call, not on what the call renders.
+
+### A picker is not a directory — and a dozen screens thought it was
+
+The profile page turned out to be one instance of something much wider. **Every "choose a person"
+dropdown in the application loaded `GET /users`** — the staff directory — and so required
+`READ_USER`:
+
+| Screen | Dropdown |
+|---|---|
+| All / Pending / Rejected / Issued requests | Requested By, Approver |
+| Assets register | Assigned To (filter) |
+| Asset form, Reassign, Repair | the holder |
+| New movement, repair flows | the recipient |
+| Profile → leave | who will act for you |
+| Settings → Branches, Departments | the manager, the head |
+
+So an officer could not filter their own request list, assign an asset, raise a movement or apply for
+leave without a permission that **also opens the Users page** and needs `READ_ROLE` behind it to
+render its filters. The choice on offer was: grant administrative rights broadly, or leave ordinary
+screens broken. Neither was a decision anybody made — it followed from a picker borrowing a
+directory.
+
+**`GET /users/picker`** is the one list behind all of them now.
+
+- **The scope is identical.** It runs through the same `resolveVisibleBranch` the directory uses, so
+  a branch user is offered their own duty station and ALL scope is offered everyone — exactly what
+  these dropdowns returned before. Nothing widened, nothing narrowed.
+- **The shape is narrower** (`StaffOptionDTO`: id, names, work email, job title) and **the permission
+  is lower** (authentication alone). Those two go together: opening it to every signed-in user is
+  defensible *because* what comes back is a name and a title rather than a personnel record —
+  no duty station, department, staff number, account state, roles or reporting line.
+
+`fetchStaffOptions` loads it into the same store `fetchAllUsers` filled, dispatching the same action,
+so every component reading `users` kept working — the shape is a subset of what they already read.
+Only the Users page itself still reads the directory, which is what the directory is for.
+
+*The trade to be aware of:* any signed-in user can now enumerate the names and job titles of people
+at their own branch. That is a staff list of your immediate colleagues, which is roughly what a
+printed seating plan discloses — and it replaces a rule that said "or hold the permission that
+governs the whole personnel register".
+
+*The general shape, and it is the counterpart to the route/endpoint rule:* **a self-service action
+must not borrow an administrative endpoint.** When it does, the permission comes with it, and so does
+everything else that permission opens. **Five** endpoints on this one page had done it — the
+password, the picture, the profile itself, the leave picker, and the audit-column lookup.
+
+*A note on the guard test, found while adding these:* `refusedWithNoAuthorities` cannot distinguish a
+filter-chain refusal from a **business** one. Both self-service endpoints resolve the caller from the
+request and refuse when there is none, so they read as *guarded* to the prober while being
+authenticated-only in fact. Both are named in `DELIBERATELY_AUTHENTICATED_ONLY` regardless, so the
+intent does not rest on that accident — the same distinction `MovementRouteAuthorizationTest` already
+has to make.
+
+**Still open — `/leave/**` is in no security matcher at all.** It falls through to
+`.anyRequest().authenticated()`, so any signed-in user can read **every** leave record in the bank
+(`GET /leave`) and file leave **for any colleague** (`POST /leave/{userId}`), marking them away.
+Already listed in `EndpointGuardCoverageTest.KNOWN_UNGUARDED`; left there because who may file leave
+for whom is a policy question rather than a mechanical fix — self-service plus a manager, most
+likely, which is a different shape from the permissions the module has today.
+
+*Left alone deliberately:* `DELETE /users/**` is matched to `DELETE_USER` and no DELETE endpoint
+exists. Harmless, but it makes the permission look meaningful — worth removing or implementing, and
+neither is urgent. Accounts are disabled, never deleted, which is the right model for a bank.
+
 ## Audit trails page
 
 The best-built page in the app before this — server-side paging, proper date bounds, a service that

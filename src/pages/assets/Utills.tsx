@@ -36,7 +36,7 @@ const AssetUtills = () => {
     const { setIssuableAssets } = useContext(RequestContext);
 
     const { fetchInventory } = InventoryUtills();
-    const { fetchAllUsers } = UserUtils();
+    const { fetchStaffOptions } = UserUtils();
     const { fetchAllBranches } = BranchUtills();
     const { fetchAllSuppliers } = SupplierUtills();
 
@@ -87,7 +87,9 @@ const AssetUtills = () => {
     const searchUserByName = async (firstName: string) => {
         try {
             const params = { firstName }
-            await fetchAllUsers(params);
+            // The picker, not the directory — "Assigned To" is a dropdown on the assets page,
+            // and reading it should not require the permission that administers staff.
+            await fetchStaffOptions(params);
         } catch (error) {
             console.log(error)
         }
