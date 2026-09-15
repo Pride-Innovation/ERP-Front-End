@@ -92,6 +92,21 @@ const Movement = () => {
     const { has } = usePermissions();
     const mayApproveMovements = has(PERMISSIONS.APPROVE_MOVEMENT);
 
+    /*
+     * Who may open Repair / Disposal at all.
+     *
+     * The button was ungated while the New Movement button directly beside it was not. Measured on
+     * live data: sixteen accounts hold READ_MOVEMENT and so reach this page and saw it, while only
+     * eight could submit a repair and four a disposal - so half the people offered it got a 403 on
+     * the first thing they tried, which reads as a broken button rather than as a boundary.
+     *
+     * A disjunction because the modal carries four flows under two permissions; it filters its own
+     * tiles to whichever of the two the viewer actually holds, so somebody with one of them is not
+     * offered the other's flow.
+     */
+    const mayRepairAssets = has(PERMISSIONS.REPAIR_ASSET);
+    const mayDisposeAssets = has(PERMISSIONS.DISPOSE_ASSET);
+
     const fetchPendingCount = async () => {
         if (!currentUserId || !mayApproveMovements) return;
         const r = (await fetchPendingApprovalMovementsService(currentUserId, { pageSize: 1, pageNumber: 0 })) as any;
@@ -249,14 +264,16 @@ const Movement = () => {
                         >
                             Consignments
                         </Button>
-                        <Button
-                            variant="outlined"
-                            startIcon={<BuildOutlinedIcon />}
-                            onClick={() => setRepairOpen(true)}
-                            sx={{ height: 36, px: 2, borderRadius: '8px', textTransform: 'none', fontWeight: 600 }}
-                        >
-                            Repair / Disposal
-                        </Button>
+                        {(mayRepairAssets || mayDisposeAssets) && (
+                            <Button
+                                variant="outlined"
+                                startIcon={<BuildOutlinedIcon />}
+                                onClick={() => setRepairOpen(true)}
+                                sx={{ height: 36, px: 2, borderRadius: '8px', textTransform: 'none', fontWeight: 600 }}
+                            >
+                                Repair / Disposal
+                            </Button>
+                        )}
                         <RequirePermission permission={PERMISSIONS.CREATE_MOVEMENT}>
                             <Button
                                 variant="contained"

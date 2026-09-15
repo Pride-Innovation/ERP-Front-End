@@ -33,14 +33,12 @@ import { loadAllGeneralAssets } from "./slice";
 import { useSelector } from "react-redux";
 import { crudStates } from "../../../utils/constants";
 import Reassign from "../Reassign";
-import Repair from "../Repair";
 import ToStore from "../ToStore";
 import { FormContext } from "../../../context/form";
 import InfoIcon from '@mui/icons-material/Info';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import AssignmentIndOutlinedIcon from '@mui/icons-material/AssignmentIndOutlined';
-import BuildOutlinedIcon from '@mui/icons-material/BuildOutlined';
 import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
 import { AssetContext } from "../../../context/asset";
 import { PERMISSIONS } from "../../../core/permissions/constants";
@@ -106,7 +104,6 @@ const GeneralAssets = () => {
     const { scopeFor } = useAccessScope();
     const canUpdateAsset = has(PERMISSIONS.UPDATE_ASSET);
     const canReassignAsset = has(PERMISSIONS.REASSIGN_ASSET);
-    const canRepairAsset = has(PERMISSIONS.REPAIR_ASSET);
     const canReceiveAssetInStore = has(PERMISSIONS.RECEIVE_ASSET_IN_STORE);
     const canDisposeAsset = has(PERMISSIONS.DISPOSE_ASSET);
     const canDeleteAsset = has(PERMISSIONS.DELETE_ASSET);
@@ -171,11 +168,10 @@ const GeneralAssets = () => {
     const grantedActions = useMemo(() => new Set<string>([
         ...(canUpdateAsset ? [PERMISSIONS.UPDATE_ASSET] : []),
         ...(canReassignAsset ? [PERMISSIONS.REASSIGN_ASSET] : []),
-        ...(canRepairAsset ? [PERMISSIONS.REPAIR_ASSET] : []),
         ...(canReceiveAssetInStore ? [PERMISSIONS.RECEIVE_ASSET_IN_STORE] : []),
         ...(canDisposeAsset ? [PERMISSIONS.DISPOSE_ASSET] : []),
         ...(canDeleteAsset ? [PERMISSIONS.DELETE_ASSET] : []),
-    ]), [canUpdateAsset, canReassignAsset, canRepairAsset, canReceiveAssetInStore, canDisposeAsset]);
+    ]), [canUpdateAsset, canReassignAsset, canReceiveAssetInStore, canDisposeAsset]);
 
     /** Branches for the Location filter; fetched once. */
     const [branches, setBranches] = useState<ReferenceOption[]>([]);
@@ -469,7 +465,6 @@ const GeneralAssets = () => {
      * be read against each other:
      *   Update            PUT    /assets/{id}            UPDATE_ASSET
      *   Reassign          POST   /assets/reassign/{id}   REASSIGN_ASSET
-     *   Repair            POST   /assets/repairs/{id}    REPAIR_ASSET
      *   Receive into Store PUT   /assets/store/{id}      RECEIVE_ASSET_IN_STORE
      *   Dispose           POST   /movements/disposal     DISPOSE_ASSET
      *   Delete Record     DELETE /assets/{id}            DELETE_ASSET
@@ -481,7 +476,6 @@ const GeneralAssets = () => {
             { value: crudStates.read, label: "View Details", icon: <RemoveRedEyeIcon fontSize='small' />, divider: true },
             { value: crudStates.update, label: "Update", icon: <ModeEditIcon fontSize='small' color='info' />, permission: PERMISSIONS.UPDATE_ASSET },
             { value: crudStates.reassign, label: "Reassign", icon: <AssignmentIndOutlinedIcon fontSize='small' color='secondary' />, permission: PERMISSIONS.REASSIGN_ASSET },
-            { value: crudStates.repair, label: "Repair", icon: <BuildOutlinedIcon fontSize='small' color='primary' />, permission: PERMISSIONS.REPAIR_ASSET },
             { value: crudStates.inStore, label: "Receive into Store", icon: <HomeOutlinedIcon fontSize='small' color='action' />, permission: PERMISSIONS.RECEIVE_ASSET_IN_STORE },
             { value: crudStates.dispose, label: "Dispose", icon: <InfoIcon fontSize='small' color='error' />, permission: PERMISSIONS.DISPOSE_ASSET },
             /*
@@ -494,6 +488,24 @@ const GeneralAssets = () => {
              */
             { value: crudStates.delete, label: "Delete Record", icon: <DeleteOutlineIcon fontSize='small' color='error' />, permission: PERMISSIONS.DELETE_ASSET },
         ];
+        /*
+         * There is deliberately no "Repair" here any more.
+         *
+         * It posted to `POST /assets/repairs/{id}`, which set a status and wrote a maintenance
+         * record and did nothing else: no movement, so the asset never went anywhere; no custody
+         * hand-over, so the trail still said its user held it; no approval; and no branch scope, so
+         * any holder of REPAIR_ASSET could book any asset in the bank by id. Both status ids it used
+         * were hardcoded and both named the wrong status.
+         *
+         * Sending an asset for repair is Movements -> Repair / Disposal -> Repair Transfer, which
+         * moves it to the store its category routes to, takes custody at the right moment, climbs
+         * the approval ladder, scopes to the asset's branch, and opens the maintenance record this
+         * option used to write. Nothing is lost: the table held 0 repair rows against 24 repair
+         * movements, so this option had never successfully been used.
+         *
+         * The asset's Repair History tab is unaffected - it reads the records, and will now have
+         * some to show.
+         */
         /*
          * In the deleted view the live actions are meaningless — the record is out of the register,
          * so there is nothing to reassign, repair or dispose of. Restore is the only thing that
@@ -522,7 +534,7 @@ const GeneralAssets = () => {
     useEffect(() => {
         handleOptionChanged();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [canUpdateAsset, canReassignAsset, canRepairAsset, canReceiveAssetInStore, canDisposeAsset,
+    }, [canUpdateAsset, canReassignAsset, canReceiveAssetInStore, canDisposeAsset,
         canDeleteAsset, selectedStatus]);
 
     // Statuses power the status filter (resolved by code).
@@ -701,18 +713,6 @@ const GeneralAssets = () => {
             {crudStates.reassign === currentState
                 && <ModalComponent width={"40%"} title={`Reassign ${assetType?.name || 'Asset'}`} open={open} handleClose={handleClose}>
                     <Reassign
-                        handleClickAction={handleOptionClicked}
-                        sendingRequest={loading}
-                        handleClose={handleClose}
-                        buttonText='Confirm'
-                        asset={currentAsset}
-                        module={assetType?.name || ''}
-                    />
-                </ModalComponent>
-            }
-            {crudStates.repair === currentState
-                && <ModalComponent width={"90%"} title={`Repair ${assetType?.name || 'Asset'}`} open={open} handleClose={handleClose}>
-                    <Repair
                         handleClickAction={handleOptionClicked}
                         sendingRequest={loading}
                         handleClose={handleClose}

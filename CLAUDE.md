@@ -491,6 +491,158 @@ entitled.
 that needs a principal must mint a token and bind a `MockHttpServletRequest`; `ConsignmentLifecycleTest`
 now shows the pattern.
 
+## Repair — two flows sharing a word, now one
+
+The bank had **two unrelated features called Repair**, and each was missing exactly what the other
+had.
+
+| | Assets page row menu | Movements page modal |
+|---|---|---|
+| Endpoint | `POST /assets/repairs/{id}` | `POST /movements/repair-transfer` |
+| Wrote | a `Repair` row + a status flip | a `Movement` + custody hand-over |
+| Moved the asset | **no** | yes, to a Head Office store |
+| Approval | **none** | climbs the initiator's ladder |
+| Branch-scoped | **no** | yes |
+| Recorded what failed | yes | **no** |
+| Fed Reports → Maintenance | yes | **no** |
+
+Measured before the change: **13 `REPAIR_TRANSFER` + 7 `RETURN_AFTER_REPAIR` + 3 `TEMP_REPLACEMENT`
++ 1 `DISPOSAL_TRANSFER` movements, and 0 rows in `repair`.** So the flow the bank actually used
+produced nothing the maintenance report could show — which is why that tab "has never had a row to
+render" — and the flow that produced those rows had never once been used.
+
+**The journey now carries the record.** `transferForRepair` opens the `Repair` and links it to the
+movement; `returnAfterRepair` closes it. One repair, one journey, one record. Returning a repaired
+asset *is* the moment the repair finished, so asking for the completion through a separate endpoint —
+which nothing on the movements page ever called — is what left records "Pending" for the life of an
+asset.
+
+The record is created **after** the movement, deliberately: an EXTERNAL repair's technician is the
+consultant, and the movement is where a consultant id has been resolved into a named vendor. And
+`closeForReturn` is **tolerant of finding nothing** — the seven assets already returned this way
+predate the record existing, and refusing a real movement to fix a reporting gap is the wrong way
+round.
+
+### Both hardcoded status ids named the wrong status
+
+Trap #4, live, in both directions:
+
+```
+id  7 = inMaintenance    ← what a repair should set
+id 12 = stockCompleted   ← what completeRepair set, calling it "in store"
+id 13 = sentToStore      ← what createRepair set, calling it "the repair status"
+```
+
+So booking a repair marked the asset **"Sent to Store"** and finishing one marked it **"Stock
+Completed"** — a *stock-order* status, on an asset, which the register has no rendering for. Latent
+rather than live (0 assets read either, because the flow was never used), and it would have started
+producing wrong statuses the day anybody used it. Resolved by code now, and
+`RepairFlowUnificationTest` pins their absence.
+
+*That test strips comments before asserting*, because the javadoc explaining the removed literals
+names them — and the obvious fix for a source assertion failing on its own explanation is to delete
+the explanation, which is the wrong trade. Verified non-vacuous by putting `findOneStatus(13L)` back
+and watching it fail.
+
+### The assets-page flow is gone
+
+`POST /assets/repairs/{assetId}`, `Repair.tsx`, the row-menu option, `crudStates.repair` and the
+already-dead `repairAssetService`. Nothing was migrated: the table held zero rows. **The GET reads
+and the PUT stay** — an asset's maintenance history and closing a repair on the bench are real and
+separate duties, and the bench needs the second (clear the queue Friday, ship Monday). `completeRepair`
+gained the branch guard it never had: it reached the asset through `AssetService.findOne`, which
+deliberately carries no check, and nothing afterwards asked whose asset it was.
+
+### Repair is an asset action, as disposal already was
+
+The three repair endpoints asked for `CREATE_MOVEMENT` — not by decision, but because they were
+written as movement endpoints. Disposal had already been given `DISPOSE_ASSET` for exactly this
+reasoning; repair had not. Measured: **four accounts at Gulu and Mbarara held `CREATE_MOVEMENT`
+without `REPAIR_ASSET`** — including the branch that raised every one of the thirteen transfers — so
+the permission named for repair was walked around by the route people actually use.
+
+`RepairPermissionSeeder` grants `REPAIR_ASSET` once to every role already holding `CREATE_MOVEMENT`.
+Measured after: **4 → 8 holders, matching `CREATE_MOVEMENT` exactly, and nobody who could raise a
+repair yesterday lost it.**
+
+**It could not use the absence-of-the-row marker** that `AssetTrailPermissionSeeder` and
+`UserAccessPermissionSeeder` use, because `REPAIR_ASSET` has existed all along and four roles already
+held it — there is no absence to read. It goes through `OneTimeSeed` instead, and so runs **after**
+`initializePermissions()` rather than before it: the opposite ordering constraint to its two
+neighbours, for the opposite reason. Re-running would be a real bug, not a wasted cycle — an
+administrator revoking it in Settings would find it back on the next restart.
+
+`RepairFlowUnificationTest` pins **the marker, never the grants** — asserting the effect against live
+data turns that revocation, which is the feature working, into a build failure.
+
+**The previews take a disjunction** (`READ_MOVEMENT` *or* `REPAIR_ASSET`). A preview says where an
+asset would go; gating it on the read permission alone would show the form to somebody entitled to
+perform the repair and then refuse to tell them the destination — the same failure one screen further
+in.
+
+### The entry button was ungated
+
+The **Repair / Disposal** button on `/movement` had no guard, while the New Movement button directly
+beside it was wrapped in `RequirePermission`. Sixteen accounts hold `READ_MOVEMENT` and so saw it;
+eight could submit a repair and four a disposal. Gated now, and the modal **filters its own four
+tiles** by the permission each flow's endpoint demands — somebody holding `REPAIR_ASSET` and not
+`DISPOSE_ASSET` is not offered a disposal that would come back 403.
+
+### A branch could not bring its own asset home
+
+`asset.branch` does not mean "who owns this" — it means *where it is*, and `relocateAsset` writes the
+destination's location on receipt. Measured: **all 13 transfers originated at Gulu; all 7 assets
+currently in maintenance read Head Office.** So with only the current branch consulted,
+`requireAssetInScope` refused Gulu every action on its own asset the moment Head Office received it,
+including initiating the return.
+
+The guard is **multi-ended** now — in reach when *either* end is the caller's: where the asset sits,
+or the branch recorded on its repair transfer. Same pair the inventory report already makes visible
+inside the shared stores, same shape as the multi-ended rule a movement gets. **The holder list is
+unchanged, so SELF is untouched**: this widens by exactly one branch.
+
+*Deliberately not* done by preserving the origin on `asset.branch` — that field also decides which
+Admin store a repaired asset goes home to (`currentStoreOf`) and which branch this very guard checks,
+so changing its meaning would have changed the flows rather than the reach.
+
+*A near-miss worth keeping:* `SharedStoreVisibilityTest` asserts this file does not name the
+visibility scoping, so that nobody copies a **store-location** filter in. A comment explaining the
+change mentioned it by identifier and failed the test. The assertion is right and stayed; the comment
+says it in prose. It now also pins the widening positively, so the origin end cannot be tidied away.
+
+### What the form now asks for
+
+`faultDescription` is **required** and separate from `remarks` — remarks describe the *journey* (who
+to call at the far end), the fault describes the *failure*, and folding them together would fill the
+maintenance report's only column about the fault with courier notes. Required **except** where the
+category is non-repairable, because that diverts straight to disposal and opens no record; the
+front-end condition mirrors the service's own early return rather than guessing at it.
+
+`technician` is optional: for an IT- or Admin-routed repair the bench decides after it arrives, and
+for an EXTERNAL one the server defaults it to the consultant the form already chose. The return leg
+takes `completionNotes` and `completionDocuments`, both optional — a repair with no notes is still a
+repair that happened.
+
+### Still open
+
+- The **non-repairable divert has never fired** — all 12 categories are `repairable = true`, so that
+  path is unexercised against real data.
+- `TEMP_REPLACEMENT` and `RETURN_AFTER_REPAIR` also moved to `REPAIR_ASSET`. Whether returning a
+  repaired asset should instead be a storekeeper's permission is a policy question, not a mechanical
+  one, and was left as it is.
+- **The non-repairable divert crosses a permission boundary.** `transferForRepair` on a
+  non-repairable category calls `disposeAsset`, so a holder of `REPAIR_ASSET` without `DISPOSE_ASSET`
+  would write an asset off through the repair endpoint. Pre-existing (it was `CREATE_MOVEMENT`
+  before, which is wider still) and unreachable today, since no category is non-repairable — but
+  sharper now that the two permissions mean different things. Closing it means either refusing the
+  divert without `DISPOSE_ASSET` or dropping the divert; both are decisions about what a
+  non-repairable category should do, not mechanical fixes.
+- **`RepairService`'s guard is single-branch while `RepairMovementService`'s is multi-ended.**
+  Closing a repair on the bench keys on the asset's current branch alone, which is correct for both
+  phases as it stands — the bench closes it after receipt, when the asset reads Head Office, and
+  before receipt the origin branch still matches. Making it multi-ended would mean giving that
+  service a movement repository for a case that does not arise.
+
 ## Requests
 
 The listing was the most hardened search in the codebase — every filter declared, a sort whitelist,
@@ -1001,26 +1153,41 @@ left the list.
 The badge was right the whole time because it comes from a **separate** endpoint returning a bare
 number. That split is what made the write look like it had not happened.
 
-**This is the third encounter with this trap in this codebase, handled three different ways:**
+**This is the fourth encounter with this trap in this codebase, resolved four different ways:**
 
-| Field | What the wire says | What consumers do |
+| Field | Resolved how | Outcome |
 |---|---|---|
-| `isHeadOffice` | `headOffice` | check **both** spellings, with a comment explaining why |
-| `isEnabled`, `isAccountNonLocked` | `enabled`, `accountNonLocked` | read the stripped name — correct, by discovery |
-| `isRead` | `read` | read `isRead` — **wrong**, and silently |
+| `BranchWithManagersDTO.isHeadOffice` | **pinned at the source**, with a comment | correct — and never propagated to `Branch` itself |
+| `Branch.isHeadOffice` (2 readers) | consumers check **both** spellings | correct, defensively |
+| `Branch.isHeadOffice` (3 readers) | consumers read the Java name | **broken, silently** |
+| `isEnabled`, `isAccountNonLocked` | consumers read the stripped name | correct, by discovery |
+| `isRead` | consumer reads the Java name | **broken, silently** |
 
-The lesson is not "remember the rule". It is that **a wire name nobody chose is a wire name every
-consumer has to rediscover**, and one of them eventually gets it wrong. `@JsonProperty("isRead")`
-pins it to what both sides already declare.
+Somebody had already found this, fixed one DTO properly and written the explanation — and the fix
+never reached the entity next to it. The lesson is not "remember the rule": it is that **a wire name
+nobody chose is one every consumer has to rediscover**, and eventually one gets it wrong.
+
+**The three silent `isHeadOffice` failures, none of which announced itself:**
+
+| Where | What it cost |
+|---|---|
+| `store/utillls.tsx` `resolveHeadOfficeBranch()` | `.find(b => b.isHeadOffice)` never matched, so the store page's Head Office fallback has **never** worked — including in the branch-filter work that reasoned about it |
+| `settings/branch/ViewBranch.tsx` | the "HQ" badge never rendered |
+| `users/CreateUser.tsx` | `$isHeadOffice` always false, so **"Department is required for Head Office staff" never fired** — measured, 2 of 18 Head Office staff have no department |
+
+`Branch`, the nested branch on `UserResponseDTO`, and `User.isActing` are pinned now.
+`BooleanWireNameTest` reads the actual JSON, which is the only thing that can see a name agreed
+between two languages where neither declares it — and it asserts the deliberate *non*-changes too, so
+a later tidy-up of "inconsistent" names has to come and read why first.
 
 *Nothing a type checker can see:* it is a name agreed between two languages and neither side declares
 it. `AppNotificationWireTest` reads the actual JSON — the only thing that can catch it — and also
 pins that `link` and `requestId` stay gone and that the websocket push uses the same DTO as the
 listing, so a notification cannot arrive in one shape and reload in another.
 
-*The others are deliberately left alone.* `enabled` and `accountNonLocked` have consumers reading the
-stripped names today; renaming the wire to match the Java field would break every one of them. The
-rule is to pin a name when fixing it, not to standardise the whole surface at once.
+*`enabled` and `accountNonLocked` are deliberately left derived.* Consumers read those names today, so
+pinning them to the Java spelling would break every working reader to fix nothing. **Pin a name where
+it is wrong; do not standardise a surface that works.**
 
 ### Retention
 

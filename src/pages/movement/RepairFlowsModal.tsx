@@ -39,17 +39,31 @@ import {
 } from './service';
 import { IDisposalCandidate, IMovementFlowPreview } from './interface';
 import { noApproverError } from './constants';
+import { PERMISSIONS } from '../../core/permissions/constants';
+import usePermissions from '../../core/permissions/usePermissions';
 import NoApproverDialog from './NoApproverDialog';
 
 const PRIMARY = '#08796C';
 
 type Flow = 'repair-transfer' | 'temp-replacement' | 'return-after-repair' | 'disposal';
 
-const FLOWS: { key: Flow; label: string; description: string; icon: JSX.Element; color: string }[] = [
-    { key: 'repair-transfer', label: 'Repair Transfer', description: 'Send a faulty asset for repair — routed by its category to IT, Admin or an external consultant.', icon: <BuildOutlinedIcon />, color: '#2563EB' },
-    { key: 'temp-replacement', label: 'Temporary Replacement', description: 'Issue a stand-in asset from the IT store to keep the affected user working.', icon: <SwapHorizOutlinedIcon />, color: '#A16207' },
-    { key: 'return-after-repair', label: 'Return After Repair', description: 'Send a repaired asset back to its location and optionally reclaim the temporary one.', icon: <RestartAltOutlinedIcon />, color: '#047857' },
-    { key: 'disposal', label: 'Disposal', description: 'Move an irreparable or written-off asset to the Disposal store.', icon: <DeleteSweepOutlinedIcon />, color: '#B91C1C' },
+/**
+ * The four flows, each naming the permission its endpoint actually demands.
+ *
+ * <p>Listed here so the picker and the security rules cannot drift: offering a tile whose POST comes
+ * back 403 reads as a broken button rather than as a boundary, which is the failure the movements
+ * table's row buttons were fixed for.
+ *
+ * <p>The three repair flows moved from `CREATE_MOVEMENT` to `REPAIR_ASSET` with this change - they
+ * are asset actions implemented as movements, exactly as disposal always was. Measured before it:
+ * four accounts at Gulu and Mbarara could send an asset for repair from here and not from the assets
+ * page, because only this route asked the movement permission.
+ */
+const FLOWS: { key: Flow; label: string; description: string; icon: JSX.Element; color: string; permission: string }[] = [
+    { key: 'repair-transfer', label: 'Repair Transfer', description: 'Send a faulty asset for repair — routed by its category to IT, Admin or an external consultant.', icon: <BuildOutlinedIcon />, color: '#2563EB', permission: PERMISSIONS.REPAIR_ASSET },
+    { key: 'temp-replacement', label: 'Temporary Replacement', description: 'Issue a stand-in asset from the IT store to keep the affected user working.', icon: <SwapHorizOutlinedIcon />, color: '#A16207', permission: PERMISSIONS.REPAIR_ASSET },
+    { key: 'return-after-repair', label: 'Return After Repair', description: 'Send a repaired asset back to its location and optionally reclaim the temporary one.', icon: <RestartAltOutlinedIcon />, color: '#047857', permission: PERMISSIONS.REPAIR_ASSET },
+    { key: 'disposal', label: 'Disposal', description: 'Move an irreparable or written-off asset to the Disposal store.', icon: <DeleteSweepOutlinedIcon />, color: '#B91C1C', permission: PERMISSIONS.DISPOSE_ASSET },
 ];
 
 
@@ -75,6 +89,26 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
     const [recipient, setRecipient] = useState<IUser | null>(null);
     const [remarks, setRemarks] = useState('');
 
+    /*
+     * The maintenance record, which this form had no way to describe until now.
+     *
+     * A repair transfer used to carry only `remarks`, and remarks describe the *journey* - who to
+     * call at the far end, what else is in the box. So a repair had nowhere to say what failed, and
+     * the transfer wrote no Repair row at all: measured, 24 repair movements against 0 repair rows,
+     * which is why the Maintenance report and the asset's Repair History tab were empty for every
+     * repair the bank had done.
+     *
+     * The fault is required (a maintenance record with no fault is not one). The technician is not:
+     * for an IT- or Admin-routed repair the bench decides that after it arrives, and for an EXTERNAL
+     * one the server defaults it to the consultant this form has already chosen.
+     */
+    const [faultDescription, setFaultDescription] = useState('');
+    const [technician, setTechnician] = useState('');
+
+    /** Closes that record as the asset is sent home - the return *is* the moment it finished. */
+    const [completionNotes, setCompletionNotes] = useState('');
+    const [completionDocs, setCompletionDocs] = useState<File[]>([]);
+
     // repair routing (repair-transfer only)
     const [repairDestination, setRepairDestination] = useState<RepairDestination>('IT');
     const [consultants, setConsultants] = useState<IConsultant[]>([]);
@@ -99,6 +133,17 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
     const [earlyDisposalReason, setEarlyDisposalReason] = useState('');
     /** Written off before its category's useful life is up, so the server will demand a reason. */
     const needsEarlyDisposalReason = !!disposalCandidate && !disposalCandidate.pastUsefulLife;
+
+    /*
+     * Only the flows whose endpoint will admit this viewer.
+     *
+     * The entry button on the movements page was ungated, so every one of the sixteen accounts that
+     * can open the register saw it while only eight could submit anything. Filtering here as well as
+     * on the button matters: somebody may hold REPAIR_ASSET and not DISPOSE_ASSET, and a picker that
+     * offers all four to them promises a refusal on one.
+     */
+    const { has } = usePermissions();
+    const availableFlows = FLOWS.filter((f) => has(f.permission));
 
     const categoryNotRepairable = flow === 'repair-transfer' && asset?.assetType?.repairable === false;
 
@@ -207,6 +252,8 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
         setRepairDestination('IT'); setConsultant(null); setDispatchDocs([]);
         setDisposalCandidate(null); setEarlyDisposalReason('');
         setPreview(null); setReturnLoaner(true);
+        setFaultDescription(''); setTechnician('');
+        setCompletionNotes(''); setCompletionDocs([]);
     };
 
     const back = () => { setFlow(null); reset(); };
@@ -222,10 +269,16 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
      * and a dispatch date while it was still sitting in its approval ladder, undispatched.
      */
 
-    /** Uploads the selected dispatch documents and returns their stored paths (EXTERNAL repairs). */
-    const uploadDispatchDocs = async (): Promise<string[] | null> => {
+    /**
+     * Uploads a set of chosen files and returns their stored paths, or null if any failed.
+     *
+     * <p>Shared by the EXTERNAL repair's signed dispatch documents and the return leg's completion
+     * paperwork. Returning null rather than a partial list on failure is the point: a repair recorded
+     * with half its evidence attached is worse than one the operator was told to retry.
+     */
+    const uploadDocs = async (files: File[]): Promise<string[] | null> => {
         const paths: string[] = [];
-        for (const file of dispatchDocs) {
+        for (const file of files) {
             const r = (await uploadStandaloneMovementDocumentService(file)) as any;
             if ((r?.status === 200 || r?.status === 201) && r.data?.path) {
                 paths.push(r.data.path);
@@ -251,13 +304,28 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
             let response: any;
             if (flow === 'repair-transfer') {
                 if (!asset) { toast.warning('Select the faulty asset.'); setSending(false); return; }
+                if (!categoryNotRepairable && !faultDescription.trim()) {
+                    /*
+                     * Required, except where the server will not ask for it.
+                     *
+                     * A non-repairable category is diverted straight to disposal, and a disposal
+                     * opens no maintenance record - so demanding a fault description there would
+                     * block a transfer on a field nothing reads. The condition mirrors the service's
+                     * own early return rather than guessing at it.
+                     *
+                     * Checked here as well as on the server so the message names the field; a 400
+                     * carrying the service's sentence cannot point at the box.
+                     */
+                    toast.warning('Describe what is wrong with the asset.');
+                    setSending(false); return;
+                }
 
                 let deliveryDocuments: string[] | undefined;
                 let consultantId: number | undefined;
                 if (!categoryNotRepairable && repairDestination === 'EXTERNAL') {
                     if (!consultant) { toast.warning('Select the external consultant.'); setSending(false); return; }
                     if (dispatchDocs.length === 0) { toast.warning('Attach at least one signed dispatch document.'); setSending(false); return; }
-                    const paths = await uploadDispatchDocs();
+                    const paths = await uploadDocs(dispatchDocs);
                     if (!paths) { setSending(false); return; }
                     deliveryDocuments = paths;
                     consultantId = consultant.id;
@@ -265,6 +333,9 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
 
                 response = await repairTransferService({
                     assetId: asset.id,
+                    // Opens the maintenance record that this journey carries.
+                    faultDescription: faultDescription.trim(),
+                    technician: technician.trim() || null,
                     repairDestination: categoryNotRepairable ? null : repairDestination,
                     consultantId: consultantId ?? null,
                     deliveryDocuments: deliveryDocuments ?? null,
@@ -282,9 +353,20 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
                 // Destination, recipient and loaner are all derived server-side from the asset's
                 // repair transfer, so none of them are sent. Only the decision to hold the loaner
                 // back is the user's to make.
+                // Closes the maintenance record the transfer opened. Uploaded before the call so a
+                // failed upload stops the return rather than completing it with nothing attached.
+                let completionDocuments: string[] | undefined;
+                if (completionDocs.length > 0) {
+                    const paths = await uploadDocs(completionDocs);
+                    if (!paths) { setSending(false); return; }
+                    completionDocuments = paths;
+                }
+
                 response = await returnAfterRepairService({
                     assetId: asset.id,
                     returnLoaner,
+                    completionNotes: completionNotes.trim() || null,
+                    completionDocuments: completionDocuments ?? null,
                     remarks: remarks || null,
                     ...bypass,
                 });
@@ -385,8 +467,15 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
                 <Typography variant="body2" sx={{ color: '#64748B', mb: 2 }}>
                     Choose the asset-lifecycle movement you want to initiate.
                 </Typography>
+                {availableFlows.length === 0 && (
+                    <Alert severity="info" sx={{ borderRadius: 2, '& .MuiAlert-message': { fontSize: '0.82rem' } }}>
+                        You do not have the permissions for any of these actions. Sending an asset for
+                        repair needs <strong>REPAIR_ASSET</strong>; writing one off needs
+                        <strong> DISPOSE_ASSET</strong>.
+                    </Alert>
+                )}
                 <Box sx={{ display: 'grid', gap: 1.5, gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' } }}>
-                    {FLOWS.map((f) => (
+                    {availableFlows.map((f) => (
                             <Paper
                                 key={f.key}
                                 onClick={() => setFlow(f.key)}
@@ -541,6 +630,43 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
                         </Alert>
                     ) : asset && (
                         <>
+                            {/*
+                              * What failed, and who is expected to fix it.
+                              *
+                              * This is the maintenance record. Until now a repair transfer carried only
+                              * `remarks` - which describes the journey - so a repair had nowhere to say
+                              * what was wrong with the asset, and wrote no record at all: 24 repair
+                              * movements in the database against 0 repair rows. The Maintenance report
+                              * and the asset's Repair History tab read those rows, which is why both
+                              * were empty for every repair the bank had actually carried out.
+                              */}
+                            <SectionLabel>The fault</SectionLabel>
+                            <TextField
+                                fullWidth
+                                required
+                                multiline
+                                rows={2}
+                                label="What is wrong with it"
+                                placeholder="e.g. Will not power on after the power surge on 12 Sep"
+                                value={faultDescription}
+                                onChange={(e) => setFaultDescription(e.target.value)}
+                                sx={autocompleteSx}
+                                helperText="Recorded on the asset's repair history and the maintenance report."
+                            />
+                            <TextField
+                                fullWidth
+                                sx={fieldSx}
+                                label="Technician"
+                                placeholder={repairDestination === 'EXTERNAL'
+                                    ? 'Defaults to the consultant chosen below'
+                                    : 'Optional \u2014 the bench decides once it arrives'}
+                                value={technician}
+                                onChange={(e) => setTechnician(e.target.value)}
+                                helperText={repairDestination === 'EXTERNAL'
+                                    ? 'Left blank, the consultant selected below is recorded as the technician.'
+                                    : 'Leave blank if it is not yet known who will work on it.'}
+                            />
+
                             <SectionLabel>Repair routing</SectionLabel>
                             <TextField
                                 select fullWidth
@@ -790,6 +916,90 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
                                     <strong> {preview.destinationLocationName ?? 'its origin branch'}</strong> unassigned and
                                     flagged as pool stock, available to lend out.
                                 </Alert>
+                            )}
+
+                            {/*
+                              * Closing the maintenance record, at the moment it is actually true.
+                              *
+                              * The old flow asked for this through a separate "complete repair"
+                              * endpoint that nothing on this page ever called, so a record - on the
+                              * rare occasions one existed - stayed "Pending" for the life of the
+                              * asset. Returning a repaired asset *is* the moment the repair finished.
+                              *
+                              * Both optional: a repair with no notes is still a repair that happened,
+                              * and refusing the return for want of a sentence would strand the asset
+                              * at Head Office.
+                              */}
+                            <SectionLabel>Repair outcome — optional</SectionLabel>
+                            <TextField
+                                fullWidth
+                                multiline
+                                rows={2}
+                                label="What was done"
+                                placeholder="e.g. Replaced the power board and reseated the battery"
+                                value={completionNotes}
+                                onChange={(e) => setCompletionNotes(e.target.value)}
+                                sx={autocompleteSx}
+                                helperText="Closes this asset's open maintenance record."
+                            />
+
+                            <Box
+                                component="label"
+                                sx={{
+                                    display: 'flex', alignItems: 'center', gap: 1.5,
+                                    px: 2, py: 1.5, borderRadius: 2, cursor: 'pointer',
+                                    border: `1.5px dashed ${alpha(meta!.color, 0.35)}`,
+                                    bgcolor: alpha(meta!.color, 0.02),
+                                    transition: 'border-color 0.15s ease, background-color 0.15s ease',
+                                    '&:hover': { borderColor: meta!.color, bgcolor: alpha(meta!.color, 0.05) },
+                                }}
+                            >
+                                <Box
+                                    sx={{
+                                        width: 34, height: 34, borderRadius: '9px', flexShrink: 0,
+                                        bgcolor: alpha(meta!.color, 0.1), color: meta!.color,
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    }}
+                                >
+                                    <UploadFileOutlinedIcon sx={{ fontSize: 18 }} />
+                                </Box>
+                                <Box sx={{ minWidth: 0 }}>
+                                    <Typography variant="body2" sx={{ fontWeight: 600, color: '#1E293B', fontSize: '0.82rem' }}>
+                                        Attach completion document(s)
+                                    </Typography>
+                                    <Typography variant="caption" sx={{ color: '#94A3B8' }}>
+                                        Job card, invoice or test report — click to browse
+                                    </Typography>
+                                </Box>
+                                <input
+                                    type="file"
+                                    hidden
+                                    multiple
+                                    accept=".pdf,.png,.jpg,.jpeg"
+                                    onChange={(e) => {
+                                        const files = Array.from(e.target.files ?? []);
+                                        if (files.length) setCompletionDocs((prev) => [...prev, ...files]);
+                                        e.target.value = '';
+                                    }}
+                                />
+                            </Box>
+                            {completionDocs.length > 0 && (
+                                <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 0.75 }}>
+                                    {completionDocs.map((f, i) => (
+                                        <Chip
+                                            key={`${f.name}-${i}`}
+                                            label={f.name}
+                                            size="small"
+                                            deleteIcon={<CloseIcon />}
+                                            onDelete={() => setCompletionDocs((prev) => prev.filter((_, j) => j !== i))}
+                                            sx={{
+                                                maxWidth: 220, fontWeight: 600, fontSize: '0.72rem',
+                                                bgcolor: alpha(meta!.color, 0.07), color: meta!.color,
+                                                '& .MuiChip-deleteIcon': { color: alpha(meta!.color, 0.55), '&:hover': { color: meta!.color } },
+                                            }}
+                                        />
+                                    ))}
+                                </Stack>
                             )}
 
                             {preview.loanerAssetId && (

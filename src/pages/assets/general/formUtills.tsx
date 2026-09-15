@@ -446,11 +446,6 @@ const OfficeEquipmentUtills = () => {
                 setCurrentState(crudStates.reassign);
                 handleOpen();
                 break;
-            case crudStates.repair:
-                setCurrentAsset(determineCurrentAsset(moduleID as number, officeAsset as IOfficeEquipment[]))
-                setCurrentState(crudStates.repair);
-                handleOpen();
-                break;
             case crudStates.inStore:
                 setCurrentAsset(determineCurrentAsset(moduleID as number, officeAsset as IOfficeEquipment[]))
                 setCurrentState(crudStates.inStore);

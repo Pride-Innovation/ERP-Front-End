@@ -161,11 +161,6 @@ const GeneralAssetUtills = (typeId: string) => {
                 setCurrentState(crudStates.reassign);
                 handleOpen();
                 break;
-            case crudStates.repair:
-                setCurrentAsset(determineCurrentAsset(moduleID as number, generalAssets));
-                setCurrentState(crudStates.repair);
-                handleOpen();
-                break;
             case crudStates.inStore:
                 setCurrentAsset(determineCurrentAsset(moduleID as number, generalAssets));
                 setCurrentState(crudStates.inStore);

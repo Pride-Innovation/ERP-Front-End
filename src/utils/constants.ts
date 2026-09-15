@@ -34,7 +34,6 @@ export const crudStates: {
     acknowledgeReceipt: string;
     approveIssuance: string;
     reassign: string;
-    repair: string;
     inStore: string;
     enable: string;
     block: string;
@@ -61,7 +60,6 @@ export const crudStates: {
     acknowledgeReceipt: "acknowledgeReceipt",
     approveIssuance: "approveIssuance",
     reassign: "reassign",
-    repair: "repair",
     inStore: "inStore",
     enable: "enable",
     block: "block",

@@ -58,16 +58,17 @@ const reassignAssetService = async (id: string | number, body: object) => {
     }
 };
 
-const repairAssetService = async (id: string | number, body: object) => {
-    try {
-        const response = await axiosInstance.post(`assets/repairs/${id}`, body, {
-            headers: { "Content-Type": "multipart/form-data" },
-        });
-        return response;
-    } catch (error) {
-        return error;
-    }
-};
+/*
+ * There is no `repairAssetService` here any more.
+ *
+ * It posted to `POST /assets/repairs/{id}` - an endpoint that no longer exists, because booking an
+ * asset in for repair now goes through `POST /movements/repair-transfer`, which actually moves the
+ * asset. Worth knowing that this export was already dead before it was removed: the Repair modal
+ * called axiosInstance directly rather than going through it.
+ *
+ * `completeRepairAssetService` (PUT) and `listRepairDetailService` (GET) stay - closing a repair on
+ * the bench and reading an asset's maintenance history are real and separate duties.
+ */
 
 const completeRepairAssetService = async (id: string | number, body: object) => {
     try {
@@ -180,7 +181,6 @@ export {
     getAssetByIdService,
     updateAssetService,
     reassignAssetService,
-    repairAssetService,
     completeRepairAssetService,
     listRepairDetailService,
     updateAssetImageService,
