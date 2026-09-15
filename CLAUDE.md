@@ -919,6 +919,126 @@ The call-site comment in `IssuanceService` still described the old behaviour —
 are left untouched here" — while the method beside it did the opposite. Corrected, because that is
 the comment someone reads before "restoring" the behaviour that caused this.
 
+## Notifications
+
+The delivery half was well built — STOMP over SockJS on the canonical `/user/queue/notifications`
+destination, with a comment explaining exactly why the explicit-id form silently never matches,
+reconnect handling, and a badge that increments on push. **What was missing is that a notification
+did not do anything.**
+
+### They went nowhere, and the links would not have worked anyway
+
+Clicking a notification — on the page or in the bell — **only marked it read**. The page's own
+comment said *"no navigation"*. Yet every notification carried a `link`, and the frontend even had
+`link: string | null` on its interface. Nothing read it. So a notification said "Request Rejected"
+and left you to go and find the request, which is most of the way to not having sent it.
+
+Measured across 760 live rows:
+
+| | |
+|---:|---|
+| **760 of 760** | absolute URLs including a host from configuration — no router can follow one, and it is wrong the moment the app is served from anywhere else |
+| **744 of 760** | pointed at `/asset-request/view?id=37` — a **query parameter**, while the route takes a **path segment**. They would have landed on the detail page with no id |
+
+Both survived because nothing ever followed a link. The column was written 760 times and read zero.
+
+**The fix is a target, not a corrected URL.** `entity_type` + `entity_id` say what the notification
+is *about*; `notificationRoute()` turns that into a route against `ROUTES`. Java cannot know when a
+frontend route is renamed — a URL written there is a guess that ages silently, and 744 rows are what
+that looks like. Now a rename is a one-line change instead of a table full of dead links.
+
+*The general shape:* **a server should not store another system's routes.** It is the same fault as a
+page keying on a positional index into a server-ordered list — one side owns the fact and the other
+holds a stale copy of it.
+
+**V24 backfills all 760** from `type` + the old id column, which is unambiguous per type: the
+workflow engine's notifications are about requests, the movement service's about movements. Verified
+after applying: **0 without a target, 0 mismatched.** `link` and `request_id` are dropped rather than
+left — a `request_id` beside an `entity_id` is exactly what somebody writes a movement id into again.
+
+*Which had already happened:* `request_id` held a **movement** id for all 69 movement notifications,
+because `createAndPush`'s fifth parameter was called `requestId` and the movement service passed
+`movement.getId()`. A field whose name was wrong for 9% of the table.
+
+### A third of them had no name
+
+The page knew three types. Five are emitted: `STEP_PENDING` 478, `STEP_APPROVED` 173,
+`MOVEMENT_PENDING` 45, `WORKFLOW_COMPLETED` 40, `MOVEMENT_UPDATE` 24. So **242 of 760 — including
+every movement awaiting somebody's approval** — rendered as "Other" with a generic icon and no tile.
+
+Types are now grouped rather than listed one-per-option: *Waiting on me* covers both a request step
+and a movement approval, because whether a task is one or the other is the system's distinction, not
+the reader's. One `bucketOf` mapping drives the dropdown and the tiles, so they cannot disagree about
+what a filter covers.
+
+*Deliberately tolerant of the unknown:* the type stays a **string** on the wire rather than an enum
+the two sides must agree on. A sixth kind should render as a readable row on an older client, not
+break it — `kindOf` falls back to "Update".
+
+### Read-on-open, and a notification that leads nowhere is not clickable
+
+Opening the thing *is* reading the notification; asking for both is asking somebody to tidy up after
+the software. The explicit mark-read control stays for the other case — "I can see what this says and
+I need not go there" — which is why they are two handlers rather than one.
+
+The read is **not awaited** before navigating: the badge is corrected by the refresh, and a slow
+write should not sit between a click and the page it asked for. And where `notificationRoute` returns
+null the row is plain text with no pointer cursor — the honest rendering for something that leads
+nowhere, and what 744 rows should have been doing all along.
+
+### "Mark as read" worked, and the browser could not tell
+
+The tick **did** write to the database. The row was updated and the badge went down. The list did not
+change, and on reload everything was unread again — which reads exactly like a button that only
+touches the UI.
+
+**Lombok gives a primitive `boolean isRead` the getter `isRead()`, and Jackson strips the `is`
+prefix.** So the API published **`"read": true"`** while the frontend — and its TypeScript interface —
+both said `isRead`. The field was permanently `undefined` in the browser: every notification rendered
+as unread however many times it was marked, and since the page opens filtered to unread, nothing ever
+left the list.
+
+The badge was right the whole time because it comes from a **separate** endpoint returning a bare
+number. That split is what made the write look like it had not happened.
+
+**This is the third encounter with this trap in this codebase, handled three different ways:**
+
+| Field | What the wire says | What consumers do |
+|---|---|---|
+| `isHeadOffice` | `headOffice` | check **both** spellings, with a comment explaining why |
+| `isEnabled`, `isAccountNonLocked` | `enabled`, `accountNonLocked` | read the stripped name — correct, by discovery |
+| `isRead` | `read` | read `isRead` — **wrong**, and silently |
+
+The lesson is not "remember the rule". It is that **a wire name nobody chose is a wire name every
+consumer has to rediscover**, and one of them eventually gets it wrong. `@JsonProperty("isRead")`
+pins it to what both sides already declare.
+
+*Nothing a type checker can see:* it is a name agreed between two languages and neither side declares
+it. `AppNotificationWireTest` reads the actual JSON — the only thing that can catch it — and also
+pins that `link` and `requestId` stay gone and that the websocket push uses the same DTO as the
+listing, so a notification cannot arrive in one shape and reload in another.
+
+*The others are deliberately left alone.* `enabled` and `accountNonLocked` have consumers reading the
+stripped names today; renaming the wire to match the Java field would break every one of them. The
+rule is to pin a name when fixing it, not to standardise the whole surface at once.
+
+### Retention
+
+`NotificationRetentionScheduler` prunes **read** notifications past 90 days, nightly. Unread ones are
+never touched at any age: an unread notification is outstanding work, and a request still waiting on
+somebody does not become less true for having waited a quarter — deleting it would take the prompt
+away and leave the task. Nothing is lost by pruning the read ones, because what actually happened
+lives in `audit_event`; a notification is a nudge, not a record.
+
+Measured: **760 rows, none yet older than ninety days**, so this deletes nothing today. It exists
+because an unbounded row-per-event log becomes the largest table in the database simply by being left
+alone.
+
+*Not changed:* "Mark all as read" still marks everything unread, including items never looked at. I
+considered narrowing it to what is on screen and decided against — that is what the control says and
+what every other application does with it, and a surprising version of a familiar button is worse
+than a blunt one.
+
 ## The user model
 
 The directory listing was scoped. Everything else about a user record was not, and three of the

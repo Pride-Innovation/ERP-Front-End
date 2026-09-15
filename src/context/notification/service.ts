@@ -5,8 +5,14 @@ export interface IAppNotification {
     title: string;
     message: string;
     type: string;
-    requestId: number | null;
-    link: string | null;
+    /**
+     * What the notification is about — `'REQUEST'` / `'MOVEMENT'` — and which record.
+     *
+     * <p>These replaced a `link` holding a frontend URL built in Java, and a `requestId` that held a
+     * *movement* id for movement notifications. `notificationRoute()` turns the pair into a route.
+     */
+    entityType: string | null;
+    entityId: number | null;
     isRead: boolean;
     createDate: string;
 }

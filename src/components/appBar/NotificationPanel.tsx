@@ -1,4 +1,6 @@
 import React from 'react';
+import { notificationRoute } from '../../context/notification/notificationTarget';
+import { IAppNotification } from '../../context/notification/service';
 import {
     Avatar,
     Box,
@@ -43,6 +45,26 @@ interface Props {
 const NotificationPanel: React.FC<Props> = ({ anchor, onClose }) => {
     const { notifications, unreadCount, handleMarkRead, handleMarkAllRead } = useNotifications();
     const navigate = useNavigate();
+
+    /**
+     * Opens what the notification is about, marking it read on the way, and closes the panel.
+     *
+     * <h2>The bell did not go anywhere either</h2>
+     * Clicking an item here only marked it read — the same gap the notifications page had. So the
+     * quickest route to a request awaiting your approval was: see the bell, read the title, dismiss
+     * the panel, find the page yourself.
+     *
+     * <p>Read-on-open, because opening the thing *is* reading the notification. Where a notification
+     * points at nothing, it is left alone rather than dismissed on a click that did nothing visible —
+     * a row that vanishes when you click it and takes you nowhere reads as a bug.
+     */
+    const openNotification = (n: IAppNotification) => {
+        const route = notificationRoute(n);
+        if (!route) return;
+        if (!n.isRead) handleMarkRead(n.id);
+        onClose?.();
+        navigate(route);
+    };
     const open = Boolean(anchor);
 
     const goToAll = () => {
@@ -104,9 +126,11 @@ const NotificationPanel: React.FC<Props> = ({ anchor, onClose }) => {
                         <React.Fragment key={n.id}>
                             <ListItem
                                 alignItems="flex-start"
-                                onClick={() => !n.isRead && handleMarkRead(n.id)}
+                                onClick={() => openNotification(n)}
                                 sx={{
-                                    cursor: n.isRead ? 'default' : 'pointer',
+                                    // Follows the target, not the read state: a read notification
+                                    // still opens the request it was about.
+                                    cursor: notificationRoute(n) ? 'pointer' : 'default',
                                     bgcolor: n.isRead ? 'transparent' : 'rgba(5,84,75,0.04)',
                                     px: 2,
                                     py: 1.2,

@@ -52,21 +52,46 @@ import {
     markRead,
 } from '../../context/notification/service';
 
+import { useNavigate } from 'react-router-dom';
+import { kindOf, notificationRoute } from '../../context/notification/notificationTarget';
+import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
+import ThumbUpOutlinedIcon from '@mui/icons-material/ThumbUpOutlined';
 const PRIMARY = brand[500];
 /** Server window fetched once; filtering + pagination happen client-side over it. */
 const FETCH_WINDOW = 200;
 const PAGE_SIZE = 15;
 
 type ReadFilter = 'all' | 'unread' | 'read';
-type TypeFilter = 'all' | 'STEP_PENDING' | 'STEP_REJECTED' | 'WORKFLOW_COMPLETED' | 'OTHER';
-const KNOWN_TYPES = ['STEP_PENDING', 'STEP_REJECTED', 'WORKFLOW_COMPLETED'];
+/*
+ * The five kinds the server actually sends, not the three this page used to know.
+ *
+ * Measured across 760 live rows: STEP_PENDING 478, STEP_APPROVED 173, MOVEMENT_PENDING 45,
+ * WORKFLOW_COMPLETED 40, MOVEMENT_UPDATE 24. Three of those had no label, no icon and no tile, so
+ * **242 of 760 — about a third, including every movement waiting on somebody's approval** — arrived
+ * as "Other" with a generic mark beside them.
+ */
+type TypeFilter = 'all' | 'ACTION' | 'PROGRESS' | 'STEP_REJECTED' | 'WORKFLOW_COMPLETED' | 'OTHER';
 
 const TYPE_LABELS: Record<TypeFilter, string> = {
     all: 'All types',
-    STEP_PENDING: 'Action required',
+    // Grouped rather than listed one type per option: a reader wants "things waiting on me", and
+    // whether that is a request step or a movement is the system's distinction, not theirs.
+    ACTION: 'Waiting on me',
+    PROGRESS: 'Progress',
     STEP_REJECTED: 'Rejections',
     WORKFLOW_COMPLETED: 'Completed',
     OTHER: 'Other',
+};
+
+/** Which filter bucket a server type falls in — the one mapping, shared with the tiles below. */
+const bucketOf = (type: string): TypeFilter => {
+    switch (kindOf(type).group) {
+        case 'action': return 'ACTION';
+        case 'progress': return 'PROGRESS';
+        case 'rejected': return 'STEP_REJECTED';
+        case 'completed': return 'WORKFLOW_COMPLETED';
+        default: return 'OTHER';
+    }
 };
 
 const typeIcon = (type: string) => {
@@ -75,6 +100,12 @@ const typeIcon = (type: string) => {
             return <CancelOutlinedIcon sx={{ color: '#C53030', fontSize: 18 }} />;
         case 'STEP_PENDING':
             return <AssignmentOutlinedIcon sx={{ color: '#BC892C', fontSize: 18 }} />;
+        case 'MOVEMENT_PENDING':
+            return <LocalShippingOutlinedIcon sx={{ color: '#BC892C', fontSize: 18 }} />;
+        case 'MOVEMENT_UPDATE':
+            return <LocalShippingOutlinedIcon sx={{ color: PRIMARY, fontSize: 18 }} />;
+        case 'STEP_APPROVED':
+            return <ThumbUpOutlinedIcon sx={{ color: PRIMARY, fontSize: 18 }} />;
         case 'WORKFLOW_COMPLETED':
             return <CheckCircleOutlineIcon sx={{ color: PRIMARY, fontSize: 18 }} />;
         default:
@@ -281,6 +312,7 @@ const NotificationFilters = ({ onApply }: { onApply: (f: NotificationFilterValue
 const Notifications = () => {
     const { handleMarkAllRead, loadNotifications: refreshNavbar } = useNotifications();
 
+    const navigate = useNavigate();
     const [items, setItems] = useState<IAppNotification[]>([]);
     const [totalOnServer, setTotalOnServer] = useState(0);
     const [loading, setLoading] = useState(true);
@@ -313,8 +345,9 @@ const Notifications = () => {
             if (filters.readStatus === 'unread' && n.isRead) return false;
             if (filters.readStatus === 'read' && !n.isRead) return false;
             if (filters.type) {
-                if (filters.type === 'OTHER' && KNOWN_TYPES.includes(n.type)) return false;
-                if (filters.type !== 'OTHER' && n.type !== filters.type) return false;
+                // One bucket mapping, so the dropdown and the tiles cannot disagree about which
+                // notifications a filter covers.
+                if (bucketOf(n.type) !== filters.type) return false;
             }
             if (filters.dateFrom && new Date(n.createDate) < new Date(filters.dateFrom)) return false;
             if (filters.dateTo && new Date(n.createDate) > new Date(filters.dateTo)) return false;
@@ -328,6 +361,33 @@ const Notifications = () => {
 
     const unread = items.filter((n) => !n.isRead).length;
     const countType = (t: string) => items.filter((n) => n.type === t).length;
+
+    /**
+     * Opens what the notification is about, marking it read on the way.
+     *
+     * <h2>This is the thing notifications did not do</h2>
+     * Clicking a row used to mark it read and nothing else — the page said so in a comment: "no
+     * navigation". So a notification told you "Request Rejected" and left you to go and find the
+     * request yourself, which is most of the way to not having sent it.
+     *
+     * <p>Read-on-open rather than a separate step: opening the thing *is* reading the notification,
+     * and asking somebody to do both is asking them to tidy up after the software. The explicit
+     * mark-read control stays for the other case — "I can see what this says and I do not need to go
+     * there" — which is why the two are separate handlers rather than one.
+     *
+     * <p>A notification with no target is not clickable at all; {@link notificationRoute} returns
+     * null and the row renders as plain text. That is the honest rendering for something that leads
+     * nowhere, and is what the 744 dead links should have been doing.
+     */
+    const openOne = async (n: IAppNotification) => {
+        const route = notificationRoute(n);
+        if (!n.isRead) {
+            // Not awaited before navigating: the badge is corrected by `refreshNavbar`, and a slow
+            // write should not sit between the click and the page it was asking for.
+            markRead(n.id).then(refreshNavbar).catch(() => { /* the row simply stays unread */ });
+        }
+        if (route) navigate(route);
+    };
 
     /**
      * Marks a single notification read — no navigation. In the default unread view the
@@ -440,7 +500,7 @@ const Notifications = () => {
                         value={countType('STEP_PENDING')}
                         icon={<AssignmentOutlinedIcon />}
                         accent="gold"
-                        onClick={() => toggleTileFilter({ type: 'STEP_PENDING' }, filters.type === 'STEP_PENDING')}
+                        onClick={() => toggleTileFilter({ type: 'ACTION' }, filters.type === 'ACTION')}
                     />
                 </Grid>
                 <Grid item xs={6} sm={3}>
@@ -539,6 +599,8 @@ const Notifications = () => {
                                 isLast={idx === paginated.length - 1}
                                 leaving={leaving.has(n.id)}
                                 onMarkRead={() => markOne(n)}
+                                onOpen={() => openOne(n)}
+                                canOpen={notificationRoute(n) !== null}
                             />
                         ))}
                     </Box>
@@ -565,21 +627,28 @@ const NotificationRow = ({
     isLast,
     leaving,
     onMarkRead,
+    onOpen,
+    canOpen,
 }: {
     notification: IAppNotification;
     isLast: boolean;
     leaving: boolean;
     onMarkRead: () => void;
+    onOpen: () => void;
+    /** False when the notification is about nothing in particular — then the row is not a link. */
+    canOpen: boolean;
 }) => (
     <Box
-        onClick={onMarkRead}
+        onClick={canOpen ? onOpen : undefined}
         sx={{
             px: 2.5,
             py: 1.75,
             display: 'flex',
             gap: 2,
             alignItems: 'flex-start',
-            cursor: n.isRead ? 'default' : 'pointer',
+            // A pointer means "this goes somewhere", so it follows the target rather than the
+            // read state — a read notification still opens the request it was about.
+            cursor: canOpen ? 'pointer' : 'default',
             bgcolor: n.isRead ? 'transparent' : alpha(PRIMARY, 0.04),
             borderBottom: isLast ? 'none' : `1px solid ${border.subtle}`,
             // Fade out briefly when marked read in the unread view, then leave the list.
