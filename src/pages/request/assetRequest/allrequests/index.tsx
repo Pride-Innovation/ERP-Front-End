@@ -169,7 +169,6 @@ const Request = () => {
         closeModal();
         runQuery({
             statusIds,
-            status: "CREATED",
             startDate: tableStartDate ? dayjs(tableStartDate).format('YYYY-MM-DDTHH:mm:ss') : '',
             endDate: tableEndDate ? dayjs(tableEndDate).format('YYYY-MM-DDTHH:mm:ss') : ''
         });
@@ -183,7 +182,6 @@ const Request = () => {
             setStatusIds(allRequestCsv);
             runQuery({
                 statusIds: allRequestCsv,
-                status: "CREATED",
                 startDate: tableStartDate ? dayjs(tableStartDate).format('YYYY-MM-DDTHH:mm:ss') : '',
                 endDate: tableEndDate ? dayjs(tableEndDate).format('YYYY-MM-DDTHH:mm:ss') : ''
             });
@@ -196,7 +194,6 @@ const Request = () => {
         if (statusIds && tableStartDate && tableEndDate) {
             const params = {
                 statusIds,
-                status: "CREATED",
                 startDate: tableStartDate ? dayjs(tableStartDate).format('YYYY-MM-DDTHH:mm:ss') : '',
                 endDate: tableEndDate ? dayjs(tableEndDate).format('YYYY-MM-DDTHH:mm:ss') : ''
             }; // Fetching requests with status Asset Request Created ID
@@ -311,7 +308,7 @@ const Request = () => {
         const group = groups[status];
         if (!group) {
             // Default (all) case
-            runQuery({ statusIds: allRequestCsv, status: "CREATED" });
+            runQuery({ statusIds: allRequestCsv });
             setStatusIds(allRequestCsv);
             setSelectedStatus('all');
             return;
@@ -459,7 +456,7 @@ const Request = () => {
                  */
                 onApplyFilters={(filters) =>
                     runQuery(toRequestParams(
-                        { statusIds: statusIds || allRequestCsv, status: "CREATED" },
+                        { statusIds: statusIds || allRequestCsv },
                         filters,
                     ))}
                 onPaginationChange={(model) => fetchAllRequests(activeParams.current, model)}

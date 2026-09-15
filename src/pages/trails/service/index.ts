@@ -16,7 +16,7 @@ export interface AuditTrailPage {
 }
 
 /** `All` is what the dropdowns hold for "no filter"; sending it would filter on the literal word. */
-const meaningful = (value?: string) =>
+const meaningful = (value?: string | null) =>
     (value && value.trim() && value !== 'All' ? value.trim() : undefined);
 
 /**
@@ -46,6 +46,15 @@ export const fetchAuditTrailsService = async (query: IAuditTrailQuery): Promise<
             eventType: meaningful(query.eventType),
             module: meaningful(query.module),
             severity: meaningful(query.severity),
+            /*
+             * The forensic three. `GET /audit/trails` has declared all of them since it was written
+             * and nothing ever sent them, so "everything this person did" and "everything that
+             * happened to request #37" could only be approached by typing a name into free-text
+             * search — which also matches anyone whose description merely mentions them.
+             */
+            actorId: query.actorId,
+            entityType: meaningful(query.entityType),
+            entityId: query.entityId,
             from: startOfDay(query.dateFrom),
             to: endOfDay(query.dateTo),
             pageNumber: query.pageNumber ?? 0,
@@ -59,8 +68,32 @@ export const fetchAuditTrailsService = async (query: IAuditTrailQuery): Promise<
     };
 };
 
-export const fetchAuditTrailSummaryService = async (): Promise<IAuditTrailSummary> => {
-    const res = await axiosInstance.get(`${ENDPOINT}/summary`);
+/**
+ * The four tiles, over the rows the current filters describe.
+ *
+ * <p>This took no parameters, so the figures above a narrowed table described the whole log: filter
+ * to "critical events in Movement last week" and the tiles still read the totals for everything.
+ * Two kinds of number on one screen, with nothing saying which was which.
+ *
+ * <p>It takes the same filters as the listing, built the same way, so the two cannot come to
+ * describe different things.
+ */
+export const fetchAuditTrailSummaryService = async (
+    query: IAuditTrailQuery = {},
+): Promise<IAuditTrailSummary> => {
+    const res = await axiosInstance.get(`${ENDPOINT}/summary`, {
+        params: {
+            search: meaningful(query.search),
+            eventType: meaningful(query.eventType),
+            module: meaningful(query.module),
+            severity: meaningful(query.severity),
+            actorId: query.actorId,
+            entityType: meaningful(query.entityType),
+            entityId: query.entityId,
+            from: startOfDay(query.dateFrom),
+            to: endOfDay(query.dateTo),
+        },
+    });
     return res.data;
 };
 

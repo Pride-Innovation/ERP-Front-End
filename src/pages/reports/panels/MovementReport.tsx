@@ -5,9 +5,9 @@ import PendingActionsOutlinedIcon from '@mui/icons-material/PendingActionsOutlin
 import ReportShell, { ReportShellFilters } from '../ReportShell';
 import ReportSummaryCards from '../ReportSummaryCards';
 import ReportDataTable, { ReportColumn, StatusChip } from '../ReportDataTable';
-import useReportData from '../useReportData';
+import useReportData, { REPORT_PAGE_SIZE, truncationNotice } from '../useReportData';
 import { fetchRowsService } from '../../../core/apis/globalService';
-import { movementTypeLabel, statusLabel } from '../../movement/constants';
+import { movementTypeLabel, statusConfig, statusLabel } from '../../movement/constants';
 
 const ACCENT = '#0891B2';
 
@@ -85,40 +85,61 @@ const toRows = (m: any): MovementRow[] => {
     }));
 };
 
+/**
+ * A movement's own statuses, for the shell's Status dropdown.
+ *
+ * <p>The dropdown was filled from the Status catalogue — request and asset states — which a movement
+ * can never hold, so choosing one matched nothing and the table read as "there are none of those".
+ * `id` is the enum constant because that is what `GET /movements` binds its `status` parameter to.
+ */
+const MOVEMENT_STATUSES = Object.entries(statusConfig)
+    .map(([code, cfg]) => ({ id: code, label: cfg.label, code }));
+
 const MovementReport = () => {
-    const { rows, loading, error, applyFilters, refresh } = useReportData<MovementRow>(
+    const { rows, notice, loading, error, applyFilters, refresh } = useReportData<MovementRow>(
         async (f: ReportShellFilters) => {
             /*
-             * Everything is narrowed in the browser: GET /movements declares only pageSize and
-             * pageNumber, so there is nothing to filter with server-side. Fine at present volume,
-             * but it loads a page and narrows it — this is the report to revisit first if the
-             * movement table grows into the tens of thousands.
+             * Dates and status go to the server now.
+             *
+             * The comment here used to say "GET /movements declares only pageSize and pageNumber, so
+             * there is nothing to filter with server-side". That stopped being true when the register
+             * gained `MovementSearchDao`: the endpoint declares dates, status, type, category,
+             * source, destination, courier and initiator. This report went on pulling a page and
+             * narrowing it in the browser — and narrowing *after* a cap means a filter searches only
+             * the first 500 records, so a match beyond them reads as "no results".
+             *
+             * The date filter was worse than redundant: it re-parsed the row's own **display
+             * string** (`"14 Sep 2026"`, built by `fmtDate` a few lines above), so every movement
+             * compared as midnight and a change of format or locale would have broken it silently.
              */
             const res = (await fetchRowsService({
-                pageNumber: 0, pageSize: 500, endPoint: 'movements',
+                pageNumber: 0, pageSize: REPORT_PAGE_SIZE, endPoint: 'movements',
+                params: {
+                    startDate: f.dateFrom,
+                    endDate: f.dateTo,
+                    // The enum constant, which is what the endpoint binds.
+                    status: f.statusCode,
+                },
             })) as any;
 
             if (res?.status !== 200) throw new Error('movements');
             const flat = ((res.data?.content ?? []) as any[]).flatMap(toRows);
 
-            const from = f.dateFrom ? new Date(f.dateFrom).getTime() : null;
-            const to = f.dateTo ? new Date(f.dateTo).getTime() : null;
-
-            return flat.filter((r) => {
+            /*
+             * Branch, department and category stay in the browser: a movement's ends are *stores*
+             * and people, so `source`/`destination` take store names rather than a branch, and the
+             * category belongs to each item rather than to the movement.
+             */
+            const narrowed = flat.filter((r) => {
                 // A movement counts as touching a branch at either end, matching how the movements
                 // listing itself scopes them.
                 if (f.branch && r.fromBranch !== f.branch && r.toBranch !== f.branch) return false;
                 if (f.department && r.fromDepartment !== f.department && r.toDepartment !== f.department) return false;
                 if (f.category && r.category !== f.category) return false;
-                if (f.status && r.status !== f.status) return false;
-                if (from || to) {
-                    const t = new Date(r.movementDate).getTime();
-                    if (Number.isNaN(t)) return true; // undated rows are kept rather than hidden
-                    if (from && t < from) return false;
-                    if (to && t > to) return false;
-                }
                 return true;
             });
+
+            return { rows: narrowed, notice: truncationNotice(res, 'movements') };
         },
     );
 
@@ -143,7 +164,9 @@ const MovementReport = () => {
             accentColor={ACCENT}
             filterFields={['dateRange', 'branch', 'department', 'category', 'status']}
             onApplyFilters={applyFilters}
+            statusOptions={MOVEMENT_STATUSES}
             onRefresh={refresh}
+            notice={notice}
             summaryCards={summaryCards}
             exportRows={rows}
             exportColumns={COLUMNS}

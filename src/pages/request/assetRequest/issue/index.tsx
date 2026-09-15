@@ -96,7 +96,7 @@ const IssuedRequest = () => {
     useEffect(() => {
         if (issuedGroupCsv && selectedStatus === 'all') {
             setStatusIds(issuedGroupCsv);
-            runQuery({ statusIds: issuedGroupCsv, status: "ISSUED" });
+            runQuery({ statusIds: issuedGroupCsv });
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [issuedGroupCsv]);
@@ -157,7 +157,7 @@ const IssuedRequest = () => {
         const code = codeByOption[status];
         if (!code) {
             // Default (all) case — the whole issued group.
-            runQuery({ statusIds: issuedGroupCsv, status: "ISSUED" });
+            runQuery({ statusIds: issuedGroupCsv });
             setStatusIds(issuedGroupCsv);
             setSelectedStatus('all');
             return;
@@ -167,7 +167,7 @@ const IssuedRequest = () => {
         if (resolved == null) return; // status catalogue not loaded yet
         const statusId = String(resolved);
 
-        runQuery({ status: "ISSUED", statusIds: statusId });
+        runQuery({ statusIds: statusId });
         setSelectedStatus(status);
         setStatusIds(statusId);
     }
@@ -227,7 +227,7 @@ const IssuedRequest = () => {
                          * request in the system under a heading that said Issued.
                          */
                         onApplyFilters={(filters) =>
-                            runQuery(toRequestParams({ statusIds, status: "ISSUED" }, filters))}
+                            runQuery(toRequestParams({ statusIds }, filters))}
                         onPaginationChange={(model) => fetchAllRequests(activeParams.current, model)}
                         onExport={(format) => exportRequests(format, activeParams.current)}
                         searchKey={REQUEST_SEARCH_KEY}

@@ -81,7 +81,6 @@ const PendingRequest = () => {
 
     const params = {
         ...(statusIds ? { statusIds } : {}),
-        status: "PENDING",
         ...(currentUser?.id ? { currentApproverId: currentUser.id } : {})
     };
 
@@ -198,7 +197,7 @@ const PendingRequest = () => {
                 // Ids resolved from codes at call time (never hardcoded).
                 const inProgressIds = statusIdsByCodes(statuses, PENDING_REQUEST_CODES);
                 if (!inProgressIds) return; // status catalogue not loaded yet
-                const param = { status: "PENDING", statusIds: inProgressIds, ...approverParam };
+                const param = { statusIds: inProgressIds, ...approverParam };
                 runQuery(param);
                 setSelectedStatus(status);
                 setStatusIds(inProgressIds);
@@ -207,7 +206,7 @@ const PendingRequest = () => {
             case 'requestAcknowledged': {
                 const acknowledgedIds = statusIdsByCodes(statuses, ['unitAcknowledged']);
                 if (!acknowledgedIds) return; // status catalogue not loaded yet
-                const param = { status: "PENDING", statusIds: acknowledgedIds, ...approverParam };
+                const param = { statusIds: acknowledgedIds, ...approverParam };
                 runQuery(param);
                 setSelectedStatus(status);
                 setStatusIds(acknowledgedIds);
@@ -215,7 +214,7 @@ const PendingRequest = () => {
             }
             default:
                 setStatusIds('');
-                runQuery({ status: "PENDING", ...approverParam });
+                runQuery({ ...approverParam });
                 setSelectedStatus('all');
                 break;
         }

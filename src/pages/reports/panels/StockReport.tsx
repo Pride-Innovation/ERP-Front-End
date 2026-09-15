@@ -5,7 +5,7 @@ import PendingActionsOutlinedIcon from '@mui/icons-material/PendingActionsOutlin
 import ReportShell, { ReportShellFilters } from '../ReportShell';
 import ReportSummaryCards from '../ReportSummaryCards';
 import ReportDataTable, { ReportColumn, StatusChip } from '../ReportDataTable';
-import useReportData from '../useReportData';
+import useReportData, { REPORT_PAGE_SIZE, truncationNotice } from '../useReportData';
 import { fetchRowsService } from '../../../core/apis/globalService';
 
 const ACCENT = '#0369A1';
@@ -105,11 +105,11 @@ const toRows = (stock: any): StockRow[] => {
 };
 
 const StockReport = () => {
-    const { rows, loading, error, applyFilters, refresh } = useReportData<StockRow>(
+    const { rows, notice, loading, error, applyFilters, refresh } = useReportData<StockRow>(
         async (f: ReportShellFilters) => {
             const res = (await fetchRowsService({
                 pageNumber: 0,
-                pageSize: 300,
+                pageSize: REPORT_PAGE_SIZE,
                 endPoint: 'stocks',
                 params: { startDate: f.dateFrom, endDate: f.dateTo },
             })) as any;
@@ -118,17 +118,24 @@ const StockReport = () => {
             const flat = ((res.data?.content ?? []) as any[]).flatMap(toRows);
 
             /*
-             * Branch, category, department and status are narrowed here: /stocks pages orders and
-             * takes no filters for them, and category/department live on the commodity of a line
-             * rather than on the order at all.
+             * Category and department only.
+             *
+             * The comment here used to say `/stocks` "takes no filters for them" — it takes
+             * `branchId` and `stockStatusId`, and has all along, so those two were being narrowed in
+             * the browser for no reason. They go to the server now: narrowing after a cap searches
+             * only the page in hand, so a branch whose orders fall outside it reads as "no results",
+             * which is indistinguishable from having none.
+             *
+             * These two genuinely have nowhere to go. Both belong to the **commodity on a line**
+             * rather than to the order, so the endpoint has nothing to filter on.
              */
-            return flat.filter((r) => {
-                if (f.branch && r.branch !== f.branch) return false;
+            const narrowed = flat.filter((r) => {
                 if (f.category && r.category !== f.category) return false;
                 if (f.department && r.department !== f.department) return false;
-                if (f.status && r.status !== f.status) return false;
                 return true;
             });
+
+            return { rows: narrowed, notice: truncationNotice(res, 'purchase orders') };
         },
     );
 
@@ -154,6 +161,7 @@ const StockReport = () => {
             filterFields={['dateRange', 'branch', 'department', 'category', 'status']}
             onApplyFilters={applyFilters}
             onRefresh={refresh}
+            notice={notice}
             summaryCards={summaryCards}
             exportRows={rows}
             exportColumns={COLUMNS}

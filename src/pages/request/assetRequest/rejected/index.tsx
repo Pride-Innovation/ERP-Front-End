@@ -90,7 +90,7 @@ const RejectedRequest = () => {
         // Depends on statusIds, which resolves only once the status catalogue has loaded — an
         // empty dependency list here would fire once with nothing and never fetch again.
         if (!statusIds) return;
-        runQuery({ statusIds, status: "REJECTED" });
+        runQuery({ statusIds });
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [statusIds]);
 
@@ -140,7 +140,7 @@ const RejectedRequest = () => {
                     rows={requestTableData}
                     columnHeaders={columnHeaders}
                     handleOptionClicked={handleOptionClicked}
-                    params={{ statusIds, status: "REJECTED" }}
+                    params={{ statusIds }}
                     refresh
                     columnFilters={buildRequestColumnFilters(statuses, fetchStaffOptions)}
                     /*
@@ -149,7 +149,7 @@ const RejectedRequest = () => {
                      * in the system under a heading that said Rejected.
                      */
                     onApplyFilters={(filters) =>
-                        runQuery(toRequestParams({ statusIds, status: "REJECTED" }, filters))}
+                        runQuery(toRequestParams({ statusIds }, filters))}
                     onPaginationChange={(model) => fetchAllRequests(activeParams.current, model)}
                     onExport={(format) => exportRequests(format, activeParams.current)}
                     searchKey={REQUEST_SEARCH_KEY}

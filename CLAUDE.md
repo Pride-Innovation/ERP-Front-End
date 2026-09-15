@@ -919,6 +919,187 @@ The call-site comment in `IssuanceService` still described the old behaviour —
 are left untouched here" — while the method beside it did the opposite. Corrected, because that is
 the comment someone reads before "restoring" the behaviour that caused this.
 
+## Audit trails page
+
+The best-built page in the app before this — server-side paging, proper date bounds, a service that
+throws instead of swallowing, a `background` flag so polling is not itself recorded, and gating that
+matches its endpoint. Five things it still got wrong.
+
+**Exports were silently truncated, and that was live.** `EXPORT_PAGE_SIZE` is 1,000 and nothing
+compared it against the total; the table holds **1,661 rows**, so exporting the unfiltered trail
+handed somebody 1,000 rows with no indication that 661 were missing. Worse here than anywhere else in
+the application — this is the artefact that goes into a dispute or an audit, and it looks complete.
+It now says what it captured out of what matched.
+
+**The tiles counted the whole table while the table showed a slice.** `GET /audit/trails/summary`
+took no parameters at all, so narrowing to "critical events in Movement last week" left the four
+figures above reading the totals for everything. It takes the same filters as the listing now, and
+one aggregate query replaces four unfiltered counters. *Note the meaning that changed with it:*
+"Active actors" counted distinct actors **since midnight**; under a date filter that was simply a
+different question from the one being asked, so it now counts distinct actors **in the result**.
+
+**Every page click recounted the largest table in the database.** The summary rode along with each
+page fetch, so paging from 1 to 2 re-ran four aggregates over 1,661 rows — to produce figures that
+could not change, because they ignored the filters. It is fetched on its own now and follows the
+filters, not the page.
+
+**Three filters the endpoint had always declared and nothing ever sent.** `actorId`, `entityType`
+and `entityId` — which is to say *"what else did this person do"* and *"what else happened to this
+record"*, most of what an audit trail is opened for. The only way near them was typing a name into
+free-text search, which also returns every row that merely mentions it. The Actor and Record cells
+are now drill-downs, with a chip to step back out — its own chip rather than a seventh dropdown,
+because a filter arrived at by clicking a row needs its exit where the eye already is.
+
+**The most precise column never left the page.** `IAuditTrail.action` was documented as "not shown,
+but exported and searchable" and was **not exported** — the export was built from the table's
+columns. So `MOVEMENT_APPROVAL_BYPASSED`, the identifier somebody would grep a saved log for, existed
+on every row and reached no file. The export now has its own column set: action code, actor email and
+the affected record, none of which the screen has room for.
+
+*Also:* the Module dropdown offered **Store**, which has **zero call sites** in the backend and zero
+rows in 1,661 — a filter that can only ever match nothing, and therefore worse than a missing one,
+because the empty table reads as an answer. Removed. Disposal and Maintenance stay: each has a live
+call site and will fill as those flows are used.
+
+*The general shape, and this page is the fourth place it has appeared:* **a cap, a default or a
+vocabulary that cannot match must say so.** An empty table and a truncated file are both perfectly
+plausible answers to the question asked — which is exactly why they have to be labelled.
+
+## Reports page
+
+Six tabs over stocks, assets, requests, movements, disposals and repairs. The shell, the filters and
+the gating all had faults; the panels themselves were sound.
+
+### Four of twenty-seven accounts could open it
+
+The sidebar link **and** the route were both gated on **`READ_AUDIT`** — which no tab touches. The
+page reads `/stocks`, `/assets`, `/requests`, `/movements` and `/assets/repairs`.
+
+Measured: **4 of 27 accounts could open it; 23 who could read every report on it were refused
+outright.** Not merely missing a link — `PrivateRoute` turned the URL away too, so there was no way
+in at all. Nobody hit the opposite failure, which is why nobody reported it: people do not complain
+about a page they have never seen.
+
+Both now ask for **any of** `READ_ASSET` / `READ_REQUEST` / `READ_MOVEMENT` / `READ_INVENTORY`, and
+the page **hides the tabs a viewer cannot load** rather than rendering them and letting the panel say
+"Could not load this report" — a boundary must not arrive as a fault. The hero's count follows the
+visible tabs, since a total including tabs you cannot open is simply wrong.
+
+*One trap avoided in doing it:* the visible list is filtered, so the panel is keyed on the tab's
+**position in the visible list**, never its declared id. Keying on the id while filtering the list is
+how the asset detail page came to show the wrong panel.
+
+### A filter that was declared, logged, and filtered nothing
+
+`GET /requests` declared `String status`, passed it to the service, and **wrote it to the debug
+log** — so it read as a working filter from every angle. `RequestSearchCriteria` has no such field
+and `RequestSearchDao` only ever restricts on `statusIds`. The reports page wired its Status dropdown
+to it, and the dropdown did **nothing at all**.
+
+Sharper than trap #2, which at least drops an unknown parameter silently: this one *advertised* a
+filter the endpoint does not implement, and the log line made it look consulted.
+
+**Removed rather than implemented** — `statusIds` already does the job, and a second way to say the
+same thing is how two things drift apart. Implementing it would also have been the dangerous choice:
+four request tabs were sending `status: "CREATED"` / `"PENDING"` / `"REJECTED"` / `"ISSUED"`, which
+are not status codes, so making the parameter live would have filtered those tabs down to nothing.
+Those inert sends are gone too, or they would have become undeclared parameters — trap #2 shape,
+looking functional while doing nothing.
+
+### Three date faults in one filter bar
+
+- **Every range was three hours out.** `getDateRange` used `toISOString()`; Spring binds that to a
+  `LocalDateTime` and discards the offset, so on a +03:00 server "Today" searched from **21:00 the
+  previous day**. The identical bug was found and fixed on the movements panel; this page never got
+  the same treatment. Both now send local `YYYY-MM-DDTHH:mm:ss`.
+- **Custom ranges used a different format and lost their last day.** The From/To boxes are
+  `type="date"`, so they emitted a bare `YYYY-MM-DD` while presets emitted a full timestamp — one
+  field, two formats, depending on how it was set. A bare date is midnight, so "to the 14th" excluded
+  everything that happened on the 14th. `customRange` widens to the whole day at both ends.
+- **The bar claimed a period it had not applied.** It opens reading *This Month* while the panel
+  started from an empty filter set and loaded everything. Not an error state — a heading that
+  disagrees with a perfectly plausible table beneath it. It now applies its opening state once the
+  lookups resolve (the branch and status ids come from those; firing earlier would send a date range
+  and silently drop the rest), and **Clear** puts back the opening state instead of applying `{}`.
+
+### The Movement tab's Status dropdown could only ever match nothing
+
+The dropdown was filled from `GET /statuses` — the Status *entity*, carrying request and asset states
+("Request Approved", "In Store"). A movement's status is a **different vocabulary**: its own enum of
+DRAFT / DISPATCHED / IN_TRANSIT / … So the tab offered statuses no movement can hold, and choosing
+one emptied the table. An empty table reads as "there are none of those", not as a broken filter.
+
+`ReportShell` takes an optional `statusOptions` so a report whose subject has its own states supplies
+them; everything else keeps the catalogue.
+
+**And that tab was filtering in the browser against an endpoint that now filters properly.** Its
+comment still said *"GET /movements declares only pageSize and pageNumber"* — untrue since
+`MovementSearchDao` landed. Dates and status go to the server now. Its date filter was worse than
+redundant: it re-parsed the row's own **display string** (`"14 Sep 2026"`, formatted a few lines
+above), so every movement compared as midnight and a format or locale change would have broken it
+silently.
+
+*The general shape:* **narrowing after a cap searches only the first page.** A match beyond it reads
+as "no results", which is indistinguishable from there being none.
+
+### Caps were silent, and the pager showed the cap as the total
+
+Each panel fetched one page — 300 or 500, each panel having invented its own — and the table pages
+locally with `count={rows.length}`. So the pager read "1–25 of 300" as though 300 were the total, and
+the summary cards totalled the truncated set. The same two-kinds-of-number fault the movements
+register had before it was paged properly.
+
+Now one `REPORT_PAGE_SIZE`, and `truncationNotice` compares what was read against `totalElements` and
+says so above the table — where it qualifies the cards and the export as well as the rows.
+
+**Measured: nothing truncates today** — 252 assets, 68 movements, 52 requests, 42 stock orders,
+**0 repairs**. So this was latent rather than live. Worth knowing that the Maintenance tab has never
+had a row to render: its mapping, cards and empty state are entirely unexercised against real data.
+
+### The Schedule control did nothing
+
+A Daily / Weekly / Monthly picker behind a clock icon, emitted on every Apply, **read by no panel** —
+and the hero advertised "Generate, schedule and export". Removed, and the hero corrected.
+
+A control that silently does nothing is worse than an absent feature: somebody sets it, believes a
+report is arriving weekly, and stops checking. Scheduled reports need a server that can run and
+deliver one; that is a feature, not a dropdown.
+
+*Also:* the Stock tab matched statuses by **display name**, which Settings can rename. It matches on
+the stable code now.
+
+### Two filters that were narrowing in the browser against parameters that existed
+
+`GET /stocks` has declared **`branchId` and `stockStatusId`** all along, and the Stock report was
+filtering both in the browser anyway — under a comment asserting the endpoint "takes no filters for
+them". Both go to the server now. Category and department stay client-side and genuinely have
+nowhere to go: each belongs to the **commodity on a line** rather than to the order.
+
+*Left client-side deliberately:* `/assets/repairs` has no branch parameter (branch lives on the
+asset) and `/requests` has none for the requester's branch or department. Both are narrowed in the
+browser, which is sound while the volumes are small — and the truncation notice now says when that
+assumption stops holding, which it did not before.
+
+### "Department" on an asset is the holder's, and it hides almost everything
+
+The Asset Register and Disposal tabs derive department from **`assignedTo.department`** — an asset
+has no department of its own. So the filter answers *"assets currently held by someone in that
+department"*, which is a fair question and a different one from what the bare label implies.
+
+What makes it matter is the scale of the omission. Measured: **234 of 252 assets have no holder or no
+department recorded** — 105 are unassigned outright — so applying this filter silently removes 93% of
+the estate. An almost-empty register reads as "there are none of those", not as "most records cannot
+answer this question".
+
+Kept rather than removed, because the question is real, but it now **reports what it set aside**:
+how many records had no holder or no department, out of how many. The same reasoning as the
+truncation notice — a filter may narrow, but it must not narrow invisibly.
+
+*This is the asset-location trap in a different guise.* There, a dotted path through a nullable
+association dropped every unassigned asset in the FROM clause. Here nothing is broken in the query at
+all — the filter is doing exactly what it was written to do, and what it was written to do is nearly
+always the wrong answer to the question on the label.
+
 ## Export columns are configurable — done
 
 A register running to fifteen columns prints as an unreadable wall. Somebody holding

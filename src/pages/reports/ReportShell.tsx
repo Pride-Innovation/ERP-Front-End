@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
+    Alert,
     alpha,
     Box,
     Button,
@@ -22,7 +23,6 @@ import TableChartOutlinedIcon from '@mui/icons-material/TableChartOutlined';
 import PictureAsPdfOutlinedIcon from '@mui/icons-material/PictureAsPdfOutlined';
 import DataObjectOutlinedIcon from '@mui/icons-material/DataObjectOutlined';
 import TuneOutlinedIcon from '@mui/icons-material/TuneOutlined';
-import ScheduleSendOutlinedIcon from '@mui/icons-material/ScheduleSendOutlined';
 import dayjs from 'dayjs';
 import useReportLookups, { LookupOption } from './useReportLookups';
 import { ReportColumn } from './ReportDataTable';
@@ -51,14 +51,46 @@ export interface ReportShellFilters {
     /** The status's stable camelCase code — what client-side matching compares against. */
     statusCode?: string;
     status?: string;
-    schedule?: string;
 }
+
+/*
+ * There was a `schedule` field here, and a Daily / Weekly / Monthly picker behind a clock icon in
+ * the filter header, emitted on every Apply. **No panel ever read it**, and nothing anywhere
+ * scheduled anything — the page hero still advertised "Generate, schedule and export".
+ *
+ * Removed rather than left in place. A control that silently does nothing is worse than an absent
+ * feature: somebody sets it, believes a report is now arriving weekly, and stops checking. If
+ * scheduled reports are wanted they need a server that can run and deliver one, which is a feature
+ * rather than a dropdown.
+ */
 
 interface ReportShellProps {
     title: string;
     subtitle?: string;
     accentColor: string;
     filterFields?: Array<'dateRange' | 'branch' | 'department' | 'category' | 'status'>;
+    /**
+     * Statuses this report actually uses, when they are not the ones in the status catalogue.
+     *
+     * <h2>Why this had to exist</h2>
+     * The Status dropdown was filled from `GET /statuses` — the Status *entity*, which carries
+     * request and asset states ("Request Approved", "In Store"). A **movement**'s status is a
+     * different vocabulary entirely: its own enum of DRAFT / DISPATCHED / IN_TRANSIT / … So the
+     * Movement report offered a list of statuses no movement can ever hold, and picking any of them
+     * matched nothing. Not an error — an empty table, which reads as "there are none of those".
+     *
+     * <p>A report whose subject has its own states passes them here; everything else keeps the
+     * catalogue.
+     */
+    statusOptions?: LookupOption[];
+    /**
+     * Something the reader has to know before trusting the figures — currently, that the report read
+     * less than the server holds.
+     *
+     * <p>Above the table rather than inside it, because it qualifies the summary cards and the
+     * export as much as the rows.
+     */
+    notice?: string | null;
     onApplyFilters?: (f: ReportShellFilters) => void;
     /** Override the built-in export for a report that needs a bespoke document. */
     onExportPdf?: () => void;
@@ -85,32 +117,56 @@ const DATE_PRESETS = [
     { label: 'Custom', value: 'custom' },
 ];
 
-const SCHEDULES = [
-    { label: 'Daily', value: 'daily' },
-    { label: 'Weekly', value: 'weekly' },
-    { label: 'Monthly', value: 'monthly' },
-];
-
 // Branch / department / category / status options now come from the live directories via
 // useReportLookups. They used to be four hardcoded arrays of names here — a fixed five branches
 // that bore no relation to the bank's actual estate, and labels that could not be used to query.
 
+/**
+ * Local wall-clock, the format every endpoint in this application expects.
+ *
+ * <h2>Why not `toISOString()`</h2>
+ * That produces UTC with a trailing `Z`, and Spring binds it to a `LocalDateTime` **without
+ * complaining and discards the offset** — so the instant is re-read as a wall-clock time. On a
+ * +03:00 server "Today" then searched from **21:00 the previous day**: last night's records wrongly
+ * included, the last three hours of today wrongly excluded. No error, no empty table, just a
+ * slightly wrong answer, which is why it has to be looked for rather than noticed.
+ *
+ * <p>The movements panel was fixed for exactly this; the reports page never got the same treatment.
+ */
+const wire = (d: dayjs.Dayjs): string => d.format('YYYY-MM-DDTHH:mm:ss');
+
 const getDateRange = (preset: string): { from: string; to: string } => {
     const now = dayjs();
     switch (preset) {
-        case 'today': return { from: now.startOf('day').toISOString(), to: now.endOf('day').toISOString() };
-        case 'week': return { from: now.startOf('week').toISOString(), to: now.endOf('week').toISOString() };
-        case 'month': return { from: now.startOf('month').toISOString(), to: now.endOf('month').toISOString() };
+        case 'today': return { from: wire(now.startOf('day')), to: wire(now.endOf('day')) };
+        case 'week': return { from: wire(now.startOf('week')), to: wire(now.endOf('week')) };
+        case 'month': return { from: wire(now.startOf('month')), to: wire(now.endOf('month')) };
         case 'quarter': {
             const month = now.month();
             const quarterStart = now.month(Math.floor(month / 3) * 3).startOf('month');
             const quarterEnd = quarterStart.add(2, 'month').endOf('month');
-            return { from: quarterStart.toISOString(), to: quarterEnd.toISOString() };
+            return { from: wire(quarterStart), to: wire(quarterEnd) };
         }
-        case 'year': return { from: now.startOf('year').toISOString(), to: now.endOf('year').toISOString() };
+        case 'year': return { from: wire(now.startOf('year')), to: wire(now.endOf('year')) };
         default: return { from: '', to: '' };
     }
 };
+
+/**
+ * The custom From / To boxes, in the same format and with the same day boundaries as a preset.
+ *
+ * <h2>Two bugs this closes</h2>
+ * The boxes are `type="date"`, so they produce a bare `YYYY-MM-DD` while every preset produced a
+ * full timestamp — **the same filter field carried two different formats depending on how it was
+ * set.** And a bare date is midnight, so a "To" of the 14th excluded everything that happened *on*
+ * the 14th; the report quietly lost its last day.
+ *
+ * <p>Widened to the whole day at both ends, so "1st to 14th" means what a reader means by it.
+ */
+const customRange = (from: string, to: string): { from: string; to: string } => ({
+    from: from ? wire(dayjs(from).startOf('day')) : '',
+    to: to ? wire(dayjs(to).endOf('day')) : '',
+});
 
 const PILL_INPUT_SX = {
     '& .MuiOutlinedInput-root': {
@@ -130,6 +186,8 @@ const ReportShell = ({
     accentColor,
     filterFields = ['dateRange', 'branch', 'department', 'category', 'status'],
     onApplyFilters,
+    statusOptions,
+    notice,
     onExportPdf,
     onExportExcel,
     onExportCsv,
@@ -147,23 +205,25 @@ const ReportShell = ({
     const [department, setDepartment] = useState('');
     const [category, setCategory] = useState('');
     const [status, setStatus] = useState('');
-    const [schedule, setSchedule] = useState('');
-    const [showSchedule, setShowSchedule] = useState(false);
 
     /** Live branch / department / category / status directories for the four dropdowns. */
     const lookups = useReportLookups();
 
+    /** The catalogue, unless this report's subject has a vocabulary of its own. */
+    const statusChoices = statusOptions ?? lookups.statuses;
+
     /** Resolves a selected id back to its directory entry, so the emitted filter carries both. */
     const pick = (options: LookupOption[], id: string) => options.find((o) => String(o.id) === String(id));
 
-    const handleApply = () => {
-        const range = datePreset !== 'custom' ? getDateRange(datePreset) : { from: customFrom, to: customTo };
+    /** Exactly what the controls currently say, in the shape the panels consume. */
+    const currentFilters = useCallback((): ReportShellFilters => {
+        const range = datePreset !== 'custom' ? getDateRange(datePreset) : customRange(customFrom, customTo);
         const b = pick(lookups.branches, branch);
         const d = pick(lookups.departments, department);
         const c = pick(lookups.categories, category);
-        const s = pick(lookups.statuses, status);
+        const s = pick(statusChoices, status);
 
-        onApplyFilters?.({
+        return {
             dateFrom: range.from,
             dateTo: range.to,
             branchId: b?.id,
@@ -175,9 +235,30 @@ const ReportShell = ({
             statusId: s?.id,
             statusCode: s?.code,
             status: s?.label,
-            schedule: schedule || undefined,
-        });
-    };
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [datePreset, customFrom, customTo, branch, department, category, status, lookups]);
+
+    const handleApply = () => onApplyFilters?.(currentFilters());
+
+    /*
+     * The bar opens reading "This Month" — so that is what the first table must show.
+     *
+     * It did not. The panel started from an empty filter set and loaded everything, under a Period
+     * control confidently naming a month. Nobody reading the page could tell: it is not an error
+     * state, it is a heading that disagrees with the table beneath it, and the table looks perfectly
+     * plausible.
+     *
+     * Applied once the lookups have arrived, because the branch and status ids come from them —
+     * firing earlier would send a date range and silently drop everything else.
+     */
+    const primed = useRef(false);
+    useEffect(() => {
+        if (primed.current || lookups.loading) return;
+        primed.current = true;
+        onApplyFilters?.(currentFilters());
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [lookups.loading]);
 
     /**
      * Exports what is on screen. Reads the current filter controls rather than the last applied
@@ -185,7 +266,7 @@ const ReportShell = ({
      */
     const runExport = (kind: 'pdf' | 'excel' | 'csv') => {
         if (!exportRows || !exportColumns) return;
-        const range = datePreset !== 'custom' ? getDateRange(datePreset) : { from: customFrom, to: customTo };
+        const range = datePreset !== 'custom' ? getDateRange(datePreset) : customRange(customFrom, customTo);
         const input = {
             title,
             columns: exportColumns,
@@ -196,7 +277,7 @@ const ReportShell = ({
                 branch: pick(lookups.branches, branch)?.label,
                 department: pick(lookups.departments, department)?.label,
                 category: pick(lookups.categories, category)?.label,
-                status: pick(lookups.statuses, status)?.label,
+                status: pick(statusChoices, status)?.label,
             },
         };
         if (kind === 'pdf') exportReportPdf(input);
@@ -204,6 +285,13 @@ const ReportShell = ({
         else exportReportCsv(input);
     };
 
+    /**
+     * Back to the opening state — which is "this month", not "everything".
+     *
+     * <p>It used to reset the controls to *This Month* and then apply an **empty** filter set, so
+     * Clear left the bar and the table disagreeing permanently. Clearing should mean "put it back
+     * how it opened", and what it opened as is now one definition rather than two.
+     */
     const handleClear = () => {
         setDatePreset('month');
         setCustomFrom('');
@@ -212,8 +300,10 @@ const ReportShell = ({
         setDepartment('');
         setCategory('');
         setStatus('');
-        setSchedule('');
-        onApplyFilters?.({});
+        onApplyFilters?.({
+            dateFrom: getDateRange('month').from,
+            dateTo: getDateRange('month').to,
+        });
     };
 
     return (
@@ -245,12 +335,6 @@ const ReportShell = ({
                         </Typography>
                     </Stack>
                     <Stack direction="row" gap={0.5}>
-                        <Tooltip title="Schedule report">
-                            <IconButton size="small" onClick={() => setShowSchedule(p => !p)}
-                                sx={{ color: showSchedule ? accentColor : '#64748B', bgcolor: showSchedule ? alpha(accentColor, 0.08) : 'transparent' }}>
-                                <ScheduleSendOutlinedIcon sx={{ fontSize: 16 }} />
-                            </IconButton>
-                        </Tooltip>
                         <Tooltip title={showFilters ? 'Collapse filters' : 'Expand filters'}>
                             <IconButton size="small" onClick={() => setShowFilters(p => !p)}
                                 sx={{ color: '#64748B' }}>
@@ -339,20 +423,7 @@ const ReportShell = ({
                                     <FormControl fullWidth size="small" sx={PILL_INPUT_SX}>
                                         <Select value={status} onChange={e => setStatus(e.target.value)} displayEmpty>
                                             <MenuItem value=""><em style={{ fontSize: '0.8rem', fontStyle: 'normal', color: '#94A3B8' }}>All Statuses</em></MenuItem>
-                                            {lookups.statuses.map(s => <MenuItem key={s.id} value={String(s.id)} sx={{ fontSize: '0.8rem' }}>{s.label}</MenuItem>)}
-                                        </Select>
-                                    </FormControl>
-                                </Grid>
-                            )}
-
-                            {/* Schedule (collapsible) */}
-                            {showSchedule && (
-                                <Grid item xs={12} sm={6} md={2}>
-                                    <Typography sx={{ fontSize: '0.72rem', fontWeight: 600, color: '#64748B', mb: 0.5, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Schedule</Typography>
-                                    <FormControl fullWidth size="small" sx={PILL_INPUT_SX}>
-                                        <Select value={schedule} onChange={e => setSchedule(e.target.value)} displayEmpty>
-                                            <MenuItem value=""><em style={{ fontSize: '0.8rem', fontStyle: 'normal', color: '#94A3B8' }}>One-time</em></MenuItem>
-                                            {SCHEDULES.map(s => <MenuItem key={s.value} value={s.value} sx={{ fontSize: '0.8rem' }}>{s.label}</MenuItem>)}
+                                            {statusChoices.map(s => <MenuItem key={s.id} value={String(s.id)} sx={{ fontSize: '0.8rem' }}>{s.label}</MenuItem>)}
                                         </Select>
                                     </FormControl>
                                 </Grid>
@@ -454,6 +525,10 @@ const ReportShell = ({
                     </IconButton>
                 </Tooltip>
             </Box>
+
+            {notice && (
+                <Alert severity="warning" sx={{ mb: 2, py: 0.5 }}>{notice}</Alert>
+            )}
 
             {/* ── Report content slot ─────────────────────────────────── */}
             {children}

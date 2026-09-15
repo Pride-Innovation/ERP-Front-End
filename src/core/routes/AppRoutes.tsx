@@ -99,8 +99,23 @@ const routeElements = (
           {/* Store Sub-Routes */}
           {StoreRoutes()}
 
-          {/* Reports */}
-          <Route element={<PrivateRoute permission={PERMISSIONS.READ_AUDIT} />}>
+          {/*
+            * Reports — gated on what the six tabs actually read.
+            *
+            * This was READ_AUDIT, which no tab touches: the page reads stocks, assets, requests,
+            * movements and repairs. Measured when it was found, **4 of 27 accounts could open it and
+            * 23 who could read every report on it were refused outright** — the sidebar hid the link
+            * and this guard turned the URL away, so there was no route in at all.
+            *
+            * `anyOf`, because the page hides the tabs a viewer cannot load: holding one of these
+            * means there is something here worth opening.
+            */}
+          <Route element={<PrivateRoute anyOf={[
+            PERMISSIONS.READ_ASSET,
+            PERMISSIONS.READ_REQUEST,
+            PERMISSIONS.READ_MOVEMENT,
+            PERMISSIONS.READ_INVENTORY,
+          ]} />}>
             <Route path={ROUTES.REPORTS} element={<ReportsPage />} />
           </Route>
 

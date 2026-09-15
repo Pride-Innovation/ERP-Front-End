@@ -5,7 +5,7 @@ import EngineeringOutlinedIcon from '@mui/icons-material/EngineeringOutlined';
 import ReportShell, { ReportShellFilters } from '../ReportShell';
 import ReportSummaryCards from '../ReportSummaryCards';
 import ReportDataTable, { ReportColumn, StatusChip } from '../ReportDataTable';
-import useReportData from '../useReportData';
+import useReportData, { REPORT_PAGE_SIZE, truncationNotice } from '../useReportData';
 import { fetchRowsService } from '../../../core/apis/globalService';
 
 const ACCENT = '#D97706';
@@ -61,11 +61,11 @@ const toRow = (r: any): MaintenanceRow => ({
 });
 
 const MaintenanceReport = () => {
-    const { rows, loading, error, applyFilters, refresh } = useReportData<MaintenanceRow>(
+    const { rows, notice, loading, error, applyFilters, refresh } = useReportData<MaintenanceRow>(
         async (f: ReportShellFilters) => {
             const res = (await fetchRowsService({
                 pageNumber: 0,
-                pageSize: 300,
+                pageSize: REPORT_PAGE_SIZE,
                 endPoint: 'assets/repairs',
                 params: {
                     assetTypeId: f.categoryId,
@@ -78,7 +78,10 @@ const MaintenanceReport = () => {
             const mapped: MaintenanceRow[] = (res.data?.content ?? []).map(toRow);
 
             // Branch lives on the asset, not the repair, so it is narrowed here.
-            return f.branch ? mapped.filter((r) => r.branch === f.branch) : mapped;
+            return {
+                rows: f.branch ? mapped.filter((r) => r.branch === f.branch) : mapped,
+                notice: truncationNotice(res, 'repairs'),
+            };
         },
     );
 
@@ -105,6 +108,7 @@ const MaintenanceReport = () => {
             filterFields={['dateRange', 'branch', 'category']}
             onApplyFilters={applyFilters}
             onRefresh={refresh}
+            notice={notice}
             summaryCards={summaryCards}
             exportRows={rows}
             exportColumns={COLUMNS}

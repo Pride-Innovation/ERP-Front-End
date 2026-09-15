@@ -5,7 +5,7 @@ import PendingActionsOutlinedIcon from '@mui/icons-material/PendingActionsOutlin
 import ReportShell, { ReportShellFilters } from '../ReportShell';
 import ReportSummaryCards from '../ReportSummaryCards';
 import ReportDataTable, { ReportColumn } from '../ReportDataTable';
-import useReportData from '../useReportData';
+import useReportData, { REPORT_PAGE_SIZE, combineNotices, truncationNotice } from '../useReportData';
 import { fetchRowsService } from '../../../core/apis/globalService';
 
 const ACCENT = '#DC2626';
@@ -66,11 +66,11 @@ const toRow = (a: any): DisposalRow => ({
 });
 
 const DisposalReport = () => {
-    const { rows, loading, error, applyFilters, refresh } = useReportData<DisposalRow>(
+    const { rows, notice, loading, error, applyFilters, refresh } = useReportData<DisposalRow>(
         async (f: ReportShellFilters) => {
             const res = (await fetchRowsService({
                 pageNumber: 0,
-                pageSize: 500,
+                pageSize: REPORT_PAGE_SIZE,
                 endPoint: 'assets',
                 params: {
                     // The one filter that defines this report: written-off assets only.
@@ -84,7 +84,32 @@ const DisposalReport = () => {
 
             if (res?.status !== 200) throw new Error('disposals');
             const mapped: DisposalRow[] = (res.data?.content ?? []).map(toRow);
-            return f.department ? mapped.filter((r) => r.department === f.department) : mapped;
+            /*
+             * An asset has no department. This one is the **holder's** — `assignedTo.department` —
+             * so the filter answers "assets currently held by someone in that department", which is
+             * a fair question but a different one from what the bare label suggests.
+             *
+             * It matters because of how much it hides. Measured on live data: **234 of 252 assets
+             * have no holder or no department recorded**, so applying this quietly removes 93% of
+             * the estate. An empty-looking register reads as "there are none", which is why the
+             * count of what was set aside is reported rather than left to be noticed.
+             */
+            const withoutDepartment = mapped.filter((r) => r.department === '—').length;
+            const narrowed = f.department
+                ? mapped.filter((r) => r.department === f.department)
+                : mapped;
+
+            return {
+                rows: narrowed,
+                notice: combineNotices(
+                    truncationNotice(res, 'disposals'),
+                    f.department && withoutDepartment > 0
+                        ? `Department here means the holder's: ${withoutDepartment} of `
+                          + `${mapped.length} records have no holder or no department recorded and `
+                          + 'are not shown.'
+                        : undefined,
+                ),
+            };
         },
     );
 
@@ -113,6 +138,7 @@ const DisposalReport = () => {
             filterFields={['dateRange', 'branch', 'department', 'category']}
             onApplyFilters={applyFilters}
             onRefresh={refresh}
+            notice={notice}
             summaryCards={summaryCards}
             exportRows={rows}
             exportColumns={COLUMNS}

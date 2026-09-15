@@ -5,7 +5,7 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
     alpha,
     Box,
@@ -35,6 +35,7 @@ import PictureAsPdfOutlinedIcon from '@mui/icons-material/PictureAsPdfOutlined';
 import TableChartOutlinedIcon from '@mui/icons-material/TableChartOutlined';
 import DataObjectOutlinedIcon from '@mui/icons-material/DataObjectOutlined';
 import TodayOutlinedIcon from '@mui/icons-material/TodayOutlined';
+import { toast } from 'react-toastify';
 import { IAuditTrail, IAuditTrailSummary } from './interface';
 import {
     fetchAuditTrailsService, fetchAuditTrailSummaryService, recordExportService,
@@ -168,19 +169,116 @@ const fmtTimestamp = (value?: string) => {
         + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 };
 
+/** "Request #37", or a dash when the event was not about a particular record. */
+const recordLabel = (row: IAuditTrail): string =>
+    (row.entityType ? `${row.entityType}${row.entityId ? ` #${row.entityId}` : ''}` : '—');
+
+/** A cell that narrows the log to itself. */
+const DrillLink = ({ label, title, onClick }: { label: string; title: string; onClick: () => void }) => (
+    <Tooltip title={title}>
+        <Box
+            component="span"
+            role="button"
+            tabIndex={0}
+            onClick={onClick}
+            onKeyDown={(e: React.KeyboardEvent) => {
+                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(); }
+            }}
+            sx={{
+                cursor: 'pointer', borderBottom: '1px dashed', borderColor: alpha(PRIMARY, 0.45),
+                '&:hover': { color: PRIMARY }, '&:focus-visible': { outline: `2px solid ${PRIMARY}` },
+            }}
+        >
+            {label}
+        </Box>
+    </Tooltip>
+);
+
 // ── Table column definitions ──────────────────────────────────────────────
-const COLUMNS: ReportColumn<IAuditTrail>[] = [
+/**
+ * Built per render so the Actor and Record cells can narrow the log to themselves.
+ *
+ * <p>Those two questions — *what else did this person do* and *what else happened to this record* —
+ * are most of what an audit trail is opened for, and both were unreachable: the only way near them
+ * was typing a name into free-text search, which also returns every row that merely mentions it.
+ * The endpoint has taken `actorId`, `entityType` and `entityId` all along.
+ */
+const buildColumns = (
+    onFocus: (focus: { actorId?: number | null; actorName?: string; entityType?: string | null; entityId?: number | null }) => void,
+): ReportColumn<IAuditTrail>[] => [
     { id: 'timeStamp',   label: 'Timestamp',   minWidth: 160, format: (v) => fmtTimestamp(v) },
     { id: 'event',       label: 'Event',        minWidth: 110, format: (v) => <EventChip value={v} /> },
     { id: 'module',      label: 'Module',       minWidth: 120, format: (v) => <ModuleChip value={v} /> },
-    { id: 'actor',       label: 'Actor',        minWidth: 160, format: (v) => <ActorCell name={v} /> },
+    {
+        id: 'actor', label: 'Actor', minWidth: 160,
+        format: (v, row) => (row.actorId
+            ? (
+                <DrillLink
+                    label={v}
+                    title={`Show everything ${v} has done`}
+                    onClick={() => onFocus({ actorId: row.actorId, actorName: v })}
+                />
+            )
+            // System events have no actor to follow — rendered plainly rather than as a dead link.
+            : <ActorCell name={v} />),
+    },
     { id: 'description', label: 'Description',  minWidth: 280 },
+    {
+        id: 'entityType', label: 'Record', minWidth: 130,
+        format: (_v, row) => (row.entityType
+            ? (
+                <DrillLink
+                    label={recordLabel(row)}
+                    title={`Show the full history of ${recordLabel(row)}`}
+                    onClick={() => onFocus({ entityType: row.entityType, entityId: row.entityId })}
+                />
+            )
+            : <Typography sx={{ fontSize: '0.8rem', color: '#94A3B8' }}>—</Typography>),
+    },
     { id: 'ipAddress',   label: 'IP Address',   minWidth: 130 },
     { id: 'severity',    label: 'Severity',     minWidth: 100, format: (v) => <SeverityChip value={v} /> },
 ];
 
+/**
+ * The columns a file gets, which are not the columns the screen gets.
+ *
+ * <p>Two things reach the file that the table has no room for, and both are the parts an exported
+ * log is actually read for:
+ *
+ * <ul>
+ *   <li><b>Action</b> — the machine-readable code (`MOVEMENT_APPROVAL_BYPASSED`). The description is
+ *       prose; this is the identifier, and it is what somebody greps a saved log for. It was
+ *       documented on `IAuditTrail` as "not shown, but exported and searchable" — and it was not
+ *       exported, because the export is built from the table's columns.</li>
+ *   <li><b>Record</b> — the entity the event was about. Without it a row says something happened to
+ *       something, and the reader has to infer which from the sentence.</li>
+ * </ul>
+ */
+const EXPORT_COLUMNS: ReportColumn<any>[] = [
+    { id: 'timeStamp',   label: 'Timestamp' },
+    { id: 'event',       label: 'Event' },
+    { id: 'action',      label: 'Action code' },
+    { id: 'module',      label: 'Module' },
+    { id: 'actor',       label: 'Actor' },
+    { id: 'actorEmail',  label: 'Actor email' },
+    { id: 'description', label: 'Description' },
+    { id: 'record',      label: 'Record' },
+    { id: 'ipAddress',   label: 'IP address' },
+    { id: 'severity',    label: 'Severity' },
+];
+
 const ALL_EVENTS    = ['All', 'created', 'updated', 'deleted', 'login', 'logout', 'approved', 'rejected', 'system'];
-const ALL_MODULES   = ['All', 'Assets', 'Inventory', 'Users', 'Store', 'Requests', 'Movement', 'Disposal', 'Maintenance', 'System'];
+/*
+ * `Store` is deliberately absent, though `AuditModule.STORE` exists.
+ *
+ * Nothing in the application records one: measured, **zero call sites** across the whole backend,
+ * and zero rows in 1,661. Offering it gave an empty table indistinguishable from "nothing has
+ * happened in Store" — a filter that can only ever match nothing is worse than a missing one,
+ * because the reader believes the answer.
+ *
+ * Disposal and Maintenance stay: each has a live call site and will fill as those flows are used.
+ */
+const ALL_MODULES   = ['All', 'Assets', 'Inventory', 'Users', 'Requests', 'Movement', 'Disposal', 'Maintenance', 'System'];
 const ALL_SEVERITIES = ['All', 'info', 'warning', 'critical'];
 
 /** How often the "Live" badge refetches while it is switched on. */
@@ -207,6 +305,20 @@ const AuditTrails = () => {
     const [moduleFilter, setModuleFilter]   = useState('All');
     const [severityFilter, setSeverityFilter] = useState('All');
 
+    /**
+     * A drill-down: one person's activity, or one record's history.
+     *
+     * <p>Held apart from the filter bar because it is not something typed — it is arrived at by
+     * clicking a row, and cleared by one chip rather than by hunting for which dropdown caused it.
+     * `GET /audit/trails` has declared `actorId`, `entityType` and `entityId` since it was written;
+     * nothing ever sent them, so the closest anyone could get was typing a name into free-text
+     * search, which also matches every row that merely mentions them.
+     */
+    const [focus, setFocus] = useState<{
+        actorId?: number | null; actorName?: string;
+        entityType?: string | null; entityId?: number | null;
+    } | null>(null);
+
     const [applied, setApplied] = useState({
         search: '', dateFrom: '', dateTo: '', eventType: 'All', module: 'All', severity: 'All',
     });
@@ -223,6 +335,12 @@ const AuditTrails = () => {
 
     const todayLabel = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 
+    /** Page 1 of the new question — page 4 of the old one means nothing. */
+    const columns = useMemo(
+        () => buildColumns((next) => { setPage(0); setFocus(next); }),
+        [],
+    );
+
     /**
      * Fetches the current page.
      *
@@ -230,26 +348,30 @@ const AuditTrails = () => {
      * audit trail, and a tab left open on a thirty-second refresh would otherwise write nearly three
      * thousand "viewed the audit trail" rows a day and bury everything the log is for.
      */
+    /** Everything currently narrowing the log — the bar plus any drill-down. */
+    const query = useMemo(() => ({
+        search: applied.search,
+        dateFrom: applied.dateFrom,
+        dateTo: applied.dateTo,
+        eventType: applied.eventType,
+        module: applied.module,
+        severity: applied.severity,
+        actorId: focus?.actorId ?? undefined,
+        entityType: focus?.entityType ?? undefined,
+        entityId: focus?.entityId ?? undefined,
+    }), [applied, focus]);
+
     const load = useCallback(async (background = false) => {
         if (!background) setLoading(true);
         try {
-            const [pageData, summaryData] = await Promise.all([
-                fetchAuditTrailsService({
-                    search: applied.search,
-                    dateFrom: applied.dateFrom,
-                    dateTo: applied.dateTo,
-                    eventType: applied.eventType,
-                    module: applied.module,
-                    severity: applied.severity,
-                    pageNumber: page,
-                    pageSize: rowsPerPage,
-                    background,
-                }),
-                fetchAuditTrailSummaryService(),
-            ]);
+            const pageData = await fetchAuditTrailsService({
+                ...query,
+                pageNumber: page,
+                pageSize: rowsPerPage,
+                background,
+            });
             setRows(pageData.rows);
             setTotal(pageData.totalElements);
-            setSummary(summaryData);
             setError(null);
         } catch {
             // Not cleared to an empty array: "we could not ask" and "nothing happened" are opposite
@@ -258,18 +380,43 @@ const AuditTrails = () => {
         } finally {
             if (!background) setLoading(false);
         }
-    }, [applied, page, rowsPerPage]);
+    }, [query, page, rowsPerPage]);
 
     useEffect(() => { load(); }, [load]);
+
+    /*
+     * The tiles are fetched on their own, and only when the *filters* change.
+     *
+     * They used to ride along with every page fetch, so turning from page 1 to page 2 re-ran four
+     * aggregate counts over the largest table in the database — to produce figures that could not
+     * have changed, because they ignored the filters entirely. They follow the filters now, and
+     * paging leaves them alone.
+     */
+    const loadSummary = useCallback(async () => {
+        try {
+            setSummary(await fetchAuditTrailSummaryService(query));
+        } catch {
+            // The table is the page; failing to draw its tiles must not hide it. The listing's own
+            // error, if there is one, is already on screen.
+            setSummary(null);
+        }
+    }, [query]);
+
+    useEffect(() => { loadSummary(); }, [loadSummary]);
 
     // Keep the poll pointed at the current filters without making the interval depend on them —
     // re-creating the timer on every filter change would reset the countdown each time.
     const loadRef = useRef(load);
     loadRef.current = load;
+    const summaryRef = useRef(loadSummary);
+    summaryRef.current = loadSummary;
 
     useEffect(() => {
         if (!live) return undefined;
-        const timer = setInterval(() => loadRef.current(true), LIVE_POLL_MS);
+        const timer = setInterval(() => {
+            loadRef.current(true);
+            summaryRef.current();
+        }, LIVE_POLL_MS);
         return () => clearInterval(timer);
     }, [live]);
 
@@ -282,6 +429,7 @@ const AuditTrails = () => {
     };
 
     const clearFilters = () => {
+        setFocus(null);
         setSearch('');
         setDateFrom('');
         setDateTo('');
@@ -302,17 +450,28 @@ const AuditTrails = () => {
     const runExport = async (kind: 'pdf' | 'excel' | 'csv') => {
         setExporting(true);
         try {
-            const { rows: exportRows } = await fetchAuditTrailsService({
-                search: applied.search,
-                dateFrom: applied.dateFrom,
-                dateTo: applied.dateTo,
-                eventType: applied.eventType,
-                module: applied.module,
-                severity: applied.severity,
+            const { rows: exportRows, totalElements } = await fetchAuditTrailsService({
+                ...query,
                 pageNumber: 0,
                 pageSize: EXPORT_PAGE_SIZE,
                 background: true, // the export itself is recorded below; don't also log a "view"
             });
+
+            /*
+             * Say so when the file is not the whole answer.
+             *
+             * The cap was silent, and the table holds 1,661 rows today — so exporting the unfiltered
+             * trail handed somebody 1,000 rows and no indication that 661 were missing. Worse here
+             * than anywhere else in the application: this is the artefact that goes into a dispute
+             * or an audit, and it looks complete.
+             */
+            if (totalElements > exportRows.length) {
+                toast.warning(
+                    `Exported the most recent ${exportRows.length.toLocaleString()} of `
+                    + `${totalElements.toLocaleString()} matching events. `
+                    + 'Narrow the dates or filters to capture the rest.',
+                );
+            }
 
             // Timestamps and chips are React nodes in the table; a file needs the text.
             const flat = exportRows.map((r) => ({
@@ -320,9 +479,12 @@ const AuditTrails = () => {
                 timeStamp: fmtTimestamp(r.timeStamp),
                 event: EVENT_CONFIG[r.event]?.label ?? r.event,
                 severity: SEVERITY_CONFIG[r.severity]?.label ?? r.severity,
+                action: r.action ?? '—',
+                actorEmail: r.actorEmail ?? '—',
+                record: recordLabel(r),
             }));
 
-            const input = { title: 'Audit Trail', columns: COLUMNS, rows: flat };
+            const input = { title: 'Audit Trail', columns: EXPORT_COLUMNS, rows: flat };
             if (kind === 'pdf') await exportReportPdf(input);
             else if (kind === 'excel') exportReportExcel(input);
             else exportReportCsv(input);
@@ -574,6 +736,29 @@ const AuditTrails = () => {
                     </Collapse>
                 </Box>
 
+                {/*
+                  * An active drill-down, and the way out of it.
+                  *
+                  * Its own chip rather than a seventh dropdown: it is arrived at by clicking a row,
+                  * so the way back has to be somewhere the eye already is. Without it a narrowed log
+                  * looks like a quiet one, and nothing on the filter bar explains why.
+                  */}
+                {focus && (
+                    <Box sx={{ mb: 2 }}>
+                        <Chip
+                            label={focus.actorId
+                                ? `Showing only: ${focus.actorName ?? 'this person'}`
+                                : `Showing only: ${focus.entityType}${focus.entityId ? ` #${focus.entityId}` : ''}`}
+                            onDelete={() => { setPage(0); setFocus(null); }}
+                            size="small"
+                            sx={{
+                                bgcolor: alpha(PRIMARY, 0.1), color: PRIMARY, fontWeight: 700,
+                                fontSize: '0.75rem', border: `1px solid ${alpha(PRIMARY, 0.25)}`,
+                            }}
+                        />
+                    </Box>
+                )}
+
                 {/* ── Result count + Export ─────────────────────────────── */}
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
                     <Typography sx={{ fontSize: '0.8rem', color: '#64748B' }}>
@@ -656,7 +841,7 @@ const AuditTrails = () => {
 
                 {/* ── Data Table ───────────────────────────────────────── */}
                 <ReportDataTable
-                    columns={COLUMNS}
+                    columns={columns}
                     rows={rows}
                     accentColor={PRIMARY}
                     rowKey="id"

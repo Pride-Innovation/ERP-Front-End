@@ -5,7 +5,7 @@ import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 import ReportShell, { ReportShellFilters } from '../ReportShell';
 import ReportSummaryCards from '../ReportSummaryCards';
 import ReportDataTable, { ReportColumn, StatusChip } from '../ReportDataTable';
-import useReportData from '../useReportData';
+import useReportData, { REPORT_PAGE_SIZE, truncationNotice } from '../useReportData';
 import { fetchRowsService } from '../../../core/apis/globalService';
 
 const ACCENT = '#7C3AED';
@@ -76,15 +76,28 @@ const toRows = (r: any): RequestRow[] => {
 };
 
 const RequestsReport = () => {
-    const { rows, loading, error, applyFilters, refresh } = useReportData<RequestRow>(
+    const { rows, notice, loading, error, applyFilters, refresh } = useReportData<RequestRow>(
         async (f: ReportShellFilters) => {
             const res = (await fetchRowsService({
                 pageNumber: 0,
-                pageSize: 300,
+                pageSize: REPORT_PAGE_SIZE,
                 endPoint: 'requests',
                 params: {
-                    // /requests filters by status *name*, not id.
-                    status: f.status,
+                    /*
+                     * `statusIds`, not `status`.
+                     *
+                     * `GET /requests` **declares** a `status` parameter, so Spring accepted it
+                     * without a murmur — but `RequestSearchCriteria` has no such field and
+                     * `RequestSearchDao` only ever filters on `statusIds`. It was bound and never
+                     * read, and this panel did not narrow by status in the browser either, so
+                     * picking a status here changed **nothing at all**.
+                     *
+                     * Sharper than an undeclared parameter (which Spring drops silently) because the
+                     * signature looks right: the endpoint advertises a filter it does not implement.
+                     * The dead parameter has been removed from the controller so the next reader is
+                     * not offered it again.
+                     */
+                    statusIds: f.statusId,
                     startDate: f.dateFrom,
                     endDate: f.dateTo,
                 },
@@ -95,12 +108,14 @@ const RequestsReport = () => {
 
             // Branch, department and category have no query parameters on /requests — they belong to
             // the requester and to each line's commodity rather than to the request itself.
-            return flat.filter((r) => {
+            const narrowed = flat.filter((r) => {
                 if (f.branch && r.branch !== f.branch) return false;
                 if (f.department && r.department !== f.department) return false;
                 if (f.category && r.category !== f.category) return false;
                 return true;
             });
+
+            return { rows: narrowed, notice: truncationNotice(res, 'requests') };
         },
     );
 
@@ -127,6 +142,7 @@ const RequestsReport = () => {
             filterFields={['dateRange', 'branch', 'department', 'category', 'status']}
             onApplyFilters={applyFilters}
             onRefresh={refresh}
+            notice={notice}
             summaryCards={summaryCards}
             exportRows={rows}
             exportColumns={COLUMNS}

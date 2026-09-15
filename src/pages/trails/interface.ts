@@ -55,6 +55,11 @@ export interface IAuditTrailQuery {
     eventType?: string;
     module?: string;
     severity?: string;
+    /** Narrow to one person's activity. The id, not the name — two people share a name. */
+    actorId?: number | null;
+    /** Narrow to one record's history, e.g. every event about Request #37. */
+    entityType?: string | null;
+    entityId?: number | null;
     pageNumber?: number;
     pageSize?: number;
     /** Set on auto-refresh ticks so polling is not recorded as somebody reading the log. */
