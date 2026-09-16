@@ -148,7 +148,10 @@ export const EXPORT_TABLES: ExportTable[] = [
             on('requestDate', 'Requested on'),
             on('requestedBy', 'Requested by'),
             on('approver', 'Currently with'),
-            on('requestedFrom', 'Branch'),
+            // Not 'Branch' any more: for a Head Office request this cell carries the
+            // requester's department, so a header saying Branch would be wrong on exactly the rows
+            // the change was made for.
+            on('requestedFrom', 'Requested from'),
             on('priority', 'Priority'),
             on('status', 'Status'),
             off('id', 'Request no.'),

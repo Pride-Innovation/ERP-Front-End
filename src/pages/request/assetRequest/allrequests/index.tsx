@@ -54,6 +54,7 @@ import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import AcknowledgeRequest from "../AcknowledgeRequest";
 import AcknowledgeReceipt from "../AcknowledgeReceipt";
 import ApproveIssuance from "../ApproveIssuance";
+import { useDepartmentOptions } from '../useDepartmentOptions';
 
 
 const Request = () => {
@@ -63,6 +64,7 @@ const Request = () => {
      * Branch-scoped on the server, so the list offered matches what this listing can actually return.
      */
     const fetchStaffOptions = useStaffOptions();
+    const departmentOptions = useDepartmentOptions();
 
     const { requestTableData, setOptions } = useContext(RequestContext);
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
@@ -449,7 +451,7 @@ const Request = () => {
                  * `startDate`/`endDate`. The Status dropdown offered Active/Disabled/Locked — user
                  * account states, copied from the users page and never adapted.
                  */
-                columnFilters={buildRequestColumnFilters(statuses, fetchStaffOptions)}
+                columnFilters={buildRequestColumnFilters(statuses, fetchStaffOptions, departmentOptions)}
                 /*
                  * Merged over the tab's base parameters rather than replacing them, so the status
                  * chip above the table survives a filter being applied.

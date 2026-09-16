@@ -111,6 +111,15 @@ export const generateApprovalPdf = async (
     const panelH = 54;
     const panelY = y;
 
+    /*
+     * Both, side by side - and deliberately not `requestedFromLabel`.
+     *
+     * The screens choose one name because a table cell and a hero tile have room for one. A signed
+     * approval certificate is the document somebody produces months later to answer "who asked for
+     * this, and from where", and there the branch and the department are two different facts that are
+     * both worth having: "Head Office   ·   Finance". Narrowing it to the department would throw away
+     * the half that locates the request in the bank.
+     */
     const requesterSub = [
         request.requester?.branch?.name,
         (request.requester?.department as { name?: string } | null | undefined)?.name,
@@ -148,6 +157,8 @@ export const generateApprovalPdf = async (
         ['Raised On', fmtDate(request.createDate)],
         ['Priority', request.priority ? `${request.priority[0].toUpperCase()}${request.priority.slice(1)}` : '—'],
         ['Category', request.assetType?.name || '—'],
+        // Stays the literal branch, and stays labelled Branch: the department is already printed
+        // beside it in the panel above, and on a certificate a row headed "Branch" should name one.
         ['Branch', request.requester?.branch?.name || '—'],
         ['Current Status', statusLabel],
     ];

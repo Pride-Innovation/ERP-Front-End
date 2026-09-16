@@ -46,6 +46,210 @@ as a value with no `status`. Treat anything that is not 200 as failed.
 
 ---
 
+## Living behind the firewall
+
+The WAF in front of this application imposes three rules, and each of them changes something
+structural. **Read this before adding an endpoint, a status code, or an axios call.**
+
+| The firewall | What it forces |
+|---|---|
+| blocks **PUT** and **DELETE**, at every path | the verb travels in a header |
+| blocks **403** responses (passes every other 4xx) | refusals travel as `422` + `errorCode` |
+| blocks **OPTIONS** | the front end must be served **same-origin** |
+
+### The verb travels in a header, and *where* it is restored is the whole security story
+
+40 `@PutMapping`s and 19 `@DeleteMapping`s stay exactly as they are. `HttpMethodOverrideFilter` turns
+a POST carrying `X-HTTP-Method-Override: PUT|DELETE` back into the real verb, so routes, controllers
+and security rules are untouched.
+
+**It sits inside the security chain, after `CorsFilter` and before `AuthorizationFilter`** — measured
+positions 4, 12 and 13. That window is the only correct place and each boundary is there for its own
+reason.
+
+**Before authorization**, because authorization is *method-specific* — **17 rules** name
+`HttpMethod.PUT` or `HttpMethod.DELETE`, and the same path routinely carries a different permission
+per verb:
+
+```java
+.requestMatchers(HttpMethod.DELETE, ASSET_ROUTE).hasAuthority(DELETE_ASSET)
+.requestMatchers(HttpMethod.POST,   ASSET_ROUTE).hasAuthority(CREATE_ASSET)
+```
+
+Restore the verb *after* Spring Security and a holder of `CREATE_ASSET` alone can send
+`POST /assets/{id}` with a DELETE header: the POST rule admits it, the dispatcher routes it to the
+`@DeleteMapping`, the asset is gone. All 17 rules invert the same way.
+
+**After CORS**, because CORS is about what the browser *actually sent*. This shipped wrong: the filter
+was first registered as a servlet filter at `HIGHEST_PRECEDENCE`, in front of everything, so
+`DefaultCorsProcessor` read a method of `PUT` from a request the browser had sent as `POST`, did not
+find it in `allowedMethods`, and answered **`Reject: HTTP 'PUT' is not allowed`** with a bare 403
+`Invalid CORS request`. Every write in development was broken by it.
+
+**What hid it: the preflight succeeded.** A preflight asks about `Access-Control-Request-Method`,
+which correctly said `POST`, and preflights are answered before the override header is ever consulted.
+Only the real request failed, inside the CORS layer rather than the application — so the browser
+reported a generic network error and the server log blamed a verb nobody had sent.
+
+*Widening `allowedMethods` to include PUT and DELETE would also have silenced it, and would have been
+wrong twice over:* it would advertise `Access-Control-Allow-Methods: PUT, DELETE` to browsers — verbs
+the firewall drops — and it would leave the CORS layer adjudicating a verb that never crossed the
+network. `anOverriddenWriteFromABrowserSurvivesCors` pins the real fix.
+
+**The general lesson, and it is the one to carry forward: this filter makes `getMethod()` lie, and
+everything downstream believes it.** Before adding any check that reads the method, decide which verb
+it is actually about — the one on the wire, or the one intended. CORS wants the first. Authorization
+wants the second.
+
+*A trap met while fixing it:* deleting `HttpMethodOverrideConfiguration.java` left its compiled
+`.class` in `target/classes` — `mvn compile` does not remove orphans — so Spring registered the filter
+**twice**, once per placement. The two instances had different `getFilterName()` values, so
+`OncePerRequestFilter`'s once-guard did not dedupe them, the second saw a method of `PUT` and refused
+it with a 400. **`mvn clean` after deleting a `@Configuration`**, and treat a filter that suddenly
+refuses its own output as a duplicate-registration symptom.
+
+**Three narrowings, and the third is the one that looks wrong and isn't.** Only on POST; only PUT and
+DELETE; and **an unrecognised value is a 400, never a fall-through to the POST handler**. Ignoring a
+bad override is the friendly-looking option and it means a typo, or a header the firewall rewrote,
+quietly performs a *different operation* from the one asked for.
+
+**The audit is exhaustive, not sampled.** `OverriddenVerbAuthorizationMatrixTest` walks **all 17**
+method-specific matchers and checks *both* directions on each: refused for the authority the POST rule
+on the same path grants (the reachable escalation), and **admitted** for the authority that owns the
+verb. The second half is what proves the override does anything — without it the request would meet
+the POST rule, which that caller does not satisfy. Break the ordering and **28 of its 36 assertions
+fail**.
+
+The list is written out by hand rather than reflected off `SecurityConfiguration`: a test that derives
+its expectations from the thing it tests agrees with it by construction, wrong included. A guard
+counts the matcher lines, so an eighteenth rule added without a row fails the build.
+
+**The other ~60 PUT/DELETE endpoints need no such audit.** They are guarded by `@PreAuthorize` on the
+handler method, evaluated *after* routing on the method actually selected — so an overridden verb
+cannot land on one handler while being judged by another's rule. The escalation exists only where the
+rule is chosen by `(method, path)` before routing. Two are spot-checked anyway, because "safe by
+construction" is a claim about Spring's ordering rather than about this application.
+
+**`MethodOverrideSecurityTest` asserts the escalation, not the filter's order** — an order assertion
+would pass just as happily if Spring Security later registered itself earlier. Verified by inverting
+the order to `LOWEST_PRECEDENCE`: **four cases failed.** The class javadoc records which four, and
+which pass either way and why — notably the `/assets/{id}` case, which still passes when broken
+because the handler's own `requireAssetInScope` refuses it, and a business refusal is
+indistinguishable from a route refusal by status alone. *Add a case here and break the order to check
+it fails; a test that cannot fail for its own reason reads like cover.*
+
+Multipart needed its own test rather than reasoning: `PUT /assets/repairs/{id}` and
+`PUT /assets/image/{id}` consume `multipart/form-data`, Tomcat parses parts for POST, and the wrapper
+reports PUT. It works because `getParts()` delegates past the wrapper to the real request — asserted
+by reaching the handler with its `@RequestParam` bound, because "was not refused" is also satisfied by
+a 404 from a route that never matched.
+
+### 403 is unavailable, so the status is transport and `errorCode` is the meaning
+
+`AccessDenied.STATUS` (422) and `AccessDenied.ERROR_CODE` are declared once and read by both the
+handlers and the tests. **Every refusal in the application funnels through two
+`@ExceptionHandler`s** — a filter-chain or `@PreAuthorize` refusal arrives there via
+`CustomBearerTokenAccessDeniedHandler`, and a service-level scope check throws into the same place —
+which is why moving off 403 was two methods plus one `ResponseStatusException` in
+`IssuanceApprovalRecordService`, not ninety call sites.
+
+422 because it is the only 4xx this application does not already use: 400, 401, 404 and 409 all carry
+other meanings, and reusing one would make a refusal indistinguishable from a validation failure or a
+missing record.
+
+**Never 401.** The front end reads 401 as an expired session — it attempts a refresh and then signs
+the user out. A branch officer opening another branch's record would be logged out.
+
+On the front end this was **one branch**: `store/utillls.tsx` was the only code site reading the
+number; every other "403" in `src/` is a comment. It now reads `errorCode` first and still accepts
+403, because a backend that has not been redeployed yet still sends it.
+
+### The rewrite lives in the interceptor, not at 53 call sites
+
+`axiosInstance`'s request interceptor rewrites `put`/`delete` to `post` plus the override header, and
+attaches `X-CSRF-TOKEN` to anything that is not a GET or HEAD. **Every existing
+`axiosInstance.put(...)` and `.delete(...)` keeps working untouched** — no migration across 23 service
+files, and nothing to forget.
+
+The SMS gateway project this pattern comes from sets the header **by hand at each call site**, which
+is fine at its eight. This application has **53** (36 `put`, 17 `delete`), and a missed one fails
+*only in production, behind the firewall*, where nobody developing will ever meet it.
+
+Idempotent on purpose: the 401 refresh path replays the original config through the interceptor
+again, by which time the method is already `post`.
+
+`doRefresh` uses raw axios deliberately — so a 401 on the refresh cannot recurse through the response
+interceptor — and therefore sets the CSRF header itself. Without that line every user's session would
+look unrecoverable the moment their token expired.
+
+**The call sites still say `.put` and `.delete`, and that is the design** — reading one tells you
+nothing about what goes on the wire, so there are two tests, doing different jobs.
+`axiosMethodOverride.test.ts` replaces the instance's *adapter* — the last thing axios calls before
+the network — and asserts what it receives, so it exercises the real interceptor rather than a
+stand-in: `.put` arrives as `method: 'post'` with `X-HTTP-Method-Override: PUT`, the JSON body
+untouched, a CSRF token attached, a GET left alone with neither header, and a replayed config not
+wrapped twice. `package.json` gained a one-line jest `moduleNameMapper` for it: axios v1 publishes
+ESM at its package root and CRA's jest does not transform `node_modules`, so the import is pointed at
+the CJS build shipped in the same package — the same code, not a mock.
+
+**`axiosWiring.test.ts` fails the build if any file calls a verb on raw `axios`, or creates a second
+instance.** This had already happened: `settings/approvalWorkflows/index.tsx` called
+`axios.get/post/put/delete` directly and so had been shipping with **no `Authorization` header at all**
+on routes requiring `READ_SETTING`/`UPDATE_SETTING`. Verified non-vacuous by reintroducing one. Same
+reasoning as `exportWiring.test.ts`: where safety lives in a choke point, a test must prove everything
+goes through it.
+
+### The CSRF token is a formality, and must not be read as protection
+
+The firewall rejects a state-changing request carrying no CSRF token, so one is minted per session in
+`sessionStorage` and sent as `X-CSRF-TOKEN`. **Nothing validates it** — not the firewall (confirmed:
+no header-against-cookie check), and not the backend, where `csrf()` stays `disable()`d and the
+service stays `STATELESS`.
+
+That is not a gap. This API authenticates with a **Bearer token from `sessionStorage`, never a
+cookie**, so a cross-site request cannot attach credentials at all — the attack a real CSRF token
+defends against is already impossible here. Turning on stateful CSRF would add a session to a
+deliberately stateless service to defend against something it is not exposed to.
+
+Worth stating plainly because the opposite reading is the dangerous one: someone who believes the
+token is the protection may later remove the thing that actually is.
+
+### OPTIONS is blocked, so production must be same-origin
+
+**This is a deployment constraint, not a code one, and it was already true before any of this.** A
+CORS preflight *is* an OPTIONS request, and this application forces one on every single call — it
+sends `Authorization` and `application/json`, neither of which is CORS-safelisted. So behind the
+firewall a cross-origin deployment cannot work at all.
+
+The front end must therefore be served from the **same origin** as the API — one host, one scheme,
+one port, with a reverse proxy sending `/api/v1/**` to Spring — and `REACT_APP_BASE_URL` set to a
+relative path. Same-origin requests are never preflighted, so nothing in
+`corsConfigurationSource()` runs, and the two new headers cost nothing extra for exactly that reason.
+
+That configuration stays for local development (`:3000` against `:7777`, no firewall). Its
+`allowedHeaders` is a **whitelist** — `X-HTTP-Method-Override` and `X-CSRF-TOKEN` had to be added by
+name, or every write fails preflight with an error naming no header.
+
+**`allowedMethods` is `GET, POST` and nothing else.** Not because the server refuses the others — it
+still serves PUT and DELETE, and a direct API client inside the firewall may use them — but because
+this list is what a *browser* is told it may send, and a browser that believes it may send a PUT will
+send one and have it dropped in transit. OPTIONS was in the list and never needed to be: the list is
+checked against `Access-Control-Request-Method`, the verb a preflight is *asking about*, not the
+preflight's own verb. Pinned by `onlyGetAndPostAreAdvertisedToBrowsers`.
+
+**No code anywhere issues an OPTIONS request** — searched, and the only occurrence was that CORS list.
+The preflight is emitted by the *browser*, automatically, and only cross-origin; it cannot be
+intercepted or suppressed from application code, which is why same-origin serving is the whole of the
+answer. `axiosMethodOverride.test.ts` pins that every verb the interceptor emits is GET or POST.
+
+**One thing that would have broken on the day of the same-origin switch, now fixed in advance.**
+`useWebSocket` derived its STOMP URL by stripping `/api/v1` off `REACT_APP_BASE_URL`. Relative — which
+is what same-origin means — that leaves an empty string and builds `"/ws"`, and SockJS requires an
+absolute URL. Live notifications would have failed, for a reason nowhere near the configuration change
+that caused it. It now falls back to `window.location.origin`, which changes nothing while the base
+URL is absolute.
+
+
 ## Permission model
 
 Effective permissions =
@@ -1004,6 +1208,155 @@ holder of `READ_REQUEST` could read every request in the bank by id.
 *What was already right:* the request routes are gated to match their endpoints
 (`READ`/`CREATE`/`UPDATE_REQUEST`, `ISSUE_ITEMS`), and `canEditRequest` requires `isRequester` — stricter
 than the backend guard, which is the safe direction.
+
+### Department filters — declared end to end, and labelled for what they can answer
+
+Both the assets register and the four request tabs now filter by department. Neither backend had the
+parameter, so this is trap #2 territory: **a key the endpoint does not declare is dropped silently and
+returns the unfiltered list**, which is how the assets, requests and store filters were all partly
+inert before. Each one is declared on the controller, carried on the criteria, and matched in the DAO.
+
+| | Parameter | Matches on |
+|---|---|---|
+| Assets | `departmentId` | the **holder's** department — an asset has none of its own |
+| Requests | `requesterDepartmentId` | the **requester's** — a request belongs to where the person works |
+
+`requesterDepartmentId` rather than a bare `departmentId`: that listing already filters by
+`requesterId` and `approverId`, and an unqualified name beside them reads as though it might mean the
+approver's.
+
+**Explicit LEFT joins through the cached helpers**, because `assignedTo`/`requester` and their
+`department` are all nullable — a dotted path becomes an INNER join that drops rows in the FROM
+clause. Worth stating why that is not visible in the obvious test: an unassigned asset has no
+department either way, so a *filtered* query looks right while the join is wrong for the next
+predicate to reuse it. `DepartmentFilterTest` therefore asserts the **unfiltered** search still
+returns the 105 unassigned assets and the department-less requests, which is the only place an INNER
+join would show.
+
+**Both filters narrow hard, and the labels say why rather than leaving an empty table to imply it.**
+Measured: only **18 of 252 assets** are held by somebody with a department (all at Head Office, since
+no branch staff have one), and **12 of 60 requests** can match. For a branch-scoped viewer either
+filter can only ever return nothing.
+
+So the labels are **"Holder's Department"** and **"Requester's Department"**, not "Department". Naming
+whose it is tells the reader the value comes from a person — and therefore that an unassigned asset
+cannot match — in the dropdown, in the filter chip, and on the printed export strip. That was chosen
+over adding a hint field to the shared filter component, which would have been more surface for the
+same sentence. *A vocabulary that cannot match must say so*, and this is the cheapest place to say it.
+
+*Also:* the request export's filter strip names the department for the same reason it names the
+others — a file showing twelve rows with no visible heading reads as the whole register.
+
+### Asset location names the department at Head Office too — and it was already half-built
+
+The register's **Location** column had done this all along, in `determineBranchName`. It was broken in
+two ways, and **both were latent rather than live**, which is why nobody had reported either:
+
+- **It decided "is this Head Office" by comparing a display name** — `branch?.name === "Head Office"`.
+  A branch is renamed from Settings; the day somebody makes it "Head Office - Kampala" the column
+  silently reverts to branch names for everyone. The same fault the Stock report had matching statuses
+  by display name. The **server's own location filter had it too**, as `equal(holderBranchName,
+  "head office")`.
+- **A Head Office holder with no department produced an empty cell** (`|| ""`), which reads as data
+  failing to load. All 18 Head-Office-held assets have a department today — but two Head Office staff
+  do not, so it was one assignment away.
+
+**The flag could not be keyed on until a second serialisation fault was fixed.** `buildAssetDao`
+assembles the asset's branch field by field to avoid recursion, and **left `isHeadOffice` out** — so
+it defaulted to `false` for every asset in the estate. Measured: an asset whose branch is named
+"Head Office" serialised as `isHeadOffice: false`, while the same flag on its *holder's* branch came
+through correctly, because that one passes the real entity. Nothing read it, so nothing looked wrong.
+Together with the Jackson `headOffice` naming this is the **second** way that flag has failed silently,
+and both produce the identical symptom: the rule matches nothing and looks implemented.
+
+*The general shape, worth carrying:* **a field omitted from a primitive-boolean builder is not
+missing, it is `false`** — an answer, confidently wrong, indistinguishable from a real one.
+
+### Two rules, because the column and the detail page ask different questions
+
+`asset.branch` means *where the asset physically is* — `relocateAsset` writes the destination store's
+location on transfer. The holder is a different fact, and they routinely disagree: **seven assets sit
+in maintenance at Head Office today, every one of them sent from Gulu.**
+
+| | Answers | Head Office becomes |
+|---|---|---|
+| `holderLocationLabel` — register column | **who has it** (holder first) | the holder's department |
+| `assetLocationLabel` — detail page | **where it is** (asset's branch) | the holder's department *only when the holder is at Head Office too* |
+
+That condition on the second is what keeps it honest: a Gulu officer's laptop on the Head Office bench
+reads "Head Office", not a department belonging to somebody who is not there. Collapsing the two into
+one helper would delete the only place the estate records where an item physically is, rather than
+reconcile them — so the difference is deliberate and tested.
+
+The detail page's label moved from "Branch / Location" to **"Location"**, matching the column, because
+a tile that can say "Finance" should not be headed Branch.
+
+### "Requested from" names the department at Head Office
+
+The column showed the requester's **branch**, which is the useful answer at a branch and nearly
+useless at Head Office: that is one name covering **18 people across four departments**. It now shows
+the *department* for a Head Office requester and the branch name everywhere else — Gulu still reads
+"Gulu Branch", a Finance request reads "Finance".
+
+**Keyed on `isHeadOffice`, not written as "department, else branch".** The simpler form reads better
+and is the wrong rule. Measured: **all 46 non-Head-Office requests have no department recorded**, so
+the two are indistinguishable today — and the simpler one would start silently rewriting the Gulu and
+Mbarara rows the day somebody assigns a branch officer a department. A test pins that case.
+
+**Head Office with no department reads "Head Office".** Two of the fourteen Head Office requests come
+from accounts with no department (users 1 and 2). Without the fallback those cells are empty, which
+reads as data failing to load rather than as a person not being in a department. Deliberately not
+"Head Office — no department": that flags an administrative gap on every affected row of a column
+people read for orientation, and the gap belongs on the user record.
+
+**Three mappers built this string and would have drifted.** The list rows, the single-request shape,
+and — the trap — `formatExportData`, which the export uses because it **refetches from the API rather
+than writing out the rows on screen**. Changing only the screen would have produced a spreadsheet
+saying "Head Office" for a table saying "Finance", and nobody compares a saved file with the screen it
+came from. All three now call `requestedFromLabel`, the same extraction `requestApproverLabel` got
+when seven places had built one string by hand.
+
+*Fixed on the way:* that export mapper read `item.requester.branch.name` with no optional chaining, so
+a requester with no branch threw and took the whole export with it.
+
+**The export header said "Branch"** and now says "Requested from" — on exactly the rows this change
+was made for, the old label was wrong.
+
+**No backend change: the data was already on the wire.** `UserBuilder` carries both `branch` and
+`department` on every requester.
+
+**It depends on the `isHeadOffice` pin, and would have failed silently without it.** Lombok names a
+primitive `boolean isHeadOffice`'s getter `isHeadOffice()` and Jackson strips the prefix, so it was
+published as `headOffice` until `@JsonProperty` pinned it. Read under the Java name the flag is
+`undefined`, every Head Office row falls through to the branch name, and the feature looks implemented
+while doing nothing. `requestedFromLabel.test.ts` asserts what that regression looks like, and
+`BooleanWireNameTest` pins the name itself.
+
+*No filter risk:* there is no "Requested from" filter — the bar is Title, Requested By, Approver,
+Priority, Status, Date — so nothing can disagree with the column. *Fleet requisitions are unaffected:*
+`determineAPIString` routes only the four asset-request tabs to the request export mapper.
+
+**The detail screens say the same thing now.** The request detail hero and the issuance screen's hero
+both read *"Requested From"* through the same helper — a reader who opens a request from a list saying
+"Finance" would otherwise land on a page saying "Head Office", and that kind of small disagreement
+makes a reader distrust both. **The labels moved with the values**: "Branch / Location" and "Branch"
+would have been wrong on exactly the rows the rule exists for.
+
+**Three raw reads survive, each for its own reason, each with a note at the site:**
+
+| Where | Why it keeps the branch |
+|---|---|
+| `generateApprovalPdf` requester panel | prints **both** — "Head Office · Finance". A signed certificate answers "who asked, and from where" months later, where the two are different facts and both are worth having |
+| `generateApprovalPdf` details table | the row is headed **Branch** and the department is already printed above it; a row headed Branch should name one |
+| `MovementHistory` timeline entry | answers *a person's department*, not the request's origin — its unconditional `department ?? branch` fallback is the right answer to that question, and adopting the Head-Office-keyed rule would be wrong |
+
+*A stale comment corrected while passing:* `approvalTrail.isHeadOfficeRequest` reads **both** spellings
+of the flag and explained itself by saying Jackson "publishes it as `headOffice`". That stopped being
+true when the property was pinned. The dual read stays — it gates whether a certificate may be
+printed, which is behaviour rather than display, and a redundant read costs nothing while an
+over-tidied one would fail closed against an older server — but the comment now says the name is
+pinned, so nobody reads it and concludes otherwise. `requestedFromLabel` deliberately reads the pinned
+name alone rather than spreading the workaround to a third site.
 
 ### The engraved-number picker re-offered what you had just picked
 

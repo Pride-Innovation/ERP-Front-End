@@ -38,6 +38,7 @@ import {
 } from './service';
 import { requestApproverLabel } from "../approverLabel";
 import { REQUEST_ROW_KIND } from "./rowActions";
+import { requestedFromLabel } from '../requestedFromLabel';
 
 const RequestUtills = () => {
     const endPoint = 'requests';
@@ -167,7 +168,7 @@ const RequestUtills = () => {
         approver: requestMock[0].currentApprover
             ? `${requestMock[0].currentApprover.firstName ?? ''} ${requestMock[0].currentApprover.lastName ?? ''}`.trim() || null
             : null,
-        requestedFrom: requestMock[0].requester?.branch?.name,
+        requestedFrom: requestedFromLabel(requestMock[0].requester),
         status: requestMock[0]?.status?.status,
         action: {
             label: "options",
@@ -282,7 +283,10 @@ const RequestUtills = () => {
                     // Names the unit when the step is routed to one, so a request with Admin does
                     // not read as unassigned in a column headed "Approver".
                     approver: requestApproverLabel(request),
-                    requestedFrom: request.requester?.branch?.name,
+                    // Head Office is four departments, so the branch name says almost nothing
+                    // there; everywhere else it is already the useful answer. One rule, shared with
+                    // the export's own mapper so the file cannot disagree with the screen.
+                    requestedFrom: requestedFromLabel(request.requester),
                     status: request.status?.status,
                     requesterID: request.requester?.id as number,
                 }

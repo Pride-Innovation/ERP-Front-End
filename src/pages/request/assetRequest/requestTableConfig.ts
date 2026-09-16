@@ -62,6 +62,7 @@ export const REQUEST_SEARCH_KEY = 'name';
 export const buildRequestColumnFilters = (
     statuses: IStatus[],
     fetchUserOptions: AsyncOptionsFetcher,
+    departmentOptions: Array<{ value: number; label: string }> = [],
 ): IColumnFilter[] => [
     { key: 'name', label: 'Request Title', type: 'text' },
     /*
@@ -93,6 +94,23 @@ export const buildRequestColumnFilters = (
         type: 'asyncSelect',
         placeholder: 'Search staff…',
         fetchOptions: fetchUserOptions,
+    },
+    /*
+     * Department — the requester's, because a request has none of its own.
+     *
+     * Carries `requesterDepartmentId`, newly declared on `GET /requests`. Named for *whose*
+     * department rather than a bare `departmentId`: this listing already filters by `requesterId` and
+     * `approverId`, and an unqualified name beside them reads as though it might mean the approver's.
+     *
+     * Measured when it was added: **12 of 60 requests can match** — Business Technology 5, Finance 5,
+     * Administration & Procurement 2. The other 48 come from Gulu and Mbarara, where no staff have a
+     * department recorded, plus two Head Office accounts that have none. So this narrows hard, and
+     * the export's filter strip names it for exactly that reason: a short list under no visible
+     * heading reads as "there are no more requests".
+     */
+    {
+        key: 'requesterDepartmentId', label: "Requester's Department", type: 'select',
+        options: departmentOptions,
     },
     {
         key: 'priority', label: 'Priority', type: 'select', options: [
@@ -161,6 +179,14 @@ export const buildRequestFilterSummary = (
         out.push({ label: 'Approver', value: String(params.approverId__label || params.approverId) });
     }
     if (params.priority) out.push({ label: 'Priority', value: String(params.priority) });
+    // Named on the printed strip because this filter removes four requests in five; a file that does
+    // not say it was narrowed looks like the whole register.
+    if (params.requesterDepartmentId) {
+        out.push({
+            label: "Requester's Department",
+            value: String(params.requesterDepartmentId__label || params.requesterDepartmentId),
+        });
+    }
     if (params.statusIds) {
         const names = String(params.statusIds).split(',')
             .map((id) => statuses.find((s) => s.id === Number(id))?.name)

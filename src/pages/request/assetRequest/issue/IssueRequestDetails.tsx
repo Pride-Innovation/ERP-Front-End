@@ -68,6 +68,7 @@ import AssetTypeUtills from "../../../settings/assetTypes/utills";
 import CommodityUtills from "../../../settings/commodity/utills";
 import { ROUTES } from "../../../../core/routes/routes";
 import { fieldSx } from "../../../../components/forms/Inputs";
+import { requestedFromLabel } from '../../requestedFromLabel';
 
 type RequestLine = { commodity: ICommodity; quantity: number };
 
@@ -365,7 +366,14 @@ const IssueRequestDetails = () => {
     const lastName = request.requester?.lastName ?? '';
     const requesterName = `${firstName} ${lastName}`.trim() || 'Unknown requester';
     const initials = `${firstName[0] ?? ''}${lastName[0] ?? ''}`.toUpperCase() || '—';
-    const branchName = request.requester?.branch?.name ?? '—';
+    /*
+     * Where the request came from, named as the register names it.
+     *
+     * An issuer is deciding what to hand over and to whom; "Head Office" narrows that to eighteen
+     * people across four departments, while "Finance" is an answer. Shares the register's rule rather
+     * than repeating it, so the two screens cannot drift into describing one request differently.
+     */
+    const requestedFrom = requestedFromLabel(request.requester);
     const requestedOn = request.createDate
         ? new Date(request.createDate as string).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
         : '—';
@@ -505,7 +513,7 @@ const IssueRequestDetails = () => {
                         value={requesterName}
                         avatar={<Avatar sx={{ width: 22, height: 22, bgcolor: brand[500], fontSize: '0.6rem', fontWeight: 700 }}>{initials}</Avatar>}
                     />
-                    <HeroFact label="Branch" value={branchName === '—' ? null : branchName} />
+                    <HeroFact label="Requested From" value={requestedFrom} />
                     <HeroFact label="Requested on" value={requestedOn === '—' ? null : requestedOn} />
                     <HeroFact
                         label="Reference"

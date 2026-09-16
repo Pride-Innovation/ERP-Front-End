@@ -38,10 +38,18 @@ const SIGN_OFF_TYPE = {
 /**
  * Whether the requester sits at Head Office.
  *
- * Checks both spellings on purpose: the entity field is `isHeadOffice`, but Jackson derives the
- * JSON property from the `isHeadOffice()` getter and publishes it as `headOffice`. Which one
- * arrives depends on the serialiser's naming, and reading only one has silently mis-scoped
- * requests before — see the same defensive pair in `panels/WorkflowRoutesPanel`.
+ * <h2>The dual read is now belt-and-braces, and the comment that was here was out of date</h2>
+ * It used to say the flag "is published as `headOffice`". That was true and is not any more:
+ * `Branch.isHeadOffice` carries an explicit `@JsonProperty("isHeadOffice")`, and
+ * `BooleanWireNameTest` asserts both that the pinned name is present and that the derived one is
+ * <em>absent</em>. So `branch.headOffice` is always undefined today and the second half of the
+ * expression is what actually answers.
+ *
+ * <p>Left reading both anyway, because this gates whether an approval certificate may be printed —
+ * behaviour, not display — and a redundant read costs nothing while an over-tidied one would fail
+ * closed against an older server. The comment is corrected rather than the code, so nobody reads this
+ * and concludes the wire name is still unpinned; `requestedFromLabel` deliberately reads the pinned
+ * name alone rather than spreading the workaround.
  */
 export const isHeadOfficeRequest = (request: IRequest): boolean => {
     const branch = request?.requester?.branch as

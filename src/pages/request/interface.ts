@@ -90,7 +90,12 @@ export interface IRequestTableData {
     status?: string | null;
     requester?: string;
     currentApprover?: string;
-    requestedFrom?: string;
+    /**
+     * Where the request came from: the requester's department at Head Office, their branch anywhere
+     * else. Built by `requestedFromLabel`, which is why `null` is possible — a requester with neither
+     * on record has nothing to say here, and an empty cell is the honest rendering of that.
+     */
+    requestedFrom?: string | null;
     requesterID?: number | null;
     /*
      * Carried for the row menu, never displayed.

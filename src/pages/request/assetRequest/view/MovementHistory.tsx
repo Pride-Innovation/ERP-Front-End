@@ -169,6 +169,11 @@ const MovementHistory = ({ request }: { request: IRequest }) => {
                         user: {
                             name: fullName(request.requester),
                             title: request.requester?.title?.name || '',
+                            /* A person's department in a timeline entry, not the request's origin -
+                               so this keeps its own unconditional fallback rather than adopting
+                               `requestedFromLabel`, which is keyed on Head Office. The field is
+                               labelled `department`; falling back to the branch when there is none is
+                               the right answer to *this* question. */
                             department: request.requester?.department?.name || request.requester?.branch?.name,
                         },
                         comments: request.description || '',

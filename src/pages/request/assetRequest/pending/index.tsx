@@ -36,6 +36,7 @@ import {
 } from "../requestTableConfig";
 import useStaffOptions from "../useStaffOptions";
 import useRequestExport from "../useRequestExport";
+import { useDepartmentOptions } from '../useDepartmentOptions';
 
 const PendingRequest = () => {
     /*
@@ -44,6 +45,7 @@ const PendingRequest = () => {
      * Branch-scoped on the server, so the list offered matches what this listing can actually return.
      */
     const fetchStaffOptions = useStaffOptions();
+    const departmentOptions = useDepartmentOptions();
 
     const { exportRequests } = useRequestExport('Pending');
     const { requests } = useSelector((state: RootState) => state.AssetsRequestsStore)
@@ -284,7 +286,7 @@ const PendingRequest = () => {
                     status
                     onStatusChange={handleStatusChange}
                     selectedStatus={selectedStatus}
-                    columnFilters={buildRequestColumnFilters(statuses, fetchStaffOptions)}
+                    columnFilters={buildRequestColumnFilters(statuses, fetchStaffOptions, departmentOptions)}
                     /*
                      * Merged over this tab's own parameters, never replacing them.
                      *

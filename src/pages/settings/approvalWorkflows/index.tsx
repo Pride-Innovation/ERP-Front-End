@@ -8,7 +8,18 @@ Managing Director
 */
 
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+/*
+ * The shared instance, not raw axios.
+ *
+ * This file used to call `axios` directly against `${BASE_URL}`, which skipped the request
+ * interceptor and so sent **no Authorization header at all** — a live bug, since these routes require
+ * READ_SETTING / UPDATE_SETTING. It also now matters for a second reason: the interceptor is what
+ * rewrites PUT and DELETE into the POST-plus-header form the firewall permits, so a direct call would
+ * be the one thing in the application still sending a verb that is blocked in production.
+ *
+ * `axiosWiring.test.ts` fails the build if raw axios verbs come back anywhere.
+ */
+import axiosInstance from '../../../core/apis/axiosInstance';
 import {
     Box,
     Button,
@@ -48,7 +59,6 @@ import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 
 const TEAL = '#05544B';
 const GOLD = '#BC892C';
-const BASE_URL = process.env.REACT_APP_BASE_URL;
 
 // ── Interfaces ──────────────────────────────────────────────────────────────
 
@@ -486,7 +496,7 @@ const ApprovalWorkflows: React.FC = () => {
 
     const load = () => {
         setLoading(true);
-        axios.get<ApprovalWorkflowDTO[]>(`${BASE_URL}/approval-workflows`)
+        axiosInstance.get<ApprovalWorkflowDTO[]>('approval-workflows')
             .then((r) => setWorkflows(r.data))
             .catch(() => {})
             .finally(() => setLoading(false));
@@ -494,8 +504,8 @@ const ApprovalWorkflows: React.FC = () => {
 
     useEffect(() => {
         load();
-        axios.get(`${BASE_URL}/asset-types`).then((r) => setAssetTypes(r.data)).catch(() => {});
-        axios.get(`${BASE_URL}/branches`).then((r) => setBranches(r.data)).catch(() => {});
+        axiosInstance.get('asset-types').then((r) => setAssetTypes(r.data)).catch(() => {});
+        axiosInstance.get('branches').then((r) => setBranches(r.data)).catch(() => {});
     }, []);
 
     const openCreate = () => { setEditing(undefined); setView('form'); };
@@ -504,21 +514,21 @@ const ApprovalWorkflows: React.FC = () => {
 
     const handleSave = async (dto: ApprovalWorkflowDTO) => {
         if (dto.id) {
-            await axios.put(`${BASE_URL}/approval-workflows/${dto.id}`, dto);
+            await axiosInstance.put(`approval-workflows/${dto.id}`, dto);
         } else {
-            await axios.post(`${BASE_URL}/approval-workflows`, dto);
+            await axiosInstance.post('approval-workflows', dto);
         }
         load();
     };
 
     const handleToggle = async (id: number) => {
-        await axios.put(`${BASE_URL}/approval-workflows/${id}/toggle-active`);
+        await axiosInstance.put(`approval-workflows/${id}/toggle-active`);
         load();
     };
 
     const handleDelete = async () => {
         if (!deleteTarget?.id) return;
-        await axios.delete(`${BASE_URL}/approval-workflows/${deleteTarget.id}`);
+        await axiosInstance.delete(`approval-workflows/${deleteTarget.id}`);
         setDeleteTarget(null);
         load();
     };

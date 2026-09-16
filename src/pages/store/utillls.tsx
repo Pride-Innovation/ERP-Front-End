@@ -33,12 +33,26 @@ import useAccessScope from "../../core/permissions/useAccessScope";
  *
  * <p>Distinguishing the two matters because the answers differ. A boundary is permanent and the user
  * should go back; a failure is worth retrying.
+ *
+ * <h2>Read by code, not by number</h2>
+ * A refusal used to arrive as 403 and this asked for that number. It does not any more: the firewall
+ * in front of the API blocks 403 and replaces it with its own page, so refusals now travel under a
+ * different status with `errorCode: "ACCESS_DENIED"` naming what they are. The code is the fact; the
+ * status is whatever survives the firewall, and reading the number here would break again the next
+ * time it has to move.
+ *
+ * <p>The old status is still accepted, because a backend that has not been redeployed yet still
+ * sends it and answering "could not load, try again" to a permanent boundary is the failure this
+ * function exists to prevent.
  */
 export const listingFailure = (response: unknown): string => {
+    const body = (response as { data?: { errorCode?: string }; response?: { data?: { errorCode?: string } } });
+    const errorCode = body?.response?.data?.errorCode ?? body?.data?.errorCode;
+
     const status = (response as { status?: number; response?: { status?: number } })?.status
         ?? (response as { response?: { status?: number } })?.response?.status;
 
-    if (status === 403 || status === 401) {
+    if (errorCode === 'ACCESS_DENIED' || status === 422 || status === 403 || status === 401) {
         return 'You do not have access to this branch\u2019s store. Showing nothing rather than another branch\u2019s figures.';
     }
     return 'Could not load this store\u2019s stock. Please try again.';

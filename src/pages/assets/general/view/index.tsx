@@ -62,6 +62,7 @@ import NotesOutlinedIcon from '@mui/icons-material/NotesOutlined';
 import ListAltOutlinedIcon from '@mui/icons-material/ListAltOutlined';
 import HistoryOutlinedIcon from '@mui/icons-material/HistoryOutlined';
 import BuildOutlinedIcon from '@mui/icons-material/BuildOutlined';
+import { assetLocationLabel } from '../../assetLocationLabel';
 
 const statusTone = (code?: string) => {
     switch ((code ?? '').toLowerCase()) {
@@ -388,7 +389,12 @@ const GeneralAssetDetails = () => {
                     {/* At-a-glance strip — key facts as light tiles across the base of the hero */}
                     <Box sx={{ position: 'relative', display: 'flex', flexWrap: 'wrap', bgcolor: alpha(brand[500], 0.03), borderTop: `1px solid ${border.subtle}` }}>
                         <HeroFact first label="Assigned To" value={asset.assignedTo ? `${asset.assignedTo.lastName ?? ''} ${asset.assignedTo.firstName ?? ''}`.trim() : 'Unassigned'} />
-                        <HeroFact label="Branch / Location" value={asset.branch?.name || null} />
+                        {/* Head Office broken out by department, as the register's Location
+                            column does — but derived from the asset's own branch, and only when the
+                            holder is at Head Office too. An item on the Head Office repair bench
+                            belonging to a Gulu officer keeps reading "Head Office", which is where it
+                            actually is. */}
+                        <HeroFact label="Location" value={assetLocationLabel(asset)} />
                         <HeroFact label="Date Received" value={asset.dateReceipt ? moment(asset.dateReceipt).format('Do MMM YYYY') : null} />
                         <HeroFact label="Purchase Cost" value={formatUGX(asset.purchaseCost)} />
                     </Box>
@@ -458,7 +464,7 @@ const GeneralAssetDetails = () => {
                                         <Section title="Classification & Assignment" icon={<CategoryOutlinedIcon />}>
                                             <Grid item xs={12} sm={6}><Field label="Asset Type" value={asset.assetType?.name || null} /></Grid>
                                             <Grid item xs={12} sm={6}><Field label="Status" value={asset.assetStatus?.status ? camelCaseToWords(asset.assetStatus.status) : null} /></Grid>
-                                            <Grid item xs={12} sm={6}><Field label="Branch / Location" value={asset.branch?.name || null} /></Grid>
+                                            <Grid item xs={12} sm={6}><Field label="Location" value={assetLocationLabel(asset)} /></Grid>
                                             <Grid item xs={12} sm={6}><Field label="Assigned To" value={asset.assignedTo ? `${asset.assignedTo.lastName ?? ''} ${asset.assignedTo.firstName ?? ''}`.trim() : null} /></Grid>
                                             <Grid item xs={12} sm={6}><Field label="Commodity" value={asset.commodity?.name || null} /></Grid>
                                         </Section>

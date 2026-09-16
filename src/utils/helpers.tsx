@@ -19,6 +19,7 @@ import { IAssetType } from "../pages/settings/assetTypes/interface";
 import { IStockCommodities } from "../pages/inventory/interface";
 import { IITEquipment, IFleet } from "../pages/assets/interface";
 import { IStatus } from "../pages/settings/statuses/interface";
+import { holderLocationLabel, IAssetOrigin } from '../pages/assets/assetLocationLabel';
 
 export const camelCaseToWords = (camelCaseString: string) => {
     return camelCaseString ? camelCaseString
@@ -501,18 +502,30 @@ export const formatNumber = (num: number): string => {
  * @param item - The equipment item to check.
  * @returns The branch name if it exists, otherwise an empty string.
  */
-export const determineBranchName = (item: IITEquipment | IFleet) => {
-
-    if (item?.assignedTo) {
-        if (item.assignedTo.branch?.name === "Head Office") {
-            return item.assignedTo.department?.name || "";
-        } else {
-            return item.assignedTo.branch?.name || "";
-        }
-    }
-
-    return item.branch?.name || "";
-};
+/**
+ * The register's Location column: the holder's department at Head Office, their branch elsewhere.
+ *
+ * <p>Delegates to {@link holderLocationLabel}, which the asset detail page's sibling rule lives
+ * beside. Two faults were fixed in the move, and both were latent rather than live — worth saying,
+ * because a fix that changes nothing visible today is easy to mistake for a fix that was not needed:
+ *
+ * <ul>
+ *   <li><b>It decided "is this Head Office" by comparing a display name</b> — {@code === "Head Office"}
+ *       — and a branch is renamed from Settings. The day somebody makes it "Head Office - Kampala"
+ *       this stops matching and the column quietly reverts to showing a branch name for everyone.
+ *       It reads the {@code isHeadOffice} flag now. (That flag could not be trusted until two
+ *       separate serialisation faults were fixed; see {@code assetLocationLabel}.)</li>
+ *   <li><b>A Head Office holder with no department produced an empty cell</b> ({@code || ""}), which
+ *       reads as data failing to load rather than as somebody not being in a department. It falls
+ *       back to the branch name. All 18 Head-Office-held assets have a department today, but two
+ *       Head Office staff do not — so this was one assignment away from being live.</li>
+ * </ul>
+ *
+ * <p>Kept as a named export rather than replaced at the call sites: it is what the two asset row
+ * mappers already import, and the rule is the thing worth sharing, not the name.
+ */
+export const determineBranchName = (item: IITEquipment | IFleet) =>
+    holderLocationLabel(item as unknown as IAssetOrigin) ?? "";
 
 
 /**

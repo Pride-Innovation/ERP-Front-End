@@ -90,6 +90,7 @@ import { IRequest, IRequestAxiosResponse } from "../../interface";
 import { ICommodity } from "../../../settings/commodity/interface";
 import { brand, neutral, border, surface } from "../../../../utils/tokens";
 import { camelCaseToWords } from "../../../../utils/helpers";
+import { requestedFromLabel } from '../../requestedFromLabel';
 
 /**
  * Approve and Reject: the hero's proportions, their own meaning.
@@ -640,7 +641,13 @@ const RequestDetails = () => {
 
                 {/* At-a-glance strip — key facts as light tiles across the base of the hero */}
                 <Box sx={{ position: 'relative', display: 'flex', flexWrap: 'wrap', bgcolor: alpha(brand[500], 0.03), borderTop: `1px solid ${border.subtle}` }}>
-                    <HeroFact first label="Branch / Location" value={request.requester?.branch?.name || null} />
+                    {/* The same rule the register's "Requested from" column uses: the department
+                        at Head Office, the branch name everywhere else. Reading "Head Office" here
+                        while the list this page was opened from says "Finance" is the kind of small
+                        disagreement that makes a reader distrust both. The label moved with the
+                        value - "Branch / Location" would be wrong on exactly the rows the rule
+                        exists for. */}
+                    <HeroFact first label="Requested From" value={requestedFromLabel(request.requester)} />
                     {/* Names the unit when the step is routed to one — see requestApproverLabel.
                         Reading "Not specified" for a request genuinely sitting with Admin says the
                         workflow has stalled, which is the opposite of the truth. */}
