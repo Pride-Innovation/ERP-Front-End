@@ -32,7 +32,7 @@ import { RequestContext } from "../../context/request/RequestContext";
 import { toast } from "react-toastify";
 import { validateStockItems } from "../../utils/helpers";
 import { addStockService } from "./service";
-import { brand, gold, neutral, border, surface, elevation, radii, status as statusTokens } from "../../utils/tokens";
+import { brand, gold, neutral, border, surface, radii, status as statusTokens } from "../../utils/tokens";
 import InventoryIcon from "@mui/icons-material/Inventory";
 import BusinessIcon from "@mui/icons-material/Business";
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
@@ -71,6 +71,7 @@ const CreateInventory = () => {
     const [formDataToSubmit, setFormDataToSubmit] = useState<IInventory | null>(null);
     // Stable per-submission key so a network retry (or an accidental double click that
     // slips past the disabled button) can never create a duplicate stock + duplicate assets.
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [idempotencyKey, setIdempotencyKey] = useState<string>(() => crypto.randomUUID());
     const navigate = useNavigate();
 

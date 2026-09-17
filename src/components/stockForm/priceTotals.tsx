@@ -18,7 +18,7 @@ import { formatNumberWithCommas } from './helper';
 import AccountBalanceWalletOutlinedIcon from '@mui/icons-material/AccountBalanceWalletOutlined';
 import ShoppingBasketOutlinedIcon from '@mui/icons-material/ShoppingBasketOutlined';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import { brand, gold, neutral, border, status } from '../../utils/tokens';
+import { brand, gold, neutral, status } from '../../utils/tokens';
 
 // Currency symbol (can be made configurable if needed)
 const CURRENCY = 'UGX';

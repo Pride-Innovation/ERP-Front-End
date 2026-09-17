@@ -32,6 +32,7 @@ import { brand, neutral, border } from "../../../utils/tokens";
 import { useNavigate } from "react-router-dom";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import AddIcon from '@mui/icons-material/AddCircleOutline';
 import SaveIcon from '@mui/icons-material/Save';
 import DescriptionIcon from '@mui/icons-material/Description';
 import ChairIcon from '@mui/icons-material/Chair';
@@ -47,6 +48,8 @@ const SteppedOfficeEquipmentForm = ({
     control,
     register,
     buttonText,
+    secondaryButtonText,
+    onSecondaryIntent,
     sendingRequest,
     formFields,
     trigger,
@@ -103,11 +106,17 @@ const SteppedOfficeEquipmentForm = ({
     const handleBack = () => setActiveStep((prev) => prev - 1);
 
     /**
-     * Single primary action. It is ALWAYS a plain button (never type="submit"), so neither a
-     * click on a non-final step nor an Enter keypress can ever submit the form. Submission only
-     * happens here, and only when we are genuinely on the last step — guarding against the case
+     * The step-through and submit action. It is ALWAYS a plain button (never type="submit"), so
+     * neither a click on a non-final step nor an Enter keypress can ever submit the form. Submission
+     * only happens here, and only when we are genuinely on the last step — guarding against the case
      * where the step count changes (e.g. the "Technical Details" step appears/disappears as the
      * category field-config loads).
+     *
+     * <p>Shared by both final-step buttons where there are two. The difference between "Save" and
+     * "Save and add another" is entirely what the *page* does afterwards, so the second button
+     * announces its intent and then takes this identical path — rather than carrying a second copy
+     * of the step logic, the validation and the `requestSubmit`, which is how two buttons that should
+     * behave the same come to disagree about which fields they check.
      */
     const handlePrimaryAction = async (e: React.MouseEvent<HTMLButtonElement>) => {
         const isLast = activeStep === steps.length - 1;
@@ -306,6 +315,33 @@ const SteppedOfficeEquipmentForm = ({
                                 }}
                             >
                                 Previous
+                            </MuiButton>
+                        )}
+
+                        {/*
+                          * "Save and add another" — only where a page asked for it, and only on the
+                          * last step, where saving is what the other button does too.
+                          *
+                          * Rendered before the primary so the emphasised action sits last, which is
+                          * where the eye finishes. It calls `onSecondaryIntent` and then the very
+                          * same handler, so the validation and submission it performs are not a
+                          * second implementation of them.
+                          */}
+                        {secondaryButtonText && activeStep === steps.length - 1 && (
+                            <MuiButton
+                                onClick={(e) => { onSecondaryIntent?.(); return handlePrimaryAction(e); }}
+                                type="button"
+                                variant="outlined"
+                                startIcon={<AddIcon fontSize="small" />}
+                                disabled={sendingRequest}
+                                sx={{
+                                    flex: { xs: 1, sm: 'initial' }, height: 40, borderRadius: '8px',
+                                    textTransform: 'none', fontWeight: 600,
+                                    borderColor: alpha(P, 0.4), color: brand[600],
+                                    '&:hover': { borderColor: P, bgcolor: alpha(P, 0.05) },
+                                }}
+                            >
+                                {secondaryButtonText}
                             </MuiButton>
                         )}
 

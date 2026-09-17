@@ -109,12 +109,36 @@ const UpdateGeneralAsset = () => {
         };
         try {
             const response = await updateOfficeEquipmentService(request, id as string) as IOfficeEquipmentAxiosResponse;
-            if (response.status === 201) {
+
+            /*
+             * 200 or 201. The endpoint answers `201 CREATED` to a PUT — semantically odd for an
+             * update, and left alone because changing it would break this check and any other caller
+             * reading it for no visible gain. Accepting both means a later correction to 200 does not
+             * silently turn every successful save into "Failed to update asset".
+             */
+            if (response.status === 200 || response.status === 201) {
                 toast.success('Asset updated successfully');
                 dispatch(updateGeneralAssetInStore(response.data));
-            } else {
-                toast.error('Failed to update asset');
+
+                /*
+                 * Back to the register for this category, which is where the reader came from and
+                 * where the change they just made is visible.
+                 *
+                 * `typeId` is the right category by construction, not by luck: the request above
+                 * pins `assetType` to it, so an update cannot move an asset into a different
+                 * category — the list this returns to is always the one now holding it.
+                 *
+                 * The toast survives the navigation because `ToastContainer` is mounted in `App`,
+                 * above the router, so there is no need to delay the redirect to let it be read.
+                 *
+                 * Returned from here rather than falling through: `setSendingRequest(false)` below
+                 * would be setting state on a component that is being unmounted.
+                 */
+                navigate(`${ROUTES.LIST_GENERAL_ASSETS}/${typeId}`);
+                return;
             }
+
+            toast.error('Failed to update asset');
         } catch (error) {
             console.error('Error updating asset:', error);
             toast.error('Failed to update asset. Please try again.');

@@ -106,4 +106,5 @@ export const heroPrimarySx = {
     },
 };
 
+// eslint-disable-next-line import/no-anonymous-default-export
 export default { heroActionBase, heroSecondarySx, heroPrimarySx };

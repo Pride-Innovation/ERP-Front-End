@@ -162,6 +162,15 @@ export interface IAssetForm {
     control: Control<IAsset>;
     register: UseFormRegister<IAsset>;
     buttonText: string;
+    /**
+     * Optional second action on the wizard's last step, e.g. "Save and add another".
+     *
+     * <p>Only the create page supplies these. `onSecondaryIntent` is called immediately before the
+     * form submits, so the page can record which button was pressed and decide afterwards whether to
+     * navigate away or clear the form for the next entry.
+     */
+    secondaryButtonText?: string;
+    onSecondaryIntent?: () => void;
     sendingRequest: boolean;
     option?: string | undefined;
     handleChange?: (event: SelectChangeEvent) => void;

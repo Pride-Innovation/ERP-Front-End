@@ -92,9 +92,19 @@ function drainQueue(error: unknown, newToken: string | null): void {
         if (newToken) {
             config.headers['Authorization'] = `Bearer ${newToken}`;
             resolve(axiosInstance(config));
-        } else {
-            reject(error);
+            return;
         }
+
+        /*
+         * No token means the session ended, and these are requests that were parked mid-flight.
+         *
+         * Rejecting them sends an error into every caller at once — a page with four panels loading
+         * produced four unhandled rejections and four error overlays, on top of a redirect to the
+         * login screen. `error` is null on that path and they are simply abandoned; a caller passing
+         * a real error still gets it, which is what keeps this usable for anything but expiry.
+         */
+        if (error === null) return;
+        reject(error);
     });
 }
 
@@ -130,8 +140,25 @@ async function doRefresh(): Promise<string | null> {
             }
         );
 
+        /*
+         * A response without a token is a failed refresh, whatever status it carried.
+         *
+         * `POST /auth/refresh-token` used to answer **200 with an empty body** on every failure path
+         * — no header, expired token, invalid token — because the handler simply returned without
+         * writing anything. This code then read `data.accessToken` off an empty body, got `undefined`
+         * and stored the string "undefined" as the access token before deciding the refresh had
+         * failed anyway.
+         *
+         * The server refuses properly now (401 with a message). This check stays because it is the
+         * cheap half: a browser running against a backend that has not been redeployed still meets
+         * the old 200, and storing "undefined" as a credential is worse than any honest failure.
+         */
+        if (!data?.accessToken) {
+            return null;
+        }
+
         sessionStorage.setItem(ACCESS_TOKEN_KEY, data.accessToken);
-        sessionStorage.setItem(REFRESH_TOKEN_KEY, data.refreshToken);
+        sessionStorage.setItem(REFRESH_TOKEN_KEY, data.refreshToken ?? storedRefresh);
 
         // Keep cached user profile in sync with the refreshed identity.
         if (data.id) {
@@ -226,12 +253,34 @@ axiosInstance.interceptors.response.use(
                 return axiosInstance(original);
             }
 
-            // Refresh failed — session is unrecoverable.
-            drainQueue(new Error('Session expired'), null);
+            /*
+             * The session is unrecoverable: clear it, say so once, and leave.
+             *
+             * <h2>Why this does not reject</h2>
+             * It used to end in `Promise.reject(new Error('Session expired'))`. Every request that
+             * was in flight when the token expired then threw into whatever called it — and the
+             * services that correctly *throw* rather than swallowing, such as the audit trail's,
+             * carried it up to React, which rendered:
+             *
+             *     Uncaught runtime errors:
+             *     AxiosError: Full authentication is required to access this resource
+             *
+             * on top of a page that was already navigating away. The redirect is assigned
+             * synchronously but the browser tears the page down asynchronously, so the overlay wins
+             * the race and the user's last sight of the application is a stack trace.
+             *
+             * A promise that never settles is the honest answer here: there is no result, there will
+             * be no result, and the page these callers belong to is being replaced. It leaks a
+             * pending promise for the few milliseconds until navigation, which is the whole cost.
+             *
+             * The same reasoning applies to the parked queue, which is why `drainQueue` is handed
+             * null rather than an error.
+             */
+            drainQueue(null, null);
             clearSession();
             toast.info('Your session has expired. Please log in again.');
             window.location.href = '/';
-            return Promise.reject(new Error('Session expired'));
+            return new Promise<AxiosResponse>(() => { /* never settles; the page is leaving */ });
         }
 
         const data = error.response?.data as

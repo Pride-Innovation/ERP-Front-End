@@ -7,6 +7,7 @@ Managing Director
 
 import { Route } from 'react-router'
 import { createBrowserRouter, createRoutesFromElements } from 'react-router-dom'
+import RouteError from '../../pages/errors/RouteError'
 import Login from '../../pages/authentication/Login'
 import { ROUTES } from './routes'
 import PasswordReset from '../../pages/authentication/PasswordReset'
@@ -39,7 +40,20 @@ import { PERMISSIONS } from '../permissions/constants'
  * does not support them.
  */
 const routeElements = (
-    <>
+    /*
+     * One pathless boundary around the whole tree.
+     *
+     * `errorElement` catches what the catch-all `*` route cannot: a page that throws while rendering,
+     * a loader that fails, a lazy chunk that will not load. Both are needed - one is about addresses
+     * that do not exist, the other about pages that break - and neither existed, so every one of
+     * those cases reached React Router's own developer page ("Unexpected Application Error! ...
+     * Hey developer"), which is a message written for whoever built the application and shown to
+     * whoever is using it.
+     *
+     * A pathless route rather than one `errorElement` per branch: the tree is assembled from six
+     * sub-route functions, and putting it on each would be six places to forget one.
+     */
+    <Route errorElement={<RouteError />}>
       <Route path={ROUTES.LOGIN} element={<Login />} />
       <Route path={ROUTES.FORGOT_PASSWORD} element={<PasswordReset />} />
       <Route path={ROUTES.RESET_PASSWORD} element={<ResetPassword />} />
@@ -121,7 +135,21 @@ const routeElements = (
 
         </Route>
       </Route>
-    </>
+
+      {/*
+        * Anything that matches nothing else.
+        *
+        * Without it React Router answered a mistyped URL, a stale bookmark or a bad `navigate()` with
+        * its own developer page — "Unexpected Application Error! 404 Not Found / 💿 Hey developer 👋"
+        * — a message written for whoever built the application, shown to whoever is using it, with no
+        * navigation and no way back.
+        *
+        * Outside `PrivateRoute` on purpose: a signed-out user typing a bad address should be told the
+        * page does not exist, not bounced to a login screen that then sends them somewhere they did
+        * not ask for.
+        */}
+      <Route path="*" element={<RouteError />} />
+    </Route>
 )
 
 export const router = createBrowserRouter(createRoutesFromElements(routeElements));

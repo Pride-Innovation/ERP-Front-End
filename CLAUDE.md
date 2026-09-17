@@ -157,8 +157,13 @@ which is why moving off 403 was two methods plus one `ResponseStatusException` i
 other meanings, and reusing one would make a refusal indistinguishable from a validation failure or a
 missing record.
 
-**Never 401.** The front end reads 401 as an expired session — it attempts a refresh and then signs
-the user out. A branch officer opening another branch's record would be logged out.
+**Never 401 — for `AccessDeniedException`.** The front end reads 401 as an expired session: it
+attempts a refresh and then signs the user out. A branch officer opening another branch's record must
+not be logged out for it.
+
+**But `InsufficientAuthenticationException` belongs on 401, and putting it on 422 broke session
+expiry.** See the section below; that was a real regression and the reasoning recorded here for a week
+was wrong.
 
 On the front end this was **one branch**: `store/utillls.tsx` was the only code site reading the
 number; every other "403" in `src/` is a comment. It now reads `errorCode` first and still accepts
@@ -248,6 +253,118 @@ is what same-origin means — that leaves an empty string and builds `"/ws"`, an
 absolute URL. Live notifications would have failed, for a reason nowhere near the configuration change
 that caused it. It now falls back to `window.location.origin`, which changes nothing while the base
 URL is absolute.
+
+
+## Session expiry: 401 means "who are you", 422 means "no"
+
+Moving refusals off 403 took `InsufficientAuthenticationException` along with `AccessDeniedException`,
+on the reasoning that both were "authorization". **They are not, and conflating them broke expiry
+outright.**
+
+An expired token makes `JwtService.extractUserEmail` return null — `extractAllClaims` swallows the
+parse failure — so `JwtAuthenticationFilter` sets no authentication and the request reaches
+`AuthorizationFilter` as **anonymous**. `ExceptionTranslationFilter` then calls the entry point, which
+raises `InsufficientAuthenticationException("Full authentication is required to access this
+resource")`. Mapped to 422, that never matched the interceptor's `status === 401` refresh branch: no
+refresh, no sign-out, and the error surfaced in the browser as an uncaught
+`AxiosError: Full authentication is required to access this resource`.
+
+Measured before the fix: **no header, a garbage token and a correctly-signed expired token all
+returned 422.** After: all three 401, carrying `errorCode: "SESSION_EXPIRED"`.
+
+**The rule, stated so it is not re-collapsed:**
+
+| | Means | The front end should |
+|---|---|---|
+| **401** | I do not know who you are | refresh, then sign out |
+| **`AccessDenied.STATUS`** | I know you, and the answer is no | say so, change nothing |
+
+Only 403 is unavailable. 401 was never in question, and `SessionExpiryTest` now pins both halves —
+including that an authenticated caller refused a route gets 422 and **not** 401, or the front end
+would refresh a perfectly good token and sign somebody out for opening another branch's record.
+
+### The refresh endpoint answered 200 with an empty body on every failure
+
+Worse than the above and entirely separate. `AuthenticationService.refreshToken` returned early with
+no header, fell through when the email was null, and fell through again when the token was invalid —
+**writing nothing in all three cases**. Measured: a refresh with no header and one with an expired
+token both answered `200 OK`, zero bytes.
+
+The browser then read `data.accessToken` off an empty body, got `undefined`, and **stored the string
+"undefined" as the access token** before concluding the refresh had failed anyway. *A response that
+says "fine" while handing back nothing is the worst shape a failure can take, because every caller has
+to know that success is not success.* It refuses with 401 and a message now, and the browser keeps a
+`!data?.accessToken` guard for the version-skew window.
+
+### Ending a session must not also throw into every caller
+
+The 401 branch ended in `Promise.reject(new Error('Session expired'))`, and `drainQueue` rejected
+every parked request. So each request in flight when the token expired threw into whatever called it —
+and services that correctly **throw** rather than swallowing, like the audit trail's, carried it up to
+React. The redirect is assigned synchronously but the browser tears the page down asynchronously, so
+the error overlay won the race: the user's last sight of the application was a stack trace on a page
+already navigating to the login screen.
+
+Both now return a promise that **never settles**. There is no result, there will be no result, and the
+page these callers belong to is being replaced; the cost is a pending promise for the few milliseconds
+until navigation. `drainQueue` distinguishes the two cases by `error === null`, so a caller passing a
+real error still gets one.
+
+*Noted while reading, not changed:* `JwtService.isTokenExpired` returns **true when the token is
+still valid** — it is `new Date().before(expiry)`. `isTokenValid` reads `… && isTokenExpired(token)`,
+which looks inverted and is correct only because the helper is misnamed. Behaviourally right today;
+a trap for whoever next reads it.
+
+
+## `@Value` on a `static` field injects nothing
+
+Tried on `AssetCategoryFeatureSeeder`, to make the Infra and Admin fulfilment mailboxes configurable
+per environment. **The application stopped starting.** Three faults compound, and the third is the
+only reason it was noticed:
+
+1. **Spring applies `@Value` to a bean *instance*.** A static field belongs to the class, so the
+   container never populates it. It logs `WARN ... Autowired annotation is not supported on static
+   fields` and carries on — one line among hundreds at startup, with the app reporting itself started.
+2. **A `static final` map initialises at class-load**, before the container exists. Even with (1)
+   fixed, the map would already be built from nulls.
+3. **`Map.ofEntries` rejects null values** → `ExceptionInInitializerError` → the context fails to
+   load. Measured: NPE at the `Map.entry("Computers", infraEmail)` line.
+
+**(3) was the lucky part.** A `HashMap` tolerates nulls; every asset category would have been seeded
+with a null fulfilment mailbox and it would have surfaced weeks later as requests routing nowhere.
+
+**The working shape was already in the file next door.** `BranchHeadOfficeSeeder` takes the same kind
+of value on a plain instance field and logs-and-skips when it is blank. `AssetCategoryFeatureSeeder`
+now matches it, and leaves `ownerGroupEmail` **unset** rather than blank when no address is
+configured — the seeder only fills empty fields, so an unset one is picked up on a later startup while
+a blank one reads as "already seeded" and is never revisited.
+
+`StaticValueInjectionTest` walks every class in `src/main/java` reflectively and fails the build on any
+static `@Value`. Verified by putting one back on a different class and watching it name it.
+
+### The twelve-entry map became a one-entry set
+
+It sent **one** category to Infra and eleven to Admin, then defaulted unlisted ones to Admin — eleven
+identical answers plus a default that repeated them. `INFRA_FULFILLED_CATEGORIES = Set.of("Computers")`
+with an Admin fallback is the same behaviour for every category it named, the same for every category
+it did not, and a category added in Settings tomorrow is routed instead of quietly missing an entry.
+
+### One env var cannot mean two things
+
+The change also pointed `application.head.office.admin-email` at `${ADMIN_EMAIL}` — **already taken**
+by `application.admin.email`, which four classes read as *the application administrator* (the workflow
+engine's ADMIN approver, the report service's recipient). The `.env` ended up with `ADMIN_EMAIL`
+defined twice, and Spring refused it outright:
+`Duplicate key ADMIN_EMAIL (attempted merging values ... and ...)`.
+
+The Head Office mailboxes now have their own variables, named for the key path they fill:
+`HEAD_OFFICE_INFRA_EMAIL` and `HEAD_OFFICE_ADMIN_EMAIL`. **Other environments need the same rename** —
+`INFRA_EMAIL` / `ADMIN_EMAIL` no longer feed `application.head.office.*`.
+
+*A trap met writing the test:* `seedFeatures()` is `@Transactional`, so the injected bean is a CGLIB
+proxy whose inherited copy of the field is null — Spring populates the *target*. Reading the proxy's
+field reproduces exactly the symptom the test is about, for an unrelated reason, and the first version
+of the test failed against correct code. It reads through `AopTestUtils.getUltimateTargetObject`.
 
 
 ## Permission model
@@ -1208,6 +1325,131 @@ holder of `READ_REQUEST` could read every request in the bank by id.
 *What was already right:* the request routes are gated to match their endpoints
 (`READ`/`CREATE`/`UPDATE_REQUEST`, `ISSUE_ITEMS`), and `canEditRequest` requires `isRequester` — stricter
 than the backend guard, which is the safe direction.
+
+### The tag search: a unique constraint that existed on the wrong column
+
+The navigation bar searches by engraved number. Four faults, and the first was live.
+
+**Searching three assets returned a 500.** `findByEngravedNumber` returned `Optional<Asset>`, which
+does not mean "at most one" to Spring Data — it means *throw on a second row*. Measured:
+
+```
+'PBL-2026-LPT07' -> IncorrectResultSizeDataAccessException: 2 results were returned
+```
+
+Three engraved numbers were carried by two assets each, so six real assets were unfindable.
+
+**The constraint existed, on the dead column.** `Asset.tagName` carries `@Column(unique = true)` and
+Hibernate duly created a unique index on `tag_name` — **NULL on all 252 rows**, written by nothing.
+`engraved_number`, the field the estate actually uses, had none. Somebody built this correctly once
+against a field that was then replaced rather than removed. It is also why the route is
+`/assets/tag-name` while the column it searches is `engravedNumber`.
+
+**Only the bulk import checked uniqueness.** `createAsset` and `updateAsset` set the field straight
+from the request, so the form beside the import created the very duplicates the import refused. All
+three now share `requireEngravedNumberAvailable(value, excludingAssetId)` — the exclusion is what
+makes it usable on an update, or re-saving a record would collide with itself.
+
+**The search had no scope at all** and returned the whole entity. Any holder of `READ_ASSET` could
+find any asset in the bank by tag and be sent to a detail page that then refused them.
+
+### V25: a generic repair, not a list of ids
+
+The three collisions were `PBL-2026-LPT06` (155/307), `PBL-2026-LPT07` (154/306) and
+`PBL-CTHNG-FNT001` (1310/1315). **Those ids are not in the migration.** Another environment has
+different collisions or none, and a migration naming these would do nothing there while the
+`ALTER TABLE` failed on rows it had not touched. The rule is stated instead: within each group, the
+**lowest id keeps the number** and the rest get their own id appended — deterministic, so re-running
+the reasoning gives the same answer, and it happens to keep the record carrying a serial number in
+both laptop cases.
+
+**Re-tagged rather than deleted or merged.** All six are live assets somebody holds, and each is a
+distinct physical item — two laptops, two coat hangers. Soft-deleting one would remove a real asset
+and orphan its assignment history; merging would fold two custody trails into one. Both destroy
+information to fix a label.
+
+**NULL stays allowed, and that is the decision.** 33 assets have no engraved number, all Head Office
+at `requireUpdate` — *"not yet completed after stocking"*, in the issuance service's own words.
+Requiring one at creation would break receiving stock. MySQL treats NULLs as distinct in a unique
+index, which is what lets both rules hold.
+
+**Required at completion instead — and there is no Complete screen.** `crudStates.complete` exists as
+a constant with a comment and nothing dispatches it, so the **ordinary update form is the
+completion**: an asset leaves `requireUpdate` by being edited, and issuance refuses anything still in
+that status. So the number is demanded exactly when an asset stops being a half-finished stock line,
+and never before — an asset may still be edited freely while it stays in `requireUpdate`.
+
+### The search is scoped multi-ended, and omits rather than refuses
+
+Same rule as the repair guard: in reach when **either** the asset's current branch **or** the branch
+recorded on its repair transfer is the caller's. A plain branch equality is the obvious rule and wrong
+in both directions, because `asset.branch` means *where the asset is* — a Gulu laptop reads Head
+Office once the bench receives it and Gulu before that, so a strict rule makes the label unscannable
+by whichever side is holding it.
+
+**Out-of-reach matches are omitted, not refused**, so "no such tag" and "not yours" are the same
+answer. Refusing would confirm that a number exists somewhere the caller may not look — and the front
+end says "no asset in your branch carries that tag" for both, which is the honest reading of what it
+was told.
+
+The endpoint returns a seven-field `AssetTagMatch` rather than the entity. It briefly returned a
+**list**, which was defensible while duplicates existed in the data and is not now that V25 has
+constrained the column — it made every caller branch on a length that can only be 0 or 1. The service
+still reads a list internally, so a lost index degrades into *answering* rather than throwing; the
+endpoint takes the first.
+
+**`assetTypeId` is on the DTO because the detail route needs it**, and its absence was the bug that
+followed. The search navigated to `${ROUTES.LIST_ASSETS}/${id}` while the page lives at
+`/assets/general/:typeId/view/:id` — so a successful search landed on a URL matching no route. That
+had always been wrong and was never reached, because the search silently did nothing on every path;
+**fixing the search walked straight into the broken destination behind it.**
+
+**Nothing found is `204`, not `404` and not an error.** A search that matches nothing has succeeded.
+404 was the first attempt and was worse than it looked: this application's `NotFoundException` handler
+carries **no `@ResponseStatus`** and returns a bare `{"message": …}` map, so it answers **200** — the
+browser would have read that map as a match with no id. A 204 cannot be mistaken for anything, needs
+no `errorCode` to keep the interceptor quiet, and does not make the ordinary case travel as an
+exception.
+
+### The router had no error page and no catch-all
+
+`createBrowserRouter` was built with neither, so a mistyped URL, a stale bookmark or a bad `navigate()`
+got React Router's own developer page — *"Unexpected Application Error! 404 Not Found / 💿 Hey
+developer 👋"* — a message written for whoever built the application, shown to whoever is using it,
+with no navigation and no way back.
+
+Both now exist: a `<Route path="*">` for addresses that do not exist and one pathless `errorElement`
+boundary around the whole tree for pages that throw. **Both are needed** — they answer different
+questions — and the boundary is one pathless route rather than an `errorElement` per branch, because
+the tree is assembled from six sub-route functions and that would be six places to forget one. The
+catch-all sits *outside* `PrivateRoute` on purpose: a signed-out user typing a bad address should be
+told the page does not exist, not bounced to a login screen that then sends them somewhere they did
+not ask for.
+
+`RouteError` distinguishes the two cases in its wording — a 404 is almost always an aged link and
+saying "something went wrong" would invite a retry that cannot work — and shows the underlying message
+only for a real fault, where it is the one useful thing to quote.
+
+### The search could fire twice
+
+The button carried `disabled={searching}`; the input's `onKeyDown` Enter handler did not, so holding
+or double-tapping Enter ran the whole search again mid-flight. The guard is inside the handler now.
+
+*The other thing that reads as a double call* is the **CORS preflight**: the dev server is `:3000`, the
+API is `:7777`, and `Authorization` is not CORS-safelisted, so every request is an `OPTIONS` followed
+by the `GET`. That pair is two rows in the network panel and disappears the moment the two are served
+from one origin.
+
+*The front end did nothing at all on any failure.* The service ended in `catch (error) { return error }`
+(trap #6), so the component's own `try/catch` could never fire; it then tested `result.id`, which an
+AxiosError does not have, and fell through. A tag that did not exist and one that did looked identical
+from the outside — no message, no navigation. It now distinguishes the four outcomes, encodes the
+query parameter (engraved numbers carry slashes and `+`, which a query string reads as a space), and
+disables the button while a lookup is in flight.
+
+*Left alone:* `tag_name` and its unique index. Dropping an audited column means handling `asset_aud`
+too (trap #5), and a dead column with a correct constraint harms nothing — but it is now recorded in
+V25 so the next person to wonder about the endpoint's name finds the answer.
 
 ### Department filters — declared end to end, and labelled for what they can answer
 

@@ -6,7 +6,7 @@ Managing Director
 */
 
 import { useState } from "react";
-import { IModule, IPermission, IRole, IRolesAxiosResponse, IRoleAxiosResponse, IPermissionsAxiosResponse } from "../interface";
+import { IModule, IPermission, IRole, IRolesAxiosResponse, IPermissionsAxiosResponse } from "../interface";
 import BalanceIcon from '@mui/icons-material/Balance';
 import SettingsBrightnessIcon from '@mui/icons-material/SettingsBrightness';
 import DirectionsCarFilledIcon from '@mui/icons-material/DirectionsCarFilled';

@@ -25,6 +25,9 @@ const OfficeEquipmentForm = ({
     control,
     register,
     buttonText,
+    // Optional, and only the create page supplies them — see SteppedAssetForm.
+    secondaryButtonText,
+    onSecondaryIntent,
     sendingRequest,
     lpoParams,
     userParams,
@@ -97,6 +100,8 @@ const OfficeEquipmentForm = ({
             control={control}
             register={register}
             buttonText={buttonText}
+            secondaryButtonText={secondaryButtonText}
+            onSecondaryIntent={onSecondaryIntent}
             sendingRequest={sendingRequest}
             formFields={configuredFormFields}
             isUpdate={!!lpoParams}

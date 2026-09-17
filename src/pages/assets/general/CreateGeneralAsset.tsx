@@ -1,3 +1,4 @@
+import React from 'react';
 import { useEffect, useState } from "react";
 import { IOfficeEquipment, IOfficeEquipmentAxiosResponse } from "../interface";
 import { useForm } from "react-hook-form";
@@ -49,6 +50,19 @@ const CreateGeneralAsset = () => {
 
     const navigate = useNavigate();
 
+    /*
+     * Which button was pressed, read after the save completes.
+     *
+     * A ref rather than state on purpose: it is set in the click handler immediately before the form
+     * submits, and `onSubmit` reads it in the same tick. State would not have re-rendered in time, so
+     * the first "Save and add another" of a session would navigate away — the classic stale-closure
+     * version of this pattern, and the reason it is worth saying out loud.
+     *
+     * Reset after every save so an "add another" followed by a plain "Save" does not keep the user
+     * on the form.
+     */
+    const addAnotherRef = React.useRef(false);
+
     useEffect(() => {
         reset({ assetType: typeId ? Number(typeId) : undefined } as unknown as IOfficeEquipment);
     }, [reset, typeId]);
@@ -57,16 +71,57 @@ const CreateGeneralAsset = () => {
         setSendingRequest(true);
         try {
             const response = await createOfficeEquipmentService(formData) as IOfficeEquipmentAxiosResponse;
-            if (response.status === 201) {
+
+            // 200 or 201, for the same reason the update page accepts both: the status these
+            // endpoints answer with should not be the thing that decides whether a save "worked".
+            if (response.status === 200 || response.status === 201) {
                 toast.success(`${assetType?.name || 'Asset'} created successfully!`);
-                reset({ assetType: typeId ? Number(typeId) : undefined } as unknown as IOfficeEquipment);
-            } else {
-                toast.error(`Failed to create ${assetType?.name || 'asset'}`);
+
+                /*
+                 * Back to the register for the category the asset actually landed in.
+                 *
+                 * Read from the response first, falling back to the URL. Today they are always the
+                 * same — `AssetForm` takes `overrideAssetTypeId` from `typeId` and exposes no category
+                 * selector, so a created asset cannot end up anywhere else — but that is a fact about
+                 * a field the form does not currently have, not a guarantee. The update page can rely
+                 * on `typeId` because it *pins* `assetType` to it in the request; this one does not,
+                 * so it asks the server what it created.
+                 *
+                 * The toast survives the navigation: `ToastContainer` is mounted in `App`, above the
+                 * router.
+                 *
+                 * Returned from here rather than falling through, or `setSendingRequest(false)` below
+                 * would set state on a component that is unmounting.
+                 */
+                if (addAnotherRef.current) {
+                    /*
+                     * Stay, and clear the form for the next one — the rapid-entry workflow this page
+                     * was originally built around, now something the user chooses rather than the
+                     * only thing the page does.
+                     *
+                     * The category is put back deliberately: it is the one field that should survive,
+                     * because somebody registering several assets in a row is registering several of
+                     * the same kind.
+                     */
+                    addAnotherRef.current = false;
+                    reset({ assetType: typeId ? Number(typeId) : undefined } as unknown as IOfficeEquipment);
+                    setSendingRequest(false);
+                    return;
+                }
+
+                const landedIn = response.data?.assetType?.id ?? (typeId ? Number(typeId) : undefined);
+                navigate(`${ROUTES.LIST_GENERAL_ASSETS}/${landedIn}`);
+                return;
             }
+
+            toast.error(`Failed to create ${assetType?.name || 'asset'}`);
         } catch (error) {
             console.error("Error creating asset:", error);
             toast.error("Failed to create asset. Please try again.");
         }
+        // Cleared on every path that did not act on it, so a failed "add another" does not silently
+        // keep the user on the form after they press plain Save next time.
+        addAnotherRef.current = false;
         setSendingRequest(false);
     };
 
@@ -125,6 +180,8 @@ const CreateGeneralAsset = () => {
             <form style={{ width: '100%' }} autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
                 <OfficeEquipmentForm
                     buttonText={`Save ${assetType?.name || 'Asset'}`}
+                    secondaryButtonText="Save & add another"
+                    onSecondaryIntent={() => { addAnotherRef.current = true; }}
                     formState={formState}
                     control={control}
                     sendingRequest={sendingRequest}
