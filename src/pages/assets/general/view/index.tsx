@@ -63,6 +63,8 @@ import ListAltOutlinedIcon from '@mui/icons-material/ListAltOutlined';
 import HistoryOutlinedIcon from '@mui/icons-material/HistoryOutlined';
 import BuildOutlinedIcon from '@mui/icons-material/BuildOutlined';
 import { assetLocationLabel } from '../../assetLocationLabel';
+import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
+import { refusal } from '../../../../core/apis/globalService';
 
 const statusTone = (code?: string) => {
     switch ((code ?? '').toLowerCase()) {
@@ -180,6 +182,8 @@ const HeroFact = ({ label, value, first }: { label: string; value?: string | nul
 
 const GeneralAssetDetails = () => {
     const [asset, setAsset] = useState<IOfficeEquipment>({} as IOfficeEquipment);
+    /** Why the record could not be shown, when it could not. Null while it can. */
+    const [loadError, setLoadError] = useState<string | null>(null);
     const { typeId, id } = useParams<{ typeId: string; id: string }>();
     const [loading, setLoading] = useState<boolean>(false);
     const [open, setOpen] = useState<boolean>(false);
@@ -209,13 +213,31 @@ const GeneralAssetDetails = () => {
     const canUpdateAsset = !!asset && canActOn(PERMISSIONS.UPDATE_ASSET, 'ASSETS', scopedRecord);
     const canReassignAsset = !!asset && canActOn(PERMISSIONS.REASSIGN_ASSET, 'ASSETS', scopedRecord);
 
+    /*
+     * A record that could not be loaded must not render as a record.
+     *
+     * This used to catch into `console.log` and leave `asset` at its initial `{}`, so a refusal — or
+     * any network failure — drew the whole detail page with every field empty and nothing saying
+     * why. That is the "a boundary must not render as a fact" failure the store page and the profile
+     * page have both had: the screen asserts an asset with no name, no branch and no status, which
+     * is not what the server said.
+     *
+     * It is the reason clicking an out-of-reach row from the IT store looked like a blank page rather
+     * than a permission boundary, and it would still bite on a genuine refusal now that the scoping
+     * is fixed.
+     */
     const fetchAsset = async () => {
         setLoading(true);
+        setLoadError(null);
         try {
             const response = await getOfficeEquipmentByIDService(id as string) as IOfficeEquipmentAxiosResponse;
-            if (response.status === 200) setAsset(response.data);
+            if (response.status === 200) {
+                setAsset(response.data);
+            } else {
+                setLoadError(refusal(response, 'This asset could not be loaded.'));
+            }
         } catch (error) {
-            console.log(error);
+            setLoadError(refusal(error, 'This asset could not be loaded.'));
         }
         setLoading(false);
     };
@@ -279,6 +301,34 @@ const GeneralAssetDetails = () => {
         return (
             <Box sx={{ bgcolor: surface.page, minHeight: '100vh', p: 3 }}>
                 <Loading items={assetType?.name || 'Asset'} />
+            </Box>
+        );
+    }
+
+    /*
+     * Shown in place of the record, not beside it. A banner over a page of empty fields still reads
+     * as "this asset has no name"; replacing the content is the only rendering that does not assert
+     * something the server declined to tell us.
+     */
+    if (loadError || !asset?.id) {
+        return (
+            <Box sx={{ bgcolor: surface.page, minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', p: 3 }}>
+                <Paper elevation={0} sx={{ maxWidth: 520, width: '100%', p: { xs: 3, sm: 4.5 }, borderRadius: '16px', border: 1, borderColor: border.subtle, textAlign: 'center' }}>
+                    <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
+                        This asset could not be shown
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: 'text.secondary', mb: 3, lineHeight: 1.7 }}>
+                        {loadError || 'The record could not be loaded.'}
+                    </Typography>
+                    <MuiButton
+                        variant="contained"
+                        startIcon={<ArrowBackIosNewOutlinedIcon sx={{ fontSize: 12 }} />}
+                        onClick={() => navigate(-1)}
+                        sx={{ textTransform: 'none', fontWeight: 600, borderRadius: '8px' }}
+                    >
+                        Go back
+                    </MuiButton>
+                </Paper>
             </Box>
         );
     }

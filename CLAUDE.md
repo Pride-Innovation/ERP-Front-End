@@ -2629,6 +2629,55 @@ assets into the shared stores by *store*, not by branch. `RepairMovementService`
 **asset's** branch, which is correct; adding a store-location check there would refuse every branch
 its own repairs. `StockTakeScopeTest` pins that absence.
 
+### Reading your own asset while it is away — the listing and the detail page disagreed
+
+A branch BOM opening `/store/it` can see their own laptop on the Head Office repair bench, clicks it,
+and gets a **blank page**. Two independent bugs, and the scoping one is not really a widening.
+
+**The listing was already multi-ended.** `InventoryReportController.scopeAssets` reaches an asset when
+*either* end is the caller's — where it sits, or where it came from. `AssetService.requireAssetInScope`
+was **single-ended**, so the row was listed and then would not open. *A row that sits in your list and
+will not open is the exact failure this scoping exists to prevent* — so this removes a contradiction
+inside the scope rather than relaxing it.
+
+The cause is the one already recorded here: `asset.branch` means *where the asset is*, and
+`relocateAsset` overwrites it on receipt. **Measured: seven assets in maintenance read Head Office and
+every one came from Gulu.**
+
+**Three deliberate narrowings, and the second is the one that matters:**
+
+1. **VIEW only.** MANAGE stays single-ended, so a branch still cannot edit, reassign or write off an
+   asset sitting at Head Office.
+2. **Only while the asset is away** — keyed on status `inMaintenance` / `pendingDisposal`, not on the
+   existence of a past transfer. Widening on a historical event would let a branch read an asset
+   forever because it once sent it for repair; this lapses when the item comes home.
+3. **The holder list is unchanged**, so SELF is untouched: one branch is added, nothing else.
+
+**Disposal needed a second source.** `disposeAsset` never sets `originLocation` — only the repair
+transfer does — so `branchLastSentAwayFrom` falls back to the movement's **source store's location**,
+which both builders always set. Measured across the twelve assets currently away: the two agree on
+every repair, and the source store is the only signal for a disposal. Included now rather than later
+because a branch asset written off tomorrow produces the identical report with no origin recorded.
+
+**One asset cannot be reached by any rule.** Asset 1158 is `inMaintenance` at Head Office with **no
+transfer movement at all** — nothing ever recorded where it came from. Left alone deliberately: that
+is a data correction, not a scoping change, and pretending otherwise would mean inventing an origin.
+
+**The tag search reads the same helper**, and a test pins that `branchLastSentAwayFrom` has exactly
+two call sites. If the search could find an asset the record then refused to open, it would recreate
+the contradiction this rule removes.
+
+### The blank page was a separate bug, and would have survived the fix
+
+`fetchAsset` caught into `console.log` and left `asset` at its initial `{}` — so a refusal, or any
+network failure, drew the whole detail page with every field empty and nothing saying why. **That is
+what the BOM actually saw**, and it would still bite on a genuine refusal now that the scoping is
+right.
+
+It renders the reason *in place of* the record now, not beside it: a banner over a page of empty
+fields still reads as "this asset has no name". Third instance of the same shape after the store page
+and the profile page — *a boundary must not render as a fact.*
+
 ### Visibility inside the shared stores — done
 
 A branch sees **its own items** in the bank-wide IT and Disposal stores. **Visibility only**; no
