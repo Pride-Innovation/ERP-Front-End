@@ -5,578 +5,440 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import {
-    alpha,
-    Avatar,
-    Box,
-    Button,
-    Chip,
-    Divider,
-    Grid,
-    IconButton,
-    LinearProgress,
-    Paper,
-    Stack,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
-    Tooltip,
-    Typography,
-} from '@mui/material';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { RequirePermission } from '../../core/permissions';
+import usePermissions from '../../core/permissions/usePermissions';
+import { PERMISSIONS } from '../../core/permissions/constants';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import {
+    alpha, Box, Button, Chip, Grid, Stack, Tooltip, Typography,
+} from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import SwapHorizOutlinedIcon from '@mui/icons-material/SwapHorizOutlined';
 import PendingActionsOutlinedIcon from '@mui/icons-material/PendingActionsOutlined';
-import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
-import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
 import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
-import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
-import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
-import DownloadOutlinedIcon from '@mui/icons-material/DownloadOutlined';
-import TrendingUpOutlinedIcon from '@mui/icons-material/TrendingUpOutlined';
+import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
 import AssignmentTurnedInOutlinedIcon from '@mui/icons-material/AssignmentTurnedInOutlined';
-import AccessTimeOutlinedIcon from '@mui/icons-material/AccessTimeOutlined';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import BuildOutlinedIcon from '@mui/icons-material/BuildOutlined';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import DraftsOutlinedIcon from '@mui/icons-material/DraftsOutlined';
+import { toast } from 'react-toastify';
+import { RootState } from '../../store';
 import { ROUTES } from '../../core/routes/routes';
-import { mockMovements, statusConfig, MovementStatus } from './mockMovements';
+import ModalComponent from '../../components/modal';
+import { PageHero, PageSection, StatTile, EmptyState } from '../../components/layout';
+import { brand, neutral } from '../../utils/tokens';
+import MovementUtills from './utills';
+import MovementTable from './MovementTable';
+import RepairFlowsModal from './RepairFlowsModal';
+import MovementActionModal from './MovementActionModal';
+import MovementFilters, {
+    MovementFilterValues, hasActiveMovementFilters,
+} from './allMovements/MovementFilters';
+import { exportMovementsPdf, exportMovementsExcel, exportMovementsCsv } from './allMovements/exportMovements';
+import RoutesUtills from '../../core/routes/utills';
+import {
+    fetchPendingApprovalMovementsService, fetchMovementStatusCountsService,
+    fetchMovementFilterOptionsService,
+} from './service';
+import { fetchRowsService } from '../../core/apis/globalService';
 
-const PRIMARY   = '#08796C';
-const SECONDARY = '#BC892C';
+import { MovementStatus } from './constants';
+import { IMovement } from './interface';
+/** How many rows the digest pulls when filters are on — enough to be useful, not a register dump. */
+const DIGEST_SIZE = 50;
 
-// ── Stat widget ──────────────────────────────────────────────────────────────
-interface StatCardProps {
-    label: string;
-    value: number;
-    icon: React.ReactNode;
-    accentColor: string;
-    sub?: string;
-    onClick?: () => void;
-}
-const StatCard = ({ label, value, icon, accentColor, sub, onClick }: StatCardProps) => (
-    <Paper
-        elevation={0}
-        onClick={onClick}
-        sx={{
-            p: 2.5,
-            borderRadius: 3,
-            border: `1px solid ${alpha(accentColor, 0.18)}`,
-            cursor: onClick ? 'pointer' : 'default',
-            transition: 'box-shadow 0.2s, transform 0.15s',
-            '&:hover': onClick ? { boxShadow: `0 4px 20px ${alpha(accentColor, 0.16)}`, transform: 'translateY(-2px)' } : {},
-            position: 'relative',
-            overflow: 'hidden',
-        }}
-    >
-        <Box
-            sx={{
-                position: 'absolute', top: -12, right: -12,
-                width: 70, height: 70, borderRadius: '50%',
-                bgcolor: alpha(accentColor, 0.08),
-            }}
-        />
-        <Stack direction="row" alignItems="flex-start" justifyContent="space-between">
-            <Box>
-                <Typography variant="caption" sx={{ color: 'text.secondary', textTransform: 'uppercase', letterSpacing: '0.07em', fontSize: '0.65rem', fontWeight: 600 }}>
-                    {label}
-                </Typography>
-                <Typography variant="h3" sx={{ fontWeight: 800, color: accentColor, mt: 0.25, lineHeight: 1.1 }}>
-                    {value}
-                </Typography>
-                {sub && (
-                    <Typography variant="caption" sx={{ color: 'text.disabled', fontSize: '0.7rem', mt: 0.25, display: 'block' }}>
-                        {sub}
-                    </Typography>
-                )}
-            </Box>
-            <Box
-                sx={{
-                    width: 40, height: 40, borderRadius: 2,
-                    bgcolor: alpha(accentColor, 0.1),
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    color: accentColor,
-                    flexShrink: 0,
-                }}
-            >
-                {icon}
-            </Box>
-        </Stack>
-    </Paper>
-);
+/** Cap on one export, so a careless export of everything cannot pull the table into the browser. */
+const EXPORT_LIMIT = 5000;
 
-// ── Status chip ───────────────────────────────────────────────────────────────
-const StatusChip = ({ status }: { status: MovementStatus }) => {
-    const cfg = statusConfig[status];
-    return (
-        <Chip
-            label={cfg.label}
-            size="small"
-            sx={{
-                height: 20,
-                fontSize: '0.67rem',
-                fontWeight: 700,
-                bgcolor: cfg.bg,
-                color: cfg.color,
-                border: `1px solid ${cfg.border}`,
-                '& .MuiChip-label': { px: 1.25 },
-            }}
-        />
-    );
-};
-
-// ── Workflow step ─────────────────────────────────────────────────────────────
-interface WorkflowStepProps {
-    step: number;
-    label: string;
-    description: string;
-    color: string;
-    icon: React.ReactNode;
-    isLast?: boolean;
-}
-const WorkflowStep = ({ step, label, description, color, icon, isLast }: WorkflowStepProps) => (
-    <Stack direction="row" spacing={0} alignItems="flex-start" sx={{ flex: 1 }}>
-        <Stack alignItems="center" sx={{ mr: 1.5, minWidth: 36 }}>
-            <Box
-                sx={{
-                    width: 36, height: 36, borderRadius: '50%',
-                    bgcolor: alpha(color, 0.12),
-                    border: `2px solid ${alpha(color, 0.3)}`,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    color, flexShrink: 0,
-                }}
-            >
-                {icon}
-            </Box>
-            {!isLast && (
-                <Box sx={{ width: 2, flex: 1, minHeight: 24, bgcolor: alpha(color, 0.15), my: 0.5 }} />
-            )}
-        </Stack>
-        <Box sx={{ pt: 0.5, pb: isLast ? 0 : 2 }}>
-            <Typography variant="caption" sx={{ color, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', fontSize: '0.63rem' }}>
-                Step {step}
-            </Typography>
-            <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'text.primary', lineHeight: 1.3 }}>
-                {label}
-            </Typography>
-            <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.72rem', lineHeight: 1.5 }}>
-                {description}
-            </Typography>
-        </Box>
-    </Stack>
-);
-
-// ── Main page ─────────────────────────────────────────────────────────────────
 const Movement = () => {
     const navigate = useNavigate();
+    const { movements } = useSelector((state: RootState) => state.MovementStore);
 
-    // Calculated stats from mock data
-    const total = mockMovements.length;
-    const pending = mockMovements.filter(m => m.status === 'pending_approval').length;
-    const approved = mockMovements.filter(m => m.status === 'approved').length;
-    const rejected = mockMovements.filter(m => m.status === 'rejected').length;
-    const released = mockMovements.filter(m => m.status === 'released').length;
-    const completed = mockMovements.filter(m => m.status === 'completed').length;
-    const draft = mockMovements.filter(m => m.status === 'draft').length;
+    const {
+        fetchAllMovements, loading, count, modalState,
+        open, handleClose, sendingRequest, setSendingRequest,
+        currentMovement,
+    } = MovementUtills();
+    const [repairOpen, setRepairOpen] = useState(false);
+
+    /*
+     * The "Pending My Approval" inbox used to sit here as a second table.
+     *
+     * Removed: this page already carries a hero, a five-tile stat strip, a filter bar and the
+     * movements table, and a second table of the same rows pushed the actual list below the fold.
+     * Approvers are told by email and by the in-app bell instead — see
+     * MovementApprovalService#notifyApprover — and act from the movement's own detail page, which is
+     * where the full context lives anyway.
+     *
+     * The endpoint it used (GET /movements/pending-approval/{approverId}) is untouched and still
+     * feeds the dashboard.
+     */
+    const currentUserId = RoutesUtills().getCurrentUser()?.id;
+    /** Count only — the rows themselves are read from the movement's own page. */
+    const [pendingCount, setPendingCount] = useState(0);
+
+    /**
+     * Only an approver has an approval inbox.
+     *
+     * <p>`GET /movements/pending-approval/{id}` requires APPROVE_MOVEMENT, and this ran for everyone
+     * who opened the page — so on live data six of the twelve accounts that can read movements got a
+     * 403 on every page load, for a chip they were never going to be shown. The endpoint was right;
+     * the page simply was not asking whether it had any business calling it.
+     *
+     * <p>The old `pendingCount > 0` test guarded the chip but not the request, which is the wrong end:
+     * by then the call has already failed.
+     */
+    const { has } = usePermissions();
+    const mayApproveMovements = has(PERMISSIONS.APPROVE_MOVEMENT);
+
+    /*
+     * Who may open Repair / Disposal at all.
+     *
+     * The button was ungated while the New Movement button directly beside it was not. Measured on
+     * live data: sixteen accounts hold READ_MOVEMENT and so reach this page and saw it, while only
+     * eight could submit a repair and four a disposal - so half the people offered it got a 403 on
+     * the first thing they tried, which reads as a broken button rather than as a boundary.
+     *
+     * A disjunction because the modal carries four flows under two permissions; it filters its own
+     * tiles to whichever of the two the viewer actually holds, so somebody with one of them is not
+     * offered the other's flow.
+     */
+    const mayRepairAssets = has(PERMISSIONS.REPAIR_ASSET);
+    const mayDisposeAssets = has(PERMISSIONS.DISPOSE_ASSET);
+
+    const fetchPendingCount = async () => {
+        if (!currentUserId || !mayApproveMovements) return;
+        const r = (await fetchPendingApprovalMovementsService(currentUserId, { pageSize: 1, pageNumber: 0 })) as any;
+        if (r?.status === 200) setPendingCount(r.data?.totalElements ?? r.data?.content?.length ?? 0);
+    };
+
+    const [filters, setFilters] = useState<MovementFilterValues>({});
+    const filtersActive = hasActiveMovementFilters(filters);
+
+    /** The panel's filters as endpoint parameters; blank values are left out entirely. */
+    const queryParams = useMemo(() => {
+        const params: Record<string, any> = {};
+        Object.entries(filters).forEach(([key, value]) => {
+            if (value) params[key] = value;
+        });
+        return params;
+    }, [filters]);
+
+    /**
+     * The filters as a printed strip, so a sheet says which slice of the register it is.
+     *
+     * <p>The old exporter printed none, so two exports taken minutes apart under different filters
+     * were indistinguishable once saved — and an export is precisely the artefact that outlives the
+     * screen that produced it.
+     */
+    const exportFilterStrip = useMemo(() => {
+        const labels: Record<string, string> = {
+            dateFrom: 'From', dateTo: 'To', movementType: 'Type', movementCategory: 'Category',
+            status: 'Status', source: 'Source', destination: 'Destination', courier: 'Courier',
+            trackingNumber: 'Tracking No', receiptStatus: 'Receipt', initiator: 'Initiated by',
+        };
+        return Object.entries(queryParams)
+            .filter(([, value]) => Boolean(value))
+            .map(([key, value]) => ({ label: labels[key] ?? key, value: String(value) }));
+    }, [queryParams]);
+
+    /*
+     * A digest, but of the register rather than of the first hundred rows.
+     *
+     * This page fetched 100 movements and did the filtering, the counting and the exports over them.
+     * The heading showed the true total while the five tiles counted the loaded rows, so past a
+     * hundred the tiles stopped summing to the number printed directly above them — and a filter
+     * that matched only later movements reported "no results". Both now come from the server.
+     *
+     * Unfiltered this is a recent-eight digest; with filters on it becomes a real, if capped,
+     * result list, and "View all" is a page away for anything longer.
+     */
+    const [statusCounts, setStatusCounts] = useState<Record<string, number>>({});
+    const [filterOptions, setFilterOptions] = useState({
+        sources: [] as string[], destinations: [] as string[],
+        couriers: [] as string[], initiators: [] as string[],
+    });
+
+    const load = useCallback(() => {
+        fetchAllMovements({
+            ...queryParams,
+            pageNumber: 0,
+            pageSize: DIGEST_SIZE,
+            sortBy: 'createDate',
+            sortDirection: 'desc',
+        });
+        fetchMovementStatusCountsService(queryParams).then((r: any) => {
+            setStatusCounts(r?.status === 200 ? (r.data ?? {}) : {});
+        });
+        fetchPendingCount();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [queryParams]);
+
+    const refresh = () => load();
+    useEffect(() => { load(); }, [load]);
+
+    // From the whole scoped register, not from the rows on screen, so the panel cannot fail to offer
+    // a value it would have matched.
+    useEffect(() => {
+        fetchMovementFilterOptionsService().then((r: any) => {
+            if (r?.status === 200 && r.data) setFilterOptions(r.data);
+        });
+    }, []);
+
+    const openMovement = (movement: IMovement) => navigate(`${ROUTES.READ_MOVEMENT}/${movement.id}`);
+
+    const countBy = (s: MovementStatus) => statusCounts[s] ?? 0;
+    const inTransit = countBy('DISPATCHED') + countBy('IN_TRANSIT');
+
+    // Already filtered and ordered by the query; capped at eight only when nothing is filtered.
+    const filteredMovements = movements;
+    const recent = filtersActive ? filteredMovements : filteredMovements.slice(0, 8);
+
+    /**
+     * Exports cover every match, not the handful on screen.
+     *
+     * <p>They ran over the loaded rows, so an export from this page was silently partial — the worst
+     * kind, because the file looks complete.
+     */
+    const handleExport = async (fn: (rows: IMovement[]) => void) => {
+        const res: any = await fetchRowsService({
+            endPoint: 'movements',
+            pageNumber: 0,
+            pageSize: EXPORT_LIMIT,
+            params: queryParams,
+        });
+        const rows: IMovement[] = res?.status === 200 ? (res.data?.content ?? []) : [];
+
+        if (rows.length === 0) {
+            toast.warning('There are no movements matching the current filters to export.');
+            return;
+        }
+        if ((res.data?.totalElements ?? 0) > rows.length) {
+            toast.info(`Exporting the first ${rows.length.toLocaleString()} of `
+                + `${res.data.totalElements.toLocaleString()} matches. Narrow the filters for the rest.`);
+        }
+        fn(rows);
+    };
 
     const todayLabel = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 
-    const completionRate = total > 0 ? Math.round((completed / total) * 100) : 0;
-
-    // Recent movements – show 6
-    const recentMovements = [...mockMovements]
-        .sort((a, b) => new Date(b.lastModified).getTime() - new Date(a.lastModified).getTime())
-        .slice(0, 6);
-
-    const workflowSteps = [
-        { step: 1, label: 'Initiate Request', description: 'Select assets, officer and destination', color: PRIMARY, icon: <AddIcon sx={{ fontSize: 16 }} /> },
-        { step: 2, label: 'Submit for Approval', description: 'Supervisor reviews and approves/rejects', color: SECONDARY, icon: <PendingActionsOutlinedIcon sx={{ fontSize: 16 }} /> },
-        { step: 3, label: 'Generate Security Pass', description: 'Auto-generated for branch movements', color: '#2563EB', icon: <AssignmentTurnedInOutlinedIcon sx={{ fontSize: 16 }} /> },
-        { step: 4, label: 'Release Assets', description: 'Releasing officer signs and dispatches', color: '#7C3AED', icon: <LocalShippingOutlinedIcon sx={{ fontSize: 16 }} /> },
-        { step: 5, label: 'Receive & Complete', description: 'Receipt acknowledged, audit trail closed', color: '#059669', icon: <CheckCircleOutlineOutlinedIcon sx={{ fontSize: 16 }} /> },
-    ];
-
     return (
-        <Box sx={{ minHeight: '100vh', width: '100%', bgcolor: '#F1F5FB', pb: 4 }}>
-
-            {/* ── Gradient Header ──────────────────────────────────────── */}
-            <Box
-                sx={{
-                    background: 'linear-gradient(135deg, #08796C 0%, #065E53 60%, #044a42 100%)',
-                    px: { xs: 2, md: 4 },
-                    pt: 3,
-                    pb: 3,
-                    position: 'relative',
-                    overflow: 'hidden',
-                }}
-            >
-                <Box sx={{ position: 'absolute', top: -40, right: -40, width: 220, height: 220, borderRadius: '50%', bgcolor: alpha('#fff', 0.04), pointerEvents: 'none' }} />
-                <Box sx={{ position: 'absolute', bottom: -30, right: 160, width: 120, height: 120, borderRadius: '50%', bgcolor: alpha('#fff', 0.03), pointerEvents: 'none' }} />
-
-                <Stack direction="row" alignItems="flex-start" justifyContent="space-between" gap={2} flexWrap="wrap">
-                    <Stack direction="row" alignItems="center" gap={2}>
-                        <Box sx={{
-                            width: 46, height: 46, borderRadius: 2,
-                            bgcolor: alpha('#fff', 0.15),
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            backdropFilter: 'blur(4px)',
-                        }}>
-                            <SwapHorizOutlinedIcon sx={{ color: '#fff', fontSize: 24 }} />
-                        </Box>
-                        <Box>
-                            <Typography variant="h5" sx={{ color: '#fff', fontWeight: 700, lineHeight: 1.2 }}>
-                                Asset Movement
-                            </Typography>
-                            <Typography variant="body2" sx={{ color: alpha('#fff', 0.72), mt: 0.3 }}>
-                                Initiate, approve, track and complete asset transfers across branches and departments.
-                            </Typography>
-                        </Box>
-                    </Stack>
-
-                    <Stack direction="row" alignItems="center" gap={1.5} flexShrink={0} flexWrap="wrap">
-                        <Box sx={{
-                            bgcolor: alpha('#fff', 0.12),
-                            backdropFilter: 'blur(8px)',
-                            border: `1px solid ${alpha('#fff', 0.18)}`,
-                            borderRadius: 2,
-                            px: 2.5,
-                            py: 1.5,
-                            textAlign: 'right',
-                        }}>
-                            <Typography variant="h4" sx={{ color: '#fff', fontWeight: 800, lineHeight: 1 }}>{total}</Typography>
-                            <Typography variant="caption" sx={{ color: alpha('#fff', 0.72), display: 'block', mt: 0.3 }}>total movements</Typography>
-                            <Typography variant="caption" sx={{ color: alpha('#fff', 0.5), fontSize: '0.68rem' }}>{todayLabel}</Typography>
-                        </Box>
-                        <Stack direction="column" gap={1}>
+        // Same page padding as PageShell (used by /movement/all) so the two pages align.
+        <Box sx={{ minHeight: '100vh', px: { xs: 2, sm: 3 }, py: { xs: 2, sm: 3 }, pb: 4 }}>
+            <PageHero
+                title="Movement Management"
+                subtitle="Transfers, replenishment, repairs and disposals across stores"
+                icon={<SwapHorizOutlinedIcon />}
+                stat={{ value: (count ?? 0).toLocaleString(), label: 'movements', helper: todayLabel }}
+                actions={
+                    <Stack direction="row" spacing={1.25} alignItems="center">
+                        {/*
+                         * What replaced the "Pending My Approval" table: the same count, costing one
+                         * chip instead of a second table. Clicking it filters the list below to what
+                         * is awaiting a decision, so the answer stays on this page.
+                         */}
+                        {pendingCount > 0 && (
+                            <Tooltip title={`${pendingCount} movement(s) awaiting your approval — you were emailed for each`}>
+                                <Chip
+                                    icon={<PendingActionsOutlinedIcon sx={{ fontSize: 15 }} />}
+                                    label={`${pendingCount} awaiting you`}
+                                    onClick={() => setFilters((f) => ({ ...f, status: 'DRAFT' }))}
+                                    sx={{
+                                        height: 32, fontWeight: 700, fontSize: '0.76rem', cursor: 'pointer',
+                                        bgcolor: alpha('#F59E0B', 0.14), color: '#B45309',
+                                        border: `1px solid ${alpha('#F59E0B', 0.3)}`,
+                                        '& .MuiChip-icon': { color: '#B45309' },
+                                        '&:hover': { bgcolor: alpha('#F59E0B', 0.22) },
+                                    }}
+                                />
+                            </Tooltip>
+                        )}
+                        {/* The journeys movements ride on. Separate entry point because a consignment
+                            spans several movements and belongs to nobody's individual record. */}
+                        <Button
+                            variant="outlined"
+                            startIcon={<LocalShippingOutlinedIcon />}
+                            onClick={() => navigate(ROUTES.CONSIGNMENTS)}
+                            sx={{ height: 36, px: 2, borderRadius: '8px', textTransform: 'none', fontWeight: 600 }}
+                        >
+                            Consignments
+                        </Button>
+                        {(mayRepairAssets || mayDisposeAssets) && (
                             <Button
                                 variant="outlined"
-                                startIcon={<SwapHorizOutlinedIcon />}
-                                sx={{
-                                    borderRadius: 2, fontWeight: 600, px: 2, height: 36, fontSize: '0.78rem',
-                                    borderColor: alpha('#fff', 0.45), color: '#fff',
-                                    '&:hover': { borderColor: '#fff', bgcolor: alpha('#fff', 0.1) },
-                                }}
-                                onClick={() => navigate(`${ROUTES.MOVEMENT}/all`)}
+                                startIcon={<BuildOutlinedIcon />}
+                                onClick={() => setRepairOpen(true)}
+                                sx={{ height: 36, px: 2, borderRadius: '8px', textTransform: 'none', fontWeight: 600 }}
                             >
-                                All Movements
+                                Repair / Disposal
                             </Button>
+                        )}
+                        <RequirePermission permission={PERMISSIONS.CREATE_MOVEMENT}>
                             <Button
                                 variant="contained"
                                 startIcon={<AddIcon />}
-                                sx={{
-                                    borderRadius: 2, fontWeight: 700, px: 2, height: 36, fontSize: '0.78rem',
-                                    bgcolor: alpha('#fff', 0.18), backdropFilter: 'blur(4px)',
-                                    border: `1px solid ${alpha('#fff', 0.3)}`, color: '#fff',
-                                    boxShadow: 'none',
-                                    '&:hover': { bgcolor: alpha('#fff', 0.28), boxShadow: 'none' },
-                                }}
                                 onClick={() => navigate(ROUTES.CREATE_MOVEMENT)}
+                                sx={{
+                                    height: 36, px: 2.5, borderRadius: '8px', textTransform: 'none', fontWeight: 600,
+                                    bgcolor: brand[500], '&:hover': { bgcolor: brand[700] },
+                                    boxShadow: `0 2px 8px ${alpha(brand[500], 0.3)}`,
+                                }}
                             >
                                 New Movement
                             </Button>
-                        </Stack>
+                        </RequirePermission>
                     </Stack>
-                </Stack>
+                }
+            />
 
-                <Stack direction="row" gap={1} flexWrap="wrap" sx={{ mt: 2.5 }}>
-                    {[
-                        { label: 'Drafts',     value: draft,     color: alpha('#fff', 0.55) },
-                        { label: 'Pending',    value: pending,   color: '#FCD34D' },
-                        { label: 'Approved',   value: approved,  color: '#6EE7B7' },
-                        { label: 'Released',   value: released,  color: '#93C5FD' },
-                        { label: 'Rejected',   value: rejected,  color: '#FCA5A5' },
-                        { label: 'Completed',  value: completed, color: '#A7F3D0' },
-                    ].map(pill => (
-                        <Box key={pill.label} sx={{ display: 'flex', alignItems: 'center', gap: 0.6, px: 1.25, py: 0.55, borderRadius: 1.5, bgcolor: alpha('#fff', 0.1), backdropFilter: 'blur(4px)', border: `1px solid ${alpha('#fff', 0.15)}` }}>
-                            <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: pill.color, flexShrink: 0 }} />
-                            <Typography variant="caption" sx={{ fontWeight: 700, color: '#fff', fontSize: '0.73rem' }}>{pill.value}</Typography>
-                            <Typography variant="caption" sx={{ color: alpha('#fff', 0.65), fontSize: '0.7rem' }}>{pill.label}</Typography>
-                        </Box>
-                    ))}
-                </Stack>
-            </Box>
-
-            {/* ── Content area ──────────────────────────────────────── */}
-            <Box sx={{ px: { xs: 1, md: 3 }, pt: 3, display: 'flex', flexDirection: 'column', gap: 3 }}>
-
-            {/* ── KPI Stats ────────────────────────────────────────────────── */}
-            <Grid container spacing={2}>
-                <Grid item xs={6} sm={4} lg={2}>
-                    <StatCard label="Total" value={total} accentColor={PRIMARY} icon={<SwapHorizOutlinedIcon sx={{ fontSize: 18 }} />} sub="All movements" />
+            {/* Status overview */}
+            <Grid container spacing={2} sx={{ mb: 3 }}>
+                <Grid item xs={6} sm={4} md={2.4}>
+                    <StatTile
+                        label="Awaiting Approval"
+                        value={countBy('DRAFT')}
+                        accent="warning"
+                        icon={<PendingActionsOutlinedIcon />}
+                        onClick={() => navigate(`${ROUTES.MOVEMENT}/all`)}
+                    />
                 </Grid>
-                <Grid item xs={6} sm={4} lg={2}>
-                    <StatCard label="Drafts" value={draft} accentColor="#6B7280" icon={<DraftsOutlinedIcon sx={{ fontSize: 18 }} />} sub="Not submitted" />
+                <Grid item xs={6} sm={4} md={2.4}>
+                    <StatTile
+                        label="Initiated"
+                        value={countBy('INITIATED')}
+                        accent="gold"
+                        icon={<SwapHorizOutlinedIcon />}
+                        onClick={() => navigate(`${ROUTES.MOVEMENT}/all`)}
+                    />
                 </Grid>
-                <Grid item xs={6} sm={4} lg={2}>
-                    <StatCard label="Pending" value={pending} accentColor="#D97706" icon={<PendingActionsOutlinedIcon sx={{ fontSize: 18 }} />} sub="Awaiting approval" />
+                <Grid item xs={6} sm={4} md={2.4}>
+                    <StatTile
+                        label="In Transit"
+                        value={inTransit}
+                        accent="info"
+                        icon={<LocalShippingOutlinedIcon />}
+                        onClick={() => navigate(`${ROUTES.MOVEMENT}/all`)}
+                    />
                 </Grid>
-                <Grid item xs={6} sm={4} lg={2}>
-                    <StatCard label="Approved" value={approved} accentColor="#059669" icon={<CheckCircleOutlineOutlinedIcon sx={{ fontSize: 18 }} />} sub="Ready to release" />
+                <Grid item xs={6} sm={4} md={2.4}>
+                    <StatTile
+                        label="Received"
+                        value={countBy('RECEIVED')}
+                        accent="brand"
+                        icon={<AssignmentTurnedInOutlinedIcon />}
+                        onClick={() => navigate(`${ROUTES.MOVEMENT}/all`)}
+                    />
                 </Grid>
-                <Grid item xs={6} sm={4} lg={2}>
-                    <StatCard label="Released" value={released} accentColor="#2563EB" icon={<LocalShippingOutlinedIcon sx={{ fontSize: 18 }} />} sub="In transit" />
-                </Grid>
-                <Grid item xs={6} sm={4} lg={2}>
-                    <StatCard label="Rejected" value={rejected} accentColor="#DC2626" icon={<CancelOutlinedIcon sx={{ fontSize: 18 }} />} sub="Needs attention" />
+                <Grid item xs={6} sm={4} md={2.4}>
+                    <StatTile
+                        label="Completed"
+                        value={countBy('COMPLETED')}
+                        accent="success"
+                        icon={<CheckCircleOutlineOutlinedIcon />}
+                        onClick={() => navigate(`${ROUTES.MOVEMENT}/all`)}
+                    />
                 </Grid>
             </Grid>
 
-            {/* ── Completion progress ──────────────────────────────────────── */}
-            <Paper elevation={0} sx={{ borderRadius: 3, border: `1px solid ${alpha('#000', 0.07)}`, px: 3, py: 2.25 }}>
-                <Stack direction="row" alignItems="center" justifyContent="space-between" mb={1}>
-                    <Stack direction="row" alignItems="center" spacing={1}>
-                        <TrendingUpOutlinedIcon sx={{ fontSize: 16, color: PRIMARY }} />
-                        <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'text.primary' }}>
-                            Completion Rate
-                        </Typography>
-                    </Stack>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 800, color: PRIMARY }}>
-                        {completionRate}%
-                    </Typography>
-                </Stack>
-                <LinearProgress
-                    variant="determinate"
-                    value={completionRate}
-                    sx={{
-                        height: 7, borderRadius: 4, bgcolor: alpha(PRIMARY, 0.1),
-                        '& .MuiLinearProgress-bar': { bgcolor: PRIMARY, borderRadius: 4 },
-                    }}
-                />
-                <Stack direction="row" justifyContent="space-between" mt={1}>
-                    <Typography variant="caption" sx={{ color: 'text.disabled', fontSize: '0.68rem' }}>
-                        {completed} completed of {total} total
-                    </Typography>
-                    <Typography variant="caption" sx={{ color: 'text.disabled', fontSize: '0.68rem' }}>
-                        {total - completed} in progress
-                    </Typography>
-                </Stack>
-            </Paper>
+            {/* Filters & export bar — same styling as the Reports page */}
+            <MovementFilters
+                sources={filterOptions.sources}
+                destinations={filterOptions.destinations}
+                couriers={filterOptions.couriers}
+                initiators={filterOptions.initiators}
+                onApply={setFilters}
+                onExportPdf={() => handleExport((rows) => exportMovementsPdf(rows, { filters: exportFilterStrip }))}
+                onExportExcel={() => handleExport(exportMovementsExcel)}
+                onExportCsv={() => handleExport(exportMovementsCsv)}
+                onRefresh={refresh}
+            />
 
-            {/* ── Main split: table + sidebar ─────────────────────────────── */}
-            <Grid container spacing={3} alignItems="flex-start">
+            {/* Recent movements */}
+            <PageSection
+                title={filtersActive ? 'Filtered Movements' : 'Recent Movements'}
+                subtitle={filtersActive
+                    ? `${recent.length} movement(s) matching the current filters`
+                    : 'The latest transfers across all stores'}
+                icon={<SwapHorizOutlinedIcon />}
+                mb={0}
+            >
+                {/* Result count — mirrors the audit-trail page so the two read the same way. */}
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
+                    <Typography sx={{ fontSize: '0.8rem', color: neutral[500] }}>
+                        Showing{' '}
+                        <Box component="span" sx={{ fontWeight: 700, color: neutral[900] }}>{recent.length}</Box>
+                        {' '}of{' '}
+                        <Box component="span" sx={{ fontWeight: 700, color: neutral[900] }}>{movements.length}</Box>
+                        {' '}movement{movements.length === 1 ? '' : 's'}
+                    </Typography>
+                    {filtersActive && (
+                        <Chip
+                            label="Filters applied"
+                            size="small"
+                            sx={{ height: 22, fontWeight: 600, fontSize: '0.68rem', bgcolor: alpha(brand[500], 0.08), color: brand[700] }}
+                        />
+                    )}
+                </Box>
 
-                {/* Recent movements table */}
-                <Grid item xs={12} lg={8}>
-                    <Paper elevation={0} sx={{ borderRadius: 3, border: `1px solid ${alpha('#000', 0.07)}`, overflow: 'hidden' }}>
-                        {/* Table header */}
-                        <Box sx={{ px: 3, py: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: `1px solid ${alpha('#000', 0.06)}`, background: `linear-gradient(135deg, ${alpha(PRIMARY, 0.04)} 0%, transparent 100%)` }}>
-                            <Stack direction="row" spacing={1.5} alignItems="center">
-                                <Box sx={{ width: 30, height: 30, borderRadius: 1.5, bgcolor: alpha(PRIMARY, 0.1), display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                    <AccessTimeOutlinedIcon sx={{ fontSize: 15, color: PRIMARY }} />
-                                </Box>
-                                <Box>
-                                    <Typography variant="caption" sx={{ color: 'text.secondary', textTransform: 'uppercase', letterSpacing: '0.07em', fontSize: '0.65rem', display: 'block' }}>
-                                        Overview
-                                    </Typography>
-                                    <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'text.primary', lineHeight: 1.2 }}>
-                                        Recent Movements
-                                    </Typography>
-                                </Box>
-                            </Stack>
+                <MovementTable
+                    rows={recent}
+                    loading={loading}
+                    onView={openMovement}
+                    paginateOver={15}
+                    empty={(
+                        <EmptyState
+                            variant="inline"
+                            title={filtersActive ? 'No movements matched your filters' : 'No movements yet'}
+                            description={filtersActive
+                                ? 'Adjust or clear the filters above to see movements.'
+                                : 'Create a movement or initiate a repair / disposal to see it here.'}
+                            icon={<SwapHorizOutlinedIcon />}
+                            action={filtersActive ? undefined : (
+                                <RequirePermission permission={PERMISSIONS.CREATE_MOVEMENT}>
+                                    <Button variant="contained" startIcon={<AddIcon />} onClick={() => navigate(ROUTES.CREATE_MOVEMENT)}
+                                        sx={{ textTransform: 'none', borderRadius: '8px', bgcolor: brand[500], '&:hover': { bgcolor: brand[700] } }}>
+                                        New Movement
+                                    </Button>
+                                </RequirePermission>
+                            )}
+                        />
+                    )}
+                    footer={(
+                        <>
+                            <Typography sx={{ fontSize: '0.75rem', color: neutral[500] }}>
+                                {filtersActive
+                                    ? 'Every movement matching the current filters'
+                                    : `Latest ${recent.length} of ${movements.length} movements`}
+                            </Typography>
                             <Button
-                                endIcon={<ArrowForwardIcon sx={{ fontSize: 13 }} />}
                                 size="small"
-                                sx={{ color: PRIMARY, fontWeight: 600, fontSize: '0.75rem', '&:hover': { bgcolor: alpha(PRIMARY, 0.06) } }}
+                                endIcon={<ArrowForwardIcon />}
                                 onClick={() => navigate(`${ROUTES.MOVEMENT}/all`)}
+                                sx={{ textTransform: 'none', fontWeight: 600, fontSize: '0.75rem', color: brand[600] }}
                             >
-                                View All
+                                View all movements
                             </Button>
-                        </Box>
+                        </>
+                    )}
+                />
+            </PageSection>
 
-                        <TableContainer>
-                            <Table size="small">
-                                <TableHead>
-                                    <TableRow sx={{ '& .MuiTableCell-head': { bgcolor: alpha('#000', 0.02), fontWeight: 700, fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'text.secondary', py: 1.25, borderBottom: `1px solid ${alpha('#000', 0.06)}` } }}>
-                                        <TableCell>Reference</TableCell>
-                                        <TableCell>Officer</TableCell>
-                                        <TableCell>Destination</TableCell>
-                                        <TableCell align="center">Assets</TableCell>
-                                        <TableCell>Status</TableCell>
-                                        <TableCell align="right">Actions</TableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {recentMovements.map((mov, idx) => {
-                                        const isEditable = mov.status === 'draft' || mov.status === 'rejected';
-                                        return (
-                                            <TableRow
-                                                key={mov.id}
-                                                sx={{
-                                                    '&:hover': { bgcolor: alpha(PRIMARY, 0.025) },
-                                                    '& .MuiTableCell-root': { py: 1.25, fontSize: '0.78rem', borderBottom: idx === recentMovements.length - 1 ? 'none' : `1px solid ${alpha('#000', 0.05)}` },
-                                                    bgcolor: mov.status === 'rejected' ? alpha('#DC2626', 0.018) : 'transparent',
-                                                }}
-                                            >
-                                                <TableCell>
-                                                    <Stack direction="row" alignItems="center" spacing={1}>
-                                                        {mov.status === 'rejected' && (
-                                                            <Tooltip title={`Rejected: ${mov.rejectionComment}`}>
-                                                                <InfoOutlinedIcon sx={{ fontSize: 13, color: '#DC2626' }} />
-                                                            </Tooltip>
-                                                        )}
-                                                        <Typography variant="caption" sx={{ fontWeight: 700, color: PRIMARY, fontFamily: 'monospace', fontSize: '0.75rem' }}>
-                                                            {mov.referenceNo}
-                                                        </Typography>
-                                                    </Stack>
-                                                    <Typography variant="caption" sx={{ color: 'text.disabled', fontSize: '0.66rem', display: 'block' }}>
-                                                        {mov.createdDate}
-                                                    </Typography>
-                                                </TableCell>
-                                                <TableCell>
-                                                    <Stack direction="row" spacing={1} alignItems="center">
-                                                        <Avatar sx={{ width: 26, height: 26, fontSize: '0.65rem', fontWeight: 700, bgcolor: alpha(PRIMARY, 0.15), color: PRIMARY }}>
-                                                            {mov.requestingOfficer.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                                                        </Avatar>
-                                                        <Box>
-                                                            <Typography variant="caption" sx={{ fontWeight: 600, display: 'block', lineHeight: 1.2 }}>
-                                                                {mov.requestingOfficer}
-                                                            </Typography>
-                                                            <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.67rem' }}>
-                                                                {mov.department}
-                                                            </Typography>
-                                                        </Box>
-                                                    </Stack>
-                                                </TableCell>
-                                                <TableCell>
-                                                    <Typography variant="caption" sx={{ fontWeight: 500, display: 'block' }}>{mov.destination}</Typography>
-                                                    <Chip
-                                                        label={mov.destinationType}
-                                                        size="small"
-                                                        sx={{ height: 16, fontSize: '0.6rem', fontWeight: 600, bgcolor: alpha(PRIMARY, 0.07), color: PRIMARY, '& .MuiChip-label': { px: 0.75 }, mt: 0.25 }}
-                                                    />
-                                                </TableCell>
-                                                <TableCell align="center">
-                                                    <Chip
-                                                        label={mov.assetsCount}
-                                                        size="small"
-                                                        sx={{ height: 20, fontSize: '0.7rem', fontWeight: 700, bgcolor: alpha(SECONDARY, 0.1), color: SECONDARY, '& .MuiChip-label': { px: 1 } }}
-                                                    />
-                                                </TableCell>
-                                                <TableCell>
-                                                    <StatusChip status={mov.status} />
-                                                </TableCell>
-                                                <TableCell align="right">
-                                                    <Stack direction="row" spacing={0.5} justifyContent="flex-end">
-                                                        <Tooltip title="View details">
-                                                            <IconButton size="small" sx={{ color: PRIMARY, '&:hover': { bgcolor: alpha(PRIMARY, 0.08) } }} onClick={() => navigate(`${ROUTES.READ_MOVEMENT}/${mov.id}`)}>
-                                                                <VisibilityOutlinedIcon sx={{ fontSize: 15 }} />
-                                                            </IconButton>
-                                                        </Tooltip>
-                                                        {isEditable && (
-                                                            <Tooltip title="Edit movement">
-                                                                <IconButton size="small" sx={{ color: SECONDARY, '&:hover': { bgcolor: alpha(SECONDARY, 0.08) } }} onClick={() => navigate(`${ROUTES.UPDATE_MOVEMENT}/${mov.id}`)}>
-                                                                    <EditOutlinedIcon sx={{ fontSize: 15 }} />
-                                                                </IconButton>
-                                                            </Tooltip>
-                                                        )}
-                                                        {mov.securityPassAvailable && (
-                                                            <Tooltip title="Download security pass">
-                                                                <IconButton size="small" sx={{ color: '#2563EB', '&:hover': { bgcolor: alpha('#2563EB', 0.08) } }}>
-                                                                    <DownloadOutlinedIcon sx={{ fontSize: 15 }} />
-                                                                </IconButton>
-                                                            </Tooltip>
-                                                        )}
-                                                    </Stack>
-                                                </TableCell>
-                                            </TableRow>
-                                        );
-                                    })}
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
-                    </Paper>
-                </Grid>
+            <ModalComponent open={repairOpen} handleClose={() => setRepairOpen(false)} title="Repair & Disposal" width="46%">
+                <RepairFlowsModal handleClose={() => setRepairOpen(false)} onDone={refresh} />
+            </ModalComponent>
 
-                {/* Right sidebar: workflow + quick actions */}
-                <Grid item xs={12} lg={4}>
-                    <Stack spacing={2.5}>
-
-                        {/* Quick actions */}
-                        <Paper elevation={0} sx={{ borderRadius: 3, border: `1px solid ${alpha('#000', 0.07)}`, overflow: 'hidden' }}>
-                            <Box sx={{ px: 2.5, py: 1.75, borderBottom: `1px solid ${alpha('#000', 0.06)}`, background: `linear-gradient(135deg, ${alpha(PRIMARY, 0.04)} 0%, transparent 100%)` }}>
-                                <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>Quick Actions</Typography>
-                            </Box>
-                            <Stack spacing={0} divider={<Divider />} sx={{ p: 0 }}>
-                                {[
-                                    { label: 'New Asset Movement', sub: 'Start a movement request', icon: <AddIcon sx={{ fontSize: 16 }} />, color: PRIMARY, action: () => navigate(ROUTES.CREATE_MOVEMENT) },
-                                    { label: 'Pending Approvals', sub: `${pending} awaiting your review`, icon: <PendingActionsOutlinedIcon sx={{ fontSize: 16 }} />, color: '#D97706', action: () => navigate(`${ROUTES.MOVEMENT}/all`) },
-                                    { label: 'Released Movements', sub: `${released} assets in transit`, icon: <LocalShippingOutlinedIcon sx={{ fontSize: 16 }} />, color: '#2563EB', action: () => navigate(`${ROUTES.MOVEMENT}/all`) },
-                                    { label: 'Rejected Requests', sub: `${rejected} need attention`, icon: <CancelOutlinedIcon sx={{ fontSize: 16 }} />, color: '#DC2626', action: () => navigate(`${ROUTES.MOVEMENT}/all`) },
-                                ].map((item) => (
-                                    <Stack
-                                        key={item.label}
-                                        direction="row"
-                                        alignItems="center"
-                                        spacing={1.5}
-                                        onClick={item.action}
-                                        sx={{
-                                            px: 2.5, py: 1.5, cursor: 'pointer',
-                                            transition: 'background 0.15s',
-                                            '&:hover': { bgcolor: alpha(item.color, 0.04) },
-                                        }}
-                                    >
-                                        <Box sx={{ width: 30, height: 30, borderRadius: 1.5, bgcolor: alpha(item.color, 0.1), color: item.color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                                            {item.icon}
-                                        </Box>
-                                        <Box sx={{ flex: 1, minWidth: 0 }}>
-                                            <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary', lineHeight: 1.3 }}>{item.label}</Typography>
-                                            <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.7rem' }}>{item.sub}</Typography>
-                                        </Box>
-                                        <ArrowForwardIcon sx={{ fontSize: 14, color: 'text.disabled', flexShrink: 0 }} />
-                                    </Stack>
-                                ))}
-                            </Stack>
-                        </Paper>
-
-                        {/* Workflow guide */}
-                        <Paper elevation={0} sx={{ borderRadius: 3, border: `1px solid ${alpha('#000', 0.07)}`, overflow: 'hidden' }}>
-                            <Box sx={{ px: 2.5, py: 1.75, borderBottom: `1px solid ${alpha('#000', 0.06)}`, background: `linear-gradient(135deg, ${alpha(PRIMARY, 0.04)} 0%, transparent 100%)` }}>
-                                <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>Movement Workflow</Typography>
-                                <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.7rem' }}>End-to-end process overview</Typography>
-                            </Box>
-                            <Box sx={{ p: 2.5 }}>
-                                <Stack spacing={0}>
-                                    {workflowSteps.map((s, i) => (
-                                        <WorkflowStep
-                                            key={s.step}
-                                            {...s}
-                                            isLast={i === workflowSteps.length - 1}
-                                        />
-                                    ))}
-                                </Stack>
-                            </Box>
-                        </Paper>
-
-                        {/* State legend */}
-                        <Paper elevation={0} sx={{ borderRadius: 3, border: `1px solid ${alpha('#000', 0.07)}`, p: 2.5 }}>
-                            <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1.5 }}>Status Reference</Typography>
-                            <Stack spacing={1}>
-                                {(Object.entries(statusConfig) as [MovementStatus, typeof statusConfig[MovementStatus]][]).map(([key, cfg]) => (
-                                    <Stack key={key} direction="row" alignItems="center" spacing={1.25}>
-                                        <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: cfg.color, flexShrink: 0 }} />
-                                        <Typography variant="caption" sx={{ fontWeight: 600, color: cfg.color, minWidth: 110, fontSize: '0.73rem' }}>
-                                            {cfg.label}
-                                        </Typography>
-                                        <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.69rem' }}>
-                                            {key === 'draft' && 'Saved but not submitted'}
-                                            {key === 'pending_approval' && 'Awaiting supervisor review'}
-                                            {key === 'approved' && 'Authorised – ready to release'}
-                                            {key === 'rejected' && 'Returned with comment – editable'}
-                                            {key === 'released' && 'Assets dispatched, in transit'}
-                                            {key === 'received' && 'Recipient acknowledged'}
-                                            {key === 'completed' && 'Fully closed, audit trail saved'}
-                                        </Typography>
-                                    </Stack>
-                                ))}
-                            </Stack>
-                        </Paper>
-                    </Stack>
-                </Grid>
-            </Grid>
-            </Box>
+            {/* Approve / Reject from the inbox */}
+            <ModalComponent open={open} handleClose={handleClose} title="">
+                <MovementActionModal
+                    action={modalState as any}
+                    movement={currentMovement}
+                    handleClose={handleClose}
+                    sendingRequest={sendingRequest}
+                    setSendingRequest={setSendingRequest}
+                    onDone={refresh}
+                />
+            </ModalComponent>
         </Box>
     );
 };

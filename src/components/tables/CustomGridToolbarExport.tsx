@@ -1,74 +1,200 @@
 /*
 13.9 Pride's Standard Copyright Notice:
-Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
+Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify,
 and distribute this software and its documentation for any purpose is prohibited unless authorized in writing by the
 Managing Director
 */
 
 import { useState } from 'react';
-import { Box, Button, Menu, MenuItem } from '@mui/material';
+import { alpha, Box, Button, CircularProgress, Divider, ListItemIcon, ListItemText, Menu, MenuItem, Typography } from '@mui/material';
 import TableChartOutlinedIcon from '@mui/icons-material/TableChartOutlined';
 import PictureAsPdfOutlinedIcon from '@mui/icons-material/PictureAsPdfOutlined';
 import KeyboardArrowDownOutlinedIcon from '@mui/icons-material/KeyboardArrowDownOutlined';
+import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
+import ViewColumnOutlinedIcon from '@mui/icons-material/ViewColumnOutlined';
 import TableUtills from './utills';
+import { OnExportHandler } from './interface';
+import ExportColumnsDialog from './ExportColumnsDialog';
+import { findExportTable } from '../../utils/exports/exportTables';
+
+// const PRIMARY = '#08796C';
+const GREEN   = '#15803d';
 
 interface CustomGridToolbarExportProps {
     module?: string;
     rows?: any[];
+    onExport?: OnExportHandler;
+    /**
+     * The table's stable identity in the export registry.
+     *
+     * <p>Not the `module` string beside it: that one names the asset *category* on the assets page
+     * (so one table has twelve of them) and is shared by two unrelated request tables. Absent, the
+     * export behaves exactly as it always has.
+     */
+    tableKey?: string;
 }
 
-// const PRIMARY = '#08796C';
-
-const CustomGridToolbarExport = ({ module, rows = [] }: CustomGridToolbarExportProps) => {
+const CustomGridToolbarExport = ({
+    module, rows = [], onExport, tableKey,
+}: CustomGridToolbarExportProps) => {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+    const [busy, setBusy] = useState(false);
+    const [picking, setPicking] = useState(false);
     const open = Boolean(anchorEl);
-    const { generatePDFFromRows, generateExcelFromRows } = TableUtills({ moduleName: module });
+    const { generatePDFFromRows, generateExcelFromRows } = TableUtills({ moduleName: module, tableKey });
+
+    // Only offered for a table the registry knows — elsewhere there is nothing to choose between.
+    const configurable = Boolean(tableKey && findExportTable(tableKey));
 
     const handleOpen = (e: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(e.currentTarget);
     const handleClose = () => setAnchorEl(null);
+
+    const runExport = async (format: 'pdf' | 'excel') => {
+        handleClose();
+        if (onExport) {
+            try { setBusy(true); await onExport(format); }
+            finally { setBusy(false); }
+            return;
+        }
+        if (format === 'excel') await generateExcelFromRows(rows);
+        else await generatePDFFromRows(rows);
+    };
 
     return (
         <Box>
             <Button
                 variant="outlined"
                 size="small"
-                endIcon={<KeyboardArrowDownOutlinedIcon />}
-                startIcon={<TableChartOutlinedIcon />}
                 onClick={handleOpen}
+                disabled={busy}
+                startIcon={busy
+                    ? <CircularProgress size={13} sx={{ color: GREEN }} />
+                    : <FileDownloadOutlinedIcon sx={{ fontSize: '16px !important' }} />
+                }
+                endIcon={<KeyboardArrowDownOutlinedIcon sx={{
+                    fontSize: '15px !important',
+                    transition: 'transform 0.2s',
+                    transform: open ? 'rotate(180deg)' : 'none',
+                }} />}
                 sx={{
-                    height: 38, px: 2, borderRadius: "8px",
-                    border: `1px solid #86EFAC`, color: '#15803D',
-                    textTransform: 'none', fontWeight: 600, fontSize: '0.85rem',
-                    '&:hover': { bgcolor: '#F0FDF4', borderColor: '#15803D' },
-                    transition: 'all 0.2s',
+                    height: 34, px: 1.75, borderRadius: '8px',
+                    border: `1px solid ${alpha(GREEN, 0.3)}`,
+                    color: GREEN,
+                    textTransform: 'none', fontWeight: 600, fontSize: '0.82rem',
+                    bgcolor: 'transparent',
+                    transition: 'all 0.15s',
+                    '&:hover': {
+                        bgcolor: alpha(GREEN, 0.06),
+                        borderColor: alpha(GREEN, 0.6),
+                        boxShadow: `0 1px 4px ${alpha(GREEN, 0.15)}`,
+                    },
+                    '&.Mui-disabled': { opacity: 0.6 },
                 }}
             >
-                Export
+                {busy ? 'Exporting…' : 'Export'}
             </Button>
 
             <Menu
                 anchorEl={anchorEl}
                 open={open}
                 onClose={handleClose}
+                transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+                anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
                 PaperProps={{
-                    elevation: 3,
+                    elevation: 0,
                     sx: {
-                        borderRadius: "8px", mt: 0.75,
-                        border: '1px solid #EEF2F7',
-                        minWidth: 180,
-                        '& .MuiMenuItem-root': { fontSize: '0.85rem', gap: 1.5, py: 1 },
+                        mt: 0.75,
+                        minWidth: 200,
+                        borderRadius: '10px',
+                        border: '1px solid #E8EDF3',
+                        boxShadow: '0 4px 6px -1px rgba(0,0,0,0.07), 0 10px 24px -4px rgba(0,0,0,0.09)',
+                        overflow: 'hidden',
                     },
                 }}
             >
-                <MenuItem onClick={() => { generateExcelFromRows(rows); handleClose(); }}>
-                    <TableChartOutlinedIcon sx={{ fontSize: 18, color: '#15803D' }} />
-                    Download as Excel
-                </MenuItem>
-                <MenuItem onClick={() => { generatePDFFromRows(rows); handleClose(); }}>
-                    <PictureAsPdfOutlinedIcon sx={{ fontSize: 18, color: '#DC2626' }} />
-                    Download as PDF
-                </MenuItem>
+                {/* Header label */}
+                <Box sx={{ px: 2, pt: 1.25, pb: 0.75 }}>
+                    <Typography sx={{ fontSize: '0.67rem', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                        Download as
+                    </Typography>
+                </Box>
+                <Divider sx={{ borderColor: '#F1F5F9', mx: 1 }} />
+                <Box sx={{ p: 0.5 }}>
+                    <MenuItem
+                        onClick={() => runExport('excel')}
+                        sx={{
+                            borderRadius: '7px', py: 1, px: 1.25, gap: 1,
+                            '&:hover': { bgcolor: alpha(GREEN, 0.06) },
+                        }}
+                    >
+                        <ListItemIcon sx={{ minWidth: 30 }}>
+                            <TableChartOutlinedIcon sx={{ fontSize: 17, color: GREEN }} />
+                        </ListItemIcon>
+                        <ListItemText
+                            primary="Excel Spreadsheet"
+                            secondary=".xlsx format"
+                            primaryTypographyProps={{ fontSize: '0.83rem', fontWeight: 600, color: '#1E293B' }}
+                            secondaryTypographyProps={{ fontSize: '0.72rem', color: '#94A3B8' }}
+                        />
+                    </MenuItem>
+                    <MenuItem
+                        onClick={() => runExport('pdf')}
+                        sx={{
+                            borderRadius: '7px', py: 1, px: 1.25, gap: 1,
+                            '&:hover': { bgcolor: alpha('#DC2626', 0.05) },
+                        }}
+                    >
+                        <ListItemIcon sx={{ minWidth: 30 }}>
+                            <PictureAsPdfOutlinedIcon sx={{ fontSize: 17, color: '#DC2626' }} />
+                        </ListItemIcon>
+                        <ListItemText
+                            primary="PDF Document"
+                            secondary=".pdf format"
+                            primaryTypographyProps={{ fontSize: '0.83rem', fontWeight: 600, color: '#1E293B' }}
+                            secondaryTypographyProps={{ fontSize: '0.72rem', color: '#94A3B8' }}
+                        />
+                    </MenuItem>
+                </Box>
+
+                {/*
+                 * Choosing columns sits under the two formats rather than in front of them: the
+                 * common case is "give me the file", and putting a dialog in that path would tax
+                 * every export for the sake of the occasional tidy-up. It is a setting you visit
+                 * once and it is remembered.
+                 */}
+                {configurable && (
+                    <>
+                        <Divider sx={{ borderColor: '#F1F5F9', mx: 1 }} />
+                        <Box sx={{ p: 0.5 }}>
+                            <MenuItem
+                                onClick={() => { handleClose(); setPicking(true); }}
+                                sx={{
+                                    borderRadius: '7px', py: 0.85, px: 1.25, gap: 1,
+                                    '&:hover': { bgcolor: alpha('#475569', 0.05) },
+                                }}
+                            >
+                                <ListItemIcon sx={{ minWidth: 30 }}>
+                                    <ViewColumnOutlinedIcon sx={{ fontSize: 17, color: '#64748B' }} />
+                                </ListItemIcon>
+                                <ListItemText
+                                    primary="Choose columns…"
+                                    secondary="Applies to your downloads"
+                                    primaryTypographyProps={{ fontSize: '0.83rem', fontWeight: 600, color: '#1E293B' }}
+                                    secondaryTypographyProps={{ fontSize: '0.72rem', color: '#94A3B8' }}
+                                />
+                            </MenuItem>
+                        </Box>
+                    </>
+                )}
             </Menu>
+
+            {configurable && (
+                <ExportColumnsDialog
+                    tableKey={tableKey as string}
+                    open={picking}
+                    onClose={() => setPicking(false)}
+                />
+            )}
         </Box>
     );
 };

@@ -20,6 +20,8 @@ export const crudStates: {
     read: string;
     delete: string;
     dispose: string;
+    /** Puts a soft-deleted record back into its register. */
+    restore: string;
     deactivate: string;
     disable: string;
     unblock: string;
@@ -32,16 +34,20 @@ export const crudStates: {
     acknowledgeReceipt: string;
     approveIssuance: string;
     reassign: string;
-    repair: string;
     inStore: string;
     enable: string;
     block: string;
+    /** Fill in engraved number + remaining details for a newly-stocked asset. */
+    complete: string;
+    /** Record a physical delivery against a stock order (credits the store, registers assets, issues a GRN). */
+    receiveDelivery: string;
 } = {
     create: "create",
     update: "update",
     read: "read",
     delete: "delete",
     dispose: "dispose",
+    restore: "restore",
     deactivate: "deactivate",
     disable: "disable",
     unblock: "unblock",
@@ -54,10 +60,11 @@ export const crudStates: {
     acknowledgeReceipt: "acknowledgeReceipt",
     approveIssuance: "approveIssuance",
     reassign: "reassign",
-    repair: "repair",
     inStore: "inStore",
     enable: "enable",
-    block: "block"
+    block: "block",
+    complete: "complete",
+    receiveDelivery: "receiveDelivery",
 }
 
 export const requestStatus: {
@@ -71,6 +78,38 @@ export const requestStatus: {
     rejected: "rejected",
     normal: "normal"
 }
+
+/**
+ * Request-status *codes* grouped by lifecycle stage. Ids are resolved at runtime from the loaded
+ * status catalogue (see `statusIdsByCodes` in utils/helpers) — never hardcode ids, since seeded
+ * ids vary by environment. Codes, by contrast, are stable across re-seeds.
+ *
+ * A request in any of the workflow-approval codes has advanced past one approval stage and is
+ * awaiting the next, so listing/pending views must include them or a request vanishes the moment
+ * it advances past the first step.
+ */
+export const WORKFLOW_APPROVAL_CODES: ReadonlyArray<string> = [
+    'managerApproved',
+    'hodApproved',
+    'bomApproved',
+    'branchManagerApproved',
+    'supervisorApproved',
+    'unitAcknowledged',
+];
+
+/** "Approved at some stage, awaiting the next" — the in-progress approval chain (Pending tab). */
+export const PENDING_REQUEST_CODES: ReadonlyArray<string> = ['requestApproved', ...WORKFLOW_APPROVAL_CODES];
+
+/** Post-issuance states — awaiting issuance approval / receipt acknowledgement (Issued tab). */
+export const ISSUED_REQUEST_CODES: ReadonlyArray<string> = ['issued', 'issuanceApproved', 'receiptAcknowledged'];
+
+/** Every request lifecycle state — the "All" view. */
+export const ALL_REQUEST_CODES: ReadonlyArray<string> = [
+    'requestCreated',
+    'requestRejected',
+    ...PENDING_REQUEST_CODES,
+    ...ISSUED_REQUEST_CODES,
+];
 
 export const assetStatus: {
     use: string;
@@ -87,6 +126,23 @@ export const assetStatus: {
 }
 
 
+/**
+ * @deprecated These category names no longer exist.
+ *
+ * Asset categories became configurable (Settings → Asset Categories) and the seed now defines
+ * twelve of them: "IT Equipment" is now "Computers", "Office Equipment" split into "Furniture"
+ * and "Equipment", and "Fleet" is "Vehicle/Fleet". Only "Stationery" survives by name. Every
+ * comparison against these values therefore fails silently and takes the fallback branch.
+ *
+ * The dashboard no longer reads this — it derives categories from the AssetType store (see
+ * `pages/dashboard/categories.ts`). Two callers still do, and both need the same treatment:
+ *
+ *   - `components/tables/utills.tsx` — also carries hardcoded `assetTypeId` values (2, 1, 55)
+ *     that are environment-specific ids, not stable identifiers.
+ *   - `pages/assets/general/formUtills.tsx`
+ *
+ * Fix those by looking the category up in the AssetType store by id, then delete this.
+ */
 export const assetTypesStatusConstants: {
     itEquipment: string;
     officeEquipment: string;

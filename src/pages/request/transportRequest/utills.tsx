@@ -6,6 +6,7 @@ Managing Director
 */
 
 import { useEffect, useState } from "react";
+import { PERMISSIONS } from '../../../core/permissions/constants';
 import { IOptions, ITableHeader } from "../../../components/tables/interface";
 import { ITransportRequest } from "../interface";
 import { transportRequest } from "../../../mocks/request";
@@ -92,8 +93,8 @@ const TransportRequestUtills = () => {
         action: {
             label: "options",
             options: [
-                { value: crudStates.delete, label: "Delete", icon: <InfoIcon fontSize='small' color='error' /> },
-                { value: crudStates.update, label: "Update", icon: <ModeEditIcon fontSize='small' color='info' /> },
+                { value: crudStates.delete, label: "Delete", icon: <InfoIcon fontSize='small' color='error' />, permission: PERMISSIONS.DELETE_REQUEST },
+                { value: crudStates.update, label: "Update", icon: <ModeEditIcon fontSize='small' color='info' />, permission: PERMISSIONS.UPDATE_REQUEST },
                 { value: crudStates.read, label: "View Details", icon: <RemoveRedEyeIcon fontSize='small' color='inherit' /> }
             ]
         },

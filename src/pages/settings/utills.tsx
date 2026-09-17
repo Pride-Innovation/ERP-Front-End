@@ -14,6 +14,11 @@ import WorkOutlineOutlinedIcon from '@mui/icons-material/WorkOutlineOutlined';
 import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
 import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined';
 import PublicOutlinedIcon from '@mui/icons-material/PublicOutlined';
+import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
+import GroupWorkOutlinedIcon from '@mui/icons-material/GroupWorkOutlined';
+import EngineeringOutlinedIcon from '@mui/icons-material/EngineeringOutlined';
+import DeliveryDiningOutlinedIcon from '@mui/icons-material/DeliveryDiningOutlined';
+import ViewColumnOutlinedIcon from '@mui/icons-material/ViewColumnOutlined';
 
 const SettingsUtills = () => {
 
@@ -55,11 +60,41 @@ const SettingsUtills = () => {
             icon: <PublicOutlinedIcon />
         },
         {
-            id: 6,
+            id: 7,
             text: "Departments",
             path: ROUTES.DEPARTMENT,
             icon: <AccountTreeOutlinedIcon />
-        }
+        },
+        {
+            id: 8,
+            text: "Units",
+            path: ROUTES.UNITS,
+            icon: <GroupWorkOutlinedIcon />
+        },
+        {
+            id: 9,
+            text: "Asset Categories",
+            path: ROUTES.ASSET_TYPES,
+            icon: <Inventory2OutlinedIcon />
+        },
+        {
+            id: 10,
+            text: "Repair Consultants",
+            path: ROUTES.CONSULTANTS,
+            icon: <EngineeringOutlinedIcon />
+        },
+        {
+            id: 11,
+            text: "Couriers",
+            path: ROUTES.COURIERS,
+            icon: <DeliveryDiningOutlinedIcon />
+        },
+        {
+            id: 12,
+            text: "Export Columns",
+            path: ROUTES.EXPORT_COLUMNS,
+            icon: <ViewColumnOutlinedIcon />
+        },
     ]
 
     return ({ navigations })

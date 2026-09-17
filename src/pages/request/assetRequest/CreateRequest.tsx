@@ -1,6 +1,6 @@
 /*
 13.9 Pride's Standard Copyright Notice:
-Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
+Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify,
 and distribute this software and its documentation for any purpose is prohibited unless authorized in writing by the
 Managing Director
 */
@@ -11,18 +11,17 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import {
     Box,
     Container,
-    Divider,
+    Stack,
     Typography,
-    LinearProgress,
-    Stepper,
-    Step,
-    StepLabel,
-    Card,
-    useTheme,
-    useMediaQuery,
     alpha,
-    Avatar
 } from "@mui/material";
+import NoteAddOutlinedIcon from '@mui/icons-material/NoteAddOutlined';
+import ChecklistOutlinedIcon from '@mui/icons-material/ChecklistOutlined';
+import RateReviewOutlinedIcon from '@mui/icons-material/RateReviewOutlined';
+import HowToVoteOutlinedIcon from '@mui/icons-material/HowToVoteOutlined';
+import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
+import ArrowForwardIosRoundedIcon from '@mui/icons-material/ArrowForwardIosRounded';
+import { brand, neutral, border, surface, elevation, radii, status } from "../../../utils/tokens";
 import RequestForm from "./RequestForm";
 import { IRequest, IRequestAxiosResponse } from "../interface";
 import { requestSchema } from "./schema";
@@ -31,67 +30,53 @@ import { validateInventoryItems } from "../../../utils/helpers";
 import { toast } from "react-toastify";
 import { createAssetRequestService } from "./service";
 import { RowData } from "../../../components/forms/interface";
-import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
-
 import { useNavigate } from "react-router";
 import { ROUTES } from "../../../core/routes/routes";
+
+const P = brand[500];
 
 const initialData: RowData[] = [
     { id: 1, name: '', groupName: '', quantity: 0 },
 ];
 
-// Brand colors
-const PRIMARY_COLOR = '#08796C'; // Teal green
-// 
+/** Where this form sits in the request lifecycle. Rendered as the rail below the title. */
+const LIFECYCLE = [
+    { label: 'Start Request',   icon: <NoteAddOutlinedIcon sx={{ fontSize: 14 }} /> },
+    { label: 'Fill Details',    icon: <ChecklistOutlinedIcon sx={{ fontSize: 14 }} /> },
+    { label: 'Review & Submit', icon: <RateReviewOutlinedIcon sx={{ fontSize: 14 }} /> },
+    { label: 'Approval',        icon: <HowToVoteOutlinedIcon sx={{ fontSize: 14 }} /> },
+];
+
+/** The fields the hero checklist tracks, with their live done-state. */
+function buildChecklist(formData: Partial<IRequest>, rows: RowData[]) {
+    return [
+        { label: 'Title',       done: Boolean(formData.name) },
+        { label: 'Priority',    done: Boolean(formData.priority) },
+        { label: 'Description', done: Boolean(formData.description) },
+        { label: 'Items',       done: rows.some(r => r.name && r.quantity > 0) },
+    ];
+}
 
 const CreateRequest = () => {
     const [sendingRequest, setSendingRequest] = useState(false);
     const [signature, setSignature] = useState("");
     const [file, setFile] = useState<File | null>(null);
     const { rows, setRows } = useContext(RequestContext);
-    const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-    const isTablet = useMediaQuery(theme.breakpoints.down('md'));
+    const navigate = useNavigate();
 
-    useEffect(() => { setRows(initialData) }, [setRows]);
+    useEffect(() => { setRows(initialData); }, [setRows]);
 
-    const {
-        control,
-        handleSubmit,
-        formState,
-        register,
-        reset,
-        watch
-    } = useForm<IRequest>({
+    const { control, handleSubmit, formState, register, reset, watch, setValue } = useForm<IRequest>({
         mode: 'onChange',
         resolver: yupResolver(requestSchema),
     });
 
-    // Watch form values to determine completion percentage
     const formValues = watch();
-    const formProgress = calculateFormProgress(formValues, rows);
-    const navigate = useNavigate();
+    const checklist = buildChecklist(formValues, rows);
+    const doneCount = checklist.filter(c => c.done).length;
+    const formProgress = Math.round((doneCount / checklist.length) * 100);
 
-    useEffect(() => {
-        reset({} as IRequest);
-    }, [reset]);
-
-    // Calculate form completion percentage
-    function calculateFormProgress(formData: Partial<IRequest>, rows: RowData[]): number {
-        let totalFields = 3; // Required fields: name, priority, description
-        let completedFields = 0;
-
-        if (formData.name) completedFields++;
-        if (formData.priority) completedFields++;
-        if (formData.description) completedFields++;
-
-        // Consider item selection as well
-        const validItems = rows.filter(row => row.name && row.quantity > 0);
-        if (validItems.length > 0) completedFields++;
-        totalFields++;
-
-        return Math.round((completedFields / totalFields) * 100);
-    }
+    useEffect(() => { reset({} as IRequest); }, [reset]);
 
     const onSubmit = async (formData: IRequest) => {
         setSendingRequest(true);
@@ -103,14 +88,18 @@ const CreateRequest = () => {
             payload.append("name", formData.name);
             payload.append("description", formData.description as string);
 
+            if (formData.assetTypeId != null && formData.assetTypeId !== '') {
+                payload.append("assetTypeId", String(formData.assetTypeId));
+            }
+            if (formData.attributes && Object.keys(formData.attributes).length > 0) {
+                payload.append("attributes", JSON.stringify(formData.attributes));
+            }
             if (file) payload.append("file", file);
 
-            const formattedCommodities = result.validData.map(item => ({
-                commodityId: item.id,
-                quantity: item.quantity
-            }));
-
-            payload.append("requestCommodities", JSON.stringify(formattedCommodities));
+            payload.append(
+                "requestCommodities",
+                JSON.stringify(result.validData.map(item => ({ commodityId: item.id, quantity: item.quantity }))),
+            );
 
             try {
                 const response = await createAssetRequestService(payload) as IRequestAxiosResponse;
@@ -122,8 +111,7 @@ const CreateRequest = () => {
                     setRows(initialData);
                     navigate(ROUTES.REQUEST);
                 }
-            } catch (error) {
-                console.log(error);
+            } catch {
                 toast.error("Failed to create request. Please try again.");
             }
         } else {
@@ -132,165 +120,176 @@ const CreateRequest = () => {
         setSendingRequest(false);
     };
 
+    const isDone = formProgress === 100;
+
     return (
         <Container maxWidth="xl" sx={{ py: { xs: 2, md: 3 } }}>
-            <Card
-                elevation={0}
+
+            {/* ── Page header card ───────────────────────────────────── */}
+            <Box
                 sx={{
                     mb: 3,
-                    borderRadius: 2,
-                    border: '1px solid',
-                    borderColor: alpha('#000', 0.08),
-                    overflow: 'hidden'
+                    borderRadius: `${radii.lg}px`,
+                    border: `1px solid ${border.subtle}`,
+                    bgcolor: surface.card,
+                    overflow: 'hidden',
+                    boxShadow: elevation.card,
                 }}
             >
-                <Box
-                    sx={{
-                        p: { xs: 2.5, sm: 3.5 },
-                        background: 'linear-gradient(135deg, #08796C 0%, #065E53 65%, #044a42 100%)',
-                        display: 'flex',
-                        flexDirection: { xs: 'column', sm: 'row' },
-                        alignItems: { xs: 'flex-start', sm: 'center' },
-                        justifyContent: 'space-between',
-                        gap: 2,
-                        position: 'relative',
-                        overflow: 'hidden',
-                        '&::before': {
-                            content: '""',
-                            position: 'absolute',
-                            top: -40,
-                            right: -40,
-                            width: 200,
-                            height: 200,
-                            borderRadius: '50%',
-                            bgcolor: 'rgba(255,255,255,0.05)',
-                            pointerEvents: 'none',
-                        },
-                        '&::after': {
-                            content: '""',
-                            position: 'absolute',
-                            bottom: -60,
-                            right: 80,
-                            width: 160,
-                            height: 160,
-                            borderRadius: '50%',
-                            bgcolor: 'rgba(255,255,255,0.04)',
-                            pointerEvents: 'none',
-                        },
-                    }}
-                >
-                    <Box sx={{ display: 'flex', alignItems: 'center', zIndex: 1 }}>
-                        <Avatar
-                            sx={{
-                                bgcolor: 'rgba(255,255,255,0.18)',
-                                color: '#fff',
-                                mr: 2,
-                                width: { xs: 44, sm: 52 },
-                                height: { xs: 44, sm: 52 },
-                                boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                            }}
-                        >
-                            <AddCircleOutlineIcon sx={{ fontSize: { xs: 22, sm: 26 } }} />
-                        </Avatar>
-                        <Box>
-                            <Typography
-                                variant={isMobile ? "h6" : "h5"}
-                                sx={{
-                                    fontWeight: 700,
-                                    color: '#fff',
-                                    mb: 0.5,
-                                    letterSpacing: '-0.3px',
-                                }}
-                            >
+                {/* Title row */}
+                <Box sx={{
+                    px: { xs: 2.5, sm: 3.5 },
+                    py: 2.5,
+                    display: 'flex',
+                    flexDirection: { xs: 'column', md: 'row' },
+                    alignItems: { xs: 'flex-start', md: 'center' },
+                    justifyContent: 'space-between',
+                    gap: 2,
+                }}>
+                    {/* Left — icon + title */}
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, minWidth: 0 }}>
+                        <Box sx={{
+                            width: 44,
+                            height: 44,
+                            borderRadius: 1.5,
+                            bgcolor: alpha(P, 0.08),
+                            border: `1px solid ${alpha(P, 0.18)}`,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexShrink: 0,
+                        }}>
+                            <NoteAddOutlinedIcon sx={{ fontSize: 22, color: brand[600] }} />
+                        </Box>
+                        <Box sx={{ minWidth: 0 }}>
+                            <Typography variant="h6" sx={{ fontWeight: 700, color: neutral[900], lineHeight: 1.25, letterSpacing: '-0.01em' }}>
                                 Create New Request
                             </Typography>
-                            <Typography
-                                variant="body2"
-                                sx={{ color: 'rgba(255,255,255,0.72)' }}
-                            >
+                            <Typography variant="body2" sx={{ color: neutral[500], mt: 0.25 }}>
                                 Fill in the details below to submit a new asset request
                             </Typography>
                         </Box>
                     </Box>
-                    <Box sx={{ textAlign: { xs: 'left', sm: 'right' }, flexShrink: 0, zIndex: 1 }}>
-                        <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)', fontWeight: 500, display: 'block' }}>
-                            Form Completion
-                        </Typography>
-                        <LinearProgress
-                            variant="determinate"
-                            value={formProgress}
-                            sx={{
-                                my: 0.5,
-                                height: 6,
-                                width: { xs: '100%', sm: 140 },
-                                borderRadius: 3,
-                                bgcolor: 'rgba(255,255,255,0.2)',
-                                '& .MuiLinearProgress-bar': {
-                                    bgcolor: formProgress === 100 ? '#4caf50' : 'rgba(255,255,255,0.9)',
-                                    borderRadius: 3,
-                                },
-                            }}
-                        />
-                        <Typography variant="caption" sx={{ color: formProgress === 100 ? '#a5f3c0' : 'rgba(255,255,255,0.9)', fontWeight: 600 }}>
-                            {formProgress}% Complete
-                        </Typography>
+
+                    {/* Right — live field checklist */}
+                    <Box sx={{ flexShrink: 0, width: { xs: '100%', md: 'auto' } }}>
+                        <Stack
+                            direction="row"
+                            alignItems="center"
+                            spacing={1}
+                            sx={{ mb: 1, justifyContent: { xs: 'flex-start', md: 'flex-end' } }}
+                        >
+                            <Typography sx={{
+                                fontSize: '0.68rem',
+                                fontWeight: 700,
+                                color: neutral[400],
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.08em',
+                            }}>
+                                Completion
+                            </Typography>
+                            <Typography sx={{
+                                fontSize: '0.78rem',
+                                fontWeight: 800,
+                                fontVariantNumeric: 'tabular-nums',
+                                color: isDone ? status.success.strong : brand[700],
+                            }}>
+                                {formProgress}%
+                            </Typography>
+                            {isDone && (
+                                <Typography sx={{ fontSize: '0.72rem', fontWeight: 600, color: status.success.strong }}>
+                                    · Ready to submit
+                                </Typography>
+                            )}
+                        </Stack>
+
+                        {/* One pip per tracked field — lights up as it's filled */}
+                        <Stack direction="row" spacing={0.75} sx={{ flexWrap: 'wrap', rowGap: 0.75, justifyContent: { xs: 'flex-start', md: 'flex-end' } }}>
+                            {checklist.map((item) => (
+                                <Stack
+                                    key={item.label}
+                                    direction="row"
+                                    alignItems="center"
+                                    spacing={0.5}
+                                    sx={{
+                                        px: 1,
+                                        py: 0.4,
+                                        borderRadius: `${radii.pill}px`,
+                                        border: `1px solid ${item.done ? alpha(P, 0.35) : border.default}`,
+                                        bgcolor: item.done ? alpha(P, 0.07) : 'transparent',
+                                        transition: 'all 0.25s ease',
+                                    }}
+                                >
+                                    {item.done ? (
+                                        <CheckRoundedIcon sx={{ fontSize: 12, color: brand[600] }} />
+                                    ) : (
+                                        <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: neutral[300], mx: '3px' }} />
+                                    )}
+                                    <Typography sx={{
+                                        fontSize: '0.68rem',
+                                        fontWeight: 600,
+                                        color: item.done ? brand[700] : neutral[500],
+                                    }}>
+                                        {item.label}
+                                    </Typography>
+                                </Stack>
+                            ))}
+                        </Stack>
                     </Box>
                 </Box>
 
-                {/* Process steps */}
-                <Divider />
+                {/* Lifecycle rail — advances to "Review & Submit" once the form is complete */}
                 <Box sx={{
-                    px: { xs: 2, sm: 3 },
-                    py: 2,
-                    bgcolor: alpha(PRIMARY_COLOR, 0.02),
+                    px: { xs: 2.5, sm: 3.5 },
+                    py: 1.5,
+                    borderTop: `1px solid ${border.subtle}`,
+                    bgcolor: surface.muted,
                     overflowX: 'auto',
-                    '&::-webkit-scrollbar': {
-                        height: '4px',
-                    },
-                    '&::-webkit-scrollbar-track': {
-                        backgroundColor: alpha('#000', 0.05),
-                    },
-                    '&::-webkit-scrollbar-thumb': {
-                        backgroundColor: alpha('#000', 0.2),
-                        borderRadius: '4px',
-                    }
                 }}>
-                    <Stepper
-                        activeStep={1}
-                        alternativeLabel
-                        sx={{
-                            minWidth: isTablet ? 360 : 'auto',
-                            '& .MuiStepIcon-root': { color: alpha(PRIMARY_COLOR, 0.25) },
-                            '& .MuiStepIcon-root.Mui-active': { color: PRIMARY_COLOR },
-                            '& .MuiStepIcon-root.Mui-completed': { color: PRIMARY_COLOR },
-                            '& .MuiStepConnector-line': { borderColor: alpha(PRIMARY_COLOR, 0.2) },
-                            '& .MuiStepLabel-label': { fontSize: { xs: 11, sm: 13 } },
-                            '& .MuiStepLabel-label.Mui-active': { color: PRIMARY_COLOR, fontWeight: 600 },
-                            '& .MuiStepLabel-label.Mui-completed': { color: PRIMARY_COLOR },
-                        }}
-                    >
-                        <Step completed>
-                            <StepLabel>Start Request</StepLabel>
-                        </Step>
-                        <Step active>
-                            <StepLabel>Fill Details</StepLabel>
-                        </Step>
-                        <Step>
-                            <StepLabel>Review & Submit</StepLabel>
-                        </Step>
-                        <Step>
-                            <StepLabel>Approval</StepLabel>
-                        </Step>
-                    </Stepper>
+                    <Stack direction="row" alignItems="center" spacing={1} sx={{ width: 'max-content' }}>
+                        {LIFECYCLE.map((step, idx) => {
+                            const activeIdx = isDone ? 2 : 1;
+                            const state = idx < activeIdx ? 'done' : idx === activeIdx ? 'active' : 'todo';
+                            return (
+                                <Stack key={step.label} direction="row" alignItems="center" spacing={1}>
+                                    {idx > 0 && (
+                                        <ArrowForwardIosRoundedIcon sx={{ fontSize: 10, color: neutral[300] }} />
+                                    )}
+                                    <Stack
+                                        direction="row"
+                                        alignItems="center"
+                                        spacing={0.75}
+                                        sx={{
+                                            px: 1.25,
+                                            py: 0.5,
+                                            borderRadius: `${radii.pill}px`,
+                                            transition: 'all 0.25s ease',
+                                            ...(state === 'active' && { bgcolor: P, color: '#fff' }),
+                                            ...(state === 'done' && { bgcolor: alpha(P, 0.08), color: brand[700] }),
+                                            ...(state === 'todo' && { color: neutral[400] }),
+                                        }}
+                                    >
+                                        <Box sx={{ display: 'flex', color: 'inherit' }}>
+                                            {state === 'done' ? <CheckRoundedIcon sx={{ fontSize: 14 }} /> : step.icon}
+                                        </Box>
+                                        <Typography sx={{
+                                            fontSize: '0.72rem',
+                                            fontWeight: state === 'active' ? 700 : 600,
+                                            color: 'inherit',
+                                            whiteSpace: 'nowrap',
+                                        }}>
+                                            {step.label}
+                                        </Typography>
+                                    </Stack>
+                                </Stack>
+                            );
+                        })}
+                    </Stack>
                 </Box>
-            </Card>
+            </Box>
 
-            {/* Main Form Section */}
-            <Box
-                component="form"
-                autoComplete="off"
-                onSubmit={handleSubmit(onSubmit)}
-            >
+            {/* ── Main form ──────────────────────────────────────────── */}
+            <Box component="form" autoComplete="off" onSubmit={handleSubmit(onSubmit)}>
                 <RequestForm
                     setFile={setFile}
                     file={file}
@@ -299,12 +298,11 @@ const CreateRequest = () => {
                     formState={formState}
                     control={control}
                     register={register}
+                    setValue={setValue}
                     sendingRequest={sendingRequest}
                     buttonText="Submit Request"
                 />
             </Box>
-
-
         </Container>
     );
 };

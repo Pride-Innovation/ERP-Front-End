@@ -7,7 +7,6 @@ Managing Director
 
 import { useEffect, useState } from "react";
 import { ITableHeader } from "../../../components/tables/interface";
-import assignmentHistoryMock from "../../../mocks/assignmentHistory";
 import { getTableHeaders } from "../../../components/tables/getTableHeaders";
 import { crudStates } from "../../../utils/constants";
 import { fetchRowsService } from "../../../core/apis/globalService";
@@ -42,21 +41,14 @@ const AssignmentHistoryUtills = () => {
         handleOpen();
     };
 
-    const {
-        id,
-        user,
-        statusBefore,
-        statusAfter,
-        asset,
-        ...data
-    } = assignmentHistoryMock[0];
-
-    const rowData = {
-        user: assignmentHistoryMock[0].user?.firstName,
+    // Column template derived from the real table-data shape (IAssetAssignmentHistoryTableData),
+    // not a mock — so the columns can never drift from what the API actually maps into.
+    const rowData: IAssetAssignmentHistoryTableData = {
+        user: "",
         engravedNumber: "",
         location: "",
-        // statusAfter: assignmentHistoryMock[0].statusAfter?.name,
-        ...data,
+        startDate: "",
+        endDate: "",
     };
 
     const fetchAssignmentHistory = async (params?: Record<string, any>) => {
@@ -64,7 +56,7 @@ const AssignmentHistoryUtills = () => {
         try {
             const response = await fetchRowsService({
                 pageNumber: 0,
-                pageSize: 10,
+                pageSize: 200, // pull the full history; the table pages client-side
                 endPoint,
                 params
             }) as IAssetAssignmentHistorysAxiosResponse

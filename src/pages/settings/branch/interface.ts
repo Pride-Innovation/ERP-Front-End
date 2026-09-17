@@ -26,6 +26,10 @@ export interface IBranch {
     name: string
     email: string
     telephone?: string | null;
+    /** Distribution-list reaching every manager of this branch; used as dynamic CC target for workflow steps. */
+    managersGroupEmail?: string | null;
+    /** Flagged by the backend seeder; drives the Head-Office-only Department picker on the User form. */
+    isHeadOffice?: boolean;
     branchManager?: IUser | null;
     branchOperationsManager?: IUser | null;
     relationshipManager?: IUser | null;
@@ -39,6 +43,7 @@ export interface IBranchDTO {
     name: string;
     email: string;
     telephone: string;
+    managersGroupEmail?: string | null;
     region: number;
     district: number;
     branchManager?: number | null;
@@ -64,6 +69,7 @@ export interface IBranchForm {
             name?: FieldError;
             email?: FieldError;
             telephone?: FieldError;
+            managersGroupEmail?: FieldError;
             region?: FieldError;
             district?: FieldError;
         };
@@ -93,6 +99,8 @@ export interface IBranchDetails {
     branch: IBranch;
     deleteBranch: (role: IBranch) => void;
     updateBranch: (role: IBranch) => void;
+    /** Position in the rendered grid — used to rotate the card accent colour. */
+    index?: number;
 }
 
 export interface IDeleteBranch {

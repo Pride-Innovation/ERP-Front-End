@@ -1,3 +1,5 @@
+import { RequirePermission } from '../../../core/permissions';
+import { PERMISSIONS } from '../../../core/permissions/constants';
 /*
 13.9 Pride's Standard Copyright Notice:
 Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify,
@@ -5,108 +7,217 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { useContext, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-    alpha, Avatar, Box, Button, Card, Chip, CircularProgress, IconButton, InputAdornment,
-    Paper, Stack, Tab, Table, TableBody, TableCell, TableContainer,
-    TableHead, TablePagination, TableRow, Tabs, TextField, Tooltip, Typography,
+    alpha, Box, Button, Grid, IconButton, Paper, Stack, Tab, Tabs, Tooltip,
 } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
 import AddIcon from '@mui/icons-material/Add';
-import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
-import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
 import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
 import AssignmentTurnedInOutlinedIcon from '@mui/icons-material/AssignmentTurnedInOutlined';
+import TaskAltOutlinedIcon from '@mui/icons-material/TaskAltOutlined';
 import SwapHorizOutlinedIcon from '@mui/icons-material/SwapHorizOutlined';
-import DownloadOutlinedIcon from '@mui/icons-material/DownloadOutlined';
 import RefreshIcon from '@mui/icons-material/Refresh';
+import PendingActionsOutlinedIcon from '@mui/icons-material/PendingActionsOutlined';
 import { useSelector } from 'react-redux';
+import {
+    fetchMovementStatusCountsService, fetchMovementFilterOptionsService,
+} from '../service';
+import { fetchRowsService } from '../../../core/apis/globalService';
+
+import { toast } from 'react-toastify';
 import { RootState } from '../../../store';
 import { MovementContext } from '../../../context/movement/MovementContext';
 import { ROUTES } from '../../../core/routes/routes';
 import ModalComponent from '../../../components/modal';
-import { crudStates } from '../../../utils/constants';
+import { PageHero, StatTile, EmptyState } from '../../../components/layout';
+import { brand, neutral, border } from '../../../utils/tokens';
 import MovementUtills from '../utills';
-import ApproveMovement from '../ApproveMovement';
-import RejectMovement from '../RejectMovement';
-import ReleaseMovement from '../ReleaseMovement';
-import ReceiveMovement from '../ReceiveMovement';
-import DeleteMovement from '../DeleteMovement';
-import { statusConfig, MovementStatus } from '../mockMovements';
+import MovementTable from '../MovementTable';
+import MovementActionModal from '../MovementActionModal';
+import MovementFilters, {
+    MovementFilterValues,
+} from './MovementFilters';
+import { exportMovementsPdf, exportMovementsExcel, exportMovementsCsv } from './exportMovements';
 import { IMovement } from '../interface';
-
-const PRIMARY = '#08796C';
-const SECONDARY = '#BC892C';
+import RoutesUtills from '../../../core/routes/utills';
+/**
+ * How many rows one export may pull.
+ *
+ * <p>High enough that every realistic filtered view fits in one file, bounded so a careless export
+ * of the whole register cannot pull the table into the browser's memory. The user is told when the
+ * cap bites, because a silently truncated export is worse than a refused one.
+ */
+const EXPORT_LIMIT = 5000;
 
 const STATUS_TABS: Array<{ value: string; label: string }> = [
     { value: 'all', label: 'All' },
-    { value: 'draft', label: 'Draft' },
-    { value: 'pending_approval', label: 'Pending' },
-    { value: 'approved', label: 'Approved' },
-    { value: 'rejected', label: 'Rejected' },
-    { value: 'released', label: 'Released' },
-    { value: 'received', label: 'Received' },
-    { value: 'completed', label: 'Completed' },
+    { value: 'DRAFT', label: 'Awaiting Approval' },
+    { value: 'INITIATED', label: 'Initiated' },
+    { value: 'DISPATCHED', label: 'Dispatched' },
+    { value: 'IN_TRANSIT', label: 'In Transit' },
+    { value: 'RECEIVED', label: 'Received' },
+    { value: 'COMPLETED', label: 'Completed' },
+    { value: 'CANCELLED', label: 'Cancelled' },
 ];
-
-// ── Status chip ───────────────────────────────────────────────────────────────
-const StatusChip = ({ statusName }: { statusName?: string }) => {
-    if (!statusName) return null;
-    const key = statusName.toLowerCase().replace(' ', '_') as MovementStatus;
-    const cfg = statusConfig[key];
-    if (!cfg) return <Chip label={statusName} size="small" />;
-    return (
-        <Chip
-            label={cfg.label}
-            size="small"
-            sx={{ height: 20, fontSize: '0.67rem', fontWeight: 700, bgcolor: cfg.bg, color: cfg.color, border: `1px solid ${cfg.border}`, '& .MuiChip-label': { px: 1.25 } }}
-        />
-    );
-};
 
 const AllMovements = () => {
     const navigate = useNavigate();
     const { movements } = useSelector((state: RootState) => state.MovementStore);
-    const { currentMovement, setCurrentMovement } = useContext(MovementContext);
+    const { setCurrentMovement } = useContext(MovementContext);
     const {
-        fetchAllMovements,
-        loading,
-        count,
-        modalState,
-        setModalState,
-        open,
-        handleOpen,
-        handleClose,
-        sendingRequest,
-        setSendingRequest,
+        fetchAllMovements, loading, count, modalState, setModalState,
+        open, handleOpen, handleClose, sendingRequest, setSendingRequest,
+        currentMovement,
     } = MovementUtills();
 
-    const [search, setSearch] = useState('');
     const [statusTab, setStatusTab] = useState('all');
+    const [filters, setFilters] = useState<MovementFilterValues>({});
+
+    /*
+     * Everything below is asked of the server now.
+     *
+     * This page fetched the first hundred movements once and did the rest in the browser — eleven
+     * filters, the sort, the paging, three exports and five tiles. Past a hundred rows the register
+     * stopped: a movement matching a filter exactly came back as "no results", which reads exactly
+     * like "there is no such movement", and the tiles under-reported against the total printed
+     * above them. `GET /movements` now declares every filter, so there is something to ask.
+     */
     const [page, setPage] = useState(0);
-    const [rowsPerPage, setRowsPerPage] = useState(10);
+    const [rowsPerPage, setRowsPerPage] = useState(15);
+    const [sort, setSort] = useState<{ column: string; order: 'asc' | 'desc' }>(
+        { column: 'date', order: 'desc' },
+    );
 
-    useEffect(() => { fetchAllMovements({ pageSize: 50 }); }, []);
+    /** The column ids the table sorts by, translated to entity fields the query understands. */
+    const SORT_FIELDS: Record<string, string> = {
+        ref: 'id', date: 'createDate', status: 'status', type: 'movementType',
+    };
 
-    // ── Client-side filter ────────────────────────────────────────────────────
-    const filtered = movements.filter(m => {
-        const matchesSearch = !search || [
-            m.referenceNo,
-            m.requestingOfficer ? `${m.requestingOfficer.firstName} ${m.requestingOfficer.lastName}` : '',
-            m.destination,
-        ].some(field => field?.toLowerCase().includes(search.toLowerCase()));
+    /** Filters + status tab as the endpoint's parameters. Blank values are left out entirely. */
+    const queryParams = useMemo(() => {
+        const params: Record<string, any> = {};
+        Object.entries(filters).forEach(([key, value]) => {
+            if (value) params[key] = value;
+        });
+        // The tab is the same `status` filter; the tab wins because the panel cannot show it.
+        if (statusTab !== 'all') params.status = statusTab;
+        return params;
+    }, [filters, statusTab]);
 
-        const matchesStatus = statusTab === 'all' ||
-            m.status?.name?.toLowerCase().replace(' ', '_') === statusTab;
+    /**
+     * The filters as a printed strip, so a sheet says which slice of the register it is.
+     *
+     * <p>The old exporter printed none, so two exports taken minutes apart under different filters
+     * were indistinguishable once saved — and an export is precisely the artefact that outlives the
+     * screen that produced it.
+     */
+    const exportFilterStrip = useMemo(() => {
+        const labels: Record<string, string> = {
+            dateFrom: 'From', dateTo: 'To', movementType: 'Type', movementCategory: 'Category',
+            status: 'Status', source: 'Source', destination: 'Destination', courier: 'Courier',
+            trackingNumber: 'Tracking No', receiptStatus: 'Receipt', initiator: 'Initiated by',
+        };
+        return Object.entries(queryParams)
+            .filter(([, value]) => Boolean(value))
+            .map(([key, value]) => ({ label: labels[key] ?? key, value: String(value) }));
+    }, [queryParams]);
 
-        return matchesSearch && matchesStatus;
+    /** The panel's filters without the tab — what the tab labels and the tiles are counted over. */
+    const countParams = useMemo(() => {
+        const params: Record<string, any> = {};
+        Object.entries(filters).forEach(([key, value]) => {
+            if (value) params[key] = value;
+        });
+        return params;
+    }, [filters]);
+
+
+    const [statusCounts, setStatusCounts] = useState<Record<string, number>>({});
+
+    /** Every match across all statuses — what the "All" tab means now that a page is not the set. */
+    const totalAcrossStatuses = useMemo(
+        () => Object.values(statusCounts).reduce((sum, n) => sum + n, 0),
+        [statusCounts],
+    );
+    const [filterOptions, setFilterOptions] = useState({
+        sources: [] as string[], destinations: [] as string[],
+        couriers: [] as string[], initiators: [] as string[],
     });
 
-    const paginated = filtered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+    const load = useCallback(() => {
+        fetchAllMovements({
+            ...queryParams,
+            pageNumber: page,
+            pageSize: rowsPerPage,
+            sortBy: SORT_FIELDS[sort.column] ?? 'createDate',
+            sortDirection: sort.order,
+        });
+        /*
+         * Counts follow the panel's filters and neither the paging nor the status tab.
+         *
+         * Not the paging, because the tiles describe the whole matching set rather than the page in
+         * front of the user, and must not move as they page. Not the tab, because each tab is
+         * labelled with its own count — narrowing by the selected tab would leave every other tab
+         * reading zero, and the one you are on reading the total.
+         */
+        fetchMovementStatusCountsService(countParams).then((r: any) => {
+            setStatusCounts(r?.status === 200 ? (r.data ?? {}) : {});
+        });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [queryParams, countParams, page, rowsPerPage, sort]);
+
+    useEffect(() => { load(); }, [load]);
+
+    // Options come from the whole scoped register, once — deliberately not narrowed by the current
+    // filters, or choosing a source would empty the destination list and the panel could never be
+    // widened again.
+    useEffect(() => {
+        fetchMovementFilterOptionsService().then((r: any) => {
+            if (r?.status === 200 && r.data) setFilterOptions(r.data);
+        });
+    }, []);
+
+    const refresh = () => load();
+
+    // Already filtered, sorted and paged by the query that produced them.
+    const filtered = movements;
+
+    /**
+     * Exports cover every match, not the page on screen.
+     *
+     * <p>They ran over the loaded rows, so an export was silently a partial one — the worst kind,
+     * because the file looks complete. Fetched fresh under the same filters with the paging removed.
+     */
+    const handleExport = async (fn: (rows: IMovement[]) => void) => {
+        const res: any = await fetchRowsService({
+            endPoint: 'movements',
+            pageNumber: 0,
+            pageSize: EXPORT_LIMIT,
+            params: queryParams,
+        });
+        const rows: IMovement[] = res?.status === 200 ? (res.data?.content ?? []) : [];
+
+        if (rows.length === 0) {
+            toast.warning('There are no movements matching the current filters to export.');
+            return;
+        }
+        if ((res.data?.totalElements ?? 0) > rows.length) {
+            toast.info(`Exporting the first ${rows.length.toLocaleString()} of `
+                + `${res.data.totalElements.toLocaleString()} matches. Narrow the filters for the rest.`);
+        }
+        fn(rows);
+    };
+
+    const summaryTiles: Array<{ status: string; label: string; icon: JSX.Element; accent: 'warning' | 'gold' | 'info' | 'brand' | 'success' }> = [
+        { status: 'DRAFT', label: 'Awaiting Approval', icon: <PendingActionsOutlinedIcon />, accent: 'warning' },
+        { status: 'INITIATED', label: 'Initiated', icon: <SwapHorizOutlinedIcon />, accent: 'gold' },
+        { status: 'DISPATCHED', label: 'Dispatched', icon: <LocalShippingOutlinedIcon />, accent: 'info' },
+        { status: 'RECEIVED', label: 'Received', icon: <AssignmentTurnedInOutlinedIcon />, accent: 'brand' },
+        { status: 'COMPLETED', label: 'Completed', icon: <TaskAltOutlinedIcon />, accent: 'success' },
+    ];
+
+    const currentUserId = RoutesUtills().getCurrentUser()?.id;
 
     const openModal = (state: string, movement: IMovement) => {
         setCurrentMovement(movement);
@@ -114,315 +225,171 @@ const AllMovements = () => {
         handleOpen();
     };
 
-    const renderModal = () => {
-        const props = { movement: currentMovement, handleClose, sendingRequest, setSendingRequest };
-        switch (modalState) {
-            case crudStates.approve: return <ApproveMovement {...props} />;
-            case crudStates.reject: return <RejectMovement {...props} />;
-            case 'release': return <ReleaseMovement {...props} />;
-            case 'receive': return <ReceiveMovement {...props} />;
-            case crudStates.delete: return <DeleteMovement {...props} />;
-            default: return null;
-        }
-    };
-
     const todayLabel = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 
     return (
-        <Box sx={{ minHeight: '100vh', width: '100%', bgcolor: '#F1F5FB', pb: 4 }}>
-
-            {/* Gradient Header */}
-            <Box sx={{
-                background: 'linear-gradient(135deg, #08796C 0%, #065E53 60%, #044a42 100%)',
-                px: { xs: 2, md: 4 },
-                pt: 3,
-                pb: 3,
-                position: 'relative',
-                overflow: 'hidden',
-            }}>
-                {/* Decorative circles */}
-                <Box sx={{ position: 'absolute', top: -50, right: -50, width: 200, height: 200, borderRadius: '50%', bgcolor: 'rgba(255,255,255,0.04)', pointerEvents: 'none' }} />
-                <Box sx={{ position: 'absolute', bottom: -50, right: 140, width: 120, height: 120, borderRadius: '50%', bgcolor: 'rgba(255,255,255,0.03)', pointerEvents: 'none' }} />
-
-                <Stack direction="row" alignItems="flex-start" justifyContent="space-between" gap={2}>
-                    <Stack direction="row" alignItems="center" gap={2}>
-                        <Box sx={{ width: 46, height: 46, borderRadius: 2, bgcolor: 'rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(4px)', flexShrink: 0 }}>
-                            <SwapHorizOutlinedIcon sx={{ color: '#fff', fontSize: 24 }} />
-                        </Box>
-                        <Box>
-                            <Typography variant="h5" sx={{ color: '#fff', fontWeight: 700, lineHeight: 1.2 }}>
-                                All Movements
-                            </Typography>
-                            <Typography variant="body2" sx={{ color: alpha('#fff', 0.70), mt: 0.25 }}>
-                                Track and manage asset movement requests
-                            </Typography>
-                        </Box>
-                    </Stack>
-                    <Box sx={{ bgcolor: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.18)', borderRadius: 2, px: 2.5, py: 1.25, textAlign: 'right', flexShrink: 0, display: { xs: 'none', sm: 'block' } }}>
-                        <Typography variant="h4" sx={{ color: '#fff', fontWeight: 800, lineHeight: 1 }}>
-                            {(count ?? 0).toLocaleString()}
-                        </Typography>
-                        <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)', fontWeight: 500, display: 'block', mt: 0.25 }}>
-                            total movements
-                        </Typography>
-                        <Typography sx={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.68rem', display: 'block', mt: 0.5 }}>
-                            {todayLabel}
-                        </Typography>
-                    </Box>
-                </Stack>
-            </Box>
-
-            {/* Page content */}
-            <Box sx={{ px: { xs: 1, md: 3 }, pt: 3, width: '100%', maxWidth: '1500px' }}>
-            <Card sx={{
-                width: '100%',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.07), 0 4px 24px rgba(0,0,0,0.05)',
-                borderRadius: '14px',
-                overflow: 'hidden',
-                border: 'none',
-            }}>
-                {/* Toolbar */}
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 3, pt: 2.5, pb: 1.5, flexWrap: 'wrap', gap: 1.5, bgcolor: '#fff', borderBottom: '1px solid #F1F5F9' }}>
-                    <Stack direction="row" alignItems="center" gap={1.5}>
-                        <Box sx={{ width: 36, height: 36, borderRadius: 1.5, bgcolor: alpha(PRIMARY, 0.08), display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                            <SwapHorizOutlinedIcon sx={{ fontSize: 18, color: PRIMARY }} />
-                        </Box>
-                        <Box>
-                            <Typography sx={{ fontWeight: 700, fontSize: '0.9rem', color: '#0F172A', lineHeight: 1.2 }}>All Movements</Typography>
-                            <Typography sx={{ fontSize: '0.72rem', color: '#94A3B8' }}>{count} total movement{count !== 1 ? 's' : ''}</Typography>
-                        </Box>
-                    </Stack>
-                    <Stack direction="row" gap={1} alignItems="center">
+        // Same page padding PageShell applied, so swapping the header for PageHero keeps alignment.
+        <Box sx={{ px: { xs: 2, sm: 3 }, py: { xs: 2, sm: 3 } }}>
+            <PageHero
+                title="All Movements"
+                subtitle="Store-to-store and asset transfers across locations"
+                icon={<SwapHorizOutlinedIcon />}
+                stat={{ value: (count ?? 0).toLocaleString(), label: 'movements', helper: todayLabel }}
+                actions={
+                    <Stack direction="row" spacing={1.25} alignItems="center">
                         <Tooltip title="Refresh" arrow>
-                            <IconButton onClick={() => fetchAllMovements({ pageSize: 50 })} sx={{ width: 38, height: 38, borderRadius: 1.5, border: '1px solid #E2E8F0', color: '#64748B', '&:hover': { borderColor: PRIMARY, color: PRIMARY, bgcolor: alpha(PRIMARY, 0.04) }, transition: 'all 0.2s' }}>
+                            <IconButton
+                                onClick={refresh}
+                                sx={{
+                                    width: 36, height: 36, borderRadius: '8px', bgcolor: '#fff',
+                                    border: `1px solid ${border.subtle}`, color: neutral[500],
+                                    '&:hover': { borderColor: brand[500], color: brand[600], bgcolor: alpha(brand[500], 0.04) },
+                                }}
+                            >
                                 <RefreshIcon sx={{ fontSize: 18 }} />
                             </IconButton>
                         </Tooltip>
+                        {/* POST /movements is guarded by CREATE_MOVEMENT; offering the button to
+                            someone without it sends them to a form whose save then fails. */}
+                        <RequirePermission permission={PERMISSIONS.CREATE_MOVEMENT}>
                         <Button
                             variant="contained"
                             startIcon={<AddIcon />}
-                            onClick={() => navigate(`${ROUTES.MOVEMENT}/create`)}
-                            sx={{ height: 38, px: 2.5, borderRadius: '8px', bgcolor: PRIMARY, color: '#fff', textTransform: 'none', fontWeight: 600, fontSize: '0.85rem', boxShadow: `0 2px 8px ${alpha(PRIMARY, 0.30)}`, '&:hover': { bgcolor: '#065E54', boxShadow: `0 4px 14px ${alpha(PRIMARY, 0.40)}`, transform: 'translateY(-1px)' }, transition: 'all 0.2s' }}
+                            onClick={() => navigate(ROUTES.CREATE_MOVEMENT)}
+                            sx={{
+                                height: 36, px: 2.5, borderRadius: '8px', textTransform: 'none', fontWeight: 600,
+                                bgcolor: brand[500], '&:hover': { bgcolor: brand[700] },
+                                boxShadow: `0 2px 8px ${alpha(brand[500], 0.3)}`,
+                            }}
                         >
                             New Movement
                         </Button>
+                        </RequirePermission>
                     </Stack>
-                </Box>
-
-                {/* Filters */}
-                <Box sx={{ bgcolor: '#fff', borderBottom: '1px solid #EEF2F7' }}>
-                    <Box sx={{ px: 3, pt: 2, pb: 0 }}>
-                        <TextField
-                            fullWidth
-                            size="small"
-                            placeholder="Search by reference, officer, or destination..."
-                            value={search}
-                            onChange={e => { setSearch(e.target.value); setPage(0); }}
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start">
-                                        <SearchIcon sx={{ fontSize: 18, color: '#94A3B8' }} />
-                                    </InputAdornment>
-                                ),
-                                sx: { borderRadius: 1.5 },
-                            }}
+                }
+            />
+            {/* Status summary tiles (click to filter) */}
+            <Grid container spacing={2} sx={{ mb: 3 }}>
+                {summaryTiles.map((t) => (
+                    <Grid item xs={6} sm={4} md={2.4} key={t.status}>
+                        <StatTile
+                            label={t.label}
+                            value={statusCounts[t.status] ?? 0}
+                            icon={t.icon}
+                            accent={t.accent}
+                            onClick={() => setStatusTab(statusTab === t.status ? 'all' : t.status)}
                         />
-                    </Box>
-                    <Tabs
-                        value={statusTab}
-                        onChange={(_, v) => { setStatusTab(v); setPage(0); }}
-                        variant="scrollable"
-                        scrollButtons="auto"
-                        sx={{
-                            px: 1.5,
-                            '& .MuiTab-root': { fontSize: '0.75rem', fontWeight: 600, minWidth: 80, textTransform: 'none' },
-                            '& .MuiTabs-indicator': { bgcolor: PRIMARY },
-                            '& .MuiTab-root.Mui-selected': { color: PRIMARY },
-                        }}
-                    >
-                        {STATUS_TABS.map(t => (
-                            <Tab key={t.value} value={t.value} label={t.label} />
-                        ))}
-                    </Tabs>
-                </Box>
+                    </Grid>
+                ))}
+            </Grid>
+
+            {/* Filters & export bar — same styling as the Reports page */}
+            <MovementFilters
+                sources={filterOptions.sources}
+                destinations={filterOptions.destinations}
+                couriers={filterOptions.couriers}
+                initiators={filterOptions.initiators}
+                onApply={setFilters}
+                onExportPdf={() => handleExport((rows) => exportMovementsPdf(rows, { filters: exportFilterStrip }))}
+                onExportExcel={() => handleExport(exportMovementsExcel)}
+                onExportCsv={() => handleExport(exportMovementsCsv)}
+                onRefresh={refresh}
+            />
+
+            <Paper variant="outlined" sx={{ borderRadius: 2, overflow: 'hidden', borderColor: border.subtle }}>
+                {/* Status tabs — each carries its own count so the split is readable without clicking.
+                    Narrowing the list is the "Filters & Options" panel's job; this card only tabs. */}
+                <Tabs
+                    value={statusTab}
+                    onChange={(_, v) => setStatusTab(v)}
+                    variant="scrollable"
+                    scrollButtons="auto"
+                    sx={{
+                        px: 1.5, mt: 1.5, borderBottom: `1px solid ${border.subtle}`,
+                        minHeight: 40,
+                        '& .MuiTab-root': {
+                            fontSize: '0.75rem', fontWeight: 600, minWidth: 80, minHeight: 40,
+                            textTransform: 'none', color: neutral[500], py: 0,
+                        },
+                        '& .MuiTabs-indicator': { bgcolor: brand[500], height: 2.5, borderRadius: '2px 2px 0 0' },
+                        '& .MuiTab-root.Mui-selected': { color: brand[600] },
+                    }}
+                >
+                    {STATUS_TABS.map((t) => {
+                        // `movements.length` used to be the whole set and is now one page, so the
+                        // All tab would have counted 15 however large the register is.
+                        const n = t.value === 'all' ? totalAcrossStatuses : (statusCounts[t.value] ?? 0);
+                        const selected = statusTab === t.value;
+                        return (
+                            <Tab
+                                key={t.value}
+                                value={t.value}
+                                label={(
+                                    <Stack direction="row" alignItems="center" spacing={0.75}>
+                                        <span>{t.label}</span>
+                                        <Box
+                                            sx={{
+                                                minWidth: 18, px: 0.5, height: 18, borderRadius: '9px',
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                fontSize: '0.62rem', fontWeight: 700,
+                                                bgcolor: selected ? alpha(brand[500], 0.12) : neutral[100],
+                                                color: selected ? brand[700] : neutral[500],
+                                            }}
+                                        >
+                                            {n}
+                                        </Box>
+                                    </Stack>
+                                )}
+                            />
+                        );
+                    })}
+                </Tabs>
 
                 {/* Table */}
-                <TableContainer component={Paper} elevation={0} sx={{ borderRadius: 0 }}>
-                    <Table stickyHeader size="small">
-                        <TableHead>
-                            <TableRow sx={{ '& .MuiTableCell-head': { background: 'linear-gradient(120deg, #08796C 0%, #065E53 100%)', color: 'rgba(255,255,255,0.92)', fontWeight: 700, fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.07em', whiteSpace: 'nowrap', borderBottom: '2px solid rgba(255,255,255,0.15)', py: 1.5, px: 2.5 } }}>
-                                <TableCell>Reference</TableCell>
-                                <TableCell>Officer</TableCell>
-                                <TableCell>Destination</TableCell>
-                                <TableCell align="center">Assets</TableCell>
-                                <TableCell>Status</TableCell>
-                                <TableCell>Date</TableCell>
-                                <TableCell align="right">Actions</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {loading ? (
-                                <TableRow>
-                                    <TableCell colSpan={7} sx={{ textAlign: 'center', py: 5, border: 'none' }}>
-                                        <CircularProgress size={32} sx={{ color: PRIMARY }} />
-                                    </TableCell>
-                                </TableRow>
-                            ) : paginated.length === 0 ? (
-                                <TableRow>
-                                    <TableCell colSpan={7} sx={{ textAlign: 'center', py: 6, border: 'none' }}>
-                                        <SwapHorizOutlinedIcon sx={{ fontSize: 36, color: 'text.disabled', mb: 1, display: 'block', mx: 'auto' }} />
-                                        <Typography variant="body2" color="text.disabled">No movements found.</Typography>
-                                    </TableCell>
-                                </TableRow>
-                            ) : paginated.map((mov, idx) => {
-                                const isEditable = mov.status?.name === 'draft' || mov.status?.name === 'rejected';
-                                const isPending = mov.status?.name === 'pending_approval';
-                                const isApproved = mov.status?.name === 'approved';
-                                const isReleased = mov.status?.name === 'released';
-                                const officerName = mov.requestingOfficer
-                                    ? `${mov.requestingOfficer.firstName} ${mov.requestingOfficer.lastName}`
-                                    : '—';
-                                const initials = mov.requestingOfficer
-                                    ? `${mov.requestingOfficer.firstName[0]}${mov.requestingOfficer.lastName[0]}`
-                                    : '?';
-
-                                return (
-                                    <TableRow
-                                        key={mov.id}
-                                        sx={{
-                                            bgcolor: idx % 2 === 1 ? '#FAFBFC' : '#fff',
-                                            borderBottom: '1px solid #EEF2F7',
-                                            transition: 'background-color 0.12s, box-shadow 0.12s',
-                                            '&:hover': { bgcolor: '#F0FDF9', boxShadow: `inset 3px 0 0 ${PRIMARY}` },
-                                            '&:last-child td': { borderBottom: 'none' },
-                                            '& .MuiTableCell-root': { py: 1.5, px: 2.5, fontSize: '0.78rem', color: '#0F172A', borderBottom: 'none' },
-                                        }}
-                                    >
-                                        <TableCell>
-                                            <Typography variant="caption" sx={{ fontWeight: 700, color: PRIMARY, fontFamily: 'monospace', fontSize: '0.76rem' }}>
-                                                {mov.referenceNo ?? `#${mov.id}`}
-                                            </Typography>
-                                        </TableCell>
-                                        <TableCell>
-                                            <Stack direction="row" spacing={1} alignItems="center">
-                                                <Avatar sx={{ width: 26, height: 26, fontSize: '0.62rem', fontWeight: 700, bgcolor: alpha(PRIMARY, 0.12), color: PRIMARY }}>
-                                                    {initials}
-                                                </Avatar>
-                                                <Box>
-                                                    <Typography variant="caption" sx={{ fontWeight: 600, lineHeight: 1.2, display: 'block' }}>
-                                                        {officerName}
-                                                    </Typography>
-                                                    {mov.requestingOfficer?.department?.name && (
-                                                        <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.66rem' }}>
-                                                            {mov.requestingOfficer.department.name}
-                                                        </Typography>
-                                                    )}
-                                                </Box>
-                                            </Stack>
-                                        </TableCell>
-                                        <TableCell>
-                                            <Typography variant="caption" sx={{ fontWeight: 500 }}>{mov.destination ?? '—'}</Typography>
-                                            {mov.destinationType && (
-                                                <Chip label={mov.destinationType} size="small" sx={{ display: 'block', mt: 0.25, height: 15, fontSize: '0.59rem', fontWeight: 600, bgcolor: alpha(PRIMARY, 0.06), color: PRIMARY, '& .MuiChip-label': { px: 0.75 } }} />
-                                            )}
-                                        </TableCell>
-                                        <TableCell align="center">
-                                            <Chip label={mov.assetsCount ?? 0} size="small" sx={{ height: 20, fontWeight: 700, bgcolor: alpha(SECONDARY, 0.1), color: SECONDARY }} />
-                                        </TableCell>
-                                        <TableCell>
-                                            <StatusChip statusName={mov.status?.name} />
-                                        </TableCell>
-                                        <TableCell>
-                                            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                                                {mov.createDate ? new Date(mov.createDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'}
-                                            </Typography>
-                                        </TableCell>
-                                        <TableCell align="right">
-                                            <Stack direction="row" spacing={0.5} justifyContent="flex-end">
-                                                <Tooltip title="View details">
-                                                    <IconButton size="small" onClick={() => navigate(`${ROUTES.READ_MOVEMENT}/${mov.id}`)} sx={{ color: PRIMARY, '&:hover': { bgcolor: alpha(PRIMARY, 0.08) } }}>
-                                                        <VisibilityOutlinedIcon sx={{ fontSize: 15 }} />
-                                                    </IconButton>
-                                                </Tooltip>
-                                                {isEditable && (
-                                                    <Tooltip title="Edit">
-                                                        <IconButton size="small" onClick={() => navigate(`${ROUTES.UPDATE_MOVEMENT}/${mov.id}`)} sx={{ color: SECONDARY, '&:hover': { bgcolor: alpha(SECONDARY, 0.08) } }}>
-                                                            <EditOutlinedIcon sx={{ fontSize: 15 }} />
-                                                        </IconButton>
-                                                    </Tooltip>
-                                                )}
-                                                {isPending && (
-                                                    <>
-                                                        <Tooltip title="Approve">
-                                                            <IconButton size="small" onClick={() => openModal(crudStates.approve, mov)} sx={{ color: '#059669', '&:hover': { bgcolor: alpha('#059669', 0.08) } }}>
-                                                                <CheckCircleOutlineIcon sx={{ fontSize: 15 }} />
-                                                            </IconButton>
-                                                        </Tooltip>
-                                                        <Tooltip title="Reject">
-                                                            <IconButton size="small" onClick={() => openModal(crudStates.reject, mov)} sx={{ color: '#DC2626', '&:hover': { bgcolor: alpha('#DC2626', 0.08) } }}>
-                                                                <CancelOutlinedIcon sx={{ fontSize: 15 }} />
-                                                            </IconButton>
-                                                        </Tooltip>
-                                                    </>
-                                                )}
-                                                {isApproved && (
-                                                    <Tooltip title="Release assets">
-                                                        <IconButton size="small" onClick={() => openModal('release', mov)} sx={{ color: '#2563EB', '&:hover': { bgcolor: alpha('#2563EB', 0.08) } }}>
-                                                            <LocalShippingOutlinedIcon sx={{ fontSize: 15 }} />
-                                                        </IconButton>
-                                                    </Tooltip>
-                                                )}
-                                                {isReleased && (
-                                                    <Tooltip title="Acknowledge receipt">
-                                                        <IconButton size="small" onClick={() => openModal('receive', mov)} sx={{ color: '#059669', '&:hover': { bgcolor: alpha('#059669', 0.08) } }}>
-                                                            <AssignmentTurnedInOutlinedIcon sx={{ fontSize: 15 }} />
-                                                        </IconButton>
-                                                    </Tooltip>
-                                                )}
-                                                {mov.securityPassAvailable && (
-                                                    <Tooltip title="Download security pass">
-                                                        <IconButton size="small" sx={{ color: '#2563EB', '&:hover': { bgcolor: alpha('#2563EB', 0.08) } }}>
-                                                            <DownloadOutlinedIcon sx={{ fontSize: 15 }} />
-                                                        </IconButton>
-                                                    </Tooltip>
-                                                )}
-                                                {isEditable && (
-                                                    <Tooltip title="Delete">
-                                                        <IconButton size="small" onClick={() => openModal(crudStates.delete, mov)} sx={{ color: '#DC2626', '&:hover': { bgcolor: alpha('#DC2626', 0.08) } }}>
-                                                            <DeleteOutlineIcon sx={{ fontSize: 15 }} />
-                                                        </IconButton>
-                                                    </Tooltip>
-                                                )}
-                                            </Stack>
-                                        </TableCell>
-                                    </TableRow>
-                                );
-                            })}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
-
-                {/* Pagination */}
-                {filtered.length > 0 && (
-                    <Box sx={{ borderTop: '1px solid #EEF2F7', bgcolor: '#FAFBFC' }}>
-                        <TablePagination
-                            component="div"
-                            count={filtered.length}
-                            page={page}
-                            onPageChange={(_, newPage) => setPage(newPage)}
-                            rowsPerPage={rowsPerPage}
-                            onRowsPerPageChange={e => { setRowsPerPage(parseInt(e.target.value, 10)); setPage(0); }}
-                            rowsPerPageOptions={[5, 10, 25, 50]}
-                            sx={{ '& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows': { fontSize: '0.8125rem', color: '#64748B', margin: 0 }, '& .MuiTablePagination-select': { fontSize: '0.8125rem' }, '& .MuiIconButton-root': { borderRadius: 1.5, '&:hover': { bgcolor: alpha(PRIMARY, 0.06) } } }}
+                <MovementTable
+                    variant="lifecycle"
+                    rows={filtered}
+                    loading={loading}
+                    onView={(mov) => navigate(`${ROUTES.READ_MOVEMENT}/${mov.id}`)}
+                    onAction={(action, mov) => openModal(action, mov)}
+                    currentUserId={currentUserId}
+                    actionsAs="menu"
+                    disableSurface
+                    stickyHeader
+                    maxHeight="clamp(320px, calc(100vh - 370px), 1400px)"
+                    paginateOver={0}
+                    paginationResetKey={`${statusTab}|${JSON.stringify(filters)}`}
+                    server={{
+                        page,
+                        rowsPerPage,
+                        total: count ?? 0,
+                        onPageChange: setPage,
+                        onRowsPerPageChange: (size) => { setRowsPerPage(size); setPage(0); },
+                        onSortChange: (column, order) => { setSort({ column, order }); setPage(0); },
+                    }}
+                    empty={(
+                        <EmptyState
+                            variant="inline"
+                            title="No movements found"
+                            description={statusTab !== 'all' || Object.values(filters).some(Boolean)
+                                ? 'Adjust the filters above or pick a different status tab.'
+                                : 'Create a movement to see it listed here.'}
+                            icon={<SwapHorizOutlinedIcon />}
                         />
-                    </Box>
-                )}
-            </Card>
+                    )}
+                />
+            </Paper>
 
             <ModalComponent open={open} handleClose={handleClose} title="">
-                {renderModal()}
+                <MovementActionModal
+                    action={modalState as any}
+                    movement={currentMovement}
+                    handleClose={handleClose}
+                    sendingRequest={sendingRequest}
+                    setSendingRequest={setSendingRequest}
+                    onDone={refresh}
+                />
             </ModalComponent>
-            </Box>
         </Box>
     );
 };

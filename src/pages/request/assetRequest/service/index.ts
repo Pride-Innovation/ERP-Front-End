@@ -152,8 +152,25 @@ const findRequestReportByRequestService = async (requestId: number) => {
     }
 }
 
+/**
+ * The workflow step log for a request — every stage, who actioned it, when, and with what comment.
+ *
+ * Goes through `axiosInstance` rather than a bare axios call so it carries the same auth and
+ * error handling as everything else here.
+ */
+const fetchWorkflowStepLogsService = async (requestId: number | string) => {
+    try {
+        const response = await axiosInstance.get(`/workflow/step-logs/${requestId}`);
+        return response;
+    }
+    catch (error) {
+        return error;
+    }
+}
+
 export {
     createAssetRequestService,
+    fetchWorkflowStepLogsService,
     updateAssetRequestService,
     deleteAssetRequestService,
     findAssetRequestByIDService,

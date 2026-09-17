@@ -5,846 +5,526 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { useEffect, useRef, useState } from 'react';
-import { useWatch } from 'react-hook-form';
+import { useEffect, useMemo, useState } from 'react';
 import {
-    alpha, Autocomplete, Avatar, Box, Button, Chip, CircularProgress,
-    Collapse, Divider, Grid, IconButton, Paper, Stack, TextField, Tooltip, Typography,
+    alpha, Alert, Autocomplete, Box, Button, Chip, CircularProgress, Divider, Grid, IconButton,
+    MenuItem, Paper, Stack, TextField, ToggleButton, ToggleButtonGroup, Tooltip, Typography,
 } from '@mui/material';
-import { useNavigate } from 'react-router';
-import { toast } from 'react-toastify';
-import { UseFormInput, UseFormSelect, UseFormDatePicker, UseFormAutocompleteComponent } from '../../components/forms';
-import ButtonComponent from '../../components/forms/Button';
-import { IMovementForm } from './interface';
-import { ROUTES } from '../../core/routes/routes';
-import { fetchRowsService } from '../../core/apis/globalService';
-import RoutesUtills from '../../core/routes/utills';
-import { IUser } from '../users/interface';
-import { IAsset } from '../assets/interface';
-import { IOptions } from '../../components/tables/interface';
-
-import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
-import AttachFileOutlinedIcon from '@mui/icons-material/AttachFileOutlined';
-import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
-import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
-import CloseIcon from '@mui/icons-material/Close';
-import CloudUploadOutlinedIcon from '@mui/icons-material/CloudUploadOutlined';
-import VerifiedUserOutlinedIcon from '@mui/icons-material/VerifiedUserOutlined';
-import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import ApartmentOutlinedIcon from '@mui/icons-material/ApartmentOutlined';
-import BadgeOutlinedIcon from '@mui/icons-material/BadgeOutlined';
-import InventoryOutlinedIcon from '@mui/icons-material/InventoryOutlined';
-import FingerprintIcon from '@mui/icons-material/Fingerprint';
-import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
-import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined';
+import HowToRegOutlinedIcon from '@mui/icons-material/HowToRegOutlined';
+import SwapHorizOutlinedIcon from '@mui/icons-material/SwapHorizOutlined';
 import StorefrontOutlinedIcon from '@mui/icons-material/StorefrontOutlined';
-import CategoryOutlinedIcon from '@mui/icons-material/CategoryOutlined';
+import InventoryOutlinedIcon from '@mui/icons-material/InventoryOutlined';
 import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
-import BuildOutlinedIcon from '@mui/icons-material/BuildOutlined';
-import AssignmentIndOutlinedIcon from '@mui/icons-material/AssignmentIndOutlined';
-import PriceCheckOutlinedIcon from '@mui/icons-material/PriceCheckOutlined';
-import InsertDriveFileOutlinedIcon from '@mui/icons-material/InsertDriveFileOutlined';
-import PictureAsPdfOutlinedIcon from '@mui/icons-material/PictureAsPdfOutlined';
-import ImageOutlinedIcon from '@mui/icons-material/ImageOutlined';
-import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
-import NumbersOutlinedIcon from '@mui/icons-material/NumbersOutlined';
-import ArrowForwardOutlinedIcon from '@mui/icons-material/ArrowForwardOutlined';
+import CategoryOutlinedIcon from '@mui/icons-material/CategoryOutlined';
+import FingerprintIcon from '@mui/icons-material/Fingerprint';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import AddIcon from '@mui/icons-material/Add';
+import SaveIcon from '@mui/icons-material/Save';
+import NotesOutlinedIcon from '@mui/icons-material/NotesOutlined';
+import { toast } from 'react-toastify';
+import { fieldSx } from '../../components/forms/Inputs';
+import { autocompleteSx } from '../../components/forms/Autocomplete';
+import { PageSection } from '../../components/layout';
+import { brand, neutral, border, status } from '../../utils/tokens';
+import { fetchRowsService } from '../../core/apis/globalService';
+import { IMovementForm, IStoreView } from './interface';
+import { IAsset } from '../assets/interface';
+import { IUser } from '../users/interface';
+import { creatableMovementTypes, storeTypeLabels } from './constants';
+import {
+    fetchStoresService, fetchStoreAssetsService, fetchStoreBalancesService,
+} from './service';
 
-const PRIMARY = '#08796C';
-const BLUE = '#4285F4';
-const AMBER = '#F59E0B';
-const NA = 'Not Available';
+const P = brand[500];
+const BLUE = status.info.main;
 
-// ─── Mock seed data (replace with real user from getCurrentUser on mount) ────
-const MOCK_OFFICER: IUser = {
-    id: 'mock-1',
-    firstName: 'Samuel',
-    lastName: 'Odong',
-    staffNumber: 'PBL-2024-0182',
-    gender: 'Male',
-    email: 'samuel.odong@pridebank.co.ug',
-    title: { id: 1, name: 'Branch Operations Manager', reportsTo: { id: 2, name: 'Regional Operations Director' }, role: { id: 1, name: 'Operations', permissions: [] } },
-    branch: { id: 1, name: 'Kampala Main Branch', code: 'KMB' } as any,
-    department: null,
-};
-
-const MOCK_ASSETS: IAsset[] = [
-    {
-        id: 'mock-a1',
-        engravedNumber: 'PBL-LAP-2023-0042',
-        assetName: 'Dell Latitude 5540 Laptop',
-        hostname: 'PBL-KMB-WS042',
-        make: 'Dell',
-        model: 'Latitude 5540',
-        category: 'IT Equipment',
-        assetType: { id: 1, name: 'Laptop', category: 'IT Equipment' } as any,
-        assetStatus: { id: 1, name: 'Active', color: '#16A34A' } as any,
-        branch: { id: 1, name: 'Kampala Main Branch' } as any,
-        assignedTo: { id: 1, firstName: 'Jane', lastName: 'Nakato', staffNumber: 'PBL-2022-0099' } as any,
-        purchaseCost: '3,200,000',
-        dateReceipt: '2023-03-15',
-        lpoNumber: 'LPO-2023-00144',
-        detailNetBookValue: '2,560,000',
-        netValueB: '2,560,000',
-        unitOfMeasure: 'Unit',
-        costOfTheAsset: '3,200,000',
-    },
-    {
-        id: 'mock-a2',
-        engravedNumber: 'PBL-SCN-2022-0017',
-        assetName: 'HP ScanJet Pro 3000s4',
-        hostname: 'PBL-KMB-SCN017',
-        make: 'HP',
-        model: 'ScanJet Pro 3000s4',
-        category: 'Office Equipment',
-        assetType: { id: 3, name: 'Scanner', category: 'Office Equipment' } as any,
-        assetStatus: { id: 1, name: 'Active', color: '#16A34A' } as any,
-        branch: { id: 1, name: 'Kampala Main Branch' } as any,
-        assignedTo: { id: 2, firstName: 'Peter', lastName: 'Okello', staffNumber: 'PBL-2021-0034' } as any,
-        purchaseCost: '850,000',
-        dateReceipt: '2022-07-22',
-        lpoNumber: 'LPO-2022-00289',
-        detailNetBookValue: '595,000',
-        netValueB: '595,000',
-        unitOfMeasure: 'Unit',
-        costOfTheAsset: '850,000',
-    },
-];
-
-const destinationTypeOptions: IOptions[] = [
-    { value: 'Branch', label: 'Branch' },
-    { value: 'Department', label: 'Department' },
-    { value: 'External', label: 'External Vendor' },
-];
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-const InfoRow = ({ icon, label, value, color }: { icon: React.ReactNode; label: string; value?: string | null; color?: string }) => (
-    <Stack direction="row" alignItems="center" spacing={0.75} sx={{ minWidth: 0 }}>
-        <Box sx={{ color: color ?? 'text.disabled', flexShrink: 0, display: 'flex' }}>{icon}</Box>
-        <Typography variant="caption" sx={{ color: 'text.secondary', flexShrink: 0, fontSize: '0.7rem' }}>{label}:</Typography>
-        <Typography variant="caption" sx={{ fontWeight: 600, color: value ? 'text.primary' : 'text.disabled', fontSize: '0.7rem', fontStyle: value ? 'normal' : 'italic', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            {value || NA}
-        </Typography>
-    </Stack>
-);
-
-const StatusChip = ({ status, color }: { status: string; color?: string }) => (
-    <Chip
-        label={status}
-        size="small"
-        sx={{
-            height: 18, fontSize: '0.62rem', fontWeight: 700,
-            bgcolor: alpha(color ?? '#16A34A', 0.1),
-            color: color ?? '#16A34A',
-            border: `1px solid ${alpha(color ?? '#16A34A', 0.25)}`,
-            borderRadius: '5px',
-        }}
-    />
-);
-
-// ─── FormSection ──────────────────────────────────────────────────────────────
-
-interface SectionProps {
-    title: string;
-    subtitle?: string;
-    icon?: React.ReactNode;
-    children: React.ReactNode;
-    helpText?: string;
-    badge?: React.ReactNode;
+interface IBalanceView {
+    commodityId: number;
+    commodityName: string;
+    quantity: number;
+    assetTypeName?: string;
 }
 
-const FormSection = ({ title, subtitle, icon, children, helpText, badge }: SectionProps) => (
-    <Box>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: subtitle ? 0.5 : 2.5, pb: 1.5, borderBottom: `1.5px solid ${alpha(PRIMARY, 0.08)}` }}>
-            {icon && (
-                <Box sx={{ mr: 1.5, color: PRIMARY, bgcolor: alpha(PRIMARY, 0.1), display: 'flex', alignItems: 'center', justifyContent: 'center', width: 30, height: 30, borderRadius: '8px', flexShrink: 0 }}>
-                    {icon}
-                </Box>
-            )}
-            <Typography variant="subtitle1" sx={{ fontWeight: 700, color: 'text.primary', flexGrow: 1, fontSize: '0.9rem' }}>
-                {title}
-            </Typography>
-            {badge}
-            {helpText && (
-                <Tooltip title={helpText} arrow placement="top">
-                    <IconButton size="small"><HelpOutlineIcon fontSize="small" color="action" /></IconButton>
-                </Tooltip>
-            )}
-        </Box>
-        {subtitle && <Typography variant="body2" sx={{ mb: 2.5, color: 'text.secondary', fontSize: '0.82rem' }}>{subtitle}</Typography>}
-        {children}
-    </Box>
-);
-
-// ─── UserProfileCard ──────────────────────────────────────────────────────────
-
-const UserProfileCard = ({ user, role, accentColor = PRIMARY }: { user: IUser; role: string; accentColor?: string }) => {
-    const initials = `${user.firstName?.[0] ?? ''}${user.lastName?.[0] ?? ''}`.toUpperCase();
-    const fullName = `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim();
-    const titleName = user.title?.name ?? null;
-    const roleName = (user.title as any)?.role?.name ?? null;
-    const branchName = user.branch?.name ?? null;
-    const deptName = user.department?.name ?? null;
-    const reportsTo = user.title?.reportsTo?.name ?? null;
-
-    return (
-        <Box sx={{ borderRadius: 2, border: `1px solid ${alpha(accentColor, 0.18)}`, bgcolor: alpha(accentColor, 0.025), overflow: 'hidden' }}>
-            <Box sx={{ px: 2, py: 1.25, bgcolor: alpha(accentColor, 0.07), borderBottom: `1px solid ${alpha(accentColor, 0.12)}`, display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                <Avatar sx={{ width: 40, height: 40, bgcolor: alpha(accentColor, 0.18), color: accentColor, fontWeight: 800, fontSize: '0.95rem', border: `2px solid ${alpha(accentColor, 0.3)}`, flexShrink: 0 }}>
-                    {initials}
-                </Avatar>
-                <Box flex={1} overflow="hidden">
-                    <Typography sx={{ fontSize: '0.62rem', fontWeight: 700, color: accentColor, textTransform: 'uppercase', letterSpacing: 0.6, lineHeight: 1 }}>{role}</Typography>
-                    <Typography variant="body2" fontWeight={700} noWrap sx={{ lineHeight: 1.3 }}>{fullName}</Typography>
-                    {titleName && <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.7rem' }} noWrap>{titleName}</Typography>}
-                </Box>
-                <CheckCircleOutlineIcon sx={{ fontSize: 18, color: alpha(accentColor, 0.5), flexShrink: 0 }} />
-            </Box>
-            <Box sx={{ px: 2, py: 1.25 }}>
-                <Grid container spacing={0.5}>
-                    <Grid item xs={12} sm={6}><InfoRow icon={<NumbersOutlinedIcon sx={{ fontSize: 11 }} />} label="Staff No." value={user.staffNumber} color={accentColor} /></Grid>
-                    <Grid item xs={12} sm={6}><InfoRow icon={<AccountTreeOutlinedIcon sx={{ fontSize: 11 }} />} label="Role" value={roleName} color={accentColor} /></Grid>
-                    <Grid item xs={12} sm={6}><InfoRow icon={<ApartmentOutlinedIcon sx={{ fontSize: 11 }} />} label="Branch" value={branchName} color={accentColor} /></Grid>
-                    <Grid item xs={12} sm={6}><InfoRow icon={<StorefrontOutlinedIcon sx={{ fontSize: 11 }} />} label="Dept." value={deptName} color={accentColor} /></Grid>
-                    <Grid item xs={12} sm={6}><InfoRow icon={<EmailOutlinedIcon sx={{ fontSize: 11 }} />} label="Email" value={user.email} color={accentColor} /></Grid>
-                    <Grid item xs={12} sm={6}><InfoRow icon={<VerifiedUserOutlinedIcon sx={{ fontSize: 11 }} />} label="Reports To" value={reportsTo} color={accentColor} /></Grid>
-                </Grid>
-            </Box>
-        </Box>
-    );
+/** Dropdown paper styling shared with the app's SelectComponent. */
+const menuPaperSx = {
+    mt: 0.5,
+    borderRadius: '8px',
+    boxShadow: `0 4px 20px ${alpha('#000', 0.1)}`,
+    '& .MuiMenuItem-root': {
+        fontSize: '0.875rem',
+        py: 1,
+        '&:hover': { backgroundColor: alpha(P, 0.06) },
+        '&.Mui-selected': {
+            backgroundColor: alpha(P, 0.1),
+            color: P,
+            '&:hover': { backgroundColor: alpha(P, 0.14) },
+        },
+    },
 };
 
-// ─── AssetCard ────────────────────────────────────────────────────────────────
-
-const AssetCard = ({ asset, onRemove }: { asset: IAsset; onRemove: () => void }) => {
-    const assignedToName = asset.assignedTo
-        ? `${(asset.assignedTo as IUser).firstName} ${(asset.assignedTo as IUser).lastName}`
-        : null;
-    const statusColor = (asset.assetStatus as any)?.color ?? '#16A34A';
-
-    return (
-        <Box sx={{ borderRadius: 2, border: `1px solid ${alpha(PRIMARY, 0.15)}`, bgcolor: '#FAFCFC', overflow: 'hidden', transition: 'all 0.15s', '&:hover': { borderColor: alpha(PRIMARY, 0.35), bgcolor: alpha(PRIMARY, 0.015) } }}>
-            <Box sx={{ px: 2, py: 1.25, bgcolor: alpha(PRIMARY, 0.05), borderBottom: `1px solid ${alpha(PRIMARY, 0.1)}`, display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                <Box sx={{ width: 34, height: 34, borderRadius: 1.5, flexShrink: 0, bgcolor: alpha(PRIMARY, 0.12), color: PRIMARY, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <InventoryOutlinedIcon sx={{ fontSize: 16 }} />
-                </Box>
-                <Box flex={1} overflow="hidden">
-                    <Stack direction="row" alignItems="center" spacing={0.75} flexWrap="wrap">
-                        <Chip icon={<FingerprintIcon sx={{ fontSize: '10px !important' }} />} label={asset.engravedNumber} size="small" sx={{ height: 20, fontSize: '0.7rem', fontWeight: 700, bgcolor: alpha(PRIMARY, 0.1), color: PRIMARY, border: `1px solid ${alpha(PRIMARY, 0.2)}` }} />
-                        {asset.assetType && <Chip label={asset.assetType.name} size="small" sx={{ height: 18, fontSize: '0.62rem', bgcolor: alpha('#6366F1', 0.08), color: '#6366F1', border: `1px solid ${alpha('#6366F1', 0.2)}` }} />}
-                        {asset.assetStatus?.name && <StatusChip status={asset.assetStatus.name} color={statusColor} />}
-                    </Stack>
-                    <Typography variant="body2" fontWeight={700} noWrap sx={{ mt: 0.2, fontSize: '0.82rem' }}>{asset.assetName || NA}</Typography>
-                </Box>
-                <IconButton size="small" onClick={onRemove} sx={{ flexShrink: 0, color: 'text.disabled', '&:hover': { color: 'error.main', bgcolor: alpha('#d32f2f', 0.06) } }}>
-                    <CloseIcon sx={{ fontSize: 16 }} />
-                </IconButton>
-            </Box>
-            <Box sx={{ px: 2, py: 1.25 }}>
-                <Grid container spacing={0.5} rowSpacing={0.75}>
-                    <Grid item xs={12} sm={6} md={4}><InfoRow icon={<BuildOutlinedIcon sx={{ fontSize: 11 }} />} label="Make / Model" value={[asset.make, asset.model].filter(Boolean).join(' / ')} color={PRIMARY} /></Grid>
-                    <Grid item xs={12} sm={6} md={4}><InfoRow icon={<CategoryOutlinedIcon sx={{ fontSize: 11 }} />} label="Category" value={asset.category ?? asset.assetType?.name} color={PRIMARY} /></Grid>
-                    <Grid item xs={12} sm={6} md={4}><InfoRow icon={<ApartmentOutlinedIcon sx={{ fontSize: 11 }} />} label="Current Location" value={asset.branch?.name} color={PRIMARY} /></Grid>
-                    <Grid item xs={12} sm={6} md={4}><InfoRow icon={<AssignmentIndOutlinedIcon sx={{ fontSize: 11 }} />} label="Assigned To" value={assignedToName} color={AMBER} /></Grid>
-                    <Grid item xs={12} sm={6} md={4}><InfoRow icon={<PriceCheckOutlinedIcon sx={{ fontSize: 11 }} />} label="Purchase Cost" value={asset.purchaseCost ? `UGX ${asset.purchaseCost}` : null} color={AMBER} /></Grid>
-                    <Grid item xs={12} sm={6} md={4}><InfoRow icon={<NumbersOutlinedIcon sx={{ fontSize: 11 }} />} label="LPO Number" value={asset.lpoNumber} color={PRIMARY} /></Grid>
-                </Grid>
-            </Box>
-        </Box>
-    );
+/** Soft-teal toggle group tuned to sit alongside the medium inputs. */
+const toggleGroupSx = {
+    '& .MuiToggleButton-root': {
+        textTransform: 'none',
+        fontWeight: 600,
+        fontSize: '0.82rem',
+        color: neutral[500],
+        borderColor: border.default,
+        '&.Mui-selected': {
+            bgcolor: alpha(P, 0.1),
+            color: P,
+            fontWeight: 700,
+            '&:hover': { bgcolor: alpha(P, 0.16) },
+        },
+    },
 };
 
-// ─── DestinationConfirmCard ───────────────────────────────────────────────────
+const storeLabel = (s: IStoreView) => `${s.name} · ${storeTypeLabels[s.storeType] ?? s.storeType}`;
 
-const DestinationConfirmCard = ({ label, type }: { label: string; type: string }) => {
-    const typeColors: Record<string, { bg: string; text: string; icon: React.ReactNode }> = {
-        Branch: { bg: alpha(PRIMARY, 0.07), text: PRIMARY, icon: <ApartmentOutlinedIcon sx={{ fontSize: 16 }} /> },
-        Department: { bg: alpha(BLUE, 0.07), text: BLUE, icon: <AccountTreeOutlinedIcon sx={{ fontSize: 16 }} /> },
-        External: { bg: alpha(AMBER, 0.07), text: AMBER, icon: <StorefrontOutlinedIcon sx={{ fontSize: 16 }} /> },
+const MovementForm = ({ setValue, watch, formState, items, setItems, sendingRequest, buttonText }: IMovementForm) => {
+    const [stores, setStores] = useState<IStoreView[]>([]);
+    const [loadingStores, setLoadingStores] = useState(false);
+
+    const [sourceStore, setSourceStore] = useState<IStoreView | null>(null);
+    const [destStore, setDestStore] = useState<IStoreView | null>(null);
+    const [recipientUser, setRecipientUser] = useState<IUser | null>(null);
+
+    const [userOptions, setUserOptions] = useState<IUser[]>([]);
+    const [userLoading, setUserLoading] = useState(false);
+
+    const [sourceAssets, setSourceAssets] = useState<IAsset[]>([]);
+    const [sourceBalances, setSourceBalances] = useState<IBalanceView[]>([]);
+
+    // Item-add controls
+    const [lineKind, setLineKind] = useState<'ASSET' | 'COMMODITY'>('ASSET');
+    const [pickedAsset, setPickedAsset] = useState<IAsset | null>(null);
+    const [pickedCommodity, setPickedCommodity] = useState<IBalanceView | null>(null);
+    const [lineQty, setLineQty] = useState<number>(1);
+
+    const destinationKind: 'STORE' | 'USER' = watch('destinationKind') ?? 'STORE';
+
+    // Load stores once
+    useEffect(() => {
+        (async () => {
+            setLoadingStores(true);
+            const r = (await fetchStoresService()) as any;
+            if (r?.status === 200) setStores(r.data ?? []);
+            setLoadingStores(false);
+        })();
+    }, []);
+
+    // When source store changes, load its assets + balances and reset items
+    useEffect(() => {
+        if (!sourceStore) { setSourceAssets([]); setSourceBalances([]); return; }
+        (async () => {
+            const [aRes, bRes] = await Promise.all([
+                fetchStoreAssetsService(sourceStore.id) as any,
+                fetchStoreBalancesService({ storeId: sourceStore.id }) as any,
+            ]);
+            setSourceAssets(aRes?.status === 200 ? aRes.data ?? [] : []);
+            setSourceBalances(bRes?.status === 200 ? bRes.data ?? [] : []);
+        })();
+        setItems([]);
+        setPickedAsset(null);
+        setPickedCommodity(null);
+    }, [sourceStore, setItems]);
+
+    const fetchUsers = async (query = '') => {
+        setUserLoading(true);
+        try {
+            // The staff picker, not the directory: this dropdown required READ_USER purely because
+            // it read `GET /users`, and creating a movement is not administering staff.
+            const r = (await fetchRowsService({
+                pageNumber: 0, pageSize: 10, endPoint: 'users/picker',
+                params: query ? { name: query } : {},
+            })) as any;
+            if (r?.status === 200) setUserOptions(r.data?.content ?? []);
+        } finally {
+            setUserLoading(false);
+        }
     };
-    const config = typeColors[type] ?? typeColors['Branch'];
-    return (
-        <Box sx={{ p: 1.75, borderRadius: 2, border: `1px solid ${alpha(config.text, 0.18)}`, bgcolor: config.bg, display: 'flex', alignItems: 'center', gap: 1.5 }}>
-            <Box sx={{ width: 38, height: 38, borderRadius: 1.5, bgcolor: alpha(config.text, 0.12), color: config.text, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                {config.icon}
-            </Box>
-            <Box flex={1}>
-                <Typography sx={{ fontSize: '0.62rem', fontWeight: 700, color: config.text, textTransform: 'uppercase', letterSpacing: 0.5, lineHeight: 1 }}>{type} Destination</Typography>
-                <Typography variant="body2" fontWeight={700} sx={{ mt: 0.15 }}>{label}</Typography>
-            </Box>
-            <Stack direction="row" alignItems="center" spacing={0.5}>
-                <CheckCircleOutlineIcon sx={{ color: config.text, fontSize: 17, opacity: 0.7 }} />
-                <Typography sx={{ fontSize: '0.65rem', fontWeight: 700, color: config.text }}>Confirmed</Typography>
-            </Stack>
-        </Box>
+
+    // Derived movement category for UX (backend is authoritative)
+    const destLocationId = destinationKind === 'STORE' ? destStore?.locationId : recipientUser?.branch?.id;
+    const destLocationName = destinationKind === 'STORE' ? destStore?.locationName : recipientUser?.branch?.name;
+    const isInterLocation = useMemo(
+        () => !!sourceStore && destLocationId != null && Number(sourceStore.locationId) !== Number(destLocationId),
+        [sourceStore, destLocationId]
     );
-};
 
-// ─── DocumentDropZone ─────────────────────────────────────────────────────────
+    const addLine = () => {
+        if (lineKind === 'ASSET') {
+            if (!pickedAsset) { toast.warning('Select an asset to add.'); return; }
+            if (items.some((i) => i.assetId === pickedAsset.id)) { toast.warning('Asset already added.'); return; }
+            setItems([...items, { assetId: pickedAsset.id, quantity: 1, label: pickedAsset.engravedNumber, subLabel: pickedAsset.assetName }]);
+            setPickedAsset(null);
+        } else {
+            if (!pickedCommodity) { toast.warning('Select a commodity to add.'); return; }
+            if (lineQty < 1) { toast.warning('Quantity must be at least 1.'); return; }
+            if (lineQty > pickedCommodity.quantity) { toast.warning(`Only ${pickedCommodity.quantity} in stock.`); return; }
+            if (items.some((i) => i.commodityId === pickedCommodity.commodityId)) { toast.warning('Commodity already added.'); return; }
+            setItems([...items, { commodityId: pickedCommodity.commodityId, quantity: lineQty, label: pickedCommodity.commodityName, subLabel: `Qty ${lineQty}` }]);
+            setPickedCommodity(null);
+            setLineQty(1);
+        }
+    };
 
-const getFileIcon = (file: File): React.ReactNode => {
-    if (file.type === 'application/pdf') return <PictureAsPdfOutlinedIcon sx={{ fontSize: 20, color: '#DC2626' }} />;
-    if (file.type.startsWith('image/')) return <ImageOutlinedIcon sx={{ fontSize: 20, color: BLUE }} />;
-    return <InsertDriveFileOutlinedIcon sx={{ fontSize: 20, color: '#64748B' }} />;
-};
-const formatFileSize = (bytes: number) => {
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-};
+    const removeLine = (idx: number) => setItems(items.filter((_, i) => i !== idx));
 
-const DocumentDropZone = ({
-    files, onAdd, onRemove, fileInputRef,
-}: {
-    files: File[]; onAdd: (f: FileList | null) => void; onRemove: (i: number) => void; fileInputRef: React.RefObject<HTMLInputElement>;
-}) => (
-    <Box>
-        <Box
-            onClick={() => fileInputRef.current?.click()}
-            onDragOver={(e) => e.preventDefault()}
-            onDrop={(e) => { e.preventDefault(); onAdd(e.dataTransfer.files); }}
-            sx={{ border: `2px dashed ${alpha(PRIMARY, 0.3)}`, borderRadius: 2, p: 2.5, textAlign: 'center', cursor: 'pointer', transition: 'all 0.2s', bgcolor: alpha(PRIMARY, 0.02), '&:hover': { borderColor: alpha(PRIMARY, 0.6), bgcolor: alpha(PRIMARY, 0.05) } }}
+    const scopeChip = sourceStore && destLocationId != null ? (
+        <Chip
+            label={isInterLocation ? 'Inter-Location' : 'Intra-Location'}
+            size="small"
+            sx={{ height: 22, fontSize: '0.66rem', fontWeight: 700, bgcolor: alpha(isInterLocation ? BLUE : P, 0.1), color: isInterLocation ? BLUE : P }}
+        />
+    ) : undefined;
+
+    return (
+        <Paper
+            elevation={0}
+            sx={{
+                width: '100%',
+                borderRadius: 2.5,
+                overflow: 'hidden',
+                border: `1px solid ${border.subtle}`,
+                bgcolor: '#fff',
+            }}
         >
-            <Stack alignItems="center" spacing={0.5}>
-                <Box sx={{ width: 46, height: 46, borderRadius: 2, bgcolor: alpha(PRIMARY, 0.09), color: PRIMARY, display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 0.5 }}>
-                    <CloudUploadOutlinedIcon sx={{ fontSize: 24 }} />
+            {/* ── Header ── */}
+            <Box sx={{ px: { xs: 2.5, md: 3.5 }, py: 2.5, borderBottom: `1px solid ${border.subtle}`, display: 'flex', alignItems: 'center', gap: 2 }}>
+                <Box sx={{ width: 44, height: 44, borderRadius: 1.5, bgcolor: alpha(P, 0.1), color: brand[600], display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <SwapHorizOutlinedIcon />
                 </Box>
-                <Typography variant="body2" fontWeight={700} color="text.primary">Click to upload or drag & drop</Typography>
-                <Typography variant="caption" color="text.secondary">PDF, JPG or PNG &middot; Max 5 MB per file &middot; Multiple files supported</Typography>
-                <Button size="small" variant="outlined" startIcon={<AddCircleOutlineIcon sx={{ fontSize: 14 }} />} sx={{ mt: 0.75, height: 30, px: 2, borderRadius: 1.5, textTransform: 'none', fontWeight: 600, fontSize: '0.75rem', borderColor: alpha(PRIMARY, 0.4), color: PRIMARY, '&:hover': { borderColor: PRIMARY, bgcolor: alpha(PRIMARY, 0.05) }, pointerEvents: 'none' }}>
-                    Browse Files
-                </Button>
-            </Stack>
-        </Box>
-        <input ref={fileInputRef} type="file" hidden multiple accept=".pdf,.jpg,.jpeg,.png" onChange={(e) => onAdd(e.target.files)} />
-        {files.length > 0 && (
-            <Box mt={1.5}>
-                <Stack direction="row" alignItems="center" justifyContent="space-between" mb={1}>
-                    <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: 0.5, fontSize: '0.65rem' }}>
-                        Attached Documents ({files.length})
+                <Box sx={{ minWidth: 0, flexGrow: 1 }}>
+                    <Typography variant="h6" sx={{ fontWeight: 700, color: neutral[900], lineHeight: 1.25 }}>
+                        Movement Details
                     </Typography>
-                    <Typography variant="caption" sx={{ color: 'text.disabled', fontSize: '0.65rem' }}>
-                        Total: {formatFileSize(files.reduce((s, f) => s + f.size, 0))}
+                    <Typography variant="body2" sx={{ color: neutral[500] }}>
+                        Choose what is moving, where it is coming from, and where it is going
                     </Typography>
-                </Stack>
-                <Stack spacing={0.75}>
-                    {files.map((file, i) => (
-                        <Box key={i} sx={{ display: 'flex', alignItems: 'center', gap: 1.5, px: 1.75, py: 1.1, borderRadius: 1.5, border: `1px solid ${alpha('#000', 0.07)}`, bgcolor: '#fff', transition: 'all 0.15s', '&:hover': { borderColor: alpha(PRIMARY, 0.25), bgcolor: alpha(PRIMARY, 0.02) } }}>
-                            <Box sx={{ flexShrink: 0 }}>{getFileIcon(file)}</Box>
-                            <Box flex={1} overflow="hidden">
-                                <Typography variant="body2" fontWeight={600} noWrap sx={{ fontSize: '0.82rem' }}>{file.name}</Typography>
-                                <Stack direction="row" alignItems="center" spacing={1}>
-                                    <Typography variant="caption" color="text.secondary">{formatFileSize(file.size)}</Typography>
-                                    <Typography variant="caption" sx={{ color: alpha('#000', 0.2) }}>•</Typography>
-                                    <Typography variant="caption" color="text.secondary" sx={{ textTransform: 'uppercase', fontSize: '0.6rem', fontWeight: 700 }}>{file.name.split('.').pop()}</Typography>
-                                </Stack>
-                            </Box>
-                            <Chip label={`Doc ${i + 1}`} size="small" sx={{ height: 18, fontSize: '0.6rem', fontWeight: 700, bgcolor: alpha(PRIMARY, 0.07), color: PRIMARY, border: `1px solid ${alpha(PRIMARY, 0.15)}` }} />
-                            <IconButton size="small" onClick={() => onRemove(i)} sx={{ color: 'text.disabled', '&:hover': { color: 'error.main', bgcolor: alpha('#d32f2f', 0.06) } }}>
-                                <CloseIcon sx={{ fontSize: 15 }} />
-                            </IconButton>
-                        </Box>
-                    ))}
-                </Stack>
-            </Box>
-        )}
-    </Box>
-);
-
-// ─── MovementForm ─────────────────────────────────────────────────────────────
-
-const MovementForm = ({
-    register, control, formState, setValue, sendingRequest, buttonText, onFilesChange, initialAssets = [],
-}: IMovementForm) => {
-    const navigate = useNavigate();
-    const { getCurrentUser } = RoutesUtills();
-    const fileInputRef = useRef<HTMLInputElement>(null);
-
-    const [officerOptions, setOfficerOptions] = useState<IOptions[]>([]);
-    const [officerMap, setOfficerMap] = useState<Map<any, IUser>>(new Map());
-    const [selectedOfficer, setSelectedOfficer] = useState<IUser | null>(null);
-
-    const [showChangeApprover, setShowChangeApprover] = useState(false);
-    const [approverOptions, setApproverOptions] = useState<IOptions[]>([]);
-    const [approverMap, setApproverMap] = useState<Map<any, IUser>>(new Map());
-    const [selectedApprover, setSelectedApprover] = useState<IUser | null>(null);
-
-    const [destinationOptions, setDestinationOptions] = useState<IOptions[]>([]);
-    const [selectedDestination, setSelectedDestination] = useState<IOptions | null>(null);
-
-    const [assetSearchOptions, setAssetSearchOptions] = useState<IOptions[]>([]);
-    const [assetMap, setAssetMap] = useState<Map<any, IAsset>>(new Map());
-    const [selectedAssets, setSelectedAssets] = useState<IAsset[]>([]);
-    const [assetInputValue, setAssetInputValue] = useState('');
-    const [assetSearchLoading, setAssetSearchLoading] = useState(false);
-
-    const [files, setFiles] = useState<File[]>([]);
-
-    const destinationType = useWatch({ control, name: 'destinationType' });
-
-    // Seed with logged-in user (or mock) on mount
-    useEffect(() => {
-        const user: IUser = getCurrentUser();
-        const seedUser = (user?.id) ? user : MOCK_OFFICER;
-        const opt: IOptions = { label: `${seedUser.firstName} ${seedUser.lastName}`, value: seedUser.id as any };
-        setOfficerOptions([opt]);
-        setOfficerMap(new Map([[seedUser.id, seedUser]]));
-        setValue('officerId', seedUser.id);
-        setSelectedOfficer(seedUser);
-
-        if (initialAssets.length === 0) {
-            setSelectedAssets(MOCK_ASSETS);
-            setValue('assetIds', MOCK_ASSETS.map((a) => a.id as string | number));
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
-    useEffect(() => {
-        if (initialAssets.length > 0) {
-            setSelectedAssets(initialAssets);
-            setValue('assetIds', initialAssets.map((a) => a.id as string | number));
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
-    useEffect(() => {
-        if (destinationType) fetchDestinations('', destinationType);
-        setValue('destinationId', null);
-        setValue('destination', '');
-        setSelectedDestination(null);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [destinationType]);
-
-    const fetchUsers = async (query = '', forApprover = false) => {
-        try {
-            const r = await fetchRowsService({ pageNumber: 0, pageSize: 10, endPoint: 'users', params: query ? { name: query } : {} }) as any;
-            if (r?.status === 200) {
-                const content: IUser[] = r.data?.content ?? [];
-                const map = new Map<any, IUser>(content.map((u) => [u.id, u]));
-                const opts: IOptions[] = content.map((u) => ({ label: `${u.firstName} ${u.lastName}`, value: u.id as any }));
-                if (forApprover) { setApproverMap(map); setApproverOptions(opts); }
-                else { setOfficerMap(map); setOfficerOptions(opts); }
-            }
-        } catch { /* silent */ }
-    };
-
-    const fetchDestinations = async (query = '', type: string) => {
-        if (!type) return;
-        const endpointMap: Record<string, string> = { Branch: 'branches', Department: 'departments', External: 'vendors' };
-        const ep = endpointMap[type];
-        if (!ep) return;
-        try {
-            const r = await fetchRowsService({ pageNumber: 0, pageSize: 10, endPoint: ep, params: query ? { name: query } : {} }) as any;
-            if (r?.status === 200) setDestinationOptions((r.data?.content ?? []).map((item: any) => ({ label: item.name, value: item.id })));
-        } catch { /* silent */ }
-    };
-
-    const fetchAssets = async (query = '') => {
-        setAssetSearchLoading(true);
-        try {
-            const r = await fetchRowsService({ pageNumber: 0, pageSize: 10, endPoint: 'assets', params: query ? { engravedNumber: query } : {} }) as any;
-            if (r?.status === 200) {
-                const content: IAsset[] = r.data?.content ?? [];
-                setAssetMap(new Map(content.map((a) => [a.id, a])));
-                setAssetSearchOptions(content.map((a) => ({ label: a.engravedNumber, value: a.id as any })));
-            }
-        } catch { /* silent */ }
-        setAssetSearchLoading(false);
-    };
-
-    const handleAddFiles = (fileList: FileList | null) => {
-        if (!fileList) return;
-        const validTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
-        const maxSize = 5 * 1024 * 1024;
-        const incoming: File[] = [];
-        Array.from(fileList).forEach((f) => {
-            if (!validTypes.includes(f.type)) { toast.warning(`${f.name}: Unsupported format — use PDF, JPG or PNG.`); return; }
-            if (f.size > maxSize) { toast.warning(`${f.name}: Exceeds 5 MB limit.`); return; }
-            incoming.push(f);
-        });
-        setFiles((prev) => { const updated = [...prev, ...incoming]; onFilesChange?.(updated); return updated; });
-    };
-
-    const handleRemoveFile = (index: number) => {
-        setFiles((prev) => { const updated = prev.filter((_, i) => i !== index); onFilesChange?.(updated); return updated; });
-    };
-
-    const renderOfficerOption = (props: any, option: IOptions) => {
-        const user = officerMap.get(option.value);
-        return (
-            <Box component="li" {...props} sx={{ px: 1.5, py: 1, display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                <Avatar sx={{ width: 32, height: 32, bgcolor: alpha(PRIMARY, 0.12), color: PRIMARY, fontSize: '0.75rem', fontWeight: 800, flexShrink: 0 }}>{option.label[0]?.toUpperCase() ?? '?'}</Avatar>
-                <Box>
-                    <Typography variant="body2" fontWeight={600} lineHeight={1.2}>{option.label}</Typography>
-                    <Stack direction="row" spacing={0.75}>
-                        {user?.title && <Typography variant="caption" color="text.secondary">{user.title.name}</Typography>}
-                        {user?.branch && <Typography variant="caption" color="text.disabled">&middot; {user.branch.name}</Typography>}
-                    </Stack>
                 </Box>
+                {scopeChip}
             </Box>
-        );
-    };
 
-    const renderApproverOption = (props: any, option: IOptions) => {
-        const user = approverMap.get(option.value);
-        return (
-            <Box component="li" {...props} sx={{ px: 1.5, py: 1, display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                <Avatar sx={{ width: 32, height: 32, bgcolor: alpha(BLUE, 0.12), color: BLUE, fontSize: '0.75rem', fontWeight: 800, flexShrink: 0 }}>{option.label[0]?.toUpperCase() ?? '?'}</Avatar>
-                <Box>
-                    <Typography variant="body2" fontWeight={600} lineHeight={1.2}>{option.label}</Typography>
-                    {user?.title && <Typography variant="caption" color="text.secondary">{user.title.name}</Typography>}
-                </Box>
-            </Box>
-        );
-    };
+            {/* ── Body ── */}
+            <Box sx={{ px: { xs: 2.5, md: 3.5 }, py: 3 }}>
 
-    const renderAssetOption = (props: any, option: IOptions) => {
-        const asset = assetMap.get((option as IOptions).value);
-        return (
-            <Box component="li" {...props} sx={{ px: 1.5, py: 1.25, display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                <Box sx={{ width: 32, height: 32, borderRadius: 1, flexShrink: 0, bgcolor: alpha(PRIMARY, 0.1), color: PRIMARY, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <FingerprintIcon sx={{ fontSize: 16 }} />
-                </Box>
-                <Box flex={1} overflow="hidden">
-                    <Stack direction="row" alignItems="center" spacing={0.75} flexWrap="wrap">
-                        <Typography variant="body2" fontWeight={700} noWrap>{(option as IOptions).label}</Typography>
-                        {asset?.assetType && <Chip label={asset.assetType.name} size="small" sx={{ height: 16, fontSize: '0.6rem', fontWeight: 700, bgcolor: alpha(PRIMARY, 0.08), color: PRIMARY }} />}
-                        {asset?.assetStatus?.name && <StatusChip status={asset.assetStatus.name} color={(asset.assetStatus as any).color} />}
-                    </Stack>
-                    {asset?.assetName && <Typography variant="caption" color="text.secondary" noWrap>{asset.assetName}</Typography>}
-                    {asset?.branch && <Typography variant="caption" color="text.disabled" noWrap> &middot; {asset.branch.name}</Typography>}
-                </Box>
-            </Box>
-        );
-    };
-
-    return (
-        <Stack spacing={3} sx={{ maxWidth: 960, mx: 'auto', width: '100%' }}>
-
-            {/* ── Section 1: Requesting Officer ──────────────────────────── */}
-            <Paper elevation={0} sx={{ p: 3, borderRadius: 2.5, border: `1px solid ${alpha('#000', 0.07)}` }}>
-                <FormSection
-                    title="Requesting Officer"
-                    subtitle="The officer initiating this asset movement request."
-                    icon={<PersonOutlineOutlinedIcon sx={{ fontSize: 16 }} />}
-                >
-                    <Grid container spacing={2.5} alignItems="flex-start">
-                        <Grid item xs={12} sm={selectedOfficer ? 5 : 8}>
-                            <UseFormAutocompleteComponent
-                                register={register} control={control} formState={formState}
-                                value="officerId" label="Search Officer"
-                                options={officerOptions}
-                                onInputChange={(_, v) => { if (v) fetchUsers(v); }}
-                                onChange={(_, option) => {
-                                    const user = option ? officerMap.get((option as IOptions).value) ?? null : null;
-                                    setSelectedOfficer(user);
-                                    setShowChangeApprover(false);
-                                    setSelectedApprover(null);
-                                    setValue('approverId', null);
-                                }}
-                                renderOption={renderOfficerOption}
-                            />
-                        </Grid>
-                        {selectedOfficer && (
-                            <Grid item xs={12} sm={7}>
-                                <UserProfileCard user={selectedOfficer} role="Requesting Officer" accentColor={PRIMARY} />
-                            </Grid>
-                        )}
-                    </Grid>
-                </FormSection>
-            </Paper>
-
-            {/* ── Section 2: Approving Authority ─────────────────────────── */}
-            {selectedOfficer && (
-                <Paper elevation={0} sx={{ p: 3, borderRadius: 2.5, border: `1px solid ${alpha(showChangeApprover ? BLUE : PRIMARY, 0.12)}`, bgcolor: alpha(showChangeApprover ? BLUE : PRIMARY, 0.015), transition: 'all 0.2s' }}>
-                    <FormSection
-                        title="Approving Authority"
-                        subtitle="The designated approver based on the officer's reporting line."
-                        icon={<VerifiedUserOutlinedIcon sx={{ fontSize: 16 }} />}
-                        badge={
-                            <Button
-                                size="small"
-                                variant={showChangeApprover ? 'contained' : 'outlined'}
-                                color={showChangeApprover ? 'error' : 'primary'}
-                                startIcon={showChangeApprover ? <CloseIcon sx={{ fontSize: 13 }} /> : <EditOutlinedIcon sx={{ fontSize: 13 }} />}
-                                sx={{ fontWeight: 600, fontSize: '0.72rem', height: 28, borderRadius: 1.5, textTransform: 'none', mr: 1 }}
-                                onClick={() => {
-                                    setShowChangeApprover((p) => !p);
-                                    if (showChangeApprover) { setSelectedApprover(null); setValue('approverId', null); }
-                                }}
-                            >
-                                {showChangeApprover ? 'Cancel' : 'Change Approver'}
-                            </Button>
-                        }
+                {/* Section 1: Movement type */}
+                <PageSection title="Movement Type" subtitle="What kind of transfer is this?" icon={<SwapHorizOutlinedIcon fontSize="small" />}>
+                    <TextField
+                        select fullWidth label="Movement Type"
+                        value={watch('movementType') ?? ''}
+                        onChange={(e) => setValue('movementType', e.target.value, { shouldValidate: true })}
+                        error={!!formState.errors.movementType}
+                        helperText={formState.errors.movementType?.message as string}
+                        sx={fieldSx}
+                        SelectProps={{
+                            MenuProps: { PaperProps: { elevation: 3, sx: menuPaperSx } },
+                            renderValue: (v) => creatableMovementTypes.find((t) => t.value === v)?.label ?? String(v),
+                        }}
                     >
-                        {!showChangeApprover && (
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, p: 1.75, borderRadius: 1.5, bgcolor: alpha(PRIMARY, 0.04), border: `1px dashed ${alpha(PRIMARY, 0.2)}` }}>
-                                <Box sx={{ width: 38, height: 38, borderRadius: 1.5, bgcolor: alpha(PRIMARY, 0.1), color: PRIMARY, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                                    <VerifiedUserOutlinedIcon sx={{ fontSize: 18 }} />
+                        {creatableMovementTypes.map((t) => (
+                            <MenuItem key={t.value} value={t.value}>
+                                <Box>
+                                    <Typography variant="body2" fontWeight={600}>{t.label}</Typography>
+                                    <Typography variant="caption" color="text.secondary" display="block">{t.description}</Typography>
                                 </Box>
-                                <Box flex={1}>
-                                    <Typography variant="caption" sx={{ color: PRIMARY, fontWeight: 700, textTransform: 'uppercase', fontSize: '0.62rem', letterSpacing: 0.5 }}>Default Approver (Reporting Line)</Typography>
-                                    <Typography variant="body2" fontWeight={700}>{selectedOfficer.title?.reportsTo?.name ?? NA}</Typography>
-                                    <Stack direction="row" alignItems="center" spacing={0.5} mt={0.2} flexWrap="wrap">
-                                        <BadgeOutlinedIcon sx={{ fontSize: 11, color: 'text.secondary' }} />
-                                        <Typography variant="caption" color="text.secondary">Title: {selectedOfficer.title?.name ?? NA}</Typography>
-                                        <Typography variant="caption" color="text.disabled"> &middot; </Typography>
-                                        <AccountTreeOutlinedIcon sx={{ fontSize: 11, color: 'text.secondary' }} />
-                                        <Typography variant="caption" color="text.secondary">Role: {(selectedOfficer.title as any)?.role?.name ?? NA}</Typography>
-                                    </Stack>
-                                </Box>
-                                <Chip label="Auto-assigned" size="small" sx={{ height: 20, fontSize: '0.65rem', fontWeight: 700, bgcolor: alpha(PRIMARY, 0.1), color: PRIMARY, border: `1px solid ${alpha(PRIMARY, 0.2)}` }} />
-                            </Box>
-                        )}
+                            </MenuItem>
+                        ))}
+                    </TextField>
+                </PageSection>
 
-                        <Collapse in={showChangeApprover}>
-                            <Box>
-                                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
-                                    Search and select an alternative approver. This overrides the default reporting line for this request.
-                                </Typography>
-                                <Grid container spacing={2.5} alignItems="flex-start">
-                                    <Grid item xs={12} sm={selectedApprover ? 5 : 8}>
-                                        <UseFormAutocompleteComponent
-                                            register={register} control={control} formState={formState}
-                                            value="approverId" label="Search Alternative Approver"
-                                            options={approverOptions} required={false}
-                                            onInputChange={(_, v) => { if (v) fetchUsers(v, true); }}
-                                            onChange={(_, option) => {
-                                                setSelectedApprover(option ? approverMap.get((option as IOptions).value) ?? null : null);
-                                            }}
-                                            renderOption={renderApproverOption}
-                                        />
-                                    </Grid>
-                                    {selectedApprover && (
-                                        <Grid item xs={12} sm={7}>
-                                            <UserProfileCard user={selectedApprover} role="Alternative Approver" accentColor={BLUE} />
-                                        </Grid>
-                                    )}
-                                </Grid>
-                            </Box>
-                        </Collapse>
-                    </FormSection>
-                </Paper>
-            )}
-
-            {/* ── Section 3: Assets to Move ───────────────────────────────── */}
-            <Paper elevation={0} sx={{ p: 3, borderRadius: 2.5, border: `1px solid ${alpha(selectedAssets.length === 0 && formState.errors.assetIds ? '#d32f2f' : '#000', selectedAssets.length === 0 && formState.errors.assetIds ? 0.4 : 0.07)}` }}>
-                <FormSection
-                    title="Assets to Move"
-                    subtitle="Search and add assets by engraved number. Full asset details are shown for verification."
-                    icon={<InventoryOutlinedIcon sx={{ fontSize: 16 }} />}
-                    badge={
-                        selectedAssets.length > 0 ? (
-                            <Chip label={`${selectedAssets.length} asset${selectedAssets.length > 1 ? 's' : ''} selected`} size="small" sx={{ height: 22, fontSize: '0.68rem', fontWeight: 700, bgcolor: alpha(PRIMARY, 0.08), color: PRIMARY, border: `1px solid ${alpha(PRIMARY, 0.2)}`, mr: 1 }} />
-                        ) : undefined
-                    }
+                {/* Section 2: Source & destination */}
+                <PageSection
+                    title="Source & Destination"
+                    subtitle="Pick the source store, then where the items are going."
+                    icon={<StorefrontOutlinedIcon fontSize="small" />}
+                    actions={scopeChip}
                 >
-                    <Box sx={{ maxWidth: 520 }}>
-                        <Autocomplete
-                            options={assetSearchOptions}
-                            getOptionLabel={(o) => (o as IOptions).label ?? ''}
-                            value={null}
-                            inputValue={assetInputValue}
-                            loading={assetSearchLoading}
-                            filterOptions={(x) => x}
-                            isOptionEqualToValue={(o, v) => (o as IOptions).value === (v as IOptions).value}
-                            onInputChange={(_, v, reason) => {
-                                setAssetInputValue(v);
-                                if (reason === 'input') fetchAssets(v);
-                            }}
-                            onChange={(_, selected) => {
-                                if (!selected) return;
-                                const opt = selected as IOptions;
-                                const asset = assetMap.get(opt.value);
-                                if (!asset) return;
-                                if (selectedAssets.some((a) => a.id === asset.id)) { toast.warning(`Asset ${asset.engravedNumber} is already in the list.`); return; }
-                                const updated = [...selectedAssets, asset];
-                                setSelectedAssets(updated);
-                                setValue('assetIds', updated.map((a) => a.id as string | number));
-                                setAssetInputValue('');
-                                setAssetSearchOptions([]);
-                            }}
-                            renderInput={(params) => (
-                                <TextField
-                                    {...params}
-                                    label="Search by Engraved Number"
-                                    placeholder="e.g. PBL-LAP-2023-0042"
-                                    size="small"
-                                    error={!!formState.errors.assetIds}
-                                    helperText={formState.errors.assetIds && selectedAssets.length === 0 ? (formState.errors.assetIds.message as string) : undefined}
-                                    InputProps={{
-                                        ...params.InputProps,
-                                        endAdornment: (
-                                            <>{assetSearchLoading && <CircularProgress color="inherit" size={16} sx={{ mr: 1 }} />}{params.InputProps.endAdornment}</>
-                                        ),
-                                    }}
+                    <Grid container spacing={2.5}>
+                        <Grid item xs={12} sm={6}>
+                            <Autocomplete
+                                options={stores}
+                                loading={loadingStores}
+                                value={sourceStore}
+                                getOptionLabel={storeLabel}
+                                isOptionEqualToValue={(o, v) => o.id === v.id}
+                                onChange={(_, v) => { setSourceStore(v); setValue('sourceStoreId', v?.id ?? '', { shouldValidate: true }); }}
+                                renderInput={(params) => (
+                                    <TextField {...params} label="Source Store" sx={autocompleteSx}
+                                        error={!!formState.errors.sourceStoreId}
+                                        helperText={formState.errors.sourceStoreId?.message as string}
+                                        InputProps={{ ...params.InputProps, endAdornment: <>{loadingStores && <CircularProgress size={15} sx={{ mr: 3 }} />}{params.InputProps.endAdornment}</> }}
+                                    />
+                                )}
+                            />
+                            {sourceStore && (
+                                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.75, ml: 0.5 }}>
+                                    {sourceStore.locationName}{sourceStore.departmentName ? ` · ${sourceStore.departmentName}` : ''}
+                                </Typography>
+                            )}
+                        </Grid>
+
+                        <Grid item xs={12} sm={6}>
+                            <ToggleButtonGroup
+                                exclusive size="small" fullWidth
+                                value={destinationKind}
+                                onChange={(_, v) => {
+                                    if (!v) return;
+                                    setValue('destinationKind', v);
+                                    setDestStore(null); setRecipientUser(null);
+                                    setValue('destStoreId', null); setValue('recipientUserId', null);
+                                }}
+                                sx={{ mb: 1.5, ...toggleGroupSx }}
+                            >
+                                <ToggleButton value="STORE">To Store</ToggleButton>
+                                <ToggleButton value="USER">To User</ToggleButton>
+                            </ToggleButtonGroup>
+
+                            {destinationKind === 'STORE' ? (
+                                <Autocomplete
+                                    options={stores.filter((s) => s.id !== sourceStore?.id)}
+                                    value={destStore}
+                                    getOptionLabel={storeLabel}
+                                    isOptionEqualToValue={(o, v) => o.id === v.id}
+                                    onChange={(_, v) => { setDestStore(v); setValue('destStoreId', v?.id ?? null, { shouldValidate: true }); }}
+                                    renderInput={(params) => (
+                                        <TextField {...params} label="Destination Store" sx={autocompleteSx}
+                                            error={!!formState.errors.destStoreId}
+                                            helperText={formState.errors.destStoreId?.message as string} />
+                                    )}
+                                />
+                            ) : (
+                                <Autocomplete
+                                    options={userOptions}
+                                    loading={userLoading}
+                                    value={recipientUser}
+                                    getOptionLabel={(u) => `${u.firstName} ${u.lastName}`}
+                                    isOptionEqualToValue={(o, v) => o.id === v.id}
+                                    filterOptions={(x) => x}
+                                    onInputChange={(_, v, reason) => { if (reason === 'input' && v) fetchUsers(v); }}
+                                    onChange={(_, v) => { setRecipientUser(v); setValue('recipientUserId', v?.id ?? null, { shouldValidate: true }); }}
+                                    renderInput={(params) => (
+                                        <TextField {...params} label="Recipient User" sx={autocompleteSx}
+                                            error={!!formState.errors.recipientUserId}
+                                            helperText={formState.errors.recipientUserId?.message as string}
+                                            InputProps={{ ...params.InputProps, endAdornment: <>{userLoading && <CircularProgress size={15} sx={{ mr: 3 }} />}{params.InputProps.endAdornment}</> }}
+                                        />
+                                    )}
                                 />
                             )}
-                            renderOption={renderAssetOption}
-                        />
-                    </Box>
+                            {destinationKind === 'USER' && recipientUser?.branch && (
+                                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.75, ml: 0.5 }}>
+                                    {recipientUser.branch.name}{recipientUser.department ? ` · ${recipientUser.department.name}` : ''}
+                                </Typography>
+                            )}
+                        </Grid>
+                    </Grid>
+                </PageSection>
 
-                    {selectedAssets.length > 0 && (
+                {/* Section 3: Items */}
+                <PageSection
+                    title="Items to Move"
+                    subtitle="Add serialized assets or consumables held by the source store."
+                    icon={<InventoryOutlinedIcon fontSize="small" />}
+                    actions={items.length > 0 ? <Chip label={`${items.length} item${items.length > 1 ? 's' : ''}`} size="small" sx={{ height: 22, fontWeight: 700, bgcolor: alpha(P, 0.08), color: P }} /> : undefined}
+                >
+                    {!sourceStore ? (
+                        <Box sx={{ py: 5, textAlign: 'center', borderRadius: 2, border: `1px dashed ${neutral[200]}` }}>
+                            <StorefrontOutlinedIcon sx={{ fontSize: 28, color: neutral[300], mb: 0.5 }} />
+                            <Typography variant="body2" sx={{ color: neutral[500] }}>
+                                Select a source store first to see what it holds.
+                            </Typography>
+                        </Box>
+                    ) : (
                         <>
-                            <Divider sx={{ my: 2 }}>
-                                <Stack direction="row" alignItems="center" spacing={1}>
-                                    <LocalShippingOutlinedIcon sx={{ fontSize: 13, color: 'text.disabled' }} />
-                                    <Typography variant="caption" sx={{ color: 'text.disabled', fontSize: '0.7rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                                        {selectedAssets.length} Asset{selectedAssets.length > 1 ? 's' : ''} Queued for Movement
-                                    </Typography>
-                                </Stack>
-                            </Divider>
-                            <Stack spacing={1.5}>
-                                {selectedAssets.map((asset, idx) => (
-                                    <AssetCard
-                                        key={asset.id ?? idx}
-                                        asset={asset}
-                                        onRemove={() => {
-                                            const updated = selectedAssets.filter((_, i) => i !== idx);
-                                            setSelectedAssets(updated);
-                                            setValue('assetIds', updated.map((a) => a.id as string | number));
-                                        }}
-                                    />
-                                ))}
-                            </Stack>
+                            <ToggleButtonGroup exclusive size="small" value={lineKind} onChange={(_, v) => v && setLineKind(v)} sx={{ mb: 2, ...toggleGroupSx }}>
+                                <ToggleButton value="ASSET"><FingerprintIcon sx={{ fontSize: 15, mr: 0.5 }} /> Asset</ToggleButton>
+                                <ToggleButton value="COMMODITY"><CategoryOutlinedIcon sx={{ fontSize: 15, mr: 0.5 }} /> Consumable</ToggleButton>
+                            </ToggleButtonGroup>
+
+                            <Grid container spacing={1.5} alignItems="flex-start">
+                                {lineKind === 'ASSET' ? (
+                                    <Grid item xs={12} sm={9}>
+                                        <Autocomplete
+                                            options={sourceAssets.filter((a) => !items.some((i) => i.assetId === a.id))}
+                                            value={pickedAsset}
+                                            getOptionLabel={(a) => `${a.engravedNumber} — ${a.assetName}`}
+                                            isOptionEqualToValue={(o, v) => o.id === v.id}
+                                            onChange={(_, v) => setPickedAsset(v)}
+                                            renderInput={(params) => <TextField {...params} label="Select Asset (by engraved no.)" sx={autocompleteSx} />}
+                                        />
+                                    </Grid>
+                                ) : (
+                                    <>
+                                        <Grid item xs={12} sm={6}>
+                                            <Autocomplete
+                                                options={sourceBalances.filter((b) => !items.some((i) => i.commodityId === b.commodityId))}
+                                                value={pickedCommodity}
+                                                getOptionLabel={(b) => `${b.commodityName} (${b.quantity} in stock)`}
+                                                isOptionEqualToValue={(o, v) => o.commodityId === v.commodityId}
+                                                onChange={(_, v) => setPickedCommodity(v)}
+                                                renderInput={(params) => <TextField {...params} label="Select Consumable" sx={autocompleteSx} />}
+                                            />
+                                        </Grid>
+                                        <Grid item xs={6} sm={3}>
+                                            <TextField type="number" fullWidth label="Quantity" value={lineQty} sx={fieldSx}
+                                                inputProps={{ min: 1, max: pickedCommodity?.quantity ?? undefined }}
+                                                onChange={(e) => setLineQty(Math.max(1, Number(e.target.value)))} />
+                                        </Grid>
+                                    </>
+                                )}
+                                <Grid item xs={12} sm={3}>
+                                    <Button fullWidth variant="outlined" startIcon={<AddIcon />} onClick={addLine}
+                                        sx={{
+                                            height: 48, borderRadius: '8px', textTransform: 'none', fontWeight: 600,
+                                            borderColor: alpha(P, 0.5), color: P,
+                                            '&:hover': { borderColor: P, bgcolor: alpha(P, 0.05) },
+                                        }}>
+                                        Add Item
+                                    </Button>
+                                </Grid>
+                            </Grid>
+
+                            {items.length > 0 && (
+                                <>
+                                    <Divider sx={{ my: 2 }} />
+                                    <Stack spacing={1}>
+                                        {items.map((it, idx) => (
+                                            <Stack key={idx} direction="row" alignItems="center" spacing={1.5}
+                                                sx={{
+                                                    p: 1.25, borderRadius: 1.5, border: `1px solid ${border.subtle}`, bgcolor: '#FAFBFC',
+                                                    transition: 'border-color 0.15s ease',
+                                                    '&:hover': { borderColor: alpha(P, 0.35) },
+                                                }}>
+                                                <Box sx={{ width: 30, height: 30, borderRadius: 1, bgcolor: alpha(it.assetId ? P : '#BC892C', 0.1), color: it.assetId ? P : '#BC892C', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                                    {it.assetId ? <FingerprintIcon sx={{ fontSize: 15 }} /> : <CategoryOutlinedIcon sx={{ fontSize: 15 }} />}
+                                                </Box>
+                                                <Box flex={1} minWidth={0}>
+                                                    <Typography variant="caption" fontWeight={700} noWrap display="block">{it.label}</Typography>
+                                                    <Typography variant="caption" color="text.secondary" noWrap>{it.subLabel}</Typography>
+                                                </Box>
+                                                <Tooltip title="Remove">
+                                                    <IconButton size="small" onClick={() => removeLine(idx)} sx={{ color: status.danger.main }}>
+                                                        <DeleteOutlineIcon sx={{ fontSize: 16 }} />
+                                                    </IconButton>
+                                                </Tooltip>
+                                            </Stack>
+                                        ))}
+                                    </Stack>
+                                </>
+                            )}
                         </>
                     )}
-                </FormSection>
-            </Paper>
+                </PageSection>
 
-            {/* ── Section 4: Movement Destination ────────────────────────── */}
-            <Paper elevation={0} sx={{ p: 3, borderRadius: 2.5, border: `1px solid ${alpha('#000', 0.07)}` }}>
-                <FormSection
-                    title="Movement Destination"
-                    subtitle="Specify where the assets are going and who will receive them."
-                    icon={<LocalShippingOutlinedIcon sx={{ fontSize: 16 }} />}
+                {/*
+                 * Section 4: Journey
+                 *
+                 * States whether this movement travels, without collecting anything — the same shape
+                 * the repair flows settled on.
+                 *
+                 * <p>Courier, tracking number and delivery dates used to be captured here and were
+                 * dead data: the carrier is not known when a movement is written, and both dispatch
+                 * paths overwrite whatever was typed. A solo dispatch resolves the courier from the
+                 * registry and restates `courierService` from its name; a consignment dispatch stamps
+                 * the whole load's courier, plate and dates over every movement on board. A planned
+                 * name could therefore be silently replaced by a different one, leaving no trace it
+                 * had ever been intended. The consignment is where an intended courier belongs — it
+                 * is the journey, and it is authoritative.
+                 */}
+                {sourceStore && destLocationId != null && (
+                    <PageSection
+                        title="Journey"
+                        subtitle="Whether this movement travels, and where its courier is captured."
+                        icon={<LocalShippingOutlinedIcon fontSize="small" />}
+                    >
+                        <Alert severity="info" sx={{ borderRadius: 2, '& .MuiAlert-message': { fontSize: '0.82rem' } }}>
+                            {isInterLocation ? (
+                                <>
+                                    <strong>{sourceStore.locationName} → {destLocationName}</strong> — this movement
+                                    leaves its location, so it has to be dispatched. The courier, plate number,
+                                    tracking number and signed dispatch note are captured at that point, either on
+                                    this movement on its own or once for the whole van if it travels on a
+                                    consignment.
+                                </>
+                            ) : (
+                                <>
+                                    Both ends of this movement are within <strong>{sourceStore.locationName}</strong>,
+                                    so no courier, tracking number or delivery dates are needed.
+                                </>
+                            )}
+                        </Alert>
+                    </PageSection>
+                )}
+
+                {/* Section 5: Approval + remarks */}
+                <PageSection
+                    title="Approval & Remarks"
+                    subtitle="Whether this movement needs approval is set by policy, not by choice."
+                    icon={<NotesOutlinedIcon fontSize="small" />}
+                    mb={0}
                 >
-                    <Grid container spacing={2.5}>
-                        <Grid item xs={12} sm={5}>
-                            <UseFormSelect
-                                register={register} control={control} formState={formState}
-                                value="destinationType" label="Destination Type"
-                                options={destinationTypeOptions}
-                            />
-                        </Grid>
-
-                        {destinationType && (
-                            <Grid item xs={12} sm={7}>
-                                <UseFormAutocompleteComponent
-                                    register={register} control={control} formState={formState}
-                                    value="destinationId"
-                                    label={destinationType === 'Branch' ? 'Select Branch' : destinationType === 'Department' ? 'Select Department' : 'Select External Vendor'}
-                                    options={destinationOptions}
-                                    onInputChange={(_, v) => fetchDestinations(v, destinationType)}
-                                    onChange={(_, option) => {
-                                        if (option) { const opt = option as IOptions; setValue('destination', opt.label); setSelectedDestination(opt); }
-                                        else { setValue('destination', ''); setSelectedDestination(null); }
-                                    }}
-                                />
-                            </Grid>
-                        )}
-
-                        {selectedDestination && (
-                            <Grid item xs={12}>
-                                <DestinationConfirmCard label={selectedDestination.label} type={destinationType} />
-                            </Grid>
-                        )}
-
-                        {selectedDestination && selectedOfficer && (
-                            <Grid item xs={12}>
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, p: 1.5, borderRadius: 1.5, border: `1px solid ${alpha('#000', 0.06)}`, bgcolor: '#F8FAFC', flexWrap: 'wrap' }}>
-                                    <Box sx={{ flex: 1, minWidth: 120 }}>
-                                        <Typography sx={{ fontSize: '0.62rem', fontWeight: 700, color: 'text.disabled', textTransform: 'uppercase', letterSpacing: 0.5 }}>From</Typography>
-                                        <Typography variant="body2" fontWeight={700} noWrap>{selectedOfficer.branch?.name ?? selectedOfficer.department?.name ?? NA}</Typography>
-                                    </Box>
-                                    <ArrowForwardOutlinedIcon sx={{ color: 'text.disabled', fontSize: 18, flexShrink: 0 }} />
-                                    <Box sx={{ flex: 1, minWidth: 120 }}>
-                                        <Typography sx={{ fontSize: '0.62rem', fontWeight: 700, color: PRIMARY, textTransform: 'uppercase', letterSpacing: 0.5 }}>To</Typography>
-                                        <Typography variant="body2" fontWeight={700} noWrap>{selectedDestination.label}</Typography>
-                                    </Box>
-                                    {selectedAssets.length > 0 && (
-                                        <>
-                                            <Divider orientation="vertical" flexItem sx={{ mx: 0.5 }} />
-                                            <Box sx={{ flexShrink: 0 }}>
-                                                <Typography sx={{ fontSize: '0.62rem', fontWeight: 700, color: 'text.disabled', textTransform: 'uppercase', letterSpacing: 0.5 }}>Assets</Typography>
-                                                <Typography variant="body2" fontWeight={700}>{selectedAssets.length} item{selectedAssets.length > 1 ? 's' : ''}</Typography>
-                                            </Box>
-                                        </>
-                                    )}
-                                </Box>
-                            </Grid>
-                        )}
-
-                        <Grid item xs={12} sm={6}>
-                            <UseFormInput
-                                register={register} control={control} formState={formState}
-                                value={"receivingParty" as any} label="Receiving Party / Officer Name" required={false}
-                            />
-                        </Grid>
-                        <Grid item xs={12} sm={6}>
-                            <UseFormInput
-                                register={register} control={control} formState={formState}
-                                value={"receivingPartyContact" as any} label="Receiving Party Contact" required={false}
-                            />
-                        </Grid>
-                    </Grid>
-                </FormSection>
-            </Paper>
-
-            {/* ── Section 5: Movement Details ─────────────────────────────── */}
-            <Paper elevation={0} sx={{ p: 3, borderRadius: 2.5, border: `1px solid ${alpha('#000', 0.07)}` }}>
-                <FormSection
-                    title="Movement Details"
-                    subtitle="Describe the purpose and provide the expected return date if this is a temporary movement."
-                    icon={<DescriptionOutlinedIcon sx={{ fontSize: 16 }} />}
-                >
-                    <Grid container spacing={2.5}>
-                        <Grid item xs={12}>
-                            <UseFormInput
-                                register={register} control={control} formState={formState}
-                                value="reason" label="Reason for Movement" multiline row={4}
-                            />
-                        </Grid>
-                        <Grid item xs={12} sm={5}>
-                            <UseFormDatePicker
-                                register={register} control={control} formState={formState}
-                                value="expectedReturnDate" label="Expected Return Date (if temporary)" required={false}
-                            />
-                        </Grid>
-                    </Grid>
-                </FormSection>
-            </Paper>
-
-            {/* ── Section 6: Supporting Documents ─────────────────────────── */}
-            <Paper elevation={0} sx={{ p: 3, borderRadius: 2.5, border: `1px solid ${alpha('#000', 0.07)}` }}>
-                <FormSection
-                    title="Supporting Documents"
-                    subtitle="Attach authorization letters, purchase orders, or any supporting documentation. Optional but recommended."
-                    icon={<AttachFileOutlinedIcon sx={{ fontSize: 16 }} />}
-                    badge={
-                        files.length > 0 ? (
-                            <Chip label={`${files.length} file${files.length > 1 ? 's' : ''}`} size="small" sx={{ bgcolor: alpha(PRIMARY, 0.08), color: PRIMARY, fontWeight: 700, height: 20, fontSize: '0.68rem', mr: 1, border: `1px solid ${alpha(PRIMARY, 0.2)}` }} />
-                        ) : undefined
-                    }
-                >
-                    <Box sx={{ maxWidth: 640 }}>
-                        <DocumentDropZone files={files} onAdd={handleAddFiles} onRemove={handleRemoveFile} fileInputRef={fileInputRef} />
+                    {/*
+                     * Stated, not chosen. This was a switch defaulting to off, so a cross-location
+                     * movement could be sent with no oversight simply by leaving it alone. The
+                     * backend now derives it from the movement category, and this panel reports the
+                     * same derivation so there is no surprise at submit.
+                     */}
+                    <Box sx={{ mb: 2.5, p: 1.75, borderRadius: 2, bgcolor: alpha(P, 0.04), border: `1px solid ${alpha(P, 0.12)}` }}>
+                        <Stack direction="row" spacing={1.25} alignItems="flex-start">
+                            <HowToRegOutlinedIcon sx={{ fontSize: 18, color: P, mt: 0.2 }} />
+                            <Box>
+                                <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                                    {isInterLocation ? 'Approval required' : 'No approval required'}
+                                </Typography>
+                                <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                                    {isInterLocation
+                                        ? 'This movement crosses a location boundary, so it climbs your reporting ladder before it can be dispatched. You will not be able to dispatch it until every tier has approved.'
+                                        : 'Source and destination are in the same location, so this movement can be dispatched straight away.'}
+                                </Typography>
+                            </Box>
+                        </Stack>
                     </Box>
-                </FormSection>
-            </Paper>
+                    <TextField fullWidth multiline rows={3} label="Remarks (optional)" sx={fieldSx} value={watch('remarks') ?? ''} onChange={(e) => setValue('remarks', e.target.value)} />
+                </PageSection>
+            </Box>
 
-            {/* ── Actions ─────────────────────────────────────────────────── */}
-            <Paper elevation={0} sx={{ px: 3, py: 2.5, borderRadius: 2.5, border: `1px solid ${alpha('#000', 0.07)}`, display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 2 }}>
-                <Box sx={{ width: 130 }}>
-                    <ButtonComponent sendingRequest={false} buttonText="Cancel" buttonColor="inherit" variant="outlined" type="button" handleClick={() => navigate(ROUTES.MOVEMENT)} />
-                </Box>
-                <Box sx={{ width: 220 }}>
-                    <ButtonComponent sendingRequest={sendingRequest} buttonText={buttonText} buttonColor="primary" variant="contained" type="submit" />
-                </Box>
-            </Paper>
-        </Stack>
+            {/* ── Footer ── */}
+            <Box
+                sx={{
+                    px: { xs: 2, md: 3.5 },
+                    py: 2,
+                    borderTop: `1px solid ${border.subtle}`,
+                    bgcolor: '#FAFBFC',
+                    display: 'flex',
+                    flexDirection: { xs: 'column', sm: 'row' },
+                    alignItems: { xs: 'stretch', sm: 'center' },
+                    justifyContent: 'space-between',
+                    gap: 1.5,
+                }}
+            >
+                <Typography variant="caption" sx={{ color: neutral[400], display: { xs: 'none', sm: 'block' } }}>
+                    {items.length > 0
+                        ? <>{items.length} item{items.length > 1 ? 's' : ''} ready to move{isInterLocation && <> · <Box component="span" sx={{ color: BLUE, fontWeight: 600 }}>Inter-Location</Box></>}</>
+                        : 'Add at least one item to create this movement'}
+                </Typography>
+                <Button
+                    type="submit"
+                    variant="contained"
+                    startIcon={<SaveIcon fontSize="small" />}
+                    disabled={sendingRequest}
+                    sx={{
+                        height: 40, minWidth: 180, borderRadius: '8px', textTransform: 'none', fontWeight: 600,
+                        bgcolor: P, boxShadow: `0 2px 8px ${alpha(P, 0.3)}`,
+                        '&:hover': { bgcolor: brand[700], boxShadow: `0 4px 14px ${alpha(P, 0.4)}` },
+                        '&.Mui-disabled': { bgcolor: alpha(P, 0.45), color: '#fff' },
+                    }}
+                >
+                    {sendingRequest ? 'Saving…' : buttonText}
+                </Button>
+            </Box>
+        </Paper>
     );
 };
 

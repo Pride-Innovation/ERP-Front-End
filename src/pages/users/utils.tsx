@@ -6,12 +6,14 @@ Managing Director
 */
 
 import { usersMock } from '../../mocks/users';
+import { PERMISSIONS } from '../../core/permissions/constants';
 import { useContext, useEffect, useState } from 'react';
 import { getTableHeaders } from '../../components/tables/getTableHeaders';
 import { IOptions, ITableHeader } from '../../components/tables/interface';
 import InfoIcon from '@mui/icons-material/Info';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import { IUsersAxiosResponse, IUser, IUserTableData } from './interface';
+import { fetchStaffOptionsService } from './service/staffPicker';
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import { crudStates } from '../../utils/constants';
 import { IFormData } from '../assets/interface';
@@ -76,6 +78,39 @@ const UserUtils = () => {
     }, [selectedItemDetails]);
 
 
+    /**
+     * Loads the **staff picker** into the same store `fetchAllUsers` fills.
+     *
+     * <h2>Why a second loader rather than a flag</h2>
+     * These are two different questions that happen to want the same store. `fetchAllUsers` reads the
+     * staff directory and answers to `READ_USER`, which is right for the Users page. A dropdown
+     * asking "who should this be assigned to" is not administering the directory, and requiring that
+     * permission is what made the assets, movement and request screens unusable for an officer.
+     *
+     * <p>It dispatches `loadUsers` unchanged, so every component reading `users` from the store keeps
+     * working — the shape is a subset (id, names, email, title), which is all any of them read.
+     *
+     * <p>The scope is identical to the directory's, so nobody is offered a person they were not
+     * offered before.
+     */
+    const fetchStaffOptions = async (params?: Record<string, any>, pageNumber = 0, pageSize = 10) => {
+        setLoading(true);
+        try {
+            const { content, totalElements } = await fetchStaffOptionsService({
+                name: params?.name,
+                pageNumber,
+                pageSize,
+            });
+            setTotalUsers(totalElements);
+            dispatch(loadUsers(content as any));
+            setCount(totalElements);
+        } catch (error) {
+            // An empty dropdown is visible where it is used; the reason belongs in the console.
+            console.warn('Could not load staff options', error);
+        }
+        setLoading(false);
+    };
+
     const fetchAllUsers = async (params?: Record<string, any>, pageNumber = 0, pageSize = 10) => {
         setLoading(true)
         try {
@@ -127,11 +162,11 @@ const UserUtils = () => {
     } = usersMock[0];
 
     const rowData = {
-        image: usersMock[0]?.profileImage,
+        // image: usersMock[0]?.profileImage,
         name: `${usersMock[0].firstName} ${usersMock[0].lastName} ${(usersMock[0].otherName !== null ? usersMock[0].otherName : "")}`,
         staffNumber: usersMock[0].staffNumber,
         email: usersMock[0].email,
-        title: usersMock[0].title?.name,
+        // title: usersMock[0].title?.name,
         dutyStation: usersMock[0].branch?.name,
         availability: usersMock[0].availability,
         ...data,
@@ -139,12 +174,38 @@ const UserUtils = () => {
         action: {
             label: "options",
             options: [
-                { value: crudStates.disable, label: "Disable Account", icon: <InfoIcon fontSize='small' color='error' /> },
-                { value: crudStates.block, label: "Block Account", icon: <BlockIcon fontSize='small' color='error' /> },
-                { value: crudStates.update, label: "Update", icon: <ModeEditIcon fontSize='small' color='info' /> },
-                { value: crudStates.read, label: "View Details", icon: <RemoveRedEyeIcon fontSize='small' color='inherit' /> },
-                { value: crudStates.unblock, label: "Unblock", icon: <LockPersonOutlinedIcon fontSize='small' color='warning' /> },
-                { value: crudStates.enable, label: "Enable", icon: <VpnKeyOutlinedIcon fontSize='small' color='success' /> },
+                /*
+                 * Each entry names the permission its endpoint demands, so this list and the
+                 * security rules can be read against each other:
+                 *   View Details  GET  /users               READ_USER   (page is gated on it already)
+                 *   Update        PUT  /users/{id}          UPDATE_USER
+                 *   Enable        POST /users/{id}/enable   CREATE_USER
+                 *   Unblock       POST /users/{id}/unblock  CREATE_USER
+                 *   Disable       POST /users/{id}/disable  CREATE_USER
+                 *   Block         POST /users/{id}/block    CREATE_USER
+                 *
+                 * The four account actions answer to CREATE_USER because they are POSTs under
+                 * /users/**, which the matcher maps to the create permission. That reads oddly —
+                 * blocking an account is a change to a person who already exists, not a creation —
+                 * but the endpoint is the authority and this list mirrors it rather than guessing.
+                 * Worth correcting on the backend; correcting it here alone would hide a control
+                 * from someone the API would in fact let through.
+                 */
+                { value: crudStates.read, label: "View Details", icon: <RemoveRedEyeIcon fontSize='small' />, divider: true },
+                { value: crudStates.update, label: "Update", icon: <ModeEditIcon fontSize='small' color='info' />, permission: PERMISSIONS.UPDATE_USER },
+                /*
+                  * These four answer to MANAGE_USER_ACCESS now, not CREATE_USER.
+                  *
+                  * They only ever asked for the create permission because they are POSTs under
+                  * `/users/**` and inherited its matcher — nobody decided that suspending an
+                  * account and minting one were the same right. The front end mirrors the server's
+                  * rule rather than guessing at it; if these two drift, the menu offers a button
+                  * the endpoint refuses.
+                  */
+                { value: crudStates.enable, label: "Enable", icon: <VpnKeyOutlinedIcon fontSize='small' color='success' />, permission: PERMISSIONS.MANAGE_USER_ACCESS },
+                { value: crudStates.unblock, label: "Unblock", icon: <LockPersonOutlinedIcon fontSize='small' color='warning' />, permission: PERMISSIONS.MANAGE_USER_ACCESS },
+                { value: crudStates.disable, label: "Disable Account", icon: <InfoIcon fontSize='small' />, danger: true, permission: PERMISSIONS.MANAGE_USER_ACCESS },
+                { value: crudStates.block, label: "Block Account", icon: <BlockIcon fontSize='small' />, danger: true, permission: PERMISSIONS.MANAGE_USER_ACCESS },
             ]
         },
     };
@@ -236,39 +297,45 @@ const UserUtils = () => {
     };
 
 
+    /**
+     * Maps the raw user payload to the flat row shape the table renders.
+     * Exposed (via `transformUsersForExport`) so the page can run the same
+     * mapping on a full filtered result-set fetched purely for export.
+     */
+    const mapUserToRow = (user: IUser): IUserTableData => {
+        const {
+            branch: _b,
+            department: _d,
+            lastModifiedBy: _lmb,
+            title: _t,
+            createdBy: _cb,
+            profileImage: _pi,
+            ...fieldsData
+        } = user;
+        return {
+            ...fieldsData,
+            image: user?.profileImage,
+            name: `${user.firstName} ${user.lastName} ${(user.otherName !== null ? user.otherName : "")}`,
+            staffNumber: user.staffNumber,
+            email: user.email,
+            title: user.title?.name as string,
+            dutyStation: determineDutyStation(user),
+            availability: determineUserAvailability(user),
+            status: determineUserStatus(user),
+        } as unknown as IUserTableData;
+    };
+
     const handleUsersTableData = (users: Array<IUser>) => {
-        const data: Array<IUserTableData> = users.map((user, index) => {
-            const {
-                branch,
-                department,
-                lastModifiedBy,
-                title,
-                createdBy,
-                profileImage,
-                ...fieldsData
-            } = users[index];
-
-            return (
-                {
-                    ...fieldsData,
-                    image: user?.profileImage,
-                    name: `${user.firstName} ${user.lastName} ${(user.otherName !== null ? user.otherName : "")}`,
-                    staffNumber: user.staffNumber,
-                    email: user.email,
-                    title: user.title?.name as string,
-                    dutyStation: determineDutyStation(user),
-                    availability: determineUserAvailability(user),
-                    // availability: user.availability, Update this value from the backend if user goes on leave, account is blocked or disabled
-                    status: determineUserStatus(user)
-                }
-            )
-        })
-
-        setUsersTableData(data);
+        setUsersTableData(users.map(mapUserToRow));
     }
 
+    const transformUsersForExport = (users: Array<IUser>) => users.map(mapUserToRow);
+
+    // Always mirror the redux user list — including the empty case, so that
+    // a filter combo returning zero rows clears the table instead of leaving
+    // stale rows on screen.
     useEffect(() => {
-        if (users.length > 0) { handleUsersTableData(users) }
+        handleUsersTableData(users);
     }, [users]);
 
     const generateUserFields = (): Array<IFormData<IUser>> => {
@@ -356,11 +423,13 @@ const UserUtils = () => {
         handleClose,
         userFields: generateUserFields(),
         fetchAllUsers,
+        fetchStaffOptions,
         handleOptionClicked,
         usersTableData,
         loading,
         endPoint,
-        count
+        count,
+        transformUsersForExport,
     })
 }
 

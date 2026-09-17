@@ -6,8 +6,9 @@ Managing Director
 */
 
 import { useContext, useEffect } from "react";
+import { PERMISSIONS } from '../../../core/permissions/constants';
 import { crudStates } from "../../../utils/constants";
-import { Grid } from "@mui/material";
+import { Box } from "@mui/material";
 import ModalComponent from "../../../components/modal";
 import TableComponent from "../../../components/tables/TableComponent";
 import RepairHistoryUtills from "./RepairHistoryUtills";
@@ -48,7 +49,8 @@ const RepairHistory = ({ id }: { id: string | number }) => {
         if (repairsTableData.length > 0) {
             const newOptions = [
                 { value: crudStates.read, label: "Description", icon: <DescriptionOutlinedIcon fontSize='small' color='secondary' /> },
-                { value: crudStates.update, label: "Complete Repair", icon: <HandymanOutlinedIcon fontSize='small' color='info' /> },
+                // PUT /assets/repairs/{id} — closing a repair answers to REPAIR_ASSET, not UPDATE_ASSET.
+                { value: crudStates.update, label: "Complete Repair", icon: <HandymanOutlinedIcon fontSize='small' color='info' />, permission: PERMISSIONS.REPAIR_ASSET },
                 { value: crudStates.upload, label: "Attachments", icon: <AttachmentOutlinedIcon fontSize='small' color='inherit' /> },
             ]
 
@@ -75,7 +77,7 @@ const RepairHistory = ({ id }: { id: string | number }) => {
                 </ModalComponent>
             }
 
-            <Grid xs={12} container>
+            <Box sx={{ width: '100%' }}>
                 {modalState === crudStates.create &&
                     <ModalComponent
                         title='Create Repair History'
@@ -88,22 +90,23 @@ const RepairHistory = ({ id }: { id: string | number }) => {
                 }
                 {columnHeaders.length > 0 &&
                     <TableComponent
+                tableKey="repairHistory"
                         endPoint={endPoint}
                         loading={loading}
-                        count={100}
                         exportData
+                        flat
                         // createAction
                         header={header}
                         rows={repairsTableData}
                         module="Repairs & Maintenance"
                         columnHeaders={columnHeaders}
-                        paginationMode='server'
+                        paginationMode='client'
                         onCreationHandler={handleCreation}
                         handleOptionClicked={handleOptionClicked}
                         filterOptions
                     />
                 }
-            </Grid>
+            </Box>
         </>
     )
 }

@@ -27,7 +27,7 @@ export const SummaryCard = ({ label, value, subLabel, icon, color, trend }: Summ
         },
     }}>
         {/* accent bar */}
-        <Box sx={{ position: 'absolute', top: 0, left: 0, width: 4, height: '100%', bgcolor: color, borderRadius: '2px 0 0 2px' }} />
+        {/* <Box sx={{ position: 'absolute', top: 0, left: 0, width: 4, height: '100%', bgcolor: color, borderRadius: '2px 0 0 2px' }} /> */}
 
         <Stack direction="row" alignItems="flex-start" justifyContent="space-between">
             <Box>

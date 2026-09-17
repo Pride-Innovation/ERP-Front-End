@@ -1,6 +1,6 @@
 /*
 13.9 Pride's Standard Copyright Notice:
-Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
+Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify,
 and distribute this software and its documentation for any purpose is prohibited unless authorized in writing by the
 Managing Director
 */
@@ -14,18 +14,21 @@ import {
     Badge,
     Avatar,
     alpha,
-    Chip,
-    IconButton
+    IconButton,
+    Tooltip,
 } from "@mui/material";
 import EditIcon from '@mui/icons-material/Edit';
-import LockIcon from '@mui/icons-material/Lock';
-import EventAvailableIcon from '@mui/icons-material/EventAvailable';
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import EventAvailableOutlinedIcon from '@mui/icons-material/EventAvailableOutlined';
+import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
+import BusinessOutlinedIcon from '@mui/icons-material/BusinessOutlined';
+import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined';
+import BadgeOutlinedIcon from '@mui/icons-material/BadgeOutlined';
+import CalendarTodayOutlinedIcon from '@mui/icons-material/CalendarTodayOutlined';
+import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 import { IUser } from "../users/interface";
-
-
-// Brand colors
-const PRIMARY_COLOR = '#08796C'; // Teal
-const SECONDARY_COLOR = '#BC892C'; // Gold
+import StatusChip, { StatusTone } from "../../components/layout/StatusChip";
+import { brand, neutral, border, elevation, radii } from "../../utils/tokens";
 
 interface UserHeaderProps {
     user: IUser | null;
@@ -36,6 +39,29 @@ interface UserHeaderProps {
     onChangePassword: () => void;
 }
 
+/** One meta-row entry: small icon + value. Renders nothing when value is empty. */
+const MetaItem = ({ icon, value }: { icon: React.ReactNode; value?: string | null }) => {
+    if (!value) return null;
+    return (
+        <Stack direction="row" alignItems="center" spacing={0.75} sx={{ minWidth: 0 }}>
+            <Box sx={{ display: 'flex', color: neutral[400], '& .MuiSvgIcon-root': { fontSize: 16 } }}>
+                {icon}
+            </Box>
+            <Typography variant="body2" sx={{ color: neutral[600], whiteSpace: 'nowrap' }} noWrap>
+                {value}
+            </Typography>
+        </Stack>
+    );
+};
+
+/** Account standing — shown to admins viewing someone else's profile. */
+const accountState = (user: IUser | null): { label: string; tone: StatusTone } => {
+    if (user?.blocked) return { label: 'Blocked', tone: 'danger' };
+    if (user?.enabled === false) return { label: 'Disabled', tone: 'neutral' };
+    if (user?.accountNonLocked === false) return { label: 'Locked', tone: 'pending' };
+    return { label: 'Active', tone: 'success' };
+};
+
 const UserHeader = ({
     user,
     userImage,
@@ -44,170 +70,202 @@ const UserHeader = ({
     onUpdateAvailability,
     onChangePassword
 }: UserHeaderProps) => {
-    // const theme = useTheme();
-    // const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-
-    // Determine availability status
     const isAvailable = user?.availability === 'present';
+    const account = accountState(user);
+
+    const fullName = [user?.firstName, user?.lastName, user?.otherName]
+        .filter(Boolean)
+        .join(' ');
+
+    const unitName =
+        user?.unit && typeof user.unit === 'object' ? user.unit.name : null;
+    const departmentLine = [user?.department?.name, unitName].filter(Boolean).join(' · ');
+
+    const memberSince = user?.createDate
+        ? new Date(user.createDate).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+        : null;
 
     return (
         <Paper
             elevation={0}
             sx={{
-                borderRadius: 2,
+                borderRadius: `${radii.lg}px`,
+                border: `1px solid ${border.subtle}`,
+                bgcolor: '#fff',
+                boxShadow: elevation.card,
                 overflow: 'hidden',
-                border: `1px solid ${alpha('#000', 0.08)}`,
             }}
         >
-            {/* Header accent bar */}
-            <Box sx={{ height: 4, bgcolor: PRIMARY_COLOR }} />
-
-            <Box sx={{ p: { xs: 2, sm: 3 } }}>
+            <Box sx={{ p: { xs: 2.5, md: 3.5 } }}>
                 <Box
                     sx={{
                         display: 'flex',
-                        flexDirection: { xs: 'column', sm: 'row' },
-                        alignItems: { xs: 'center', sm: 'flex-start' },
-                        gap: 3,
+                        flexDirection: { xs: 'column', md: 'row' },
+                        alignItems: { xs: 'center', md: 'flex-start' },
+                        gap: { xs: 2.5, md: 3 },
                     }}
                 >
-                    {/* Profile Photo Section */}
-                    <Box sx={{ position: 'relative' }}>
-                        <Badge
-                            overlap="circular"
-                            anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                            badgeContent={
-                                isCurrentUser ? (
+                    {/* ── Avatar ── */}
+                    <Badge
+                        overlap="circular"
+                        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                        badgeContent={
+                            isCurrentUser ? (
+                                <Tooltip title="Update profile photo" arrow>
                                     <IconButton
                                         onClick={onUpdateImage}
                                         sx={{
-                                            bgcolor: PRIMARY_COLOR,
-                                            color: 'white',
-                                            width: 36,
-                                            height: 36,
-                                            boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
-                                            '&:hover': {
-                                                bgcolor: alpha(PRIMARY_COLOR, 0.9),
-                                            }
+                                            bgcolor: brand[500],
+                                            color: '#fff',
+                                            width: 32,
+                                            height: 32,
+                                            border: '2px solid #fff',
+                                            boxShadow: elevation.raised,
+                                            '&:hover': { bgcolor: brand[700] },
                                         }}
                                     >
-                                        <EditIcon fontSize="small" />
+                                        <EditIcon sx={{ fontSize: 16 }} />
                                     </IconButton>
-                                ) : null
-                            }
-                        >
-                            <Avatar
-                                src={userImage}
-                                alt={`${user?.firstName || ''} ${user?.lastName || ''}`}
-                                sx={{
-                                    width: { xs: 100, sm: 120 },
-                                    height: { xs: 100, sm: 120 },
-                                    border: `3px solid ${isAvailable ? '#4caf50' : '#ff9800'}`,
-                                    boxShadow: '0 3px 10px rgba(0,0,0,0.15)',
-                                }}
-                            />
-                        </Badge>
-
-                        <Chip
-                            size="small"
-                            label={isAvailable ? "Available" : "Away"}
-                            color={isAvailable ? "success" : "warning"}
+                                </Tooltip>
+                            ) : null
+                        }
+                    >
+                        <Avatar
+                            src={userImage}
+                            alt={fullName || 'User profile photo'}
                             sx={{
-                                position: 'absolute',
-                                bottom: -6,
-                                left: '50%',
-                                transform: 'translateX(-50%)',
-                                fontWeight: 500,
+                                width: { xs: 96, md: 104 },
+                                height: { xs: 96, md: 104 },
+                                border: '3px solid #fff',
+                                boxShadow: `0 0 0 1px ${border.default}, ${elevation.card}`,
                             }}
                         />
-                    </Box>
+                    </Badge>
 
-                    {/* User Details Section */}
-                    <Box sx={{
-                        flex: 1,
-                        textAlign: { xs: 'center', sm: 'left' },
-                        mt: { xs: 1, sm: 0 }
-                    }}>
-                        <Typography
-                            variant="h5"
+                    {/* ── Identity ── */}
+                    <Box
+                        sx={{
+                            flex: 1,
+                            minWidth: 0,
+                            textAlign: { xs: 'center', md: 'left' },
+                        }}
+                    >
+                        <Stack
+                            direction="row"
+                            alignItems="center"
+                            spacing={1.25}
                             sx={{
-                                fontWeight: 600,
-                                mb: 0.5,
-                                color: 'text.primary',
+                                flexWrap: 'wrap',
+                                justifyContent: { xs: 'center', md: 'flex-start' },
+                                rowGap: 0.75,
                             }}
                         >
-                            {user?.firstName} {user?.lastName}
-                            {user?.otherName && ` ${user.otherName}`}
-                        </Typography>
+                            <Typography
+                                variant="h5"
+                                sx={{
+                                    fontWeight: 700,
+                                    color: neutral[900],
+                                    letterSpacing: '-0.01em',
+                                    lineHeight: 1.2,
+                                }}
+                            >
+                                {fullName || 'Unnamed User'}
+                            </Typography>
+
+                            <StatusChip
+                                label={isAvailable ? 'Available' : 'Away'}
+                                tone={isAvailable ? 'success' : 'pending'}
+                                icon={<FiberManualRecordIcon sx={{ fontSize: 10 }} />}
+                            />
+
+                            {!isCurrentUser && (
+                                <StatusChip
+                                    label={account.label}
+                                    tone={account.tone}
+                                    variant="outlined"
+                                />
+                            )}
+                        </Stack>
 
                         <Typography
                             variant="body1"
-                            sx={{
-                                color: PRIMARY_COLOR,
-                                fontWeight: 500,
-                                mb: 1,
-                            }}
+                            sx={{ color: brand[600], fontWeight: 600, mt: 0.5 }}
                         >
                             {user?.title?.name || 'No Title'}
                         </Typography>
 
-                        <Typography
-                            variant="body2"
+                        {/* Meta row — who/where/how-to-reach at a glance */}
+                        <Stack
+                            direction="row"
                             sx={{
-                                color: 'text.secondary',
-                                mb: 1.5,
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: { xs: 'center', sm: 'flex-start' },
-                                gap: 0.5,
+                                mt: 1.5,
+                                flexWrap: 'wrap',
+                                columnGap: 2.5,
+                                rowGap: 1,
+                                justifyContent: { xs: 'center', md: 'flex-start' },
                             }}
                         >
-                            <Box component="span" sx={{ fontWeight: 600 }}>Staff ID:</Box> {user?.staffNumber || 'N/A'}
-                        </Typography>
-
-                        {/* Action Buttons for current user */}
-                        {isCurrentUser && (
-                            <Stack
-                                direction={{ xs: 'column', sm: 'row' }}
-                                spacing={1.5}
-                                sx={{ mt: { xs: 2, sm: 0 } }}
-                            >
-                                <Button
-                                    size="small"
-                                    variant="outlined"
-                                    startIcon={<LockIcon />}
-                                    onClick={onChangePassword}
-                                    sx={{
-                                        borderColor: alpha(PRIMARY_COLOR, 0.5),
-                                        color: PRIMARY_COLOR,
-                                        '&:hover': {
-                                            borderColor: PRIMARY_COLOR,
-                                            bgcolor: alpha(PRIMARY_COLOR, 0.05),
-                                        }
-                                    }}
-                                >
-                                    Change Password
-                                </Button>
-
-                                <Button
-                                    size="small"
-                                    variant="outlined"
-                                    startIcon={<EventAvailableIcon />}
-                                    onClick={onUpdateAvailability}
-                                    sx={{
-                                        borderColor: alpha(SECONDARY_COLOR, 0.5),
-                                        color: SECONDARY_COLOR,
-                                        '&:hover': {
-                                            borderColor: SECONDARY_COLOR,
-                                            bgcolor: alpha(SECONDARY_COLOR, 0.05),
-                                        }
-                                    }}
-                                >
-                                    Update Availability
-                                </Button>
-                            </Stack>
-                        )}
+                            <MetaItem icon={<EmailOutlinedIcon />} value={user?.email} />
+                            <MetaItem icon={<BusinessOutlinedIcon />} value={user?.branch?.name} />
+                            <MetaItem icon={<AccountTreeOutlinedIcon />} value={departmentLine || null} />
+                            <MetaItem icon={<BadgeOutlinedIcon />} value={user?.staffNumber ? `Staff No. ${user.staffNumber}` : null} />
+                            <MetaItem icon={<CalendarTodayOutlinedIcon />} value={memberSince ? `Member since ${memberSince}` : null} />
+                        </Stack>
                     </Box>
+
+                    {/* ── Actions (current user only) ── */}
+                    {isCurrentUser && (
+                        <Stack
+                            direction={{ xs: 'row', md: 'column' }}
+                            spacing={1.25}
+                            sx={{
+                                flexShrink: 0,
+                                width: { xs: '100%', md: 'auto' },
+                                justifyContent: { xs: 'center', md: 'flex-start' },
+                                flexWrap: 'wrap',
+                            }}
+                        >
+                            <Button
+                                size="small"
+                                variant="outlined"
+                                startIcon={<LockOutlinedIcon sx={{ fontSize: 16 }} />}
+                                onClick={onChangePassword}
+                                sx={{
+                                    height: 36,
+                                    px: 2,
+                                    borderRadius: '8px',
+                                    textTransform: 'none',
+                                    fontWeight: 600,
+                                    borderColor: alpha(brand[500], 0.4),
+                                    color: brand[600],
+                                    whiteSpace: 'nowrap',
+                                    '&:hover': { borderColor: brand[500], bgcolor: alpha(brand[500], 0.05) },
+                                }}
+                            >
+                                Change Password
+                            </Button>
+
+                            <Button
+                                size="small"
+                                variant="outlined"
+                                startIcon={<EventAvailableOutlinedIcon sx={{ fontSize: 16 }} />}
+                                onClick={onUpdateAvailability}
+                                sx={{
+                                    height: 36,
+                                    px: 2,
+                                    borderRadius: '8px',
+                                    textTransform: 'none',
+                                    fontWeight: 600,
+                                    borderColor: border.default,
+                                    color: neutral[600],
+                                    whiteSpace: 'nowrap',
+                                    '&:hover': { borderColor: neutral[400], bgcolor: neutral[50] },
+                                }}
+                            >
+                                Update Availability
+                            </Button>
+                        </Stack>
+                    )}
                 </Box>
             </Box>
         </Paper>

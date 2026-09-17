@@ -15,17 +15,15 @@ import { loadAllRequests } from "../../pages/request/assetRequest/slice";
 import { loadUsers } from "../../pages/users/slice";
 import { loadAllInventory } from "../../pages/inventory/slice";
 import AssetUtills from "../../pages/assets/Utills";
-import { assetTypesStatusConstants } from "../../utils/constants";
-import { loadAllFleet } from "../../pages/assets/fleet/slice";
-import { loadAllITAssets } from "../../pages/assets/ITEquipment/slice";
-import { loadAllOfficeAssets } from "../../pages/assets/officeEquipment/slice";
+import { loadAllGeneralAssets } from "../../pages/assets/general/slice";
+import { loadAllStores } from "../../pages/store/slice";
 import { useContext } from "react";
 import { AssetContext } from "../../context/asset";
 
 
 const CustomTablePagination = ({ endPoint, params, selectedStatus, filterParams }: ICustomTablePagination) => {
     const dispatch = useDispatch<AppDispatch>();
-    const { determineAssetTypeState, determineStatusId } = AssetUtills()
+    const { determineStatusId } = AssetUtills()
     const { fieldName, fieldText } = useContext(AssetContext);
 
     // console.log(selectedStatus, 'selectedStatus from custom table pagination');
@@ -46,18 +44,12 @@ const CustomTablePagination = ({ endPoint, params, selectedStatus, filterParams 
                 dispatch(loadAllInventory(content))
                 break;
             case "assets":
-                const assetType = determineAssetTypeState(params?.assetTypeId);
-
-                if (assetType.name === assetTypesStatusConstants.fleet) {
-                    dispatch(loadAllFleet(content))
-                }
-                if (assetType.name === assetTypesStatusConstants.itEquipment) {
-                    dispatch(loadAllITAssets(content))
-                }
-                if (assetType.name === assetTypesStatusConstants.officeEquipment) {
-                    dispatch(loadAllOfficeAssets(content))
-                }
-
+                // Unified asset store — all categories live in GeneralAssetStore.
+                dispatch(loadAllGeneralAssets(content));
+                break;
+            case "store":
+                // Store balance listings (Admin / IT / Disposal store pages).
+                dispatch(loadAllStores(content));
                 break;
             default:
                 break
@@ -87,9 +79,14 @@ const CustomTablePagination = ({ endPoint, params, selectedStatus, filterParams 
             }) as IhandleTablePagination;
             const { content } = response.data;
 
-            if (content.length > 0) {
-                handleReduxStoreUpdate(endPoint, content, params);
-            }
+            /*
+             * Dispatched even when empty.
+             *
+             * This used to be guarded by `content.length > 0`, so paging to a page that legitimately
+             * has no rows left the previous page's rows on screen — the table showed stale data and
+             * gave no sign of it. An empty result is a result.
+             */
+            handleReduxStoreUpdate(endPoint, content ?? [], params);
 
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : ErrorMessage;

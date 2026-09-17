@@ -1,6 +1,6 @@
 /*
 13.9 Pride's Standard Copyright Notice:
-Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
+Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify,
 and distribute this software and its documentation for any purpose is prohibited unless authorized in writing by the
 Managing Director
 */
@@ -25,71 +25,76 @@ const HandleRoutes = () => {
         }
     };
 
-    const handleActiveRoute = (item: ISideBarItem) => {
-        setActiveRoute(item.id)
-    }
-
+    /**
+     * Maps the current URL to the sidebar item that should be highlighted.
+     *
+     * Looked up by `route` (not array position), so adding or reordering
+     * sidebar entries no longer shifts which item gets highlighted for a
+     * given URL. Each mapping is "is the current pathname this exact route,
+     * or a descendant of it?" — the more specific routes are listed first
+     * so that, for example, `/assets-mgt/approval-workflows` highlights
+     * "Approval Workflows" and not "Assets" (which would also match by
+     * substring under the old logic).
+     */
     const handleRouteChange = (route: string) => {
+        // Exact-match routes — must come before any substring/prefix rules
+        // below, because some of these URLs are prefixes of others.
+        const exactMatches: Array<string> = [
+            ROUTES.NOTIFICATIONS,
+            ROUTES.APPROVAL_WORKFLOWS,
+            ROUTES.AUDIT_TRAILS,
+            ROUTES.PROFILE,
+        ];
+
+        // Prefix-match routes (in order of specificity — deepest first).
+        // A `route` matches `prefix` when it equals `prefix` exactly OR
+        // begins with `prefix + "/"`. This avoids false positives like
+        // "/assets-mgt/approval-workflows" matching "/assets-mgt".
+        const prefixMatches: Array<string> = [
+            ROUTES.NOTIFICATIONS,
+            ROUTES.APPROVAL_WORKFLOWS,
+            ROUTES.AUDIT_TRAILS,
+            ROUTES.SETTINGS,
+            ROUTES.REPORTS,
+            ROUTES.STORE,
+            ROUTES.MOVEMENT,
+            ROUTES.INVENTORY,
+            ROUTES.TRANSPORT_REQUEST,
+            ROUTES.REQUEST,
+            ROUTES.USERS,
+            ROUTES.LIST_ASSETS,
+        ];
+
+        // Dashboard is a special case: only exact "/assets-mgt", because
+        // every other route in the app starts with that prefix.
         if (route === ROUTES.ASSETS_MANAGEMENT) {
-            handleClick(sideBarList[0]);
-            handleActiveRoute(sideBarList[0])
-        }
-        if ([ROUTES.LIST_ASSETS].includes(route)) {
-            handleClick(sideBarList[1])
-            handleActiveRoute(sideBarList[1])
-        }
-        if (route.indexOf(ROUTES.LIST_ASSETS) !== -1) {
-            handleActiveRoute(sideBarList[1])
-        }
-        if (route === ROUTES.USERS) {
-            handleClick(sideBarList[2])
-            handleActiveRoute(sideBarList[2])
-        }
-        if (route === ROUTES.REQUEST) {
-            handleClick(sideBarList[3])
-            handleActiveRoute(sideBarList[3])
-        }
-        if (route.indexOf(ROUTES.REQUEST) !== -1) {
-            handleActiveRoute(sideBarList[3])
-        }
-        if (route === ROUTES.TRANSPORT_REQUEST) {
-            handleClick(sideBarList[4])
-            handleActiveRoute(sideBarList[4])
-        }
-        if (route.indexOf(ROUTES.TRANSPORT_REQUEST) !== -1) {
-            handleActiveRoute(sideBarList[4])
-        }
-        if ([ROUTES.INVENTORY].includes(route)) {
-            handleClick(sideBarList[5])
-            handleActiveRoute(sideBarList[5])
-        }
-        if (route.indexOf(ROUTES.INVENTORY) !== -1) {
-            handleActiveRoute(sideBarList[5])
-        }
-        if (route.indexOf(ROUTES.STORE) !== -1) {
-            handleActiveRoute(sideBarList[6])
+            highlightByRoute(ROUTES.ASSETS_MANAGEMENT);
+            return;
         }
 
-        if (route.indexOf(ROUTES.MOVEMENT) !== -1) {
-            handleActiveRoute(sideBarList[7])
+        for (const r of exactMatches) {
+            if (route === r) {
+                highlightByRoute(r);
+                return;
+            }
         }
 
-        if (route.indexOf(ROUTES.REPORTS) !== -1) {
-            handleActiveRoute(sideBarList[8])
+        for (const prefix of prefixMatches) {
+            if (route === prefix || route.startsWith(prefix + '/')) {
+                highlightByRoute(prefix);
+                return;
+            }
         }
+    };
 
-        if ([ROUTES.SETTINGS].includes(route)) {
-            handleClick(sideBarList[9])
-            handleActiveRoute(sideBarList[9])
-        }
-        if (route.indexOf(ROUTES.SETTINGS) !== -1) {
-            handleActiveRoute(sideBarList[9])
-        }
-        if (route === ROUTES.AUDIT_TRAILS) {
-            handleClick(sideBarList[10])
-            handleActiveRoute(sideBarList[10])
-        }
-    }
+    /**
+     * Highlights the sidebar item whose `route` matches the given path.
+     * Look up by `route` so reorderings of `sideBarList` can't break us.
+     */
+    const highlightByRoute = (route: string) => {
+        const item = sideBarList.find((entry) => entry.route === route);
+        if (item) setActiveRoute(item.id);
+    };
 
     return (
         {

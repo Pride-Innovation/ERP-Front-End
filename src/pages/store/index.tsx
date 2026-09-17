@@ -1,444 +1,549 @@
 /*
 13.9 Pride's Standard Copyright Notice:
-Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
+Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify,
 and distribute this software and its documentation for any purpose is prohibited unless authorized in writing by the
 Managing Director
 */
 
 import {
     Box,
-    alpha,
     Button,
     Chip,
-    Divider,
+    Collapse,
     Grid,
     Paper,
     Skeleton,
     Stack,
+    Tooltip,
     Typography,
-} from "@mui/material";
+    alpha,
+} from '@mui/material';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 import AdminPanelSettingsOutlinedIcon from '@mui/icons-material/AdminPanelSettingsOutlined';
 import LaptopChromebookOutlinedIcon from '@mui/icons-material/LaptopChromebookOutlined';
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
-import BusinessCenterOutlinedIcon from '@mui/icons-material/BusinessCenterOutlined';
-import MonitorOutlinedIcon from '@mui/icons-material/MonitorOutlined';
-import DirectionsCarOutlinedIcon from '@mui/icons-material/DirectionsCarOutlined';
-import ContentPasteOutlinedIcon from '@mui/icons-material/ContentPasteOutlined';
-import CategoryOutlinedIcon from '@mui/icons-material/CategoryOutlined';
 import ArrowForwardIosOutlinedIcon from '@mui/icons-material/ArrowForwardIosOutlined';
 import StorefrontOutlinedIcon from '@mui/icons-material/StorefrontOutlined';
-import { useNavigate } from "react-router-dom";
-import { ROUTES } from "../../core/routes/routes";
-import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
-import { RootState } from "../../store";
-import AssetTypeUtills from "../settings/assetTypes/utills";
-import RoutesUtills from "../../core/routes/utills";
-import { fetchRowsService } from "../../core/apis/globalService";
-import { IStoresAxiosResponse } from "./interface";
-import { IAssetType } from "../settings/assetTypes/interface";
-import { SvgIconComponent } from "@mui/icons-material";
+import SwapHorizOutlinedIcon from '@mui/icons-material/SwapHorizOutlined';
+import AccountBalanceOutlinedIcon from '@mui/icons-material/AccountBalanceOutlined';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import PublicOutlinedIcon from '@mui/icons-material/PublicOutlined';
+import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined';
+import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
+import FormatListNumberedOutlinedIcon from '@mui/icons-material/FormatListNumberedOutlined';
+import BadgeOutlinedIcon from '@mui/icons-material/BadgeOutlined';
+import FactCheckOutlinedIcon from '@mui/icons-material/FactCheckOutlined';
+import { SvgIconComponent } from '@mui/icons-material';
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+import { PageHero, StatTile } from '../../components/layout';
+import { brand, neutral, border, status } from '../../utils/tokens';
+import { ROUTES } from '../../core/routes/routes';
+import usePermissions from '../../core/permissions/usePermissions';
+import { PERMISSIONS } from '../../core/permissions/constants';
+import { fetchBalancesService, fetchBranchOverviewService } from './service';
+import BalancesPanel, { IBalanceView } from './BalancesPanel';
+import { STORE_ACCENT } from './StoreViewPage';
 
-const getCategoryStyle = (name: string): { color: string; Icon: SvgIconComponent } => {
-    const lower = name.toLowerCase();
-    if (lower.includes('office')) return { color: '#6366f1', Icon: BusinessCenterOutlinedIcon };
-    if (lower.includes('it') || lower.includes('tech') || lower.includes('computer') || lower.includes('laptop'))
-        return { color: '#0ea5e9', Icon: MonitorOutlinedIcon };
-    if (lower.includes('fleet') || lower.includes('vehicle') || lower.includes('car') || lower.includes('transport'))
-        return { color: '#f59e0b', Icon: DirectionsCarOutlinedIcon };
-    if (lower.includes('station') || lower.includes('paper') || lower.includes('print'))
-        return { color: '#10b981', Icon: ContentPasteOutlinedIcon };
-    return { color: '#8b5cf6', Icon: CategoryOutlinedIcon };
+// ── Store definitions ─────────────────────────────────────────────────────────
+
+// Store accents come from STORE_ACCENT (see StoreViewPage) so the quick-link pills here and the
+// store pages they open can never drift apart.
+
+type StoreDef = {
+    type: string;
+    title: string;
+    subtitle: string;
+    accentColor: string;
+    Icon: SvgIconComponent;
+    path: string;
 };
 
-const STORES = [
+const STORES: StoreDef[] = [
     {
         type: 'admin',
         title: 'Admin Store',
         subtitle: 'Administrative supplies & office materials',
-        description: 'Manages administrative supplies, stationery, office furniture, and other operational materials issued to branches and staff.',
-        gradient: 'linear-gradient(135deg, #08796C 0%, #0cb39e 100%)',
-        accentColor: '#08796C',
+        accentColor: STORE_ACCENT.admin,
         Icon: AdminPanelSettingsOutlinedIcon,
         path: ROUTES.STORE_ADMIN,
-        badge: 'Operational',
     },
     {
         type: 'it',
         title: 'IT Store',
         subtitle: 'Technology equipment & digital assets',
-        description: 'Manages computers, peripherals, networking hardware, software accessories, and all technology-related inventory across branches.',
-        gradient: 'linear-gradient(135deg, #0369a1 0%, #38bdf8 100%)',
-        accentColor: '#0369a1',
+        accentColor: STORE_ACCENT.it,
         Icon: LaptopChromebookOutlinedIcon,
         path: ROUTES.STORE_IT,
-        badge: 'Operational',
     },
     {
         type: 'disposal',
         title: 'Disposal Store',
         subtitle: 'Items awaiting disposal or write-off',
-        description: 'Holds all assets and commodities flagged for disposal, decommissioning, or pending write-off approvals as per policy.',
-        gradient: 'linear-gradient(135deg, #b45309 0%, #fb923c 100%)',
-        accentColor: '#b45309',
+        accentColor: STORE_ACCENT.disposal,
         Icon: DeleteOutlineOutlinedIcon,
         path: ROUTES.STORE_DISPOSAL,
-        badge: 'Pending Review',
     },
 ];
 
+interface IBranchRow {
+    id: number;
+    name: string;
+    region?: string;
+    itemLines: number;
+    /** Units on hand across those lines — what a storekeeper actually cares about. */
+    totalQuantity: number;
+    /** Serialized assets booked into the branch's stores. */
+    assetsHeld: number;
+    low: number;
+}
+
+/**
+ * What share of a branch's stock lines are running low.
+ *
+ * <p>The counts beside it say how much is held; this says whether it is healthy, which is the
+ * question the overview exists to answer. A branch with nothing stocked reads as an empty rail
+ * rather than a green one — no stock is not the same as no problem.
+ */
+const BranchHealthBar = ({ itemLines, low }: { itemLines: number; low: number }) => {
+    if (itemLines <= 0) {
+        return (
+            <Tooltip title="Nothing stocked in this branch's stores" arrow>
+                <Box sx={{ width: 56, height: 4, borderRadius: 2, bgcolor: alpha(status.danger.main, 0.18), flexShrink: 0 }} />
+            </Tooltip>
+        );
+    }
+    const lowShare = Math.max(0, Math.min(1, low / itemLines));
+    const healthy = Math.round((1 - lowShare) * 100);
+    return (
+        <Tooltip title={`${itemLines - low} of ${itemLines} line(s) above their reorder level (${healthy}%)`} arrow>
+            <Box sx={{ width: 56, height: 4, borderRadius: 2, bgcolor: alpha(status.warning.strong, 0.25), overflow: 'hidden', flexShrink: 0 }}>
+                <Box sx={{ width: `${healthy}%`, height: '100%', bgcolor: brand[500], transition: 'width 0.3s ease' }} />
+            </Box>
+        </Tooltip>
+    );
+};
+
 // ── Component ─────────────────────────────────────────────────────────────────
 
-const PRIMARY = '#08796C';
-
 const Store = () => {
+    const { has } = usePermissions();
+    const seesAllBranches = has(PERMISSIONS.VIEW_ALL_BRANCHES);
     const navigate = useNavigate();
-    const { fetchAllAssetTypes } = AssetTypeUtills();
-    const { getCurrentUser } = RoutesUtills();
-    const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore);
 
-    // categoryCounts: keyed by assetType.id → totalElements
-    const [categoryCounts, setCategoryCounts] = useState<Record<string | number, number>>({});
-    const [countsLoading, setCountsLoading] = useState(false);
+    // Cross-branch snapshot for the Admin: stocked item lines + low-stock count per branch store.
+    const [branchRows, setBranchRows] = useState<IBranchRow[]>([]);
+    const [branchesLoading, setBranchesLoading] = useState(false);
+    const [expandedRegions, setExpandedRegions] = useState<Set<string>>(new Set());
 
-    useEffect(() => { fetchAllAssetTypes(); }, []);
+    // Consumable balances — lifted from BalancesPanel so the KPI strip can read the
+    // counts and the low-stock tile can toggle the panel's filter.
+    const [balanceRows, setBalanceRows] = useState<IBalanceView[]>([]);
+    const [balancesLoading, setBalancesLoading] = useState(true);
+    const [lowOnly, setLowOnly] = useState(false);
+    const balancesRef = useRef<HTMLDivElement | null>(null);
 
-    useEffect(() => {
-        if (assetTypes.length > 0) {
-            fetchCounts(assetTypes);
-        }
-    }, [assetTypes]);
-
-    const fetchCounts = async (types: IAssetType[]) => {
-        const branchId = getCurrentUser()?.title?.branch?.id;
-        setCountsLoading(true);
+    const loadBalances = async () => {
+        setBalancesLoading(true);
         try {
-            const results = await Promise.all(
-                types.map(async (type) => {
-                    const response = await fetchRowsService({
-                        pageNumber: 0,
-                        pageSize: 1,
-                        endPoint: 'store',
-                        params: { branchId, assetTypeId: type.id },
-                    }) as IStoresAxiosResponse;
-                    return {
-                        id: type.id,
-                        count: response?.status === 200 ? response.data.totalElements : 0,
-                    };
-                })
-            );
-            const counts: Record<string | number, number> = {};
-            results.forEach(r => { if (r.id !== undefined) counts[r.id] = r.count; });
-            setCategoryCounts(counts);
+            const res = (await fetchBalancesService()) as any;
+            if (res?.status === 200) setBalanceRows(res.data ?? []);
+        } finally {
+            setBalancesLoading(false);
+        }
+    };
+
+    useEffect(() => { fetchBranchesOverview(); loadBalances(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+    // One aggregated call for every branch. This used to fan out into a request per branch just to
+    // read a count, so a 50-branch estate meant 50 round trips on every page load.
+    const fetchBranchesOverview = async () => {
+        setBranchesLoading(true);
+        try {
+            const res = (await fetchBranchOverviewService()) as any;
+            const rows: IBranchRow[] = res?.status === 200
+                ? (res.data ?? []).map((b: any) => ({
+                    id: b.branchId,
+                    name: b.branchName,
+                    region: b.regionName,
+                    itemLines: b.itemLines ?? 0,
+                    totalQuantity: b.totalQuantity ?? 0,
+                    assetsHeld: b.assetsHeld ?? 0,
+                    low: b.lowStockLines ?? 0,
+                }))
+                : [];
+            setBranchRows(rows);
+            // Surface problems immediately: regions carrying low-stock alerts start expanded.
+            setExpandedRegions(new Set(
+                rows.filter((b) => b.low > 0).map((b) => b.region ?? 'Unassigned')
+            ));
         } catch (e) {
             console.log(e);
         }
-        setCountsLoading(false);
+        setBranchesLoading(false);
+    };
+
+    // Group branches by region so the overview reads as a short list of regions
+    // instead of one long flat table.
+    const regionGroups = useMemo(() => {
+        const groups = new Map<string, IBranchRow[]>();
+        branchRows.forEach((b) => {
+            const key = b.region ?? 'Unassigned';
+            if (!groups.has(key)) groups.set(key, []);
+            groups.get(key)!.push(b);
+        });
+        return Array.from(groups.entries())
+            .map(([region, rows]) => ({
+                region,
+                rows: rows.sort((a, b) => a.name.localeCompare(b.name)),
+                itemLines: rows.reduce((sum, r) => sum + r.itemLines, 0),
+                totalQuantity: rows.reduce((sum, r) => sum + r.totalQuantity, 0),
+                low: rows.reduce((sum, r) => sum + r.low, 0),
+            }))
+            .sort((a, b) => a.region.localeCompare(b.region));
+    }, [branchRows]);
+
+    const toggleRegion = (region: string) => {
+        setExpandedRegions((prev) => {
+            const next = new Set(prev);
+            if (next.has(region)) next.delete(region); else next.add(region);
+            return next;
+        });
     };
 
     const todayLabel = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-    const totalItems = Object.values(categoryCounts).reduce((sum, n) => sum + n, 0);
+    const totalItemLines = branchRows.reduce((sum, b) => sum + b.itemLines, 0);
+    const totalUnits = branchRows.reduce((sum, b) => sum + b.totalQuantity, 0);
+    const totalAssetsHeld = branchRows.reduce((sum, b) => sum + b.assetsHeld, 0);
+    const branchesStocked = branchRows.filter((b) => b.itemLines > 0).length;
+    const lowStockCount = balanceRows.filter((r) => r.lowStock).length;
+
+    const jumpToLowStock = () => {
+        setLowOnly(true);
+        balancesRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
 
     return (
-        <Box sx={{ minHeight: '100vh', width: '100%', bgcolor: '#F1F5FB', pb: 4 }}>
-
-            {/* ── Page Header ─────────────────────────────────────────── */}
-            <Box
-                sx={{
-                    background: 'linear-gradient(135deg, #08796C 0%, #065E53 60%, #044a42 100%)',
-                    px: { xs: 2, md: 4 },
-                    pt: 3,
-                    pb: 3,
-                    position: 'relative',
-                    overflow: 'hidden',
-                }}
-            >
-                <Box sx={{ position: 'absolute', top: -40, right: -40, width: 220, height: 220, borderRadius: '50%', bgcolor: alpha('#fff', 0.04), pointerEvents: 'none' }} />
-                <Box sx={{ position: 'absolute', bottom: -30, right: 160, width: 120, height: 120, borderRadius: '50%', bgcolor: alpha('#fff', 0.03), pointerEvents: 'none' }} />
-
-                <Stack direction="row" alignItems="flex-start" justifyContent="space-between" gap={2}>
-                    {/* Left: icon + title */}
-                    <Stack direction="row" alignItems="center" gap={2}>
-                        <Box sx={{
-                            width: 46, height: 46, borderRadius: 2,
-                            bgcolor: alpha('#fff', 0.15),
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            backdropFilter: 'blur(4px)',
-                        }}>
-                            <StorefrontOutlinedIcon sx={{ color: '#fff', fontSize: 24 }} />
-                        </Box>
-                        <Box>
-                            <Typography variant="h5" sx={{ color: '#fff', fontWeight: 700, lineHeight: 1.2 }}>
-                                Store Management
-                            </Typography>
-                            <Typography variant="body2" sx={{ color: alpha('#fff', 0.72), mt: 0.3 }}>
-                                Overview of all organizational stores and inventory
-                            </Typography>
-                        </Box>
+        // Same page padding as PageShell / the other module pages so everything aligns.
+        <Box sx={{ minHeight: '100vh', px: { xs: 2, sm: 3 }, py: { xs: 2, sm: 3 }, pb: 4 }}>
+            <PageHero
+                title="Store Management"
+                subtitle="Overview of all organizational stores and inventory"
+                icon={<StorefrontOutlinedIcon />}
+                actions={
+                    <Stack direction="row" spacing={1}>
+                        {/*
+                          * Offered only to someone the stock-take endpoints will admit.
+                          *
+                          * This was ungated while both its endpoints require READ_STOCK_TAKE, so
+                          * anyone who could open the store page was invited to a screen that then
+                          * answered "Access Denied" over "Could not load stock takes." Holding
+                          * READ_STORE says you may see what a store holds; reading a count is a
+                          * narrower thing and has its own permission.
+                          */}
+                        {has(PERMISSIONS.READ_STOCK_TAKE) && (
+                        <Button
+                            variant="outlined"
+                            startIcon={<FactCheckOutlinedIcon />}
+                            onClick={() => navigate(ROUTES.STOCK_TAKE)}
+                            sx={{ textTransform: 'none', fontWeight: 600, borderRadius: '8px', borderColor: alpha(brand[500], 0.4), color: brand[500] }}
+                        >
+                            Stock Take
+                        </Button>
+                        )}
+                        <Button
+                            variant="outlined"
+                            startIcon={<BadgeOutlinedIcon />}
+                            onClick={() => navigate(ROUTES.MY_ITEMS)}
+                            sx={{ textTransform: 'none', fontWeight: 600, borderRadius: '8px', borderColor: alpha(brand[500], 0.4), color: brand[500] }}
+                        >
+                            My Items
+                        </Button>
+                        <Button
+                            variant="contained"
+                            startIcon={<SwapHorizOutlinedIcon />}
+                            onClick={() => navigate(ROUTES.CREATE_MOVEMENT)}
+                            sx={{ bgcolor: brand[500], textTransform: 'none', fontWeight: 600, borderRadius: '8px', '&:hover': { bgcolor: brand[700] } }}
+                        >
+                            Initiate Movement
+                        </Button>
                     </Stack>
-
-                    {/* Right: frosted stats badge */}
-                    <Box sx={{
-                        bgcolor: alpha('#fff', 0.12),
-                        backdropFilter: 'blur(8px)',
-                        border: `1px solid ${alpha('#fff', 0.18)}`,
-                        borderRadius: 2,
-                        px: 2.5,
-                        py: 1.5,
-                        textAlign: 'right',
-                        flexShrink: 0,
-                    }}>
-                        <Typography variant="h4" sx={{ color: '#fff', fontWeight: 800, lineHeight: 1 }}>
-                            {countsLoading
-                                ? <Skeleton width={50} sx={{ display: 'inline-block', bgcolor: alpha('#fff', 0.2) }} />
-                                : totalItems
-                            }
-                        </Typography>
-                        <Typography variant="caption" sx={{ color: alpha('#fff', 0.72), display: 'block', mt: 0.3 }}>
-                            total items
-                        </Typography>
-                        <Typography variant="caption" sx={{ color: alpha('#fff', 0.5), fontSize: '0.68rem' }}>
-                            {todayLabel}
-                        </Typography>
-                    </Box>
-                </Stack>
-
-                {/* Category summary pills */}
-                <Stack direction="row" gap={1} flexWrap="wrap" sx={{ mt: 2.5 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, px: 1.25, py: 0.6, borderRadius: 1.5, bgcolor: alpha('#fff', 0.1), backdropFilter: 'blur(4px)', border: `1px solid ${alpha('#fff', 0.15)}` }}>
-                        <StorefrontOutlinedIcon sx={{ fontSize: 13, color: alpha('#fff', 0.85) }} />
-                        <Typography variant="caption" sx={{ fontWeight: 700, color: '#fff', fontSize: '0.75rem' }}>{STORES.length}</Typography>
-                        <Typography variant="caption" sx={{ color: alpha('#fff', 0.7), fontSize: '0.7rem' }}>active stores</Typography>
-                    </Box>
-                    {assetTypes.map(type => {
-                        const { Icon } = getCategoryStyle(type.name);
-                        return (
-                            <Box key={type.id} sx={{ display: 'flex', alignItems: 'center', gap: 0.75, px: 1.25, py: 0.6, borderRadius: 1.5, bgcolor: alpha('#fff', 0.1), backdropFilter: 'blur(4px)', border: `1px solid ${alpha('#fff', 0.15)}` }}>
-                                <Icon sx={{ fontSize: 13, color: alpha('#fff', 0.85) }} />
-                                <Typography variant="caption" sx={{ fontWeight: 700, color: '#fff', fontSize: '0.75rem' }}>
-                                    {countsLoading
-                                        ? <Skeleton width={20} sx={{ display: 'inline-block', bgcolor: alpha('#fff', 0.2) }} />
-                                        : (categoryCounts[type.id] ?? 0)
-                                    }
-                                </Typography>
-                                <Typography variant="caption" sx={{ color: alpha('#fff', 0.7), fontSize: '0.7rem' }}>{type.name}</Typography>
-                            </Box>
-                        );
-                    })}
-                </Stack>
-            </Box>
-
-            {/* ── Content area ─────────────────────────────────────────── */}
-            <Box sx={{ px: { xs: 1, md: 3 }, pt: 3, width: '100%', maxWidth: '1500px' }}>
-
-            {/* ── Store Cards ── */}
-            <Grid container spacing={2.5}>
-                {STORES.map(store => {
-                    const { Icon } = store;
-                    return (
-                        <Grid item xs={12} md={4} key={store.type}>
-                            <Paper
-                                elevation={0}
-                                sx={{
-                                    borderRadius: 3,
-                                    border: `1px solid ${alpha('#000', 0.07)}`,
-                                    overflow: 'hidden',
-                                    height: '100%',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    transition: 'box-shadow 0.25s ease, transform 0.22s ease',
-                                    '&:hover': {
-                                        boxShadow: `0 10px 30px ${alpha(store.accentColor, 0.22)}`,
-                                        transform: 'translateY(-3px)',
-                                    },
-                                }}
-                            >
-                                {/* Gradient header */}
-                                <Box
+                }
+                stat={{
+                    // Units, not lines: "12 lines" says nothing about whether a store can meet a
+                    // request; the quantity on hand does.
+                    value: branchesLoading
+                        ? (<Skeleton width={50} sx={{ display: 'inline-block' }} /> as any)
+                        : totalUnits.toLocaleString(),
+                    label: 'units on hand',
+                    helper: todayLabel,
+                }}
+                tabs={
+                    // Store quick links — accent-colored pills; each store's own page carries
+                    // the full identity, so the tile descriptions now live in tooltips.
+                    <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ py: 1.25 }}>
+                        {STORES.map((store) => (
+                            <Tooltip key={store.type} title={store.subtitle} arrow>
+                                <Button
+                                    onClick={() => navigate(store.path)}
+                                    startIcon={<store.Icon sx={{ fontSize: '16px !important' }} />}
+                                    endIcon={<ArrowForwardIosOutlinedIcon sx={{ fontSize: '10px !important' }} />}
                                     sx={{
-                                        background: store.gradient,
-                                        p: 3,
-                                        position: 'relative',
-                                        overflow: 'hidden',
+                                        height: 34,
+                                        px: 1.75,
+                                        borderRadius: '8px',
+                                        textTransform: 'none',
+                                        fontWeight: 700,
+                                        fontSize: '0.78rem',
+                                        color: store.accentColor,
+                                        bgcolor: alpha(store.accentColor, 0.07),
+                                        border: `1px solid ${alpha(store.accentColor, 0.2)}`,
+                                        transition: 'all 0.15s ease',
+                                        '&:hover': {
+                                            bgcolor: alpha(store.accentColor, 0.14),
+                                            borderColor: alpha(store.accentColor, 0.45),
+                                        },
                                     }}
                                 >
-                                    <Box sx={{ position: 'absolute', right: -30, top: -30, width: 110, height: 110, borderRadius: '50%', bgcolor: 'rgba(255,255,255,0.07)' }} />
-                                    <Box sx={{ position: 'absolute', right: 30, bottom: -25, width: 60, height: 60, borderRadius: '50%', bgcolor: 'rgba(255,255,255,0.05)' }} />
-
-                                    <Stack direction="row" alignItems="flex-start" spacing={2} sx={{ position: 'relative' }}>
-                                        <Box sx={{ width: 46, height: 46, borderRadius: 2, bgcolor: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                                            <Icon sx={{ fontSize: 22, color: '#fff' }} />
-                                        </Box>
-                                        <Box flex={1}>
-                                            <Stack direction="row" alignItems="center" spacing={1} mb={0.5}>
-                                                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#fff', lineHeight: 1.2 }}>
-                                                    {store.title}
-                                                </Typography>
-                                                <Chip
-                                                    label={store.badge}
-                                                    size="small"
-                                                    sx={{
-                                                        height: 18,
-                                                        fontSize: '0.62rem',
-                                                        fontWeight: 700,
-                                                        bgcolor: 'rgba(255,255,255,0.18)',
-                                                        color: '#fff',
-                                                        border: '1px solid rgba(255,255,255,0.3)',
-                                                        '& .MuiChip-label': { px: 0.75 },
-                                                    }}
-                                                />
-                                            </Stack>
-                                            <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.82)', fontSize: '0.73rem', lineHeight: 1.4 }}>
-                                                {store.subtitle}
-                                            </Typography>
-                                        </Box>
-                                    </Stack>
-                                </Box>
-
-                                {/* Card body */}
-                                <Box sx={{ p: 2.5, flex: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
-                                    <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.8rem', lineHeight: 1.65 }}>
-                                        {store.description}
-                                    </Typography>
-
-                                    {/* ── Inventory counts ── */}
-                                    <Box>
-                                        <Typography
-                                            variant="caption"
-                                            sx={{ color: 'text.disabled', textTransform: 'uppercase', letterSpacing: '0.07em', fontSize: '0.65rem', fontWeight: 600, display: 'block', mb: 1 }}
-                                        >
-                                            Inventory Overview
-                                        </Typography>
-
-                                        {assetTypes.length > 0 ? (
-                                            <Grid container spacing={1}>
-                                                {assetTypes.map(type => {
-                                                    const { color, Icon: CatIcon } = getCategoryStyle(type.name);
-                                                    const count = categoryCounts[type.id];
-                                                    return (
-                                                        <Grid item xs={6} key={type.id}>
-                                                            <Box
-                                                                sx={{
-                                                                    p: 1.25,
-                                                                    borderRadius: 2,
-                                                                    bgcolor: alpha(color, 0.05),
-                                                                    border: `1px solid ${alpha(color, 0.14)}`,
-                                                                }}
-                                                            >
-                                                                <Stack direction="row" alignItems="center" spacing={0.5} mb={0.5}>
-                                                                    <CatIcon sx={{ fontSize: 12, color }} />
-                                                                    <Typography variant="caption" sx={{ fontSize: '0.65rem', fontWeight: 600, color, lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                                                        {type.name}
-                                                                    </Typography>
-                                                                </Stack>
-                                                                {countsLoading ? (
-                                                                    <Skeleton variant="text" width="60%" height={28} />
-                                                                ) : (
-                                                                    <Stack direction="row" alignItems="baseline" spacing={0.4}>
-                                                                        <Typography variant="h6" sx={{ fontWeight: 800, color: 'text.primary', fontSize: '1.3rem', lineHeight: 1 }}>
-                                                                            {count ?? 0}
-                                                                        </Typography>
-                                                                        <Typography variant="caption" sx={{ color: 'text.disabled', fontSize: '0.65rem' }}>
-                                                                            items
-                                                                        </Typography>
-                                                                    </Stack>
-                                                                )}
-                                                            </Box>
-                                                        </Grid>
-                                                    );
-                                                })}
-                                            </Grid>
-                                        ) : (
-                                            /* Skeleton placeholders while asset types load */
-                                            <Grid container spacing={1}>
-                                                {[0, 1, 2, 3].map(i => (
-                                                    <Grid item xs={6} key={i}>
-                                                        <Skeleton variant="rounded" height={60} sx={{ borderRadius: 2 }} />
-                                                    </Grid>
-                                                ))}
-                                            </Grid>
-                                        )}
-                                    </Box>
-
-                                    {/* CTA */}
-                                    <Box sx={{ mt: 'auto', pt: 0.5 }}>
-                                        <Button
-                                            fullWidth
-                                            variant="outlined"
-                                            endIcon={<ArrowForwardIosOutlinedIcon sx={{ fontSize: 11 }} />}
-                                            onClick={() => navigate(store.path)}
-                                            sx={{
-                                                borderRadius: 2,
-                                                textTransform: 'none',
-                                                fontWeight: 600,
-                                                fontSize: '0.82rem',
-                                                py: 0.9,
-                                                borderColor: alpha(store.accentColor, 0.4),
-                                                color: store.accentColor,
-                                                '&:hover': {
-                                                    borderColor: store.accentColor,
-                                                    bgcolor: alpha(store.accentColor, 0.05),
-                                                },
-                                            }}
-                                        >
-                                            View {store.title}
-                                        </Button>
-                                    </Box>
-                                </Box>
-                            </Paper>
-                        </Grid>
-                    );
-                })}
-            </Grid>
-
-            {/* ── Quick guide bar ── */}
-            <Paper
-                elevation={0}
-                sx={{
-                    borderRadius: 3,
-                    border: `1px solid ${alpha('#000', 0.06)}`,
-                    bgcolor: alpha(PRIMARY, 0.02),
-                    p: 2.5,
-                }}
-            >
-                <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} alignItems={{ md: 'center' }}>
-                    <Box flex={1}>
-                        <Typography variant="caption" sx={{ color: PRIMARY, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', fontSize: '0.68rem', display: 'block', mb: 0.4 }}>
-                            How it works
-                        </Typography>
-                        <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.8rem', lineHeight: 1.6 }}>
-                            Select a store to view its full inventory report. Use the branch filter to switch between branches, then navigate
-                            across category tabs — <strong>Office Equipment</strong>, <strong>IT Equipment</strong>, <strong>Fleet</strong>, and <strong>Stationery</strong> — to view stock levels and records.
-                        </Typography>
-                    </Box>
-                    <Divider orientation="vertical" flexItem sx={{ display: { xs: 'none', md: 'block' }, borderColor: alpha('#000', 0.07) }} />
-                    <Stack direction="row" spacing={1} flexShrink={0}>
-                        {STORES.map(s => (
-                            <Button
-                                key={s.type}
-                                size="small"
-                                onClick={() => navigate(s.path)}
-                                sx={{
-                                    textTransform: 'none',
-                                    fontSize: '0.75rem',
-                                    fontWeight: 600,
-                                    color: s.accentColor,
-                                    bgcolor: alpha(s.accentColor, 0.07),
-                                    borderRadius: 1.5,
-                                    px: 1.5,
-                                    '&:hover': { bgcolor: alpha(s.accentColor, 0.14) },
-                                }}
-                            >
-                                {s.title}
-                            </Button>
+                                    {store.title}
+                                </Button>
+                            </Tooltip>
                         ))}
                     </Stack>
-                </Stack>
-                </Paper>
+                }
+            />
 
-            </Box>{/* end content area */}
+            {/* ── KPI strip ── */}
+            <Grid container spacing={2} sx={{ mb: 3 }}>
+                <Grid item xs={6} sm={3}>
+                    <StatTile
+                        label="Branches Stocked"
+                        value={branchesLoading ? '…' : branchesStocked}
+                        helper={`of ${branchRows.length} branches`}
+                        icon={<AccountBalanceOutlinedIcon />}
+                        accent="brand"
+                    />
+                </Grid>
+                <Grid item xs={6} sm={3}>
+                    <StatTile
+                        label="Assets in Stores"
+                        value={branchesLoading ? '…' : totalAssetsHeld.toLocaleString()}
+                        helper={`${totalItemLines.toLocaleString()} consumable lines`}
+                        icon={<FormatListNumberedOutlinedIcon />}
+                        accent="gold"
+                    />
+                </Grid>
+                <Grid item xs={6} sm={3}>
+                    <StatTile
+                        label="Low-Stock Alerts"
+                        value={balancesLoading ? '…' : lowStockCount}
+                        helper="click to review"
+                        icon={<WarningAmberOutlinedIcon />}
+                        accent="warning"
+                        onClick={jumpToLowStock}
+                    />
+                </Grid>
+                <Grid item xs={6} sm={3}>
+                    <StatTile
+                        label="Consumable Balances"
+                        value={balancesLoading ? '…' : balanceRows.length}
+                        helper="tracked balance lines"
+                        icon={<Inventory2OutlinedIcon />}
+                        accent="info"
+                    />
+                </Grid>
+            </Grid>
+
+            {/* ── Branches overview, grouped by region ── */}
+            <Paper elevation={0} sx={{ mt: 3, borderRadius: 2.5, border: `1px solid ${border.subtle}`, overflow: 'hidden' }}>
+                <Box sx={{ px: 2.5, py: 1.75, borderBottom: `1px solid ${border.subtle}`, display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+                    <AccountBalanceOutlinedIcon sx={{ fontSize: 18, color: brand[500] }} />
+                    <Typography sx={{ fontWeight: 700 }}>
+                        {seesAllBranches ? 'Branches Overview' : 'Your Branch'}
+                    </Typography>
+                    {/* The listing is branch-scoped server-side, so a branch officer sees a single
+                        row. Saying so stops "Branches Overview" reading as the whole estate. */}
+                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                        {seesAllBranches
+                            ? 'Grouped by region — expand a region to see its branch stores. Regions with low-stock alerts open automatically.'
+                            : 'Stock health for the branch you belong to. Estate-wide figures need cross-branch access.'}
+                    </Typography>
+                </Box>
+
+                {branchesLoading ? (
+                    <Stack spacing={0} divider={<Box sx={{ borderBottom: `1px solid ${border.subtle}` }} />}>
+                        {[0, 1, 2].map((i) => (
+                            <Box key={i} sx={{ px: 2.5, py: 1.75, display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                                <Skeleton variant="rounded" width={28} height={28} />
+                                <Skeleton width={160} />
+                                <Box sx={{ flex: 1 }} />
+                                <Skeleton width={90} />
+                                <Skeleton width={60} />
+                            </Box>
+                        ))}
+                    </Stack>
+                ) : regionGroups.length > 0 ? (
+                    regionGroups.map(({ region, rows, itemLines, totalQuantity, low }, idx) => {
+                        const open = expandedRegions.has(region);
+                        return (
+                            <Box key={region} sx={{ borderTop: idx > 0 ? `1px solid ${border.subtle}` : 'none' }}>
+                                {/* Region header — the whole row toggles */}
+                                <Box
+                                    onClick={() => toggleRegion(region)}
+                                    // Matches the keyboard affordances the branch rows below already
+                                    // have. Previously this was a bare clickable div, so a region
+                                    // could only be toggled with a mouse.
+                                    role="button"
+                                    tabIndex={0}
+                                    aria-expanded={open}
+                                    aria-label={`${open ? 'Collapse' : 'Expand'} ${region}`}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter' || e.key === ' ') {
+                                            e.preventDefault();
+                                            toggleRegion(region);
+                                        }
+                                    }}
+                                    sx={{
+                                        px: 2.5, py: 1.5,
+                                        display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap',
+                                        cursor: 'pointer', userSelect: 'none',
+                                        bgcolor: open ? alpha(brand[500], 0.025) : 'transparent',
+                                        transition: 'background-color 0.15s ease',
+                                        '&:hover': { bgcolor: alpha(brand[500], 0.04) },
+                                        '&:focus-visible': { outline: `2px solid ${brand[500]}`, outlineOffset: -2 },
+                                    }}
+                                >
+                                    <Box sx={{ width: 28, height: 28, borderRadius: 1, bgcolor: alpha(brand[500], 0.08), color: brand[500], display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                        <PublicOutlinedIcon sx={{ fontSize: 15 }} />
+                                    </Box>
+                                    <Typography sx={{ fontWeight: 700, fontSize: '0.9rem', color: neutral[800] }}>{region}</Typography>
+                                    <Typography variant="caption" sx={{ color: neutral[400] }}>
+                                        {rows.length} branch{rows.length !== 1 ? 'es' : ''}
+                                    </Typography>
+                                    <Box sx={{ flex: 1 }} />
+                                    {/* The alert leads: it is the only chip here anyone has to act on. */}
+                                    {low > 0 && (
+                                        <Chip
+                                            icon={<WarningAmberOutlinedIcon sx={{ fontSize: 13 }} />}
+                                            label={`${low} low stock`}
+                                            size="small"
+                                            sx={{ height: 22, fontWeight: 700, fontSize: '0.68rem', bgcolor: alpha(status.warning.strong, 0.12), color: status.warning.strong, '& .MuiChip-icon': { color: status.warning.strong } }}
+                                        />
+                                    )}
+                                    {/* Units lead, matching the hero headline and the branch rows
+                                        below: a line count says nothing about whether the region can
+                                        actually meet a request. */}
+                                    <Chip
+                                        label={`${totalQuantity.toLocaleString()} unit${totalQuantity !== 1 ? 's' : ''} · ${itemLines.toLocaleString()} line${itemLines !== 1 ? 's' : ''}`}
+                                        size="small"
+                                        sx={{ height: 22, fontWeight: 700, fontSize: '0.68rem', fontVariantNumeric: 'tabular-nums', bgcolor: alpha(brand[500], 0.08), color: brand[500] }}
+                                    />
+                                    {/* Purely decorative: the header itself is the control, so this
+                                        must not be a nested <button> or a second tab stop. */}
+                                    <Box aria-hidden sx={{ ml: 0.5, display: 'flex', alignItems: 'center' }}>
+                                        <ExpandMoreIcon sx={{ fontSize: 18, color: neutral[500], transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s ease' }} />
+                                    </Box>
+                                </Box>
+
+                                {/* Branches within the region — lean clickable rows that drill into
+                                    the branch's Admin store (pre-filtered via ?branchId=). */}
+                                <Collapse in={open} timeout="auto" unmountOnExit>
+                                    {rows.map((b, bi) => (
+                                        <Box
+                                            key={b.id}
+                                            onClick={() => navigate(`${ROUTES.STORE_ADMIN}?branchId=${b.id}`)}
+                                            role="link"
+                                            tabIndex={0}
+                                            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navigate(`${ROUTES.STORE_ADMIN}?branchId=${b.id}`); } }}
+                                            aria-label={`Open ${b.name} store`}
+                                            sx={{
+                                                pl: 7, pr: 2.5, py: 1.1,
+                                                display: 'flex', alignItems: 'center', gap: 1.25, flexWrap: 'wrap',
+                                                cursor: 'pointer',
+                                                borderTop: bi === 0 ? `1px solid ${border.subtle}` : 'none',
+                                                // Intentionally lighter than border.subtle: this
+                                                // separates rows *within* a region, so it must sit
+                                                // below the region dividers in the hierarchy.
+                                                borderBottom: `1px solid ${neutral[100]}`,
+                                                transition: 'background-color 0.13s ease',
+                                                '&:hover': { bgcolor: alpha(brand[500], 0.035) },
+                                                '&:hover .branch-row-arrow': { color: brand[500], transform: 'translateX(2px)' },
+                                                '&:focus-visible': { outline: `2px solid ${brand[500]}`, outlineOffset: -2 },
+                                            }}
+                                        >
+                                            <StorefrontOutlinedIcon sx={{ fontSize: 15, color: neutral[400], flexShrink: 0 }} />
+                                            <Typography sx={{ fontWeight: 600, fontSize: '0.84rem', color: neutral[800] }}>{b.name}</Typography>
+                                            {/*
+                                             * Health first. `itemLines` and `totalQuantity` are weak
+                                             * signals — 400 units could be 399 paperclips — while the
+                                             * share of lines running low is the number that decides
+                                             * whether anyone needs to act on this branch today.
+                                             */}
+                                            <BranchHealthBar itemLines={b.itemLines} low={b.low} />
+                                            <Box sx={{ flex: 1 }} />
+                                            {b.low > 0 && (
+                                                <Chip
+                                                    icon={<WarningAmberOutlinedIcon sx={{ fontSize: 12 }} />}
+                                                    label={`${b.low} low`}
+                                                    size="small"
+                                                    sx={{ height: 22, fontWeight: 700, fontSize: '0.68rem', bgcolor: alpha(status.warning.strong, 0.12), color: status.warning.strong, '& .MuiChip-icon': { color: status.warning.strong } }}
+                                                />
+                                            )}
+                                            <Chip
+                                                label={`${b.totalQuantity.toLocaleString()} unit${b.totalQuantity !== 1 ? 's' : ''} · ${b.itemLines} line${b.itemLines !== 1 ? 's' : ''}`}
+                                                size="small"
+                                                sx={{
+                                                    height: 22, fontWeight: 700, fontSize: '0.68rem', fontVariantNumeric: 'tabular-nums',
+                                                    bgcolor: alpha(b.itemLines === 0 ? status.danger.main : brand[500], 0.1),
+                                                    color: b.itemLines === 0 ? status.danger.main : brand[500],
+                                                }}
+                                            />
+                                            {b.assetsHeld > 0 && (
+                                                <Chip
+                                                    label={`${b.assetsHeld} asset${b.assetsHeld !== 1 ? 's' : ''}`}
+                                                    size="small"
+                                                    sx={{
+                                                        height: 22, fontWeight: 700, fontSize: '0.68rem', fontVariantNumeric: 'tabular-nums',
+                                                        bgcolor: alpha(STORE_ACCENT.it, 0.1), color: STORE_ACCENT.it,
+                                                    }}
+                                                />
+                                            )}
+                                            {/* No per-row "Replenish" here. It navigated to the bare
+                                                movement form with no branch context — identical to the
+                                                global action in the hero — so it promised a
+                                                branch-scoped shortcut it could not deliver. A real one
+                                                needs the movement form to accept a source-store
+                                                prefill, which has to resolve branch → store first.
+                                                Keeping the row free of nested controls also keeps this
+                                                `role="link"` valid. */}
+                                            <ArrowForwardIosOutlinedIcon
+                                                className="branch-row-arrow"
+                                                sx={{ fontSize: 11, color: neutral[300], flexShrink: 0, transition: 'all 0.15s ease' }}
+                                            />
+                                        </Box>
+                                    ))}
+                                </Collapse>
+                            </Box>
+                        );
+                    })
+                ) : (
+                    <Box sx={{ py: 4, textAlign: 'center', color: 'text.disabled' }}>
+                        <Typography variant="body2">No branches found.</Typography>
+                    </Box>
+                )}
+            </Paper>
+
+            {/* ── Consumable balances: set reorder thresholds + see low stock ── */}
+            <Box ref={balancesRef} sx={{ scrollMarginTop: 80 }}>
+                <BalancesPanel
+                    rows={balanceRows}
+                    setRows={setBalanceRows}
+                    loading={balancesLoading}
+                    lowOnly={lowOnly}
+                    onLowOnlyChange={setLowOnly}
+                />
+            </Box>
         </Box>
     );
 };

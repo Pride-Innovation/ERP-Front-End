@@ -7,7 +7,6 @@ Managing Director
 
 import {
     Box,
-    Grid,
     Typography,
     Button,
     Stack,
@@ -33,17 +32,22 @@ import ModalComponent from '../../../components/modal';
 import CreateDepartment from './CreateDepartment';
 import UpdateDepartment from './UpdateDepartment';
 import DeleteDepartment from './DeleteDepartment';
+import ManageUnits from '../units/ManageUnits';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../store';
 import Loading from '../../../components/loading';
 import DepartmentDetails from './DepartmentDetails';
 import { useDebounce } from '../../../hooks/useDebounce';
+import { RequirePermission } from '../../../core/permissions';
+import { PERMISSIONS } from '../../../core/permissions/constants';
+import { PageHero } from '../../../components/layout';
 
 const PRIMARY = '#08796C';
 
 const Departments = () => {
     const { setModalState, handleClose, handleOpen, modalState, open, fetchAllDepartments, loading } = DepartmentUtills();
     const [currentDepartment, setCurrentDepartment] = useState<IDepartment>({} as IDepartment);
+    const [unitsDepartment, setUnitsDepartment] = useState<IDepartment | null>(null);
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
     const [searchTerm, setSearchTerm] = useState<string>("");
     const [pageNumber, setPageNumber] = useState<number>(0);
@@ -86,6 +90,10 @@ const Departments = () => {
         handleOpen();
     };
 
+    const manageUnits = (department: IDepartment) => {
+        setUnitsDepartment(department);
+    };
+
     return (
         <>
             {/* Modals */}
@@ -119,22 +127,29 @@ const Departments = () => {
                     />
                 </ModalComponent>
             )}
+            {unitsDepartment && (
+                <ModalComponent width="55%" title="Manage Units" open={Boolean(unitsDepartment)} handleClose={() => setUnitsDepartment(null)}>
+                    <ManageUnits
+                        department={unitsDepartment}
+                        handleClose={() => setUnitsDepartment(null)}
+                    />
+                </ModalComponent>
+            )}
 
-            {/* Sub-page Header */}
-            <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 3, pb: 2.5, borderBottom: '1px solid #E2E8F0' }}>
-                <Stack direction="row" alignItems="center" spacing={1.5}>
-                    <Box sx={{ width: 44, height: 44, borderRadius: '12px', background: 'linear-gradient(135deg, #08796C, #065E53)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                        <AccountTreeOutlinedIcon sx={{ color: '#fff', fontSize: 22 }} />
-                    </Box>
-                    <Box>
-                        <Typography variant="h6" sx={{ fontWeight: 700, color: '#1E293B', lineHeight: 1.3 }}>Department Management</Typography>
-                        <Typography variant="body2" sx={{ color: '#64748B' }}>Manage organizational departments, leadership, and team structures</Typography>
-                    </Box>
-                </Stack>
-                <Box sx={{ bgcolor: alpha(PRIMARY, 0.08), color: PRIMARY, fontWeight: 700, borderRadius: '6px', px: 1.5, py: 0.5, fontSize: '0.75rem', flexShrink: 0, mt: 0.5 }}>
-                    {totalElements} {totalElements === 1 ? 'department' : 'departments'}
-                </Box>
-            </Box>
+            <PageHero
+                title="Department Management"
+                subtitle="Manage organizational departments, leadership, and team structures"
+                icon={<AccountTreeOutlinedIcon />}
+                stat={{ value: totalElements ?? 0, label: 'records' }}
+                actions={
+                    <RequirePermission permission={PERMISSIONS.CREATE_SETTING}>
+                        <Button onClick={createDepartment} startIcon={<AddIcon />} variant="contained"
+                            sx={{ height: 36, px: 2.5, borderRadius: '8px', textTransform: 'none', fontWeight: 600, bgcolor: PRIMARY, flexShrink: 0, '&:hover': { bgcolor: '#065E53' }, boxShadow: `0 2px 8px ${alpha(PRIMARY, 0.3)}` }}>
+                            Add Department
+                        </Button>
+                    </RequirePermission>
+                }
+            />
 
             {/* Filter Bar */}
             <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} alignItems={{ xs: "stretch", sm: "center" }} justifyContent="space-between" sx={{ mb: 3 }}>
@@ -158,10 +173,6 @@ const Departments = () => {
                         />
                     )}
                 </Stack>
-                <Button onClick={createDepartment} startIcon={<AddIcon />} variant="contained"
-                    sx={{ height: 36, px: 2.5, borderRadius: '8px', textTransform: 'none', fontWeight: 600, bgcolor: PRIMARY, flexShrink: 0, '&:hover': { bgcolor: '#065E53' }, boxShadow: `0 2px 8px ${alpha(PRIMARY, 0.3)}` }}>
-                    Add Department
-                </Button>
             </Stack>
 
             {/* Department Cards */}
@@ -183,17 +194,18 @@ const Departments = () => {
                     </Paper>
                 ) : departments.length > 0 ? (
                     <Fade in={!loading}>
-                        <Grid container spacing={3}>
-                            {departments.map((department) => (
-                                <Grid item xs={12} sm={6} md={6} lg={6} key={department.id}>
-                                    <DepartmentDetails
-                                        department={department}
-                                        deleteDepartment={deleteDepartment}
-                                        updateDepartment={updateDepartment}
-                                    />
-                                </Grid>
+                        <Box className="settings-card-grid">
+                            {departments.map((department, i) => (
+                                <DepartmentDetails
+                                    key={department.id}
+                                    department={department}
+                                    deleteDepartment={deleteDepartment}
+                                    updateDepartment={updateDepartment}
+                                    manageUnits={manageUnits}
+                                    index={i}
+                                />
                             ))}
-                        </Grid>
+                        </Box>
                     </Fade>
                 ) : (
                     <Fade in={!loading}>
@@ -233,18 +245,20 @@ const Departments = () => {
                                     Clear Search
                                 </Button>
                             ) : (
-                                <Button
-                                    variant="contained"
-                                    onClick={createDepartment}
-                                    startIcon={<AddIcon />}
-                                    sx={{
-                                        textTransform: 'none',
-                                        borderRadius: 1.5,
-                                        px: 3
-                                    }}
-                                >
-                                    Add Department
-                                </Button>
+                                <RequirePermission permission={PERMISSIONS.CREATE_SETTING}>
+                                    <Button
+                                        variant="contained"
+                                        onClick={createDepartment}
+                                        startIcon={<AddIcon />}
+                                        sx={{
+                                            textTransform: 'none',
+                                            borderRadius: 1.5,
+                                            px: 3
+                                        }}
+                                    >
+                                        Add Department
+                                    </Button>
+                                </RequirePermission>
                             )}
                         </Paper>
                     </Fade>

@@ -1,66 +1,72 @@
 /*
 13.9 Pride's Standard Copyright Notice:
-Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
+Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify,
 and distribute this software and its documentation for any purpose is prohibited unless authorized in writing by the
 Managing Director
 */
 
 import { alpha, createTheme, responsiveFontSizes } from '@mui/material/styles';
+import {
+    border,
+    brand,
+    elevation,
+    gold,
+    neutral,
+    radii,
+    status,
+    surface,
+    text,
+} from './tokens';
+import './theme.d';
 
-const PRIMARY = '#08796C';
-const PRIMARY_DARK = '#065E54';
-const PRIMARY_LIGHT = '#0A9B8C';
-const SECONDARY = '#BC892C';
-const SECONDARY_DARK = '#9B7024';
-const BORDER_COLOR = '#E5E9F0';
+// Saturated brand accent — not part of the 50-900 scale because it's only
+// used for the `palette.primary.light` slot, which MUI consumes for ripples
+// and subtle highlights.
+const PRIMARY_LIGHT_ACCENT = '#0A9B8C';
 
 const customThemes = createTheme({
     palette: {
         primary: {
-            main: PRIMARY,
-            dark: PRIMARY_DARK,
-            light: PRIMARY_LIGHT,
-            contrastText: '#ffffff',
+            main: brand[500],
+            dark: brand[700],
+            light: PRIMARY_LIGHT_ACCENT,
+            contrastText: neutral[0],
         },
         secondary: {
-            main: SECONDARY,
-            dark: SECONDARY_DARK,
-            contrastText: '#ffffff',
+            main: gold[500],
+            dark: gold[700],
+            contrastText: neutral[0],
         },
-        error: {
-            main: '#D32F2F',
-        },
-        warning: {
-            main: '#F59E0B',
-        },
-        info: {
-            main: '#3B82F6',
-        },
-        success: {
-            main: '#10B981',
-        },
+        error:   { main: status.danger.main },
+        warning: { main: status.warning.main },
+        info:    { main: status.info.main },
+        success: { main: status.success.main },
         background: {
-            default: '#F1F5FB',
-            paper: '#FFFFFF',
+            default: surface.page,
+            paper:   surface.card,
         },
         text: {
-            primary: '#111827',
-            secondary: '#6B7280',
-            disabled: '#9CA3AF',
+            primary:   text.heading,
+            secondary: text.muted,
+            disabled:  text.subtle,
         },
-        divider: '#E5E9F0',
+        divider: border.subtle,
         grey: {
-            50: '#F9FAFB',
-            100: '#F3F4F6',
-            200: '#E5E7EB',
-            300: '#D1D5DB',
-            400: '#9CA3AF',
-            500: '#6B7280',
-            600: '#4B5563',
-            700: '#374151',
-            800: '#1F2937',
-            900: '#111827',
+            50:  neutral[50],
+            100: neutral[100],
+            200: neutral[200],
+            300: neutral[300],
+            400: neutral[400],
+            500: neutral[500],
+            600: neutral[600],
+            700: neutral[700],
+            800: neutral[800],
+            900: neutral[900],
         },
+        brand,
+        gold,
+        surface,
+        border,
     },
 
     typography: {
@@ -75,38 +81,38 @@ const customThemes = createTheme({
         h5: { fontSize: '0.975rem', fontWeight: 600, lineHeight: 1.5 },
         h6: { fontSize: '0.875rem', fontWeight: 600, lineHeight: 1.5 },
         subtitle1: { fontSize: '0.825rem', fontWeight: 500, lineHeight: 1.5 },
-        subtitle2: { fontSize: '0.8rem', fontWeight: 500, lineHeight: 1.5, color: '#6B7280' },
+        subtitle2: { fontSize: '0.8rem', fontWeight: 500, lineHeight: 1.5, color: text.muted },
         body1: { fontSize: '0.825rem', lineHeight: 1.6 },
         body2: { fontSize: '0.8rem', lineHeight: 1.6 },
-        caption: { fontSize: '0.7rem', lineHeight: 1.5, color: '#6B7280' },
+        caption: { fontSize: '0.7rem', lineHeight: 1.5, color: text.muted },
         overline: { fontSize: '0.625rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' },
         button: { textTransform: 'none', fontWeight: 600, fontSize: '0.8rem', letterSpacing: '0.01em' },
     },
 
     shape: {
-        borderRadius: 10,
+        borderRadius: radii.md,
     },
 
     shadows: [
         'none',
         '0px 1px 2px rgba(0, 0, 0, 0.06)',
-        '0px 1px 3px rgba(0, 0, 0, 0.08), 0px 1px 2px rgba(0, 0, 0, 0.04)',
-        '0px 4px 6px -1px rgba(0, 0, 0, 0.07), 0px 2px 4px -1px rgba(0, 0, 0, 0.05)',
+        elevation.card,
+        elevation.raised,
         '0px 10px 15px -3px rgba(0, 0, 0, 0.07), 0px 4px 6px -2px rgba(0, 0, 0, 0.04)',
         '0px 20px 25px -5px rgba(0, 0, 0, 0.08), 0px 10px 10px -5px rgba(0, 0, 0, 0.03)',
-        '0px 25px 50px -12px rgba(0, 0, 0, 0.15)',
+        elevation.overlay,
         '0px 1px 2px rgba(0, 0, 0, 0.06)',
         '0px 1px 3px rgba(0, 0, 0, 0.08)',
         '0px 4px 6px -1px rgba(0, 0, 0, 0.07)',
         '0px 10px 15px -3px rgba(0, 0, 0, 0.07)',
         '0px 20px 25px -5px rgba(0, 0, 0, 0.08)',
-        '0px 25px 50px -12px rgba(0, 0, 0, 0.15)',
+        elevation.overlay,
         '0px 1px 2px rgba(0, 0, 0, 0.06)',
         '0px 1px 3px rgba(0, 0, 0, 0.08)',
         '0px 4px 6px -1px rgba(0, 0, 0, 0.07)',
         '0px 10px 15px -3px rgba(0, 0, 0, 0.07)',
         '0px 20px 25px -5px rgba(0, 0, 0, 0.08)',
-        '0px 25px 50px -12px rgba(0, 0, 0, 0.15)',
+        elevation.overlay,
         '0px 1px 2px rgba(0, 0, 0, 0.06)',
         '0px 1px 3px rgba(0, 0, 0, 0.08)',
         '0px 4px 6px -1px rgba(0, 0, 0, 0.07)',
@@ -128,25 +134,25 @@ const customThemes = createTheme({
                     fontFamily: '"Inter", "Roboto", "Helvetica Neue", Arial, sans-serif',
                     WebkitFontSmoothing: 'antialiased',
                     MozOsxFontSmoothing: 'grayscale',
-                    backgroundColor: '#F1F5FB',
+                    backgroundColor: surface.page,
                 },
                 '::-webkit-scrollbar': {
                     width: '6px',
                     height: '6px',
                 },
                 '::-webkit-scrollbar-track': {
-                    background: '#F3F4F6',
+                    background: surface.subtle,
                 },
                 '::-webkit-scrollbar-thumb': {
-                    background: alpha(PRIMARY, 0.35),
+                    background: alpha(brand[500], 0.35),
                     borderRadius: '3px',
                     '&:hover': {
-                        background: alpha(PRIMARY, 0.55),
+                        background: alpha(brand[500], 0.55),
                     },
                 },
                 '::selection': {
-                    background: alpha(PRIMARY, 0.2),
-                    color: PRIMARY_DARK,
+                    background: alpha(brand[500], 0.2),
+                    color: brand[700],
                 },
             },
         },
@@ -164,26 +170,26 @@ const customThemes = createTheme({
                     paddingRight: 16,
                     transition: 'all 0.2s ease',
                     '&:focus-visible': {
-                        outline: `2px solid ${alpha(PRIMARY, 0.5)}`,
+                        outline: `2px solid ${alpha(brand[500], 0.5)}`,
                         outlineOffset: 2,
                     },
                 },
                 contained: {
-                    boxShadow: `0 1px 3px ${alpha(PRIMARY, 0.3)}, 0 1px 2px ${alpha(PRIMARY, 0.2)}`,
+                    boxShadow: `0 1px 3px ${alpha(brand[500], 0.3)}, 0 1px 2px ${alpha(brand[500], 0.2)}`,
                     '&:hover': {
-                        boxShadow: `0 4px 12px ${alpha(PRIMARY, 0.35)}`,
+                        boxShadow: `0 4px 12px ${alpha(brand[500], 0.35)}`,
                         transform: 'translateY(-1px)',
                     },
                     '&:active': {
                         transform: 'translateY(0)',
-                        boxShadow: `0 1px 3px ${alpha(PRIMARY, 0.3)}`,
+                        boxShadow: `0 1px 3px ${alpha(brand[500], 0.3)}`,
                     },
                 },
                 outlined: {
                     borderWidth: '1.5px',
                     '&:hover': {
                         borderWidth: '1.5px',
-                        backgroundColor: alpha(PRIMARY, 0.04),
+                        backgroundColor: alpha(brand[500], 0.04),
                     },
                 },
                 sizeSmall: {
@@ -204,9 +210,9 @@ const customThemes = createTheme({
         MuiCard: {
             styleOverrides: {
                 root: {
-                    borderRadius: 12,
-                    border: `1px solid ${BORDER_COLOR}`,
-                    boxShadow: '0px 1px 3px rgba(0, 0, 0, 0.06), 0px 1px 2px rgba(0, 0, 0, 0.04)',
+                    borderRadius: radii.lg,
+                    border: `1px solid ${border.subtle}`,
+                    boxShadow: elevation.card,
                     transition: 'box-shadow 0.25s ease, transform 0.25s ease',
                 },
             },
@@ -215,13 +221,13 @@ const customThemes = createTheme({
         MuiPaper: {
             styleOverrides: {
                 root: {
-                    borderRadius: 12,
+                    borderRadius: radii.lg,
                 },
                 elevation1: {
-                    boxShadow: '0px 1px 3px rgba(0, 0, 0, 0.08), 0px 1px 2px rgba(0, 0, 0, 0.04)',
+                    boxShadow: elevation.card,
                 },
                 elevation2: {
-                    boxShadow: '0px 4px 6px -1px rgba(0, 0, 0, 0.07), 0px 2px 4px -1px rgba(0, 0, 0, 0.04)',
+                    boxShadow: elevation.raised,
                 },
                 elevation3: {
                     boxShadow: '0px 10px 15px -3px rgba(0, 0, 0, 0.07), 0px 4px 6px -2px rgba(0, 0, 0, 0.04)',
@@ -238,35 +244,35 @@ const customThemes = createTheme({
                 root: {
                     '& .MuiOutlinedInput-root': {
                         borderRadius: 8,
-                        backgroundColor: '#FFFFFF',
+                        backgroundColor: surface.card,
                         transition: 'box-shadow 0.2s ease, border-color 0.2s ease',
                         '& fieldset': {
-                            borderColor: BORDER_COLOR,
+                            borderColor: border.subtle,
                             borderWidth: '1.5px',
                             transition: 'border-color 0.2s ease',
                         },
                         '&:hover fieldset': {
-                            borderColor: alpha(PRIMARY, 0.4),
+                            borderColor: alpha(brand[500], 0.4),
                         },
                         '&.Mui-focused fieldset': {
-                            borderColor: PRIMARY,
+                            borderColor: brand[500],
                             borderWidth: '2px',
                         },
                         '&.Mui-focused': {
-                            boxShadow: `0 0 0 3px ${alpha(PRIMARY, 0.12)}`,
+                            boxShadow: `0 0 0 3px ${alpha(brand[500], 0.12)}`,
                         },
                         '&.Mui-error fieldset': {
-                            borderColor: '#D32F2F',
+                            borderColor: status.danger.main,
                         },
                         '&.Mui-disabled': {
-                            backgroundColor: '#F9FAFB',
+                            backgroundColor: surface.muted,
                         },
                     },
                     '& .MuiInputLabel-root': {
                         fontSize: '0.875rem',
                         fontWeight: 500,
                         '&.Mui-focused': {
-                            color: PRIMARY,
+                            color: brand[500],
                         },
                     },
                     '& .MuiOutlinedInput-input': {
@@ -293,7 +299,7 @@ const customThemes = createTheme({
         MuiChip: {
             styleOverrides: {
                 root: {
-                    borderRadius: 6,
+                    borderRadius: radii.sm,
                     fontWeight: 500,
                     fontSize: '0.7rem',
                     height: 22,
@@ -312,16 +318,16 @@ const customThemes = createTheme({
         MuiTooltip: {
             styleOverrides: {
                 tooltip: {
-                    backgroundColor: '#1F2937',
-                    color: '#F9FAFB',
+                    backgroundColor: surface.inverse,
+                    color: neutral[50],
                     fontSize: '0.75rem',
                     fontWeight: 500,
-                    borderRadius: 6,
+                    borderRadius: radii.sm,
                     padding: '6px 10px',
                     boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
                 },
                 arrow: {
-                    color: '#1F2937',
+                    color: surface.inverse,
                 },
             },
         },
@@ -329,7 +335,7 @@ const customThemes = createTheme({
         MuiDivider: {
             styleOverrides: {
                 root: {
-                    borderColor: '#E5E9F0',
+                    borderColor: border.subtle,
                 },
             },
         },
@@ -384,8 +390,8 @@ const customThemes = createTheme({
         MuiDialog: {
             styleOverrides: {
                 paper: {
-                    borderRadius: 16,
-                    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+                    borderRadius: radii.xl,
+                    boxShadow: elevation.overlay,
                 },
             },
         },
@@ -393,9 +399,9 @@ const customThemes = createTheme({
         MuiMenu: {
             styleOverrides: {
                 paper: {
-                    borderRadius: 10,
-                    border: `1px solid ${BORDER_COLOR}`,
-                    boxShadow: '0 10px 30px rgba(0,0,0,0.12)',
+                    borderRadius: radii.md,
+                    border: `1px solid ${border.subtle}`,
+                    boxShadow: elevation.floating,
                     marginTop: 4,
                 },
             },
@@ -404,18 +410,18 @@ const customThemes = createTheme({
         MuiMenuItem: {
             styleOverrides: {
                 root: {
-                    borderRadius: 6,
+                    borderRadius: radii.sm,
                     margin: '2px 6px',
                     fontSize: '0.875rem',
                     transition: 'background-color 0.15s ease',
                     '&:hover': {
-                        backgroundColor: alpha(PRIMARY, 0.06),
+                        backgroundColor: alpha(brand[500], 0.06),
                     },
                     '&.Mui-selected': {
-                        backgroundColor: alpha(PRIMARY, 0.1),
+                        backgroundColor: alpha(brand[500], 0.1),
                         fontWeight: 600,
                         '&:hover': {
-                            backgroundColor: alpha(PRIMARY, 0.14),
+                            backgroundColor: alpha(brand[500], 0.14),
                         },
                     },
                 },
@@ -425,9 +431,16 @@ const customThemes = createTheme({
         MuiPopover: {
             styleOverrides: {
                 paper: {
-                    borderRadius: 10,
-                    border: `1px solid ${BORDER_COLOR}`,
-                    boxShadow: '0 10px 30px rgba(0,0,0,0.12)',
+                    // Set explicitly so MuiPaper.root's larger radii.lg can't compete on the same
+                    // element — two radii on one box reads as a doubled edge.
+                    borderRadius: radii.md,
+                    border: `1px solid ${border.subtle}`,
+                    // Not elevation.floating: that is 30px of blur at zero spread, which scales with
+                    // the element. It reads as a gentle lift under a short Select dropdown, but a
+                    // tall row-action menu paints the same halo down its whole height and pools it at
+                    // the bottom. Negative spread keeps the shadow hugging the edge whatever the
+                    // height, so a six-item menu looks as light as a three-item one.
+                    boxShadow: elevation.popover,
                 },
             },
         },
@@ -446,7 +459,7 @@ const customThemes = createTheme({
                 root: {
                     borderRadius: 4,
                     height: 6,
-                    backgroundColor: alpha(PRIMARY, 0.12),
+                    backgroundColor: alpha(brand[500], 0.12),
                 },
                 bar: {
                     borderRadius: 4,
@@ -484,7 +497,7 @@ const customThemes = createTheme({
                     borderRadius: 8,
                     transition: 'all 0.2s ease',
                     '&:hover': {
-                        backgroundColor: alpha(PRIMARY, 0.08),
+                        backgroundColor: alpha(brand[500], 0.08),
                     },
                 },
             },
@@ -501,7 +514,7 @@ const customThemes = createTheme({
         MuiAlert: {
             styleOverrides: {
                 root: {
-                    borderRadius: 10,
+                    borderRadius: radii.md,
                     fontSize: '0.875rem',
                     fontWeight: 500,
                 },
@@ -519,7 +532,7 @@ const customThemes = createTheme({
                 track: {
                     borderRadius: 12,
                     opacity: 1,
-                    backgroundColor: '#D1D5DB',
+                    backgroundColor: neutral[300],
                 },
             },
         },
@@ -529,9 +542,9 @@ const customThemes = createTheme({
                 root: {
                     fontSize: '0.875rem',
                     fontWeight: 500,
-                    color: '#374151',
+                    color: neutral[700],
                     '&.Mui-focused': {
-                        color: PRIMARY,
+                        color: brand[500],
                     },
                 },
             },

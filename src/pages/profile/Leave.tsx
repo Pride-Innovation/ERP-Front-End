@@ -38,13 +38,10 @@ import PersonIcon from '@mui/icons-material/Person';
 import NoteAddIcon from '@mui/icons-material/NoteAdd';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import dayjs, { Dayjs } from 'dayjs';
-import UserUtils from '../users/utils';
 import { IColleague } from './interface';
-import { useSelector } from 'react-redux';
-import { IUser } from '../users/interface';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { leaveSchema } from './schema';
-import { submitLeaveApplicationService } from './service';
+import { fetchColleaguesService, submitLeaveApplicationService } from './service';
 import { toast } from 'react-toastify';
 
 // Brand colors
@@ -208,9 +205,13 @@ const LeaveComponent = ({ handleClose, id }: { handleClose: () => void, id: stri
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   // const isMediumScreen = useMediaQuery(theme.breakpoints.down('md'));
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { fetchAllUsers } = UserUtils();
-  const [colleagues, SetColleagues] = useState<IColleague[]>([] as Array<IColleague>); // Replace with fetched users
-  const { users } = useSelector((state: any) => state.UserStore);
+  /*
+    * The colleague list comes from its own endpoint, not from the staff directory.
+    *
+    * `fetchAllUsers()` here meant `GET /users` — so an officer needed `READ_USER` to go on leave,
+    * and only the first ten people in the bank were ever offered (`pageSize=10`).
+    */
+  const [colleagues, SetColleagues] = useState<IColleague[]>([]);
 
   const {
     control,
@@ -283,24 +284,31 @@ const LeaveComponent = ({ handleClose, id }: { handleClose: () => void, id: stri
   };
 
   useEffect(() => {
-    fetchAllUsers();
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data } = await fetchColleaguesService();
+        const people = data?.content ?? [];
+        // The server already excludes you and narrows to your own branch, so there is nothing left
+        // to filter out here — the old `filter(id !== me)` existed because the directory included
+        // everybody.
+        if (!cancelled) {
+          SetColleagues(people.map((c: {
+            id: number; firstName?: string; lastName?: string; email?: string; title?: string;
+          }) => ({
+            id: c.id,
+            name: [c.firstName, c.lastName].filter(Boolean).join(' ').trim() || c.email || `User ${c.id}`,
+            role: c.title || 'Employee',
+          })));
+        }
+      } catch (e) {
+        // An empty picker is visible in the form; the reason belongs in the console rather than in a
+        // toast over a modal the person is still filling in.
+        console.warn('Could not load colleagues for the acting-person picker', e);
+      }
+    })();
+    return () => { cancelled = true; };
   }, []);
-
-  const handleColleagues = async () => {
-    const data: Array<IColleague> = users.map((user: IUser) => ({
-      id: user.id,
-      name: `${user.firstName} ${user.lastName}`,
-      role: user.title?.name || 'Employee'
-    })).filter((user: IColleague) => user.id !== parseInt(id, 10)); // Exclude current user
-
-    SetColleagues(data);
-  };
-
-  useEffect(() => {
-    if (users.length > 0) {
-      handleColleagues();
-    }
-  }, [users]);
 
 
   return (

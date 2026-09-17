@@ -1,261 +1,124 @@
 /*
 13.9 Pride's Standard Copyright Notice:
-Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
+Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify,
 and distribute this software and its documentation for any purpose is prohibited unless authorized in writing by the
 Managing Director
 */
 
-import {
-    Box,
-    Card,
-    CardContent,
-    Divider,
-    Grid,
-    Stack,
-    Typography,
-    Paper,
-    useTheme,
-    alpha,
-    Alert
-} from "@mui/material";
-import ButtonComponent from "../../components/forms/Button";
-import { IAssetAxiosResponse, IDispose } from "./interface";
-import {
-    Assignment as AssetIcon,
-    DeleteForever as DeleteIcon,
-    Fingerprint as FingerprintIcon,
-    Warning as WarningIcon
-} from '@mui/icons-material';
-import { disposeITEquipmentService } from "./ITEquipment/service";
+import { useState } from "react";
+import { Alert, Box, Stack, TextField, Typography } from "@mui/material";
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import { IDispose } from "./interface";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../../store";
-import { disposeAsset } from "./ITEquipment/slice";
 import { toast } from "react-toastify";
-import { assetTypesStatusConstants } from "../../utils/constants";
-import { disposeOfficeEquipmentService } from "./officeEquipment/service";
-import { disposeOfficeAsset } from "./officeEquipment/slice";
-import { disposeFleetService } from "./fleet/service";
-import { disposeFleetAsset } from "./fleet/slice";
+import { disposeGeneralAssetFromStore } from "./general/slice";
+import { disposeAssetService } from "../movement/service";
+import ActionModalShell, { ActionPoints, AssetIdentityCard } from "./ActionModalShell";
 
+/**
+ * Retires an asset by raising a DISPOSAL_TRANSFER movement to the Head Office Disposal store.
+ *
+ * <p>This used to POST `assets/{id}`, which only set a `disposed` flag and a date: no movement, no
+ * store change, no status. So the bank had two "Dispose" buttons doing materially different things,
+ * and the flag-only one was the more discoverable of the two — an asset could read as disposed while
+ * still physically sitting in a branch store, with nothing recording its journey to Head Office.
+ * Both now go through the same endpoint and the same eligibility rules.
+ */
 const Dispose = ({
     handleClose,
     sendingRequest,
     buttonText,
     asset,
-    module
 }: IDispose) => {
-    const theme = useTheme();
-    const dispatch = useDispatch<AppDispatch>()
+    const dispatch = useDispatch<AppDispatch>();
+    const [saving, setSaving] = useState(false);
+    const [reason, setReason] = useState('');
+
+    // The server owns this judgement; `disposalStatus` is its answer, computed from the category's
+    // useful life against the asset's receipt date. Anything other than a definite "ready" is
+    // treated as early, so a missing or unparseable date asks for a reason rather than skipping one.
+    const pastUsefulLife = (asset?.disposalStatus ?? '').toLowerCase().includes('ready');
 
     const handleDisposal = async () => {
+        if (!pastUsefulLife && !reason.trim()) {
+            toast.warning('This asset is still within its useful life — give a reason for disposing of it early.');
+            return;
+        }
+        setSaving(true);
         try {
-            const response = module === assetTypesStatusConstants.itEquipment
-                ? await disposeITEquipmentService(asset?.id as string) as IAssetAxiosResponse
-                : module === assetTypesStatusConstants.officeEquipment
-                    ? await disposeOfficeEquipmentService(asset?.id as string) as IAssetAxiosResponse
-                    : await disposeFleetService(asset?.id as string) as IAssetAxiosResponse;
+            const response = await disposeAssetService({
+                assetId: asset?.id,
+                earlyDisposalReason: pastUsefulLife ? null : reason.trim(),
+            }) as any;
 
-            if (response.status === 201) {
-                toast.success("Asset disposed successfully");
-                module === assetTypesStatusConstants.itEquipment
-                    ? dispatch(disposeAsset(response.data))
-                    : module === assetTypesStatusConstants.officeEquipment
-                        ? dispatch(disposeOfficeAsset(response.data))
-                        : dispatch(disposeFleetAsset(response.data));
+            if (response?.status === 200 || response?.status === 201) {
+                toast.success('Disposal movement created — the asset moves to the Disposal store on completion.');
+                dispatch(disposeGeneralAssetFromStore(asset?.id));
+                handleClose();
+            } else {
+                // Surfaced rather than swallowed: the common rejections are actionable by the user
+                // ("receive it into a store first"), and the old catch-and-log left them staring at
+                // a modal that had silently done nothing.
+                toast.error(response?.data?.message ?? 'Could not dispose this asset.');
             }
-        } catch (error) {
-            console.log(error, "Error Message")
         } finally {
-            handleClose()
+            setSaving(false);
         }
     }
 
     return (
-        <Card
-            elevation={0}
-            sx={{
-                borderRadius: 2,
-                overflow: 'hidden',
-                border: `1px solid ${alpha(theme.palette.error.main, 0.15)}`,
-            }}
+        <ActionModalShell
+            tone="error"
+            icon={<DeleteForeverIcon />}
+            title="Confirm Asset Disposal"
+            subtitle="Raises a disposal movement to the Head Office Disposal store"
+            onCancel={handleClose}
+            onConfirm={handleDisposal}
+            confirmText={buttonText}
+            confirmIcon={<DeleteOutlineIcon />}
+            busy={sendingRequest || saving}
+            busyText="Disposing..."
         >
-            {/* Top accent bar */}
-            <Box sx={{ height: 3, bgcolor: theme.palette.error.main }} />
-
-            <Box
-                sx={{
-                    bgcolor: alpha(theme.palette.error.main, 0.05),
-                    py: 1.75,
-                    px: 3,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 1.5,
-                    borderBottom: `1px solid ${alpha(theme.palette.error.main, 0.1)}`
-                }}
-            >
-                <Box sx={{
-                    width: 34, height: 34, borderRadius: 1.5,
-                    bgcolor: alpha(theme.palette.error.main, 0.12),
-                    display: 'flex', alignItems: 'center', justifyContent: 'center'
-                }}>
-                    <DeleteIcon sx={{ color: theme.palette.error.main, fontSize: 18 }} />
-                </Box>
+            <Stack spacing={3}>
                 <Box>
-                    <Typography variant="subtitle1" fontWeight={700} sx={{ color: theme.palette.error.main, lineHeight: 1.2 }}>
-                        Asset Disposal
+                    <Typography variant="body1" sx={{ mb: 2, fontWeight: 500 }}>
+                        Are you sure you want to dispose of this asset? This action:
                     </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                        This action is permanent and cannot be reversed
-                    </Typography>
+                    <ActionPoints
+                        tone="error"
+                        points={[
+                            <>Raises a <strong>disposal movement</strong> to the Head Office Disposal store</>,
+                            'Sets the asset to pending disposal, and retires it once the movement completes',
+                            <>Keeps the record in the <strong>audit trail</strong> for historical reporting</>,
+                            'Requires the asset to be held in an IT or Admin store, not by a user',
+                        ]}
+                    />
                 </Box>
-            </Box>
 
-            <CardContent sx={{ p: 3 }}>
-                <Alert
-                    severity="warning"
-                    icon={<WarningIcon />}
-                    sx={{
-                        mb: 3,
-                        borderRadius: 1.5,
-                        '& .MuiAlert-icon': {
-                            color: theme.palette.warning.dark
-                        }
-                    }}
-                >
-                    <Typography variant="body2" fontWeight={500}>
-                        This action cannot be undone. The asset will be permanently marked as disposed.
-                    </Typography>
-                </Alert>
-
-                <Grid container spacing={3}>
-                    {/* Asset Information Section */}
-                    <Grid item xs={12}>
-                        <Paper
-                            elevation={0}
-                            sx={{
-                                p: 2.5,
-                                borderRadius: 1.5,
-                                bgcolor: alpha(theme.palette.error.main, 0.02),
-                                border: `1px solid ${alpha(theme.palette.error.main, 0.08)}`,
-                                borderLeft: `3px solid ${alpha(theme.palette.error.main, 0.45)}`,
-                                mb: 1
-                            }}
-                        >
-                            <Typography variant="body2" color="text.secondary" fontWeight={500} sx={{ mb: 2 }}>
-                                Are you sure you want to dispose of the following asset?
-                            </Typography>
-
-                            <Stack spacing={2.5}>
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                                    <Box
-                                        sx={{
-                                            bgcolor: theme.palette.primary.main,
-                                            color: 'white',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            p: 0.8,
-                                            borderRadius: 1,
-                                            boxShadow: `0 3px 6px ${alpha(theme.palette.primary.main, 0.25)}`
-                                        }}
-                                    >
-                                        <AssetIcon fontSize="small" />
-                                    </Box>
-                                    <Box>
-                                        <Typography variant="caption" color="text.secondary" fontWeight={500}>
-                                            Asset Name
-                                        </Typography>
-                                        <Typography variant="subtitle1" fontWeight={600} color="text.primary">
-                                            {asset.assetName}
-                                        </Typography>
-                                    </Box>
-                                </Box>
-
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                                    <Box
-                                        sx={{
-                                            bgcolor: alpha(theme.palette.grey[500], 0.1),
-                                            color: theme.palette.grey[600],
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            p: 0.8,
-                                            borderRadius: 1
-                                        }}
-                                    >
-                                        <FingerprintIcon fontSize="small" />
-                                    </Box>
-                                    <Box>
-                                        <Typography variant="caption" color="text.secondary" fontWeight={500}>
-                                            Engraved Number
-                                        </Typography>
-                                        {asset.engravedNumber ? (
-                                            <Typography variant="subtitle1" fontWeight={500} color="text.primary">
-                                                {asset.engravedNumber}
-                                            </Typography>
-                                        ) : (
-                                            <Typography variant="body2" fontStyle="italic" color="text.disabled">
-                                                Not specified
-                                            </Typography>
-                                        )}
-                                    </Box>
-                                </Box>
-
-                                {asset.branch && (
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                                        <Box
-                                            sx={{
-                                                bgcolor: alpha(theme.palette.info.main, 0.1),
-                                                color: theme.palette.info.main,
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center',
-                                                p: 0.8,
-                                                borderRadius: 1
-                                            }}
-                                        >
-                                            <AssetIcon fontSize="small" />
-                                        </Box>
-                                        <Box>
-                                            <Typography variant="caption" color="text.secondary" fontWeight={500}>
-                                                Branch Location
-                                            </Typography>
-                                            <Typography variant="subtitle1" fontWeight={500} color="text.primary">
-                                                {asset.branch?.name}
-                                            </Typography>
-                                        </Box>
-                                    </Box>
-                                )}
-                            </Stack>
-                        </Paper>
-                    </Grid>
-                </Grid>
-
-                {/* Action Buttons */}
-                <Divider sx={{ my: 3 }} />
-
-                <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-                    <Stack direction="row" spacing={2}>
-                        <ButtonComponent
-                            handleClick={handleClose}
-                            buttonColor='info'
-                            type='button'
-                            variant="outlined"
-                            sendingRequest={false}
-                            buttonText="Cancel"
+                {!pastUsefulLife && (
+                    <Box>
+                        <Alert severity="warning" sx={{ borderRadius: 2, mb: 2, '& .MuiAlert-message': { fontSize: '0.82rem' } }}>
+                            This asset has not reached the end of its useful life. It can still be written off —
+                            damage and theft do not wait for the schedule — but the reason is recorded on the movement.
+                        </Alert>
+                        <TextField
+                            fullWidth
+                            required
+                            multiline
+                            rows={2}
+                            label="Reason for early disposal"
+                            placeholder="e.g. Screen and board damaged beyond economical repair"
+                            value={reason}
+                            onChange={(e) => setReason(e.target.value)}
                         />
-                        <ButtonComponent
-                            buttonColor='error'
-                            type='submit'
-                            sendingRequest={sendingRequest}
-                            handleClick={handleDisposal}
-                            buttonText={buttonText}
-                        // startIcon={<DeleteIcon />}
-                        />
-                    </Stack>
-                </Box>
-            </CardContent>
-        </Card>
+                    </Box>
+                )}
+
+                <AssetIdentityCard asset={asset} />
+            </Stack>
+        </ActionModalShell>
     );
 }
 

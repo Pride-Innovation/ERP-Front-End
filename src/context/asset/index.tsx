@@ -1,3 +1,4 @@
+import { IOptions } from '../../components/tables/interface';
 import {
     createContext,
     Dispatch,
@@ -15,8 +16,8 @@ interface IAssetContext {
     setFieldText: Dispatch<SetStateAction<string>>;
     officeEquipmentCount: number;
     setOfficeEquipmentCount: Dispatch<SetStateAction<number>>;
-    options: Array<{ value: string | number, label: string, icon: JSX.Element }>,
-    setOptions: Dispatch<SetStateAction<Array<{ value: string | number, label: string, icon: JSX.Element }>>>
+    options: Array<IOptions>,
+    setOptions: Dispatch<SetStateAction<Array<IOptions>>>
 }
 
 export const AssetContext = createContext<IAssetContext>({} as IAssetContext);
@@ -26,7 +27,7 @@ const AssetContextProvider: FC<{ children: React.ReactNode }> = ({ children }) =
     const [officeEquipmentCount, setOfficeEquipmentCount] = useState<number>(0);
     const [fieldName, setFieldName] = useState<string>('');
     const [fieldText, setFieldText] = useState<string>('');
-    const [options, setOptions] = useState<Array<{ value: string | number, label: string, icon: JSX.Element }>>([] as Array<{ value: string | number, label: string, icon: JSX.Element }>);
+    const [options, setOptions] = useState<Array<IOptions>>([] as Array<IOptions>);
 
     return (
         <AssetContext.Provider value={{

@@ -123,7 +123,7 @@ const BranchForm = ({
     update = false,
 }: IBranchForm) => {
     const { formFields } = BranchUtills();
-    const { fetchAllUsers } = UserUtils();
+    const { fetchStaffOptions } = UserUtils();
     const { fetchAllRegions } = RegionUtills();
     const { fetchAllDistricts } = DistrictUtills();
     const [loading, setLoading] = useState(true);
@@ -134,7 +134,7 @@ const BranchForm = ({
         setLoading(true);
         try {
             await Promise.all([
-                fetchAllUsers(),
+                fetchStaffOptions(),
                 fetchAllRegions(),
                 fetchAllDistricts()
             ]);
@@ -144,7 +144,7 @@ const BranchForm = ({
             console.error("Error loading form data:", error);
             setLoading(false);
         }
-    }, [fetchAllUsers, fetchAllRegions, fetchAllDistricts]);
+    }, [fetchStaffOptions, fetchAllRegions, fetchAllDistricts]);
 
     // Only fetch data once and prevent re-renders
     useEffect(() => {
@@ -156,7 +156,7 @@ const BranchForm = ({
 
     // Memoize field collections to prevent recreation on each render
     const generalFields = useMemo(() =>
-        formFields.filter(field => ['name', 'email', 'telephone'].includes(field.value))
+        formFields.filter(field => ['name', 'email', 'telephone', 'managersGroupEmail'].includes(field.value))
         , [formFields]);
 
     const locationFields = useMemo(() =>
@@ -217,6 +217,9 @@ const BranchForm = ({
                 </Grid>
                 <Grid item xs={12} md={6}>
                     {renderField(generalFields.find(f => f.value === 'telephone'))}
+                </Grid>
+                <Grid item xs={12} md={6}>
+                    {renderField(generalFields.find(f => f.value === 'managersGroupEmail'))}
                 </Grid>
             </FormSection>
 

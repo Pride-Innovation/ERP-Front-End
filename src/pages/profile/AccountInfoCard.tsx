@@ -25,17 +25,79 @@ import LockOpenIcon from '@mui/icons-material/LockOpen';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 import moment from "moment";
-import { IUser } from "../users/interface";
+import { useEffect, useState } from "react";
+import { IUser, IUserAxiosResponse } from "../users/interface";
+import { fetchSingleUserService } from "../users/service";
+import usePermissions from "../../core/permissions/usePermissions";
+import { PERMISSIONS } from "../../core/permissions/constants";
 import InfoItem from "./InfoItem";
 
 // Brand colors
 const PRIMARY_COLOR = '#08796C';
+
+/** Formats a date only when it is present and parseable — never "Invalid date". */
+const formatAuditDate = (value?: string | null) => {
+    if (!value) return '';
+    const parsed = moment(value);
+    return parsed.isValid() ? parsed.format('MMMM Do, YYYY') : '';
+};
 
 interface AccountInfoCardProps {
     user: IUser | null;
 }
 
 const AccountInfoCard = ({ user }: AccountInfoCardProps) => {
+    // The API returns `createdBy` / `lastModifiedBy` as user ids, so the names
+    // have to be looked up separately. Cached by id to avoid refetching.
+    const [actorNames, setActorNames] = useState<Record<number, string>>({});
+    const createdById = typeof user?.createdBy === 'number' ? user.createdBy : null;
+    const modifiedById = typeof user?.lastModifiedBy === 'number' ? user.lastModifiedBy : null;
+
+    /** Resolving another person's name is a directory read; without it the id is shown instead. */
+    const { has } = usePermissions();
+    const canReadUsers = has(PERMISSIONS.READ_USER);
+
+    /*
+     * Only asked for by somebody who may read the directory.
+     *
+     * These resolve "Created by" and "Last modified by" — other people's records, reached through
+     * `GET /users/{id}`, which answers to `READ_USER`. On an officer's own profile the creator is
+     * typically an administrator, so this fired a **403 per profile load** for a name that is not
+     * theirs to see.
+     *
+     * The fallback was already correct: it prints `User #1` when the lookup fails, and the comment
+     * below says so. What was wrong is that it asked at all — a page must hold what its calls
+     * require, and the check belongs on the call rather than on what the call renders.
+     */
+    useEffect(() => {
+        if (!canReadUsers) return;
+
+        const pending = [createdById, modifiedById]
+            .filter((id): id is number => id !== null && !(id in actorNames))
+            .filter((id, index, ids) => ids.indexOf(id) === index);
+
+        if (!pending.length) return;
+
+        let cancelled = false;
+        (async () => {
+            const resolved: Record<number, string> = {};
+            await Promise.all(pending.map(async (id) => {
+                const response = await fetchSingleUserService(id) as IUserAxiosResponse;
+                const actor = response?.status === 200 ? response.data : null;
+                // Fall back to the id so the field still identifies *someone*
+                // when the lookup is denied or the account no longer exists.
+                resolved[id] = actor
+                    ? [actor.firstName, actor.lastName].filter(Boolean).join(' ').trim() || `User #${id}`
+                    : `User #${id}`;
+            }));
+            if (!cancelled) setActorNames((previous) => ({ ...previous, ...resolved }));
+        })();
+
+        return () => { cancelled = true; };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [createdById, modifiedById, canReadUsers]);
+
+    const actorName = (id: number | null) => (id === null ? '' : actorNames[id] || `User #${id}`);
 
     /**
      * Returns account status with appropriate visual indicators based on status hierarchy:
@@ -170,30 +232,30 @@ const AccountInfoCard = ({ user }: AccountInfoCardProps) => {
                     <InfoItem
                         icon={<CalendarTodayIcon fontSize="small" />}
                         label="Created Date"
-                        value={user?.createDate ? moment(user.createDate).format('MMMM Do, YYYY') : 'Not available'}
+                        value={formatAuditDate(user?.createDate)}
+                        emptyText="Not available"
                     />
 
                     <InfoItem
                         icon={<PersonOutlineIcon fontSize="small" />}
                         label="Created By"
-                        value={user?.createdBy ? `${user.createdBy.firstName} ${user.createdBy.lastName}` : 'System'}
+                        value={actorName(createdById)}
+                        emptyText="Created by the system"
                     />
 
-                    {user?.lastModified && (
-                        <InfoItem
-                            icon={<CalendarTodayIcon fontSize="small" />}
-                            label="Last Modified"
-                            value={moment(user.lastModified).format('MMMM Do, YYYY')}
-                        />
-                    )}
+                    <InfoItem
+                        icon={<CalendarTodayIcon fontSize="small" />}
+                        label="Last Modified"
+                        value={formatAuditDate(user?.lastModified)}
+                        emptyText="No changes recorded"
+                    />
 
-                    {user?.lastModifiedBy && (
-                        <InfoItem
-                            icon={<PersonOutlineIcon fontSize="small" />}
-                            label="Modified By"
-                            value={`${user.lastModifiedBy.firstName} ${user.lastModifiedBy.lastName}`}
-                        />
-                    )}
+                    <InfoItem
+                        icon={<PersonOutlineIcon fontSize="small" />}
+                        label="Modified By"
+                        value={actorName(modifiedById)}
+                        emptyText="Not yet modified"
+                    />
                 </Stack>
             </Box>
         </Paper>

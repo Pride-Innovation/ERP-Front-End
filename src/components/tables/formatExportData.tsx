@@ -6,11 +6,12 @@ Managing Director
 */
 
 import { fetchAllRowsService } from "../../core/apis/globalService";
-import { IITEquipment } from "../../pages/assets/ITEquipment/interface";
+import { IITEquipment } from "../../pages/assets/interface";
 import { IInventory, IStockCommodities } from "../../pages/inventory/interface";
 import { IRequest } from "../../pages/request/interface";
 import { IUser } from "../../pages/users/interface";
 import { camelCaseToWords } from "../../utils/helpers";
+import { requestedFromLabel } from '../../pages/request/requestedFromLabel';
 
 /**
  * Formats and fetches export data for different modules.
@@ -201,7 +202,19 @@ function processResponseData(data: any, moduleName: string, assetTypeId?: number
             priority: item.priority || '',
             requester: item.requester ? item.requester.firstName + ' ' + item.requester.lastName || '' : '',
             currentApprover: item.currentApprover ? item.currentApprover.firstName + ' ' + item.currentApprover.lastName || '' : '',
-            requestedFrom: item.requester.branch.name || '',
+            /*
+             * The same rule the table uses, not a second copy of it.
+             *
+             * This mapper exists because the export refetches from the API rather than writing out
+             * the rows on screen, so it never sees `buildRequestRows`. Left to build the string
+             * itself, the downloaded file said "Head Office" while the table it came from said
+             * "Finance" - and nothing would have reported that, because nobody compares a saved
+             * spreadsheet with the screen it was taken from.
+             *
+             * Also fixes an unguarded `item.requester.branch.name`: a requester with no branch threw
+             * here and took the whole export with it.
+             */
+            requestedFrom: requestedFromLabel(item.requester) ?? '',
             status: item.status?.name || ''
         }));
     } else if (moduleName === 'users') {

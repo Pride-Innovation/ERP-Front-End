@@ -14,6 +14,7 @@ import { changePasswordSchema } from "./schema";
 import ChangePasswordForm from "./ChangePasswordForm";
 import { changeUserPasswordService } from "./service";
 import { toast } from "react-toastify";
+import { refusal } from "../../core/apis/globalService";
 
 const ChangePassword = ({ handleClose }: IChangePasswordComponent) => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
@@ -56,11 +57,21 @@ const ChangePassword = ({ handleClose }: IChangePasswordComponent) => {
                 reset({ ...defaultUser });
                 toast.success("Password changed successfully");
             }
+            /*
+             * Anything that is not a 201 is a refusal, and it has to be shown.
+             *
+             * This swallowed every failure into a console line and then closed the modal in
+             * `finally` — so a wrong old password, or a new one the server rejects, looked exactly
+             * like success: the dialog shut, nothing was said, and the person believed their
+             * password had changed. That became far more likely the moment a password policy
+             * existed, because "too short" is now a refusal an ordinary user will meet.
+             */
+            toast.error(refusal(response, 'Could not change your password. Please try again.'));
         } catch (error) {
-            console.log(error);
+            console.error('Password change failed', error);
+            toast.error(refusal(error, 'Could not change your password. Please try again.'));
         } finally {
             setSendingRequest(false);
-            handleClose();
         }
     };
 

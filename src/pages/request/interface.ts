@@ -9,7 +9,8 @@ import {
     Control,
     FieldError,
     FormState,
-    UseFormRegister
+    UseFormRegister,
+    UseFormSetValue
 } from "react-hook-form";
 import { IUser } from "../users/interface";
 import { IPermission } from "../settings/interface";
@@ -17,6 +18,7 @@ import { Dispatch, SetStateAction } from "react";
 import { IStatus } from "../settings/statuses/interface";
 import { IAxiosResponse, IFetchDataRequest } from "../../core/apis/interface";
 import { ICommodity } from "../settings/commodity/interface";
+import { IAssetType } from "../settings/assetTypes/interface";
 
 export interface IAssetParticulars {
     name: string;
@@ -52,11 +54,33 @@ export interface IRequest {
     requester?: IUser | null
     requestReports?: Array<IRequestReport>,
     currentApprover?: IUser | null,
+    /**
+     * The unit a group step is routed to, when it is routed to a unit rather than a person.
+     *
+     * <p>The engine admits a member of this unit as a valid actor, and the inbox listing already
+     * matches on it — so without it the page shows such a request as awaiting the viewer and then
+     * offers no button.
+     */
+    currentUnit?: { id?: string | number | null; name?: string } | null,
+    /**
+     * What the workflow is waiting for: REQUEST_APPROVAL, ACKNOWLEDGE_REQUEST, ISSUANCE,
+     * ACKNOWLEDGE_RECEIPT — or null for a finished, rejected or pre-engine request.
+     *
+     * <p>This is what decides which action to offer. Status cannot: `unitAcknowledged` sits among the
+     * approval codes while the workflow has already moved to issuance, so a menu built from status
+     * offers Approve on a request nobody can approve.
+     */
+    currentStepType?: string | null,
     commodities?: Array<{
         commodity: ICommodity,
         quantity: number
     }> | null,
-    emailMessage?: string | null
+    emailMessage?: string | null,
+    /** Primary asset category for the request — drives custom attributes and workflow selection. */
+    assetTypeId?: string | number | null,
+    assetType?: IAssetType | null,
+    /** Values for the category's custom attributes, keyed by attribute key (e.g. { warranty_months: 24 }). */
+    attributes?: Record<string, any> | null,
 }
 
 export interface IRequestTableData {
@@ -66,8 +90,25 @@ export interface IRequestTableData {
     status?: string | null;
     requester?: string;
     currentApprover?: string;
-    requestedFrom?: string;
+    /**
+     * Where the request came from: the requester's department at Head Office, their branch anywhere
+     * else. Built by `requestedFromLabel`, which is why `null` is possible — a requester with neither
+     * on record has nothing to say here, and an empty cell is the honest rendering of that.
+     */
+    requestedFrom?: string | null;
     requesterID?: number | null;
+    /*
+     * Carried for the row menu, never displayed.
+     *
+     * The menu decides what to offer from the same rules the detail page uses, and those ask who
+     * the step is routed to and what kind of step it is. Ids and the step type rather than the
+     * objects, so nothing here can be mistaken for something to render.
+     */
+    currentApproverId?: number | string | null;
+    currentUnitId?: number | string | null;
+    currentStepType?: string | null;
+    /** Marks the row as an asset request, which is what selects its menu rules. */
+    rowKind?: string;
 }
 
 
@@ -85,6 +126,7 @@ export interface IRequestForm {
     };
     control: Control<IRequest>;
     register: UseFormRegister<IRequest>;
+    setValue: UseFormSetValue<IRequest>;
     buttonText: string;
     sendingRequest: boolean;
     setImage: Dispatch<SetStateAction<string>>
@@ -121,7 +163,7 @@ export interface INavigation {
     text: string;
     path: string;
     icon: JSX.Element;
-    permission: IPermission
+    permission?: IPermission | string
 }
 
 export interface ITransportRequest {
@@ -304,16 +346,15 @@ export interface IBranchAssetStaticsAxiosResponse extends IAxiosResponse {
 
 export interface AssetStats {
     total: number;
-    active: number;
+    assigned: number;
     inMaintenance: number;
     unassigned: number;
+    /** Original display name from the API (e.g. "IT Equipment") */
+    label?: string;
 }
 
-export interface BranchAssetStats {
-    itequipment: AssetStats;
-    officeequipment: AssetStats;
-    fleet: AssetStats;
-}
+/** Keyed by normalised type name (spaces stripped, lower-cased). Dynamic — supports any asset type. */
+export type BranchAssetStats = Record<string, AssetStats>;
 
 export interface SubDomain {
     id: number;
@@ -346,6 +387,13 @@ export interface StatusColorConfig extends ChipColorConfig {
 
 export interface IPersonalAssetReport {
     type: string;
+    /**
+     * The category's id.
+     *
+     * Needed because the asset detail route is per-category — `/assets/general/{typeId}/view/{id}`
+     * — so a payload carrying only the category name cannot produce a working link.
+     */
+    typeId: number | null;
     totalItems: number;
     assets: {
         id: number;
@@ -353,6 +401,8 @@ export interface IPersonalAssetReport {
         engravingNumber: string;
         status: string;
         serialNumber: string;
+        /** The branch holding it, for a person whose items span more than one. */
+        location?: string | null;
     }[];
 }
 

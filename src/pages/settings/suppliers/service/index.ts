@@ -7,6 +7,20 @@ Managing Director
 
 import axiosInstance from "../../../../core/apis/axiosInstance";
 
+/**
+ * A paginated page of suppliers, searchable by name.
+ *
+ * <p>Unscoped on purpose: suppliers are organisation-wide. A branch does not own its suppliers the
+ * way it owns its staff, so unlike the user directory there is nothing here to narrow by branch.
+ */
+const fetchSuppliersService = async (params?: Record<string, any>) => {
+    try {
+        return await axiosInstance.get('suppliers', { params });
+    } catch (error) {
+        return error;
+    }
+};
+
 const createSupplierService = async (body: Object) => {
     try {
         const response = await axiosInstance.post('suppliers', body);
@@ -35,6 +49,7 @@ const deleteSupplierService = async (id: string | number) => {
 }
 
 export {
+    fetchSuppliersService,
     createSupplierService,
     updateSupplierService,
     deleteSupplierService

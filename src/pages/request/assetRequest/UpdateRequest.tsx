@@ -20,10 +20,11 @@ import { ICommodity } from '../../settings/commodity/interface';
 import { RowData } from '../../../components/forms/interface';
 import { validateInventoryItems } from '../../../utils/helpers';
 import { toast } from 'react-toastify';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../../store';
 import CommodityUtills from '../../settings/commodity/utills';
 import { ROUTES } from '../../../core/routes/routes';
+import usePermissions from '../../../core/permissions/usePermissions';
+import RoutesUtills from '../../../core/routes/utills';
+import { canEditRequest } from './actionRules';
 
 const UpdateRequest = () => {
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
@@ -32,9 +33,10 @@ const UpdateRequest = () => {
     const [defaultRequest, setDefaultRequest] = useState<any>(requestMock[0]);
     const { setRows, rows } = useContext(RequestContext);
     const [file, setFile] = useState<File | null>(null);
-    const { commodities } = useSelector((state: RootState) => state.CommodityStore);
     const { fetchAllCommodities } = CommodityUtills();
     const navigate = useNavigate();
+    const { has } = usePermissions();
+    const { getCurrentUser } = RoutesUtills();
 
     // New state to track if file was initially present and file type
     const [initialFile, setInitialFile] = useState<{
@@ -47,6 +49,8 @@ const UpdateRequest = () => {
         filePath: null
     });
 
+    // Load the full commodity catalogue so every saved item has a matching option in
+    // the "Name" dropdown — otherwise items outside the fetched page render blank.
     useEffect(() => { fetchAllCommodities() }, []);
 
     // Helper function to determine file type from extension
@@ -73,7 +77,26 @@ const UpdateRequest = () => {
             const response = await findAssetRequestByIDService(id as string) as IRequestAxiosResponse;
             if (response.status === 200) {
                 const { data } = response;
+
+                // The route is reachable by typing the URL, so re-check here rather than trusting
+                // that the caller only linked here from an Edit button it had already gated.
+                if (!canEditRequest(data, {
+                    id: getCurrentUser()?.id,
+                    unitId: getCurrentUser()?.unit?.id,
+                    has,
+                })) {
+                    toast.error("This request can no longer be edited.");
+                    navigate(ROUTES.REQUEST);
+                    return;
+                }
+
                 setDefaultRequest({ ...data, status: data.status?.id });
+
+                // Populate the Request Items table straight from the fetched request.
+                // We map from data.commodities directly (it carries name, unit, quantity,
+                // commodity id and asset type), so this does not depend on any other
+                // async store having loaded first.
+                setRows(buildRows(data.commodities));
 
                 // Process file information from signaturePath
                 if (data.signaturePath) {
@@ -101,24 +124,23 @@ const UpdateRequest = () => {
 
     useEffect(() => { findAssetRequestById() }, [id]);
 
-    const handleRows = () => {
-        if (defaultRequest?.commodities
-            && commodities?.length > 0) {
-            const rowData = (defaultRequest.commodities as Array<{
-                commodity: ICommodity,
-                quantity: number
-            }>
-            ).map((commodity, index) => ({
-                id: Date.now() + index,
-                name: commodity.commodity.name,
-                groupName: commodity.commodity.groupName,
-                quantity: commodity.quantity,
-                commodityId: commodity.commodity.id,
-                assetTypeId: commodity.commodity.assetType?.id,
-            })) as Array<RowData>;
-
-            setRows(rowData);
-        }
+    /**
+     * Maps a request's saved commodities into the InventoryTable's RowData shape.
+     * Each row carries every column the table renders: asset type, name, unit of
+     * measure (groupName), quantity and the commodity id used on submit.
+     */
+    const buildRows = (
+        requestCommodities?: Array<{ commodity: ICommodity, quantity: number }> | null,
+    ): Array<RowData> => {
+        if (!Array.isArray(requestCommodities)) return [];
+        return requestCommodities.map((item, index) => ({
+            id: Date.now() + index,
+            name: item.commodity.name,
+            groupName: item.commodity.groupName,
+            quantity: item.quantity,
+            commodityId: item.commodity.id,
+            assetTypeId: item.commodity.assetType?.id,
+        })) as Array<RowData>;
     }
 
     const {
@@ -126,14 +148,14 @@ const UpdateRequest = () => {
         handleSubmit,
         formState,
         register,
-        reset
+        reset,
+        setValue
     } = useForm<IRequest>({
         mode: 'onChange',
         resolver: yupResolver(requestSchema),
     });
 
     useEffect(() => {
-        handleRows()
         reset({ ...defaultRequest });
     }, [defaultRequest]);
 
@@ -147,6 +169,13 @@ const UpdateRequest = () => {
             payload.append("priority", formData.priority);
             payload.append("name", formData.name);
             payload.append("description", formData.description as string);
+
+            if (formData.assetTypeId != null && formData.assetTypeId !== '') {
+                payload.append("assetTypeId", String(formData.assetTypeId));
+            }
+            if (formData.attributes && Object.keys(formData.attributes).length > 0) {
+                payload.append("attributes", JSON.stringify(formData.attributes));
+            }
 
             // Only attach file if a new file was selected
             if (file) payload.append("file", file);
@@ -222,6 +251,7 @@ const UpdateRequest = () => {
                             formState={formState}
                             control={control}
                             register={register}
+                            setValue={setValue}
                             sendingRequest={sendingRequest}
                             buttonText="Update"
                         />

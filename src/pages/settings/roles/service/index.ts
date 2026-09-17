@@ -22,6 +22,12 @@ const removePermissionFromRoleService = async (roleId: string | number, permissi
     return response;
 }
 
+/** Every role, for pickers that need the full list rather than a page of it. */
+const fetchAllRolesService = async () => {
+    const response = await axiosInstance.get('roles', { params: { pageSize: 200 } });
+    return response;
+}
+
 const createRoleService = async (body: Object) => {
     const response = await axiosInstance.post('roles', body);
     return response;
@@ -41,6 +47,7 @@ export {
     fetchAllPermissionsService,
     assignPermissionToRoleService,
     removePermissionFromRoleService,
+    fetchAllRolesService,
     createRoleService,
     updateRoleService,
     deleteRoleService

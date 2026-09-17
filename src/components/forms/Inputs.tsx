@@ -19,7 +19,7 @@ import { Visibility, VisibilityOff } from '@mui/icons-material';
 
 const PRIMARY_COLOR = '#08796C';
 
-const fieldSx = {
+export const fieldSx = {
     '& .MuiOutlinedInput-root': {
         borderRadius: '8px',
         backgroundColor: '#FAFAFA',
@@ -100,7 +100,9 @@ export const InputComponent = ({
     multiline = false,
     required,
     row = 0,
-    disabled = false
+    disabled = false,
+    placeholder,
+    helperText
 }: IInputForm) => (
     <BootstrapInput
         fullWidth
@@ -112,6 +114,8 @@ export const InputComponent = ({
         type={type}
         id={id}
         label={label}
+        placeholder={placeholder}
+        helperText={error ? undefined : helperText}
         variant="outlined"
         {...field}
         error={Boolean(error)}

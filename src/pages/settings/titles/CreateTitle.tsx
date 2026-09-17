@@ -28,7 +28,7 @@ const CreateTitle = ({ sendingRequest, setSendingRequest, handleClose }: ICreate
         reset,
     } = useForm<ITitle>({
         mode: "onChange",
-        resolver: yupResolver(titleSchema),
+        resolver: yupResolver(titleSchema) as any,
     });
 
     useEffect(() => {

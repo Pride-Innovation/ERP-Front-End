@@ -33,6 +33,8 @@ export interface IInputForm {
     handleMouseDown?: (event: React.MouseEvent<HTMLButtonElement>) => void;
     row?: number;
     disabled?: boolean
+    placeholder?: string;
+    helperText?: string;
 }
 
 export interface IInputPropAdornment {
@@ -87,6 +89,8 @@ export interface IUseFormInput<T extends FieldValues> {
     onInputChange?: (event: any, value: string) => void;
     renderOption?: (props: any, option: any) => React.ReactNode;
     onChange?: (event: any, value: any) => void;
+    placeholder?: string;
+    helperText?: string;
 }
 
 export interface IDatePickerComponent {
@@ -116,6 +120,13 @@ export interface IAutocompleteComponent {
 export interface IFileUploadButton {
     title: string;
     module: string;
+    /**
+     * The asset category an import belongs to.
+     *
+     * Required for the asset template, whose columns, required markers and dropdowns all come from
+     * that category's own field configuration. Absent for every other module.
+     */
+    assetTypeId?: number;
 }
 
 export interface ICheckboxComponent {

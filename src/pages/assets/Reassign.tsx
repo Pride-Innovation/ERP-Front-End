@@ -1,64 +1,52 @@
+/*
+13.9 Pride's Standard Copyright Notice:
+Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify,
+and distribute this software and its documentation for any purpose is prohibited unless authorized in writing by the
+Managing Director
+*/
+
 import {
-    Box,
-    Card,
-    CardContent,
-    Divider,
-    Grid,
-    Stack,
-    Typography,
     Autocomplete,
+    Box,
+    CircularProgress,
+    Stack,
     TextField,
-    alpha,
-    Paper,
-    useTheme
+    Typography,
 } from "@mui/material";
-import ButtonComponent from "../../components/forms/Button";
 import { IAssetAxiosResponse, IReassign } from "./interface";
-import {
-    Assignment as AssetIcon,
-    Person as PersonIcon,
-    Fingerprint as FingerprintIcon,
-    SwapHoriz as SwapIcon
-} from '@mui/icons-material';
+import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
+import PersonIcon from '@mui/icons-material/Person';
 import { useEffect, useState } from "react";
 import { IOptions } from "../../components/tables/interface";
-import CircularProgress from '@mui/material/CircularProgress';
 import { useDebounce } from "../../hooks/useDebounce";
 import { AppDispatch, RootState } from "../../store";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import UserUtils from "../users/utils";
 import { searchUserService } from "../users/service";
 import { IUsersAxiosResponse } from "../users/interface";
-import { useDispatch } from "react-redux";
 import { loadUsers } from "../users/slice";
-import { reassignITEquipmentService } from "./ITEquipment/service";
-import { updateITAsset } from "./ITEquipment/slice";
 import { toast } from "react-toastify";
-import { assetTypesStatusConstants } from "../../utils/constants";
-import { reassignOfficeEquipmentService } from "./officeEquipment/service";
-import { updateOfficeAsset } from "./officeEquipment/slice";
-import { updateFleetAsset } from "./fleet/slice";
-import { reassignFleetService } from "./fleet/service";
-
-const PRIMARY_COLOR = '#08796C';
+import axiosInstance from "../../core/apis/axiosInstance";
+import { updateGeneralAssetInStore } from "./general/slice";
+import { fieldSx } from "../../components/forms/Inputs";
+import ActionModalShell, { ActionPoints, AssetIdentityCard } from "./ActionModalShell";
 
 const Reassign = ({
     handleClose,
     sendingRequest,
     buttonText,
     asset,
-    module
 }: IReassign) => {
-    const theme = useTheme();
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const [searchLoading, setSearchLoading] = useState(false);
+    const [saving, setSaving] = useState(false);
     const [optionsObject, setOptionsObject] = useState<{ usersOptions: Array<IOptions> }>({
         usersOptions: []
     });
     const [selectedUser, setSelectedUser] = useState<IOptions | null>(null);
     const { users } = useSelector((state: RootState) => state.UserStore);
-    const { fetchAllUsers } = UserUtils();
+    const { fetchStaffOptions } = UserUtils();
     const dispatch = useDispatch<AppDispatch>();
 
     const [localInput, setLocalInput] = useState<string>('');
@@ -78,7 +66,7 @@ const Reassign = ({
         if (optionsObject.usersOptions.length === 0) {
             try {
                 setLoading(true);
-                await fetchAllUsers();
+                await fetchStaffOptions();
             } catch (error) {
                 console.error("Error fetching initial users:", error);
             } finally {
@@ -116,264 +104,101 @@ const Reassign = ({
 
     }, [debouncedInput]);
 
-    const handleCancel = () => {
-        handleClose();
-    };
-
-
     const reassignAsset = async () => {
+        setSaving(true);
         try {
-            const response = module === assetTypesStatusConstants.itEquipment
-                ? await reassignITEquipmentService(
-                    asset?.id as number,
-                    { assignedTo: selectedUser?.value }
-                ) as IAssetAxiosResponse
-                : module === assetTypesStatusConstants.officeEquipment
-                    ? await reassignOfficeEquipmentService(
-                        asset?.id as number,
-                        { assignedTo: selectedUser?.value }
-                    ) as IAssetAxiosResponse
-                    : await reassignFleetService(
-                        asset?.id as number,
-                        { assignedTo: selectedUser?.value }
-                    ) as IAssetAxiosResponse;
+            // The legacy per-category reassign services all hit the same
+            // `assets/reassign/{id}` endpoint — call it directly.
+            const response = await axiosInstance.post(
+                `assets/reassign/${asset?.id}`,
+                { assignedTo: selectedUser?.value }
+            ) as IAssetAxiosResponse;
 
             if (response.status === 201) {
                 toast.success("Asset reassigned successfully");
-                module === assetTypesStatusConstants.itEquipment
-                    ? dispatch(updateITAsset(response.data))
-                    : module === assetTypesStatusConstants.officeEquipment
-                        ? dispatch(updateOfficeAsset(response.data))
-                        : dispatch(updateFleetAsset(response.data));
+                dispatch(updateGeneralAssetInStore(response.data));
             }
         } catch (error) {
             console.error("Error reassigning asset:", error);
         } finally {
+            setSaving(false);
             handleClose();
         }
     };
 
     return (
-        <Card
-            elevation={0}
-            sx={{
-                borderRadius: 2,
-                overflow: 'hidden',
-                border: `1px solid ${alpha(PRIMARY_COLOR, 0.12)}`,
-            }}
+        <ActionModalShell
+            tone="primary"
+            icon={<SwapHorizIcon />}
+            title="Reassign Asset"
+            subtitle="Transfer this asset to another staff member"
+            onCancel={handleClose}
+            onConfirm={reassignAsset}
+            confirmText={buttonText}
+            confirmIcon={<SwapHorizIcon />}
+            busy={sendingRequest || saving}
+            busyText="Reassigning..."
+            confirmDisabled={!selectedUser}
         >
-            {/* Top accent bar */}
-            <Box sx={{ height: 3, bgcolor: PRIMARY_COLOR }} />
-
-            <Box
-                sx={{
-                    bgcolor: alpha(PRIMARY_COLOR, 0.05),
-                    py: 1.75,
-                    px: 3,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 1.5,
-                    borderBottom: `1px solid ${alpha(PRIMARY_COLOR, 0.1)}`
-                }}
-            >
-                <Box sx={{
-                    width: 34, height: 34, borderRadius: 1.5,
-                    bgcolor: alpha(PRIMARY_COLOR, 0.12),
-                    display: 'flex', alignItems: 'center', justifyContent: 'center'
-                }}>
-                    <SwapIcon sx={{ color: PRIMARY_COLOR, fontSize: 18 }} />
-                </Box>
+            <Stack spacing={3}>
                 <Box>
-                    <Typography variant="subtitle1" fontWeight={700} sx={{ color: PRIMARY_COLOR, lineHeight: 1.2 }}>
-                        Asset Reassignment
+                    <Typography variant="body1" sx={{ mb: 2, fontWeight: 500 }}>
+                        You're about to hand this asset to another user. This action:
                     </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                        Transfer ownership to another staff member
+                    <ActionPoints
+                        points={[
+                            'Closes the current assignment and opens one for the new holder',
+                            'Is recorded in the asset\'s assignment history',
+                            'Does not change the asset\'s branch or condition',
+                        ]}
+                    />
+                </Box>
+
+                <AssetIdentityCard asset={asset} />
+
+                <Box>
+                    <Typography variant="caption" sx={{ fontWeight: 700, color: '#475569', display: 'block', mb: 0.75 }}>
+                        New Holder
                     </Typography>
+                    <Autocomplete
+                        open={open}
+                        onOpen={handleOpen}
+                        onClose={() => setOpen(false)}
+                        isOptionEqualToValue={(option, value) => option.value === value.value}
+                        getOptionLabel={(option) => option.label as string}
+                        options={optionsObject.usersOptions}
+                        value={selectedUser}
+                        onInputChange={(_, newInputValue) => setLocalInput(newInputValue)}
+                        onChange={(_, value) => setSelectedUser(value)}
+                        loading={loading || searchLoading}
+                        fullWidth
+                        noOptionsText="No users found"
+                        loadingText="Searching users..."
+                        renderInput={(params) => (
+                            <TextField
+                                {...params}
+                                size="medium"
+                                placeholder="Search by name, email, or employee ID"
+                                helperText="The asset will show as held by this person once reassigned"
+                                sx={fieldSx}
+                                InputProps={{
+                                    ...params.InputProps,
+                                    startAdornment: (
+                                        <PersonIcon color="action" sx={{ ml: 1, mr: 0.5 }} fontSize="small" />
+                                    ),
+                                    endAdornment: (
+                                        <>
+                                            {(loading || searchLoading) ? <CircularProgress color="primary" size={18} /> : null}
+                                            {params.InputProps.endAdornment}
+                                        </>
+                                    ),
+                                }}
+                            />
+                        )}
+                    />
                 </Box>
-            </Box>
-
-            <CardContent sx={{ p: 3 }}>
-                <Grid container spacing={3}>
-                    <Grid item xs={12}>
-                        <Paper
-                            elevation={0}
-                            sx={{
-                                p: 2.5,
-                                borderRadius: 1.5,
-                                bgcolor: alpha(PRIMARY_COLOR, 0.02),
-                                border: `1px solid ${alpha(PRIMARY_COLOR, 0.08)}`,
-                                borderLeft: `3px solid ${alpha(PRIMARY_COLOR, 0.45)}`,
-                                mb: 3
-                            }}
-                        >
-                            <Typography variant="body2" color="text.secondary" fontWeight={500} sx={{ mb: 2 }}>
-                                You're about to reassign the following asset to another user:
-                            </Typography>
-
-                            <Stack spacing={2}>
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                                    <Box
-                                        sx={{
-                                            bgcolor: theme.palette.primary.main,
-                                            color: 'white',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            p: 0.8,
-                                            borderRadius: 1,
-                                            boxShadow: `0 3px 6px ${alpha(theme.palette.primary.main, 0.25)}`
-                                        }}
-                                    >
-                                        <AssetIcon fontSize="small" />
-                                    </Box>
-                                    <Box>
-                                        <Typography variant="caption" color="text.secondary" fontWeight={500}>
-                                            Asset Name
-                                        </Typography>
-                                        <Typography variant="subtitle1" fontWeight={600} color="text.primary">
-                                            {asset.assetName}
-                                        </Typography>
-                                    </Box>
-                                </Box>
-
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                                    <Box
-                                        sx={{
-                                            bgcolor: alpha(theme.palette.grey[500], 0.1),
-                                            color: theme.palette.grey[600],
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            p: 0.8,
-                                            borderRadius: 1
-                                        }}
-                                    >
-                                        <FingerprintIcon fontSize="small" />
-                                    </Box>
-                                    <Box>
-                                        <Typography variant="caption" color="text.secondary" fontWeight={500}>
-                                            Engraved Number
-                                        </Typography>
-                                        {asset.engravedNumber ? (
-                                            <Typography variant="subtitle1" fontWeight={500} color="text.primary">
-                                                {asset.engravedNumber}
-                                            </Typography>
-                                        ) : (
-                                            <Typography variant="body2" fontStyle="italic" color="text.disabled">
-                                                Not specified
-                                            </Typography>
-                                        )}
-                                    </Box>
-                                </Box>
-
-                                {asset.assignedTo && (
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                                        <Box
-                                            sx={{
-                                                bgcolor: alpha(theme.palette.info.main, 0.1),
-                                                color: theme.palette.info.main,
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center',
-                                                p: 0.8,
-                                                borderRadius: 1
-                                            }}
-                                        >
-                                            <PersonIcon fontSize="small" />
-                                        </Box>
-                                        <Box>
-                                            <Typography variant="caption" color="text.secondary" fontWeight={500}>
-                                                Currently Assigned To
-                                            </Typography>
-                                            <Typography variant="subtitle1" fontWeight={500} color="text.primary">
-                                                {asset.assignedTo?.firstName} {asset.assignedTo?.lastName}
-                                            </Typography>
-                                        </Box>
-                                    </Box>
-                                )}
-                            </Stack>
-                        </Paper>
-                    </Grid>
-
-                    <Grid item xs={12}>
-                        <Typography variant="subtitle2" color="text.primary" fontWeight={600} sx={{ mb: 1.5, color: PRIMARY_COLOR }}>
-                            Select New User
-                        </Typography>
-
-                        <Autocomplete
-                            open={open}
-                            onOpen={handleOpen}
-                            onClose={() => setOpen(false)}
-                            isOptionEqualToValue={(option, value) => option.value === value.value}
-                            getOptionLabel={(option) => option.label as string}
-                            options={optionsObject.usersOptions}
-                            value={selectedUser}
-                            onInputChange={(_, newInputValue) => setLocalInput(newInputValue)}
-                            onChange={(_, value) => {
-                                setSelectedUser(value);
-                            }}
-                            loading={loading || searchLoading}
-                            fullWidth
-                            noOptionsText="No users found"
-                            loadingText="Searching users..."
-                            sx={{
-                                '& .MuiOutlinedInput-root': {
-                                    borderRadius: 1.5,
-                                    '&:hover .MuiOutlinedInput-notchedOutline': {
-                                        borderColor: theme.palette.primary.main,
-                                        borderWidth: '1px',
-                                    },
-                                }
-                            }}
-                            renderInput={(params) => (
-                                <TextField
-                                    {...params}
-                                    label="Select User to Reassign Asset"
-                                    placeholder="Search by name, email, or employee ID"
-                                    variant="outlined"
-                                    InputProps={{
-                                        ...params.InputProps,
-                                        startAdornment: (
-                                            <PersonIcon color="action" sx={{ ml: 1, mr: 0.5 }} />
-                                        ),
-                                        endAdornment: (
-                                            <>
-                                                {(loading || searchLoading) ? <CircularProgress color="primary" size={20} /> : null}
-                                                {params.InputProps.endAdornment}
-                                            </>
-                                        ),
-                                    }}
-                                // helperText={localInput ? "Searching after 5 seconds of typing..." : null}
-                                />
-                            )}
-                        />
-                    </Grid>
-                </Grid>
-
-                <Divider sx={{ my: 3 }} />
-
-                <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-                    <Stack direction="row" spacing={2}>
-                        <ButtonComponent
-                            handleClick={handleCancel}
-                            buttonColor='info'
-                            type='button'
-                            variant="outlined"
-                            sendingRequest={false}
-                            buttonText="Cancel"
-                        />
-                        <ButtonComponent
-                            buttonColor='primary'
-                            type='submit'
-                            sendingRequest={sendingRequest}
-                            handleClick={reassignAsset}
-                            buttonText={buttonText}
-                        />
-                    </Stack>
-                </Box>
-            </CardContent>
-        </Card>
+            </Stack>
+        </ActionModalShell>
     );
 }
 

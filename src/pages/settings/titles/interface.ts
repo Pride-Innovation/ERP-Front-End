@@ -24,8 +24,15 @@ export interface ITitleDetails {
     title: ITitle;
     deleteTitle: (role: ITitle) => void;
     updateTitle: (role: ITitle) => void;
+    /** Position in the rendered grid — used to rotate the card accent colour. */
+    index?: number;
 }
 
+
+export interface ITitleOption {
+    value: number;
+    label: string;
+}
 
 export interface ITitleForm {
     formState: FormState<ITitle> & {
@@ -39,6 +46,8 @@ export interface ITitleForm {
     sendingRequest: boolean;
     handleClose: () => void;
     update?: boolean;
+    /** Pre-populated option for the "Reports To" picker when editing an existing title. */
+    initialReportsTo?: ITitleOption | null;
 }
 
 export interface ICreateTitle {

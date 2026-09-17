@@ -15,14 +15,14 @@ import {
 import {
     assetStatus,
     assetTypesStatusConstants,
-    crudStates,
     requestStatus
 } from "../../utils/constants";
 import { MenuItem, useTheme } from "@mui/material";
-import { exportPDF } from "../../utils/pdf";
+import { exportListPdf } from "../../utils/pdf/listPdf";
 import { useContext, useEffect, useState } from "react";
 import { FileContext } from "../../context/file/FileContext";
 import RoutesUtills from "../../core/routes/utills";
+import usePermissions from "../../core/permissions/usePermissions";
 import formatExportData, { ModuleTypeMap } from "./formatExportData";
 import { toast } from "react-toastify";
 import { exportExcel } from "../../utils/excel";
@@ -30,8 +30,20 @@ import { FormContext } from "../../context/form";
 import dayjs from "dayjs";
 import { camelCaseToWords } from "../../utils/helpers";
 import { RequestContext } from "../../context/request/RequestContext";
+import {
+    filterRequestRowOptions,
+    isRequestRow,
+} from "../../pages/request/assetRequest/rowActions";
+import {
+    applyExportColumns,
+    loadExportColumnConfig,
+    readViewerChoice,
+    resolveExportColumns,
+} from "../../utils/exports/exportColumns";
 
-const TableUtills = ({ moduleName }: { moduleName?: string }) => {
+const TableUtills = ({ moduleName, tableKey }: { moduleName?: string; tableKey?: string }) => {
+    // Row options carrying a `permission` are hidden from anyone who does not hold it.
+    const { has } = usePermissions();
     const { fileName } = useContext(FileContext);
     const { getCurrentUser } = RoutesUtills();
     const { requestStatusIds } = useContext(RequestContext);
@@ -135,17 +147,64 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
         }
     };
 
+    type ExportMeta = {
+        filters?: Array<{ label: string; value: string }>;
+        /**
+         * Overrides the document title and filename.
+         *
+         * <p>Both otherwise come from `FileContext`, which the toolbar sets to the table's `module`
+         * — "General Asset" for every asset category. That name drives the row-action filtering and
+         * cannot be changed, so a caller that knows the real subject ("IT Equipment") says so here
+         * rather than exporting three different registers under one title.
+         */
+        title?: string;
+    };
+
+    /**
+     * Narrows a table's columns to those configured for export, then to the viewer's own choice.
+     *
+     * <h2>Why here, and only here</h2>
+     * Every table that exports through `TableComponent` — seventeen of them, plus the assets and
+     * requests pages, which call these two functions directly — builds its columns in
+     * `determineRowsandColumns` from the keys of the first row. That makes this the one place the
+     * whole shared path passes through, so a page gets the feature by naming its `tableKey` and
+     * nothing else.
+     *
+     * <p>A table with no `tableKey`, or one not in the registry, keeps exactly today's behaviour.
+     * That is what lets this arrive against twenty-odd existing tables without a flag day.
+     */
+    const narrowColumns = async <T extends { dataKey: string }>(columns: T[]): Promise<T[]> => {
+        if (!tableKey) return columns;
+        const config = await loadExportColumnConfig();
+        return applyExportColumns(
+            columns,
+            resolveExportColumns(tableKey, config, readViewerChoice(tableKey)),
+        );
+    };
+
     /**
      * Generate PDF directly from an array of rows (no DataGrid API needed).
+     * `meta.filters` is rendered as a strip under the header so the reader
+     * knows which slice of the data the export represents.
      */
-    const generatePDFFromRows = (rowsData: any[]) => {
+    const generatePDFFromRows = async (rowsData: any[], meta?: ExportMeta) => {
         try {
             if (!rowsData || rowsData.length === 0) {
                 toast.error(`No data available for export`);
                 return;
             }
-            const { columns, rows } = determineRowsandColumns(rowsData);
-            exportPDF(columns, rows, fileName || moduleName || 'export');
+            const { columns: allColumns, rows } = determineRowsandColumns(rowsData);
+            const columns = await narrowColumns(allColumns);
+            /*
+             * The reports' PDF, not the older list one.
+             *
+             * `utils/pdf.js` painted a hundred-point solid header block on every page, repeated no
+             * column headings past page one, showed no filter summary and numbered nothing — so a
+             * printed register gave the reader no way to tell what it was a register of, or which
+             * page they were holding. exportListPdf uses the same docKit furniture as the reports,
+             * the GRN and the dispatch notes, so every document the bank prints now looks alike.
+             */
+            await exportListPdf(columns, rows, meta?.title || fileName || moduleName || 'export', meta);
         } catch (error) {
             console.error('Error generating PDF:', error);
             toast.error('Failed to generate PDF: ' + (error instanceof Error ? error.message : 'Unknown error'));
@@ -154,15 +213,17 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
 
     /**
      * Generate Excel directly from an array of rows (no DataGrid API needed).
+     * `meta.filters` is rendered on the cover sheet.
      */
-    const generateExcelFromRows = (rowsData: any[]) => {
+    const generateExcelFromRows = async (rowsData: any[], meta?: ExportMeta) => {
         try {
             if (!rowsData || rowsData.length === 0) {
                 toast.error(`No data available for export`);
                 return;
             }
-            const { columns, rows } = determineRowsandColumns(rowsData);
-            exportExcel(columns, rows, fileName || moduleName || 'export');
+            const { columns: allColumns, rows } = determineRowsandColumns(rowsData);
+            const columns = await narrowColumns(allColumns);
+            exportExcel(columns, rows, meta?.title || fileName || moduleName || 'export', meta);
         } catch (error) {
             console.error('Error generating Excel:', error);
             toast.error('Failed to generate Excel: ' + (error instanceof Error ? error.message : 'Unknown error'));
@@ -221,8 +282,29 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
                 return;
             }
 
-            // Export to PDF
-            exportPDF(exportData.columns, exportData.data, fileName || moduleName || 'export');
+            /*
+             * The same exporter as the row-based path above.
+             *
+             * These two paths differ only in where the rows come from — this one from the DataGrid
+             * or a fresh API call, the other from an array the page already holds — and there was
+             * never a reason for them to produce different-looking documents. While this called the
+             * older `utils/pdf.js`, the register you got depended on which screen you exported from:
+             * one with repeating column headings, a filter summary and page numbers, one without.
+             *
+             * The date range travels as `meta` so a printed sheet says which slice of the data it is,
+             * which is the whole point of the newer exporter and what the old one could not show.
+             */
+            const exportFilters = [
+                tableStartDate ? { label: 'From', value: dayjs(tableStartDate).format('DD MMM YYYY') } : null,
+                tableEndDate ? { label: 'To', value: dayjs(tableEndDate).format('DD MMM YYYY') } : null,
+            ].filter(Boolean) as Array<{ label: string; value: string }>;
+
+            await exportListPdf(
+                exportData.columns,
+                exportData.data,
+                fileName || moduleName || 'export',
+                exportFilters.length ? { filters: exportFilters } : undefined,
+            );
 
         } catch (error) {
             console.error('Error generating PDF:', error);
@@ -335,6 +417,22 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
      * For this purpose we need to ensure that each request owner has to be tracked and not able to approve or reject their own request.
      * This is to ensure that the request is approved by a different person than the one who created it.
      */
+    /**
+     * The row menu, filtered to what the signed-in user may actually do.
+     *
+     * <p>Two independent questions, and both must pass. {@link resolveStateOptions} below answers
+     * "does this action make sense for this row right now" — is it already approved, are you the
+     * requester, has it been issued. This answers "may this person perform it at all".
+     *
+     * <p>Central rather than per page. Before this only the assets page filtered its row menu, so
+     * every other table offered Approve, Delete and Issue to anyone who could open the page; the
+     * click then came back 403, which reads as a broken button rather than as a boundary. A page now
+     * names the permission on the option and this does the rest — which also means a table added
+     * later is gated by default instead of by remembering.
+     *
+     * <p>Presentation only. The endpoint enforces the same rule regardless, and it is the authority;
+     * this exists so the app does not offer what it will then refuse.
+     */
     const handleOptionsFilter = (
         column: any,
         filter?: boolean,
@@ -342,12 +440,50 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
         module?: string,
         optionsfilterParams?: Record<string, any>
     ) => {
-        const options = column?.actionData?.options || [];
-        const currentUserId = getCurrentUser()?.id || 0;
+        /*
+         * Requests answer to one rule, shared with their detail page.
+         *
+         * `actionRules` decides the detail page's buttons from the request's workflow step and the
+         * viewer's relationship to it. The menu used to decide the same thing from the tab and the
+         * row's status, and the two disagreed: the menu offered Approve on rows routed to somebody
+         * else, and on rows whose workflow had already moved past approval. See
+         * `filterRequestRowOptions` for what each of those cost.
+         *
+         * The `filter` flag is not consulted here. It said "narrow this menu by business state",
+         * and the Rejected tab never set it — so that tab showed Update and Delete on other
+         * people's requests, which the backend refuses. Narrowing is not optional for a request.
+         *
+         * <p>Nor is the module: the transport-request module calls itself `"request"` as well, and
+         * these rules would have emptied its menu. The row says what it is.
+         */
+        if (isRequestRow(row)) {
+            const user = getCurrentUser();
+            const allowed = filterRequestRowOptions(
+                column?.actionData?.options || [],
+                row,
+                { id: user?.id, unitId: user?.unit?.id, has },
+            );
+            return allowed.filter((option: any) => !option?.permission || has(option.permission));
+        }
 
-        const isRequestModule = module === 'request';
-        const isPendingRequestModule = module === 'pending requests';
-        const isIssuedRequestModule = module === 'issued requests';
+        const stateAllowed = resolveStateOptions(column, filter, row, module, optionsfilterParams);
+        return (stateAllowed ?? []).filter(
+            (option: any) => !option?.permission || has(option.permission));
+    };
+
+    /**
+     * Business-state rules for the modules that still key on the row's own status — assets,
+     * repairs, GRN. Requests are handled above and no longer reach here.
+     */
+    const resolveStateOptions = (
+        column: any,
+        filter?: boolean,
+        row?: any,
+        module?: string,
+        optionsfilterParams?: Record<string, any>
+    ) => {
+        const options = column?.actionData?.options || [];
+
         const isITEquipmentModule = module === 'IT Equipment';
         const isOfficeEquipmentModule = module === 'Office Equipment';
         const isFleetEquipmentModule = module === 'Fleet';
@@ -355,267 +491,6 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
         const isGRNDocumentsModule = module === 'GRN documents';
 
         const isFilterEnabled = Boolean(filter);
-
-        // Handle Request module filtering (existing logic)
-        if ((isRequestModule || isPendingRequestModule || isIssuedRequestModule) && isFilterEnabled) {
-            const isRequester = row?.requesterID === currentUserId;
-            const status = optionsfilterParams?.status?.toUpperCase() || "";
-
-            if (isRequester) {
-
-                if (status === "CREATED" && row?.status === "requestCreated") {
-                    return options.filter(
-                        (option: any) =>
-                            option.value !== crudStates.approve &&
-                            option.value !== crudStates.reject &&
-                            option.value !== crudStates.acknowledgeReceipt &&
-                            option.value !== crudStates.approveIssuance &&
-                            option.value !== crudStates.issue &&
-                            option.value !== crudStates.acknowledgeRequest &&
-                            option.value !== crudStates.delete &&
-                            option.value !== crudStates.update
-                    );
-                }
-
-                if (status === "CREATED" && row?.status === "requestIssued") {
-                    return options.filter(
-                        (option: any) =>
-                            option.value !== crudStates.approve &&
-                            option.value !== crudStates.reject &&
-                            option.value !== crudStates.update &&
-                            option.value !== crudStates.delete &&
-                            option.value !== crudStates.approveIssuance &&
-                            option.value !== crudStates.issue &&
-                            option.value !== crudStates.acknowledgeRequest &&
-                            option.value !== crudStates.acknowledgeReceipt
-                    )
-                }
-
-                if (status === "CREATED" && row?.status === "requestAcknowledged") {
-                    return options.filter(
-                        (option: any) =>
-                            option.value !== crudStates.approve &&
-                            option.value !== crudStates.reject &&
-                            option.value !== crudStates.update &&
-                            option.value !== crudStates.delete &&
-                            option.value !== crudStates.approveIssuance &&
-                            option.value !== crudStates.issue &&
-                            option.value !== crudStates.acknowledgeRequest &&
-                            option.value !== crudStates.acknowledgeReceipt
-                    )
-                }
-
-                if (status === "CREATED" && row?.status === "requestRejected") {
-                    return options.filter(
-                        (option: any) =>
-                            option.value !== crudStates.approve &&
-                            option.value !== crudStates.reject &&
-                            option.value !== crudStates.approveIssuance &&
-                            option.value !== crudStates.issue &&
-                            option.value !== crudStates.acknowledgeRequest &&
-                            option.value !== crudStates.acknowledgeReceipt
-                    )
-                }
-
-                if (status === "CREATED" && row?.status === "requestApproved") {
-                    return options.filter(
-                        (option: any) =>
-                            option.value !== crudStates.approve &&
-                            option.value !== crudStates.reject &&
-                            option.value !== crudStates.update &&
-                            option.value !== crudStates.delete &&
-                            option.value !== crudStates.approveIssuance &&
-                            option.value !== crudStates.issue &&
-                            option.value !== crudStates.acknowledgeRequest &&
-                            option.value !== crudStates.acknowledgeReceipt
-                    )
-                }
-
-                if (status === "CREATED" && row?.status === "receiptAcknowledged") {
-                    return options.filter(
-                        (option: any) =>
-                            option.value !== crudStates.approve &&
-                            option.value !== crudStates.reject &&
-                            option.value !== crudStates.update &&
-                            option.value !== crudStates.delete &&
-                            option.value !== crudStates.approveIssuance &&
-                            option.value !== crudStates.issue &&
-                            option.value !== crudStates.acknowledgeRequest &&
-                            option.value !== crudStates.acknowledgeReceipt
-                    )
-                }
-
-                if (status === "CREATED" && row?.status === "issuanceApproved") {
-                    return options.filter(
-                        (option: any) =>
-                            option.value !== crudStates.approve &&
-                            option.value !== crudStates.reject &&
-                            option.value !== crudStates.approveIssuance &&
-                            option.value !== crudStates.issue &&
-                            option.value !== crudStates.acknowledgeRequest &&
-                            option.value !== crudStates.update &&
-                            option.value !== crudStates.delete
-                    )
-                }
-
-                if (status === "PENDING") {
-                    return options.filter(
-                        (option: any) =>
-                            option.value !== crudStates.issue &&
-                            option.value !== crudStates.acknowledgeRequest
-                    );
-                }
-
-
-                if (status === "ISSUED" && row?.status === "requestIssued") {
-                    return options.filter(
-                        (option: any) =>
-                            option.value !== crudStates.acknowledgeReceipt &&
-                            option.value !== crudStates.approveIssuance
-                    )
-                }
-
-                if (status === "ISSUED" && row?.status === "receiptAcknowledged") {
-                    return options.filter(
-                        (option: any) =>
-                            option.value !== crudStates.approveIssuance &&
-                            option.value !== crudStates.acknowledgeReceipt
-                    )
-                }
-
-                if (status === "ISSUED" && row?.status === "issuanceApproved") {
-                    return options.filter(
-                        (option: any) =>
-                            option.value !== crudStates.approveIssuance
-                    )
-                }
-
-            } else if (!isRequester) {
-
-                console.log(status, "Status in Option Filter", row?.status, "Row Status in Option Filter");
-                if (status === "CREATED" && row?.status === "requestCreated") {
-                    return options.filter(
-                        (option: any) =>
-                            option.value !== crudStates.update &&
-                            option.value !== crudStates.delete &&
-                            option.value !== crudStates.acknowledgeReceipt &&
-                            option.value !== crudStates.approveIssuance &&
-                            option.value !== crudStates.issue &&
-                            option.value !== crudStates.acknowledgeRequest
-                    );
-                }
-
-                if (status === "CREATED" && row?.status === "requestApproved") {
-                    return options.filter(
-                        (option: any) =>
-                            option.value !== crudStates.approve &&
-                            option.value !== crudStates.reject &&
-                            option.value !== crudStates.update &&
-                            option.value !== crudStates.delete &&
-                            option.value !== crudStates.approveIssuance &&
-                            option.value !== crudStates.issue &&
-                            option.value !== crudStates.acknowledgeReceipt
-                    )
-                }
-
-                if (status === "CREATED" && row?.status === "requestAcknowledged") {
-                    return options.filter(
-                        (option: any) =>
-                            option.value !== crudStates.approve &&
-                            option.value !== crudStates.reject &&
-                            option.value !== crudStates.update &&
-                            option.value !== crudStates.delete &&
-                            option.value !== crudStates.approveIssuance &&
-                            option.value !== crudStates.acknowledgeRequest &&
-                            option.value !== crudStates.acknowledgeReceipt
-                    )
-                }
-
-                if (status === "CREATED" && row?.status === "requestIssued") {
-                    console.log("Information detected")
-                    return options.filter(
-                        (option: any) =>
-                            option.value !== crudStates.approve &&
-                            option.value !== crudStates.reject &&
-                            option.value !== crudStates.update &&
-                            option.value !== crudStates.delete &&
-                            option.value !== crudStates.acknowledgeReceipt &&
-                            option.value !== crudStates.acknowledgeRequest &&
-                            option.value !== crudStates.issue
-
-                    )
-                }
-
-                if (status === "CREATED" && row?.status === "requestRejected") {
-                    return options.filter(
-                        (option: any) =>
-                            option.value !== crudStates.approve &&
-                            option.value !== crudStates.reject &&
-                            option.value !== crudStates.approveIssuance &&
-                            option.value !== crudStates.issue &&
-                            option.value !== crudStates.acknowledgeRequest &&
-                            option.value !== crudStates.acknowledgeReceipt &&
-                            option.value !== crudStates.update &&
-                            option.value !== crudStates.delete
-                    )
-                }
-
-                if (status === "CREATED" && row?.status === "issuanceApproved") {
-                    return options.filter(
-                        (option: any) =>
-                            option.value !== crudStates.approve &&
-                            option.value !== crudStates.reject &&
-                            option.value !== crudStates.approveIssuance &&
-                            option.value !== crudStates.issue &&
-                            option.value !== crudStates.acknowledgeRequest &&
-                            option.value !== crudStates.acknowledgeReceipt &&
-                            option.value !== crudStates.update &&
-                            option.value !== crudStates.delete
-                    )
-                }
-
-
-                if (status === "PENDING" && row?.status === "requestAcknowledged") {
-                    return options.filter(
-                        (option: any) => option.value !== 'acknowledgeRequest'
-                    );
-                }
-
-                if (status === "PENDING" && row?.status === "requestApproved") {
-                    return options.filter(
-                        (option: any) => option.value !== 'issue'
-                    );
-                }
-
-                if (status === "ISSUED" && row?.status === "requestIssued") {
-                    return options.filter(
-                        (option: any) => option.value !== crudStates.acknowledgeReceipt
-                    )
-                }
-
-                if (status === "ISSUED" && row?.status === "receiptAcknowledged") {
-                    return options.filter(
-                        (option: any) =>
-                            option.value !== crudStates.approveIssuance &&
-                            option.value !== crudStates.acknowledgeReceipt
-                    )
-                }
-
-                if (status === "ISSUED" && row?.status === "issuanceApproved") {
-                    return options.filter(
-                        (option: any) =>
-                            option.value !== crudStates.approveIssuance &&
-                            option.value !== crudStates.acknowledgeReceipt
-                    )
-                }
-            }
-
-            return options.filter(
-                (option: any) =>
-                    option.value !== 'delete' &&
-                    option.value !== 'update'
-            );
-        }
 
         // Handle IT Equipment, Fleet Equipment and Office Equipment module filtering (same logic for both)
         if ((isITEquipmentModule || isOfficeEquipmentModule || isFleetEquipmentModule) && isFilterEnabled) {
@@ -728,6 +603,16 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
             color: theme.palette.success.main
         },
         {
+            label: "Issued",
+            value: "assetIssued",
+            color: theme.palette.info.main
+        },
+        {
+            label: "In Transit",
+            value: "inTransit",
+            color: theme.palette.primary.main
+        },
+        {
             label: "In Store",
             value: "inStore",
             color: theme.palette.error.main
@@ -736,7 +621,24 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
             label: "In Use",
             value: "receiptAcknowledged",
             color: theme.palette.info.main
+        },
+        {
+            label: "Due for Disposal",
+            value: "dueForDisposal",
+            color: theme.palette.error.dark
         }
+        /*
+         * The soft-deleted view is NOT here.
+         *
+         * This list only reaches a page whose module name is one of three hardcoded categories, and
+         * asset categories have been configurable since the single /assets/general/:typeId route
+         * landed — so anything created in Settings falls to the `default` case and gets no status
+         * filter at all. An entry added here is invisible to most of the estate.
+         *
+         * The assets page renders its own control for it, next to the export actions, which is also
+         * where it belongs: whether you may see deleted records is a permission question, not a
+         * per-category one.
+         */
     ];
 
     const userFilterStatuses: { label: string, value: string, color: string }[] = [
@@ -822,30 +724,6 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
         },
     ]
 
-    const storeFilterStatuses: { label: string, value: string, color: string }[] = [
-        {
-            label: "Office Equipment",
-            value: "officeEquipment",
-            color: theme.palette.success.main
-        },
-        {
-            label: "IT Equipment",
-            value: "itEquipment",
-            color: theme.palette.error.main
-        },
-        {
-            label: "Fleet",
-            value: "fleet",
-            color: theme.palette.warning.main
-        },
-        {
-            label: "Stationery",
-            value: "stationery",
-            color: theme.palette.info.main
-        }
-    ];
-
-
     const determineFilterStatuses = () => {
         switch (moduleName) {
             case assetTypesStatusConstants.itEquipment:
@@ -862,8 +740,6 @@ const TableUtills = ({ moduleName }: { moduleName?: string }) => {
                 return setFilterStatuses(requestsPendingFilterStatuses);
             case "inventory":
                 return setFilterStatuses(inventoryFilterStatuses);
-            case "stores":
-                return setFilterStatuses(storeFilterStatuses);
             default:
                 return [] as Array<{ label: string, value: string, color: string }>;
         }

@@ -28,8 +28,13 @@ import {
 } from 'chart.js';
 import { Doughnut, Bar } from 'react-chartjs-2';
 import CountUp from 'react-countup';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../../store';
 import { fetchRowsService } from '../../../../core/apis/globalService';
 import { IRequest, IRequestsAxiosResponse } from '../../interface';
+import { ALL_REQUEST_CODES, PENDING_REQUEST_CODES, ISSUED_REQUEST_CODES } from '../../../../utils/constants';
+import { statusIdByCode, statusIdsByCodes } from '../../../../utils/helpers';
+import StatusUtills from '../../../settings/statuses/Utills';
 import InboxOutlinedIcon from '@mui/icons-material/InboxOutlined';
 import HourglassEmptyOutlinedIcon from '@mui/icons-material/HourglassEmptyOutlined';
 import BlockOutlinedIcon from '@mui/icons-material/BlockOutlined';
@@ -150,8 +155,22 @@ const LegendPill = ({ color, label, count }: { color: string; label: string; cou
 const RequestOverview = () => {
     const [loading, setLoading] = useState(true);
     const [requests, setRequests] = useState<IRequest[]>([]);
+    const { statuses } = useSelector((state: RootState) => state.StatusesStore);
+    const { fetchAllStatuses } = StatusUtills();
+
+    // Ids resolved from stable codes (never hardcoded — seeded ids vary by environment).
+    const allRequestCsv = statusIdsByCodes(statuses, ALL_REQUEST_CODES);
+    const idSet = (codes: ReadonlyArray<string>): number[] =>
+        statusIdsByCodes(statuses, codes).split(',').filter(Boolean).map(Number);
+    const createdId = statusIdByCode(statuses, 'requestCreated');
+    const rejectedId = statusIdByCode(statuses, 'requestRejected');
+    const pendingIds = idSet(PENDING_REQUEST_CODES);
+    const issuedIds = idSet(ISSUED_REQUEST_CODES);
+
+    useEffect(() => { fetchAllStatuses(); }, []);
 
     useEffect(() => {
+        if (!allRequestCsv) return; // wait for the status catalogue
         (async () => {
             setLoading(true);
             try {
@@ -159,7 +178,7 @@ const RequestOverview = () => {
                     pageNumber: 0,
                     pageSize: 100,
                     endPoint: 'requests',
-                    params: { statusIds: '1,2,3,4,5,6,7' },
+                    params: { statusIds: allRequestCsv },
                 }) as IRequestsAxiosResponse;
                 if (res.status === 200) {
                     setRequests(res.data.content || []);
@@ -167,14 +186,15 @@ const RequestOverview = () => {
             } catch (_) { /* silent */ }
             setLoading(false);
         })();
-    }, []);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [allRequestCsv]);
 
     /* ── Derived counts ─────────────────────────────────────────────── */
     const total = requests.length;
-    const created = requests.filter(r => Number(r.status?.id) === 1).length;
-    const rejected = requests.filter(r => Number(r.status?.id) === 2).length;
-    const pending = requests.filter(r => [3, 4].includes(Number(r.status?.id))).length;
-    const issued = requests.filter(r => [5, 6, 7].includes(Number(r.status?.id))).length;
+    const created = requests.filter(r => Number(r.status?.id) === createdId).length;
+    const rejected = requests.filter(r => Number(r.status?.id) === rejectedId).length;
+    const pending = requests.filter(r => pendingIds.includes(Number(r.status?.id))).length;
+    const issued = requests.filter(r => issuedIds.includes(Number(r.status?.id))).length;
 
     const pct = (n: number) => (total > 0 ? Math.round((n / total) * 100) : 0);
 

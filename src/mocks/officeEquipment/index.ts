@@ -5,7 +5,7 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { IOfficeEquipment } from "../../pages/assets/officeEquipment/interface";
+import { IOfficeEquipment } from "../../pages/assets/interface";
 import { inventoryMock } from "../inventory";
 import { suppliersMock } from "../settings";
 import { statusMocks } from "../status";

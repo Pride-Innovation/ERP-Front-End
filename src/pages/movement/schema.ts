@@ -8,12 +8,27 @@ Managing Director
 import * as yup from 'yup';
 
 export const movementSchema = yup.object().shape({
-    officerId: yup.mixed().required('Requesting officer is required'),
-    approverId: yup.mixed().nullable().optional(),
-    destination: yup.string().required('Destination is required'),
-    destinationId: yup.mixed().nullable().optional(),
-    destinationType: yup.string().required('Destination type is required'),
-    assetIds: yup.array().required().min(1, 'Please add at least one asset to move'),
-    reason: yup.string().required('Reason is required'),
-    expectedReturnDate: yup.string().nullable().optional(),
+    movementType: yup.string().required('Movement type is required'),
+    sourceStoreId: yup.mixed().required('Source store is required'),
+    destinationKind: yup.string().required('Destination kind is required'),
+    destStoreId: yup
+        .mixed()
+        .nullable()
+        .when('destinationKind', {
+            is: 'STORE',
+            then: (s) => s.required('Destination store is required'),
+            otherwise: (s) => s.nullable().optional(),
+        }),
+    recipientUserId: yup
+        .mixed()
+        .nullable()
+        .when('destinationKind', {
+            is: 'USER',
+            then: (s) => s.required('Recipient user is required'),
+            otherwise: (s) => s.nullable().optional(),
+        }),
+    // No courier / tracking / delivery-date rules: the create form does not collect them. They are
+    // captured at dispatch, where the carrier is actually known — see the Journey note in
+    // MovementForm.
+    remarks: yup.string().nullable().optional(),
 });

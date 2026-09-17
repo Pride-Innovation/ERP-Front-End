@@ -24,13 +24,20 @@ interface InfoItemProps {
     label: string;
     value: ReactNode | string;
     copyable?: boolean;
+    /**
+     * Shown — muted and italicised — in place of the value when there is none.
+     * Lets each field explain its own absence ("Not yet modified", "Not
+     * assigned") instead of falling back to a generic label.
+     */
+    emptyText?: string;
 }
 
 const InfoItem = ({
     icon,
     label,
     value,
-    copyable = false
+    copyable = false,
+    emptyText = 'Not specified'
 }: InfoItemProps) => {
     const handleCopy = () => {
         if (typeof value === 'string') {
@@ -39,7 +46,10 @@ const InfoItem = ({
         }
     };
 
-    const isEmpty = value === null || value === undefined || value === '';
+    // Whitespace-only counts as empty too — composed values (e.g. a full name
+    // built from missing parts) otherwise render as a blank row.
+    const isEmpty = value === null || value === undefined
+        || (typeof value === 'string' && value.trim() === '');
 
     return (
         <Box
@@ -100,7 +110,7 @@ const InfoItem = ({
                                     fontStyle: isEmpty ? 'italic' : 'normal'
                                 }}
                             >
-                                {isEmpty ? 'Not specified' : value}
+                                {isEmpty ? emptyText : value}
                             </Typography>
                         ) : (
                             value

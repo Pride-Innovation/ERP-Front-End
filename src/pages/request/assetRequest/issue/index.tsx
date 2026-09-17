@@ -6,9 +6,9 @@ Managing Director
 */
 
 import TableComponent from "../../../../components/tables/TableComponent";
-import { Box, Card } from "@mui/material";
+import { Box } from "@mui/material";
 import RequestUtills from "../utills";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../store";
 import { RequestContext } from "../../../../context/request/RequestContext";
@@ -19,20 +19,61 @@ import AcknowledgeReceipt from "../AcknowledgeReceipt";
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import ApproveIssuance from "../ApproveIssuance";
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
-import { IPermission } from "../../../settings/interface";
-import { permissionsMock } from "../../../../mocks/settings";
-import RoutesUtills from "../../../../core/routes/utills";
+import usePermissions from "../../../../core/permissions/usePermissions";
+import { PERMISSIONS } from "../../../../core/permissions/constants";
+import StatusUtills from "../../../settings/statuses/Utills";
+import { statusIdByCode } from "../../../../utils/helpers";
+import {
+    REQUEST_SEARCH_KEY,
+    REQUEST_SORT_FIELDS,
+    buildRequestColumnFilters,
+    toRequestParams,
+} from "../requestTableConfig";
+import useStaffOptions from "../useStaffOptions";
+import useRequestExport from "../useRequestExport";
+import { useDepartmentOptions } from '../useDepartmentOptions';
 
 const IssuedRequest = () => {
+    /*
+     * The staff directory behind the "Requested By" and "Approver" pickers.
+     *
+     * Branch-scoped on the server, so the list offered matches what this listing can actually return.
+     */
+    const fetchStaffOptions = useStaffOptions();
+    const departmentOptions = useDepartmentOptions();
+
     const { requests } = useSelector((state: RootState) => state.AssetsRequestsStore)
+    const { statuses } = useSelector((state: RootState) => state.StatusesStore);
+    const { fetchAllStatuses } = StatusUtills();
     const { requestTableData, setOptions, setRequestStatusIds } = useContext(RequestContext);
-    const [permissions, setPermissions] = useState<IPermission[]>([] as IPermission[]);
-    const { getCurrentUser } = RoutesUtills();
+    const { has } = usePermissions();
     const [selectedStatus, setSelectedStatus] = useState<string>('all');
-    const [statusIds, setStatusIds] = useState<string>(`${5},${6},${7}`); // Default to '1' for "Request Created"
+
+    // The "Issued" tab groups the three post-issuance request states. Ids are resolved from
+    // status codes (never hardcoded — seeded ids vary by environment, see utils/helpers).
+    const ISSUED_GROUP_CODES = ['issued', 'issuanceApproved', 'receiptAcknowledged'];
+    const issuedGroupCsv = ISSUED_GROUP_CODES
+        .map((code) => statusIdByCode(statuses, code))
+        .filter((id): id is number => id != null)
+        .join(',');
+
+    const [statusIds, setStatusIds] = useState<string>('');
+    const { exportRequests } = useRequestExport('Issued');
+
+    /** The parameters in force, so paging and exporting reissue the query on screen. */
+    const activeParams = useRef<Record<string, any>>({});
+
+    const runQuery = (next: Record<string, any>) => {
+        activeParams.current = next;
+        fetchAllRequests(next);
+    };
+
+    useEffect(() => { fetchAllStatuses(); }, []);
 
     useEffect(() => {
-        setRequestStatusIds(statusIds.split(',').map(id => parseInt(id, 10)));
+        if (statusIds) {
+            setRequestStatusIds(statusIds.split(',').map(id => parseInt(id, 10)));
+        }
     }, [statusIds]);
 
     const {
@@ -51,16 +92,16 @@ const IssuedRequest = () => {
         setSendingRequest
     } = RequestUtills();
 
-    const params = { statusIds: statusIds, status: "ISSUED" }
-
+    // Load the issued-group requests once the status catalogue resolves the group ids
+    // (Request Issued + Issuance Approved + Receipt Acknowledged). Only drives the default
+    // "all" view; per-status filters are handled by handleStatusChange.
     useEffect(() => {
-        /**
-         * This should contain the Status ID for Request Issued for Approval and Issuance Approved.
-         */
-        fetchAllRequests(params);
-
-        // setFileData({ file: "", module: "", jsonData: [] });
-    }, []);
+        if (issuedGroupCsv && selectedStatus === 'all') {
+            setStatusIds(issuedGroupCsv);
+            runQuery({ statusIds: issuedGroupCsv });
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [issuedGroupCsv]);
 
 
     useEffect(() => { handleRequest(requests) }, [requests]);
@@ -72,11 +113,7 @@ const IssuedRequest = () => {
      * This effect checks the permissions of the current user and sets the options for the request actions accordingly.
      */
     useEffect(() => {
-        if (!permissions || permissions.length === 0) return;
-
-        const hasApproveIssuancePermission = permissions.some(
-            (perm) => perm.name === permissionsMock.find(p => p.name === "APPROVE_ISSUANCE")?.name
-        );
+        const hasApproveIssuancePermission = has(PERMISSIONS.APPROVE_ISSUANCE);
 
         const newOptions = [
             {
@@ -102,13 +139,7 @@ const IssuedRequest = () => {
 
 
         setOptions(newOptions);
-    }, [permissions]);
-
-
-    useEffect(() => {
-        if (getCurrentUser()?.title?.role?.permissions) {
-            setPermissions(getCurrentUser()?.title?.role?.permissions || []);
-        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
 
@@ -118,35 +149,27 @@ const IssuedRequest = () => {
      * @param status - The status filter to apply
      */
     const handleStatusChange = (status: string) => {
-        let param;
-        let statusId;
+        // Map the filter option to its status code, then resolve the id (never hardcode).
+        const codeByOption: Record<string, string> = {
+            requestIssued: 'issued',
+            issuanceApproved: 'issuanceApproved',
+            receiptAcknowledged: 'receiptAcknowledged',
+        };
 
-        switch (status) {
-            // ISSUED status group
-            case 'requestIssued':
-                param = { status: "ISSUED", statusIds: '5' };
-                statusId = '5';
-                break;
-
-            case 'issuanceApproved':
-                param = { status: "ISSUED", statusIds: '6' };
-                statusId = '6';
-                break;
-
-            case 'receiptAcknowledged':
-                param = { status: "ISSUED", statusIds: '7' };
-                statusId = '7';
-                break;
-
-            // Default (all) case
-            default:
-                fetchAllRequests(params);
-                setSelectedStatus('all');
-                return; // Exit early for the default case
+        const code = codeByOption[status];
+        if (!code) {
+            // Default (all) case — the whole issued group.
+            runQuery({ statusIds: issuedGroupCsv });
+            setStatusIds(issuedGroupCsv);
+            setSelectedStatus('all');
+            return;
         }
 
-        // For all non-default cases:
-        fetchAllRequests(param);
+        const resolved = statusIdByCode(statuses, code);
+        if (resolved == null) return; // status catalogue not loaded yet
+        const statusId = String(resolved);
+
+        runQuery({ statusIds: statusId });
         setSelectedStatus(status);
         setStatusIds(statusId);
     }
@@ -178,27 +201,13 @@ const IssuedRequest = () => {
     )
 
     return (
-        <Box width={'100%'} sx={{
-            px: 3,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center'
-        }}>
+        // Full-width like the other request tabs (All/Pending/Rejected) — the previous
+        // px-padding + 1500px-capped Card made this tab's table visibly narrower.
+        <Box width={'100%'}>
             {renderModals()}
-            <Card
-                elevation={0}
-                sx={{
-                    borderRadius: 2,
-                    width: '100%',
-                    maxWidth: "1500px",
-                    overflow: 'hidden',
-                    border: "none",
-                    bgcolor: 'white'
-                }}
-            >
-
-                {columnHeaders.length > 0 &&
+            {columnHeaders.length > 0 &&
                     <TableComponent
+                tableKey="assetRequests"
                         endPoint={endPoint}
                         loading={loading}
                         count={count}
@@ -211,31 +220,22 @@ const IssuedRequest = () => {
                         params={{ statusIds: statusIds }}
                         refresh
                         status
-                        optionsfilterParams={
-                            {
-                                status: "ISSUED"
-                            }
-                        }
                         onStatusChange={handleStatusChange}
                         selectedStatus={selectedStatus}
-                        filterOptions
-                        columnFilters={[
-                            { key: 'assetName', label: 'Asset Name', type: 'text' },
-                            { key: 'requestedBy', label: 'Requested By', type: 'text' },
-                            { key: 'requestedFrom', label: 'Requested From', type: 'text' },
-                            {
-                                key: 'status', label: 'Status', type: 'select', options: [
-                                    { value: 'active', label: 'Active' },
-                                    { value: 'disabled', label: 'Disabled' },
-                                    { value: 'locked', label: 'Locked' },
-                                ]
-                            },
-                            { key: 'createdAt', label: 'Request Created', type: 'dateRange' },
-                        ]}
-                        onApplyFilters={(filters) => fetchAllRequests(filters)}
+                        columnFilters={buildRequestColumnFilters(statuses, fetchStaffOptions, departmentOptions)}
+                        /*
+                         * Merged over this tab's own parameters. It previously passed the filters
+                         * alone, dropping `statusIds` — so filtering the Issued tab listed every
+                         * request in the system under a heading that said Issued.
+                         */
+                        onApplyFilters={(filters) =>
+                            runQuery(toRequestParams({ statusIds }, filters))}
+                        onPaginationChange={(model) => fetchAllRequests(activeParams.current, model)}
+                        onExport={(format) => exportRequests(format, activeParams.current)}
+                        searchKey={REQUEST_SEARCH_KEY}
+                        serverSortFields={REQUEST_SORT_FIELDS}
                     />
                 }
-            </Card>
         </Box>
     )
 }

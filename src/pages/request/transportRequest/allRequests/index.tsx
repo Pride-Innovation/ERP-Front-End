@@ -116,6 +116,7 @@ const TransportRequest = () => {
             {allTranportRequests?.length > 0 && <Grid xs={12} container>
                 {columnHeaders.length > 0 &&
                     <TableComponent
+                tableKey="transportRequests"
                         endPoint={endPoint}
                         loading={loading}
                         count={100}

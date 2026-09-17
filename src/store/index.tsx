@@ -25,12 +25,14 @@ import CommodityReducer from "../pages/settings/commodity/slice"
 import AssetTypeReducer from "../pages/settings/assetTypes/slice"
 import TitleReducer from "../pages/settings/titles/slice"
 import StoreReducer from "../pages/store/slice"
-import ITAssetReducer from "../pages/assets/ITEquipment/slice"
-import OfficeAssetReducer from "../pages/assets/officeEquipment/slice"
-import FleetReducer from "../pages/assets/fleet/slice"
+// All asset categories (including the legacy IT Equipment / Office Equipment /
+// Fleet) live in GeneralAssetStore now — the per-category slices have been
+// retired in favour of the parameterised `/assets/general/:typeId` route.
 import AssetReducer from "../pages/assets/slice"
+import GeneralAssetReducer from "../pages/assets/general/slice"
 import AssetAssignmentHistoryReducer from "../pages/assets/trails/slice"
 import MovementReducer from "../pages/movement/slice"
+import ApprovalWorkflowReducer from "../pages/approvalWorkflows/slice"
 
 
 export const store = configureStore({
@@ -50,12 +52,11 @@ export const store = configureStore({
         AssetTypeStore: AssetTypeReducer,
         TitleStore: TitleReducer,
         StoreStore: StoreReducer,
-        ITAssetStore: ITAssetReducer,
-        OfficeAssetStore: OfficeAssetReducer,
-        FleetStore: FleetReducer,
         AssetStore: AssetReducer,
+        GeneralAssetStore: GeneralAssetReducer,
         AssetAssignmentHistoryStore: AssetAssignmentHistoryReducer,
         MovementStore: MovementReducer,
+        ApprovalWorkflowStore: ApprovalWorkflowReducer,
     },
 });
 

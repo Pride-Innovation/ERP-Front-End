@@ -1,13 +1,12 @@
-import { useState } from 'react';
-// import { alpha, Typography } from '@mui/material';
 import TuneOutlinedIcon from '@mui/icons-material/TuneOutlined';
 import CheckCircleOutlinedIcon from '@mui/icons-material/CheckCircleOutlined';
 import InventoryOutlinedIcon from '@mui/icons-material/InventoryOutlined';
 import BuildOutlinedIcon from '@mui/icons-material/BuildOutlined';
-// import AttachMoneyOutlinedIcon from '@mui/icons-material/AttachMoneyOutlined';
 import ReportShell, { ReportShellFilters } from '../ReportShell';
 import ReportSummaryCards from '../ReportSummaryCards';
 import ReportDataTable, { ReportColumn, StatusChip } from '../ReportDataTable';
+import useReportData, { REPORT_PAGE_SIZE, combineNotices, truncationNotice } from '../useReportData';
+import { fetchRowsService } from '../../../core/apis/globalService';
 
 const ACCENT = '#059669';
 
@@ -22,20 +21,12 @@ interface AssetRow {
     department: string;
     assignedTo: string;
     status: string;
+    statusCode: string;
     purchaseCost: string;
     netBookValue: string;
     acquisitionDate: string;
     condition: string;
 }
-
-const MOCK_ROWS: AssetRow[] = [
-    { id: 1, assetName: 'HP EliteBook 840', category: 'IT Equipment', subCategory: 'Laptop', serialNumber: 'SN-HPE-001', assetTag: 'TAG-0001', branch: 'Head Office', department: 'IT', assignedTo: 'John Okello', status: 'active', purchaseCost: 'UGX 1,500,000', netBookValue: 'UGX 900,000', acquisitionDate: '2024-03-01', condition: 'Good' },
-    { id: 2, assetName: 'Toyota Hilux D/C', category: 'Fleet', subCategory: 'Pickup', serialNumber: 'SN-TH-002', assetTag: 'TAG-0002', branch: 'Gulu Branch', department: 'Operations', assignedTo: 'Mary Akot', status: 'inRepair', purchaseCost: 'UGX 90,000,000', netBookValue: 'UGX 54,000,000', acquisitionDate: '2023-06-15', condition: 'Fair' },
-    { id: 3, assetName: 'Canon LBP Printer', category: 'Office Equipment', subCategory: 'Printer', serialNumber: 'SN-CLB-003', assetTag: 'TAG-0003', branch: 'Mbarara Branch', department: 'Finance', assignedTo: 'Unassigned', status: 'inStore', purchaseCost: 'UGX 1,300,000', netBookValue: 'UGX 650,000', acquisitionDate: '2023-11-20', condition: 'Good' },
-    { id: 4, assetName: 'Dell Monitor 24"', category: 'IT Equipment', subCategory: 'Monitor', serialNumber: 'SN-DM-004', assetTag: 'TAG-0004', branch: 'Head Office', department: 'Finance', assignedTo: 'Sarah Nalule', status: 'active', purchaseCost: 'UGX 700,000', netBookValue: 'UGX 420,000', acquisitionDate: '2024-01-10', condition: 'Good' },
-    { id: 5, assetName: 'Motorola Radio', category: 'Office Equipment', subCategory: 'Communication', serialNumber: 'SN-MR-005', assetTag: 'TAG-0005', branch: 'Kampala Branch', department: 'Security', assignedTo: 'Peter Omara', status: 'active', purchaseCost: 'UGX 350,000', netBookValue: 'UGX 175,000', acquisitionDate: '2023-08-01', condition: 'Good' },
-    { id: 6, assetName: 'HP DesignJet', category: 'Office Equipment', subCategory: 'Printer', serialNumber: 'SN-HD-006', assetTag: 'TAG-0006', branch: 'Head Office', department: 'Admin', assignedTo: 'Unassigned', status: 'disposed', purchaseCost: 'UGX 2,200,000', netBookValue: 'UGX 0', acquisitionDate: '2020-05-12', condition: 'Beyond repair' },
-];
 
 const COLUMNS: ReportColumn<AssetRow>[] = [
     { id: 'assetTag', label: 'Tag', minWidth: 90 },
@@ -53,31 +44,105 @@ const COLUMNS: ReportColumn<AssetRow>[] = [
     { id: 'condition', label: 'Condition', minWidth: 100 },
 ];
 
-const AssetRegisterReport = () => {
-    const [rows, setRows] = useState<AssetRow[]>(MOCK_ROWS);
+/** Money arrives from the server pre-formatted with separators; only the currency is missing. */
+const money = (v?: string | null) => (v ? `UGX ${v}` : '—');
 
-    const activeCount = rows.filter(r => r.status === 'active').length;
-    const inRepair = rows.filter(r => r.status === 'inRepair').length;
-    const inStore = rows.filter(r => r.status === 'inStore').length;
-    // const disposed = rows.filter(r => r.status === 'disposed').length;
+const fmtDate = (v?: string | null) => {
+    if (!v) return '—';
+    const d = new Date(v);
+    return Number.isNaN(d.getTime())
+        ? v // dateReceipt is free text, so anything unparseable is shown as recorded
+        : d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+};
+
+const toRow = (a: any): AssetRow => ({
+    id: a.id,
+    assetName: a.assetName ?? '—',
+    category: a.assetType?.name ?? '—',
+    subCategory: a.commodity?.name ?? '—',
+    serialNumber: a.serialNumber ?? '—',
+    assetTag: a.engravedNumber ?? '—',
+    branch: a.branch?.name ?? '—',
+    department: a.assignedTo?.department?.name ?? '—',
+    assignedTo: a.assignedTo
+        ? `${a.assignedTo.firstName ?? ''} ${a.assignedTo.lastName ?? ''}`.trim() || '—'
+        : 'Unassigned',
+    status: a.assetStatus?.name ?? '—',
+    statusCode: a.assetStatus?.status ?? '',
+    purchaseCost: money(a.purchaseCost),
+    netBookValue: money(a.detailNetBookValue),
+    acquisitionDate: fmtDate(a.dateReceipt),
+    // The server derives this from the category's useful life against the receipt date.
+    condition: a.disposalStatus ?? '—',
+});
+
+const AssetRegisterReport = () => {
+    const { rows, notice, loading, error, applyFilters, refresh } = useReportData<AssetRow>(
+        async (f: ReportShellFilters) => {
+            /*
+             * Filtered server-side wherever /assets supports it. Department is the exception: it
+             * lives on the holder, not the asset, so there is no query parameter for it and it has
+             * to be narrowed below.
+             */
+            const res = (await fetchRowsService({
+                pageNumber: 0,
+                pageSize: REPORT_PAGE_SIZE,
+                endPoint: 'assets',
+                params: {
+                    assetTypeId: f.categoryId,
+                    assetStatusId: f.statusId,
+                    location: f.branch,
+                    startDate: f.dateFrom,
+                    endDate: f.dateTo,
+                },
+            })) as any;
+
+            if (res?.status !== 200) throw new Error('assets');
+            const mapped: AssetRow[] = (res.data?.content ?? []).map(toRow);
+            /*
+             * An asset has no department. This one is the **holder's** — `assignedTo.department` —
+             * so the filter answers "assets currently held by someone in that department", which is
+             * a fair question but a different one from what the bare label suggests.
+             *
+             * It matters because of how much it hides. Measured on live data: **234 of 252 assets
+             * have no holder or no department recorded**, so applying this quietly removes 93% of
+             * the estate. An empty-looking register reads as "there are none", which is why the
+             * count of what was set aside is reported rather than left to be noticed.
+             */
+            const withoutDepartment = mapped.filter((r) => r.department === '—').length;
+            const narrowed = f.department
+                ? mapped.filter((r) => r.department === f.department)
+                : mapped;
+
+            return {
+                rows: narrowed,
+                notice: combineNotices(
+                    truncationNotice(res, 'assets'),
+                    f.department && withoutDepartment > 0
+                        ? `Department here means the holder's: ${withoutDepartment} of `
+                          + `${mapped.length} records have no holder or no department recorded and `
+                          + 'are not shown.'
+                        : undefined,
+                ),
+            };
+        },
+    );
+
+    // Counted off the stable status codes, not the display names, so renaming a status in Settings
+    // cannot silently zero a card.
+    const countByCode = (...codes: string[]) => rows.filter((r) => codes.includes(r.statusCode)).length;
+    const inUse = countByCode('assetAssigned', 'issued');
+    const inStore = countByCode('sentToStore', 'issuanceAvailable');
+    const inRepair = countByCode('inMaintenance');
 
     const summaryCards = (
         <ReportSummaryCards cards={[
-            { label: 'Total Assets', value: rows.length, icon: <TuneOutlinedIcon />, color: ACCENT, subLabel: 'All registered' },
-            { label: 'In Use / Active', value: activeCount, icon: <CheckCircleOutlinedIcon />, color: '#15803D', trend: 5, subLabel: 'Assigned & deployed' },
+            { label: 'Total Assets', value: rows.length, icon: <TuneOutlinedIcon />, color: ACCENT, subLabel: 'Matching filters' },
+            { label: 'In Use / Active', value: inUse, icon: <CheckCircleOutlinedIcon />, color: '#15803D', subLabel: 'Assigned & deployed' },
             { label: 'In Store', value: inStore, icon: <InventoryOutlinedIcon />, color: '#0369A1', subLabel: 'Unassigned stock' },
             { label: 'In Repair', value: inRepair, icon: <BuildOutlinedIcon />, color: '#D97706', subLabel: 'Under maintenance' },
         ]} />
     );
-
-    const handleFilters = (f: ReportShellFilters) => {
-        let filtered = [...MOCK_ROWS];
-        if (f.branch) filtered = filtered.filter(r => r.branch === f.branch);
-        if (f.department) filtered = filtered.filter(r => r.department === f.department);
-        if (f.category) filtered = filtered.filter(r => r.category === f.category);
-        if (f.status) filtered = filtered.filter(r => r.status === f.status);
-        setRows(filtered);
-    };
 
     return (
         <ReportShell
@@ -85,14 +150,22 @@ const AssetRegisterReport = () => {
             subtitle="Full register of all assets with values, locations and assignments"
             accentColor={ACCENT}
             filterFields={['dateRange', 'branch', 'department', 'category', 'status']}
-            onApplyFilters={handleFilters}
-            onRefresh={() => setRows(MOCK_ROWS)}
-            onExportPdf={() => alert('PDF export triggered')}
-            onExportExcel={() => alert('Excel export triggered')}
-            onExportCsv={() => alert('CSV export triggered')}
+            onApplyFilters={applyFilters}
+            onRefresh={refresh}
+            notice={notice}
             summaryCards={summaryCards}
+            exportRows={rows}
+            exportColumns={COLUMNS}
         >
-            <ReportDataTable columns={COLUMNS} rows={rows} accentColor={ACCENT} rowKey="id" />
+            <ReportDataTable
+                columns={COLUMNS}
+                rows={rows}
+                accentColor={ACCENT}
+                rowKey="id"
+                loading={loading}
+                error={error}
+                emptyMessage="No assets match these filters."
+            />
         </ReportShell>
     );
 };

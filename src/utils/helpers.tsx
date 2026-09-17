@@ -16,10 +16,10 @@ import {
 } from "../components/forms/interface";
 import { ICommodity } from "../pages/settings/commodity/interface";
 import { IAssetType } from "../pages/settings/assetTypes/interface";
-import { assetTypesStatusConstants } from "./constants";
 import { IStockCommodities } from "../pages/inventory/interface";
-import { IITEquipment } from "../pages/assets/ITEquipment/interface";
-import { IFleet } from "../pages/assets/fleet/interface";
+import { IITEquipment, IFleet } from "../pages/assets/interface";
+import { IStatus } from "../pages/settings/statuses/interface";
+import { holderLocationLabel, IAssetOrigin } from '../pages/assets/assetLocationLabel';
 
 export const camelCaseToWords = (camelCaseString: string) => {
     return camelCaseString ? camelCaseString
@@ -27,6 +27,37 @@ export const camelCaseToWords = (camelCaseString: string) => {
         .replace(/_/g, ' ')
         .replace(/^./, (str) => str.toUpperCase()) : '';
 }
+
+/**
+ * Frontend status codes that don't 1:1 match a seeded status `status` value.
+ * (The asset list filters by `inStore`, but the seeded status code is `sentToStore`.)
+ */
+const STATUS_CODE_ALIASES: Record<string, string> = {
+    inStore: 'sentToStore',
+};
+
+/**
+ * Resolves a status id from the loaded statuses by its code.
+ * The single source of truth for status ids on the frontend — never hardcode them,
+ * since seeded ids vary by environment.
+ */
+export const statusIdByCode = (statuses: IStatus[], code: string): number | null => {
+    const target = STATUS_CODE_ALIASES[code] ?? code;
+    const match = (statuses ?? []).find((s) => s.status === target);
+    return (match?.id as number) ?? null;
+};
+
+/**
+ * Resolves a set of status codes to their ids from the loaded statuses.
+ * Codes that don't resolve are dropped. Returns a CSV string (e.g. "4,6,8"),
+ * ready to pass straight to the request-list `statusIds` param — so a status
+ * group is defined by stable codes, never by environment-specific ids.
+ */
+export const statusIdsByCodes = (statuses: IStatus[], codes: ReadonlyArray<string>): string =>
+    codes
+        .map((code) => statusIdByCode(statuses, code))
+        .filter((id): id is number => id != null)
+        .join(',');
 
 
 export const convertStringToUpperCase = (str: string) => {
@@ -204,16 +235,33 @@ export function validateStockItems(items: any[]): StockValidationResult {
             errors.push(`${prefix} Ordered Quantity must be a number greater than 0.`);
         }
 
-        if (typeof deliveredQuantity !== 'number' || deliveredQuantity <= 0) {
-            errors.push(`${prefix} Delivered Quantity must be a number greater than 0.`);
+        // Delivered may legitimately be 0 (ordered but nothing has arrived yet) — only the
+        // total, later top-ups, must never exceed what was ordered.
+        if (typeof deliveredQuantity !== 'number' || deliveredQuantity < 0) {
+            errors.push(`${prefix} Delivered Quantity cannot be negative.`);
         }
 
-        if (typeof costPrice !== 'number' || costPrice <= 0) {
-            errors.push(`${prefix} Cost Price must be a number greater than 0.`);
+        if (
+            typeof deliveredQuantity === 'number' &&
+            typeof orderedQuantity === 'number' &&
+            deliveredQuantity > orderedQuantity
+        ) {
+            errors.push(`${prefix} Delivered Quantity (${deliveredQuantity}) cannot exceed Ordered Quantity (${orderedQuantity}).`);
         }
 
-        if (typeof purchasePrice !== 'number' || purchasePrice <= 0) {
-            errors.push(`${prefix} Purchase Price must be a number greater than 0.`);
+        // Prices may be 0 (e.g. donated / zero-cost items) but never negative. An empty field
+        // is a distinct "required" case — don't report it as "negative".
+        if (typeof costPrice !== 'number') {
+            errors.push(`${prefix} Cost Price is required.`);
+        } else if (costPrice < 0) {
+            errors.push(`${prefix} Cost Price cannot be negative.`);
+        }
+
+        // Purchase Price is auto-synced from Cost Price, so it will always have a value
+        if (typeof purchasePrice !== 'number') {
+            errors.push(`${prefix} Purchase Price is required.`);
+        } else if (purchasePrice < 0) {
+            errors.push(`${prefix} Purchase Price cannot be negative.`);
         }
 
         if (
@@ -221,9 +269,10 @@ export function validateStockItems(items: any[]): StockValidationResult {
             typeof name === 'string' && name.trim() !== '' &&
             typeof groupName === 'string' && groupName.trim() !== '' &&
             typeof orderedQuantity === 'number' && orderedQuantity > 0 &&
-            typeof deliveredQuantity === 'number' && deliveredQuantity > 0 &&
-            typeof costPrice === 'number' && costPrice > 0 &&
-            typeof purchasePrice === 'number' && purchasePrice > 0
+            typeof deliveredQuantity === 'number' && deliveredQuantity >= 0 &&
+            deliveredQuantity <= orderedQuantity &&
+            typeof costPrice === 'number' && costPrice >= 0 &&
+            typeof purchasePrice === 'number' && purchasePrice >= 0
         ) {
             validItems.push({
                 id: commodityId,
@@ -312,14 +361,16 @@ export const validateAssetsOfItems = (
         const { quantity, selectedAssets } = record;
         const prefix = `Item ${index + 1}:`;
 
-        const assetTypeName = assetTypes.find(ast => record.assetTypeId === ast.id)?.name;
+        const assetType = assetTypes.find(ast => record.assetTypeId === ast.id);
 
         let hasError = false;
 
-        // Quantity mismatch validation (excluding stationery)
+        // Engraved numbers must cover the quantity — but only for categories that track
+        // serialized assets. Consumable categories (tracksAssets off: Stationery, Building
+        // & Construction, Cleaning, …) have no asset records, so nothing can be selected.
+        // Replaces the old hardcoded "not Stationery" name check.
         if (
-            assetTypeName &&
-            assetTypeName !== assetTypesStatusConstants.stationery &&
+            assetType?.tracksAssets === true &&
             selectedAssets?.length !== quantity
         ) {
             errors.push(
@@ -451,18 +502,30 @@ export const formatNumber = (num: number): string => {
  * @param item - The equipment item to check.
  * @returns The branch name if it exists, otherwise an empty string.
  */
-export const determineBranchName = (item: IITEquipment | IFleet) => {
-
-    if (item?.assignedTo) {
-        if (item.assignedTo.branch?.name === "Head Office") {
-            return item.assignedTo.department?.name || "";
-        } else {
-            return item.assignedTo.branch?.name || "";
-        }
-    }
-
-    return item.branch?.name || "";
-};
+/**
+ * The register's Location column: the holder's department at Head Office, their branch elsewhere.
+ *
+ * <p>Delegates to {@link holderLocationLabel}, which the asset detail page's sibling rule lives
+ * beside. Two faults were fixed in the move, and both were latent rather than live — worth saying,
+ * because a fix that changes nothing visible today is easy to mistake for a fix that was not needed:
+ *
+ * <ul>
+ *   <li><b>It decided "is this Head Office" by comparing a display name</b> — {@code === "Head Office"}
+ *       — and a branch is renamed from Settings. The day somebody makes it "Head Office - Kampala"
+ *       this stops matching and the column quietly reverts to showing a branch name for everyone.
+ *       It reads the {@code isHeadOffice} flag now. (That flag could not be trusted until two
+ *       separate serialisation faults were fixed; see {@code assetLocationLabel}.)</li>
+ *   <li><b>A Head Office holder with no department produced an empty cell</b> ({@code || ""}), which
+ *       reads as data failing to load rather than as somebody not being in a department. It falls
+ *       back to the branch name. All 18 Head-Office-held assets have a department today, but two
+ *       Head Office staff do not — so this was one assignment away from being live.</li>
+ * </ul>
+ *
+ * <p>Kept as a named export rather than replaced at the call sites: it is what the two asset row
+ * mappers already import, and the rule is the thing worth sharing, not the name.
+ */
+export const determineBranchName = (item: IITEquipment | IFleet) =>
+    holderLocationLabel(item as unknown as IAssetOrigin) ?? "";
 
 
 /**

@@ -1,6 +1,6 @@
 /*
 13.9 Pride's Standard Copyright Notice:
-Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
+Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify,
 and distribute this software and its documentation for any purpose is prohibited unless authorized in writing by the
 Managing Director
 */
@@ -13,37 +13,28 @@ import GroupIcon from '@mui/icons-material/Group';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import RecentActorsIcon from '@mui/icons-material/RecentActors';
 import TuneIcon from '@mui/icons-material/Tune';
-import RoutesUtills from '../../core/routes/utills';
-import { IPermission } from '../../pages/settings/interface';
 import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
 import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
 import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 import { Store } from '@mui/icons-material'
-import { permissionsMock } from '../../mocks/settings';
 import BarChartOutlinedIcon from '@mui/icons-material/BarChartOutlined';
+import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined';
+import usePermissions from '../../core/permissions/usePermissions';
+import { PERMISSIONS } from '../../core/permissions/constants';
 
 
 const SideBarElements = () => {
-    const { getCurrentUser } = RoutesUtills();
-    const userPermissions = getCurrentUser()?.title?.role?.permissions as Array<IPermission>;
+    const { has } = usePermissions();
 
-    /**
-     * 
-     * @param permission - The permission to check against the user's permissions
-     * @returns 
-     */
-    const rightsToViewRow = (permission: IPermission): boolean => {
-        if (!userPermissions) return false;
-        // Check if the user has the specific permission
-        return userPermissions.some((userPermission: IPermission) => userPermission.id === permission.id);
-    }
-
+    // Items are rendered in this order, sectioned by `group` (uppercase micro-label
+    // when the drawer is open, hairline divider when collapsed).
     const sideBarList: Array<ISideBarItem> = [
         {
             id: 1,
             name: "Dashboard",
             route: ROUTES.ASSETS_MANAGEMENT,
             icon: <DashboardIcon />,
+            group: "Overview",
             subroutes: [],
             access: true
         },
@@ -52,85 +43,118 @@ const SideBarElements = () => {
             name: "Assets",
             route: ROUTES.LIST_ASSETS,
             icon: <TuneIcon />,
+            group: "Operations",
             subroutes: [],
-            access: rightsToViewRow(permissionsMock[39]) // Assuming this is the permission for asset read access
-        },
-        {
-            id: 3,
-            name: "Users",
-            route: ROUTES.USERS,
-            icon: <GroupIcon />,
-            subroutes: [],
-            access: rightsToViewRow(permissionsMock[9]) // Assuming this is the permission for user read access
+            access: has(PERMISSIONS.READ_ASSET)
         },
         {
             id: 4,
             name: "Requests",
             route: ROUTES.REQUEST,
             icon: <RecentActorsIcon />,
+            group: "Operations",
             subroutes: [],
-            access: rightsToViewRow(permissionsMock[12]) // Assuming this is the permission for request read access
+            access: has(PERMISSIONS.READ_REQUEST)
         },
         {
             id: 5,
             name: "Transport",
             route: ROUTES.TRANSPORT_REQUEST,
             icon: <DirectionsCarIcon />,
+            group: "Operations",
             subroutes: [],
-            // access: rightsToViewRow(permissionsMock[19]) // Assuming this is the permission for transport read access
-            access: false // Temporarily set to false for testing purposes
+            access: has(PERMISSIONS.READ_TRANSPORT)
         },
         {
             id: 6,
             name: "Inventory",
             route: ROUTES.INVENTORY,
             icon: <Inventory2OutlinedIcon />,
+            group: "Operations",
             subroutes: [],
-            access: rightsToViewRow(permissionsMock[23]) // Assuming this is the permission for inventory read access
+            access: has(PERMISSIONS.READ_INVENTORY)
         },
         {
             id: 7,
             name: "Store",
             route: ROUTES.STORE,
             icon: <Store />,
+            group: "Operations",
             subroutes: [],
-            access: rightsToViewRow(permissionsMock[35]) // Assuming this is the permission for store access
+            access: has(PERMISSIONS.READ_STORE)
         },
         {
             id: 8,
             name: "Movement",
             route: ROUTES.MOVEMENT,
             icon: <LocalShippingOutlinedIcon />,
+            group: "Operations",
             subroutes: [],
-            access: rightsToViewRow(permissionsMock[36]) // Assuming this is the permission for movement access
+            // Must match the route guard in subroutes/movement — a link the route then rejects is
+            // worse than no link.
+            access: has(PERMISSIONS.READ_MOVEMENT)
         },
         {
             id: 9,
             name: "Reports",
             route: ROUTES.REPORTS,
             icon: <BarChartOutlinedIcon />,
+            group: "Insights",
             subroutes: [],
-            access: rightsToViewRow(permissionsMock[31]) // Reuse READ_AUDIT or adjust to a dedicated report permission
+            /*
+             * What the six tabs actually read — not READ_AUDIT, which no tab touches.
+             *
+             * Measured when this was found: **4 of 27 accounts could see this link, and 23 could
+             * read every report on it without ever being shown it.** Nobody hit the opposite
+             * failure, so the page was simply invisible to the people it was built for — and nobody
+             * complained, because nobody complains about a page they do not know exists.
+             *
+             * A disjunction rather than one permission: the page hides the tabs a viewer cannot
+             * load, so holding any one of these is enough to have something worth opening.
+             */
+            access: has(PERMISSIONS.READ_ASSET)
+                || has(PERMISSIONS.READ_REQUEST)
+                || has(PERMISSIONS.READ_MOVEMENT)
+                || has(PERMISSIONS.READ_INVENTORY)
         },
-                {
+        {
+            id: 12,
+            name: "Audit Trails",
+            route: ROUTES.AUDIT_TRAILS,
+            icon: <ReceiptLongIcon />,
+            group: "Insights",
+            subroutes: [],
+            access: has(PERMISSIONS.READ_AUDIT)
+        },
+        {
+            id: 3,
+            name: "Users",
+            route: ROUTES.USERS,
+            icon: <GroupIcon />,
+            group: "Administration",
+            subroutes: [],
+            access: has(PERMISSIONS.READ_USER)
+        },
+        {
             id: 10,
             name: "Settings",
             route: ROUTES.SETTINGS,
             icon: <SettingsIcon />,
+            group: "Administration",
             subroutes: [],
-            access: rightsToViewRow(permissionsMock[27]) // Assuming this is the permission for settings access
+            access: has(PERMISSIONS.READ_SETTING)
         },
         {
             id: 11,
-            name: "Audit Trails",
-            route: ROUTES.AUDIT_TRAILS,
-            icon: <ReceiptLongIcon />,
+            name: "Approval Workflows",
+            route: ROUTES.APPROVAL_WORKFLOWS,
+            icon: <AccountTreeOutlinedIcon />,
+            group: "Administration",
             subroutes: [],
-            access: rightsToViewRow(permissionsMock[31]) // Assuming this is the permission for audit trails access
+            access: has(PERMISSIONS.READ_SETTING)
         },
     ]
     return ({ sideBarList })
 }
 
 export default SideBarElements
-

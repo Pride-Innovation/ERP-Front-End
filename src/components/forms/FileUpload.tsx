@@ -22,17 +22,24 @@ const VisuallyHiddenInput = styled('input')({
 
 export default function InputFileUpload({
     inputRef,
-    handleFileUpload
+    handleFileUpload,
+    accept,
+    multiple = true,
 }: {
     inputRef: React.Ref<HTMLInputElement>;
-    handleFileUpload: (files: FileList | null) => void
+    handleFileUpload: (files: FileList | null) => void;
+    /** Restricts the OS picker, e.g. ".pdf,.jpg,.png". Omit to accept anything. */
+    accept?: string;
+    /** Defaults to true to preserve the behaviour of existing callers. */
+    multiple?: boolean;
 }) {
     return (
         <VisuallyHiddenInput
             ref={inputRef}
             type="file"
             onChange={(event) => handleFileUpload(event.target.files)}
-            multiple
+            accept={accept}
+            multiple={multiple}
         />
     );
 }

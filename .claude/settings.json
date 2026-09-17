@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Set-Location \"C:\\\\Users\\\\sodong\\\\Projects\\\\ERP-Back-End\"; & \".\\\\mvnw.cmd\" -o -q compile 2>&1 | Select-Object -Last 30; \"EXIT: $LASTEXITCODE\")"
+    ]
+  }
+}

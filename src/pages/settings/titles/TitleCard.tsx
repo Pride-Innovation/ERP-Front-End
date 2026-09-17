@@ -1,188 +1,191 @@
 /*
 13.9 Pride's Standard Copyright Notice:
-Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
+Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify,
 and distribute this software and its documentation for any purpose is prohibited unless authorized in writing by the
 Managing Director
 */
 
 import {
+    Avatar,
     Box,
-    Button,
-    Card,
-    Stack,
-    Typography,
-    useTheme,
-    alpha,
     Chip,
+    Divider,
     IconButton,
-    Tooltip
+    Paper,
+    Stack,
+    Tooltip,
+    Typography,
+    alpha,
 } from '@mui/material';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
-import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import WorkOutlineOutlinedIcon from '@mui/icons-material/WorkOutlineOutlined';
 import SupervisorAccountOutlinedIcon from '@mui/icons-material/SupervisorAccountOutlined';
 import SecurityOutlinedIcon from '@mui/icons-material/SecurityOutlined';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
-import { ITitleDetails } from './interface';
 
-const TitleCard = ({ title, updateTitle, deleteTitle }: ITitleDetails) => {
-    const theme = useTheme();
+import { ITitleDetails } from './interface';
+import { getCardColor } from '../cardColors';
+
+const TitleCard = ({ title, updateTitle, deleteTitle, index = 0 }: ITitleDetails) => {
+    const color = getCardColor(index);
 
     return (
-        <Card
+        <Paper
             elevation={0}
             sx={{
-                borderRadius: 2,
+                borderRadius: 2.5,
+                border: `1px solid ${alpha(color, 0.18)}`,
                 overflow: 'hidden',
-                border: `1px solid ${alpha(theme.palette.divider, 0.15)}`,
-                transition: 'all 0.25s ease-in-out',
                 height: '100%',
                 display: 'flex',
                 flexDirection: 'column',
+                transition: 'all 0.2s ease',
                 '&:hover': {
-                    boxShadow: `0 8px 24px ${alpha(theme.palette.common.black, 0.08)}`,
-                    transform: 'translateY(-4px)',
-                    borderColor: alpha(theme.palette.primary.main, 0.3)
-                }
+                    boxShadow: `0 4px 20px ${alpha(color, 0.15)}`,
+                    transform: 'translateY(-2px)',
+                    borderColor: alpha(color, 0.35),
+                },
             }}
         >
-            {/* Header with title name */}
-            <Box
-                sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    p: 2.5,
-                    background: 'linear-gradient(135deg, rgba(8,121,108,0.1) 0%, rgba(8,121,108,0.03) 100%)',
-                    borderBottom: `1px solid ${alpha(theme.palette.divider, 0.1)}`
-                }}
-            >
-                <Stack direction="row" alignItems="center" spacing={1.5}>
-                    <Box
+            <Box sx={{ p: 2.5, flex: 1, display: 'flex', flexDirection: 'column' }}>
+                {/* Header */}
+                <Stack direction="row" spacing={2} alignItems="flex-start">
+                    <Avatar
                         sx={{
-                            width: 42,
-                            height: 42,
+                            width: 48,
+                            height: 48,
+                            bgcolor: alpha(color, 0.1),
+                            color,
                             borderRadius: '12px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            bgcolor: 'rgba(8,121,108,0.18)'
+                            flexShrink: 0,
+                            border: `1px solid ${alpha(color, 0.2)}`,
                         }}
                     >
-                        <WorkOutlineOutlinedIcon sx={{ color: theme.palette.primary.main }} />
-                    </Box>
-                    <Box>
-                        <Typography variant="h6" sx={{ fontWeight: 600, color: theme.palette.text.primary }}>
-                            {title.name}
-                        </Typography>
-                        <Chip
-                            size="small"
-                            label="Position"
-                            sx={{
-                                mt: 0.5,
-                                fontSize: '0.7rem',
-                                height: 20,
-                                bgcolor: alpha(theme.palette.secondary.main, 0.1),
-                                color: theme.palette.secondary.main,
-                                fontWeight: 500
-                            }}
-                        />
-                    </Box>
-                </Stack>
+                        <WorkOutlineOutlinedIcon fontSize="small" />
+                    </Avatar>
 
-                <Tooltip title="More options">
-                    <IconButton size="small">
-                        <MoreVertIcon fontSize="small" />
-                    </IconButton>
-                </Tooltip>
-            </Box>
-
-            {/* Content */}
-            <Box sx={{ p: 2.5, flex: 1 }}>
-                <Stack spacing={2}>
-                    {/* Reports To */}
-                    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
-                        <SupervisorAccountOutlinedIcon
-                            fontSize="small"
-                            sx={{ color: alpha(theme.palette.secondary.main, 0.8), mt: 0.25 }}
-                        />
-                        <Stack>
-                            <Typography variant="caption" color="text.secondary">Reports To</Typography>
-                            <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                                {title.reportsTo ? title.reportsTo.name : 'None'}
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                        <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 0.5 }}>
+                            <Typography
+                                variant="subtitle1"
+                                sx={{ fontWeight: 700, color: '#1E293B', lineHeight: 1.3 }}
+                                noWrap
+                                title={title.name}
+                            >
+                                {title.name}
                             </Typography>
+                            {title.shortCode && (
+                                <Chip
+                                    label={title.shortCode}
+                                    size="small"
+                                    sx={{
+                                        height: 20,
+                                        fontSize: '0.65rem',
+                                        fontWeight: 700,
+                                        bgcolor: alpha(color, 0.1),
+                                        color,
+                                        border: `1px solid ${alpha(color, 0.3)}`,
+                                        '& .MuiChip-label': { px: 1 },
+                                    }}
+                                />
+                            )}
                         </Stack>
+                        <Typography variant="caption" color="text.secondary">
+                            Position
+                        </Typography>
                     </Box>
+                </Stack>
 
-                    {/* Role */}
-                    {title.role && (
-                        <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
-                            <SecurityOutlinedIcon
-                                fontSize="small"
-                                sx={{ color: alpha(theme.palette.secondary.main, 0.8), mt: 0.25 }}
-                            />
-                            <Stack>
-                                <Typography variant="caption" color="text.secondary">Role</Typography>
-                                <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                                    {title.role.name}
-                                </Typography>
-                            </Stack>
-                        </Box>
-                    )}
+                <Divider sx={{ my: 2, borderColor: alpha(color, 0.1) }} />
+
+                {/* Detail rows */}
+                <Stack spacing={1.25}>
+                    <DetailRow
+                        icon={<SupervisorAccountOutlinedIcon sx={{ fontSize: 16, color: '#94A3B8' }} />}
+                        label="Reports to"
+                        value={title.reportsTo?.name}
+                        emptyLabel="None"
+                    />
+                    <DetailRow
+                        icon={<SecurityOutlinedIcon sx={{ fontSize: 16, color: '#94A3B8' }} />}
+                        label="Role"
+                        value={title.role?.name}
+                        emptyLabel="Not assigned"
+                    />
+                </Stack>
+
+                <Stack direction="row" justifyContent="flex-end" spacing={1} sx={{ mt: 'auto', pt: 2 }}>
+                    <Tooltip title="Edit title" arrow>
+                        <IconButton
+                            size="small"
+                            onClick={() => updateTitle(title)}
+                            sx={{
+                                color,
+                                bgcolor: alpha(color, 0.06),
+                                borderRadius: '8px',
+                                '&:hover': { bgcolor: alpha(color, 0.14) },
+                            }}
+                        >
+                            <EditOutlinedIcon fontSize="small" />
+                        </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Delete title" arrow>
+                        <IconButton
+                            size="small"
+                            onClick={() => deleteTitle(title)}
+                            sx={{
+                                color: 'error.main',
+                                bgcolor: alpha('#ef4444', 0.06),
+                                borderRadius: '8px',
+                                '&:hover': { bgcolor: alpha('#ef4444', 0.14) },
+                            }}
+                        >
+                            <DeleteOutlineIcon fontSize="small" />
+                        </IconButton>
+                    </Tooltip>
                 </Stack>
             </Box>
-
-            {/* Actions */}
-            <Box
-                sx={{
-                    p: 2,
-                    borderTop: `1px solid ${alpha(theme.palette.divider, 0.12)}`,
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    gap: 1,
-                    bgcolor: alpha('#08796C', 0.02),
-                }}
-            >
-                <Button
-                    onClick={() => updateTitle(title)}
-                    variant="contained"
-                    fullWidth
-                    size="small"
-                    sx={{
-                        textTransform: 'none',
-                        bgcolor: '#08796C',
-                        '&:hover': { bgcolor: '#065E53' },
-                        fontWeight: 600,
-                        borderRadius: '8px',
-                        boxShadow: '0 2px 6px rgba(8,121,108,0.3)',
-                    }}
-                    startIcon={<EditOutlinedIcon />}
-                >
-                    Edit
-                </Button>
-                <Button
-                    onClick={() => deleteTitle(title)}
-                    variant="outlined"
-                    fullWidth
-                    size="small"
-                    color="error"
-                    sx={{
-                        textTransform: 'none',
-                        borderColor: alpha(theme.palette.error.main, 0.4),
-                        '&:hover': {
-                            borderColor: theme.palette.error.main,
-                            bgcolor: alpha(theme.palette.error.main, 0.04)
-                        },
-                        fontWeight: 600,
-                        borderRadius: '8px',
-                    }}
-                    startIcon={<DeleteOutlineOutlinedIcon />}
-                >
-                    Delete
-                </Button>
-            </Box>
-        </Card>
+        </Paper>
     );
 };
+
+const DetailRow = ({
+    icon,
+    label,
+    value,
+    emptyLabel,
+}: {
+    icon: React.ReactNode;
+    label: string;
+    value?: string | null;
+    emptyLabel: string;
+}) => (
+    <Stack direction="row" spacing={1} alignItems="center" sx={{ minWidth: 0 }}>
+        {icon}
+        <Typography
+            variant="caption"
+            sx={{ color: '#64748B', fontWeight: 600, minWidth: 70, flexShrink: 0 }}
+        >
+            {label}
+        </Typography>
+        <Typography
+            variant="body2"
+            sx={{
+                flex: 1,
+                minWidth: 0,
+                color: value ? '#334155' : '#94A3B8',
+                fontStyle: value ? 'normal' : 'italic',
+                fontWeight: value ? 500 : 400,
+                fontSize: '0.8rem',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+            }}
+            title={value ?? undefined}
+        >
+            {value || emptyLabel}
+        </Typography>
+    </Stack>
+);
 
 export default TitleCard;

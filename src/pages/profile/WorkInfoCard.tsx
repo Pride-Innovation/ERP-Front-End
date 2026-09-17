@@ -81,37 +81,38 @@ const WorkInfoCard = ({ user }: WorkInfoCardProps) => {
                     <InfoItem
                         icon={<BadgeIcon fontSize="small" />}
                         label="Staff Number"
-                        value={user?.staffNumber || 'Not assigned'}
+                        value={user?.staffNumber || ''}
+                        emptyText="Not assigned"
                         copyable
                     />
 
                     <InfoItem
                         icon={<WorkIcon fontSize="small" />}
                         label="Department"
-                        value={user?.department?.name || 'Not assigned'}
+                        value={user?.department?.name || ''}
+                        emptyText="Not assigned"
                     />
 
                     <InfoItem
                         icon={<ApartmentIcon fontSize="small" />}
                         label="Branch"
-                        value={user?.branch?.name || 'Not assigned'}
+                        value={user?.branch?.name || ''}
+                        emptyText="Not assigned"
                     />
 
-                    {user?.branch?.region && (
-                        <InfoItem
-                            icon={<PublicIcon fontSize="small" />}
-                            label="Region"
-                            value={user.branch.region.name}
-                        />
-                    )}
+                    <InfoItem
+                        icon={<PublicIcon fontSize="small" />}
+                        label="Region"
+                        value={user?.branch?.region?.name || ''}
+                        emptyText="Not assigned"
+                    />
 
-                    {user?.branch?.district && (
-                        <InfoItem
-                            icon={<MapIcon fontSize="small" />}
-                            label="District"
-                            value={user.branch.district.name}
-                        />
-                    )}
+                    <InfoItem
+                        icon={<MapIcon fontSize="small" />}
+                        label="District"
+                        value={user?.branch?.district?.name || ''}
+                        emptyText="Not assigned"
+                    />
                 </Stack>
             </Box>
         </Paper>

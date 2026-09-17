@@ -6,32 +6,62 @@ Managing Director
 */
 
 import TableComponent from "../../../../components/tables/TableComponent";
-import { Box, Card } from "@mui/material";
+import { Box } from "@mui/material";
 import RequestUtills from "../utills";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../../store";
 import { RequestContext } from "../../../../context/request/RequestContext";
-import { crudStates } from "../../../../utils/constants";
+import { crudStates, PENDING_REQUEST_CODES } from "../../../../utils/constants";
+import { statusIdsByCodes } from "../../../../utils/helpers";
+import StatusUtills from "../../../settings/statuses/Utills";
 import ModalComponent from "../../../../components/modal";
 import AcknowledgeRequest from "../AcknowledgeRequest";
+import ApproveRequest from "../ApprovedRequest";
+import RejectRequest from "../RejectRequest";
+import ApproveIssuance from "../ApproveIssuance";
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
+import AddTaskIcon from '@mui/icons-material/AddTask';
+import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
+import usePermissions from "../../../../core/permissions/usePermissions";
+import { PERMISSIONS } from "../../../../core/permissions/constants";
 import RoutesUtills from "../../../../core/routes/utills";
-import { IPermission } from "../../../settings/interface";
-import { permissionsMock } from "../../../../mocks/settings";
+import {
+    REQUEST_SEARCH_KEY,
+    REQUEST_SORT_FIELDS,
+    buildRequestColumnFilters,
+    toRequestParams,
+} from "../requestTableConfig";
+import useStaffOptions from "../useStaffOptions";
+import useRequestExport from "../useRequestExport";
+import { useDepartmentOptions } from '../useDepartmentOptions';
 
 const PendingRequest = () => {
+    /*
+     * The staff directory behind the "Requested By" and "Approver" pickers.
+     *
+     * Branch-scoped on the server, so the list offered matches what this listing can actually return.
+     */
+    const fetchStaffOptions = useStaffOptions();
+    const departmentOptions = useDepartmentOptions();
+
+    const { exportRequests } = useRequestExport('Pending');
     const { requests } = useSelector((state: RootState) => state.AssetsRequestsStore)
+    const { statuses } = useSelector((state: RootState) => state.StatusesStore);
+    const { fetchAllStatuses } = StatusUtills();
     const { requestTableData, setOptions, setRequestStatusIds } = useContext(RequestContext);
-    const [permissions, setPermissions] = useState<IPermission[]>([] as IPermission[]);
+    const { has } = usePermissions();
     const { getCurrentUser } = RoutesUtills();
+    const currentUser = getCurrentUser();
     const [selectedStatus, setSelectedStatus] = useState<string>('all');
-    const [statusIds, setStatusIds] = useState<string>(`${3},${4}`); // Default to '1' for "Request Created"
+    const [statusIds, setStatusIds] = useState<string>('');
 
     useEffect(() => {
-        setRequestStatusIds(statusIds.split(',').map(id => parseInt(id, 10)));
+        if (statusIds) {
+            setRequestStatusIds(statusIds.split(',').map(id => parseInt(id, 10)));
+        }
     }, [statusIds]);
 
     const {
@@ -44,22 +74,43 @@ const PendingRequest = () => {
         count,
         modalState,
         open,
-        handleClose,
+        handleClose: closeModal,
         currentRequest,
         sendingRequest,
         setSendingRequest,
         // module
     } = RequestUtills()
 
-    const params = { statusIds: statusIds, status: "PENDING" };
+    const params = {
+        ...(statusIds ? { statusIds } : {}),
+        ...(currentUser?.id ? { currentApproverId: currentUser.id } : {})
+    };
+
+    /**
+     * The parameters currently in force.
+     *
+     * Held so that paging and exporting reissue exactly the query on screen. Without it both rebuilt
+     * their own request and lost this tab's approver scoping and status ids.
+     */
+    const activeParams = useRef<Record<string, any>>(params);
+
+    const runQuery = (next: Record<string, any>) => {
+        activeParams.current = next;
+        fetchAllRequests(next);
+    };
+
+    // Close the modal and re-fetch from the server so the list reflects the
+    // request's new state (e.g. it leaves this approver's queue once actioned).
+    const handleClose = () => {
+        closeModal();
+        runQuery(activeParams.current);
+    };
+
+    useEffect(() => { fetchAllStatuses(); }, []);
 
     useEffect(() => {
-        /**
-         * This should contain the Status ID for Pending Requests
-         */
-        fetchAllRequests(params);
-
-        // setFileData({ file: "", module: "", jsonData: [] });
+        runQuery(params);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
 
@@ -71,24 +122,48 @@ const PendingRequest = () => {
      * This effect checks the permissions of the current user and sets the options for the request actions accordingly.
      */
     useEffect(() => {
-        if (!permissions || permissions.length === 0) return;
-
-        const hasIssueRequestPermission = permissions.some(
-            (perm) => perm.name === permissionsMock.find(p => p.name === "ISSUE_ITEMS")?.name
-        );
-
-        const hasAcknowledgeRequestPermission = permissions.some(
-            (perm) => perm.name === permissionsMock.find(p => p.name === "ACKNOWLEDGE_REQUEST")?.name
-        );
+        const hasApproveRequestPermission = has(PERMISSIONS.APPROVE_REQUEST);
+        const hasRejectRequestPermission = has(PERMISSIONS.REJECT_REQUEST);
+        const hasIssueRequestPermission = has(PERMISSIONS.ISSUE_ITEMS);
+        const hasAcknowledgeRequestPermission = has(PERMISSIONS.ACKNOWLEDGE_REQUEST);
+        const hasApproveIssuancePermission = has(PERMISSIONS.APPROVE_ISSUANCE);
 
         const newOptions = [
             {
                 value: crudStates.read,
                 label: "View Details",
-                icon: <RemoveRedEyeIcon fontSize='small'
-                    color='inherit' />
+                icon: <RemoveRedEyeIcon fontSize='small' color='inherit' />
             }
         ];
+
+        if (hasApproveRequestPermission) {
+            newOptions.push({
+                value: crudStates.approve,
+                label: "Approve Request",
+                icon: <AddTaskIcon fontSize='small' color='primary' />
+            });
+        }
+
+        // Distinct from a normal ladder approval: a pending item whose request status is
+        // "issued" is waiting on the issuer's-manager sign-off (approverSubject=ISSUER), which
+        // must go through the dedicated /approve-issuance endpoint — that's the only path that
+        // creates the cross-location fulfilment movement. handleOptionsFilter (tables/utills.tsx)
+        // swaps this in for "Approve Request" on those rows specifically.
+        if (hasApproveIssuancePermission) {
+            newOptions.push({
+                value: crudStates.approveIssuance,
+                label: "Approve Issuance",
+                icon: <AddTaskIcon fontSize='small' color='primary' />
+            });
+        }
+
+        if (hasRejectRequestPermission) {
+            newOptions.push({
+                value: crudStates.reject,
+                label: "Reject Request",
+                icon: <RemoveCircleOutlineIcon fontSize='small' color='error' />
+            });
+        }
 
         if (hasIssueRequestPermission) {
             newOptions.push({
@@ -107,13 +182,7 @@ const PendingRequest = () => {
         }
 
         setOptions(newOptions);
-    }, [permissions]);
-
-
-    useEffect(() => {
-        if (getCurrentUser()?.title?.role?.permissions) {
-            setPermissions(getCurrentUser()?.title?.role?.permissions || []);
-        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     /**
@@ -121,36 +190,60 @@ const PendingRequest = () => {
      * Updates the request list based on the selected status filter
      * @param status - The status filter to apply
      */
+    const approverParam = currentUser?.id ? { currentApproverId: currentUser.id } : {};
+
     const handleStatusChange = (status: string) => {
-        let param;
-        let statusId;
-
         switch (status) {
-            // PENDING status group
-            case 'requestApproved':
-                param = { status: "PENDING", statusIds: '3' };
-                statusId = '3';
+            case 'requestApproved': {
+                // "Approved at one stage, awaiting the next" — the in-progress approval chain.
+                // Ids resolved from codes at call time (never hardcoded).
+                const inProgressIds = statusIdsByCodes(statuses, PENDING_REQUEST_CODES);
+                if (!inProgressIds) return; // status catalogue not loaded yet
+                const param = { statusIds: inProgressIds, ...approverParam };
+                runQuery(param);
+                setSelectedStatus(status);
+                setStatusIds(inProgressIds);
                 break;
-
-            case 'requestAcknowledged':
-                param = { status: "PENDING", statusIds: '4' };
-                statusId = '4';
+            }
+            case 'requestAcknowledged': {
+                const acknowledgedIds = statusIdsByCodes(statuses, ['unitAcknowledged']);
+                if (!acknowledgedIds) return; // status catalogue not loaded yet
+                const param = { statusIds: acknowledgedIds, ...approverParam };
+                runQuery(param);
+                setSelectedStatus(status);
+                setStatusIds(acknowledgedIds);
                 break;
-
+            }
             default:
-                fetchAllRequests(params);
+                setStatusIds('');
+                runQuery({ ...approverParam });
                 setSelectedStatus('all');
-                return; // Exit early for the default case
+                break;
         }
-
-        // For all non-default cases:
-        fetchAllRequests(param);
-        setSelectedStatus(status);
-        setStatusIds(statusId);
     }
 
     const renderModals = () => (
         <>
+            {crudStates.approve === modalState &&
+                <ModalComponent width={"60%"} title='Approve Request' open={open} handleClose={handleClose}>
+                    <ApproveRequest
+                        setSendingRequest={setSendingRequest}
+                        handleClose={handleClose}
+                        request={currentRequest}
+                        sendingRequest={sendingRequest}
+                        buttonText="Approve" />
+                </ModalComponent>
+            }
+            {crudStates.reject === modalState &&
+                <ModalComponent width={"60%"} title='Reject Request' open={open} handleClose={handleClose}>
+                    <RejectRequest
+                        setSendingRequest={setSendingRequest}
+                        handleClose={handleClose}
+                        request={currentRequest}
+                        sendingRequest={sendingRequest}
+                        buttonText="Reject" />
+                </ModalComponent>
+            }
             {crudStates.acknowledgeRequest === modalState &&
                 <ModalComponent width={"70%"} title='Acknowledge Request' open={open} handleClose={handleClose}>
                     <AcknowledgeRequest
@@ -161,67 +254,54 @@ const PendingRequest = () => {
                         buttonText="Acknowledge" />
                 </ModalComponent>
             }
+            {crudStates.approveIssuance === modalState &&
+                <ModalComponent width={"60%"} title='Approve Issuance' open={open} handleClose={handleClose}>
+                    <ApproveIssuance
+                        setSendingRequest={setSendingRequest}
+                        handleClose={handleClose}
+                        request={currentRequest}
+                        sendingRequest={sendingRequest}
+                        buttonText="Approve" />
+                </ModalComponent>
+            }
         </>)
 
     return (
-        <Box width={'100%'} sx={{
-            px: 3,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center'
-        }}>
+        <Box width={'100%'}>
             {renderModals()}
-            <Card
-                elevation={0}
-                sx={{
-                    borderRadius: 2,
-                    width: '100%',
-                    maxWidth: "1500px",
-                    overflow: 'hidden',
-                    border: "none",
-                    bgcolor: 'white'
-                }}
-            >
-
-                {columnHeaders.length > 0 &&
-                    <TableComponent
-                        endPoint={endPoint}
-                        loading={loading}
-                        count={count}
-                        exportData
-                        module={"pending requests"}
-                        header={{ plural: "Pending Requests", singular: "Pending Requests" }}
-                        rows={requestTableData}
-                        columnHeaders={columnHeaders}
-                        handleOptionClicked={handleOptionClicked}
-                        params={{ statusIds: statusIds }}
-                        filterOptions
-                        refresh
-                        optionsfilterParams={
-                            {
-                                status: "PENDING"
-                            }
-                        }
-                        status
-                        onStatusChange={handleStatusChange}
-                        selectedStatus={selectedStatus}
-                        columnFilters={[
-                            { key: 'assetName', label: 'Asset Name', type: 'text' },
-                            { key: 'requestedBy', label: 'Requested By', type: 'text' },
-                            { key: 'requestedFrom', label: 'Requested From', type: 'text' },
-                            {
-                                key: 'status', label: 'Status', type: 'select', options: [
-                                    { value: 'active', label: 'Active' },
-                                    { value: 'disabled', label: 'Disabled' },
-                                    { value: 'locked', label: 'Locked' },
-                                ]
-                            },
-                            { key: 'createdAt', label: 'Request Created', type: 'dateRange' },
-                        ]}
-                        onApplyFilters={(filters) => fetchAllRequests(filters)}
-                    />
-                }
-            </Card>
+            {columnHeaders.length > 0 &&
+                <TableComponent
+                tableKey="assetRequests"
+                    endPoint={endPoint}
+                    loading={loading}
+                    count={count}
+                    exportData
+                    module={"pending requests"}
+                    header={{ plural: "Pending Requests", singular: "Pending Requests" }}
+                    rows={requestTableData}
+                    columnHeaders={columnHeaders}
+                    handleOptionClicked={handleOptionClicked}
+                    params={{ ...(statusIds ? { statusIds } : {}), ...approverParam }}
+                    refresh
+                    status
+                    onStatusChange={handleStatusChange}
+                    selectedStatus={selectedStatus}
+                    columnFilters={buildRequestColumnFilters(statuses, fetchStaffOptions, departmentOptions)}
+                    /*
+                     * Merged over this tab's own parameters, never replacing them.
+                     *
+                     * This previously spread only the filters and the approver param, dropping the
+                     * tab's `statusIds` — so applying any filter on Pending widened it to every
+                     * request in the system under a heading that said Pending.
+                     */
+                    onApplyFilters={(filters) =>
+                        runQuery(toRequestParams({ ...params, ...approverParam }, filters))}
+                    onPaginationChange={(model) => fetchAllRequests(activeParams.current, model)}
+                    onExport={(format) => exportRequests(format, activeParams.current)}
+                    searchKey={REQUEST_SEARCH_KEY}
+                    serverSortFields={REQUEST_SORT_FIELDS}
+                />
+            }
         </Box>
     )
 }

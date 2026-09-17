@@ -5,7 +5,7 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { IFleet } from "../../pages/assets/fleet/interface";
+import { IFleet } from "../../pages/assets/interface";
 import { branchesMock } from "../branch";
 import { inventoryMock } from "../inventory";
 import { suppliersMock } from "../settings";

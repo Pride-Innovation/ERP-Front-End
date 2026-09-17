@@ -14,6 +14,7 @@ import {
 import { IAxiosResponse, IFetchDataRequest } from "../../core/apis/interface";
 import { ITitle } from "../settings/titles/interface";
 import { IBranch } from "../settings/branch/interface";
+import { IRole } from "../settings/interface";
 import { IDepartment } from "../settings/departments/interface";
 import { Dispatch, SetStateAction } from "react";
 
@@ -31,13 +32,25 @@ export interface IUser {
     availability?: string | null;
     branch?: IBranch | null;
     department?: IDepartment | null
+    /** Optional unit (Head Office). Carries the id when set from the form, or the summary object from the API. */
+    unit?: { id: number; name: string; groupEmail?: string | null } | number | null;
     enabled?: boolean | null;
-    lastModifiedBy?: IUser | null
-    createdBy?: IUser | null
+    /** Audit columns — the API returns the actor's user id, not the user object. */
+    lastModifiedBy?: number | null
+    createdBy?: number | null
     createDate?: string | null
     lastModified?: string | null
     accountNonLocked?: boolean | null;
     blocked?: boolean | null;
+    /**
+     * Roles granted on top of the one the title carries.
+     *
+     * Effective permissions are `title.role.permissions` united with these, which is how one person
+     * holds several capabilities at once. The login response omitted them until now, so the browser
+     * only ever saw the first half and every permission granted this way was invisible to every
+     * guard in the app.
+     */
+    additionalRoles?: Array<IRole> | null;
 }
 
 export interface IUserTableData {
@@ -140,12 +153,21 @@ export interface IUserCreationResponseAxiosResponse extends IAxiosResponse {
     data: IUserCreationResponse
 }
 
+/**
+ * Shape of one row after the import template has been parsed and the header
+ * names have been camel-cased by the upload handler. Mirrors the backend
+ * `BulkUserDTO` and the column order in `userImportTemplate.ts`.
+ */
 export interface IBulkUserData {
-    "No.": number;
-    "Name": string;
-    "Staff Number": string;
-    "Email": string;
-    "Title": string;
-    "Duty Station": string;
-    "Gender": string;
+    no?: number;
+    firstName: string;
+    lastName: string;
+    otherName?: string;
+    email: string;
+    staffNumber: string;
+    gender: string;
+    title: string;
+    role?: string;
+    dutyStation: string;
+    department?: string;
 }

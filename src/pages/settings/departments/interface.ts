@@ -31,6 +31,9 @@ interface IDepartmentDetails {
     department: IDepartment;
     deleteDepartment: (role: IDepartment) => void;
     updateDepartment: (role: IDepartment) => void;
+    manageUnits: (department: IDepartment) => void;
+    /** Position in the rendered grid — used to rotate the card accent colour. */
+    index?: number;
 }
 
 

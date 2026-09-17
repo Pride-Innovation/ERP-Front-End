@@ -9,7 +9,7 @@ const LOGIN: string = "/";
 const FORGOT_PASSWORD: string = "/forgot-password";
 const RESET_PASSWORD: string = '/reset-password';
 const ASSETS_MANAGEMENT: string = "/assets-mgt"
-const REFRESH_TOKEN: string = "/auth/refresh"
+const REFRESH_TOKEN: string = "/auth/refresh-token"
 const SETTINGS: string = `${ASSETS_MANAGEMENT}/settings`;
 const PROFILE: string = `${ASSETS_MANAGEMENT}/profile`;
 const USERS: string = `${ASSETS_MANAGEMENT}/users`;
@@ -23,12 +23,18 @@ const STORE: string = `${ASSETS_MANAGEMENT}/store`;
 const STORE_ADMIN: string = `${STORE}/admin`;
 const STORE_IT: string = `${STORE}/it`;
 const STORE_DISPOSAL: string = `${STORE}/disposal`;
+/** What the signed-in user is personally holding — not a store, a personal accountability view. */
+const MY_ITEMS: string = `${STORE}/my-items`;
+/** Counting a store and reconciling its balances to the shelf. */
+const STOCK_TAKE: string = `${STORE}/stock-take`;
 
 /* Inventory Routes */
 const INVENTORY: string = `${ASSETS_MANAGEMENT}/inventory`;
 const CREATE_INVENTORY: string = `${ASSETS_MANAGEMENT}/inventory/create`
 const UPDATE_INVENTORY: string = `${ASSETS_MANAGEMENT}/inventory/update`
 const READ_INVENTORY: string = `${ASSETS_MANAGEMENT}/inventory/view`
+/** Read-only report: order lines where the GRN trail or asset register disagrees with the order. */
+const INVENTORY_RECONCILIATION: string = `${ASSETS_MANAGEMENT}/inventory/reconciliation`
 
 /* Request Routes */
 const REQUEST: string = `${ASSETS_MANAGEMENT}/asset-request`
@@ -52,21 +58,16 @@ const LIST_ISSUED: string = `${REQUEST}/issued`
 const LIST_TRANSPORT_PENDING: string = `${TRANSPORT_REQUEST}/pending`
 const LIST_TRANSPORT_REJECTED: string = `${TRANSPORT_REQUEST}/rejected`
 
-/* IT Equipment Routes */
+/* Asset Routes — the per-category list/create/update/view all flow through
+ * the single parameterised `/assets/general/:typeId` pattern below. There are
+ * intentionally no hardcoded category routes (no `/it-equipment`, no `/fleet`,
+ * no `/office-equipment`) — adding a new category in Settings → Asset
+ * Categories is the only thing required to expose it in the UI. */
 const LIST_ASSETS: string = `${ASSETS_MANAGEMENT}/assets`
-const LIST_IT_EQUIPMENT: string = `${LIST_ASSETS}/it-equipment`
-const CREATE_ITEQUIPMENT: string = `${LIST_ASSETS}/it-equipment/create`
-const UPDATE_ITEQUIPMENT: string = `${LIST_ASSETS}/it-equipment/update`
+const LIST_GENERAL_ASSETS: string = `${LIST_ASSETS}/general`
 
-/* Fleet Routes */
-const LIST_FLEET: string = `${LIST_ASSETS}/fleet`
-const CREATE_FLEET: string = `${LIST_ASSETS}/fleet/create`
-const UPDATE_FLEET: string = `${LIST_ASSETS}/fleet/update`
-
-/* Office Equipment Routes */
-const LIST_OFFICE_EQUIPMENT: string = `${LIST_ASSETS}/office-equipment`
-const CREATE_OFFICE_EQUIPMENT: string = `${LIST_ASSETS}/office-equipment/create`
-const UPDATE_OFFICE_EQUIPMENT: string = `${LIST_ASSETS}/office-equipment/update`
+/* Dedicated full-page list of the logged-in user's notifications. */
+const NOTIFICATIONS: string = `${ASSETS_MANAGEMENT}/notifications`
 
 /* Settings Routes */
 const BRANCHES: string = `${ASSETS_MANAGEMENT}/settings/branches`;
@@ -75,6 +76,13 @@ const TITLES: string = `${ASSETS_MANAGEMENT}/settings/titles`;
 const SUPPLIERS: string = `${ASSETS_MANAGEMENT}/settings/suppliers`;
 const REGIONS: string = `${ASSETS_MANAGEMENT}/settings/regions`;
 const DEPARTMENT: string = `${ASSETS_MANAGEMENT}/settings/departments`;
+const UNITS: string = `${ASSETS_MANAGEMENT}/settings/units`;
+const ASSET_TYPES: string = `${ASSETS_MANAGEMENT}/settings/asset-categories`;
+const CONSULTANTS: string = `${ASSETS_MANAGEMENT}/settings/consultants`;
+const COURIERS: string = `${ASSETS_MANAGEMENT}/settings/couriers`;
+const EXPORT_COLUMNS: string = `${ASSETS_MANAGEMENT}/settings/export-columns`;
+
+const APPROVAL_WORKFLOWS: string = `${ASSETS_MANAGEMENT}/approval-workflows`;
 
 /* Errors Page */
 const ERRORS: string = `${ASSETS_MANAGEMENT}/restricted-access`
@@ -88,6 +96,8 @@ const MOVEMENT: string = `${ASSETS_MANAGEMENT}/movement`;
 const CREATE_MOVEMENT: string = `${ASSETS_MANAGEMENT}/movement/create`
 const UPDATE_MOVEMENT: string = `${ASSETS_MANAGEMENT}/movement/update`
 const READ_MOVEMENT: string = `${ASSETS_MANAGEMENT}/movement/view`
+/** Consignments — the physical journeys that movements ride on. */
+const CONSIGNMENTS: string = `${ASSETS_MANAGEMENT}/movement/consignments`
 
 export const ROUTES = {
     FORGOT_PASSWORD,
@@ -101,20 +111,12 @@ export const ROUTES = {
     AUDIT_TRAILS,
     TEST,
     LIST_ASSETS,
-    LIST_IT_EQUIPMENT,
-    CREATE_ITEQUIPMENT,
-    UPDATE_ITEQUIPMENT,
     REQUEST,
     CREATE_REQUEST,
     UPDATE_REQUEST,
     READ_REQUEST,
     ISSUE_REQUEST,
-    LIST_OFFICE_EQUIPMENT,
-    LIST_FLEET,
-    CREATE_FLEET,
-    UPDATE_FLEET,
-    CREATE_OFFICE_EQUIPMENT,
-    UPDATE_OFFICE_EQUIPMENT,
+    LIST_GENERAL_ASSETS,
     ERRORS,
     LIST_ALL,
     LIST_PENDING,
@@ -132,18 +134,29 @@ export const ROUTES = {
     REGIONS,
     INVENTORY,
     DEPARTMENT,
+    UNITS,
+    ASSET_TYPES,
+    CONSULTANTS,
+    COURIERS,
+    EXPORT_COLUMNS,
     CREATE_INVENTORY,
     UPDATE_INVENTORY,
     READ_INVENTORY,
+    INVENTORY_RECONCILIATION,
     CREATE_USER,
     UPDATE_USER,
     STORE,
     STORE_ADMIN,
     STORE_IT,
     STORE_DISPOSAL,
+    MY_ITEMS,
+    STOCK_TAKE,
     MOVEMENT,
     CREATE_MOVEMENT,
     UPDATE_MOVEMENT,
     READ_MOVEMENT,
-    REPORTS
+    CONSIGNMENTS,
+    REPORTS,
+    APPROVAL_WORKFLOWS,
+    NOTIFICATIONS
 }

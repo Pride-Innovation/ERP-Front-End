@@ -6,29 +6,89 @@ Managing Director
 */
 
 
+import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { fetchRowsService } from "../../../core/apis/globalService"
-import { IAssetTypesAxiosResponse } from "./interface";
 import { AppDispatch } from "../../../store";
-import { loadAllAssetTypes } from "./slice";
+import { fetchRowsService } from "../../../core/apis/globalService";
+import { IAssetType, IAssetTypesAxiosResponse } from "./interface";
+import {
+    addAssetType,
+    loadAllAssetTypes,
+    removeAssetType,
+    setPaginationMeta,
+    updateAssetType,
+} from "./slice";
 
 const AssetTypeUtills = () => {
     const endPoint: string = "asset-types";
+    const [modalState, setModalState] = useState<string>("");
+    const [open, setOpen] = useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(false);
     const dispatch = useDispatch<AppDispatch>();
 
-    const fetchAllAssetTypes = async () => {
+    const handleOpen = () => setOpen(true);
+    const handleClose = () => {
+        setOpen(false);
+        setModalState("");
+    };
+
+    const fetchAllAssetTypes = async ({
+        pageNumber = 0,
+        pageSize = 50,
+        name,
+    }: {
+        pageNumber?: number;
+        pageSize?: number;
+        name?: string;
+    } = {}) => {
+        setLoading(true);
         try {
-            const response = await fetchRowsService({ pageNumber: 0, pageSize: 10, endPoint }) as IAssetTypesAxiosResponse;
+            const params: Record<string, any> = {};
+            if (name) params.name = name;
+            const response = await fetchRowsService({
+                pageNumber,
+                pageSize,
+                endPoint,
+                params,
+            }) as IAssetTypesAxiosResponse;
             if (response.status === 200) {
-                dispatch(loadAllAssetTypes(response.data.content))
+                dispatch(loadAllAssetTypes(response.data.content));
+                dispatch(setPaginationMeta({
+                    totalPages: response.data.totalPages,
+                    totalElements: response.data.totalElements,
+                }));
             }
         } catch (error) {
-            console.log(error)
+            console.log(error);
         }
-    }
-    return ({
-        fetchAllAssetTypes
-    })
-}
+        setLoading(false);
+    };
 
-export default AssetTypeUtills
+    const addAssetTypeToStore = (assetType: IAssetType) => {
+        dispatch(addAssetType(assetType));
+    };
+
+    const updateAssetTypeInStore = (assetType: IAssetType) => {
+        dispatch(updateAssetType(assetType));
+    };
+
+    const removeAssetTypeFromStore = (assetType: IAssetType) => {
+        dispatch(removeAssetType(assetType));
+    };
+
+    return {
+        endPoint,
+        modalState,
+        setModalState,
+        open,
+        loading,
+        handleOpen,
+        handleClose,
+        fetchAllAssetTypes,
+        addAssetTypeToStore,
+        updateAssetTypeInStore,
+        removeAssetTypeFromStore,
+    };
+};
+
+export default AssetTypeUtills;

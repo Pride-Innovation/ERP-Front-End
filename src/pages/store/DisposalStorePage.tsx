@@ -6,7 +6,7 @@ Managing Director
 */
 
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
-import StoreViewPage from './StoreViewPage';
+import StoreViewPage, { STORE_ACCENT } from './StoreViewPage';
 
 const DisposalStorePage = () => (
     <StoreViewPage
@@ -14,8 +14,7 @@ const DisposalStorePage = () => (
         title="Disposal Store"
         subtitle="Items awaiting disposal or write-off"
         Icon={DeleteOutlineOutlinedIcon}
-        gradient="linear-gradient(135deg, #b45309 0%, #fb923c 100%)"
-        accentColor="#b45309"
+        accentColor={STORE_ACCENT.disposal}
     />
 );
 

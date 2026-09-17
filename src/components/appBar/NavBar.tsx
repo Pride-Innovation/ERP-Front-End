@@ -6,33 +6,35 @@ Managing Director
 */
 
 import {
+    alpha,
     Avatar,
     Badge,
     Box,
-    Container,
-    IconButton,
+    Divider,
     Stack,
-    Toolbar
 } from '@mui/material'
 import React, { useState } from 'react'
-import ButtonComponent from '../forms/Button'
 import { TypographyComponent } from '../headers/TypographyComponent';
 import PopoverComponent from '../forms/Popover';
-import { crudStates } from '../../utils/constants';
 import MaleLogo from '../../statics/images/male.jpg';
 import FemaleLogo from '../../statics/images/Female.jpg'
-import { grey } from '@mui/material/colors';
 import AppBarUtills, { modalStates } from './utills';
 import ModalComponent from '../modal';
 import ChangePassword from '../../pages/profile/ChangePassword';
 import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
+import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded';
 import RoutesUtills from '../../core/routes/utills';
 import FilterByTagName from './FilterByTagName';
+import { useNotifications } from '../../context/notification/NotificationContext';
+import NotificationPanel from './NotificationPanel';
+import { brand, neutral } from '../../utils/tokens';
 
 const NavBar = () => {
     const { getCurrentUser } = RoutesUtills();
     const [action, setAction] = useState<string>("");
     const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
+    const [notifAnchor, setNotifAnchor] = useState<HTMLElement | null>(null);
+    const { unreadCount } = useNotifications();
 
     const handleAnchorClick = (event: React.MouseEvent<HTMLButtonElement>) => {
         setAnchorEl(event.currentTarget);
@@ -47,88 +49,130 @@ const NavBar = () => {
     } = AppBarUtills();
 
     return (
-        <Container maxWidth="xl">
+        <Box sx={{ width: '100%', display: 'flex', alignItems: 'center' }}>
             {modalState === modalStates.password &&
                 <ModalComponent title='Change Password' open={open} handleClose={handleClose} width="60%">
                     <ChangePassword handleClose={handleClose} />
                 </ModalComponent>
             }
-            <Toolbar disableGutters>
                 {getCurrentUser() &&
-                    <Stack direction="row" spacing={2} sx={{ ml: "auto", display: "flex", alignItems: "center" }}>
+                    <Stack direction="row" spacing={1.75} sx={{ ml: "auto", display: "flex", alignItems: "center" }}>
                         <FilterByTagName />
-                        <Box>
-                            <ButtonComponent
-                                handleClick={(event: React.MouseEvent<HTMLButtonElement>) => {
-                                    setAction(crudStates.create)
-                                    handleAnchorClick?.(event);
-                                }}
-                                sendingRequest={false}
-                                buttonText="+ New"
-                                buttonColor='secondary'
-                                type='button' />
-                        </Box>
                         <Badge
-                            badgeContent={4}
+                            badgeContent={unreadCount > 0 ? unreadCount : undefined}
                             color="warning"
+                            overlap="circular"
+                            anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
                             sx={{
                                 '& .MuiBadge-badge': {
                                     fontWeight: 700,
                                     fontSize: '0.6rem',
                                     minWidth: 18,
                                     height: 18,
+                                    border: `2px solid ${neutral[0]}`,
+                                    px: 0.5,
                                 }
                             }}
                         >
                             <Box
+                                onClick={(e) => setNotifAnchor(e.currentTarget)}
                                 sx={{
-                                    width: 36,
-                                    height: 36,
+                                    width: 38,
+                                    height: 38,
                                     borderRadius: '50%',
-                                    bgcolor: 'rgba(255,255,255,0.12)',
+                                    bgcolor: neutral[100],
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                     cursor: 'pointer',
-                                    border: '1px solid rgba(255,255,255,0.2)',
+                                    border: `1px solid ${neutral[200]}`,
                                     transition: 'all 0.2s ease',
-                                    '&:hover': { bgcolor: 'rgba(255,255,255,0.2)' },
+                                    '&:hover': {
+                                        bgcolor: alpha(brand[500], 0.08),
+                                        borderColor: alpha(brand[500], 0.3),
+                                        '& svg': { color: brand[600] },
+                                    },
                                 }}
                             >
-                                <NotificationsNoneIcon sx={{ color: 'rgba(255,255,255,0.9)', fontSize: '1.2rem' }} />
+                                <NotificationsNoneIcon sx={{ color: neutral[600], fontSize: '1.25rem', transition: 'color 0.2s ease' }} />
                             </Box>
                         </Badge>
-                        <TypographyComponent
-                            size='0.875rem'
-                            weight={600}
+                        <NotificationPanel
+                            anchor={notifAnchor}
+                            onClose={() => setNotifAnchor(null)}
+                        />
+                        <Divider
+                            orientation="vertical"
+                            flexItem
                             sx={{
-                                color: 'rgba(255,255,255,0.92)',
-                                display: { xs: 'none', lg: 'block' },
-                                letterSpacing: 0.2,
+                                my: 1,
+                                borderColor: neutral[200],
+                                display: { xs: 'none', sm: 'block' },
                             }}
-                        >
-                            {getCurrentUser()?.firstName} {getCurrentUser()?.lastName}
-                        </TypographyComponent>
-                        <IconButton
-                            onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
+                        />
+                        <Stack
+                            direction="row"
+                            spacing={1.25}
+                            onClick={(event: React.MouseEvent<HTMLDivElement>) => {
                                 setAction("")
-                                handleAnchorClick?.(event)
+                                handleAnchorClick?.(event as unknown as React.MouseEvent<HTMLButtonElement>)
                             }}
                             sx={{
-                                p: 0.5,
-                                border: '2px solid rgba(255,255,255,0.3)',
-                                borderRadius: '50%',
-                                transition: 'all 0.2s ease',
-                                '&:hover': {
-                                    border: '2px solid rgba(255,255,255,0.6)',
-                                    boxShadow: '0 0 0 3px rgba(255,255,255,0.1)',
-                                },
+                                alignItems: 'center',
+                                cursor: 'pointer',
+                                pl: 0.5,
+                                pr: { xs: 0, lg: 1 },
+                                py: 0.5,
+                                borderRadius: '999px',
+                                transition: 'background-color 0.2s ease',
+                                '&:hover': { bgcolor: neutral[100] },
                             }}
                         >
                             <Avatar
                                 src={getCurrentUser()?.image || (getCurrentUser()?.gender === 'male' ? MaleLogo : FemaleLogo)}
-                                sx={{ height: 36, width: 36, cursor: "pointer" }} />
-                        </IconButton>
+                                sx={{
+                                    height: 36,
+                                    width: 36,
+                                    border: `2px solid ${neutral[0]}`,
+                                    boxShadow: `0 0 0 1px ${neutral[200]}`,
+                                }}
+                            />
+                            <Box sx={{ display: { xs: 'none', lg: 'flex' }, flexDirection: 'column', maxWidth: 180, minWidth: 0 }}>
+                                <TypographyComponent
+                                    size='0.85rem'
+                                    weight={600}
+                                    sx={{
+                                        color: neutral[800],
+                                        letterSpacing: 0.2,
+                                        lineHeight: 1.25,
+                                        whiteSpace: 'nowrap',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                    }}
+                                >
+                                    {getCurrentUser()?.firstName} {getCurrentUser()?.lastName}
+                                </TypographyComponent>
+                                {getCurrentUser()?.email &&
+                                    <TypographyComponent
+                                        size='0.7rem'
+                                        weight={500}
+                                        sx={{
+                                            color: neutral[500],
+                                            letterSpacing: 0.1,
+                                            lineHeight: 1.25,
+                                            whiteSpace: 'nowrap',
+                                            overflow: 'hidden',
+                                            textOverflow: 'ellipsis',
+                                        }}
+                                    >
+                                        {getCurrentUser()?.email}
+                                    </TypographyComponent>
+                                }
+                            </Box>
+                            <KeyboardArrowDownRoundedIcon
+                                sx={{ fontSize: 18, color: neutral[400], display: { xs: 'none', lg: 'block' } }}
+                            />
+                        </Stack>
                     </Stack>}
                 <PopoverComponent
                     anchorEl={anchorEl}
@@ -136,10 +180,7 @@ const NavBar = () => {
                     moduleID={getCurrentUser().id}
                     handleOptionClicked={handleOptionClicked}
                     options={options(action)} />
-
-            </Toolbar>
-        </Container >
-
+        </Box>
     )
 }
 

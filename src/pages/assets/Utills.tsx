@@ -10,84 +10,63 @@ import { IAssetType } from "../settings/assetTypes/interface"
 import SettingsBrightnessIcon from '@mui/icons-material/SettingsBrightness';
 import BalanceIcon from '@mui/icons-material/Balance';
 import DirectionsCarFilledIcon from '@mui/icons-material/DirectionsCarFilled';
+import CategoryOutlinedIcon from '@mui/icons-material/CategoryOutlined';
 import { useContext, useState } from "react";
 import { useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../store";
-import { assetTypesStatusConstants } from "../../utils/constants";
 import InventoryUtills from "../inventory/Utills";
 import UserUtils from "../users/utils";
 import BranchUtills from "../settings/branch/utills";
 import SupplierUtills from "../settings/suppliers/Utills";
 import { fetchRowsService } from "../../core/apis/globalService";
-import { IAssetsAxiosResponse } from "./interface";
+import { IAsset, IAssetsAxiosResponse } from "./interface";
 import { useDispatch } from "react-redux";
 import { listAllAssets } from "./slice";
 import { RequestContext } from "../../context/request/RequestContext";
+import { statusIdByCode } from "../../utils/helpers";
 
 const AssetUtills = () => {
     const [currentAssetType, setCurrentAssetType] = useState<IAssetType>({} as IAssetType);
     const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore);
+    const { statuses } = useSelector((state: RootState) => state.StatusesStore);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [loading, setLoading] = useState<boolean>(false);
     const endPoint: string = "assets";
     const dispatch = useDispatch<AppDispatch>();
-    const { setAssetsEngravedInStore } = useContext(RequestContext);
+    const { setIssuableAssets } = useContext(RequestContext);
 
     const { fetchInventory } = InventoryUtills();
-    const { fetchAllUsers } = UserUtils();
+    const { fetchStaffOptions } = UserUtils();
     const { fetchAllBranches } = BranchUtills();
     const { fetchAllSuppliers } = SupplierUtills();
 
+    /**
+     * Every asset category — including the previously hardcoded IT Equipment /
+     * Office Equipment / Fleet — now resolves to the same parameterised
+     * `/assets-mgt/assets/general/{typeId}` route. The icon is the only thing
+     * still chosen by name so that the familiar three categories keep their
+     * distinct tab icons; all other categories fall back to a generic icon.
+     */
     const determineAssetTypeByAssetName = (assetType: IAssetType) => {
+        const lower = (assetType.name ?? '').toLocaleLowerCase();
+        const icon = lower.includes('it equipment')
+            ? <SettingsBrightnessIcon />
+            : lower.includes('office equipment')
+                ? <BalanceIcon />
+                : lower.includes('fleet')
+                    ? <DirectionsCarFilledIcon />
+                    : <CategoryOutlinedIcon />;
 
-        if (assetType.name.toLocaleLowerCase().indexOf(
-            assetTypesStatusConstants.itEquipment.toLocaleLowerCase()
-        ) !== -1) {
-            return ({
-                id: assetType.id as number,
-                text: assetType.name,
-                path: ROUTES.LIST_IT_EQUIPMENT,
-                otherRoutes: [
-                    ROUTES.CREATE_ITEQUIPMENT,
-                    ROUTES.UPDATE_ITEQUIPMENT
-                ],
-                icon: <SettingsBrightnessIcon />,
-                // permission: routePermission(8) as IPermission
-            })
-        }
-
-        if (assetType.name.toLocaleLowerCase().indexOf(
-            assetTypesStatusConstants.officeEquipment.toLocaleLowerCase()
-        ) !== -1) {
-            return ({
-                id: assetType.id as number,
-                text: assetType.name,
-                path: ROUTES.LIST_OFFICE_EQUIPMENT,
-                otherRoutes: [
-                    ROUTES.CREATE_OFFICE_EQUIPMENT,
-                    ROUTES.UPDATE_OFFICE_EQUIPMENT
-                ],
-                icon: <BalanceIcon />,
-                // permission: routePermission(12) as IPermission
-            })
-        }
-
-        if (assetType.name.toLocaleLowerCase().indexOf(
-            assetTypesStatusConstants.fleet.toLocaleLowerCase()
-        ) !== -1) {
-            return ({
-                id: assetType.id as number,
-                text: assetType.name,
-                path: ROUTES.LIST_FLEET,
-                otherRoutes: [
-                    ROUTES.CREATE_FLEET,
-                    ROUTES.UPDATE_FLEET
-                ],
-                icon: <DirectionsCarFilledIcon />,
-                // permission: routePermission(16) as IPermission
-            })
-        }
-
+        return {
+            id: assetType.id as number,
+            text: assetType.name,
+            path: `${ROUTES.LIST_GENERAL_ASSETS}/${assetType.id}`,
+            otherRoutes: [
+                `${ROUTES.LIST_GENERAL_ASSETS}/${assetType.id}/create`,
+                `${ROUTES.LIST_GENERAL_ASSETS}/${assetType.id}/update`,
+            ],
+            icon,
+        };
     }
 
     const determineAssetTypeState = (id: number): IAssetType => {
@@ -108,7 +87,9 @@ const AssetUtills = () => {
     const searchUserByName = async (firstName: string) => {
         try {
             const params = { firstName }
-            await fetchAllUsers(params);
+            // The picker, not the directory — "Assigned To" is a dropdown on the assets page,
+            // and reading it should not require the permission that administers staff.
+            await fetchStaffOptions(params);
         } catch (error) {
             console.log(error)
         }
@@ -133,23 +114,58 @@ const AssetUtills = () => {
         }
     }
 
+    /**
+     * Loads assets into the shared engraved-number pool the issuance picker renders from.
+     *
+     * <p>Callers filter by commodity/status and rely on getting *every* match, not a page of them:
+     * the pool feeds an Autocomplete with no paging control behind it. At the old pageSize of 10 an
+     * issuer simply could not see the 11th available monitor except by typing its engraved number.
+     */
     const fetchAllAssets = async (params?: Record<string, any>) => {
         setLoading(true)
         try {
             const response = await fetchRowsService({
                 pageNumber: 0,
-                pageSize: 10,
+                pageSize: 200,
                 endPoint,
                 params
             }) as IAssetsAxiosResponse
 
             if (response.status === 200) {
-                setAssetsEngravedInStore(prev => {
-                    const merged = [...response.data.content, ...prev];
-                    const uniqueByName = Array.from(new Map(merged.map(item => [item.engravedNumber, item])).values());
-                    return uniqueByName;
-                });
-                dispatch(listAllAssets(response.data.content));
+                const fresh = response.data.content;
+                const commodityId = params?.commodityId as number | undefined;
+
+                /*
+                 * A commodity's bucket is replaced by the query that covers it, not merged into.
+                 *
+                 * These queries all carry `assetStatusId = Available for Issuance`, so an asset that
+                 * has been issued since the last look does not come back — and under the old
+                 * append-only merge it therefore stayed forever, because nothing can overwrite a row
+                 * that is no longer in any result. Replacing is the only operation that can remove
+                 * it.
+                 *
+                 * A *search* is the one exception: it is narrowed by engraved number, so its result
+                 * is a slice of the commodity rather than the whole of it, and treating that slice
+                 * as the new truth would discard everything the user had not typed. Those merge, and
+                 * the fresh copy still wins per id.
+                 *
+                 * Keyed by `id`, not `engravedNumber`: the id is the identity the server enforces
+                 * on, and two assets awaiting completion both carry a blank engraved number, which
+                 * collapsed them into one entry.
+                 */
+                if (commodityId != null) {
+                    const isSearch = Boolean(params?.engravedNumber);
+                    setIssuableAssets(prev => {
+                        const base = isSearch ? (prev[commodityId] ?? []) : [];
+                        const byId = new Map<number, IAsset>();
+                        [...base, ...fresh].forEach(asset => {
+                            if (asset?.id != null) byId.set(asset.id as number, asset);
+                        });
+                        return { ...prev, [commodityId]: Array.from(byId.values()) };
+                    });
+                }
+
+                dispatch(listAllAssets(fresh));
             }
         } catch (error) {
             console.log(error)
@@ -158,22 +174,9 @@ const AssetUtills = () => {
     }
 
 
-    const determineStatusId = (status: string) => {
-        switch (status) {
-            case 'requireUpdate':
-                return 9;
-            case 'issuanceAvailable':
-                return 8;
-            case 'receiptAcknowledged':
-                return 7;
-            case 'inStore':
-                return 12;
-            case 'inMaintenance':
-                return 13;
-            default:
-                return null;
-        }
-    }
+    // Resolve a status id from its code against the loaded status catalogue.
+    // Replaces the previously hardcoded (and partly wrong) id map.
+    const determineStatusId = (status: string) => statusIdByCode(statuses, status);
 
     return ({
         determineAssetTypeByAssetName,

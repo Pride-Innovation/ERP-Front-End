@@ -1,6 +1,6 @@
 /*
 13.9 Pride's Standard Copyright Notice:
-Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
+Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify,
 and distribute this software and its documentation for any purpose is prohibited unless authorized in writing by the
 Managing Director
 */
@@ -16,6 +16,10 @@ import CreateStatus from "./CreateStatus";
 import ModalComponent from "../../../components/modal";
 import UpdateStatus from "./UpdateStatus";
 import DeleteStatus from "./DeleteStatus";
+import { RequirePermission } from "../../../core/permissions";
+import { PERMISSIONS } from "../../../core/permissions/constants";
+import FlagOutlinedIcon from "@mui/icons-material/FlagOutlined";
+import { PageHero } from "../../../components/layout";
 
 const Statuses = () => {
     const [currentStatus, setCurrentStatus] = useState<IStatus>({} as IStatus);
@@ -67,23 +71,23 @@ const Statuses = () => {
                 </ModalComponent>
             }
             <Box sx={{ width: "100%" }}>
-                <Box sx={{
-                    width: "100%",
-                    display: "flex",
-                    justifyContent: "flex-end",
-                    mb: 4,
-                    alignItems: "center",
-                }}>
-                    <Box>
-                        <ButtonComponent
-                            handleClick={createStatus}
-                            sendingRequest={false}
-                            buttonText="Create Status"
-                            variant='contained'
-                            buttonColor='info'
-                            type='button' />
-                    </Box>
-                </Box>
+                <PageHero
+                    title="Status Management"
+                    subtitle="Manage workflow statuses"
+                    icon={<FlagOutlinedIcon />}
+                    stat={{ value: statuses?.length ?? 0, label: 'records' }}
+                    actions={
+                        <RequirePermission permission={PERMISSIONS.CREATE_STATUS}>
+                            <ButtonComponent
+                                handleClick={createStatus}
+                                sendingRequest={false}
+                                buttonText="Create Status"
+                                variant='contained'
+                                buttonColor='info'
+                                type='button' />
+                        </RequirePermission>
+                    }
+                />
                 <Box
                     display="grid"
                     gridTemplateColumns="repeat(4, 1fr)"

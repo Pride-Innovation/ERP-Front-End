@@ -38,7 +38,7 @@ import TextFieldsIcon from '@mui/icons-material/TextFields';
 import InfoIcon from '@mui/icons-material/Info';
 import { toast } from 'react-toastify';
 import dayjs, { Dayjs } from 'dayjs';
-import { completeRepairAssetService } from '../../ITEquipment/service';
+import { completeRepairAssetService } from '../../general/service';
 
 // Get file icon based on file type
 const getFileTypeInfo = (fileName: string) => {

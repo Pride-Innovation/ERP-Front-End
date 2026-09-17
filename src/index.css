@@ -18,33 +18,28 @@ html {
   scroll-behavior: smooth;
   overflow-x: hidden;
   /*
-   * RESPONSIVE SCALING STRATEGY
-   * Browser default is 16px. By setting 14px here, every rem-based value
-   * in MUI (spacing, font sizes, component heights) shrinks by ~12.5%
-   * across ALL screens without touching individual components.
-   * Additional reductions apply at smaller viewports.
+   * RESPONSIVE SCALING STRATEGY (desktop / laptop only — no mobile tier)
+   *
+   * The root font size is the single lever that scales every rem-based
+   * MUI value (spacing, typography, component heights) proportionally,
+   * without touching individual components.
+   *
+   * Instead of stepped px breakpoints we scale fluidly with clamp() in
+   * rem units, so the value tracks the viewport smoothly AND still
+   * honours the user's browser font-size / zoom preference (px would
+   * override it and hurt accessibility).
+   *
+   *   clamp(min, preferred, max)
+   *     min  0.8125rem (13px) — floor for 13" laptops (≈1280px and below);
+   *                             never shrinks past this.
+   *     pref 0.6875rem + 0.156vw — grows with viewport width:
+   *                             ≈14px at 1920 (FHD, our established
+   *                             baseline density).
+   *     max  0.9375rem (15px) — ceiling for large / ultra-wide monitors
+   *                             (2560px+), so text stays comfortable
+   *                             without breaking the dense ERP feel.
    */
-  font-size: 14px;
-}
-
-/* 14" laptop / 1366×768 */
-@media (max-width: 1366px) {
-  html { font-size: 13.5px; }
-}
-
-/* Small laptop / large tablet */
-@media (max-width: 1024px) {
-  html { font-size: 13px; }
-}
-
-/* Tablet */
-@media (max-width: 768px) {
-  html { font-size: 12.5px; }
-}
-
-/* Phone */
-@media (max-width: 480px) {
-  html { font-size: 12px; }
+  font-size: clamp(0.8125rem, 0.6875rem + 0.156vw, 0.9375rem);
 }
 
 body {
@@ -145,4 +140,91 @@ img, svg {
 #root {
   overflow-x: hidden;
   max-width: 100vw;
+}
+
+/* ─── Asset-type card grid ──────────────────────────────────── */
+/*
+ * Uses CSS Grid so each breakpoint can be tuned independently.
+ * Cards have a minimum comfortable width (~260 px) and fill
+ * the available width equally up to the column cap for that
+ * viewport tier.
+ */
+.asset-type-grid {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: 1fr;               /* < 480 px  – 1 col  */
+}
+
+/* Phone landscape / small tablet */
+@media (min-width: 480px) {
+  .asset-type-grid { grid-template-columns: repeat(2, 1fr); } /* 2 cols */
+}
+
+/* 14-inch laptop (1366 × 768) and similar */
+@media (min-width: 1024px) {
+  .asset-type-grid { grid-template-columns: repeat(3, 1fr); } /* 3 cols */
+}
+
+/* Standard FHD / large desktop (1440 px) */
+@media (min-width: 1440px) {
+  .asset-type-grid { grid-template-columns: repeat(4, 1fr); } /* 4 cols */
+}
+
+/* Wide monitor (1920 px) */
+@media (min-width: 1920px) {
+  .asset-type-grid { grid-template-columns: repeat(5, 1fr); } /* 5 cols */
+}
+
+/* Ultra-wide / 2 K+ (2560 px) */
+@media (min-width: 2560px) {
+  .asset-type-grid { grid-template-columns: repeat(6, 1fr); } /* 6 cols */
+}
+
+/* ─── Generic settings-card grid ───────────────────────────────
+ * Shared layout for Branch / Department / Supplier / Title /
+ * Commodity / Region card lists. Mirrors `.asset-type-grid` so
+ * settings pages keep a uniform card density across breakpoints.
+ * Cards have a comfortable min width (~280 px) and fill the
+ * available width equally up to the column cap per viewport tier.
+ */
+.settings-card-grid {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: 1fr;               /* < 480 px  – 1 col */
+}
+@media (min-width: 480px) {
+  .settings-card-grid { grid-template-columns: repeat(2, 1fr); } /* 2 cols */
+}
+@media (min-width: 1024px) {
+  .settings-card-grid { grid-template-columns: repeat(3, 1fr); } /* 3 cols */
+}
+@media (min-width: 1440px) {
+  .settings-card-grid { grid-template-columns: repeat(4, 1fr); } /* 4 cols */
+}
+@media (min-width: 1920px) {
+  .settings-card-grid { grid-template-columns: repeat(5, 1fr); } /* 5 cols */
+}
+@media (min-width: 2560px) {
+  .settings-card-grid { grid-template-columns: repeat(6, 1fr); } /* 6 cols */
+}
+
+/* Wider variant for cards with denser content (suppliers, branches
+ * with management team + contact info). Caps one column lower so
+ * each card has room to breathe. */
+.settings-card-grid--wide {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 600px) {
+  .settings-card-grid--wide { grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 1280px) {
+  .settings-card-grid--wide { grid-template-columns: repeat(3, 1fr); }
+}
+@media (min-width: 1700px) {
+  .settings-card-grid--wide { grid-template-columns: repeat(4, 1fr); }
+}
+@media (min-width: 2200px) {
+  .settings-card-grid--wide { grid-template-columns: repeat(5, 1fr); }
 }

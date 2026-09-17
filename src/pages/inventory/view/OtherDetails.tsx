@@ -1,27 +1,23 @@
 /*
 13.9 Pride's Standard Copyright Notice:
-Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
+Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify,
 and distribute this software and its documentation for any purpose is prohibited unless authorized in writing by the
 Managing Director
 */
 
 import {
-    Grid,
     Box,
     Typography,
-    Divider,
-    useTheme,
+    Stack,
+    Chip,
     alpha,
-    Fade,
-    CircularProgress,
-    Alert
 } from "@mui/material";
 import ViewInventoryutills from "./utills";
 import TableComponent from "../../../components/tables/TableComponent";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { IInventory, IStockCommodities } from "../interface";
-import InventoryOutlinedIcon from '@mui/icons-material/InventoryOutlined';
-import CategoryIcon from '@mui/icons-material/Category';
+import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
+import { brand, neutral } from "../../../utils/tokens";
 
 const OtherDetails = ({ inventory }: { inventory: IInventory }) => {
     const {
@@ -33,104 +29,77 @@ const OtherDetails = ({ inventory }: { inventory: IInventory }) => {
         handleInventoryTableData
     } = ViewInventoryutills();
 
-    const theme = useTheme();
-    const [localLoading, setLocalLoading] = useState(true);
-    const hasCommodities = inventory.commodities && inventory.commodities.length > 0;
+    const hasCommodities = !!inventory.commodities && inventory.commodities.length > 0;
 
     useEffect(() => {
-        setLocalLoading(true);
         if (inventory.id && hasCommodities) {
             handleInventoryTableData(inventory.commodities as Array<IStockCommodities>);
         }
-        // Add a small delay to make loading smoother
-        setTimeout(() => setLocalLoading(false), 500);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [inventory]);
 
-    // Calculate total items
     const totalItems = stocksTableData?.reduce((sum, item) => sum + (item.deliveredQuantity || 0), 0) || 0;
+    const uniqueCount = stocksTableData?.length || 0;
 
     return (
-        <Fade in={!localLoading}>
-            <Box sx={{ p: { xs: 2, md: 3 } }}>
-                <Box sx={{ mb: 3 }}>
-                    <Typography
-                        variant="h6"
-                        sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 1,
-                            color: theme.palette.primary.main,
-                            fontWeight: 500
-                        }}
-                    >
-                        <CategoryIcon />
-                        Inventory Commodities
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                        All commodities included in this inventory delivery
-                    </Typography>
-                    <Divider sx={{ mt: 1.5 }} />
-                </Box>
-
-                {localLoading || loading ? (
-                    <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-                        <CircularProgress size={32} />
+        <Box>
+            {/* Section header */}
+            <Stack
+                direction={{ xs: 'column', sm: 'row' }}
+                justifyContent="space-between"
+                alignItems={{ xs: 'flex-start', sm: 'center' }}
+                spacing={1.5}
+                sx={{ px: { xs: 2, md: 2.5 }, pt: { xs: 2, md: 2.5 }, pb: 1.5 }}
+            >
+                <Stack direction="row" spacing={1.25} alignItems="center">
+                    <Box sx={{ width: 32, height: 32, borderRadius: 1.5, bgcolor: alpha(brand[500], 0.1), color: brand[600], display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Inventory2OutlinedIcon sx={{ fontSize: 18 }} />
                     </Box>
-                ) : (
-                    <Grid container spacing={2}>
-                        {hasCommodities ? (
-                            <>
-                                {/* Summary Section */}
-                                <Grid item xs={12}>
-                                    <Box
-                                        sx={{
-                                            display: 'flex',
-                                            justifyContent: 'space-between',
-                                            alignItems: 'center',
-                                            bgcolor: alpha(theme.palette.primary.main, 0.04),
-                                            p: 2,
-                                            borderRadius: 1,
-                                            mb: 2
-                                        }}
-                                    >
-                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                            <InventoryOutlinedIcon sx={{ color: theme.palette.primary.main }} />
-                                            <Typography variant="subtitle1" fontWeight={500}>
-                                                Total Items: {totalItems}
-                                            </Typography>
-                                        </Box>
-                                        <Typography variant="caption" color="text.secondary">
-                                            Unique Commodities: {stocksTableData?.length || 0}
-                                        </Typography>
-                                    </Box>
-                                </Grid>
+                    <Box>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 700, color: neutral[900] }}>
+                            Stock Commodities
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: neutral[500] }}>
+                            Items received in this delivery
+                        </Typography>
+                    </Box>
+                </Stack>
 
-                                {/* Table Section */}
-                                <Grid item xs={12}>
-                                    <TableComponent
-                                        endPoint={endPoint}
-                                        loading={loading}
-                                        count={stocksTableData.length || 0}
-                                        exportData
-                                        header={{ ...header, singular: "Inventory Commodity", plural: "Inventory Commodities" }}
-                                        module="inventory commodities"
-                                        rows={stocksTableData || []}
-                                        columnHeaders={columnHeaders}
-                                        paginationMode='server'
-                                    />
-                                </Grid>
-                            </>
-                        ) : (
-                            <Grid item xs={12}>
-                                <Alert severity="info" sx={{ mt: 2 }}>
-                                    No commodities found in this inventory.
-                                </Alert>
-                            </Grid>
-                        )}
-                    </Grid>
-                )}
-            </Box>
-        </Fade>
+                <Stack direction="row" spacing={1}>
+                    <Chip
+                        size="small"
+                        label={`${totalItems.toLocaleString()} delivered`}
+                        sx={{ height: 24, fontWeight: 700, fontSize: '0.72rem', bgcolor: alpha(brand[500], 0.08), color: brand[700] }}
+                    />
+                    <Chip
+                        size="small"
+                        label={`${uniqueCount} commodit${uniqueCount === 1 ? 'y' : 'ies'}`}
+                        sx={{ height: 24, fontWeight: 600, fontSize: '0.72rem', bgcolor: alpha('#BC892C', 0.1), color: '#946C22' }}
+                    />
+                </Stack>
+            </Stack>
+
+            {hasCommodities ? (
+                <TableComponent
+                    endPoint={endPoint}
+                    loading={loading}
+                    exportData
+                    flat
+                    header={{ ...header, singular: "Inventory Commodity", plural: "Inventory Commodities" }}
+                    module="inventory commodities"
+                    rows={stocksTableData || []}
+                    columnHeaders={columnHeaders}
+                    paginationMode='client'
+                />
+            ) : (
+                <Box sx={{ py: 6, textAlign: 'center' }}>
+                    <Inventory2OutlinedIcon sx={{ fontSize: 40, color: neutral[300], mb: 1 }} />
+                    <Typography variant="body2" sx={{ color: neutral[500] }}>
+                        No commodities found in this inventory.
+                    </Typography>
+                </Box>
+            )}
+        </Box>
     );
 };
 

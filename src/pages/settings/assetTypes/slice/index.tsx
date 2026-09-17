@@ -10,24 +10,66 @@ import { createSlice } from "@reduxjs/toolkit";
 import { IAssetType } from "../interface";
 
 interface IAssetTypeState {
-    assetTypes: Array<IAssetType>
+    assetTypes: Array<IAssetType>;
+    totalPages: number;
+    totalElements: number;
 }
 
 const initialState: IAssetTypeState = {
-    assetTypes: []
+    assetTypes: [],
+    totalPages: 0,
+    totalElements: 0,
 }
-
 
 const assetTypeSlice = createSlice({
     name: "assetTypes",
     initialState,
     reducers: {
         loadAllAssetTypes: (state, action) => {
-            state.assetTypes = action.payload
-        }
+            state.assetTypes = action.payload;
+        },
+        setPaginationMeta: (state, action) => {
+            state.totalPages = action.payload.totalPages;
+            state.totalElements = action.payload.totalElements;
+        },
+        addAssetType: (state, action) => {
+            state.assetTypes = [...state.assetTypes, action.payload];
+        },
+        updateAssetType: (state, action) => {
+            state.assetTypes = state.assetTypes.map(at =>
+                at.id === action.payload?.id ? action.payload : at
+            );
+        },
+        updateAssetTypeFieldConfig: (state, action) => {
+            // action.payload = { id, fieldConfig }
+            state.assetTypes = state.assetTypes.map(at =>
+                at.id === action.payload?.id
+                    ? { ...at, fieldConfig: action.payload.fieldConfig }
+                    : at
+            );
+        },
+        updateAssetTypeCustomAttributes: (state, action) => {
+            // action.payload = { id, customAttributes }
+            state.assetTypes = state.assetTypes.map(at =>
+                at.id === action.payload?.id
+                    ? { ...at, customAttributes: action.payload.customAttributes }
+                    : at
+            );
+        },
+        removeAssetType: (state, action) => {
+            state.assetTypes = state.assetTypes.filter(at => at.id !== action.payload?.id);
+        },
     }
 });
 
 const { actions, reducer } = assetTypeSlice;
-export const { loadAllAssetTypes } = actions;
+export const {
+    loadAllAssetTypes,
+    setPaginationMeta,
+    addAssetType,
+    updateAssetType,
+    updateAssetTypeFieldConfig,
+    updateAssetTypeCustomAttributes,
+    removeAssetType,
+} = actions;
 export default reducer;

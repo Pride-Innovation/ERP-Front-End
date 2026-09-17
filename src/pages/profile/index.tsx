@@ -7,6 +7,7 @@ Managing Director
 
 import { useContext, useEffect, useState } from "react";
 import {
+    Alert,
     Container,
     Grid,
     alpha
@@ -28,10 +29,11 @@ import UserHeader from "./UserHeader";
 import UserInfoCard from "./UserInfoCard";
 import WorkInfoCard from "./WorkInfoCard";
 import AccountInfoCard from "./AccountInfoCard";
-import { fetchSingleUserService } from "../users/service";
+import { fetchOwnProfileService, fetchSingleUserService } from "../users/service";
 import { IUserAxiosResponse } from "../users/interface";
 import { toast } from "react-toastify";
 import { removeUserProfileImageService, updateUserProfileImageService } from "./service";
+import { refusal } from "../../core/apis/globalService";
 
 
 const Profile = () => {
@@ -42,6 +44,14 @@ const Profile = () => {
     const { handleClose, modalState, open, handleOptionClicked } = AppBarUtills();
     const { getCurrentUser } = RoutesUtills();
     const [image, setImage] = useState<string>('');
+    /** Set when the profile could not be read — a refusal, or a record that is not there. */
+    const [loadError, setLoadError] = useState<string | null>(null);
+
+    /*
+     * Declared before the fetch that reads it — it decides which endpoint is asked, and it gates
+     * every action on the page, so the two must be the same judgement.
+     */
+    const isCurrentUser = getCurrentUser()?.id === parseInt(id as string, 10);
     const {
         open: formOpen,
         handleClose: formHandleClose,
@@ -50,10 +60,41 @@ const Profile = () => {
         handleOpen: formHandleOpen
     } = UserUtils();
 
+    /*
+     * Cleared before every fetch, and on every failure.
+     *
+     * `UserContext` is mounted at the app root, so `user` survives navigation — and this swallowed
+     * its failures into a `console.log` with no non-200 branch. The two together meant that opening a
+     * profile the server refused left **the previously-viewed person's profile rendered under the new
+     * URL**: their name, email, staff number and duty station, under somebody else's id.
+     *
+     * That became reachable when user records were scoped by branch, so it is this page's job to
+     * handle a refusal rather than paint over it. A boundary must not render as a fact — and here the
+     * fact it rendered was another person's record.
+     */
     const getUserDetails = async () => {
+        setLoadError(null);
+        setUser({} as typeof user);
         try {
-            const response = await fetchSingleUserService(id as string) as IUserAxiosResponse;
-            if (response.status === 200) {
+            /*
+              * Your own profile does not go through the directory.
+              *
+              * `GET /users/{id}` is the staff directory and needs `READ_USER` — so reading your own
+              * profile through it required a permission that also opens the Users page, which in turn
+              * needs `READ_ROLE` for one of its filters. An officer ended up holding two
+              * administrative permissions to look at themselves.
+              *
+              * `isCurrentUser` is computed from the same id below, so the two cannot disagree about
+              * whose profile this is.
+              */
+            const response = (isCurrentUser
+                ? await fetchOwnProfileService()
+                : await fetchSingleUserService(id as string)) as IUserAxiosResponse;
+            if (response.status !== 200) {
+                setLoadError(refusal(response, 'This profile could not be loaded.'));
+                return;
+            }
+            {
                 // Process the profile image path before setting user data
                 const userData = response.data;
                 if (userData.profileImage) {
@@ -67,7 +108,8 @@ const Profile = () => {
                 setUser(userData);
             }
         } catch (error) {
-            console.log(error);
+            console.error('Could not load profile', error);
+            setLoadError(refusal(error, 'This profile could not be loaded.'));
         }
     };
 
@@ -76,7 +118,6 @@ const Profile = () => {
     }, [id]);
 
     const userImage = image || (user?.profileImage || (user?.gender === 'male' ? MaleProfile : FemaleProfile));
-    const isCurrentUser = getCurrentUser()?.id === parseInt(id as string, 10);
 
 
     const handleProfileImageUpdate = async (file: File) => {
@@ -131,6 +172,14 @@ const Profile = () => {
         }
     };
 
+    if (loadError) {
+        return (
+            <Container maxWidth="xl" sx={{ py: 3 }}>
+                <Alert severity="warning">{loadError}</Alert>
+            </Container>
+        );
+    }
+
     return (
         <Container maxWidth="xl" sx={{ py: 3, bgcolor: '#F3F7FB', borderRadius: 2, border: `1px solid ${alpha('#000', 0.08)}` }}>
             {modalState === modalStates.password && (
@@ -161,7 +210,12 @@ const Profile = () => {
             {formModalState === crudStates.update && (
                 <ModalComponent title='Update Personal Information' open={formOpen} handleClose={formHandleClose} width="70%">
                     <UpdateUsers
-                        handleClose={formHandleClose}
+                        handleClose={() => {
+                            formHandleClose();
+                            // UpdateUsers writes to the Redux store, but this page renders
+                            // from UserContext — refetch so the header/cards show the edit.
+                            getUserDetails();
+                        }}
                         sendingRequest={false}
                         setSendingRequest={() => { }}
                         user={user}

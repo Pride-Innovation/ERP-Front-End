@@ -1,26 +1,21 @@
-import React, { useContext, useEffect } from 'react';
+import { useContext } from 'react';
 import {
     Box,
     Typography,
-    Grid,
     Chip,
-    useTheme,
-    // useMediaQuery,
     alpha,
 } from '@mui/material';
 import {
     History as HistoryIcon,
 } from '@mui/icons-material';
-import { IRequest, IRequestReport, IRequestReportAxiosResponse } from '../../interface';
+import { IRequest, IRequestReport } from '../../interface';
 import MovementStage from './MovementStage';
-import { findRequestReportByRequestService } from '../service';
 import { RequestContext } from '../../../../context/request/RequestContext';
+import { brand } from '../../../../utils/tokens';
 
-// Brand colors (consistent with other components)
 const PRIMARY_COLOR = '#08796C';
-const ACCENT_COLOR = '#BC892C';
+const REJECT_COLOR = '#DC2626';
 
-// Define the data structure for movement history
 export interface MovementStep {
     id?: number;
     status: string;
@@ -38,303 +33,231 @@ export interface MovementStep {
     isCurrent?: boolean;
 }
 
+const fmtDate = (d?: string | null) =>
+    d ? new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A';
+const fmtTime = (d?: string | null) =>
+    d ? new Date(d).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : '';
+const fullName = (u?: { firstName?: string; lastName?: string } | null) =>
+    `${u?.firstName ?? ''} ${u?.lastName ?? ''}`.trim();
 
+const isRejection = (report: IRequestReport) =>
+    (report.status?.status ?? '').toLowerCase().includes('reject');
+
+/** Human label for an approval-history entry, derived from its status code. */
+const reportLabel = (report: IRequestReport): string => {
+    const code = (report.status?.status ?? '').toLowerCase();
+    if (code.includes('reject')) return 'Request Rejected';
+    // A fresh "requestCreated" record after the first one is a resubmission by the requester.
+    if (code === 'requestcreated') return 'Request Resubmitted';
+    return report.status?.name || 'Approved';
+};
 
 const MovementHistory = ({ request }: { request: IRequest }) => {
-    const theme = useTheme();
-    // const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-    // const isTablet = useMediaQuery(theme.breakpoints.down('md'));
-    const [requestReport, setRequestReport] = React.useState<IRequestReport | null>(null);
     const { acknowledgeRequest, currentIssuance, issuanceApproval, acknowledgeIssuance } = useContext(RequestContext);
 
-    const findRequestReportByRequest = async (requestId: number) => {
-        try {
-            const response = await findRequestReportByRequestService(requestId) as IRequestReportAxiosResponse;
-            if (response.data && response.data.id && response.status === 200) {
-                setRequestReport(response.data);
-                return response;
-            }
-            return null;
-        } catch (error) {
-            console.error("Error fetching request report:", error);
-            return null;
-        }
-    }
+    // The full, append-only approval trail comes back on the request itself — every
+    // approval, rejection and resubmission is its own persisted record.
+    const reports = [...(request.requestReports ?? [])].sort(
+        (a, b) => new Date(a.createDate).getTime() - new Date(b.createDate).getTime(),
+    );
 
-    useEffect(() => {
-        if (request && request.id) {
-            findRequestReportByRequest(request.id as number)
-        }
-    }, [request]);
+    // Header/progress reflect the request's *current* state; individual rejections
+    // are still rendered in the trail below regardless of where the request is now.
+    const requestIsRejected = (request.status?.status ?? '').toLowerCase() === 'requestrejected';
 
+    const progressPercent = requestIsRejected ? 100
+        : acknowledgeIssuance?.createDate ? 100
+        : issuanceApproval?.createDate ? 80
+        : currentIssuance?.createDate ? 60
+        : acknowledgeRequest?.createDate ? 40
+        : request ? 20 : 0;
+
+    const currentStageLabel = requestIsRejected ? 'Request Rejected'
+        : acknowledgeIssuance?.createDate ? 'Items Received'
+        : issuanceApproval?.createDate ? 'Issuance Approved'
+        : currentIssuance?.createDate ? 'Items Issued'
+        : acknowledgeRequest?.createDate ? 'Admin Acknowledgment'
+        : request ? 'Request Submitted' : 'Initiated';
 
     return (
         <Box>
-            {/* Header section - more compact for tab content */}
-            <Box sx={{ mb: 2, display: 'flex', alignItems: 'center' }}>
+            {/* Header */}
+            <Box sx={{ mb: 2.5, display: 'flex', alignItems: 'center', gap: 1.5 }}>
                 <Box
                     sx={{
-                        color: PRIMARY_COLOR,
-                        bgcolor: alpha(PRIMARY_COLOR, 0.08),
+                        width: 32,
+                        height: 32,
+                        borderRadius: '8px',
+                        bgcolor: alpha(brand[500], 0.1),
+                        color: brand[600],
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        borderRadius: 1,
-                        p: 0.5,
-                        mr: 1.5,
-                        width: 34,
-                        height: 34
+                        flexShrink: 0,
                     }}
                 >
-                    <HistoryIcon fontSize="small" />
+                    <HistoryIcon sx={{ fontSize: 17 }} />
                 </Box>
                 <Box>
-                    <Typography variant="subtitle1" fontWeight={600} color="text.primary">
-                        Asset Request Workflow
+                    <Typography variant="subtitle2" fontWeight={700} color="text.primary">
+                        Approval History
                     </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                        Track approval, processing, and delivery status
+                    <Typography variant="caption" color="text.secondary">
+                        Track approvals, processing and delivery
                     </Typography>
                 </Box>
             </Box>
 
-            {/* Progress indicator - streamlined */}
-            <Box
-                sx={{
-                    mb: 3,
-                    px: { xs: 0, md: 1 },
-                    py: 1,
-                    bgcolor: alpha('#f5f5f5', 0.5),
-                    borderRadius: 1,
-                    border: `1px solid ${alpha('#000', 0.06)}`
-                }}
-            >
-                <Grid container spacing={2} alignItems="center">
-                    <Grid item xs={12} sm={4}>
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                            <Typography variant="body2" color="text.secondary" sx={{ mr: 1 }}>
-                                Current Stage:
-                            </Typography>
-                            <Chip
-                                label={
-                                    acknowledgeIssuance ? "Items Received" :
-                                        issuanceApproval ? "Issuance Approved" :
-                                            currentIssuance ? "Items Issued" :
-                                                acknowledgeRequest ? "Admin Acknowledgment" :
-                                                    request ? "Request Submitted" : "Initiated"
-                                }
-                                size="small"
-                                sx={{
-                                    fontWeight: 600,
-                                    bgcolor: alpha(PRIMARY_COLOR, 0.9),
-                                    color: 'white'
-                                }}
-                            />
-                        </Box>
-                    </Grid>
-                    <Grid item xs={12} sm={8}>
-                        <Box sx={{ position: 'relative', height: 6, bgcolor: alpha(PRIMARY_COLOR, 0.1), borderRadius: 3 }}>
-                            <Box
-                                sx={{
-                                    position: 'absolute',
-                                    left: 0,
-                                    top: 0,
-                                    height: '100%',
-                                    width: `${acknowledgeIssuance ? 100 :
-                                        issuanceApproval ? 80 :
-                                            currentIssuance ? 60 :
-                                                acknowledgeRequest ? 40 :
-                                                    request ? 20 : 0}%`,
-                                    background: `linear-gradient(90deg, ${PRIMARY_COLOR} 0%, ${ACCENT_COLOR} 100%)`,
-                                    borderRadius: 3,
-                                    transition: 'width 1s ease-in-out'
-                                }}
-                            />
-                        </Box>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 0.5 }}>
-                            <Typography variant="caption" color="text.secondary">
-                                Start
-                            </Typography>
-                            <Typography variant="caption" color="text.secondary">
-                                {Math.round((acknowledgeIssuance ? 100 :
-                                    issuanceApproval ? 80 :
-                                        currentIssuance ? 60 :
-                                            acknowledgeRequest ? 40 :
-                                                request ? 20 : 0))}% Complete
-                            </Typography>
-                        </Box>
-                    </Grid>
-                </Grid>
+            {/* Progress strip */}
+            <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexShrink: 0 }}>
+                    <Typography variant="caption" color="text.secondary">
+                        Current stage:
+                    </Typography>
+                    <Chip
+                        label={currentStageLabel}
+                        size="small"
+                        sx={{
+                            fontWeight: 700,
+                            fontSize: '0.72rem',
+                            bgcolor: requestIsRejected ? REJECT_COLOR : brand[500],
+                            color: '#fff',
+                            height: 22,
+                        }}
+                    />
+                </Box>
+                <Box sx={{ flex: 1, minWidth: 120 }}>
+                    <Box sx={{ position: 'relative', height: 5, bgcolor: alpha('#000', 0.06), borderRadius: 3 }}>
+                        <Box
+                            sx={{
+                                position: 'absolute',
+                                left: 0,
+                                top: 0,
+                                height: '100%',
+                                width: `${progressPercent}%`,
+                                bgcolor: requestIsRejected ? REJECT_COLOR : PRIMARY_COLOR,
+                                borderRadius: 3,
+                                transition: 'width 0.6s ease',
+                            }}
+                        />
+                    </Box>
+                </Box>
             </Box>
 
-            {/* Custom Timeline implementation - centered alignment */}
+            {/* Timeline */}
             <Box sx={{ position: 'relative' }}>
-                {/* Vertical line */}
+                {/* Vertical connector line */}
                 <Box
                     sx={{
                         position: 'absolute',
-                        left: 16, // Consistent left positioning for all screen sizes
-                        top: 0,
-                        bottom: 0,
+                        left: 16,
+                        top: 4,
+                        bottom: 16,
                         width: 2,
-                        background: `linear-gradient(to bottom, 
-                            ${alpha(PRIMARY_COLOR, 0.7)}, 
-                            ${alpha(PRIMARY_COLOR, 0.2)} 70%, 
-                            ${alpha(PRIMARY_COLOR, 0.1)})`,
-                        zIndex: 0
+                        bgcolor: alpha('#000', 0.06),
+                        zIndex: 0,
                     }}
                 />
 
+                {/* Original submission */}
+                {request && (
+                    <MovementStage step={{
+                        id: 0,
+                        status: 'Request Submitted',
+                        date: fmtDate(request.createDate),
+                        time: fmtTime(request.createDate),
+                        user: {
+                            name: fullName(request.requester),
+                            title: request.requester?.title?.name || '',
+                            /* A person's department in a timeline entry, not the request's origin -
+                               so this keeps its own unconditional fallback rather than adopting
+                               `requestedFromLabel`, which is keyed on Head Office. The field is
+                               labelled `department`; falling back to the branch when there is none is
+                               the right answer to *this* question. */
+                            department: request.requester?.department?.name || request.requester?.branch?.name,
+                        },
+                        comments: request.description || '',
+                        isCompleted: true,
+                    }} />
+                )}
 
-                {request && <MovementStage step={{
-                    id: 1,
-                    status: request.status?.name as string,
-                    date: request.createDate ? new Date(request.createDate).toLocaleDateString('en-GB', {
-                        day: '2-digit',
-                        month: 'short',
-                        year: 'numeric'
-                    }) : 'N/A',
-                    time: request.createDate ? new Date(request.createDate).toLocaleTimeString('en-GB', {
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    }) : '',
-                    user: {
-                        name: request.requester?.firstName + ' ' + request.requester?.lastName || '',
-                        title: request.requester?.title?.name || '',
-                        department: request.requester?.department?.name ? request.requester?.department?.name : request.requester?.branch?.name,
-                    },
-                    comments: request.description || '',
-                    isCompleted: true
-                }} />}
+                {/* Every approval, rejection and resubmission — append-only */}
+                {reports.map((report) => (
+                    <MovementStage key={report.id} step={{
+                        status: reportLabel(report),
+                        date: fmtDate(report.createDate),
+                        time: fmtTime(report.createDate),
+                        user: {
+                            name: fullName(report.approver),
+                            title: report.approver?.title?.name || '',
+                            department: report.approver?.department?.name || report.approver?.branch?.name,
+                        },
+                        comments: report.comment || '',
+                        isCompleted: true,
+                        isRejected: isRejection(report),
+                    }} />
+                ))}
 
-                {requestReport && <MovementStage step={{
-                    status: "Manager Approval",
-                    date: requestReport.createDate ? new Date(requestReport.createDate).toLocaleDateString('en-GB', {
-                        day: '2-digit',
-                        month: 'short',
-                        year: 'numeric'
-                    }) : 'N/A',
-                    time: requestReport.createDate ? new Date(requestReport.createDate).toLocaleTimeString('en-GB', {
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    }) : '',
-                    user: {
-                        name: requestReport.approver?.firstName + ' ' + requestReport.approver?.lastName || '',
-                        title: requestReport.approver?.title?.name || '',
-                        department: requestReport.approver?.department?.name ? requestReport.approver?.department?.name : requestReport.approver?.branch?.name,
-                    },
-                    comments: requestReport.comment || '',
-                    isCompleted: true
-                }} />}
+                {acknowledgeRequest?.createDate && (
+                    <MovementStage step={{
+                        status: 'Admin Acknowledgment',
+                        date: fmtDate(acknowledgeRequest.createDate),
+                        time: fmtTime(acknowledgeRequest.createDate),
+                        user: {
+                            name: fullName(acknowledgeRequest.user),
+                            title: acknowledgeRequest.user?.title?.name || '',
+                            department: acknowledgeRequest.user?.department?.name || acknowledgeRequest.user?.branch?.name,
+                        },
+                        comments: acknowledgeRequest.comment || '',
+                        isCompleted: true,
+                    }} />
+                )}
 
-                {acknowledgeRequest && <MovementStage step={{
-                    status: "Admin Acknowledgment",
-                    date: acknowledgeRequest.createDate ? new Date(acknowledgeRequest.createDate).toLocaleDateString('en-GB', {
-                        day: '2-digit',
-                        month: 'short',
-                        year: 'numeric'
-                    }) : 'N/A',
-                    time: acknowledgeRequest.createDate ? new Date(acknowledgeRequest.createDate).toLocaleTimeString('en-GB', {
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    }) : '',
-                    user: {
-                        name: acknowledgeRequest.user?.firstName + ' ' + acknowledgeRequest.user?.lastName || '',
-                        title: acknowledgeRequest.user?.title?.name || '',
-                        department: acknowledgeRequest.user?.department?.name ? acknowledgeRequest.user?.department?.name : acknowledgeRequest.user?.branch?.name,
-                    },
-                    comments: acknowledgeRequest.comment || '',
-                    isCompleted: true
-                }} />}
-                {currentIssuance && <MovementStage step={{
-                    status: "Items Issued",
-                    date: currentIssuance.createDate ? new Date(currentIssuance.createDate).toLocaleDateString('en-GB', {
-                        day: '2-digit',
-                        month: 'short',
-                        year: 'numeric'
-                    }) : 'N/A',
-                    time: currentIssuance.createDate ? new Date(currentIssuance.createDate).toLocaleTimeString('en-GB', {
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    }) : '',
-                    user: {
-                        name: currentIssuance.issuer?.firstName + ' ' + currentIssuance.issuer?.lastName || '',
-                        title: currentIssuance.issuer?.title?.name || '',
-                        department: currentIssuance.issuer?.department?.name ? currentIssuance.issuer?.department?.name : currentIssuance.issuer?.branch?.name,
-                    },
-                    comments: currentIssuance.comment || '',
-                    isCompleted: true
-                }} />}
-                {issuanceApproval && <MovementStage step={{
-                    status: "Issuance Approved",
-                    date: issuanceApproval.createDate ? new Date(issuanceApproval.createDate).toLocaleDateString('en-GB', {
-                        day: '2-digit',
-                        month: 'short',
-                        year: 'numeric'
-                    }) : 'N/A',
-                    time: issuanceApproval.createDate ? new Date(issuanceApproval.createDate).toLocaleTimeString('en-GB', {
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    }) : '',
-                    user: {
-                        name: issuanceApproval.user?.firstName + ' ' + issuanceApproval.user?.lastName || '',
-                        title: issuanceApproval.user?.title?.name || '',
-                        department: issuanceApproval.user?.department?.name ? issuanceApproval.user?.department?.name : issuanceApproval.user?.branch?.name,
-                    },
-                    comments: issuanceApproval.comment || '',
-                    isCompleted: true
-                }} />}
-                {acknowledgeIssuance && <MovementStage step={{
-                    status: "Items Received",
-                    date: acknowledgeIssuance.createDate ? new Date(acknowledgeIssuance.createDate).toLocaleDateString('en-GB', {
-                        day: '2-digit',
-                        month: 'short',
-                        year: 'numeric'
-                    }) : 'N/A',
-                    time: acknowledgeIssuance.createDate ? new Date(acknowledgeIssuance.createDate).toLocaleTimeString('en-GB', {
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    }) : '',
-                    user: {
-                        name: acknowledgeIssuance.user?.firstName + ' ' + acknowledgeIssuance.user?.lastName || '',
-                        title: acknowledgeIssuance.user?.title?.name || '',
-                        department: acknowledgeIssuance.user?.department?.name ? acknowledgeIssuance.user?.department?.name : acknowledgeIssuance.user?.branch?.name,
-                    },
-                    comments: acknowledgeIssuance.comment || '',
-                    isCompleted: true
-                }} />}
+                {currentIssuance?.createDate && (
+                    <MovementStage step={{
+                        status: 'Items Issued',
+                        date: fmtDate(currentIssuance.createDate),
+                        time: fmtTime(currentIssuance.createDate),
+                        user: {
+                            name: fullName(currentIssuance.issuer),
+                            title: currentIssuance.issuer?.title?.name || '',
+                            department: currentIssuance.issuer?.department?.name || currentIssuance.issuer?.branch?.name,
+                        },
+                        comments: currentIssuance.comment || '',
+                        isCompleted: true,
+                    }} />
+                )}
+
+                {issuanceApproval?.createDate && (
+                    <MovementStage step={{
+                        status: 'Issuance Approved',
+                        date: fmtDate(issuanceApproval.createDate),
+                        time: fmtTime(issuanceApproval.createDate),
+                        user: {
+                            name: fullName(issuanceApproval.user),
+                            title: issuanceApproval.user?.title?.name || '',
+                            department: issuanceApproval.user?.department?.name || issuanceApproval.user?.branch?.name,
+                        },
+                        comments: issuanceApproval.comment || '',
+                        isCompleted: true,
+                    }} />
+                )}
+
+                {acknowledgeIssuance?.createDate && (
+                    <MovementStage step={{
+                        status: 'Items Received',
+                        date: fmtDate(acknowledgeIssuance.createDate),
+                        time: fmtTime(acknowledgeIssuance.createDate),
+                        user: {
+                            name: fullName(acknowledgeIssuance.user),
+                            title: acknowledgeIssuance.user?.title?.name || '',
+                            department: acknowledgeIssuance.user?.department?.name || acknowledgeIssuance.user?.branch?.name,
+                        },
+                        comments: acknowledgeIssuance.comment || '',
+                        isCompleted: true,
+                    }} />
+                )}
             </Box>
-
-            <Box
-                sx={{
-                    textAlign: 'center',
-                    mt: 2,
-                    pt: 1.5,
-                    pb: 0.5,
-                    borderTop: `1px dashed ${alpha(theme.palette.divider, 0.3)}`
-                }}
-            >
-                <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.8rem' }}>
-                    This request was initiated on <b>14 Sep 2025</b> and is currently in the <b>Items Issued</b> stage.
-                </Typography>
-            </Box>
-
-            {/* Add custom animation for the pulsing dot */}
-            <Box
-                sx={{
-                    '@keyframes pulse': {
-                        '0%': {
-                            boxShadow: `0 0 0 0 ${alpha(PRIMARY_COLOR, 0.7)}`,
-                        },
-                        '70%': {
-                            boxShadow: `0 0 0 6px ${alpha(PRIMARY_COLOR, 0)}`,
-                        },
-                        '100%': {
-                            boxShadow: `0 0 0 0 ${alpha(PRIMARY_COLOR, 0)}`,
-                        },
-                    }
-                }}
-            />
         </Box>
     );
 };

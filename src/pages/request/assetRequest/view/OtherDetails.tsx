@@ -1,11 +1,9 @@
+import React from 'react';
 import {
     Box,
     Typography,
     Paper,
     alpha,
-    Divider,
-    Chip,
-    Stack
 } from "@mui/material";
 import { IRequest } from "../../interface";
 import { IAcknowledgeIssuanceReceipt, IIssue } from "../issue/interface";
@@ -21,150 +19,111 @@ import InputOutlinedIcon from '@mui/icons-material/InputOutlined';
 import HdrAutoOutlinedIcon from '@mui/icons-material/HdrAutoOutlined';
 import EventAvailableOutlinedIcon from '@mui/icons-material/EventAvailableOutlined';
 import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
-import HistoryIcon from '@mui/icons-material/History';
+import AccessTimeOutlinedIcon from '@mui/icons-material/AccessTimeOutlined';
 import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
+import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined';
+import { brand, border } from '../../../../utils/tokens';
+import { requestApproverLabel } from '../../approverLabel';
 
-// Brand colors
-const PRIMARY_COLOR = '#08796C';
-const SECONDARY_COLOR = '#BC892C';
+const TEAL = '#08796C';
 
-// Enhanced version of DetailSection
-const EnhancedDetailSection = ({
-    label,
-    text,
-    icon,
-    timestamp,
-    status = "completed",
-    islocation = false
-}: {
-    label: string;
-    text: string;
-    icon: JSX.Element;
-    timestamp?: string;
-    status?: "pending" | "completed" | "active";
-    islocation?: boolean;
-}) => {
-
-    // Define colors based on status
-    const getStatusStyles = () => {
-        switch (status) {
-            case "pending":
-                return {
-                    iconColor: "text.disabled",
-                    iconBg: alpha('#000', 0.05),
-                    borderColor: alpha('#000', 0.08)
-                };
-            case "active":
-                return {
-                    iconColor: PRIMARY_COLOR,
-                    iconBg: alpha(PRIMARY_COLOR, 0.12),
-                    borderColor: alpha(PRIMARY_COLOR, 0.3)
-                };
-            case "completed":
-            default:
-                return {
-                    iconColor: SECONDARY_COLOR,
-                    iconBg: alpha(SECONDARY_COLOR, 0.12),
-                    borderColor: alpha(SECONDARY_COLOR, 0.3)
-                };
-        }
-    };
-
-    const styles = getStatusStyles();
-
-    return (
-        <Paper
-            elevation={0}
+// ── Section header ──────────────────────────────────────────────────────────
+const SectionHeader = ({ title, icon }: { title: string; icon: React.ReactNode }) => (
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25, mb: 1.5 }}>
+        <Box
             sx={{
-                p: 2,
-                mb: 2,
-                borderRadius: 1.5,
-                border: `1px solid ${styles.borderColor}`,
-                bgcolor: alpha('#fff', 0.7),
-                transition: 'all 0.2s',
-                '&:hover': {
-                    boxShadow: `0 3px 10px ${alpha('#000', 0.08)}`,
-                }
+                width: 26,
+                height: 26,
+                borderRadius: '7px',
+                bgcolor: alpha(brand[500], 0.1),
+                color: brand[600],
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+                '& svg': { fontSize: 15 },
             }}
         >
-            <Stack direction="row" spacing={2} alignItems="flex-start">
-                <Box
-                    sx={{
-                        bgcolor: styles.iconBg,
-                        color: styles.iconColor,
-                        borderRadius: 1,
-                        width: 40,
-                        height: 40,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flexShrink: 0
-                    }}
-                >
-                    {icon}
-                </Box>
-
-                <Box sx={{ flexGrow: 1 }}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
-                        <Typography variant="subtitle2" fontWeight={600} color="text.primary">
-                            {label}
-                        </Typography>
-
-                        {status === "pending" ? (
-                            <Chip
-                                label="Pending"
-                                size="small"
-                                sx={{
-                                    fontSize: '0.75rem',
-                                    bgcolor: alpha('#9e9e9e', 0.1),
-                                    color: '#757575',
-                                    fontWeight: 500
-                                }}
-                            />
-                        ) : null}
-                    </Box>
-
-                    <Typography variant="body2" color="text.primary" sx={{ mb: 0.5 }}>
-                        {text}
-                    </Typography>
-
-                    {timestamp && (
-                        <Typography variant="caption" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                            {islocation ? <LocationOnOutlinedIcon fontSize="inherit" /> : <HistoryIcon fontSize="inherit" />}
-                            {timestamp}
-                        </Typography>
-                    )}
-                </Box>
-            </Stack>
-        </Paper>
-    );
-};
-
-// Section header component
-const SectionHeader = ({ title, icon }: { title: string, icon: JSX.Element }) => (
-    <Box sx={{ mb: 2, mt: 3 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-            <Box
-                sx={{
-                    bgcolor: alpha(PRIMARY_COLOR, 0.1),
-                    color: PRIMARY_COLOR,
-                    borderRadius: 1,
-                    width: 32,
-                    height: 32,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                }}
-            >
-                {icon}
-            </Box>
-            <Typography variant="subtitle1" fontWeight={600} color="text.secondary">
-                {title}
-            </Typography>
+            {icon}
         </Box>
-        <Divider sx={{ mt: 1.5 }} />
+        <Typography variant="caption" fontWeight={700} color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: '0.6px', fontSize: '0.7rem' }}>
+            {title}
+        </Typography>
     </Box>
 );
+
+// ── Info row — icon + label + value ────────────────────────────────────────
+const InfoRow = ({
+    icon,
+    label,
+    value,
+    secondary,
+    highlight = false,
+}: {
+    icon: React.ReactNode;
+    label: string;
+    value: string;
+    secondary?: string;
+    highlight?: boolean;
+}) => (
+    <Box
+        sx={{
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: 1.5,
+            py: 1.1,
+            borderBottom: `1px solid ${alpha('#000', 0.05)}`,
+            '&:last-child': { borderBottom: 'none' },
+        }}
+    >
+        <Box sx={{ color: highlight ? TEAL : 'text.disabled', mt: 0.15, flexShrink: 0, '& svg': { fontSize: 16 } }}>
+            {icon}
+        </Box>
+        <Box sx={{ minWidth: 0, flex: 1 }}>
+            <Typography variant="caption" color="text.disabled" sx={{ display: 'block', lineHeight: 1.2, mb: 0.25, fontSize: '0.68rem' }}>
+                {label}
+            </Typography>
+            <Typography variant="body2" fontWeight={highlight ? 600 : 400} color={highlight ? 'text.primary' : 'text.primary'} sx={{ lineHeight: 1.4 }}>
+                {value}
+            </Typography>
+            {secondary && (
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.25 }}>
+                    {secondary}
+                </Typography>
+            )}
+        </Box>
+    </Box>
+);
+
+// ── Card wrapper ────────────────────────────────────────────────────────────
+const InfoCard = ({ children, mt = 0 }: { children: React.ReactNode; mt?: number }) => (
+    <Paper
+        elevation={0}
+        sx={{
+            border: `1px solid ${border.subtle}`,
+            borderRadius: 2,
+            overflow: 'hidden',
+            bgcolor: '#fff',
+            mt,
+        }}
+    >
+        {children}
+    </Paper>
+);
+
+const CardContent = ({ children, header }: { children: React.ReactNode; header: React.ReactNode }) => (
+    <>
+        <Box sx={{ px: 2, pt: 2, pb: 1.5, bgcolor: alpha(brand[500], 0.025), borderBottom: `1px solid ${alpha(brand[500], 0.07)}` }}>
+            {header}
+        </Box>
+        <Box sx={{ px: 2, py: 0.5 }}>
+            {children}
+        </Box>
+    </>
+);
+
+const getTimestamp = (dateString?: string | Date) =>
+    dateString ? moment(dateString).format('MMM DD, YYYY · h:mm A') : undefined;
 
 const OtherDetails = ({
     request,
@@ -173,139 +132,171 @@ const OtherDetails = ({
     issuanceApproval,
     issuance
 }: {
-    request: IRequest
-} & {
-    acknowledgeIssuance?: IAcknowledgeIssuanceReceipt,
-    acknowledgeRequest?: IAcknowledgeIssuanceReceipt,
-    issuanceApproval?: IAcknowledgeIssuanceReceipt,
-    issuance?: IIssue
+    request: IRequest;
+    acknowledgeIssuance?: IAcknowledgeIssuanceReceipt;
+    acknowledgeRequest?: IAcknowledgeIssuanceReceipt;
+    issuanceApproval?: IAcknowledgeIssuanceReceipt;
+    issuance?: IIssue;
 }) => {
-    // Determine if we have any processing details
-    const hasProcessingDetails = acknowledgeRequest?.user || issuance?.issuer ||
-        issuanceApproval?.user || acknowledgeIssuance?.user;
-
-    // Get formatted timestamps if available
-    const getTimestamp = (dateString?: string | Date) => {
-        return dateString ? moment(dateString).format('MMM DD, YYYY - h:mm A') : undefined;
-    };
+    const hasProcessingDetails =
+        acknowledgeRequest?.user ||
+        issuance?.issuer ||
+        issuanceApproval?.user ||
+        acknowledgeIssuance?.user;
 
     return (
-        <Box sx={{ px: 1 }}>
-            {/* Request Initiation Section */}
-            <SectionHeader title="Request Initiation" icon={<AssignmentTurnedInIcon fontSize="small" />} />
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
 
-            {request.requester && (
-                <EnhancedDetailSection
-                    label="Requested By"
-                    icon={<AccountCircleOutlinedIcon />}
-                    text={`${request.requester.firstName} ${request.requester.lastName}`}
-                    timestamp={getTimestamp(request.createDate as string)}
-                    status="completed"
-                />
-            )}
+            {/* Request Initiation */}
+            <InfoCard>
+                <CardContent
+                    header={<SectionHeader title="Request Initiation" icon={<AssignmentTurnedInIcon />} />}
+                >
+                    {request.requester && (
+                        <InfoRow
+                            icon={<AccountCircleOutlinedIcon />}
+                            label="Requested By"
+                            value={`${request.requester.firstName} ${request.requester.lastName}`}
+                            secondary={getTimestamp(request.createDate as string)}
+                            highlight
+                        />
+                    )}
 
-            {request.currentApprover && (
-                <EnhancedDetailSection
-                    label="Current Approver"
-                    icon={<SupervisedUserCircleOutlinedIcon />}
-                    text={`${request.currentApprover.firstName} ${request.currentApprover.lastName}`}
-                    status={acknowledgeRequest?.user ? "active" : "pending"}
-                    islocation
-                    timestamp={`${request.currentApprover.title?.name
-                        ? request.currentApprover.title.name : ''} 
-                        • ${request.currentApprover.department?.name ?
-                            `${request?.currentApprover?.department?.name} •` : ''} 
-                         ${request?.currentApprover?.branch?.name}`}
-                />
-            )}
+                    {/*
+                      * Rendered for a unit-routed step too, which used to disappear entirely: the row
+                      * was conditional on `currentApprover`, so a request with Admin simply had no
+                      * "Current Approver" line at all and the reader could not tell whether that meant
+                      * nobody or nobody-had-checked.
+                      *
+                      * The secondary line stays a person's posting; a unit has no title or department
+                      * to qualify it with, and inventing one would be worse than leaving it blank.
+                      */}
+                    {requestApproverLabel(request) && (
+                        <InfoRow
+                            icon={<SupervisedUserCircleOutlinedIcon />}
+                            label="Current Approver"
+                            value={requestApproverLabel(request) as string}
+                            secondary={request.currentApprover ? [
+                                request.currentApprover.title?.name,
+                                request.currentApprover.department?.name,
+                                request.currentApprover.branch?.name,
+                            ].filter(Boolean).join(' · ') : undefined}
+                        />
+                    )}
 
-            {/* Processing Timeline Section */}
+                    {request.currentApprover?.branch?.name && (
+                        <InfoRow
+                            icon={<LocationOnOutlinedIcon />}
+                            label="Approver Branch"
+                            value={request.currentApprover.branch.name}
+                        />
+                    )}
+
+                    {!request.requester && !request.currentApprover && (
+                        <Typography variant="body2" color="text.disabled" sx={{ py: 1.5, fontStyle: 'italic', fontSize: '0.82rem' }}>
+                            No initiation details available
+                        </Typography>
+                    )}
+                </CardContent>
+            </InfoCard>
+
+            {/* Processing Timeline */}
             {hasProcessingDetails && (
-                <>
-                    <SectionHeader title="Processing Timeline" icon={<TodayOutlinedIcon fontSize="small" />} />
+                <InfoCard>
+                    <CardContent
+                        header={<SectionHeader title="Processing Timeline" icon={<AccountTreeOutlinedIcon />} />}
+                    >
+                        {acknowledgeRequest?.user && (
+                            <InfoRow
+                                icon={<AddchartIcon />}
+                                label="Request Acknowledged"
+                                value={`${acknowledgeRequest.user.firstName} ${acknowledgeRequest.user.lastName}`}
+                                secondary={getTimestamp(acknowledgeRequest.createDate as string)}
+                                highlight
+                            />
+                        )}
 
-                    {acknowledgeRequest?.user && (
-                        <EnhancedDetailSection
-                            label="Request Acknowledged"
-                            icon={<AddchartIcon />}
-                            text={`${acknowledgeRequest.user.firstName} ${acknowledgeRequest.user.lastName}`}
-                            timestamp={getTimestamp(acknowledgeRequest.createDate as string)}
-                            status="completed"
-                        />
-                    )}
+                        {issuance?.issuer && (
+                            <InfoRow
+                                icon={<InputOutlinedIcon />}
+                                label="Items Issued"
+                                value={`${issuance.issuer.firstName} ${issuance.issuer.lastName}`}
+                                secondary={getTimestamp(issuance.createDate)}
+                                highlight
+                            />
+                        )}
 
-                    {issuance?.issuer && (
-                        <EnhancedDetailSection
-                            label="Items Issued"
-                            icon={<InputOutlinedIcon />}
-                            text={`${issuance.issuer.firstName} ${issuance.issuer.lastName}`}
-                            timestamp={getTimestamp(issuance.createDate)}
-                            status="completed"
-                        />
-                    )}
+                        {issuanceApproval?.user && (
+                            <InfoRow
+                                icon={<ThumbUpOffAltIcon />}
+                                label="Issuance Approved"
+                                value={`${issuanceApproval.user.firstName} ${issuanceApproval.user.lastName}`}
+                                secondary={getTimestamp(issuanceApproval.createDate as string)}
+                                highlight
+                            />
+                        )}
 
-                    {issuanceApproval?.user && (
-                        <EnhancedDetailSection
-                            label="Issuance Approved"
-                            icon={<ThumbUpOffAltIcon />}
-                            text={`${issuanceApproval.user.firstName} ${issuanceApproval.user.lastName}`}
-                            timestamp={getTimestamp(issuanceApproval.createDate as string)}
-                            status="completed"
-                        />
-                    )}
-
-                    {acknowledgeIssuance?.user && (
-                        <EnhancedDetailSection
-                            label="Issuance Acknowledged"
-                            icon={<HdrAutoOutlinedIcon />}
-                            text={`${acknowledgeIssuance.user.firstName} ${acknowledgeIssuance.user.lastName}`}
-                            timestamp={getTimestamp(acknowledgeIssuance.createDate as string)}
-                            status="completed"
-                        />
-                    )}
-                </>
+                        {acknowledgeIssuance?.user && (
+                            <InfoRow
+                                icon={<HdrAutoOutlinedIcon />}
+                                label="Issuance Acknowledged"
+                                value={`${acknowledgeIssuance.user.firstName} ${acknowledgeIssuance.user.lastName}`}
+                                secondary={getTimestamp(acknowledgeIssuance.createDate as string)}
+                                highlight
+                            />
+                        )}
+                    </CardContent>
+                </InfoCard>
             )}
 
-            {/* Timestamps Section */}
-            <SectionHeader title="Timestamps" icon={<EventAvailableOutlinedIcon fontSize="small" />} />
+            {/* Timestamps */}
+            <InfoCard>
+                <CardContent
+                    header={<SectionHeader title="Timestamps" icon={<AccessTimeOutlinedIcon />} />}
+                >
+                    {request.createDate && (
+                        <InfoRow
+                            icon={<TodayOutlinedIcon />}
+                            label="Created"
+                            value={moment(request.createDate).format('MMMM DD, YYYY')}
+                            secondary={moment(request.createDate).format('h:mm A')}
+                        />
+                    )}
 
-            {request.createDate && (
-                <EnhancedDetailSection
-                    label="Creation Date"
-                    icon={<TodayOutlinedIcon />}
-                    text={moment(request.createDate).format('MMMM DD, YYYY - h:mm A')}
-                    status="completed"
-                />
-            )}
+                    {request.lastModified && (
+                        <InfoRow
+                            icon={<EventAvailableOutlinedIcon />}
+                            label="Last Updated"
+                            value={moment(request.lastModified).format('MMMM DD, YYYY')}
+                            secondary={moment(request.lastModified).format('h:mm A')}
+                        />
+                    )}
 
-            {request.lastModified && (
-                <EnhancedDetailSection
-                    label="Last Updated"
-                    icon={<EventAvailableOutlinedIcon />}
-                    text={moment(request.lastModified).format('MMMM DD, YYYY - h:mm A')}
-                    status="completed"
-                />
-            )}
+                    {!request.createDate && !request.lastModified && (
+                        <Typography variant="body2" color="text.disabled" sx={{ py: 1.5, fontStyle: 'italic', fontSize: '0.82rem' }}>
+                            No timestamp data available
+                        </Typography>
+                    )}
+                </CardContent>
+            </InfoCard>
 
-            {/* Empty State */}
+            {/* Empty state */}
             {!request.requester && !hasProcessingDetails && !request.createDate && (
-                <Paper
-                    elevation={0}
+                <Box
                     sx={{
-                        p: 3,
-                        borderRadius: 2,
-                        border: `1px dashed ${alpha('#000', 0.15)}`,
+                        py: 5,
                         display: 'flex',
-                        justifyContent: 'center',
+                        flexDirection: 'column',
                         alignItems: 'center',
-                        bgcolor: 'background.paper',
-                        my: 3
+                        gap: 1,
+                        color: 'text.disabled',
                     }}
                 >
-                    <Typography color="text.secondary" align="center" sx={{ fontStyle: 'italic' }}>
-                        No processing details available for this request
+                    <AssignmentTurnedInIcon sx={{ fontSize: 36 }} />
+                    <Typography variant="body2" sx={{ fontStyle: 'italic' }}>
+                        No processing details available
                     </Typography>
-                </Paper>
+                </Box>
             )}
         </Box>
     );

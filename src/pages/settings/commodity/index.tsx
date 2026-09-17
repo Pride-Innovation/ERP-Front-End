@@ -7,7 +7,6 @@ Managing Director
 
 import {
   Box,
-  Grid,
   Typography,
   Button,
   Stack,
@@ -40,6 +39,9 @@ import CreateCommodity from "./CreateCommodity";
 import UpdateCommodity from "./UpdateCommodity";
 import DeleteCommodity from "./DeleteCommodity";
 import { useDebounce } from "../../../hooks/useDebounce";
+import { RequirePermission } from "../../../core/permissions";
+import { PERMISSIONS } from "../../../core/permissions/constants";
+import { PageHero } from "../../../components/layout";
 
 const PRIMARY = '#08796C';
 
@@ -145,21 +147,20 @@ const Commodities = () => {
         </ModalComponent>
       )}
 
-      {/* Sub-page Header */}
-      <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 3, pb: 2.5, borderBottom: '1px solid #E2E8F0' }}>
-        <Stack direction="row" alignItems="center" spacing={1.5}>
-          <Box sx={{ width: 44, height: 44, borderRadius: '12px', background: 'linear-gradient(135deg, #08796C, #065E53)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <CategoryOutlinedIcon sx={{ color: '#fff', fontSize: 22 }} />
-          </Box>
-          <Box>
-            <Typography variant="h6" sx={{ fontWeight: 700, color: '#1E293B', lineHeight: 1.3 }}>Commodity Management</Typography>
-            <Typography variant="body2" sx={{ color: '#64748B' }}>Manage commodity types, asset classifications, and inventory categories</Typography>
-          </Box>
-        </Stack>
-        <Box sx={{ bgcolor: alpha(PRIMARY, 0.08), color: PRIMARY, fontWeight: 700, borderRadius: '6px', px: 1.5, py: 0.5, fontSize: '0.75rem', flexShrink: 0, mt: 0.5 }}>
-          {totalElements} items
-        </Box>
-      </Box>
+      <PageHero
+        title="Commodity Management"
+        subtitle="Manage commodity types, asset classifications, and inventory categories"
+        icon={<CategoryOutlinedIcon />}
+        stat={{ value: totalElements ?? 0, label: 'records' }}
+        actions={
+          <RequirePermission permission={PERMISSIONS.CREATE_SETTING}>
+            <Button onClick={createCommodity} startIcon={<AddIcon />} variant="contained"
+              sx={{ height: 36, px: 2.5, borderRadius: '8px', textTransform: 'none', fontWeight: 600, bgcolor: PRIMARY, flexShrink: 0, '&:hover': { bgcolor: '#065E53' }, boxShadow: `0 2px 8px ${alpha(PRIMARY, 0.3)}` }}>
+              Add Commodity
+            </Button>
+          </RequirePermission>
+        }
+      />
 
       {/* Filter Bar */}
       <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} alignItems={{ xs: "stretch", sm: "center" }} justifyContent="space-between" sx={{ mb: 3 }}>
@@ -186,10 +187,6 @@ const Commodities = () => {
             </Select>
           </FormControl>
         </Stack>
-        <Button onClick={createCommodity} startIcon={<AddIcon />} variant="contained"
-          sx={{ height: 36, px: 2.5, borderRadius: '8px', textTransform: 'none', fontWeight: 600, bgcolor: PRIMARY, flexShrink: 0, '&:hover': { bgcolor: '#065E53' }, boxShadow: `0 2px 8px ${alpha(PRIMARY, 0.3)}` }}>
-          Add Commodity
-        </Button>
       </Stack>
 
       {/* Commodity Cards */}
@@ -212,17 +209,17 @@ const Commodities = () => {
         ) : commodities.length > 0 ? (
           <Fade in={!loading}>
             <Box>
-              <Grid container spacing={3}>
-                {commodities.map((commodity) => (
-                  <Grid item xs={12} sm={6} md={6} lg={6} xl={4} key={commodity.id}>
-                    <CommodityCard
-                      commodity={commodity}
-                      deleteCommodity={deleteCommodity}
-                      updateCommodity={updateCommodity}
-                    />
-                  </Grid>
+              <Box className="settings-card-grid--wide">
+                {commodities.map((commodity, i) => (
+                  <CommodityCard
+                    key={commodity.id}
+                    commodity={commodity}
+                    deleteCommodity={deleteCommodity}
+                    updateCommodity={updateCommodity}
+                    index={i}
+                  />
                 ))}
-              </Grid>
+              </Box>
               {totalPages > 1 && (
                 <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
                   <Pagination
@@ -278,18 +275,20 @@ const Commodities = () => {
                   Clear Filters
                 </Button>
               ) : (
-                <Button
-                  variant="contained"
-                  onClick={createCommodity}
-                  startIcon={<AddIcon />}
-                  sx={{
-                    textTransform: 'none',
-                    borderRadius: 1.5,
-                    px: 3
-                  }}
-                >
-                  Create Commodity
-                </Button>
+                <RequirePermission permission={PERMISSIONS.CREATE_SETTING}>
+                  <Button
+                    variant="contained"
+                    onClick={createCommodity}
+                    startIcon={<AddIcon />}
+                    sx={{
+                      textTransform: 'none',
+                      borderRadius: 1.5,
+                      px: 3
+                    }}
+                  >
+                    Create Commodity
+                  </Button>
+                </RequirePermission>
               )}
             </Paper>
           </Fade>

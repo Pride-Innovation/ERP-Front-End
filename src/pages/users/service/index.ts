@@ -8,6 +8,22 @@ Managing Director
 import axiosInstance from "../../../core/apis/axiosInstance";
 import { IUserAxiosResponse } from "../interface";
 
+/**
+ * A paginated page of the staff directory.
+ *
+ * <p>Branch-scoped on the server: a branch user's request comes back with their own duty station
+ * whatever they ask for, and Head Office sees everyone. There is deliberately no `branchId` here —
+ * passing one from the client would be a suggestion rather than a rule, and the endpoint ignores it
+ * below ALL scope.
+ */
+const fetchUsersService = async (params?: Record<string, any>) => {
+  try {
+    return await axiosInstance.get("users", { params });
+  } catch (error) {
+    return error;
+  }
+};
+
 const createUSerService = async (body: object) => {
   try {
     const response = await axiosInstance.post("users", body);
@@ -43,6 +59,25 @@ const unBlockUserService = async (id: string | number) => {
     return error;
   }
 }
+
+/**
+ * Your own record, from the JWT.
+ *
+ * <p>Separate from `fetchSingleUserService` because they are different questions with different
+ * rules. That one reads the **staff directory** and needs `READ_USER`; this one takes no id and can
+ * only ever return the caller, so it needs nothing beyond being signed in.
+ *
+ * <p>Using the directory endpoint for the profile page is what made seeing your own profile require
+ * `READ_USER` — which showed the Users page, which loads roles, which needs `READ_ROLE`. A chain of
+ * administrative permissions, entered through a page about yourself.
+ */
+const fetchOwnProfileService = async () => {
+  try {
+    return await axiosInstance.get('users/me');
+  } catch (error) {
+    return error;
+  }
+};
 
 const fetchSingleUserService = async (id: string | number) => {
   try {
@@ -100,6 +135,8 @@ const bulkInsertUsersService = async (data: object) => {
 
 export {
   createUSerService,
+  fetchUsersService,
+  fetchOwnProfileService,
   fetchSingleUserService,
   deleteUserService,
   searchUserService,

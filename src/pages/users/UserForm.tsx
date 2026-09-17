@@ -1,51 +1,55 @@
 /*
 13.9 Pride's Standard Copyright Notice:
-Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
+Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify,
 and distribute this software and its documentation for any purpose is prohibited unless authorized in writing by the
 Managing Director
 */
 
 import {
     Box,
+    Collapse,
     Grid,
     Stack,
     Typography,
     alpha,
     Button as MuiButton,
     Paper,
+    CircularProgress,
 } from '@mui/material';
+import { useEffect, useMemo } from 'react';
+import { useWatch } from 'react-hook-form';
 
-import UserUtils from './utils';
-import {
-    UseFormAutocompleteComponent,
-    UseFormDatePicker,
-    UseFormInput,
-    UseFormSelect
-} from '../../components/forms';
+import { UseFormInput, UseFormSelect } from '../../components/forms';
+import AsyncAutocomplete, { IAsyncAutocompleteOption } from '../../components/forms/AsyncAutocomplete';
+import { PageSection } from '../../components/layout';
+import { brand, neutral, border, status } from '../../utils/tokens';
 import { IUserForm } from './interface';
-import TitleUtills from '../settings/titles/utills';
-import { useEffect } from 'react';
-import BranchUtills from '../settings/branch/utills';
-import DepartmentUtills from '../settings/departments/utills';
+import {
+    fetchBranchesPage,
+    fetchDepartmentsPage,
+    fetchTitlesPage,
+    fetchUnitsPage,
+} from './service/referenceData';
 
-// Icons
-import PersonIcon from '@mui/icons-material/Person';
-import ContactMailIcon from '@mui/icons-material/ContactMail';
-import BusinessIcon from '@mui/icons-material/Business';
-import CancelIcon from '@mui/icons-material/Cancel';
-import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
+import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
+import BadgeOutlinedIcon from '@mui/icons-material/BadgeOutlined';
+import BusinessOutlinedIcon from '@mui/icons-material/BusinessOutlined';
+import CloseIcon from '@mui/icons-material/Close';
 import SaveIcon from '@mui/icons-material/Save';
 
-// Brand colors
-const PRIMARY_COLOR = '#08796C';
+const P = brand[500];
 
-const sectionPaperSx = {
-    p: { xs: 2, sm: 3 },
-    borderRadius: 2,
-    border: `1px solid ${alpha('#000', 0.08)}`,
-    bgcolor: alpha(PRIMARY_COLOR, 0.02),
-    boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
-};
+interface IUserFormProps extends IUserForm {
+    /** Pre-selected options for hydrating the async fields on Update. */
+    initialTitle?: IAsyncAutocompleteOption | null;
+    initialBranch?: IAsyncAutocompleteOption | null;
+    initialDepartment?: IAsyncAutocompleteOption | null;
+    initialUnit?: IAsyncAutocompleteOption | null;
+    /** Notifies parent when the selected branch changes (used to drive department visibility & schema context). */
+    onBranchChange?: (option: IAsyncAutocompleteOption | null) => void;
+    /** Notifies parent when the selected department changes (used to clear a stale unit selection). */
+    onDepartmentChange?: (option: IAsyncAutocompleteOption | null) => void;
+}
 
 const UserForm = ({
     formState,
@@ -55,264 +59,269 @@ const UserForm = ({
     sendingRequest,
     handleClose,
     mode = 'create',
-}: IUserForm) => {
-    const { userFields } = UserUtils();
-    const { fetchAllTitles } = TitleUtills();
-    const { fetchAllBranches } = BranchUtills();
-    const { fetchAllDepartments } = DepartmentUtills();
+    initialTitle = null,
+    initialBranch = null,
+    initialDepartment = null,
+    initialUnit = null,
+    onBranchChange,
+    onDepartmentChange,
+}: IUserFormProps) => {
+    // The Department field exists in the form schema; useWatch lets us react to
+    // the live branch selection without rerendering the whole tree.
+    const selectedBranchId = useWatch({ control, name: 'branch' as any });
+    const selectedDepartmentId = useWatch({ control, name: 'department' as any });
 
-    useEffect(() => { fetchAllTitles() }, []);
-    useEffect(() => { fetchAllBranches() }, []);
-    useEffect(() => { fetchAllDepartments() }, []);
+    const isHeadOffice = useMemo(() => {
+        // initialBranch covers Update form pre-fill; onBranchChange callback (parent state) covers post-change.
+        // We rely on the parent to inform us via onBranchChange — see CreateUser/UpdateUsers.
+        if (initialBranch?.raw?.isHeadOffice && initialBranch.value === selectedBranchId) return true;
+        return false;
+    }, [initialBranch, selectedBranchId]);
 
-    const personalInfoFields = userFields.filter(field =>
-        ['firstName', 'lastName', 'otherName', 'email', 'phone', 'gender', 'dateOfBirth', 'title'].includes(field.value)
-    );
-
-    const workInfoFields = userFields.filter(field =>
-        ['branch', 'department', 'employmentType', 'designation', 'staffNumber', 'availability'].includes(field.value)
-    );
-
-    const accountFields = userFields.filter(field =>
-        ['username', 'role', 'status'].includes(field.value)
-    );
-
-    const otherFields = userFields.filter(field =>
-        !personalInfoFields.includes(field) &&
-        !workInfoFields.includes(field) &&
-        !accountFields.includes(field)
-    );
-
-    const renderSectionHeader = (title: string, icon: React.ReactNode) => (
-        <Box sx={{
-            display: 'flex',
-            alignItems: 'center',
-            mb: 2,
-            position: 'relative'
-        }}>
-            <Box
-                sx={{
-                    bgcolor: alpha(PRIMARY_COLOR, 0.1),
-                    color: PRIMARY_COLOR,
-                    width: 36,
-                    height: 36,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    borderRadius: 1,
-                    mr: 2
-                }}
-            >
-                {icon}
-            </Box>
-            <Typography
-                variant="h6"
-                sx={{
-                    fontWeight: 600,
-                    color: 'text.primary',
-                    position: 'relative',
-                    zIndex: 1
-                }}
-            >
-                {title}
-            </Typography>
-            <Box
-                sx={{
-                    position: 'absolute',
-                    left: 0,
-                    right: 0,
-                    height: '1px',
-                    bgcolor: alpha('#000', 0.1),
-                    bottom: -8,
-                    zIndex: 0
-                }}
-            />
-        </Box>
-    );
-
-    const renderFormFields = (fields: any[], columnSize: number = 12) => (
-        <Grid container spacing={2} sx={{ mt: 0.5 }}>
-            {fields.map((field) => {
-                const commonProps = {
-                    register,
-                    control,
-                    formState,
-                    value: field.value,
-                    label: field.label,
-                    required: field.required === false ? field.required : true
-                };
-
-                let gridSize;
-                if (field.type === "textarea") {
-                    gridSize = 12;
-                } else if (field.value === "firstName" || field.value === "lastName") {
-                    gridSize = 6;
-                } else if (field.value === "email") {
-                    gridSize = 12;
-                } else if (columnSize <= 6) {
-                    gridSize = 12;
-                } else {
-                    gridSize = 6;
-                }
-
-                return (
-                    <Grid item xs={12} sm={gridSize} key={field.value}>
-                        {field.type === "input" && <UseFormInput {...commonProps} />}
-                        {field.type === "textarea" && <UseFormInput {...commonProps} multiline row={4} />}
-                        {field.type === "number" && <UseFormInput {...commonProps} type="number" />}
-                        {field.type === "select" && (
-                            <UseFormSelect {...commonProps} options={field.options} />
-                        )}
-                        {field.type === "date" && <UseFormDatePicker {...commonProps} />}
-                        {field.type === "autocomplete" && (
-                            <UseFormAutocompleteComponent {...commonProps} options={field.options} />
-                        )}
-                    </Grid>
-                );
-            })}
-        </Grid>
-    );
+    // Route changes while dirty (Cancel, breadcrumbs, browser Back) are guarded
+    // by the useBlocker in CreateUser/UpdateUsers — this only covers tab close/refresh.
+    useEffect(() => {
+        if (!formState.isDirty) return;
+        const warn = (e: BeforeUnloadEvent) => {
+            e.preventDefault();
+            e.returnValue = '';
+        };
+        window.addEventListener('beforeunload', warn);
+        return () => window.removeEventListener('beforeunload', warn);
+    }, [formState.isDirty]);
 
     return (
         <Paper
             elevation={0}
             sx={{
                 width: '100%',
-                borderRadius: 2,
+                borderRadius: 2.5,
                 overflow: 'hidden',
-                border: `1px solid ${alpha('#000', 0.08)}`,
+                border: `1px solid ${border.subtle}`,
+                bgcolor: '#fff',
             }}
         >
-            {/* Header */}
-            <Box
-                sx={{
-                    bgcolor: alpha(PRIMARY_COLOR, 0.03),
-                    p: 3,
-                    display: 'flex',
-                    alignItems: 'center',
-                    borderBottom: `1px solid ${alpha('#000', 0.08)}`,
-                }}
-            >
-                <Box
-                    sx={{
-                        bgcolor: alpha(PRIMARY_COLOR, 0.12),
-                        color: PRIMARY_COLOR,
-                        width: 44,
-                        height: 44,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        borderRadius: 1.5,
-                        mr: 2,
-                        flexShrink: 0,
-                    }}
+            {/* ── Body ── */}
+            <Box sx={{ px: { xs: 2.5, md: 3.5 }, py: 3 }}>
+                <PageSection
+                    variant="flat"
+                    title="Personal Information"
+                    subtitle="The user's names, corporate email and gender"
+                    icon={<PersonOutlineIcon />}
+                    mb={4}
                 >
-                    {mode === 'update' ? <ManageAccountsIcon /> : <PersonIcon />}
-                </Box>
-                <Box>
-                    <Typography variant="h6" sx={{ color: 'text.primary', fontWeight: 600, mb: 0.5 }}>
-                        {mode === 'update' ? 'Update User Account' : 'Create New User'}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                        {mode === 'update'
-                            ? 'Modify user account details, permissions and work information'
-                            : 'Fill in the details below to register a new user account'}
-                    </Typography>
-                </Box>
+                    <Grid container spacing={2.5}>
+                        <Grid item xs={12} sm={6}>
+                            <UseFormInput
+                                register={register}
+                                control={control}
+                                formState={formState}
+                                value="firstName"
+                                label="First Name"
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <UseFormInput
+                                register={register}
+                                control={control}
+                                formState={formState}
+                                value="lastName"
+                                label="Last Name"
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <UseFormInput
+                                register={register}
+                                control={control}
+                                formState={formState}
+                                value="otherName"
+                                label="Other Name"
+                                required={false}
+                                helperText="Optional"
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <UseFormInput
+                                register={register}
+                                control={control}
+                                formState={formState}
+                                value="email"
+                                label="Email Address"
+                                placeholder="e.g. jdoe@pridebank.co.ug"
+                                helperText="Must be a @pridebank.co.ug address — the verification email is sent here"
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <UseFormSelect
+                                register={register}
+                                control={control}
+                                formState={formState}
+                                value="gender"
+                                label="Gender"
+                                options={[
+                                    { label: 'Male', value: 'male' },
+                                    { label: 'Female', value: 'female' },
+                                ]}
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <UseFormSelect
+                                register={register}
+                                control={control}
+                                formState={formState}
+                                value="availability"
+                                label="Availability"
+                                options={[
+                                    { label: 'Present', value: 'present' },
+                                    { label: 'Absent', value: 'absent' },
+                                ]}
+                                helperText="Whether the user is currently on duty and can receive assignments"
+                            />
+                        </Grid>
+                    </Grid>
+                </PageSection>
+
+                <PageSection
+                    variant="flat"
+                    title="Title & Identification"
+                    subtitle="Job title and staff number"
+                    icon={<BadgeOutlinedIcon />}
+                    mb={4}
+                >
+                    <Grid container spacing={2.5}>
+                        <Grid item xs={12} sm={6}>
+                            <AsyncAutocomplete
+                                control={control}
+                                name={'title' as any}
+                                label="Title"
+                                required
+                                error={(formState.errors as any).title}
+                                fetchPage={fetchTitlesPage}
+                                initialOption={initialTitle}
+                                placeholder="Search titles…"
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <UseFormInput
+                                register={register}
+                                control={control}
+                                formState={formState}
+                                value="staffNumber"
+                                label="Staff Number"
+                                placeholder="Enter the staff number"
+                            />
+                        </Grid>
+                    </Grid>
+                </PageSection>
+
+                <PageSection
+                    variant="flat"
+                    title="Duty Station"
+                    subtitle="Where the user is stationed — departments and units apply to Head Office staff only"
+                    icon={<BusinessOutlinedIcon />}
+                    mb={0}
+                >
+                    <Grid container spacing={2.5}>
+                        <Grid item xs={12} sm={6}>
+                            <AsyncAutocomplete
+                                control={control}
+                                name={'branch' as any}
+                                label="Duty Station"
+                                required
+                                error={(formState.errors as any).branch}
+                                fetchPage={fetchBranchesPage}
+                                initialOption={initialBranch}
+                                onOptionChange={onBranchChange}
+                                placeholder="Search branches (Head Office, etc.)…"
+                            />
+                        </Grid>
+                        {isHeadOffice && (
+                            <Grid item xs={12} sm={6}>
+                                <Collapse in appear>
+                                    <AsyncAutocomplete
+                                        control={control}
+                                        name={'department' as any}
+                                        label="Department"
+                                        required
+                                        error={(formState.errors as any).department}
+                                        fetchPage={fetchDepartmentsPage(selectedBranchId)}
+                                        initialOption={initialDepartment}
+                                        onOptionChange={onDepartmentChange}
+                                        refetchKey={selectedBranchId}
+                                        placeholder="Search Head Office departments…"
+                                    />
+                                </Collapse>
+                            </Grid>
+                        )}
+                        {isHeadOffice && selectedDepartmentId && (
+                            <Grid item xs={12} sm={6}>
+                                <Collapse in appear>
+                                    <AsyncAutocomplete
+                                        control={control}
+                                        name={'unit' as any}
+                                        label="Unit (optional)"
+                                        required={false}
+                                        error={(formState.errors as any).unit}
+                                        fetchPage={fetchUnitsPage(selectedDepartmentId)}
+                                        initialOption={initialUnit}
+                                        refetchKey={selectedDepartmentId}
+                                        placeholder="Search units in this department…"
+                                    />
+                                </Collapse>
+                            </Grid>
+                        )}
+                    </Grid>
+                </PageSection>
             </Box>
 
-            {/* Form Content */}
-            <Box sx={{ p: { xs: 2, sm: 3 } }}>
-                <Grid container spacing={3}>
-                    {/* Personal Information */}
-                    <Grid item xs={12} md={6} lg={6}>
-                        <Paper elevation={0} sx={{ ...sectionPaperSx, height: '100%' }}>
-                            {renderSectionHeader('Personal Information', <PersonIcon />)}
-                            {renderFormFields(personalInfoFields, 5)}
-                        </Paper>
-                    </Grid>
-
-                    {/* Work + Account sections */}
-                    <Grid item xs={12} md={6} lg={6}>
-                        <Stack spacing={3}>
-                            <Paper elevation={0} sx={sectionPaperSx}>
-                                {renderSectionHeader('Work Information', <BusinessIcon />)}
-                                {renderFormFields(workInfoFields, 7)}
-                            </Paper>
-
-                            <Paper elevation={0} sx={sectionPaperSx}>
-                                {renderSectionHeader('Account & Access', <ManageAccountsIcon />)}
-                                {renderFormFields(accountFields, 7)}
-                            </Paper>
-
-                            {otherFields.length > 0 && (
-                                <Paper elevation={0} sx={sectionPaperSx}>
-                                    {renderSectionHeader('Additional Information', <ContactMailIcon />)}
-                                    {renderFormFields(otherFields, 7)}
-                                </Paper>
-                            )}
-                        </Stack>
-                    </Grid>
-                </Grid>
-            </Box>
-
-            {/* Footer */}
+            {/* ── Footer ── */}
             <Box
                 sx={{
-                    p: 3,
-                    borderTop: `1px solid ${alpha('#000', 0.08)}`,
-                    bgcolor: alpha('#f5f5f5', 0.5),
+                    px: { xs: 2, md: 3.5 },
+                    py: 2,
+                    borderTop: `1px solid ${border.subtle}`,
+                    bgcolor: '#FAFBFC',
                     display: 'flex',
-                    justifyContent: 'flex-end',
+                    flexDirection: { xs: 'column', sm: 'row' },
+                    alignItems: { xs: 'stretch', sm: 'center' },
+                    justifyContent: 'space-between',
+                    gap: 1.5,
                 }}
             >
-                <Stack
-                    direction={{ xs: 'column', sm: 'row' }}
-                    spacing={2}
-                    sx={{ width: { xs: '100%', sm: 'auto' } }}
-                >
+                <Stack direction="row" spacing={1.5} alignItems="center">
                     <MuiButton
-                        variant="outlined"
                         onClick={handleClose}
-                        startIcon={<CancelIcon />}
+                        type="button"
+                        variant="text"
+                        startIcon={<CloseIcon fontSize="small" />}
                         sx={{
-                            borderColor: alpha('#000', 0.2),
-                            color: 'text.secondary',
-                            minWidth: { xs: '100%', sm: 110 },
-                            '&:hover': {
-                                borderColor: alpha('#000', 0.3),
-                                bgcolor: alpha('#000', 0.05),
-                            },
+                            color: neutral[500], textTransform: 'none', fontSize: '0.82rem', borderRadius: '8px',
+                            '&:hover': { color: status.danger.main, bgcolor: alpha(status.danger.main, 0.06) },
                         }}
                     >
                         Cancel
                     </MuiButton>
-                    <MuiButton
-                        type="submit"
-                        variant="contained"
-                        disabled={sendingRequest}
-                        startIcon={<SaveIcon />}
-                        sx={{
-                            minWidth: { xs: '100%', sm: 140 },
-                            bgcolor: PRIMARY_COLOR,
-                            boxShadow: `0 4px 12px ${alpha(PRIMARY_COLOR, 0.3)}`,
-                            textTransform: 'none',
-                            fontWeight: 600,
-                            '&:hover': {
-                                bgcolor: '#065f54',
-                                transform: 'translateY(-1px)',
-                                boxShadow: `0 6px 16px ${alpha(PRIMARY_COLOR, 0.4)}`,
-                            },
-                            transition: 'all 0.2s ease',
-                            '&.Mui-disabled': {
-                                bgcolor: alpha(PRIMARY_COLOR, 0.5),
-                                color: '#fff',
-                            },
-                        }}
-                    >
-                        {sendingRequest ? 'Saving…' : buttonText}
-                    </MuiButton>
+                    <Typography variant="caption" sx={{ color: neutral[400], display: { xs: 'none', sm: 'block' } }}>
+                        {mode === 'update'
+                            ? 'Changes take effect immediately after saving'
+                            : 'A verification email is sent once the user is created'}
+                    </Typography>
                 </Stack>
+
+                <MuiButton
+                    type="submit"
+                    variant="contained"
+                    disabled={sendingRequest}
+                    startIcon={sendingRequest ? <CircularProgress size={16} sx={{ color: '#fff' }} /> : <SaveIcon fontSize="small" />}
+                    sx={{
+                        height: 40, minWidth: { xs: '100%', sm: 170 }, borderRadius: '8px', textTransform: 'none', fontWeight: 600,
+                        bgcolor: P, boxShadow: `0 2px 8px ${alpha(P, 0.3)}`,
+                        '&:hover': { bgcolor: brand[700], boxShadow: `0 4px 14px ${alpha(P, 0.4)}` },
+                        '&.Mui-disabled': { bgcolor: alpha(P, 0.45), color: '#fff' },
+                    }}
+                >
+                    {sendingRequest ? 'Saving…' : buttonText}
+                </MuiButton>
             </Box>
         </Paper>
     );

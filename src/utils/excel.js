@@ -8,7 +8,15 @@ Managing Director
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 
-export const exportExcel = async (columns, rows, fileName) => {
+/**
+ * @param {Array<{title: string, dataKey: string}>} columns
+ * @param {Array<Record<string, any>>} rows
+ * @param {string} fileName
+ * @param {{ filters?: Array<{label: string, value: string}> }} [meta]
+ *   Optional metadata. `filters` is rendered as an "Applied Filters" section
+ *   on the cover so the reader knows the slice of data they're looking at.
+ */
+export const exportExcel = async (columns, rows, fileName, meta = {}) => {
     try {
         // Create a new workbook with two worksheets: cover page and data
         const workbook = new ExcelJS.Workbook();
@@ -130,20 +138,47 @@ export const exportExcel = async (columns, rows, fileName) => {
             });
         }
 
+        // Applied filters section (if any) — gives the reader provenance for the export.
+        const filters = Array.isArray(meta.filters) ? meta.filters : [];
+        if (filters.length > 0) {
+            coverSheet.addRow([]);
+            const filtersHeaderRow = coverSheet.addRow(['', 'APPLIED FILTERS', '', '']);
+            const filtersHeaderRowNum = filtersHeaderRow.number;
+            ['B', 'C', 'D'].forEach(col => {
+                const cell = coverSheet.getCell(`${col}${filtersHeaderRowNum}`);
+                cell.fill = { type: 'pattern', pattern: 'solid', fgColor: secondaryColor };
+                cell.font = { bold: true, color: headerFontColor };
+            });
+
+            filters.forEach((f, idx) => {
+                const r = coverSheet.addRow(['', f.label, f.value, '']);
+                ['B', 'C', 'D'].forEach(col => {
+                    const cell = coverSheet.getCell(`${col}${r.number}`);
+                    cell.border = {
+                        top: { style: 'thin', color: borderColor },
+                        left: { style: col === 'B' ? 'medium' : 'thin', color: borderColor },
+                        bottom: { style: idx === filters.length - 1 ? 'medium' : 'thin', color: borderColor },
+                        right: { style: col === 'D' ? 'medium' : 'thin', color: borderColor },
+                    };
+                    if (idx % 2 === 1) cell.fill = { type: 'pattern', pattern: 'solid', fgColor: highlightColor };
+                });
+            });
+        }
+
         // Add a company signature section
         coverSheet.addRow([]);
         coverSheet.addRow([]);
-        coverSheet.addRow(['', 'Pride Bank Limited', '', '']);
-        coverSheet.getCell('B16').font = { bold: true, size: 18, color: primaryColor };
-        coverSheet.addRow(['', 'Asset Management System', '', '']);
-        coverSheet.getCell('B17').font = { italic: true, size: 14, color: secondaryColor };
+        const signatureRow = coverSheet.addRow(['', 'Pride Bank Limited', '', '']);
+        coverSheet.getCell(`B${signatureRow.number}`).font = { bold: true, size: 18, color: primaryColor };
+        const subSigRow = coverSheet.addRow(['', 'Asset Management System', '', '']);
+        coverSheet.getCell(`B${subSigRow.number}`).font = { italic: true, size: 14, color: secondaryColor };
 
         // Add confidential watermark diagonally
         coverSheet.addRow([]);
         coverSheet.addRow([]);
-        coverSheet.addRow(['', 'CONFIDENTIAL', '', '']);
-        coverSheet.mergeCells('B20:D20');
-        const watermarkCell = coverSheet.getCell('B20');
+        const watermarkRow = coverSheet.addRow(['', 'CONFIDENTIAL', '', '']);
+        coverSheet.mergeCells(`B${watermarkRow.number}:D${watermarkRow.number}`);
+        const watermarkCell = coverSheet.getCell(`B${watermarkRow.number}`);
         watermarkCell.font = { bold: true, color: { argb: '15087970' }, size: 72 };
         watermarkCell.alignment = { vertical: 'middle', horizontal: 'center', textRotation: 45 };
 
@@ -152,10 +187,10 @@ export const exportExcel = async (columns, rows, fileName) => {
         coverSheet.addRow([]);
         coverSheet.addRow([]);
         coverSheet.addRow([]);
-        coverSheet.addRow(['', `© ${new Date().getFullYear()} Pride Bank Limited. All rights reserved.`, '', '']);
-        coverSheet.mergeCells('B25:D25');
-        coverSheet.getCell('B25').font = { italic: true, size: 10, color: { argb: 'FF777777' } };
-        coverSheet.getCell('B25').alignment = { horizontal: 'center' };
+        const copyrightRow = coverSheet.addRow(['', `© ${new Date().getFullYear()} Pride Bank Limited. All rights reserved.`, '', '']);
+        coverSheet.mergeCells(`B${copyrightRow.number}:D${copyrightRow.number}`);
+        coverSheet.getCell(`B${copyrightRow.number}`).font = { italic: true, size: 10, color: { argb: 'FF777777' } };
+        coverSheet.getCell(`B${copyrightRow.number}`).alignment = { horizontal: 'center' };
 
         // ===== DATA PAGE DESIGN =====
 

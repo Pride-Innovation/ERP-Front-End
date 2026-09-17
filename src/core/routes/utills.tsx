@@ -1,12 +1,9 @@
 /*
 13.9 Pride's Standard Copyright Notice:
-Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify, 
+Copyright ©20XX. Management of Pride Bank Limited (PBL). All Rights Reserved. Permission to use, copy, modify,
 and distribute this software and its documentation for any purpose is prohibited unless authorized in writing by the
 Managing Director
 */
-
-import { permissionsMock } from "../../mocks/settings";
-import { IPermission } from "../../pages/settings/interface";
 
 const RoutesUtills = () => {
     const accessToken: string = 'access-token';
@@ -17,52 +14,16 @@ const RoutesUtills = () => {
         return JSON.parse(sessionStorage.getItem(currentUser) || '{}');
     }
 
-    /**
-     * 
-     * @param permission - The permission to check against the current user's permissions.
-     * Determines if the current user has the specified permission.
-     * @returns 
-     */
-
-    const determinePermission = (permission: IPermission): boolean => {
-        const currentUser = getCurrentUser();
-        if (!currentUser ||
-            !currentUser.title ||
-            !currentUser.title.role ||
-            !currentUser.title.role.permissions
-        ) {
-            return false;
-        }
-        if (currentUser.title.role.permissions.length === 0) return false;
-        if (!permission || !permission.id) return false;
-
-        const permissionDetails = getCurrentUser()?.
-            title?.
-            role?.
-            permissions.find(
-                (perm: IPermission) => perm.id === permission.id);
-        if (permissionDetails) return true;
-        return false;
-    }
-
-    const routePermission = (id: number) => permissionsMock.find(perm => perm.id === id);
-
-    const isAuthenticated = () => {
+    const isAuthenticated = (): boolean => {
         const token = sessionStorage.getItem(accessToken);
-        if (token) {
-            return true
-        };
-        return false;
+        return Boolean(token);
     }
-
 
     return ({
         getCurrentUser,
         accessToken,
         isAuthenticated,
-        determinePermission,
         currentUser,
-        routePermission,
         refreshToken
     })
 }
