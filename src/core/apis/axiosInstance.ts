@@ -23,7 +23,17 @@ const CURRENT_USER_KEY  = 'current-user';
  */
 const METHOD_OVERRIDE_HEADER = 'X-HTTP-Method-Override';
 const CSRF_TOKEN_HEADER = 'X-CSRF-TOKEN';
-const CSRF_TOKEN_KEY = 'csrf-token';
+
+/**
+ * The cookie/header pair, named and shaped exactly as the SMS gateway frontend does it - that
+ * application passes through the same firewall, so its wire format is the one known to be accepted.
+ *
+ * The token is carried in BOTH a cookie and a request header with the same value: the classic
+ * double-submit. Nothing server-side has to hold state for it, which is why the backend keeps
+ * `csrf()` disabled and stays STATELESS.
+ */
+const XSRF_COOKIE_NAME  = 'XSRF-TOKEN';
+const XSRF_TOKEN_HEADER = 'X-XSRF-TOKEN';
 
 /**
  * The verbs the firewall blocks outright, at every path.
@@ -51,8 +61,19 @@ const BLOCKED_METHODS = new Set(['put', 'delete']);
  * `crypto` where available because a predictable value would at least look wrong to anyone reading
  * the traffic.
  */
+function getCookie(name: string): string | null {
+    const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+    return match ? decodeURIComponent(match[2]) : null;
+}
+
+function setCookie(name: string, value: string): void {
+    // Secure only where the page is already HTTPS, or the cookie is silently dropped in local dev.
+    const secure = window.location.protocol === 'https:' ? '; Secure' : '';
+    document.cookie = `${name}=${encodeURIComponent(value)}; Path=/; SameSite=Strict${secure}`;
+}
+
 function csrfToken(): string {
-    const existing = sessionStorage.getItem(CSRF_TOKEN_KEY);
+    const existing = getCookie(XSRF_COOKIE_NAME);
     if (existing) return existing;
 
     const minted =
@@ -63,7 +84,7 @@ function csrfToken(): string {
                     .map((b) => b.toString(16).padStart(2, '0')).join('')
                 : `${Date.now().toString(16)}${Math.random().toString(16).slice(2)}`;
 
-    sessionStorage.setItem(CSRF_TOKEN_KEY, minted);
+    setCookie(XSRF_COOKIE_NAME, minted);
     return minted;
 }
 
@@ -72,6 +93,12 @@ const { REACT_APP_BASE_URL } = process.env;
 const axiosInstance = axios.create({
     baseURL: REACT_APP_BASE_URL,
     timeout: 60000,
+    // Same three options the SMS gateway frontend sets. `withCredentials` costs nothing
+    // same-origin - cookies already travel - and the backend already sets
+    // `setAllowCredentials(true)`, so local cross-origin development is unaffected.
+    withCredentials: true,
+    xsrfCookieName: XSRF_COOKIE_NAME,
+    xsrfHeaderName: XSRF_TOKEN_HEADER,
 });
 
 // ── Token-refresh queue ────────────────────────────────────────────────────
@@ -135,6 +162,7 @@ async function doRefresh(): Promise<string | null> {
                     // headers are not applied, so the CSRF one is set here: this is a POST, and the
                     // firewall refuses a state-changing request without it. Without this line the
                     // session would look unrecoverable to every user the moment their token expired.
+                    [XSRF_TOKEN_HEADER]: csrfToken(),
                     [CSRF_TOKEN_HEADER]: csrfToken(),
                 },
             }
@@ -178,7 +206,7 @@ function clearSession(): void {
     sessionStorage.removeItem(CURRENT_USER_KEY);
     // A new sign-in gets a new token. Nothing validates it, so this changes no behaviour — it keeps
     // the session's own storage from outliving the session.
-    sessionStorage.removeItem(CSRF_TOKEN_KEY);
+    setCookie(XSRF_COOKIE_NAME, '');
 }
 
 // ── Request interceptor: attach access token ───────────────────────────────
@@ -216,7 +244,9 @@ axiosInstance.interceptors.request.use(
         // The firewall wants a CSRF token on anything that changes state. It validates nothing; see
         // `csrfToken` for why that is not the gap it looks like.
         if (method !== 'get' && method !== 'head') {
-            config.headers[CSRF_TOKEN_HEADER] = csrfToken();
+            const token = csrfToken();
+            config.headers[XSRF_TOKEN_HEADER] = token;
+            config.headers[CSRF_TOKEN_HEADER] = token;
         }
 
         return config;
