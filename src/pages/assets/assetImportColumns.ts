@@ -107,7 +107,7 @@ export const ASSET_IMPORT_COLUMNS: ColumnSpec[] = [
 
     // ── IT-specific: only appear where the category enables them ─────────────
     { header: 'Hostname', configKey: 'hostname', width: 20, optIn: true },
-    { header: 'IP Address', configKey: 'ipAddress', width: 16, optIn: true, hint: 'IPv4, e.g. 10.20.1.44.' },
+    { header: 'IP Address', configKey: 'ipAddress', width: 16, optIn: true, hint: 'IPv4, e.g. 192.0.2.44.' },
     { header: 'MAC Address', configKey: 'macAddress', width: 20, optIn: true, hint: 'Any separator; stored as 00:1B:44:11:3A:B7.' },
     { header: 'RAM', configKey: 'ram', width: 12, optIn: true, sample: '16GB' },
     { header: 'CPU Speed', configKey: 'cpuSpeed', width: 14, optIn: true },

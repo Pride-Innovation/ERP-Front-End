@@ -32,7 +32,7 @@ export const itEquipmentMock: IITEquipment[] = [
         cpuSpeed: "3.6 GHz",
         hardDiskSize: "512GB SSD",
         macAddress: "00:1A:2B:3C:4D:5E",
-        ipAddress: "192.168.1.101",
+        ipAddress: "192.0.2.101",
         interfaceType: "Ethernet",
         assetDepreciationRate: "20%",
         description: "Lightweight business laptop",

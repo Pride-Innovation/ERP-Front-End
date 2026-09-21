@@ -2372,6 +2372,120 @@ credentials, not records of anything, and what is worth keeping is already in `a
 `PasswordResetTest` pins all three — no write, the audit row still made, and the entity, repository
 and table absent.
 
+## The application can build its own database — V1 exists now
+
+Deploying into a new Ubuntu environment failed on the first startup, and the cause was not the
+deployment. **The schema could never be created from the migrations**, in any environment, and had
+not been able to since Flyway was introduced.
+
+The migrations began at **V2**, with `baseline-on-migrate: true` and `baseline-version: 1` telling
+Flyway to *assume* a version-1 schema was already present. On a database Hibernate built years ago
+that assumption holds. On an empty one it is false, and **V2's guards do not catch it**: they test
+for a *column* (`information_schema.COLUMNS`), not for the table. Against an empty database the guard
+reads "column absent", emits `ALTER TABLE stock ADD COLUMN po_number ...`, and MySQL answers that
+`stock` does not exist. Every environment to date was cloned from one that predated Flyway, so
+nothing ever exercised the path.
+
+`application.yaml` predicted this in a comment and offered two ways out. **The other one does not
+work.** "Bootstrap once with `ddl-auto=update`" fails twice over: Flyway runs *before* Hibernate, so
+flipping it changes nothing — V2 still fails first; and even with Flyway disabled for one startup,
+only V2–V8 are guarded. From V12 onward the DDL is plain, so `ALTER TABLE movement ADD COLUMN
+consignment_id` (V12), `approval_bypassed` (V15), `restore_status_code` (V16), `deleted` (V20) and
+`CREATE TABLE audit_event` (V17) all collide with what Hibernate has just built, while V21's
+`DROP TABLE password_reset` and V24's `DROP COLUMN link` name things Hibernate would never create.
+You would fix it one restart at a time and never converge.
+
+### It cannot affect a database that already exists, and that was measured
+
+**Flyway ignores any migration at or below the baseline version in `flyway_schema_history`.** Every
+existing environment carries a `BASELINE` row at version 1, so V1 is reported as `BASELINE_IGNORED`
+and never runs there.
+
+Verified rather than reasoned: a clone of the development database carrying its real 25-row history
+was given a V1 that would have created a **conspicuously named marker table**. `validate` passed,
+`migrate` reported **0 migrations executed**, the marker was never created, and the clone still had
+105 tables and 25 history rows. The development database itself was only ever read from
+(`mysqldump --no-data`) and finished the exercise at 105 tables, 25 rows, 252 assets.
+
+**This is also why it had to arrive as a new file rather than as edits to the existing ones.**
+Changing an applied migration changes its checksum, and every database that already ran it then
+fails validation on the next startup. A new file below the baseline is the only change that is free
+on existing databases.
+
+### How V1 was built, and why the diff is the proof
+
+Derived mechanically from a `mysqldump --no-data` of the development database (at V25) by undoing
+exactly what V2–V25 add and restoring what they drop — 12 tables removed, ~20 columns removed, the
+indexes and constraints those migrations create removed.
+
+Historical fidelity is not the requirement and reasoning was not the evidence. **The requirement is
+that V1..V25 lands on exactly the schema that is running.** So an empty database was built from
+V1..V25 and compared against the reference: **818 columns, 277 indexes, 153 foreign keys, 104 tables
+— zero differences**, including types, nullability, defaults, `EXTRA`, engine and collation.
+
+Two deliberate asymmetries, each forced by a migration that is *not* guarded:
+
+| | |
+|---|---|
+| `password_reset` is **absent** | V21 drops it with `IF EXISTS`, so a new database need not create a table whose only future is to be dropped |
+| `app_notification.link` and `request_id` are **present** | V24 drops them **unguarded**, and MySQL has no `DROP COLUMN IF EXISTS` — without them a new database fails at V24 |
+
+### The bug the diff could not see, and only booting found
+
+A schema comparison passed completely and the application still would not start.
+
+Every entity is `@GeneratedValue(strategy = AUTO)`, which on MySQL — a server with no native
+sequences — Hibernate emulates with a one-row **`<table>_seq`** table holding the next high value.
+When Hibernate creates that table it inserts the starting row too. **`mysqldump --no-data` brings the
+table and not the row**, and nothing complains until the first insert:
+`could not read a hi value - you need to populate the table: permissions_seq`. All 25 migrations
+reported success and `DataInitializer` then died on the first permission it tried to write.
+
+V1 now primes all **22** sequence tables. This is the one piece of row data that is genuinely schema
+rather than business data, which is why it belongs in a migration and not in a seeder.
+
+*The general shape, and it is the reason the boot test existed at all:* **a schema that compares
+identical is not the same as a schema that works.** `--no-data` is a claim about business rows; it
+silently also drops the rows a schema needs to function.
+
+Proven end to end afterwards: empty database → real application → **`Started ErpApplication in
+18.093 seconds`**, no errors, and the seeders produced 85 permissions, 12 roles, 23 statuses, 54
+branches, 15 departments, 12 asset types, 56 stores and 2 users. The resulting schema was then
+diffed against the reference again — identical on all three axes.
+
+### What this leaves for whoever writes migration 26
+
+`BaselineMigrationTest` does **not** re-check V1, which was verified once by construction. It checks
+the thing that can still go wrong.
+
+**A new migration that contradicts V1 is invisible on every database that exists.** It runs there
+once and succeeds, because none of those databases was built from V1. It fails only in a *brand-new
+environment* — the one place nobody exercises before deploying, which is precisely how the original
+fault survived as long as it did.
+
+So the test reads the **unguarded** DDL out of every migration and checks V1 is in the state it
+expects: a table it creates must not already be in V1, a column it drops must be, a column or
+constraint it adds must not. Guarded statements — `CREATE TABLE IF NOT EXISTS`, and the
+`SET @ddl := (SELECT IF(NOT EXISTS(...)))` form most of these files use — need no agreement, since
+they no-op either way. It also pins that every `_seq` table V1 creates is primed, and that
+`baseline-version` stays at 1, which is the whole of what keeps V1 harmless on existing databases.
+
+Verified non-vacuous by breaking it three ways — dropping a sequence seed, removing
+`app_notification.link`, and letting V1 create `audit_event` — each failing the assertion that owns
+it, and passing again on restore.
+
+**Deploying into a new environment is now: create an empty database, set the environment variables,
+start the application.** No dump, no manual baseline, no `ddl-auto` flip. Existing environments
+notice nothing.
+
+*One thing to clear first on a server that already tried and failed.* A failed migration leaves a
+`success = 0` row behind, and Flyway refuses to do anything afterwards — **shipping V1 does not on
+its own rescue such a database**, it still answers `Detected failed migration to version 2`.
+Reproduced exactly: an empty database migrated without V1 fails with `Table 'x.stock' doesn't exist`
+and leaves one table (`flyway_schema_history`) holding one failed row. Either
+`DELETE FROM flyway_schema_history WHERE success = 0;` or dropping and recreating the database clears
+it — both were measured, and both then build all 105 tables.
+
 ## Still open
 
 **1. Permissions gating across the app — front-end sweep done.** Row menus are now filtered
