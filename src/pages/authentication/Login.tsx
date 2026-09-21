@@ -50,6 +50,17 @@ const Login = () => {
             const response = await loginService(formData) as unknown as ILoginResponse;
             if (response?.status === 200) {
                 const { accessToken, refreshToken } = response.data;
+
+                /*
+                 * A 200 that carries no token is a failed sign-in, whatever the status says.
+                 * Without this, `handleSessionStorage` writes the string "undefined" into
+                 * sessionStorage, which reads as a valid session everywhere afterwards.
+                 */
+                if (!accessToken) {
+                    toast.error('Sign-in did not return a session. Please try again.');
+                    return;
+                }
+
                 handleSessionStorage(response.data, accessToken, refreshToken);
                 toast.success(`Welcome back, ${response.data.firstName} 👋`);
                 navigate(ROUTES.ASSETS_MANAGEMENT);
