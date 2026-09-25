@@ -54,7 +54,7 @@ structural. **Read this before adding an endpoint, a status code, or an axios ca
 | The firewall | What it forces |
 |---|---|
 | blocks **PUT** and **DELETE**, at every path | the verb travels in a header |
-| blocks **403** responses (passes every other 4xx) | refusals travel as `422` + `errorCode` |
+| admits only **400, 401, 404, 407, 409, 417, 440** — every 5xx and every other 4xx is blocked | refusals travel as `417`, faults as `440`, both + `errorCode` |
 | blocks **OPTIONS** | the front end must be served **same-origin** |
 
 ### The verb travels in a header, and *where* it is restored is the whole security story
@@ -144,18 +144,57 @@ reports PUT. It works because `getParts()` delegates past the wrapper to the rea
 by reaching the handler with its `@RequestParam` bound, because "was not refused" is also satisfied by
 a 404 from a route that never matched.
 
-### 403 is unavailable, so the status is transport and `errorCode` is the meaning
+### Only seven 4xx codes exist here, so the status is transport and `errorCode` is the meaning
 
-`AccessDenied.STATUS` (422) and `AccessDenied.ERROR_CODE` are declared once and read by both the
+**The allowed set is `400, 401, 404, 407, 409, 417, 440`. Everything else, including the whole 5xx
+range, is blocked.** `WafStatus` holds that list and `WafStatusCoverageTest` fails the build on any
+source that leaves it.
+
+**This was discovered the expensive way.** Refusals were moved off 403 to **422** when the block on
+403 was found — and 422 is not on the list either, so *every permission refusal in the application
+was being blocked from that change until this one*. Worse, a blocked status does not arrive as an
+error: the firewall substitutes its own page under **HTTP 200** with an HTML body, so the caller gets
+a success carrying something unparseable while the server log records an ordinary refusal. Neither
+end can see it alone. That is why the constraint now lives in a constant with a test behind it rather
+than in someone's memory.
+
+`AccessDenied.STATUS` (417) and `AccessDenied.ERROR_CODE` are declared once and read by both the
 handlers and the tests. **Every refusal in the application funnels through two
 `@ExceptionHandler`s** — a filter-chain or `@PreAuthorize` refusal arrives there via
 `CustomBearerTokenAccessDeniedHandler`, and a service-level scope check throws into the same place —
 which is why moving off 403 was two methods plus one `ResponseStatusException` in
 `IssuanceApprovalRecordService`, not ninety call sites.
 
-422 because it is the only 4xx this application does not already use: 400, 401, 404 and 409 all carry
-other meanings, and reusing one would make a refusal indistinguishable from a validation failure or a
-missing record.
+**417 because only two of the seven admitted codes are unspent.** 400, 401, 404 and 409 already carry
+validation, authentication, absence and conflict; reusing one would make a refusal indistinguishable
+from them. That leaves 417 and 440 — 417 for a refusal, 440 for an unexpected fault.
+
+**407 is on the firewall's list and must never be used.** Browsers read it as *Proxy Authentication
+Required* and may present a credential dialog for a proxy that does not exist. An admitted code is
+not automatically a usable one.
+
+**500 had no floor at all, which mattered more than the seven hand-written ones.** There was no
+`@ExceptionHandler(Exception.class)`, so any unhandled exception — a null dereference, a driver
+timeout — became Spring's default 500 and vanished into the firewall. Fixing the named sites would
+have changed nothing. The catch-all has one subtlety worth keeping: it sits *in front of* the
+resolver that normally honours a `ResponseStatusException`, so without its `ErrorResponse` check it
+would flatten every 400 and 409 raised across the asset-type, courier and consultant services into
+"something went wrong". A test pins that specifically.
+
+**And `@ControllerAdvice` cannot see a filter.** An exception in `JwtAuthenticationFilter` or
+`HttpMethodOverrideFilter` is re-dispatched by the container to `/error`, which Spring Boot answers
+with the original status — a 500. `WafSafeErrorController` replaces Spring's, passes an admitted
+status through untouched, and rewrites anything else to 440 while reporting the original as
+`upstreamStatus`.
+
+*On the front end this needed almost nothing*, because refusals are recognised by `errorCode` rather
+than by number — the one numeric branch is `status === 401` in the interceptor, and 401 is admitted.
+Two small changes were still needed: `store/utillls.tsx` gained 417 alongside its 422/403 fallbacks,
+and the interceptor had to be told that `SERVER_ERROR` is **unclaimed**. Its rule is that a body
+carrying `errorCode` belongs to whoever made the call and is not toasted here — true of the movement
+pages' no-approver dialog and the login page's blocked/locked branches, and false of a generic server
+fault, which no caller recognises. Left claimed, an unexpected error would have been the one failure
+that showed the user nothing at all.
 
 **Never 401 — for `AccessDeniedException`.** The front end reads 401 as an expired session: it
 attempts a refresh and then signs the user out. A branch officer opening another branch's record must

@@ -32,6 +32,17 @@ const CSRF_TOKEN_HEADER = 'X-CSRF-TOKEN';
  * double-submit. Nothing server-side has to hold state for it, which is why the backend keeps
  * `csrf()` disabled and stays STATELESS.
  */
+/**
+ * Codes that carry no caller-specific handling, and so must still be reported here.
+ *
+ * <p>The rule below is that a body carrying `errorCode` belongs to whoever made the call - the
+ * movement pages' "no approver" dialog, the login page's blocked/locked branches. `SERVER_ERROR` is
+ * the opposite: it is the backend's floor for a fault nothing else handled, no caller recognises it,
+ * and leaving it claimed would make an unexpected server error the one failure that shows the user
+ * nothing at all.
+ */
+const UNCLAIMED_ERROR_CODES = new Set(['SERVER_ERROR']);
+
 const XSRF_COOKIE_NAME  = 'XSRF-TOKEN';
 const XSRF_TOKEN_HEADER = 'X-XSRF-TOKEN';
 
@@ -333,7 +344,7 @@ axiosInstance.interceptors.response.use(
          * Toasting here too would pre-empt that dialog with a bare error and stack two messages on
          * screen. Everything without a code is unclaimed, and still reported here.
          */
-        if (!errorCode) {
+        if (!errorCode || UNCLAIMED_ERROR_CODES.has(errorCode)) {
             toast.error(message);
         }
 
