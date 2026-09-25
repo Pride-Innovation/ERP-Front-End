@@ -6,7 +6,9 @@ Two repos, worked on together:
 - **Backend** — `ERP-Back-End` (Spring Boot 3.2, Hibernate 6.3 + Envers, Flyway, MySQL)
 
 Verify with `npx tsc --noEmit -p tsconfig.json`, `npx eslint src/... --ext .ts,.tsx`, and
-`./mvnw.cmd -o test` (77 tests at time of writing, all green).
+`./mvnw.cmd -o test` — **444 backend tests** and **63 frontend** at time of writing, all green.
+Run the frontend suite as `CI=true npx react-scripts test --watchAll=false`; plain `npx jest` fails
+on a Babel transform, because the config that makes it work is CRA's.
 
 ---
 
@@ -294,7 +296,7 @@ that caused it. It now falls back to `window.location.origin`, which changes not
 URL is absolute.
 
 
-## Session expiry: 401 means "who are you", 422 means "no"
+## Session expiry: 401 means "who are you", 417 means "no"
 
 Moving refusals off 403 took `InsufficientAuthenticationException` along with `AccessDeniedException`,
 on the reasoning that both were "authorization". **They are not, and conflating them broke expiry
@@ -318,9 +320,11 @@ returned 422.** After: all three 401, carrying `errorCode: "SESSION_EXPIRED"`.
 | **401** | I do not know who you are | refresh, then sign out |
 | **`AccessDenied.STATUS`** | I know you, and the answer is no | say so, change nothing |
 
-Only 403 is unavailable. 401 was never in question, and `SessionExpiryTest` now pins both halves —
-including that an authenticated caller refused a route gets 422 and **not** 401, or the front end
-would refresh a perfectly good token and sign somebody out for opening another branch's record.
+401 was never in question - it is on the firewall's admitted list - and `SessionExpiryTest` pins
+both halves, including that an authenticated caller refused a route gets `AccessDenied.STATUS` and
+**not** 401, or the front end would refresh a perfectly good token and sign somebody out for opening
+another branch's record. (That refusal travelled as 422 when this was written and is 417 now; the
+test reads the constant, so it followed the change on its own.)
 
 ### The refresh endpoint answered 200 with an empty body on every failure
 
@@ -2080,6 +2084,66 @@ likely, which is a different shape from the permissions the module has today.
 *Left alone deliberately:* `DELETE /users/**` is matched to `DELETE_USER` and no DELETE endpoint
 exists. Harmless, but it makes the permission look meaningful — worth removing or implementing, and
 neither is urgent. Accounts are disabled, never deleted, which is the right model for a bank.
+
+## Every bulk import read the wrong worksheet
+
+User import failed with the server reporting only *"Something went wrong"*. The payload explains
+itself once seen: **12 roles, 54 branches, 15 departments, 2 genders** — the bank's reference data,
+one item per row, each column petering out as its list ran dry:
+
+```json
+[{"titles":"Super Admin Title","roles":"SUPER_ADMIN","branches":"Head Office","departments":"People & Culture","genders":"Male"},
+ …
+ {"titles":"Data Scientist","branches":"western","departments":"Administration & Procurement"},
+ …
+ {"titles":"Regional Credit Administrator"}]
+```
+
+That is column-wise reference data, not people. **The importer was parsing the dropdown source
+sheet.** Both templates open with a hidden one:
+
+```ts
+// userImportTemplate.ts:44   and   assetImportTemplate.ts:56
+const lists = wb.addWorksheet('_Lists', { state: 'veryHidden' });   // added FIRST
+const users = wb.addWorksheet('Users', { … });                      // added SECOND
+```
+
+and `FileUploadButton` took `workbook.SheetNames[0]`. **Both user and asset import were broken**,
+and had been since the templates gained validation dropdowns — the hidden sheet is what makes those
+work.
+
+**It hid because the wrong sheet parses perfectly.** `_Lists` has real headers, so the result is
+well-formed rows that simply describe titles and branches instead of staff. There is no parse error
+to notice; the file uploads, the rows map, the request posts. The only signal is on the server, and
+it names a field rather than a sheet — which sends whoever reads it looking at the DTO.
+
+`pickDataSheet` takes the first **visible** sheet, then skips anything with a leading underscore.
+Visibility first because Excel marks `_Lists` as `veryHidden` and no template hides the sheet a user
+is meant to fill in; the underscore rule is the backstop for a template re-saved by a tool that drops
+visibility flags. Deliberately **not** "the sheet called Users or Assets" — people rename tabs, and a
+file exported from another system has neither name, so that would break the case the old code got
+right. It falls back to the first sheet when every candidate looks like scaffolding.
+
+*Verified by breaking it:* restoring `SheetNames[0]` fails three of the six cases with
+`Expected: "Users", Received: "_Lists"` — the bug itself, reproduced.
+
+### The server said "Something went wrong" for a client error
+
+Worth separating, because it is why this took a log dive rather than a glance.
+
+`UserController.bulkInsertUsers` takes the rows as a `@RequestParam` string and calls
+`objectMapper.readValue` itself, so Jackson's `UnrecognizedPropertyException` never became Spring's
+`HttpMessageNotReadableException` and its automatic 400. It escaped as an ordinary unhandled
+exception, reached the catch-all, and was reported as a **server fault** — telling the user nothing
+and implying the fault was ours.
+
+A `JsonProcessingException` handler now answers **400** naming the column and listing what was
+expected. The field name was in the server log the whole time; it just never reached the person who
+could act on it.
+
+*One thing this did prove:* the response was a deliverable 440 carrying a message. Before the
+allowed-status work it would have been a 500, which the firewall replaces wholesale — the user would
+have seen the rejection page and there would have been no payload to inspect at all.
 
 ## Audit trails page
 

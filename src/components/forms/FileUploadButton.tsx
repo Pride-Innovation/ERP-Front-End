@@ -13,6 +13,7 @@ import { useContext, useRef, useState } from "react";
 import { IFileUploadButton } from "./interface";
 import { FileContext } from "../../context/file/FileContext";
 import * as XLSX from 'xlsx';
+import { pickDataSheet } from './pickDataSheet';
 import { toast } from "react-toastify";
 import { importTemplates } from "./importTemplates";
 import { downloadUserImportTemplate } from "../../pages/users/userImportTemplate";
@@ -140,7 +141,13 @@ const FileUploadButton = ({ title, module, assetTypeId }: IFileUploadButton) => 
                     return;
                 }
 
-                const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                const sheetName = pickDataSheet(workbook);
+                if (!sheetName) {
+                    toast.error('Could not find a data sheet in that file.');
+                    return;
+                }
+
+                const worksheet = workbook.Sheets[sheetName];
                 const rawJson = XLSX.utils.sheet_to_json(worksheet);
 
                 if (rawJson.length === 0) {
