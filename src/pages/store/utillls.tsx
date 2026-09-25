@@ -52,7 +52,10 @@ export const listingFailure = (response: unknown): string => {
     const status = (response as { status?: number; response?: { status?: number } })?.status
         ?? (response as { response?: { status?: number } })?.response?.status;
 
-    if (errorCode === 'ACCESS_DENIED' || status === 422 || status === 403 || status === 401) {
+    if (errorCode === 'ACCESS_DENIED'
+        // Numeric fallbacks for a backend older than the caller: 417 today, 422 before the
+        // firewall's allowed-status list was known, 403 before that.
+        || status === 417 || status === 422 || status === 403 || status === 401) {
         return 'You do not have access to this branch\u2019s store. Showing nothing rather than another branch\u2019s figures.';
     }
     return 'Could not load this store\u2019s stock. Please try again.';
