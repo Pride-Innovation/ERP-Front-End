@@ -305,7 +305,13 @@ export interface IRepairDetails {
     id: number | string;
     repairStartDate: string;
     repairEndDate: string;
+    /** The name as recorded. Rows from before the picker carry typed text and no type. */
     technician: string;
+    technicianType?: 'INTERNAL' | 'EXTERNAL' | null;
+    technicianUserId?: number | null;
+    technicianConsultantId?: number | null;
+    /** Where the repair went — decides which unit's officers may be named as its technician. */
+    repairDestination?: 'IT' | 'ADMIN' | 'EXTERNAL' | null;
     repairReason: string;
     documents: string[];
     asset: IAsset;

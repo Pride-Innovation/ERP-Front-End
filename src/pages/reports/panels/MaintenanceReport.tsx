@@ -54,7 +54,11 @@ const toRow = (r: any): MaintenanceRow => ({
     branch: r.asset?.branch?.name ?? '—',
     startDate: fmtDate(r.repairStartDate),
     completionDate: fmtDate(r.repairEndDate),
-    technician: r.technician ?? '—',
+    // "Internal" / "External" when the record says which; typed text from before the picker has no kind.
+    technician: r.technician
+        ? (r.technicianType === 'INTERNAL' ? `${r.technician} (Internal)`
+            : r.technicianType === 'EXTERNAL' ? `${r.technician} (External)` : r.technician)
+        : '—',
     status: r.status ?? '—',
     // The reason it went in, plus whatever was written when it came back.
     description: [r.repairReason, r.completionNotes].filter(Boolean).join(' — ') || '—',

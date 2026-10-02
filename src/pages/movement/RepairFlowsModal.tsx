@@ -19,6 +19,7 @@ import ArrowForwardIosOutlinedIcon from '@mui/icons-material/ArrowForwardIosOutl
 import UploadFileOutlinedIcon from '@mui/icons-material/UploadFileOutlined';
 import CategoryOutlinedIcon from '@mui/icons-material/CategoryOutlined';
 import CloseIcon from '@mui/icons-material/Close';
+import AssignmentReturnOutlinedIcon from '@mui/icons-material/AssignmentReturnOutlined';
 import { toast } from 'react-toastify';
 import ButtonComponent from '../../components/forms/Button';
 import { fieldSx } from '../../components/forms/Inputs';
@@ -42,10 +43,14 @@ import { noApproverError } from './constants';
 import { PERMISSIONS } from '../../core/permissions/constants';
 import usePermissions from '../../core/permissions/usePermissions';
 import NoApproverDialog from './NoApproverDialog';
+import LoanerList from './LoanerList';
+import TechnicianPicker, {
+    EMPTY_TECHNICIAN, ITechnicianSelection, isTechnicianChosen, isTechnicianPartial, technicianPayload,
+} from '../../components/repair/TechnicianPicker';
 
 const PRIMARY = '#08796C';
 
-type Flow = 'repair-transfer' | 'temp-replacement' | 'return-after-repair' | 'disposal';
+type Flow = 'repair-transfer' | 'temp-replacement' | 'return-after-repair' | 'disposal' | 'loaners';
 
 /**
  * The four flows, each naming the permission its endpoint actually demands.
@@ -61,9 +66,10 @@ type Flow = 'repair-transfer' | 'temp-replacement' | 'return-after-repair' | 'di
  */
 const FLOWS: { key: Flow; label: string; description: string; icon: JSX.Element; color: string; permission: string }[] = [
     { key: 'repair-transfer', label: 'Repair Transfer', description: 'Send a faulty asset for repair — routed by its category to IT, Admin or an external consultant.', icon: <BuildOutlinedIcon />, color: '#2563EB', permission: PERMISSIONS.REPAIR_ASSET },
-    { key: 'temp-replacement', label: 'Temporary Replacement', description: 'Issue a stand-in asset from the IT store to keep the affected user working.', icon: <SwapHorizOutlinedIcon />, color: '#A16207', permission: PERMISSIONS.REPAIR_ASSET },
-    { key: 'return-after-repair', label: 'Return After Repair', description: 'Send a repaired asset back to its location and optionally reclaim the temporary one.', icon: <RestartAltOutlinedIcon />, color: '#047857', permission: PERMISSIONS.REPAIR_ASSET },
+    { key: 'temp-replacement', label: 'Temporary Replacement', description: 'Lend a stand-in asset from the pool to keep someone working. They return it themselves when done.', icon: <SwapHorizOutlinedIcon />, color: '#A16207', permission: PERMISSIONS.REPAIR_ASSET },
+    { key: 'return-after-repair', label: 'Return After Repair', description: 'Send a repaired asset back to the person who had it. Any loaner they hold stays with them until they return it.', icon: <RestartAltOutlinedIcon />, color: '#047857', permission: PERMISSIONS.REPAIR_ASSET },
     { key: 'disposal', label: 'Disposal', description: 'Move an irreparable or written-off asset to the Disposal store.', icon: <DeleteSweepOutlinedIcon />, color: '#B91C1C', permission: PERMISSIONS.DISPOSE_ASSET },
+    { key: 'loaners', label: 'Outstanding Loaners', description: 'Temporary assets still out, oldest first — return one for its holder, or make it permanent.', icon: <AssignmentReturnOutlinedIcon />, color: '#7C3AED', permission: PERMISSIONS.REPAIR_ASSET },
 ];
 
 
@@ -98,12 +104,13 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
      * which is why the Maintenance report and the asset's Repair History tab were empty for every
      * repair the bank had done.
      *
-     * The fault is required (a maintenance record with no fault is not one). The technician is not:
-     * for an IT- or Admin-routed repair the bench decides that after it arrives, and for an EXTERNAL
-     * one the server defaults it to the consultant this form has already chosen.
+     * The fault is required (a maintenance record with no fault is not one). The technician is not
+     * when the repair is raised: for an IT- or Admin-routed repair the bench decides that after it
+     * arrives, and an EXTERNAL one is worked on by the consultant this form has already chosen. It is
+     * required by the time the repair closes, which the return leg below enforces.
      */
     const [faultDescription, setFaultDescription] = useState('');
-    const [technician, setTechnician] = useState('');
+    const [technician, setTechnician] = useState<ITechnicianSelection>(EMPTY_TECHNICIAN);
 
     /** Closes that record as the asset is sent home - the return *is* the moment it finished. */
     const [completionNotes, setCompletionNotes] = useState('');
@@ -124,8 +131,14 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
      */
     const [preview, setPreview] = useState<IMovementFlowPreview | null>(null);
     const [previewLoading, setPreviewLoading] = useState(false);
-    /** Unticked when the recipient is keeping the loaner for now. */
-    const [returnLoaner, setReturnLoaner] = useState(true);
+    /*
+     * Loaners. A temporary replacement may name the asset under repair it stands in for, which is
+     * what tells somebody holding two loaners which is which, and what reminds them to hand it back
+     * when that asset comes home. Optional: a loaner can cover a disposal, or nothing in particular.
+     */
+    const [coversAsset, setCoversAsset] = useState<IAsset | null>(null);
+    /** Repair transfer only: also lend the holder a stand-in, tied to this repair. */
+    const [lendLoaner, setLendLoaner] = useState(false);
 
     // disposal
     const [disposalCandidates, setDisposalCandidates] = useState<IDisposalCandidate[]>([]);
@@ -147,7 +160,7 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
 
     const categoryNotRepairable = flow === 'repair-transfer' && asset?.assetType?.repairable === false;
 
-    const needsPoolAssets = flow === 'temp-replacement';
+    const needsPoolAssets = flow === 'temp-replacement' || (flow === 'repair-transfer' && lendLoaner);
 
     useEffect(() => {
         if (needsPoolAssets && poolAssets.length === 0) {
@@ -164,10 +177,12 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
                 if (r?.status === 200) setDisposalCandidates(r.data ?? []);
             })();
         }
-    }, [flow]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [flow, needsPoolAssets]); // eslint-disable-line react-hooks/exhaustive-deps
 
     // The chosen asset's category dictates the default repair routing (overridable below).
     useEffect(() => {
+        // A technician chosen for one asset's repair says nothing about another's.
+        setTechnician(EMPTY_TECHNICIAN);
         if (flow !== 'repair-transfer') return;
         setRepairDestination(asset?.assetType?.repairDestination ?? 'IT');
     }, [asset, flow]);
@@ -251,8 +266,8 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
         setAsset(null); setTempAsset(null); setRecipient(null); setRemarks('');
         setRepairDestination('IT'); setConsultant(null); setDispatchDocs([]);
         setDisposalCandidate(null); setEarlyDisposalReason('');
-        setPreview(null); setReturnLoaner(true);
-        setFaultDescription(''); setTechnician('');
+        setPreview(null); setCoversAsset(null); setLendLoaner(false);
+        setFaultDescription(''); setTechnician(EMPTY_TECHNICIAN);
         setCompletionNotes(''); setCompletionDocs([]);
     };
 
@@ -320,6 +335,17 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
                     setSending(false); return;
                 }
 
+                // Optional here, but not half-chosen: a kind with nobody picked would be refused.
+                if (!categoryNotRepairable && repairDestination !== 'EXTERNAL' && isTechnicianPartial(technician)) {
+                    toast.warning('Choose the technician, or set Technician back to "Not yet known".');
+                    setSending(false); return;
+                }
+
+                if (lendLoaner && !categoryNotRepairable && !tempAsset) {
+                    toast.warning('Choose the temporary asset to lend, or untick "Lend a temporary replacement".');
+                    setSending(false); return;
+                }
+
                 let deliveryDocuments: string[] | undefined;
                 let consultantId: number | undefined;
                 if (!categoryNotRepairable && repairDestination === 'EXTERNAL') {
@@ -335,26 +361,38 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
                     assetId: asset.id,
                     // Opens the maintenance record that this journey carries.
                     faultDescription: faultDescription.trim(),
-                    technician: technician.trim() || null,
+                    // An external repair's technician is the consultant below, recorded server-side.
+                    ...(repairDestination !== 'EXTERNAL' ? technicianPayload(technician) : {}),
                     repairDestination: categoryNotRepairable ? null : repairDestination,
                     consultantId: consultantId ?? null,
                     deliveryDocuments: deliveryDocuments ?? null,
+                    // Lent to whoever held the asset, and tied to this repair - the server derives both.
+                    tempAssetId: lendLoaner && !categoryNotRepairable && tempAsset ? tempAsset.id : null,
                     remarks: remarks || null,
                     ...bypass,
                 });
             } else if (flow === 'temp-replacement') {
                 if (!tempAsset || !recipient) { toast.warning('Select the temporary asset and recipient.'); setSending(false); return; }
                 response = await tempReplacementService({
-                    tempAssetId: tempAsset.id, recipientUserId: recipient.id, remarks: remarks || null, ...bypass,
+                    tempAssetId: tempAsset.id,
+                    recipientUserId: recipient.id,
+                    coversAssetId: coversAsset?.id ?? null,
+                    remarks: remarks || null,
+                    ...bypass,
                 });
             } else if (flow === 'return-after-repair') {
                 if (!asset) { toast.warning('Select the repaired asset.'); setSending(false); return; }
                 if (preview?.blockedReason) { toast.warning(preview.blockedReason); setSending(false); return; }
-                // Destination, recipient and loaner are all derived server-side from the asset's
-                // repair transfer, so none of them are sent. Only the decision to hold the loaner
-                // back is the user's to make.
+                // Destination and recipient are derived server-side from the asset's repair
+                // transfer, so neither is sent. No loaner moves with this return.
                 // Closes the maintenance record the transfer opened. Uploaded before the call so a
                 // failed upload stops the return rather than completing it with nothing attached.
+                // A closed repair names who did the work. Asked only when the repair does not already.
+                if (preview?.openRepairId && !preview.technicianName && !isTechnicianChosen(technician)) {
+                    toast.warning('Record who repaired this asset before returning it.');
+                    setSending(false); return;
+                }
+
                 let completionDocuments: string[] | undefined;
                 if (completionDocs.length > 0) {
                     const paths = await uploadDocs(completionDocs);
@@ -364,9 +402,9 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
 
                 response = await returnAfterRepairService({
                     assetId: asset.id,
-                    returnLoaner,
                     completionNotes: completionNotes.trim() || null,
                     completionDocuments: completionDocuments ?? null,
+                    ...technicianPayload(technician),
                     remarks: remarks || null,
                     ...bypass,
                 });
@@ -653,19 +691,6 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
                                 sx={autocompleteSx}
                                 helperText="Recorded on the asset's repair history and the maintenance report."
                             />
-                            <TextField
-                                fullWidth
-                                sx={fieldSx}
-                                label="Technician"
-                                placeholder={repairDestination === 'EXTERNAL'
-                                    ? 'Defaults to the consultant chosen below'
-                                    : 'Optional \u2014 the bench decides once it arrives'}
-                                value={technician}
-                                onChange={(e) => setTechnician(e.target.value)}
-                                helperText={repairDestination === 'EXTERNAL'
-                                    ? 'Left blank, the consultant selected below is recorded as the technician.'
-                                    : 'Leave blank if it is not yet known who will work on it.'}
-                            />
 
                             <SectionLabel>Repair routing</SectionLabel>
                             <TextField
@@ -673,7 +698,13 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
                                 sx={{ ...fieldSx, '& .MuiSelect-select': { paddingRight: '32px' } }}
                                 label="Repair Destination"
                                 value={repairDestination}
-                                onChange={(e) => { setRepairDestination(e.target.value as RepairDestination); setConsultant(null); }}
+                                onChange={(e) => {
+                                    setRepairDestination(e.target.value as RepairDestination);
+                                    setConsultant(null);
+                                    // The internal list belongs to the routing, so a choice made for
+                                    // one routing is not carried into another.
+                                    setTechnician(EMPTY_TECHNICIAN);
+                                }}
                                 helperText={asset.assetType?.repairDestination
                                     ? `Category default: ${asset.assetType.repairDestination}`
                                     : 'No category default configured — IT store assumed'}
@@ -701,6 +732,24 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
                                 <MenuItem value="ADMIN">Admin Store — facilities / administration team</MenuItem>
                                 <MenuItem value="EXTERNAL">External Consultant — outside repair vendor</MenuItem>
                             </TextField>
+
+                            {/*
+                              * Who will work on it — the kind first, then the person or vendor.
+                              *
+                              * Not shown for an external repair: that is worked on by the consultant
+                              * it is sent to, chosen just below for the routing, and asking twice
+                              * would only offer a way to name two vendors on one repair.
+                              */}
+                            {repairDestination !== 'EXTERNAL' && (
+                                <>
+                                    <SectionLabel>Technician — optional</SectionLabel>
+                                    <TechnicianPicker
+                                        repairDestination={repairDestination}
+                                        value={technician}
+                                        onChange={setTechnician}
+                                    />
+                                </>
+                            )}
 
                             {repairDestination === 'EXTERNAL' && (
                                 <>
@@ -778,12 +827,52 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
                                     )}
                                     <Typography variant="caption" sx={{ color: '#94A3B8', lineHeight: 1.5 }}>
                                         External repairs require the consultant and at least one signed dispatch document;
-                                        custody is coordinated by the Head Office Admin store.
+                                        custody is coordinated by the Head Office Admin store. The consultant is recorded
+                                        as the technician.
                                     </Typography>
+                                </>
+                            )}
+
+                            {/*
+                              * A stand-in for the person left without one, tied to this repair. Only
+                              * offered when somebody holds the asset - there is nobody to lend to
+                              * otherwise, and the server would refuse.
+                              */}
+                            {asset.assignedTo && (
+                                <>
+                                    <SectionLabel>Temporary replacement — optional</SectionLabel>
+                                    <FormControlLabel
+                                        control={<Checkbox checked={lendLoaner} onChange={(e) => { setLendLoaner(e.target.checked); if (!e.target.checked) setTempAsset(null); }} />}
+                                        label={
+                                            <Box>
+                                                <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                                    Lend {asset.assignedTo.firstName} {asset.assignedTo.lastName} a temporary replacement
+                                                </Typography>
+                                                <Typography variant="caption" sx={{ color: '#64748B' }}>
+                                                    Recorded as covering this repair. They keep it until they return it
+                                                    themselves, once this asset is back with them.
+                                                </Typography>
+                                            </Box>
+                                        }
+                                        sx={{ alignItems: 'flex-start', m: 0 }}
+                                    />
+                                    {lendLoaner && assetPicker('Temporary Asset (pool stock)', poolAssets, tempAsset, setTempAsset)}
                                 </>
                             )}
                         </>
                     )}
+                </>
+            )}
+
+            {/* ── Outstanding loaners ── */}
+            {flow === 'loaners' && (
+                <>
+                    <Typography variant="body2" sx={{ color: '#64748B' }}>
+                        Every temporary asset still out that you can see, longest-held first. A loaner is
+                        never collected automatically — its holder returns it from their dashboard once
+                        their own asset is back, or you can return it for them here.
+                    </Typography>
+                    <LoanerList mode="all" onChanged={onDone} emptyText="No temporary assets are out on loan." />
                 </>
             )}
 
@@ -868,6 +957,19 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
                     <SectionLabel>Replacement</SectionLabel>
                     {assetPicker('Temporary Asset (pool stock)', poolAssets, tempAsset, setTempAsset)}
                     {userPicker('Recipient User')}
+
+                    {/*
+                      * Optional. Naming the asset under repair is what lets somebody holding two
+                      * loaners tell them apart, and what reminds them to hand this one back when
+                      * that asset comes home. Leave it empty for a loaner covering a disposal, or
+                      * nothing in particular. Nothing ever returns a loaner automatically.
+                      */}
+                    <SectionLabel>Standing in for — optional</SectionLabel>
+                    {assetPicker('Asset under repair (search by engraved number)', assetSearch, coversAsset, setCoversAsset, true)}
+                    <Typography variant="caption" sx={{ color: '#64748B', mt: -1 }}>
+                        The recipient keeps the temporary asset until they return it themselves, from My
+                        Assets on their dashboard.
+                    </Typography>
                 </>
             )}
 
@@ -930,6 +1032,35 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
                               * and refusing the return for want of a sentence would strand the asset
                               * at Head Office.
                               */}
+                            {/*
+                              * Who repaired it. A closed repair must say, and this return is what
+                              * closes it - so when the repair does not already name somebody, the
+                              * form asks here, with the same two-step picker the transfer uses.
+                              * Records from before the picker carry typed text, which is accepted.
+                              */}
+                            {preview.openRepairId && (
+                                <>
+                                    <SectionLabel>Who repaired it</SectionLabel>
+                                    {preview.technicianName ? (
+                                        <TextField
+                                            fullWidth sx={fieldSx} label="Technician"
+                                            value={`${preview.technicianName}${preview.technicianType === 'INTERNAL'
+                                                ? ' · Internal officer'
+                                                : preview.technicianType === 'EXTERNAL' ? ' · External consultant' : ''}`}
+                                            InputProps={{ readOnly: true }}
+                                            helperText="Recorded on this repair. Change it from the asset's Repair History if it is wrong."
+                                        />
+                                    ) : (
+                                        <TechnicianPicker
+                                            required
+                                            repairDestination={preview.repairDestination ?? 'IT'}
+                                            value={technician}
+                                            onChange={setTechnician}
+                                        />
+                                    )}
+                                </>
+                            )}
+
                             <SectionLabel>Repair outcome — optional</SectionLabel>
                             <TextField
                                 fullWidth
@@ -1002,25 +1133,18 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
                                 </Stack>
                             )}
 
-                            {preview.loanerAssetId && (
-                                <>
-                                    <SectionLabel>Temporary asset</SectionLabel>
-                                    <FormControlLabel
-                                        control={<Checkbox checked={returnLoaner} onChange={(e) => setReturnLoaner(e.target.checked)} />}
-                                        label={
-                                            <Box>
-                                                <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                                                    Return loaner {preview.loanerAssetLabel}
-                                                </Typography>
-                                                <Typography variant="caption" sx={{ color: '#64748B' }}>
-                                                    Issued to {preview.recipientUserName ?? 'this user'} while the asset was under
-                                                    repair. Untick if they are keeping it for now.
-                                                </Typography>
-                                            </Box>
-                                        }
-                                        sx={{ alignItems: 'flex-start', m: 0 }}
-                                    />
-                                </>
+                            {/*
+                              * No loaner checkbox, deliberately. This return used to take a loaner
+                              * back in the same call - guessing which one when the user held several,
+                              * and able to collect it before their own asset had even been approved to
+                              * travel. A loaner now stays with them until they hand it back.
+                              */}
+                            {preview.recipientUserId && (
+                                <Alert severity="info" sx={{ borderRadius: 2, '& .MuiAlert-message': { fontSize: '0.82rem' } }}>
+                                    Any temporary asset {preview.recipientUserName ?? 'the user'} holds stays with them
+                                    until this asset reaches them. They are then reminded to return it, from My Assets
+                                    on their dashboard.
+                                </Alert>
                             )}
                         </>
                     )}
@@ -1053,16 +1177,20 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
                 </Alert>
             )}
 
-            {/* ── Remarks ── */}
-            <SectionLabel>Remarks — optional</SectionLabel>
-            <TextField
-                fullWidth multiline rows={3}
-                // fieldSx pads the inner input for single-line height; a multiline root already
-                // carries its own padding, so zero the textarea's to avoid doubling up.
-                sx={{ ...fieldSx, '& .MuiInputBase-input': { padding: 0, fontSize: '0.875rem', lineHeight: 1.5 } }}
-                placeholder="Any additional context for this movement…"
-                value={remarks} onChange={(e) => setRemarks(e.target.value)}
-            />
+            {/* ── Remarks ── (the loaners view acts per row and creates nothing from here) */}
+            {flow !== 'loaners' && (
+                <>
+                    <SectionLabel>Remarks — optional</SectionLabel>
+                    <TextField
+                        fullWidth multiline rows={3}
+                        // fieldSx pads the inner input for single-line height; a multiline root already
+                        // carries its own padding, so zero the textarea's to avoid doubling up.
+                        sx={{ ...fieldSx, '& .MuiInputBase-input': { padding: 0, fontSize: '0.875rem', lineHeight: 1.5 } }}
+                        placeholder="Any additional context for this movement…"
+                        value={remarks} onChange={(e) => setRemarks(e.target.value)}
+                    />
+                </>
+            )}
 
             {/* ── Footer actions ── */}
             <Divider sx={{ borderColor: '#EEF2F7' }} />
@@ -1076,9 +1204,11 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
                         '&:hover': { borderColor: '#CBD5E1', bgcolor: '#F8FAFC' },
                     }}
                 >
-                    Cancel
+                    {flow === 'loaners' ? 'Close' : 'Cancel'}
                 </Button>
-                <ButtonComponent sendingRequest={sending} buttonText="Create Movement" buttonColor="primary" variant="contained" type="button" handleClick={() => submit()} />
+                {flow !== 'loaners' && (
+                    <ButtonComponent sendingRequest={sending} buttonText="Create Movement" buttonColor="primary" variant="contained" type="button" handleClick={() => submit()} />
+                )}
             </Stack>
 
             <NoApproverDialog

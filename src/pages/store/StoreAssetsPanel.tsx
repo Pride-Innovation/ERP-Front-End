@@ -87,13 +87,25 @@ const StoreAssetsPanel = ({ branchId, storeType, accentColor }: Props) => {
                 const storesRes = await axiosInstance.get('inventory/stores', {
                     params: bankWide ? { storeType } : { locationId: branchId, storeType },
                 });
-                const store = ((storesRes.data as Array<{ id: number }>) ?? [])[0];
+                if (!Array.isArray(storesRes.data)) {
+                    throw new Error('The store directory response was not a list');
+                }
+                const store = (storesRes.data as Array<{ id: number }>)[0];
                 if (!store) {
                     if (!cancelled) { setAssets([]); setLoading(false); }
                     return;
                 }
                 const assetsRes = await axiosInstance.get(`inventory/stores/${store.id}/assets`);
-                if (!cancelled) setAssets((assetsRes.data as IAsset[]) ?? []);
+                /*
+                 * A 200 is not proof of a list. A response cut off mid-serialisation arrives as a
+                 * string, and so does the firewall's rejection page - and storing either here made
+                 * the next render call `.filter` on it and take the whole page down. Anything but an
+                 * array is a failure, and says so rather than reading as an empty store.
+                 */
+                if (!Array.isArray(assetsRes.data)) {
+                    throw new Error('The store assets response was not a list');
+                }
+                if (!cancelled) setAssets(assetsRes.data as IAsset[]);
             } catch (e) {
                 if (!cancelled) setError('Could not load the assets held by this store.');
             } finally {

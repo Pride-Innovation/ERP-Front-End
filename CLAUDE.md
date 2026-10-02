@@ -6,7 +6,7 @@ Two repos, worked on together:
 - **Backend** — `ERP-Back-End` (Spring Boot 3.2, Hibernate 6.3 + Envers, Flyway, MySQL)
 
 Verify with `npx tsc --noEmit -p tsconfig.json`, `npx eslint src/... --ext .ts,.tsx`, and
-`./mvnw.cmd -o test` — **444 backend tests** and **63 frontend** at time of writing, all green.
+`./mvnw.cmd -o test` — **468 backend tests** and **63 frontend** at time of writing, all green.
 Run the frontend suite as `CI=true npx react-scripts test --watchAll=false`; plain `npx jest` fails
 on a Babel transform, because the config that makes it work is CRA's.
 
@@ -982,10 +982,106 @@ maintenance report's only column about the fault with courier notes. Required **
 category is non-repairable, because that diverts straight to disposal and opens no record; the
 front-end condition mirrors the service's own early return rather than guessing at it.
 
-`technician` is optional: for an IT- or Admin-routed repair the bench decides after it arrives, and
-for an EXTERNAL one the server defaults it to the consultant the form already chose. The return leg
-takes `completionNotes` and `completionDocuments`, both optional — a repair with no notes is still a
-repair that happened.
+The return leg takes `completionNotes` and `completionDocuments`, both optional — a repair with no
+notes is still a repair that happened.
+
+### Who repaired it — a reference, not typed text (V26)
+
+`Repair.technician` was a free-text box, so a repair was tied to nobody: one officer under several
+spellings, a vendor typable onto an in-house job, and no report able to say what a person or vendor
+had repaired. Every form now asks **the kind first, then one reference** (`TechnicianPicker`, shared
+by the transfer, the return, the bench completion and the repair detail's *Record / Change*):
+
+| Kind | Chosen from | Stored as |
+|---|---|---|
+| Internal officer | active members of the unit servicing the routing — **Infra** for IT, **Admin** for Admin | `technician_user_id` |
+| External consultant | active consultants in Settings | `technician_consultant_id` |
+
+`technician` stays as the **name when recorded**, so a rename does not rewrite who did a past repair
+and rows from before V26 display unchanged. `repair_destination` is stored on the record because it
+decides which unit's officers are eligible, and was otherwise only recoverable from the journey.
+
+- **The unit is found by the role it confers** (`INFRA_UNIT` / `ADMIN_UNIT`), never by its name —
+  units are renamed in Settings.
+- **`GET /movements/repair-technicians` is deliberately not branch-scoped**, unlike `/users/picker`:
+  both units sit at Head Office and service the bank, so a Gulu officer raising a repair would
+  otherwise be offered nobody.
+- **An EXTERNAL repair's technician is its consultant**, recorded from the routing choice; the form
+  does not ask twice, and the server refuses a different technician rather than guessing which of
+  the two is wrong. IT and Admin repairs may still name a consultant — IT calls vendors in.
+- **Optional when raised, required when closed** — on both closing paths (the return leg and the
+  bench's `PUT /assets/repairs/{id}`). One recorded earlier suffices; typed text from before V26
+  counts, or every pre-existing repair would be stranded at Head Office for want of a dropdown.
+- **The return checks this before creating its movement**, so a refusal costs nothing.
+- *Fixed on the way:* the bench completion caught **every** exception into a 440, so a refusal or a
+  validation 400 read as "Error creating repair" and a server fault; it now catches only the upload
+  failure. And its form had no non-200 branch (trap #6), so a refused completion closed the dialog
+  exactly as a successful one did.
+
+### Loaners are returned by hand — nothing moves one automatically
+
+Returning a repaired asset used to create a **second movement in the same call** taking a loaner
+back. Three faults, none fixable by refining it:
+
+- **It guessed which loaner** — the newest `TEMP_REPLACEMENT` ever issued to the user
+  (`findTempReplacementsForUser`, now deleted). That query read *movements*, which say a loaner was
+  *sent*, so a loaner returned months ago still matched: a second repair could "return" an asset
+  already back in the pool or lent to someone else.
+- **It moved too early** — the loaner's leg needed no approval while the repaired asset's did, so
+  the user could be left with nothing to work on.
+- **Cancelling the return left the loaner's leg live.**
+
+`LoanerService` now owns the whole life of a loan. **Who holds a loaner is an open assignment
+flagged `temporary`** (`findOpenLoansForUser`), never a movement. A loan ends one of two ways, each
+deliberate:
+
+| | Who | How |
+|---|---|---|
+| **Return** | the holder (authentication alone — it is theirs to hand back), or `REPAIR_ASSET` with the holder in reach | `RETURN_TO_STORE` from the holder to the store it was lent from, carrying `issuanceAvailable` |
+| **Make permanent** | `REPAIR_ASSET` only | closes the temporary assignment, opens an ordinary one, clears `temporaryPool` — for when the asset it stood in for is written off |
+
+- **The link to a repair is optional and only a label.** A temp replacement may name the asset it
+  covers (`coversAssetId` → the open `Repair`, stored on the movement's existing `repair_id`); the
+  repair transfer can lend one in the same call, tied automatically. A loaner for a disposal, or for
+  nothing, has no link.
+- **A return follows ordinary movement policy** — within one location it completes on receipt;
+  across locations it is approved and dispatched like anything that travels, with the usual
+  no-approver override. `InventoryService` now applies `restoreStatusCode` on `RETURN_TO_STORE`
+  (previously only on `RETURN_AFTER_REPAIR`); an ordinary hand-back carries none and is unaffected.
+- **What stops loaners going missing is visibility, not automation.** `LoanerReminder` (a separate
+  component, so `MovementService` can call it without a cycle through `LoanerService`) notifies the
+  holder when a `RETURN_AFTER_REPAIR` reaches them — `LOANER_RETURN_DUE`, target `LOANER`, routed to
+  the dashboard. A loaner tied to a *different* repair is not mentioned; an unlinked one is, since the
+  system cannot tell. Never throws: a reminder failing must not fail a receipt.
+- **Where people see them:** *My Assets* on the dashboard ("On loan to you", with Return), and the
+  repair modal's **Outstanding Loaners** tile for `REPAIR_ASSET` — oldest first, "Due back" once the
+  covered asset is home, "Return under way" while one is in flight.
+
+### Trap: a Lombok `hashCode` through an inverse collection
+
+`@Data` on an entity includes every field in `equals`/`hashCode`. Where that includes a lazy
+`@OneToMany` whose elements hash back to the owner — `Title.users` ↔ `User.title`,
+`Region.branches` ↔ `Branch.region`, `Stock.stockCommodities` ↔ `StockCommodity.stock` — hashing
+one entity initialises the collection, and loading the collection hashes each element into it,
+**re-entering the set mid-load**. Hibernate guards that with an `assert`: in tests (`-ea`) it fails
+as a bare `AssertionError` in `PersistentSet.initializeEmptyCollection`; in production, where
+assertions are off, it silently loads the collection twice. Met by `LoanerFlowTest`, because a
+movement's items are hashed on every flush and the walk reaches all three. Those three collections
+are now `@EqualsAndHashCode.Exclude` / `@ToString.Exclude`.
+
+**Fixing one of these can expose a JSON loop it was hiding — and did.** In production the
+re-entrant load left `Stock.stockCommodities` reading *empty*, so Jackson wrote `[]` and never
+followed `StockCommodity.stock` back to the stock. Once the hashCode stopped re-entering, the set
+loaded its real lines and every response carrying an asset with a stock (the `/store/it` page first)
+recursed into a `StackOverflowError`. `stockCommodities` is now `@JsonIgnoreProperties("stock")`,
+pinned by `StockSerializationTest`, which reproduces the overflow when the annotation is removed.
+**Before excluding an inverse collection from hashCode, check it is not serialised with a
+back-pointer** (`Title.users` and `Region.branches` are `@JsonIgnore`; `GrnReport.stock` already was).
+
+**Others like them remain** —
+`User.toString` ↔ `Token.toString` overflows the stack if a failure message tries to print a
+notification, which is why that test asserts on ids. Exclude the inverse side whenever one bites;
+a sweep would be the better fix.
 
 ### Still open
 

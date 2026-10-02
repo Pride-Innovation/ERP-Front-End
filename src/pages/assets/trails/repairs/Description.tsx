@@ -28,6 +28,22 @@ import {
 } from '@mui/icons-material';
 import { IRepairDetails } from '../../interface';
 import moment from 'moment';
+import { useState } from 'react';
+import { toast } from 'react-toastify';
+import TechnicianPicker, {
+    EMPTY_TECHNICIAN, ITechnicianSelection, isTechnicianChosen, technicianPayload,
+} from '../../../../components/repair/TechnicianPicker';
+import { assignRepairTechnicianService } from '../../general/service';
+import usePermissions from '../../../../core/permissions/usePermissions';
+import { PERMISSIONS } from '../../../../core/permissions/constants';
+
+/** "Jane Doe · Internal officer" — the kind is shown when it is known; typed text from before the picker has none. */
+const technicianLabel = (name?: string | null, type?: string | null) => {
+    if (!name) return 'Not assigned';
+    if (type === 'INTERNAL') return `${name} · Internal officer`;
+    if (type === 'EXTERNAL') return `${name} · External consultant`;
+    return name;
+};
 
 interface DescriptionProps {
     repair: IRepairDetails;
@@ -44,6 +60,41 @@ const Description = ({ repair, handleClose, handleViewAttachments }: Description
     const status = repair?.status === "Completed" ? 'Completed' : 'Pending';
     const statusColor = repair.status === "Completed" ? theme.palette.success.main : theme.palette.warning.main;
     const hasCompletionDocuments = repair?.completionDocuments && repair.completionDocuments.length > 0;
+
+    /*
+     * Recording the technician between the bench receiving an asset and closing the repair.
+     *
+     * Gated on REPAIR_ASSET, which is what `PUT /assets/repairs/**` demands; the server also checks
+     * the asset is within the caller's reach, and says so if not. Kept locally after saving so the
+     * panel shows the answer without a refetch of the whole history.
+     */
+    const { has } = usePermissions();
+    const canRecordTechnician = has(PERMISSIONS.REPAIR_ASSET);
+    const [shown, setShown] = useState({ name: repair?.technician, type: repair?.technicianType });
+    const [editing, setEditing] = useState(false);
+    const [selection, setSelection] = useState<ITechnicianSelection>(EMPTY_TECHNICIAN);
+    const [saving, setSaving] = useState(false);
+
+    const saveTechnician = async () => {
+        if (!isTechnicianChosen(selection)) {
+            toast.warning('Choose an internal officer or an external consultant.');
+            return;
+        }
+        setSaving(true);
+        try {
+            const r = (await assignRepairTechnicianService(repair.id, technicianPayload(selection))) as any;
+            if (r?.status !== 200) {
+                toast.error(r?.response?.data?.detail ?? r?.response?.data?.message ?? 'Could not record the technician.');
+                return;
+            }
+            setShown({ name: r.data?.technician, type: r.data?.technicianType });
+            setEditing(false);
+            setSelection(EMPTY_TECHNICIAN);
+            toast.success('Technician recorded.');
+        } finally {
+            setSaving(false);
+        }
+    };
 
 
     return (
@@ -143,13 +194,39 @@ const Description = ({ repair, handleClose, handleViewAttachments }: Description
                                     <TechnicianIcon
                                         sx={{ mt: 0.3, mr: 1, fontSize: 18, color: alpha(theme.palette.text.secondary, 0.7) }}
                                     />
-                                    <Box>
+                                    <Box sx={{ flex: 1, minWidth: 0 }}>
                                         <Typography variant="body2" color="text.secondary" fontWeight={500}>
                                             Technician
                                         </Typography>
-                                        <Typography variant="body2" fontWeight={500} color="text.primary">
-                                            {repair.technician || 'Not assigned'}
-                                        </Typography>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+                                            <Typography variant="body2" fontWeight={500} color="text.primary">
+                                                {technicianLabel(shown.name, shown.type)}
+                                            </Typography>
+                                            {canRecordTechnician && !editing && (
+                                                <Button size="small" onClick={() => setEditing(true)} sx={{ textTransform: 'none', minWidth: 0, p: 0.25 }}>
+                                                    {shown.name ? 'Change' : 'Record'}
+                                                </Button>
+                                            )}
+                                        </Box>
+                                        {editing && (
+                                            <Box sx={{ mt: 1.5, display: 'grid', gap: 1 }}>
+                                                <TechnicianPicker
+                                                    required
+                                                    repairDestination={repair?.repairDestination ?? 'IT'}
+                                                    value={selection}
+                                                    onChange={setSelection}
+                                                    helperText="Who worked on, or is working on, this repair."
+                                                />
+                                                <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
+                                                    <Button size="small" onClick={() => { setEditing(false); setSelection(EMPTY_TECHNICIAN); }} disabled={saving}>
+                                                        Cancel
+                                                    </Button>
+                                                    <Button size="small" variant="contained" onClick={saveTechnician} disabled={saving}>
+                                                        {saving ? 'Saving…' : 'Save'}
+                                                    </Button>
+                                                </Box>
+                                            </Box>
+                                        )}
                                     </Box>
                                 </Box>
 
