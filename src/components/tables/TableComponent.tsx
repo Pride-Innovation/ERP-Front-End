@@ -67,6 +67,9 @@ const getStatusMeta = (raw: string): { bg: string; text: string; border: string;
     if (s === 'low') return { bg: alpha('#dc2626', 0.08), text: '#b91c1c', border: alpha('#dc2626', 0.18), dot: '#dc2626' };
     if (s === 'warning') return { bg: alpha('#d97706', 0.08), text: '#b45309', border: alpha('#d97706', 0.18), dot: '#d97706' };
     if (s === 'not monitored') return { bg: alpha('#64748b', 0.08), text: '#475569', border: alpha('#64748b', 0.18), dot: '#94a3b8' };
+    // A loaner on the shelf. Matched before the 'available' rule below, which would paint it the same
+    // blue as stock awaiting issuance - the confusion this status exists to remove.
+    if (s === 'loanavailable' || s === 'onloan') return { bg: alpha('#a16207', 0.1), text: '#a16207', border: alpha('#a16207', 0.22), dot: '#ca8a04' };
     if (s.includes('approved') || s === 'active' || s.includes('complet') || s === 'in stock' || s === 'instore')
         return { bg: alpha('#16a34a', 0.08), text: '#15803d', border: alpha('#16a34a', 0.18), dot: '#16a34a' };
     if (s.includes('pending') || s.includes('created') || s === 'inactive' || s.includes('process') || s === 'requireupdate')
@@ -87,6 +90,12 @@ const STATUS_DISPLAY_LABELS: Record<string, string> = {
     stockCompleted: 'Fully Stocked',
     stockPending: 'Partially Stocked',
     stockClosedShort: 'Closed Short',
+    // The seeded names, which the camelCase fallback would turn into "Issuance Available" and
+    // "Loan Available" - close enough to each other to blur exactly the distinction that matters.
+    issuanceAvailable: 'Available for Issuance',
+    loanAvailable: 'Available for Loan',
+    // Display-only: an assigned asset that is a loaner (see the assets register mapper).
+    onLoan: 'On Loan',
 };
 
 // ─── Avatar colour from string ────────────────────────────────────────────────

@@ -6,7 +6,7 @@ Two repos, worked on together:
 - **Backend** — `ERP-Back-End` (Spring Boot 3.2, Hibernate 6.3 + Envers, Flyway, MySQL)
 
 Verify with `npx tsc --noEmit -p tsconfig.json`, `npx eslint src/... --ext .ts,.tsx`, and
-`./mvnw.cmd -o test` — **468 backend tests** and **63 frontend** at time of writing, all green.
+`./mvnw.cmd -o test` — **476 backend tests** and **63 frontend** at time of writing, all green.
 Run the frontend suite as `CI=true npx react-scripts test --watchAll=false`; plain `npx jest` fails
 on a Babel transform, because the config that makes it work is CRA's.
 
@@ -1056,6 +1056,49 @@ deliberate:
 - **Where people see them:** *My Assets* on the dashboard ("On loan to you", with Return), and the
   repair modal's **Outstanding Loaners** tile for `REPAIR_ASSET` — oldest first, "Due back" once the
   covered asset is home, "Return under way" while one is in flight.
+
+### Receive into Store, and a loaner's own status
+
+Measured when reported: two scanners received "for temporary replacement" sat in the **Head Office
+Admin store** — the default when no store is chosen — so the IT store page never showed them, and the
+register looked unchanged because they read **"Available for Issuance" before and after**.
+
+**A loaner now reads `loanAvailable` ("Available for Loan")**, its own status. It used to share
+`issuanceAvailable` with stock awaiting issuance against a request, and
+`validateAssetsReadyForIssuance` checked **only that status** — so a loaner could be issued
+permanently and leave the pool. Issuance now refuses any pool asset, *whatever its status*, because the
+pool assets that existed before this carried the old one. `LoanerStatusSeeder` relabels shelved,
+unassigned pool stock once (`OneTimeSeed`; it runs after `seedStatuses()`, which creates the row). A
+returned loaner (`LoanerService`) and a repaired asset whose holder has left also land on
+`loanAvailable`.
+
+**The switch decides the default store.** On: the category's loaner store — the IT store for an
+IT-routed category, the Head Office Admin store otherwise (`AssetService.loanerStoreFor`, the same
+split as repair routing). Off: the Admin store where the asset stands, as before. A loaner may only be
+kept in an **IT or Admin** store, because those are all the temporary-replacement picker reads; one
+had been booked into the Disposal store, flagged lendable and never offered. The dialog says where the
+asset will go and what it will read *before* Confirm.
+
+**"Sent to Store" is parked.** Not issuable, not lendable; it leaves that state only by an edit,
+a disposal, a repair transfer or an assignment.
+
+- **Reassign now takes an asset out of the store.** It used to set the holder and leave
+  `currentStore` and the shelf status alone, so an asset read "in the Admin store" and "with Jane" at
+  once, still "Sent to Store". Only shelf statuses (`sentToStore`, `issuanceAvailable`) become
+  `assetAssigned`; maintenance, transit and disposal are left as they are. **A loaner is refused** —
+  lend it through Temporary Replacement, or receive it with the switch off first — or it would leave as
+  an ordinary assignment nothing ever asks back.
+- **The detail page's "Assign to Officer"** was gated on status `inStore`, a code no status has, so it
+  never rendered. It reads `sentToStore` now. (The register's "In Store" filter was fine all along —
+  `helpers.tsx` aliases `inStore` → `sentToStore`.)
+- **The one silent failure was "no approver".** The shared request handler toasts most refusals, but
+  `NO_APPROVER` carries an `errorCode` and so is left to the caller — and this dialog never handled it.
+  A hand-back from a holder at one branch into a store at another is cross-location and climbs the
+  ladder; it now offers the same recorded override as every movement form (`SendToStoreDTO` carries
+  `proceedWithoutApproval` / `bypassReason`).
+- **Reassign closed its dialog in `finally`**, so a refusal looked like success. It stays open now.
+- **On the register**, `loanAvailable` reads "Available for Loan" in amber, and a loaner out with
+  somebody reads **"On Loan"** rather than "Asset Assigned" (display only, from the pool flag).
 
 ### Trap: a Lombok `hashCode` through an inverse collection
 

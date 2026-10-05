@@ -60,7 +60,7 @@ import { fetchAllBranches, ReferenceOption, fetchAllDepartments } from "../../us
  * codes the status chips above the table already use.
  */
 const ASSET_STATUS_CODES = [
-    'requireUpdate', 'issuanceAvailable', 'sentToStore', 'assetAssigned', 'assetIssued',
+    'requireUpdate', 'issuanceAvailable', 'loanAvailable', 'sentToStore', 'assetAssigned', 'assetIssued',
     'receiptAcknowledged', 'inMaintenance', 'inTransit', 'pendingDisposal',
 ];
 
@@ -452,6 +452,7 @@ const GeneralAssets = () => {
     const handleStatusChange = (status: string) => {
         if (status === 'requireUpdate'
             || status === 'issuanceAvailable'
+            || status === 'loanAvailable'
             || status === 'receiptAcknowledged'
             || status === 'inStore'
             || status === 'inMaintenance'
