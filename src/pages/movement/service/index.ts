@@ -43,7 +43,9 @@ export const dispatchMovementService = async (
     id: string | number,
     body: {
         courierService?: string | null;
-        trackingNumber?: string | null;
+        // No trackingNumber: the system issues it (reserveMovementTrackingService).
+        /** The courier's own waybill or reference, if they gave one. */
+        courierReference?: string | null;
         dispatchDate?: string | null;
         expectedDeliveryDate?: string | null;
         deliveryDocuments?: string[];
@@ -56,6 +58,19 @@ export const dispatchMovementService = async (
 ) => {
     try {
         return await axiosInstance.post(`${ENDPOINT}/${id}/dispatch`, body);
+    } catch (error) {
+        return error;
+    }
+};
+
+/**
+ * Reserves the tracking number this movement will travel under (or returns the one it already has).
+ * Called as the dispatch form opens: the release note printed there carries it and is signed before
+ * Dispatch. Idempotent on the server, so reopening the form spends nothing.
+ */
+export const reserveMovementTrackingService = async (id: string | number) => {
+    try {
+        return await axiosInstance.post(`${ENDPOINT}/${id}/tracking-number`);
     } catch (error) {
         return error;
     }

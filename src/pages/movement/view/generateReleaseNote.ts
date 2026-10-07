@@ -115,6 +115,8 @@ export const generateReleaseNote = async (movement: IMovement): Promise<void> =>
         ['Tracking No', movement.trackingNumber || '—'],
         ['Dispatch Date', fmtDate(movement.dispatchDate)],
         ['Expected Delivery', fmtDate(movement.expectedDeliveryDate)],
+        // The courier's own waybill, only when they gave one - an empty cell would read as missing.
+        ...(movement.courierReference ? [['Courier Ref', movement.courierReference] as [string, string]] : []),
     ];
     if (logistics.some(([, v]) => v && v !== '—')) {
         y = sectionLabel(doc, 'Logistics', margin, y);

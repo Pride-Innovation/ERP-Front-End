@@ -604,6 +604,7 @@ const UpdateInventory = () => {
                                 section="items"
                                 hideSubmitBar
                                 lockDeliveredQuantity
+                                stockBranchId={defaultInventory?.branch?.id ?? null}
                             />
                         </Box>
                         {activeStep === 2 && <ReviewStep />}

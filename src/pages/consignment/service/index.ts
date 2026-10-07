@@ -103,6 +103,18 @@ export const removeMovementFromConsignmentService = async (
 
 // ── Journey ────────────────────────────────────────────────────────────────
 
+/**
+ * Reserves the tracking number this load will travel under (or returns the one it already has).
+ * Called as the dispatch form opens, because the consignment note printed there carries it.
+ */
+export const reserveConsignmentTrackingService = async (id: number | string) => {
+    try {
+        return await axiosInstance.post(`${ENDPOINT}/${id}/tracking-number`);
+    } catch (error) {
+        return error;
+    }
+};
+
 export const dispatchConsignmentService = async (
     id: number | string,
     body: IConsignmentDispatchPayload

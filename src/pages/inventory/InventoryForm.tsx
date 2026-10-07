@@ -49,7 +49,8 @@ const InventoryForm = ({
     buttonText,
     section,
     hideSubmitBar,
-    lockDeliveredQuantity
+    lockDeliveredQuantity,
+    stockBranchId
 }: IInventoryForm) => {
     const showDetails = section === undefined || section === 'details';
     const showItems = section === undefined || section === 'items';
@@ -185,7 +186,7 @@ const InventoryForm = ({
             {/* Stock items table */}
             {showItems && (
                 <Box sx={{ mb: 2.5 }}>
-                    <StockItems lockDeliveredQuantity={lockDeliveredQuantity} />
+                    <StockItems lockDeliveredQuantity={lockDeliveredQuantity} stockBranchId={stockBranchId} />
                 </Box>
             )}
 

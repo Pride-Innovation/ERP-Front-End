@@ -18,6 +18,11 @@ export interface ICommodity {
     groupName: string;
     assetType?: IAssetType | null;
     suppliers?: ISupplier[];
+    /** True: the three fields below are this commodity's own rule. False: it follows its category. */
+    stockingOverride?: boolean;
+    stockAtHeadOffice?: boolean;
+    stockAtAllBranches?: boolean;
+    stockingBranchIds?: number[];
 }
 
 export interface ICommodityFormValues {
@@ -56,6 +61,8 @@ export interface ICommodityDetails {
     updateCommodity: (role: ICommodity) => void;
     /** Position in the rendered grid — used to rotate the card accent colour. */
     index?: number;
+    configureStocking?: (commodity: ICommodity) => void;
+    branchName?: (id: number) => string | undefined;
 }
 
 export interface IDeleteCommodity {

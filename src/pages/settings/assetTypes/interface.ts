@@ -92,6 +92,10 @@ export interface IAssetType {
     repairDestination?: RepairDestination | null;
     fieldConfig?: IAssetFieldConfig | null;
     customAttributes?: ICustomAttribute[] | null;
+    /** Where it may be stocked - read here, changed only through PUT /asset-types/{id}/stocking-rule. */
+    stockAtHeadOffice?: boolean | null;
+    stockAtAllBranches?: boolean | null;
+    stockingBranchIds?: number[] | null;
 }
 
 export interface IAssetTypeFormValues {

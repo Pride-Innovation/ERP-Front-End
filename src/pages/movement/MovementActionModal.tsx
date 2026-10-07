@@ -27,7 +27,9 @@ import {
     dispatchMovementService, markInTransitService, receiveMovementService,
     completeMovementService, cancelMovementService,
     approveMovementService, rejectMovementService, uploadMovementDocumentService,
+    reserveMovementTrackingService,
 } from './service';
+import TrackingNumberField from '../../components/tracking/TrackingNumberField';
 import { generateReleaseNote } from './view/generateReleaseNote';
 import ButtonComponent from '../../components/forms/Button';
 import { fieldSx } from '../../components/forms/Inputs';
@@ -93,7 +95,15 @@ interface Props extends IMovementAction {
 const MovementActionModal = ({ action, movement, handleClose, sendingRequest, setSendingRequest, onDone }: Props) => {
     const meta = ACTION_META[action];
 
-    const [trackingNumber, setTrackingNumber] = useState(movement.trackingNumber ?? '');
+    /*
+     * Issued by the system, not typed - reserved as the dispatch form opens, because the release
+     * note printed below carries it and is signed before Dispatch is pressed. The courier's own
+     * waybill, when they give one, goes in courierReference.
+     */
+    const [trackingNumber, setTrackingNumber] = useState<string | null>(movement.trackingNumber ?? null);
+    const [trackingLoading, setTrackingLoading] = useState(false);
+    const [trackingFailed, setTrackingFailed] = useState(false);
+    const [courierReference, setCourierReference] = useState('');
     const [dispatchDate, setDispatchDate] = useState('');
     const [expectedDeliveryDate, setExpectedDeliveryDate] = useState('');
     const [receiptStatus, setReceiptStatus] = useState<ReceiptStatus>('RECEIVED_OK');
@@ -112,6 +122,23 @@ const MovementActionModal = ({ action, movement, handleClose, sendingRequest, se
         (async () => {
             const res = (await fetchCouriersService(true)) as any;
             if (res?.status === 200) setCouriers(res.data ?? []);
+        })();
+        if (movement.id == null) return;
+        const movementId = movement.id;
+        (async () => {
+            setTrackingLoading(true);
+            try {
+                const res = (await reserveMovementTrackingService(movementId)) as any;
+                if (res?.status === 200 && res.data?.trackingNumber) {
+                    setTrackingNumber(res.data.trackingNumber);
+                    setTrackingFailed(false);
+                } else {
+                    // Not fatal: dispatch issues one itself. The note just would not carry it yet.
+                    setTrackingFailed(true);
+                }
+            } finally {
+                setTrackingLoading(false);
+            }
         })();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [action]);
@@ -141,6 +168,7 @@ const MovementActionModal = ({ action, movement, handleClose, sendingRequest, se
             courierService: courierName || movement.courierService,
             plateNumber: plateNumber || movement.plateNumber,
             trackingNumber: trackingNumber || movement.trackingNumber,
+            courierReference: courierReference.trim() || movement.courierReference,
             dispatchDate: dispatchDate ? new Date(dispatchDate).toISOString() : movement.dispatchDate,
             expectedDeliveryDate: expectedDeliveryDate ? new Date(expectedDeliveryDate).toISOString() : movement.expectedDeliveryDate,
         });
@@ -185,7 +213,7 @@ const MovementActionModal = ({ action, movement, handleClose, sendingRequest, se
                         courierId: typeof courierValue === 'object' ? courierValue.id ?? null : null,
                         courierName: typeof courierValue === 'string' ? courierValue : null,
                         plateNumber: plateNumber.trim(),
-                        trackingNumber: trackingNumber || null,
+                        courierReference: courierReference.trim() || null,
                         dispatchDate: dispatchDate ? new Date(dispatchDate).toISOString() : null,
                         expectedDeliveryDate: expectedDeliveryDate ? new Date(expectedDeliveryDate).toISOString() : null,
                         deliveryDocuments: documents,
@@ -275,6 +303,7 @@ const MovementActionModal = ({ action, movement, handleClose, sendingRequest, se
             {/* Action-specific fields */}
             {action === 'dispatch' && (
                 <>
+                    <TrackingNumberField value={trackingNumber} loading={trackingLoading} failed={trackingFailed} />
                     <SectionLabel>Courier</SectionLabel>
                     <Autocomplete
                         freeSolo
@@ -296,7 +325,13 @@ const MovementActionModal = ({ action, movement, handleClose, sendingRequest, se
                         )}
                     />
                     <TextField fullWidth sx={fieldSx} label="Vehicle Plate Number" value={plateNumber} onChange={(e) => setPlateNumber(e.target.value)} />
-                    <TextField fullWidth sx={fieldSx} label="Tracking Number" value={trackingNumber} onChange={(e) => setTrackingNumber(e.target.value)} />
+                    <TextField
+                        fullWidth sx={fieldSx}
+                        label="Courier reference / waybill (optional)"
+                        placeholder="The courier's own number, if they gave one"
+                        value={courierReference}
+                        onChange={(e) => setCourierReference(e.target.value)}
+                    />
                     {/* Plain CSS grid — MUI Grid's negative-margin spacing shifts fields out of
                         line with the full-width inputs above it inside a Stack. */}
                     <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, alignItems: 'start' }}>

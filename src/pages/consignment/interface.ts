@@ -56,7 +56,10 @@ export interface IConsignment {
 
     courier?: IRefSummary | null;
     courierService?: string | null;
+    /** Issued by the system (TRK-2026-000042-7); every movement on board carries the same one. */
     trackingNumber?: string | null;
+    /** The courier's own waybill or reference, typed at dispatch. */
+    courierReference?: string | null;
     plateNumber?: string | null;
     dispatchDate?: string | null;
     expectedDeliveryDate?: string | null;
@@ -85,7 +88,9 @@ export interface IConsignmentDispatchPayload {
     courierId?: number | null;
     courierName?: string | null;
     plateNumber?: string | null;
-    trackingNumber?: string | null;
+    // No trackingNumber: issued by the system (reserveConsignmentTrackingService).
+    /** The courier's own waybill or reference, if they gave one. */
+    courierReference?: string | null;
     dispatchDate?: string | null;
     expectedDeliveryDate?: string | null;
     deliveryDocuments: string[];

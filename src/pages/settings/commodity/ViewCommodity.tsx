@@ -23,18 +23,29 @@ import CategoryOutlinedIcon from '@mui/icons-material/CategoryOutlined';
 import LayersOutlinedIcon from '@mui/icons-material/LayersOutlined';
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
+import StorefrontOutlinedIcon from '@mui/icons-material/StorefrontOutlined';
 
 import { ICommodityDetails } from './interface';
 import { getCardColor } from '../cardColors';
+import { describeStockingRule, effectiveStockingRule } from '../../../components/stocking/stockingRule';
+import { usePermissions } from '../../../core/permissions';
+import { PERMISSIONS } from '../../../core/permissions/constants';
 
 const CommodityCard = ({
     commodity,
     updateCommodity,
     deleteCommodity,
     index = 0,
+    configureStocking,
+    branchName = () => undefined,
 }: ICommodityDetails) => {
     const color = getCardColor(index);
     const suppliers = commodity.suppliers ?? [];
+    const { has } = usePermissions();
+    const canUpdate = has(PERMISSIONS.UPDATE_SETTING);
+    const canDelete = has(PERMISSIONS.DELETE_SETTING);
+    const stocking = describeStockingRule(effectiveStockingRule(commodity), branchName)
+        + (commodity.stockingOverride ? ' · own rule' : '');
 
     return (
         <Paper
@@ -104,6 +115,12 @@ const CommodityCard = ({
                         value={commodity.assetType?.name}
                         emptyLabel="Not specified"
                     />
+                    <DetailRow
+                        icon={<StorefrontOutlinedIcon sx={{ fontSize: 16, color: '#94A3B8' }} />}
+                        label="Stocked"
+                        value={stocking}
+                        emptyLabel=""
+                    />
                 </Stack>
 
                 {/* Suppliers */}
@@ -140,6 +157,23 @@ const CommodityCard = ({
                 </Stack>
 
                 <Stack direction="row" justifyContent="flex-end" spacing={1} sx={{ mt: 'auto', pt: 2 }}>
+                    {canUpdate && configureStocking && (
+                    <Tooltip title="Where can this be stocked?" arrow>
+                        <IconButton
+                            size="small"
+                            onClick={() => configureStocking(commodity)}
+                            sx={{
+                                color: '#1565C0',
+                                bgcolor: alpha('#1976D2', 0.06),
+                                borderRadius: '8px',
+                                '&:hover': { bgcolor: alpha('#1976D2', 0.14) },
+                            }}
+                        >
+                            <StorefrontOutlinedIcon fontSize="small" />
+                        </IconButton>
+                    </Tooltip>
+                    )}
+                    {canUpdate && (
                     <Tooltip title="Edit commodity" arrow>
                         <IconButton
                             size="small"
@@ -154,6 +188,8 @@ const CommodityCard = ({
                             <EditOutlinedIcon fontSize="small" />
                         </IconButton>
                     </Tooltip>
+                    )}
+                    {canDelete && (
                     <Tooltip title="Delete commodity" arrow>
                         <IconButton
                             size="small"
@@ -168,6 +204,7 @@ const CommodityCard = ({
                             <DeleteOutlineIcon fontSize="small" />
                         </IconButton>
                     </Tooltip>
+                    )}
                 </Stack>
             </Box>
         </Paper>

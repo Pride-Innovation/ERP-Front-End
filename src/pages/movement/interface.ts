@@ -63,7 +63,10 @@ export interface IMovement {
     recipientUser?: IUser | null;
 
     courierService?: string | null;
+    /** Issued by the system (TRK-2026-000042-7); the consignment's when it travels on one. */
     trackingNumber?: string | null;
+    /** The courier's own waybill or reference, typed at dispatch. */
+    courierReference?: string | null;
     dispatchDate?: string | null;
     expectedDeliveryDate?: string | null;
     deliveryDocuments?: string[];

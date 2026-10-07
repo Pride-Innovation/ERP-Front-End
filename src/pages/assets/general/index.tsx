@@ -15,7 +15,7 @@ import {
     useState
 } from "react";
 import { useNavigate, useParams } from "react-router";
-import { alpha, Box, Chip, LinearProgress, Paper, Stack, Typography } from "@mui/material";
+import { alpha, Box, Chip, Paper, Stack, Typography } from "@mui/material";
 import CategoryOutlinedIcon from '@mui/icons-material/CategoryOutlined';
 import { toast } from "react-toastify";
 
@@ -50,6 +50,7 @@ import { IAssetImportResult } from "../interface";
 import { bulkImportAssetsService, fetchAssetImportTemplateService } from "../service/importService";
 import { assetImportHeaders } from "../assetImportTemplate";
 import AssetBulkImportResult from "../AssetBulkImportResult";
+import ImportProgressDialog from "../../../components/forms/ImportProgressDialog";
 import { fetchAllBranches, ReferenceOption, fetchAllDepartments } from "../../users/service/referenceData";
 
 /**
@@ -191,7 +192,17 @@ const GeneralAssets = () => {
     const [importResult, setImportResult] = useState<IAssetImportResult | null>(null);
     const [importRows, setImportRows] = useState<any[]>([]);
     const [importHeaders, setImportHeaders] = useState<string[]>([]);
-    const [importProgress, setImportProgress] = useState<{ done: number; total: number } | null>(null);
+    /*
+     * `preparing` covers reading the category's template before anything is sent; `inFlight` is the
+     * batch on the wire. Both exist so the dialog is never a bar parked at 0% - the state a one-batch
+     * file (most of them) used to show for its whole upload.
+     */
+    const [importProgress, setImportProgress] = useState<{
+        done: number;
+        total: number;
+        preparing?: boolean;
+        inFlight?: { from: number; to: number };
+    } | null>(null);
 
     const {
         columnHeaders,
@@ -581,6 +592,8 @@ const GeneralAssets = () => {
      */
     const importAssets = async (rows: any[]) => {
         if (!currentAssetType.id) return;
+        // Up before the first await, so the dialog appears the moment the file is accepted.
+        setImportProgress({ done: 0, total: rows.length, preparing: true });
         try {
             const meta = await fetchAssetImportTemplateService(Number(currentAssetType.id));
 
@@ -601,6 +614,11 @@ const GeneralAssets = () => {
                 Number(currentAssetType.id),
                 meta.batchSize,
                 (done, total) => setImportProgress({ done, total }),
+                (from, to, total) => setImportProgress((prev) => ({
+                    done: prev?.done ?? 0,
+                    total,
+                    inFlight: { from, to },
+                })),
             );
 
             setImportResult(result);
@@ -665,25 +683,13 @@ const GeneralAssets = () => {
               * a spinner would leave the user unable to tell a slow import from a stuck one.
               */}
             {importProgress && (
-                <ModalComponent width="34%" title="Importing assets" open handleClose={() => { }}>
-                    <Box sx={{ pt: 1 }}>
-                        <Typography sx={{ fontSize: '0.86rem', color: '#475569', mb: 1.5 }}>
-                            Importing {importProgress.done.toLocaleString()} of{' '}
-                            {importProgress.total.toLocaleString()} rows…
-                        </Typography>
-                        <LinearProgress
-                            variant="determinate"
-                            value={importProgress.total ? (importProgress.done / importProgress.total) * 100 : 0}
-                            sx={{
-                                height: 8, borderRadius: 4, bgcolor: alpha(PRIMARY, 0.12),
-                                '& .MuiLinearProgress-bar': { bgcolor: PRIMARY, borderRadius: 4 },
-                            }}
-                        />
-                        <Typography sx={{ fontSize: '0.75rem', color: '#94A3B8', mt: 1.5 }}>
-                            Rows are saved as they go, so nothing already imported is lost if this stops.
-                        </Typography>
-                    </Box>
-                </ModalComponent>
+                <ImportProgressDialog
+                    title="Importing assets"
+                    subtitle={header.plural}
+                    noun="rows"
+                    progress={importProgress}
+                    footnote="Rows are saved as they go, so nothing already imported is lost if it stops."
+                />
             )}
 
             {importResult && (

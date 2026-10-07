@@ -6,7 +6,7 @@ Two repos, worked on together:
 - **Backend** — `ERP-Back-End` (Spring Boot 3.2, Hibernate 6.3 + Envers, Flyway, MySQL)
 
 Verify with `npx tsc --noEmit -p tsconfig.json`, `npx eslint src/... --ext .ts,.tsx`, and
-`./mvnw.cmd -o test` — **476 backend tests** and **63 frontend** at time of writing, all green.
+`./mvnw.cmd -o test` — **503 backend tests** and **74 frontend** at time of writing, all green.
 Run the frontend suite as `CI=true npx react-scripts test --watchAll=false`; plain `npx jest` fails
 on a Babel transform, because the config that makes it work is CRA's.
 
@@ -804,6 +804,36 @@ their own. BM and BOM at Gulu (BRANCH) and the Admin/Infra/Procurement accounts 
 permission rule ("not attached to a branch") so that counting 403s could not pass with every
 `@PreAuthorize` deleted. SELF introduced a second ("could not be identified"), and the helper had to
 learn it — the distinction being kept is route-guard failure versus business rule, not the wording.
+
+## Tracking numbers are issued, not typed (V27)
+
+The tracking number was free text at dispatch — any format, and nothing stopped two journeys sharing
+one. It is now **`TRK-<year>-<sequence>-<Luhn check digit>`**, e.g. `TRK-2026-000042-5`, issued by
+`TrackingNumberService` and never accepted from the client (neither dispatch payload has the field;
+`TrackingNumberTest` pins that by reflection).
+
+- **One number per trip.** A movement travelling alone has its own; a consignment has one and every
+  movement on it carries the same. Loading a movement onto a consignment marks its own number
+  `SUPERSEDED` (kept, so a gap in the sequence is explained); taking it off clears it, and it is issued
+  a fresh one next time.
+- **Issued when the dispatch form opens, not at dispatch.** The form prints the note the courier signs,
+  and the signed copy is uploaded *before* Dispatch — so the number must already exist.
+  `POST /movements/{id}/tracking-number` and `/consignments/{id}/tracking-number` reserve it,
+  idempotently; dispatch calls the same `ensure` in case nothing reserved one.
+- **Unique by construction and by constraint.** The registry table `tracking_number` hands out the
+  sequence from AUTO_INCREMENT (shared by movements and consignments, so the two can never collide)
+  and carries a unique index on the number. `number` is nullable for the instant between insert and
+  format — MySQL treats NULLs as distinct.
+- **Sequential, not random:** short to read out, ordered, nothing to retry. Guessable costs nothing —
+  a tracking number opens no screen. Dashes, not slashes, because it is searched and a slash breaks a
+  query string.
+- **The check digit is mirrored in the browser** (`utils/trackingNumber.ts`), so the search boxes say
+  "a digit may be mistyped" instead of returning nothing. Both test suites assert the same vector, so
+  the two copies cannot drift.
+- **The courier's own number** goes in `courierReference` (optional, not unique — theirs), on both
+  entities and their `_aud` tables (trap #5), and prints on the notes when present.
+- Typed numbers from before this were left exactly as they were: visible and searchable, not
+  registered.
 
 ## Consignments
 
@@ -2223,6 +2253,162 @@ likely, which is a different shape from the permissions the module has today.
 *Left alone deliberately:* `DELETE /users/**` is matched to `DELETE_USER` and no DELETE endpoint
 exists. Harmless, but it makes the permission look meaningful — worth removing or implementing, and
 neither is urgent. Accounts are disabled, never deleted, which is the right model for a bank.
+
+## Stocking rules — which branch may stock what (V28)
+
+Nothing restricted it: every category could be stocked by every branch, and the stock form offered
+all twelve to everyone. Now each **category** says where it may be stocked — Head Office, all
+branches, and/or named branches — and a **commodity** may override its category (toner at the
+branches while printers stay at Head Office). Settings → Asset Categories and Settings → Commodities,
+storefront icon on each card; the card's chip says where it may be stocked.
+
+| | Rule |
+|---|---|
+| Head Office | its own switch only — never one of "all branches", and naming it in the branch list is refused (it would read as a grant and do nothing) |
+| All branches | every non-Head-Office branch, **including one opened later** — which is why it is a flag and not a pre-ticked list |
+| Named branches | consulted only while "all branches" is off |
+| Commodity | follows its category unless `stocking_override`; with no category at all, Head Office only |
+| Nothing ticked | legal, and confirmed in the dialog before it is sent |
+
+**Enforced where an order line comes into being**, and nowhere else: `StockService.createStock`
+(before anything is saved) and the lines `updateStock` **adds**. `StockingRuleTest` pins exactly two
+call sites.
+
+- **Receipts are never checked.** Goods ordered under yesterday's rule arrive at the door either way;
+  refusing the receipt would leave them physically present and recorded nowhere.
+- **Existing lines on a correction are not re-checked.** Otherwise tightening a rule would freeze every
+  price or quantity correction on orders placed before the change.
+- **Bulk asset import is deliberately untouched** (`AssetService` builds its own `Stock`) — left as it
+  is by decision.
+
+**Saved through its own endpoint, never with the category's other fields** —
+`PUT /asset-types/{id}/stocking-rule`, `PUT /commodities/{id}/stocking-rule`, both `UPDATE_SETTING`,
+audited as `STOCKING_RULE_CHANGED` with the before and after. `AssetTypeDTO` carries the rule
+read-only, so saving a description cannot reset who may stock the category. Both are replacements:
+the rule afterwards is exactly what was sent.
+
+**Day one mirrors history.** V28 starts every category at Head Office only, then opens to all branches
+every category a non-Head-Office branch had ever stocked. Measured: Cleaning & Hygiene, Kitchen &
+Groceries, Printing & Branding and Stationery — what Gulu and Mbarara had actually ordered. So nobody
+lost the ability to order something they had ordered before. A **new** category starts at Head Office
+only: widening is a decision, narrowing a surprise. *A fresh environment has no history, so every
+category starts Head Office only there.*
+
+**The form filters; the server decides.** `GET /stocking/stockable` (`CREATE_INVENTORY` or
+`UPDATE_INVENTORY`, not `READ_SETTING` — a storekeeper should not need Settings to fill in a delivery)
+says which categories and commodities a branch may stock, and `StockItems` offers only those. Three
+details:
+
+- **A category is offered when its rule admits the branch *or* any of its commodities does**, so an
+  override surfaces its category, offering only itself.
+- **The correction page asks for the order's branch** (`?branchId=`), not the corrector's — Head
+  Office correcting Gulu's order is checked against Gulu's rule, and a filter on the wrong branch would
+  offer lines the server then refuses.
+- **A line already on the order stays selectable** even if the rule no longer admits it, matching the
+  server's "only added lines" rule. If the stockable list cannot be read, nothing is hidden and the
+  server has the last word — an empty form with no reason given would be worse.
+
+**The Head Office fallback stopped assuming id 1.** `resolveStockBranch` used
+`HEAD_OFFICE_BRANCH_ID = 1L` (trap #4's shape); it is found by the `isHeadOffice` flag now, through
+`StockingRuleService.stockingBranchForCurrentUser`, so the branch the form is filtered for is the
+branch the order is checked against.
+
+### Category and commodity writes were unguarded
+
+`POST/PUT/DELETE` on `/asset-types/**` and `/commodities/**` fell through to `authenticated()` —
+any login could rename a category, change its depreciation rate or delete a commodity. They now answer
+to `CREATE_SETTING` / `UPDATE_SETTING` / `DELETE_SETTING` by verb — the keys the Settings pages
+**already** gated their buttons on, so a button shown is a call admitted. Eight lines came off
+`EndpointGuardCoverageTest.KNOWN_UNGUARDED`.
+
+Measured before guarding: **all 4 accounts holding `READ_SETTING` hold all three write keys**, so no
+one who could edit a category in Settings lost it; what closed is the API called directly. The card
+buttons were ungated (only *Add* was) and are gated by verb now.
+
+*Not done:* the `GET`s stay open — the stock form, the request form and the asset pages all read the
+category and commodity lists, and gating them on `READ_SETTING` would break those for everybody else.
+
+*A test-harness note:* saving a `Stock` needs **both** a bound request (for `CurrentUserService`) **and**
+an `Authentication` in the `SecurityContext` — `created_by` is filled by Spring Data's auditor
+(`ApplicationAuditAware`), which reads the latter. Without it the insert fails `created_by cannot be
+null`. `StockingRuleTest.signInAs` sets both.
+
+*And one about the scratch copy:* `robocopy` preserves the source file's timestamp, so after a
+deliberate break in the scratch copy is reverted the `.class` looks newer than the restored source and
+Maven **does not recompile it** — the test then "fails" against the broken class while the source is
+correct. Run `clean` (or delete the package's classes) after reverting a break.
+
+## Emails — one layout, every message
+
+All mail is built in `notification/Email.java` and sent by `MailDispatcher`. There were **seven
+hand-built templates** and they had drifted into seven looks: card widths of 620, 650, 700 and 900px,
+pill and square buttons, emoji icons, an "Employee Portal" badge on one, three different
+"automated message" boxes naming three different systems ("Asset Management System", "HR System",
+"ERP system"), three different signatures, a footer hardcoded to **© 2025**, and the movement mail
+with a footer of its own.
+
+**Most of the styling never reached the reader anyway.** They relied on CSS the major clients strip:
+`linear-gradient` (Outlook), `display:flex` / `grid` (Outlook, several webmails) and
+`filter: brightness(0) invert(1)` on the logo (Gmail and Outlook). With the filter gone, the
+**full-colour logo sat on a teal band** — teal "PRIDE" on teal.
+
+`EmailLayout` is now the only place the frame exists: a 4px brand bar, the logo **on white** (as it
+is drawn) with **"Assets Management"** opposite it, a coloured label (Action required / Approved /
+Rejected / For your information / Completed), the title, the body, one solid button with a copyable
+fallback link, and one footer with the current year. Tables and inline styles only. A template
+supplies a title and a body, built from `paragraph` / `details` / `table` / `callout` / `codeBox`,
+and cannot restyle the frame. **Every value that came from a person goes through `esc`** — names,
+comments and leave reasons were interpolated raw into HTML before. The stock body is the one trusted
+exception: `StockService` builds it as markup.
+
+Public signatures are unchanged, so none of the 23 call sites moved.
+
+**Faults fixed on the way:**
+
+| | |
+|---|---|
+| Workflow mail linked `/asset-request/view?id=37` | the route takes a path segment — the button opened a page with no request. Now `/view/37`, like the request mail |
+| Stock mail linked `/stocks/{id}` | no such front-end route; now `/assets-mgt/inventory/view/{id}` |
+| `COMPLETION` workflow mails | fell to the default and arrived labelled **"Action required"** on a message saying something had finished |
+| The workflow step title | was used only in `<title>`, never shown in the body |
+| `buildCommodityRows` | appended `width:100%%` with no `format()`, so the HTML literally said `100%%` |
+| **The logo was read from `src/main/resources/...` on disk** | that path exists only when started from the source checkout. Packaged and run anywhere else, the inline attachment cannot be read and **the whole message fails** inside `MailDispatcher`'s catch — no email, only a log line. Now a `ClassPathResource` |
+
+*A trap met in the first render:* the font stack was `'Segoe UI',Roboto,…` inside **single-quoted**
+style attributes, so the first quote closed the attribute and silently dropped the rest — everything
+came out in the client's default serif. Family names are unquoted now, and `EmailTemplateTest`
+refuses any quote opening inside a style value.
+
+`EmailTemplateTest` renders all nine variants with sample data, writes them to
+`target/email-previews/` for viewing in a browser, and pins the shared frame, the application name,
+the absence of stripped CSS and the hardcoded year, escaping, the completion label, the CC copy
+having no button, and the three link shapes.
+
+## Import dialogs — the asset one said nothing, the user one did not exist
+
+The asset import already had a progress dialog, and it read as no dialog at all. Rows go up in
+batches of `BULK_IMPORT_BATCH_LIMIT` (200) and the bar moved only when a batch **returned** — so any
+file of 200 rows or fewer, which is most of them, sat at *"Importing 0 of N rows… 0%"* for its entire
+upload and then vanished. It also opened only after the template fetch, and carried a close button
+wired to nothing.
+
+`bulkImportAssetsService` now takes `onBatchStart(from, to, total)`, called as each batch is sent, and
+the dialog shows *Preparing…* (indeterminate) from the moment the file is accepted, then *Uploading
+rows 201–400 of 450* with a **buffer** bar — solid for what has finished, moving for the batch on the
+wire. The close button is hidden, since nothing can be cancelled mid-batch, and `beforeunload` asks
+before the tab is closed while an import runs. `importService.test.ts` pins the order of the
+announcements.
+
+**User import had no dialog at all** — between choosing the file and the summary, the page showed
+nothing. Both now share `components/forms/ImportProgressDialog`, which owns the hidden close button
+and the `beforeunload` guard (mounted only while an import runs). User import is **one request**, so
+nothing can be counted until it returns: its dialog says *Uploading 40 users…* over an
+**indeterminate** bar, deliberately — a percentage it could not know would be a bar parked at 0%
+again, which is the fault this fixes. Batching user import would buy a real count; it was not done,
+because user files are tens of rows and the endpoint's per-row error reporting assumes one payload.
+
+*Not covered:* reading and parsing the spreadsheet in `FileUploadButton` happens before any of this, on
+the main thread, so a dialog could not paint during it anyway.
 
 ## Every bulk import read the wrong worksheet
 

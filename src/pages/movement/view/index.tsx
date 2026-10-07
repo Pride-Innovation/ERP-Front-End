@@ -855,6 +855,11 @@ const MovementDetails = () => {
                                 <Box sx={{ display: 'grid', gap: 1.5, gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' } }}>
                                     <Tile label="Tracking" icon={<QrCode2OutlinedIcon />}>
                                         <CodeBadge value={movement.trackingNumber} />
+                                        {movement.courierReference && (
+                                            <Typography variant="caption" sx={{ color: '#64748B', display: 'block', mt: 0.75 }} noWrap>
+                                                Courier ref · <Box component="span" sx={{ fontFamily: 'monospace', fontWeight: 700, color: '#334155' }}>{movement.courierReference}</Box>
+                                            </Typography>
+                                        )}
                                     </Tile>
                                     {movement.status !== 'INITIATED' && movement.status !== 'DRAFT' && (() => {
                                         /*
