@@ -43,7 +43,9 @@ export const dispatchMovementService = async (
     id: string | number,
     body: {
         courierService?: string | null;
-        trackingNumber?: string | null;
+        // No trackingNumber: the system issues it (reserveMovementTrackingService).
+        /** The courier's own waybill or reference, if they gave one. */
+        courierReference?: string | null;
         dispatchDate?: string | null;
         expectedDeliveryDate?: string | null;
         deliveryDocuments?: string[];
@@ -56,6 +58,19 @@ export const dispatchMovementService = async (
 ) => {
     try {
         return await axiosInstance.post(`${ENDPOINT}/${id}/dispatch`, body);
+    } catch (error) {
+        return error;
+    }
+};
+
+/**
+ * Reserves the tracking number this movement will travel under (or returns the one it already has).
+ * Called as the dispatch form opens: the release note printed there carries it and is signed before
+ * Dispatch. Idempotent on the server, so reopening the form spends nothing.
+ */
+export const reserveMovementTrackingService = async (id: string | number) => {
+    try {
+        return await axiosInstance.post(`${ENDPOINT}/${id}/tracking-number`);
     } catch (error) {
         return error;
     }
@@ -280,6 +295,60 @@ export const previewRepairTransferService = async (
         return await axiosInstance.get('movements/repair-transfer/preview', {
             params: { assetId, ...(repairDestination ? { repairDestination } : {}) },
         });
+    } catch (error) {
+        return error;
+    }
+};
+
+/**
+ * The officers who may be recorded as a repair's internal technician: the Infra unit for an IT
+ * repair, the Admin unit for an Admin one. Not branch-scoped - both units service the whole bank -
+ * which is why this is not the staff picker.
+ */
+export const fetchRepairTechniciansService = async (repairDestination: string) => {
+    try {
+        return await axiosInstance.get('movements/repair-technicians', { params: { repairDestination } });
+    } catch (error) {
+        return error;
+    }
+};
+
+// ── Loaners (temporary replacements still out) ──────────────────────────────
+//
+// A loaner is returned by hand, never as a side effect of returning a repaired asset — see
+// LoanerService on the server. `mine` and `return` need only a sign-in: a loaner is the holder's to
+// hand back. The full list and making one permanent need REPAIR_ASSET.
+
+export const fetchMyLoanersService = async () => {
+    try {
+        return await axiosInstance.get('movements/loaners/mine');
+    } catch (error) {
+        return error;
+    }
+};
+
+export const fetchOutstandingLoanersService = async () => {
+    try {
+        return await axiosInstance.get('movements/loaners');
+    } catch (error) {
+        return error;
+    }
+};
+
+export const returnLoanerService = async (
+    assetId: number | string,
+    body?: { remarks?: string | null; proceedWithoutApproval?: boolean; bypassReason?: string },
+) => {
+    try {
+        return await axiosInstance.post(`movements/loaners/${assetId}/return`, body ?? {});
+    } catch (error) {
+        return error;
+    }
+};
+
+export const makeLoanerPermanentService = async (assetId: number | string) => {
+    try {
+        return await axiosInstance.post(`movements/loaners/${assetId}/make-permanent`);
     } catch (error) {
         return error;
     }

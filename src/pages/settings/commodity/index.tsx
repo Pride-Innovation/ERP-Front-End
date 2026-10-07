@@ -42,6 +42,8 @@ import { useDebounce } from "../../../hooks/useDebounce";
 import { RequirePermission } from "../../../core/permissions";
 import { PERMISSIONS } from "../../../core/permissions/constants";
 import { PageHero } from "../../../components/layout";
+import StockingRuleEditor from "../../../components/stocking/StockingRuleEditor";
+import { fetchBranchOptionsService, updateCommodityStockingRuleService } from "../../../components/stocking/service";
 
 const PRIMARY = '#08796C';
 
@@ -51,6 +53,8 @@ const Commodities = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [assetTypeFilter, setAssetTypeFilter] = useState<number | "all">("all");
   const [pageNumber, setPageNumber] = useState<number>(0);
+  const [stockingOpen, setStockingOpen] = useState<boolean>(false);
+  const [branchNames, setBranchNames] = useState<Map<number, string>>(new Map());
   const pageSize = 9;
 
   const debouncedSearch = useDebounce(searchTerm, 500);
@@ -66,8 +70,21 @@ const Commodities = () => {
     loading,
     setModalState,
     handleOpen,
-    fetchAllCommodities
+    fetchAllCommodities,
+    updateCommodityInStore
   } = CommodityUtills();
+
+  // Names for the cards' stocking summaries. A failure leaves them counted rather than named.
+  useEffect(() => {
+    fetchBranchOptionsService()
+      .then((list) => setBranchNames(new Map(list.map((b) => [b.id, b.name]))))
+      .catch(() => undefined);
+  }, []);
+
+  const configureStocking = (commodity: ICommodity) => {
+    setCurrentCommodity(commodity);
+    setStockingOpen(true);
+  };
 
   useEffect(() => {
     fetchAllCommodities({
@@ -132,6 +149,26 @@ const Commodities = () => {
             handleClose={handleClose}
             setSendingRequest={setSendingRequest}
             sendingRequest={sendingRequest}
+          />
+        </ModalComponent>
+      )}
+      {stockingOpen && (
+        <ModalComponent
+          width="40%"
+          title={`Where can ${currentCommodity.name} be stocked?`}
+          open={stockingOpen}
+          handleClose={() => setStockingOpen(false)}
+        >
+          <StockingRuleEditor
+            rule={currentCommodity}
+            commodity={{
+              override: currentCommodity.stockingOverride === true,
+              categoryName: currentCommodity.assetType?.name,
+              categoryRule: currentCommodity.assetType ?? undefined,
+            }}
+            onSave={(request) => updateCommodityStockingRuleService(currentCommodity.id as number, request)}
+            onSaved={(data) => updateCommodityInStore(data)}
+            handleClose={() => setStockingOpen(false)}
           />
         </ModalComponent>
       )}
@@ -217,6 +254,8 @@ const Commodities = () => {
                     deleteCommodity={deleteCommodity}
                     updateCommodity={updateCommodity}
                     index={i}
+                    configureStocking={configureStocking}
+                    branchName={(id) => branchNames.get(id)}
                   />
                 ))}
               </Box>

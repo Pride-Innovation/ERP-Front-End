@@ -31,6 +31,7 @@ import { StatusTone } from '../../../components/layout/StatusChip';
 import { IPersonalAssetReport } from '../../request/interface';
 import { IAsyncData } from '../useDashboardData';
 import WidgetCard from './WidgetCard';
+import LoanerList from '../../movement/LoanerList';
 
 interface IMyAssetsProps {
     assets: IAsyncData<IPersonalAssetReport[]>;
@@ -82,6 +83,28 @@ const MyAssets = ({ assets }: IMyAssetsProps) => {
             emptyTitle="Nothing assigned to you"
             emptyDescription="Assets issued to you will be listed here, grouped by category."
         >
+            {/*
+              * Loaners, with the way to hand one back.
+              *
+              * A temporary asset is never collected automatically any more - returning somebody's
+              * repaired laptop used to take a loaner back at the same moment, guessing which one when
+              * they held several and sometimes before the laptop had even set off. So this is where a
+              * loaner comes back from: the holder, once their own asset is with them. Renders nothing
+              * for the many people who hold no loaner.
+              */}
+            <Box sx={{ mb: 2 }}>
+                <LoanerList
+                    mode="mine"
+                    emptyText={null}
+                    onChanged={reload}
+                    heading={
+                        <Typography variant="caption" sx={{ fontWeight: 700, color: neutral[500], textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                            On loan to you
+                        </Typography>
+                    }
+                />
+            </Box>
+
             <Box sx={{ overflowX: 'auto', mx: -2.5, mb: -2.5 }}>
                 <Table size="small">
                     <TableHead>

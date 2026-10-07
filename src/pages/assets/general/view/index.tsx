@@ -421,7 +421,9 @@ const GeneralAssetDetails = () => {
                                         Edit Asset
                                     </MuiButton>
                                 )}
-                                {canReassignAsset && asset?.assetStatus?.status === 'inStore' && (
+                                {/* `sentToStore` is the code a store hand-back writes. This read 'inStore',
+                                    a code no status has, so the button never appeared for anyone. */}
+                                {canReassignAsset && asset?.assetStatus?.status === 'sentToStore' && (
                                     <MuiButton
                                         variant="text"
                                         disableElevation

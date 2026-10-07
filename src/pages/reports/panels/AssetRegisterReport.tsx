@@ -132,7 +132,8 @@ const AssetRegisterReport = () => {
     // cannot silently zero a card.
     const countByCode = (...codes: string[]) => rows.filter((r) => codes.includes(r.statusCode)).length;
     const inUse = countByCode('assetAssigned', 'issued');
-    const inStore = countByCode('sentToStore', 'issuanceAvailable');
+    // Loaners on the shelf are in store too - they used to be counted here as issuanceAvailable.
+    const inStore = countByCode('sentToStore', 'issuanceAvailable', 'loanAvailable');
     const inRepair = countByCode('inMaintenance');
 
     const summaryCards = (

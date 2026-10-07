@@ -35,7 +35,6 @@ import PictureAsPdfOutlinedIcon from '@mui/icons-material/PictureAsPdfOutlined';
 import BlockOutlinedIcon from '@mui/icons-material/BlockOutlined';
 import DirectionsCarOutlinedIcon from '@mui/icons-material/DirectionsCarOutlined';
 import QrCode2OutlinedIcon from '@mui/icons-material/QrCode2Outlined';
-import EventOutlinedIcon from '@mui/icons-material/EventOutlined';
 import PlaceOutlinedIcon from '@mui/icons-material/PlaceOutlined';
 import BadgeOutlinedIcon from '@mui/icons-material/BadgeOutlined';
 import ReceiptLongOutlinedIcon from '@mui/icons-material/ReceiptLongOutlined';
@@ -79,40 +78,198 @@ const fmtDate = (d?: string | null) =>
 const fmtDateTime = (d?: string | null) => (d ? new Date(d).toLocaleString('en-GB') : null);
 
 // ── Presentational primitives ───────────────────────────────────────────────
-// Same grammar as the consignment detail: an icon + uppercase micro-label above the value, so a
-// reader scans labels down the left and values across, rather than parsing sentence fragments.
+// An uppercase micro-label above or beside each value throughout, so a reader scans labels and
+// values in two passes rather than parsing sentence fragments.
 
-const Fact = ({ label, value, icon, mono }: {
-    label: string; value?: ReactNode; icon?: ReactNode; mono?: boolean;
-}) => (
-    <Box>
-        <Stack direction="row" alignItems="center" spacing={0.6} sx={{ mb: 0.35 }}>
-            {icon && (
-                <Box sx={{ color: neutral[400], display: 'flex', '& .MuiSvgIcon-root': { fontSize: 13 } }}>{icon}</Box>
-            )}
-            <Typography
-                variant="caption"
-                sx={{ color: neutral[500], textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 700, fontSize: '0.62rem' }}
-            >
-                {label}
-            </Typography>
-        </Stack>
-        <Typography
-            variant="body2"
-            sx={{
-                color: value ? neutral[800] : neutral[400],
-                fontWeight: 600,
-                fontFamily: mono && value ? 'monospace' : undefined,
-                fontSize: '0.82rem',
-                wordBreak: 'break-word',
-            }}
-        >
-            {value || '—'}
-        </Typography>
+/*
+ * One surface for every panel on the page: white, a hairline border and a soft lift.
+ *
+ * The page sits on the app's blue-grey background, and the journey card used to be a faint teal
+ * wash over it - tinted panels on a tinted card on a tinted page, so the most important block on
+ * the screen was the one that disappeared. White with a shadow separates by contrast rather than by
+ * colour, which is what the repair and disposal modals already do.
+ */
+const SURFACE_SX = {
+    bgcolor: '#fff',
+    border: '1px solid #E8EDF3',
+    borderRadius: '14px',
+    boxShadow: '0 1px 2px rgba(15, 23, 42, 0.04), 0 12px 32px -20px rgba(15, 23, 42, 0.22)',
+} as const;
+
+/** The modal grammar: a rounded, tinted icon chip with a hairline in its own colour. */
+const IconChip = ({ accent, size = 36, children }: { accent: string; size?: number; children: ReactNode }) => (
+    <Box sx={{
+        width: size, height: size, borderRadius: '10px', flexShrink: 0,
+        bgcolor: alpha(accent, 0.09), color: accent, border: `1px solid ${alpha(accent, 0.18)}`,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        '& .MuiSvgIcon-root': { fontSize: Math.round(size * 0.5) },
+    }}
+    >
+        {children}
     </Box>
 );
 
-/** A widget panel with a tinted icon-chip header band. */
+/** A section heading inside a card: micro-label, then a hairline running to the edge. */
+const SubHeading = ({ icon, accent, children }: { icon: ReactNode; accent: string; children: ReactNode }) => (
+    <Stack direction="row" spacing={1} alignItems="center" mb={1.75}>
+        <Box sx={{ color: accent, display: 'flex', '& .MuiSvgIcon-root': { fontSize: 15 } }}>{icon}</Box>
+        <Typography
+            variant="caption"
+            sx={{ fontWeight: 800, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.08em', fontSize: '0.64rem', whiteSpace: 'nowrap' }}
+        >
+            {children}
+        </Typography>
+        <Divider sx={{ flex: 1, borderColor: '#EEF2F7' }} />
+    </Stack>
+);
+
+const initialsOf = (name?: string | null) => {
+    const parts = (name ?? '').trim().split(/\s+/).filter(Boolean);
+    if (parts.length === 0) return '?';
+    return (parts[0][0] + (parts.length > 1 ? parts[parts.length - 1][0] : '')).toUpperCase();
+};
+
+/** A person on the movement: initials avatar, their role in small caps, their name. */
+const PersonRow = ({ role, name, accent }: { role: string; name?: string | null; accent: string }) => (
+    <Stack direction="row" spacing={1.5} alignItems="center">
+        <Box sx={{
+            width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            bgcolor: name ? alpha(accent, 0.1) : '#F1F5F9', color: name ? accent : '#94A3B8',
+            border: `1px solid ${name ? alpha(accent, 0.2) : '#E2E8F0'}`,
+            fontWeight: 700, fontSize: '0.78rem',
+        }}
+        >
+            {name ? initialsOf(name) : '—'}
+        </Box>
+        <Box minWidth={0}>
+            <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 700, fontSize: '0.62rem', letterSpacing: '0.06em', textTransform: 'uppercase', display: 'block' }}>
+                {role}
+            </Typography>
+            <Typography sx={{ color: name ? '#1E293B' : '#94A3B8', fontWeight: 600, fontSize: '0.86rem' }} noWrap>
+                {name || 'Not recorded'}
+            </Typography>
+        </Box>
+    </Stack>
+);
+
+/** Label on the left, value on the right, a hairline between rows - reads like a receipt. */
+const InfoRow = ({ label, value, last }: { label: string; value?: ReactNode; last?: boolean }) => (
+    <Stack
+        direction="row" justifyContent="space-between" alignItems="center" spacing={2}
+        sx={{ py: 1.1, borderBottom: last ? 'none' : '1px dashed #E2E8F0' }}
+    >
+        <Typography variant="caption" sx={{ color: '#64748B', fontSize: '0.76rem', flexShrink: 0 }}>{label}</Typography>
+        <Box sx={{ textAlign: 'right', minWidth: 0 }}>
+            {typeof value === 'string' || value == null ? (
+                <Typography sx={{ color: value ? '#1E293B' : '#94A3B8', fontWeight: 600, fontSize: '0.8rem' }}>
+                    {value || '—'}
+                </Typography>
+            ) : value}
+        </Box>
+    </Stack>
+);
+
+/** A small bordered tile inside a card, for one fact that deserves its own space. */
+const Tile = ({ label, icon, children }: { label: string; icon: ReactNode; children: ReactNode }) => (
+    <Box sx={{ p: 1.5, borderRadius: '10px', bgcolor: '#F8FAFC', border: '1px solid #EEF2F7', minWidth: 0 }}>
+        <Stack direction="row" spacing={0.6} alignItems="center" sx={{ mb: 0.75, color: '#94A3B8', '& .MuiSvgIcon-root': { fontSize: 14 } }}>
+            {icon}
+            <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 700, fontSize: '0.62rem', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                {label}
+            </Typography>
+        </Stack>
+        {children}
+    </Box>
+);
+
+/** A reference people read out or copy - tracking, plate - set as a monospace badge. */
+const CodeBadge = ({ value }: { value?: string | null }) => (value ? (
+    <Box component="span" sx={{
+        display: 'inline-block', px: 1, py: 0.35, borderRadius: '6px', bgcolor: '#fff',
+        border: '1px solid #E2E8F0', fontFamily: 'monospace', fontWeight: 700, fontSize: '0.78rem',
+        color: '#1E293B', letterSpacing: '0.04em', maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis',
+    }}
+    >
+        {value}
+    </Box>
+) : (
+    <Typography sx={{ color: '#94A3B8', fontWeight: 600, fontSize: '0.8rem' }}>—</Typography>
+));
+
+const DAY_MS = 86_400_000;
+/** Whole days between two dates, by calendar day - a delivery due on the 16th is not late at noon. */
+const daysBetween = (from: string, to: string) => {
+    const a = new Date(from); const b = new Date(to);
+    const start = Date.UTC(a.getFullYear(), a.getMonth(), a.getDate());
+    const end = Date.UTC(b.getFullYear(), b.getMonth(), b.getDate());
+    return Math.round((end - start) / DAY_MS);
+};
+
+/**
+ * Dispatched → expected, as a strip, with whether the delivery kept to it.
+ *
+ * <p>The verdict is the reason this is drawn rather than listed: two dates side by side make the
+ * reader do the subtraction, and "was it late?" is the question anyone opening a delivered movement
+ * is asking. Only stated when it can be known - delivered, or past its date and not yet in.
+ */
+const DeliveryWindow = ({ dispatched, expected, received }: {
+    dispatched?: string | null; expected?: string | null; received?: string | null;
+}) => {
+    const span = dispatched && expected ? daysBetween(dispatched, expected) : null;
+    let verdict: { label: string; tone: string } | null = null;
+    if (expected && received) {
+        const late = daysBetween(expected, received);
+        verdict = late > 0
+            ? { label: `Delivered ${late} day${late === 1 ? '' : 's'} late`, tone: status.danger.main }
+            : { label: 'Delivered on time', tone: status.success.strong };
+    } else if (expected && daysBetween(expected, new Date().toISOString()) > 0) {
+        verdict = { label: 'Overdue', tone: status.danger.main };
+    }
+
+    const end = (label: string, value?: string | null, align: 'left' | 'right' = 'left') => (
+        <Box sx={{ textAlign: align, minWidth: 0 }}>
+            <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 700, fontSize: '0.62rem', letterSpacing: '0.06em', textTransform: 'uppercase', display: 'block' }}>
+                {label}
+            </Typography>
+            <Typography sx={{ color: value ? '#1E293B' : '#94A3B8', fontWeight: 700, fontSize: '0.86rem' }}>
+                {fmtDate(value) ?? '—'}
+            </Typography>
+        </Box>
+    );
+
+    return (
+        <Box sx={{ p: 1.5, borderRadius: '10px', bgcolor: '#F8FAFC', border: '1px solid #EEF2F7' }}>
+            <Stack direction="row" alignItems="center" spacing={1.5}>
+                {end('Dispatched', dispatched)}
+                <Stack alignItems="center" sx={{ flex: 1, minWidth: 40 }}>
+                    <Typography variant="caption" sx={{ color: '#64748B', fontSize: '0.66rem', fontWeight: 600, mb: 0.25 }}>
+                        {span != null ? `${span} day${span === 1 ? '' : 's'}` : ' '}
+                    </Typography>
+                    <Box sx={{ width: '100%', display: 'flex', alignItems: 'center' }}>
+                        <Box sx={{ width: 7, height: 7, borderRadius: '50%', bgcolor: BLUE, flexShrink: 0 }} />
+                        <Box sx={{ flex: 1, borderTop: `2px dashed ${alpha(BLUE, 0.35)}` }} />
+                        <ArrowForwardIcon sx={{ fontSize: 15, color: BLUE, ml: -0.25 }} />
+                    </Box>
+                </Stack>
+                {end('Expected', expected, 'right')}
+            </Stack>
+            {verdict && (
+                <Stack direction="row" justifyContent="center" sx={{ mt: 1.25 }}>
+                    <Box sx={{
+                        px: 1.25, py: 0.35, borderRadius: '999px', fontSize: '0.7rem', fontWeight: 700,
+                        color: verdict.tone, bgcolor: alpha(verdict.tone, 0.08), border: `1px solid ${alpha(verdict.tone, 0.22)}`,
+                    }}
+                    >
+                        {verdict.label}
+                    </Box>
+                </Stack>
+            )}
+        </Box>
+    );
+};
+
+/** A widget panel: white surface, icon-chip header, hairline under it. */
 const WidgetCard = ({
     icon, title, subtitle, headerAction, accent = P, children,
 }: {
@@ -121,23 +278,19 @@ const WidgetCard = ({
 }) => (
     <Card
         elevation={0}
-        sx={{ height: '100%', border: `1px solid ${border.subtle}`, borderRadius: 2, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}
+        sx={{ ...SURFACE_SX, height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}
     >
         <Box
-            px={2.5} py={1.6} display="flex" alignItems="center" gap={1.5}
-            sx={{ borderBottom: `1px solid ${border.subtle}`, background: `linear-gradient(90deg, ${alpha(accent, 0.05)} 0%, transparent 65%)` }}
+            px={2.5} py={1.75} display="flex" alignItems="center" gap={1.5}
+            sx={{ borderBottom: '1px solid #EEF2F7' }}
         >
-            <Box sx={{
-                width: 32, height: 32, borderRadius: 1.5, bgcolor: alpha(accent, 0.1), color: accent,
-                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-            }}
-            >
-                {icon}
-            </Box>
+            <IconChip accent={accent}>{icon}</IconChip>
             <Box flex={1} minWidth={0}>
-                <Typography variant="subtitle2" fontWeight={700} lineHeight={1.25}>{title}</Typography>
+                <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1E293B', lineHeight: 1.25 }}>{title}</Typography>
                 {subtitle && (
-                    <Typography variant="caption" sx={{ color: neutral[500], fontSize: '0.7rem' }}>{subtitle}</Typography>
+                    <Typography variant="caption" sx={{ color: '#64748B', fontSize: '0.72rem', display: 'block', lineHeight: 1.4 }}>
+                        {subtitle}
+                    </Typography>
                 )}
             </Box>
             {headerAction}
@@ -146,23 +299,39 @@ const WidgetCard = ({
     </Card>
 );
 
-/** One end of the route — a store, or the person the items end up with. */
+/**
+ * One end of the route — a store, or the person the items end up with.
+ *
+ * A white card with a coloured rail down its leading edge and the modal's icon chip: the colour says
+ * which end it is at a glance, and the name reads at body size rather than as a caption.
+ */
 const RoutePanel = ({ kind, title, sub, accent, icon }: {
     kind: string; title: string; sub?: string; accent: string; icon: ReactNode;
 }) => (
     <Box sx={{
-        flex: 1, minWidth: 0, p: 1.75, borderRadius: 2,
-        bgcolor: alpha(accent, 0.04), border: `1px solid ${alpha(accent, 0.18)}`,
+        flex: 1, minWidth: 0, position: 'relative', overflow: 'hidden',
+        p: 2, pl: 2.5, borderRadius: '12px', bgcolor: '#fff',
+        border: '1px solid #E8EDF3',
+        '&::before': {
+            content: '""', position: 'absolute', left: 0, top: 0, bottom: 0, width: 4, bgcolor: accent,
+        },
     }}
     >
-        <Stack direction="row" spacing={0.75} alignItems="center" mb={0.6}>
-            <Box sx={{ color: accent, display: 'flex', '& .MuiSvgIcon-root': { fontSize: 14 } }}>{icon}</Box>
-            <Typography variant="caption" sx={{ fontWeight: 700, color: accent, letterSpacing: '0.06em', fontSize: '0.62rem' }}>
-                {kind}
-            </Typography>
+        <Stack direction="row" spacing={1.5} alignItems="center">
+            <IconChip accent={accent} size={40}>{icon}</IconChip>
+            <Box minWidth={0} flex={1}>
+                <Typography variant="caption" sx={{ fontWeight: 800, color: accent, letterSpacing: '0.08em', fontSize: '0.62rem', display: 'block' }}>
+                    {kind}
+                </Typography>
+                <Typography sx={{ color: '#1E293B', fontWeight: 700, fontSize: '0.95rem', lineHeight: 1.3 }} noWrap>{title}</Typography>
+                {sub && (
+                    <Stack direction="row" spacing={0.4} alignItems="center" sx={{ color: '#64748B', mt: 0.15 }}>
+                        <PlaceOutlinedIcon sx={{ fontSize: 13 }} />
+                        <Typography variant="caption" sx={{ color: '#64748B' }} noWrap>{sub}</Typography>
+                    </Stack>
+                )}
+            </Box>
         </Stack>
-        <Typography variant="body2" fontWeight={700} sx={{ color: neutral[900] }} noWrap>{title}</Typography>
-        {sub && <Typography variant="caption" sx={{ color: neutral[500] }} noWrap>{sub}</Typography>}
     </Box>
 );
 
@@ -202,41 +371,47 @@ const MovementStepper = ({ steps, currentIndex, dates }: {
                 currentIndex < 0 ? 'upcoming' : i < currentIndex ? 'done' : i === currentIndex ? 'current' : 'upcoming';
             const meta = STEP_META[step];
             const stamp = dates[step];
+            /*
+             * Three states that must read apart at a glance: done is a solid disc, current is a ring
+             * around a solid disc, upcoming is a hollow outline. They used to be three tints of the
+             * same pale teal, which on a tinted card barely read as different at all.
+             */
+            const disc = state === 'upcoming'
+                ? { bgcolor: '#fff', color: '#94A3B8', border: '1.5px dashed #CBD5E1', boxShadow: 'none' }
+                : state === 'current'
+                    ? { bgcolor: P, color: '#fff', border: `2px solid ${P}`, boxShadow: `0 0 0 5px ${alpha(P, 0.15)}` }
+                    : { bgcolor: P, color: '#fff', border: `2px solid ${P}`, boxShadow: `0 2px 6px ${alpha(P, 0.3)}` };
             return (
                 <Box key={step} sx={{ display: 'flex', alignItems: 'flex-start', flex: i === steps.length - 1 ? '0 0 auto' : 1 }}>
-                    <Stack alignItems="center" spacing={0.6} sx={{ minWidth: 92, flexShrink: 0 }}>
+                    <Stack alignItems="center" spacing={0.75} sx={{ minWidth: 96, flexShrink: 0 }}>
                         <Box sx={{
-                            width: 36, height: 36, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            bgcolor: state === 'upcoming' ? neutral[100] : alpha(P, state === 'current' ? 0.14 : 0.1),
-                            color: state === 'upcoming' ? neutral[400] : P,
-                            border: `2px solid ${state === 'current' ? P : 'transparent'}`,
-                            boxShadow: state === 'current' ? `0 0 0 4px ${alpha(P, 0.12)}` : 'none',
-                            transition: 'all 0.2s ease',
+                            width: 38, height: 38, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            transition: 'all 0.2s ease', ...disc,
                         }}
                         >
-                            {state === 'done' ? <CheckCircleOutlineIcon sx={{ fontSize: 17 }} /> : meta.icon}
+                            {state === 'done' ? <CheckCircleOutlineIcon sx={{ fontSize: 19 }} /> : meta.icon}
                         </Box>
                         <Typography
                             variant="caption"
                             sx={{
-                                fontWeight: state === 'upcoming' ? 500 : 700,
-                                color: state === 'upcoming' ? neutral[400] : neutral[800],
-                                whiteSpace: 'nowrap', fontSize: '0.72rem', lineHeight: 1.2,
+                                fontWeight: state === 'upcoming' ? 600 : 700,
+                                color: state === 'upcoming' ? '#94A3B8' : state === 'current' ? P : '#1E293B',
+                                whiteSpace: 'nowrap', fontSize: '0.75rem', lineHeight: 1.2,
                             }}
                         >
                             {meta.label}
                         </Typography>
                         <Typography
                             variant="caption"
-                            sx={{ color: neutral[400], fontSize: '0.62rem', whiteSpace: 'nowrap', minHeight: 14 }}
+                            sx={{ color: '#64748B', fontSize: '0.66rem', whiteSpace: 'nowrap', minHeight: 15 }}
                         >
                             {state !== 'upcoming' ? (stamp ?? '') : ''}
                         </Typography>
                     </Stack>
                     {i < steps.length - 1 && (
                         <Box sx={{
-                            flex: 1, height: 2, mt: '17px', mx: 0.5, minWidth: 20, borderRadius: 1,
-                            bgcolor: i < currentIndex ? P : neutral[200],
+                            flex: 1, height: 3, mt: '18px', mx: 0.5, minWidth: 20, borderRadius: 2,
+                            bgcolor: i < currentIndex ? P : '#E2E8F0',
                         }}
                         />
                     )}
@@ -429,13 +604,22 @@ const MovementDetails = () => {
              */}
             <Paper
                 elevation={0}
-                sx={{
-                    p: { xs: 2, sm: 2.5 }, borderRadius: 2, mb: 3,
-                    border: `1px solid ${border.subtle}`,
-                    background: `linear-gradient(135deg, ${alpha(P, 0.04)} 0%, ${alpha(P, 0.01)} 60%, transparent 100%)`,
-                }}
+                sx={{ ...SURFACE_SX, p: { xs: 2, sm: 3 }, mb: 3 }}
             >
-                <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap sx={{ mb: 2.25 }}>
+                {/* Header: what this block is, then where the movement stands. */}
+                <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 1.75 }}>
+                    <IconChip accent={P} size={38}><SwapHorizOutlinedIcon /></IconChip>
+                    <Box flex={1} minWidth={0}>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1E293B', lineHeight: 1.25 }}>
+                            Journey
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: '#64748B', fontSize: '0.72rem' }}>
+                            Where it is, where it is going, and how far it has got
+                        </Typography>
+                    </Box>
+                </Stack>
+
+                <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap sx={{ mb: 2.5 }}>
                     <StatusChip label={statusLabel(movement.status)} tone={statusTone(movement.status)} size="md" />
                     {movement.receiptStatus && movement.receiptStatus !== 'PENDING' && (
                         <StatusChip
@@ -484,32 +668,56 @@ const MovementDetails = () => {
                         sub={movement.sourceStore?.location?.name ?? movement.sourceUser?.branch?.name}
                     />
 
-                    <Stack alignItems="center" spacing={0.4} sx={{ flexShrink: 0, px: { md: 1 } }}>
+                    {/*
+                      * The connector: a dashed track with the courier riding on it. The dashes run
+                      * through the courier on wide screens, so the two panels read as one route.
+                      */}
+                    <Stack
+                        alignItems="center" justifyContent="center" spacing={0.5}
+                        sx={{
+                            flexShrink: 0, position: 'relative', minWidth: { md: 150 }, py: { xs: 0.5, md: 0 },
+                            '&::before': {
+                                content: '""', position: 'absolute', left: 0, right: 0, top: '50%',
+                                borderTop: `2px dashed ${alpha(BLUE, 0.3)}`,
+                                display: { xs: 'none', md: 'block' },
+                            },
+                        }}
+                    >
                         {courierName ? (
                             <>
                                 <Box sx={{
-                                    px: 1.25, height: 26, borderRadius: '999px', display: 'flex', alignItems: 'center', gap: 0.6,
-                                    bgcolor: alpha(BLUE, 0.1), color: BLUE, maxWidth: 190,
+                                    position: 'relative', zIndex: 1,
+                                    px: 1.5, height: 30, borderRadius: '999px', display: 'flex', alignItems: 'center', gap: 0.75,
+                                    bgcolor: '#fff', color: BLUE, maxWidth: 200,
+                                    border: `1px solid ${alpha(BLUE, 0.3)}`, boxShadow: `0 2px 8px ${alpha(BLUE, 0.15)}`,
                                 }}
                                 >
-                                    <LocalShippingOutlinedIcon sx={{ fontSize: 14 }} />
-                                    <Typography variant="caption" sx={{ fontWeight: 700, fontSize: '0.68rem' }} noWrap>
+                                    <LocalShippingOutlinedIcon sx={{ fontSize: 16 }} />
+                                    <Typography variant="caption" sx={{ fontWeight: 700, fontSize: '0.74rem' }} noWrap>
                                         {courierName}
                                     </Typography>
                                 </Box>
                                 {movement.plateNumber && (
-                                    <Typography variant="caption" sx={{ color: neutral[400], fontFamily: 'monospace', fontSize: '0.62rem' }}>
+                                    <Typography
+                                        variant="caption"
+                                        sx={{
+                                            position: 'relative', zIndex: 1, px: 0.75, borderRadius: '4px', bgcolor: '#F8FAFC',
+                                            border: '1px solid #E2E8F0', color: '#475569', fontFamily: 'monospace',
+                                            fontSize: '0.66rem', fontWeight: 600, letterSpacing: '0.04em',
+                                        }}
+                                    >
                                         {movement.plateNumber}
                                     </Typography>
                                 )}
                             </>
                         ) : (
                             <Box sx={{
-                                width: 30, height: 30, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                bgcolor: neutral[100],
+                                position: 'relative', zIndex: 1,
+                                width: 34, height: 34, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                bgcolor: '#fff', border: '1px solid #E2E8F0', boxShadow: '0 2px 6px rgba(15, 23, 42, 0.06)',
                             }}
                             >
-                                <ArrowForwardIcon sx={{ fontSize: 15, color: neutral[400], transform: { xs: 'rotate(90deg)', md: 'none' } }} />
+                                <ArrowForwardIcon sx={{ fontSize: 16, color: '#64748B', transform: { xs: 'rotate(90deg)', md: 'none' } }} />
                             </Box>
                         )}
                     </Stack>
@@ -534,10 +742,10 @@ const MovementDetails = () => {
                         </Typography>
                     </Stack>
                 ) : (
-                    <>
-                        <Divider sx={{ mb: 2, borderColor: alpha(P, 0.1) }} />
+                    // An inset tray, so the progress reads as its own strip beneath the route.
+                    <Box sx={{ p: { xs: 1.5, sm: 2 }, pt: { xs: 2, sm: 2.25 }, borderRadius: '12px', bgcolor: '#F8FAFC', border: '1px solid #EEF2F7' }}>
                         <MovementStepper steps={lifecycleSteps} currentIndex={currentStepIndex} dates={stepDates} />
-                    </>
+                    </Box>
                 )}
             </Paper>
 
@@ -616,22 +824,75 @@ const MovementDetails = () => {
                             subtitle="Courier, vehicle & delivery window"
                             accent={BLUE}
                         >
-                            <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: '1fr 1fr' }}>
-                                <Fact label="Courier" icon={<LocalShippingOutlinedIcon />} value={courierName} />
-                                <Fact label="Plate" icon={<DirectionsCarOutlinedIcon />} value={movement.plateNumber} mono />
-                                <Fact label="Tracking" icon={<QrCode2OutlinedIcon />} value={movement.trackingNumber} mono />
-                                <Fact label="Dispatched" icon={<EventOutlinedIcon />} value={fmtDate(movement.dispatchDate)} />
-                                <Fact label="Expected" icon={<EventOutlinedIcon />} value={fmtDate(movement.expectedDeliveryDate)} />
-                                {movement.status !== 'INITIATED' && movement.status !== 'DRAFT' && (
-                                    <Fact
-                                        label="Custody"
-                                        icon={<PlaceOutlinedIcon />}
-                                        value={movement.custodyTransferSettled
-                                            ? `With ${courierName ?? 'courier'}`
-                                            : 'Not yet handed over'}
-                                    />
-                                )}
-                            </Box>
+                            <Stack spacing={1.5}>
+                                {/* The courier and its vehicle, as one line. */}
+                                <Stack
+                                    direction="row" spacing={1.5} alignItems="center"
+                                    sx={{ p: 1.5, borderRadius: '10px', border: `1px solid ${alpha(BLUE, 0.18)}`, bgcolor: alpha(BLUE, 0.03) }}
+                                >
+                                    <IconChip accent={BLUE} size={40}><LocalShippingOutlinedIcon /></IconChip>
+                                    <Box flex={1} minWidth={0}>
+                                        <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 700, fontSize: '0.62rem', letterSpacing: '0.06em', textTransform: 'uppercase', display: 'block' }}>
+                                            Courier
+                                        </Typography>
+                                        <Typography sx={{ color: courierName ? '#1E293B' : '#94A3B8', fontWeight: 700, fontSize: '0.92rem' }} noWrap>
+                                            {courierName ?? 'Not yet assigned'}
+                                        </Typography>
+                                    </Box>
+                                    {movement.plateNumber && (
+                                        <Stack alignItems="flex-end" spacing={0.25} sx={{ flexShrink: 0 }}>
+                                            <Stack direction="row" spacing={0.4} alignItems="center" sx={{ color: '#94A3B8' }}>
+                                                <DirectionsCarOutlinedIcon sx={{ fontSize: 13 }} />
+                                                <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 700, fontSize: '0.6rem', letterSpacing: '0.06em' }}>
+                                                    PLATE
+                                                </Typography>
+                                            </Stack>
+                                            <CodeBadge value={movement.plateNumber} />
+                                        </Stack>
+                                    )}
+                                </Stack>
+
+                                <Box sx={{ display: 'grid', gap: 1.5, gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' } }}>
+                                    <Tile label="Tracking" icon={<QrCode2OutlinedIcon />}>
+                                        <CodeBadge value={movement.trackingNumber} />
+                                        {movement.courierReference && (
+                                            <Typography variant="caption" sx={{ color: '#64748B', display: 'block', mt: 0.75 }} noWrap>
+                                                Courier ref · <Box component="span" sx={{ fontFamily: 'monospace', fontWeight: 700, color: '#334155' }}>{movement.courierReference}</Box>
+                                            </Typography>
+                                        )}
+                                    </Tile>
+                                    {movement.status !== 'INITIATED' && movement.status !== 'DRAFT' && (() => {
+                                        /*
+                                         * Where the items physically are. "With Safe Boda" on a movement
+                                         * that was delivered days ago was the old reading: the hand-over to
+                                         * the courier is recorded, the hand-over at the far end is the
+                                         * receipt, so a received or completed movement is delivered.
+                                         */
+                                        const delivered = movement.status === 'COMPLETED' || movement.status === 'RECEIVED';
+                                        const custody = delivered
+                                            ? { label: 'Delivered', tone: status.success.strong }
+                                            : movement.custodyTransferSettled
+                                                ? { label: `With ${courierName ?? 'courier'}`, tone: BLUE }
+                                                : { label: 'Not yet handed over', tone: status.warning.strong };
+                                        return (
+                                            <Tile label="Custody" icon={<PlaceOutlinedIcon />}>
+                                                <Stack direction="row" spacing={0.75} alignItems="center">
+                                                    <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: custody.tone, boxShadow: `0 0 0 3px ${alpha(custody.tone, 0.15)}` }} />
+                                                    <Typography sx={{ color: custody.tone, fontWeight: 700, fontSize: '0.82rem' }} noWrap>
+                                                        {custody.label}
+                                                    </Typography>
+                                                </Stack>
+                                            </Tile>
+                                        );
+                                    })()}
+                                </Box>
+
+                                <DeliveryWindow
+                                    dispatched={movement.dispatchDate}
+                                    expected={movement.expectedDeliveryDate}
+                                    received={movement.receiptDate}
+                                />
+                            </Stack>
                         </WidgetCard>
                     </Grid>
                 )}
@@ -766,57 +1027,114 @@ const MovementDetails = () => {
                 {/* ── Parties, receiving & record ── */}
                 <Grid item xs={12}>
                     <WidgetCard icon={<InfoOutlinedIcon fontSize="small" />} title="Details" subtitle="Parties, receiving & record metadata" accent={INDIGO}>
-                        <Box sx={{ display: 'grid', gap: { xs: 2.5, md: 4 }, gridTemplateColumns: { xs: '1fr', md: '1fr 1fr 1fr' } }}>
+                        {/*
+                          * Three columns, separated by hairlines on wide screens so each reads as its
+                          * own group: who was involved, how it was received, and when the record moved.
+                          */}
+                        <Box sx={{
+                            display: 'grid', gap: { xs: 3, md: 0 }, gridTemplateColumns: { xs: '1fr', md: '1fr 1fr 1fr' },
+                            '& > *': { px: { md: 3 } },
+                            '& > *:first-of-type': { pl: { md: 0 } },
+                            '& > *:last-of-type': { pr: { md: 0 } },
+                            '& > * + *': { borderLeft: { md: '1px solid #EEF2F7' } },
+                        }}
+                        >
                             <Box>
-                                <Stack direction="row" spacing={0.75} alignItems="center" mb={1.5}>
-                                    <BadgeOutlinedIcon sx={{ fontSize: 15, color: INDIGO }} />
-                                    <Typography variant="caption" sx={{ fontWeight: 700, color: neutral[700], textTransform: 'uppercase', letterSpacing: '0.06em', fontSize: '0.65rem' }}>
-                                        Parties
-                                    </Typography>
+                                <SubHeading icon={<BadgeOutlinedIcon />} accent={INDIGO}>Parties</SubHeading>
+                                <Stack spacing={1.75}>
+                                    <PersonRow
+                                        role="Initiator" accent={INDIGO}
+                                        name={movement.initiator ? `${movement.initiator.firstName} ${movement.initiator.lastName}` : null}
+                                    />
+                                    {recipient && <PersonRow role="Recipient" accent={GOLD} name={recipient} />}
                                 </Stack>
-                                <Stack spacing={1.5}>
-                                    <Fact label="Initiator" value={movement.initiator ? `${movement.initiator.firstName} ${movement.initiator.lastName}` : null} />
-                                    {recipient && <Fact label="Recipient" value={recipient} />}
-                                    {movement.request && <Fact label="Linked Request" value={`#${movement.request.id}`} mono />}
-                                    {movement.repair && <Fact label="Linked Repair" value={`#${movement.repair.id}`} mono />}
-                                </Stack>
+                                {(movement.request || movement.repair) && (
+                                    <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mt: 2 }}>
+                                        {movement.request && (
+                                            <Box sx={{ px: 1.1, py: 0.4, borderRadius: '6px', bgcolor: alpha(P, 0.06), border: `1px solid ${alpha(P, 0.18)}`, color: P, fontSize: '0.72rem', fontWeight: 700 }}>
+                                                Request #{movement.request.id}
+                                            </Box>
+                                        )}
+                                        {movement.repair && (
+                                            <Box sx={{ px: 1.1, py: 0.4, borderRadius: '6px', bgcolor: alpha(BLUE, 0.06), border: `1px solid ${alpha(BLUE, 0.18)}`, color: BLUE, fontSize: '0.72rem', fontWeight: 700 }}>
+                                                Repair #{movement.repair.id}
+                                            </Box>
+                                        )}
+                                    </Stack>
+                                )}
                             </Box>
 
                             <Box>
-                                <Stack direction="row" spacing={0.75} alignItems="center" mb={1.5}>
-                                    <ReceiptLongOutlinedIcon sx={{ fontSize: 15, color: INDIGO }} />
-                                    <Typography variant="caption" sx={{ fontWeight: 700, color: neutral[700], textTransform: 'uppercase', letterSpacing: '0.06em', fontSize: '0.65rem' }}>
-                                        Receiving
-                                    </Typography>
-                                </Stack>
-                                <Stack spacing={1.5}>
-                                    <Fact label="Receiving Officer" value={movement.receivingOfficer ? `${movement.receivingOfficer.firstName} ${movement.receivingOfficer.lastName}` : null} />
-                                    <Fact label="Receipt Date" value={fmtDate(movement.receiptDate)} />
-                                    <Fact label="Receipt Status" value={movement.receiptStatus ? receiptStatusLabels[movement.receiptStatus] : null} />
-                                    <Fact label="Remarks" value={movement.remarks} />
-                                </Stack>
+                                <SubHeading icon={<ReceiptLongOutlinedIcon />} accent={INDIGO}>Receiving</SubHeading>
+                                <PersonRow
+                                    role="Receiving Officer" accent={status.success.strong}
+                                    name={movement.receivingOfficer ? `${movement.receivingOfficer.firstName} ${movement.receivingOfficer.lastName}` : null}
+                                />
+                                <Box sx={{ mt: 1.25 }}>
+                                    <InfoRow label="Receipt date" value={fmtDate(movement.receiptDate)} />
+                                    <InfoRow
+                                        label="Receipt status"
+                                        last={!movement.remarks}
+                                        value={movement.receiptStatus && movement.receiptStatus !== 'PENDING'
+                                            ? (
+                                                <StatusChip
+                                                    label={receiptStatusLabels[movement.receiptStatus]}
+                                                    tone={movement.receiptStatus === 'RECEIVED_OK' ? 'success' : 'pending'}
+                                                />
+                                            )
+                                            : (movement.receiptStatus ? receiptStatusLabels[movement.receiptStatus] : null)}
+                                    />
+                                </Box>
+                                {movement.remarks && (
+                                    <Box sx={{ mt: 1.5, p: 1.25, borderRadius: '8px', bgcolor: '#F8FAFC', borderLeft: `3px solid ${alpha(INDIGO, 0.4)}` }}>
+                                        <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 700, fontSize: '0.6rem', letterSpacing: '0.06em', display: 'block', mb: 0.25 }}>
+                                            REMARKS
+                                        </Typography>
+                                        <Typography sx={{ color: '#334155', fontSize: '0.8rem', fontStyle: 'italic', wordBreak: 'break-word' }}>
+                                            {movement.remarks}
+                                        </Typography>
+                                    </Box>
+                                )}
                             </Box>
 
                             <Box>
-                                <Stack direction="row" spacing={0.75} alignItems="center" mb={1.5}>
-                                    <HistoryOutlinedIcon sx={{ fontSize: 15, color: INDIGO }} />
-                                    <Typography variant="caption" sx={{ fontWeight: 700, color: neutral[700], textTransform: 'uppercase', letterSpacing: '0.06em', fontSize: '0.65rem' }}>
-                                        Record
-                                    </Typography>
-                                </Stack>
-                                <Stack spacing={1.1}>
+                                <SubHeading icon={<HistoryOutlinedIcon />} accent={INDIGO}>Record</SubHeading>
+                                {/* A short timeline: the record's life is a sequence, so it is drawn as one. */}
+                                <Stack spacing={0}>
                                     {([
                                         ['Created', movement.createDate],
-                                        ['Last Modified', movement.lastModified],
+                                        ['Last modified', movement.lastModified],
                                         ['Completed', movement.completionDate],
-                                    ] as Array<[string, string | null | undefined]>).map(([label, value]) => (
-                                        <Stack key={label} direction="row" justifyContent="space-between" alignItems="baseline" spacing={1}>
-                                            <Typography variant="caption" sx={{ color: neutral[500] }}>{label}</Typography>
-                                            <Typography variant="caption" sx={{ fontWeight: 600, color: value ? neutral[800] : neutral[400], textAlign: 'right' }}>
-                                                {fmtDateTime(value) ?? '—'}
-                                            </Typography>
-                                        </Stack>
-                                    ))}
+                                    ] as Array<[string, string | null | undefined]>).map(([label, value], i, all) => {
+                                        const last = i === all.length - 1;
+                                        const when = value ? new Date(value) : null;
+                                        return (
+                                            <Stack key={label} direction="row" spacing={1.5} alignItems="stretch">
+                                                <Stack alignItems="center" sx={{ width: 12, flexShrink: 0 }}>
+                                                    <Box sx={{
+                                                        width: 10, height: 10, borderRadius: '50%', mt: 0.5, flexShrink: 0,
+                                                        bgcolor: value ? INDIGO : '#fff',
+                                                        border: `2px solid ${value ? INDIGO : '#CBD5E1'}`,
+                                                    }}
+                                                    />
+                                                    {!last && <Box sx={{ width: 2, flex: 1, minHeight: 16, bgcolor: '#E2E8F0', my: 0.4 }} />}
+                                                </Stack>
+                                                <Box pb={last ? 0 : 1.5} minWidth={0}>
+                                                    <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 700, fontSize: '0.62rem', letterSpacing: '0.06em', textTransform: 'uppercase', display: 'block' }}>
+                                                        {label}
+                                                    </Typography>
+                                                    <Typography sx={{ color: when ? '#1E293B' : '#94A3B8', fontWeight: 600, fontSize: '0.82rem' }}>
+                                                        {when ? fmtDate(value) : 'Not yet'}
+                                                        {when && (
+                                                            <Box component="span" sx={{ color: '#64748B', fontWeight: 500, ml: 0.75, fontSize: '0.74rem' }}>
+                                                                {when.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
+                                                            </Box>
+                                                        )}
+                                                    </Typography>
+                                                </Box>
+                                            </Stack>
+                                        );
+                                    })}
                                 </Stack>
                             </Box>
                         </Box>

@@ -159,6 +159,12 @@ interface IInventoryForm {
      * typing a new figure into a correction form cannot do any of that.
      */
     lockDeliveredQuantity?: boolean;
+    /**
+     * The branch an order being corrected belongs to. Lines added to it are checked against that
+     * branch's stocking rules, which are not the corrector's when Head Office corrects a branch order.
+     * Omitted on the create page, where the order is raised for the caller's own branch.
+     */
+    stockBranchId?: number | null;
 }
 
 

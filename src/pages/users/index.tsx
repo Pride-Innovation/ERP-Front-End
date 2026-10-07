@@ -22,6 +22,7 @@ import { toast } from 'react-toastify';
 import { FileContext } from '../../context/file/FileContext';
 import { bulkInsertUsersService } from './service';
 import BulkImportResult, { IBulkImportResult } from './BulkImportResult';
+import ImportProgressDialog from '../../components/forms/ImportProgressDialog';
 import PeopleOutlinedIcon from '@mui/icons-material/PeopleOutlined';
 import { PERMISSIONS } from '../../core/permissions/constants';
 import usePermissions from '../../core/permissions/usePermissions';
@@ -64,6 +65,12 @@ const Users = () => {
 
   /** Result summary shown after a bulk import completes (success, partial, or all-failed). */
   const [importResult, setImportResult] = useState<IBulkImportResult | null>(null);
+  /*
+   * Rows being uploaded, or null. User import is one request, so there is nothing to count until it
+   * returns - the dialog says how many are going up and shows an indeterminate bar, rather than the
+   * nothing-at-all this page used to show between choosing the file and the summary.
+   */
+  const [uploadingCount, setUploadingCount] = useState<number | null>(null);
 
   /** Latest filter object that has been applied (already in backend-param shape). */
   const [activeFilters, setActiveFilters] = useState<Record<string, any>>({});
@@ -185,6 +192,7 @@ const Users = () => {
   };
 
   const bulkInsertUsers = async (users: Array<IBulkUserData>) => {
+    setUploadingCount(users.length);
     try {
       const data = new FormData();
       data.append('users', JSON.stringify(users));
@@ -235,6 +243,7 @@ const Users = () => {
       console.error('Bulk Insert Error', error);
       toast.error('Bulk import request failed. Please try again.');
     } finally {
+      setUploadingCount(null);
       // Clear the FileContext so re-uploading the same file re-runs the import.
       setFileData({} as any);
     }
@@ -401,6 +410,15 @@ const Users = () => {
             buttonText="Enable"
           />
         </ModalComponent>
+      )}
+
+      {uploadingCount !== null && (
+        <ImportProgressDialog
+          title="Importing users"
+          noun="users"
+          progress={{ total: uploadingCount }}
+          footnote="Each user is saved or refused individually, and the summary that follows lists any that were not created."
+        />
       )}
 
       {importResult && (

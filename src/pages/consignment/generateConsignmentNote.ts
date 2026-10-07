@@ -32,6 +32,7 @@ export interface ConsignmentNoteOverrides {
     courierName?: string | null;
     plateNumber?: string | null;
     trackingNumber?: string | null;
+    courierReference?: string | null;
     dispatchDate?: string | null;
     expectedDeliveryDate?: string | null;
 }
@@ -128,6 +129,10 @@ export const generateConsignmentNote = async (
         ['Tracking No', overrides.trackingNumber || consignment.trackingNumber || '—'],
         ['Dispatch Date', fmtDate(overrides.dispatchDate ?? consignment.dispatchDate)],
         ['Expected Delivery', fmtDate(overrides.expectedDeliveryDate ?? consignment.expectedDeliveryDate)],
+        // The courier's own waybill, only when they gave one.
+        ...((overrides.courierReference || consignment.courierReference)
+            ? [['Courier Ref', (overrides.courierReference || consignment.courierReference) as string] as [string, string]]
+            : []),
     ];
     y = sectionLabel(doc, 'Logistics', margin, y);
     const rows = Math.ceil(logistics.length / 2);

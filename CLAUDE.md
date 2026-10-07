@@ -6,7 +6,7 @@ Two repos, worked on together:
 - **Backend** — `ERP-Back-End` (Spring Boot 3.2, Hibernate 6.3 + Envers, Flyway, MySQL)
 
 Verify with `npx tsc --noEmit -p tsconfig.json`, `npx eslint src/... --ext .ts,.tsx`, and
-`./mvnw.cmd -o test` — **444 backend tests** and **63 frontend** at time of writing, all green.
+`./mvnw.cmd -o test` — **503 backend tests** and **74 frontend** at time of writing, all green.
 Run the frontend suite as `CI=true npx react-scripts test --watchAll=false`; plain `npx jest` fails
 on a Babel transform, because the config that makes it work is CRA's.
 
@@ -805,6 +805,36 @@ permission rule ("not attached to a branch") so that counting 403s could not pas
 `@PreAuthorize` deleted. SELF introduced a second ("could not be identified"), and the helper had to
 learn it — the distinction being kept is route-guard failure versus business rule, not the wording.
 
+## Tracking numbers are issued, not typed (V27)
+
+The tracking number was free text at dispatch — any format, and nothing stopped two journeys sharing
+one. It is now **`TRK-<year>-<sequence>-<Luhn check digit>`**, e.g. `TRK-2026-000042-5`, issued by
+`TrackingNumberService` and never accepted from the client (neither dispatch payload has the field;
+`TrackingNumberTest` pins that by reflection).
+
+- **One number per trip.** A movement travelling alone has its own; a consignment has one and every
+  movement on it carries the same. Loading a movement onto a consignment marks its own number
+  `SUPERSEDED` (kept, so a gap in the sequence is explained); taking it off clears it, and it is issued
+  a fresh one next time.
+- **Issued when the dispatch form opens, not at dispatch.** The form prints the note the courier signs,
+  and the signed copy is uploaded *before* Dispatch — so the number must already exist.
+  `POST /movements/{id}/tracking-number` and `/consignments/{id}/tracking-number` reserve it,
+  idempotently; dispatch calls the same `ensure` in case nothing reserved one.
+- **Unique by construction and by constraint.** The registry table `tracking_number` hands out the
+  sequence from AUTO_INCREMENT (shared by movements and consignments, so the two can never collide)
+  and carries a unique index on the number. `number` is nullable for the instant between insert and
+  format — MySQL treats NULLs as distinct.
+- **Sequential, not random:** short to read out, ordered, nothing to retry. Guessable costs nothing —
+  a tracking number opens no screen. Dashes, not slashes, because it is searched and a slash breaks a
+  query string.
+- **The check digit is mirrored in the browser** (`utils/trackingNumber.ts`), so the search boxes say
+  "a digit may be mistyped" instead of returning nothing. Both test suites assert the same vector, so
+  the two copies cannot drift.
+- **The courier's own number** goes in `courierReference` (optional, not unique — theirs), on both
+  entities and their `_aud` tables (trap #5), and prints on the notes when present.
+- Typed numbers from before this were left exactly as they were: visible and searchable, not
+  registered.
+
 ## Consignments
 
 The same shape as the movements register, plus a scoping hole and a new trap.
@@ -982,10 +1012,149 @@ maintenance report's only column about the fault with courier notes. Required **
 category is non-repairable, because that diverts straight to disposal and opens no record; the
 front-end condition mirrors the service's own early return rather than guessing at it.
 
-`technician` is optional: for an IT- or Admin-routed repair the bench decides after it arrives, and
-for an EXTERNAL one the server defaults it to the consultant the form already chose. The return leg
-takes `completionNotes` and `completionDocuments`, both optional — a repair with no notes is still a
-repair that happened.
+The return leg takes `completionNotes` and `completionDocuments`, both optional — a repair with no
+notes is still a repair that happened.
+
+### Who repaired it — a reference, not typed text (V26)
+
+`Repair.technician` was a free-text box, so a repair was tied to nobody: one officer under several
+spellings, a vendor typable onto an in-house job, and no report able to say what a person or vendor
+had repaired. Every form now asks **the kind first, then one reference** (`TechnicianPicker`, shared
+by the transfer, the return, the bench completion and the repair detail's *Record / Change*):
+
+| Kind | Chosen from | Stored as |
+|---|---|---|
+| Internal officer | active members of the unit servicing the routing — **Infra** for IT, **Admin** for Admin | `technician_user_id` |
+| External consultant | active consultants in Settings | `technician_consultant_id` |
+
+`technician` stays as the **name when recorded**, so a rename does not rewrite who did a past repair
+and rows from before V26 display unchanged. `repair_destination` is stored on the record because it
+decides which unit's officers are eligible, and was otherwise only recoverable from the journey.
+
+- **The unit is found by the role it confers** (`INFRA_UNIT` / `ADMIN_UNIT`), never by its name —
+  units are renamed in Settings.
+- **`GET /movements/repair-technicians` is deliberately not branch-scoped**, unlike `/users/picker`:
+  both units sit at Head Office and service the bank, so a Gulu officer raising a repair would
+  otherwise be offered nobody.
+- **An EXTERNAL repair's technician is its consultant**, recorded from the routing choice; the form
+  does not ask twice, and the server refuses a different technician rather than guessing which of
+  the two is wrong. IT and Admin repairs may still name a consultant — IT calls vendors in.
+- **Optional when raised, required when closed** — on both closing paths (the return leg and the
+  bench's `PUT /assets/repairs/{id}`). One recorded earlier suffices; typed text from before V26
+  counts, or every pre-existing repair would be stranded at Head Office for want of a dropdown.
+- **The return checks this before creating its movement**, so a refusal costs nothing.
+- *Fixed on the way:* the bench completion caught **every** exception into a 440, so a refusal or a
+  validation 400 read as "Error creating repair" and a server fault; it now catches only the upload
+  failure. And its form had no non-200 branch (trap #6), so a refused completion closed the dialog
+  exactly as a successful one did.
+
+### Loaners are returned by hand — nothing moves one automatically
+
+Returning a repaired asset used to create a **second movement in the same call** taking a loaner
+back. Three faults, none fixable by refining it:
+
+- **It guessed which loaner** — the newest `TEMP_REPLACEMENT` ever issued to the user
+  (`findTempReplacementsForUser`, now deleted). That query read *movements*, which say a loaner was
+  *sent*, so a loaner returned months ago still matched: a second repair could "return" an asset
+  already back in the pool or lent to someone else.
+- **It moved too early** — the loaner's leg needed no approval while the repaired asset's did, so
+  the user could be left with nothing to work on.
+- **Cancelling the return left the loaner's leg live.**
+
+`LoanerService` now owns the whole life of a loan. **Who holds a loaner is an open assignment
+flagged `temporary`** (`findOpenLoansForUser`), never a movement. A loan ends one of two ways, each
+deliberate:
+
+| | Who | How |
+|---|---|---|
+| **Return** | the holder (authentication alone — it is theirs to hand back), or `REPAIR_ASSET` with the holder in reach | `RETURN_TO_STORE` from the holder to the store it was lent from, carrying `issuanceAvailable` |
+| **Make permanent** | `REPAIR_ASSET` only | closes the temporary assignment, opens an ordinary one, clears `temporaryPool` — for when the asset it stood in for is written off |
+
+- **The link to a repair is optional and only a label.** A temp replacement may name the asset it
+  covers (`coversAssetId` → the open `Repair`, stored on the movement's existing `repair_id`); the
+  repair transfer can lend one in the same call, tied automatically. A loaner for a disposal, or for
+  nothing, has no link.
+- **A return follows ordinary movement policy** — within one location it completes on receipt;
+  across locations it is approved and dispatched like anything that travels, with the usual
+  no-approver override. `InventoryService` now applies `restoreStatusCode` on `RETURN_TO_STORE`
+  (previously only on `RETURN_AFTER_REPAIR`); an ordinary hand-back carries none and is unaffected.
+- **What stops loaners going missing is visibility, not automation.** `LoanerReminder` (a separate
+  component, so `MovementService` can call it without a cycle through `LoanerService`) notifies the
+  holder when a `RETURN_AFTER_REPAIR` reaches them — `LOANER_RETURN_DUE`, target `LOANER`, routed to
+  the dashboard. A loaner tied to a *different* repair is not mentioned; an unlinked one is, since the
+  system cannot tell. Never throws: a reminder failing must not fail a receipt.
+- **Where people see them:** *My Assets* on the dashboard ("On loan to you", with Return), and the
+  repair modal's **Outstanding Loaners** tile for `REPAIR_ASSET` — oldest first, "Due back" once the
+  covered asset is home, "Return under way" while one is in flight.
+
+### Receive into Store, and a loaner's own status
+
+Measured when reported: two scanners received "for temporary replacement" sat in the **Head Office
+Admin store** — the default when no store is chosen — so the IT store page never showed them, and the
+register looked unchanged because they read **"Available for Issuance" before and after**.
+
+**A loaner now reads `loanAvailable` ("Available for Loan")**, its own status. It used to share
+`issuanceAvailable` with stock awaiting issuance against a request, and
+`validateAssetsReadyForIssuance` checked **only that status** — so a loaner could be issued
+permanently and leave the pool. Issuance now refuses any pool asset, *whatever its status*, because the
+pool assets that existed before this carried the old one. `LoanerStatusSeeder` relabels shelved,
+unassigned pool stock once (`OneTimeSeed`; it runs after `seedStatuses()`, which creates the row). A
+returned loaner (`LoanerService`) and a repaired asset whose holder has left also land on
+`loanAvailable`.
+
+**The switch decides the default store.** On: the category's loaner store — the IT store for an
+IT-routed category, the Head Office Admin store otherwise (`AssetService.loanerStoreFor`, the same
+split as repair routing). Off: the Admin store where the asset stands, as before. A loaner may only be
+kept in an **IT or Admin** store, because those are all the temporary-replacement picker reads; one
+had been booked into the Disposal store, flagged lendable and never offered. The dialog says where the
+asset will go and what it will read *before* Confirm.
+
+**"Sent to Store" is parked.** Not issuable, not lendable; it leaves that state only by an edit,
+a disposal, a repair transfer or an assignment.
+
+- **Reassign now takes an asset out of the store.** It used to set the holder and leave
+  `currentStore` and the shelf status alone, so an asset read "in the Admin store" and "with Jane" at
+  once, still "Sent to Store". Only shelf statuses (`sentToStore`, `issuanceAvailable`) become
+  `assetAssigned`; maintenance, transit and disposal are left as they are. **A loaner is refused** —
+  lend it through Temporary Replacement, or receive it with the switch off first — or it would leave as
+  an ordinary assignment nothing ever asks back.
+- **The detail page's "Assign to Officer"** was gated on status `inStore`, a code no status has, so it
+  never rendered. It reads `sentToStore` now. (The register's "In Store" filter was fine all along —
+  `helpers.tsx` aliases `inStore` → `sentToStore`.)
+- **The one silent failure was "no approver".** The shared request handler toasts most refusals, but
+  `NO_APPROVER` carries an `errorCode` and so is left to the caller — and this dialog never handled it.
+  A hand-back from a holder at one branch into a store at another is cross-location and climbs the
+  ladder; it now offers the same recorded override as every movement form (`SendToStoreDTO` carries
+  `proceedWithoutApproval` / `bypassReason`).
+- **Reassign closed its dialog in `finally`**, so a refusal looked like success. It stays open now.
+- **On the register**, `loanAvailable` reads "Available for Loan" in amber, and a loaner out with
+  somebody reads **"On Loan"** rather than "Asset Assigned" (display only, from the pool flag).
+
+### Trap: a Lombok `hashCode` through an inverse collection
+
+`@Data` on an entity includes every field in `equals`/`hashCode`. Where that includes a lazy
+`@OneToMany` whose elements hash back to the owner — `Title.users` ↔ `User.title`,
+`Region.branches` ↔ `Branch.region`, `Stock.stockCommodities` ↔ `StockCommodity.stock` — hashing
+one entity initialises the collection, and loading the collection hashes each element into it,
+**re-entering the set mid-load**. Hibernate guards that with an `assert`: in tests (`-ea`) it fails
+as a bare `AssertionError` in `PersistentSet.initializeEmptyCollection`; in production, where
+assertions are off, it silently loads the collection twice. Met by `LoanerFlowTest`, because a
+movement's items are hashed on every flush and the walk reaches all three. Those three collections
+are now `@EqualsAndHashCode.Exclude` / `@ToString.Exclude`.
+
+**Fixing one of these can expose a JSON loop it was hiding — and did.** In production the
+re-entrant load left `Stock.stockCommodities` reading *empty*, so Jackson wrote `[]` and never
+followed `StockCommodity.stock` back to the stock. Once the hashCode stopped re-entering, the set
+loaded its real lines and every response carrying an asset with a stock (the `/store/it` page first)
+recursed into a `StackOverflowError`. `stockCommodities` is now `@JsonIgnoreProperties("stock")`,
+pinned by `StockSerializationTest`, which reproduces the overflow when the annotation is removed.
+**Before excluding an inverse collection from hashCode, check it is not serialised with a
+back-pointer** (`Title.users` and `Region.branches` are `@JsonIgnore`; `GrnReport.stock` already was).
+
+**Others like them remain** —
+`User.toString` ↔ `Token.toString` overflows the stack if a failure message tries to print a
+notification, which is why that test asserts on ids. Exclude the inverse side whenever one bites;
+a sweep would be the better fix.
 
 ### Still open
 
@@ -2084,6 +2253,162 @@ likely, which is a different shape from the permissions the module has today.
 *Left alone deliberately:* `DELETE /users/**` is matched to `DELETE_USER` and no DELETE endpoint
 exists. Harmless, but it makes the permission look meaningful — worth removing or implementing, and
 neither is urgent. Accounts are disabled, never deleted, which is the right model for a bank.
+
+## Stocking rules — which branch may stock what (V28)
+
+Nothing restricted it: every category could be stocked by every branch, and the stock form offered
+all twelve to everyone. Now each **category** says where it may be stocked — Head Office, all
+branches, and/or named branches — and a **commodity** may override its category (toner at the
+branches while printers stay at Head Office). Settings → Asset Categories and Settings → Commodities,
+storefront icon on each card; the card's chip says where it may be stocked.
+
+| | Rule |
+|---|---|
+| Head Office | its own switch only — never one of "all branches", and naming it in the branch list is refused (it would read as a grant and do nothing) |
+| All branches | every non-Head-Office branch, **including one opened later** — which is why it is a flag and not a pre-ticked list |
+| Named branches | consulted only while "all branches" is off |
+| Commodity | follows its category unless `stocking_override`; with no category at all, Head Office only |
+| Nothing ticked | legal, and confirmed in the dialog before it is sent |
+
+**Enforced where an order line comes into being**, and nowhere else: `StockService.createStock`
+(before anything is saved) and the lines `updateStock` **adds**. `StockingRuleTest` pins exactly two
+call sites.
+
+- **Receipts are never checked.** Goods ordered under yesterday's rule arrive at the door either way;
+  refusing the receipt would leave them physically present and recorded nowhere.
+- **Existing lines on a correction are not re-checked.** Otherwise tightening a rule would freeze every
+  price or quantity correction on orders placed before the change.
+- **Bulk asset import is deliberately untouched** (`AssetService` builds its own `Stock`) — left as it
+  is by decision.
+
+**Saved through its own endpoint, never with the category's other fields** —
+`PUT /asset-types/{id}/stocking-rule`, `PUT /commodities/{id}/stocking-rule`, both `UPDATE_SETTING`,
+audited as `STOCKING_RULE_CHANGED` with the before and after. `AssetTypeDTO` carries the rule
+read-only, so saving a description cannot reset who may stock the category. Both are replacements:
+the rule afterwards is exactly what was sent.
+
+**Day one mirrors history.** V28 starts every category at Head Office only, then opens to all branches
+every category a non-Head-Office branch had ever stocked. Measured: Cleaning & Hygiene, Kitchen &
+Groceries, Printing & Branding and Stationery — what Gulu and Mbarara had actually ordered. So nobody
+lost the ability to order something they had ordered before. A **new** category starts at Head Office
+only: widening is a decision, narrowing a surprise. *A fresh environment has no history, so every
+category starts Head Office only there.*
+
+**The form filters; the server decides.** `GET /stocking/stockable` (`CREATE_INVENTORY` or
+`UPDATE_INVENTORY`, not `READ_SETTING` — a storekeeper should not need Settings to fill in a delivery)
+says which categories and commodities a branch may stock, and `StockItems` offers only those. Three
+details:
+
+- **A category is offered when its rule admits the branch *or* any of its commodities does**, so an
+  override surfaces its category, offering only itself.
+- **The correction page asks for the order's branch** (`?branchId=`), not the corrector's — Head
+  Office correcting Gulu's order is checked against Gulu's rule, and a filter on the wrong branch would
+  offer lines the server then refuses.
+- **A line already on the order stays selectable** even if the rule no longer admits it, matching the
+  server's "only added lines" rule. If the stockable list cannot be read, nothing is hidden and the
+  server has the last word — an empty form with no reason given would be worse.
+
+**The Head Office fallback stopped assuming id 1.** `resolveStockBranch` used
+`HEAD_OFFICE_BRANCH_ID = 1L` (trap #4's shape); it is found by the `isHeadOffice` flag now, through
+`StockingRuleService.stockingBranchForCurrentUser`, so the branch the form is filtered for is the
+branch the order is checked against.
+
+### Category and commodity writes were unguarded
+
+`POST/PUT/DELETE` on `/asset-types/**` and `/commodities/**` fell through to `authenticated()` —
+any login could rename a category, change its depreciation rate or delete a commodity. They now answer
+to `CREATE_SETTING` / `UPDATE_SETTING` / `DELETE_SETTING` by verb — the keys the Settings pages
+**already** gated their buttons on, so a button shown is a call admitted. Eight lines came off
+`EndpointGuardCoverageTest.KNOWN_UNGUARDED`.
+
+Measured before guarding: **all 4 accounts holding `READ_SETTING` hold all three write keys**, so no
+one who could edit a category in Settings lost it; what closed is the API called directly. The card
+buttons were ungated (only *Add* was) and are gated by verb now.
+
+*Not done:* the `GET`s stay open — the stock form, the request form and the asset pages all read the
+category and commodity lists, and gating them on `READ_SETTING` would break those for everybody else.
+
+*A test-harness note:* saving a `Stock` needs **both** a bound request (for `CurrentUserService`) **and**
+an `Authentication` in the `SecurityContext` — `created_by` is filled by Spring Data's auditor
+(`ApplicationAuditAware`), which reads the latter. Without it the insert fails `created_by cannot be
+null`. `StockingRuleTest.signInAs` sets both.
+
+*And one about the scratch copy:* `robocopy` preserves the source file's timestamp, so after a
+deliberate break in the scratch copy is reverted the `.class` looks newer than the restored source and
+Maven **does not recompile it** — the test then "fails" against the broken class while the source is
+correct. Run `clean` (or delete the package's classes) after reverting a break.
+
+## Emails — one layout, every message
+
+All mail is built in `notification/Email.java` and sent by `MailDispatcher`. There were **seven
+hand-built templates** and they had drifted into seven looks: card widths of 620, 650, 700 and 900px,
+pill and square buttons, emoji icons, an "Employee Portal" badge on one, three different
+"automated message" boxes naming three different systems ("Asset Management System", "HR System",
+"ERP system"), three different signatures, a footer hardcoded to **© 2025**, and the movement mail
+with a footer of its own.
+
+**Most of the styling never reached the reader anyway.** They relied on CSS the major clients strip:
+`linear-gradient` (Outlook), `display:flex` / `grid` (Outlook, several webmails) and
+`filter: brightness(0) invert(1)` on the logo (Gmail and Outlook). With the filter gone, the
+**full-colour logo sat on a teal band** — teal "PRIDE" on teal.
+
+`EmailLayout` is now the only place the frame exists: a 4px brand bar, the logo **on white** (as it
+is drawn) with **"Assets Management"** opposite it, a coloured label (Action required / Approved /
+Rejected / For your information / Completed), the title, the body, one solid button with a copyable
+fallback link, and one footer with the current year. Tables and inline styles only. A template
+supplies a title and a body, built from `paragraph` / `details` / `table` / `callout` / `codeBox`,
+and cannot restyle the frame. **Every value that came from a person goes through `esc`** — names,
+comments and leave reasons were interpolated raw into HTML before. The stock body is the one trusted
+exception: `StockService` builds it as markup.
+
+Public signatures are unchanged, so none of the 23 call sites moved.
+
+**Faults fixed on the way:**
+
+| | |
+|---|---|
+| Workflow mail linked `/asset-request/view?id=37` | the route takes a path segment — the button opened a page with no request. Now `/view/37`, like the request mail |
+| Stock mail linked `/stocks/{id}` | no such front-end route; now `/assets-mgt/inventory/view/{id}` |
+| `COMPLETION` workflow mails | fell to the default and arrived labelled **"Action required"** on a message saying something had finished |
+| The workflow step title | was used only in `<title>`, never shown in the body |
+| `buildCommodityRows` | appended `width:100%%` with no `format()`, so the HTML literally said `100%%` |
+| **The logo was read from `src/main/resources/...` on disk** | that path exists only when started from the source checkout. Packaged and run anywhere else, the inline attachment cannot be read and **the whole message fails** inside `MailDispatcher`'s catch — no email, only a log line. Now a `ClassPathResource` |
+
+*A trap met in the first render:* the font stack was `'Segoe UI',Roboto,…` inside **single-quoted**
+style attributes, so the first quote closed the attribute and silently dropped the rest — everything
+came out in the client's default serif. Family names are unquoted now, and `EmailTemplateTest`
+refuses any quote opening inside a style value.
+
+`EmailTemplateTest` renders all nine variants with sample data, writes them to
+`target/email-previews/` for viewing in a browser, and pins the shared frame, the application name,
+the absence of stripped CSS and the hardcoded year, escaping, the completion label, the CC copy
+having no button, and the three link shapes.
+
+## Import dialogs — the asset one said nothing, the user one did not exist
+
+The asset import already had a progress dialog, and it read as no dialog at all. Rows go up in
+batches of `BULK_IMPORT_BATCH_LIMIT` (200) and the bar moved only when a batch **returned** — so any
+file of 200 rows or fewer, which is most of them, sat at *"Importing 0 of N rows… 0%"* for its entire
+upload and then vanished. It also opened only after the template fetch, and carried a close button
+wired to nothing.
+
+`bulkImportAssetsService` now takes `onBatchStart(from, to, total)`, called as each batch is sent, and
+the dialog shows *Preparing…* (indeterminate) from the moment the file is accepted, then *Uploading
+rows 201–400 of 450* with a **buffer** bar — solid for what has finished, moving for the batch on the
+wire. The close button is hidden, since nothing can be cancelled mid-batch, and `beforeunload` asks
+before the tab is closed while an import runs. `importService.test.ts` pins the order of the
+announcements.
+
+**User import had no dialog at all** — between choosing the file and the summary, the page showed
+nothing. Both now share `components/forms/ImportProgressDialog`, which owns the hidden close button
+and the `beforeunload` guard (mounted only while an import runs). User import is **one request**, so
+nothing can be counted until it returns: its dialog says *Uploading 40 users…* over an
+**indeterminate** bar, deliberately — a percentage it could not know would be a bar parked at 0%
+again, which is the fault this fixes. Batching user import would buy a real count; it was not done,
+because user files are tens of rows and the endpoint's per-row error reporting assumes one payload.
+
+*Not covered:* reading and parsing the spreadsheet in `FileUploadButton` happens before any of this, on
+the main thread, so a dialog could not paint during it anyway.
 
 ## Every bulk import read the wrong worksheet
 

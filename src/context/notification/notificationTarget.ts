@@ -49,6 +49,9 @@ export const NOTIFICATION_KINDS: Record<string, NotificationKind> = {
     MOVEMENT_UPDATE: { label: 'Movement update', group: 'progress' },
     STEP_REJECTED: { label: 'Rejected', group: 'rejected' },
     WORKFLOW_COMPLETED: { label: 'Completed', group: 'completed' },
+    // Sent when someone's own asset reaches them back from repair while they still hold a loaner.
+    // Something for them to do, so it sits with the other actions.
+    LOANER_RETURN_DUE: { label: 'Return loaner', group: 'action' },
 };
 
 /**
@@ -79,6 +82,10 @@ export const notificationRoute = (notification: IAppNotification): string | null
             return `${ROUTES.READ_REQUEST}/${entityId}`;
         case 'MOVEMENT':
             return `${ROUTES.READ_MOVEMENT}/${entityId}`;
+        case 'LOANER':
+            // The dashboard, not the asset: the Return button lives in My Assets, and the asset's own
+            // page needs READ_ASSET, which the borrower may well not hold.
+            return ROUTES.ASSETS_MANAGEMENT;
         default:
             // An entity kind this client does not know. Better unclickable than wrong.
             return null;

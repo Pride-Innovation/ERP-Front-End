@@ -25,7 +25,7 @@ import {
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { IRepairDetailAxiosResponse, IRepairDetails } from '../../interface';
+import { IRepairDetails } from '../../interface';
 import CloseIcon from '@mui/icons-material/Close';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
@@ -39,6 +39,9 @@ import InfoIcon from '@mui/icons-material/Info';
 import { toast } from 'react-toastify';
 import dayjs, { Dayjs } from 'dayjs';
 import { completeRepairAssetService } from '../../general/service';
+import TechnicianPicker, {
+    EMPTY_TECHNICIAN, ITechnicianSelection, isTechnicianChosen, technicianPayload,
+} from '../../../../components/repair/TechnicianPicker';
 
 // Get file icon based on file type
 const getFileTypeInfo = (fileName: string) => {
@@ -84,6 +87,15 @@ const CompleteRepair = ({ repair, handleClose }: CompleteRepairProps) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submissionSuccess, setSubmissionSuccess] = useState(false);
 
+    /*
+     * Who repaired it. A closed repair must name somebody, so this is asked for whenever the repair
+     * does not already - typed text on a record from before the picker counts, as it does on the
+     * server. Recorded technicians are shown rather than re-asked.
+     */
+    const alreadyRecorded = !!(repair?.technicianType || repair?.technician?.trim());
+    const [technician, setTechnician] = useState<ITechnicianSelection>(EMPTY_TECHNICIAN);
+    const [technicianError, setTechnicianError] = useState('');
+
     // Validate form before submission
     const validateForm = () => {
         let isValid = true;
@@ -113,6 +125,10 @@ const CompleteRepair = ({ repair, handleClose }: CompleteRepairProps) => {
             errors.files = 'Please fix file errors before submitting';
             isValid = false;
         }
+
+        const missingTechnician = !alreadyRecorded && !isTechnicianChosen(technician);
+        setTechnicianError(missingTechnician ? 'Record who repaired this asset' : '');
+        if (missingTechnician) isValid = false;
 
         setFormErrors(errors);
         return isValid;
@@ -172,13 +188,26 @@ const CompleteRepair = ({ repair, handleClose }: CompleteRepairProps) => {
                 formData.append('completionDocuments', file);
             });
 
-            const response = await completeRepairAssetService(repair.id, formData) as IRepairDetailAxiosResponse;
-            if (response.status === 201) {
-                toast.success("Repair completed successfully!");
-                setSubmissionSuccess(true);
+            Object.entries(technicianPayload(technician)).forEach(([key, value]) => {
+                formData.append(key, String(value));
+            });
 
-                // dispatch(updateITAsset(response.data));
+            const response = await completeRepairAssetService(repair.id, formData) as any;
+            /*
+             * Anything but 201 is a failure (trap #6: the service returns the error rather than
+             * throwing). This used to fall through to the success timers below, so a refusal closed
+             * the dialog exactly as a completion did - and a repair the server would not close read
+             * as closed.
+             */
+            if (response?.status !== 201) {
+                toast.error(response?.response?.data?.detail
+                    ?? response?.response?.data?.message
+                    ?? 'Failed to mark repair as completed. Please try again.');
+                setIsSubmitting(false);
+                return;
             }
+            toast.success("Repair completed successfully!");
+            setSubmissionSuccess(true);
             // Show success feedback
             // toast.success('Repair marked as completed successfully!');
 
@@ -355,6 +384,35 @@ const CompleteRepair = ({ repair, handleClose }: CompleteRepairProps) => {
                                                         }
                                                     }}
                                                 />
+                                            </Box>
+
+                                            {/* Who repaired it */}
+                                            <Box>
+                                                <Box sx={{ mb: 1, display: 'flex', alignItems: 'center' }}>
+                                                    <BuildIcon fontSize="small" sx={{ color: theme.palette.primary.main, mr: 1 }} />
+                                                    <Typography variant="subtitle2" fontWeight={600}>
+                                                        Technician *
+                                                    </Typography>
+                                                </Box>
+                                                {alreadyRecorded ? (
+                                                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                                                        {repair.technician}
+                                                        {repair.technicianType === 'INTERNAL' && ' · Internal officer'}
+                                                        {repair.technicianType === 'EXTERNAL' && ' · External consultant'}
+                                                    </Typography>
+                                                ) : (
+                                                    <>
+                                                        <TechnicianPicker
+                                                            required
+                                                            repairDestination={repair?.repairDestination ?? 'IT'}
+                                                            value={technician}
+                                                            onChange={(next) => { setTechnician(next); setTechnicianError(''); }}
+                                                        />
+                                                        {technicianError && (
+                                                            <Typography variant="caption" color="error">{technicianError}</Typography>
+                                                        )}
+                                                    </>
+                                                )}
                                             </Box>
                                         </Stack>
                                     </CardContent>

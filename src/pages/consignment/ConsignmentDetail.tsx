@@ -368,6 +368,9 @@ const ConsignmentDetail = ({
                     <Fact label="Courier" icon={<LocalShippingOutlinedIcon />} value={consignment.courierService ?? consignment.courier?.name} />
                     <Fact label="Plate" icon={<DirectionsCarOutlinedIcon />} value={consignment.plateNumber} mono />
                     <Fact label="Tracking" icon={<QrCode2OutlinedIcon />} value={consignment.trackingNumber} mono />
+                    {consignment.courierReference && (
+                        <Fact label="Courier ref" icon={<QrCode2OutlinedIcon />} value={consignment.courierReference} mono />
+                    )}
 
                     {/* Dates only appear once there are dates — a draft has no journey to time yet. */}
                     {consignment.status !== 'DRAFT' && (

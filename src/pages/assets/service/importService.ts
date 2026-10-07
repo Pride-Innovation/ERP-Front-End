@@ -52,13 +52,17 @@ const readBatch = (payload: any, rows: any[], offset: number): IAssetImportResul
  * rows already committed stay committed and are reported, and the caller can correct and re-upload
  * safely because duplicates are refused.
  *
- * @param onProgress called with rows attempted so far, for the progress bar
+ * @param onProgress   called with rows attempted so far, for the progress bar
+ * @param onBatchStart called as each batch is sent, with its 1-based first and last row - so the
+ *                     dialog can say what is in flight. Without it a file of one batch (the usual
+ *                     case: 200 rows) reads "0 of N" for the whole upload and looks stuck.
  */
 export const bulkImportAssetsService = async (
     rows: any[],
     assetTypeId: number,
     batchSize: number,
     onProgress?: (done: number, total: number) => void,
+    onBatchStart?: (from: number, to: number, total: number) => void,
 ): Promise<IAssetImportResult> => {
     const combined: IAssetImportResult = {
         success: false, total: rows.length, inserted: 0, failed: 0, errors: [],
@@ -66,6 +70,7 @@ export const bulkImportAssetsService = async (
 
     for (let offset = 0; offset < rows.length; offset += batchSize) {
         const batch = rows.slice(offset, offset + batchSize);
+        onBatchStart?.(offset + 1, offset + batch.length, rows.length);
         const form = new FormData();
         form.append('assets', JSON.stringify(batch));
         form.append('assetTypeID', String(assetTypeId));

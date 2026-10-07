@@ -603,6 +603,13 @@ const TableUtills = ({ moduleName, tableKey }: { moduleName?: string; tableKey?:
             color: theme.palette.success.main
         },
         {
+            // Loaners on the shelf. They used to read "Issuance Available" and sit in the tab above,
+            // indistinguishable from stock waiting to be issued against a request.
+            label: "Available for Loan",
+            value: "loanAvailable",
+            color: theme.palette.warning.dark
+        },
+        {
             label: "Issued",
             value: "assetIssued",
             color: theme.palette.info.main

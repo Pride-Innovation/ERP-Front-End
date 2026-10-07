@@ -63,7 +63,10 @@ export interface IMovement {
     recipientUser?: IUser | null;
 
     courierService?: string | null;
+    /** Issued by the system (TRK-2026-000042-7); the consignment's when it travels on one. */
     trackingNumber?: string | null;
+    /** The courier's own waybill or reference, typed at dispatch. */
+    courierReference?: string | null;
     dispatchDate?: string | null;
     expectedDeliveryDate?: string | null;
     deliveryDocuments?: string[];
@@ -176,10 +179,43 @@ export interface IMovementFlowPreview {
     recipientUserName?: string | null;
     /** The recorded holder has left, so the asset returns to its branch unassigned as pool stock. */
     returningToBranchUnassigned: boolean;
-    loanerAssetId?: number | null;
-    loanerAssetLabel?: string | null;
+    /**
+     * The open repair a return would close, where it went, and who it already names as technician.
+     * The return form asks for a technician only when `technicianName` is empty — a closed repair
+     * must say who did the work.
+     */
+    openRepairId?: number | null;
+    repairDestination?: 'IT' | 'ADMIN' | 'EXTERNAL' | null;
+    technicianType?: 'INTERNAL' | 'EXTERNAL' | null;
+    technicianName?: string | null;
     /** Set when the flow cannot proceed — shown beside the field rather than thrown at submit. */
     blockedReason?: string | null;
+}
+
+/**
+ * A temporary replacement still out with somebody (`GET /movements/loaners[/mine]`).
+ *
+ * `coversAssetLabel` is what tells a holder of two loaners which is which; it is null for a loaner
+ * issued without naming a repair — one covering a disposal, or nothing in particular.
+ */
+export interface ILoaner {
+    assetId: number;
+    engravedNumber?: string | null;
+    assetName?: string | null;
+    category?: string | null;
+    holderId: number;
+    holderName?: string | null;
+    holderBranchName?: string | null;
+    since?: string | null;
+    coversAssetId?: number | null;
+    coversAssetLabel?: string | null;
+    /** "Pending" while the covered repair runs, "Completed" once it closed. */
+    coversRepairStatus?: string | null;
+    /** The covered asset is back with the holder — the loaner is now due. */
+    coveredAssetBack: boolean;
+    returnStoreName?: string | null;
+    /** A return already under way; the loaner is not offered for return again. */
+    pendingReturnMovementId?: number | null;
 }
 
 /**

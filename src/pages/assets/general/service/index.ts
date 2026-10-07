@@ -81,6 +81,18 @@ const completeRepairAssetService = async (id: string | number, body: object) => 
     }
 };
 
+/**
+ * Records or corrects who worked on a repair, without closing it - for the days between the bench
+ * receiving an asset and finishing it. Same three fields as every other repair form.
+ */
+const assignRepairTechnicianService = async (id: string | number, body: object) => {
+    try {
+        return await axiosInstance.put(`assets/repairs/${id}/technician`, body);
+    } catch (error) {
+        return error;
+    }
+};
+
 const listRepairDetailService = async (id: string | number, pageSize = 200) => {
     try {
         // Pull the full repair history in one page; the table pages client-side.
@@ -182,6 +194,7 @@ export {
     updateAssetService,
     reassignAssetService,
     completeRepairAssetService,
+    assignRepairTechnicianService,
     listRepairDetailService,
     updateAssetImageService,
     removeAssetImageService,

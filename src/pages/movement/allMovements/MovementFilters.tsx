@@ -5,6 +5,7 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
+import { trackingNumberTypo } from '../../../utils/trackingNumber';
 import { useState } from 'react';
 import {
     alpha,
@@ -376,8 +377,10 @@ const MovementFilters = ({
                             <Grid item xs={12} sm={6} md={2}>
                                 <FieldLabel>Tracking #</FieldLabel>
                                 <TextField
-                                    fullWidth size="small" placeholder="e.g. TRK-0012"
+                                    fullWidth size="small" placeholder="e.g. TRK-2026-000042-7"
                                     value={trackingNumber} onChange={e => setTrackingNumber(e.target.value)}
+                                    error={!!trackingNumberTypo(trackingNumber)}
+                                    helperText={trackingNumberTypo(trackingNumber) ?? undefined}
                                     sx={PILL_INPUT_SX}
                                 />
                             </Grid>

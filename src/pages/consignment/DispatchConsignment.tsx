@@ -23,7 +23,8 @@ import { brand, neutral, border, status as statusTokens } from '../../utils/toke
 import { fetchCouriersService } from '../settings/couriers/service';
 import { ICourier } from '../settings/couriers/interface';
 import { uploadStandaloneMovementDocumentService } from '../movement/service';
-import { dispatchConsignmentService } from './service';
+import { dispatchConsignmentService, reserveConsignmentTrackingService } from './service';
+import TrackingNumberField from '../../components/tracking/TrackingNumberField';
 import { IConsignment } from './interface';
 import { generateConsignmentNote } from './generateConsignmentNote';
 
@@ -47,7 +48,15 @@ const DispatchConsignment = ({
     const [couriers, setCouriers] = useState<ICourier[]>([]);
     const [courierValue, setCourierValue] = useState<ICourier | string | null>(null);
     const [plateNumber, setPlateNumber] = useState('');
-    const [trackingNumber, setTrackingNumber] = useState('');
+    /*
+     * Issued by the system as this form opens - the consignment note printed here carries it and is
+     * signed before Dispatch. Every movement on the van travels under the same number. The courier's
+     * own waybill, when they give one, goes in courierReference.
+     */
+    const [trackingNumber, setTrackingNumber] = useState<string | null>(consignment.trackingNumber ?? null);
+    const [trackingLoading, setTrackingLoading] = useState(false);
+    const [trackingFailed, setTrackingFailed] = useState(false);
+    const [courierReference, setCourierReference] = useState('');
     const [dispatchDate, setDispatchDate] = useState('');
     const [expectedDeliveryDate, setExpectedDeliveryDate] = useState('');
     const [documents, setDocuments] = useState<string[]>([]);
@@ -59,6 +68,22 @@ const DispatchConsignment = ({
             const res = (await fetchCouriersService(true)) as any;
             if (res?.status === 200) setCouriers(res.data ?? []);
         })();
+        (async () => {
+            setTrackingLoading(true);
+            try {
+                const res = (await reserveConsignmentTrackingService(consignment.id)) as any;
+                if (res?.status === 200 && res.data?.trackingNumber) {
+                    setTrackingNumber(res.data.trackingNumber);
+                    setTrackingFailed(false);
+                } else {
+                    // Not fatal: dispatch issues one itself. The note just would not carry it yet.
+                    setTrackingFailed(true);
+                }
+            } finally {
+                setTrackingLoading(false);
+            }
+        })();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     /*
@@ -89,6 +114,7 @@ const DispatchConsignment = ({
             courierName: typeof courierValue === 'object' ? courierValue?.name : courierValue,
             plateNumber,
             trackingNumber,
+            courierReference: courierReference.trim() || null,
             dispatchDate: dispatchDate ? new Date(dispatchDate).toISOString() : null,
             expectedDeliveryDate: expectedDeliveryDate ? new Date(expectedDeliveryDate).toISOString() : null,
         });
@@ -113,7 +139,7 @@ const DispatchConsignment = ({
                 courierId: typeof courierValue === 'object' ? courierValue.id ?? null : null,
                 courierName: typeof courierValue === 'string' ? courierValue : null,
                 plateNumber: plateNumber.trim(),
-                trackingNumber: trackingNumber || null,
+                courierReference: courierReference.trim() || null,
                 dispatchDate: dispatchDate ? new Date(dispatchDate).toISOString() : null,
                 expectedDeliveryDate: expectedDeliveryDate ? new Date(expectedDeliveryDate).toISOString() : null,
                 deliveryDocuments: documents,
@@ -168,6 +194,8 @@ const DispatchConsignment = ({
                 </Box>
             </Stack>
 
+            <TrackingNumberField value={trackingNumber} loading={trackingLoading} failed={trackingFailed} />
+
             <SectionLabel>Courier &amp; vehicle</SectionLabel>
 
             <Autocomplete
@@ -206,8 +234,9 @@ const DispatchConsignment = ({
                     value={plateNumber} onChange={(e) => setPlateNumber(e.target.value)}
                 />
                 <TextField
-                    fullWidth sx={fieldSx} label="Tracking number"
-                    value={trackingNumber} onChange={(e) => setTrackingNumber(e.target.value)}
+                    fullWidth sx={fieldSx} label="Courier reference / waybill (optional)"
+                    placeholder="The courier's own number"
+                    value={courierReference} onChange={(e) => setCourierReference(e.target.value)}
                 />
             </Box>
 

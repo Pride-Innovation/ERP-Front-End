@@ -49,6 +49,9 @@ import { neutral, border, status as statusTokens } from '../../utils/tokens';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
+import StorefrontOutlinedIcon from '@mui/icons-material/StorefrontOutlined';
+import { fetchStockableService } from '../stocking/service';
+import { IStockable } from '../stocking/stockingRule';
 
 const PRIMARY_COLOR = '#08796C';
 const SECONDARY_COLOR = '#BC892C';
@@ -197,15 +200,46 @@ interface StockItemsProps {
      * GRN all have to happen with it — none of which a correction form can do.
      */
     lockDeliveredQuantity?: boolean;
+    /** The branch of an order being corrected; omitted when raising one for the caller's own branch. */
+    stockBranchId?: number | null;
 }
 
-const StockItems = ({ lockDeliveredQuantity = false }: StockItemsProps) => {
+const StockItems = ({ lockDeliveredQuantity = false, stockBranchId }: StockItemsProps) => {
     const { fetchAllCommodities } = CommodityUtills();
-    const [itemOptions, setItemOptions] = useState<{ name: string; groupName: string, assetTypeId: number | string }[]>([]);
+    const [itemOptions, setItemOptions] = useState<{ id?: number | string; name: string; groupName: string, assetTypeId: number | string }[]>([]);
+    /*
+     * What this branch may stock (Settings → Asset Categories). Null while loading or if it could not
+     * be read - then nothing is hidden and the server, which enforces the same rule, has the last word.
+     * Hiding everything on a failed read would leave an empty form with no reason given.
+     */
+    const [stockable, setStockable] = useState<IStockable | null>(null);
     const [showPrices, setShowPrices] = useState(false);
     const { stockRows, setStockRows, setAssetType } = useContext(RequestContext);
     const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore);
     const { commodities } = useSelector((state: RootState) => state.CommodityStore);
+
+    useEffect(() => {
+        let cancelled = false;
+        setStockable(null);
+        fetchStockableService(stockBranchId)
+            .then((result) => { if (!cancelled) setStockable(result); })
+            .catch(() => undefined);
+        return () => { cancelled = true; };
+    }, [stockBranchId]);
+
+    /*
+     * A line already on the order keeps its own category and commodity selectable even when the rule
+     * no longer admits them: an order raised under yesterday's rule can still be corrected, and the
+     * server checks only the lines a correction adds.
+     */
+    const typeAllowed = (typeId: unknown, row: StockRowData) =>
+        !stockable
+        || stockable.assetTypeIds.some((id) => String(id) === String(typeId))
+        || String(row.assetTypeId) === String(typeId);
+    const commodityAllowed = (commodityId: unknown, row: StockRowData) =>
+        !stockable
+        || stockable.commodityIds.some((id) => String(id) === String(commodityId))
+        || String(row.commodityId) === String(commodityId);
 
     const handleInputChange = (id: number, field: keyof StockRowData, value: any) => {
         const updatedRows = stockRows.map((row) => {
@@ -314,6 +348,7 @@ const StockItems = ({ lockDeliveredQuantity = false }: StockItemsProps) => {
     useEffect(() => {
         if (commodities && commodities.length > 0) {
             const options = commodities.map((item: any) => ({
+                id: item.id,
                 name: item.name,
                 groupName: item.groupName,
                 assetTypeId: item?.assetType?.id
@@ -424,6 +459,21 @@ const StockItems = ({ lockDeliveredQuantity = false }: StockItemsProps) => {
                         <Typography variant="caption" sx={{ color: neutral[500], fontSize: '0.75rem' }}>
                             Add and manage the items received in this delivery
                         </Typography>
+                        {stockable && (
+                            <Tooltip
+                                title="Which categories each branch may stock is set in Settings → Asset Categories. Only those allowed here are offered."
+                                arrow
+                            >
+                                <Stack direction="row" spacing={0.5} alignItems="center" sx={{ mt: 0.25, color: PRIMARY_COLOR, cursor: 'help' }}>
+                                    <StorefrontOutlinedIcon sx={{ fontSize: 13 }} />
+                                    <Typography variant="caption" sx={{ fontWeight: 600, fontSize: '0.72rem' }}>
+                                        {stockable.assetTypeIds.length === 0
+                                            ? `${stockable.branchName} is not set up to stock any category`
+                                            : `Showing what ${stockable.branchName} may stock`}
+                                    </Typography>
+                                </Stack>
+                            </Tooltip>
+                        )}
                     </Box>
                 </Stack>
                 <Stack direction="row" spacing={1.5} alignItems="center" sx={{ ml: 'auto', flexShrink: 0 }}>
@@ -631,7 +681,7 @@ const StockItems = ({ lockDeliveredQuantity = false }: StockItemsProps) => {
                                         <MenuItem value="" disabled>
                                             <em>Select Type</em>
                                         </MenuItem>
-                                        {assetTypes.map((assetTyp) => (
+                                        {assetTypes.filter((assetTyp) => typeAllowed(assetTyp.id, row)).map((assetTyp) => (
                                             <MenuItem key={assetTyp.id} value={assetTyp.id}>
                                                 {assetTyp.name}
                                             </MenuItem>
@@ -667,6 +717,7 @@ const StockItems = ({ lockDeliveredQuantity = false }: StockItemsProps) => {
                                             </MenuItem>
                                             {itemOptions
                                                 .filter(ele => ele.assetTypeId === row.assetTypeId)
+                                                .filter(ele => commodityAllowed(ele.id, row))
                                                 .map((item) => (
                                                     <MenuItem key={item.name} value={item.name}>
                                                         {item.name}

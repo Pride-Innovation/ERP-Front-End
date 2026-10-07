@@ -117,12 +117,15 @@ const Reassign = ({
             if (response.status === 201) {
                 toast.success("Asset reassigned successfully");
                 dispatch(updateGeneralAssetInStore(response.data));
+                handleClose();
             }
         } catch (error) {
+            // The shared request handler has already shown the server's reason (a loaner refused, an
+            // asset out of reach). The dialog stays open so the choice can be changed - it used to
+            // close in `finally`, so a refusal looked exactly like a reassignment that had worked.
             console.error("Error reassigning asset:", error);
         } finally {
             setSaving(false);
-            handleClose();
         }
     };
 

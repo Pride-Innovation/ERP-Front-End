@@ -31,6 +31,7 @@ import CategoryOutlinedIcon from '@mui/icons-material/CategoryOutlined';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import TuneOutlinedIcon from '@mui/icons-material/TuneOutlined';
+import StorefrontOutlinedIcon from '@mui/icons-material/StorefrontOutlined';
 
 import { IAssetType } from './interface';
 import FieldConfigModal from './FieldConfigModal';
@@ -47,6 +48,10 @@ import { useDebounce } from '../../../hooks/useDebounce';
 import { RequirePermission } from '../../../core/permissions';
 import { PERMISSIONS } from '../../../core/permissions/constants';
 import { PageHero } from '../../../components/layout';
+import StockingRuleEditor from '../../../components/stocking/StockingRuleEditor';
+import { describeStockingRule, isNowhere } from '../../../components/stocking/stockingRule';
+import { fetchBranchOptionsService, updateCategoryStockingRuleService } from '../../../components/stocking/service';
+import { usePermissions } from '../../../core/permissions';
 
 const PRIMARY = '#08796C';
 
@@ -65,14 +70,22 @@ const AssetTypeCard = ({
     onEdit,
     onDelete,
     onConfigure,
+    onStocking,
+    branchName,
 }: {
     assetType: IAssetType;
     index: number;
     onEdit: (at: IAssetType) => void;
     onDelete: (at: IAssetType) => void;
     onConfigure: (at: IAssetType) => void;
+    onStocking: (at: IAssetType) => void;
+    branchName: (id: number) => string | undefined;
 }) => {
     const color = getCategoryColor(index);
+    const { has } = usePermissions();
+    const canUpdate = has(PERMISSIONS.UPDATE_SETTING);
+    const canDelete = has(PERMISSIONS.DELETE_SETTING);
+    const stockedNowhere = isNowhere(assetType);
 
     return (
         <Paper
@@ -175,8 +188,45 @@ const AssetTypeCard = ({
                     />
                 )}
 
-                {/* Actions */}
+                {/* Where it may be stocked - always shown, since it decides what every stock form offers */}
+                <Tooltip title="Where this category may be stocked" arrow>
+                    <Chip
+                        size="small"
+                        icon={<StorefrontOutlinedIcon sx={{ fontSize: '13px !important' }} />}
+                        label={describeStockingRule(assetType, branchName)}
+                        sx={{
+                            mb: 1.5,
+                            ml: assetType.fieldConfig ? 1 : 0,
+                            height: 20,
+                            fontSize: '0.62rem',
+                            fontWeight: 600,
+                            bgcolor: stockedNowhere ? alpha('#ef4444', 0.08) : alpha('#1976D2', 0.07),
+                            color: stockedNowhere ? 'error.main' : '#1565C0',
+                            border: `1px solid ${stockedNowhere ? alpha('#ef4444', 0.3) : alpha('#1976D2', 0.25)}`,
+                            '& .MuiChip-icon': { color: 'inherit' },
+                        }}
+                    />
+                </Tooltip>
+
+                {/* Actions - each gated on the key its endpoint demands, so a button shown is a call admitted */}
                 <Stack direction="row" justifyContent="flex-end" spacing={1}>
+                    {canUpdate && (
+                    <Tooltip title="Where can this be stocked?" arrow>
+                        <IconButton
+                            size="small"
+                            onClick={() => onStocking(assetType)}
+                            sx={{
+                                color: '#1565C0',
+                                bgcolor: alpha('#1976D2', 0.06),
+                                borderRadius: '8px',
+                                '&:hover': { bgcolor: alpha('#1976D2', 0.14) },
+                            }}
+                        >
+                            <StorefrontOutlinedIcon fontSize="small" />
+                        </IconButton>
+                    </Tooltip>
+                    )}
+                    {canUpdate && (
                     <Tooltip title="Configure fields" arrow>
                         <IconButton
                             size="small"
@@ -191,6 +241,8 @@ const AssetTypeCard = ({
                             <TuneOutlinedIcon fontSize="small" />
                         </IconButton>
                     </Tooltip>
+                    )}
+                    {canUpdate && (
                     <Tooltip title="Edit category" arrow>
                         <IconButton
                             size="small"
@@ -205,6 +257,8 @@ const AssetTypeCard = ({
                             <EditOutlinedIcon fontSize="small" />
                         </IconButton>
                     </Tooltip>
+                    )}
+                    {canDelete && (
                     <Tooltip title="Delete category" arrow>
                         <IconButton
                             size="small"
@@ -219,6 +273,7 @@ const AssetTypeCard = ({
                             <DeleteOutlineIcon fontSize="small" />
                         </IconButton>
                     </Tooltip>
+                    )}
                 </Stack>
             </Box>
         </Paper>
@@ -226,7 +281,9 @@ const AssetTypeCard = ({
 };
 
 const AssetTypes = () => {
-    const { setModalState, handleClose, handleOpen, modalState, open, fetchAllAssetTypes, loading } = AssetTypeUtills();
+    const { setModalState, handleClose, handleOpen, modalState, open, fetchAllAssetTypes, loading, updateAssetTypeInStore } = AssetTypeUtills();
+    const [stockingOpen, setStockingOpen] = useState<boolean>(false);
+    const [branchNames, setBranchNames] = useState<Map<number, string>>(new Map());
     const [currentAssetType, setCurrentAssetType] = useState<IAssetType>({} as IAssetType);
     const [sendingRequest, setSendingRequest] = useState<boolean>(false);
     const [configureOpen, setConfigureOpen] = useState<boolean>(false);
@@ -241,6 +298,13 @@ const AssetTypes = () => {
     useEffect(() => {
         fetchAllAssetTypes({ pageNumber, pageSize, name: debouncedSearch || undefined });
     }, [pageNumber, debouncedSearch]);
+
+    // Names for the cards' stocking summaries. A failure leaves them counted rather than named.
+    useEffect(() => {
+        fetchBranchOptionsService()
+            .then((list) => setBranchNames(new Map(list.map((b) => [b.id, b.name]))))
+            .catch(() => undefined);
+    }, []);
 
     const handleSearchChange = (value: string) => {
         setSearchTerm(value);
@@ -269,6 +333,11 @@ const AssetTypes = () => {
         setCurrentAssetType(assetType);
         setModalState(crudStates.delete);
         handleOpen();
+    };
+
+    const configureStocking = (assetType: IAssetType) => {
+        setCurrentAssetType(assetType);
+        setStockingOpen(true);
     };
 
     const configureFields = (assetType: IAssetType) => {
@@ -309,6 +378,22 @@ const AssetTypes = () => {
                     <FieldConfigModal
                         assetType={currentAssetType}
                         handleClose={() => setConfigureOpen(false)}
+                    />
+                </ModalComponent>
+            )}
+
+            {stockingOpen && (
+                <ModalComponent
+                    width="40%"
+                    title={`Where can ${currentAssetType.name} be stocked?`}
+                    open={stockingOpen}
+                    handleClose={() => setStockingOpen(false)}
+                >
+                    <StockingRuleEditor
+                        rule={currentAssetType}
+                        onSave={(request) => updateCategoryStockingRuleService(currentAssetType.id as number, request)}
+                        onSaved={(data) => updateAssetTypeInStore(data)}
+                        handleClose={() => setStockingOpen(false)}
                     />
                 </ModalComponent>
             )}
@@ -417,6 +502,8 @@ const AssetTypes = () => {
                                     onEdit={editAssetType}
                                     onDelete={deleteAssetType}
                                     onConfigure={configureFields}
+                                    onStocking={configureStocking}
+                                    branchName={(id) => branchNames.get(id)}
                                 />
                             ))}
                         </Box>

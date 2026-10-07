@@ -115,7 +115,14 @@ const GeneralAssetUtills = (typeId: string) => {
                 engravedNumber: item.engravedNumber,
                 dateReceived: moment(item.dateReceipt).format('Do MMMM YYYY'),
                 make: item.make,
-                status: item?.assetStatus?.status as string,
+                /*
+                 * A loaner out with somebody reads "Asset Assigned", like any assigned asset. Shown as
+                 * "On Loan" so the register says it is coming back - the pool flag is what the server
+                 * keys on, and a shelved loaner already reads Available for Loan on its own.
+                 */
+                status: (item?.temporaryPool && item?.assetStatus?.status === 'assetAssigned'
+                    ? 'onLoan'
+                    : item?.assetStatus?.status) as string,
                 assignedTo: item.assignedTo?.firstName
                     ? `${item.assignedTo?.lastName} ${item.assignedTo?.firstName}`
                     : "",
