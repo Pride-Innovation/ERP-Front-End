@@ -5,7 +5,7 @@ import PendingActionsOutlinedIcon from '@mui/icons-material/PendingActionsOutlin
 import ReportShell, { ReportShellFilters } from '../ReportShell';
 import ReportSummaryCards from '../ReportSummaryCards';
 import ReportDataTable, { ReportColumn } from '../ReportDataTable';
-import useReportData, { REPORT_PAGE_SIZE, combineNotices, truncationNotice } from '../useReportData';
+import useReportData, { REPORT_PAGE_SIZE, combineNotices, truncationNotice, HOLDER_DEPARTMENT_NOTE } from '../useReportData';
 import { fetchRowsService } from '../../../core/apis/globalService';
 
 const ACCENT = '#DC2626';
@@ -37,6 +37,7 @@ const COLUMNS: ReportColumn<DisposalRow>[] = [
     { id: 'approvedBy', label: 'Approved By', minWidth: 130 },
     { id: 'netBookValueAtDisposal', label: 'NBV at Disposal', minWidth: 130, align: 'right' },
 ];
+
 
 const fmtDate = (v?: string | null) =>
     (v ? new Date(v).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—');
@@ -76,38 +77,23 @@ const DisposalReport = () => {
                     // The one filter that defines this report: written-off assets only.
                     disposed: true,
                     assetTypeId: f.categoryId,
-                    location: f.branch,
-                    startDate: f.dateFrom,
-                    endDate: f.dateTo,
+                    branchId: f.branchId,
+                    departmentId: f.departmentId,
+                    /*
+                     * When it was written off. `startDate`/`endDate` match the asset's creation date,
+                     * so "disposed this month" listed disposed assets *created* this month.
+                     */
+                    disposedFrom: f.dateFrom,
+                    disposedTo: f.dateTo,
                 },
             })) as any;
 
             if (res?.status !== 200) throw new Error('disposals');
-            const mapped: DisposalRow[] = (res.data?.content ?? []).map(toRow);
-            /*
-             * An asset has no department. This one is the **holder's** — `assignedTo.department` —
-             * so the filter answers "assets currently held by someone in that department", which is
-             * a fair question but a different one from what the bare label suggests.
-             *
-             * It matters because of how much it hides. Measured on live data: **234 of 252 assets
-             * have no holder or no department recorded**, so applying this quietly removes 93% of
-             * the estate. An empty-looking register reads as "there are none", which is why the
-             * count of what was set aside is reported rather than left to be noticed.
-             */
-            const withoutDepartment = mapped.filter((r) => r.department === '—').length;
-            const narrowed = f.department
-                ? mapped.filter((r) => r.department === f.department)
-                : mapped;
-
             return {
-                rows: narrowed,
+                rows: (res.data?.content ?? []).map(toRow),
                 notice: combineNotices(
                     truncationNotice(res, 'disposals'),
-                    f.department && withoutDepartment > 0
-                        ? `Department here means the holder's: ${withoutDepartment} of `
-                          + `${mapped.length} records have no holder or no department recorded and `
-                          + 'are not shown.'
-                        : undefined,
+                    f.departmentId ? HOLDER_DEPARTMENT_NOTE : undefined,
                 ),
             };
         },

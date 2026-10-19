@@ -153,7 +153,7 @@ const CreateInventory = () => {
         borderRadius: '8px',
         textTransform: 'none' as const,
         fontWeight: 700,
-        fontSize: '0.9rem',
+        fontSize: '0.9375rem',
         color: '#fff',
         background: `linear-gradient(135deg, ${brand[500]} 0%, ${brand[700]} 100%)`,
         boxShadow: `0 6px 16px ${alpha(brand[500], 0.32)}`,
@@ -261,12 +261,12 @@ const CreateInventory = () => {
                     '&:last-of-type': { borderBottom: 'none' },
                 }}
             >
-                <Typography sx={{ fontSize: '0.8rem', fontWeight: 600, color: neutral[500], whiteSpace: 'nowrap' }}>
+                <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: neutral[500], whiteSpace: 'nowrap' }}>
                     {label}
                 </Typography>
                 <Typography
                     sx={{
-                        fontSize: '0.875rem',
+                        fontSize: '0.9375rem',
                         fontWeight: value ? 700 : 500,
                         color: value ? neutral[900] : neutral[400],
                         fontStyle: value ? 'normal' : 'italic',
@@ -280,7 +280,7 @@ const CreateInventory = () => {
         );
 
         const GroupLabel = ({ children }: { children: string }) => (
-            <Typography sx={{ fontSize: '0.66rem', fontWeight: 800, color: neutral[400], textTransform: 'uppercase', letterSpacing: '0.1em', mb: 0.75 }}>
+            <Typography sx={{ fontSize: '0.8rem', fontWeight: 800, color: neutral[400], textTransform: 'uppercase', letterSpacing: '0.1em', mb: 0.75 }}>
                 {children}
             </Typography>
         );
@@ -289,7 +289,7 @@ const CreateInventory = () => {
             bgcolor: surface.muted,
             borderBottom: `1px solid ${border.subtle}`,
             fontWeight: 700,
-            fontSize: '0.68rem',
+            fontSize: '0.8rem',
             color: neutral[500],
             textTransform: 'uppercase',
             letterSpacing: '0.07em',
@@ -303,17 +303,17 @@ const CreateInventory = () => {
                 <Paper elevation={0} sx={{ borderRadius: 2, border: `1px solid ${border.subtle}`, bgcolor: '#fff', overflow: 'hidden' }}>
                     <Stack direction={{ xs: 'column', md: 'row' }} alignItems="stretch">
                         <Box sx={{ flex: 1, minWidth: 0, px: { xs: 2.5, md: 3 }, py: { xs: 2.5, md: 3 } }}>
-                            <Typography sx={{ fontSize: '0.66rem', fontWeight: 800, color: neutral[400], textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                            <Typography sx={{ fontSize: '0.8rem', fontWeight: 800, color: neutral[400], textTransform: 'uppercase', letterSpacing: '0.1em' }}>
                                 Stock entry
                             </Typography>
                             <Typography sx={{ fontSize: { xs: '1.25rem', md: '1.45rem' }, fontWeight: 800, color: neutral[900], lineHeight: 1.25, mt: 0.75, wordBreak: 'break-word' }}>
                                 {formDataToSubmit?.name || 'Untitled stock'}
                             </Typography>
                             <Stack direction="row" spacing={1.25} alignItems="center" flexWrap="wrap" useFlexGap sx={{ mt: 1.5 }}>
-                                <Box sx={{ px: 1, py: 0.4, borderRadius: '6px', bgcolor: alpha(brand[500], 0.08), color: brand[700], fontSize: '0.75rem', fontWeight: 700, fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace' }}>
+                                <Box sx={{ px: 1, py: 0.4, borderRadius: '6px', bgcolor: alpha(brand[500], 0.08), color: brand[700], fontSize: '0.8rem', fontWeight: 700, fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace' }}>
                                     LPO {formDataToSubmit?.lpoNumber || '—'}
                                 </Box>
-                                <Typography sx={{ fontSize: '0.82rem', fontWeight: 600, color: hasSupplier ? neutral[700] : neutral[400], fontStyle: hasSupplier ? 'normal' : 'italic' }}>
+                                <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: hasSupplier ? neutral[700] : neutral[400], fontStyle: hasSupplier ? 'normal' : 'italic' }}>
                                     {hasSupplier ? supplierName : 'No supplier recorded'}
                                 </Typography>
                             </Stack>
@@ -332,16 +332,16 @@ const CreateInventory = () => {
                                 justifyContent: 'center',
                             }}
                         >
-                            <Typography sx={{ fontSize: '0.66rem', fontWeight: 800, color: brand[700], textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                            <Typography sx={{ fontSize: '0.8rem', fontWeight: 800, color: brand[700], textTransform: 'uppercase', letterSpacing: '0.1em' }}>
                                 Total value
                             </Typography>
                             <Stack direction="row" alignItems="baseline" spacing={0.75} sx={{ mt: 0.75 }}>
-                                <Typography sx={{ fontSize: '0.8rem', fontWeight: 800, color: brand[600] }}>{CURRENCY}</Typography>
+                                <Typography sx={{ fontSize: '0.875rem', fontWeight: 800, color: brand[600] }}>{CURRENCY}</Typography>
                                 <Typography sx={{ fontSize: { xs: '1.5rem', md: '1.7rem' }, fontWeight: 800, color: neutral[900], lineHeight: 1.1, fontVariantNumeric: 'tabular-nums' }}>
                                     {fmtMoney(grandTotal)}
                                 </Typography>
                             </Stack>
-                            <Typography sx={{ fontSize: '0.78rem', fontWeight: 600, color: neutral[500], mt: 1 }}>
+                            <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: neutral[500], mt: 1 }}>
                                 {stockRows.length} item{stockRows.length === 1 ? '' : 's'} · {totalOrdered} unit{totalOrdered === 1 ? '' : 's'} ordered
                             </Typography>
                         </Box>
@@ -352,7 +352,7 @@ const CreateInventory = () => {
                 <Paper elevation={0} sx={{ borderRadius: 2, border: `1px solid ${border.subtle}`, bgcolor: '#fff', overflow: 'hidden' }}>
                     <Stack direction="row" alignItems="center" spacing={1.25} sx={{ px: { xs: 2.5, md: 3 }, py: 1.75, borderBottom: `1px solid ${border.subtle}` }}>
                         <BusinessIcon sx={{ fontSize: 18, color: neutral[400] }} />
-                        <Typography sx={{ fontWeight: 700, fontSize: '0.92rem', color: neutral[900] }}>Order details</Typography>
+                        <Typography sx={{ fontWeight: 700, fontSize: '0.9375rem', color: neutral[900] }}>Order details</Typography>
                     </Stack>
                     <Grid container>
                         <Grid item xs={12} md={6} sx={{ px: { xs: 2.5, md: 3 }, py: 2.25, borderRight: { md: `1px solid ${border.subtle}` }, borderBottom: { xs: `1px solid ${border.subtle}`, md: 'none' } }}>
@@ -371,9 +371,9 @@ const CreateInventory = () => {
                     <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={1.25} sx={{ px: { xs: 2.5, md: 3 }, py: 1.75, borderBottom: `1px solid ${border.subtle}` }}>
                         <Stack direction="row" alignItems="center" spacing={1.25}>
                             <InventoryIcon sx={{ fontSize: 18, color: neutral[400] }} />
-                            <Typography sx={{ fontWeight: 700, fontSize: '0.92rem', color: neutral[900] }}>Items</Typography>
+                            <Typography sx={{ fontWeight: 700, fontSize: '0.9375rem', color: neutral[900] }}>Items</Typography>
                         </Stack>
-                        <Typography sx={{ fontSize: '0.78rem', fontWeight: 700, color: neutral[500] }}>
+                        <Typography sx={{ fontSize: '0.875rem', fontWeight: 700, color: neutral[500] }}>
                             {totalDelivered} of {totalOrdered} units received
                         </Typography>
                     </Stack>
@@ -411,15 +411,15 @@ const CreateInventory = () => {
                                             {/* Item */}
                                             <TableCell sx={{ pl: { xs: 2.5, md: 3 } }}>
                                                 <Stack direction="row" spacing={1.5} alignItems="center">
-                                                    <Typography sx={{ fontSize: '0.75rem', fontWeight: 700, color: neutral[300], minWidth: 14, fontVariantNumeric: 'tabular-nums' }}>
+                                                    <Typography sx={{ fontSize: '0.8rem', fontWeight: 700, color: neutral[300], minWidth: 14, fontVariantNumeric: 'tabular-nums' }}>
                                                         {idx + 1}
                                                     </Typography>
                                                     <Box sx={{ minWidth: 0 }}>
-                                                        <Typography sx={{ fontSize: '0.9rem', fontWeight: 700, color: neutral[900], lineHeight: 1.35 }}>
+                                                        <Typography sx={{ fontSize: '0.9375rem', fontWeight: 700, color: neutral[900], lineHeight: 1.35 }}>
                                                             {row.name || '—'}
                                                         </Typography>
                                                         {row.groupName && (
-                                                            <Typography sx={{ fontSize: '0.72rem', color: neutral[500], mt: 0.15 }}>
+                                                            <Typography sx={{ fontSize: '0.8rem', color: neutral[500], mt: 0.15 }}>
                                                                 {row.groupName}
                                                             </Typography>
                                                         )}
@@ -434,7 +434,7 @@ const CreateInventory = () => {
                                                         <Typography sx={{ fontSize: '0.95rem', fontWeight: 800, color: tone.strong, fontVariantNumeric: 'tabular-nums' }}>
                                                             {delivered}
                                                         </Typography>
-                                                        <Typography sx={{ fontSize: '0.78rem', fontWeight: 600, color: neutral[400], fontVariantNumeric: 'tabular-nums' }}>
+                                                        <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: neutral[400], fontVariantNumeric: 'tabular-nums' }}>
                                                             / {ordered}
                                                         </Typography>
                                                     </Stack>
@@ -444,13 +444,13 @@ const CreateInventory = () => {
                                                 </Box>
                                             </TableCell>
 
-                                            <TableCell align="right" sx={{ fontSize: '0.875rem', color: neutral[700], fontVariantNumeric: 'tabular-nums' }}>
+                                            <TableCell align="right" sx={{ fontSize: '0.9375rem', color: neutral[700], fontVariantNumeric: 'tabular-nums' }}>
                                                 {fmtMoney(Number(row.costPrice) || 0)}
                                             </TableCell>
-                                            <TableCell align="right" sx={{ fontSize: '0.875rem', color: neutral[700], fontVariantNumeric: 'tabular-nums' }}>
+                                            <TableCell align="right" sx={{ fontSize: '0.9375rem', color: neutral[700], fontVariantNumeric: 'tabular-nums' }}>
                                                 {fmtMoney(purchase)}
                                             </TableCell>
-                                            <TableCell align="right" sx={{ pr: { xs: 2.5, md: 3 }, fontSize: '0.9rem', fontWeight: 800, color: neutral[900], fontVariantNumeric: 'tabular-nums' }}>
+                                            <TableCell align="right" sx={{ pr: { xs: 2.5, md: 3 }, fontSize: '0.9375rem', fontWeight: 800, color: neutral[900], fontVariantNumeric: 'tabular-nums' }}>
                                                 {fmtMoney(lineTotal)}
                                             </TableCell>
                                         </TableRow>
@@ -459,17 +459,17 @@ const CreateInventory = () => {
                             </TableBody>
                             <TableFooter>
                                 <TableRow sx={{ '& td': { borderBottom: 'none', py: 2, bgcolor: alpha(brand[500], 0.03) } }}>
-                                    <TableCell sx={{ pl: { xs: 2.5, md: 3 }, fontWeight: 800, color: neutral[700], fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.07em' }}>
+                                    <TableCell sx={{ pl: { xs: 2.5, md: 3 }, fontWeight: 800, color: neutral[700], fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.07em' }}>
                                         Total
                                     </TableCell>
-                                    <TableCell align="center" sx={{ fontWeight: 800, color: neutral[800], fontSize: '0.9rem', fontVariantNumeric: 'tabular-nums' }}>
+                                    <TableCell align="center" sx={{ fontWeight: 800, color: neutral[800], fontSize: '0.9375rem', fontVariantNumeric: 'tabular-nums' }}>
                                         {totalDelivered} / {totalOrdered}
                                     </TableCell>
                                     <TableCell />
                                     <TableCell />
                                     <TableCell align="right" sx={{ pr: { xs: 2.5, md: 3 } }}>
                                         <Stack direction="row" alignItems="baseline" spacing={0.6} justifyContent="flex-end">
-                                            <Typography sx={{ fontSize: '0.72rem', fontWeight: 800, color: brand[600] }}>{CURRENCY}</Typography>
+                                            <Typography sx={{ fontSize: '0.8rem', fontWeight: 800, color: brand[600] }}>{CURRENCY}</Typography>
                                             <Typography sx={{ fontWeight: 800, color: brand[700], fontSize: '1.05rem', fontVariantNumeric: 'tabular-nums' }}>
                                                 {fmtMoney(grandTotal)}
                                             </Typography>
@@ -485,7 +485,7 @@ const CreateInventory = () => {
                 <Paper elevation={0} sx={{ borderRadius: 2, border: `1px solid ${alpha(gold[500], 0.35)}`, bgcolor: alpha(gold[500], 0.05), px: { xs: 2.5, md: 3 }, py: 2.25 }}>
                     <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 1.25 }}>
                         <WarningAmberIcon sx={{ fontSize: 18, color: gold[700] }} />
-                        <Typography sx={{ fontSize: '0.88rem', fontWeight: 800, color: neutral[900] }}>Before you submit</Typography>
+                        <Typography sx={{ fontSize: '0.9375rem', fontWeight: 800, color: neutral[900] }}>Before you submit</Typography>
                     </Stack>
                     <Stack component="ul" spacing={0.85} sx={{ m: 0, pl: 0, listStyle: 'none' }}>
                         {[
@@ -495,7 +495,7 @@ const CreateInventory = () => {
                         ].map((line) => (
                             <Stack key={line} component="li" direction="row" spacing={1.25} alignItems="flex-start">
                                 <Box sx={{ width: 5, height: 5, borderRadius: '50%', bgcolor: gold[600], mt: '7px', flexShrink: 0 }} />
-                                <Typography sx={{ fontSize: '0.84rem', color: neutral[700], lineHeight: 1.55 }}>{line}</Typography>
+                                <Typography sx={{ fontSize: '0.875rem', color: neutral[700], lineHeight: 1.55 }}>{line}</Typography>
                             </Stack>
                         ))}
                     </Stack>
@@ -574,7 +574,7 @@ const CreateInventory = () => {
                             sx={{ mb: 1, justifyContent: { xs: 'flex-start', md: 'flex-end' } }}
                         >
                             <Typography sx={{
-                                fontSize: '0.68rem',
+                                fontSize: '0.8rem',
                                 fontWeight: 700,
                                 color: neutral[400],
                                 textTransform: 'uppercase',
@@ -583,7 +583,7 @@ const CreateInventory = () => {
                                 Completion
                             </Typography>
                             <Typography sx={{
-                                fontSize: '0.78rem',
+                                fontSize: '0.875rem',
                                 fontWeight: 800,
                                 fontVariantNumeric: 'tabular-nums',
                                 color: isDone ? statusTokens.success.strong : brand[700],
@@ -591,7 +591,7 @@ const CreateInventory = () => {
                                 {formProgress}%
                             </Typography>
                             {isDone && (
-                                <Typography sx={{ fontSize: '0.72rem', fontWeight: 600, color: statusTokens.success.strong }}>
+                                <Typography sx={{ fontSize: '0.8rem', fontWeight: 600, color: statusTokens.success.strong }}>
                                     · Ready to submit
                                 </Typography>
                             )}
@@ -619,7 +619,7 @@ const CreateInventory = () => {
                                         <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: neutral[300], mx: '3px' }} />
                                     )}
                                     <Typography sx={{
-                                        fontSize: '0.68rem',
+                                        fontSize: '0.8rem',
                                         fontWeight: 600,
                                         color: item.done ? brand[700] : neutral[500],
                                     }}>
@@ -665,7 +665,7 @@ const CreateInventory = () => {
                                             {state === 'done' ? <CheckRoundedIcon sx={{ fontSize: 14 }} /> : step.icon}
                                         </Box>
                                         <Typography sx={{
-                                            fontSize: '0.72rem',
+                                            fontSize: '0.8rem',
                                             fontWeight: state === 'active' ? 700 : 600,
                                             color: 'inherit',
                                             whiteSpace: 'nowrap',
@@ -744,7 +744,7 @@ const CreateInventory = () => {
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                fontSize: '0.85rem',
+                                fontSize: '0.875rem',
                                 fontWeight: 800,
                                 color: brand[700],
                                 bgcolor: alpha(PRIMARY_COLOR, 0.1),
@@ -752,10 +752,10 @@ const CreateInventory = () => {
                                 {activeStep + 1}
                             </Box>
                             <Box sx={{ minWidth: 0 }}>
-                                <Typography sx={{ fontSize: '0.88rem', fontWeight: 700, color: neutral[800], lineHeight: 1.2 }}>
+                                <Typography sx={{ fontSize: '0.9375rem', fontWeight: 700, color: neutral[800], lineHeight: 1.2 }}>
                                     {steps[activeStep]}
                                 </Typography>
-                                <Typography sx={{ fontSize: '0.72rem', color: neutral[500] }}>
+                                <Typography sx={{ fontSize: '0.8rem', color: neutral[500] }}>
                                     Step {activeStep + 1} of 3 · {activeStep === 0
                                         ? 'Order & delivery details'
                                         : activeStep === 1

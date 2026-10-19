@@ -147,13 +147,13 @@ const StockTrend = ({ stocking, categories, scope }: IStockTrendProps) => {
                     onChange={(event) => setSelected(event.target.value)}
                     sx={{
                         minWidth: 160,
-                        fontSize: '0.78rem',
+                        fontSize: '0.875rem',
                         '& .MuiOutlinedInput-notchedOutline': { borderColor: border.default },
                     }}
                 >
-                    <MenuItem value={ALL} sx={{ fontSize: '0.8rem' }}>All categories</MenuItem>
+                    <MenuItem value={ALL} sx={{ fontSize: '0.875rem' }}>All categories</MenuItem>
                     {seriesKeys.map((key) => (
-                        <MenuItem key={key} value={key} sx={{ fontSize: '0.8rem' }}>
+                        <MenuItem key={key} value={key} sx={{ fontSize: '0.875rem' }}>
                             {displayName.get(key)}
                         </MenuItem>
                     ))}

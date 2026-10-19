@@ -542,7 +542,7 @@ const Attachment = ({ repair, handleClose }: AttachmentProps) => {
                                                                 sx={{
                                                                     height: 20,
                                                                     minWidth: 40,
-                                                                    fontSize: '0.65rem',
+                                                                    fontSize: '0.8rem',
                                                                     fontWeight: 500,
                                                                     color: fileType.color,
                                                                     bgcolor: alpha(fileType.color, 0.08),
@@ -566,7 +566,7 @@ const Attachment = ({ repair, handleClose }: AttachmentProps) => {
                                                                 size="small"
                                                                 sx={{
                                                                     height: 16,
-                                                                    fontSize: '0.6rem',
+                                                                    fontSize: '0.8rem',
                                                                     fontWeight: 500,
                                                                     color: fileType.color,
                                                                     bgcolor: alpha(fileType.color, 0.08),

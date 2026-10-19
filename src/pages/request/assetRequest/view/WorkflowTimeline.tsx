@@ -136,7 +136,7 @@ const WorkflowTimeline: React.FC<Props> = ({ requestId }) => {
                                         bgcolor: config.bgColor,
                                         color: config.color,
                                         fontWeight: 700,
-                                        fontSize: '0.7rem',
+                                        fontSize: '0.8rem',
                                         border: `1px solid ${alpha(config.color, 0.3)}`,
                                     }}
                                 />

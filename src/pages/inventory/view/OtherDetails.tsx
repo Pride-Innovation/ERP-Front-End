@@ -69,12 +69,12 @@ const OtherDetails = ({ inventory }: { inventory: IInventory }) => {
                     <Chip
                         size="small"
                         label={`${totalItems.toLocaleString()} delivered`}
-                        sx={{ height: 24, fontWeight: 700, fontSize: '0.72rem', bgcolor: alpha(brand[500], 0.08), color: brand[700] }}
+                        sx={{ height: 24, fontWeight: 700, fontSize: '0.8rem', bgcolor: alpha(brand[500], 0.08), color: brand[700] }}
                     />
                     <Chip
                         size="small"
                         label={`${uniqueCount} commodit${uniqueCount === 1 ? 'y' : 'ies'}`}
-                        sx={{ height: 24, fontWeight: 600, fontSize: '0.72rem', bgcolor: alpha('#BC892C', 0.1), color: '#946C22' }}
+                        sx={{ height: 24, fontWeight: 600, fontSize: '0.8rem', bgcolor: alpha('#BC892C', 0.1), color: '#946C22' }}
                     />
                 </Stack>
             </Stack>

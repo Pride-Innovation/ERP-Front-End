@@ -6,7 +6,7 @@ Two repos, worked on together:
 - **Backend** — `ERP-Back-End` (Spring Boot 3.2, Hibernate 6.3 + Envers, Flyway, MySQL)
 
 Verify with `npx tsc --noEmit -p tsconfig.json`, `npx eslint src/... --ext .ts,.tsx`, and
-`./mvnw.cmd -o test` — **503 backend tests** and **74 frontend** at time of writing, all green.
+`./mvnw.cmd -o test` — **511 backend tests** and **137 frontend** at time of writing, all green.
 Run the frontend suite as `CI=true npx react-scripts test --watchAll=false`; plain `npx jest` fails
 on a Babel transform, because the config that makes it work is CRA's.
 
@@ -2651,6 +2651,35 @@ association dropped every unassigned asset in the FROM clause. Here nothing is b
 all — the filter is doing exactly what it was written to do, and what it was written to do is nearly
 always the wrong answer to the question on the label.
 
+### A second audit: four filters that still did nothing, and a status column with no colour
+
+**Every chip was grey.** `StatusChip` lowercased the status's *display name* and looked it up in a
+map of single words — "Asset Assigned" and "Stock Pending" matched nothing, and the map's own
+camelCase keys could never match after lowercasing. Colour now comes from the **code**
+(`reportStatus.ts`), through the shared tone chip; movements defer to `movement/constants.statusTone`
+so a movement reads the same colour here as in its register. `reportStatus.test.ts` lists every
+`StatusSeeder` code by hand, so a new status without a colour fails the build.
+
+| Tab | Fault | Now |
+|---|---|---|
+| Movement | sent `startDate`/`endDate`; the endpoint declares `dateFrom`/`dateTo` (trap #2) — every period returned everything | `dateFrom`/`dateTo` |
+| Stock | the comment said `branchId`/`stockStatusId` were sent; the params did not contain them | sent |
+| Disposal | period matched the asset's `createDate` — "disposed this month" meant *created* this month | `disposedFrom`/`disposedTo` on `GET /assets`, matching `disposalDate` |
+| Asset Register | opened on "This Month" over `createDate`, so the register showed only this month's additions | opens on **All time** (`defaultPreset`) |
+| Assets, Disposal | branch sent by name as `location`, a partial LIKE | `branchId` on `GET /assets` (asset's branch or holder's) |
+| Assets, Disposal, Requests | department narrowed in the browser after the cap | `departmentId` / `requesterDepartmentId` |
+| Maintenance | no Status filter, though repairs record one and the endpoint takes it | offered; sort gained the `id` tie-break |
+
+**Each tab offers only its own statuses** (`statusCodes`) — the catalogue mixes request, asset and
+stock states, and picking another vocabulary's status emptied the table.
+
+**Two columns named the wrong person.** "Approving Officer" (requests) and "Approved By" (movements)
+showed `currentApprover` — who it is *waiting on*, blank once finished. Both are **Currently With**;
+the request one also names a routed unit. "Approval Date" appeared whenever the code contained
+"approved", which includes every intermediate tier; it was `lastModified` all along and is headed
+**Last Updated**. The request cards count by request on the two terminal codes — In Progress,
+Completed (`receiptAcknowledged`), Rejected — where "Approved" had counted anything past one tier.
+
 ## Export columns are configurable — done
 
 A register running to fifteen columns prints as an unreadable wall. Somebody holding
@@ -3474,6 +3503,37 @@ revoked on the next restart, which is a bug this codebase has already had once.
 *The general rule this is the third instance of:* **the route's permission and the endpoint's
 permission must be the same permission.** When they differ the page opens and the data does not, and
 that reads as a broken screen rather than as a boundary.
+
+### Stock take, second pass: the buttons, a way out, and the history
+
+**The route and the landing button were gated; nothing inside the pages was.** A holder of
+`READ_STOCK_TAKE` alone was offered Open, Save, Submit, Approve, Send back and Post, each a refusal.
+`stockTakeRules.ts` mirrors the controller and service rule for rule, and both pages read it. Approve
+and Send back are also hidden from **whoever counted the sheet** (the server refuses them), which
+needed `countedById` on `CountView`; the name alone could not say who it was.
+
+**There was no way to cancel a count, and an abandoned one blocked its store for good** — one open
+count per store, and the cancel endpoint existed with nothing calling it. Now offered, with a required
+reason: an approver may cancel anything short of POSTED, and the counter may cancel **their own**
+count while it is DRAFT or IN_PROGRESS. The endpoint takes either permission; the service narrows
+the counter's half and refuses as `AccessDeniedException`.
+
+**The adjustment history was not scoped** — every store's corrections to any `READ_STOCK_TAKE`
+holder, beside a count listing that was. Narrowed by the same rule (`storeIsInScope`), and a named
+store out of reach is refused. **The totals had to move too:** they came from a separate
+`summariseByReason` aggregate over every store, which would have kept disclosing bank-wide figures
+above a narrowed list. They are computed from the scoped list now, and the aggregate is gone.
+
+Also: the Open dialog offers only stores the viewer may count (not couriers, which the server now
+refuses as well); every step writes an audit row (`STOCK_COUNT_*`, module Inventory — posting
+inside the transaction that changes the balances, WARNING when anything moved); a refused sheet
+says so rather than "not found"; Submit stops if its save fails; and reversal rows read "Stock order
+reversal".
+
+*A latent bug found on the way:* `@Transactional` meant for `openCount` sat above the **private**
+`requireStoreCountable` — where Spring ignores it — so opening a count ran with no transaction and a
+failure mid-snapshot left a count with only some of its lines. `StockTakeScopeTest` pins it by
+reflection now.
 
 ### Follow the existing shape
 

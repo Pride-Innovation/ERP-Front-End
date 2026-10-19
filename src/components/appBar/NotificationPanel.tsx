@@ -102,11 +102,11 @@ const NotificationPanel: React.FC<Props> = ({ anchor, onClose }) => {
                     <NotificationsNoneIcon sx={{ color: '#fff', fontSize: '1.2rem' }} />
                     <Typography variant="subtitle1" fontWeight={700} color="#fff">Notifications</Typography>
                     {unreadCount > 0 && (
-                        <Chip label={unreadCount} size="small" sx={{ bgcolor: GOLD, color: '#fff', fontWeight: 700, height: 20, fontSize: '0.7rem' }} />
+                        <Chip label={unreadCount} size="small" sx={{ bgcolor: GOLD, color: '#fff', fontWeight: 700, height: 20, fontSize: '0.8rem' }} />
                     )}
                 </Box>
                 {unreadCount > 0 && (
-                    <Button size="small" onClick={handleMarkAllRead} sx={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.7rem', textTransform: 'none' }}>
+                    <Button size="small" onClick={handleMarkAllRead} sx={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.8rem', textTransform: 'none' }}>
                         Mark all read
                     </Button>
                 )}

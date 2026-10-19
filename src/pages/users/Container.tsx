@@ -72,7 +72,7 @@ const Container = ({ children }: { children: React.ReactNode }) => {
                         <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)', fontWeight: 500, display: 'block', mt: 0.25 }}>
                             total users
                         </Typography>
-                        <Typography sx={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.68rem', display: 'block', mt: 0.5 }}>
+                        <Typography sx={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem', display: 'block', mt: 0.5 }}>
                             {todayLabel}
                         </Typography>
                     </Box>

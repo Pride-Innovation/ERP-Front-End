@@ -155,7 +155,7 @@ const CategorySummary = ({ accentColor }: CategorySummaryProps) => {
             <Box sx={{ px: 2.5, py: 1.5, borderBottom: '1px solid #EEF2F7', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1, flexWrap: 'wrap' }}>
                 <Typography
                     variant="caption"
-                    sx={{ color: '#94A3B8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', fontSize: '0.68rem' }}
+                    sx={{ color: '#94A3B8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', fontSize: '0.8rem' }}
                 >
                     Inventory by category
                 </Typography>

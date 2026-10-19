@@ -51,7 +51,7 @@ const PILL_INPUT_SX = {
     '& .MuiOutlinedInput-root': {
         borderRadius: '8px',
         bgcolor: '#fff',
-        fontSize: '0.8rem',
+        fontSize: '0.875rem',
         height: 36,
         '& fieldset': { borderColor: '#E2E8F0' },
         '&:hover fieldset': { borderColor: PRIMARY },
@@ -59,7 +59,7 @@ const PILL_INPUT_SX = {
     },
 };
 
-const FIELD_LABEL_SX = { fontSize: '0.72rem', fontWeight: 600, color: '#64748B', mb: 0.5, textTransform: 'uppercase' as const, letterSpacing: '0.05em' };
+const FIELD_LABEL_SX = { fontSize: '0.8rem', fontWeight: 600, color: '#64748B', mb: 0.5, textTransform: 'uppercase' as const, letterSpacing: '0.05em' };
 
 // ── Event type config ─────────────────────────────────────────────────────
 const EVENT_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
@@ -94,7 +94,7 @@ const EventChip = ({ value }: { value: string }) => {
             size="small"
             sx={{
                 bgcolor: cfg.bg, color: cfg.color, fontWeight: 700,
-                fontSize: '0.7rem', height: 22,
+                fontSize: '0.8rem', height: 22,
                 border: `1px solid ${alpha(cfg.color, 0.25)}`,
             }}
         />
@@ -109,7 +109,7 @@ const SeverityChip = ({ value }: { value: string }) => {
             size="small"
             sx={{
                 bgcolor: cfg.bg, color: cfg.color, fontWeight: 700,
-                fontSize: '0.7rem', height: 22,
+                fontSize: '0.8rem', height: 22,
                 border: `1px solid ${alpha(cfg.color, 0.25)}`,
             }}
         />
@@ -124,7 +124,7 @@ const ModuleChip = ({ value }: { value: string }) => {
             size="small"
             sx={{
                 bgcolor: alpha(color, 0.1), color,
-                fontWeight: 600, fontSize: '0.7rem', height: 22,
+                fontWeight: 600, fontSize: '0.8rem', height: 22,
             }}
         />
     );
@@ -144,11 +144,11 @@ const ActorCell = ({ name }: { name: string }) => {
                 width: 28, height: 28, borderRadius: '50%',
                 bgcolor: alpha(color, 0.12), color,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: '0.65rem', fontWeight: 700, flexShrink: 0,
+                fontSize: '0.8rem', fontWeight: 700, flexShrink: 0,
             }}>
                 {initials}
             </Box>
-            <Typography sx={{ fontSize: '0.8rem', fontWeight: 500, color: '#1E293B', whiteSpace: 'nowrap' }}>
+            <Typography sx={{ fontSize: '0.875rem', fontWeight: 500, color: '#1E293B', whiteSpace: 'nowrap' }}>
                 {safeName}
             </Typography>
         </Stack>
@@ -233,7 +233,7 @@ const buildColumns = (
                     onClick={() => onFocus({ entityType: row.entityType, entityId: row.entityId })}
                 />
             )
-            : <Typography sx={{ fontSize: '0.8rem', color: '#94A3B8' }}>—</Typography>),
+            : <Typography sx={{ fontSize: '0.875rem', color: '#94A3B8' }}>—</Typography>),
     },
     { id: 'ipAddress',   label: 'IP Address',   minWidth: 130 },
     { id: 'severity',    label: 'Severity',     minWidth: 100, format: (v) => <SeverityChip value={v} /> },
@@ -527,7 +527,7 @@ const AuditTrails = () => {
                             onClick={() => setLive(p => !p)}
                             sx={{
                                 bgcolor: live ? '#22C55E' : '#94A3B8', color: '#fff', fontWeight: 700,
-                                fontSize: '0.72rem', cursor: 'pointer',
+                                fontSize: '0.8rem', cursor: 'pointer',
                                 ...(live && {
                                     animation: 'pulse 2s infinite',
                                     '@keyframes pulse': { '0%, 100%': { opacity: 1 }, '50%': { opacity: 0.55 } },
@@ -600,7 +600,7 @@ const AuditTrails = () => {
                     }}>
                         <Stack direction="row" alignItems="center" gap={1}>
                             <TuneOutlinedIcon sx={{ fontSize: 16, color: PRIMARY }} />
-                            <Typography sx={{ fontWeight: 700, fontSize: '0.82rem', color: '#0F172A' }}>
+                            <Typography sx={{ fontWeight: 700, fontSize: '0.875rem', color: '#0F172A' }}>
                                 Filters &amp; Options
                             </Typography>
                         </Stack>
@@ -663,9 +663,9 @@ const AuditTrails = () => {
                                     <Typography sx={FIELD_LABEL_SX}>Event Type</Typography>
                                     <FormControl fullWidth size="small" sx={PILL_INPUT_SX}>
                                         <Select value={eventType} onChange={e => setEventType(e.target.value)} displayEmpty>
-                                            <MenuItem value="All"><em style={{ fontSize: '0.8rem', fontStyle: 'normal', color: '#94A3B8' }}>All Events</em></MenuItem>
+                                            <MenuItem value="All"><em style={{ fontSize: '0.875rem', fontStyle: 'normal', color: '#94A3B8' }}>All Events</em></MenuItem>
                                             {ALL_EVENTS.filter(e => e !== 'All').map(e => (
-                                                <MenuItem key={e} value={e} sx={{ fontSize: '0.8rem' }}>
+                                                <MenuItem key={e} value={e} sx={{ fontSize: '0.875rem' }}>
                                                     {EVENT_CONFIG[e]?.label ?? e}
                                                 </MenuItem>
                                             ))}
@@ -678,9 +678,9 @@ const AuditTrails = () => {
                                     <Typography sx={FIELD_LABEL_SX}>Module</Typography>
                                     <FormControl fullWidth size="small" sx={PILL_INPUT_SX}>
                                         <Select value={moduleFilter} onChange={e => setModuleFilter(e.target.value)} displayEmpty>
-                                            <MenuItem value="All"><em style={{ fontSize: '0.8rem', fontStyle: 'normal', color: '#94A3B8' }}>All Modules</em></MenuItem>
+                                            <MenuItem value="All"><em style={{ fontSize: '0.875rem', fontStyle: 'normal', color: '#94A3B8' }}>All Modules</em></MenuItem>
                                             {ALL_MODULES.filter(m => m !== 'All').map(m => (
-                                                <MenuItem key={m} value={m} sx={{ fontSize: '0.8rem' }}>{m}</MenuItem>
+                                                <MenuItem key={m} value={m} sx={{ fontSize: '0.875rem' }}>{m}</MenuItem>
                                             ))}
                                         </Select>
                                     </FormControl>
@@ -691,9 +691,9 @@ const AuditTrails = () => {
                                     <Typography sx={FIELD_LABEL_SX}>Severity</Typography>
                                     <FormControl fullWidth size="small" sx={PILL_INPUT_SX}>
                                         <Select value={severityFilter} onChange={e => setSeverityFilter(e.target.value)} displayEmpty>
-                                            <MenuItem value="All"><em style={{ fontSize: '0.8rem', fontStyle: 'normal', color: '#94A3B8' }}>All Severities</em></MenuItem>
+                                            <MenuItem value="All"><em style={{ fontSize: '0.875rem', fontStyle: 'normal', color: '#94A3B8' }}>All Severities</em></MenuItem>
                                             {ALL_SEVERITIES.filter(s => s !== 'All').map(s => (
-                                                <MenuItem key={s} value={s} sx={{ fontSize: '0.8rem', textTransform: 'capitalize' }}>
+                                                <MenuItem key={s} value={s} sx={{ fontSize: '0.875rem', textTransform: 'capitalize' }}>
                                                     {SEVERITY_CONFIG[s]?.label ?? s}
                                                 </MenuItem>
                                             ))}
@@ -709,7 +709,7 @@ const AuditTrails = () => {
                                             onClick={applyFilters}
                                             sx={{
                                                 height: 36, px: 2, textTransform: 'none', fontWeight: 600,
-                                                fontSize: '0.8rem', bgcolor: PRIMARY, borderRadius: '8px',
+                                                fontSize: '0.875rem', bgcolor: PRIMARY, borderRadius: '8px',
                                                 boxShadow: `0 2px 8px ${alpha(PRIMARY, 0.35)}`,
                                                 '&:hover': { bgcolor: alpha(PRIMARY, 0.85), boxShadow: `0 4px 14px ${alpha(PRIMARY, 0.4)}` },
                                             }}
@@ -721,7 +721,7 @@ const AuditTrails = () => {
                                             onClick={clearFilters}
                                             sx={{
                                                 height: 36, px: 1.5, textTransform: 'none', fontWeight: 600,
-                                                fontSize: '0.8rem', borderRadius: '8px',
+                                                fontSize: '0.875rem', borderRadius: '8px',
                                                 borderColor: '#CBD5E1', color: '#64748B',
                                                 '&:hover': { borderColor: PRIMARY, color: PRIMARY, bgcolor: alpha(PRIMARY, 0.04) },
                                             }}
@@ -753,7 +753,7 @@ const AuditTrails = () => {
                             size="small"
                             sx={{
                                 bgcolor: alpha(PRIMARY, 0.1), color: PRIMARY, fontWeight: 700,
-                                fontSize: '0.75rem', border: `1px solid ${alpha(PRIMARY, 0.25)}`,
+                                fontSize: '0.8rem', border: `1px solid ${alpha(PRIMARY, 0.25)}`,
                             }}
                         />
                     </Box>
@@ -761,7 +761,7 @@ const AuditTrails = () => {
 
                 {/* ── Result count + Export ─────────────────────────────── */}
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-                    <Typography sx={{ fontSize: '0.8rem', color: '#64748B' }}>
+                    <Typography sx={{ fontSize: '0.875rem', color: '#64748B' }}>
                         Showing{' '}
                         <Box component="span" sx={{ fontWeight: 700, color: '#0F172A' }}>{rows.length}</Box>
                         {' '}of{' '}
@@ -770,7 +770,7 @@ const AuditTrails = () => {
                     </Typography>
 
                     <Stack direction="row" alignItems="center" gap={1}>
-                        {/* <Typography sx={{ fontSize: '0.75rem', color: '#94A3B8', mr: 0.5 }}>Export as:</Typography> */}
+                        {/* <Typography sx={{ fontSize: '0.8rem', color: '#94A3B8', mr: 0.5 }}>Export as:</Typography> */}
 
                         <Tooltip title="Export PDF">
                             <Button
@@ -779,7 +779,7 @@ const AuditTrails = () => {
                                 disabled={exporting}
                                 onClick={() => runExport('pdf')}
                                 sx={{
-                                    height: 32, px: 1.5, borderRadius: '8px', fontSize: '0.75rem', fontWeight: 600,
+                                    height: 32, px: 1.5, borderRadius: '8px', fontSize: '0.8rem', fontWeight: 600,
                                     textTransform: 'none', borderColor: '#E2E8F0', color: '#DC2626',
                                     '&:hover': { borderColor: '#DC2626', bgcolor: alpha('#DC2626', 0.04) },
                                 }}
@@ -795,7 +795,7 @@ const AuditTrails = () => {
                                 disabled={exporting}
                                 onClick={() => runExport('excel')}
                                 sx={{
-                                    height: 32, px: 1.5, borderRadius: '8px', fontSize: '0.75rem', fontWeight: 600,
+                                    height: 32, px: 1.5, borderRadius: '8px', fontSize: '0.8rem', fontWeight: 600,
                                     textTransform: 'none', borderColor: '#E2E8F0', color: '#15803D',
                                     '&:hover': { borderColor: '#15803D', bgcolor: alpha('#15803D', 0.04) },
                                 }}
@@ -811,7 +811,7 @@ const AuditTrails = () => {
                                 disabled={exporting}
                                 onClick={() => runExport('csv')}
                                 sx={{
-                                    height: 32, px: 1.5, borderRadius: '8px', fontSize: '0.75rem', fontWeight: 600,
+                                    height: 32, px: 1.5, borderRadius: '8px', fontSize: '0.8rem', fontWeight: 600,
                                     textTransform: 'none', borderColor: '#E2E8F0', color: '#0369A1',
                                     '&:hover': { borderColor: '#0369A1', bgcolor: alpha('#0369A1', 0.04) },
                                 }}

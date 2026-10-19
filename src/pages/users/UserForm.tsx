@@ -295,7 +295,7 @@ const UserForm = ({
                         variant="text"
                         startIcon={<CloseIcon fontSize="small" />}
                         sx={{
-                            color: neutral[500], textTransform: 'none', fontSize: '0.82rem', borderRadius: '8px',
+                            color: neutral[500], textTransform: 'none', fontSize: '0.875rem', borderRadius: '8px',
                             '&:hover': { color: status.danger.main, bgcolor: alpha(status.danger.main, 0.06) },
                         }}
                     >

@@ -10,8 +10,7 @@ Managing Director
 import { ReactNode, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
-    alpha, Box, Button, Card, Divider, Grid, Paper, Stack,
-    Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tooltip, Typography,
+    alpha, Box, Button, Card, Grid, Paper, Stack, Tooltip, Typography,
 } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import SwapHorizOutlinedIcon from '@mui/icons-material/SwapHorizOutlined';
@@ -22,37 +21,32 @@ import FlightTakeoffOutlinedIcon from '@mui/icons-material/FlightTakeoffOutlined
 import AssignmentTurnedInOutlinedIcon from '@mui/icons-material/AssignmentTurnedInOutlined';
 import TaskAltOutlinedIcon from '@mui/icons-material/TaskAltOutlined';
 import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
-import FingerprintIcon from '@mui/icons-material/Fingerprint';
 import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import HowToRegOutlinedIcon from '@mui/icons-material/HowToRegOutlined';
-import UploadFileOutlinedIcon from '@mui/icons-material/UploadFileOutlined';
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
-import PictureAsPdfOutlinedIcon from '@mui/icons-material/PictureAsPdfOutlined';
 import BlockOutlinedIcon from '@mui/icons-material/BlockOutlined';
 import DirectionsCarOutlinedIcon from '@mui/icons-material/DirectionsCarOutlined';
 import QrCode2OutlinedIcon from '@mui/icons-material/QrCode2Outlined';
 import PlaceOutlinedIcon from '@mui/icons-material/PlaceOutlined';
-import BadgeOutlinedIcon from '@mui/icons-material/BadgeOutlined';
-import ReceiptLongOutlinedIcon from '@mui/icons-material/ReceiptLongOutlined';
-import HistoryOutlinedIcon from '@mui/icons-material/HistoryOutlined';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { toast } from 'react-toastify';
 import { IMovement } from '../interface';
 import { findMovementByIdService, fetchMovementApprovalsService, uploadMovementDocumentService } from '../service';
 import { generateReleaseNote } from './generateReleaseNote';
+import MovementDocuments, { UploadDocumentButton } from './MovementDocuments';
+import { DetailsPanel, ItemList, itemsSummary } from './MovementSections';
 import { ROUTES } from '../../../core/routes/routes';
 import Loading from '../../../components/loading';
 import ModalComponent from '../../../components/modal';
 import { PageHero, StatusChip, EmptyState } from '../../../components/layout';
-import { dataHeadCellSx, dataBodyCellSx, dataRowSx, dataSurfaceSx } from '../../../components/tables/dataTableSx';
 import MovementActionModal from '../MovementActionModal';
 import LoadOntoConsignmentModal from '../LoadOntoConsignmentModal';
 import RoutesUtills from '../../../core/routes/utills';
-import { brand, gold, neutral, border, status } from '../../../utils/tokens';
+import { brand, gold, neutral, status } from '../../../utils/tokens';
 import {
     movementTypeLabel, statusLabel, statusTone, categoryLabels, receiptStatusLabels,
     canDispatch, canMarkInTransit, canReceive, canComplete, canCancel,
@@ -109,73 +103,12 @@ const IconChip = ({ accent, size = 36, children }: { accent: string; size?: numb
     </Box>
 );
 
-/** A section heading inside a card: micro-label, then a hairline running to the edge. */
-const SubHeading = ({ icon, accent, children }: { icon: ReactNode; accent: string; children: ReactNode }) => (
-    <Stack direction="row" spacing={1} alignItems="center" mb={1.75}>
-        <Box sx={{ color: accent, display: 'flex', '& .MuiSvgIcon-root': { fontSize: 15 } }}>{icon}</Box>
-        <Typography
-            variant="caption"
-            sx={{ fontWeight: 800, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.08em', fontSize: '0.64rem', whiteSpace: 'nowrap' }}
-        >
-            {children}
-        </Typography>
-        <Divider sx={{ flex: 1, borderColor: '#EEF2F7' }} />
-    </Stack>
-);
-
-const initialsOf = (name?: string | null) => {
-    const parts = (name ?? '').trim().split(/\s+/).filter(Boolean);
-    if (parts.length === 0) return '?';
-    return (parts[0][0] + (parts.length > 1 ? parts[parts.length - 1][0] : '')).toUpperCase();
-};
-
-/** A person on the movement: initials avatar, their role in small caps, their name. */
-const PersonRow = ({ role, name, accent }: { role: string; name?: string | null; accent: string }) => (
-    <Stack direction="row" spacing={1.5} alignItems="center">
-        <Box sx={{
-            width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            bgcolor: name ? alpha(accent, 0.1) : '#F1F5F9', color: name ? accent : '#94A3B8',
-            border: `1px solid ${name ? alpha(accent, 0.2) : '#E2E8F0'}`,
-            fontWeight: 700, fontSize: '0.78rem',
-        }}
-        >
-            {name ? initialsOf(name) : '—'}
-        </Box>
-        <Box minWidth={0}>
-            <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 700, fontSize: '0.62rem', letterSpacing: '0.06em', textTransform: 'uppercase', display: 'block' }}>
-                {role}
-            </Typography>
-            <Typography sx={{ color: name ? '#1E293B' : '#94A3B8', fontWeight: 600, fontSize: '0.86rem' }} noWrap>
-                {name || 'Not recorded'}
-            </Typography>
-        </Box>
-    </Stack>
-);
-
-/** Label on the left, value on the right, a hairline between rows - reads like a receipt. */
-const InfoRow = ({ label, value, last }: { label: string; value?: ReactNode; last?: boolean }) => (
-    <Stack
-        direction="row" justifyContent="space-between" alignItems="center" spacing={2}
-        sx={{ py: 1.1, borderBottom: last ? 'none' : '1px dashed #E2E8F0' }}
-    >
-        <Typography variant="caption" sx={{ color: '#64748B', fontSize: '0.76rem', flexShrink: 0 }}>{label}</Typography>
-        <Box sx={{ textAlign: 'right', minWidth: 0 }}>
-            {typeof value === 'string' || value == null ? (
-                <Typography sx={{ color: value ? '#1E293B' : '#94A3B8', fontWeight: 600, fontSize: '0.8rem' }}>
-                    {value || '—'}
-                </Typography>
-            ) : value}
-        </Box>
-    </Stack>
-);
-
 /** A small bordered tile inside a card, for one fact that deserves its own space. */
 const Tile = ({ label, icon, children }: { label: string; icon: ReactNode; children: ReactNode }) => (
     <Box sx={{ p: 1.5, borderRadius: '10px', bgcolor: '#F8FAFC', border: '1px solid #EEF2F7', minWidth: 0 }}>
         <Stack direction="row" spacing={0.6} alignItems="center" sx={{ mb: 0.75, color: '#94A3B8', '& .MuiSvgIcon-root': { fontSize: 14 } }}>
             {icon}
-            <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 700, fontSize: '0.62rem', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+            <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 700, fontSize: '0.8rem', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
                 {label}
             </Typography>
         </Stack>
@@ -187,14 +120,14 @@ const Tile = ({ label, icon, children }: { label: string; icon: ReactNode; child
 const CodeBadge = ({ value }: { value?: string | null }) => (value ? (
     <Box component="span" sx={{
         display: 'inline-block', px: 1, py: 0.35, borderRadius: '6px', bgcolor: '#fff',
-        border: '1px solid #E2E8F0', fontFamily: 'monospace', fontWeight: 700, fontSize: '0.78rem',
+        border: '1px solid #E2E8F0', fontFamily: 'monospace', fontWeight: 700, fontSize: '0.875rem',
         color: '#1E293B', letterSpacing: '0.04em', maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis',
     }}
     >
         {value}
     </Box>
 ) : (
-    <Typography sx={{ color: '#94A3B8', fontWeight: 600, fontSize: '0.8rem' }}>—</Typography>
+    <Typography sx={{ color: '#94A3B8', fontWeight: 600, fontSize: '0.875rem' }}>—</Typography>
 ));
 
 const DAY_MS = 86_400_000;
@@ -229,10 +162,10 @@ const DeliveryWindow = ({ dispatched, expected, received }: {
 
     const end = (label: string, value?: string | null, align: 'left' | 'right' = 'left') => (
         <Box sx={{ textAlign: align, minWidth: 0 }}>
-            <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 700, fontSize: '0.62rem', letterSpacing: '0.06em', textTransform: 'uppercase', display: 'block' }}>
+            <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 700, fontSize: '0.8rem', letterSpacing: '0.06em', textTransform: 'uppercase', display: 'block' }}>
                 {label}
             </Typography>
-            <Typography sx={{ color: value ? '#1E293B' : '#94A3B8', fontWeight: 700, fontSize: '0.86rem' }}>
+            <Typography sx={{ color: value ? '#1E293B' : '#94A3B8', fontWeight: 700, fontSize: '0.9375rem' }}>
                 {fmtDate(value) ?? '—'}
             </Typography>
         </Box>
@@ -243,7 +176,7 @@ const DeliveryWindow = ({ dispatched, expected, received }: {
             <Stack direction="row" alignItems="center" spacing={1.5}>
                 {end('Dispatched', dispatched)}
                 <Stack alignItems="center" sx={{ flex: 1, minWidth: 40 }}>
-                    <Typography variant="caption" sx={{ color: '#64748B', fontSize: '0.66rem', fontWeight: 600, mb: 0.25 }}>
+                    <Typography variant="caption" sx={{ color: '#64748B', fontSize: '0.8rem', fontWeight: 600, mb: 0.25 }}>
                         {span != null ? `${span} day${span === 1 ? '' : 's'}` : ' '}
                     </Typography>
                     <Box sx={{ width: '100%', display: 'flex', alignItems: 'center' }}>
@@ -257,7 +190,7 @@ const DeliveryWindow = ({ dispatched, expected, received }: {
             {verdict && (
                 <Stack direction="row" justifyContent="center" sx={{ mt: 1.25 }}>
                     <Box sx={{
-                        px: 1.25, py: 0.35, borderRadius: '999px', fontSize: '0.7rem', fontWeight: 700,
+                        px: 1.25, py: 0.35, borderRadius: '999px', fontSize: '0.8rem', fontWeight: 700,
                         color: verdict.tone, bgcolor: alpha(verdict.tone, 0.08), border: `1px solid ${alpha(verdict.tone, 0.22)}`,
                     }}
                     >
@@ -288,7 +221,7 @@ const WidgetCard = ({
             <Box flex={1} minWidth={0}>
                 <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1E293B', lineHeight: 1.25 }}>{title}</Typography>
                 {subtitle && (
-                    <Typography variant="caption" sx={{ color: '#64748B', fontSize: '0.72rem', display: 'block', lineHeight: 1.4 }}>
+                    <Typography variant="caption" sx={{ color: '#64748B', fontSize: '0.8rem', display: 'block', lineHeight: 1.4 }}>
                         {subtitle}
                     </Typography>
                 )}
@@ -320,7 +253,7 @@ const RoutePanel = ({ kind, title, sub, accent, icon }: {
         <Stack direction="row" spacing={1.5} alignItems="center">
             <IconChip accent={accent} size={40}>{icon}</IconChip>
             <Box minWidth={0} flex={1}>
-                <Typography variant="caption" sx={{ fontWeight: 800, color: accent, letterSpacing: '0.08em', fontSize: '0.62rem', display: 'block' }}>
+                <Typography variant="caption" sx={{ fontWeight: 800, color: accent, letterSpacing: '0.08em', fontSize: '0.8rem', display: 'block' }}>
                     {kind}
                 </Typography>
                 <Typography sx={{ color: '#1E293B', fontWeight: 700, fontSize: '0.95rem', lineHeight: 1.3 }} noWrap>{title}</Typography>
@@ -396,14 +329,14 @@ const MovementStepper = ({ steps, currentIndex, dates }: {
                             sx={{
                                 fontWeight: state === 'upcoming' ? 600 : 700,
                                 color: state === 'upcoming' ? '#94A3B8' : state === 'current' ? P : '#1E293B',
-                                whiteSpace: 'nowrap', fontSize: '0.75rem', lineHeight: 1.2,
+                                whiteSpace: 'nowrap', fontSize: '0.8rem', lineHeight: 1.2,
                             }}
                         >
                             {meta.label}
                         </Typography>
                         <Typography
                             variant="caption"
-                            sx={{ color: '#64748B', fontSize: '0.66rem', whiteSpace: 'nowrap', minHeight: 15 }}
+                            sx={{ color: '#64748B', fontSize: '0.8rem', whiteSpace: 'nowrap', minHeight: 15 }}
                         >
                             {state !== 'upcoming' ? (stamp ?? '') : ''}
                         </Typography>
@@ -466,23 +399,17 @@ const MovementDetails = () => {
 
     const currentUserId = RoutesUtills().getCurrentUser()?.id;
     const fileInputRef = useRef<HTMLInputElement | null>(null);
-    const [uploading, setUploading] = useState(false);
+    /** The name of the file being uploaded, so the card can show it in place while it travels. */
+    const [uploading, setUploading] = useState<string | null>(null);
 
-    const handleUploadDocument = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file || !id) return;
-        setUploading(true);
-        try {
-            const res = (await uploadMovementDocumentService(id, file)) as any;
-            if (res?.status === 200) {
-                toast.success('Document uploaded');
-                await load();
-            } else {
-                toast.error(res?.data?.message ?? 'Failed to upload document');
-            }
-        } finally {
-            setUploading(false);
-            if (fileInputRef.current) fileInputRef.current.value = '';
+    const uploadDocument = async (file: File) => {
+        if (!id) return;
+        const res = (await uploadMovementDocumentService(id, file)) as any;
+        if (res?.status === 200) {
+            toast.success('Document attached');
+            await load();
+        } else {
+            toast.error(res?.response?.data?.message ?? res?.data?.message ?? 'Failed to upload document');
         }
     };
 
@@ -533,6 +460,8 @@ const MovementDetails = () => {
     const lifecycleSteps = buildLifecycleSteps(movement, hadApproval);
     const currentStepIndex = lifecycleSteps.indexOf(movement.status ?? '');
     const showApproval = approvals.length > 0 || isPendingApproval(movement);
+    // The endpoint's own rule: CREATE_MOVEMENT, and reach over the movement (requireMovementInScope).
+    const canUploadDocuments = mayAct(PERMISSIONS.CREATE_MOVEMENT);
     const showLogistics = movement.movementCategory === 'INTER_LOCATION';
     const courierName = movement.courier?.name ?? movement.courierService ?? null;
 
@@ -547,11 +476,9 @@ const MovementDetails = () => {
     };
 
     const items = movement.items ?? [];
-    const assetCount = items.filter((it) => it.asset).length;
-    const unitCount = items.reduce((sum, it) => sum + (it.asset ? 1 : Number(it.quantity) || 0), 0);
 
     const actionBtnSx = {
-        height: 36, borderRadius: '8px', textTransform: 'none', fontWeight: 600, fontSize: '0.78rem',
+        height: 36, borderRadius: '8px', textTransform: 'none', fontWeight: 600, fontSize: '0.875rem',
     } as const;
     const outlinedBtnSx = { ...actionBtnSx, bgcolor: '#fff' } as const;
 
@@ -613,7 +540,7 @@ const MovementDetails = () => {
                         <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1E293B', lineHeight: 1.25 }}>
                             Journey
                         </Typography>
-                        <Typography variant="caption" sx={{ color: '#64748B', fontSize: '0.72rem' }}>
+                        <Typography variant="caption" sx={{ color: '#64748B', fontSize: '0.8rem' }}>
                             Where it is, where it is going, and how far it has got
                         </Typography>
                     </Box>
@@ -644,7 +571,7 @@ const MovementDetails = () => {
                                 startIcon={<LocalShippingOutlinedIcon sx={{ fontSize: 15 }} />}
                                 endIcon={<OpenInNewIcon sx={{ fontSize: 13 }} />}
                                 onClick={() => navigate(ROUTES.CONSIGNMENTS)}
-                                sx={{ ...outlinedBtnSx, height: 30, fontSize: '0.72rem' }}
+                                sx={{ ...outlinedBtnSx, height: 30, fontSize: '0.8rem' }}
                             >
                                 {movement.consignment.reference ?? `Consignment #${movement.consignment.id}`}
                             </Button>
@@ -693,7 +620,7 @@ const MovementDetails = () => {
                                 }}
                                 >
                                     <LocalShippingOutlinedIcon sx={{ fontSize: 16 }} />
-                                    <Typography variant="caption" sx={{ fontWeight: 700, fontSize: '0.74rem' }} noWrap>
+                                    <Typography variant="caption" sx={{ fontWeight: 700, fontSize: '0.8rem' }} noWrap>
                                         {courierName}
                                     </Typography>
                                 </Box>
@@ -703,7 +630,7 @@ const MovementDetails = () => {
                                         sx={{
                                             position: 'relative', zIndex: 1, px: 0.75, borderRadius: '4px', bgcolor: '#F8FAFC',
                                             border: '1px solid #E2E8F0', color: '#475569', fontFamily: 'monospace',
-                                            fontSize: '0.66rem', fontWeight: 600, letterSpacing: '0.04em',
+                                            fontSize: '0.8rem', fontWeight: 600, letterSpacing: '0.04em',
                                         }}
                                     >
                                         {movement.plateNumber}
@@ -755,64 +682,10 @@ const MovementDetails = () => {
                     <WidgetCard
                         icon={<Inventory2OutlinedIcon fontSize="small" />}
                         title="Items"
-                        subtitle={items.length > 0
-                            ? `${assetCount} asset(s) · ${unitCount} unit(s) in total`
-                            : 'Assets & consumables on this movement'}
+                        subtitle={itemsSummary(items)}
                         accent={GOLD}
                     >
-                        {items.length > 0 ? (
-                            <Paper elevation={0} sx={dataSurfaceSx}>
-                                <TableContainer>
-                                    <Table size="small">
-                                        <TableHead>
-                                            <TableRow>
-                                                <TableCell sx={{ ...dataHeadCellSx, width: 44 }} align="right">#</TableCell>
-                                                <TableCell sx={dataHeadCellSx}>Item</TableCell>
-                                                <TableCell sx={{ ...dataHeadCellSx, minWidth: 130 }}>Reference</TableCell>
-                                                <TableCell sx={{ ...dataHeadCellSx, width: 70 }} align="right">Qty</TableCell>
-                                            </TableRow>
-                                        </TableHead>
-                                        <TableBody>
-                                            {items.map((it, i) => (
-                                                <TableRow key={it.id ?? i} hover={false} sx={dataRowSx(i)}>
-                                                    <TableCell sx={{ ...dataBodyCellSx, color: neutral[400] }} align="right">{i + 1}</TableCell>
-                                                    <TableCell sx={dataBodyCellSx}>
-                                                        <Stack direction="row" spacing={1} alignItems="center" sx={{ minWidth: 0 }}>
-                                                            <Box sx={{
-                                                                width: 24, height: 24, borderRadius: 1, flexShrink: 0,
-                                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                                bgcolor: alpha(it.asset ? P : GOLD, 0.1), color: it.asset ? P : GOLD,
-                                                            }}
-                                                            >
-                                                                {it.asset
-                                                                    ? <FingerprintIcon sx={{ fontSize: 13 }} />
-                                                                    : <Inventory2OutlinedIcon sx={{ fontSize: 13 }} />}
-                                                            </Box>
-                                                            <Box minWidth={0}>
-                                                                <Typography variant="caption" sx={{ fontWeight: 700, display: 'block', color: neutral[800] }} noWrap>
-                                                                    {it.asset ? it.asset.assetName : it.commodity?.name}
-                                                                </Typography>
-                                                                <Typography variant="caption" sx={{ color: neutral[400], fontSize: '0.65rem' }}>
-                                                                    {it.asset ? 'Serialized asset' : 'Consumable'}
-                                                                </Typography>
-                                                            </Box>
-                                                        </Stack>
-                                                    </TableCell>
-                                                    <TableCell sx={{ ...dataBodyCellSx, fontFamily: 'monospace', color: neutral[500], fontSize: '0.72rem' }}>
-                                                        {it.asset ? (it.asset.engravedNumber || it.serialNumber || it.assetTag || '—') : '—'}
-                                                    </TableCell>
-                                                    <TableCell sx={{ ...dataBodyCellSx, fontWeight: 700 }} align="right">
-                                                        {it.asset ? 1 : it.quantity}
-                                                    </TableCell>
-                                                </TableRow>
-                                            ))}
-                                        </TableBody>
-                                    </Table>
-                                </TableContainer>
-                            </Paper>
-                        ) : (
-                            <EmptyState variant="inline" title="No items listed" icon={<Inventory2OutlinedIcon />} />
-                        )}
+                        <ItemList items={items} />
                     </WidgetCard>
                 </Grid>
 
@@ -832,10 +705,10 @@ const MovementDetails = () => {
                                 >
                                     <IconChip accent={BLUE} size={40}><LocalShippingOutlinedIcon /></IconChip>
                                     <Box flex={1} minWidth={0}>
-                                        <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 700, fontSize: '0.62rem', letterSpacing: '0.06em', textTransform: 'uppercase', display: 'block' }}>
+                                        <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 700, fontSize: '0.8rem', letterSpacing: '0.06em', textTransform: 'uppercase', display: 'block' }}>
                                             Courier
                                         </Typography>
-                                        <Typography sx={{ color: courierName ? '#1E293B' : '#94A3B8', fontWeight: 700, fontSize: '0.92rem' }} noWrap>
+                                        <Typography sx={{ color: courierName ? '#1E293B' : '#94A3B8', fontWeight: 700, fontSize: '0.9375rem' }} noWrap>
                                             {courierName ?? 'Not yet assigned'}
                                         </Typography>
                                     </Box>
@@ -843,7 +716,7 @@ const MovementDetails = () => {
                                         <Stack alignItems="flex-end" spacing={0.25} sx={{ flexShrink: 0 }}>
                                             <Stack direction="row" spacing={0.4} alignItems="center" sx={{ color: '#94A3B8' }}>
                                                 <DirectionsCarOutlinedIcon sx={{ fontSize: 13 }} />
-                                                <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 700, fontSize: '0.6rem', letterSpacing: '0.06em' }}>
+                                                <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 700, fontSize: '0.8rem', letterSpacing: '0.06em' }}>
                                                     PLATE
                                                 </Typography>
                                             </Stack>
@@ -878,7 +751,7 @@ const MovementDetails = () => {
                                             <Tile label="Custody" icon={<PlaceOutlinedIcon />}>
                                                 <Stack direction="row" spacing={0.75} alignItems="center">
                                                     <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: custody.tone, boxShadow: `0 0 0 3px ${alpha(custody.tone, 0.15)}` }} />
-                                                    <Typography sx={{ color: custody.tone, fontWeight: 700, fontSize: '0.82rem' }} noWrap>
+                                                    <Typography sx={{ color: custody.tone, fontWeight: 700, fontSize: '0.875rem' }} noWrap>
                                                         {custody.label}
                                                     </Typography>
                                                 </Stack>
@@ -955,7 +828,7 @@ const MovementDetails = () => {
                                                         “{a.comment}”
                                                     </Typography>
                                                 )}
-                                                <Typography variant="caption" sx={{ color: neutral[400], fontSize: '0.65rem' }}>
+                                                <Typography variant="caption" sx={{ color: neutral[400], fontSize: '0.8rem' }}>
                                                     {fmtDateTime(a.createDate) ?? ''}
                                                 </Typography>
                                             </Box>
@@ -971,173 +844,40 @@ const MovementDetails = () => {
                     <WidgetCard
                         icon={<DescriptionOutlinedIcon fontSize="small" />}
                         title="Documents"
-                        subtitle="Signed release & delivery notes"
-                        headerAction={
-                            <Stack direction="row" spacing={0.75}>
-                                <Button
-                                    size="small" variant="text" startIcon={<PictureAsPdfOutlinedIcon sx={{ fontSize: 15 }} />}
-                                    onClick={() => generateReleaseNote(movement)}
-                                    sx={{ borderRadius: '8px', fontWeight: 600, fontSize: '0.72rem', color: P }}
-                                >
-                                    Release Note
-                                </Button>
-                                <Button
-                                    size="small" variant="outlined" startIcon={<UploadFileOutlinedIcon sx={{ fontSize: 15 }} />}
-                                    disabled={uploading} onClick={() => fileInputRef.current?.click()}
-                                    sx={{ borderRadius: '8px', fontWeight: 600, fontSize: '0.72rem' }}
-                                >
-                                    {uploading ? 'Uploading…' : 'Upload'}
-                                </Button>
-                            </Stack>
-                        }
+                        subtitle="Release note and signed delivery documents"
+                        headerAction={canUploadDocuments ? (
+                            <UploadDocumentButton uploading={!!uploading} onClick={() => fileInputRef.current?.click()} />
+                        ) : undefined}
                     >
-                        <input ref={fileInputRef} type="file" hidden onChange={handleUploadDocument} />
-                        {movement.deliveryDocuments && movement.deliveryDocuments.length > 0 ? (
-                            <Stack spacing={0.75}>
-                                {movement.deliveryDocuments.map((doc, i) => {
-                                    const name = doc.split('/').pop();
-                                    return (
-                                        <Stack
-                                            key={i} direction="row" spacing={1} alignItems="center"
-                                            component="a" href={`/statics/${name}`} target="_blank" rel="noopener noreferrer"
-                                            sx={{
-                                                p: 1.1, borderRadius: 1.5, border: `1px solid ${border.subtle}`,
-                                                textDecoration: 'none', color: 'inherit', transition: 'background-color .15s, border-color .15s',
-                                                '&:hover': { bgcolor: alpha(P, 0.04), borderColor: alpha(P, 0.3) },
-                                            }}
-                                        >
-                                            <DescriptionOutlinedIcon sx={{ fontSize: 16, color: P, flexShrink: 0 }} />
-                                            <Typography variant="caption" sx={{ fontWeight: 600, flex: 1 }} noWrap>{name}</Typography>
-                                            <OpenInNewIcon sx={{ fontSize: 13, color: neutral[400] }} />
-                                        </Stack>
-                                    );
-                                })}
-                            </Stack>
-                        ) : (
-                            <EmptyState
-                                variant="inline"
-                                title="No documents attached"
-                                description="Upload the signed release / delivery note."
-                                icon={<DescriptionOutlinedIcon />}
-                            />
-                        )}
+                        <MovementDocuments
+                            documents={movement.deliveryDocuments ?? []}
+                            canUpload={canUploadDocuments}
+                            onUpload={uploadDocument}
+                            onReleaseNote={() => generateReleaseNote(movement)}
+                            inputRef={fileInputRef}
+                            uploading={uploading}
+                            setUploading={setUploading}
+                        />
                     </WidgetCard>
                 </Grid>
 
                 {/* ── Parties, receiving & record ── */}
                 <Grid item xs={12}>
                     <WidgetCard icon={<InfoOutlinedIcon fontSize="small" />} title="Details" subtitle="Parties, receiving & record metadata" accent={INDIGO}>
-                        {/*
-                          * Three columns, separated by hairlines on wide screens so each reads as its
-                          * own group: who was involved, how it was received, and when the record moved.
-                          */}
-                        <Box sx={{
-                            display: 'grid', gap: { xs: 3, md: 0 }, gridTemplateColumns: { xs: '1fr', md: '1fr 1fr 1fr' },
-                            '& > *': { px: { md: 3 } },
-                            '& > *:first-of-type': { pl: { md: 0 } },
-                            '& > *:last-of-type': { pr: { md: 0 } },
-                            '& > * + *': { borderLeft: { md: '1px solid #EEF2F7' } },
-                        }}
-                        >
-                            <Box>
-                                <SubHeading icon={<BadgeOutlinedIcon />} accent={INDIGO}>Parties</SubHeading>
-                                <Stack spacing={1.75}>
-                                    <PersonRow
-                                        role="Initiator" accent={INDIGO}
-                                        name={movement.initiator ? `${movement.initiator.firstName} ${movement.initiator.lastName}` : null}
-                                    />
-                                    {recipient && <PersonRow role="Recipient" accent={GOLD} name={recipient} />}
-                                </Stack>
-                                {(movement.request || movement.repair) && (
-                                    <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mt: 2 }}>
-                                        {movement.request && (
-                                            <Box sx={{ px: 1.1, py: 0.4, borderRadius: '6px', bgcolor: alpha(P, 0.06), border: `1px solid ${alpha(P, 0.18)}`, color: P, fontSize: '0.72rem', fontWeight: 700 }}>
-                                                Request #{movement.request.id}
-                                            </Box>
-                                        )}
-                                        {movement.repair && (
-                                            <Box sx={{ px: 1.1, py: 0.4, borderRadius: '6px', bgcolor: alpha(BLUE, 0.06), border: `1px solid ${alpha(BLUE, 0.18)}`, color: BLUE, fontSize: '0.72rem', fontWeight: 700 }}>
-                                                Repair #{movement.repair.id}
-                                            </Box>
-                                        )}
-                                    </Stack>
-                                )}
-                            </Box>
-
-                            <Box>
-                                <SubHeading icon={<ReceiptLongOutlinedIcon />} accent={INDIGO}>Receiving</SubHeading>
-                                <PersonRow
-                                    role="Receiving Officer" accent={status.success.strong}
-                                    name={movement.receivingOfficer ? `${movement.receivingOfficer.firstName} ${movement.receivingOfficer.lastName}` : null}
-                                />
-                                <Box sx={{ mt: 1.25 }}>
-                                    <InfoRow label="Receipt date" value={fmtDate(movement.receiptDate)} />
-                                    <InfoRow
-                                        label="Receipt status"
-                                        last={!movement.remarks}
-                                        value={movement.receiptStatus && movement.receiptStatus !== 'PENDING'
-                                            ? (
-                                                <StatusChip
-                                                    label={receiptStatusLabels[movement.receiptStatus]}
-                                                    tone={movement.receiptStatus === 'RECEIVED_OK' ? 'success' : 'pending'}
-                                                />
-                                            )
-                                            : (movement.receiptStatus ? receiptStatusLabels[movement.receiptStatus] : null)}
-                                    />
-                                </Box>
-                                {movement.remarks && (
-                                    <Box sx={{ mt: 1.5, p: 1.25, borderRadius: '8px', bgcolor: '#F8FAFC', borderLeft: `3px solid ${alpha(INDIGO, 0.4)}` }}>
-                                        <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 700, fontSize: '0.6rem', letterSpacing: '0.06em', display: 'block', mb: 0.25 }}>
-                                            REMARKS
-                                        </Typography>
-                                        <Typography sx={{ color: '#334155', fontSize: '0.8rem', fontStyle: 'italic', wordBreak: 'break-word' }}>
-                                            {movement.remarks}
-                                        </Typography>
-                                    </Box>
-                                )}
-                            </Box>
-
-                            <Box>
-                                <SubHeading icon={<HistoryOutlinedIcon />} accent={INDIGO}>Record</SubHeading>
-                                {/* A short timeline: the record's life is a sequence, so it is drawn as one. */}
-                                <Stack spacing={0}>
-                                    {([
-                                        ['Created', movement.createDate],
-                                        ['Last modified', movement.lastModified],
-                                        ['Completed', movement.completionDate],
-                                    ] as Array<[string, string | null | undefined]>).map(([label, value], i, all) => {
-                                        const last = i === all.length - 1;
-                                        const when = value ? new Date(value) : null;
-                                        return (
-                                            <Stack key={label} direction="row" spacing={1.5} alignItems="stretch">
-                                                <Stack alignItems="center" sx={{ width: 12, flexShrink: 0 }}>
-                                                    <Box sx={{
-                                                        width: 10, height: 10, borderRadius: '50%', mt: 0.5, flexShrink: 0,
-                                                        bgcolor: value ? INDIGO : '#fff',
-                                                        border: `2px solid ${value ? INDIGO : '#CBD5E1'}`,
-                                                    }}
-                                                    />
-                                                    {!last && <Box sx={{ width: 2, flex: 1, minHeight: 16, bgcolor: '#E2E8F0', my: 0.4 }} />}
-                                                </Stack>
-                                                <Box pb={last ? 0 : 1.5} minWidth={0}>
-                                                    <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 700, fontSize: '0.62rem', letterSpacing: '0.06em', textTransform: 'uppercase', display: 'block' }}>
-                                                        {label}
-                                                    </Typography>
-                                                    <Typography sx={{ color: when ? '#1E293B' : '#94A3B8', fontWeight: 600, fontSize: '0.82rem' }}>
-                                                        {when ? fmtDate(value) : 'Not yet'}
-                                                        {when && (
-                                                            <Box component="span" sx={{ color: '#64748B', fontWeight: 500, ml: 0.75, fontSize: '0.74rem' }}>
-                                                                {when.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
-                                                            </Box>
-                                                        )}
-                                                    </Typography>
-                                                </Box>
-                                            </Stack>
-                                        );
-                                    })}
-                                </Stack>
-                            </Box>
-                        </Box>
+                        <DetailsPanel
+                            movement={movement}
+                            recipient={recipient}
+                            receiptStatus={movement.receiptStatus
+                                ? (movement.receiptStatus !== 'PENDING'
+                                    ? (
+                                        <StatusChip
+                                            label={receiptStatusLabels[movement.receiptStatus]}
+                                            tone={movement.receiptStatus === 'RECEIVED_OK' ? 'success' : 'pending'}
+                                        />
+                                    )
+                                    : receiptStatusLabels[movement.receiptStatus])
+                                : null}
+                        />
                     </WidgetCard>
                 </Grid>
             </Grid>

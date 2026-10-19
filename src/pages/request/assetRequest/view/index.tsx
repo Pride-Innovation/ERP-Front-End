@@ -164,7 +164,7 @@ const StatusChip = ({ statusCode }: { statusCode?: string }) => {
                 bgcolor: cfg.bg,
                 color: cfg.color,
                 fontWeight: 700,
-                fontSize: '0.72rem',
+                fontSize: '0.8rem',
                 border: `1px solid ${alpha(cfg.color, 0.25)}`,
                 height: 24,
             }}
@@ -189,7 +189,7 @@ const PriorityChip = ({ priority }: { priority?: string }) => {
                 bgcolor: cfg.bg,
                 color: cfg.color,
                 fontWeight: 700,
-                fontSize: '0.72rem',
+                fontSize: '0.8rem',
                 border: `1px solid ${alpha(cfg.color, 0.25)}`,
                 height: 24,
                 '& .MuiChip-icon': { ml: 0.5 },
@@ -243,11 +243,11 @@ const HeroFact = ({ label, value, first }: { label: string; value?: string | nul
                 borderLeft: { xs: 'none', sm: first ? 'none' : `1px solid ${border.subtle}` },
             }}
         >
-            <Typography sx={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.09em', textTransform: 'uppercase', color: neutral[500] }}>
+            <Typography sx={{ fontSize: '0.8rem', fontWeight: 700, letterSpacing: '0.09em', textTransform: 'uppercase', color: neutral[500] }}>
                 {label}
             </Typography>
             <Typography noWrap sx={{
-                fontSize: '0.9rem', mt: 0.35,
+                fontSize: '0.9375rem', mt: 0.35,
                 fontWeight: empty ? 400 : 700,
                 fontStyle: empty ? 'italic' : 'normal',
                 color: empty ? neutral[400] : neutral[800],
@@ -485,7 +485,7 @@ const RequestDetails = () => {
                                             bgcolor: alpha(brand[500], 0.1),
                                             color: brand[700],
                                             fontWeight: 700,
-                                            fontSize: '0.72rem',
+                                            fontSize: '0.8rem',
                                             height: 24,
                                             border: `1px solid ${alpha(brand[500], 0.2)}`,
                                         }}
@@ -784,7 +784,7 @@ const RequestDetails = () => {
                                     '& .MuiTab-root': {
                                         minHeight: 48,
                                         textTransform: 'none',
-                                        fontSize: '0.82rem',
+                                        fontSize: '0.875rem',
                                         fontWeight: 500,
                                         color: 'text.secondary',
                                         gap: 0.75,

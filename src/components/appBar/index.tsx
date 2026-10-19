@@ -283,7 +283,9 @@ export default function ApplicationDrawer({ window }: Props) {
                     width: 0,
                     minHeight: '100vh',
                     bgcolor: surface.page,
-                    overflowX: 'hidden',
+                    // Scroll, never clip: content too wide for a small laptop must stay reachable.
+                    // This is the one place horizontal overflow is handled — see index.css.
+                    overflowX: 'auto',
                     overflowY: 'auto',
                 }}
             >

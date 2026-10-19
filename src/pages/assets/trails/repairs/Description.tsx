@@ -398,7 +398,7 @@ const Description = ({ repair, handleClose, handleViewAttachments }: Description
                                             color: theme.palette.success.main,
                                             fontWeight: 500,
                                             border: `1px solid ${alpha(theme.palette.success.main, 0.3)}`,
-                                            fontSize: '0.7rem',
+                                            fontSize: '0.8rem',
                                             height: 20
                                         }}
                                     />

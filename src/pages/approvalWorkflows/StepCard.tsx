@@ -72,7 +72,7 @@ const StepCard: React.FC<IStepCardProps> = ({ step, index, total, roles, units, 
                     bgcolor: TEAL, borderRadius: '50%', width: 22, height: 22,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}>
-                    <Typography variant="caption" sx={{ color: '#fff', fontWeight: 700, fontSize: '0.65rem' }}>
+                    <Typography variant="caption" sx={{ color: '#fff', fontWeight: 700, fontSize: '0.8rem' }}>
                         {index + 1}
                     </Typography>
                 </Box>
@@ -81,7 +81,7 @@ const StepCard: React.FC<IStepCardProps> = ({ step, index, total, roles, units, 
                 </Typography>
                 {step.optional && (
                     <Chip label="Opt" size="small"
-                        sx={{ fontSize: '0.6rem', height: 16, bgcolor: alpha(GOLD, 0.12), color: GOLD }} />
+                        sx={{ fontSize: '0.8rem', height: 16, bgcolor: alpha(GOLD, 0.12), color: GOLD }} />
                 )}
             </Stack>
             {total > 1 && (
@@ -142,7 +142,7 @@ const StepCard: React.FC<IStepCardProps> = ({ step, index, total, roles, units, 
                         options={Object.entries(APPROVER_SUBJECT_LABELS).map(([k, v]) => ({ value: k, label: v }))}
                     />
                     {step.approverSubject === 'ISSUER' && (
-                        <Typography sx={{ mt: 0.5, fontSize: '0.68rem', color: 'text.secondary' }}>
+                        <Typography sx={{ mt: 0.5, fontSize: '0.8rem', color: 'text.secondary' }}>
                             Climbs the issuer’s reporting line (e.g. the issuer’s manager). Use on an issuance-approval step.
                         </Typography>
                     )}
@@ -165,7 +165,7 @@ const StepCard: React.FC<IStepCardProps> = ({ step, index, total, roles, units, 
                             ...units.map((u) => ({ value: String(u.id), label: u.name })),
                         ]}
                     />
-                    <Typography sx={{ mt: 0.5, fontSize: '0.68rem', color: 'text.secondary' }}>
+                    <Typography sx={{ mt: 0.5, fontSize: '0.8rem', color: 'text.secondary' }}>
                         {(() => {
                             const u = units.find((x) => x.id === step.unitId);
                             if (u) {
@@ -236,7 +236,7 @@ const StepCard: React.FC<IStepCardProps> = ({ step, index, total, roles, units, 
                             key={src}
                             label={NOTIFY_GROUP_SOURCE_LABELS[src]}
                             size="small"
-                            sx={{ height: 20, fontSize: '0.65rem' }}
+                            sx={{ height: 20, fontSize: '0.8rem' }}
                         />
                     ))
                 }
@@ -280,7 +280,7 @@ const StepCard: React.FC<IStepCardProps> = ({ step, index, total, roles, units, 
                             key={role.id}
                             label={role.name}
                             size="small"
-                            sx={{ height: 20, fontSize: '0.65rem' }}
+                            sx={{ height: 20, fontSize: '0.8rem' }}
                         />
                     ))
                 }

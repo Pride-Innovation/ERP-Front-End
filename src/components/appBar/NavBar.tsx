@@ -66,7 +66,7 @@ const NavBar = () => {
                             sx={{
                                 '& .MuiBadge-badge': {
                                     fontWeight: 700,
-                                    fontSize: '0.6rem',
+                                    fontSize: '0.8rem',
                                     minWidth: 18,
                                     height: 18,
                                     border: `2px solid ${neutral[0]}`,

@@ -58,7 +58,7 @@ const SectionLabel = ({ children }: { children: React.ReactNode }) => (
             variant="caption"
             sx={{
                 fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase',
-                color: '#94A3B8', fontSize: '0.66rem', whiteSpace: 'nowrap',
+                color: '#94A3B8', fontSize: '0.8rem', whiteSpace: 'nowrap',
             }}
         >
             {children}
@@ -76,7 +76,7 @@ const selectMenuProps = {
                 mt: 0.5, borderRadius: '8px',
                 boxShadow: `0 4px 24px ${alpha('#000', 0.12)}`,
                 '& .MuiMenuItem-root': {
-                    fontSize: '0.875rem', minHeight: 40, px: 2,
+                    fontSize: '0.9375rem', minHeight: 40, px: 2,
                     '&:hover': { backgroundColor: alpha(PRIMARY, 0.06) },
                     '&.Mui-selected': {
                         backgroundColor: alpha(PRIMARY, 0.1),
@@ -292,8 +292,8 @@ const MovementActionModal = ({ action, movement, handleClose, sendingRequest, se
                     <Typography variant="caption" sx={{ fontWeight: 700, color: PRIMARY, fontFamily: 'monospace' }}>
                         #{movement.id}
                     </Typography>
-                    <Chip label={movementTypeLabel(movement.movementType)} size="small" sx={{ height: 20, fontSize: '0.68rem', fontWeight: 700, bgcolor: alpha(PRIMARY, 0.08), color: PRIMARY }} />
-                    <Chip label={statusCfg.label} size="small" sx={{ height: 20, fontSize: '0.68rem', fontWeight: 700, bgcolor: statusCfg.bg, color: statusCfg.color }} />
+                    <Chip label={movementTypeLabel(movement.movementType)} size="small" sx={{ height: 20, fontSize: '0.8rem', fontWeight: 700, bgcolor: alpha(PRIMARY, 0.08), color: PRIMARY }} />
+                    <Chip label={statusCfg.label} size="small" sx={{ height: 20, fontSize: '0.8rem', fontWeight: 700, bgcolor: statusCfg.bg, color: statusCfg.color }} />
                 </Stack>
                 <Typography variant="caption" sx={{ color: '#64748B', display: 'block', mt: 1 }}>
                     {movement.sourceStore?.name ?? '—'} → {movement.destStore?.name ?? (movement.recipientUser ? `${movement.recipientUser.firstName} ${movement.recipientUser.lastName}` : '—')}
@@ -347,11 +347,11 @@ const MovementActionModal = ({ action, movement, handleClose, sendingRequest, se
                     <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
                         <Button size="small" variant="text" startIcon={<PictureAsPdfOutlinedIcon sx={{ fontSize: 16 }} />}
                             onClick={handleGenerateDispatchNote}
-                            sx={{ borderRadius: 2, fontWeight: 600, fontSize: '0.72rem', textTransform: 'none', color: PRIMARY }}>
+                            sx={{ borderRadius: 2, fontWeight: 600, fontSize: '0.8rem', textTransform: 'none', color: PRIMARY }}>
                             Generate Dispatch Note
                         </Button>
                         <Button component="label" size="small" variant="outlined" startIcon={<UploadFileOutlinedIcon sx={{ fontSize: 16 }} />} disabled={uploading}
-                            sx={{ borderRadius: 2, fontWeight: 600, fontSize: '0.72rem', textTransform: 'none' }}>
+                            sx={{ borderRadius: 2, fontWeight: 600, fontSize: '0.8rem', textTransform: 'none' }}>
                             {uploading ? 'Uploading…' : 'Upload Signed Copy'}
                             <input type="file" hidden onChange={handleUploadDocument} />
                         </Button>
@@ -359,7 +359,7 @@ const MovementActionModal = ({ action, movement, handleClose, sendingRequest, se
                             const name = doc.split('/').pop();
                             return (
                                 <Chip key={i} size="small" icon={<DescriptionOutlinedIcon sx={{ fontSize: 14 }} />} label={name}
-                                    sx={{ height: 24, fontWeight: 500, fontSize: '0.72rem', bgcolor: alpha(PRIMARY, 0.07), color: PRIMARY }} />
+                                    sx={{ height: 24, fontWeight: 500, fontSize: '0.8rem', bgcolor: alpha(PRIMARY, 0.07), color: PRIMARY }} />
                             );
                         })}
                     </Stack>
@@ -381,7 +381,7 @@ const MovementActionModal = ({ action, movement, handleClose, sendingRequest, se
                     </TextField>
                     <TextField
                         fullWidth multiline rows={2} label="Remarks" value={remarks} onChange={(e) => setRemarks(e.target.value)}
-                        sx={{ ...fieldSx, '& .MuiInputBase-input': { padding: 0, fontSize: '0.875rem', lineHeight: 1.5 } }}
+                        sx={{ ...fieldSx, '& .MuiInputBase-input': { padding: 0, fontSize: '0.9375rem', lineHeight: 1.5 } }}
                     />
                 </>
             )}
@@ -391,7 +391,7 @@ const MovementActionModal = ({ action, movement, handleClose, sendingRequest, se
                     <SectionLabel>Comment — optional</SectionLabel>
                     <TextField
                         fullWidth multiline rows={2} placeholder="Add a comment…" value={remarks} onChange={(e) => setRemarks(e.target.value)}
-                        sx={{ ...fieldSx, '& .MuiInputBase-input': { padding: 0, fontSize: '0.875rem', lineHeight: 1.5 } }}
+                        sx={{ ...fieldSx, '& .MuiInputBase-input': { padding: 0, fontSize: '0.9375rem', lineHeight: 1.5 } }}
                     />
                 </>
             )}
@@ -401,7 +401,7 @@ const MovementActionModal = ({ action, movement, handleClose, sendingRequest, se
                     <SectionLabel>Reason — required</SectionLabel>
                     <TextField
                         fullWidth multiline rows={3} placeholder="Explain why this movement is being rejected…" value={reason} onChange={(e) => setReason(e.target.value)}
-                        sx={{ ...fieldSx, '& .MuiInputBase-input': { padding: 0, fontSize: '0.875rem', lineHeight: 1.5 } }}
+                        sx={{ ...fieldSx, '& .MuiInputBase-input': { padding: 0, fontSize: '0.9375rem', lineHeight: 1.5 } }}
                     />
                 </>
             )}
@@ -411,7 +411,7 @@ const MovementActionModal = ({ action, movement, handleClose, sendingRequest, se
                     <SectionLabel>Remarks — optional</SectionLabel>
                     <TextField
                         fullWidth multiline rows={3} placeholder="Add any remarks…" value={remarks} onChange={(e) => setRemarks(e.target.value)}
-                        sx={{ ...fieldSx, '& .MuiInputBase-input': { padding: 0, fontSize: '0.875rem', lineHeight: 1.5 } }}
+                        sx={{ ...fieldSx, '& .MuiInputBase-input': { padding: 0, fontSize: '0.9375rem', lineHeight: 1.5 } }}
                     />
                 </>
             )}
@@ -421,7 +421,7 @@ const MovementActionModal = ({ action, movement, handleClose, sendingRequest, se
                     <SectionLabel>Cancellation reason — required</SectionLabel>
                     <TextField
                         fullWidth multiline rows={3} placeholder="Explain why this movement is being cancelled…" value={reason} onChange={(e) => setReason(e.target.value)}
-                        sx={{ ...fieldSx, '& .MuiInputBase-input': { padding: 0, fontSize: '0.875rem', lineHeight: 1.5 } }}
+                        sx={{ ...fieldSx, '& .MuiInputBase-input': { padding: 0, fontSize: '0.9375rem', lineHeight: 1.5 } }}
                     />
                 </>
             )}

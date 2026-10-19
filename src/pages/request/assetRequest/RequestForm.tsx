@@ -147,7 +147,7 @@ const RequestForm = ({
                             color: '#64748B',
                             textTransform: 'none',
                             fontWeight: 500,
-                            fontSize: '0.85rem',
+                            fontSize: '0.875rem',
                             '&:hover': { borderColor: '#CBD5E1', bgcolor: '#F8FAFC' },
                         }}
                     >
@@ -166,7 +166,7 @@ const RequestForm = ({
                             boxShadow: `0 2px 8px ${alpha(PRIMARY_COLOR, 0.25)}`,
                             textTransform: 'none',
                             fontWeight: 600,
-                            fontSize: '0.85rem',
+                            fontSize: '0.875rem',
                             '&:hover': {
                                 bgcolor: '#065f54',
                                 boxShadow: `0 4px 14px ${alpha(PRIMARY_COLOR, 0.35)}`,

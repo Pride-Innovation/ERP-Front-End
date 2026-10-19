@@ -854,7 +854,7 @@ const GeneralAssets = () => {
                                 label={fact}
                                 size="small"
                                 sx={{
-                                    height: 22, fontSize: '0.68rem', fontWeight: 600,
+                                    height: 22, fontSize: '0.8rem', fontWeight: 600,
                                     bgcolor: alpha(PRIMARY, 0.06), color: PRIMARY,
                                     border: `1px solid ${alpha(PRIMARY, 0.14)}`,
                                     '& .MuiChip-label': { px: 1 },
@@ -893,7 +893,7 @@ const GeneralAssets = () => {
                                         runQuery(next, activeQuery.current.filters);
                                     }}
                                     sx={{
-                                        height: 22, fontSize: '0.68rem', fontWeight: 600,
+                                        height: 22, fontSize: '0.8rem', fontWeight: 600,
                                         transition: 'background-color .15s ease, border-color .15s ease',
                                         // Filled while the view is active, so the page always says
                                         // which register you are looking at.

@@ -153,7 +153,7 @@ const PageHero = ({
                                             mt: 0.5,
                                             textTransform: 'uppercase',
                                             letterSpacing: '0.06em',
-                                            fontSize: '0.6rem',
+                                            fontSize: '0.8rem',
                                         }}
                                     >
                                         {stat.label}
@@ -163,7 +163,7 @@ const PageHero = ({
                                     <Typography
                                         sx={{
                                             color: neutral[400],
-                                            fontSize: '0.65rem',
+                                            fontSize: '0.8rem',
                                             display: 'block',
                                             mt: 0.25,
                                         }}

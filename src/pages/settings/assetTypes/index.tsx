@@ -138,7 +138,7 @@ const AssetTypeCard = ({
                                     size="small"
                                     sx={{
                                         height: 20,
-                                        fontSize: '0.65rem',
+                                        fontSize: '0.8rem',
                                         fontWeight: 700,
                                         bgcolor: alpha(color, 0.1),
                                         color: color,
@@ -178,7 +178,7 @@ const AssetTypeCard = ({
                         sx={{
                             mb: 1.5,
                             height: 20,
-                            fontSize: '0.62rem',
+                            fontSize: '0.8rem',
                             fontWeight: 600,
                             bgcolor: alpha(color, 0.08),
                             color: color,
@@ -198,7 +198,7 @@ const AssetTypeCard = ({
                             mb: 1.5,
                             ml: assetType.fieldConfig ? 1 : 0,
                             height: 20,
-                            fontSize: '0.62rem',
+                            fontSize: '0.8rem',
                             fontWeight: 600,
                             bgcolor: stockedNowhere ? alpha('#ef4444', 0.08) : alpha('#1976D2', 0.07),
                             color: stockedNowhere ? 'error.main' : '#1565C0',

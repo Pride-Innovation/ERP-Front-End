@@ -20,6 +20,7 @@ interface MaintenanceRow {
     completionDate: string;
     technician: string;
     status: string;
+    statusCode: string;
     description: string;
 }
 
@@ -39,7 +40,7 @@ const COLUMNS: ReportColumn<MaintenanceRow>[] = [
     { id: 'startDate', label: 'Start Date', minWidth: 100 },
     { id: 'completionDate', label: 'Completion', minWidth: 100, format: (v) => v || '—' },
     { id: 'technician', label: 'Technician', minWidth: 130 },
-    { id: 'status', label: 'Status', minWidth: 110, format: (v) => <StatusChip value={v} /> },
+    { id: 'status', label: 'Status', minWidth: 110, format: (v, r) => <StatusChip value={v} code={r.statusCode} /> },
     { id: 'description', label: 'Reason / Notes', minWidth: 260 },
 ];
 
@@ -60,9 +61,17 @@ const toRow = (r: any): MaintenanceRow => ({
             : r.technicianType === 'EXTERNAL' ? `${r.technician} (External)` : r.technician)
         : '—',
     status: r.status ?? '—',
+    // Repair.status is itself the stable value ("Pending" / "Completed").
+    statusCode: r.status ?? '',
     // The reason it went in, plus whatever was written when it came back.
     description: [r.repairReason, r.completionNotes].filter(Boolean).join(' — ') || '—',
 });
+
+/** Repair.status is free text with two values written by RepairService, not the status catalogue. */
+const REPAIR_STATUSES = [
+    { id: 'Pending', label: 'Pending', code: 'Pending' },
+    { id: 'Completed', label: 'Completed', code: 'Completed' },
+];
 
 const MaintenanceReport = () => {
     const { rows, notice, loading, error, applyFilters, refresh } = useReportData<MaintenanceRow>(
@@ -73,6 +82,7 @@ const MaintenanceReport = () => {
                 endPoint: 'assets/repairs',
                 params: {
                     assetTypeId: f.categoryId,
+                    status: f.statusCode,
                     startDate: f.dateFrom,
                     endDate: f.dateTo,
                 },
@@ -107,9 +117,10 @@ const MaintenanceReport = () => {
             title="Maintenance Report"
             subtitle="Repair jobs raised against assets, and where each one stands"
             accentColor={ACCENT}
-            // No department or status filter: neither is recorded on a repair. Offering a control
-            // that silently does nothing is worse than not offering it.
-            filterFields={['dateRange', 'branch', 'category']}
+            // No department filter: a repair records none. Status it does record, and
+            // /assets/repairs filters on it.
+            filterFields={['dateRange', 'branch', 'category', 'status']}
+            statusOptions={REPAIR_STATUSES}
             onApplyFilters={applyFilters}
             onRefresh={refresh}
             notice={notice}

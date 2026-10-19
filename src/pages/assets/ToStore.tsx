@@ -232,7 +232,7 @@ const ToStore = ({
                     />
                 </Box>
 
-                <Alert severity="info" sx={{ borderRadius: 2, '& .MuiAlert-message': { fontSize: '0.82rem' } }}>
+                <Alert severity="info" sx={{ borderRadius: 2, '& .MuiAlert-message': { fontSize: '0.875rem' } }}>
                     It will go to <strong>{destination?.name ?? defaultLabel}</strong> and read{' '}
                     <strong>{temporaryPool ? 'Available for Loan' : 'Sent to Store'}</strong>.
                 </Alert>

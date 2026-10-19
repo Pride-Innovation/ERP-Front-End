@@ -126,7 +126,7 @@ const MyItems = () => {
                                     '& th': {
                                         bgcolor: alpha(brand[500], 0.04),
                                         borderBottom: `1px solid ${border.subtle}`,
-                                        fontWeight: 700, fontSize: '0.68rem', color: brand[700],
+                                        fontWeight: 700, fontSize: '0.8rem', color: brand[700],
                                         textTransform: 'uppercase', letterSpacing: '0.05em',
                                         py: 1.4, whiteSpace: 'nowrap',
                                     },
@@ -146,15 +146,15 @@ const MyItems = () => {
                                         hover
                                         sx={{
                                             '&:nth-of-type(odd)': { bgcolor: alpha(neutral[900], 0.012) },
-                                            '& td': { borderBottom: `1px solid ${alpha(neutral[900], 0.05)}`, py: 1.3, fontSize: '0.83rem' },
+                                            '& td': { borderBottom: `1px solid ${alpha(neutral[900], 0.05)}`, py: 1.3, fontSize: '0.875rem' },
                                         }}
                                     >
                                         <TableCell>
-                                            <Typography sx={{ fontSize: '0.85rem', fontWeight: 600, color: neutral[900] }}>
+                                            <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: neutral[900] }}>
                                                 {a.assetName || '—'}
                                             </Typography>
                                             {a.model && (
-                                                <Typography sx={{ fontSize: '0.71rem', color: neutral[500] }}>{a.model}</Typography>
+                                                <Typography sx={{ fontSize: '0.8rem', color: neutral[500] }}>{a.model}</Typography>
                                             )}
                                         </TableCell>
                                         <TableCell sx={{ color: neutral[600] }}>{a.assetType?.name || '—'}</TableCell>
@@ -166,7 +166,7 @@ const MyItems = () => {
                                                     size="small"
                                                     label={a.assetStatus.name}
                                                     sx={{
-                                                        height: 21, fontSize: '0.7rem', fontWeight: 600,
+                                                        height: 21, fontSize: '0.8rem', fontWeight: 600,
                                                         bgcolor: (a.assetStatus.status ?? '').toLowerCase() === 'inmaintenance'
                                                             ? statusTokens.warning.soft : alpha(brand[500], 0.08),
                                                         color: (a.assetStatus.status ?? '').toLowerCase() === 'inmaintenance'

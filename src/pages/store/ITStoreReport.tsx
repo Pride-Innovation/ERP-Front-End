@@ -29,7 +29,7 @@ const ITStoreReport = () => {
                     <LaptopChromebookOutlinedIcon sx={{ fontSize: 16, color: theme.palette.info.main }} />
                 </Box>
                 <Box>
-                    <Typography variant="caption" sx={{ color: 'text.secondary', textTransform: 'uppercase', letterSpacing: '0.07em', fontSize: '0.68rem', display: 'block' }}>Inventory</Typography>
+                    <Typography variant="caption" sx={{ color: 'text.secondary', textTransform: 'uppercase', letterSpacing: '0.07em', fontSize: '0.8rem', display: 'block' }}>Inventory</Typography>
                     <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'text.primary', lineHeight: 1.2 }}>IT Store Report</Typography>
                 </Box>
             </Box>

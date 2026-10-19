@@ -44,7 +44,7 @@ const TrackingNumberField = ({ value, loading, failed }: {
                     <QrCode2OutlinedIcon sx={{ fontSize: 19 }} />
                 </Box>
                 <Box flex={1} minWidth={0}>
-                    <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 700, fontSize: '0.62rem', letterSpacing: '0.06em', textTransform: 'uppercase', display: 'block' }}>
+                    <Typography variant="caption" sx={{ color: '#64748B', fontWeight: 700, fontSize: '0.8rem', letterSpacing: '0.06em', textTransform: 'uppercase', display: 'block' }}>
                         Tracking number · assigned to this dispatch
                     </Typography>
                     {loading ? (

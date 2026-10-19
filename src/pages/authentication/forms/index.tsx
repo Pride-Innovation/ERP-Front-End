@@ -39,7 +39,7 @@ const FieldLabel = ({ label, focused }: { label: string; focused: boolean }) => 
             display: 'block',
             mb: 0.75,
             fontWeight: 600,
-            fontSize: '0.72rem',
+            fontSize: '0.8rem',
             letterSpacing: 0.4,
             textTransform: 'uppercase',
             color: focused ? PRIMARY : '#64748B',
@@ -87,7 +87,7 @@ const AuthenticationForm = ({
             },
         },
         '& .MuiOutlinedInput-input': {
-            fontSize: '0.875rem',
+            fontSize: '0.9375rem',
             fontWeight: 500,
             color: '#0F172A',
             '&::placeholder': { color: '#94A3B8', opacity: 1 },
@@ -126,7 +126,7 @@ const AuthenticationForm = ({
                 />
                 <FormHelperText
                     error
-                    sx={{ minHeight: 20, mx: 0, mt: 0.5, mb: 1.5, fontSize: '0.72rem', fontWeight: 500 }}
+                    sx={{ minHeight: 20, mx: 0, mt: 0.5, mb: 1.5, fontSize: '0.8rem', fontWeight: 500 }}
                 >
                     {formState.errors.email?.message ?? ''}
                 </FormHelperText>
@@ -146,7 +146,7 @@ const AuthenticationForm = ({
                                     fontWeight: 600,
                                     color: PRIMARY,
                                     textDecoration: 'none',
-                                    fontSize: '0.72rem',
+                                    fontSize: '0.8rem',
                                     '&:hover': { textDecoration: 'underline' },
                                     lineHeight: 1,
                                     mb: 0.75,
@@ -203,7 +203,7 @@ const AuthenticationForm = ({
                     />
                     <FormHelperText
                         error
-                        sx={{ minHeight: 20, mx: 0, mt: 0.5, mb: 2.5, fontSize: '0.72rem', fontWeight: 500 }}
+                        sx={{ minHeight: 20, mx: 0, mt: 0.5, mb: 2.5, fontSize: '0.8rem', fontWeight: 500 }}
                     >
                         {formState.errors.password?.message ?? ''}
                     </FormHelperText>
@@ -219,7 +219,7 @@ const AuthenticationForm = ({
                 sx={{
                     height: 50,
                     borderRadius: '10px',
-                    fontSize: '0.875rem',
+                    fontSize: '0.9375rem',
                     fontWeight: 700,
                     letterSpacing: 0.3,
                     textTransform: 'none',

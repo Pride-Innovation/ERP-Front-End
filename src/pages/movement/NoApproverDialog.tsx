@@ -44,7 +44,7 @@ const NoApproverDialog = ({
                 <Alert
                     severity="warning"
                     icon={<GppMaybeOutlinedIcon fontSize="small" />}
-                    sx={{ borderRadius: 2, '& .MuiAlert-message': { fontSize: '0.82rem' } }}
+                    sx={{ borderRadius: 2, '& .MuiAlert-message': { fontSize: '0.875rem' } }}
                 >
                     {message
                         ?? 'No approver could be resolved on your reporting line for this movement.'}

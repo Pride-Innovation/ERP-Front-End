@@ -21,7 +21,7 @@ export const dataHeadCellSx = {
     bgcolor: neutral[50],
     color: neutral[500],
     fontWeight: 700,
-    fontSize: '0.68rem',
+    fontSize: '0.8rem',
     textTransform: 'uppercase',
     letterSpacing: '0.07em',
     whiteSpace: 'nowrap',
@@ -40,7 +40,7 @@ export const dataHeadCellSx = {
 export const dataBodyCellSx = {
     py: 1.2,
     px: 2,
-    fontSize: '0.78rem',
+    fontSize: '0.875rem',
     color: neutral[800],
     borderColor: neutral[100],
 } as const;
@@ -67,10 +67,10 @@ export const dataPaginationSx = {
     borderTop: `1px solid ${border.subtle}`,
     bgcolor: neutral[50],
     '& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows': {
-        fontSize: '0.78rem',
+        fontSize: '0.875rem',
         color: neutral[500],
     },
-    '& .MuiTablePagination-select': { fontSize: '0.78rem' },
+    '& .MuiTablePagination-select': { fontSize: '0.875rem' },
 } as const;
 
 /** The card the table sits in. */
@@ -89,7 +89,7 @@ export const dataActionSelectSx = {
     '& .MuiOutlinedInput-root': { borderRadius: '8px' },
     borderRadius: '8px',
     bgcolor: '#fff',
-    fontSize: '0.75rem',
+    fontSize: '0.8rem',
     fontWeight: 600,
     height: 30,
     color: neutral[600],

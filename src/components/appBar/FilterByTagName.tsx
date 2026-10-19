@@ -118,7 +118,7 @@ const FilterByTagName = () => {
                         ml: 0.5,
                         flex: 1,
                         color: 'text.primary',
-                        fontSize: '0.875rem',
+                        fontSize: '0.9375rem',
                         '& input::placeholder': {
                             color: 'text.secondary',
                             opacity: 1,

@@ -41,7 +41,7 @@ export const heroActionBase = {
     borderRadius: '12px',
     textTransform: 'none' as const,
     fontWeight: 700,
-    fontSize: '0.875rem',
+    fontSize: '0.9375rem',
     letterSpacing: '-0.1px',
     whiteSpace: 'nowrap' as const,
     transition: 'transform .16s ease, box-shadow .16s ease, background-color .16s ease, border-color .16s ease',

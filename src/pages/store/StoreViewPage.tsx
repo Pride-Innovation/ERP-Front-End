@@ -161,7 +161,7 @@ const StoreViewPage = ({ storeType, title, subtitle, Icon, accentColor }: StoreV
                         sx={{
                             textTransform: 'none',
                             fontWeight: 600,
-                            fontSize: '0.82rem',
+                            fontSize: '0.875rem',
                             color: accentColor,
                             bgcolor: alpha(accentColor, 0.06),
                             border: `1px solid ${alpha(accentColor, 0.25)}`,
@@ -229,7 +229,7 @@ const StoreViewPage = ({ storeType, title, subtitle, Icon, accentColor }: StoreV
                                 fontWeight: 700,
                                 textTransform: 'uppercase',
                                 letterSpacing: '0.06em',
-                                fontSize: '0.65rem',
+                                fontSize: '0.8rem',
                                 display: 'block',
                                 lineHeight: 1,
                                 mb: 0.4,
@@ -252,7 +252,7 @@ const StoreViewPage = ({ storeType, title, subtitle, Icon, accentColor }: StoreV
                                     label="Active"
                                     sx={{
                                         height: 18,
-                                        fontSize: '0.62rem',
+                                        fontSize: '0.8rem',
                                         fontWeight: 700,
                                         bgcolor: alpha(status.success.main, 0.1),
                                         color: status.success.strong,
@@ -267,7 +267,7 @@ const StoreViewPage = ({ storeType, title, subtitle, Icon, accentColor }: StoreV
                                 {currentBranch?.email && (
                                     <Stack direction="row" alignItems="center" spacing={0.4}>
                                         <EmailOutlinedIcon sx={{ fontSize: 12, color: 'text.disabled' }} />
-                                        <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.7rem' }} noWrap>
+                                        <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.8rem' }} noWrap>
                                             {currentBranch.email}
                                         </Typography>
                                     </Stack>
@@ -275,7 +275,7 @@ const StoreViewPage = ({ storeType, title, subtitle, Icon, accentColor }: StoreV
                                 {currentBranch?.telephone && (
                                     <Stack direction="row" alignItems="center" spacing={0.4}>
                                         <PhoneOutlinedIcon sx={{ fontSize: 12, color: 'text.disabled' }} />
-                                        <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.7rem' }} noWrap>
+                                        <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.8rem' }} noWrap>
                                             {currentBranch.telephone}
                                         </Typography>
                                     </Stack>
@@ -299,7 +299,7 @@ const StoreViewPage = ({ storeType, title, subtitle, Icon, accentColor }: StoreV
                                 color: 'text.secondary',
                                 textTransform: 'uppercase',
                                 letterSpacing: '0.06em',
-                                fontSize: '0.68rem',
+                                fontSize: '0.8rem',
                                 whiteSpace: 'nowrap',
                             }}
                         >

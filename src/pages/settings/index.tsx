@@ -79,7 +79,7 @@ const Settings = () => {
                     <Typography
                         sx={{
                             fontWeight: 700,
-                            fontSize: '0.85rem',
+                            fontSize: '0.875rem',
                             textTransform: 'uppercase',
                             letterSpacing: '0.06em',
                             color: '#fff',
@@ -111,7 +111,7 @@ const Settings = () => {
                                 py: 1,
                                 px: 2,
                                 fontWeight: isActive(item) ? 600 : 500,
-                                fontSize: '0.875rem',
+                                fontSize: '0.9375rem',
                                 color: isActive(item) ? '#fff' : '#334155',
                                 bgcolor: isActive(item) ? PRIMARY : 'transparent',
                                 boxShadow: isActive(item)

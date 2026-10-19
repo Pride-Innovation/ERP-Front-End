@@ -5,8 +5,9 @@ import BuildOutlinedIcon from '@mui/icons-material/BuildOutlined';
 import ReportShell, { ReportShellFilters } from '../ReportShell';
 import ReportSummaryCards from '../ReportSummaryCards';
 import ReportDataTable, { ReportColumn, StatusChip } from '../ReportDataTable';
-import useReportData, { REPORT_PAGE_SIZE, combineNotices, truncationNotice } from '../useReportData';
+import useReportData, { REPORT_PAGE_SIZE, combineNotices, truncationNotice, HOLDER_DEPARTMENT_NOTE } from '../useReportData';
 import { fetchRowsService } from '../../../core/apis/globalService';
+import { ASSET_STATUS_CODES } from '../reportStatus';
 
 const ACCENT = '#059669';
 
@@ -37,12 +38,13 @@ const COLUMNS: ReportColumn<AssetRow>[] = [
     { id: 'branch', label: 'Branch', minWidth: 120 },
     { id: 'department', label: 'Department', minWidth: 110 },
     { id: 'assignedTo', label: 'Assigned To', minWidth: 130 },
-    { id: 'status', label: 'Status', minWidth: 100, format: (v) => <StatusChip value={v} /> },
+    { id: 'status', label: 'Status', minWidth: 100, format: (v, r) => <StatusChip value={v} code={r.statusCode} /> },
     { id: 'purchaseCost', label: 'Purchase Cost', minWidth: 130, align: 'right' },
     { id: 'netBookValue', label: 'Net Book Value', minWidth: 130, align: 'right' },
     { id: 'acquisitionDate', label: 'Acquired', minWidth: 100 },
     { id: 'condition', label: 'Condition', minWidth: 100 },
 ];
+
 
 /** Money arrives from the server pre-formatted with separators; only the currency is missing. */
 const money = (v?: string | null) => (v ? `UGX ${v}` : '—');
@@ -80,9 +82,9 @@ const AssetRegisterReport = () => {
     const { rows, notice, loading, error, applyFilters, refresh } = useReportData<AssetRow>(
         async (f: ReportShellFilters) => {
             /*
-             * Filtered server-side wherever /assets supports it. Department is the exception: it
-             * lives on the holder, not the asset, so there is no query parameter for it and it has
-             * to be narrowed below.
+             * Every filter runs in the database. Department and branch used to be narrowed here, or
+             * sent as a partial-name `location` — narrowing after the cap searched only the page in
+             * hand, and a picked branch name matched every branch whose name contained it.
              */
             const res = (await fetchRowsService({
                 pageNumber: 0,
@@ -91,38 +93,19 @@ const AssetRegisterReport = () => {
                 params: {
                     assetTypeId: f.categoryId,
                     assetStatusId: f.statusId,
-                    location: f.branch,
+                    branchId: f.branchId,
+                    departmentId: f.departmentId,
                     startDate: f.dateFrom,
                     endDate: f.dateTo,
                 },
             })) as any;
 
             if (res?.status !== 200) throw new Error('assets');
-            const mapped: AssetRow[] = (res.data?.content ?? []).map(toRow);
-            /*
-             * An asset has no department. This one is the **holder's** — `assignedTo.department` —
-             * so the filter answers "assets currently held by someone in that department", which is
-             * a fair question but a different one from what the bare label suggests.
-             *
-             * It matters because of how much it hides. Measured on live data: **234 of 252 assets
-             * have no holder or no department recorded**, so applying this quietly removes 93% of
-             * the estate. An empty-looking register reads as "there are none", which is why the
-             * count of what was set aside is reported rather than left to be noticed.
-             */
-            const withoutDepartment = mapped.filter((r) => r.department === '—').length;
-            const narrowed = f.department
-                ? mapped.filter((r) => r.department === f.department)
-                : mapped;
-
             return {
-                rows: narrowed,
+                rows: (res.data?.content ?? []).map(toRow),
                 notice: combineNotices(
                     truncationNotice(res, 'assets'),
-                    f.department && withoutDepartment > 0
-                        ? `Department here means the holder's: ${withoutDepartment} of `
-                          + `${mapped.length} records have no holder or no department recorded and `
-                          + 'are not shown.'
-                        : undefined,
+                    f.departmentId ? HOLDER_DEPARTMENT_NOTE : undefined,
                 ),
             };
         },
@@ -151,6 +134,9 @@ const AssetRegisterReport = () => {
             subtitle="Full register of all assets with values, locations and assignments"
             accentColor={ACCENT}
             filterFields={['dateRange', 'branch', 'department', 'category', 'status']}
+            statusCodes={ASSET_STATUS_CODES}
+            // A register: its period means "added between", so it opens on the whole estate.
+            defaultPreset="all"
             onApplyFilters={applyFilters}
             onRefresh={refresh}
             notice={notice}

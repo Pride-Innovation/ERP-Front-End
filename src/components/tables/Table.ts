@@ -63,7 +63,7 @@ export const DataGridStyled = styled(DataGrid)(() => ({
         textTransform: 'uppercase',
         color: HEADER_TEXT,
         fontWeight: 700,
-        fontSize: '0.65rem',
+        fontSize: '0.8rem',
         letterSpacing: '0.07em',
         lineHeight: 1.4,
     },
@@ -119,7 +119,7 @@ export const DataGridStyled = styled(DataGrid)(() => ({
 
     // ── Cells ─────────────────────────────────────────────────────────────────
     '& .MuiDataGrid-cell': {
-        fontSize: '0.825rem',
+        fontSize: '0.875rem',
         color: TEXT_PRIMARY,
         lineHeight: 1.5,
         padding: '6px 18px',
@@ -148,15 +148,15 @@ export const DataGridStyled = styled(DataGrid)(() => ({
 
     '& .MuiTablePagination-root': {
         color: TEXT_SECONDARY,
-        fontSize: '0.8125rem',
+        fontSize: '0.875rem',
     },
     '& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows': {
-        fontSize: '0.8125rem',
+        fontSize: '0.875rem',
         color: TEXT_SECONDARY,
         margin: 0,
     },
     '& .MuiTablePagination-select': {
-        fontSize: '0.8125rem',
+        fontSize: '0.875rem',
         padding: '4px 8px',
         borderRadius: '6px',
         '&:focus': { backgroundColor: alpha(brand[500], 0.08) },
@@ -229,7 +229,7 @@ export const MultiLineCell = styled(Box)({
 });
 
 export const CellPrimaryText = styled('div')({
-    fontSize: '0.825rem',
+    fontSize: '0.875rem',
     fontWeight: 600,
     color: TEXT_PRIMARY,
     lineHeight: 1.35,
@@ -239,7 +239,7 @@ export const CellPrimaryText = styled('div')({
 });
 
 export const CellSecondaryText = styled('div')({
-    fontSize: '0.72rem',
+    fontSize: '0.8rem',
     fontWeight: 400,
     color: TEXT_SECONDARY,
     lineHeight: 1.3,

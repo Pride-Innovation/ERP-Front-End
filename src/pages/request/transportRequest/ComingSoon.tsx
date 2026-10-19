@@ -121,7 +121,7 @@ const TransportComingSoon = () => {
                         sx={{
                             fontWeight: 700,
                             letterSpacing: '0.12em',
-                            fontSize: '0.68rem',
+                            fontSize: '0.8rem',
                             color: gold[800],
                             bgcolor: alpha(gold[500], 0.14),
                             border: `1px solid ${alpha(gold[500], 0.35)}`,

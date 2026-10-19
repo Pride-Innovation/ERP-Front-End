@@ -71,7 +71,7 @@ const FilterBranchForm = () => {
                 '& .MuiAutocomplete-listbox': {
                     padding: '4px 0',
                     '& .MuiAutocomplete-option': {
-                        fontSize: '0.875rem',
+                        fontSize: '0.9375rem',
                         minHeight: 38,
                         px: 2,
                         '&:hover': { backgroundColor: alpha(PRIMARY_COLOR, 0.06) },

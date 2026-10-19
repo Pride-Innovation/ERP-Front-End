@@ -11,6 +11,10 @@ import {
     Button,
     Chip,
     CircularProgress,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
     LinearProgress,
     MenuItem,
     Paper,
@@ -38,9 +42,11 @@ import UndoOutlinedIcon from '@mui/icons-material/UndoOutlined';
 import PublishOutlinedIcon from '@mui/icons-material/PublishOutlined';
 import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
 import ReplayOutlinedIcon from '@mui/icons-material/ReplayOutlined';
+import BlockOutlinedIcon from '@mui/icons-material/BlockOutlined';
 
 import {
     approveStockCountService,
+    cancelStockCountService,
     fetchStockCountService,
     postStockCountService,
     saveStockCountLinesService,
@@ -49,10 +55,19 @@ import {
 } from './service';
 import { ADJUSTMENT_REASONS, AdjustmentReason, IStockCount, IStockCountLine } from './stockTakeInterface';
 import { ROUTES } from '../../core/routes/routes';
+import usePermissions from '../../core/permissions/usePermissions';
+import RoutesUtills from '../../core/routes/utills';
+import { canCancel, canPost, canRecordCounts, canReview, reviewBlockedAsCounter } from './stockTakeRules';
 import { fieldSx } from '../../components/forms/Inputs';
 import { brand, gold, neutral, border, surface, elevation, radii, status as statusTokens } from '../../utils/tokens';
 
 type Draft = Record<number, { counted: string; reason: AdjustmentReason | ''; note: string }>;
+
+/** A refusal travels as 417 with `errorCode: ACCESS_DENIED`; older backends sent 422 or 403. */
+const isRefusal = (error: any): boolean => {
+    const status = error?.response?.status;
+    return error?.response?.data?.errorCode === 'ACCESS_DENIED' || [417, 422, 403].includes(status);
+};
 
 const STATUS_TONE: Record<string, { bg: string; fg: string }> = {
     DRAFT: { bg: alpha(neutral[500], 0.12), fg: neutral[700] },
@@ -79,6 +94,16 @@ const StockCountSheet = () => {
     const [draft, setDraft] = useState<Draft>({});
     const [loading, setLoading] = useState(true);
     const [busy, setBusy] = useState(false);
+    /*
+     * Why the sheet is missing. A refusal used to read "Count sheet not found" — a boundary rendered
+     * as a fact about the record.
+     */
+    const [loadError, setLoadError] = useState<string | null>(null);
+    /** Which reason dialog is open: sending back, or cancelling. Both require a reason. */
+    const [reasonFor, setReasonFor] = useState<'sendBack' | 'cancel' | null>(null);
+
+    const { has } = usePermissions();
+    const currentUserId = (RoutesUtills().getCurrentUser() as { id?: number } | null)?.id ?? null;
 
     const load = useCallback(async () => {
         try {
@@ -90,8 +115,12 @@ const StockCountSheet = () => {
                 reason: (l.reason ?? '') as AdjustmentReason | '',
                 note: l.note ?? '',
             }])));
-        } catch {
-            toast.error('Could not load this count sheet.');
+            setLoadError(null);
+        } catch (error) {
+            setCount(null);
+            setLoadError(isRefusal(error)
+                ? 'You do not have access to this count. Stock takes are limited to stores at your branch.'
+                : 'Could not load this count sheet. Please try again.');
         } finally {
             setLoading(false);
         }
@@ -114,52 +143,56 @@ const StockCountSheet = () => {
     const setField = (commodityId: number, field: 'counted' | 'reason' | 'note', value: string) =>
         setDraft((prev) => ({ ...prev, [commodityId]: { ...prev[commodityId], [field]: value } }));
 
-    const run = async (fn: () => Promise<any>, success: string) => {
+    /** Runs one or more calls in order, stopping at the first failure. Returns whether all ran. */
+    const run = async (steps: Array<() => Promise<any>>, success: string): Promise<boolean> => {
         setBusy(true);
         try {
-            await fn();
+            for (const step of steps) await step();
             toast.success(success);
             await load();
+            return true;
         } catch {
             // The axios interceptor surfaces the server's message, which names the offending lines.
+            return false;
         } finally {
             setBusy(false);
         }
     };
 
-    const save = () => run(() => saveStockCountLinesService(id as string, {
+    const saveLines = () => saveStockCountLinesService(id as string, {
         lines: Object.entries(draft).map(([commodityId, d]) => ({
             commodityId: Number(commodityId),
             countedQuantity: d.counted === '' ? null : Number(d.counted),
             reason: d.reason || null,
             note: d.note || null,
         })),
-    }), 'Counts saved');
+    });
 
-    const submit = async () => {
-        await run(() => saveStockCountLinesService(id as string, {
-            lines: Object.entries(draft).map(([commodityId, d]) => ({
-                commodityId: Number(commodityId),
-                countedQuantity: d.counted === '' ? null : Number(d.counted),
-                reason: d.reason || null,
-                note: d.note || null,
-            })),
-        }), 'Counts saved');
-        await run(() => submitStockCountService(id as string), 'Submitted for review');
-    };
+    const save = () => run([saveLines], 'Counts saved');
 
-    const sendBack = () => {
-        const remarks = window.prompt('Why is this going back to be recounted?');
-        if (!remarks?.trim()) return;
-        run(() => sendBackStockCountService(id as string, remarks.trim()), 'Sent back for recount');
+    // One sequence, so a failed save stops the submit instead of submitting the last saved figures.
+    const submit = () => run([saveLines, () => submitStockCountService(id as string)], 'Submitted for review');
+
+    const confirmReason = async (remarks: string) => {
+        const ok = reasonFor === 'sendBack'
+            ? await run([() => sendBackStockCountService(id as string, remarks)], 'Sent back for recount')
+            : await run([() => cancelStockCountService(id as string, remarks)], 'Count cancelled');
+        if (ok) setReasonFor(null);
     };
 
     if (loading) {
         return <Stack alignItems="center" sx={{ py: 8 }}><CircularProgress sx={{ color: brand[500] }} /></Stack>;
     }
     if (!count) {
-        return <Box sx={{ p: 3 }}><Alert severity="error">Count sheet not found.</Alert></Box>;
+        return <Box sx={{ p: 3 }}><Alert severity="error">{loadError ?? 'Count sheet not found.'}</Alert></Box>;
     }
+
+    // What this viewer may do — the same rules the endpoints apply (see stockTakeRules).
+    const mayRecord = canRecordCounts(count, has);
+    const mayReview = canReview(count, has, currentUserId);
+    const mayPost = canPost(count, has);
+    const mayCancel = canCancel(count, has, currentUserId);
+    const blockedAsCounter = reviewBlockedAsCounter(count, has, currentUserId);
 
     const tone = STATUS_TONE[count.status] ?? STATUS_TONE.DRAFT;
 
@@ -175,10 +208,10 @@ const StockCountSheet = () => {
                         <Box>
                             <Stack direction="row" spacing={1} alignItems="center">
                                 <Typography variant="h6" sx={{ fontWeight: 700, color: neutral[900] }}>{count.reference}</Typography>
-                                <Chip size="small" label={count.status.replace('_', ' ')} sx={{ height: 22, fontWeight: 700, fontSize: '0.68rem', bgcolor: tone.bg, color: tone.fg }} />
+                                <Chip size="small" label={count.status.replace('_', ' ')} sx={{ height: 22, fontWeight: 700, fontSize: '0.8rem', bgcolor: tone.bg, color: tone.fg }} />
                                 {count.blind && counting && (
                                     <Tooltip arrow title="System quantities are withheld while counting, so the shelf is counted rather than the number confirmed.">
-                                        <Chip size="small" icon={<VisibilityOffOutlinedIcon sx={{ fontSize: 13 }} />} label="Blind" sx={{ height: 22, fontWeight: 700, fontSize: '0.68rem', bgcolor: alpha(gold[500], 0.14), color: gold[700], '& .MuiChip-icon': { color: gold[700] } }} />
+                                        <Chip size="small" icon={<VisibilityOffOutlinedIcon sx={{ fontSize: 13 }} />} label="Blind" sx={{ height: 22, fontWeight: 700, fontSize: '0.8rem', bgcolor: alpha(gold[500], 0.14), color: gold[700], '& .MuiChip-icon': { color: gold[700] } }} />
                                     </Tooltip>
                                 )}
                             </Stack>
@@ -235,7 +268,7 @@ const StockCountSheet = () => {
                 <TableContainer sx={{ overflowX: 'auto' }}>
                     <Table size="small" sx={{ minWidth: revealed ? 980 : 780 }}>
                         <TableHead>
-                            <TableRow sx={{ '& th': { bgcolor: alpha(brand[500], 0.04), borderBottom: `1px solid ${border.subtle}`, fontWeight: 700, fontSize: '0.67rem', color: brand[700], textTransform: 'uppercase', letterSpacing: '0.05em', py: 1.4, whiteSpace: 'nowrap' } }}>
+                            <TableRow sx={{ '& th': { bgcolor: alpha(brand[500], 0.04), borderBottom: `1px solid ${border.subtle}`, fontWeight: 700, fontSize: '0.8rem', color: brand[700], textTransform: 'uppercase', letterSpacing: '0.05em', py: 1.4, whiteSpace: 'nowrap' } }}>
                                 <TableCell>Commodity</TableCell>
                                 {revealed && <TableCell align="center">System</TableCell>}
                                 <TableCell align="center" sx={{ width: 130 }}>Counted</TableCell>
@@ -251,7 +284,7 @@ const StockCountSheet = () => {
                                     line={line}
                                     idx={idx}
                                     draft={draft[line.commodityId]}
-                                    editable={counting && !busy}
+                                    editable={mayRecord && !busy}
                                     revealed={revealed}
                                     onChange={setField}
                                 />
@@ -261,11 +294,28 @@ const StockCountSheet = () => {
                 </TableContainer>
             </Paper>
 
-            {/* Actions */}
-            {!terminal && (
+            {blockedAsCounter && (
+                <Alert severity="info">
+                    You counted this sheet, so its variances must be approved by somebody else.
+                </Alert>
+            )}
+
+            {/* Actions — only those this viewer's permissions and relationship to the count allow. */}
+            {!terminal && (mayRecord || mayReview || mayPost || mayCancel) && (
                 <Paper elevation={0} sx={{ p: 2.25, borderRadius: 2, border: `1px solid ${border.subtle}`, bgcolor: '#fff' }}>
-                    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} justifyContent="flex-end">
-                        {counting && (
+                    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} justifyContent="flex-end" alignItems={{ sm: 'center' }}>
+                        {approved && mayPost && (
+                            <Typography variant="body2" sx={{ color: neutral[500], mr: { sm: 'auto' } }}>
+                                Posting is the only step that changes stock.
+                            </Typography>
+                        )}
+                        {mayCancel && (
+                            <Button onClick={() => setReasonFor('cancel')} disabled={busy} startIcon={<BlockOutlinedIcon />}
+                                sx={{ textTransform: 'none', fontWeight: 600, borderRadius: `${radii.pill}px`, px: 2.5, color: statusTokens.danger.strong, mr: { sm: approved && mayPost ? 0 : 'auto' } }}>
+                                Cancel count
+                            </Button>
+                        )}
+                        {mayRecord && (
                             <>
                                 <Button onClick={save} disabled={busy} startIcon={<SaveOutlinedIcon />}
                                     sx={{ textTransform: 'none', fontWeight: 600, borderRadius: `${radii.pill}px`, px: 2.5, color: neutral[700] }}>
@@ -277,32 +327,34 @@ const StockCountSheet = () => {
                                 </Button>
                             </>
                         )}
-                        {reviewing && (
+                        {reviewing && mayReview && (
                             <>
-                                <Button onClick={sendBack} disabled={busy} startIcon={<UndoOutlinedIcon />}
+                                <Button onClick={() => setReasonFor('sendBack')} disabled={busy} startIcon={<UndoOutlinedIcon />}
                                     sx={{ textTransform: 'none', fontWeight: 600, borderRadius: `${radii.pill}px`, px: 2.5, color: statusTokens.warning.strong }}>
                                     Send back
                                 </Button>
-                                <Button onClick={() => run(() => approveStockCountService(id as string), 'Variances approved')}
+                                <Button onClick={() => run([() => approveStockCountService(id as string)], 'Variances approved')}
                                     disabled={busy} variant="contained" disableElevation startIcon={<CheckCircleOutlineIcon />} sx={primaryBtn}>
                                     Approve variances
                                 </Button>
                             </>
                         )}
-                        {approved && (
-                            <>
-                                <Typography variant="body2" sx={{ color: neutral[500], alignSelf: 'center', mr: 'auto' }}>
-                                    Posting is the only step that changes stock.
-                                </Typography>
-                                <Button onClick={() => run(() => postStockCountService(id as string), 'Adjustments posted')}
-                                    disabled={busy} variant="contained" disableElevation startIcon={<PublishOutlinedIcon />} sx={primaryBtn}>
-                                    Post adjustments
-                                </Button>
-                            </>
+                        {approved && mayPost && (
+                            <Button onClick={() => run([() => postStockCountService(id as string)], 'Adjustments posted')}
+                                disabled={busy} variant="contained" disableElevation startIcon={<PublishOutlinedIcon />} sx={primaryBtn}>
+                                Post adjustments
+                            </Button>
                         )}
                     </Stack>
                 </Paper>
             )}
+
+            <ReasonDialog
+                kind={reasonFor}
+                busy={busy}
+                onClose={() => setReasonFor(null)}
+                onConfirm={confirmReason}
+            />
 
             {count.status === 'POSTED' && (
                 <Alert severity="success" icon={<CheckCircleOutlineIcon fontSize="small" />}>
@@ -310,6 +362,53 @@ const StockCountSheet = () => {
                 </Alert>
             )}
         </Box>
+    );
+};
+
+/**
+ * The reason behind Send back or Cancel. Both require one on the server, so the Confirm button waits
+ * for it. Replaces a browser `window.prompt`, which could not say what the reason was for.
+ */
+const ReasonDialog = ({ kind, busy, onClose, onConfirm }: {
+    kind: 'sendBack' | 'cancel' | null;
+    busy: boolean;
+    onClose: () => void;
+    onConfirm: (remarks: string) => void;
+}) => {
+    const [remarks, setRemarks] = useState('');
+    useEffect(() => { if (kind) setRemarks(''); }, [kind]);
+
+    const cancelling = kind === 'cancel';
+    return (
+        <Dialog open={kind !== null} onClose={busy ? undefined : onClose} maxWidth="sm" fullWidth
+            PaperProps={{ sx: { borderRadius: `${radii.xl}px` } }}>
+            <DialogTitle sx={{ fontWeight: 700 }}>
+                {cancelling ? 'Cancel this count' : 'Send back for recount'}
+            </DialogTitle>
+            <DialogContent dividers>
+                <Stack spacing={2}>
+                    <Typography variant="body2" sx={{ color: neutral[600] }}>
+                        {cancelling
+                            ? 'Nothing has been applied to stock, so nothing is undone. The store becomes free for a new count.'
+                            : 'The counter will see this note on the sheet and can correct the lines before submitting again.'}
+                    </Typography>
+                    <TextField
+                        autoFocus fullWidth multiline rows={3} required
+                        label={cancelling ? 'Why is it being cancelled?' : 'What needs recounting?'}
+                        value={remarks} onChange={(e) => setRemarks(e.target.value)}
+                        sx={fieldSx}
+                    />
+                </Stack>
+            </DialogContent>
+            <DialogActions sx={{ px: 3, py: 2 }}>
+                <Button onClick={onClose} disabled={busy} sx={{ textTransform: 'none' }}>Back</Button>
+                <Button onClick={() => onConfirm(remarks.trim())} disabled={busy || !remarks.trim()}
+                    variant="contained" disableElevation
+                    sx={{ ...primaryBtn, ...(cancelling ? { background: statusTokens.danger.strong, '&:hover': { background: statusTokens.danger.strong } } : {}) }}>
+                    {cancelling ? 'Cancel count' : 'Send back'}
+                </Button>
+            </DialogActions>
+        </Dialog>
     );
 };
 
@@ -329,7 +428,7 @@ const SummaryTile = ({ label, value, tone, signed }: {
     label: string; value: number; tone?: { soft: string; strong: string }; signed?: boolean;
 }) => (
     <Box sx={{ flex: 1, p: 1.75, borderRadius: 2, border: `1px solid ${border.subtle}`, bgcolor: tone ? tone.soft : '#fff' }}>
-        <Typography sx={{ fontSize: '0.62rem', fontWeight: 700, color: neutral[400], textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</Typography>
+        <Typography sx={{ fontSize: '0.8rem', fontWeight: 700, color: neutral[400], textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</Typography>
         <Typography sx={{ fontSize: '1.1rem', fontWeight: 800, color: tone ? tone.strong : neutral[900], fontVariantNumeric: 'tabular-nums' }}>
             {signed && value > 0 ? `+${value}` : value}
         </Typography>
@@ -355,11 +454,11 @@ const LineRow = ({ line, idx, draft, editable, revealed, onChange }: {
             bgcolor: line.recountRequired
                 ? statusTokens.warning.soft
                 : idx % 2 ? alpha(neutral[900], 0.012) : 'transparent',
-            '& td': { borderBottom: `1px solid ${alpha(neutral[900], 0.05)}`, py: 1.1, fontSize: '0.83rem' },
+            '& td': { borderBottom: `1px solid ${alpha(neutral[900], 0.05)}`, py: 1.1, fontSize: '0.875rem' },
         }}>
             <TableCell>
-                <Typography sx={{ fontSize: '0.85rem', fontWeight: 600, color: neutral[900] }}>{line.commodityName}</Typography>
-                <Typography sx={{ fontSize: '0.7rem', color: neutral[500] }}>
+                <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: neutral[900] }}>{line.commodityName}</Typography>
+                <Typography sx={{ fontSize: '0.8rem', color: neutral[500] }}>
                     {line.assetTypeName || '—'}
                     {line.recountRequired && ' · stock moved during the count — count this line again'}
                 </Typography>
@@ -416,8 +515,8 @@ const LineRow = ({ line, idx, draft, editable, revealed, onChange }: {
                         {ADJUSTMENT_REASONS.map((r) => (
                             <MenuItem key={r.value} value={r.value}>
                                 <Box>
-                                    <Typography sx={{ fontSize: '0.84rem', fontWeight: 600 }}>{r.label}</Typography>
-                                    <Typography sx={{ fontSize: '0.7rem', color: neutral[500] }}>{r.hint}</Typography>
+                                    <Typography sx={{ fontSize: '0.875rem', fontWeight: 600 }}>{r.label}</Typography>
+                                    <Typography sx={{ fontSize: '0.8rem', color: neutral[500] }}>{r.hint}</Typography>
                                 </Box>
                             </MenuItem>
                         ))}
@@ -440,7 +539,7 @@ const LineRow = ({ line, idx, draft, editable, revealed, onChange }: {
                         sx={fieldSx}
                     />
                 ) : (
-                    <Typography sx={{ color: neutral[600], fontSize: '0.8rem' }}>{line.note || '—'}</Typography>
+                    <Typography sx={{ color: neutral[600], fontSize: '0.875rem' }}>{line.note || '—'}</Typography>
                 )}
             </TableCell>
         </TableRow>

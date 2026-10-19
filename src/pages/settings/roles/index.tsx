@@ -191,7 +191,7 @@ const Roles = () => {
                             icon={<FilterListOffIcon fontSize="small" />}
                             onClick={clearFilters}
                             onDelete={clearFilters}
-                            sx={{ height: 36, borderRadius: '8px', fontSize: '0.8rem', fontWeight: 500 }}
+                            sx={{ height: 36, borderRadius: '8px', fontSize: '0.875rem', fontWeight: 500 }}
                         />
                     )}
                 </Stack>

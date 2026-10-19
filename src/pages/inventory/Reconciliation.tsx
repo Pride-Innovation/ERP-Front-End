@@ -147,7 +147,7 @@ const Reconciliation = () => {
                         <TableContainer sx={{ overflowX: 'auto' }}>
                             <Table sx={{ minWidth: 1040 }} size="small">
                                 <TableHead>
-                                    <TableRow sx={{ '& th': { bgcolor: alpha(brand[500], 0.04), borderBottom: `1px solid ${border.subtle}`, fontWeight: 700, fontSize: '0.68rem', color: brand[700], textTransform: 'uppercase', letterSpacing: '0.05em', py: 1.5, whiteSpace: 'nowrap' } }}>
+                                    <TableRow sx={{ '& th': { bgcolor: alpha(brand[500], 0.04), borderBottom: `1px solid ${border.subtle}`, fontWeight: 700, fontSize: '0.8rem', color: brand[700], textTransform: 'uppercase', letterSpacing: '0.05em', py: 1.5, whiteSpace: 'nowrap' } }}>
                                         <TableCell>Stock / LPO</TableCell>
                                         <TableCell>Commodity</TableCell>
                                         <TableCell align="center">Ordered</TableCell>
@@ -194,23 +194,23 @@ const ReconciliationRow = ({ row, onOpen }: { row: IStockReconciliationRow; onOp
         <TableRow
             hover
             sx={{
-                '& td': { borderBottom: `1px solid ${alpha(neutral[900], 0.05)}`, py: 1.4, fontSize: '0.83rem' },
+                '& td': { borderBottom: `1px solid ${alpha(neutral[900], 0.05)}`, py: 1.4, fontSize: '0.875rem' },
                 bgcolor: row.discrepant ? alpha(gold[500], 0.04) : 'transparent',
             }}
         >
             <TableCell>
-                <Typography sx={{ fontSize: '0.83rem', fontWeight: 700, color: neutral[900] }}>
+                <Typography sx={{ fontSize: '0.875rem', fontWeight: 700, color: neutral[900] }}>
                     {row.lpoNumber || `#${row.stockId}`}
                 </Typography>
-                <Typography sx={{ fontSize: '0.72rem', color: neutral[500] }}>
+                <Typography sx={{ fontSize: '0.8rem', color: neutral[500] }}>
                     {row.stockName || '—'}{row.branchName ? ` · ${row.branchName}` : ''}
                 </Typography>
             </TableCell>
             <TableCell>
-                <Typography sx={{ fontSize: '0.83rem', fontWeight: 600, color: neutral[800] }}>
+                <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: neutral[800] }}>
                     {row.commodityName}
                 </Typography>
-                <Typography sx={{ fontSize: '0.72rem', color: neutral[500] }}>
+                <Typography sx={{ fontSize: '0.8rem', color: neutral[500] }}>
                     {row.assetTypeName || '—'}{row.tracksAssets ? '' : ' · consumable'}
                 </Typography>
             </TableCell>
@@ -256,7 +256,7 @@ const GapChip = ({ value }: { value: number }) =>
             sx={{ height: 22, fontWeight: 700, bgcolor: statusTokens.danger.soft, color: statusTokens.danger.strong }}
         />
     ) : (
-        <Typography component="span" sx={{ color: neutral[400], fontSize: '0.83rem' }}>—</Typography>
+        <Typography component="span" sx={{ color: neutral[400], fontSize: '0.875rem' }}>—</Typography>
     );
 
 const StatCard = ({ icon, label, value, tone }: { icon: ReactNode; label: string; value: number; tone: Record<number, string> }) => (
@@ -265,7 +265,7 @@ const StatCard = ({ icon, label, value, tone }: { icon: ReactNode; label: string
             {icon}
         </Box>
         <Box sx={{ minWidth: 0 }}>
-            <Typography sx={{ fontSize: '0.6rem', fontWeight: 700, color: neutral[400], textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</Typography>
+            <Typography sx={{ fontSize: '0.8rem', fontWeight: 700, color: neutral[400], textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</Typography>
             <Typography sx={{ fontSize: '1.05rem', fontWeight: 800, color: neutral[900], lineHeight: 1.2 }}>{value.toLocaleString()}</Typography>
         </Box>
     </Box>

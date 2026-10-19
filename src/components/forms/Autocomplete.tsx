@@ -47,7 +47,7 @@ export const autocompleteSx = {
         // MUI nested rule has higher specificity — !important is required here too
         '& .MuiAutocomplete-input': {
             padding: '13px 4px !important',
-            fontSize: '0.875rem',
+            fontSize: '0.9375rem',
             lineHeight: 1.5,
         },
     },
@@ -56,7 +56,7 @@ export const autocompleteSx = {
     },
     '& .MuiInputLabel-root': {
         color: 'rgba(0, 0, 0, 0.45)',
-        fontSize: '0.875rem',
+        fontSize: '0.9375rem',
         '&.Mui-focused': { color: PRIMARY_COLOR },
         '&.Mui-error': { color: '#D32F2F' },
     },
@@ -66,7 +66,7 @@ export const autocompleteSx = {
     },
     '& .MuiChip-root': {
         height: 24,
-        fontSize: '0.8rem',
+        fontSize: '0.875rem',
         backgroundColor: alpha(PRIMARY_COLOR, 0.08),
         color: PRIMARY_COLOR,
         '& .MuiChip-deleteIcon': {
@@ -179,7 +179,7 @@ const AutocompleteComponent = ({
                 '& .MuiAutocomplete-listbox': {
                     padding: '4px 0',
                     '& .MuiAutocomplete-option': {
-                        fontSize: '0.875rem',
+                        fontSize: '0.9375rem',
                         minHeight: 40,
                         px: 2,
                         '&:hover': { backgroundColor: alpha(PRIMARY_COLOR, 0.06) },

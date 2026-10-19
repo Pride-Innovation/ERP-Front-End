@@ -69,7 +69,7 @@ const RequestMovements = ({ requestId }: { requestId?: number | string }) => {
                                 <Box minWidth={0}>
                                     <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
                                         <Typography variant="caption" sx={{ fontWeight: 700, color: PRIMARY, fontFamily: 'monospace' }}>#{m.id}</Typography>
-                                        <Chip label={movementTypeLabel(m.movementType)} size="small" sx={{ height: 18, fontSize: '0.62rem', fontWeight: 600, bgcolor: alpha(PRIMARY, 0.06), color: PRIMARY }} />
+                                        <Chip label={movementTypeLabel(m.movementType)} size="small" sx={{ height: 18, fontSize: '0.8rem', fontWeight: 600, bgcolor: alpha(PRIMARY, 0.06), color: PRIMARY }} />
                                     </Stack>
                                     <Stack direction="row" alignItems="center" spacing={0.5} mt={0.25}>
                                         <Typography variant="caption" color="text.secondary" noWrap>{m.sourceStore?.name ?? '—'}</Typography>
@@ -79,7 +79,7 @@ const RequestMovements = ({ requestId }: { requestId?: number | string }) => {
                                 </Box>
                             </Stack>
                             <Stack direction="row" spacing={1} alignItems="center" flexShrink={0}>
-                                <Chip label={cfg.label} size="small" sx={{ height: 20, fontSize: '0.66rem', fontWeight: 700, bgcolor: cfg.bg, color: cfg.color }} />
+                                <Chip label={cfg.label} size="small" sx={{ height: 20, fontSize: '0.8rem', fontWeight: 700, bgcolor: cfg.bg, color: cfg.color }} />
                                 <LaunchOutlinedIcon sx={{ fontSize: 15, color: 'text.disabled' }} />
                             </Stack>
                         </Stack>

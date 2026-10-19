@@ -22,7 +22,7 @@ const datePickerSx = {
     '& .MuiInputBase-root': {
         borderRadius: '6px',
         backgroundColor: alpha(PRIMARY_COLOR, 0.025),
-        fontSize: '0.875rem',
+        fontSize: '0.9375rem',
         transition: 'all 0.2s ease',
         '&:hover .MuiOutlinedInput-notchedOutline': {
             borderColor: alpha(PRIMARY_COLOR, 0.5),
@@ -38,7 +38,7 @@ const datePickerSx = {
     },
     '& .MuiInputBase-input': {
         py: '8.5px',
-        fontSize: '0.875rem',
+        fontSize: '0.9375rem',
     },
     '& .MuiInputAdornment-root .MuiIconButton-root': {
         color: PRIMARY_COLOR,

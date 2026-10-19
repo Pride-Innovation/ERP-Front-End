@@ -284,20 +284,20 @@ const Consultants = () => {
                                     <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
                                         <Chip size="small"
                                             label={consultant.active !== false ? 'Active' : 'Inactive'}
-                                            sx={{ height: 24, fontWeight: 600, fontSize: '0.72rem',
+                                            sx={{ height: 24, fontWeight: 600, fontSize: '0.8rem',
                                                 bgcolor: consultant.active !== false ? alpha('#15803D', 0.08) : alpha('#B91C1C', 0.08),
                                                 color: consultant.active !== false ? '#15803D' : '#B91C1C' }} />
                                         {consultant.specialization && (
                                             <Chip size="small" label={consultant.specialization}
-                                                sx={{ height: 24, fontWeight: 600, fontSize: '0.72rem', bgcolor: alpha(PRIMARY, 0.07), color: brand[700] }} />
+                                                sx={{ height: 24, fontWeight: 600, fontSize: '0.8rem', bgcolor: alpha(PRIMARY, 0.07), color: brand[700] }} />
                                         )}
                                         {consultant.contactPerson && (
                                             <Chip size="small" icon={<PersonOutlineOutlinedIcon sx={{ fontSize: 14 }} />} label={consultant.contactPerson}
-                                                sx={{ height: 24, fontWeight: 500, fontSize: '0.72rem', bgcolor: alpha('#64748B', 0.07), color: neutral[600] }} />
+                                                sx={{ height: 24, fontWeight: 500, fontSize: '0.8rem', bgcolor: alpha('#64748B', 0.07), color: neutral[600] }} />
                                         )}
                                         {consultant.phone && (
                                             <Chip size="small" icon={<LocalPhoneOutlinedIcon sx={{ fontSize: 14 }} />} label={consultant.phone}
-                                                sx={{ height: 24, fontWeight: 500, fontSize: '0.72rem', bgcolor: alpha('#64748B', 0.07), color: neutral[600] }} />
+                                                sx={{ height: 24, fontWeight: 500, fontSize: '0.8rem', bgcolor: alpha('#64748B', 0.07), color: neutral[600] }} />
                                         )}
                                     </Stack>
                                 </Paper>

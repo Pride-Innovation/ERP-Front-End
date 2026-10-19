@@ -180,7 +180,7 @@ const CreateRequest = () => {
                             sx={{ mb: 1, justifyContent: { xs: 'flex-start', md: 'flex-end' } }}
                         >
                             <Typography sx={{
-                                fontSize: '0.68rem',
+                                fontSize: '0.8rem',
                                 fontWeight: 700,
                                 color: neutral[400],
                                 textTransform: 'uppercase',
@@ -189,7 +189,7 @@ const CreateRequest = () => {
                                 Completion
                             </Typography>
                             <Typography sx={{
-                                fontSize: '0.78rem',
+                                fontSize: '0.875rem',
                                 fontWeight: 800,
                                 fontVariantNumeric: 'tabular-nums',
                                 color: isDone ? status.success.strong : brand[700],
@@ -197,7 +197,7 @@ const CreateRequest = () => {
                                 {formProgress}%
                             </Typography>
                             {isDone && (
-                                <Typography sx={{ fontSize: '0.72rem', fontWeight: 600, color: status.success.strong }}>
+                                <Typography sx={{ fontSize: '0.8rem', fontWeight: 600, color: status.success.strong }}>
                                     · Ready to submit
                                 </Typography>
                             )}
@@ -226,7 +226,7 @@ const CreateRequest = () => {
                                         <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: neutral[300], mx: '3px' }} />
                                     )}
                                     <Typography sx={{
-                                        fontSize: '0.68rem',
+                                        fontSize: '0.8rem',
                                         fontWeight: 600,
                                         color: item.done ? brand[700] : neutral[500],
                                     }}>
@@ -273,7 +273,7 @@ const CreateRequest = () => {
                                             {state === 'done' ? <CheckRoundedIcon sx={{ fontSize: 14 }} /> : step.icon}
                                         </Box>
                                         <Typography sx={{
-                                            fontSize: '0.72rem',
+                                            fontSize: '0.8rem',
                                             fontWeight: state === 'active' ? 700 : 600,
                                             color: 'inherit',
                                             whiteSpace: 'nowrap',

@@ -80,7 +80,7 @@ const TitleCard = ({ title, updateTitle, deleteTitle, index = 0 }: ITitleDetails
                                     size="small"
                                     sx={{
                                         height: 20,
-                                        fontSize: '0.65rem',
+                                        fontSize: '0.8rem',
                                         fontWeight: 700,
                                         bgcolor: alpha(color, 0.1),
                                         color,
@@ -176,7 +176,7 @@ const DetailRow = ({
                 color: value ? '#334155' : '#94A3B8',
                 fontStyle: value ? 'normal' : 'italic',
                 fontWeight: value ? 500 : 400,
-                fontSize: '0.8rem',
+                fontSize: '0.875rem',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
                 whiteSpace: 'nowrap',

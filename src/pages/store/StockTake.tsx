@@ -44,13 +44,16 @@ import RuleOutlinedIcon from '@mui/icons-material/RuleOutlined';
 
 import axiosInstance from '../../core/apis/axiosInstance';
 import { fetchStockAdjustmentsService, fetchStockCountsService, openStockCountService } from './service';
-import { ADJUSTMENT_REASONS, IStockCount, IVarianceReport } from './stockTakeInterface';
+import { IStockCount, IVarianceReport, adjustmentReasonLabel } from './stockTakeInterface';
+import { ICountableStore, canOpenCount, countableStores } from './stockTakeRules';
+import usePermissions from '../../core/permissions/usePermissions';
+import useAccessScope from '../../core/permissions/useAccessScope';
 import { ROUTES } from '../../core/routes/routes';
 import { PageHero, StatTile } from '../../components/layout';
 import { fieldSx } from '../../components/forms/Inputs';
 import { brand, neutral, border, radii, status as statusTokens } from '../../utils/tokens';
 
-interface IStoreOption { id: number; name: string; storeType: string }
+type IStoreOption = ICountableStore;
 
 const STATUS_TONE: Record<string, { bg: string; fg: string }> = {
     DRAFT: { bg: alpha(neutral[500], 0.12), fg: neutral[700] },
@@ -68,6 +71,9 @@ const StockTake = () => {
     const [loading, setLoading] = useState(true);
     const [openDialog, setOpenDialog] = useState(false);
     const navigate = useNavigate();
+    const { has } = usePermissions();
+    // Opening a count is PERFORM_STOCK_TAKE; reading this page is only READ_STOCK_TAKE.
+    const mayOpen = canOpenCount(has);
 
     const load = useCallback(async () => {
         setLoading(true);
@@ -95,12 +101,12 @@ const StockTake = () => {
                 title="Stock Take"
                 subtitle="Count what is on the shelf and reconcile the balances to it"
                 icon={<FactCheckOutlinedIcon />}
-                actions={
+                actions={mayOpen ? (
                     <Button variant="contained" startIcon={<AddRoundedIcon />} onClick={() => setOpenDialog(true)}
                         sx={{ bgcolor: brand[500], textTransform: 'none', fontWeight: 600, borderRadius: '8px', '&:hover': { bgcolor: brand[700] } }}>
                         Open a Count
                     </Button>
-                }
+                ) : undefined}
                 stat={{ value: loading ? '…' : String(counts.length), label: 'counts', helper: `${inFlight} in progress` }}
             />
 
@@ -123,7 +129,8 @@ const StockTake = () => {
 
             {!loading && counts.length === 0 && (
                 <Alert severity="info" sx={{ mb: 3 }}>
-                    No stock takes yet. Open a count to reconcile a store against what is physically on its shelves.
+                    No stock takes yet.
+                    {mayOpen && ' Open a count to reconcile a store against what is physically on its shelves.'}
                 </Alert>
             )}
 
@@ -135,7 +142,7 @@ const StockTake = () => {
                     <TableContainer sx={{ overflowX: 'auto' }}>
                         <Table size="small" sx={{ minWidth: 800 }}>
                             <TableHead>
-                                <TableRow sx={{ '& th': { bgcolor: alpha(brand[500], 0.04), borderBottom: `1px solid ${border.subtle}`, fontWeight: 700, fontSize: '0.67rem', color: brand[700], textTransform: 'uppercase', letterSpacing: '0.05em', py: 1.4, whiteSpace: 'nowrap' } }}>
+                                <TableRow sx={{ '& th': { bgcolor: alpha(brand[500], 0.04), borderBottom: `1px solid ${border.subtle}`, fontWeight: 700, fontSize: '0.8rem', color: brand[700], textTransform: 'uppercase', letterSpacing: '0.05em', py: 1.4, whiteSpace: 'nowrap' } }}>
                                     <TableCell>Reference</TableCell>
                                     <TableCell>Store</TableCell>
                                     <TableCell>Status</TableCell>
@@ -149,11 +156,11 @@ const StockTake = () => {
                                 {counts.map((c, idx) => {
                                     const tone = STATUS_TONE[c.status] ?? STATUS_TONE.DRAFT;
                                     return (
-                                        <TableRow key={c.id} hover sx={{ '&:nth-of-type(odd)': { bgcolor: alpha(neutral[900], 0.012) }, '& td': { borderBottom: `1px solid ${alpha(neutral[900], 0.05)}`, py: 1.2, fontSize: '0.83rem' } }}>
+                                        <TableRow key={c.id} hover sx={{ '&:nth-of-type(odd)': { bgcolor: alpha(neutral[900], 0.012) }, '& td': { borderBottom: `1px solid ${alpha(neutral[900], 0.05)}`, py: 1.2, fontSize: '0.875rem' } }}>
                                             <TableCell sx={{ fontWeight: 700, color: neutral[900] }}>{c.reference}</TableCell>
                                             <TableCell sx={{ color: neutral[600] }}>{c.storeName}</TableCell>
                                             <TableCell>
-                                                <Chip size="small" label={c.status.replace('_', ' ')} sx={{ height: 21, fontWeight: 700, fontSize: '0.68rem', bgcolor: tone.bg, color: tone.fg }} />
+                                                <Chip size="small" label={c.status.replace('_', ' ')} sx={{ height: 21, fontWeight: 700, fontSize: '0.8rem', bgcolor: tone.bg, color: tone.fg }} />
                                             </TableCell>
                                             <TableCell align="center">{c.countedLines}/{c.totalLines}</TableCell>
                                             <TableCell align="center">{c.linesWithVariance || '—'}</TableCell>
@@ -184,7 +191,7 @@ const StockTake = () => {
                     <TableContainer sx={{ overflowX: 'auto' }}>
                         <Table size="small" sx={{ minWidth: 800 }}>
                             <TableHead>
-                                <TableRow sx={{ '& th': { bgcolor: alpha(brand[500], 0.04), borderBottom: `1px solid ${border.subtle}`, fontWeight: 700, fontSize: '0.67rem', color: brand[700], textTransform: 'uppercase', letterSpacing: '0.05em', py: 1.4, whiteSpace: 'nowrap' } }}>
+                                <TableRow sx={{ '& th': { bgcolor: alpha(brand[500], 0.04), borderBottom: `1px solid ${border.subtle}`, fontWeight: 700, fontSize: '0.8rem', color: brand[700], textTransform: 'uppercase', letterSpacing: '0.05em', py: 1.4, whiteSpace: 'nowrap' } }}>
                                     <TableCell>Commodity</TableCell>
                                     <TableCell>Store</TableCell>
                                     <TableCell align="center">Before</TableCell>
@@ -197,7 +204,7 @@ const StockTake = () => {
                             </TableHead>
                             <TableBody>
                                 {report.adjustments.map((a, idx) => (
-                                    <TableRow key={a.id} hover sx={{ '&:nth-of-type(odd)': { bgcolor: alpha(neutral[900], 0.012) }, '& td': { borderBottom: `1px solid ${alpha(neutral[900], 0.05)}`, py: 1.2, fontSize: '0.83rem' } }}>
+                                    <TableRow key={a.id} hover sx={{ '&:nth-of-type(odd)': { bgcolor: alpha(neutral[900], 0.012) }, '& td': { borderBottom: `1px solid ${alpha(neutral[900], 0.05)}`, py: 1.2, fontSize: '0.875rem' } }}>
                                         <TableCell sx={{ fontWeight: 600, color: neutral[900] }}>{a.commodityName}</TableCell>
                                         <TableCell sx={{ color: neutral[600] }}>{a.storeName}</TableCell>
                                         <TableCell align="center" sx={{ fontVariantNumeric: 'tabular-nums' }}>{a.quantityBefore}</TableCell>
@@ -211,11 +218,12 @@ const StockTake = () => {
                                                 }} />
                                         </TableCell>
                                         <TableCell sx={{ color: neutral[700] }}>
-                                            {ADJUSTMENT_REASONS.find((r) => r.value === a.reason)?.label ?? a.reason}
-                                            {a.note && <Typography sx={{ fontSize: '0.7rem', color: neutral[500] }}>{a.note}</Typography>}
+                                            {adjustmentReasonLabel(a.reason)}
+                                            {a.note && <Typography sx={{ fontSize: '0.8rem', color: neutral[500] }}>{a.note}</Typography>}
                                         </TableCell>
-                                        <TableCell sx={{ color: neutral[500], fontSize: '0.76rem' }}>{a.countReference}</TableCell>
-                                        <TableCell sx={{ color: neutral[500], fontSize: '0.76rem' }}>{moment(a.postedAt).format('DD MMM YYYY')}</TableCell>
+                                        {/* A reversal comes from a deleted stock order and belongs to no count. */}
+                                        <TableCell sx={{ color: neutral[500], fontSize: '0.8rem' }}>{a.countReference || '—'}</TableCell>
+                                        <TableCell sx={{ color: neutral[500], fontSize: '0.8rem' }}>{moment(a.postedAt).format('DD MMM YYYY')}</TableCell>
                                     </TableRow>
                                 ))}
                             </TableBody>
@@ -224,7 +232,7 @@ const StockTake = () => {
                 </Paper>
             )}
 
-            <OpenCountDialog open={openDialog} onClose={() => setOpenDialog(false)} onOpened={(id) => navigate(`${ROUTES.STOCK_TAKE}/${id}`)} />
+            {mayOpen && <OpenCountDialog open={openDialog} onClose={() => setOpenDialog(false)} onOpened={(id) => navigate(`${ROUTES.STOCK_TAKE}/${id}`)} />}
         </Box>
     );
 };
@@ -236,13 +244,16 @@ const OpenCountDialog = ({ open, onClose, onOpened }: {
     const [store, setStore] = useState<IStoreOption | null>(null);
     const [notes, setNotes] = useState('');
     const [saving, setSaving] = useState(false);
+    const { canManage } = useAccessScope();
 
     useEffect(() => {
         if (!open) return;
         (async () => {
             try {
                 const res = await axiosInstance.get('inventory/stores');
-                setStores((res.data as IStoreOption[]) ?? []);
+                // Only stores this viewer may count — the same rule the server applies on Open.
+                setStores(countableStores((res.data as IStoreOption[]) ?? [],
+                    (locationId) => canManage('INVENTORY', { branchId: locationId })));
             } catch {
                 setStores([]);
             }
@@ -284,6 +295,7 @@ const OpenCountDialog = ({ open, onClose, onOpened }: {
                         onChange={(_, v) => setStore(v)}
                         getOptionLabel={(s) => `${s.name}${s.storeType ? ` · ${s.storeType}` : ''}`}
                         isOptionEqualToValue={(a, b) => a.id === b.id}
+                        noOptionsText="No store at your branch that you can count"
                         renderInput={(params) => (
                             <TextField {...params} size="medium" label="Store" required sx={fieldSx} />
                         )}

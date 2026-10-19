@@ -27,7 +27,7 @@ const ButtonComponent = ({
         minHeight: "40px",
         textTransform: 'none',
         fontWeight: 600,
-        fontSize: '0.875rem',
+        fontSize: '0.9375rem',
         borderRadius: '8px',
         letterSpacing: '0.01em',
         ...(variant === 'contained' && {

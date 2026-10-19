@@ -58,7 +58,7 @@ const RequestCommodties = ({ requestCommodties }: {
                         bgcolor: alpha(TEAL, 0.08),
                         color: TEAL,
                         fontWeight: 700,
-                        fontSize: '0.72rem',
+                        fontSize: '0.8rem',
                         height: 24,
                         border: `1px solid ${alpha(TEAL, 0.2)}`,
                     }}
@@ -92,7 +92,7 @@ const RequestCommodties = ({ requestCommodties }: {
                             variant="caption"
                             fontWeight={700}
                             color="text.disabled"
-                            sx={{ textTransform: 'uppercase', letterSpacing: '0.5px', fontSize: '0.68rem' }}
+                            sx={{ textTransform: 'uppercase', letterSpacing: '0.5px', fontSize: '0.8rem' }}
                         >
                             {h}
                         </Typography>
@@ -139,7 +139,7 @@ const RequestCommodties = ({ requestCommodties }: {
                                 bgcolor: alpha(TEAL, 0.08),
                                 color: TEAL,
                                 fontWeight: 700,
-                                fontSize: '0.75rem',
+                                fontSize: '0.8rem',
                                 minWidth: 36,
                                 height: 24,
                                 border: `1px solid ${alpha(TEAL, 0.18)}`,

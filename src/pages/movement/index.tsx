@@ -12,7 +12,7 @@ import { PERMISSIONS } from '../../core/permissions/constants';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import {
-    alpha, Box, Button, Chip, Grid, Stack, Tooltip, Typography,
+    alpha, Box, Button, Chip, Grid, Stack, Tooltip,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import SwapHorizOutlinedIcon from '@mui/icons-material/SwapHorizOutlined';
@@ -27,7 +27,7 @@ import { RootState } from '../../store';
 import { ROUTES } from '../../core/routes/routes';
 import ModalComponent from '../../components/modal';
 import { PageHero, PageSection, StatTile, EmptyState } from '../../components/layout';
-import { brand, neutral } from '../../utils/tokens';
+import { brand } from '../../utils/tokens';
 import MovementUtills from './utills';
 import MovementTable from './MovementTable';
 import RepairFlowsModal from './RepairFlowsModal';
@@ -245,7 +245,7 @@ const Movement = () => {
                                     label={`${pendingCount} awaiting you`}
                                     onClick={() => setFilters((f) => ({ ...f, status: 'DRAFT' }))}
                                     sx={{
-                                        height: 32, fontWeight: 700, fontSize: '0.76rem', cursor: 'pointer',
+                                        height: 32, fontWeight: 700, fontSize: '0.8rem', cursor: 'pointer',
                                         bgcolor: alpha('#F59E0B', 0.14), color: '#B45309',
                                         border: `1px solid ${alpha('#F59E0B', 0.3)}`,
                                         '& .MuiChip-icon': { color: '#B45309' },
@@ -358,29 +358,11 @@ const Movement = () => {
             <PageSection
                 title={filtersActive ? 'Filtered Movements' : 'Recent Movements'}
                 subtitle={filtersActive
-                    ? `${recent.length} movement(s) matching the current filters`
-                    : 'The latest transfers across all stores'}
+                    ? `${recent.length} movement${recent.length === 1 ? '' : 's'} matching the current filters`
+                    : `The latest ${recent.length} of ${movements.length} movements across all stores`}
                 icon={<SwapHorizOutlinedIcon />}
                 mb={0}
             >
-                {/* Result count — mirrors the audit-trail page so the two read the same way. */}
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
-                    <Typography sx={{ fontSize: '0.8rem', color: neutral[500] }}>
-                        Showing{' '}
-                        <Box component="span" sx={{ fontWeight: 700, color: neutral[900] }}>{recent.length}</Box>
-                        {' '}of{' '}
-                        <Box component="span" sx={{ fontWeight: 700, color: neutral[900] }}>{movements.length}</Box>
-                        {' '}movement{movements.length === 1 ? '' : 's'}
-                    </Typography>
-                    {filtersActive && (
-                        <Chip
-                            label="Filters applied"
-                            size="small"
-                            sx={{ height: 22, fontWeight: 600, fontSize: '0.68rem', bgcolor: alpha(brand[500], 0.08), color: brand[700] }}
-                        />
-                    )}
-                </Box>
-
                 <MovementTable
                     rows={recent}
                     loading={loading}
@@ -404,22 +386,16 @@ const Movement = () => {
                             )}
                         />
                     )}
+                    // One count per page: the section subtitle states it, so the footer only links on.
                     footer={(
-                        <>
-                            <Typography sx={{ fontSize: '0.75rem', color: neutral[500] }}>
-                                {filtersActive
-                                    ? 'Every movement matching the current filters'
-                                    : `Latest ${recent.length} of ${movements.length} movements`}
-                            </Typography>
-                            <Button
-                                size="small"
-                                endIcon={<ArrowForwardIcon />}
-                                onClick={() => navigate(`${ROUTES.MOVEMENT}/all`)}
-                                sx={{ textTransform: 'none', fontWeight: 600, fontSize: '0.75rem', color: brand[600] }}
-                            >
-                                View all movements
-                            </Button>
-                        </>
+                        <Button
+                            size="small"
+                            endIcon={<ArrowForwardIcon />}
+                            onClick={() => navigate(`${ROUTES.MOVEMENT}/all`)}
+                            sx={{ ml: 'auto', textTransform: 'none', fontWeight: 600, fontSize: '0.875rem', color: brand[600] }}
+                        >
+                            View all movements
+                        </Button>
                     )}
                 />
             </PageSection>

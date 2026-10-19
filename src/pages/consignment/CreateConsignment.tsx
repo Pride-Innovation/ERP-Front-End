@@ -41,13 +41,13 @@ const RoutePanel = ({ kind, name, accent, icon }: {
     >
         <Stack direction="row" spacing={0.75} alignItems="center" mb={0.4}>
             <Box sx={{ color: accent, display: 'flex', '& .MuiSvgIcon-root': { fontSize: 14 } }}>{icon}</Box>
-            <Typography variant="caption" sx={{ fontWeight: 700, color: accent, letterSpacing: '0.06em', fontSize: '0.62rem' }}>
+            <Typography variant="caption" sx={{ fontWeight: 700, color: accent, letterSpacing: '0.06em', fontSize: '0.8rem' }}>
                 {kind}
             </Typography>
         </Stack>
         <Typography
             variant="body2"
-            sx={{ fontWeight: 700, color: name ? neutral[900] : neutral[400], fontSize: '0.84rem' }}
+            sx={{ fontWeight: 700, color: name ? neutral[900] : neutral[400], fontSize: '0.875rem' }}
             noWrap
         >
             {name ?? 'Not chosen yet'}
@@ -140,7 +140,7 @@ const CreateConsignment = ({
                     <Typography variant="subtitle2" sx={{ fontWeight: 700, color: neutral[900], lineHeight: 1.3 }}>
                         One courier run
                     </Typography>
-                    <Typography variant="caption" sx={{ color: neutral[600], fontSize: '0.78rem' }}>
+                    <Typography variant="caption" sx={{ color: neutral[600], fontSize: '0.875rem' }}>
                         Open a consignment for a route, then load the approved movements travelling on it —
                         they can come from different stores and different requests.
                     </Typography>
@@ -193,7 +193,7 @@ const CreateConsignment = ({
             </Stack>
 
             {existing.length > 0 && (
-                <Alert severity="info" sx={{ borderRadius: 2, '& .MuiAlert-message': { fontSize: '0.82rem' } }}>
+                <Alert severity="info" sx={{ borderRadius: 2, '& .MuiAlert-message': { fontSize: '0.875rem' } }}>
                     There {existing.length === 1 ? 'is already a consignment' : `are already ${existing.length} consignments`} being
                     loaded for this route (<strong>{existing.map((c) => c.reference).filter(Boolean).join(', ')}</strong>).
                     Adding your movements to one of those keeps the run on a single courier.
@@ -205,7 +205,7 @@ const CreateConsignment = ({
                 fullWidth multiline rows={3}
                 // fieldSx pads the inner input for single-line height; a multiline root already
                 // carries its own padding, so zero the textarea's to avoid doubling up.
-                sx={{ ...fieldSx, '& .MuiInputBase-input': { padding: 0, fontSize: '0.875rem', lineHeight: 1.5 } }}
+                sx={{ ...fieldSx, '& .MuiInputBase-input': { padding: 0, fontSize: '0.9375rem', lineHeight: 1.5 } }}
                 placeholder="e.g. Weekly Kampala run"
                 value={remarks}
                 onChange={(e) => setRemarks(e.target.value)}

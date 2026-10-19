@@ -506,7 +506,7 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
                     Choose the asset-lifecycle movement you want to initiate.
                 </Typography>
                 {availableFlows.length === 0 && (
-                    <Alert severity="info" sx={{ borderRadius: 2, '& .MuiAlert-message': { fontSize: '0.82rem' } }}>
+                    <Alert severity="info" sx={{ borderRadius: 2, '& .MuiAlert-message': { fontSize: '0.875rem' } }}>
                         You do not have the permissions for any of these actions. Sending an asset for
                         repair needs <strong>REPAIR_ASSET</strong>; writing one off needs
                         <strong> DISPOSE_ASSET</strong>.
@@ -611,7 +611,7 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
                     onClick={back}
                     startIcon={<ArrowBackIosNewOutlinedIcon sx={{ fontSize: '11px !important' }} />}
                     sx={{
-                        textTransform: 'none', fontWeight: 600, fontSize: '0.75rem', flexShrink: 0,
+                        textTransform: 'none', fontWeight: 600, fontSize: '0.8rem', flexShrink: 0,
                         color: meta!.color, bgcolor: '#fff',
                         border: `1px solid ${alpha(meta!.color, 0.3)}`,
                         borderRadius: '8px', px: 1.25,
@@ -651,7 +651,7 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
                                         ? `Default routing: ${asset.assetType.repairDestination}`
                                         : 'No default routing set'}
                                     sx={{
-                                        height: 20, fontSize: '0.66rem', fontWeight: 700,
+                                        height: 20, fontSize: '0.8rem', fontWeight: 700,
                                         ...(asset.assetType?.repairDestination
                                             ? { bgcolor: alpha(meta!.color, 0.08), color: meta!.color }
                                             : { bgcolor: '#F1F5F9', color: '#64748B' }),
@@ -662,7 +662,7 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
                     )}
 
                     {categoryNotRepairable ? (
-                        <Alert severity="warning" sx={{ borderRadius: 2, '& .MuiAlert-message': { fontSize: '0.82rem' } }}>
+                        <Alert severity="warning" sx={{ borderRadius: 2, '& .MuiAlert-message': { fontSize: '0.875rem' } }}>
                             The <strong>{asset?.assetType?.name}</strong> category is marked non-repairable —
                             this transfer will be diverted straight to the <strong>Disposal store</strong>.
                         </Alert>
@@ -716,7 +716,7 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
                                                 mt: 0.5, borderRadius: '8px',
                                                 boxShadow: `0 4px 24px ${alpha('#000', 0.12)}`,
                                                 '& .MuiMenuItem-root': {
-                                                    fontSize: '0.875rem', minHeight: 40, px: 2,
+                                                    fontSize: '0.9375rem', minHeight: 40, px: 2,
                                                     '&:hover': { backgroundColor: alpha(PRIMARY, 0.06) },
                                                     '&.Mui-selected': {
                                                         backgroundColor: alpha(PRIMARY, 0.1),
@@ -788,7 +788,7 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
                                             <UploadFileOutlinedIcon sx={{ fontSize: 18 }} />
                                         </Box>
                                         <Box sx={{ minWidth: 0 }}>
-                                            <Typography variant="body2" sx={{ fontWeight: 600, color: '#1E293B', fontSize: '0.82rem' }}>
+                                            <Typography variant="body2" sx={{ fontWeight: 600, color: '#1E293B', fontSize: '0.875rem' }}>
                                                 Attach signed dispatch document(s) <Box component="span" sx={{ color: '#DC2626' }}>*</Box>
                                             </Typography>
                                             <Typography variant="caption" sx={{ color: '#94A3B8' }}>
@@ -817,7 +817,7 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
                                                     deleteIcon={<CloseIcon />}
                                                     onDelete={() => setDispatchDocs((prev) => prev.filter((_, j) => j !== i))}
                                                     sx={{
-                                                        maxWidth: 220, fontWeight: 600, fontSize: '0.72rem',
+                                                        maxWidth: 220, fontWeight: 600, fontSize: '0.8rem',
                                                         bgcolor: alpha(meta!.color, 0.07), color: meta!.color,
                                                         '& .MuiChip-deleteIcon': { color: alpha(meta!.color, 0.55), '&:hover': { color: meta!.color } },
                                                     }}
@@ -911,7 +911,7 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
                                         label={a.pastUsefulLife ? 'Ready for disposal' : 'In service'}
                                         sx={{
                                             flexShrink: 0,
-                                            fontSize: '0.68rem',
+                                            fontSize: '0.8rem',
                                             fontWeight: 700,
                                             bgcolor: a.pastUsefulLife ? alpha('#B91C1C', 0.08) : alpha('#B45309', 0.1),
                                             color: a.pastUsefulLife ? '#B91C1C' : '#B45309',
@@ -925,7 +925,7 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
 
                     {needsEarlyDisposalReason && (
                         <>
-                            <Alert severity="warning" sx={{ borderRadius: 2, '& .MuiAlert-message': { fontSize: '0.82rem' } }}>
+                            <Alert severity="warning" sx={{ borderRadius: 2, '& .MuiAlert-message': { fontSize: '0.875rem' } }}>
                                 This asset has served <strong>{disposalCandidate?.monthsInService} of {disposalCandidate?.usefulLifeMonths ?? '—'} months</strong> of
                                 its useful life. It can still be written off — damage and theft do not wait for the
                                 schedule — but the reason is recorded on the movement.
@@ -944,7 +944,7 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
                         </>
                     )}
 
-                    <Alert severity="info" sx={{ borderRadius: 2, '& .MuiAlert-message': { fontSize: '0.82rem' } }}>
+                    <Alert severity="info" sx={{ borderRadius: 2, '& .MuiAlert-message': { fontSize: '0.875rem' } }}>
                         The asset moves to the <strong>Disposal store</strong> and its status becomes
                         pending disposal once the movement completes.
                     </Alert>
@@ -990,7 +990,7 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
                     {previewLoading && <Typography variant="caption" sx={{ color: '#64748B' }}>Resolving where this asset belongs…</Typography>}
 
                     {!previewLoading && preview?.blockedReason && (
-                        <Alert severity="error" sx={{ borderRadius: 2, '& .MuiAlert-message': { fontSize: '0.82rem' } }}>
+                        <Alert severity="error" sx={{ borderRadius: 2, '& .MuiAlert-message': { fontSize: '0.875rem' } }}>
                             {preview.blockedReason}
                         </Alert>
                     )}
@@ -1013,7 +1013,7 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
                             </Box>
 
                             {preview.returningToBranchUnassigned && (
-                                <Alert severity="info" sx={{ borderRadius: 2, '& .MuiAlert-message': { fontSize: '0.82rem' } }}>
+                                <Alert severity="info" sx={{ borderRadius: 2, '& .MuiAlert-message': { fontSize: '0.875rem' } }}>
                                     The previous holder is no longer active, so this asset returns to
                                     <strong> {preview.destinationLocationName ?? 'its origin branch'}</strong> unassigned and
                                     flagged as pool stock, available to lend out.
@@ -1095,7 +1095,7 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
                                     <UploadFileOutlinedIcon sx={{ fontSize: 18 }} />
                                 </Box>
                                 <Box sx={{ minWidth: 0 }}>
-                                    <Typography variant="body2" sx={{ fontWeight: 600, color: '#1E293B', fontSize: '0.82rem' }}>
+                                    <Typography variant="body2" sx={{ fontWeight: 600, color: '#1E293B', fontSize: '0.875rem' }}>
                                         Attach completion document(s)
                                     </Typography>
                                     <Typography variant="caption" sx={{ color: '#94A3B8' }}>
@@ -1124,7 +1124,7 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
                                             deleteIcon={<CloseIcon />}
                                             onDelete={() => setCompletionDocs((prev) => prev.filter((_, j) => j !== i))}
                                             sx={{
-                                                maxWidth: 220, fontWeight: 600, fontSize: '0.72rem',
+                                                maxWidth: 220, fontWeight: 600, fontSize: '0.8rem',
                                                 bgcolor: alpha(meta!.color, 0.07), color: meta!.color,
                                                 '& .MuiChip-deleteIcon': { color: alpha(meta!.color, 0.55), '&:hover': { color: meta!.color } },
                                             }}
@@ -1140,7 +1140,7 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
                               * travel. A loaner now stays with them until they hand it back.
                               */}
                             {preview.recipientUserId && (
-                                <Alert severity="info" sx={{ borderRadius: 2, '& .MuiAlert-message': { fontSize: '0.82rem' } }}>
+                                <Alert severity="info" sx={{ borderRadius: 2, '& .MuiAlert-message': { fontSize: '0.875rem' } }}>
                                     Any temporary asset {preview.recipientUserName ?? 'the user'} holds stays with them
                                     until this asset reaches them. They are then reminded to return it, from My Assets
                                     on their dashboard.
@@ -1161,7 +1161,7 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
             {/* A blocked preview has no journey to describe — its source and destination are the
                 little that could be resolved before the rule stopped it, so neither note applies. */}
             {showLogistics && preview && !preview.blockedReason && !preview.interLocation && (
-                <Alert severity="info" sx={{ borderRadius: 2, '& .MuiAlert-message': { fontSize: '0.82rem' } }}>
+                <Alert severity="info" sx={{ borderRadius: 2, '& .MuiAlert-message': { fontSize: '0.875rem' } }}>
                     {preview.sourceLocationName
                         ? <>Both ends of this movement are within <strong>{preview.sourceLocationName}</strong>, so no courier, tracking number or delivery dates are needed.</>
                         : <>This movement stays within one location, so no courier or delivery details are needed.</>}
@@ -1169,7 +1169,7 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
             )}
 
             {showLogistics && preview?.interLocation && !preview.blockedReason && (
-                <Alert severity="info" sx={{ borderRadius: 2, '& .MuiAlert-message': { fontSize: '0.82rem' } }}>
+                <Alert severity="info" sx={{ borderRadius: 2, '& .MuiAlert-message': { fontSize: '0.875rem' } }}>
                     <strong>{preview.sourceLocationName} → {preview.destinationLocationName}</strong> — this movement
                     leaves its location, so it has to be dispatched. The courier, plate number, tracking number and
                     signed dispatch note are captured at that point, either on this movement on its own or once for
@@ -1185,7 +1185,7 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
                         fullWidth multiline rows={3}
                         // fieldSx pads the inner input for single-line height; a multiline root already
                         // carries its own padding, so zero the textarea's to avoid doubling up.
-                        sx={{ ...fieldSx, '& .MuiInputBase-input': { padding: 0, fontSize: '0.875rem', lineHeight: 1.5 } }}
+                        sx={{ ...fieldSx, '& .MuiInputBase-input': { padding: 0, fontSize: '0.9375rem', lineHeight: 1.5 } }}
                         placeholder="Any additional context for this movement…"
                         value={remarks} onChange={(e) => setRemarks(e.target.value)}
                     />

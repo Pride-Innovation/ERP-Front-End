@@ -132,7 +132,7 @@ const ReportsToPicker = ({ control, initialOption }: ReportsToPickerProps) => {
                                     '& .MuiAutocomplete-listbox': {
                                         padding: '4px 0',
                                         '& .MuiAutocomplete-option': {
-                                            fontSize: '0.875rem',
+                                            fontSize: '0.9375rem',
                                             minHeight: 40,
                                             px: 2,
                                             '&:hover': { backgroundColor: alpha(P, 0.06) },
@@ -151,14 +151,14 @@ const ReportsToPicker = ({ control, initialOption }: ReportsToPickerProps) => {
                         noOptionsText={
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 0.5 }}>
                                 <SearchOutlinedIcon sx={{ fontSize: 16, color: '#94A3B8' }} />
-                                <Typography sx={{ fontSize: '0.82rem', color: '#94A3B8' }}>
+                                <Typography sx={{ fontSize: '0.875rem', color: '#94A3B8' }}>
                                     {loading ? 'Searching…' : 'No titles found — try a different name'}
                                 </Typography>
                             </Box>
                         }
                         renderOption={(props, option) => (
                             <Box component="li" {...props} key={option.value}>
-                                <Typography sx={{ fontSize: '0.875rem' }}>{option.label}</Typography>
+                                <Typography sx={{ fontSize: '0.9375rem' }}>{option.label}</Typography>
                             </Box>
                         )}
                         renderInput={(params) => (
@@ -232,7 +232,7 @@ const FormSection = ({
             }}>
                 {icon}
             </Box>
-            <Typography sx={{ fontWeight: 700, fontSize: '0.875rem', color: P }}>
+            <Typography sx={{ fontWeight: 700, fontSize: '0.9375rem', color: P }}>
                 {title}
             </Typography>
         </Box>
@@ -278,7 +278,7 @@ const TitleForm = ({
                         {update ? 'Update Title' : 'Create New Title'}
                     </Typography>
                 </Stack>
-                <Typography sx={{ fontSize: '0.82rem', color: '#64748B' }}>
+                <Typography sx={{ fontSize: '0.875rem', color: '#64748B' }}>
                     {update
                         ? 'Update the title details and organisational structure'
                         : 'Define a new organisational title and its reporting hierarchy'}
@@ -304,7 +304,7 @@ const TitleForm = ({
             <FormSection title="Reporting Structure" icon={<SupervisorAccountIcon fontSize="small" />}>
                 <Grid item xs={12}>
                     <ReportsToPicker control={control} initialOption={initialReportsTo} />
-                    <Typography sx={{ mt: 0.75, fontSize: '0.72rem', color: '#94A3B8' }}>
+                    <Typography sx={{ mt: 0.75, fontSize: '0.8rem', color: '#94A3B8' }}>
                         Type to search titles by name. The first 10 matching results will appear.
                     </Typography>
                 </Grid>

@@ -62,7 +62,7 @@ export const FormHeader = ({ header }: { header: string }) => {
       mb: 3,
       fontWeight: 700,
       textTransform: "uppercase",
-      fontSize: '0.75rem',
+      fontSize: '0.8rem',
       color: theme.palette.primary.main,
       letterSpacing: '0.1em',
       display: 'flex',

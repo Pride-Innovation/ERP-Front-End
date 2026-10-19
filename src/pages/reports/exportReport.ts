@@ -42,6 +42,9 @@ const describeFilters = (f?: ReportShellFilters): string => {
     if (f.dateFrom && f.dateTo) {
         const d = (s: string) => new Date(s).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
         parts.push(`${d(f.dateFrom)} – ${d(f.dateTo)}`);
+    } else {
+        // "All time" — said, so a saved file is not read as a period nobody chose.
+        parts.push('All dates');
     }
     if (f.branch) parts.push(f.branch);
     if (f.department) parts.push(f.department);

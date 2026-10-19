@@ -16,6 +16,7 @@ import {
     status,
     surface,
     text,
+    fontSize as fs,
 } from './tokens';
 import './theme.d';
 
@@ -24,7 +25,22 @@ import './theme.d';
 // and subtle highlights.
 const PRIMARY_LIGHT_ACCENT = '#0A9B8C';
 
+/**
+ * Pixel sizes below are written as rem at the 14px root a laptop gets (index.css), so
+ * they render exactly as designed there and scale with the root — and with browser
+ * zoom — everywhere else. A px height beside rem text drifts out of proportion as the
+ * screen changes: text grows, the box around it does not.
+ */
+const ROOT_PX = 14;
+const rem = (px: number) => `${+(px / ROOT_PX).toFixed(4)}rem`;
+
 const customThemes = createTheme({
+    /**
+     * MUI's spacing unit is a fixed 8px by default, so every `p: 2` / `gap: 1.5` in the app
+     * ignored the root size. Still 8px at the laptop root; scales with it beyond.
+     */
+    spacing: (factor: number) => rem(8 * factor),
+
     palette: {
         primary: {
             main: brand[500],
@@ -71,22 +87,25 @@ const customThemes = createTheme({
 
     typography: {
         fontFamily: '"Inter", "Roboto", "Helvetica Neue", Arial, sans-serif',
-        /* All font sizes reduced ~15% from the original design values to fit
-         * 14" laptop screens (1366×768). The html font-size: 14px base in
-         * index.css gives an additional ~12.5% cascade reduction on top. */
-        h1: { fontSize: '1.9rem', fontWeight: 700, lineHeight: 1.2, letterSpacing: '-0.02em' },
-        h2: { fontSize: '1.6rem', fontWeight: 700, lineHeight: 1.3, letterSpacing: '-0.01em' },
-        h3: { fontSize: '1.3rem', fontWeight: 600, lineHeight: 1.4, letterSpacing: '-0.01em' },
-        h4: { fontSize: '1.1rem', fontWeight: 600, lineHeight: 1.4 },
-        h5: { fontSize: '0.975rem', fontWeight: 600, lineHeight: 1.5 },
-        h6: { fontSize: '0.875rem', fontWeight: 600, lineHeight: 1.5 },
-        subtitle1: { fontSize: '0.825rem', fontWeight: 500, lineHeight: 1.5 },
-        subtitle2: { fontSize: '0.8rem', fontWeight: 500, lineHeight: 1.5, color: text.muted },
-        body1: { fontSize: '0.825rem', lineHeight: 1.6 },
-        body2: { fontSize: '0.8rem', lineHeight: 1.6 },
-        caption: { fontSize: '0.7rem', lineHeight: 1.5, color: text.muted },
-        overline: { fontSize: '0.625rem', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' },
-        button: { textTransform: 'none', fontWeight: 600, fontSize: '0.8rem', letterSpacing: '0.01em' },
+        /*
+         * Normal proportions. Screen size is handled once, by the root font size in
+         * index.css — this scale used to be cut ~15% on top of a shrunken root as well,
+         * which put body text near 10.7px on a 14" laptop. Small text uses the four
+         * `fontSize` tokens; nothing renders below `fs.xs` (11.2px at the laptop root).
+         */
+        h1: { fontSize: '1.75rem', fontWeight: 700, lineHeight: 1.2, letterSpacing: '-0.02em' },
+        h2: { fontSize: '1.5rem', fontWeight: 700, lineHeight: 1.3, letterSpacing: '-0.01em' },
+        h3: { fontSize: '1.25rem', fontWeight: 600, lineHeight: 1.4, letterSpacing: '-0.01em' },
+        h4: { fontSize: '1.125rem', fontWeight: 600, lineHeight: 1.4 },
+        h5: { fontSize: fs.lg, fontWeight: 600, lineHeight: 1.5 },
+        h6: { fontSize: fs.md, fontWeight: 600, lineHeight: 1.5 },
+        subtitle1: { fontSize: fs.md, fontWeight: 500, lineHeight: 1.5 },
+        subtitle2: { fontSize: fs.sm, fontWeight: 500, lineHeight: 1.5, color: text.muted },
+        body1: { fontSize: fs.md, lineHeight: 1.6 },
+        body2: { fontSize: fs.sm, lineHeight: 1.6 },
+        caption: { fontSize: fs.xs, lineHeight: 1.5, color: text.muted },
+        overline: { fontSize: fs.xs, fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase' },
+        button: { textTransform: 'none', fontWeight: 600, fontSize: fs.sm, letterSpacing: '0.01em' },
     },
 
     shape: {
@@ -163,11 +182,11 @@ const customThemes = createTheme({
                     borderRadius: 8,
                     textTransform: 'none',
                     fontWeight: 600,
-                    fontSize: '0.8rem',
+                    fontSize: fs.sm,
                     letterSpacing: '0.01em',
-                    minHeight: 34,
-                    paddingLeft: 16,
-                    paddingRight: 16,
+                    minHeight: rem(34),
+                    paddingLeft: rem(16),
+                    paddingRight: rem(16),
                     transition: 'all 0.2s ease',
                     '&:focus-visible': {
                         outline: `2px solid ${alpha(brand[500], 0.5)}`,
@@ -193,16 +212,16 @@ const customThemes = createTheme({
                     },
                 },
                 sizeSmall: {
-                    minHeight: 28,
-                    fontSize: '0.75rem',
-                    paddingLeft: 12,
-                    paddingRight: 12,
+                    minHeight: rem(28),
+                    fontSize: fs.xs,
+                    paddingLeft: rem(12),
+                    paddingRight: rem(12),
                 },
                 sizeLarge: {
-                    minHeight: 42,
-                    fontSize: '0.875rem',
-                    paddingLeft: 24,
-                    paddingRight: 24,
+                    minHeight: rem(42),
+                    fontSize: fs.md,
+                    paddingLeft: rem(24),
+                    paddingRight: rem(24),
                 },
             },
         },
@@ -269,20 +288,20 @@ const customThemes = createTheme({
                         },
                     },
                     '& .MuiInputLabel-root': {
-                        fontSize: '0.875rem',
+                        fontSize: fs.sm,
                         fontWeight: 500,
                         '&.Mui-focused': {
                             color: brand[500],
                         },
                     },
                     '& .MuiOutlinedInput-input': {
-                        fontSize: '0.8rem',
+                        fontSize: fs.md,
                         fontWeight: 400,
-                        padding: '7px 12px',
+                        padding: `${rem(7)} ${rem(12)}`,
                     },
                     '& .MuiFormHelperText-root': {
                         marginTop: 4,
-                        fontSize: '0.75rem',
+                        fontSize: fs.xs,
                     },
                 },
             },
@@ -301,16 +320,16 @@ const customThemes = createTheme({
                 root: {
                     borderRadius: radii.sm,
                     fontWeight: 500,
-                    fontSize: '0.7rem',
-                    height: 22,
+                    fontSize: fs.xs,
+                    height: rem(24),
                     transition: 'all 0.2s ease',
                 },
                 sizeSmall: {
-                    height: 18,
-                    fontSize: '0.65rem',
+                    height: rem(20),
+                    fontSize: fs.xs,
                 },
                 sizeMedium: {
-                    height: 24,
+                    height: rem(26),
                 },
             },
         },
@@ -320,7 +339,7 @@ const customThemes = createTheme({
                 tooltip: {
                     backgroundColor: surface.inverse,
                     color: neutral[50],
-                    fontSize: '0.75rem',
+                    fontSize: fs.xs,
                     fontWeight: 500,
                     borderRadius: radii.sm,
                     padding: '6px 10px',
@@ -365,8 +384,8 @@ const customThemes = createTheme({
                 root: {
                     textTransform: 'none',
                     fontWeight: 500,
-                    fontSize: '0.8rem',
-                    minHeight: 38,
+                    fontSize: fs.sm,
+                    minHeight: rem(38),
                     transition: 'all 0.2s ease',
                     '&.Mui-selected': {
                         fontWeight: 700,
@@ -378,7 +397,7 @@ const customThemes = createTheme({
         MuiTabs: {
             styleOverrides: {
                 root: {
-                    minHeight: 38,
+                    minHeight: rem(38),
                 },
                 indicator: {
                     height: 3,
@@ -412,7 +431,7 @@ const customThemes = createTheme({
                 root: {
                     borderRadius: radii.sm,
                     margin: '2px 6px',
-                    fontSize: '0.875rem',
+                    fontSize: fs.sm,
                     transition: 'background-color 0.15s ease',
                     '&:hover': {
                         backgroundColor: alpha(brand[500], 0.06),
@@ -449,7 +468,7 @@ const customThemes = createTheme({
             styleOverrides: {
                 badge: {
                     fontWeight: 700,
-                    fontSize: '0.6875rem',
+                    fontSize: fs.xs,
                 },
             },
         },
@@ -515,7 +534,7 @@ const customThemes = createTheme({
             styleOverrides: {
                 root: {
                     borderRadius: radii.md,
-                    fontSize: '0.875rem',
+                    fontSize: fs.sm,
                     fontWeight: 500,
                 },
             },
@@ -540,7 +559,7 @@ const customThemes = createTheme({
         MuiFormLabel: {
             styleOverrides: {
                 root: {
-                    fontSize: '0.875rem',
+                    fontSize: fs.sm,
                     fontWeight: 500,
                     color: neutral[700],
                     '&.Mui-focused': {

@@ -152,27 +152,27 @@ const CreateGeneralAsset = () => {
                         }}
                     >
                         <ArrowBackIosNewOutlinedIcon sx={{ fontSize: 12 }} />
-                        <Typography variant="caption" sx={{ fontWeight: 700, fontSize: '0.78rem', color: 'inherit' }}>
+                        <Typography variant="caption" sx={{ fontWeight: 700, fontSize: '0.875rem', color: 'inherit' }}>
                             Back to {assetType?.name || 'Assets'}
                         </Typography>
                     </Box>
                     <Breadcrumbs separator="›" sx={{ '& .MuiBreadcrumbs-separator': { color: alpha('#000', 0.3), mx: 0.5 }, display: { xs: 'none', sm: 'flex' } }}>
                         <Link underline="hover" onClick={() => navigate(ROUTES.ASSETS_MANAGEMENT)}
-                            sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: 'text.disabled', fontSize: '0.75rem', cursor: 'pointer' }}>
+                            sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: 'text.disabled', fontSize: '0.8rem', cursor: 'pointer' }}>
                             <HomeOutlinedIcon sx={{ fontSize: 14 }} />Home
                         </Link>
                         <Link underline="hover" onClick={() => navigate(`${ROUTES.LIST_GENERAL_ASSETS}/${typeId}`)}
-                            sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: 'text.secondary', fontSize: '0.75rem', cursor: 'pointer' }}>
+                            sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: 'text.secondary', fontSize: '0.8rem', cursor: 'pointer' }}>
                             <CategoryOutlinedIcon sx={{ fontSize: 14 }} />{assetType?.name || 'Assets'}
                         </Link>
-                        <Typography sx={{ fontSize: '0.75rem', color: PRIMARY_COLOR, fontWeight: 600 }}>Create</Typography>
+                        <Typography sx={{ fontSize: '0.8rem', color: PRIMARY_COLOR, fontWeight: 600 }}>Create</Typography>
                     </Breadcrumbs>
                 </Stack>
                 <Chip
                     icon={<AddCircleOutlineIcon sx={{ fontSize: 14 }} />}
                     label={`New ${assetType?.name || 'Asset'}`}
                     size="small"
-                    sx={{ height: 26, fontSize: '0.72rem', fontWeight: 600, bgcolor: alpha(PRIMARY_COLOR, 0.08), color: PRIMARY_COLOR, border: `1px solid ${alpha(PRIMARY_COLOR, 0.2)}`, '& .MuiChip-icon': { color: PRIMARY_COLOR } }}
+                    sx={{ height: 26, fontSize: '0.8rem', fontWeight: 600, bgcolor: alpha(PRIMARY_COLOR, 0.08), color: PRIMARY_COLOR, border: `1px solid ${alpha(PRIMARY_COLOR, 0.2)}`, '& .MuiChip-icon': { color: PRIMARY_COLOR } }}
                 />
             </Box>
 

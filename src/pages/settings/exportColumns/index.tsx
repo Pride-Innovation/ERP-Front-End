@@ -181,7 +181,7 @@ const ExportColumnsSettings = () => {
                             <Box key={group}>
                                 <Box sx={{ px: 2, py: 1, bgcolor: alpha(brand[500], 0.04) }}>
                                     <Typography sx={{
-                                        fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.07em',
+                                        fontSize: '0.8rem', fontWeight: 700, letterSpacing: '0.07em',
                                         textTransform: 'uppercase', color: neutral[500],
                                     }}>
                                         {group}
@@ -197,7 +197,7 @@ const ExportColumnsSettings = () => {
                                         >
                                             <ListItemText
                                                 primary={table.title}
-                                                primaryTypographyProps={{ fontSize: '0.85rem', fontWeight: 600 }}
+                                                primaryTypographyProps={{ fontSize: '0.875rem', fontWeight: 600 }}
                                             />
                                             {config[table.key] && (
                                                 // Says at a glance which tables somebody has curated
@@ -205,7 +205,7 @@ const ExportColumnsSettings = () => {
                                                 <Chip
                                                     size="small"
                                                     label={`${config[table.key].length}`}
-                                                    sx={{ height: 19, fontSize: '0.65rem', fontWeight: 700 }}
+                                                    sx={{ height: 19, fontSize: '0.8rem', fontWeight: 700 }}
                                                 />
                                             )}
                                         </ListItemButton>

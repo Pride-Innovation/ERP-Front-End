@@ -133,13 +133,13 @@ const HeroFact = ({
                 borderLeft: { xs: 'none', sm: first ? 'none' : `1px solid ${border.subtle}` },
             }}
         >
-            <Typography sx={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.09em', textTransform: 'uppercase', color: neutral[500] }}>
+            <Typography sx={{ fontSize: '0.8rem', fontWeight: 700, letterSpacing: '0.09em', textTransform: 'uppercase', color: neutral[500] }}>
                 {label}
             </Typography>
             <Stack direction="row" spacing={0.85} alignItems="center" sx={{ mt: 0.35, minWidth: 0 }}>
                 {avatar}
                 <Typography noWrap sx={{
-                    fontSize: '0.9rem',
+                    fontSize: '0.9375rem',
                     fontWeight: empty ? 400 : 700,
                     fontStyle: empty ? 'italic' : 'normal',
                     color: empty ? neutral[400] : neutral[800],
@@ -443,11 +443,11 @@ const IssueRequestDetails = () => {
                                                 size="small"
                                                 icon={<ReceiptLongOutlinedIcon sx={{ fontSize: 14 }} />}
                                                 label={`Request #${request.id ?? id ?? ''}`}
-                                                sx={{ height: 24, fontWeight: 600, fontSize: '0.72rem', bgcolor: alpha(brand[500], 0.08), color: brand[700], border: `1px solid ${alpha(brand[500], 0.14)}`, '& .MuiChip-icon': { color: brand[600] } }}
+                                                sx={{ height: 24, fontWeight: 600, fontSize: '0.8rem', bgcolor: alpha(brand[500], 0.08), color: brand[700], border: `1px solid ${alpha(brand[500], 0.14)}`, '& .MuiChip-icon': { color: brand[600] } }}
                                             />
                                             {request.status?.name && (
                                                 <Chip size="small" label={request.status.name}
-                                                    sx={{ height: 24, fontWeight: 700, fontSize: '0.72rem', bgcolor: alpha(gold[500], 0.12), color: gold[700], border: `1px solid ${alpha(gold[500], 0.3)}` }} />
+                                                    sx={{ height: 24, fontWeight: 700, fontSize: '0.8rem', bgcolor: alpha(gold[500], 0.12), color: gold[700], border: `1px solid ${alpha(gold[500], 0.3)}` }} />
                                             )}
                                             <Chip
                                                 size="small"
@@ -456,7 +456,7 @@ const IssueRequestDetails = () => {
                                                     : <PendingActionsOutlinedIcon sx={{ fontSize: 14 }} />}
                                                 label={allReady ? 'Ready to issue' : `${readyCount}/${requestCommodities.length} ready`}
                                                 sx={{
-                                                    height: 24, fontWeight: 700, fontSize: '0.72rem',
+                                                    height: 24, fontWeight: 700, fontSize: '0.8rem',
                                                     bgcolor: allReady ? alpha(statusTokens.success.main, 0.12) : alpha(gold[500], 0.12),
                                                     color: allReady ? statusTokens.success.strong : gold[700],
                                                     border: `1px solid ${alpha(allReady ? statusTokens.success.main : gold[500], 0.3)}`,
@@ -477,10 +477,10 @@ const IssueRequestDetails = () => {
                         {/* Fulfilment dial — the one number that decides whether this page can be submitted */}
                         <Box sx={{ minWidth: 210, flexShrink: 0 }}>
                             <Stack direction="row" alignItems="baseline" justifyContent="space-between" sx={{ mb: 0.75 }}>
-                                <Typography sx={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.09em', textTransform: 'uppercase', color: neutral[500] }}>
+                                <Typography sx={{ fontSize: '0.8rem', fontWeight: 700, letterSpacing: '0.09em', textTransform: 'uppercase', color: neutral[500] }}>
                                     Fulfilment
                                 </Typography>
-                                <Typography sx={{ fontSize: '0.9rem', fontWeight: 800, color: allReady ? statusTokens.success.strong : gold[700] }}>
+                                <Typography sx={{ fontSize: '0.9375rem', fontWeight: 800, color: allReady ? statusTokens.success.strong : gold[700] }}>
                                     {readyPct}%
                                 </Typography>
                             </Stack>
@@ -496,7 +496,7 @@ const IssueRequestDetails = () => {
                                     },
                                 }}
                             />
-                            <Typography sx={{ fontSize: '0.7rem', color: neutral[500], mt: 0.75 }}>
+                            <Typography sx={{ fontSize: '0.8rem', color: neutral[500], mt: 0.75 }}>
                                 {allReady
                                     ? 'Every line is ready to issue'
                                     : `${requestCommodities.length - readyCount} line(s) still need attention`}
@@ -511,7 +511,7 @@ const IssueRequestDetails = () => {
                         first
                         label="Requested by"
                         value={requesterName}
-                        avatar={<Avatar sx={{ width: 22, height: 22, bgcolor: brand[500], fontSize: '0.6rem', fontWeight: 700 }}>{initials}</Avatar>}
+                        avatar={<Avatar sx={{ width: 22, height: 22, bgcolor: brand[500], fontSize: '0.8rem', fontWeight: 700 }}>{initials}</Avatar>}
                     />
                     <HeroFact label="Requested From" value={requestedFrom} />
                     <HeroFact label="Requested on" value={requestedOn === '—' ? null : requestedOn} />
@@ -562,7 +562,7 @@ const IssueRequestDetails = () => {
                         size="small"
                         label={`${readyCount}/${requestCommodities.length} ready`}
                         sx={{
-                            height: 22, fontWeight: 700, fontSize: '0.7rem',
+                            height: 22, fontWeight: 700, fontSize: '0.8rem',
                             bgcolor: allReady ? alpha(statusTokens.success.main, 0.1) : alpha(gold[500], 0.12),
                             color: allReady ? statusTokens.success.strong : gold[700],
                         }}
@@ -592,7 +592,7 @@ const IssueRequestDetails = () => {
                     placeholder="Any notes for the approver — part-issued lines, substitutions, condition of the items…"
                     value={comment}
                     onChange={(e) => setComment(e.target.value)}
-                    sx={{ ...fieldSx, '& .MuiInputBase-input': { padding: 0, fontSize: '0.875rem', lineHeight: 1.5 } }}
+                    sx={{ ...fieldSx, '& .MuiInputBase-input': { padding: 0, fontSize: '0.9375rem', lineHeight: 1.5 } }}
                 />
             </SectionCard>
 
@@ -625,7 +625,7 @@ const IssueRequestDetails = () => {
                                 ? 'All lines ready — you can issue now.'
                                 : `${readyCount} of ${requestCommodities.length} line(s) ready`}
                         </Typography>
-                        <Typography sx={{ fontSize: '0.72rem', color: neutral[500] }}>
+                        <Typography sx={{ fontSize: '0.8rem', color: neutral[500] }}>
                             {allReady
                                 ? `${totalQty} unit(s) will be recorded against ${requesterName}`
                                 : 'Pick engraved numbers or fix quantities to continue'}

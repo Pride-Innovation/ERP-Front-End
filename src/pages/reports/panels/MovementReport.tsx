@@ -23,7 +23,7 @@ interface MovementRow {
     toBranch: string;
     toDepartment: string;
     requestedBy: string;
-    approvedBy: string;
+    currentlyWith: string;
     status: string;
     statusCode: string;
     movementType: string;
@@ -40,8 +40,8 @@ const COLUMNS: ReportColumn<MovementRow>[] = [
     { id: 'toBranch', label: 'To Branch', minWidth: 130 },
     { id: 'toDepartment', label: 'To Dept.', minWidth: 110 },
     { id: 'requestedBy', label: 'Requested By', minWidth: 130 },
-    { id: 'approvedBy', label: 'Approved By', minWidth: 130, format: (v) => v || '—' },
-    { id: 'status', label: 'Status', minWidth: 100, format: (v) => <StatusChip value={v} /> },
+    { id: 'currentlyWith', label: 'Currently With', minWidth: 130, format: (v) => v || '—' },
+    { id: 'status', label: 'Status', minWidth: 100, format: (v, r) => <StatusChip value={v} code={r.statusCode} /> },
 ];
 
 const fmtDate = (v?: string | null) =>
@@ -65,7 +65,12 @@ const toRows = (m: any): MovementRow[] => {
         toBranch: m.destStore?.location?.name ?? m.recipientUser?.branch?.name ?? '—',
         toDepartment: m.destStore?.department?.name ?? m.recipientUser?.department?.name ?? '—',
         requestedBy: person(m.request?.requester ?? m.initiator),
-        approvedBy: person(m.currentApprover),
+        /*
+         * Who the movement is waiting on — not who approved it. The column was headed "Approved By"
+         * over `currentApprover`, which names the next approver and is empty once nobody is due.
+         * The movement carries no record of who approved it, so the honest heading is this one.
+         */
+        currentlyWith: person(m.currentApprover),
         status: statusLabel(m.status),
         statusCode: m.status ?? '',
         movementType: movementTypeLabel(m.movementType),
@@ -115,8 +120,11 @@ const MovementReport = () => {
             const res = (await fetchRowsService({
                 pageNumber: 0, pageSize: REPORT_PAGE_SIZE, endPoint: 'movements',
                 params: {
-                    startDate: f.dateFrom,
-                    endDate: f.dateTo,
+                    // `dateFrom`/`dateTo` — what GET /movements declares. This sent `startDate`/
+                    // `endDate`, which Spring dropped (trap #2), so every period returned every
+                    // movement.
+                    dateFrom: f.dateFrom,
+                    dateTo: f.dateTo,
                     // The enum constant, which is what the endpoint binds.
                     status: f.statusCode,
                 },

@@ -5,48 +5,53 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { ReactNode, useEffect, useMemo, useState } from 'react';
+import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import { PERMISSIONS } from '../../core/permissions/constants';
-import usePermissions from '../../core/permissions/usePermissions';
+import useAccessScope from '../../core/permissions/useAccessScope';
 import {
-    alpha, Box, CircularProgress, FormControl, ListItemIcon, ListItemText, MenuItem, Paper,
-    Select, Stack, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination,
-    TableRow, TableSortLabel, Tooltip, Typography,
+    Box, CircularProgress, Paper, Stack, Table, TableBody, TableCell, TableContainer, TableHead,
+    TablePagination, TableRow, TableSortLabel, Tooltip, Typography,
 } from '@mui/material';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
 import FlightTakeoffOutlinedIcon from '@mui/icons-material/FlightTakeoffOutlined';
 import WhereToVoteOutlinedIcon from '@mui/icons-material/WhereToVoteOutlined';
 import AssignmentTurnedInOutlinedIcon from '@mui/icons-material/AssignmentTurnedInOutlined';
 import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
-import PlaceOutlinedIcon from '@mui/icons-material/PlaceOutlined';
-import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined';
-import { brand, neutral, border, status as statusTokens } from '../../utils/tokens';
+import { brand, neutral, status as statusTokens } from '../../utils/tokens';
+import { dataPaginationSx, dataSurfaceSx } from '../../components/tables/dataTableSx';
 import {
-    dataHeadCellSx, dataBodyCellSx, dataRowSx, dataPaginationSx, dataSurfaceSx,
-    dataActionSelectSx, dataActionMenuPaperSx,
-} from '../../components/tables/dataTableSx';
+    IRowMenuAction, MONO, RowActionsMenu, TwoLine,
+    registerBodyCellSx, registerHeadCellSx, registerRowSx,
+} from '../../components/tables/registerParts';
+import { StatusChip, StatusTone } from '../../components/layout';
 import {
     IConsignment, ConsignmentStatus, consignmentStatusLabels, consignmentStatusHelp,
 } from './interface';
 
 /**
- * The consignments list, rendered with the same grammar as the movement tables
- * (`../movement/MovementTable`) so the two halves of the module read as one product: tinted
- * uppercase sortable head, zebra body, per-column minimum widths, one dropdown per row.
+ * The consignments register — the same grammar as the movements register
+ * (`../movement/MovementTable`), built from the same shared parts
+ * (`components/tables/registerParts`) so the two halves of the module cannot drift apart again.
+ *
+ * <p>Status is the one coloured element on a healthy row; an overdue date is the other thing allowed
+ * to be red, because it is the question a reader opens this page to answer.
  */
 
 // ── Column model ──────────────────────────────────────────────────────────
 
-type ColumnId = 'reference' | 'route' | 'courier' | 'load' | 'schedule' | 'status' | 'actions';
+type ColumnId = 'reference' | 'from' | 'to' | 'courier' | 'load' | 'schedule' | 'status' | 'actions';
 
 interface ConsignmentColumn {
     id: ColumnId;
     label: string;
-    minWidth: number;
+    /** Fixed width in px. Absent on From, To and Courier, which share what is left and ellipsise. */
+    width?: number;
     align?: 'left' | 'center' | 'right';
+    /**
+     * Only on columns the server can order by (`ConsignmentController.SORTABLE`). Load used to be
+     * sortable here while the endpoint has no such field, so clicking it quietly sorted by id.
+     */
     sortValue?: (c: IConsignment) => string | number;
 }
 
@@ -54,27 +59,29 @@ interface ConsignmentColumn {
 const STATUS_ORDER: ConsignmentStatus[] = ['DRAFT', 'DISPATCHED', 'IN_TRANSIT', 'ARRIVED', 'CANCELLED'];
 
 const COLUMNS: ConsignmentColumn[] = [
-    { id: 'reference', label: 'Reference', minWidth: 130, sortValue: (c) => c.id },
-    { id: 'route', label: 'Route', minWidth: 260 },
-    { id: 'courier', label: 'Courier', minWidth: 180 },
-    { id: 'load', label: 'Load', minWidth: 90, align: 'center', sortValue: (c) => c.movementCount },
-    { id: 'schedule', label: 'Schedule', minWidth: 165, sortValue: (c) => new Date(c.dispatchDate ?? c.createDate ?? 0).getTime() },
-    { id: 'status', label: 'Status', minWidth: 150, sortValue: (c) => STATUS_ORDER.indexOf(c.status) },
-    { id: 'actions', label: 'Actions', minWidth: 120, align: 'right' },
+    { id: 'reference', label: 'Consignment', width: 164, sortValue: (c) => c.id },
+    { id: 'from', label: 'From' },
+    { id: 'to', label: 'To' },
+    { id: 'courier', label: 'Courier' },
+    { id: 'load', label: 'Load', width: 76, align: 'right' },
+    { id: 'schedule', label: 'Schedule', width: 184, sortValue: (c) => new Date(c.dispatchDate ?? c.createDate ?? 0).getTime() },
+    { id: 'status', label: 'Status', width: 124, sortValue: (c) => STATUS_ORDER.indexOf(c.status) },
+    { id: 'actions', label: '', width: 52, align: 'right' },
 ];
+
+/** Below this the table scrolls rather than squeezing the three flexible columns to nothing. */
+const TABLE_MIN_WIDTH = 980;
 
 // ── Status presentation ───────────────────────────────────────────────────
 
-const STATUS_TONE: Record<ConsignmentStatus, { bg: string; fg: string; dot: string }> = {
-    DRAFT: { bg: alpha(brand[500], 0.1), fg: brand[700], dot: brand[500] },
-    DISPATCHED: { bg: alpha(statusTokens.warning.main, 0.14), fg: statusTokens.warning.strong, dot: statusTokens.warning.main },
-    IN_TRANSIT: { bg: alpha(statusTokens.info.main, 0.12), fg: statusTokens.info.strong, dot: statusTokens.info.main },
-    ARRIVED: { bg: alpha(statusTokens.success.main, 0.12), fg: statusTokens.success.strong, dot: statusTokens.success.main },
-    CANCELLED: { bg: alpha(statusTokens.danger.main, 0.1), fg: statusTokens.danger.strong, dot: statusTokens.danger.main },
+/** The shared chip's tones — the same vocabulary the movements register speaks. */
+const STATUS_TONE: Record<ConsignmentStatus, StatusTone> = {
+    DRAFT: 'neutral',
+    DISPATCHED: 'pending',
+    IN_TRANSIT: 'info',
+    ARRIVED: 'success',
+    CANCELLED: 'danger',
 };
-
-/** The road a healthy journey travels; CANCELLED steps off it wherever it stopped. */
-const JOURNEY: ConsignmentStatus[] = ['DRAFT', 'DISPATCHED', 'IN_TRANSIT', 'ARRIVED'];
 
 // ── Formatting ────────────────────────────────────────────────────────────
 
@@ -91,216 +98,114 @@ const daysFromToday = (d?: string | null): number | null => {
     return Math.round((startOfDay(then) - startOfDay(new Date())) / 86400000);
 };
 
+const referenceOf = (c: IConsignment) => c.reference ?? `CNS-${c.id}`;
+
+const Muted = ({ children }: { children: ReactNode }) => (
+    <Typography noWrap sx={{ fontSize: '0.875rem', color: neutral[400] }}>{children}</Typography>
+);
+
 // ── Cells ─────────────────────────────────────────────────────────────────
 
+/**
+ * The reference, then the number people actually quote once one is issued: the tracking number —
+ * the same place the movements register puts it. Until then, when the journey was opened.
+ */
 const ReferenceCell = ({ c }: { c: IConsignment }) => (
-    <Stack spacing={0.15}>
-        <Typography variant="caption" sx={{ fontWeight: 700, color: brand[600], fontFamily: 'monospace' }}>
-            {c.reference ?? `CNS-${c.id}`}
-        </Typography>
-        <Typography variant="caption" sx={{ color: neutral[400], fontSize: '0.6rem' }}>
-            Opened {fmtDate(c.createDate)}
-        </Typography>
-    </Stack>
+    c.trackingNumber
+        ? <TwoLine primary={referenceOf(c)} secondary={c.trackingNumber} mono />
+        : <TwoLine primary={referenceOf(c)} secondary={`Opened ${fmtDate(c.createDate)}`} />
 );
 
-/** One end of the road — a location, with the landing store named once the goods are down. */
-const RouteNode = ({ label, sub }: { label: string; sub?: string }) => (
-    <Stack direction="row" alignItems="center" spacing={0.75} sx={{ minWidth: 0 }}>
-        <Box
-            sx={{
-                width: 24, height: 24, borderRadius: '6px', flexShrink: 0,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                bgcolor: neutral[100], color: neutral[500],
-            }}
-        >
-            <PlaceOutlinedIcon sx={{ fontSize: 13 }} />
-        </Box>
-        <Stack sx={{ minWidth: 0 }}>
-            <Typography variant="caption" sx={{ fontWeight: 600, color: neutral[800] }} noWrap>{label}</Typography>
-            {sub && (
-                <Typography variant="caption" sx={{ color: neutral[400], fontSize: '0.6rem' }} noWrap>{sub}</Typography>
-            )}
-        </Stack>
-    </Stack>
-);
-
-const RouteCell = ({ c }: { c: IConsignment }) => (
-    <Stack direction="row" alignItems="center" spacing={1} sx={{ minWidth: 0 }}>
-        <RouteNode label={c.sourceLocation?.name ?? '—'} />
-        <ArrowForwardIcon sx={{ fontSize: 13, color: neutral[300], flexShrink: 0 }} />
-        <RouteNode
-            label={c.destLocation?.name ?? '—'}
-            sub={c.status === 'ARRIVED' ? (c.landingStore?.name ?? undefined) : undefined}
-        />
-    </Stack>
-);
-
-const CourierCell = ({ c }: { c: IConsignment }) => {
-    const name = c.courierService ?? c.courier?.name;
-    if (!name && !c.plateNumber) {
-        return (
-            <Typography variant="caption" sx={{ color: neutral[400], fontStyle: 'italic' }}>
-                Not yet assigned
-            </Typography>
-        );
-    }
-    return (
-        <Stack spacing={0.4} alignItems="flex-start">
-            <Typography variant="caption" sx={{ fontWeight: 600, color: neutral[800] }} noWrap>
-                {name ?? '—'}
-            </Typography>
-            <Stack direction="row" spacing={0.5} alignItems="center">
-                {c.plateNumber && (
-                    // Styled as a number plate — the one detail a gate officer reads off the screen.
-                    <Box
-                        sx={{
-                            px: 0.6, height: 17, display: 'inline-flex', alignItems: 'center',
-                            borderRadius: '3px', border: `1px solid ${neutral[300]}`, bgcolor: neutral[50],
-                            fontFamily: 'monospace', fontSize: '0.6rem', fontWeight: 700,
-                            letterSpacing: '0.04em', color: neutral[700],
-                        }}
-                    >
-                        {c.plateNumber}
-                    </Box>
-                )}
-                {c.trackingNumber && (
-                    <Typography variant="caption" sx={{ color: neutral[400], fontSize: '0.6rem', fontFamily: 'monospace' }}>
-                        {c.trackingNumber}
-                    </Typography>
-                )}
-            </Stack>
-        </Stack>
-    );
-};
-
-const LoadCell = ({ c }: { c: IConsignment }) => {
-    const empty = c.movementCount === 0;
-    return (
-        <Tooltip
-            arrow
-            title={empty
-                ? 'Nothing loaded yet — this consignment cannot be dispatched'
-                : `${c.movementCount} movement${c.movementCount === 1 ? '' : 's'} travelling together`}
-        >
-            <Box
-                sx={{
-                    display: 'inline-flex', alignItems: 'center', gap: 0.5,
-                    px: 0.9, height: 22, borderRadius: '6px',
-                    bgcolor: empty ? alpha(statusTokens.warning.main, 0.12) : alpha(brand[500], 0.08),
-                    color: empty ? statusTokens.warning.strong : brand[700],
-                    fontSize: '0.7rem', fontWeight: 700,
-                }}
-            >
-                <Inventory2OutlinedIcon sx={{ fontSize: 12 }} />
-                {c.movementCount}
-            </Box>
-        </Tooltip>
-    );
-};
+/** The destination names its landing store once the goods are down — where to go and find them. */
+const EndCell = ({ name, sub }: { name?: string | null; sub?: string | null }) =>
+    (name ? <TwoLine primary={name} secondary={sub ?? undefined} /> : <Muted>—</Muted>);
 
 /**
- * Dispatch and expected-delivery in one cell, because the pair is the question being asked:
- * has this left, and is it late? An overdue journey says so in red rather than making the
- * reader subtract two dates.
+ * The courier, then the vehicle's plate — set like a number plate, the cell's one deliberate
+ * flourish, because it is what someone at the gate reads off the screen. The tracking number lives
+ * under the reference instead: here it shared a line with the plate and was always truncated.
+ */
+const CourierCell = ({ c }: { c: IConsignment }) => {
+    const name = c.courierService ?? c.courier?.name;
+    if (!name && !c.plateNumber) return <Muted>Not assigned yet</Muted>;
+    return (
+        <Box sx={{ minWidth: 0 }} title={[name, c.plateNumber].filter(Boolean).join(' · ')}>
+            <Typography noWrap sx={{ fontSize: '0.875rem', fontWeight: 600, color: neutral[800], lineHeight: 1.4 }}>
+                {name ?? '—'}
+            </Typography>
+            {/* Only when there is a plate — an empty second line would lift the name off-centre. */}
+            {c.plateNumber && (
+                <Box sx={{
+                    display: 'inline-block', px: 0.5, mt: 0.25, lineHeight: '16px', borderRadius: '3px',
+                    border: `1px solid ${neutral[300]}`, bgcolor: neutral[50],
+                    fontFamily: MONO, fontSize: '0.8rem', fontWeight: 600, color: neutral[700],
+                }}
+                >
+                    {c.plateNumber}
+                </Box>
+            )}
+        </Box>
+    );
+};
+
+/** How many movements ride on it. An empty one says so, because it cannot be dispatched. */
+const LoadCell = ({ c }: { c: IConsignment }) => (
+    <Tooltip
+        arrow
+        title={c.movementCount === 0
+            ? 'Nothing loaded yet — this consignment cannot be dispatched'
+            : `${c.movementCount} movement${c.movementCount === 1 ? '' : 's'} travelling together`}
+    >
+        <Typography
+            component="span"
+            sx={{
+                fontSize: '0.875rem', fontWeight: 600, fontVariantNumeric: 'tabular-nums',
+                color: c.movementCount === 0 ? statusTokens.warning.strong : neutral[800],
+            }}
+        >
+            {c.movementCount === 0 ? 'Empty' : c.movementCount}
+        </Typography>
+    </Tooltip>
+);
+
+/**
+ * Dispatch and expected delivery in one cell, because the pair is the question being asked: has
+ * this left, and is it late? An overdue journey says so in red rather than making the reader
+ * subtract two dates.
  */
 const ScheduleCell = ({ c }: { c: IConsignment }) => {
-    if (c.status === 'DRAFT') {
-        return <Typography variant="caption" sx={{ color: neutral[400], fontStyle: 'italic' }}>Not dispatched</Typography>;
-    }
+    if (c.status === 'DRAFT') return <Muted>Not dispatched</Muted>;
+    // A draft abandoned before it left has no dispatch date; "Left —" read as though it had gone.
+    if (c.status === 'CANCELLED' && !c.dispatchDate) return <Muted>Never dispatched</Muted>;
     if (c.status === 'ARRIVED') {
-        return (
-            <Stack spacing={0.15}>
-                <Typography variant="caption" sx={{ color: neutral[700], fontWeight: 500 }}>
-                    Landed {fmtDate(c.arrivalDate)}
-                </Typography>
-                <Typography variant="caption" sx={{ color: neutral[400], fontSize: '0.6rem' }}>
-                    Left {fmtDate(c.dispatchDate)}
-                </Typography>
-            </Stack>
-        );
+        return <TwoLine primary={`Arrived ${fmtDate(c.arrivalDate)}`} secondary={`Left ${fmtDate(c.dispatchDate)}`} strong={false} />;
     }
 
     const due = daysFromToday(c.expectedDeliveryDate);
     const overdue = c.status !== 'CANCELLED' && due != null && due < 0;
-    return (
-        <Stack spacing={0.3} alignItems="flex-start">
-            <Typography variant="caption" sx={{ color: neutral[700], fontWeight: 500 }}>
-                Left {fmtDate(c.dispatchDate)}
-            </Typography>
-            {c.expectedDeliveryDate && (
-                overdue ? (
-                    <Box
-                        sx={{
-                            display: 'inline-flex', alignItems: 'center', gap: 0.4,
-                            px: 0.6, height: 18, borderRadius: '4px',
-                            bgcolor: alpha(statusTokens.danger.main, 0.1),
-                            color: statusTokens.danger.strong,
-                            fontSize: '0.62rem', fontWeight: 700,
-                        }}
-                    >
-                        <WarningAmberOutlinedIcon sx={{ fontSize: 11 }} />
-                        {Math.abs(due!)} d overdue
-                    </Box>
-                ) : (
-                    <Typography variant="caption" sx={{ color: neutral[400], fontSize: '0.6rem' }}>
-                        Due {fmtDate(c.expectedDeliveryDate)}{due === 0 ? ' · today' : ''}
-                    </Typography>
-                )
-            )}
-        </Stack>
-    );
+    const dueLine = !c.expectedDeliveryDate ? undefined : overdue ? (
+        <Box component="span" sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.4, color: statusTokens.danger.strong, fontWeight: 600 }}>
+            <WarningAmberOutlinedIcon sx={{ fontSize: 13 }} />
+            {Math.abs(due!)} d overdue
+        </Box>
+    ) : `Due ${fmtDate(c.expectedDeliveryDate)}${due === 0 ? ' · today' : ''}`;
+    return <TwoLine primary={`Left ${fmtDate(c.dispatchDate)}`} secondary={dueLine} strong={false} />;
 };
 
-const StatusCell = ({ c }: { c: IConsignment }) => {
-    const tone = STATUS_TONE[c.status];
-    const stage = JOURNEY.indexOf(c.status);
-    return (
-        <Stack spacing={0.6} alignItems="flex-start">
-            <Tooltip title={consignmentStatusHelp[c.status]} arrow>
-                <Box
-                    sx={{
-                        display: 'inline-flex', alignItems: 'center', gap: 0.6,
-                        bgcolor: tone.bg, color: tone.fg,
-                        borderRadius: '6px', px: 0.9, height: 22,
-                        fontSize: '0.7rem', fontWeight: 700, whiteSpace: 'nowrap', cursor: 'help',
-                    }}
-                >
-                    <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: tone.dot, flexShrink: 0 }} />
-                    {consignmentStatusLabels[c.status]}
-                </Box>
-            </Tooltip>
-            {stage >= 0 && (
-                <Stack direction="row" spacing={0.4} sx={{ pl: 0.25 }}>
-                    {JOURNEY.map((s, i) => (
-                        <Box
-                            key={s}
-                            sx={{
-                                width: i === stage ? 14 : 6, height: 5, borderRadius: 3,
-                                transition: 'width 0.15s',
-                                bgcolor: i <= stage ? tone.dot : neutral[200],
-                            }}
-                        />
-                    ))}
-                </Stack>
-            )}
-        </Stack>
-    );
-};
+/** The chip alone — the five-step bar beside it said the same thing a second time. */
+const StatusCell = ({ c }: { c: IConsignment }) => (
+    <Tooltip title={consignmentStatusHelp[c.status]} arrow>
+        <Box component="span" sx={{ display: 'inline-flex', cursor: 'help' }}>
+            <StatusChip label={consignmentStatusLabels[c.status]} tone={STATUS_TONE[c.status]} />
+        </Box>
+    </Tooltip>
+);
 
 // ── Row actions ───────────────────────────────────────────────────────────
 
 export type ConsignmentAction = 'open' | 'dispatch' | 'in-transit' | 'arrived' | 'hand-over' | 'cancel';
 
-interface RowAction {
-    action: ConsignmentAction;
-    title: string;
-    color: string;
-    icon: ReactNode;
-    /** Shown greyed with the reason on hover rather than hidden, so the blocker is legible. */
-    disabledReason?: string;
-    destructive?: boolean;
-}
+type RowAction = IRowMenuAction<ConsignmentAction>;
 
 /**
  * The permission each journey action answers to, mirroring the `@PreAuthorize` on the endpoint
@@ -325,15 +230,13 @@ const rowActionsForState = (c: IConsignment): RowAction[] => {
                 {
                     action: 'dispatch',
                     title: 'Dispatch',
-                    color: brand[600],
-                    icon: <LocalShippingOutlinedIcon sx={{ fontSize: 15 }} />,
+                    icon: <LocalShippingOutlinedIcon sx={{ fontSize: 16 }} />,
                     disabledReason: c.movementCount === 0 ? 'Load at least one movement first' : undefined,
                 },
                 {
                     action: 'cancel',
                     title: 'Cancel journey',
-                    color: statusTokens.danger.strong,
-                    icon: <CancelOutlinedIcon sx={{ fontSize: 15 }} />,
+                    icon: <CancelOutlinedIcon sx={{ fontSize: 16 }} />,
                     destructive: true,
                 },
             ];
@@ -341,22 +244,19 @@ const rowActionsForState = (c: IConsignment): RowAction[] => {
             return [{
                 action: 'in-transit',
                 title: 'Mark in transit',
-                color: statusTokens.info.strong,
-                icon: <FlightTakeoffOutlinedIcon sx={{ fontSize: 15 }} />,
+                icon: <FlightTakeoffOutlinedIcon sx={{ fontSize: 16 }} />,
             }];
         case 'IN_TRANSIT':
             return [{
                 action: 'arrived',
                 title: 'Mark arrived',
-                color: statusTokens.success.strong,
-                icon: <WhereToVoteOutlinedIcon sx={{ fontSize: 15 }} />,
+                icon: <WhereToVoteOutlinedIcon sx={{ fontSize: 16 }} />,
             }];
         case 'ARRIVED':
             return [{
                 action: 'hand-over',
                 title: 'Hand over',
-                color: statusTokens.success.strong,
-                icon: <AssignmentTurnedInOutlinedIcon sx={{ fontSize: 15 }} />,
+                icon: <AssignmentTurnedInOutlinedIcon sx={{ fontSize: 16 }} />,
             }];
         default:
             return [];
@@ -373,75 +273,8 @@ const rowActionsForState = (c: IConsignment): RowAction[] => {
  */
 const rowActions = (
     c: IConsignment,
-    permitted: (a: ConsignmentAction) => boolean,
-): RowAction[] => rowActionsForState(c).filter(a => permitted(a.action));
-
-const RowActionsSelect = ({ actions, busy, onPick }: {
-    actions: RowAction[];
-    busy: boolean;
-    onPick: (action: ConsignmentAction) => void;
-}) => {
-    const routine = actions.filter((a) => !a.destructive);
-    const destructive = actions.filter((a) => a.destructive);
-
-    /** Groups separated by a border, not a `<Divider>` — `Select` turns any child into an option. */
-    const groupSx = (leads: boolean) =>
-        (leads ? { borderTop: `1px solid ${border.subtle}`, mt: 0.5, pt: 1 } : {});
-
-    const item = (a: RowAction, i: number) => {
-        const row = (
-            <MenuItem
-                key={a.action}
-                value={a.action}
-                disabled={!!a.disabledReason}
-                sx={{
-                    fontSize: '0.78rem', py: 0.75, color: a.color,
-                    '&:hover': { bgcolor: alpha(a.color, 0.07) },
-                    ...groupSx(i === 0),
-                }}
-            >
-                <ListItemIcon sx={{ color: a.color, minWidth: '28px !important' }}>{a.icon}</ListItemIcon>
-                <ListItemText primaryTypographyProps={{ fontSize: '0.78rem', fontWeight: 600 }}>{a.title}</ListItemText>
-            </MenuItem>
-        );
-        // A disabled MenuItem swallows pointer events, so the reason hangs off a wrapper.
-        return a.disabledReason
-            ? <Tooltip key={a.action} title={a.disabledReason} arrow placement="left"><span>{row}</span></Tooltip>
-            : row;
-    };
-
-    return (
-        <FormControl size="small" sx={{ minWidth: 116 }}>
-            <Select
-                value=""
-                displayEmpty
-                disabled={busy}
-                renderValue={() => (busy ? 'Working…' : 'Actions')}
-                onChange={(e) => onPick(e.target.value as ConsignmentAction)}
-                sx={dataActionSelectSx}
-                MenuProps={{
-                    // Without this the menu's modal pads the body and the page jumps sideways.
-                    disableScrollLock: true,
-                    anchorOrigin: { vertical: 'bottom', horizontal: 'right' },
-                    transformOrigin: { vertical: 'top', horizontal: 'right' },
-                    PaperProps: { elevation: 0, sx: dataActionMenuPaperSx },
-                }}
-            >
-                <MenuItem
-                    value="open"
-                    sx={{ fontSize: '0.78rem', py: 0.75, color: brand[700], '&:hover': { bgcolor: alpha(brand[500], 0.07) } }}
-                >
-                    <ListItemIcon sx={{ color: brand[600], minWidth: '28px !important' }}>
-                        <VisibilityOutlinedIcon sx={{ fontSize: 15 }} />
-                    </ListItemIcon>
-                    <ListItemText primaryTypographyProps={{ fontSize: '0.78rem', fontWeight: 600 }}>Open journey</ListItemText>
-                </MenuItem>
-                {routine.map(item)}
-                {destructive.map(item)}
-            </Select>
-        </FormControl>
-    );
-};
+    permitted: (a: ConsignmentAction, c: IConsignment) => boolean,
+): RowAction[] => rowActionsForState(c).filter(a => permitted(a.action, c));
 
 // ── Table ─────────────────────────────────────────────────────────────────
 
@@ -485,16 +318,25 @@ const ConsignmentTable = ({
     rows, loading, busyId, empty, onAction, paginationResetKey, disableSurface,
     stickyHeader, maxHeight, server,
 }: IConsignmentTableProps) => {
-    const { has } = usePermissions();
-    // Resolved once per render, not per row — the answer cannot differ between rows.
-    const permitted = useMemo(() => {
-        const granted = new Set(
-            (Object.keys(ACTION_PERMISSION) as ConsignmentAction[])
-                .filter(a => has(ACTION_PERMISSION[a] as string)),
-        );
-        return (action: ConsignmentAction) => !ACTION_PERMISSION[action] || granted.has(action);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [rows]);
+    const { canActOnAnyOf } = useAccessScope();
+
+    /*
+     * Two questions per action, and the second is per row.
+     *
+     * This resolved the permission once for the whole table, on the reasoning that the answer
+     * "cannot differ between rows". True of the permission, false of the scope: the endpoints guard
+     * with `requireCanManageAny(MOVEMENTS, [source, destination])`, and the listing resolves VIEW.
+     * Someone who sees every branch's journeys without MANAGE reach over them was offered Dispatch,
+     * Mark arrived and Cancel on all of them, and the click came back refused — the same gap the
+     * movements register had, closed the same way.
+     */
+    const permitted = useCallback(
+        (action: ConsignmentAction, c: IConsignment) => {
+            const permission = ACTION_PERMISSION[action];
+            return !permission || canActOnAnyOf(permission, 'MOVEMENTS', [c.sourceLocation?.id, c.destLocation?.id]);
+        },
+        [canActOnAnyOf],
+    );
 
     const [orderBy, setOrderBy] = useState<ColumnId>('reference');
     const [order, setOrder] = useState<Order>('desc');
@@ -537,16 +379,21 @@ const ConsignmentTable = ({
     const renderCell = (col: ConsignmentColumn, c: IConsignment) => {
         switch (col.id) {
             case 'reference': return <ReferenceCell c={c} />;
-            case 'route': return <RouteCell c={c} />;
+            case 'from': return <EndCell name={c.sourceLocation?.name} />;
+            case 'to': return <EndCell name={c.destLocation?.name} sub={c.status === 'ARRIVED' ? c.landingStore?.name : null} />;
             case 'courier': return <CourierCell c={c} />;
             case 'load': return <LoadCell c={c} />;
             case 'schedule': return <ScheduleCell c={c} />;
             case 'status': return <StatusCell c={c} />;
             case 'actions':
                 return (
-                    // Row click opens the journey, so the dropdown must not fire it twice.
+                    // Row click opens the journey, so the menu must not fire it twice.
                     <Stack direction="row" justifyContent="flex-end" onClick={(e) => e.stopPropagation()}>
-                        <RowActionsSelect
+                        <RowActionsMenu
+                            heading={referenceOf(c)}
+                            subheading={consignmentStatusLabels[c.status]}
+                            viewLabel="Open journey"
+                            onView={() => onAction('open', c)}
                             actions={rowActions(c, permitted)}
                             busy={busyId === c.id}
                             onPick={(action) => onAction(action, c)}
@@ -560,16 +407,16 @@ const ConsignmentTable = ({
     const body = (
         <>
             <TableContainer sx={maxHeight ? { maxHeight } : undefined}>
-                <Table size="small" stickyHeader={stickyHeader}>
+                <Table size="small" stickyHeader={stickyHeader} sx={{ tableLayout: 'fixed', minWidth: TABLE_MIN_WIDTH }}>
                     <TableHead>
                         <TableRow>
                             {COLUMNS.map((col) => (
                                 <TableCell
                                     key={col.id}
                                     align={col.align ?? 'left'}
-                                    style={{ minWidth: col.minWidth }}
+                                    style={col.width ? { width: col.width } : undefined}
                                     sortDirection={orderBy === col.id ? order : false}
-                                    sx={dataHeadCellSx}
+                                    sx={registerHeadCellSx}
                                 >
                                     {col.sortValue ? (
                                         <TableSortLabel
@@ -595,15 +442,15 @@ const ConsignmentTable = ({
                             <TableRow>
                                 <TableCell colSpan={COLUMNS.length} sx={{ border: 'none', p: 0 }}>{empty}</TableCell>
                             </TableRow>
-                        ) : paginated.map((c, i) => (
+                        ) : paginated.map((c) => (
                             <TableRow
                                 key={c.id}
                                 hover={false}
                                 onClick={() => onAction('open', c)}
-                                sx={dataRowSx(i, true)}
+                                sx={registerRowSx}
                             >
                                 {COLUMNS.map((col) => (
-                                    <TableCell key={col.id} align={col.align ?? 'left'} sx={dataBodyCellSx}>
+                                    <TableCell key={col.id} align={col.align ?? 'left'} sx={registerBodyCellSx}>
                                         {renderCell(col, c)}
                                     </TableCell>
                                 ))}

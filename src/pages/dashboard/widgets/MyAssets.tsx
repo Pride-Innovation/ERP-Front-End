@@ -115,7 +115,7 @@ const MyAssets = ({ assets }: IMyAssetsProps) => {
                                     align={index > 1 ? 'right' : 'left'}
                                     sx={{
                                         fontWeight: 700,
-                                        fontSize: '0.68rem',
+                                        fontSize: '0.8rem',
                                         color: neutral[500],
                                         textTransform: 'uppercase',
                                         letterSpacing: '0.06em',

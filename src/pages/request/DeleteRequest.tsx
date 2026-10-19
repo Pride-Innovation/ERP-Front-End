@@ -168,7 +168,7 @@ const DeleteRequest = ({
                                     bgcolor: alpha(theme.palette.info.main, 0.1),
                                     color: theme.palette.info.dark,
                                     fontWeight: 500,
-                                    fontSize: '0.75rem'
+                                    fontSize: '0.8rem'
                                 }}
                             />
                         </Stack>
@@ -213,7 +213,7 @@ const DeleteRequest = ({
                                     variant="outlined"
                                     sx={{
                                         height: 24,
-                                        fontSize: '0.75rem'
+                                        fontSize: '0.8rem'
                                     }}
                                 />
                             </Box>

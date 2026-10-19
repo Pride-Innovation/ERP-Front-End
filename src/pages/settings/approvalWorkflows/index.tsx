@@ -166,13 +166,13 @@ const StepCard: React.FC<{
             <Stack direction="row" alignItems="center" spacing={1}>
                 <DragIndicatorIcon sx={{ color: alpha(TEAL, 0.35), fontSize: '1.1rem' }} />
                 <Box sx={{ bgcolor: TEAL, borderRadius: '50%', width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Typography variant="caption" sx={{ color: '#fff', fontWeight: 700, fontSize: '0.7rem' }}>{index + 1}</Typography>
+                    <Typography variant="caption" sx={{ color: '#fff', fontWeight: 700, fontSize: '0.8rem' }}>{index + 1}</Typography>
                 </Box>
                 <Typography variant="subtitle2" fontWeight={700} color={TEAL}>
                     {step.stepName || `Step ${index + 1}`}
                 </Typography>
                 {step.optional && (
-                    <Chip label="Optional" size="small" sx={{ fontSize: '0.65rem', height: 18, bgcolor: alpha(GOLD, 0.12), color: GOLD }} />
+                    <Chip label="Optional" size="small" sx={{ fontSize: '0.8rem', height: 18, bgcolor: alpha(GOLD, 0.12), color: GOLD }} />
                 )}
             </Stack>
             {total > 1 && (
@@ -464,14 +464,14 @@ const WorkflowForm: React.FC<{
                                             <Chip
                                                 label={s.stepName || `Step ${i + 1}`}
                                                 size="small"
-                                                sx={{ bgcolor: alpha(TEAL, 0.1), color: TEAL, fontSize: '0.7rem' }} />
+                                                sx={{ bgcolor: alpha(TEAL, 0.1), color: TEAL, fontSize: '0.8rem' }} />
                                             {i < form.steps.length - 1 && (
                                                 <Typography variant="caption" color="text.secondary" mx={0.25}>→</Typography>
                                             )}
                                         </React.Fragment>
                                     ))}
                                     <Chip label="Done" size="small"
-                                        sx={{ bgcolor: alpha('#2e7d32', 0.1), color: '#2e7d32', fontSize: '0.7rem' }} />
+                                        sx={{ bgcolor: alpha('#2e7d32', 0.1), color: '#2e7d32', fontSize: '0.8rem' }} />
                                 </Stack>
                             </Box>
                         </Paper>
@@ -604,10 +604,10 @@ const ApprovalWorkflows: React.FC = () => {
                                     <Stack direction="row" alignItems="center" spacing={1} mb={0.5} flexWrap="wrap">
                                         <Typography variant="subtitle1" fontWeight={700}>{wf.name}</Typography>
                                         <Chip label={wf.active ? 'Active' : 'Inactive'} size="small"
-                                            sx={{ bgcolor: wf.active ? alpha(TEAL, 0.1) : alpha('#999', 0.1), color: wf.active ? TEAL : '#666', fontWeight: 700, fontSize: '0.68rem' }} />
-                                        <Chip label={`Priority ${wf.priority}`} size="small" variant="outlined" sx={{ fontSize: '0.68rem' }} />
+                                            sx={{ bgcolor: wf.active ? alpha(TEAL, 0.1) : alpha('#999', 0.1), color: wf.active ? TEAL : '#666', fontWeight: 700, fontSize: '0.8rem' }} />
+                                        <Chip label={`Priority ${wf.priority}`} size="small" variant="outlined" sx={{ fontSize: '0.8rem' }} />
                                         <Chip label={BRANCH_SCOPE_LABELS[wf.branchScope] ?? wf.branchScope} size="small"
-                                            sx={{ bgcolor: alpha(GOLD, 0.1), color: GOLD, fontSize: '0.68rem' }} />
+                                            sx={{ bgcolor: alpha(GOLD, 0.1), color: GOLD, fontSize: '0.8rem' }} />
                                     </Stack>
 
                                     {wf.description && (
@@ -618,23 +618,23 @@ const ApprovalWorkflows: React.FC = () => {
 
                                     <Stack direction="row" spacing={1} mt={0.75} flexWrap="wrap" gap={0.5}>
                                         {wf.assetTypeName && (
-                                            <Chip label={`Category: ${wf.assetTypeName}`} size="small" variant="outlined" sx={{ fontSize: '0.68rem' }} />
+                                            <Chip label={`Category: ${wf.assetTypeName}`} size="small" variant="outlined" sx={{ fontSize: '0.8rem' }} />
                                         )}
                                         {wf.branchName && (
-                                            <Chip label={`Branch: ${wf.branchName}`} size="small" variant="outlined" sx={{ fontSize: '0.68rem' }} />
+                                            <Chip label={`Branch: ${wf.branchName}`} size="small" variant="outlined" sx={{ fontSize: '0.8rem' }} />
                                         )}
                                         <Chip label={`${wf.steps?.length ?? 0} step${(wf.steps?.length ?? 0) !== 1 ? 's' : ''}`} size="small"
-                                            sx={{ bgcolor: alpha(TEAL, 0.06), color: TEAL, fontSize: '0.68rem' }} />
+                                            sx={{ bgcolor: alpha(TEAL, 0.06), color: TEAL, fontSize: '0.8rem' }} />
                                         {(wf.steps?.length ?? 0) > 0 && (
                                             <Stack direction="row" alignItems="center" gap={0.4} flexWrap="wrap">
                                                 {wf.steps.map((s, i) => (
                                                     <React.Fragment key={i}>
                                                         <Typography variant="caption" color="text.secondary"
-                                                            sx={{ bgcolor: alpha('#000', 0.04), px: 0.8, py: 0.2, borderRadius: 1, fontSize: '0.65rem' }}>
+                                                            sx={{ bgcolor: alpha('#000', 0.04), px: 0.8, py: 0.2, borderRadius: 1, fontSize: '0.8rem' }}>
                                                             {s.stepName || `Step ${i + 1}`}
                                                         </Typography>
                                                         {i < wf.steps.length - 1 && (
-                                                            <Typography variant="caption" color="text.disabled" sx={{ fontSize: '0.6rem' }}>→</Typography>
+                                                            <Typography variant="caption" color="text.disabled" sx={{ fontSize: '0.8rem' }}>→</Typography>
                                                         )}
                                                     </React.Fragment>
                                                 ))}

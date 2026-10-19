@@ -107,7 +107,7 @@ const StatTile = ({
                                 fontWeight: 600,
                                 textTransform: 'uppercase',
                                 letterSpacing: '0.06em',
-                                fontSize: '0.65rem',
+                                fontSize: '0.8rem',
                                 cursor: tooltip ? 'help' : 'default',
                             }}
                         >
@@ -157,7 +157,7 @@ const StatTile = ({
                             borderRadius: 1,
                             px: 0.75,
                             py: 0.25,
-                            fontSize: '0.7rem',
+                            fontSize: '0.8rem',
                             fontWeight: 600,
                         }}
                     >

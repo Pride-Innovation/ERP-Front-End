@@ -7,28 +7,24 @@ Managing Director
 
 import { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import {
-    alpha, Box, CircularProgress, FormControl, IconButton, ListItemIcon, ListItemText,
-    MenuItem, Paper, Select, Stack, Table, TableBody, TableCell, TableContainer, TableHead,
-    TablePagination, TableRow, TableSortLabel, Tooltip, Typography,
+    alpha, Box, CircularProgress, IconButton, Paper, Stack, Table, TableBody, TableCell,
+    TableContainer, TableHead, TablePagination, TableRow, TableSortLabel, Tooltip, Typography,
 } from '@mui/material';
 import { PERMISSIONS } from '../../core/permissions/constants';
 import useAccessScope from '../../core/permissions/useAccessScope';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
-import StorefrontOutlinedIcon from '@mui/icons-material/StorefrontOutlined';
-import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
 import FlightTakeoffOutlinedIcon from '@mui/icons-material/FlightTakeoffOutlined';
 import AssignmentTurnedInOutlinedIcon from '@mui/icons-material/AssignmentTurnedInOutlined';
 import TaskAltOutlinedIcon from '@mui/icons-material/TaskAltOutlined';
 import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
 import { brand, neutral, border } from '../../utils/tokens';
+import { dataPaginationSx, dataSurfaceSx } from '../../components/tables/dataTableSx';
 import {
-    dataHeadCellSx, dataBodyCellSx, dataRowSx, dataPaginationSx, dataSurfaceSx,
-    dataActionSelectSx, dataActionMenuPaperSx,
-} from '../../components/tables/dataTableSx';
+    RowActionsMenu, TwoLine, registerBodyCellSx, registerHeadCellSx, registerRowSx,
+} from '../../components/tables/registerParts';
 import { StatusChip } from '../../components/layout';
 import {
     movementTypeLabel, statusLabel, statusTone, MovementStatus, MovementType,
@@ -37,22 +33,35 @@ import {
 import { IMovement } from './interface';
 
 /**
- * The movement tables, rendered with the same visual grammar as the audit-trail table
- * (`../reports/ReportDataTable`): tinted uppercase sortable head, zebra body, per-column
- * minimum widths and a tinted footer strip. Movement-specific cells live here rather than in
- * that generic component because they read the whole row, not a single value.
+ * The movement tables — the landing page's digest and the full register.
+ *
+ * <h2>Restraint is the design</h2>
+ * A row used to carry about a dozen separate marks: a coloured type pill, icon and initials badges
+ * at both ends of the route, a tinted count pill, a status chip *and* a six-segment progress bar
+ * repeating it, and the initiator filed under "Date". Three colour systems (type, avatar, status)
+ * competed in every row, so none of them led the eye anywhere.
+ *
+ * <p>Now: every cell is at most two lines — a value and a muted qualifier — and **status is the only
+ * coloured element**, because it is the one thing a reader scanning the register is looking for.
+ * The type keeps a small dot so it stays recognisable at a glance without shouting. Anything else
+ * belongs on the detail page, one click away.
  */
 
 // ── Column model ──────────────────────────────────────────────────────────
 
-type ColumnId = 'ref' | 'type' | 'route' | 'items' | 'status' | 'date' | 'actions';
+type ColumnId = 'ref' | 'type' | 'from' | 'to' | 'items' | 'status' | 'date' | 'actions';
 
 interface MovementColumn {
     id: ColumnId;
     label: string;
-    minWidth: number;
+    /**
+     * Fixed width in px. Absent on From and To, which share whatever the fixed columns leave and
+     * ellipsise long names — so the table fits the container instead of every column demanding its
+     * full content width (which made it ~230px wider than a 1366px laptop's content area).
+     */
+    width?: number;
     align?: 'left' | 'center' | 'right';
-    /** Absent for presentational columns (route, items, actions) that have no natural order. */
+    /** Absent for presentational columns that have no natural order. */
     sortValue?: (m: IMovement) => string | number;
 }
 
@@ -62,34 +71,34 @@ const STATUS_ORDER: MovementStatus[] = [
 ];
 
 const COLUMNS: Record<ColumnId, MovementColumn> = {
-    ref: { id: 'ref', label: 'Ref', minWidth: 96, sortValue: (m) => Number(m.id ?? 0) },
-    type: { id: 'type', label: 'Type', minWidth: 170, sortValue: (m) => movementTypeLabel(m.movementType) },
-    route: { id: 'route', label: 'Source → Destination', minWidth: 280 },
-    items: { id: 'items', label: 'Items', minWidth: 80, align: 'center' },
+    // Wide enough for a whole tracking number — the one value here that must never be truncated.
+    ref: { id: 'ref', label: 'Movement', width: 156, sortValue: (m) => Number(m.id ?? 0) },
+    type: { id: 'type', label: 'Type', width: 176, sortValue: (m) => movementTypeLabel(m.movementType) },
+    from: { id: 'from', label: 'From' },
+    to: { id: 'to', label: 'To' },
+    items: { id: 'items', label: 'Items', width: 64, align: 'right' },
     status: {
         id: 'status',
         label: 'Status',
-        minWidth: 150,
+        width: 120,
         sortValue: (m) => STATUS_ORDER.indexOf(m.status as MovementStatus),
     },
     date: {
         id: 'date',
-        label: 'Date',
-        minWidth: 130,
+        label: 'Raised',
+        width: 148,
         sortValue: (m) => new Date(m.createDate ?? 0).getTime(),
     },
-    actions: { id: 'actions', label: 'Actions', minWidth: 110, align: 'right' },
+    actions: { id: 'actions', label: '', width: 52, align: 'right' },
 };
 
-const RECENT_COLUMNS: ColumnId[] = ['ref', 'type', 'route', 'items', 'status', 'date', 'actions'];
-const APPROVAL_COLUMNS: ColumnId[] = ['ref', 'type', 'route', 'items', 'date', 'actions'];
+/** The actions column is appended per variant — the digest has none, since the row itself opens. */
+const RECENT_COLUMNS: ColumnId[] = ['ref', 'type', 'from', 'to', 'items', 'status', 'date'];
+const APPROVAL_COLUMNS: ColumnId[] = ['ref', 'type', 'from', 'to', 'items', 'date'];
 
 // ── Movement type colours ─────────────────────────────────────────────────
 
-/**
- * One hue per movement type, so a type is recognisable before its label is read — the same
- * device the audit trail uses for its modules.
- */
+/** One hue per type, shown only as a small dot — enough to recognise, not enough to compete. */
 const TYPE_COLORS: Record<MovementType, string> = {
     REPLENISHMENT: brand[500],
     ISSUANCE_FULFILLMENT: '#1D4ED8',
@@ -130,100 +139,46 @@ const relativeTime = (d?: string | null): string => {
 const userName = (u?: { firstName?: string; lastName?: string } | null) =>
     u ? `${u.firstName ?? ''} ${u.lastName ?? ''}`.trim() : '';
 
-const initialsOf = (name: string) =>
-    name.split(' ').filter(Boolean).map((n) => n[0]).join('').toUpperCase().slice(0, 2);
-
-/** Stable per-name hue, matching the audit trail's actor avatars. */
-const AVATAR_COLORS = ['#0369A1', '#059669', '#7C3AED', '#D97706', '#DC2626', '#0891B2', '#DB2777'];
-const avatarColor = (name: string) =>
-    AVATAR_COLORS[name.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0) % AVATAR_COLORS.length];
-
 // ── Cells ─────────────────────────────────────────────────────────────────
 
-const RefCell = ({ mov }: { mov: IMovement }) => (
-    <Stack spacing={0.15}>
-        <Typography variant="caption" sx={{ fontWeight: 700, color: brand[600], fontFamily: 'monospace' }}>
-            #{mov.id}
-        </Typography>
-        {(mov.consignment || mov.request) && (
-            <Typography variant="caption" sx={{ color: neutral[400], fontSize: '0.6rem', fontFamily: 'monospace' }}>
-                {mov.consignment
-                    ? (mov.consignment.reference ?? `CNS-${mov.consignment.id}`)
-                    : `REQ-${mov.request?.id}`}
-            </Typography>
-        )}
-    </Stack>
-);
-
-const TypeCell = ({ mov }: { mov: IMovement }) => {
-    const color = typeColor(mov.movementType);
-    return (
-        <Stack spacing={0.35} alignItems="flex-start">
-            <Box
-                sx={{
-                    display: 'inline-flex', alignItems: 'center', gap: 0.6,
-                    bgcolor: alpha(color, 0.1), color,
-                    border: `1px solid ${alpha(color, 0.22)}`,
-                    borderRadius: '6px', px: 0.9, height: 22,
-                    fontSize: '0.7rem', fontWeight: 700, whiteSpace: 'nowrap',
-                }}
-            >
-                <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: color, flexShrink: 0 }} />
-                {movementTypeLabel(mov.movementType)}
-            </Box>
-            {mov.movementCategory && (
-                <Typography variant="caption" sx={{ color: neutral[400], fontSize: '0.6rem' }}>
-                    {mov.movementCategory === 'INTER_LOCATION' ? 'Inter-location' : 'Intra-location'}
-                </Typography>
-            )}
-        </Stack>
-    );
+/**
+ * The movement's number, then the reference people actually quote: its tracking number once one is
+ * issued, else the consignment or request it belongs to.
+ */
+const RefCell = ({ mov }: { mov: IMovement }) => {
+    const reference = mov.trackingNumber
+        ?? (mov.consignment ? (mov.consignment.reference ?? `CNS-${mov.consignment.id}`) : null)
+        ?? (mov.request ? `REQ-${mov.request.id}` : null);
+    return <TwoLine primary={`#${mov.id}`} secondary={reference} mono />;
 };
 
-/** One end of the route — a store (icon badge) or a person (initials avatar). */
-const RouteNode = ({ label, sub, person }: { label: string; sub?: string; person?: boolean }) => (
-    <Stack direction="row" alignItems="center" spacing={0.75} sx={{ minWidth: 0 }}>
-        <Box
-            sx={{
-                width: 24, height: 24, borderRadius: person ? '50%' : '6px', flexShrink: 0,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: '0.6rem', fontWeight: 700,
-                bgcolor: person ? alpha(avatarColor(label), 0.12) : neutral[100],
-                color: person ? avatarColor(label) : neutral[500],
-            }}
-        >
-            {person ? initialsOf(label) : <StorefrontOutlinedIcon sx={{ fontSize: 13 }} />}
-        </Box>
-        <Stack sx={{ minWidth: 0 }}>
-            <Typography variant="caption" sx={{ fontWeight: 600, color: neutral[800] }} noWrap>
-                {label}
-            </Typography>
-            {sub && (
-                <Typography variant="caption" sx={{ color: neutral[400], fontSize: '0.6rem' }} noWrap>
-                    {sub}
-                </Typography>
-            )}
-        </Stack>
+const TypeCell = ({ mov }: { mov: IMovement }) => (
+    <Stack direction="row" alignItems="center" spacing={1} sx={{ minWidth: 0 }}>
+        <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: typeColor(mov.movementType), flexShrink: 0 }} />
+        <Typography noWrap sx={{ fontSize: '0.875rem', fontWeight: 500, color: neutral[700] }}>
+            {movementTypeLabel(mov.movementType)}
+        </Typography>
     </Stack>
 );
 
-const RouteCell = ({ mov }: { mov: IMovement }) => {
-    const recipient = userName(mov.recipientUser);
-    const toPerson = !mov.destStore && !!recipient;
-    return (
-        <Stack direction="row" alignItems="center" spacing={1} sx={{ minWidth: 0 }}>
-            <RouteNode
-                label={mov.sourceStore?.name ?? '—'}
-                sub={mov.sourceStore?.location?.name ?? undefined}
-            />
-            <ArrowForwardIcon sx={{ fontSize: 13, color: neutral[300], flexShrink: 0 }} />
-            <RouteNode
-                label={toPerson ? recipient : (mov.destStore?.name ?? (recipient || '—'))}
-                sub={toPerson ? 'Recipient' : (mov.destStore?.location?.name ?? undefined)}
-                person={toPerson}
-            />
-        </Stack>
-    );
+/**
+ * One end of a movement: a store and the branch it stands in, or a person and their duty station.
+ * The source used to read the store alone, so a return — which leaves a person, not a store —
+ * showed "—" where the person's name belonged.
+ */
+const EndCell = ({ store, person, personRole }: {
+    store?: IMovement['sourceStore'];
+    person?: IMovement['recipientUser'];
+    personRole: string;
+}) => {
+    const name = userName(person);
+    if (store) {
+        return <TwoLine primary={store.name ?? '—'} secondary={store.location?.name} />;
+    }
+    if (name) {
+        return <TwoLine primary={name} secondary={person?.branch?.name ?? personRole} />;
+    }
+    return <Typography sx={{ fontSize: '0.875rem', color: neutral[400] }}>—</Typography>;
 };
 
 const ItemsCell = ({ mov }: { mov: IMovement }) => {
@@ -234,65 +189,40 @@ const ItemsCell = ({ mov }: { mov: IMovement }) => {
     const preview = names.slice(0, 5).join(', ') + (names.length > 5 ? `, +${names.length - 5} more` : '');
     return (
         <Tooltip title={preview || 'No item lines recorded'} arrow>
-            <Box
+            <Typography
+                component="span"
                 sx={{
-                    display: 'inline-flex', alignItems: 'center', gap: 0.5,
-                    px: 0.9, height: 22, borderRadius: '6px',
-                    bgcolor: items.length ? alpha(brand[500], 0.08) : neutral[100],
-                    color: items.length ? brand[700] : neutral[400],
-                    fontSize: '0.7rem', fontWeight: 700,
+                    fontSize: '0.875rem', fontWeight: 600, fontVariantNumeric: 'tabular-nums',
+                    color: items.length ? neutral[800] : neutral[400],
                 }}
             >
-                <Inventory2OutlinedIcon sx={{ fontSize: 12 }} />
-                {items.length}
-            </Box>
+                {items.length || '—'}
+            </Typography>
         </Tooltip>
     );
 };
 
-/** Where the movement sits on the lifecycle. Cancelled stops wherever it stopped. */
-const PIPELINE: MovementStatus[] = ['DRAFT', 'INITIATED', 'DISPATCHED', 'IN_TRANSIT', 'RECEIVED', 'COMPLETED'];
+/** The chip alone — the progress bar beside it said the same thing a second time. */
+const StatusCell = ({ mov }: { mov: IMovement }) => (
+    <StatusChip label={statusLabel(mov.status)} tone={statusTone(mov.status)} />
+);
 
-const StatusCell = ({ mov }: { mov: IMovement }) => {
-    const cancelled = mov.status === 'CANCELLED';
-    const stage = PIPELINE.indexOf(mov.status as MovementStatus);
-    const tone = statusTone(mov.status);
-    const dotColor = cancelled ? '#DC2626' : brand[500];
+/** When, and by whom — the initiator used to sit under "Date" with nothing saying what it was. */
+const DateCell = ({ mov }: { mov: IMovement }) => {
+    const by = userName(mov.initiator);
     return (
-        <Stack spacing={0.6} alignItems="flex-start">
-            <StatusChip label={statusLabel(mov.status)} tone={tone} />
-            {!cancelled && stage >= 0 && (
-                <Tooltip title={`Stage ${stage + 1} of ${PIPELINE.length} — ${statusLabel(mov.status)}`} arrow>
-                    <Stack direction="row" spacing={0.4} sx={{ pl: 0.25 }}>
-                        {PIPELINE.map((s, i) => (
-                            <Box
-                                key={s}
-                                sx={{
-                                    width: i === stage ? 12 : 5, height: 5, borderRadius: 3,
-                                    transition: 'width 0.15s',
-                                    bgcolor: i <= stage ? dotColor : neutral[200],
-                                }}
-                            />
-                        ))}
-                    </Stack>
-                </Tooltip>
-            )}
-        </Stack>
+        <Tooltip title={fmtDateTime(mov.createDate)} arrow placement="top-start">
+            <Box sx={{ minWidth: 0 }}>
+                <TwoLine
+                    primary={relativeTime(mov.createDate)}
+                    secondary={by ? `by ${by}` : fmtDate(mov.createDate)}
+                    strong={false}
+                    hint={false}
+                />
+            </Box>
+        </Tooltip>
     );
 };
-
-const DateCell = ({ mov }: { mov: IMovement }) => (
-    <Tooltip title={fmtDateTime(mov.createDate)} arrow>
-        <Stack spacing={0.15}>
-            <Typography variant="caption" sx={{ color: neutral[700], fontWeight: 500 }}>
-                {relativeTime(mov.createDate)}
-            </Typography>
-            <Typography variant="caption" sx={{ color: neutral[400], fontSize: '0.6rem' }}>
-                {mov.initiator ? userName(mov.initiator) : fmtDate(mov.createDate)}
-            </Typography>
-        </Stack>
-    </Tooltip>
-);
 
 // ── Row actions ───────────────────────────────────────────────────────────
 
@@ -309,8 +239,8 @@ interface RowAction {
     destructive?: boolean;
 }
 
-const APPROVE: RowAction = { action: 'approve', title: 'Approve', color: '#15803D', icon: <CheckCircleOutlineIcon sx={{ fontSize: 15 }} /> };
-const REJECT: RowAction = { action: 'reject', title: 'Reject', color: '#B91C1C', icon: <HighlightOffIcon sx={{ fontSize: 15 }} />, destructive: true };
+const APPROVE: RowAction = { action: 'approve', title: 'Approve', color: '#15803D', icon: <CheckCircleOutlineIcon sx={{ fontSize: 16 }} /> };
+const REJECT: RowAction = { action: 'reject', title: 'Reject', color: '#B91C1C', icon: <HighlightOffIcon sx={{ fontSize: 16 }} />, destructive: true };
 
 /**
  * The permission each lifecycle action answers to, mirroring the `@PreAuthorize` on the endpoint
@@ -351,11 +281,11 @@ const rowActions = (
 
     const actions: RowAction[] = [];
     if (canApproveMovement(mov, currentUserId)) actions.push(APPROVE, REJECT);
-    if (canDispatch(mov)) actions.push({ action: 'dispatch', title: 'Dispatch', color: '#2563EB', icon: <LocalShippingOutlinedIcon sx={{ fontSize: 15 }} /> });
-    if (canMarkInTransit(mov)) actions.push({ action: 'in-transit', title: 'Mark in transit', color: '#4338CA', icon: <FlightTakeoffOutlinedIcon sx={{ fontSize: 15 }} /> });
-    if (canReceive(mov)) actions.push({ action: 'receive', title: 'Receive', color: '#047857', icon: <AssignmentTurnedInOutlinedIcon sx={{ fontSize: 15 }} /> });
-    if (canComplete(mov)) actions.push({ action: 'complete', title: 'Complete', color: '#15803D', icon: <TaskAltOutlinedIcon sx={{ fontSize: 15 }} /> });
-    if (canCancel(mov)) actions.push({ action: 'cancel', title: 'Cancel', color: '#DC2626', icon: <CancelOutlinedIcon sx={{ fontSize: 15 }} />, destructive: true });
+    if (canDispatch(mov)) actions.push({ action: 'dispatch', title: 'Dispatch', color: '#2563EB', icon: <LocalShippingOutlinedIcon sx={{ fontSize: 16 }} /> });
+    if (canMarkInTransit(mov)) actions.push({ action: 'in-transit', title: 'Mark in transit', color: '#4338CA', icon: <FlightTakeoffOutlinedIcon sx={{ fontSize: 16 }} /> });
+    if (canReceive(mov)) actions.push({ action: 'receive', title: 'Receive', color: '#047857', icon: <AssignmentTurnedInOutlinedIcon sx={{ fontSize: 16 }} /> });
+    if (canComplete(mov)) actions.push({ action: 'complete', title: 'Complete', color: '#15803D', icon: <TaskAltOutlinedIcon sx={{ fontSize: 16 }} /> });
+    if (canCancel(mov)) actions.push({ action: 'cancel', title: 'Cancel', color: '#DC2626', icon: <CancelOutlinedIcon sx={{ fontSize: 16 }} />, destructive: true });
     return actions.filter(a => permitted(a.action, mov));
 };
 
@@ -378,80 +308,10 @@ const ActionButton = ({ title, color, onClick, children }: {
 );
 
 /**
- * The row's actions as a single dropdown. Preferred where a row can offer several at once —
- * six icons side by side read as noise, and the labels say what each one does.
- *
- * `disableScrollLock` matters here: without it the menu's modal hides the body scrollbar and
- * pads the body to compensate, so the whole page jumps sideways every time a row is opened.
+ * Below this the table scrolls rather than squeezing From and To to nothing. It is the sum of the
+ * fixed columns plus room for two readable names.
  */
-const RowActionsSelect = ({ actions, onView, onPick }: {
-    actions: RowAction[];
-    onView: () => void;
-    onPick: (action: MovementAction) => void;
-}) => {
-    const routine = actions.filter((a) => !a.destructive);
-    const destructive = actions.filter((a) => a.destructive);
-
-    // Held at '' so the control always reads "Actions" — it triggers work, it does not store a choice.
-    const handleChange = (value: string) => {
-        if (value === 'view') onView();
-        else onPick(value as MovementAction);
-    };
-
-    /**
-     * Groups are separated by a border on the leading item rather than a `<Divider>`: `Select`
-     * clones every child into a clickable option, which would make a divider fire `onChange`.
-     */
-    const groupSx = (leads: boolean) =>
-        (leads ? { borderTop: `1px solid ${border.subtle}`, mt: 0.5, pt: 1 } : {});
-
-    const item = (a: RowAction, i: number) => (
-        <MenuItem
-            key={a.action}
-            value={a.action}
-            sx={{
-                fontSize: '0.78rem', py: 0.75, color: a.color,
-                '&:hover': { bgcolor: alpha(a.color, 0.07) },
-                ...groupSx(i === 0),
-            }}
-        >
-            <ListItemIcon sx={{ color: a.color, minWidth: '28px !important' }}>{a.icon}</ListItemIcon>
-            <ListItemText primaryTypographyProps={{ fontSize: '0.78rem', fontWeight: 600 }}>{a.title}</ListItemText>
-        </MenuItem>
-    );
-
-    return (
-        <FormControl size="small" sx={{ minWidth: 116 }}>
-            <Select
-                value=""
-                displayEmpty
-                renderValue={() => 'Actions'}
-                onChange={(e) => handleChange(e.target.value as string)}
-                sx={dataActionSelectSx}
-                MenuProps={{
-                    // Keeps the page still while the dropdown is open.
-                    disableScrollLock: true,
-                    anchorOrigin: { vertical: 'bottom', horizontal: 'right' },
-                    transformOrigin: { vertical: 'top', horizontal: 'right' },
-                    PaperProps: { elevation: 0, sx: dataActionMenuPaperSx },
-                }}
-            >
-                <MenuItem
-                    value="view"
-                    sx={{ fontSize: '0.78rem', py: 0.75, color: brand[700], '&:hover': { bgcolor: alpha(brand[500], 0.07) } }}
-                >
-                    <ListItemIcon sx={{ color: brand[600], minWidth: '28px !important' }}>
-                        <VisibilityOutlinedIcon sx={{ fontSize: 15 }} />
-                    </ListItemIcon>
-                    <ListItemText primaryTypographyProps={{ fontSize: '0.78rem', fontWeight: 600 }}>View details</ListItemText>
-                </MenuItem>
-
-                {routine.map(item)}
-                {destructive.map(item)}
-            </Select>
-        </FormControl>
-    );
-};
+const TABLE_MIN_WIDTH = 940;
 
 // ── Table ─────────────────────────────────────────────────────────────────
 
@@ -473,7 +333,7 @@ export interface IMovementTableProps {
     onAction?: (action: MovementAction, mov: IMovement) => void;
     /** Needed by `lifecycle` to decide whether the approve / reject pair is this user's to press. */
     currentUserId?: number | string;
-    /** `menu` collapses the row's actions into one dropdown. Defaults to a row of icon buttons. */
+    /** `menu` collapses the row's actions behind one ⋮ button. Defaults to a row of icon buttons. */
     actionsAs?: 'icons' | 'menu';
     /** Footer strip content — e.g. a "View all" link. Hidden while paginating. */
     footer?: ReactNode;
@@ -554,10 +414,15 @@ const MovementTable = ({
         [canActOnAnyOf],
     );
 
-    const columns = (variant === 'approvals' ? APPROVAL_COLUMNS : RECENT_COLUMNS)
-        .map((id) => (id === 'actions' && variant === 'lifecycle'
-            ? { ...COLUMNS.actions, minWidth: actionsAs === 'menu' ? 120 : 210 }
-            : COLUMNS[id]));
+    const columns: MovementColumn[] = [
+        ...(variant === 'approvals' ? APPROVAL_COLUMNS : RECENT_COLUMNS).map((id) => COLUMNS[id]),
+        // The digest has no actions column — clicking the row opens it, and an eye icon on every
+        // row said the same thing again.
+        ...(variant === 'recent' ? [] : [{
+            ...COLUMNS.actions,
+            width: actionsAs === 'menu' ? 52 : (variant === 'lifecycle' ? 210 : 90),
+        }]),
+    ];
 
     const [orderBy, setOrderBy] = useState<ColumnId>(initialSort?.column ?? 'date');
     const [order, setOrder] = useState<Order>(initialSort?.order ?? 'desc');
@@ -608,7 +473,8 @@ const MovementTable = ({
         switch (col.id) {
             case 'ref': return <RefCell mov={mov} />;
             case 'type': return <TypeCell mov={mov} />;
-            case 'route': return <RouteCell mov={mov} />;
+            case 'from': return <EndCell store={mov.sourceStore} person={mov.sourceUser} personRole="Holder" />;
+            case 'to': return <EndCell store={mov.destStore} person={mov.recipientUser} personRole="Recipient" />;
             case 'items': return <ItemsCell mov={mov} />;
             case 'status': return <StatusCell mov={mov} />;
             case 'date': return <DateCell mov={mov} />;
@@ -618,7 +484,9 @@ const MovementTable = ({
                     // Row click opens the movement, so the controls must not fire it twice.
                     <Stack direction="row" spacing={0.25} justifyContent="flex-end" onClick={(e) => e.stopPropagation()}>
                         {actionsAs === 'menu' ? (
-                            <RowActionsSelect
+                            <RowActionsMenu
+                                heading={`Movement #${mov.id}`}
+                                subheading={statusLabel(mov.status)}
                                 actions={actions}
                                 onView={() => onView(mov)}
                                 onPick={(action) => onAction?.(action, mov)}
@@ -626,7 +494,7 @@ const MovementTable = ({
                         ) : (
                             <>
                                 <ActionButton title="View details" color={brand[600]} onClick={() => onView(mov)}>
-                                    <VisibilityOutlinedIcon sx={{ fontSize: 15 }} />
+                                    <VisibilityOutlinedIcon sx={{ fontSize: 16 }} />
                                 </ActionButton>
                                 {actions.map((a) => (
                                     <ActionButton key={a.action} title={a.title} color={a.color} onClick={() => onAction?.(a.action, mov)}>
@@ -645,16 +513,16 @@ const MovementTable = ({
     const body = (
         <>
             <TableContainer sx={maxHeight ? { maxHeight } : undefined}>
-                <Table size="small" stickyHeader={stickyHeader}>
+                <Table size="small" stickyHeader={stickyHeader} sx={{ tableLayout: 'fixed', minWidth: TABLE_MIN_WIDTH }}>
                     <TableHead>
                         <TableRow>
                             {columns.map((col) => (
                                 <TableCell
                                     key={col.id}
                                     align={col.align ?? 'left'}
-                                    style={{ minWidth: col.minWidth }}
+                                    style={col.width ? { width: col.width } : undefined}
                                     sortDirection={orderBy === col.id ? order : false}
-                                    sx={dataHeadCellSx}
+                                    sx={registerHeadCellSx}
                                 >
                                     {col.sortValue ? (
                                         <TableSortLabel
@@ -682,18 +550,18 @@ const MovementTable = ({
                                     {empty}
                                 </TableCell>
                             </TableRow>
-                        ) : paginated.map((mov, i) => (
+                        ) : paginated.map((mov) => (
                             <TableRow
                                 key={mov.id}
                                 hover={false}
                                 onClick={() => onView(mov)}
-                                sx={dataRowSx(i, true)}
+                                sx={registerRowSx}
                             >
                                 {columns.map((col) => (
                                     <TableCell
                                         key={col.id}
                                         align={col.align ?? 'left'}
-                                        sx={dataBodyCellSx}
+                                        sx={registerBodyCellSx}
                                     >
                                         {renderCell(col, mov)}
                                     </TableCell>

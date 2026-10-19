@@ -7,6 +7,7 @@ import ReportSummaryCards from '../ReportSummaryCards';
 import ReportDataTable, { ReportColumn, StatusChip } from '../ReportDataTable';
 import useReportData, { REPORT_PAGE_SIZE, truncationNotice } from '../useReportData';
 import { fetchRowsService } from '../../../core/apis/globalService';
+import { STOCK_STATUS_CODES } from '../reportStatus';
 
 const ACCENT = '#0369A1';
 
@@ -42,7 +43,7 @@ const COLUMNS: ReportColumn<StockRow>[] = [
     { id: 'department', label: 'Department', minWidth: 110 },
     { id: 'branch', label: 'Branch', minWidth: 120 },
     { id: 'stockedBy', label: 'Stocked By', minWidth: 120 },
-    { id: 'status', label: 'Status', minWidth: 100, format: (v) => <StatusChip value={v} /> },
+    { id: 'status', label: 'Status', minWidth: 100, format: (v, r) => <StatusChip value={v} code={r.statusCode} /> },
     { id: 'remarks', label: 'Remarks', minWidth: 140 },
 ];
 
@@ -111,7 +112,14 @@ const StockReport = () => {
                 pageNumber: 0,
                 pageSize: REPORT_PAGE_SIZE,
                 endPoint: 'stocks',
-                params: { startDate: f.dateFrom, endDate: f.dateTo },
+                params: {
+                    startDate: f.dateFrom,
+                    endDate: f.dateTo,
+                    // Declared on /stocks all along; the comment below said they were sent and they
+                    // were not, so the Branch and Status dropdowns changed nothing on this tab.
+                    branchId: f.branchId,
+                    stockStatusId: f.statusId,
+                },
             })) as any;
 
             if (res?.status !== 200) throw new Error('stocks');
@@ -159,6 +167,7 @@ const StockReport = () => {
             subtitle="Purchase orders and what was ordered against each supplier"
             accentColor={ACCENT}
             filterFields={['dateRange', 'branch', 'department', 'category', 'status']}
+            statusCodes={STOCK_STATUS_CODES}
             onApplyFilters={applyFilters}
             onRefresh={refresh}
             notice={notice}

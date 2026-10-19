@@ -58,7 +58,7 @@ const SelectComponent = ({
             },
             '& .MuiInputLabel-root': {
                 color: 'rgba(0, 0, 0, 0.45)',
-                fontSize: '0.875rem',
+                fontSize: '0.9375rem',
                 '&.Mui-focused': { color: PRIMARY_COLOR },
                 '&.Mui-error': { color: '#D32F2F' },
             },
@@ -67,7 +67,7 @@ const SelectComponent = ({
             },
             '& .MuiSelect-select.MuiInputBase-input': {
                 padding: '13px 32px 13px 14px',
-                fontSize: '0.875rem',
+                fontSize: '0.9375rem',
                 lineHeight: 1.5,
             },
         }}>
@@ -89,7 +89,7 @@ const SelectComponent = ({
                             borderRadius: '8px',
                             boxShadow: `0 4px 20px ${alpha('#000', 0.1)}`,
                             '& .MuiMenuItem-root': {
-                                fontSize: '0.875rem',
+                                fontSize: '0.9375rem',
                                 py: 1,
                                 '&:hover': {
                                     backgroundColor: alpha(PRIMARY_COLOR, 0.06),

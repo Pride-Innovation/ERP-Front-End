@@ -125,7 +125,7 @@ const TabComponent = ({
                             minHeight: 50,
                             textTransform: 'none',
                             fontWeight: 500,
-                            fontSize: '0.83rem',
+                            fontSize: '0.875rem',
                             color: neutral[500],
                             gap: 0.75,
                             px: 2,

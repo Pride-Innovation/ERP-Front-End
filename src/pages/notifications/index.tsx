@@ -153,7 +153,7 @@ const PILL_INPUT_SX = {
     '& .MuiOutlinedInput-root': {
         borderRadius: '8px',
         bgcolor: '#fff',
-        fontSize: '0.8rem',
+        fontSize: '0.875rem',
         height: 36,
         '& fieldset': { borderColor: '#E2E8F0' },
         '&:hover fieldset': { borderColor: PRIMARY },
@@ -162,7 +162,7 @@ const PILL_INPUT_SX = {
 };
 
 const FieldLabel = ({ children }: { children: React.ReactNode }) => (
-    <Typography sx={{ fontSize: '0.72rem', fontWeight: 600, color: '#64748B', mb: 0.5, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+    <Typography sx={{ fontSize: '0.8rem', fontWeight: 600, color: '#64748B', mb: 0.5, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
         {children}
     </Typography>
 );
@@ -208,7 +208,7 @@ const NotificationFilters = ({ onApply }: { onApply: (f: NotificationFilterValue
             }}>
                 <Stack direction="row" alignItems="center" gap={1}>
                     <TuneOutlinedIcon sx={{ fontSize: 16, color: PRIMARY }} />
-                    <Typography sx={{ fontWeight: 700, fontSize: '0.82rem', color: '#0F172A' }}>
+                    <Typography sx={{ fontWeight: 700, fontSize: '0.875rem', color: '#0F172A' }}>
                         Filters &amp; Options
                     </Typography>
                 </Stack>
@@ -228,7 +228,7 @@ const NotificationFilters = ({ onApply }: { onApply: (f: NotificationFilterValue
                             <FormControl fullWidth size="small" sx={PILL_INPUT_SX}>
                                 <Select value={datePreset} onChange={e => setDatePreset(e.target.value)}
                                     startAdornment={<InputAdornment position="start"><CalendarTodayOutlinedIcon sx={{ fontSize: 13, color: PRIMARY }} /></InputAdornment>}>
-                                    {DATE_PRESETS.map(d => <MenuItem key={d.value} value={d.value} sx={{ fontSize: '0.8rem' }}>{d.label}</MenuItem>)}
+                                    {DATE_PRESETS.map(d => <MenuItem key={d.value} value={d.value} sx={{ fontSize: '0.875rem' }}>{d.label}</MenuItem>)}
                                 </Select>
                             </FormControl>
                         </Grid>
@@ -252,9 +252,9 @@ const NotificationFilters = ({ onApply }: { onApply: (f: NotificationFilterValue
                             <FieldLabel>Status</FieldLabel>
                             <FormControl fullWidth size="small" sx={PILL_INPUT_SX}>
                                 <Select value={readStatus} onChange={e => setReadStatus(e.target.value as ReadFilter)}>
-                                    <MenuItem value="unread" sx={{ fontSize: '0.8rem' }}>Unread</MenuItem>
-                                    <MenuItem value="read" sx={{ fontSize: '0.8rem' }}>Read</MenuItem>
-                                    <MenuItem value="all" sx={{ fontSize: '0.8rem' }}>All</MenuItem>
+                                    <MenuItem value="unread" sx={{ fontSize: '0.875rem' }}>Unread</MenuItem>
+                                    <MenuItem value="read" sx={{ fontSize: '0.875rem' }}>Read</MenuItem>
+                                    <MenuItem value="all" sx={{ fontSize: '0.875rem' }}>All</MenuItem>
                                 </Select>
                             </FormControl>
                         </Grid>
@@ -265,7 +265,7 @@ const NotificationFilters = ({ onApply }: { onApply: (f: NotificationFilterValue
                             <FormControl fullWidth size="small" sx={PILL_INPUT_SX}>
                                 <Select value={type} onChange={e => setType(e.target.value as TypeFilter)}>
                                     {(Object.keys(TYPE_LABELS) as TypeFilter[]).map(k => (
-                                        <MenuItem key={k} value={k} sx={{ fontSize: '0.8rem' }}>{TYPE_LABELS[k]}</MenuItem>
+                                        <MenuItem key={k} value={k} sx={{ fontSize: '0.875rem' }}>{TYPE_LABELS[k]}</MenuItem>
                                     ))}
                                 </Select>
                             </FormControl>
@@ -279,7 +279,7 @@ const NotificationFilters = ({ onApply }: { onApply: (f: NotificationFilterValue
                                     onClick={handleApply}
                                     sx={{
                                         height: 36, px: 2, textTransform: 'none', fontWeight: 600,
-                                        fontSize: '0.8rem', bgcolor: PRIMARY, borderRadius: '8px',
+                                        fontSize: '0.875rem', bgcolor: PRIMARY, borderRadius: '8px',
                                         boxShadow: `0 2px 8px ${alpha(PRIMARY, 0.35)}`,
                                         '&:hover': { bgcolor: alpha(PRIMARY, 0.85), boxShadow: `0 4px 14px ${alpha(PRIMARY, 0.4)}` },
                                     }}
@@ -291,7 +291,7 @@ const NotificationFilters = ({ onApply }: { onApply: (f: NotificationFilterValue
                                     onClick={handleClear}
                                     sx={{
                                         height: 36, px: 1.5, textTransform: 'none', fontWeight: 600,
-                                        fontSize: '0.8rem', borderRadius: '8px',
+                                        fontSize: '0.875rem', borderRadius: '8px',
                                         borderColor: '#CBD5E1', color: '#64748B',
                                         '&:hover': { borderColor: PRIMARY, color: PRIMARY, bgcolor: alpha(PRIMARY, 0.04) },
                                     }}
@@ -564,7 +564,7 @@ const Notifications = () => {
                     <Chip
                         label={`${filtered.length} shown`}
                         size="small"
-                        sx={{ height: 26, fontWeight: 600, fontSize: '0.72rem', bgcolor: alpha(PRIMARY, 0.07), color: brand[700] }}
+                        sx={{ height: 26, fontWeight: 600, fontSize: '0.8rem', bgcolor: alpha(PRIMARY, 0.07), color: brand[700] }}
                     />
                 </Box>
 
@@ -698,7 +698,7 @@ const NotificationRow = ({
                     />
                 )}
             </Stack>
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25, fontSize: '0.8rem' }}>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25, fontSize: '0.875rem' }}>
                 {n.message}
             </Typography>
             <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mt: 0.5 }}>
@@ -710,7 +710,7 @@ const NotificationRow = ({
                     size="small"
                     sx={{
                         height: 18,
-                        fontSize: '0.62rem',
+                        fontSize: '0.8rem',
                         fontWeight: 600,
                         bgcolor: alpha(PRIMARY, 0.08),
                         color: PRIMARY,
@@ -740,7 +740,7 @@ const NotificationRow = ({
         ) : (
             <Typography
                 variant="caption"
-                sx={{ color: neutral[400], alignSelf: 'center', flexShrink: 0, fontSize: '0.66rem', fontWeight: 600 }}
+                sx={{ color: neutral[400], alignSelf: 'center', flexShrink: 0, fontSize: '0.8rem', fontWeight: 600 }}
             >
                 Read
             </Typography>

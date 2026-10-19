@@ -64,7 +64,7 @@ const KpiCard = ({ label, value, icon, color, sub, loading }: {
         <Box sx={{ position: 'absolute', top: 0, left: 0, width: 4, height: '100%', bgcolor: color, borderRadius: '2px 0 0 2px' }} />
         <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
             <Box>
-                <Typography sx={{ fontSize: '0.68rem', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.06em', mb: 0.75 }}>
+                <Typography sx={{ fontSize: '0.8rem', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.06em', mb: 0.75 }}>
                     {label}
                 </Typography>
                 {loading ? (
@@ -74,7 +74,7 @@ const KpiCard = ({ label, value, icon, color, sub, loading }: {
                         <CountUp end={value} duration={1.4} />
                     </Typography>
                 )}
-                <Typography sx={{ fontSize: '0.72rem', color: '#64748B', mt: 0.5 }}>{sub}</Typography>
+                <Typography sx={{ fontSize: '0.8rem', color: '#64748B', mt: 0.5 }}>{sub}</Typography>
             </Box>
             <Box sx={{
                 width: 42, height: 42, borderRadius: 1.5, bgcolor: alpha(color, 0.10),
@@ -112,10 +112,10 @@ const PipelineStep = ({
                         <CountUp end={count} duration={1.2} />
                     </Typography>
                 )}
-                <Typography sx={{ fontSize: '0.72rem', fontWeight: 600, color, mt: 0.25, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                <Typography sx={{ fontSize: '0.8rem', fontWeight: 600, color, mt: 0.25, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                     {label}
                 </Typography>
-                <Typography sx={{ fontSize: '0.68rem', color: '#94A3B8', mt: 0.25 }}>
+                <Typography sx={{ fontSize: '0.8rem', color: '#94A3B8', mt: 0.25 }}>
                     {loading ? '–' : `${pct}%`}
                 </Typography>
             </Box>
@@ -146,8 +146,8 @@ const statusBadge = (s?: string): { bg: string; text: string; label: string } =>
 const LegendPill = ({ color, label, count }: { color: string; label: string; count: number }) => (
     <Stack direction="row" alignItems="center" gap={0.75}>
         <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: color, flexShrink: 0 }} />
-        <Typography sx={{ fontSize: '0.76rem', color: '#475569' }}>{label}</Typography>
-        <Typography sx={{ fontSize: '0.76rem', fontWeight: 700, color: '#0F172A' }}>{count}</Typography>
+        <Typography sx={{ fontSize: '0.8rem', color: '#475569' }}>{label}</Typography>
+        <Typography sx={{ fontSize: '0.8rem', fontWeight: 700, color: '#0F172A' }}>{count}</Typography>
     </Stack>
 );
 
@@ -269,7 +269,7 @@ const RequestOverview = () => {
 
             {/* ── Row 2: Pipeline ──────────────────────────────────────── */}
             <Card elevation={0} sx={{ border: '1px solid #EEF2F7', borderRadius: 2, p: 2.5, mb: 2.5 }}>
-                <Typography sx={{ fontSize: '0.7rem', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.06em', mb: 2 }}>
+                <Typography sx={{ fontSize: '0.8rem', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.06em', mb: 2 }}>
                     Request Lifecycle Pipeline
                 </Typography>
                 <Stack direction="row" alignItems="stretch">
@@ -286,7 +286,7 @@ const RequestOverview = () => {
                 {/* Status doughnut */}
                 <Grid item xs={12} md={4}>
                     <Card elevation={0} sx={{ border: '1px solid #EEF2F7', borderRadius: 2, p: 2.5, height: '100%' }}>
-                        <Typography sx={{ fontSize: '0.7rem', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.06em', mb: 2 }}>
+                        <Typography sx={{ fontSize: '0.8rem', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.06em', mb: 2 }}>
                             Status Distribution
                         </Typography>
                         {loading ? (
@@ -309,7 +309,7 @@ const RequestOverview = () => {
                                         <Typography sx={{ fontSize: '1.5rem', fontWeight: 800, color: '#0F172A', lineHeight: 1 }}>
                                             {total}
                                         </Typography>
-                                        <Typography sx={{ fontSize: '0.65rem', color: '#94A3B8', fontWeight: 600, textTransform: 'uppercase' }}>
+                                        <Typography sx={{ fontSize: '0.8rem', color: '#94A3B8', fontWeight: 600, textTransform: 'uppercase' }}>
                                             Total
                                         </Typography>
                                     </Box>
@@ -328,7 +328,7 @@ const RequestOverview = () => {
                 {/* Priority bar + rate pills */}
                 <Grid item xs={12} md={3}>
                     <Card elevation={0} sx={{ border: '1px solid #EEF2F7', borderRadius: 2, p: 2.5, height: '100%' }}>
-                        <Typography sx={{ fontSize: '0.7rem', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.06em', mb: 2 }}>
+                        <Typography sx={{ fontSize: '0.8rem', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.06em', mb: 2 }}>
                             Requests by Priority
                         </Typography>
                         {loading ? (
@@ -348,13 +348,13 @@ const RequestOverview = () => {
                             <Stack gap={1} sx={{ mt: 2 }}>
                                 <Stack direction="row" justifyContent="space-between" alignItems="center"
                                     sx={{ px: 1.5, py: 0.75, borderRadius: 1.5, bgcolor: alpha('#15803D', 0.07) }}>
-                                    <Typography sx={{ fontSize: '0.75rem', color: '#475569' }}>Fulfilment rate</Typography>
-                                    <Typography sx={{ fontSize: '0.82rem', fontWeight: 800, color: '#15803D' }}>{pct(issued)}%</Typography>
+                                    <Typography sx={{ fontSize: '0.8rem', color: '#475569' }}>Fulfilment rate</Typography>
+                                    <Typography sx={{ fontSize: '0.875rem', fontWeight: 800, color: '#15803D' }}>{pct(issued)}%</Typography>
                                 </Stack>
                                 <Stack direction="row" justifyContent="space-between" alignItems="center"
                                     sx={{ px: 1.5, py: 0.75, borderRadius: 1.5, bgcolor: alpha('#DC2626', 0.07) }}>
-                                    <Typography sx={{ fontSize: '0.75rem', color: '#475569' }}>Rejection rate</Typography>
-                                    <Typography sx={{ fontSize: '0.82rem', fontWeight: 800, color: '#DC2626' }}>{pct(rejected)}%</Typography>
+                                    <Typography sx={{ fontSize: '0.8rem', color: '#475569' }}>Rejection rate</Typography>
+                                    <Typography sx={{ fontSize: '0.875rem', fontWeight: 800, color: '#DC2626' }}>{pct(rejected)}%</Typography>
                                 </Stack>
                             </Stack>
                         )}
@@ -364,7 +364,7 @@ const RequestOverview = () => {
                 {/* Activity timeline feed */}
                 <Grid item xs={12} md={5}>
                     <Card elevation={0} sx={{ border: '1px solid #EEF2F7', borderRadius: 2, p: 2.5, height: '100%' }}>
-                        <Typography sx={{ fontSize: '0.7rem', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.06em', mb: 2 }}>
+                        <Typography sx={{ fontSize: '0.8rem', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.06em', mb: 2 }}>
                             Recent Activity
                         </Typography>
 
@@ -418,13 +418,13 @@ const RequestOverview = () => {
                                             </Box>
                                             <Box sx={{ flex: 1, minWidth: 0 }}>
                                                 <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
-                                                    <Typography fontWeight={600} noWrap sx={{ fontSize: '0.82rem', color: '#0F172A', maxWidth: '60%' }}>
+                                                    <Typography fontWeight={600} noWrap sx={{ fontSize: '0.875rem', color: '#0F172A', maxWidth: '60%' }}>
                                                         {req.name}
                                                     </Typography>
                                                     <Box sx={{
                                                         px: 0.9, py: 0.2, borderRadius: 10,
                                                         bgcolor: badge.bg, color: badge.text,
-                                                        fontSize: '0.67rem', fontWeight: 700, whiteSpace: 'nowrap', flexShrink: 0,
+                                                        fontSize: '0.8rem', fontWeight: 700, whiteSpace: 'nowrap', flexShrink: 0,
                                                     }}>
                                                         {badge.label}
                                                     </Box>
@@ -432,13 +432,13 @@ const RequestOverview = () => {
                                                 <Stack direction="row" alignItems="center" gap={1.5} sx={{ mt: 0.25, flexWrap: 'wrap' }}>
                                                     <Stack direction="row" alignItems="center" gap={0.4}>
                                                         <PersonOutlinedIcon sx={{ fontSize: 12, color: '#94A3B8' }} />
-                                                        <Typography sx={{ fontSize: '0.72rem', color: '#64748B' }}>
+                                                        <Typography sx={{ fontSize: '0.8rem', color: '#64748B' }}>
                                                             {req.requester?.firstName} {req.requester?.lastName}
                                                         </Typography>
                                                     </Stack>
                                                     <Stack direction="row" alignItems="center" gap={0.4}>
                                                         <ScheduleOutlinedIcon sx={{ fontSize: 12, color: '#94A3B8' }} />
-                                                        <Typography sx={{ fontSize: '0.72rem', color: '#94A3B8' }}>
+                                                        <Typography sx={{ fontSize: '0.8rem', color: '#94A3B8' }}>
                                                             {moment(req.createDate).fromNow()}
                                                         </Typography>
                                                     </Stack>

@@ -31,14 +31,14 @@ export const SummaryCard = ({ label, value, subLabel, icon, color, trend }: Summ
 
         <Stack direction="row" alignItems="flex-start" justifyContent="space-between">
             <Box>
-                <Typography sx={{ fontSize: '0.7rem', fontWeight: 600, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.06em', mb: 0.5 }}>
+                <Typography sx={{ fontSize: '0.8rem', fontWeight: 600, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.06em', mb: 0.5 }}>
                     {label}
                 </Typography>
                 <Typography sx={{ fontSize: '1.6rem', fontWeight: 800, color: '#0F172A', lineHeight: 1.1 }}>
                     {value}
                 </Typography>
                 {subLabel && (
-                    <Typography sx={{ fontSize: '0.72rem', color: '#64748B', mt: 0.5 }}>{subLabel}</Typography>
+                    <Typography sx={{ fontSize: '0.8rem', color: '#64748B', mt: 0.5 }}>{subLabel}</Typography>
                 )}
                 {trend !== undefined && (
                     <Stack direction="row" alignItems="center" gap={0.5} sx={{ mt: 0.75 }}>
@@ -46,7 +46,7 @@ export const SummaryCard = ({ label, value, subLabel, icon, color, trend }: Summ
                             ? <TrendingUpOutlinedIcon sx={{ fontSize: 14, color: '#15803D' }} />
                             : <TrendingDownOutlinedIcon sx={{ fontSize: 14, color: '#DC2626' }} />
                         }
-                        <Typography sx={{ fontSize: '0.72rem', fontWeight: 700, color: trend >= 0 ? '#15803D' : '#DC2626' }}>
+                        <Typography sx={{ fontSize: '0.8rem', fontWeight: 700, color: trend >= 0 ? '#15803D' : '#DC2626' }}>
                             {Math.abs(trend)}% vs last period
                         </Typography>
                     </Stack>

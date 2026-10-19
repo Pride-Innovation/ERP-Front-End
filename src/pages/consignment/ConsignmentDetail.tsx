@@ -81,7 +81,7 @@ const Section = ({ title, icon, action, children, dense }: {
                 sx={{
                     flex: 1,
                     fontWeight: 700,
-                    fontSize: '0.72rem',
+                    fontSize: '0.8rem',
                     letterSpacing: '0.07em',
                     textTransform: 'uppercase',
                     color: brand[700],
@@ -104,7 +104,7 @@ const Fact = ({ label, value, icon, mono }: {
             {icon && <Box sx={{ color: neutral[400], display: 'flex', '& .MuiSvgIcon-root': { fontSize: 13 } }}>{icon}</Box>}
             <Typography
                 variant="caption"
-                sx={{ color: neutral[500], textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 700, fontSize: '0.62rem' }}
+                sx={{ color: neutral[500], textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 700, fontSize: '0.8rem' }}
             >
                 {label}
             </Typography>
@@ -115,7 +115,7 @@ const Fact = ({ label, value, icon, mono }: {
                 color: value ? neutral[800] : neutral[400],
                 fontWeight: 600,
                 fontFamily: mono && value ? 'monospace' : undefined,
-                fontSize: '0.82rem',
+                fontSize: '0.875rem',
             }}
         >
             {value || '—'}
@@ -181,7 +181,7 @@ const RouteHero = ({ from, to, courier, accent }: {
                         sx={{
                             mt: 0.75,
                             textAlign: 'center',
-                            fontSize: '0.65rem',
+                            fontSize: '0.8rem',
                             fontWeight: 700,
                             color: neutral[500],
                             overflow: 'hidden',
@@ -212,13 +212,13 @@ const Endpoint = ({ label, name, icon, align = 'left' }: {
         >
             <Box sx={{ display: 'flex', color: neutral[400], '& .MuiSvgIcon-root': { fontSize: 13 } }}>{icon}</Box>
             <Typography
-                sx={{ fontSize: '0.6rem', fontWeight: 800, letterSpacing: '0.09em', textTransform: 'uppercase', color: neutral[500] }}
+                sx={{ fontSize: '0.8rem', fontWeight: 800, letterSpacing: '0.09em', textTransform: 'uppercase', color: neutral[500] }}
             >
                 {label}
             </Typography>
         </Stack>
         <Typography
-            sx={{ fontSize: '0.86rem', fontWeight: 700, color: neutral[900], lineHeight: 1.3, wordBreak: 'break-word' }}
+            sx={{ fontSize: '0.9375rem', fontWeight: 700, color: neutral[900], lineHeight: 1.3, wordBreak: 'break-word' }}
         >
             {name ?? '—'}
         </Typography>
@@ -344,10 +344,10 @@ const ConsignmentDetail = ({
                     <LocalShippingOutlinedIcon sx={{ fontSize: 15 }} />
                 </Box>
                 <Box sx={{ minWidth: 0 }}>
-                    <Typography sx={{ fontSize: '0.82rem', fontWeight: 800, color: neutral[900], lineHeight: 1.4 }}>
+                    <Typography sx={{ fontSize: '0.875rem', fontWeight: 800, color: neutral[900], lineHeight: 1.4 }}>
                         {consignmentStatusLabels[consignment.status]}
                     </Typography>
-                    <Typography sx={{ fontSize: '0.78rem', color: neutral[600], lineHeight: 1.5 }}>
+                    <Typography sx={{ fontSize: '0.875rem', color: neutral[600], lineHeight: 1.5 }}>
                         {consignmentStatusHelp[consignment.status]}
                         {consignment.status === 'ARRIVED' && consignment.landingStore?.name && (
                             <> Goods are in <strong>{consignment.landingStore.name}</strong>; each movement is handed over separately.</>
@@ -393,7 +393,7 @@ const ConsignmentDetail = ({
                         }}
                     >
                         <NotesOutlinedIcon sx={{ fontSize: 15, color: statusTokens.warning.strong, mt: '1px', flexShrink: 0 }} />
-                        <Typography sx={{ fontSize: '0.78rem', color: neutral[700], lineHeight: 1.5 }}>
+                        <Typography sx={{ fontSize: '0.875rem', color: neutral[700], lineHeight: 1.5 }}>
                             <strong>Remarks:</strong> {consignment.remarks}
                         </Typography>
                     </Box>
@@ -408,14 +408,14 @@ const ConsignmentDetail = ({
                     <Chip
                         size="small"
                         label={`${outstandingCount} awaiting hand-over`}
-                        sx={{ height: 20, fontWeight: 700, fontSize: '0.65rem', bgcolor: alpha(gold[500], 0.16), color: statusTokens.warning.strong }}
+                        sx={{ height: 20, fontWeight: 700, fontSize: '0.8rem', bgcolor: alpha(gold[500], 0.16), color: statusTokens.warning.strong }}
                     />
                 ) : undefined}
             >
                 {(consignment.movements?.length ?? 0) === 0 ? (
                     <Box sx={{ py: 3, textAlign: 'center' }}>
                         <Inventory2OutlinedIcon sx={{ fontSize: 26, color: neutral[300], mb: 0.5 }} />
-                        <Typography variant="body2" sx={{ color: neutral[500], fontSize: '0.8rem' }}>
+                        <Typography variant="body2" sx={{ color: neutral[500], fontSize: '0.875rem' }}>
                             Nothing loaded yet. Add the approved movements heading to{' '}
                             {consignment.destLocation?.name ?? 'this destination'}.
                         </Typography>
@@ -457,16 +457,16 @@ const ConsignmentDetail = ({
                                     {/* Identity and route — flexes, and wraps internally before it clips. */}
                                     <Box sx={{ flex: '1 1 240px', minWidth: 0 }}>
                                         <Stack direction="row" alignItems="center" spacing={0.75} sx={{ flexWrap: 'wrap', rowGap: 0.25 }}>
-                                            <Typography sx={{ fontWeight: 700, color: brand[600], fontFamily: 'monospace', fontSize: '0.78rem' }}>
+                                            <Typography sx={{ fontWeight: 700, color: brand[600], fontFamily: 'monospace', fontSize: '0.875rem' }}>
                                                 #{m.id}
                                             </Typography>
                                             {m.requestId && (
-                                                <Typography sx={{ color: neutral[400], fontSize: '0.63rem', fontFamily: 'monospace' }}>
+                                                <Typography sx={{ color: neutral[400], fontSize: '0.8rem', fontFamily: 'monospace' }}>
                                                     REQ-{m.requestId}
                                                 </Typography>
                                             )}
                                             <Box sx={{ width: '3px', height: '3px', borderRadius: '50%', bgcolor: neutral[300] }} />
-                                            <Typography sx={{ color: neutral[600], fontWeight: 500, fontSize: '0.76rem' }}>
+                                            <Typography sx={{ color: neutral[600], fontWeight: 500, fontSize: '0.8rem' }}>
                                                 {movementTypeLabel(m.movementType ?? undefined)}
                                             </Typography>
                                         </Stack>
@@ -477,11 +477,11 @@ const ConsignmentDetail = ({
                                             spacing={0.6}
                                             sx={{ mt: 0.35, flexWrap: 'wrap', rowGap: 0.2 }}
                                         >
-                                            <Typography sx={{ color: neutral[500], fontSize: '0.73rem' }}>
+                                            <Typography sx={{ color: neutral[500], fontSize: '0.8rem' }}>
                                                 {m.sourceStoreName ?? '—'}
                                             </Typography>
                                             <ArrowForwardIcon sx={{ fontSize: 11, color: neutral[300], flexShrink: 0 }} />
-                                            <Typography sx={{ fontWeight: 600, color: neutral[800], fontSize: '0.73rem' }}>
+                                            <Typography sx={{ fontWeight: 600, color: neutral[800], fontSize: '0.8rem' }}>
                                                 {m.recipientName ?? m.destinationName ?? '—'}
                                             </Typography>
                                         </Stack>
@@ -495,7 +495,7 @@ const ConsignmentDetail = ({
                                                     display: 'inline-flex', alignItems: 'center', gap: 0.4,
                                                     px: 0.9, height: 22, borderRadius: '6px',
                                                     bgcolor: alpha(brand[500], 0.08), color: brand[700],
-                                                    fontSize: '0.7rem', fontWeight: 700,
+                                                    fontSize: '0.8rem', fontWeight: 700,
                                                 }}
                                             >
                                                 <Inventory2OutlinedIcon sx={{ fontSize: 12 }} />
@@ -552,7 +552,7 @@ const ConsignmentDetail = ({
                             size="small"
                             label={`${loadable.length} available`}
                             sx={{
-                                height: 20, fontSize: '0.65rem', fontWeight: 700,
+                                height: 20, fontSize: '0.8rem', fontWeight: 700,
                                 bgcolor: alpha(brand[500], 0.1), color: brand[700],
                             }}
                         />
@@ -582,7 +582,7 @@ const ConsignmentDetail = ({
                                         <Typography variant="caption" sx={{ fontWeight: 700, color: neutral[800] }}>
                                             #{m.id} — {movementTypeLabel(m.movementType ?? undefined)}
                                         </Typography>
-                                        <Typography variant="caption" sx={{ color: neutral[500], fontSize: '0.65rem' }}>
+                                        <Typography variant="caption" sx={{ color: neutral[500], fontSize: '0.8rem' }}>
                                             {m.sourceStore?.name ?? '—'} → {m.destStore?.name
                                                 ?? (m.recipientUser ? `${m.recipientUser.firstName} ${m.recipientUser.lastName}` : '—')}
                                             {' · '}{m.items?.length ?? 0} item{(m.items?.length ?? 0) === 1 ? '' : 's'}
@@ -596,7 +596,7 @@ const ConsignmentDetail = ({
                                     placeholder="Approved movements heading this way…"
                                     sx={{
                                         '& .MuiOutlinedInput-root': {
-                                            borderRadius: '8px', bgcolor: '#fff', fontSize: '0.8rem',
+                                            borderRadius: '8px', bgcolor: '#fff', fontSize: '0.875rem',
                                             '& fieldset': { borderColor: border.subtle },
                                             '&:hover fieldset': { borderColor: brand[500] },
                                             '&.Mui-focused fieldset': { borderColor: brand[500] },

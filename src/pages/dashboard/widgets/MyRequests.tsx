@@ -134,7 +134,7 @@ const MyRequests = ({ requests, currentUserId, limit = 5 }: IMyRequestsProps) =>
                 <Button
                     size="small"
                     onClick={() => navigate(ROUTES.REQUEST)}
-                    sx={{ textTransform: 'none', fontWeight: 600, fontSize: '0.78rem' }}
+                    sx={{ textTransform: 'none', fontWeight: 600, fontSize: '0.875rem' }}
                 >
                     All requests
                 </Button>
@@ -275,7 +275,7 @@ const MyRequests = ({ requests, currentUserId, limit = 5 }: IMyRequestsProps) =>
                         size="small"
                         onClick={() => navigate(ROUTES.REQUEST)}
                         endIcon={<ChevronRightIcon />}
-                        sx={{ textTransform: 'none', fontWeight: 700, fontSize: '0.75rem' }}
+                        sx={{ textTransform: 'none', fontWeight: 700, fontSize: '0.8rem' }}
                     >
                         See the rest
                     </Button>

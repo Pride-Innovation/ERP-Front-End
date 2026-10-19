@@ -20,6 +20,8 @@ export type AdjustmentReason =
     | 'EXPIRED'
     | 'FOUND'
     | 'DATA_ENTRY_ERROR'
+    /** Raised by deleting a stock order, never chosen on a count sheet. */
+    | 'STOCK_REVERSAL'
     | 'OTHER';
 
 export const ADJUSTMENT_REASONS: { value: AdjustmentReason; label: string; hint: string }[] = [
@@ -31,6 +33,15 @@ export const ADJUSTMENT_REASONS: { value: AdjustmentReason; label: string; hint:
     { value: 'DATA_ENTRY_ERROR', label: 'Data entry error', hint: 'A keying or posting mistake elsewhere' },
     { value: 'OTHER', label: 'Other', hint: 'A note is required' },
 ];
+
+/**
+ * How a reason reads in the adjustment history. Wider than the dropdown above: a reversal is written
+ * by deleting a stock order, belongs to no count, and must not be offered to a counter.
+ */
+export const adjustmentReasonLabel = (reason: AdjustmentReason): string =>
+    reason === 'STOCK_REVERSAL'
+        ? 'Stock order reversal'
+        : ADJUSTMENT_REASONS.find((r) => r.value === reason)?.label ?? reason;
 
 export interface IStockCountLine {
     lineId: number;
@@ -56,6 +67,8 @@ export interface IStockCount {
     assetTypeName?: string | null;
     status: StockCountStatus;
     blind: boolean;
+    /** Who counted — what the sheet compares against to mirror "never approved by its counter". */
+    countedById?: number | null;
     countedByName?: string | null;
     approvedByName?: string | null;
     submittedAt?: string | null;

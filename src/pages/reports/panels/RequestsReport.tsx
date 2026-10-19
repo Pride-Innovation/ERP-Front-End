@@ -1,12 +1,16 @@
 import AssignmentOutlinedIcon from '@mui/icons-material/AssignmentOutlined';
 import CheckCircleOutlinedIcon from '@mui/icons-material/CheckCircleOutlined';
+import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
 import PendingActionsOutlinedIcon from '@mui/icons-material/PendingActionsOutlined';
-import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 import ReportShell, { ReportShellFilters } from '../ReportShell';
 import ReportSummaryCards from '../ReportSummaryCards';
 import ReportDataTable, { ReportColumn, StatusChip } from '../ReportDataTable';
 import useReportData, { REPORT_PAGE_SIZE, truncationNotice } from '../useReportData';
 import { fetchRowsService } from '../../../core/apis/globalService';
+import { requestApproverLabel } from '../../request/approverLabel';
+import {
+    REQUEST_DONE_CODE, REQUEST_REJECTED_CODE, REQUEST_STATUS_CODES,
+} from '../reportStatus';
 
 const ACCENT = '#7C3AED';
 
@@ -21,8 +25,8 @@ interface RequestRow {
     quantityRequested: number;
     status: string;
     statusCode: string;
-    approvalDate: string;
-    approvingOfficer: string;
+    lastUpdated: string;
+    currentlyWith: string;
     remarks: string;
 }
 
@@ -34,9 +38,9 @@ const COLUMNS: ReportColumn<RequestRow>[] = [
     { id: 'itemRequested', label: 'Item Requested', minWidth: 150 },
     { id: 'category', label: 'Category', minWidth: 120 },
     { id: 'quantityRequested', label: 'Qty', minWidth: 60, align: 'center' },
-    { id: 'status', label: 'Status', minWidth: 110, format: (v) => <StatusChip value={v} /> },
-    { id: 'approvalDate', label: 'Approval Date', minWidth: 110, format: (v) => v || '—' },
-    { id: 'approvingOfficer', label: 'Approving Officer', minWidth: 150, format: (v) => v || '—' },
+    { id: 'status', label: 'Status', minWidth: 110, format: (v, r) => <StatusChip value={v} code={r.statusCode} /> },
+    { id: 'lastUpdated', label: 'Last Updated', minWidth: 110, format: (v) => v || '—' },
+    { id: 'currentlyWith', label: 'Currently With', minWidth: 150, format: (v) => v || '—' },
     { id: 'remarks', label: 'Remarks', minWidth: 130, format: (v) => v || '—' },
 ];
 
@@ -56,9 +60,18 @@ const toRows = (r: any): RequestRow[] => {
         branch: r.requester?.branch?.name ?? '—',
         status: r.status?.name ?? '—',
         statusCode: r.status?.status ?? '',
-        // Only a fully-decided request has an approval date; the field is the last change to it.
-        approvalDate: r.status?.status?.toLowerCase().includes('approved') ? fmtDate(r.lastModified) : '',
-        approvingOfficer: person(r.currentApprover),
+        /*
+         * This was "Approval Date", shown whenever the code contained "approved" — which includes
+         * every intermediate tier (managerApproved, hodApproved, …), so a request half-way up its
+         * ladder carried an approval date. The value was always `lastModified`; the heading now says so.
+         */
+        lastUpdated: fmtDate(r.lastModified),
+        /*
+         * Who it is waiting on — a person, or the unit a group step was routed to. This was headed
+         * "Approving Officer" over `currentApprover`, which is the *next* approver, blank for a
+         * unit-routed step and for every finished request.
+         */
+        currentlyWith: requestApproverLabel(r) ?? '',
         remarks: r.description ?? '',
     };
 
@@ -98,6 +111,8 @@ const RequestsReport = () => {
                      * not offered it again.
                      */
                     statusIds: f.statusId,
+                    // The requester's department, in the database rather than after the cap.
+                    requesterDepartmentId: f.departmentId,
                     startDate: f.dateFrom,
                     endDate: f.dateTo,
                 },
@@ -106,11 +121,10 @@ const RequestsReport = () => {
             if (res?.status !== 200) throw new Error('requests');
             const flat = ((res.data?.content ?? []) as any[]).flatMap(toRows);
 
-            // Branch, department and category have no query parameters on /requests — they belong to
-            // the requester and to each line's commodity rather than to the request itself.
+            // Branch and category have no query parameters on /requests — they belong to the
+            // requester's duty station and to each line's commodity rather than to the request.
             const narrowed = flat.filter((r) => {
                 if (f.branch && r.branch !== f.branch) return false;
-                if (f.department && r.department !== f.department) return false;
                 if (f.category && r.category !== f.category) return false;
                 return true;
             });
@@ -120,17 +134,23 @@ const RequestsReport = () => {
     );
 
     const requests = new Set(rows.map((r) => r.id.split('-').slice(0, 2).join('-'))).size;
-    const approved = rows.filter((r) => r.statusCode?.toLowerCase().includes('approved')).length;
-    const pending = rows.filter((r) => !r.statusCode?.toLowerCase().includes('approved')
-        && !r.statusCode?.toLowerCase().includes('reject')).length;
-    const totalQty = rows.reduce((sum, r) => sum + r.quantityRequested, 0);
+    /*
+     * Counted by request, not by line, and on the two terminal codes. "Approved" used to mean "code
+     * contains 'approved'", which counted every request that had cleared one tier of several as
+     * having "cleared its workflow".
+     */
+    const byRequest = new Map(rows.map((r) => [r.id.split('-').slice(0, 2).join('-'), r.statusCode]));
+    const codes = Array.from(byRequest.values());
+    const completed = codes.filter((c) => c === REQUEST_DONE_CODE).length;
+    const rejected = codes.filter((c) => c === REQUEST_REJECTED_CODE).length;
+    const inProgress = codes.length - completed - rejected;
 
     const summaryCards = (
         <ReportSummaryCards cards={[
             { label: 'Requested Lines', value: rows.length, icon: <AssignmentOutlinedIcon />, color: ACCENT, subLabel: `${requests} request(s)` },
-            { label: 'Approved', value: approved, icon: <CheckCircleOutlinedIcon />, color: '#15803D', subLabel: 'Cleared their workflow' },
-            { label: 'In Progress', value: pending, icon: <PendingActionsOutlinedIcon />, color: '#D97706', subLabel: 'Awaiting a decision' },
-            { label: 'Units Requested', value: totalQty, icon: <Inventory2OutlinedIcon />, color: '#0369A1', subLabel: 'Across all lines' },
+            { label: 'In Progress', value: inProgress, icon: <PendingActionsOutlinedIcon />, color: '#D97706', subLabel: 'Still moving through the workflow' },
+            { label: 'Completed', value: completed, icon: <CheckCircleOutlinedIcon />, color: '#15803D', subLabel: 'Receipt acknowledged' },
+            { label: 'Rejected', value: rejected, icon: <CancelOutlinedIcon />, color: '#DC2626', subLabel: 'Declined in the workflow' },
         ]} />
     );
 
@@ -140,6 +160,7 @@ const RequestsReport = () => {
             subtitle="What was asked for, by whom, and where each request got to"
             accentColor={ACCENT}
             filterFields={['dateRange', 'branch', 'department', 'category', 'status']}
+            statusCodes={REQUEST_STATUS_CODES}
             onApplyFilters={applyFilters}
             onRefresh={refresh}
             notice={notice}

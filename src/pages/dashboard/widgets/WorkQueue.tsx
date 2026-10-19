@@ -168,7 +168,7 @@ const WorkQueue = ({ requests, limit = 8 }: IWorkQueueProps) => {
                     <Button
                         size="small"
                         onClick={() => navigate(ROUTES.LIST_PENDING)}
-                        sx={{ textTransform: 'none', fontWeight: 600, fontSize: '0.78rem' }}
+                        sx={{ textTransform: 'none', fontWeight: 600, fontSize: '0.875rem' }}
                     >
                         View all
                     </Button>
@@ -187,7 +187,7 @@ const WorkQueue = ({ requests, limit = 8 }: IWorkQueueProps) => {
                                     align={align ?? 'left'}
                                     sx={{
                                         fontWeight: 700,
-                                        fontSize: '0.66rem',
+                                        fontSize: '0.8rem',
                                         color: neutral[500],
                                         textTransform: 'uppercase',
                                         letterSpacing: '0.07em',
@@ -264,7 +264,7 @@ const WorkQueue = ({ requests, limit = 8 }: IWorkQueueProps) => {
                                                     borderRadius: '50%',
                                                     bgcolor: alpha(brand[500], 0.1),
                                                     color: brand[700],
-                                                    fontSize: '0.66rem',
+                                                    fontSize: '0.8rem',
                                                     fontWeight: 700,
                                                     display: 'flex',
                                                     alignItems: 'center',
@@ -386,7 +386,7 @@ const WorkQueue = ({ requests, limit = 8 }: IWorkQueueProps) => {
                         size="small"
                         onClick={() => navigate(ROUTES.LIST_PENDING)}
                         endIcon={<ChevronRightIcon />}
-                        sx={{ textTransform: 'none', fontWeight: 700, fontSize: '0.75rem' }}
+                        sx={{ textTransform: 'none', fontWeight: 700, fontSize: '0.8rem' }}
                     >
                         See the rest
                     </Button>

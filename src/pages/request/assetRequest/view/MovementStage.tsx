@@ -65,7 +65,7 @@ const UserAvatar = ({ user, color }: { user: MovementStep['user']; color: string
             bgcolor: alpha(color, 0.12),
             color,
             fontWeight: 700,
-            fontSize: '0.8rem',
+            fontSize: '0.875rem',
         }}>
             {initials || '?'}
         </Avatar>
@@ -163,7 +163,7 @@ const MovementStage = ({ step }: { step: MovementStep }) => {
                                         ml: 'auto',
                                         height: 22,
                                         fontWeight: 600,
-                                        fontSize: '0.68rem',
+                                        fontSize: '0.8rem',
                                         bgcolor: alpha(PRIMARY_COLOR, 0.1),
                                         color: PRIMARY_COLOR,
                                     }}
@@ -186,7 +186,7 @@ const MovementStage = ({ step }: { step: MovementStep }) => {
                                 <Typography
                                     variant="body2"
                                     color="text.secondary"
-                                    sx={{ fontSize: '0.85rem', lineHeight: 1.5 }}
+                                    sx={{ fontSize: '0.875rem', lineHeight: 1.5 }}
                                 >
                                     {step.comments}
                                 </Typography>

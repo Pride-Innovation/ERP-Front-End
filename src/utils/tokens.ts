@@ -128,6 +128,27 @@ export const radii = {
     pill: 9999,
 } as const;
 
+// ── Type tokens ────────────────────────────────────────────────────────────
+
+/**
+ * The type scale for small and body text. Every hand-set `fontSize` below 0.95rem must be one of
+ * these four — `typeScale.test.ts` fails the build otherwise.
+ *
+ * Rendered sizes at the 14px root a laptop gets (index.css): xs 11.2px, sm 12.25px, md 13.1px,
+ * lg 14px. `xs` is the floor; nothing in the app reads smaller. Hierarchy below that is carried
+ * by weight and colour, not by another half-pixel of size.
+ */
+export const fontSize = {
+    /** Captions, badges, table meta, overline labels. The floor. */
+    xs: '0.8rem',
+    /** Secondary text, table cells, chips, buttons. */
+    sm: '0.875rem',
+    /** Body text, form inputs. */
+    md: '0.9375rem',
+    /** Emphasised body, small headings. */
+    lg: '1rem',
+} as const;
+
 // ── Elevation tokens ───────────────────────────────────────────────────────
 
 /**
@@ -161,6 +182,7 @@ export const tokens = {
     border,
     radii,
     elevation,
+    fontSize,
 } as const;
 
 export type Tokens = typeof tokens;

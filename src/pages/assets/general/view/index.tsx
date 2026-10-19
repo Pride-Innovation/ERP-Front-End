@@ -89,7 +89,7 @@ const StatusChip = ({ code }: { code?: string }) => {
         <Chip
             size="small"
             label={camelCaseToWords(code)}
-            sx={{ height: 24, fontWeight: 700, fontSize: '0.72rem', bgcolor: tone.soft, color: tone.strong, border: `1px solid ${alpha(tone.main, 0.3)}` }}
+            sx={{ height: 24, fontWeight: 700, fontSize: '0.8rem', bgcolor: tone.soft, color: tone.strong, border: `1px solid ${alpha(tone.main, 0.3)}` }}
         />
     );
 };
@@ -104,7 +104,7 @@ const Field = ({
         : value;
     return (
         <Box sx={{ py: 1.15, borderBottom: `1px solid ${alpha('#000', 0.05)}` }}>
-            <Typography sx={{ fontSize: '0.62rem', fontWeight: 700, color: neutral[500], textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <Typography sx={{ fontSize: '0.8rem', fontWeight: 700, color: neutral[500], textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 {label}
             </Typography>
             {empty ? (
@@ -112,7 +112,7 @@ const Field = ({
             ) : (
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mt: 0.25 }}>
                     {money && (
-                        <Box component="span" sx={{ fontSize: '0.6rem', fontWeight: 700, color: '#946C22', bgcolor: alpha('#BC892C', 0.1), px: 0.6, py: 0.15, borderRadius: 0.75 }}>UGX</Box>
+                        <Box component="span" sx={{ fontSize: '0.8rem', fontWeight: 700, color: '#946C22', bgcolor: alpha('#BC892C', 0.1), px: 0.6, py: 0.15, borderRadius: 0.75 }}>UGX</Box>
                     )}
                     <Typography variant="body2" sx={{ fontWeight: 600, color: neutral[800], wordBreak: 'break-word' }}>
                         {display}
@@ -165,11 +165,11 @@ const HeroFact = ({ label, value, first }: { label: string; value?: string | nul
                 borderLeft: { xs: 'none', sm: first ? 'none' : `1px solid ${border.subtle}` },
             }}
         >
-            <Typography sx={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.09em', textTransform: 'uppercase', color: neutral[500] }}>
+            <Typography sx={{ fontSize: '0.8rem', fontWeight: 700, letterSpacing: '0.09em', textTransform: 'uppercase', color: neutral[500] }}>
                 {label}
             </Typography>
             <Typography noWrap sx={{
-                fontSize: '0.9rem', mt: 0.35,
+                fontSize: '0.9375rem', mt: 0.35,
                 fontWeight: empty ? 400 : 700,
                 fontStyle: empty ? 'italic' : 'normal',
                 color: empty ? neutral[400] : neutral[800],
@@ -396,11 +396,11 @@ const GeneralAssetDetails = () => {
                                     <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap sx={{ mt: 1 }}>
                                         <Chip size="small" icon={<CategoryOutlinedIcon sx={{ fontSize: 14 }} />}
                                             label={asset.assetType?.name || assetType?.name || 'Asset'}
-                                            sx={{ height: 24, fontWeight: 600, fontSize: '0.72rem', bgcolor: alpha(brand[500], 0.08), color: brand[700], border: `1px solid ${alpha(brand[500], 0.14)}`, '& .MuiChip-icon': { color: brand[600] } }} />
+                                            sx={{ height: 24, fontWeight: 600, fontSize: '0.8rem', bgcolor: alpha(brand[500], 0.08), color: brand[700], border: `1px solid ${alpha(brand[500], 0.14)}`, '& .MuiChip-icon': { color: brand[600] } }} />
                                         <StatusChip code={asset.assetStatus?.status ?? undefined} />
                                         {asset.engravedNumber && (
                                             <Chip size="small" icon={<BadgeOutlinedIcon sx={{ fontSize: 13 }} />} label={`#${asset.engravedNumber}`}
-                                                sx={{ height: 24, fontWeight: 600, fontSize: '0.72rem', bgcolor: neutral[100], color: neutral[600], '& .MuiChip-icon': { color: neutral[500] } }} />
+                                                sx={{ height: 24, fontWeight: 600, fontSize: '0.8rem', bgcolor: neutral[100], color: neutral[600], '& .MuiChip-icon': { color: neutral[500] } }} />
                                         )}
                                     </Stack>
                                 </Box>
@@ -490,7 +490,7 @@ const GeneralAssetDetails = () => {
                                 scrollButtons="auto"
                                 sx={{
                                     px: 1.5, minHeight: 50, borderBottom: `1px solid ${alpha('#000', 0.07)}`, bgcolor: alpha(brand[500], 0.025),
-                                    '& .MuiTab-root': { minHeight: 50, textTransform: 'none', fontSize: '0.83rem', fontWeight: 500, color: neutral[500], gap: 0.75, px: 2 },
+                                    '& .MuiTab-root': { minHeight: 50, textTransform: 'none', fontSize: '0.875rem', fontWeight: 500, color: neutral[500], gap: 0.75, px: 2 },
                                     '& .Mui-selected': { color: brand[700], fontWeight: 700 },
                                     '& .MuiTabs-indicator': { bgcolor: brand[500], height: 3, borderRadius: '3px 3px 0 0' },
                                 }}

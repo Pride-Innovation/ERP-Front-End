@@ -300,7 +300,7 @@ const Units = () => {
                                     <Stack direction="row" spacing={0.75} flexWrap="wrap" useFlexGap>
                                         <Chip size="small" icon={<AccountTreeOutlinedIcon sx={{ fontSize: 14 }} />}
                                             label={unit.department?.name || 'No department'}
-                                            sx={{ height: 24, fontWeight: 600, fontSize: '0.72rem', bgcolor: alpha(PRIMARY, 0.07), color: brand[700], '& .MuiChip-icon': { color: brand[600] } }} />
+                                            sx={{ height: 24, fontWeight: 600, fontSize: '0.8rem', bgcolor: alpha(PRIMARY, 0.07), color: brand[700], '& .MuiChip-icon': { color: brand[600] } }} />
                                         {/*
                                           * What the unit grants, on the card rather than one click in.
                                           * A unit that confers cross-branch reach is the most consequential
@@ -314,7 +314,7 @@ const Units = () => {
                                                     ? `${unit.roles?.length} role${(unit.roles?.length ?? 0) === 1 ? '' : 's'} · cross-branch`
                                                     : `${unit.roles?.length} role${(unit.roles?.length ?? 0) === 1 ? '' : 's'}`}
                                                 sx={{
-                                                    height: 24, fontWeight: 600, fontSize: '0.72rem',
+                                                    height: 24, fontWeight: 600, fontSize: '0.8rem',
                                                     bgcolor: alpha(confersCrossBranch(unit) ? '#D32F2F' : neutral[500], 0.08),
                                                     color: confersCrossBranch(unit) ? '#D32F2F' : neutral[700],
                                                     '& .MuiChip-icon': { color: confersCrossBranch(unit) ? '#D32F2F' : neutral[600] },

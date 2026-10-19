@@ -203,7 +203,7 @@ const StoreAssetsPanel = ({ branchId, storeType, accentColor }: Props) => {
                                 '& th': {
                                     bgcolor: alpha(accentColor, 0.04),
                                     borderBottom: `1px solid ${border.subtle}`,
-                                    fontWeight: 700, fontSize: '0.68rem', color: accentColor,
+                                    fontWeight: 700, fontSize: '0.8rem', color: accentColor,
                                     textTransform: 'uppercase', letterSpacing: '0.05em',
                                     py: 1.4, whiteSpace: 'nowrap',
                                 },
@@ -224,15 +224,15 @@ const StoreAssetsPanel = ({ branchId, storeType, accentColor }: Props) => {
                                     hover
                                     sx={{
                                         '&:nth-of-type(odd)': { bgcolor: alpha(neutral[900], 0.012) },
-                                        '& td': { borderBottom: `1px solid ${alpha(neutral[900], 0.05)}`, py: 1.3, fontSize: '0.83rem' },
+                                        '& td': { borderBottom: `1px solid ${alpha(neutral[900], 0.05)}`, py: 1.3, fontSize: '0.875rem' },
                                     }}
                                 >
                                     <TableCell>
-                                        <Typography sx={{ fontSize: '0.85rem', fontWeight: 600, color: neutral[900] }}>
+                                        <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: neutral[900] }}>
                                             {a.assetName || '—'}
                                         </Typography>
                                         {a.model && (
-                                            <Typography sx={{ fontSize: '0.71rem', color: neutral[500] }}>{a.model}</Typography>
+                                            <Typography sx={{ fontSize: '0.8rem', color: neutral[500] }}>{a.model}</Typography>
                                         )}
                                     </TableCell>
                                     <TableCell sx={{ color: neutral[600] }}>{a.assetType?.name || '—'}</TableCell>
@@ -243,13 +243,13 @@ const StoreAssetsPanel = ({ branchId, storeType, accentColor }: Props) => {
                                             <Chip
                                                 size="small"
                                                 label={a.assetStatus.name}
-                                                sx={{ height: 21, fontSize: '0.7rem', fontWeight: 600, bgcolor: alpha(brand[500], 0.08), color: brand[700] }}
+                                                sx={{ height: 21, fontSize: '0.8rem', fontWeight: 600, bgcolor: alpha(brand[500], 0.08), color: brand[700] }}
                                             />
                                         ) : '—'}
                                     </TableCell>
                                     <TableCell align="center">
                                         {a.temporaryPool ? (
-                                            <Chip size="small" label="Yes" sx={{ height: 21, fontSize: '0.7rem', fontWeight: 700, bgcolor: statusTokens.warning.soft, color: statusTokens.warning.strong }} />
+                                            <Chip size="small" label="Yes" sx={{ height: 21, fontSize: '0.8rem', fontWeight: 700, bgcolor: statusTokens.warning.soft, color: statusTokens.warning.strong }} />
                                         ) : (
                                             <Typography component="span" sx={{ color: neutral[400] }}>—</Typography>
                                         )}

@@ -73,7 +73,7 @@ const selectSx = {
   },
   '& .MuiInputLabel-root': {
     color: 'rgba(0, 0, 0, 0.45)',
-    fontSize: '0.875rem',
+    fontSize: '0.9375rem',
     '&.Mui-focused': { color: PRIMARY_COLOR },
     '&.Mui-error': { color: '#D32F2F' },
   },
@@ -82,7 +82,7 @@ const selectSx = {
   },
   '& .MuiSelect-select.MuiInputBase-input': {
     padding: '13px 32px 13px 14px',
-    fontSize: '0.875rem',
+    fontSize: '0.9375rem',
     lineHeight: 1.5,
   },
 };
@@ -95,7 +95,7 @@ const menuPropsStyled = {
       borderRadius: '8px',
       boxShadow: `0 4px 20px ${alpha('#000', 0.1)}`,
       '& .MuiMenuItem-root': {
-        fontSize: '0.875rem',
+        fontSize: '0.9375rem',
         py: 1,
         '&:hover': { backgroundColor: alpha(PRIMARY_COLOR, 0.06) },
         '&.Mui-selected': {
@@ -135,12 +135,12 @@ const datePickerSx = {
   },
   '& .MuiOutlinedInput-input': {
     padding: '13px 14px',
-    fontSize: '0.875rem',
+    fontSize: '0.9375rem',
     lineHeight: 1.5,
   },
   '& .MuiInputLabel-root': {
     color: 'rgba(0, 0, 0, 0.45)',
-    fontSize: '0.875rem',
+    fontSize: '0.9375rem',
     '&.Mui-focused': { color: PRIMARY_COLOR },
     '&.Mui-error': { color: '#D32F2F' },
   },
@@ -161,7 +161,7 @@ const datePickerPopperSx = {
   },
   '& .MuiPickersDay-root': {
     borderRadius: '8px',
-    fontSize: '0.8125rem',
+    fontSize: '0.875rem',
     '&:hover': { backgroundColor: alpha(PRIMARY_COLOR, 0.08) },
     '&.Mui-selected': {
       backgroundColor: PRIMARY_COLOR,
@@ -176,7 +176,7 @@ const datePickerPopperSx = {
   '& .MuiDayCalendar-weekDayLabel': {
     color: alpha(PRIMARY_COLOR, 0.7),
     fontWeight: 600,
-    fontSize: '0.75rem',
+    fontSize: '0.8rem',
   },
 };
 
@@ -501,7 +501,7 @@ const LeaveComponent = ({ handleClose, id }: { handleClose: () => void, id: stri
                 >
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <InfoOutlinedIcon sx={{ color: SECONDARY_COLOR, fontSize: '1.1rem' }} />
-                    <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>
+                    <Typography variant="body2" sx={{ fontSize: '0.875rem' }}>
                       <strong>{leaveDays} working day{leaveDays !== 1 ? 's' : ''}</strong> of leave
                     </Typography>
                   </Box>

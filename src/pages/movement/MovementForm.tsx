@@ -51,7 +51,7 @@ const menuPaperSx = {
     borderRadius: '8px',
     boxShadow: `0 4px 20px ${alpha('#000', 0.1)}`,
     '& .MuiMenuItem-root': {
-        fontSize: '0.875rem',
+        fontSize: '0.9375rem',
         py: 1,
         '&:hover': { backgroundColor: alpha(P, 0.06) },
         '&.Mui-selected': {
@@ -67,7 +67,7 @@ const toggleGroupSx = {
     '& .MuiToggleButton-root': {
         textTransform: 'none',
         fontWeight: 600,
-        fontSize: '0.82rem',
+        fontSize: '0.875rem',
         color: neutral[500],
         borderColor: border.default,
         '&.Mui-selected': {
@@ -175,7 +175,7 @@ const MovementForm = ({ setValue, watch, formState, items, setItems, sendingRequ
         <Chip
             label={isInterLocation ? 'Inter-Location' : 'Intra-Location'}
             size="small"
-            sx={{ height: 22, fontSize: '0.66rem', fontWeight: 700, bgcolor: alpha(isInterLocation ? BLUE : P, 0.1), color: isInterLocation ? BLUE : P }}
+            sx={{ height: 22, fontSize: '0.8rem', fontWeight: 700, bgcolor: alpha(isInterLocation ? BLUE : P, 0.1), color: isInterLocation ? BLUE : P }}
         />
     ) : undefined;
 
@@ -439,7 +439,7 @@ const MovementForm = ({ setValue, watch, formState, items, setItems, sendingRequ
                         subtitle="Whether this movement travels, and where its courier is captured."
                         icon={<LocalShippingOutlinedIcon fontSize="small" />}
                     >
-                        <Alert severity="info" sx={{ borderRadius: 2, '& .MuiAlert-message': { fontSize: '0.82rem' } }}>
+                        <Alert severity="info" sx={{ borderRadius: 2, '& .MuiAlert-message': { fontSize: '0.875rem' } }}>
                             {isInterLocation ? (
                                 <>
                                     <strong>{sourceStore.locationName} → {destLocationName}</strong> — this movement

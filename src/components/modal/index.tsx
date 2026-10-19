@@ -124,7 +124,7 @@ export default function ModalComponent({
                                 <Box
                                     sx={{
                                         mt: 0.5,
-                                        fontSize: '0.78rem',
+                                        fontSize: '0.875rem',
                                         color: theme.palette.text.secondary,
                                         lineHeight: 1.45,
                                     }}
