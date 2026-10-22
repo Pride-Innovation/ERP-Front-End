@@ -162,14 +162,25 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
 
     const needsPoolAssets = flow === 'temp-replacement' || (flow === 'repair-transfer' && lendLoaner);
 
+    /*
+     * The loaners that may be lent right now, read fresh each time the loaner picker appears.
+     *
+     * Filtered server-side - nothing already on a temporary replacement (or any movement) awaiting
+     * dispatch or delivery, nothing under repair. It used to be read once per modal and kept, so a
+     * loaner promised a moment ago in another flow or tab still sat in the list. A loaner chosen
+     * before the re-read that is no longer offered is cleared rather than left selected.
+     */
+    const loadPoolAssets = async () => {
+        const r = (await fetchTemporaryPoolAssetsService()) as any;
+        if (r?.status !== 200) return;
+        const fresh: IAsset[] = r.data ?? [];
+        setPoolAssets(fresh);
+        setTempAsset((chosen) => (chosen && !fresh.some((a) => a.id === chosen.id) ? null : chosen));
+    };
+
     useEffect(() => {
-        if (needsPoolAssets && poolAssets.length === 0) {
-            // Filtered server-side. This used to fetch every IT and Admin asset and narrow them in
-            // the browser, so the pool silently went incomplete once the listing passed one page.
-            (async () => {
-                const r = (await fetchTemporaryPoolAssetsService()) as any;
-                if (r?.status === 200) setPoolAssets(r.data ?? []);
-            })();
+        if (needsPoolAssets) {
+            loadPoolAssets();
         }
         if (flow === 'disposal' && disposalCandidates.length === 0) {
             (async () => {
@@ -440,6 +451,9 @@ const RepairFlowsModal = ({ handleClose, onDone }: Props) => {
                 return;
             }
             toast.error(response?.response?.data?.detail ?? response?.data?.message ?? 'Failed to create movement');
+            // A refused loaner (say, promised to another temporary replacement meanwhile) drops off
+            // the list on the re-read, so the next choice is from what is actually free.
+            if (needsPoolAssets) loadPoolAssets();
         } catch {
             toast.error('An unexpected error occurred');
         } finally {

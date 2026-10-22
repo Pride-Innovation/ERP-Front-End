@@ -81,7 +81,24 @@ export interface IStockCount {
     linesWithVariance: number;
     netUnitVariance: number;
     readyToSubmit: boolean;
+    /** The branch the counted store stands at. */
+    storeBranchName?: string | null;
+    /**
+     * Whether this viewer may act on the count at all - the store is at their own branch. The server
+     * decides: Head Office sees every branch's counts but counts only its own. Absent on an older
+     * backend, which is treated as "yes" so nothing that worked before disappears.
+     */
+    actionable?: boolean;
     lines: IStockCountLine[];
+}
+
+/** A store the viewer may open a count for, from the server - at their branch, with lines to count. */
+export interface ICountableStore {
+    id: number;
+    name: string;
+    storeType?: string | null;
+    branchName?: string | null;
+    lineCount: number;
 }
 
 export interface IStockAdjustment {

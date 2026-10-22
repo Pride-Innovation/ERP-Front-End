@@ -15,10 +15,18 @@ import {
     DialogActions,
     DialogContent,
     DialogTitle,
+    FormControlLabel,
+    IconButton,
+    InputAdornment,
     LinearProgress,
+    Menu,
     MenuItem,
     Paper,
     Stack,
+    Step,
+    StepLabel,
+    Stepper,
+    Switch,
     Table,
     TableBody,
     TableCell,
@@ -43,6 +51,8 @@ import PublishOutlinedIcon from '@mui/icons-material/PublishOutlined';
 import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
 import ReplayOutlinedIcon from '@mui/icons-material/ReplayOutlined';
 import BlockOutlinedIcon from '@mui/icons-material/BlockOutlined';
+import MoreVertRoundedIcon from '@mui/icons-material/MoreVertRounded';
+import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 
 import {
     approveStockCountService,
@@ -57,7 +67,8 @@ import { ADJUSTMENT_REASONS, AdjustmentReason, IStockCount, IStockCountLine } fr
 import { ROUTES } from '../../core/routes/routes';
 import usePermissions from '../../core/permissions/usePermissions';
 import RoutesUtills from '../../core/routes/utills';
-import { canCancel, canPost, canRecordCounts, canReview, reviewBlockedAsCounter } from './stockTakeRules';
+import { canCancel, canPost, canRecordCounts, canReview, isActionable, reviewBlockedAsCounter } from './stockTakeRules';
+import { STOCK_TAKE_STEPS, activeStepOf, groupLines } from './stockTakeProgress';
 import { fieldSx } from '../../components/forms/Inputs';
 import { brand, gold, neutral, border, surface, elevation, radii, status as statusTokens } from '../../utils/tokens';
 
@@ -101,6 +112,10 @@ const StockCountSheet = () => {
     const [loadError, setLoadError] = useState<string | null>(null);
     /** Which reason dialog is open: sending back, or cancelling. Both require a reason. */
     const [reasonFor, setReasonFor] = useState<'sendBack' | 'cancel' | null>(null);
+    // Narrow what is shown only; every line is still saved and submitted.
+    const [search, setSearch] = useState('');
+    const [uncountedOnly, setUncountedOnly] = useState(false);
+    const [moreAnchor, setMoreAnchor] = useState<HTMLElement | null>(null);
 
     const { has } = usePermissions();
     const currentUserId = (RoutesUtills().getCurrentUser() as { id?: number } | null)?.id ?? null;
@@ -171,7 +186,7 @@ const StockCountSheet = () => {
     const save = () => run([saveLines], 'Counts saved');
 
     // One sequence, so a failed save stops the submit instead of submitting the last saved figures.
-    const submit = () => run([saveLines, () => submitStockCountService(id as string)], 'Submitted for review');
+    const submit = () => run([saveLines, () => submitStockCountService(id as string)], 'Submitted for review. The other approvers at this branch have been notified.');
 
     const confirmReason = async (remarks: string) => {
         const ok = reasonFor === 'sendBack'
@@ -195,6 +210,16 @@ const StockCountSheet = () => {
     const blockedAsCounter = reviewBlockedAsCounter(count, has, currentUserId);
 
     const tone = STATUS_TONE[count.status] ?? STATUS_TONE.DRAFT;
+    const activeStep = activeStepOf(count.status);
+
+    const groups = groupLines(count.lines, {
+        search,
+        uncountedOnly: counting && uncountedOnly,
+        countedValue: (l) => draft[l.commodityId]?.counted ?? '',
+    });
+    const shownLines = groups.reduce((n, g) => n + g.lines.length, 0);
+    const columns = revealed ? 5 : 3;
+    const hasPrimaryAction = mayRecord || (reviewing && mayReview) || (approved && mayPost);
 
     return (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5, maxWidth: 1400, mx: 'auto', px: { xs: 1, sm: 2 }, py: 2 }}>
@@ -216,8 +241,9 @@ const StockCountSheet = () => {
                                 )}
                             </Stack>
                             <Typography variant="body2" sx={{ color: neutral[500], mt: 0.25 }}>
-                                {count.storeName}{count.assetTypeName ? ` · ${count.assetTypeName}` : ''}
-                                {count.countedByName ? ` · counted by ${count.countedByName}` : ''}
+                                {count.storeName}{count.storeBranchName ? ` · ${count.storeBranchName}` : ''}
+                                {count.assetTypeName ? ` · ${count.assetTypeName}` : ''}
+                                {count.countedByName ? ` · opened by ${count.countedByName}` : ''}
                                 {count.approvedByName ? ` · approved by ${count.approvedByName}` : ''}
                             </Typography>
                         </Box>
@@ -228,6 +254,20 @@ const StockCountSheet = () => {
                         All counts
                     </Button>
                 </Stack>
+
+                {/* Where this count is in the process. A cancelled count left it, so it has no step. */}
+                {activeStep != null && (
+                    <Box sx={{ px: 3, pb: 2, overflowX: 'auto' }}>
+                        <Stepper activeStep={activeStep} alternativeLabel
+                            sx={{ minWidth: 520, '& .MuiStepIcon-root.Mui-active, & .MuiStepIcon-root.Mui-completed': { color: brand[500] }, '& .MuiStepLabel-label': { fontSize: '0.8rem', mt: '4px !important' } }}>
+                            {STOCK_TAKE_STEPS.map((s) => (
+                                <Step key={s.label}>
+                                    <Tooltip arrow title={s.detail}><StepLabel>{s.label}</StepLabel></Tooltip>
+                                </Step>
+                            ))}
+                        </Stepper>
+                    </Box>
+                )}
 
                 {counting && (
                     <Box sx={{ px: 3, pb: 2 }}>
@@ -241,6 +281,13 @@ const StockCountSheet = () => {
                     </Box>
                 )}
             </Box>
+
+            {!isActionable(count) && !terminal && (
+                <Alert severity="info">
+                    <strong>View only.</strong> This count belongs to {count.storeBranchName || 'another branch'};
+                    it is counted, approved and posted by the staff at that branch.
+                </Alert>
+            )}
 
             {count.reviewRemarks && (
                 <Alert severity={count.status === 'IN_PROGRESS' ? 'warning' : 'info'} icon={<ReplayOutlinedIcon fontSize="small" />}>
@@ -263,8 +310,34 @@ const StockCountSheet = () => {
                 </Stack>
             )}
 
+            {count.status === 'CANCELLED' && (
+                <Alert severity="warning" icon={<BlockOutlinedIcon fontSize="small" />}>
+                    This count was cancelled. Nothing was applied to stock.
+                </Alert>
+            )}
+
             {/* Sheet */}
             <Paper elevation={0} sx={{ borderRadius: 2, border: `1px solid ${border.subtle}`, bgcolor: '#fff', overflow: 'hidden' }}>
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} alignItems={{ sm: 'center' }}
+                    sx={{ px: 2, py: 1.5, borderBottom: `1px solid ${border.subtle}` }}>
+                    <TextField
+                        size="small" placeholder="Search commodity or category"
+                        value={search} onChange={(e) => setSearch(e.target.value)}
+                        InputProps={{ startAdornment: <InputAdornment position="start"><SearchRoundedIcon fontSize="small" /></InputAdornment> }}
+                        sx={{ ...fieldSx, width: { xs: '100%', sm: 300 } }}
+                    />
+                    {counting && (
+                        <FormControlLabel
+                            control={<Switch size="small" checked={uncountedOnly} onChange={(e) => setUncountedOnly(e.target.checked)} />}
+                            label={<Typography variant="body2" sx={{ fontWeight: 600, color: neutral[700] }}>Uncounted only</Typography>}
+                        />
+                    )}
+                    <Typography variant="body2" sx={{ color: neutral[500], ml: { sm: 'auto !important' } }}>
+                        {shownLines === count.lines.length
+                            ? `${count.lines.length} line${count.lines.length === 1 ? '' : 's'}`
+                            : `Showing ${shownLines} of ${count.lines.length} lines`}
+                    </Typography>
+                </Stack>
                 <TableContainer sx={{ overflowX: 'auto' }}>
                     <Table size="small" sx={{ minWidth: revealed ? 980 : 780 }}>
                         <TableHead>
@@ -278,17 +351,31 @@ const StockCountSheet = () => {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {count.lines.map((line, idx) => (
-                                <LineRow
-                                    key={line.commodityId}
-                                    line={line}
-                                    idx={idx}
-                                    draft={draft[line.commodityId]}
-                                    editable={mayRecord && !busy}
-                                    revealed={revealed}
-                                    onChange={setField}
-                                />
-                            ))}
+                            {groups.length === 0 && (
+                                <TableRow>
+                                    <TableCell colSpan={columns} align="center" sx={{ py: 4, color: neutral[500] }}>
+                                        {uncountedOnly && !search.trim() ? 'Every line has been counted.' : 'No lines match.'}
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                            {groups.map((group) => [
+                                <TableRow key={`group-${group.category}`}>
+                                    <TableCell colSpan={columns} sx={{ bgcolor: alpha(neutral[900], 0.03), py: 0.9, fontWeight: 700, fontSize: '0.8rem', color: neutral[700], textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                        {group.category} · {group.lines.length}
+                                    </TableCell>
+                                </TableRow>,
+                                ...group.lines.map((line, idx) => (
+                                    <LineRow
+                                        key={line.commodityId}
+                                        line={line}
+                                        idx={idx}
+                                        draft={draft[line.commodityId]}
+                                        editable={mayRecord && !busy}
+                                        revealed={revealed}
+                                        onChange={setField}
+                                    />
+                                )),
+                            ])}
                         </TableBody>
                     </Table>
                 </TableContainer>
@@ -296,24 +383,37 @@ const StockCountSheet = () => {
 
             {blockedAsCounter && (
                 <Alert severity="info">
-                    You counted this sheet, so its variances must be approved by somebody else.
+                    You opened this count, so it must be approved or sent back by another approver at
+                    this branch. They have been notified.
                 </Alert>
             )}
 
-            {/* Actions — only those this viewer's permissions and relationship to the count allow. */}
-            {!terminal && (mayRecord || mayReview || mayPost || mayCancel) && (
-                <Paper elevation={0} sx={{ p: 2.25, borderRadius: 2, border: `1px solid ${border.subtle}`, bgcolor: '#fff' }}>
+            {/*
+              * Actions — only those this viewer's permissions and relationship to the count allow. The bar
+              * stays on screen while a long sheet scrolls, with this stage's one main action on the right;
+              * cancelling is rare and irreversible for the count, so it sits behind the menu.
+              */}
+            {!terminal && (hasPrimaryAction || mayCancel) && (
+                <Paper elevation={0} sx={{ position: 'sticky', bottom: 0, zIndex: 2, p: 2, borderRadius: 2, border: `1px solid ${border.subtle}`, bgcolor: '#fff', boxShadow: `0 -6px 18px ${alpha(neutral[900], 0.08)}` }}>
                     <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} justifyContent="flex-end" alignItems={{ sm: 'center' }}>
-                        {approved && mayPost && (
-                            <Typography variant="body2" sx={{ color: neutral[500], mr: { sm: 'auto' } }}>
-                                Posting is the only step that changes stock.
-                            </Typography>
-                        )}
+                        <Typography variant="body2" sx={{ color: neutral[500], mr: { sm: 'auto !important' } }}>
+                            {mayRecord && `${countedSoFar} of ${count.totalLines} lines counted. Save as you go; submitting reveals the differences.`}
+                            {reviewing && mayReview && 'Approve the differences, or send the sheet back for a recount.'}
+                            {approved && mayPost && 'Posting is the only step that changes stock.'}
+                        </Typography>
                         {mayCancel && (
-                            <Button onClick={() => setReasonFor('cancel')} disabled={busy} startIcon={<BlockOutlinedIcon />}
-                                sx={{ textTransform: 'none', fontWeight: 600, borderRadius: `${radii.pill}px`, px: 2.5, color: statusTokens.danger.strong, mr: { sm: approved && mayPost ? 0 : 'auto' } }}>
-                                Cancel count
-                            </Button>
+                            <>
+                                <IconButton aria-label="More actions" onClick={(e) => setMoreAnchor(e.currentTarget)} disabled={busy}
+                                    sx={{ alignSelf: { xs: 'flex-end', sm: 'center' } }}>
+                                    <MoreVertRoundedIcon />
+                                </IconButton>
+                                <Menu anchorEl={moreAnchor} open={!!moreAnchor} onClose={() => setMoreAnchor(null)}>
+                                    <MenuItem onClick={() => { setMoreAnchor(null); setReasonFor('cancel'); }}
+                                        sx={{ color: statusTokens.danger.strong, fontWeight: 600 }}>
+                                        <BlockOutlinedIcon fontSize="small" sx={{ mr: 1 }} /> Cancel count
+                                    </MenuItem>
+                                </Menu>
+                            </>
                         )}
                         {mayRecord && (
                             <>

@@ -50,6 +50,7 @@ const describeFilters = (f?: ReportShellFilters): string => {
     if (f.department) parts.push(f.department);
     if (f.category) parts.push(f.category);
     if (f.status) parts.push(f.status);
+    if (f.repairedByLabel) parts.push(`Repaired by: ${f.repairedByLabel}`);
     return parts.length ? parts.join('  ·  ') : 'All records';
 };
 

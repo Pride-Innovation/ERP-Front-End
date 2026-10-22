@@ -51,7 +51,21 @@ export interface ReportShellFilters {
     /** The status's stable camelCase code — what client-side matching compares against. */
     statusCode?: string;
     status?: string;
+    /** Maintenance only: `INTERNAL` / `EXTERNAL` / `NONE` (no technician recorded yet). */
+    repairedBy?: string;
+    repairedByLabel?: string;
 }
+
+/**
+ * Who repaired it - the kind of technician on the repair record. "Not yet recorded" is a real
+ * answer rather than a gap: a repair names its technician only when it is closed, so most open
+ * ones have none, and leaving them out of both choices would make the two look like the whole set.
+ */
+export const REPAIRED_BY_OPTIONS = [
+    { value: 'INTERNAL', label: 'Internal officer' },
+    { value: 'EXTERNAL', label: 'External consultant' },
+    { value: 'NONE', label: 'Not yet recorded' },
+];
 
 /*
  * There was a `schedule` field here, and a Daily / Weekly / Monthly picker behind a clock icon in
@@ -68,7 +82,7 @@ interface ReportShellProps {
     title: string;
     subtitle?: string;
     accentColor: string;
-    filterFields?: Array<'dateRange' | 'branch' | 'department' | 'category' | 'status'>;
+    filterFields?: Array<'dateRange' | 'branch' | 'department' | 'category' | 'status' | 'repairedBy'>;
     /**
      * Statuses this report actually uses, when they are not the ones in the status catalogue.
      *
@@ -220,6 +234,7 @@ const ReportShell = ({
     const [department, setDepartment] = useState('');
     const [category, setCategory] = useState('');
     const [status, setStatus] = useState('');
+    const [repairedBy, setRepairedBy] = useState('');
 
     /** Live branch / department / category / status directories for the four dropdowns. */
     const lookups = useReportLookups();
@@ -240,6 +255,7 @@ const ReportShell = ({
         const d = pick(lookups.departments, department);
         const c = pick(lookups.categories, category);
         const s = pick(statusChoices, status);
+        const r = REPAIRED_BY_OPTIONS.find((o) => o.value === repairedBy);
 
         return {
             dateFrom: range.from,
@@ -253,9 +269,11 @@ const ReportShell = ({
             statusId: s?.id,
             statusCode: s?.code,
             status: s?.label,
+            repairedBy: r?.value,
+            repairedByLabel: r?.label,
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [datePreset, customFrom, customTo, branch, department, category, status, lookups]);
+    }, [datePreset, customFrom, customTo, branch, department, category, status, repairedBy, lookups]);
 
     const handleApply = () => onApplyFilters?.(currentFilters());
 
@@ -296,6 +314,7 @@ const ReportShell = ({
                 department: pick(lookups.departments, department)?.label,
                 category: pick(lookups.categories, category)?.label,
                 status: pick(statusChoices, status)?.label,
+                repairedByLabel: REPAIRED_BY_OPTIONS.find((o) => o.value === repairedBy)?.label,
             },
         };
         if (kind === 'pdf') exportReportPdf(input);
@@ -318,6 +337,7 @@ const ReportShell = ({
         setDepartment('');
         setCategory('');
         setStatus('');
+        setRepairedBy('');
         const range = getDateRange(defaultPreset);
         onApplyFilters?.({
             dateFrom: range.from || undefined,
@@ -443,6 +463,19 @@ const ReportShell = ({
                                         <Select value={status} onChange={e => setStatus(e.target.value)} displayEmpty>
                                             <MenuItem value=""><em style={{ fontSize: '0.875rem', fontStyle: 'normal', color: '#94A3B8' }}>All Statuses</em></MenuItem>
                                             {statusChoices.map(s => <MenuItem key={s.id} value={String(s.id)} sx={{ fontSize: '0.875rem' }}>{s.label}</MenuItem>)}
+                                        </Select>
+                                    </FormControl>
+                                </Grid>
+                            )}
+
+                            {/* Repaired by — maintenance only */}
+                            {filterFields.includes('repairedBy') && (
+                                <Grid item xs={12} sm={6} md={2}>
+                                    <Typography sx={{ fontSize: '0.8rem', fontWeight: 600, color: '#64748B', mb: 0.5, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Repaired By</Typography>
+                                    <FormControl fullWidth size="small" sx={PILL_INPUT_SX}>
+                                        <Select value={repairedBy} onChange={e => setRepairedBy(e.target.value)} displayEmpty>
+                                            <MenuItem value=""><em style={{ fontSize: '0.875rem', fontStyle: 'normal', color: '#94A3B8' }}>Internal &amp; External</em></MenuItem>
+                                            {REPAIRED_BY_OPTIONS.map(o => <MenuItem key={o.value} value={o.value} sx={{ fontSize: '0.875rem' }}>{o.label}</MenuItem>)}
                                         </Select>
                                     </FormControl>
                                 </Grid>

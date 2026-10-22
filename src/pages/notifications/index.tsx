@@ -55,6 +55,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { kindOf, notificationRoute } from '../../context/notification/notificationTarget';
 import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
+import FactCheckOutlinedIcon from '@mui/icons-material/FactCheckOutlined';
 import ThumbUpOutlinedIcon from '@mui/icons-material/ThumbUpOutlined';
 const PRIMARY = brand[500];
 /** Server window fetched once; filtering + pagination happen client-side over it. */
@@ -102,6 +103,8 @@ const typeIcon = (type: string) => {
             return <AssignmentOutlinedIcon sx={{ color: '#BC892C', fontSize: 18 }} />;
         case 'MOVEMENT_PENDING':
             return <LocalShippingOutlinedIcon sx={{ color: '#BC892C', fontSize: 18 }} />;
+        case 'STOCK_COUNT_PENDING':
+            return <FactCheckOutlinedIcon sx={{ color: '#BC892C', fontSize: 18 }} />;
         case 'MOVEMENT_UPDATE':
             return <LocalShippingOutlinedIcon sx={{ color: PRIMARY, fontSize: 18 }} />;
         case 'STEP_APPROVED':

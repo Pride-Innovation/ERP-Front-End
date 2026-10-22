@@ -52,6 +52,8 @@ export const NOTIFICATION_KINDS: Record<string, NotificationKind> = {
     // Sent when someone's own asset reaches them back from repair while they still hold a loaner.
     // Something for them to do, so it sits with the other actions.
     LOANER_RETURN_DUE: { label: 'Return loaner', group: 'action' },
+    // Sent to every other approver at the branch when a stock count is submitted.
+    STOCK_COUNT_PENDING: { label: 'Stock count to approve', group: 'action' },
 };
 
 /**
@@ -86,6 +88,8 @@ export const notificationRoute = (notification: IAppNotification): string | null
             // The dashboard, not the asset: the Return button lives in My Assets, and the asset's own
             // page needs READ_ASSET, which the borrower may well not hold.
             return ROUTES.ASSETS_MANAGEMENT;
+        case 'STOCK_COUNT':
+            return `${ROUTES.STOCK_TAKE}/${entityId}`;
         default:
             // An entity kind this client does not know. Better unclickable than wrong.
             return null;

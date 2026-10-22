@@ -7,7 +7,7 @@ Managing Director
 
 import { PERMISSIONS, PermissionName } from '../../core/permissions/constants';
 import {
-    canCancel, canOpenCount, canPost, canRecordCounts, canReview, countableStores, reviewBlockedAsCounter,
+    canCancel, canOpenCount, canPost, canRecordCounts, canReview, isActionable, reviewBlockedAsCounter,
 } from './stockTakeRules';
 import { StockCountStatus } from './stockTakeInterface';
 
@@ -83,19 +83,21 @@ describe('cancel', () => {
     });
 });
 
-describe('the Open dialog store list', () => {
-    const stores = [
-        { id: 1, name: 'Gulu Admin', storeType: 'ADMIN', locationId: 10 },
-        { id: 2, name: 'Mbarara Admin', storeType: 'ADMIN', locationId: 20 },
-        { id: 3, name: 'IT Store', storeType: 'IT', locationId: 1 },
-        { id: 4, name: 'Safe Boda', storeType: 'COURIER', locationId: 10 },
-    ];
+describe('a count at another branch', () => {
+    // Head Office, with every stock-take permission, looking at a Gulu count: view only.
+    const elsewhere = (status: StockCountStatus) => ({ status, countedById: COUNTER_ID, actionable: false });
 
-    it('offers only stores the viewer may count, and never a courier', () => {
-        const atGulu = (loc: number | null | undefined) => loc === 10;
-        expect(countableStores(stores, atGulu).map((s) => s.id)).toEqual([1]);
+    it('offers nothing that acts, however much the viewer holds', () => {
+        expect(canRecordCounts(elsewhere('IN_PROGRESS'), both)).toBe(false);
+        expect(canReview(elsewhere('SUBMITTED'), both, OTHER_ID)).toBe(false);
+        expect(reviewBlockedAsCounter(elsewhere('SUBMITTED'), both, COUNTER_ID)).toBe(false);
+        expect(canPost(elsewhere('APPROVED'), both)).toBe(false);
+        expect(canCancel(elsewhere('DRAFT'), both, OTHER_ID)).toBe(false);
+    });
 
-        const everywhere = () => true;
-        expect(countableStores(stores, everywhere).map((s) => s.id)).toEqual([1, 2, 3]);
+    it('treats a count from an older backend, which does not say, as actionable', () => {
+        expect(isActionable({})).toBe(true);
+        expect(isActionable({ actionable: true })).toBe(true);
+        expect(isActionable({ actionable: false })).toBe(false);
     });
 });

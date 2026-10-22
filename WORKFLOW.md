@@ -169,3 +169,72 @@ etc.:
 All notification behaviour — dynamic CC, requester routing, completion fan-out —
 applies uniformly across categories. No code change is needed to onboard a new
 category; just create the workflow row.
+
+
+
+
+
+
+Response 
+
+Recommended approach
+1. Branch store → user goes through the request. A branch issuer issues from the branch store. Replace "Stationery only" with "whatever this branch store holds": the stocking rules already decide what a branch may hold. Keep the manual transfer for exceptions.
+- Perfect recommendation. I need to know how the system will notice that the request can be handled at branch level and the request does not reach office when the items requested for exist on the branch level.
+- The idea of using the stocking rule is perfect to know what items can be stocked at a branch level, but please notice that an item may not be stock at branch level but still can be replenished from head office. Please confirm if this what the system implements. Meaning that an item may not be stocked at branch level but if it was requested from head office and it was replenished to the destination branch then it should still be handled from branch level.
+- The idea for what you termed as manual transfer "That is a transfer without a request" is when user with permission tries to give users commodities without request. Like if we notice that a user or department (in case of head office) is running off stationery, then we can give them some but like you suggested we can keep them for exceptions. 
+
+2. A replenishment request ends in the branch Admin store, so the stock is shelved there rather than counted as used by the BOM.
+- This is a very interesting one because there are also scenarios where a BM or BOM is requesting for personal assets. How does the system identify that the BOM requests is to stock the store or its personal. My suggestion would be to have like a check box that is guarded by permission for example. When a user has  a permission to "restock store" then he can view this check box. So a BOM and BM can have this permission. When the checkbox is checked, then that request is for the store and not personal. This makes it more interesting, when a user is requesting for both store and for personal use. Please let me know what the system does at the moment and how you had planned to achieve this. 
+
+3. Deduct issued stock when the issuance is approved, not when the items are issued, or put it back on rejection. Moving the deduction to approval is cleaner.
+- I agree with this.
+4. Reserve stock when a movement or issue is created. Available = on hand − already promised, checked by the server, with the form showing the same figure.
+- I totally agree with this also
+5. Check asset lines on the server: the asset is in the source store, isn't on another open movement, and isn't a loaner, under repair, or awaiting completion.
+- I totally agree with this also. Please also ensure that asset is also not assigned to any other user. 
+6. Look up Head Office by its flag, not by id 1.
+- I totally agree with this. 
+
+ (c): should drawing stock out of a store be limited to people at that store's branch, with Head Office allowed to send anywhere?
+
+- yes a user should be able to only draw items from their branch stores but they should also be able to send to other branches, but only draw from their branches. There are scenarios where a branch may be requested to send items to other nearby branches. Then they should be able to draw from their branches.
+
+
+Second Feedback
+
+1. a Stock is never consulted. That is why no branch store has ever issued anything, even Stationery sitting on Gulu's shelf.
+My proposal: decide when the request reaches its Acknowledge step, after the branch approvals, not at submission. Stock can change while a request is being approved, and we don't want approvals skipped.
+- What if we create a workflow for Branches, so that certain commodities that are in this work flow never reach head office and are issued by BOM, and the issuance is approved by BM. So that we can handle such commodities using the Branch Stores. These could include Stationery category and others that could be added to this workflow to make it flexible. For head office can remain the way it is and reach Admin. This would be my suggestion. 
+- So that the BOM and BM (those with permissions) can then request from Head office to restock the branch store or also restock at the branch level since branches can also restock at branch levels. 
+- That means a branch request for such commodities will only be processed at the branch level. If the items are not available in the Branch, the requester has t wait until the branch store is restocked by the two mentioned options above.
+- here the issuer is the BOM and the approver is the BM. 
+
+b. Is an item replenished to a branch issuable there even when stocking rules don't list it? Yes, the system already behaves that way.
+ - This is very important because some commodities are only stocked at Head office so the only way branches can get them is through replenishing to other branches.
+
+c. On exceptions (giving without a request). Please go with your recommendation here. 
+
+2. Store restock vs personal requests.
+
+- Lets us go with the checkbox approach as you also recommended.
+- Then also "Store and personal items in one request should not be allowed". 
+
+
+Questions before I start
+
+1. Partially available at the branch: send the whole request to Head Office (my recommendation), or split it?
+- I do not agree with this. When a request comes for an item that according to the workflow should be handled at the branch, it should always stop at the Branch until a BOM requests for a replenishment of the Branch Store. Then the branch store is restocked and the previous requests handled at branch levels.
+
+2. IT categories: if Gulu holds the laptop, does Infra still need to acknowledge before the branch issues it? My suggestion is yes: Infra acknowledges and the branch issues.
+- To be honest, the replenishment modal may be confusing for now that a Branch may hold such assets, but let us go with the workflow, if the workflow states that the request is to handled at Head Office, please send it to head office. Just the exact way it is. It is going to be a very rare or even never an occasion where those assets will be in the branch stores.
+
+3. Restock at Head Office: show the checkbox only to branch users? Head Office would be restocking its own source.
+- Yes.
+4. Exceptions: happy with a new permission plus a required reason?
+- Am happy with permissions since every action should be guarded with permissions.
+5. For (c): should Admin and Infra, who have cross-branch inventory reach, be allowed to draw from a branch's store? I'd say no, the same as stock take: you draw only where you stand.
+- totally agree
+6. Confirm: no mixing store and personal items in one request.
+- totally Agree
+
+

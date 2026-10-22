@@ -7,6 +7,7 @@ import ReportSummaryCards from '../ReportSummaryCards';
 import ReportDataTable, { ReportColumn, StatusChip } from '../ReportDataTable';
 import useReportData, { REPORT_PAGE_SIZE, truncationNotice } from '../useReportData';
 import { fetchRowsService } from '../../../core/apis/globalService';
+import useAccessScope from '../../../core/permissions/useAccessScope';
 
 const ACCENT = '#D97706';
 
@@ -47,12 +48,17 @@ const COLUMNS: ReportColumn<MaintenanceRow>[] = [
 const fmtDate = (v?: string | null) =>
     (v ? new Date(v).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '');
 
-const toRow = (r: any): MaintenanceRow => ({
+export const toRow = (r: any): MaintenanceRow => ({
     id: r.id,
     assetTag: r.asset?.engravedNumber ?? '—',
     assetName: r.asset?.assetName ?? '—',
     category: r.asset?.assetType?.name ?? '—',
-    branch: r.asset?.branch?.name ?? '—',
+    /*
+     * The branch the repair belongs to - the one that sent the asset - not where the asset is now.
+     * On the bench an asset reads Head Office, so this column used to say "Head Office" on every open
+     * repair. Falls back to the asset's branch for a backend that does not send it yet.
+     */
+    branch: r.sentFromBranchName ?? r.asset?.branch?.name ?? '—',
     startDate: fmtDate(r.repairStartDate),
     completionDate: fmtDate(r.repairEndDate),
     // "Internal" / "External" when the record says which; typed text from before the picker has no kind.
@@ -74,6 +80,15 @@ const REPAIR_STATUSES = [
 ];
 
 const MaintenanceReport = () => {
+    /*
+     * Head Office sees every branch's repairs, a branch sees its own - the server decides that. The
+     * Branch and Repaired By filters are offered only to someone who sees every branch: for anyone
+     * else the server already narrows to their branch, so a branch picker could only ever offer
+     * itself, or be refused.
+     */
+    const { scopeFor } = useAccessScope();
+    const seesEveryBranch = scopeFor('ASSETS', 'VIEW') === 'ALL';
+
     const { rows, notice, loading, error, applyFilters, refresh } = useReportData<MaintenanceRow>(
         async (f: ReportShellFilters) => {
             const res = (await fetchRowsService({
@@ -85,15 +100,17 @@ const MaintenanceReport = () => {
                     status: f.statusCode,
                     startDate: f.dateFrom,
                     endDate: f.dateTo,
+                    // Matched on the server against the branch that sent the asset. It used to be
+                    // compared in the browser against the asset's current branch, so "Gulu" found
+                    // nothing while Gulu's assets sat on the Head Office bench.
+                    ...(seesEveryBranch && f.branchId ? { branchId: f.branchId } : {}),
+                    ...(seesEveryBranch && f.repairedBy ? { repairedBy: f.repairedBy } : {}),
                 },
             })) as any;
 
             if (res?.status !== 200) throw new Error('repairs');
-            const mapped: MaintenanceRow[] = (res.data?.content ?? []).map(toRow);
-
-            // Branch lives on the asset, not the repair, so it is narrowed here.
             return {
-                rows: f.branch ? mapped.filter((r) => r.branch === f.branch) : mapped,
+                rows: (res.data?.content ?? []).map(toRow),
                 notice: truncationNotice(res, 'repairs'),
             };
         },
@@ -118,8 +135,10 @@ const MaintenanceReport = () => {
             subtitle="Repair jobs raised against assets, and where each one stands"
             accentColor={ACCENT}
             // No department filter: a repair records none. Status it does record, and
-            // /assets/repairs filters on it.
-            filterFields={['dateRange', 'branch', 'category', 'status']}
+            // /assets/repairs filters on it. Branch and Repaired By for all-branches viewers only.
+            filterFields={seesEveryBranch
+                ? ['dateRange', 'branch', 'category', 'status', 'repairedBy']
+                : ['dateRange', 'category', 'status']}
             statusOptions={REPAIR_STATUSES}
             onApplyFilters={applyFilters}
             onRefresh={refresh}

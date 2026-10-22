@@ -6,7 +6,7 @@ Two repos, worked on together:
 - **Backend** — `ERP-Back-End` (Spring Boot 3.2, Hibernate 6.3 + Envers, Flyway, MySQL)
 
 Verify with `npx tsc --noEmit -p tsconfig.json`, `npx eslint src/... --ext .ts,.tsx`, and
-`./mvnw.cmd -o test` — **511 backend tests** and **137 frontend** at time of writing, all green.
+`./mvnw.cmd -o test` — **563 backend tests** and **179 frontend** at time of writing, all green.
 Run the frontend suite as `CI=true npx react-scripts test --watchAll=false`; plain `npx jest` fails
 on a Babel transform, because the config that makes it work is CRA's.
 
@@ -1129,6 +1129,35 @@ a disposal, a repair transfer or an assignment.
 - **Reassign closed its dialog in `finally`**, so a refusal looked like success. It stays open now.
 - **On the register**, `loanAvailable` reads "Available for Loan" in amber, and a loaner out with
   somebody reads **"On Loan"** rather than "Asset Assigned" (display only, from the pool flag).
+
+### A loaner promised once is not offered again
+
+Creating a temporary replacement only **names** the loaner on a movement; nothing on the asset
+changes until that movement is dispatched and received — it still reads "Available for Loan",
+unassigned, in its store. So the loaner list both repair modals read
+(`GET /inventory/assets/temporary-pool`) offered the same chair to the next temporary replacement,
+and `issueTemporaryReplacement` accepted it: two movements promising one chair to two people. Latent
+when fixed (all 14 temporary replacements completed). The list also offered a **pool chair that was
+itself in maintenance**.
+
+`LoanerAvailability` is the one rule for both the list and the server: pool stock, unassigned, in an
+IT or Admin store, in a lendable status (`loanAvailable`, or the older `issuanceAvailable` some shelved
+pool stock still carries), and **on no movement that is not yet completed or cancelled** — any type,
+since an asset on its way anywhere is not on the shelf. Cancelling that movement frees the loaner;
+completing it hands the loaner to the holder, which "unassigned" already excludes.
+
+- **The server refuses** a loaner that fails it, naming the movement it is on
+  ("… is already on temporary replacement #123 …"), so a stale list, a second tab or two people at
+  once cannot double-book. A repair transfer that lends one checks it **before** creating anything.
+- **The modal re-reads the list** every time the loaner picker appears and after a refusal, and
+  clears a chosen loaner no longer offered. It read the list once per modal before.
+- `LoanerFlowTest` builds its loans through `createMovement` directly, so it is untouched by the guard.
+
+`LoanerAvailabilityTest` makes the scenario through the real service inside the rolled-back
+transaction: the first loan leaves the asset untouched yet drops it from the list; a second loan of it
+is refused naming the first; every other loaner is still offered; cancelling the first brings it back;
+a repair transfer lending it is refused before any movement exists. Verified non-vacuous by removing
+the list filter and, separately, the guard.
 
 ### Trap: a Lombok `hashCode` through an inverse collection
 
@@ -2999,6 +3028,18 @@ that is not in-maintenance and not require-update", which counted **written-off 
 **4. Store page filters — done.** `GET /store` declared `branchId`, `assetTypeId`, `storeType`; the
 page sent `status`, `stockName` and `createdAt`. All three were inert (trap #2), not just Status.
 
+**And then Apply did not fetch at all.** Stock Name and Stock Level were declared end to end, and
+still did nothing on a one-page store: `TableComponent` only *stores* applied filters and merges them
+into page changes, leaving the refetch to the page's `onApplyFilters` — which `TableData` had
+commented out. So "No reorder level set" showed every line, "In Stock" ones included, with the chip
+saying it was active. A tab change also refetched without them, and paging never updated the count.
+The filters now live in `StoreContext.storeFilters`; Apply sets them, `fetchStoresCommoditiesPerBranchPerAsset`
+sends them (so rows and count agree), and `TableData` clears them on unmount because each tab mounts
+its own table and the table forgets its chips when it does. *Not trap #2 — every key was declared; the
+request simply was never made.* Checked across the app: every other `TableComponent` with
+`columnFilters` (assets, the four request tabs, inventory, users) passes `onApplyFilters`; this was the
+only one without. A table given filters and no handler will always have this fault.
+
 - **Stock Name** is now real — declared on the endpoint, matched partial and case-insensitive on the
   commodity name.
 - **Status** removed. It offered user-account states while the column beside it shows a *stock level*
@@ -3534,6 +3575,388 @@ reversal".
 `requireStoreCountable` — where Spring ignores it — so opening a count ran with no transaction and a
 failure mid-snapshot left a count with only some of its lines. `StockTakeScopeTest` pins it by
 reflection now.
+
+### Stock take, third pass: you count only where you stand
+
+**Reading and acting now follow different rules, by decision.** Reading a count still follows
+INVENTORY VIEW scope, so Head Office (ALL) reads every branch's counts. **Acting** (open, save,
+submit, approve, send back, cancel, post) is allowed only at a store whose **location is the
+caller's own branch**. `StockTakeService.canActAt` decides this, and only the super administrator is
+exempt. `MANAGE_ALL_BRANCH_INVENTORY` deliberately does **not** widen it. ADMIN_UNIT and INFRA_UNIT
+hold that multiplier for movements and balances, and with it a Head Office admin could have approved
+Gulu's count of shelves they cannot see. A count is a physical act, so the person doing it has to be
+at the shelves.
+
+**Nobody is granted the permissions by a seeder, and that is deliberate.** Today BM, BOM and
+SUPER_ADMIN hold `READ`/`PERFORM`/`APPROVE_STOCK_TAKE`; ADMIN_UNIT and INFRA_UNIT hold none. Who
+counts is decided in Settings → Roles, and can be granted to or revoked from any role, including a
+future storekeeper role. The branch rule above applies to whoever holds them.
+
+- **`GET /stock-counts/countable-stores`** (`PERFORM_STOCK_TAKE`) is the Open dialog's list: stores
+  at your own branch, not couriers, and only those with at least one balance line. The page used to
+  filter the open store directory in the browser with `canManage`, which offered stores the server
+  then refused. That filter (`countableStores` in `stockTakeRules`) is gone, so only one copy of the
+  rule exists.
+- **An empty count is refused before anything is saved, and so is an empty submit.** A count only
+  snapshots *consumable* balances, so the IT and Disposal stores (0 balance lines; they hold
+  serialized assets) used to open as sheets with nothing on them. The check runs *before* the save.
+  A first version ran it afterwards, and the test's outer transaction kept the half-made count.
+- **`CountView.actionable`** carries the server's answer per count, together with `storeBranchName`.
+  Every rule in `stockTakeRules` now requires `isActionable`. A missing value (an older backend)
+  reads as yes, so nothing that worked before disappears. The list shows a Branch column and a
+  **View only** chip; the sheet shows a view-only banner.
+
+`StockTakeBranchRuleTest` pins this. Restoring the MANAGE-scope rule makes it fail.
+
+### Stock take pages: what it is for, and whose turn it is
+
+The page used to open on four numbers and a table. Nothing said what a stock take is for or who has
+to act next. All of the following is frontend only.
+
+- **"How a stock take works"** shows the five steps: Open, Count, Submit, Review, Post
+  (`STOCK_TAKE_STEPS` in `stockTakeProgress.ts`). With no counts it fills the page together with the
+  Open button. Once counts exist it folds away to one line.
+- **Tabs:** Needs my action, In progress, Completed, All. **Next step** names whose turn it is.
+  Both are built on `stockTakeRules`, so they can never name a count whose buttons the viewer would
+  not see. **Cancelling does not count as "needs my action"**: an approver may cancel almost
+  anything, so counting it would put every open count in that tab. The page opens on your work if
+  there is any, else on what is still open. A holder of READ alone gets no "mine" tab.
+- **The Branch filter** is offered only at INVENTORY VIEW ALL and works over the loaded list (counts
+  are tens of rows). A caption says whether the figures cover your branch or all branches.
+- **The count sheet** has a step indicator (none for a cancelled count, which left the process), a
+  search box, an *Uncounted only* toggle that reads typed-but-unsaved entries, lines grouped by
+  category, and an action bar that stays on screen with one main action. Cancel sits behind its
+  menu. Narrowing only changes what is shown; every line is still saved and submitted.
+
+`stockTakeProgress.test.ts` pins this. Adding cancel to "needs my action" fails two of its cases.
+
+### Stock take maker-checker, and telling the approvers
+
+**The rule: whoever opened a count may not approve it or send it back, and any other approver at the
+branch may.** There is no exemption, the super administrator included, and the same roles and
+permissions make no difference. `requireNotTheCreator` is called by both `approve` and `sendBack`.
+Before this only Approve had the check, while the screen already hid Send back from the opener and
+claimed the server refused it.
+
+**"The opener" is `StockCount.countedBy`, set once at open and never moved.** The field name is
+historical, and the screens now say **"Opened by"**. Excluding whoever entered figures or submitted
+as well was considered and **rejected by decision**. Each branch is staffed with two maker-checkers
+(BM and BOM), and if one opens and the other counts, the wider rule would leave nobody able to
+approve. So the person who entered the figures *may* approve them, provided they did not open the
+sheet. That is accepted, not overlooked.
+
+**On submit, every other approver at the branch is told, in the app and by email**
+(`StockCountApprovalNotifier`, type `STOCK_COUNT_PENDING`, target `STOCK_COUNT`, which opens the
+sheet):
+
+- **Who:** enabled, unblocked accounts holding `APPROVE_STOCK_TAKE` whose duty station is the
+  store's branch (the same rule as `canActAt`). The opener is excluded, and so is the submitter, who
+  knows already. **Super administrators elsewhere are not told**: they may act anywhere, and naming
+  them would put every branch's count in their inbox.
+- **Sent after the submission commits** (`TransactionSynchronization.afterCommit`), never inside
+  it. A submission that fails must not have told anyone, and `createAndPush` is transactional, so an
+  exception crossing it would mark the submission for rollback even if caught. Recipients and
+  wording are read inside the transaction; only plain values and users cross into the callback.
+- **It never fails a submission.** Each recipient is independent and every failure is logged.
+  `entity_type` is a VARCHAR, so the new target needed no migration.
+- **Tests never send mail**, because a rolled-back transaction never reaches afterCommit.
+  `StockCountMakerCheckerTest` mocks `Email`, checks that nothing is written before commit, then
+  calls `deliver` directly. These are real addresses.
+
+`StockCountMakerCheckerTest` runs at a real branch with two approvers (it prints which). The opener
+is refused both decisions, a colleague with identical permissions approves, the recipient list
+equals everyone eligible, and nothing is sent before commit. Checked that the tests can fail:
+removing the rule fails the first case, and delivering immediately fails the last one.
+
+*A trap the last test met:* a failing AssertJ assertion **prints its subject**, and printing an
+`AppNotification` walks `User.toString` into `Token.toString` and **overflows the stack**. The bug was
+caught, but the report was a `StackOverflowError` instead of the assertion. The test compares
+`"TARGET:id"` strings instead.
+
+### My Items — what you hold, what of yours is away, what is coming to you
+
+`/store/my-items` listed the assets assigned to you. It had two faults.
+
+**Your asset vanished when it went for repair.** The transfer closes your assignment when Head
+Office receives the asset, so the laptop left your list the moment it reached the bench. The "Under
+Repair" tile could only count assets the older flow had left assigned. Measured: user 22 had handed
+over 7 assets still away, and 3 showed.
+
+**Most people could not find the page.** Its only way in was a button on the Store page, which needs
+`READ_STORE` (5 of 27 accounts). It now has a sidebar entry for everyone, matching its route, and the
+dashboard's My Assets widget links to it ("View all").
+
+`GET /inventory/my-items` now returns `MyItemsView`, three sections that do not overlap:
+
+| Section | Rule |
+|---|---|
+| **With you** | assigned to you, not disposed, not away; `onLoan` = an open temporary assignment |
+| **Away** | the asset's **newest** repair or disposal transfer names you as `originHolder`, and the asset is away (`AWAY_FROM_BRANCH_CODES`). Assets the older flow left assigned while away land here too |
+| **On its way** | not completed or cancelled, and addressed to you or fulfilling a request you raised (LEFT joins, trap #1) |
+
+- **`Movement.originHolder` is the source, not the assignment history.** The repair transfer
+  captures it from the active assignment, and the return leg aims at it. Measured: set on all 25
+  repair transfers and equal to the last holder on every away asset. `source_user` is empty on all
+  of them, so it cannot answer. A **bench write-off** now records it too
+  (`disposeAsset` copies the repair transfer's holder while the asset is away), so a laptop found
+  unrepairable stays on its holder's list as "for disposal". Something handed back to a store first
+  has no holder to record.
+- **The detail page admits the sender while the asset is away (decision (b)).** It is read only,
+  it lapses when the asset comes home, and it widens by one person: `holderLastSentAwayFrom`, beside
+  `branchLastSentAwayFrom`. **It is a separate limb, deliberately not added to the owner list.** At
+  SELF an owner list naming somebody admits only them, while an empty one falls through to the
+  branch. That fall-through is how a Head Office officer at SELF opens an unassigned asset on their
+  own bench, and naming the sender in the list would have refused that officer.
+- The old finder `findByAssignedTo_IdAndDisposedFalse` **ignored soft-deleted assets** (latent, 0
+  rows). It is deleted along with `assetsHeldBy`.
+- Links follow the destination's route permission: assets need `READ_ASSET`. Incoming items open
+  the **request** where there is one (its requester may read it) and otherwise the movement, only
+  with `READ_MOVEMENT`.
+
+`MyItemsTest` computes each section from the entities, not the queries. **Every real sender in the
+data is BRANCH scoped and already admitted**, so the case the new limb exists for (a SELF reader the
+branch rule refuses) is constructed inside the transaction. Removing the limb makes that case fail
+with the very refusal it fixes.
+
+*Data left for a decision, not changed:* 3 assets in maintenance at Head Office are still assigned to
+user 22 from the older flow; 2 pool loaners are held without a temporary assignment, so "On loan to
+you" never shows them; 1 held asset reads "Available for Issuance".
+
+*A trap met while building it:* `myItems.ts` beside `MyItems.tsx` is **one file on Windows**, and
+`tsc` refuses it as differing only in case. It is `myItemsData.ts`. And PowerShell 5's
+`Get-Content`/`Set-Content` reads UTF-8 source as ANSI and writes a BOM: `·` became `Â·` in two files
+and javac rejects the BOM outright. Use `[IO.File]` with `UTF8Encoding($false)` for any scripted edit.
+
+### "Assets Held" — filtered, paged and exported on the server
+
+The IT, Admin and Disposal pages' **Assets Held** table fetched the whole store and drew every row,
+with a search box as its only filter. It now reads `GET /inventory/stores/{id}/assets/page` (search,
+`assetTypeId`, `statusCode`, `loanable`, `originBranchId`, sort, page) and
+`/assets/filter-options`, and exports PDF / Excel / CSV under the current filters (registry key
+`storeAssets`, refetching up to 5000 rows and saying so when that cuts the file short).
+
+**Scoping runs first and is reused, not restated.** The new endpoints call the same private
+`scopeAssets` and `originLocations` the full listing does (`visibleStoreAssetRows`), then
+`StoreAssetListing` filters, sorts (always ending in `id`) and cuts the page **in memory**. That order
+is forced: the "sent from my branch" half of the visibility rule is read from movements *after* the
+query, so a page cut in SQL would be cut before the rule ran — wrong totals, uneven pages. Writing the
+rule into SQL instead would be a second copy of it. A store holds at most a few hundred assets.
+
+- **The full listing stays** — the movement form's picker reads it whole. The three endpoints share one
+  permission constant, `STORE_ASSET_READERS`, so they cannot drift.
+- **Totals are over the filtered set**, so the header's "N assets / N loanable" holds on every page.
+- **Dropdowns offer only values present** in what the viewer can see, and are not narrowed by the
+  active filters. **"Sent from"** is offered only for the bank-wide IT/Disposal stores and only to a
+  viewer who sees every branch — for anyone else it could only ever match their own branch.
+- **"Sent from" reads the same origin lookup as the scoping**, so the column and the visibility rule
+  cannot disagree. It reads the movement's `originLocation` only — a disposal, which does not set one,
+  shows "—" there, exactly as the scoping already treats it.
+- **Soft-deleted assets were in every store listing** — `findByCurrentStore_Id` / `_StoreType` are
+  derived queries and never had the `deleted` exclusion the other nine asset reads carry, so a deleted
+  record still sat in Assets Held and in the movement picker. `InventoryReportService` filters them
+  out now, which also covers the temporary-pool and disposal pickers built on the same finders.
+
+`StoreAssetPageScopeTest` checks the page against the full listing **as a branch viewer away from Head
+Office as well as an all-branches one** (it prints which users it used, and says so if none was found),
+plus paging, deleted assets and that every offered option matches. Verified non-vacuous: removing the
+`scopeAssets` call fails the branch-viewer case. *Found by the tests on the way:* `Map.of(...)` throws
+on a null key, so an unset sort column crashed the lookup until it was guarded.
+
+### "Sent From" had two copies of its rule, and the listing's was wrong
+
+The detail page asks *"which branch sent this here"* through `MovementService.branchLastSentAwayFrom`:
+the newest **repair or disposal transfer**, its `originLocation` else its source store's location, and
+**only while the asset is away** (`AssetService.isAwayFromItsBranch` — `inMaintenance` /
+`pendingDisposal`). The store listings had their own copy, `findOriginLocationsForAssets`, which took
+the newest movement of *any* kind carrying an origin. Only a repair transfer carries one, so returns,
+disposals and reassignments were skipped: **an asset kept the branch of its last repair for good**.
+Because `scopeAssets` reads the same lookup, that branch could still list the asset wherever it went
+next, and then be refused the record — a row in the list that will not open. Disposals, which record
+no origin, read "—".
+
+Now one rule: the query mirrors `branchLastSentAwayFrom` (batched, LEFT joins on both branch
+sources), and `originLocations` asks it only for assets that are away, through the same
+`isAwayFromItsBranch` the detail page uses (made `public static` for it). **Measured before:** no live
+asset was yet in the stale state, so this was latent; the one asset pending disposal gained its
+sending branch, which the detail page already granted.
+
+### "Sent From" on the Head Office Admin store, and a branch's Admin repairs
+
+**ADMIN-routed and EXTERNAL repairs are held in the Head Office Admin store**
+(`RepairMovementService.headOfficeAdminStore`), not the IT store. So that store also holds other
+branches' assets, and shows "Sent From" — decided by the server (`FilterOptions.originColumn`,
+`InventoryReportService.receivesAssetsFromOtherBranches`: IT, Disposal, or Head Office's
+department-less ADMIN store), not by a list in the page. A branch's own Admin store does not: what is
+there is that branch's, and the column would only repeat it — so it is left out of the table *and* the
+export.
+
+**And a branch could not see those repairs anywhere** — the IT store page showed a branch its laptops
+on the bench; nothing showed it its chairs. Measured: **six Gulu assets** (chairs, tables, a tea
+trolley) in the Head Office Admin store, unseen by Gulu.
+
+**One table, not two.** A first version gave the branch Admin page a second table, *Away for Repair
+at Head Office*. Gulu's own Admin store holds **no assets**, so the page read "Assets Held — This store
+is holding no assets" directly above six of Gulu's assets: a contradiction on one screen. The branch's
+"Assets Held" now lists them itself, as the IT page does, with a **Held At** column ("This store" /
+"Head Office Admin Store · for repair") that appears only where the table mixes two stores.
+
+- **Asked for, not implied:** `includeAwayForRepair` on `/assets/page` and `/assets/filter-options`,
+  honoured only for a branch's own department-less Admin store (`InventoryReportService.awayCompanionFor`)
+  and reported back as `FilterOptions.awayIncluded`. Without it a store reads exactly as before — the
+  full listing behind the movement picker is untouched.
+- **Not by widening the store directory**, which would also put the Head Office Admin store in every
+  branch's movement destination pickers.
+- **Scoped exactly as on the IT store** — `scopeAssets` over the Head Office Admin store's rows, then
+  narrowed to those **sent from this store's branch**. The narrowing is what keeps an all-branches
+  viewer on Gulu's page from seeing every branch's repairs under Gulu's heading. Because a sender is
+  recorded only while away, a repaired chair leaves the list the moment it is back.
+- *Fixed on the way:* the Admin store was found by `locationId` and **the first row taken**, which could
+  be a department's store at the same branch. `pickLocationStore` takes the department-less one.
+- **On the IT and Disposal pages a branch viewer gets the same "Held At" label** ("Head Office IT Store ·
+  for repair", "… · for disposal") **instead of "Sent From"**, which there only repeated their own branch
+  on every row, and a caption naming the store. Display only, keyed on `scopeFor('INVENTORY','VIEW')` —
+  the reach the server applies to those stores. Viewers who see every branch keep "Sent From", the
+  column that tells their rows apart.
+
+`AwayForRepairVisibilityTest` pins: the companion is the store repairs actually go to, and only a
+branch Admin store has one; where "Sent From" applies, store by store; every shown origin is on an away
+asset and equals the detail page's answer; an asset taken out of maintenance stops counting for its
+sender (made inside the test's transaction); a branch's page lists its own store plus exactly its away
+assets, and without the flag reads as before; and an all-branches viewer on a branch's page sees only
+that branch's. **Verified non-vacuous both ways:** removing the away gate fails the "home again" case,
+and restoring the old query fails on the pending-disposal asset.
+
+### Maintenance report — a repair belongs to the branch that sent it
+
+The tab lists **repair records** (`GET /assets/repairs`), not assets in maintenance. It scoped on the
+asset's current branch or its holder's — and on the bench neither is the sender's (receipt rewrites the
+branch to Head Office, the transfer closes the assignment). Measured: **all nine open records were
+Gulu's, every one read Head Office, and a Gulu viewer saw none of them.** The Branch column said "Head
+Office" on every open repair, and the Branch filter, compared in the browser against that, could not
+find Gulu.
+
+- **Owner = the opening transfer's branch** (`originLocation`, else source store location — the
+  `branchLastSentAwayFrom` pair), in `findForReport`'s scope clause and in `findOwningBranches` for the
+  Branch column (`RepairDTO.sentFromBranchId/Name`). Unlike a store listing this does **not** lapse
+  when the asset comes home: the record is that branch's history. No opening transfer (none today)
+  falls back to the old asset/holder pair. Every record has exactly one opening transfer; filter on
+  `REPAIR_TRANSFER`, because `TEMP_REPLACEMENT` movements carry `repair_id` too.
+- **Head Office sees all, a branch sees its own.** Branch and **Repaired By** filters are offered only
+  at ALL scope (`useAccessScope('ASSETS','VIEW')`). Branch goes to the server as `branchId` through
+  `resolveBranch`, so a branch naming another is refused. Repaired By is `INTERNAL` / `EXTERNAL` /
+  `NONE` on `technicianType` — "Not yet recorded" is an option because a technician is required only at
+  closing, so 7 of 12 records have none; an unknown value is a 400, never "no filter".
+- **A caller with no branch below ALL gets an empty page**, not every branch's repairs — `resolveBranch`
+  returns null for both.
+- **The tab is gated on `READ_REPAIR_HISTORY`**, the permission its endpoint demands (that rule is
+  matched before `/assets/**`, so `READ_ASSET` never admitted it). It was gated on `READ_ASSET`, so a
+  holder without the trail permission saw a tab that could only fail, and a holder of the trail
+  permission alone could not open the page. The tab bar, the route guard and the sidebar link now read
+  one list, `reports/reportPermissions.ts`: the page opens for anyone holding **any** tab's permission.
+- **Repairs sent before records existed are deliberately not shown** — 11 assets in maintenance have no
+  repair record (10 transferred before records existed, plus asset 1158 with no transfer at all). By
+  decision there is no backfill: the report lists recorded repairs only.
+
+`MaintenanceReportScopeTest`: Head Office sees every record and the Branch filter narrows to the
+sender; each branch sees exactly what it sent (measured: Gulu 9, Mbarara 3); a branch naming another is
+refused; Repaired By partitions the set. Restoring the old scope clause makes Gulu's view `[]` — the
+bug, reproduced.
+
+### Movement report — scoping was right; three columns and two filters were not
+
+**Visibility needed nothing.** `GET /movements` already scopes on a movement's **four ends** (source
+store, destination store, sending person, receiving person — SELF by person, a branchless caller
+refused), so a branch already saw every movement touching it — Gulu 89, Mbarara 20. Unlike repairs,
+no ownership lapses on the way: a repair transfer leaves from the branch's own Admin store.
+
+- **"Currently With" read "—" on every row.** It showed `currentApprover`, which is cleared as a
+  movement is approved — measured, **empty on all 110**. It now names whoever has the items by stage
+  (`reports/movementCurrentlyWith.ts`): DRAFT the approver, INITIATED the source, DISPATCHED /
+  IN_TRANSIT the courier, RECEIVED the receiving officer, COMPLETED the **recipient person, else the
+  destination store**. For a completed movement that is where *this* movement left the items, not
+  where an asset is today. **On the road it also names the vehicle and the journey** —
+  `movementTransitDetail`: "Plate UBA 123X · TRK-… · Ref …" (the courier's own reference only when
+  given), on a second line on screen and joined into one line in the export. All 11 movements in
+  transit carry both plate and tracking number on the movement itself — a consignment copies its own
+  onto each movement — so no lookup of the consignment is needed.
+- **Category read "—" always, and the Category filter emptied the table** — the panel read
+  `asset.assetType`, which `MovementResponseDTO` never carried. `AssetSummary` / `CommoditySummary`
+  now carry `assetTypeName`, and the filter is the server's: `assetTypeId` on `GET /movements`, an
+  **EXISTS** over the lines (a join would repeat a movement per matching line and inflate the count).
+  Rows are per line, so the browser trims a matched movement's lines of other categories.
+- **Requested By was always the initiator** — it read `request.requester`, which was not sent;
+  `RequestSummary.requesterName` now is.
+- **Branch is the server's**, `branchId` on `GET /movements`, matched on the same four ends through
+  one `touchesBranch` predicate shared with the scope — it compared names in the browser before.
+  Refused in `applyScope` below ALL unless it is the caller's own. **Branch and Department are offered
+  only at ALL scope**; Department stays a browser narrowing (no endpoint parameter for a movement's
+  department).
+
+`MovementReportFilterTest`: Branch returns exactly the movements whose four ends include it, computed
+from the entities rather than the query; a branch viewer may name only their own; Category equals
+"any line in it" and counts each movement once; the mapper carries category and requester.
+
+### The other report tabs — scoped one at a time
+
+None of the four leaked another branch's data; two hid a branch's own. Each tab's Branch filter
+(and Department, where it is a person's department) is now offered only at ALL scope, as on
+Maintenance and Movement — below it the server narrows to the caller's branch anyway, and no branch
+staff have a department recorded.
+
+- **Stock Management** — scoped right: an order belongs to the branch that placed it. Fixed the
+  `resolveBranch` null trap in `StockService.visibleBranchId` (an account with no branch below ALL got
+  every branch's orders; now refused). `StockReportScopeTest`, verified non-vacuous by removing the
+  check. **`StockFilterTest` had been passing on that hole** — it ran with nobody signed in and was
+  answered with the whole register; it now signs in as an all-branches viewer, since it tests filters
+  rather than scope. *Department stays offered to branches here*: it is the commodity's department, not a person's.
+- **Requests / Requisitions** — scoped right, on the requester's branch. The Branch filter moved to the
+  server as `requesterBranchId` on `GET /requests` (the dashboard's existing LEFT-joined predicate),
+  refused below ALL unless it is the caller's own; it compared names in the browser after the cap
+  before. `RequestReportBranchFilterTest`.
+- **Asset Register** — the real gap. The register scopes on `asset.branch` or the holder's branch, and
+  on the bench neither is the sender's. Measured: **10 Gulu assets away, 7 of them hidden from Gulu**
+  (the other 3 were sent and not yet received, so they still read Gulu). `includeAwayFromBranch` on
+  `GET /assets` adds a branch's own assets **while away** (in maintenance / pending disposal, sent by
+  this branch on their newest repair or disposal transfer — `AssetSearchDao.awayFrom`, the same rule
+  as `branchLastSentAwayFrom`, NOT EXISTS for "newest"). **Asked for by the report only**: the assets
+  page's row menu offers Edit and Reassign, which an away asset refuses. **BRANCH scope only** — at
+  SELF an away asset has no holder. Read-only by construction: every row it adds opens on the detail
+  page (pinned). Their Branch column reads Head Office, which is where they are.
+  - *Also:* `fetchAllAssets` swallowed every exception into `return null`, so the no-branch refusal is
+    resolved **before** that try. An account with no branch is refused at BRANCH scope; most such
+    accounts fall back to SELF (what they hold), which is a narrowing and correct.
+  - `AssetRegisterAwayTest`, verified non-vacuous by disabling the widening.
+- **Asset Disposal** — a write-off belongs, **permanently**, to the branch it was disposed from.
+  Every disposed asset ends up in the Head Office Disposal store and reads Head Office, so by location
+  Head Office could not tell where a write-off came from and a branch saw none of its own (latent:
+  the only disposal so far, asset 1172, was Head Office's own).
+  - **The disposal records its owner now** (`RepairMovementService.disposeAsset` sets
+    `originLocation`), as the repair transfer does. The source store cannot say on its own: a branch
+    asset written off **from the repair bench** leaves from the Head Office IT store. Owner = the
+    repair transfer's branch while the asset is away, else where it stands. No backfill: the one past
+    disposal has no repair history, so its source store (Head Office) already answers correctly.
+  - `byDisposingBranch` on `GET /assets` (with `disposed=true`) **replaces** the location rule for both
+    the scope and the Branch filter with `AssetSearchDao.disposedFrom`: the newest disposal
+    transfer's origin, else its source store's branch; no transfer at all falls back to asset/holder
+    branch. *Replaces, not widens* — by location a Head-Office-scoped viewer would see every branch's
+    write-offs. `AssetDAO.disposedFromBranchName` feeds the column, now headed **Disposed From**, via
+    `MovementService.disposingBranches` (the same rule; the newest disposal decides).
+  - Because the store listings and the detail page read disposals through the same "origin, else
+    source store" rule, a bench write-off now also reads as its branch's there.
+  - `DisposalReportScopeTest` makes a bench disposal of a Gulu asset through the **real**
+    `disposeAsset` flow inside the rolled-back transaction: the disposal records Gulu; Head Office sees
+    it as "Disposed From Gulu" and filters on it; Gulu sees it; a Head-Office-scoped viewer does not.
+    Verified non-vacuous by removing the recorded owner (both fail) and by restoring the location
+    scope (the branch case fails).
+
+### A district made a branch unhashable
+
+Met by the full suite rather than by this work: `District` was `@Data` with its `branches` set
+included in `hashCode`, the same trap as `Region.branches`. It lay dormant while **no branch had a
+district**; the first one assigned (1 of 54) made hashing that branch walk the set, and outside a
+session that is a `LazyInitializationException` — which is what `StockingRuleService` does when it
+saves a rule naming the branch. Excluded like its neighbours; `branches` is already `@JsonIgnore`, so
+there is no JSON loop for the exclusion to expose.
 
 ### Follow the existing shape
 

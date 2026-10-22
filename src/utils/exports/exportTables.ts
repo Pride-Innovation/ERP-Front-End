@@ -199,6 +199,29 @@ export const EXPORT_TABLES: ExportTable[] = [
         ],
     },
     {
+        key: 'storeAssets',
+        title: 'Store assets held',
+        group: 'Inventory & Stores',
+        /*
+         * The "Assets Held" table on the IT, Admin and Disposal store pages. One entry for all three:
+         * the store is which slice you are looking at, never what the file should contain.
+         */
+        columns: [
+            on('assetName', 'Asset'),
+            on('category', 'Category'),
+            on('engravedNumber', 'Engraved number'),
+            on('serialNumber', 'Serial number'),
+            on('status', 'Status'),
+            on('loanable', 'Loanable'),
+            on('sentFrom', 'Sent from'),
+            // A branch's Admin store also lists its assets away at the Head Office Admin store; this
+            // says which store each is in. Left out of the file on every other store page.
+            on('heldAt', 'Held at'),
+            off('model', 'Model'),
+            off('location', 'Location'),
+        ],
+    },
+    {
         key: 'inventoryOrders',
         title: 'Stock orders',
         group: 'Inventory & Stores',

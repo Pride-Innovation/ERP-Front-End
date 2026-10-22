@@ -94,6 +94,7 @@ const StoreUtills = () => {
         detailsState,
         setDetailsState,
         setStoreReportTableData,
+        storeFilters,
     } = useContext(StoreContext);
 
     /**
@@ -279,7 +280,10 @@ const StoreUtills = () => {
                 assetTypeId: currentAssetType.id,
                 // Scope to the page's store container (ADMIN / IT / DISPOSAL) when set —
                 // otherwise the Admin, IT and Disposal pages all show the same branch list.
-                ...(storeType ? { storeType: storeType.toUpperCase() } : {})
+                ...(storeType ? { storeType: storeType.toUpperCase() } : {}),
+                // The table's applied filters ride on this fetch too, so the rows and the count
+                // describe what the filter chips say rather than the whole category.
+                ...storeFilters,
             }
             const response = await fetchRowsService({
                 pageNumber: 0,

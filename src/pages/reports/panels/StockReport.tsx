@@ -8,6 +8,7 @@ import ReportDataTable, { ReportColumn, StatusChip } from '../ReportDataTable';
 import useReportData, { REPORT_PAGE_SIZE, truncationNotice } from '../useReportData';
 import { fetchRowsService } from '../../../core/apis/globalService';
 import { STOCK_STATUS_CODES } from '../reportStatus';
+import useAccessScope from '../../../core/permissions/useAccessScope';
 
 const ACCENT = '#0369A1';
 
@@ -106,6 +107,14 @@ const toRows = (stock: any): StockRow[] => {
 };
 
 const StockReport = () => {
+    /*
+     * An order belongs to the branch that placed it, and the server scopes on exactly that. The
+     * Branch filter is for Head Office: below ALL scope the server refuses any branch but the
+     * caller's own, so the dropdown offered a list where every other choice was an error.
+     */
+    const { scopeFor } = useAccessScope();
+    const seesEveryBranch = scopeFor('INVENTORY', 'VIEW') === 'ALL';
+
     const { rows, notice, loading, error, applyFilters, refresh } = useReportData<StockRow>(
         async (f: ReportShellFilters) => {
             const res = (await fetchRowsService({
@@ -117,7 +126,7 @@ const StockReport = () => {
                     endDate: f.dateTo,
                     // Declared on /stocks all along; the comment below said they were sent and they
                     // were not, so the Branch and Status dropdowns changed nothing on this tab.
-                    branchId: f.branchId,
+                    ...(seesEveryBranch && f.branchId ? { branchId: f.branchId } : {}),
                     stockStatusId: f.statusId,
                 },
             })) as any;
@@ -166,7 +175,9 @@ const StockReport = () => {
             title="Stock / Purchase Report"
             subtitle="Purchase orders and what was ordered against each supplier"
             accentColor={ACCENT}
-            filterFields={['dateRange', 'branch', 'department', 'category', 'status']}
+            filterFields={seesEveryBranch
+                ? ['dateRange', 'branch', 'department', 'category', 'status']
+                : ['dateRange', 'department', 'category', 'status']}
             statusCodes={STOCK_STATUS_CODES}
             onApplyFilters={applyFilters}
             onRefresh={refresh}

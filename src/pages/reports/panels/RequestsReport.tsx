@@ -6,6 +6,7 @@ import ReportShell, { ReportShellFilters } from '../ReportShell';
 import ReportSummaryCards from '../ReportSummaryCards';
 import ReportDataTable, { ReportColumn, StatusChip } from '../ReportDataTable';
 import useReportData, { REPORT_PAGE_SIZE, truncationNotice } from '../useReportData';
+import useAccessScope from '../../../core/permissions/useAccessScope';
 import { fetchRowsService } from '../../../core/apis/globalService';
 import { requestApproverLabel } from '../../request/approverLabel';
 import {
@@ -89,6 +90,15 @@ const toRows = (r: any): RequestRow[] => {
 };
 
 const RequestsReport = () => {
+    /*
+     * A request belongs to the branch of the person who raised it, which is what the server scopes
+     * on. Branch and Department are Head Office's filters: below ALL the server refuses another
+     * branch, and no branch staff have a department recorded, so for a branch user either could only
+     * ever return nothing.
+     */
+    const { scopeFor } = useAccessScope();
+    const seesEveryBranch = scopeFor('REQUESTS', 'VIEW') === 'ALL';
+
     const { rows, notice, loading, error, applyFilters, refresh } = useReportData<RequestRow>(
         async (f: ReportShellFilters) => {
             const res = (await fetchRowsService({
@@ -111,8 +121,10 @@ const RequestsReport = () => {
                      * not offered it again.
                      */
                     statusIds: f.statusId,
-                    // The requester's department, in the database rather than after the cap.
-                    requesterDepartmentId: f.departmentId,
+                    // The requester's department and branch, in the database rather than after the
+                    // cap. Branch was compared by name in the browser before.
+                    ...(seesEveryBranch && f.departmentId ? { requesterDepartmentId: f.departmentId } : {}),
+                    ...(seesEveryBranch && f.branchId ? { requesterBranchId: f.branchId } : {}),
                     startDate: f.dateFrom,
                     endDate: f.dateTo,
                 },
@@ -121,13 +133,8 @@ const RequestsReport = () => {
             if (res?.status !== 200) throw new Error('requests');
             const flat = ((res.data?.content ?? []) as any[]).flatMap(toRows);
 
-            // Branch and category have no query parameters on /requests — they belong to the
-            // requester's duty station and to each line's commodity rather than to the request.
-            const narrowed = flat.filter((r) => {
-                if (f.branch && r.branch !== f.branch) return false;
-                if (f.category && r.category !== f.category) return false;
-                return true;
-            });
+            // Category stays here: it belongs to each line's commodity rather than to the request.
+            const narrowed = flat.filter((r) => !f.category || r.category === f.category);
 
             return { rows: narrowed, notice: truncationNotice(res, 'requests') };
         },
@@ -159,7 +166,9 @@ const RequestsReport = () => {
             title="Requests Report"
             subtitle="What was asked for, by whom, and where each request got to"
             accentColor={ACCENT}
-            filterFields={['dateRange', 'branch', 'department', 'category', 'status']}
+            filterFields={seesEveryBranch
+                ? ['dateRange', 'branch', 'department', 'category', 'status']
+                : ['dateRange', 'category', 'status']}
             statusCodes={REQUEST_STATUS_CODES}
             onApplyFilters={applyFilters}
             onRefresh={refresh}

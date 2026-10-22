@@ -9,6 +9,7 @@ import { Fragment, useState } from 'react';
 import {
     alpha,
     Box,
+    Button,
     Collapse,
     IconButton,
     Stack,
@@ -82,6 +83,13 @@ const MyAssets = ({ assets }: IMyAssetsProps) => {
             empty={data.length === 0}
             emptyTitle="Nothing assigned to you"
             emptyDescription="Assets issued to you will be listed here, grouped by category."
+            // The full page also shows what of yours is away for repair and what is on its way.
+            actions={
+                <Button size="small" onClick={() => navigate(ROUTES.MY_ITEMS)} endIcon={<ChevronRightIcon fontSize="small" />}
+                    sx={{ textTransform: 'none', fontWeight: 600, color: brand[700] }}>
+                    View all
+                </Button>
+            }
         >
             {/*
               * Loaners, with the way to hand one back.

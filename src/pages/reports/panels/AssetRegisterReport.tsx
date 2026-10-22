@@ -8,6 +8,7 @@ import ReportDataTable, { ReportColumn, StatusChip } from '../ReportDataTable';
 import useReportData, { REPORT_PAGE_SIZE, combineNotices, truncationNotice, HOLDER_DEPARTMENT_NOTE } from '../useReportData';
 import { fetchRowsService } from '../../../core/apis/globalService';
 import { ASSET_STATUS_CODES } from '../reportStatus';
+import useAccessScope from '../../../core/permissions/useAccessScope';
 
 const ACCENT = '#059669';
 
@@ -79,6 +80,13 @@ const toRow = (a: any): AssetRow => ({
 });
 
 const AssetRegisterReport = () => {
+    /*
+     * Branch and Department are Head Office's filters: below ALL the server narrows to the caller's
+     * branch anyway, and the department is the holder's, which no branch staff have recorded.
+     */
+    const { scopeFor } = useAccessScope();
+    const seesEveryBranch = scopeFor('ASSETS', 'VIEW') === 'ALL';
+
     const { rows, notice, loading, error, applyFilters, refresh } = useReportData<AssetRow>(
         async (f: ReportShellFilters) => {
             /*
@@ -93,10 +101,19 @@ const AssetRegisterReport = () => {
                 params: {
                     assetTypeId: f.categoryId,
                     assetStatusId: f.statusId,
-                    branchId: f.branchId,
-                    departmentId: f.departmentId,
+                    ...(seesEveryBranch && f.branchId ? { branchId: f.branchId } : {}),
+                    ...(seesEveryBranch && f.departmentId ? { departmentId: f.departmentId } : {}),
                     startDate: f.dateFrom,
                     endDate: f.dateTo,
+                    /*
+                     * A branch's own assets away at Head Office - in maintenance or pending disposal.
+                     * Receipt rewrites an asset's branch to Head Office and clears its holder, so the
+                     * register's scope stopped naming the branch that sent it (7 of Gulu's were hidden
+                     * from Gulu). Asked for here and not on the assets page, whose row menu offers
+                     * Edit and Reassign that an asset at Head Office would refuse. Their Branch column
+                     * honestly reads Head Office: it says where the asset is.
+                     */
+                    includeAwayFromBranch: true,
                 },
             })) as any;
 
@@ -105,7 +122,7 @@ const AssetRegisterReport = () => {
                 rows: (res.data?.content ?? []).map(toRow),
                 notice: combineNotices(
                     truncationNotice(res, 'assets'),
-                    f.departmentId ? HOLDER_DEPARTMENT_NOTE : undefined,
+                    seesEveryBranch && f.departmentId ? HOLDER_DEPARTMENT_NOTE : undefined,
                 ),
             };
         },
@@ -133,7 +150,9 @@ const AssetRegisterReport = () => {
             title="Asset Register Report"
             subtitle="Full register of all assets with values, locations and assignments"
             accentColor={ACCENT}
-            filterFields={['dateRange', 'branch', 'department', 'category', 'status']}
+            filterFields={seesEveryBranch
+                ? ['dateRange', 'branch', 'department', 'category', 'status']
+                : ['dateRange', 'category', 'status']}
             statusCodes={ASSET_STATUS_CODES}
             // A register: its period means "added between", so it opens on the whole estate.
             defaultPreset="all"

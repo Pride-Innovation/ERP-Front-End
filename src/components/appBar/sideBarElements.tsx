@@ -19,8 +19,10 @@ import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined';
 import { Store } from '@mui/icons-material'
 import BarChartOutlinedIcon from '@mui/icons-material/BarChartOutlined';
 import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined';
+import BadgeOutlinedIcon from '@mui/icons-material/BadgeOutlined';
 import usePermissions from '../../core/permissions/usePermissions';
 import { PERMISSIONS } from '../../core/permissions/constants';
+import { REPORT_PAGE_PERMISSIONS } from '../../pages/reports/reportPermissions';
 
 
 const SideBarElements = () => {
@@ -36,6 +38,20 @@ const SideBarElements = () => {
             icon: <DashboardIcon />,
             group: "Overview",
             subroutes: [],
+            access: true
+        },
+        {
+            id: 13,
+            name: "My Items",
+            route: ROUTES.MY_ITEMS,
+            icon: <BadgeOutlinedIcon />,
+            group: "Overview",
+            subroutes: [],
+            /*
+             * Everyone signed in, like the route: it only ever describes the caller. Its one way in
+             * used to be a button on the Store page, which needs READ_STORE - measured, 5 of 27
+             * accounts - so most people could reach their own items only by typing the address.
+             */
             access: true
         },
         {
@@ -110,12 +126,10 @@ const SideBarElements = () => {
              * complained, because nobody complains about a page they do not know exists.
              *
              * A disjunction rather than one permission: the page hides the tabs a viewer cannot
-             * load, so holding any one of these is enough to have something worth opening.
+             * load, so holding any one of these is enough to have something worth opening. The
+             * list is the tabs' own, so the link, the route and the tabs cannot disagree.
              */
-            access: has(PERMISSIONS.READ_ASSET)
-                || has(PERMISSIONS.READ_REQUEST)
-                || has(PERMISSIONS.READ_MOVEMENT)
-                || has(PERMISSIONS.READ_INVENTORY)
+            access: REPORT_PAGE_PERMISSIONS.some((p) => has(p))
         },
         {
             id: 12,
