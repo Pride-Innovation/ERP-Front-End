@@ -28,6 +28,18 @@ export type ApproverType =
 export type BranchScope = 'ALL' | 'HEAD_OFFICE' | 'BRANCH';
 
 /**
+ * Which kind of request a workflow serves (V30). A branch workflow issuing from the branch store
+ * serves personal requests; a store restock must reach a workflow that fills the store from elsewhere.
+ */
+export type WorkflowPurpose = 'PERSONAL' | 'RESTOCK' | 'BOTH';
+
+export const WORKFLOW_PURPOSE_LABELS: Record<WorkflowPurpose, string> = {
+    BOTH:     'Personal requests and store restocks',
+    PERSONAL: 'Personal requests only',
+    RESTOCK:  'Store restocks only',
+};
+
+/**
  * Whose reporting line a role-based approver type climbs.
  * - REQUESTER: the requester's chain (default).
  * - ISSUER: the chain of the person who issued the items — e.g. issuance approval by the issuer's manager.
@@ -82,6 +94,8 @@ export interface IApprovalWorkflow {
     branchId: number | null;
     branchName?: string;
     branchScope: BranchScope;
+    /** Absent from an older server: treated as BOTH, which is what every workflow was before V30. */
+    appliesTo?: WorkflowPurpose;
     active: boolean;
     priority: number;
     /** Workflow only matches when the requester has at least one of these role ids. Empty = applies to all roles. */

@@ -18,6 +18,12 @@ describe('where a notification goes', () => {
         expect(kindOf('STOCK_COUNT_PENDING')).toEqual({ label: 'Stock count to approve', group: 'action' });
     });
 
+    it('files waiting-for-stock as progress and ready-to-issue as an action, both on the request', () => {
+        expect(kindOf('STOCK_WAITING')).toEqual({ label: 'Waiting for stock', group: 'progress' });
+        expect(kindOf('STOCK_READY')).toEqual({ label: 'Ready to issue', group: 'action' });
+        expect(notificationRoute(notification('REQUEST', 36))).toContain('36');
+    });
+
     it('leads nowhere rather than somewhere wrong', () => {
         expect(notificationRoute(notification('SOMETHING_NEW', 3))).toBeNull();
         expect(notificationRoute(notification('STOCK_COUNT', null))).toBeNull();

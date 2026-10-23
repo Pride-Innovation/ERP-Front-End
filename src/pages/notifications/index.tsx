@@ -105,6 +105,10 @@ const typeIcon = (type: string) => {
             return <LocalShippingOutlinedIcon sx={{ color: '#BC892C', fontSize: 18 }} />;
         case 'STOCK_COUNT_PENDING':
             return <FactCheckOutlinedIcon sx={{ color: '#BC892C', fontSize: 18 }} />;
+        case 'STOCK_READY':
+            return <AssignmentOutlinedIcon sx={{ color: '#BC892C', fontSize: 18 }} />;
+        case 'STOCK_WAITING':
+            return <LocalShippingOutlinedIcon sx={{ color: PRIMARY, fontSize: 18 }} />;
         case 'MOVEMENT_UPDATE':
             return <LocalShippingOutlinedIcon sx={{ color: PRIMARY, fontSize: 18 }} />;
         case 'STEP_APPROVED':

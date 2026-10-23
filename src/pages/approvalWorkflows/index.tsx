@@ -44,7 +44,7 @@ import { brand, gold, neutral, border, surface, elevation, radii, status } from 
 import { PageHero, EmptyState } from '../../components/layout';
 import WorkflowForm from './WorkflowForm';
 import ApprovalWorkflowUtills from './utills';
-import { BRANCH_SCOPE_LABELS, IApprovalWorkflow, IApprovalStep, APPROVER_TYPE_LABELS } from './interface';
+import { BRANCH_SCOPE_LABELS, IApprovalWorkflow, IApprovalStep, APPROVER_TYPE_LABELS, WORKFLOW_PURPOSE_LABELS } from './interface';
 import { RequirePermission } from '../../core/permissions';
 import { PERMISSIONS } from '../../core/permissions/constants';
 
@@ -289,6 +289,10 @@ const WorkflowCard = ({ wf, onEdit, onToggle, onDelete }: WorkflowCardProps) => 
                     <MetaItem
                         icon={<AccountBalanceOutlinedIcon sx={{ fontSize: 13 }} />}
                         label={BRANCH_SCOPE_LABELS[wf.branchScope] ?? wf.branchScope}
+                    />
+                    <MetaItem
+                        icon={<PeopleOutlineIcon sx={{ fontSize: 13 }} />}
+                        label={WORKFLOW_PURPOSE_LABELS[wf.appliesTo ?? 'BOTH']}
                     />
                     {wf.branchName && (
                         <MetaItem

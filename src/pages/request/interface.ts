@@ -62,6 +62,8 @@ export interface IRequest {
      * offers no button.
      */
     currentUnit?: { id?: string | number | null; name?: string } | null,
+    /** True when the request restocks the requester's branch store rather than supplying them (V30). */
+    forStoreRestock?: boolean,
     /**
      * What the workflow is waiting for: REQUEST_APPROVAL, ACKNOWLEDGE_REQUEST, ISSUANCE,
      * ACKNOWLEDGE_RECEIPT — or null for a finished, rejected or pre-engine request.

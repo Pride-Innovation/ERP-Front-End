@@ -42,6 +42,7 @@ import {
     BRANCH_SCOPE_LABELS,
     IApprovalStep,
     IApprovalWorkflow,
+    WORKFLOW_PURPOSE_LABELS,
 } from './interface';
 import { searchAssetTypesForWorkflowService } from './service';
 import { blankApprovalStep, blankApprovalWorkflow } from './utills';
@@ -327,6 +328,21 @@ const WorkflowForm: React.FC<IWorkflowFormProps> = ({ initial, branches, roles, 
                                 }}
                                 error={undefined}
                                 options={Object.entries(BRANCH_SCOPE_LABELS).map(([k, v]) => ({ value: k, label: v }))}
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={6} md={6}>
+                            {/* A store restock and a personal request can need different routes - the
+                                branch store cannot restock itself. */}
+                            <SelectComponent
+                                id="applies-to"
+                                label="Applies to"
+                                required={false}
+                                field={{
+                                    value: form.appliesTo ?? 'BOTH',
+                                    onChange: (e: any) => setField('appliesTo', e.target.value),
+                                }}
+                                error={undefined}
+                                options={Object.entries(WORKFLOW_PURPOSE_LABELS).map(([k, v]) => ({ value: k, label: v }))}
                             />
                         </Grid>
 

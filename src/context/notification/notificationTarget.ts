@@ -54,6 +54,10 @@ export const NOTIFICATION_KINDS: Record<string, NotificationKind> = {
     LOANER_RETURN_DUE: { label: 'Return loaner', group: 'action' },
     // Sent to every other approver at the branch when a stock count is submitted.
     STOCK_COUNT_PENDING: { label: 'Stock count to approve', group: 'action' },
+    // A request at its Issue step that the store cannot yet cover: news, nothing to do yet.
+    STOCK_WAITING: { label: 'Waiting for stock', group: 'progress' },
+    // The store now covers it - the issuer can act.
+    STOCK_READY: { label: 'Ready to issue', group: 'action' },
 };
 
 /**

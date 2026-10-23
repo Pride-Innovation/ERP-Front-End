@@ -76,6 +76,8 @@ const WorkflowRoutesPanel = () => {
         const scope = isHeadOffice ? 'HEAD_OFFICE' : 'BRANCH';
         return workflows
             .filter((wf) => wf.active && (wf.branchScope === scope || wf.branchScope === 'ALL'))
+            // A restock-only route fills the branch store; it is not a route for items you need yourself.
+            .filter((wf) => (wf.appliesTo ?? 'BOTH') !== 'RESTOCK')
             .sort((a, b) => (a.priority ?? 0) - (b.priority ?? 0));
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [workflows]);

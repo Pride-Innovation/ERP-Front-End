@@ -55,6 +55,7 @@ import OtherDetails from "./OtherDetails";
 import RequestCommodties from "./RequestCommodties";
 import MovementHistory from "./MovementHistory";
 import RequestMovements from "./RequestMovements";
+import StockCheckPanel from "./StockCheckPanel";
 import AttachmentViewer from "./AttachmentViewer";
 import ModalComponent from "../../../../components/modal";
 import ApproveRequest from "../ApprovedRequest";
@@ -648,6 +649,10 @@ const RequestDetails = () => {
                         value - "Branch / Location" would be wrong on exactly the rows the rule
                         exists for. */}
                     <HeroFact first label="Requested From" value={requestedFromLabel(request.requester)} />
+                    {/* Where the goods go is decided by this, so approvers and the issuer need to see it. */}
+                    <HeroFact label="Delivered To" value={request.forStoreRestock
+                        ? `${request.requester?.branch?.name ?? 'Branch'} store (restock)`
+                        : 'The requester'} />
                     {/* Names the unit when the step is routed to one — see requestApproverLabel.
                         Reading "Not specified" for a request genuinely sitting with Admin says the
                         workflow has stalled, which is the opposite of the truth. */}
@@ -656,6 +661,12 @@ const RequestDetails = () => {
                     <HeroFact label="Requested Items" value={request.commodities?.length ? `${request.commodities.length} ${request.commodities.length === 1 ? 'item' : 'items'}` : null} />
                 </Box>
             </Box>
+
+            {/* At the Issue step, whether the issuing store can cover it - so a wait for stock is
+                not read as an issuer who has not acted. */}
+            {!loading && request.id && request.currentStepType === 'ISSUANCE' && (
+                <StockCheckPanel requestId={request.id as number} />
+            )}
 
             {/* ── Body ── */}
             {loading ? (

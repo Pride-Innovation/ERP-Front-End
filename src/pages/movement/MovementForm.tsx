@@ -34,6 +34,10 @@ import { creatableMovementTypes, storeTypeLabels } from './constants';
 import {
     fetchStoresService, fetchStoreAssetsService, fetchStoreBalancesService,
 } from './service';
+import { availableOf, balanceLabel, drawableStores, movableAssets } from './drawRules';
+import usePermissions from '../../core/permissions/usePermissions';
+import { PERMISSIONS } from '../../core/permissions/constants';
+import RoutesUtills from '../../core/routes/utills';
 
 const P = brand[500];
 const BLUE = status.info.main;
@@ -42,6 +46,8 @@ interface IBalanceView {
     commodityId: number;
     commodityName: string;
     quantity: number;
+    /** On hand less what open movements and unapproved issuances have promised - the server's check. */
+    available?: number | null;
     assetTypeName?: string;
 }
 
@@ -103,6 +109,19 @@ const MovementForm = ({ setValue, watch, formState, items, setItems, sendingRequ
 
     const destinationKind: 'STORE' | 'USER' = watch('destinationKind') ?? 'STORE';
 
+    // You draw only from your own branch's stores (the super administrator from any), and may send
+    // to any - the same rule the server applies to this form.
+    const { isSuperAdmin, has } = usePermissions();
+    const viewerBranchId = (RoutesUtills().getCurrentUser() as { branch?: { id?: number } } | null)?.branch?.id ?? null;
+    const superAdmin = isSuperAdmin();
+    // Giving to a person without a request is the exception path, behind its own permission; the
+    // ordinary way to give somebody something is a request.
+    const mayGiveToPerson = superAdmin || has(PERMISSIONS.ISSUE_WITHOUT_REQUEST);
+    const sourceOptions = useMemo(
+        () => drawableStores(stores, viewerBranchId, superAdmin),
+        [stores, viewerBranchId, superAdmin],
+    );
+
     // Load stores once
     useEffect(() => {
         (async () => {
@@ -121,7 +140,9 @@ const MovementForm = ({ setValue, watch, formState, items, setItems, sendingRequ
                 fetchStoreAssetsService(sourceStore.id) as any,
                 fetchStoreBalancesService({ storeId: sourceStore.id }) as any,
             ]);
-            setSourceAssets(aRes?.status === 200 ? aRes.data ?? [] : []);
+            // Only what is free on the shelf; the server also refuses an asset already on another
+            // open movement, which only it can see.
+            setSourceAssets(aRes?.status === 200 ? movableAssets(aRes.data ?? []) : []);
             setSourceBalances(bRes?.status === 200 ? bRes.data ?? [] : []);
         })();
         setItems([]);
@@ -161,7 +182,7 @@ const MovementForm = ({ setValue, watch, formState, items, setItems, sendingRequ
         } else {
             if (!pickedCommodity) { toast.warning('Select a commodity to add.'); return; }
             if (lineQty < 1) { toast.warning('Quantity must be at least 1.'); return; }
-            if (lineQty > pickedCommodity.quantity) { toast.warning(`Only ${pickedCommodity.quantity} in stock.`); return; }
+            if (lineQty > availableOf(pickedCommodity)) { toast.warning(`Only ${availableOf(pickedCommodity)} available.`); return; }
             if (items.some((i) => i.commodityId === pickedCommodity.commodityId)) { toast.warning('Commodity already added.'); return; }
             setItems([...items, { commodityId: pickedCommodity.commodityId, quantity: lineQty, label: pickedCommodity.commodityName, subLabel: `Qty ${lineQty}` }]);
             setPickedCommodity(null);
@@ -244,9 +265,10 @@ const MovementForm = ({ setValue, watch, formState, items, setItems, sendingRequ
                     <Grid container spacing={2.5}>
                         <Grid item xs={12} sm={6}>
                             <Autocomplete
-                                options={stores}
+                                options={sourceOptions}
                                 loading={loadingStores}
                                 value={sourceStore}
+                                noOptionsText="No store at your branch to draw from"
                                 getOptionLabel={storeLabel}
                                 isOptionEqualToValue={(o, v) => o.id === v.id}
                                 onChange={(_, v) => { setSourceStore(v); setValue('sourceStoreId', v?.id ?? '', { shouldValidate: true }); }}
@@ -266,6 +288,7 @@ const MovementForm = ({ setValue, watch, formState, items, setItems, sendingRequ
                         </Grid>
 
                         <Grid item xs={12} sm={6}>
+                            {mayGiveToPerson && (
                             <ToggleButtonGroup
                                 exclusive size="small" fullWidth
                                 value={destinationKind}
@@ -280,6 +303,12 @@ const MovementForm = ({ setValue, watch, formState, items, setItems, sendingRequ
                                 <ToggleButton value="STORE">To Store</ToggleButton>
                                 <ToggleButton value="USER">To User</ToggleButton>
                             </ToggleButtonGroup>
+                            )}
+                            {destinationKind === 'USER' && (
+                                <Typography variant="caption" sx={{ display: 'block', mb: 1, color: neutral[500] }}>
+                                    Giving items to a person without a request. A reason is required below.
+                                </Typography>
+                            )}
 
                             {destinationKind === 'STORE' ? (
                                 <Autocomplete
@@ -361,7 +390,8 @@ const MovementForm = ({ setValue, watch, formState, items, setItems, sendingRequ
                                             <Autocomplete
                                                 options={sourceBalances.filter((b) => !items.some((i) => i.commodityId === b.commodityId))}
                                                 value={pickedCommodity}
-                                                getOptionLabel={(b) => `${b.commodityName} (${b.quantity} in stock)`}
+                                                getOptionLabel={(b) => balanceLabel(b)}
+                                                getOptionDisabled={(b) => availableOf(b) < 1}
                                                 isOptionEqualToValue={(o, v) => o.commodityId === v.commodityId}
                                                 onChange={(_, v) => setPickedCommodity(v)}
                                                 renderInput={(params) => <TextField {...params} label="Select Consumable" sx={autocompleteSx} />}
@@ -369,7 +399,7 @@ const MovementForm = ({ setValue, watch, formState, items, setItems, sendingRequ
                                         </Grid>
                                         <Grid item xs={6} sm={3}>
                                             <TextField type="number" fullWidth label="Quantity" value={lineQty} sx={fieldSx}
-                                                inputProps={{ min: 1, max: pickedCommodity?.quantity ?? undefined }}
+                                                inputProps={{ min: 1, max: pickedCommodity ? availableOf(pickedCommodity) : undefined }}
                                                 onChange={(e) => setLineQty(Math.max(1, Number(e.target.value)))} />
                                         </Grid>
                                     </>
@@ -486,7 +516,15 @@ const MovementForm = ({ setValue, watch, formState, items, setItems, sendingRequ
                             </Box>
                         </Stack>
                     </Box>
-                    <TextField fullWidth multiline rows={3} label="Remarks (optional)" sx={fieldSx} value={watch('remarks') ?? ''} onChange={(e) => setValue('remarks', e.target.value)} />
+                    <TextField
+                        fullWidth multiline rows={3} sx={fieldSx}
+                        label={destinationKind === 'USER' ? 'Reason for giving without a request' : 'Remarks (optional)'}
+                        required={destinationKind === 'USER'}
+                        value={watch('remarks') ?? ''}
+                        onChange={(e) => setValue('remarks', e.target.value, { shouldValidate: destinationKind === 'USER' })}
+                        error={!!formState.errors.remarks}
+                        helperText={formState.errors.remarks?.message as string}
+                    />
                 </PageSection>
             </Box>
 

@@ -168,9 +168,21 @@ const fetchWorkflowStepLogsService = async (requestId: number | string) => {
     }
 }
 
+/** Whether the store this request will be issued from holds everything on it. */
+const fetchRequestStockCheckService = async (requestId: number | string) => {
+    try {
+        const response = await axiosInstance.get(`/requests/${requestId}/stock-check`);
+        return response;
+    }
+    catch (error) {
+        return error;
+    }
+}
+
 export {
     createAssetRequestService,
     fetchWorkflowStepLogsService,
+    fetchRequestStockCheckService,
     updateAssetRequestService,
     deleteAssetRequestService,
     findAssetRequestByIDService,

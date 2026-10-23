@@ -6,7 +6,7 @@ Two repos, worked on together:
 - **Backend** — `ERP-Back-End` (Spring Boot 3.2, Hibernate 6.3 + Envers, Flyway, MySQL)
 
 Verify with `npx tsc --noEmit -p tsconfig.json`, `npx eslint src/... --ext .ts,.tsx`, and
-`./mvnw.cmd -o test` — **563 backend tests** and **179 frontend** at time of writing, all green.
+`./mvnw.cmd -o test` — **592 backend tests** and **186 frontend** at time of writing, all green.
 Run the frontend suite as `CI=true npx react-scripts test --watchAll=false`; plain `npx jest` fails
 on a Babel transform, because the config that makes it work is CRA's.
 
@@ -3726,6 +3726,182 @@ you" never shows them; 1 held asset reads "Available for Issuance".
 `tsc` refuses it as differing only in case. It is `myItemsData.ts`. And PowerShell 5's
 `Get-Content`/`Set-Content` reads UTF-8 source as ANSI and writes a BOM: `·` became `Â·` in two files
 and javac rejects the BOM outright. Use `[IO.File]` with `UTF8Encoding($false)` for any scripted edit.
+
+### Stock depletion, Phase 1: integrity (decisions recorded in WORKFLOW.md)
+
+What was found before anything changed: no branch store had ever issued a single unit (all four
+workflows route Acknowledge and Issue to a Head Office unit), and issued stock was debited **at issue**,
+so a rejected issuance left the store reading lower than the shelf. Phase 1 fixes integrity. Phases 2
+(store-restock requests) and 3 (branch-store fulfilment) are agreed in WORKFLOW.md and not built yet.
+
+**Issued stock leaves at approval (V29 `issuance.stock_settled`, plus `issuance_aud`, trap #5).**
+Issuing now only proves availability. `IssuanceApprovalRecordService` calls
+`IssuanceService.settleIssuanceStock` **before** the workflow advances: a direct issuance debits the
+issuer's branch Admin store, and a cross-location one is only marked settled because its fulfilment
+movement owns the transfer. It is idempotent on the flag. **V29 sets every existing issuance to
+settled**, or approving one issued under the old rule would debit it twice. Measured: none was
+between issue and approval.
+- *Fixed on the way:* a shortfall at issue threw `NotFoundException`, which this application answers
+  with **200** and a bare message, so a refusal could read as success. It is a 400 now.
+- Head Office is found by its flag in `IssuanceService` (it compared ids with `1L`, trap #4).
+
+**Reservations (`StockAvailabilityService`).** Available = on hand − promised, and promised reads the
+same flags the debits use:
+- open movements drawing from the store, not yet past custody handoff or completion;
+- consignment-landed movements waiting for their recipient;
+- for a branch's own Admin store, unsettled issuances not on a rejected or deleted request.
+
+Nothing is written, because a promise *is* the open movement or issuance, so cancelling or rejecting
+releases it with no bookkeeping. One store's balances (`/inventory/balances?storeId`) carry
+`available`, and the form caps and labels by it.
+
+**The movement form has its own path, `MovementService.createFromForm`.** The system's flows keep
+calling `createMovement` with their own checks. The form path adds:
+1. **Only REPLENISHMENT and DEPARTMENT_TRANSFER.** The endpoint accepted any type, so a hand-made
+   request could post a `DISPOSAL_TRANSFER` and write an asset off without `DISPOSE_ASSET`.
+   System-only fields (request, repair, origin holder, and so on) are cleared.
+2. **Draw only from your own branch's stores, send anywhere.** There is no cross-branch override, as
+   with stock take. The super administrator is exempt.
+3. **Assets must be free on the source shelf:** in that store, held by nobody, on no other open
+   movement, not a loaner, and not in maintenance, pending disposal, in transit, issued or
+   `requireUpdate`.
+4. **Consumables are checked against availability.**
+
+`drawRules.ts` mirrors 2–4 on the form.
+
+`StockIntegrityTest` covers all of it against live data. **Every asset sitting in a store today is a
+loaner, away, travelling or already on a movement**, so the double-booking case builds its own shelf
+item inside the transaction. On its first run the guard refused `PBL-2020-COAT001`, which reads
+Available for Issuance while sitting on stuck movement #3: one of the known stale rows. Checked that
+the tests can fail: removing each of the four rules fails exactly its own case.
+
+*Noted, not changed:* `RequestService` hardcodes the Rejected status as id `2L` (trap #4).
+
+### Stock depletion, Phase 2: store-restock requests (V30)
+
+**A request is personal or a store restock, chosen on the request, never guessed.** It used to be
+guessed: a request from a branch's designated BOM was a "replenishment", yet it was still delivered to
+the BOM as a person. Restocked consumables counted as used on arrival, the store was never credited,
+and a BOM's own laptop was labelled a restock.
+
+- **`Request.forStoreRestock`** (plus `request_aud`) is set by a checkbox on the create page. It is
+  shown, and accepted, only for **RESTOCK_STORE** holders **at a branch**. Without the permission the
+  answer is `AccessDeniedException`, which the controller rethrows so it arrives as a refusal rather
+  than the catch-all's 440. At Head Office it is a `BusinessRuleException`: Head Office fills its
+  store through stock orders. The flag applies to the **whole** request, because mixing is not allowed.
+- **RESTOCK_STORE** is declared in `initializePermissions()` and granted **once** to `BRANCH_MANAGER`
+  and `BRANCH_OPERATIONS_MANAGER` (`RestockPermissionSeeder`, `OneTimeSeed`, after
+  `initializePermissions()`). Shipping it empty would have stopped every branch restocking on deploy
+  day. A revocation in Settings stays revoked.
+- **`ApprovalWorkflow.appliesTo`** is PERSONAL, RESTOCK or BOTH, and every existing workflow starts
+  as BOTH. The resolver query matches the request's purpose or BOTH. This is what stops a restock
+  matching a branch workflow that issues from the very store it is meant to fill. **A restock that no
+  workflow serves is refused** in `startWorkflow`, naming the category, and the request creation rolls
+  back. It never falls through to the legacy supervisor routing. The editor has an "Applies to" field,
+  and the list shows it. The request form's routes panel leaves out restock-only routes.
+- **Fulfilment:** a restock becomes a REPLENISHMENT **into the requester's branch Admin store**,
+  carrying `restoreStatusCode = issuanceAvailable`. `InventoryService`'s default arm now applies a
+  restore status after `returnAssetToStore`, so restocked assets land ready to issue rather than
+  reading "Issued". No other movement of those types carries one. A personal request is still an
+  ISSUANCE_FULFILLMENT to the requester.
+- **Receipt acknowledgement no longer assigns a restock's assets to the requester**
+  (`IssuedAssetLifecycleService.markAssigned` stops for a restock). That would otherwise have handed
+  a whole delivery of store stock to the BOM.
+- **A restock cannot be issued from the branch it restocks**: the goods would leave the shelf only to
+  arrive back on it.
+- The request detail hero shows **Delivered To**.
+
+`StoreRestockRequestTest` covers the permission, the Head Office refusal, purpose matching, the refusal
+when no restock workflow exists, delivery into the store, assets left unassigned at receipt, the
+unchanged personal path, and the seed marker (the marker, never the grants). Checked that the tests
+can fail: breaking each of the five rules fails its own case. The asset case met the
+`User.toString` → `Token.toString` overflow again on its failing run, and asserts on the holder's id.
+
+*Left alone:* `pages/settings/approvalWorkflows/index.tsx` is an older workflow editor that nothing
+imports. If it were ever routed again, saving through it would reset "Applies to" to BOTH.
+
+### Stock depletion, Phase 3: requests handled at the branch
+
+**A workflow keeps a request at its branch by routing its Issue step to the BOM or BM.** There is no
+flag: `WorkflowEngineService.isBranchPersonIssuanceStep` recognises an ISSUANCE step, or an
+issuance-approval step (REQUEST_APPROVAL with subject ISSUER), whose approver type is BOM or
+BRANCH_MANAGER. Workflows that route those steps to a unit or a manager behave exactly as before, which
+is how Head Office categories (Computers and the rest) keep their flow untouched. The Acknowledge step
+is simply left out of a branch workflow.
+
+**Maker-checker, in the routing and behind it.**
+- `branchIssuanceApprover` tries the configured role, then the other one, skipping the requester (and
+  the issuer, for the approval step). A BOM's own request is issued by the BM.
+- **With nobody left it returns null, and the step waits.** `shouldSkipStep` never skips these steps
+  for lack of a recipient, because skipping an Issue step would skip the issuing. A waiting step
+  falls under `requireActorIsRouted`'s permissive "nothing routed" case, which is why the guarantees
+  also live in the services: `IssuanceService.issueCommodities` refuses the requester, and
+  `IssuanceApprovalRecordService` refuses the requester and the issuer.
+- **The BOM and BM are found by role when the branch fields are unset.** Measured: no branch has
+  `branch_manager_id` or `branch_operations_manager_id`. So `branchRoleHolder` takes the branch field
+  when present, else the lowest-id enabled, unblocked user at the branch holding the role.
+- The issuance's requester comes from the request, never the payload, and a mismatching payload is
+  refused. The old "Stationery only" rule on branch issuance is gone; the store's own stock is the limit.
+
+**Waiting for stock is said out loud** (`IssueStockCheckService`). The issuing store is the branch Admin
+store of whoever the Issue step is routed to (Head Office's when it is routed to a unit). Available =
+unpromised consumables + issuable serialized assets of that commodity.
+- `GET /requests/{id}/stock-check`, readable by whoever may read the request, feeds a panel on the
+  request page at the Issue step: "Waiting for stock" with the short lines, or "In stock". An unknown
+  (no store, no lines) shows nothing, because an unknown is not a shortfall.
+- Reaching an Issue step short sends **STOCK_WAITING** to the requester and the issuer. Stock landing
+  in a branch Admin store (a completed movement, or a goods receipt) sends **STOCK_READY** to the
+  issuer of every request there that it now covers. Both go out **after commit**, in their own
+  transaction, never throw, and are sent **once** per request and person
+  (`existsByRecipientIdAndTypeAndEntityId`).
+
+**Giving without a request is the exception path.** `createFromForm` to a person needs
+**ISSUE_WITHOUT_REQUEST** and a non-blank reason in the remarks. The permission is declared in
+`initializePermissions()` and granted once to every role holding CREATE_MOVEMENT
+(`IssueWithoutRequestPermissionSeeder`, `OneTimeSeed`), so nobody lost the path on deploy day. The
+form hides "To User" without it, and requires the reason with it.
+
+`BranchIssuanceTest` covers routing for an officer's and a BOM's request, the approval excluding both
+requester and issuer, waiting instead of skipping, the own-request refusal, the stock check, the
+notices (none before commit, once after), the exception permission and reason, and the seed marker.
+Checked that the tests can fail: removing the requester exclusion, the no-skip rule, the dedup check
+and the permission check each fails its own case. The skip break first surfaced as the
+`User.toString` overflow from `stepHasRecipient`'s logging, and was re-broken directly to confirm the
+assertion catches it. `IssuanceAssetGuardTest` now uses different people for issuer and requester, and
+`StockIntegrityTest`'s hand-overs carry a reason.
+
+*Configuration, not code:* BM and BOM hold neither ISSUE_ITEMS nor APPROVE_ISSUANCE, so they must be
+granted both in Settings before a branch workflow can run. Granting ISSUE_ITEMS also widens request
+reads through `requireRequestReadable`'s third limb.
+
+### Workflows are seeded into a new database — by a seeder, not a migration
+
+`WorkflowSeeder` creates the six workflows in the backend's `workflow.md` (the four that were live,
+plus Branch · Store-handled and Branch · Store restock). **A Flyway migration cannot do it:** a
+workflow points at categories, units and roles, and on a new database every one of those comes from a
+seeder that runs *after* Flyway. Ids in a migration would hard-code one environment's seed order
+into every other (trap #4).
+
+- **Runs once, last in `DataInitializer`, and only into an empty table.** It goes through
+  `OneTimeSeed`, and an existing database just gets the marker. An edit in Settings is never
+  overwritten, and deleting every workflow does not bring these back.
+- **Nothing is identified by id.** Categories are found by name, units by the role they confer
+  (`ADMIN_UNIT` / `INFRA_UNIT`), skip-roles by name, and no step names a person. An unresolved name
+  skips that workflow and logs it.
+- **Mailboxes come from `.env`:** `WORKFLOW_GROUP_EMAIL` (optional, blank by default) on every
+  step; unit steps mail the unit first (`ADMIN_TEAM_EMAIL_ADDRESS` / `IT_TEAM_EMAIL_ADDRESS`).
+- **Two deliberate differences from what was live:** Stationery moved from Branch · Admin-handled to
+  Branch · Store-handled, and both branch Admin/Infra workflows became **Personal**. Left on Both,
+  they would win every restock on priority.
+- **Existing databases change by hand**, following section 1 of the backend `workflow.md`: two edits,
+  two new workflows, and Issue Items + Approve Issuance for BM and BOM.
+
+`WorkflowSeederTest` pins name resolution, the Phase 3 shapes, one workflow per category per scope
+and request kind, saving, leave-alone and the marker. **It is not compared against the live
+workflows**, because they are edited in Settings, and pinning them would fail the build for doing
+what Settings is for. That comparison ran once, in the scratch copy: all 30 steps matched field for
+field. Checked that the tests can fail: a misspelled category fails the name check, and putting
+Stationery back into Branch · Admin-handled fails the two cases that own it.
 
 ### "Assets Held" — filtered, paged and exported on the server
 
