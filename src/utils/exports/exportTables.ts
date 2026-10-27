@@ -193,6 +193,8 @@ export const EXPORT_TABLES: ExportTable[] = [
             on('name', 'Item'),
             on('unitOfMeasure', 'Unit of measure'),
             on('quantity', 'Quantity'),
+            on('promised', 'Promised'),
+            on('available', 'Available'),
             on('branch', 'Branch'),
             on('status', 'Stock level'),
             off('minLevel', 'Reorder at'),

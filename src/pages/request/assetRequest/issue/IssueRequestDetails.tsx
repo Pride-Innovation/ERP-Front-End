@@ -69,6 +69,7 @@ import CommodityUtills from "../../../settings/commodity/utills";
 import { ROUTES } from "../../../../core/routes/routes";
 import { fieldSx } from "../../../../components/forms/Inputs";
 import { requestedFromLabel } from '../../requestedFromLabel';
+import StockCheckPanel from "../view/StockCheckPanel";
 
 type RequestLine = { commodity: ICommodity; quantity: number };
 
@@ -556,7 +557,7 @@ const IssueRequestDetails = () => {
             <SectionCard
                 icon={<Inventory2OutlinedIcon />}
                 title="Issue Items"
-                subtitle="Pre-filled from the request — pick the specific assets by engraved number, then confirm. This records the assets against the requester and updates the store."
+                subtitle="Pre-filled from the request — pick the specific assets by engraved number, then confirm. Issuing reserves the items; the store is debited when the issuance is approved."
                 headerAction={
                     <Chip
                         size="small"
@@ -575,7 +576,13 @@ const IssueRequestDetails = () => {
                         <Typography variant="caption" sx={{ mt: 1.25, color: neutral[500] }}>Loading request lines…</Typography>
                     </Stack>
                 ) : (
-                    <InventoryTable issue title="Lines to issue" lineStatus={rowStatus} />
+                    <>
+                        {/* What the issuing store can still give, per line - the figure the issue is
+                            checked against. Without it the issuer sees no stock at all, and the store
+                            page's shelf count includes what is already issued and awaiting approval. */}
+                        {request?.id && <StockCheckPanel requestId={Number(request.id)} detailed />}
+                        <InventoryTable issue title="Lines to issue" lineStatus={rowStatus} />
+                    </>
                 )}
             </SectionCard>
 

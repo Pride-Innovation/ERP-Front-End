@@ -35,6 +35,13 @@ import { Box } from '@mui/material';
  * <p>"Not monitored" is a real answer rather than a blank: a line with no threshold set is never
  * flagged however little of it is on hand, and saying so is what prompts somebody to set one.
  */
+/**
+ * A promised / available figure as the table shows it. Missing means the server did not say (an
+ * older backend), which is shown as a dash: reading it as zero would claim nothing is promised.
+ */
+const shownCount = (value?: number | null): number | string =>
+    value === null || value === undefined ? '—' : value;
+
 const stockLevelOf = (quantity: number, minLevel?: number | null): string => {
     if (!minLevel || minLevel <= 0) return 'not monitored';
     if (quantity <= minLevel / 2) return 'low';
@@ -89,6 +96,10 @@ const TableData = () => {
         unitOfMeasure: StoreMocks[0].commodity.groupName,
         ...data,
         quantity: StoreMocks[0].quantity,
+        // Beside the shelf figure, because issued-but-unapproved stock is still on the shelf and the
+        // shelf alone reads as though it were free (see shownCount).
+        promised: StoreMocks[0].promised ?? 0,
+        available: StoreMocks[0].available ?? 0,
         branch: StoreMocks[0].branch.name,
         status: stockLevelOf(StoreMocks[0].quantity, StoreMocks[0].minLevel),
         action: {
@@ -108,6 +119,8 @@ const TableData = () => {
                 name: str.commodity.name,
                 unitOfMeasure: str.commodity.groupName,
                 quantity: str.quantity,
+                promised: shownCount(str.promised),
+                available: shownCount(str.available),
                 branch: str.branch.name,
                 status: stockLevelOf(str.quantity, str.minLevel),
             });

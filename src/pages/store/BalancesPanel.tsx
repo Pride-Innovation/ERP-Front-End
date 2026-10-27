@@ -44,6 +44,8 @@ export interface IBalanceView {
     commodityName?: string;
     assetTypeName?: string;
     quantity: number;
+    /** On hand less what is already promised (issued but not approved, or on an uncollected movement). */
+    available?: number | null;
     minLevel: number;
     lowStock: boolean;
 }
@@ -298,6 +300,14 @@ const BalancesPanel = ({ rows, setRows, loading, lowOnly, onLowOnlyChange }: Bal
                                         >
                                             {r.quantity.toLocaleString()}
                                         </Typography>
+                                        {/* Said only when some of it is spoken for: issued stock stays on
+                                            the shelf until it is approved, and the shelf alone reads as
+                                            though all of it could still be issued. */}
+                                        {r.available != null && r.available < r.quantity && (
+                                            <Typography component="span" sx={{ display: 'block', fontSize: '0.8rem', color: neutral[500] }}>
+                                                {r.available.toLocaleString()} available · {(r.quantity - r.available).toLocaleString()} promised
+                                            </Typography>
+                                        )}
                                         <StockHealthBar quantity={r.quantity} minLevel={r.minLevel} />
                                     </TableCell>
                                     <TableCell align="right" sx={dataBodyCellSx}>

@@ -6,7 +6,7 @@ Two repos, worked on together:
 - **Backend** — `ERP-Back-End` (Spring Boot 3.2, Hibernate 6.3 + Envers, Flyway, MySQL)
 
 Verify with `npx tsc --noEmit -p tsconfig.json`, `npx eslint src/... --ext .ts,.tsx`, and
-`./mvnw.cmd -o test` — **592 backend tests** and **186 frontend** at time of writing, all green.
+`./mvnw.cmd -o test` — **601 backend tests** and **186 frontend** at time of writing, all green.
 Run the frontend suite as `CI=true npx react-scripts test --watchAll=false`; plain `npx jest` fails
 on a Babel transform, because the config that makes it work is CRA's.
 
@@ -3888,13 +3888,94 @@ into every other (trap #4).
 - **Nothing is identified by id.** Categories are found by name, units by the role they confer
   (`ADMIN_UNIT` / `INFRA_UNIT`), skip-roles by name, and no step names a person. An unresolved name
   skips that workflow and logs it.
-- **Mailboxes come from `.env`:** `WORKFLOW_GROUP_EMAIL` (optional, blank by default) on every
-  step; unit steps mail the unit first (`ADMIN_TEAM_EMAIL_ADDRESS` / `IT_TEAM_EMAIL_ADDRESS`).
+- **No fixed mailbox on any seeded step.** Unit steps mail the unit (`ADMIN_TEAM_EMAIL_ADDRESS` /
+  `IT_TEAM_EMAIL_ADDRESS`), and everyone else is looked up at send time. The step's own group and CC
+  fields are fallbacks: CC is read only for a *Static* CC (none is), and the group address only when
+  nobody resolves, which for a waiting branch issuance step would mail somebody who may not act. A
+  `WORKFLOW_GROUP_EMAIL` variable existed briefly, copied from the dev data's single address, and
+  was removed for that reason.
 - **Two deliberate differences from what was live:** Stationery moved from Branch · Admin-handled to
   Branch · Store-handled, and both branch Admin/Infra workflows became **Personal**. Left on Both,
   they would win every restock on priority.
 - **Existing databases change by hand**, following section 1 of the backend `workflow.md`: two edits,
   two new workflows, and Issue Items + Approve Issuance for BM and BOM.
+
+### A restock never takes a workflow that issues at the branch
+
+Met live: request 140, a Gulu restock, was taken by **Branch · Store-handled**, which had been set to
+*Applies to: Both* in Settings and outranks the restock workflow on priority (22 vs 23). Its Issue
+step goes to the BM/BOM, and a restock may not be issued from the store it fills, so the request
+would have waited at Branch Issuance forever. It never reached Head Office.
+
+`BranchIssuance.servable` now drops, for a restock, every workflow whose Issue step is a branch
+person (`BranchIssuance` also holds the step rule the engine uses, so there is one copy). The engine
+and `WorkflowResolveService` (the request form's routes preview) both apply it, so the preview names
+the workflow the request will get. Correct *Applies to* settings remain the real fix; this is the
+net. `StoreRestockRequestTest.aRestockIsNeverSentDownAWorkflowThatIssuesAtTheBranch` reproduces the
+misconfiguration and fails with the filter switched off. A request keeps the workflow it started on,
+so 140 itself has to be rejected and raised again.
+
+### Issued-but-unapproved stock is shown as promised, not as free
+
+The reservation was right all along, and was reported as broken because nothing showed it.
+Issuing reserves (approval debits), so issued stock **stays on the shelf** until the BM approves.
+The store page showed only the shelf, and the Issue Items form showed no stock at all, so the stock
+looked unreserved. `BranchIssuanceReservationTest` proves the reservation against the real Gulu
+store: issue all 10 free toners, the shelf still reads 10, 0 are free, and a second issuance before
+approval is refused with "10 already promised". It fails with the promised rule removed.
+
+- `StoreBalance` gained `@Transient promised` / `available`, filled by `GET /store` (one
+  availability read per store). Not persisted, so no migration and no `_aud` column. Null wherever
+  nobody computed it, and the table shows a dash for null rather than claiming 0 promised.
+- The store page table has **Promised** and **Available** columns, also in the export registry. The
+  Balances panel adds "N available · N promised" under on-hand when some of it is spoken for.
+- The Issue Items form shows the request's stock check in detail (every line, need vs available),
+  and its subtitle says issuing reserves and approval debits, instead of claiming it "updates the
+  store".
+
+### Issued assets never reached a Head Office requester — the hand-over was on the wrong step
+
+Two services with near-identical names do opposite jobs, and the code mixed them up:
+
+| Service | Endpoint | What it really is |
+|---|---|---|
+| `AcknowledgeRequestReceiptService` | `/acknowledge-request…` | the Infra/Admin **unit** acknowledging the *request* — step 4, **before** issuance |
+| `AcknowledgeIssuanceReceiptService` | `/acknowledge-issuance` | the **requester** acknowledging receipt of the *items* — the last step |
+
+`markAssigned` (issued assets → the requester, "Assigned") and `requireDeliveryComplete` (no receipt
+while the delivery movement is on the road) both sat in the **first**. There, no asset had been issued
+and no movement existed, so the hand-over did nothing and the check never refused anything. The
+requester's real receipt called neither.
+
+Measured when found, over requests with receipt acknowledged: **Head Office (direct issuance, no
+movement): 18 assets on 5 requests "Issued", held by nobody, in no store** — every one since the
+first request in June. **Branch (by movement): 141 assets on 40 requests held by the requester but
+still reading "Issued"** — the movement assigns the holder, and the status flip was the misplaced
+call. A branch issuing from its own store (Phase 3) has no movement either, so it would have joined
+the first group.
+
+Both moved to the requester's receipt. `markAssigned` was also made safe to run on anything:
+only assets still `assetIssued` / `inTransit` (the states `restoreToAvailable` reverses), never one
+held by somebody else, and where a movement already handed the asset over it only corrects the status
+and keeps the movement's assignment record instead of closing and duplicating it.
+`ReceiptAssignmentTest` covers all five behaviours; removing the move, or the status guard, fails its
+own cases. The delivery rule lives once, in `IssuedAssetLifecycleService.deliveryComplete`, read by
+the receipt and by the repair below.
+
+**Repaired once, on startup** (`IssuedAssetHandOverRepairSeeder`, `OneTimeSeed`, marker
+`REPAIR_ISSUED_ASSET_HAND_OVER`, last in `DataInitializer`): `markAssigned` for every non-restock
+request whose receipt is acknowledged, **each in its own `REQUIRES_NEW` transaction** so one bad
+record skips itself rather than rolling back the rest and the marker. It **skips any request whose
+delivery has not completed**: request 16 had been acknowledged while movement 4 was still in transit
+(the misplaced check let that through too), and its three assets are with the courier; completing the
+movement hands them over. Request 14 is the known stuck movement 3. Measured after, on the development
+database: 56 requests handed over, 2 skipped, 0 failed; all **18 Head Office assets Assigned to their
+requester with exactly one open assignment record**; the **141 branch assets** read Assigned; no asset
+has two open records. Three branch assets "held by someone else" also turned Assigned — each was issued
+twice (requests 14/35, 14/40, 35/15, from before double issue was refused) and is held by the
+requester of the *other* acknowledged request, through which it was correctly finished. A test pins the
+marker only: the repair commits outside any test's rollback, so no test may run it. Head Office
+requests 19 and 20, still awaiting receipt, are handed over normally when it is acknowledged.
 
 `WorkflowSeederTest` pins name resolution, the Phase 3 shapes, one workflow per category per scope
 and request kind, saving, leave-alone and the marker. **It is not compared against the live

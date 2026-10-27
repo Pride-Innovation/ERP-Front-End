@@ -17,7 +17,13 @@ import { IStockCheck, stockCheckSummary } from './stockCheck';
  * for stock looks exactly like an issuer who has not acted - the reader would chase the wrong person.
  * When the check cannot be read nothing is shown: an unknown is not a shortfall.
  */
-const StockCheckPanel = ({ requestId }: { requestId: number }) => {
+/**
+ * @param detailed on the issue page: every line with what the store can still give, not only the
+ *                 short ones. "Can still give" is on hand less what other issuances and movements have
+ *                 already promised, which is what the issue will be checked against - the shelf count
+ *                 alone overstates it whenever something is issued and not yet approved.
+ */
+const StockCheckPanel = ({ requestId, detailed = false }: { requestId: number; detailed?: boolean }) => {
     const [check, setCheck] = useState<IStockCheck | null>(null);
 
     useEffect(() => {
@@ -30,22 +36,29 @@ const StockCheckPanel = ({ requestId }: { requestId: number }) => {
     }, [requestId]);
 
     const summary = check ? stockCheckSummary(check) : null;
-    if (!summary) return null;
+    if (!summary || !check) return null;
+    const listed = detailed ? check.lines : summary.shortLines;
 
     return (
         <Alert severity={summary.waiting ? 'warning' : 'success'} sx={{ mb: 3, borderRadius: 2 }}>
             <AlertTitle sx={{ fontWeight: 700 }}>{summary.title}</AlertTitle>
             <Typography variant="body2">{summary.message}</Typography>
-            {summary.shortLines.length > 0 && (
+            {listed.length > 0 && (
                 <Box component="ul" sx={{ m: 0, mt: 0.75, pl: 2.5 }}>
-                    {summary.shortLines.map((l) => (
+                    {listed.map((l) => (
                         <li key={l.commodityId}>
-                            <Typography variant="body2">
-                                {l.commodityName}: need {l.needed}, the store has {l.available}
+                            <Typography variant="body2" sx={{ fontWeight: l.available < l.needed ? 700 : 400 }}>
+                                {l.commodityName}: need {l.needed}, {l.available} available
                             </Typography>
                         </li>
                     ))}
                 </Box>
+            )}
+            {detailed && (
+                <Typography variant="caption" sx={{ display: 'block', mt: 0.75 }}>
+                    Available is what is on the shelf less what other issuances and movements have already been
+                    promised. Issued items stay on the shelf until the issuance is approved.
+                </Typography>
             )}
         </Alert>
     );
