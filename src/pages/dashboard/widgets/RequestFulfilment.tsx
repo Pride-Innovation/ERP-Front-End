@@ -5,15 +5,40 @@ and distribute this software and its documentation for any purpose is prohibited
 Managing Director
 */
 
-import { useMemo } from 'react';
-import { Box, Stack, Typography } from '@mui/material';
+import { useMemo, useState } from 'react';
+import { Box, Stack, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 import AssignmentTurnedInOutlinedIcon from '@mui/icons-material/AssignmentTurnedInOutlined';
+import DonutLargeOutlinedIcon from '@mui/icons-material/DonutLargeOutlined';
+import BarChartOutlinedIcon from '@mui/icons-material/BarChartOutlined';
 import { Bar } from 'react-chartjs-2';
 import { neutral, surface } from '../../../utils/tokens';
 import { FULFILMENT_COLOURS, SEGMENT_GAP_PX, axisStyle, tooltipStyle } from '../chartTheme';
 import { IRequestFulfilment } from '../interface';
 import { IAsyncData } from '../useDashboardData';
 import WidgetCard from './WidgetCard';
+import FulfilmentRingsView from './FulfilmentRingsView';
+import { buildFulfilmentRings } from './fulfilmentRings';
+
+type FulfilmentView = 'rings' | 'bars';
+
+/** Each viewer's last choice, in their own browser. A convenience only: unreadable means the default. */
+const VIEW_KEY = 'dashboard.requestFulfilment.view';
+
+const readView = (): FulfilmentView => {
+    try {
+        return window.localStorage.getItem(VIEW_KEY) === 'bars' ? 'bars' : 'rings';
+    } catch {
+        return 'rings';
+    }
+};
+
+const saveView = (view: FulfilmentView) => {
+    try {
+        window.localStorage.setItem(VIEW_KEY, view);
+    } catch {
+        // Private window or blocked storage: the choice simply is not remembered.
+    }
+};
 
 interface IRequestFulfilmentProps {
     fulfilment: IAsyncData<IRequestFulfilment[]>;
@@ -28,11 +53,24 @@ interface IRequestFulfilmentProps {
  * breakdown, so rather than keep fabricating one this answers the question the available data
  * genuinely supports — and arguably the more useful one: where is demand not being met.
  *
- * Two series, stacked horizontally, so each bar's full length is what was asked for and the
- * split shows how much of it landed. Both series are direct-labelled and legended.
+ * Two views of the same rows, switched in the header, and the rings are the default:
+ *   - **Rings** (`FulfilmentRingsView`): each category's share of requests, split into delivered and
+ *     outstanding. Largest five categories, the rest as "Other".
+ *   - **Bars**: two series stacked horizontally, so each bar's full length is what was asked for and
+ *     the split shows how much of it landed. Every category, side by side.
+ * Both read the same `fulfilment` rows and the headline above them is shared, so switching changes
+ * the picture and never the figures.
  */
 const RequestFulfilment = ({ fulfilment, scope }: IRequestFulfilmentProps) => {
     const { data, loading, failed, reload } = fulfilment;
+    const [view, setView] = useState<FulfilmentView>(readView);
+    const rings = useMemo(() => buildFulfilmentRings(data), [data]);
+
+    const changeView = (_event: unknown, next: FulfilmentView | null) => {
+        if (!next) return; // a second click on the selected button: keep the view
+        setView(next);
+        saveView(next);
+    };
 
     const rows = useMemo(
         () => [...data]
@@ -128,7 +166,27 @@ const RequestFulfilment = ({ fulfilment, scope }: IRequestFulfilmentProps) => {
             title="Request Fulfilment"
             subtitle={`This year · ${scope}`}
             icon={<AssignmentTurnedInOutlinedIcon />}
-            helpText="How much of what was requested has actually been delivered, per category. The outstanding portion is demand still waiting to be met."
+            helpText={view === 'rings'
+                ? 'How much of what was requested has actually been delivered, per category. Outer ring: each category\'s share of everything requested; the five largest have their own colour and the rest are grouped as Other. Inner ring: the solid part was delivered, the pale part is still outstanding. The table lists the least delivered first.'
+                : 'How much of what was requested has actually been delivered, per category. The outstanding portion is demand still waiting to be met.'}
+            actions={
+                <ToggleButtonGroup
+                    size="small"
+                    exclusive
+                    value={view}
+                    onChange={changeView}
+                    aria-label="Chart view"
+                    sx={{ '& .MuiToggleButton-root': { px: 1, py: 0.5, color: neutral[500] } }}
+                >
+                    {/* `title`, not a Tooltip: the group hands its selection to its direct children. */}
+                    <ToggleButton value="rings" aria-label="Rings view" title="Rings">
+                        <DonutLargeOutlinedIcon fontSize="small" />
+                    </ToggleButton>
+                    <ToggleButton value="bars" aria-label="Bars view" title="Bars">
+                        <BarChartOutlinedIcon fontSize="small" />
+                    </ToggleButton>
+                </ToggleButtonGroup>
+            }
             loading={loading}
             failed={failed}
             onRetry={reload}
@@ -152,7 +210,8 @@ const RequestFulfilment = ({ fulfilment, scope }: IRequestFulfilmentProps) => {
                     </Typography>
                 </Stack>
 
-                <Stack direction="row" spacing={2}>
+                {/* The bars' two colours need this key; the rings carry their own legend. */}
+                {view === 'bars' && <Stack direction="row" spacing={2}>
                     {legend.map((entry) => (
                         <Stack key={entry.label} direction="row" alignItems="center" spacing={0.75}>
                             <Box sx={{ width: 10, height: 10, borderRadius: '2px', bgcolor: entry.colour }} />
@@ -167,12 +226,16 @@ const RequestFulfilment = ({ fulfilment, scope }: IRequestFulfilmentProps) => {
                             </Typography>
                         </Stack>
                     ))}
-                </Stack>
+                </Stack>}
             </Stack>
 
-            <Box sx={{ height: plotHeight, position: 'relative' }}>
-                <Bar data={chartData} options={options} />
-            </Box>
+            {view === 'rings' ? (
+                <FulfilmentRingsView rings={rings} />
+            ) : (
+                <Box sx={{ height: plotHeight, position: 'relative' }}>
+                    <Bar data={chartData} options={options} />
+                </Box>
+            )}
         </WidgetCard>
     );
 };

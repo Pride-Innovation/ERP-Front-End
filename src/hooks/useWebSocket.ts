@@ -28,9 +28,16 @@ interface UseWebSocketOptions {
     userId: number | string | undefined;
     onMessage: (body: string) => void;
     enabled?: boolean;
+    /** A `/user/queue/...` destination. Notifications by default; the scan relay uses `/user/queue/scans`. */
+    destination?: string;
 }
 
-export const useWebSocket = ({ userId, onMessage, enabled = true }: UseWebSocketOptions) => {
+export const useWebSocket = ({
+    userId,
+    onMessage,
+    enabled = true,
+    destination = '/user/queue/notifications',
+}: UseWebSocketOptions) => {
     const clientRef = useRef<Client | null>(null);
     const subscriptionRef = useRef<StompSubscription | null>(null);
 
@@ -49,7 +56,7 @@ export const useWebSocket = ({ userId, onMessage, enabled = true }: UseWebSocket
                 // NOT include the user id — an explicit-id form registers a destination that
                 // won't match what convertAndSendToUser(...) produces, so pushes never arrive.
                 subscriptionRef.current = client.subscribe(
-                    `/user/queue/notifications`,
+                    destination,
                     (message: IMessage) => {
                         onMessage(message.body);
                     }
@@ -62,7 +69,7 @@ export const useWebSocket = ({ userId, onMessage, enabled = true }: UseWebSocket
 
         client.activate();
         clientRef.current = client;
-    }, [userId, onMessage, enabled]);
+    }, [userId, onMessage, enabled, destination]);
 
     useEffect(() => {
         connect();

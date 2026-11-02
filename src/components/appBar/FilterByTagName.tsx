@@ -1,25 +1,72 @@
-import { Box } from "@mui/material"
+import { Box, Tooltip } from "@mui/material"
 import Paper from '@mui/material/Paper';
 import InputBase from '@mui/material/InputBase';
 import IconButton from '@mui/material/IconButton';
 import SearchIcon from '@mui/icons-material/Search';
+import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner';
 import React from "react";
 import { toast } from "react-toastify";
 import { findAssetByTagNameService } from "./service";
 import { refusal } from "../../core/apis/globalService";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "../../core/routes/routes";
+import { useScanBurst } from "./useScanBurst";
+import { useScannerPairing } from "./scanRelay/useScannerPairing";
+import { fillFocusedField } from "./scanRelay/fillFocusedField";
+import ScannerPairingDialog from "./scanRelay/ScannerPairingDialog";
 
 const FilterByTagName = () => {
     const [searchText, setSearchText] = React.useState<string>("");
     /** Disables the button while a search is in flight, so a slow lookup cannot be queued twice. */
     const [searching, setSearching] = React.useState<boolean>(false);
+    /**
+     * The same flag, readable synchronously. State updates land on the next render, so two searches
+     * started in one tick - a scan's Enter and a click, say - would both read `searching` as false.
+     */
+    const inFlight = React.useRef(false);
+    const inputRef = React.useRef<HTMLInputElement>(null);
     const navigate = useNavigate();
 
-    const handleSearch = async (event: React.MouseEvent<HTMLButtonElement>) => {
-        event.preventDefault();
-        if (!searchText.trim()) {
-            toast.error("Please enter a tag name to search.");
+    /*
+     * A scan fills the box and searches at once - on any page, whether or not the box has the cursor.
+     * Typing still waits for Enter or the button. The box shows the scanned number either way, so the
+     * user can see what was read and search it again.
+     */
+    useScanBurst((code) => {
+        setSearchText(code);
+        void runSearch(code);
+    }, inputRef);
+
+    /*
+     * The handheld PDA, paired with this tab. Its scans arrive over the server rather than as key
+     * presses, so a selected form field cannot catch them on its own: one that has focus is filled
+     * here, the way a scanner plugged into this computer would fill it. Anything else is searched.
+     */
+    const [pairingOpen, setPairingOpen] = React.useState(false);
+    const pairing = useScannerPairing((code) => {
+        if (fillFocusedField(code, inputRef.current)) {
+            toast.info(`Scanned "${code}" into the selected field.`, { autoClose: 2000 });
+            return;
+        }
+        setSearchText(code);
+        void runSearch(code);
+    });
+    const scannerConnected = pairing.state.phase === 'connected';
+
+    // Once the PDA connects, get the dialog out of the way: the toast and the green button say so.
+    React.useEffect(() => {
+        if (scannerConnected) setPairingOpen(false);
+    }, [scannerConnected]);
+
+    const openPairing = () => {
+        setPairingOpen(true);
+        if (pairing.state.phase === 'idle') void pairing.start();
+    };
+
+    const runSearch = async (text: string) => {
+        const tag = text.trim();
+        if (!tag) {
+            toast.error("Please enter or scan an engraved number to search.");
             return;
         }
         /*
@@ -43,11 +90,12 @@ const FilterByTagName = () => {
          * CORS-safelisted, so every request is an OPTIONS followed by the GET. That pair disappears
          * the moment the two are served from one origin — see the firewall notes in CLAUDE.md.)
          */
-        if (searching) return;
+        if (inFlight.current) return;
 
+        inFlight.current = true;
         setSearching(true);
         try {
-            const match = await findAssetByTagNameService(searchText.trim());
+            const match = await findAssetByTagNameService(tag);
 
             if (!match) {
                 /*
@@ -56,7 +104,7 @@ const FilterByTagName = () => {
                  * identically — and must stay that way, or the search would confirm that a tag exists
                  * somewhere the user may not look.
                  */
-                toast.info(`No asset in your branch carries the tag "${searchText.trim()}".`);
+                toast.info(`No asset in your branch carries the tag "${tag}".`);
                 return;
             }
 
@@ -73,7 +121,7 @@ const FilterByTagName = () => {
              */
             if (match.assetTypeId == null) {
                 toast.warning(
-                    `"${match.engravedNumber ?? searchText.trim()}" is not filed under a category, `
+                    `"${match.engravedNumber ?? tag}" is not filed under a category, `
                     + `so its record cannot be opened from here.`,
                 );
                 return;
@@ -83,12 +131,18 @@ const FilterByTagName = () => {
         } catch (error) {
             toast.error(refusal(error, "Could not search for that tag. Please try again."));
         } finally {
+            inFlight.current = false;
             setSearching(false);
         }
     };
 
+    const handleSearch = (event: React.SyntheticEvent) => {
+        event.preventDefault();
+        void runSearch(searchText);
+    };
+
     return (
-        <Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Paper
                 component="form"
                 elevation={0}
@@ -124,17 +178,19 @@ const FilterByTagName = () => {
                             opacity: 1,
                         },
                     }}
-                    placeholder="Search by tag name..."
-                    inputProps={{ 'aria-label': 'search asset by tag name' }}
+                    placeholder="Search or scan a tag..."
+                    inputRef={inputRef}
+                    value={searchText}
+                    inputProps={{ 'aria-label': 'search or scan an asset by engraved number' }}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchText(e.target.value)}
                     onKeyDown={(e) => {
                         if (e.key === 'Enter') {
-                            handleSearch(e as unknown as React.MouseEvent<HTMLButtonElement>);
+                            handleSearch(e);
                         }
                     }}
                 />
                 <IconButton
-                    onClick={(e: React.MouseEvent<HTMLButtonElement>) => handleSearch(e)}
+                    onClick={handleSearch}
                     type="button"
                     size="small"
                     disabled={searching}
@@ -153,6 +209,30 @@ const FilterByTagName = () => {
                     <SearchIcon fontSize="small" />
                 </IconButton>
             </Paper>
+            <Tooltip title={scannerConnected ? 'Handheld scanner connected' : 'Pair a handheld scanner'} arrow>
+                <IconButton
+                    onClick={openPairing}
+                    aria-label={scannerConnected ? 'handheld scanner connected' : 'pair a handheld scanner'}
+                    sx={{
+                        width: 44,
+                        height: 44,
+                        border: 1,
+                        borderColor: scannerConnected ? 'success.main' : 'border.subtle',
+                        bgcolor: scannerConnected ? 'success.light' : 'grey.50',
+                        color: scannerConnected ? 'success.dark' : 'text.secondary',
+                        '&:hover': { bgcolor: scannerConnected ? 'success.light' : 'grey.100' },
+                    }}
+                >
+                    <QrCodeScannerIcon fontSize="small" />
+                </IconButton>
+            </Tooltip>
+            <ScannerPairingDialog
+                open={pairingOpen}
+                state={pairing.state}
+                onClose={() => setPairingOpen(false)}
+                onNewCode={() => void pairing.start()}
+                onDisconnect={() => void pairing.disconnect()}
+            />
         </Box>
     );
 };

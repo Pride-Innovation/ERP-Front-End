@@ -6,7 +6,7 @@ Two repos, worked on together:
 - **Backend** — `ERP-Back-End` (Spring Boot 3.2, Hibernate 6.3 + Envers, Flyway, MySQL)
 
 Verify with `npx tsc --noEmit -p tsconfig.json`, `npx eslint src/... --ext .ts,.tsx`, and
-`./mvnw.cmd -o test` — **601 backend tests** and **186 frontend** at time of writing, all green.
+`./mvnw.cmd -o test` — **619 backend tests** and **213 frontend** at time of writing, all green.
 Run the frontend suite as `CI=true npx react-scripts test --watchAll=false`; plain `npx jest` fails
 on a Babel transform, because the config that makes it work is CRA's.
 
@@ -578,6 +578,29 @@ Position → Trend → Records** for everyone, so the page has the same shape wh
 | Stocking Trend | trend | `DASH_VIEW_STOCK` |
 | Request Fulfilment | trend | `DASH_VIEW_REQUESTS` |
 | Recent Activity | records | assets or requests |
+
+**Request Fulfilment has two views** — **Rings** (default) and **Bars** — switched in the card
+header, each viewer's choice remembered in their browser (`localStorage`, try/caught; unreadable means
+the default). Both read the same `/current-year-summary` rows and share the headline, so switching
+changes the picture, never the figures. The rings (`FulfilmentRingsView`, built by the pure
+`buildFulfilmentRings`): outer ring each category's share of requests, inner ring delivered (solid)
+vs outstanding (60% tint) inside each slice, fed **raw counts** so the two rings line up by
+construction. **The one place a category owns a hue** — capped at the five largest, the rest folded
+into a grey "Other" whose legend line names its members, so the twelve-category rule in
+`categories.ts` still holds. Colours are the validated `FULFILMENT_RING_COLOURS` (see `chartTheme.ts`
+for the validator figures; the obvious greys failed beside magenta and blue). Slices under 6% carry no
+label; the legend is the full table — one row per category (share, delivered / requested, a bar in the
+slice's colour over its tint, % delivered) — and lists the least delivered first, the question the
+bars answer by length.
+
+**Laid out by the card's width, not the window's (CSS container queries).** It first switched to
+side-by-side on MUI's `md` breakpoint, which is the *viewport*: on a small laptop the window passed
+900px while the card was ~565px, the fixed 260px ring left the legend ~100px, every word wrapped and the
+card grew to three times its neighbour. Now: content ≥ 560px → ring beside table; narrower → stacked;
+table < 380px → bars dropped, figures kept. Checked rendered at 360 / 565 / 635px card widths.
+*Any widget whose layout depends on its own width should use a container query* — the dashboard grid,
+the sidebar and the neighbouring card all change a card's width without changing the window. `title`, not `Tooltip`, on the toggle buttons — a Tooltip between `ToggleButtonGroup` and
+its buttons breaks the selection.
 
 A **branch selector** appears only at ALL scope and moves the whole page at once (three widgets
 wanted a branch filter; per-widget controls could disagree with each other).
@@ -1651,6 +1674,81 @@ carries **no `@ResponseStatus`** and returns a bare `{"message": …}` map, so i
 browser would have read that map as a match with no id. A 204 cannot be mistaken for anything, needs
 no `errorCode` to keep the interceptor quiet, and does not make the ordinary case travel as an
 exception.
+
+### Scanning a label — the handheld PDA, from any page
+
+The bank's scanners are **Android PDAs with a built-in scan engine**. The engine decodes the symbol
+itself (QR, Code 128, Code 39, … — whatever the device is set to read) and hands the browser **plain
+text**, so the page never sees a barcode and needs no decoding library or camera. The labels encode
+the engraved number alone.
+
+In the scanner's **keyboard (keystroke) output mode** that text arrives as key presses far faster than
+anybody types, ending in Enter. `ScanBurstDetector` (`appBar/scannedTag.ts`) tells the two apart: at
+least 4 printable keys, each within 50 ms of the last, closed by Enter or Tab just as fast; Shift
+(pressed for capitals) passes through, any other key abandons the run. `useScanBurst` listens on
+`window` in the **capture** phase, so a scan works whether or not the search box has the cursor: it
+fills the box, searches at once, and swallows the closing Enter — otherwise it would also submit
+whatever had focus, or start a second search in the box. **A scan into any other field is left to that
+field** (the asset form's engraved number, the issuance picker), which is why those already work.
+Typed searches still wait for Enter or the button. `parseScannedTag` strips an AIM symbology prefix
+(`]Q1`), control characters and spaces, nothing else.
+
+**Device setting this depends on:** output mode *keyboard / keystroke emulation*, suffix *Enter*. In
+the other common mode, *direct fill*, the engine writes into the focused field without key events —
+then a scan works only with the cursor in the search box (its Enter suffix still searches), and from
+anywhere else nothing happens.
+
+### The PDA scans, the laptop searches — the scan relay
+
+What the bank actually does: labels on laptops and chairs, a person signed in **on their laptop**,
+and a PDA in their hand. The PDA's engine types into **its own** browser, so the scan has to be
+carried across. It goes through the server (`scanrelay/ScanRelayService` + `ScanRelayController`):
+
+1. The laptop's **scanner button** (beside the search box) asks `POST /scan-pairings` for a code:
+   8 characters, no 0/O/1/I/L, **single use, 5 minutes**, shown as a QR (`ERPPAIR:<code>`) and as
+   text (`K7Q4-M2XA`).
+2. The PDA opens **`/scan`** (public route, no login) and scans that QR. `POST /scan-relay/connect`
+   spends the code and returns a **256-bit relay token**, valid 8 hours. Reading the code off the
+   screen afterwards buys nothing.
+3. Every label scanned is `POST /scan-relay/scans {token, code}` → pushed to the owner on
+   `/user/queue/scans` (the notifications broker, keyed by user id), carrying the pairing id so the
+   user's *other* tabs ignore it. The laptop then **fills the selected form field** if one has focus
+   (`fillFocusedField` — through the prototype's value setter plus an `input` event, or React-controlled
+   inputs never see it), **otherwise searches**.
+
+**Why the PDA needs no login, and why that is safe:** the token authorises exactly one thing — text
+into one browser's search box. The search runs *on the laptop*, under the laptop user's login and
+scope, so the relay widens nobody's reach. PDAs are often shared, and a login per pick-up would be
+the first thing people work around.
+
+- **Ends** on: Disconnect on the laptop, Unpair on the PDA (`/scan-relay/disconnect`, which also
+  tells the laptop), the owner signing out (`LogoutService` → `endAllFor`, via an `ObjectProvider`
+  to keep the security chain's construction apart from the broker's), or 8 hours. The PDA learns on
+  its next scan: **404 `PAIRING_ENDED`**, returned directly because `NotFoundException` answers 200
+  here. An empty or >128-character scan is **400 `INVALID_SCAN`**. Both carry an `errorCode`, so the
+  interceptor leaves them to the page.
+- **The laptop also polls the pairing's status every 3 s while the code is showing**: the socket opens
+  when the code appears, and a quick PDA could connect before the subscription lands. One
+  `markConnected` announces it once, whichever path reports it.
+- **"Sent" on the PDA means the owner has a browser connected** (`SimpUserRegistry`), not a reply from
+  that tab — enough to tell the person holding the PDA when nobody is listening.
+- **Held in memory**, scans never stored. Right for the single server; several behind a balancer would
+  need the maps in the database. A restart ends every pairing, and the PDA says so on its next scan.
+- `/api/v1/scan-relay/**` is `permitAll`; `/scan-pairings` is authenticated-only and listed in
+  `EndpointGuardCoverageTest.DELIBERATELY_AUTHENTICATED_ONLY`. `ScanRelayServiceTest` (single use,
+  expiry, owner-only end/read, sign-out, per-user cap of 5, cleaning) and `ScanRelayEndpointTest`
+  (the PDA reaches its calls with no login, the laptop's need one, a whole pairing end to end with the
+  disconnect sent as POST + override header).
+- **Testing on a PC in development:** `adb reverse tcp:3000 tcp:3000` and `tcp:7777` over USB, then
+  `http://localhost:3000/scan` on the PDA — no `.env` or `FRONT_END_URL` change needed.
+
+**The search now asks the asset page's own guard.** `withinTagSearchReach` used to restate the rule
+(where it sits, or the branch it was sent from) and fell behind when the guard gained the
+*person who handed it over* limb — so an officer at SELF scanning their own laptop on the repair bench
+was told no such tag existed while My Items listed it and the page opened. It now calls
+`requireAssetInScope(asset, VIEW)` and turns a refusal into "not in reach", so *found* and *opens* are
+one fact. `MyItemsTest` asserts the search finds the sender's asset while away and not once home;
+`AwayFromBranchReadTest` pins the delegation.
 
 ### The router had no error page and no catch-all
 
@@ -3775,7 +3873,14 @@ item inside the transaction. On its first run the guard refused `PBL-2020-COAT00
 Available for Issuance while sitting on stuck movement #3: one of the known stale rows. Checked that
 the tests can fail: removing each of the four rules fails exactly its own case.
 
-*Noted, not changed:* `RequestService` hardcodes the Rejected status as id `2L` (trap #4).
+*Since fixed:* `RequestService` hardcoded Rejected as `2L` and Receipt Acknowledged as `7L` (trap #4),
+both in the dashboard's Request Fulfilment summary. **Id 7 is `inMaintenance`** on the live database
+(Receipt Acknowledged is 8), so the widget read **"0% of 388 requested items delivered"** while 62
+requests had been acknowledged that year — 261 items. Both are resolved by code now
+(`statusIdOrNone`, which matches nothing rather than failing if a code is unseeded).
+`RequestFulfilmentSummaryTest` computes requested and delivered from the request lines and their status
+**code**, and fails `expected: 261 but was: 0` with the literal restored; a source check refuses any
+status id literal in `RequestService`.
 
 ### Stock depletion, Phase 2: store-restock requests (V30)
 

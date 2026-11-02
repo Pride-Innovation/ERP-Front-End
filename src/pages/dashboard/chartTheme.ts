@@ -57,6 +57,49 @@ export const FULFILMENT_COLOURS = {
 } as const;
 
 /**
+ * Request Fulfilment's ring view: the five largest categories, then "Other".
+ *
+ * The one place a category carries a hue, against the rule in `categories.ts`, and only because the
+ * count is capped: five categorical slots plus an achromatic "Other", never more, whatever is
+ * configured in Settings. Everything past the fifth folds into "Other".
+ *
+ * Validated against the white card (`validate_palette.js --mode light --surface #ffffff`):
+ *   - the five hues, in this order: all adjacent pairs pass (worst CVD ΔE 9.1, normal 19.6);
+ *   - "Other" between slot 5 and slot 1, as a ring wraps: CVD ΔE 21.1, normal 21.6. Its grey is
+ *     the warm `#57534E` because both lighter greys tried failed - `#94A3B8` (the disposed grey)
+ *     sat at CVD 4.3 beside magenta, `#64748B` / `#6B7280` below the normal-vision floor beside blue;
+ *   - each hue against its outstanding tint (`ringTint`, 60% toward white): worst CVD ΔE 14.5,
+ *     normal 15.2 (yellow).
+ * Yellow, aqua and magenta, and every tint, sit below 3:1 on white, so the ring always ships with
+ * the 2px surface gap, slice labels and a legend carrying every figure - never bare.
+ */
+export const FULFILMENT_RING_COLOURS: ReadonlyArray<string> = [
+    '#2a78d6', // blue
+    '#eb6834', // orange
+    '#1baf7a', // aqua
+    '#eda100', // yellow
+    '#e87ba4', // magenta
+];
+
+/** "Other" in the ring view - grey, because it is a remainder, not a category. */
+export const FULFILMENT_RING_OTHER = '#57534E';
+
+/** The outstanding share of a ring slice: the slice's own hue, 60% toward white. */
+export const ringTint = (hex: string, toWhite = 0.6): string => {
+    const channel = (offset: number) => {
+        const value = parseInt(hex.slice(offset, offset + 2), 16);
+        return Math.round(value + (255 - value) * toWhite).toString(16).padStart(2, '0');
+    };
+    return `#${channel(1)}${channel(3)}${channel(5)}`;
+};
+
+/** Ink for a label sitting on a fill: dark on yellow and on every tint, white on the rest. */
+export const labelInkOn = (fill: string): string =>
+    fill === '#eda100' || !FULFILMENT_RING_COLOURS.concat(FULFILMENT_RING_OTHER).includes(fill)
+        ? neutral[900]
+        : '#ffffff';
+
+/**
  * Sequential teal ramp for magnitude — the heatmap's cell shading.
  *
  * One hue, light→dark, so more-is-darker is the only thing colour says here. Validated as an
