@@ -6,7 +6,7 @@ Two repos, worked on together:
 - **Backend** — `ERP-Back-End` (Spring Boot 3.2, Hibernate 6.3 + Envers, Flyway, MySQL)
 
 Verify with `npx tsc --noEmit -p tsconfig.json`, `npx eslint src/... --ext .ts,.tsx`, and
-`./mvnw.cmd -o test` — **619 backend tests** and **213 frontend** at time of writing, all green.
+`./mvnw.cmd -o test` — **622 backend tests** and **213 frontend** at time of writing, all green.
 Run the frontend suite as `CI=true npx react-scripts test --watchAll=false`; plain `npx jest` fails
 on a Babel transform, because the config that makes it work is CRA's.
 
@@ -2806,6 +2806,38 @@ the request one also names a routed unit. "Approval Date" appeared whenever the 
 "approved", which includes every intermediate tier; it was `lastModified` all along and is headed
 **Last Updated**. The request cards count by request on the two terminal codes — In Progress,
 Completed (`receiptAcknowledged`), Rejected — where "Approved" had counted anything past one tier.
+
+### Stock Management tab — four faults, one of them a filter that could only empty the table
+
+Reported as "the filters don't work" over an empty "This Month" + Computers. **That result was
+correct** — on 2 November no order had been created that month — but reading the tab turned up:
+
+- **Department could never match.** The dropdown lists the bank's departments; neither an order nor a
+  commodity records one, so the column read "—" on every row and any choice emptied the table. Filter
+  and column removed. A department on stock orders would be a new field, not a fix.
+- **"Stocked By" and "UOM" were "—" on every row.** The page read `createdByName` (never sent — the
+  DAO carried only the creator's id) and `commodity.unitOfMeasure` (no such field; the unit is
+  `groupName`). `StockService.nameCreators` now fills `StockDAO.createdByName` with one
+  `findAllById` per page.
+- **The Date column and the Period filter used different dates.** The column shows order date else
+  created date; the filter used created date (15 of 48 orders have no order date). `GET /stocks` gained
+  **`orderedFrom`/`orderedTo`** — `COALESCE(orderDate, createDate)` — which the report sends.
+  **`startDate`/`endDate` still mean the created date**, because the inventory page's range is labelled
+  and meant that way; changing their meaning would have moved that page's results silently.
+- **Category ran in the browser after the 1000-order cap.** It is `assetTypeId` on `GET /stocks` now,
+  an **EXISTS** over the order's lines (a join would repeat an order per matching line and inflate the
+  count). A row is a line, so the browser then trims a matched order's lines of other categories —
+  it never decides which orders appear.
+
+Also: `StockSearchDao` had **no `id` tie-break** (trap #3, the fourth listing found with it); the
+"Awaiting Delivery" card counted lines and now counts orders; the tab opens on **This Year**.
+`StockReportFilterTest` computes each expectation from the entities — category = orders with a line in
+it, each once, count agreeing; period = order date else created date; the creator's name — and none of
+its cases skipped on live data.
+
+**Still not server-paged, by design:** the tab reads up to 1000 orders and pages/sorts in the browser,
+with the truncation notice when the cap bites (48 orders today). Rows are lines while the server pages
+orders, so true server paging would split orders across pages.
 
 ## Export columns are configurable — done
 
