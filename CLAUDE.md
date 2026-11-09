@@ -3102,6 +3102,110 @@ and leaves one table (`flyway_schema_history`) holding one failed row. Either
 `DELETE FROM flyway_schema_history WHERE success = 0;` or dropping and recreating the database clears
 it — both were measured, and both then build all 105 tables.
 
+## Titles follow the May 2026 HR policy organograms
+
+`titles.json` is the HR policy's Appendix B (figures 1–18) as one tree: 200 titles, **one place per
+name** (the user import resolves a title by name). Heads hang under the MD or the ED as figures 1 and
+2 draw them; Internal Audit and Compliance under the Board. Branch titles are one shared set under
+Branch Manager, Head Office titles everything else — `Title` carries no department, by decision, and
+department stays on the user. Where the grade table and an organogram name the same job differently,
+the organogram name is kept (e.g. Manager CBS & Business Applications is "Manager Custom
+Applications").
+
+**`TitleSeeder` reconciles by name and moves only once.** The old lookup was name + short code +
+parent, so moving a title in the file created a second row for it and for everything beneath it,
+while the old rows kept their holders and their old reporting line — which is what routes SUPERVISOR
+approvals. Now a title existing by name is reused where it stands, and moving titles to the file's
+parents is the one-time step `TITLE_STRUCTURE_HR_POLICY_MAY_2026`, which also deletes duplicate rows
+nobody holds or acts in. **A later restructuring of the file needs a new marker**, or existing
+databases never see it; re-running moves on every startup would undo a move made in Settings.
+
+*Not migrated:* holders of titles dropped from the file (Head Cashier, Relationship Officer
+Group/Comm Banking) keep them — the rows stay, outside the tree's new shape.
+
+## Sign-in goes through the bank's LDAP Authentication API
+
+**AD checks the password; everything else stays here.** `POST /auth/login` still takes the account's
+email, finds the account, checks its own state (disabled / blocked / unverified — *before* AD is asked,
+so a dead account does not spend its owner's shared AD allowance), then `DirectoryAuthClient` calls
+`POST {LDAP_AUTH_BASE_URL}/api/auth/authenticate` with `X-Client-Id` / `X-Api-Key`, and on
+`authenticated: true` the application issues its own JWT exactly as before. Roles, permissions, scope
+and refresh are untouched; the AD groups the API returns are ignored.
+
+- **The AD username is the email's local part without trailing digits** (`DirectoryUsername`, the same
+  rule `Email.cleanRecipient` uses for mail), so `sodong12@` signs in with `sodong`'s password — one
+  person, several test accounts. Measured on the November 2026 AD export: **no real person's address
+  ends in digits**, only Exchange system mailboxes and one meeting-room account. If AD ever issues
+  `jdoe2`, this rule signs that account in as `jdoe`; the returned username must equal the one sent or
+  the sign-in is refused (`LOGIN_REFUSED_IDENTITY_MISMATCH`, CRITICAL). The returned *email* is
+  deliberately not compared — AD emails and usernames differ legitimately, and both sides lose their
+  digits the same way, so it could only refuse real people.
+- **Retry once, only for `RATE_LIMITED` / `SERVICE_UNAVAILABLE`.** Never a refused credential, and
+  never a timeout: the API may have checked the password before the answer was lost, and a repeat
+  would count twice toward the five-failures-in-fifteen-minutes throttle every bank system shares.
+- **No local failed-attempt counter or auto-block in LDAP mode** — AD throttles, and our block would
+  fire sooner and separately for each test account sharing one AD identity. Failures are audited.
+- **Statuses, all firewall-admitted:** wrong password or unknown email → 401 `INVALID_CREDENTIALS` (one
+  message for both — an unknown address used to answer "User not found"); `USER_THROTTLED` → 401;
+  `VALIDATION_ERROR` → 400; service down, rate-limited, or our own client credentials refused → 440
+  `SIGN_IN_UNAVAILABLE` (the last also CRITICAL in the audit). Fail closed throughout.
+- **Passwords are never logged.** `org.springframework.web` runs at DEBUG and prints request bodies
+  through `toString`, so `AuthenticationRequest` and `ChangePasswordDTO` were writing passwords to the
+  log; both exclude them now, and the client's request record redacts its own.
+- **Password actions are refused in LDAP mode** (change, reset request, reset →
+  400 `PASSWORD_MANAGED_BY_AD`), and the pages hide them via public `GET /auth/mode`. See below.
+- `AUTH_MODE` defaults to **LDAP** (an unset environment fails closed); `LOCAL` checks the stored
+  hashes and is for development machines without API access. An `http://` base URL refuses to start.
+  Variables: `AUTH_MODE`, `LDAP_AUTH_BASE_URL`, `LDAP_AUTH_CLIENT_ID`, `LDAP_AUTH_API_KEY`,
+  `LDAP_AUTH_CONNECT_TIMEOUT_MS` (5000), `LDAP_AUTH_READ_TIMEOUT_MS` (10000). One registration per
+  environment.
+
+### Password reset and change password in LDAP mode
+
+**Refused by the server, hidden by the pages — both, deliberately.** Hiding alone is not enough: a
+local change would *succeed*, write a hash nobody signs in with, and tell the person their password
+had changed while their AD password had not. So all three actions call one guard,
+`DirectoryAuthSettings.requireLocalPasswords()`, which in LDAP mode throws a `SignInException` →
+**400 `PASSWORD_MANAGED_BY_AD`**: *"Passwords are managed in Active Directory. Please contact the IT
+Service Desk to change or reset yours."*
+
+| Action | Endpoint | Guard placement, and why there |
+|---|---|---|
+| Change password | `POST users/change-password` | first line of `UserService.changePassword`, before the old password is compared — the refusal reveals nothing about the stored hash |
+| Request a reset link | `POST request-password-reset` | first line of `PasswordResetService.requestPasswordReset`, before the lookup — no email is sent and no "unknown address" audit row is written |
+| Set a password from a link | `POST reset-password` | first line of `PasswordResetService.resetPassword`, before `PasswordPolicy` and the token — a link issued before the switch cannot change the stored hash |
+
+**The pages ask `GET /auth/mode`** (public, `AUTH_MODE_ROUTE` in the `permitAll` block; answers
+`{mode, passwordsManagedByDirectory}` and nothing about any account) through `useAuthMode`, which asks
+once per page load and caches it:
+
+- **Login** — "Forgot password?" only in `LOCAL`; in LDAP the subtitle says to use the Windows
+  (network) password.
+- **Profile** — `UserHeader.onChangePassword` is optional and the button renders only when it is
+  passed, which `profile/index.tsx` does only in `LOCAL`.
+- **`/forgot-password`** — reached by an old link or a bookmark; in LDAP it shows "Passwords are
+  managed in Active Directory … contact the IT Service Desk" instead of the form.
+
+**Unknown hides.** While the mode is loading, or if it cannot be read, every password action stays
+hidden — briefly hiding a working action is the better mistake than offering one the server refuses.
+
+**`LOCAL` is unchanged:** reset email and link, `PasswordPolicy`, the old-password check. The stored
+hashes are kept, so switching back works. `UserAccessRulesTest.bothPasswordPathsEnforceThePolicy`
+still holds.
+
+*Not verified:* what the change-password dialog shows if it does receive `PASSWORD_MANAGED_BY_AD`
+(only reachable from a page left open across the switch, since the button is hidden). The interceptor
+leaves `errorCode` bodies to the caller, so the dialog may show nothing.
+
+**A refused login used to look like an expired session.** It is a 401, and the response interceptor
+sent every 401 through the refresh branch: no refresh token on the login page, so it cleared the
+session, toasted "Your session has expired" and reloaded — the login page's own blocked / locked /
+wrong-password messages could never show. `isSignInCall` exempts `auth/login`.
+
+Tests use a mock server, never the real API (five failures throttle a real employee everywhere):
+`DirectoryAuthClientTest`, `DirectorySignInTest`, `DirectoryUsernameTest`, `axiosSignIn.test.ts`.
+Verified non-vacuous by making a refused password retryable and by switching off the identity check.
+
 ## Still open
 
 **1. Permissions gating across the app — front-end sweep done.** Row menus are now filtered

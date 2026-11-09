@@ -24,6 +24,7 @@ import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
 import { Link } from 'react-router-dom';
 import { requestPasswordResetService } from './service';
 import { AuthCard, AuthFooter, AuthHeading, AuthLogo } from './AuthCard';
+import { useAuthMode } from './useAuthMode';
 
 const PRIMARY_COLOR = '#08796C';
 
@@ -31,6 +32,7 @@ const PasswordReset = () => {
     const [loggingIn, setLoggingIn] = useState<boolean>(false);
     const [showPassword, setShowPassword] = useState<boolean>(false);
     const [emailSent, setEmailSent] = useState<boolean>(false);
+    const authMode = useAuthMode();
 
     const defaultUser: IAuthentication = { email: "", password: "reset-password" };
 
@@ -73,7 +75,13 @@ const PasswordReset = () => {
             <AuthCard>
                 <AuthLogo />
 
-                {emailSent ? (
+                {authMode === 'LDAP' ? (
+                    /* ── AD owns the password: reached by an old link or a bookmark ── */
+                    <AuthHeading
+                        title="Passwords are managed in Active Directory"
+                        subtitle="Sign in with your Windows (network) password. To change or reset it, please contact the IT Service Desk."
+                    />
+                ) : authMode === undefined ? null : emailSent ? (
                     /* ── Success state ─────────────────────────────────── */
                     <>
                         <Box sx={{ textAlign: 'center', pt: 1 }}>

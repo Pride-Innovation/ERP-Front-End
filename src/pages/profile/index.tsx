@@ -34,6 +34,7 @@ import { IUserAxiosResponse } from "../users/interface";
 import { toast } from "react-toastify";
 import { removeUserProfileImageService, updateUserProfileImageService } from "./service";
 import { refusal } from "../../core/apis/globalService";
+import { passwordsAreLocal, useAuthMode } from "../authentication/useAuthMode";
 
 
 const Profile = () => {
@@ -44,6 +45,7 @@ const Profile = () => {
     const { handleClose, modalState, open, handleOptionClicked } = AppBarUtills();
     const { getCurrentUser } = RoutesUtills();
     const [image, setImage] = useState<string>('');
+    const authMode = useAuthMode();
     /** Set when the profile could not be read — a refusal, or a record that is not there. */
     const [loadError, setLoadError] = useState<string | null>(null);
 
@@ -230,7 +232,9 @@ const Profile = () => {
                 isCurrentUser={isCurrentUser}
                 onUpdateImage={() => handleOptionClicked(modalStates.image)}
                 onUpdateAvailability={() => handleOptionClicked(modalStates.leave)}
-                onChangePassword={() => handleOptionClicked(modalStates.password)}
+                onChangePassword={passwordsAreLocal(authMode)
+                    ? () => handleOptionClicked(modalStates.password)
+                    : undefined}
             />
 
             {/* User information cards */}
