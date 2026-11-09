@@ -5,8 +5,9 @@ import PendingActionsOutlinedIcon from '@mui/icons-material/PendingActionsOutlin
 import ReportShell, { ReportShellFilters } from '../ReportShell';
 import ReportSummaryCards from '../ReportSummaryCards';
 import ReportDataTable, { ReportColumn } from '../ReportDataTable';
-import useReportData, { REPORT_PAGE_SIZE, combineNotices, truncationNotice } from '../useReportData';
+import useReportData, { REPORT_PAGE_SIZE, combineNotices, truncationNotice, HOLDER_DEPARTMENT_NOTE } from '../useReportData';
 import { fetchRowsService } from '../../../core/apis/globalService';
+import useAccessScope from '../../../core/permissions/useAccessScope';
 
 const ACCENT = '#DC2626';
 
@@ -29,7 +30,9 @@ const COLUMNS: ReportColumn<DisposalRow>[] = [
     { id: 'assetTag', label: 'Tag', minWidth: 90 },
     { id: 'assetName', label: 'Asset Name', minWidth: 180 },
     { id: 'category', label: 'Category', minWidth: 130 },
-    { id: 'branch', label: 'Branch', minWidth: 120 },
+    // Whose write-off it was. Not the asset's branch: every disposed asset ends up in the Head Office
+    // Disposal store, so that column read "Head Office" for all of them.
+    { id: 'branch', label: 'Disposed From', minWidth: 130 },
     { id: 'department', label: 'Department', minWidth: 110 },
     { id: 'disposalDate', label: 'Disposal Date', minWidth: 110 },
     { id: 'disposalMethod', label: 'Disposal Method', minWidth: 140 },
@@ -38,17 +41,20 @@ const COLUMNS: ReportColumn<DisposalRow>[] = [
     { id: 'netBookValueAtDisposal', label: 'NBV at Disposal', minWidth: 130, align: 'right' },
 ];
 
+
 const fmtDate = (v?: string | null) =>
     (v ? new Date(v).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—');
 
 const toNumber = (v?: string | null) => Number(String(v ?? '').replace(/[^0-9.-]/g, '')) || 0;
 
-const toRow = (a: any): DisposalRow => ({
+export const toRow = (a: any): DisposalRow => ({
     id: a.id,
     assetTag: a.engravedNumber ?? '—',
     assetName: a.assetName ?? '—',
     category: a.assetType?.name ?? '—',
-    branch: a.branch?.name ?? '—',
+    // `disposedFromBranchName` is the server's answer (the branch on the disposal); the asset's own
+    // branch only for a backend that does not send it yet.
+    branch: a.disposedFromBranchName ?? a.branch?.name ?? '—',
     department: a.assignedTo?.department?.name ?? '—',
     disposalDate: fmtDate(a.disposalDate),
     /*
@@ -66,6 +72,14 @@ const toRow = (a: any): DisposalRow => ({
 });
 
 const DisposalReport = () => {
+    /*
+     * A write-off belongs to the branch it was disposed from, for good: Head Office sees every one and
+     * where each came from, a branch sees its own. Branch and Department are Head Office's filters -
+     * below ALL the server narrows to the caller's branch, and the department is the former holder's.
+     */
+    const { scopeFor } = useAccessScope();
+    const seesEveryBranch = scopeFor('ASSETS', 'VIEW') === 'ALL';
+
     const { rows, notice, loading, error, applyFilters, refresh } = useReportData<DisposalRow>(
         async (f: ReportShellFilters) => {
             const res = (await fetchRowsService({
@@ -76,38 +90,25 @@ const DisposalReport = () => {
                     // The one filter that defines this report: written-off assets only.
                     disposed: true,
                     assetTypeId: f.categoryId,
-                    location: f.branch,
-                    startDate: f.dateFrom,
-                    endDate: f.dateTo,
+                    // Scope and the Branch filter by whose write-off it was, not where it stands.
+                    byDisposingBranch: true,
+                    ...(seesEveryBranch && f.branchId ? { branchId: f.branchId } : {}),
+                    ...(seesEveryBranch && f.departmentId ? { departmentId: f.departmentId } : {}),
+                    /*
+                     * When it was written off. `startDate`/`endDate` match the asset's creation date,
+                     * so "disposed this month" listed disposed assets *created* this month.
+                     */
+                    disposedFrom: f.dateFrom,
+                    disposedTo: f.dateTo,
                 },
             })) as any;
 
             if (res?.status !== 200) throw new Error('disposals');
-            const mapped: DisposalRow[] = (res.data?.content ?? []).map(toRow);
-            /*
-             * An asset has no department. This one is the **holder's** — `assignedTo.department` —
-             * so the filter answers "assets currently held by someone in that department", which is
-             * a fair question but a different one from what the bare label suggests.
-             *
-             * It matters because of how much it hides. Measured on live data: **234 of 252 assets
-             * have no holder or no department recorded**, so applying this quietly removes 93% of
-             * the estate. An empty-looking register reads as "there are none", which is why the
-             * count of what was set aside is reported rather than left to be noticed.
-             */
-            const withoutDepartment = mapped.filter((r) => r.department === '—').length;
-            const narrowed = f.department
-                ? mapped.filter((r) => r.department === f.department)
-                : mapped;
-
             return {
-                rows: narrowed,
+                rows: (res.data?.content ?? []).map(toRow),
                 notice: combineNotices(
                     truncationNotice(res, 'disposals'),
-                    f.department && withoutDepartment > 0
-                        ? `Department here means the holder's: ${withoutDepartment} of `
-                          + `${mapped.length} records have no holder or no department recorded and `
-                          + 'are not shown.'
-                        : undefined,
+                    seesEveryBranch && f.departmentId ? HOLDER_DEPARTMENT_NOTE : undefined,
                 ),
             };
         },
@@ -135,7 +136,9 @@ const DisposalReport = () => {
             title="Disposal Report"
             subtitle="Assets written off, when they went and what they were still worth"
             accentColor={ACCENT}
-            filterFields={['dateRange', 'branch', 'department', 'category']}
+            filterFields={seesEveryBranch
+                ? ['dateRange', 'branch', 'department', 'category']
+                : ['dateRange', 'category']}
             onApplyFilters={applyFilters}
             onRefresh={refresh}
             notice={notice}

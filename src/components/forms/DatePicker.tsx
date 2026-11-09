@@ -41,12 +41,12 @@ const datePickerSx = {
     },
     '& .MuiOutlinedInput-input': {
         padding: '13px 14px',
-        fontSize: '0.875rem',
+        fontSize: '0.9375rem',
         lineHeight: 1.5,
     },
     '& .MuiInputLabel-root': {
         color: 'rgba(0, 0, 0, 0.45)',
-        fontSize: '0.875rem',
+        fontSize: '0.9375rem',
         '&.Mui-focused': { color: PRIMARY_COLOR },
         '&.Mui-error': { color: '#D32F2F' },
     },
@@ -98,7 +98,7 @@ const DatePickerComponent = ({ label, field, error }: IDatePickerComponent) => {
                             },
                             '& .MuiPickersDay-root': {
                                 borderRadius: '8px',
-                                fontSize: '0.8125rem',
+                                fontSize: '0.875rem',
                                 '&:hover': { backgroundColor: alpha(PRIMARY_COLOR, 0.08) },
                                 '&.Mui-selected': {
                                     backgroundColor: PRIMARY_COLOR,
@@ -115,7 +115,7 @@ const DatePickerComponent = ({ label, field, error }: IDatePickerComponent) => {
                             '& .MuiDayCalendar-weekDayLabel': {
                                 color: alpha(PRIMARY_COLOR, 0.7),
                                 fontWeight: 600,
-                                fontSize: '0.75rem',
+                                fontSize: '0.8rem',
                             },
                         },
                     },

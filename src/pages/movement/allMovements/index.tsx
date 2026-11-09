@@ -308,7 +308,7 @@ const AllMovements = () => {
                         px: 1.5, mt: 1.5, borderBottom: `1px solid ${border.subtle}`,
                         minHeight: 40,
                         '& .MuiTab-root': {
-                            fontSize: '0.75rem', fontWeight: 600, minWidth: 80, minHeight: 40,
+                            fontSize: '0.8rem', fontWeight: 600, minWidth: 80, minHeight: 40,
                             textTransform: 'none', color: neutral[500], py: 0,
                         },
                         '& .MuiTabs-indicator': { bgcolor: brand[500], height: 2.5, borderRadius: '2px 2px 0 0' },
@@ -331,7 +331,7 @@ const AllMovements = () => {
                                             sx={{
                                                 minWidth: 18, px: 0.5, height: 18, borderRadius: '9px',
                                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                fontSize: '0.62rem', fontWeight: 700,
+                                                fontSize: '0.8rem', fontWeight: 700,
                                                 bgcolor: selected ? alpha(brand[500], 0.12) : neutral[100],
                                                 color: selected ? brand[700] : neutral[500],
                                             }}

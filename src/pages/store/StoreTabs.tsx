@@ -48,7 +48,7 @@ const StoreTabs = () => {
                     <InventoryOutlinedIcon sx={{ fontSize: 17, color: theme.palette.primary.main }} />
                 </Box>
                 <Box>
-                    <Typography variant="caption" sx={{ color: 'text.secondary', textTransform: 'uppercase', letterSpacing: '0.07em', fontSize: '0.67rem', display: 'block' }}>
+                    <Typography variant="caption" sx={{ color: 'text.secondary', textTransform: 'uppercase', letterSpacing: '0.07em', fontSize: '0.8rem', display: 'block' }}>
                         Stores
                     </Typography>
                     <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'text.primary', lineHeight: 1.2 }}>
@@ -75,7 +75,7 @@ const StoreTabs = () => {
                         minWidth: 'unset',
                         px: 1.75,
                         py: 0.5,
-                        fontSize: '0.8rem',
+                        fontSize: '0.875rem',
                         fontWeight: 500,
                         textTransform: 'none',
                         color: 'text.secondary',

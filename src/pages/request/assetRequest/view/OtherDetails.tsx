@@ -46,7 +46,7 @@ const SectionHeader = ({ title, icon }: { title: string; icon: React.ReactNode }
         >
             {icon}
         </Box>
-        <Typography variant="caption" fontWeight={700} color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: '0.6px', fontSize: '0.7rem' }}>
+        <Typography variant="caption" fontWeight={700} color="text.secondary" sx={{ textTransform: 'uppercase', letterSpacing: '0.6px', fontSize: '0.8rem' }}>
             {title}
         </Typography>
     </Box>
@@ -80,7 +80,7 @@ const InfoRow = ({
             {icon}
         </Box>
         <Box sx={{ minWidth: 0, flex: 1 }}>
-            <Typography variant="caption" color="text.disabled" sx={{ display: 'block', lineHeight: 1.2, mb: 0.25, fontSize: '0.68rem' }}>
+            <Typography variant="caption" color="text.disabled" sx={{ display: 'block', lineHeight: 1.2, mb: 0.25, fontSize: '0.8rem' }}>
                 {label}
             </Typography>
             <Typography variant="body2" fontWeight={highlight ? 600 : 400} color={highlight ? 'text.primary' : 'text.primary'} sx={{ lineHeight: 1.4 }}>
@@ -193,7 +193,7 @@ const OtherDetails = ({
                     )}
 
                     {!request.requester && !request.currentApprover && (
-                        <Typography variant="body2" color="text.disabled" sx={{ py: 1.5, fontStyle: 'italic', fontSize: '0.82rem' }}>
+                        <Typography variant="body2" color="text.disabled" sx={{ py: 1.5, fontStyle: 'italic', fontSize: '0.875rem' }}>
                             No initiation details available
                         </Typography>
                     )}
@@ -273,7 +273,7 @@ const OtherDetails = ({
                     )}
 
                     {!request.createDate && !request.lastModified && (
-                        <Typography variant="body2" color="text.disabled" sx={{ py: 1.5, fontStyle: 'italic', fontSize: '0.82rem' }}>
+                        <Typography variant="body2" color="text.disabled" sx={{ py: 1.5, fontStyle: 'italic', fontSize: '0.875rem' }}>
                             No timestamp data available
                         </Typography>
                     )}

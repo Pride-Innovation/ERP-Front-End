@@ -150,7 +150,7 @@ const SupplierDetails = ({
                                     size="small"
                                     sx={{
                                         height: 22,
-                                        fontSize: '0.68rem',
+                                        fontSize: '0.8rem',
                                         fontWeight: 500,
                                         bgcolor: alpha(color, 0.08),
                                         color,
@@ -221,7 +221,7 @@ const ContactRow = ({
                 minWidth: 0,
                 color: value ? '#334155' : '#94A3B8',
                 fontStyle: value ? 'normal' : 'italic',
-                fontSize: '0.8rem',
+                fontSize: '0.875rem',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
                 whiteSpace: 'nowrap',

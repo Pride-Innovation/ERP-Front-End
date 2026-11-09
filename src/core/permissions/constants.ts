@@ -64,6 +64,16 @@ export const PERMISSIONS = {
      * second should be grantable without the first.
      */
     MANAGE_USER_ACCESS: 'MANAGE_USER_ACCESS',
+    /**
+     * May raise a request to restock the branch store rather than for oneself (V30). Granted once to
+     * BM and BOM; branch users only - Head Office is where restocks come from.
+     */
+    RESTOCK_STORE: 'RESTOCK_STORE',
+    /**
+     * May give stock from a store straight to a person with no request behind it - the exception
+     * path, always with a reason. Granted once to every role that held CREATE_MOVEMENT.
+     */
+    ISSUE_WITHOUT_REQUEST: 'ISSUE_WITHOUT_REQUEST',
     DELETE_SETTING: 'DELETE_SETTING',
 
     READ_AUDIT: 'READ_AUDIT',

@@ -35,6 +35,13 @@ import { Box } from '@mui/material';
  * <p>"Not monitored" is a real answer rather than a blank: a line with no threshold set is never
  * flagged however little of it is on hand, and saying so is what prompts somebody to set one.
  */
+/**
+ * A promised / available figure as the table shows it. Missing means the server did not say (an
+ * older backend), which is shown as a dash: reading it as zero would claim nothing is promised.
+ */
+const shownCount = (value?: number | null): number | string =>
+    value === null || value === undefined ? '—' : value;
+
 const stockLevelOf = (quantity: number, minLevel?: number | null): string => {
     if (!minLevel || minLevel <= 0) return 'not monitored';
     if (quantity <= minLevel / 2) return 'low';
@@ -42,13 +49,32 @@ const stockLevelOf = (quantity: number, minLevel?: number | null): string => {
     return 'in stock';
 };
 
+/**
+ * The applied filters as request parameters: display labels (`…__label`) and empty values dropped,
+ * so only keys `GET /store` declares are sent.
+ */
+export const toStoreFilterParams = (filters: Record<string, any>): Record<string, string> =>
+    Object.fromEntries(
+        Object.entries(filters ?? {})
+            .filter(([key, value]) => !key.endsWith('__label') && value !== undefined && value !== null
+                && String(value).trim() !== '')
+            .map(([key, value]) => [key, String(value).trim()]),
+    );
+
 const TableData = () => {
     const [columnHeaders, setColumnHeaders] = useState<Array<ITableHeader>>([] as Array<ITableHeader>);
     const { stores } = useSelector((state: RootState) => state.StoreStore);
     const {
         count, setStoreReportTableData, storeReportTableData,
-        branchId, currentAssetType, storeType,
+        branchId, currentAssetType, storeType, setStoreFilters,
     } = useContext(StoreContext);
+
+    /*
+     * The filters belong to this table's lifetime. Each category tab mounts its own copy, and the
+     * table component forgets its filters when it unmounts - so the page must forget them too, or a
+     * fresh tab with no chips would quietly fetch under the last tab's filters.
+     */
+    useEffect(() => () => setStoreFilters({}), []); // eslint-disable-line react-hooks/exhaustive-deps
 
     const {
         sendingRequest,
@@ -70,6 +96,10 @@ const TableData = () => {
         unitOfMeasure: StoreMocks[0].commodity.groupName,
         ...data,
         quantity: StoreMocks[0].quantity,
+        // Beside the shelf figure, because issued-but-unapproved stock is still on the shelf and the
+        // shelf alone reads as though it were free (see shownCount).
+        promised: StoreMocks[0].promised ?? 0,
+        available: StoreMocks[0].available ?? 0,
         branch: StoreMocks[0].branch.name,
         status: stockLevelOf(StoreMocks[0].quantity, StoreMocks[0].minLevel),
         action: {
@@ -89,6 +119,8 @@ const TableData = () => {
                 name: str.commodity.name,
                 unitOfMeasure: str.commodity.groupName,
                 quantity: str.quantity,
+                promised: shownCount(str.promised),
+                available: shownCount(str.available),
                 branch: str.branch.name,
                 status: stockLevelOf(str.quantity, str.minLevel),
             });
@@ -177,7 +209,13 @@ const TableData = () => {
                         ]
                     },
                 ]}
-                // onApplyFilters={(filters) => fetchAllRequests(filters)}
+                /*
+                 * Apply must refetch. Without this the table only stored the filters and merged them
+                 * into page changes - so on a store with one page of stock they never reached the
+                 * server at all, and "No reorder level set" listed every line, "In Stock" included.
+                 * The page's fetch reads them from the context and resets the count with them.
+                 */
+                onApplyFilters={(filters) => setStoreFilters(toStoreFilterParams(filters))}
             />
         </Box>
     );

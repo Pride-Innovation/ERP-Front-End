@@ -180,7 +180,7 @@ const FilterEngravedNumbers = ({ row }: { row: RowData }) => {
                     <li {...props} key={option.id}>
                         <Stack direction="row" spacing={1} alignItems="center">
                             <QrCode2OutlinedIcon sx={{ fontSize: 14, color: neutral[400] }} />
-                            <Typography sx={{ fontFamily: 'monospace', fontSize: '0.8rem', fontWeight: 600 }}>
+                            <Typography sx={{ fontFamily: 'monospace', fontSize: '0.875rem', fontWeight: 600 }}>
                                 {option.engravedNumber}
                             </Typography>
                         </Stack>
@@ -196,7 +196,7 @@ const FilterEngravedNumbers = ({ row }: { row: RowData }) => {
                                 height: 22,
                                 borderRadius: '6px',
                                 fontFamily: 'monospace',
-                                fontSize: '0.72rem',
+                                fontSize: '0.8rem',
                                 fontWeight: 700,
                                 bgcolor: alpha(brand[500], 0.1),
                                 color: brand[700],
@@ -231,12 +231,12 @@ const FilterEngravedNumbers = ({ row }: { row: RowData }) => {
                                 borderColor: brand[500],
                                 borderWidth: 1.5,
                             },
-                            '& input': { fontSize: '0.8rem', fontFamily: 'monospace' },
+                            '& input': { fontSize: '0.875rem', fontFamily: 'monospace' },
                             '& input::placeholder': {
                                 color: neutral[400],
                                 opacity: 1,
                                 fontFamily: 'inherit',
-                                fontSize: '0.78rem',
+                                fontSize: '0.875rem',
                             },
                         }}
                     />
@@ -256,7 +256,7 @@ const FilterEngravedNumbers = ({ row }: { row: RowData }) => {
                         transition: 'background-color .2s ease',
                     }}
                     />
-                    <Typography sx={{ fontSize: '0.68rem', fontWeight: 700, color: progressTone }}>
+                    <Typography sx={{ fontSize: '0.8rem', fontWeight: 700, color: progressTone }}>
                         {selected} of {required} picked{over ? ' — too many' : ''}
                     </Typography>
                 </Stack>

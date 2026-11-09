@@ -98,7 +98,7 @@ const AsyncFilterSelect = ({
     return (
         <Box>
             <Typography sx={{
-                fontSize: '0.67rem', fontWeight: 700, color: '#64748B',
+                fontSize: '0.8rem', fontWeight: 700, color: '#64748B',
                 textTransform: 'uppercase', letterSpacing: '0.06em', mb: 0.5,
             }}>
                 {label}
@@ -138,7 +138,7 @@ const AsyncFilterSelect = ({
                         placeholder={placeholder ?? `Any ${label.toLowerCase()}…`}
                         sx={{
                             '& .MuiOutlinedInput-root': {
-                                height: 34, borderRadius: '8px', fontSize: '0.8rem',
+                                height: 34, borderRadius: '8px', fontSize: '0.875rem',
                                 bgcolor: selected ? alpha(primary, 0.04) : '#fff',
                                 color: selected ? primary : muted,
                                 fontWeight: selected ? 600 : 400,

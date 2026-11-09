@@ -68,7 +68,7 @@ const TONE_RAIL: Partial<Record<StatusTone, string>> = {
 };
 
 const selectSx = {
-    fontSize: '0.83rem',
+    fontSize: '0.875rem',
     borderRadius: '7px',
     '& .MuiOutlinedInput-notchedOutline': { borderColor: '#E2E8F0' },
     '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: alpha(PRIMARY_COLOR, 0.5) },
@@ -161,7 +161,7 @@ const NoItemsPlaceholder = ({ message, onAddItem }: { message: string; onAddItem
         }}>
             <InventoryIcon sx={{ fontSize: 26, color: PRIMARY_COLOR }} />
         </Box>
-        <Typography sx={{ fontSize: '0.875rem', color: '#64748B', fontWeight: 500 }}>
+        <Typography sx={{ fontSize: '0.9375rem', color: '#64748B', fontWeight: 500 }}>
             {message}
         </Typography>
         <Button
@@ -173,7 +173,7 @@ const NoItemsPlaceholder = ({ message, onAddItem }: { message: string; onAddItem
                 mt: 0.5,
                 textTransform: 'none',
                 fontWeight: 600,
-                fontSize: '0.8rem',
+                fontSize: '0.875rem',
                 height: 32,
                 px: 2,
                 borderRadius: '8px',
@@ -341,7 +341,7 @@ const InventoryTable = ({ issue, title, lineStatus }: {
                     >
                         <InventoryIcon sx={{ color: PRIMARY_COLOR, fontSize: 18 }} />
                     </Box>
-                    <Typography sx={{ fontWeight: 700, fontSize: '0.875rem', color: '#1E293B' }}>
+                    <Typography sx={{ fontWeight: 700, fontSize: '0.9375rem', color: '#1E293B' }}>
                         {title}
                     </Typography>
                     <Chip
@@ -349,7 +349,7 @@ const InventoryTable = ({ issue, title, lineStatus }: {
                         size="small"
                         sx={{
                             height: 20,
-                            fontSize: '0.7rem',
+                            fontSize: '0.8rem',
                             fontWeight: 600,
                             bgcolor: alpha(PRIMARY_COLOR, 0.1),
                             color: PRIMARY_COLOR,
@@ -365,7 +365,7 @@ const InventoryTable = ({ issue, title, lineStatus }: {
                     sx={{
                         textTransform: 'none',
                         fontWeight: 600,
-                        fontSize: '0.8rem',
+                        fontSize: '0.875rem',
                         height: 30,
                         px: 1.5,
                         borderRadius: '7px',
@@ -523,7 +523,7 @@ const InventoryTable = ({ issue, title, lineStatus }: {
                                                 size="small"
                                                 sx={{
                                                     height: 22,
-                                                    fontSize: '0.75rem',
+                                                    fontSize: '0.8rem',
                                                     fontWeight: 500,
                                                     bgcolor: alpha(SECONDARY_COLOR, 0.08),
                                                     color: SECONDARY_COLOR,
@@ -531,7 +531,7 @@ const InventoryTable = ({ issue, title, lineStatus }: {
                                                 }}
                                             />
                                         ) : (
-                                            <Typography sx={{ fontSize: '0.8rem', color: '#94A3B8', fontStyle: 'italic' }}>
+                                            <Typography sx={{ fontSize: '0.875rem', color: '#94A3B8', fontStyle: 'italic' }}>
                                                 —
                                             </Typography>
                                         )}
@@ -573,7 +573,7 @@ const InventoryTable = ({ issue, title, lineStatus }: {
                                                 inputProps={{ min: 0, style: { textAlign: 'center', width: 36, padding: '3px 0' } }}
                                                 variant="standard"
                                                 sx={{
-                                                    '& input': { fontWeight: 700, fontSize: '0.875rem', color: '#1E293B' },
+                                                    '& input': { fontWeight: 700, fontSize: '0.9375rem', color: '#1E293B' },
                                                     '& .MuiInput-underline:before, & .MuiInput-underline:after': { borderBottom: 'none' },
                                                 }}
                                             />
@@ -640,7 +640,7 @@ const InventoryTable = ({ issue, title, lineStatus }: {
                 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
                         <InfoOutlinedIcon sx={{ fontSize: 14, color: '#94A3B8' }} />
-                        <Typography sx={{ fontSize: '0.78rem', color: '#64748B' }}>
+                        <Typography sx={{ fontSize: '0.875rem', color: '#64748B' }}>
                             {rows.filter(r => r.name && r.quantity > 0).length} of {rows.length} items completed
                         </Typography>
                     </Box>
@@ -652,7 +652,7 @@ const InventoryTable = ({ issue, title, lineStatus }: {
                         sx={{
                             textTransform: 'none',
                             fontWeight: 600,
-                            fontSize: '0.78rem',
+                            fontSize: '0.875rem',
                             height: 28,
                             px: 1.25,
                             borderRadius: '7px',

@@ -133,7 +133,7 @@ const PopoverComponent = ({
                                         </Box>
                                     )}
                                     <Typography sx={{
-                                        fontSize: '0.82rem',
+                                        fontSize: '0.875rem',
                                         fontWeight: (isHeader || isView) ? 700 : 600,
                                         color: labelColor,
                                         lineHeight: 1.3,

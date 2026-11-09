@@ -294,7 +294,7 @@ const Branches = () => {
               size="small"
               onDelete={clearFilters}
               onClick={clearFilters}
-              sx={{ height: 36, borderRadius: '8px', fontSize: '0.8rem', fontWeight: 500 }}
+              sx={{ height: 36, borderRadius: '8px', fontSize: '0.875rem', fontWeight: 500 }}
             />
           )}
         </Stack>

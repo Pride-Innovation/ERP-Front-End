@@ -31,7 +31,7 @@ const ConfirmDiscardDialog = ({ open, onKeepEditing, onDiscard }: IConfirmDiscar
     <Dialog open={open} onClose={onKeepEditing} maxWidth="xs" fullWidth>
         <DialogTitle sx={{ fontWeight: 700, color: neutral[900] }}>Discard changes?</DialogTitle>
         <DialogContent>
-            <DialogContentText sx={{ color: neutral[500], fontSize: '0.9rem' }}>
+            <DialogContentText sx={{ color: neutral[500], fontSize: '0.9375rem' }}>
                 You have unsaved changes on this form. If you leave now they will be lost.
             </DialogContentText>
         </DialogContent>

@@ -1,7 +1,6 @@
 import {
     alpha,
     Box,
-    Chip,
     CircularProgress,
     Paper,
     Table,
@@ -16,6 +15,8 @@ import {
 } from '@mui/material';
 import ErrorOutlineOutlinedIcon from '@mui/icons-material/ErrorOutlineOutlined';
 import { useState } from 'react';
+import LayoutStatusChip from '../../components/layout/StatusChip';
+import { reportStatusTone } from './reportStatus';
 
 const PRIMARY = '#08796C';
 
@@ -135,7 +136,7 @@ function ReportDataTable<T>({
             {!loading && error && (
                 <Box sx={{ py: 6, textAlign: 'center' }}>
                     <ErrorOutlineOutlinedIcon sx={{ fontSize: 30, color: '#DC2626', mb: 1 }} />
-                    <Typography sx={{ color: '#B91C1C', fontSize: '0.85rem', fontWeight: 600 }}>{error}</Typography>
+                    <Typography sx={{ color: '#B91C1C', fontSize: '0.875rem', fontWeight: 600 }}>{error}</Typography>
                 </Box>
             )}
 
@@ -155,7 +156,7 @@ function ReportDataTable<T>({
                                                 bgcolor: '#F8FAFC',
                                                 color: '#475569',
                                                 fontWeight: 700,
-                                                fontSize: '0.68rem',
+                                                fontSize: '0.8rem',
                                                 textTransform: 'uppercase',
                                                 letterSpacing: '0.07em',
                                                 py: 1.25,
@@ -190,7 +191,7 @@ function ReportDataTable<T>({
                                 {paginated.length === 0 && (
                                     <TableRow>
                                         <TableCell colSpan={columns.length} align="center" sx={{ py: 6 }}>
-                                            <Typography sx={{ color: '#94A3B8', fontSize: '0.85rem' }}>
+                                            <Typography sx={{ color: '#94A3B8', fontSize: '0.875rem' }}>
                                                 {emptyMessage ?? 'No records found for the selected filters.'}
                                             </Typography>
                                         </TableCell>
@@ -210,7 +211,7 @@ function ReportDataTable<T>({
                                             <TableCell
                                                 key={String(col.id)}
                                                 align={col.align ?? 'left'}
-                                                sx={{ fontSize: '0.8rem', color: '#1F2937', py: 1.2, px: 2, borderColor: '#F1F5F9' }}
+                                                sx={{ fontSize: '0.875rem', color: '#1F2937', py: 1.2, px: 2, borderColor: '#F1F5F9' }}
                                             >
                                                 {col.format
                                                     ? col.format((row as any)[col.id], row)
@@ -234,8 +235,8 @@ function ReportDataTable<T>({
                         sx={{
                             borderTop: '1px solid #EEF2F7',
                             bgcolor: '#FAFBFC',
-                            '& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows': { fontSize: '0.78rem', color: '#64748B' },
-                            '& .MuiTablePagination-select': { fontSize: '0.78rem' },
+                            '& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows': { fontSize: '0.875rem', color: '#64748B' },
+                            '& .MuiTablePagination-select': { fontSize: '0.875rem' },
                         }}
                     />
                 </>
@@ -247,35 +248,11 @@ function ReportDataTable<T>({
 export default ReportDataTable;
 
 // ── Status chip helper (shared by panels) ─────────────────────────────────
-type StatusVariant = 'success' | 'warning' | 'error' | 'info' | 'default';
 
-const STATUS_MAP: Record<string, StatusVariant> = {
-    approved: 'success', active: 'success', completed: 'success', present: 'success',
-    pending: 'warning', created: 'warning', stockPending: 'warning', inactive: 'warning',
-    rejected: 'error', blocked: 'error', disposed: 'error', disabled: 'error',
-    issued: 'info', inRepair: 'info', repair: 'info', acknowledge: 'info', available: 'info', inStore: 'info',
-};
-
-const STATUS_COLORS: Record<StatusVariant, { bg: string; text: string; border: string }> = {
-    success: { bg: '#F0FDF4', text: '#15803D', border: '#BBF7D0' },
-    warning: { bg: '#FFFBEB', text: '#B45309', border: '#FDE68A' },
-    error: { bg: '#FEF2F2', text: '#DC2626', border: '#FECACA' },
-    info: { bg: '#EFF6FF', text: '#1D4ED8', border: '#BFDBFE' },
-    default: { bg: '#F8FAFC', text: '#475569', border: '#E2E8F0' },
-};
-
-export const StatusChip = ({ value }: { value: string }) => {
-    const variant = STATUS_MAP[value?.toLowerCase?.()] ?? 'default';
-    const c = STATUS_COLORS[variant];
-    return (
-        <Chip
-            label={value}
-            size="small"
-            sx={{
-                bgcolor: c.bg, color: c.text, border: `1px solid ${c.border}`,
-                fontWeight: 600, fontSize: '0.7rem', height: 22,
-                textTransform: 'capitalize',
-            }}
-        />
-    );
-};
+/**
+ * The display name as the label, the stable code for the colour — see `reportStatus.ts` for why
+ * the name cannot be what decides it.
+ */
+export const StatusChip = ({ value, code }: { value: string; code?: string | null }) => (
+    <LayoutStatusChip label={value || '—'} tone={reportStatusTone(code)} size="md" />
+);

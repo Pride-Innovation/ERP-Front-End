@@ -48,7 +48,7 @@ export const fieldSx = {
     },
     '& .MuiInputLabel-root': {
         color: 'rgba(0, 0, 0, 0.45)',
-        fontSize: '0.875rem',
+        fontSize: '0.9375rem',
         '&.Mui-focused': { color: PRIMARY_COLOR },
         '&.Mui-error': { color: '#D32F2F' },
     },
@@ -57,7 +57,7 @@ export const fieldSx = {
     },
     '& .MuiInputBase-input': {
         padding: '13px 14px',
-        fontSize: '0.875rem',
+        fontSize: '0.9375rem',
         lineHeight: 1.5,
     },
 };

@@ -171,7 +171,7 @@ const CustomAttributesEditor = ({ attributes, onChange }: ICustomAttributesEdito
                                             display: 'flex',
                                             alignItems: 'center',
                                             justifyContent: 'center',
-                                            fontSize: '0.7rem',
+                                            fontSize: '0.8rem',
                                             fontWeight: 700,
                                         }}
                                     >

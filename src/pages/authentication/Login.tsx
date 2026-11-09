@@ -19,12 +19,14 @@ import AuthenticationUtils from './utills';
 import { toast } from 'react-toastify';
 import { loginService } from './service';
 import { AuthCard, AuthFooter, AuthHeading, AuthLogo } from './AuthCard';
+import { passwordsAreLocal, useAuthMode } from './useAuthMode';
 
 const Login = () => {
     const [loggingIn, setLoggingIn] = useState<boolean>(false);
     const [showPassword, setShowPassword] = useState<boolean>(false);
     const navigate = useNavigate();
     const { handleSessionStorage } = AuthenticationUtils();
+    const authMode = useAuthMode();
 
     const handleClickShowPassword = () => setShowPassword((show) => !show);
     const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -76,10 +78,18 @@ const Login = () => {
                     toast.error('Your account has been disabled. Please contact your admin.');
                 } else if (errorCode === 'ACCOUNT_LOCKED') {
                     toast.error(detail || 'Your account is locked. Please verify your email.');
+                } else if (errorCode === 'USER_THROTTLED') {
+                    toast.error(detail || 'Too many failed sign-in attempts. Please wait 15 minutes and try again.');
+                } else if (errorCode === 'SIGN_IN_UNAVAILABLE') {
+                    // The sign-in service, not the person: a wrong-password message here would send
+                    // them to reset a password that is fine.
+                    toast.error(detail || 'Sign-in is temporarily unavailable. Please try again shortly.');
+                } else if (errorCode === 'VALIDATION_ERROR') {
+                    toast.error('Enter your email address and password.');
                 } else if (errorCode === 'INVALID_CREDENTIALS') {
-                    toast.error(detail || 'Invalid email or password. Please try again.');
+                    toast.error(detail || 'Incorrect email or password.');
                 } else {
-                    toast.error(detail || 'Invalid email or password. Please try again.');
+                    toast.error(detail || 'Sign-in failed. Please try again.');
                 }
             }
         } catch {
@@ -95,7 +105,9 @@ const Login = () => {
                 <AuthLogo />
                 <AuthHeading
                     title="Sign in"
-                    subtitle="Enter your credentials to access the Asset Management Portal."
+                    subtitle={authMode === 'LDAP'
+                        ? 'Sign in with your email address and your Windows (network) password.'
+                        : 'Enter your credentials to access the Asset Management Portal.'}
                 />
                 <Box
                     component="form"
@@ -107,7 +119,8 @@ const Login = () => {
                         register={register}
                         control={control}
                         formState={formState}
-                        linkText="Forgot password?"
+                        // AD owns the password in LDAP mode: there is nothing here to reset.
+                        linkText={passwordsAreLocal(authMode) ? 'Forgot password?' : undefined}
                         linkPath={ROUTES.FORGOT_PASSWORD}
                         buttonText="Sign In"
                         showPassword={showPassword}

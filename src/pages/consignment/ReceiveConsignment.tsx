@@ -125,7 +125,7 @@ const ReceiveConsignment = ({
 
     return (
         <Stack spacing={2.5}>
-            <Alert severity="info" sx={{ borderRadius: 2, '& .MuiAlert-message': { fontSize: '0.82rem' } }}>
+            <Alert severity="info" sx={{ borderRadius: 2, '& .MuiAlert-message': { fontSize: '0.875rem' } }}>
                 The goods are in <strong>{consignment.landingStore?.name ?? 'the branch store'}</strong>. Handing a
                 movement over assigns its assets to the recipient and draws its items out of that store.
                 <strong> Untick anyone who has not collected yet</strong> — they stay outstanding and can be handed
@@ -169,7 +169,7 @@ const ReceiveConsignment = ({
                                         </Typography>
                                         {m.requestId && (
                                             <Chip size="small" label={`REQ ${m.requestId}`}
-                                                sx={{ fontSize: '0.65rem', fontWeight: 700, bgcolor: alpha(brand[500], 0.1), color: brand[700] }} />
+                                                sx={{ fontSize: '0.8rem', fontWeight: 700, bgcolor: alpha(brand[500], 0.1), color: brand[700] }} />
                                         )}
                                     </Stack>
                                     <Typography variant="caption" sx={{ color: neutral[500] }}>
@@ -214,7 +214,7 @@ const ReceiveConsignment = ({
                                                             variant="caption"
                                                             sx={{
                                                                 fontWeight: 700, color: statusTokens.warning.strong,
-                                                                textTransform: 'uppercase', letterSpacing: '0.06em', fontSize: '0.62rem',
+                                                                textTransform: 'uppercase', letterSpacing: '0.06em', fontSize: '0.8rem',
                                                             }}
                                                         >
                                                             What was wrong?
@@ -227,11 +227,11 @@ const ReceiveConsignment = ({
                                                         onChange={(e) => update(m.id, { remarks: e.target.value })}
                                                         sx={{
                                                             ...fieldSx,
-                                                            '& .MuiInputBase-input': { padding: 0, fontSize: '0.82rem', lineHeight: 1.5 },
+                                                            '& .MuiInputBase-input': { padding: 0, fontSize: '0.875rem', lineHeight: 1.5 },
                                                             '& .MuiOutlinedInput-root': { backgroundColor: '#fff' },
                                                         }}
                                                     />
-                                                    <Typography variant="caption" sx={{ color: neutral[500], display: 'block', mt: 0.75, fontSize: '0.7rem' }}>
+                                                    <Typography variant="caption" sx={{ color: neutral[500], display: 'block', mt: 0.75, fontSize: '0.8rem' }}>
                                                         Recorded on the movement — this is what an investigation reads later.
                                                     </Typography>
                                                 </Box>
@@ -253,9 +253,9 @@ const ReceiveConsignment = ({
                 onChange={(e) => setRemarks(e.target.value)}
                 // fieldSx pads the inner input for single-line height; a multiline root already
                 // carries its own padding, so zero the textarea's to avoid doubling up.
-                sx={{ ...fieldSx, '& .MuiInputBase-input': { padding: 0, fontSize: '0.875rem', lineHeight: 1.5 } }}
+                sx={{ ...fieldSx, '& .MuiInputBase-input': { padding: 0, fontSize: '0.9375rem', lineHeight: 1.5 } }}
                 helperText="Applies to every movement handed over now. A line flagged with a discrepancy keeps its own note."
-                FormHelperTextProps={{ sx: { mx: 0, mt: 0.75, fontSize: '0.7rem', color: neutral[500] } }}
+                FormHelperTextProps={{ sx: { mx: 0, mt: 0.75, fontSize: '0.8rem', color: neutral[500] } }}
             />
 
             <Stack direction="row" justifyContent="flex-end" spacing={1.5}>

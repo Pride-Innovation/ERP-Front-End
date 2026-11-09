@@ -192,7 +192,7 @@ const AsyncAutocomplete = <TForm extends FieldValues>({
                         p: 1.25,
                         textAlign: 'center',
                         cursor: 'pointer',
-                        fontSize: '0.78rem',
+                        fontSize: '0.875rem',
                         fontWeight: 600,
                         color: PRIMARY_COLOR,
                         borderTop: `1px dashed ${alpha(PRIMARY_COLOR, 0.25)}`,

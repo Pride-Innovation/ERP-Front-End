@@ -311,7 +311,7 @@ const FieldConfigModal = ({ assetType, handleClose }: FieldConfigModalProps) => 
                                     color: PRIMARY_COLOR,
                                     fontWeight: 700,
                                     letterSpacing: '0.08em',
-                                    fontSize: '0.68rem',
+                                    fontSize: '0.8rem',
                                 }}
                             >
                                 {group.title}
@@ -363,7 +363,7 @@ const FieldConfigModal = ({ assetType, handleClose }: FieldConfigModalProps) => 
                                                     value={opt.value}
                                                     sx={{
                                                         px: 1.25,
-                                                        fontSize: '0.72rem',
+                                                        fontSize: '0.8rem',
                                                         fontWeight: 600,
                                                         textTransform: 'none',
                                                         gap: 0.5,

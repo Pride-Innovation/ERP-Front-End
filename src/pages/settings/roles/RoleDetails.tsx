@@ -99,7 +99,7 @@ const RoleDetails = ({ role, deleteRole, updateRole, allPermissions }: IRoleDeta
                                 bgcolor: alpha(PRIMARY, 0.1),
                                 color: PRIMARY,
                                 fontWeight: 600,
-                                fontSize: '0.7rem',
+                                fontSize: '0.8rem',
                                 borderRadius: '6px',
                                 border: `1px solid ${alpha(PRIMARY, 0.18)}`,
                                 '& .MuiChip-icon': { color: PRIMARY, ml: 0.5 },
@@ -112,7 +112,7 @@ const RoleDetails = ({ role, deleteRole, updateRole, allPermissions }: IRoleDeta
                             color="text.secondary"
                             sx={{
                                 mt: 0.25,
-                                fontSize: '0.82rem',
+                                fontSize: '0.875rem',
                                 display: '-webkit-box',
                                 WebkitLineClamp: 2,
                                 WebkitBoxOrient: 'vertical',
@@ -173,7 +173,7 @@ const RoleDetails = ({ role, deleteRole, updateRole, allPermissions }: IRoleDeta
                 >
                     <Typography
                         variant="caption"
-                        sx={{ fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: 0.6, fontSize: '0.7rem' }}
+                        sx={{ fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: 0.6, fontSize: '0.8rem' }}
                     >
                         Module
                     </Typography>
@@ -181,7 +181,7 @@ const RoleDetails = ({ role, deleteRole, updateRole, allPermissions }: IRoleDeta
                         <Typography
                             key={h}
                             variant="caption"
-                            sx={{ fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: 0.6, fontSize: '0.7rem', textAlign: 'center' }}
+                            sx={{ fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: 0.6, fontSize: '0.8rem', textAlign: 'center' }}
                         >
                             {h}
                         </Typography>

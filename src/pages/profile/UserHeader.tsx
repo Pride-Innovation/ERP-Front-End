@@ -36,7 +36,8 @@ interface UserHeaderProps {
     isCurrentUser: boolean;
     onUpdateImage: () => void;
     onUpdateAvailability: () => void;
-    onChangePassword: () => void;
+    /** Absent while Active Directory owns the password: there is nothing here to change. */
+    onChangePassword?: () => void;
 }
 
 /** One meta-row entry: small icon + value. Renders nothing when value is empty. */
@@ -225,7 +226,7 @@ const UserHeader = ({
                                 flexWrap: 'wrap',
                             }}
                         >
-                            <Button
+                            {onChangePassword && <Button
                                 size="small"
                                 variant="outlined"
                                 startIcon={<LockOutlinedIcon sx={{ fontSize: 16 }} />}
@@ -243,7 +244,7 @@ const UserHeader = ({
                                 }}
                             >
                                 Change Password
-                            </Button>
+                            </Button>}
 
                             <Button
                                 size="small"

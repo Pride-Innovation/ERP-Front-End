@@ -72,7 +72,7 @@ const StepBlock = ({ step, index }: { step: IResolvedApprovalStep; index: number
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            fontSize: '0.65rem',
+                            fontSize: '0.8rem',
                             fontWeight: 700,
                         }}
                     >
@@ -87,7 +87,7 @@ const StepBlock = ({ step, index }: { step: IResolvedApprovalStep; index: number
                         <Chip
                             label="Opt"
                             size="small"
-                            sx={{ fontSize: '0.55rem', height: 16, bgcolor: alpha(GOLD, 0.12), color: GOLD }}
+                            sx={{ fontSize: '0.8rem', height: 16, bgcolor: alpha(GOLD, 0.12), color: GOLD }}
                         />
                     )}
                     {isSkipped && (
@@ -104,7 +104,7 @@ const StepBlock = ({ step, index }: { step: IResolvedApprovalStep; index: number
             <Typography
                 variant="caption"
                 color="text.secondary"
-                sx={{ display: 'block', fontSize: '0.65rem', mb: 0.5 }}
+                sx={{ display: 'block', fontSize: '0.8rem', mb: 0.5 }}
             >
                 {APPROVER_TYPE_LABELS[step.approverType] ?? step.approverType}
             </Typography>
@@ -121,7 +121,7 @@ const StepBlock = ({ step, index }: { step: IResolvedApprovalStep; index: number
                 <Typography
                     variant="caption"
                     color="text.secondary"
-                    sx={{ display: 'block', fontSize: '0.65rem', wordBreak: 'break-all' }}
+                    sx={{ display: 'block', fontSize: '0.8rem', wordBreak: 'break-all' }}
                 >
                     {step.approverEmail}
                 </Typography>
@@ -131,7 +131,7 @@ const StepBlock = ({ step, index }: { step: IResolvedApprovalStep; index: number
                     <GroupsOutlinedIcon sx={{ fontSize: 13, color: GOLD }} />
                     <Typography
                         variant="caption"
-                        sx={{ color: GOLD, fontSize: '0.65rem' }}
+                        sx={{ color: GOLD, fontSize: '0.8rem' }}
                         noWrap
                     >
                         Fallback: {step.fallbackEmail}
@@ -197,14 +197,14 @@ const WorkflowPreview: React.FC<IWorkflowPreviewProps> = ({
                     label={`${activeSteps} active step${activeSteps !== 1 ? 's' : ''}`}
                     size="small"
                     variant="outlined"
-                    sx={{ fontSize: '0.65rem' }}
+                    sx={{ fontSize: '0.8rem' }}
                 />
                 {skippedSteps > 0 && (
                     <Chip
                         label={`${skippedSteps} skipped`}
                         size="small"
                         variant="outlined"
-                        sx={{ fontSize: '0.65rem', color: MUTED, borderColor: alpha(MUTED, 0.4) }}
+                        sx={{ fontSize: '0.8rem', color: MUTED, borderColor: alpha(MUTED, 0.4) }}
                     />
                 )}
                 {resolved.fulfilmentGroupEmail && (
@@ -215,7 +215,7 @@ const WorkflowPreview: React.FC<IWorkflowPreviewProps> = ({
                         sx={{
                             bgcolor: alpha(GOLD, 0.1),
                             color: GOLD,
-                            fontSize: '0.65rem',
+                            fontSize: '0.8rem',
                             '& .MuiChip-icon': { color: GOLD },
                         }}
                     />

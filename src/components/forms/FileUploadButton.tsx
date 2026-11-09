@@ -210,7 +210,7 @@ const FileUploadButton = ({ title, module, assetTypeId }: IFileUploadButton) => 
                     height: 34, px: 1.75, borderRadius: '8px',
                     border: `1px solid ${alpha(AMBER, 0.3)}`,
                     color: AMBER,
-                    textTransform: 'none', fontWeight: 600, fontSize: '0.82rem',
+                    textTransform: 'none', fontWeight: 600, fontSize: '0.875rem',
                     bgcolor: 'transparent',
                     transition: 'all 0.15s',
                     '&:hover': {
@@ -245,7 +245,7 @@ const FileUploadButton = ({ title, module, assetTypeId }: IFileUploadButton) => 
             >
                 {/* Header label */}
                 <Box sx={{ px: 2, pt: 1.25, pb: 0.75 }}>
-                    <Typography sx={{ fontSize: '0.67rem', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                    <Typography sx={{ fontSize: '0.8rem', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
                         Import options
                     </Typography>
                 </Box>
@@ -264,8 +264,8 @@ const FileUploadButton = ({ title, module, assetTypeId }: IFileUploadButton) => 
                         <ListItemText
                             primary="Download Template"
                             secondary="Get the import format"
-                            primaryTypographyProps={{ fontSize: '0.83rem', fontWeight: 600, color: '#1E293B' }}
-                            secondaryTypographyProps={{ fontSize: '0.72rem', color: '#94A3B8' }}
+                            primaryTypographyProps={{ fontSize: '0.875rem', fontWeight: 600, color: '#1E293B' }}
+                            secondaryTypographyProps={{ fontSize: '0.8rem', color: '#94A3B8' }}
                         />
                     </MenuItem>
                     <MenuItem
@@ -281,8 +281,8 @@ const FileUploadButton = ({ title, module, assetTypeId }: IFileUploadButton) => 
                         <ListItemText
                             primary="Upload File"
                             secondary=".xlsx or .csv"
-                            primaryTypographyProps={{ fontSize: '0.83rem', fontWeight: 600, color: '#1E293B' }}
-                            secondaryTypographyProps={{ fontSize: '0.72rem', color: '#94A3B8' }}
+                            primaryTypographyProps={{ fontSize: '0.875rem', fontWeight: 600, color: '#1E293B' }}
+                            secondaryTypographyProps={{ fontSize: '0.8rem', color: '#94A3B8' }}
                         />
                     </MenuItem>
                 </Box>

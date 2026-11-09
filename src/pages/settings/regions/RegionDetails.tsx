@@ -77,7 +77,7 @@ const RegionDetails = ({ region, deleteRegion, updateRegion, index = 0 }: IRegio
                                 size="small"
                                 sx={{
                                     height: 20,
-                                    fontSize: '0.65rem',
+                                    fontSize: '0.8rem',
                                     fontWeight: 700,
                                     bgcolor: alpha(color, 0.1),
                                     color,

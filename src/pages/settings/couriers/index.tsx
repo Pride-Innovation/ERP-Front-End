@@ -285,23 +285,23 @@ const Couriers = () => {
                                     <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
                                         <Chip size="small"
                                             label={courier.active !== false ? 'Active' : 'Inactive'}
-                                            sx={{ height: 24, fontWeight: 600, fontSize: '0.72rem',
+                                            sx={{ height: 24, fontWeight: 600, fontSize: '0.8rem',
                                                 bgcolor: courier.active !== false ? alpha('#15803D', 0.08) : alpha('#B91C1C', 0.08),
                                                 color: courier.active !== false ? '#15803D' : '#B91C1C' }} />
                                         {courier.vetted !== false ? (
                                             <Chip size="small" icon={<VerifiedOutlinedIcon sx={{ fontSize: 14 }} />} label="Vetted"
-                                                sx={{ height: 24, fontWeight: 600, fontSize: '0.72rem', bgcolor: alpha(PRIMARY, 0.07), color: brand[700] }} />
+                                                sx={{ height: 24, fontWeight: 600, fontSize: '0.8rem', bgcolor: alpha(PRIMARY, 0.07), color: brand[700] }} />
                                         ) : (
                                             <Chip size="small" label="Ad-hoc"
-                                                sx={{ height: 24, fontWeight: 600, fontSize: '0.72rem', bgcolor: alpha('#B45309', 0.08), color: '#B45309' }} />
+                                                sx={{ height: 24, fontWeight: 600, fontSize: '0.8rem', bgcolor: alpha('#B45309', 0.08), color: '#B45309' }} />
                                         )}
                                         {courier.contactPerson && (
                                             <Chip size="small" icon={<PersonOutlineOutlinedIcon sx={{ fontSize: 14 }} />} label={courier.contactPerson}
-                                                sx={{ height: 24, fontWeight: 500, fontSize: '0.72rem', bgcolor: alpha('#64748B', 0.07), color: neutral[600] }} />
+                                                sx={{ height: 24, fontWeight: 500, fontSize: '0.8rem', bgcolor: alpha('#64748B', 0.07), color: neutral[600] }} />
                                         )}
                                         {courier.phone && (
                                             <Chip size="small" icon={<LocalPhoneOutlinedIcon sx={{ fontSize: 14 }} />} label={courier.phone}
-                                                sx={{ height: 24, fontWeight: 500, fontSize: '0.72rem', bgcolor: alpha('#64748B', 0.07), color: neutral[600] }} />
+                                                sx={{ height: 24, fontWeight: 500, fontSize: '0.8rem', bgcolor: alpha('#64748B', 0.07), color: neutral[600] }} />
                                         )}
                                     </Stack>
                                 </Paper>

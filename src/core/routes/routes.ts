@@ -8,6 +8,8 @@ Managing Director
 const LOGIN: string = "/";
 const FORGOT_PASSWORD: string = "/forgot-password";
 const RESET_PASSWORD: string = '/reset-password';
+/** The handheld scanner's page. Public: the PDA is paired with a computer, not signed in. */
+const SCANNER: string = '/scan';
 const ASSETS_MANAGEMENT: string = "/assets-mgt"
 const REFRESH_TOKEN: string = "/auth/refresh-token"
 const SETTINGS: string = `${ASSETS_MANAGEMENT}/settings`;
@@ -103,6 +105,7 @@ export const ROUTES = {
     FORGOT_PASSWORD,
     LOGIN,
     RESET_PASSWORD,
+    SCANNER,
     SETTINGS,
     ASSETS_MANAGEMENT,
     PROFILE,

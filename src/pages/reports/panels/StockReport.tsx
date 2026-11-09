@@ -7,6 +7,8 @@ import ReportSummaryCards from '../ReportSummaryCards';
 import ReportDataTable, { ReportColumn, StatusChip } from '../ReportDataTable';
 import useReportData, { REPORT_PAGE_SIZE, truncationNotice } from '../useReportData';
 import { fetchRowsService } from '../../../core/apis/globalService';
+import { STOCK_STATUS_CODES } from '../reportStatus';
+import useAccessScope from '../../../core/permissions/useAccessScope';
 
 const ACCENT = '#0369A1';
 
@@ -22,7 +24,10 @@ interface StockRow {
     purchaseCost: string;
     /** Kept unformatted so the summary cards can total it. */
     costValue: number;
-    department: string;
+    /** The line's category id, so a category filter can trim the other lines of a matched order. */
+    categoryId: number | null;
+    /** The order this line belongs to, so the cards can count orders rather than lines. */
+    orderId: number;
     branch: string;
     stockedBy: string;
     status: string;
@@ -39,10 +44,14 @@ const COLUMNS: ReportColumn<StockRow>[] = [
     { id: 'unit', label: 'UOM', minWidth: 70 },
     { id: 'lpoNumber', label: 'LPO No.', minWidth: 110 },
     { id: 'purchaseCost', label: 'Purchase Cost', minWidth: 130, align: 'right' },
-    { id: 'department', label: 'Department', minWidth: 110 },
+    /*
+     * No Department column, and no Department filter. Neither an order nor a commodity records a
+     * department, so the column read "—" on every row and the filter - comparing against a name no
+     * row carried - emptied the table whatever was picked.
+     */
     { id: 'branch', label: 'Branch', minWidth: 120 },
     { id: 'stockedBy', label: 'Stocked By', minWidth: 120 },
-    { id: 'status', label: 'Status', minWidth: 100, format: (v) => <StatusChip value={v} /> },
+    { id: 'status', label: 'Status', minWidth: 100, format: (v, r) => <StatusChip value={v} code={r.statusCode} /> },
     { id: 'remarks', label: 'Remarks', minWidth: 140 },
 ];
 
@@ -58,12 +67,15 @@ const money = (n: number) => `UGX ${n.toLocaleString(undefined, { maximumFractio
  * order, and an order carries several. Flattening here keeps a row meaning one thing.
  */
 const toRows = (stock: any): StockRow[] => {
-    const lines: any[] = stock.stockCommodities ?? stock.commodities ?? [];
+    const lines: any[] = stock.commodities ?? stock.stockCommodities ?? [];
     const base = {
+        orderId: stock.id,
+        // The same date the Period filter uses on the server: ordered, else created.
         date: fmtDate(stock.orderDate ?? stock.createDate),
         supplier: stock.supplier?.name ?? '—',
         lpoNumber: stock.lpoNumber ?? stock.poNumber ?? '—',
         branch: stock.branch?.name ?? '—',
+        // Filled by the server from the creator's id; it sent no name before, so this read "—".
         stockedBy: stock.createdByName ?? '—',
         status: stock.status?.name ?? '—',
         statusCode: stock.status?.status ?? '',
@@ -82,7 +94,7 @@ const toRows = (stock: any): StockRow[] => {
             unit: '—',
             purchaseCost: money(Number(stock.totalCost) || 0),
             costValue: Number(stock.totalCost) || 0,
-            department: '—',
+            categoryId: null,
         }];
     }
 
@@ -94,62 +106,77 @@ const toRows = (stock: any): StockRow[] => {
             id: `stock-${stock.id}-${l.id ?? i}`,
             itemName: l.commodity?.name ?? '—',
             category: l.commodity?.assetType?.name ?? '—',
+            categoryId: l.commodity?.assetType?.id ?? null,
             quantity: qty,
-            unit: l.commodity?.unitOfMeasure ?? '—',
+            // A commodity's unit is its `groupName` (pieces, reams, dozens...); there is no
+            // `unitOfMeasure`, which is why this column read "—" on every row.
+            unit: l.commodity?.groupName || '—',
             // Extended, not unit price — the column says "Purchase Cost" for the line.
             purchaseCost: money(unitCost * qty),
             costValue: unitCost * qty,
-            department: l.commodity?.department?.name ?? '—',
         };
     });
 };
 
 const StockReport = () => {
+    /*
+     * An order belongs to the branch that placed it, and the server scopes on exactly that. The
+     * Branch filter is for Head Office: below ALL scope the server refuses any branch but the
+     * caller's own, so the dropdown offered a list where every other choice was an error.
+     */
+    const { scopeFor } = useAccessScope();
+    const seesEveryBranch = scopeFor('INVENTORY', 'VIEW') === 'ALL';
+
     const { rows, notice, loading, error, applyFilters, refresh } = useReportData<StockRow>(
         async (f: ReportShellFilters) => {
             const res = (await fetchRowsService({
                 pageNumber: 0,
                 pageSize: REPORT_PAGE_SIZE,
                 endPoint: 'stocks',
-                params: { startDate: f.dateFrom, endDate: f.dateTo },
+                params: {
+                    /*
+                     * The period by when the order was placed - its order date, else its created
+                     * date - which is the date the Date column shows. `startDate`/`endDate` mean the
+                     * created date, so a row could appear under a period its own date was outside.
+                     */
+                    orderedFrom: f.dateFrom,
+                    orderedTo: f.dateTo,
+                    ...(seesEveryBranch && f.branchId ? { branchId: f.branchId } : {}),
+                    stockStatusId: f.statusId,
+                    // Orders with a line in the category, chosen by the server so the 1000-order cap
+                    // cannot hide a match.
+                    assetTypeId: f.categoryId,
+                },
             })) as any;
 
             if (res?.status !== 200) throw new Error('stocks');
             const flat = ((res.data?.content ?? []) as any[]).flatMap(toRows);
 
             /*
-             * Category and department only.
-             *
-             * The comment here used to say `/stocks` "takes no filters for them" — it takes
-             * `branchId` and `stockStatusId`, and has all along, so those two were being narrowed in
-             * the browser for no reason. They go to the server now: narrowing after a cap searches
-             * only the page in hand, so a branch whose orders fall outside it reads as "no results",
-             * which is indistinguishable from having none.
-             *
-             * These two genuinely have nowhere to go. Both belong to the **commodity on a line**
-             * rather than to the order, so the endpoint has nothing to filter on.
+             * The server returned every order with at least one line in the category; an order can
+             * span categories, and a row is a line, so its other lines are dropped here. This trims
+             * lines of orders already chosen - it never decides which orders appear.
              */
-            const narrowed = flat.filter((r) => {
-                if (f.category && r.category !== f.category) return false;
-                if (f.department && r.department !== f.department) return false;
-                return true;
-            });
+            const rows = f.categoryId
+                ? flat.filter((r) => String(r.categoryId) === String(f.categoryId))
+                : flat;
 
-            return { rows: narrowed, notice: truncationNotice(res, 'purchase orders') };
+            return { rows, notice: truncationNotice(res, 'purchase orders') };
         },
     );
 
-    const orders = new Set(rows.map((r) => r.id.split('-').slice(0, 2).join('-'))).size;
+    const orders = new Set(rows.map((r) => r.orderId)).size;
     const totalValue = rows.reduce((sum, r) => sum + r.costValue, 0);
     const totalUnits = rows.reduce((sum, r) => sum + r.quantity, 0);
-    const pending = rows.filter((r) => r.statusCode === 'stockPending').length;
+    // Orders, not lines: an order with three pending lines is one order awaiting delivery.
+    const pending = new Set(rows.filter((r) => r.statusCode === 'stockPending').map((r) => r.orderId)).size;
 
     const summaryCards = (
         <ReportSummaryCards cards={[
             { label: 'Order Lines', value: rows.length, icon: <Inventory2OutlinedIcon />, color: ACCENT, subLabel: `${orders} order(s)` },
             { label: 'Units Ordered', value: totalUnits, icon: <LocalShippingOutlinedIcon />, color: '#15803D', subLabel: 'Across all lines' },
             { label: 'Purchase Value', value: money(totalValue), icon: <PaidOutlinedIcon />, color: '#7C3AED', subLabel: 'Ordered value' },
-            { label: 'Awaiting Delivery', value: pending, icon: <PendingActionsOutlinedIcon />, color: '#D97706', subLabel: 'Partially stocked' },
+            { label: 'Awaiting Delivery', value: pending, icon: <PendingActionsOutlinedIcon />, color: '#D97706', subLabel: 'Orders not fully delivered' },
         ]} />
     );
 
@@ -158,7 +185,12 @@ const StockReport = () => {
             title="Stock / Purchase Report"
             subtitle="Purchase orders and what was ordered against each supplier"
             accentColor={ACCENT}
-            filterFields={['dateRange', 'branch', 'department', 'category', 'status']}
+            filterFields={seesEveryBranch
+                ? ['dateRange', 'branch', 'category', 'status']
+                : ['dateRange', 'category', 'status']}
+            statusCodes={STOCK_STATUS_CODES}
+            // Purchase history: "This Month" opens empty for the first days of every month.
+            defaultPreset="year"
             onApplyFilters={applyFilters}
             onRefresh={refresh}
             notice={notice}

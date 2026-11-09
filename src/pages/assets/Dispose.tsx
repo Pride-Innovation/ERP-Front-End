@@ -99,7 +99,7 @@ const Dispose = ({
 
                 {!pastUsefulLife && (
                     <Box>
-                        <Alert severity="warning" sx={{ borderRadius: 2, mb: 2, '& .MuiAlert-message': { fontSize: '0.82rem' } }}>
+                        <Alert severity="warning" sx={{ borderRadius: 2, mb: 2, '& .MuiAlert-message': { fontSize: '0.875rem' } }}>
                             This asset has not reached the end of its useful life. It can still be written off —
                             damage and theft do not wait for the schedule — but the reason is recorded on the movement.
                         </Alert>

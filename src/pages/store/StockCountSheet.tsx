@@ -11,10 +11,22 @@ import {
     Button,
     Chip,
     CircularProgress,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    FormControlLabel,
+    IconButton,
+    InputAdornment,
     LinearProgress,
+    Menu,
     MenuItem,
     Paper,
     Stack,
+    Step,
+    StepLabel,
+    Stepper,
+    Switch,
     Table,
     TableBody,
     TableCell,
@@ -38,9 +50,13 @@ import UndoOutlinedIcon from '@mui/icons-material/UndoOutlined';
 import PublishOutlinedIcon from '@mui/icons-material/PublishOutlined';
 import ArrowBackIosNewOutlinedIcon from '@mui/icons-material/ArrowBackIosNewOutlined';
 import ReplayOutlinedIcon from '@mui/icons-material/ReplayOutlined';
+import BlockOutlinedIcon from '@mui/icons-material/BlockOutlined';
+import MoreVertRoundedIcon from '@mui/icons-material/MoreVertRounded';
+import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 
 import {
     approveStockCountService,
+    cancelStockCountService,
     fetchStockCountService,
     postStockCountService,
     saveStockCountLinesService,
@@ -49,10 +65,20 @@ import {
 } from './service';
 import { ADJUSTMENT_REASONS, AdjustmentReason, IStockCount, IStockCountLine } from './stockTakeInterface';
 import { ROUTES } from '../../core/routes/routes';
+import usePermissions from '../../core/permissions/usePermissions';
+import RoutesUtills from '../../core/routes/utills';
+import { canCancel, canPost, canRecordCounts, canReview, isActionable, reviewBlockedAsCounter } from './stockTakeRules';
+import { STOCK_TAKE_STEPS, activeStepOf, groupLines } from './stockTakeProgress';
 import { fieldSx } from '../../components/forms/Inputs';
 import { brand, gold, neutral, border, surface, elevation, radii, status as statusTokens } from '../../utils/tokens';
 
 type Draft = Record<number, { counted: string; reason: AdjustmentReason | ''; note: string }>;
+
+/** A refusal travels as 417 with `errorCode: ACCESS_DENIED`; older backends sent 422 or 403. */
+const isRefusal = (error: any): boolean => {
+    const status = error?.response?.status;
+    return error?.response?.data?.errorCode === 'ACCESS_DENIED' || [417, 422, 403].includes(status);
+};
 
 const STATUS_TONE: Record<string, { bg: string; fg: string }> = {
     DRAFT: { bg: alpha(neutral[500], 0.12), fg: neutral[700] },
@@ -79,6 +105,20 @@ const StockCountSheet = () => {
     const [draft, setDraft] = useState<Draft>({});
     const [loading, setLoading] = useState(true);
     const [busy, setBusy] = useState(false);
+    /*
+     * Why the sheet is missing. A refusal used to read "Count sheet not found" — a boundary rendered
+     * as a fact about the record.
+     */
+    const [loadError, setLoadError] = useState<string | null>(null);
+    /** Which reason dialog is open: sending back, or cancelling. Both require a reason. */
+    const [reasonFor, setReasonFor] = useState<'sendBack' | 'cancel' | null>(null);
+    // Narrow what is shown only; every line is still saved and submitted.
+    const [search, setSearch] = useState('');
+    const [uncountedOnly, setUncountedOnly] = useState(false);
+    const [moreAnchor, setMoreAnchor] = useState<HTMLElement | null>(null);
+
+    const { has } = usePermissions();
+    const currentUserId = (RoutesUtills().getCurrentUser() as { id?: number } | null)?.id ?? null;
 
     const load = useCallback(async () => {
         try {
@@ -90,8 +130,12 @@ const StockCountSheet = () => {
                 reason: (l.reason ?? '') as AdjustmentReason | '',
                 note: l.note ?? '',
             }])));
-        } catch {
-            toast.error('Could not load this count sheet.');
+            setLoadError(null);
+        } catch (error) {
+            setCount(null);
+            setLoadError(isRefusal(error)
+                ? 'You do not have access to this count. Stock takes are limited to stores at your branch.'
+                : 'Could not load this count sheet. Please try again.');
         } finally {
             setLoading(false);
         }
@@ -114,54 +158,68 @@ const StockCountSheet = () => {
     const setField = (commodityId: number, field: 'counted' | 'reason' | 'note', value: string) =>
         setDraft((prev) => ({ ...prev, [commodityId]: { ...prev[commodityId], [field]: value } }));
 
-    const run = async (fn: () => Promise<any>, success: string) => {
+    /** Runs one or more calls in order, stopping at the first failure. Returns whether all ran. */
+    const run = async (steps: Array<() => Promise<any>>, success: string): Promise<boolean> => {
         setBusy(true);
         try {
-            await fn();
+            for (const step of steps) await step();
             toast.success(success);
             await load();
+            return true;
         } catch {
             // The axios interceptor surfaces the server's message, which names the offending lines.
+            return false;
         } finally {
             setBusy(false);
         }
     };
 
-    const save = () => run(() => saveStockCountLinesService(id as string, {
+    const saveLines = () => saveStockCountLinesService(id as string, {
         lines: Object.entries(draft).map(([commodityId, d]) => ({
             commodityId: Number(commodityId),
             countedQuantity: d.counted === '' ? null : Number(d.counted),
             reason: d.reason || null,
             note: d.note || null,
         })),
-    }), 'Counts saved');
+    });
 
-    const submit = async () => {
-        await run(() => saveStockCountLinesService(id as string, {
-            lines: Object.entries(draft).map(([commodityId, d]) => ({
-                commodityId: Number(commodityId),
-                countedQuantity: d.counted === '' ? null : Number(d.counted),
-                reason: d.reason || null,
-                note: d.note || null,
-            })),
-        }), 'Counts saved');
-        await run(() => submitStockCountService(id as string), 'Submitted for review');
-    };
+    const save = () => run([saveLines], 'Counts saved');
 
-    const sendBack = () => {
-        const remarks = window.prompt('Why is this going back to be recounted?');
-        if (!remarks?.trim()) return;
-        run(() => sendBackStockCountService(id as string, remarks.trim()), 'Sent back for recount');
+    // One sequence, so a failed save stops the submit instead of submitting the last saved figures.
+    const submit = () => run([saveLines, () => submitStockCountService(id as string)], 'Submitted for review. The other approvers at this branch have been notified.');
+
+    const confirmReason = async (remarks: string) => {
+        const ok = reasonFor === 'sendBack'
+            ? await run([() => sendBackStockCountService(id as string, remarks)], 'Sent back for recount')
+            : await run([() => cancelStockCountService(id as string, remarks)], 'Count cancelled');
+        if (ok) setReasonFor(null);
     };
 
     if (loading) {
         return <Stack alignItems="center" sx={{ py: 8 }}><CircularProgress sx={{ color: brand[500] }} /></Stack>;
     }
     if (!count) {
-        return <Box sx={{ p: 3 }}><Alert severity="error">Count sheet not found.</Alert></Box>;
+        return <Box sx={{ p: 3 }}><Alert severity="error">{loadError ?? 'Count sheet not found.'}</Alert></Box>;
     }
 
+    // What this viewer may do — the same rules the endpoints apply (see stockTakeRules).
+    const mayRecord = canRecordCounts(count, has);
+    const mayReview = canReview(count, has, currentUserId);
+    const mayPost = canPost(count, has);
+    const mayCancel = canCancel(count, has, currentUserId);
+    const blockedAsCounter = reviewBlockedAsCounter(count, has, currentUserId);
+
     const tone = STATUS_TONE[count.status] ?? STATUS_TONE.DRAFT;
+    const activeStep = activeStepOf(count.status);
+
+    const groups = groupLines(count.lines, {
+        search,
+        uncountedOnly: counting && uncountedOnly,
+        countedValue: (l) => draft[l.commodityId]?.counted ?? '',
+    });
+    const shownLines = groups.reduce((n, g) => n + g.lines.length, 0);
+    const columns = revealed ? 5 : 3;
+    const hasPrimaryAction = mayRecord || (reviewing && mayReview) || (approved && mayPost);
 
     return (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5, maxWidth: 1400, mx: 'auto', px: { xs: 1, sm: 2 }, py: 2 }}>
@@ -175,16 +233,17 @@ const StockCountSheet = () => {
                         <Box>
                             <Stack direction="row" spacing={1} alignItems="center">
                                 <Typography variant="h6" sx={{ fontWeight: 700, color: neutral[900] }}>{count.reference}</Typography>
-                                <Chip size="small" label={count.status.replace('_', ' ')} sx={{ height: 22, fontWeight: 700, fontSize: '0.68rem', bgcolor: tone.bg, color: tone.fg }} />
+                                <Chip size="small" label={count.status.replace('_', ' ')} sx={{ height: 22, fontWeight: 700, fontSize: '0.8rem', bgcolor: tone.bg, color: tone.fg }} />
                                 {count.blind && counting && (
                                     <Tooltip arrow title="System quantities are withheld while counting, so the shelf is counted rather than the number confirmed.">
-                                        <Chip size="small" icon={<VisibilityOffOutlinedIcon sx={{ fontSize: 13 }} />} label="Blind" sx={{ height: 22, fontWeight: 700, fontSize: '0.68rem', bgcolor: alpha(gold[500], 0.14), color: gold[700], '& .MuiChip-icon': { color: gold[700] } }} />
+                                        <Chip size="small" icon={<VisibilityOffOutlinedIcon sx={{ fontSize: 13 }} />} label="Blind" sx={{ height: 22, fontWeight: 700, fontSize: '0.8rem', bgcolor: alpha(gold[500], 0.14), color: gold[700], '& .MuiChip-icon': { color: gold[700] } }} />
                                     </Tooltip>
                                 )}
                             </Stack>
                             <Typography variant="body2" sx={{ color: neutral[500], mt: 0.25 }}>
-                                {count.storeName}{count.assetTypeName ? ` · ${count.assetTypeName}` : ''}
-                                {count.countedByName ? ` · counted by ${count.countedByName}` : ''}
+                                {count.storeName}{count.storeBranchName ? ` · ${count.storeBranchName}` : ''}
+                                {count.assetTypeName ? ` · ${count.assetTypeName}` : ''}
+                                {count.countedByName ? ` · opened by ${count.countedByName}` : ''}
                                 {count.approvedByName ? ` · approved by ${count.approvedByName}` : ''}
                             </Typography>
                         </Box>
@@ -195,6 +254,20 @@ const StockCountSheet = () => {
                         All counts
                     </Button>
                 </Stack>
+
+                {/* Where this count is in the process. A cancelled count left it, so it has no step. */}
+                {activeStep != null && (
+                    <Box sx={{ px: 3, pb: 2, overflowX: 'auto' }}>
+                        <Stepper activeStep={activeStep} alternativeLabel
+                            sx={{ minWidth: 520, '& .MuiStepIcon-root.Mui-active, & .MuiStepIcon-root.Mui-completed': { color: brand[500] }, '& .MuiStepLabel-label': { fontSize: '0.8rem', mt: '4px !important' } }}>
+                            {STOCK_TAKE_STEPS.map((s) => (
+                                <Step key={s.label}>
+                                    <Tooltip arrow title={s.detail}><StepLabel>{s.label}</StepLabel></Tooltip>
+                                </Step>
+                            ))}
+                        </Stepper>
+                    </Box>
+                )}
 
                 {counting && (
                     <Box sx={{ px: 3, pb: 2 }}>
@@ -208,6 +281,13 @@ const StockCountSheet = () => {
                     </Box>
                 )}
             </Box>
+
+            {!isActionable(count) && !terminal && (
+                <Alert severity="info">
+                    <strong>View only.</strong> This count belongs to {count.storeBranchName || 'another branch'};
+                    it is counted, approved and posted by the staff at that branch.
+                </Alert>
+            )}
 
             {count.reviewRemarks && (
                 <Alert severity={count.status === 'IN_PROGRESS' ? 'warning' : 'info'} icon={<ReplayOutlinedIcon fontSize="small" />}>
@@ -230,12 +310,38 @@ const StockCountSheet = () => {
                 </Stack>
             )}
 
+            {count.status === 'CANCELLED' && (
+                <Alert severity="warning" icon={<BlockOutlinedIcon fontSize="small" />}>
+                    This count was cancelled. Nothing was applied to stock.
+                </Alert>
+            )}
+
             {/* Sheet */}
             <Paper elevation={0} sx={{ borderRadius: 2, border: `1px solid ${border.subtle}`, bgcolor: '#fff', overflow: 'hidden' }}>
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} alignItems={{ sm: 'center' }}
+                    sx={{ px: 2, py: 1.5, borderBottom: `1px solid ${border.subtle}` }}>
+                    <TextField
+                        size="small" placeholder="Search commodity or category"
+                        value={search} onChange={(e) => setSearch(e.target.value)}
+                        InputProps={{ startAdornment: <InputAdornment position="start"><SearchRoundedIcon fontSize="small" /></InputAdornment> }}
+                        sx={{ ...fieldSx, width: { xs: '100%', sm: 300 } }}
+                    />
+                    {counting && (
+                        <FormControlLabel
+                            control={<Switch size="small" checked={uncountedOnly} onChange={(e) => setUncountedOnly(e.target.checked)} />}
+                            label={<Typography variant="body2" sx={{ fontWeight: 600, color: neutral[700] }}>Uncounted only</Typography>}
+                        />
+                    )}
+                    <Typography variant="body2" sx={{ color: neutral[500], ml: { sm: 'auto !important' } }}>
+                        {shownLines === count.lines.length
+                            ? `${count.lines.length} line${count.lines.length === 1 ? '' : 's'}`
+                            : `Showing ${shownLines} of ${count.lines.length} lines`}
+                    </Typography>
+                </Stack>
                 <TableContainer sx={{ overflowX: 'auto' }}>
                     <Table size="small" sx={{ minWidth: revealed ? 980 : 780 }}>
                         <TableHead>
-                            <TableRow sx={{ '& th': { bgcolor: alpha(brand[500], 0.04), borderBottom: `1px solid ${border.subtle}`, fontWeight: 700, fontSize: '0.67rem', color: brand[700], textTransform: 'uppercase', letterSpacing: '0.05em', py: 1.4, whiteSpace: 'nowrap' } }}>
+                            <TableRow sx={{ '& th': { bgcolor: alpha(brand[500], 0.04), borderBottom: `1px solid ${border.subtle}`, fontWeight: 700, fontSize: '0.8rem', color: brand[700], textTransform: 'uppercase', letterSpacing: '0.05em', py: 1.4, whiteSpace: 'nowrap' } }}>
                                 <TableCell>Commodity</TableCell>
                                 {revealed && <TableCell align="center">System</TableCell>}
                                 <TableCell align="center" sx={{ width: 130 }}>Counted</TableCell>
@@ -245,27 +351,71 @@ const StockCountSheet = () => {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {count.lines.map((line, idx) => (
-                                <LineRow
-                                    key={line.commodityId}
-                                    line={line}
-                                    idx={idx}
-                                    draft={draft[line.commodityId]}
-                                    editable={counting && !busy}
-                                    revealed={revealed}
-                                    onChange={setField}
-                                />
-                            ))}
+                            {groups.length === 0 && (
+                                <TableRow>
+                                    <TableCell colSpan={columns} align="center" sx={{ py: 4, color: neutral[500] }}>
+                                        {uncountedOnly && !search.trim() ? 'Every line has been counted.' : 'No lines match.'}
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                            {groups.map((group) => [
+                                <TableRow key={`group-${group.category}`}>
+                                    <TableCell colSpan={columns} sx={{ bgcolor: alpha(neutral[900], 0.03), py: 0.9, fontWeight: 700, fontSize: '0.8rem', color: neutral[700], textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                        {group.category} · {group.lines.length}
+                                    </TableCell>
+                                </TableRow>,
+                                ...group.lines.map((line, idx) => (
+                                    <LineRow
+                                        key={line.commodityId}
+                                        line={line}
+                                        idx={idx}
+                                        draft={draft[line.commodityId]}
+                                        editable={mayRecord && !busy}
+                                        revealed={revealed}
+                                        onChange={setField}
+                                    />
+                                )),
+                            ])}
                         </TableBody>
                     </Table>
                 </TableContainer>
             </Paper>
 
-            {/* Actions */}
-            {!terminal && (
-                <Paper elevation={0} sx={{ p: 2.25, borderRadius: 2, border: `1px solid ${border.subtle}`, bgcolor: '#fff' }}>
-                    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} justifyContent="flex-end">
-                        {counting && (
+            {blockedAsCounter && (
+                <Alert severity="info">
+                    You opened this count, so it must be approved or sent back by another approver at
+                    this branch. They have been notified.
+                </Alert>
+            )}
+
+            {/*
+              * Actions — only those this viewer's permissions and relationship to the count allow. The bar
+              * stays on screen while a long sheet scrolls, with this stage's one main action on the right;
+              * cancelling is rare and irreversible for the count, so it sits behind the menu.
+              */}
+            {!terminal && (hasPrimaryAction || mayCancel) && (
+                <Paper elevation={0} sx={{ position: 'sticky', bottom: 0, zIndex: 2, p: 2, borderRadius: 2, border: `1px solid ${border.subtle}`, bgcolor: '#fff', boxShadow: `0 -6px 18px ${alpha(neutral[900], 0.08)}` }}>
+                    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} justifyContent="flex-end" alignItems={{ sm: 'center' }}>
+                        <Typography variant="body2" sx={{ color: neutral[500], mr: { sm: 'auto !important' } }}>
+                            {mayRecord && `${countedSoFar} of ${count.totalLines} lines counted. Save as you go; submitting reveals the differences.`}
+                            {reviewing && mayReview && 'Approve the differences, or send the sheet back for a recount.'}
+                            {approved && mayPost && 'Posting is the only step that changes stock.'}
+                        </Typography>
+                        {mayCancel && (
+                            <>
+                                <IconButton aria-label="More actions" onClick={(e) => setMoreAnchor(e.currentTarget)} disabled={busy}
+                                    sx={{ alignSelf: { xs: 'flex-end', sm: 'center' } }}>
+                                    <MoreVertRoundedIcon />
+                                </IconButton>
+                                <Menu anchorEl={moreAnchor} open={!!moreAnchor} onClose={() => setMoreAnchor(null)}>
+                                    <MenuItem onClick={() => { setMoreAnchor(null); setReasonFor('cancel'); }}
+                                        sx={{ color: statusTokens.danger.strong, fontWeight: 600 }}>
+                                        <BlockOutlinedIcon fontSize="small" sx={{ mr: 1 }} /> Cancel count
+                                    </MenuItem>
+                                </Menu>
+                            </>
+                        )}
+                        {mayRecord && (
                             <>
                                 <Button onClick={save} disabled={busy} startIcon={<SaveOutlinedIcon />}
                                     sx={{ textTransform: 'none', fontWeight: 600, borderRadius: `${radii.pill}px`, px: 2.5, color: neutral[700] }}>
@@ -277,32 +427,34 @@ const StockCountSheet = () => {
                                 </Button>
                             </>
                         )}
-                        {reviewing && (
+                        {reviewing && mayReview && (
                             <>
-                                <Button onClick={sendBack} disabled={busy} startIcon={<UndoOutlinedIcon />}
+                                <Button onClick={() => setReasonFor('sendBack')} disabled={busy} startIcon={<UndoOutlinedIcon />}
                                     sx={{ textTransform: 'none', fontWeight: 600, borderRadius: `${radii.pill}px`, px: 2.5, color: statusTokens.warning.strong }}>
                                     Send back
                                 </Button>
-                                <Button onClick={() => run(() => approveStockCountService(id as string), 'Variances approved')}
+                                <Button onClick={() => run([() => approveStockCountService(id as string)], 'Variances approved')}
                                     disabled={busy} variant="contained" disableElevation startIcon={<CheckCircleOutlineIcon />} sx={primaryBtn}>
                                     Approve variances
                                 </Button>
                             </>
                         )}
-                        {approved && (
-                            <>
-                                <Typography variant="body2" sx={{ color: neutral[500], alignSelf: 'center', mr: 'auto' }}>
-                                    Posting is the only step that changes stock.
-                                </Typography>
-                                <Button onClick={() => run(() => postStockCountService(id as string), 'Adjustments posted')}
-                                    disabled={busy} variant="contained" disableElevation startIcon={<PublishOutlinedIcon />} sx={primaryBtn}>
-                                    Post adjustments
-                                </Button>
-                            </>
+                        {approved && mayPost && (
+                            <Button onClick={() => run([() => postStockCountService(id as string)], 'Adjustments posted')}
+                                disabled={busy} variant="contained" disableElevation startIcon={<PublishOutlinedIcon />} sx={primaryBtn}>
+                                Post adjustments
+                            </Button>
                         )}
                     </Stack>
                 </Paper>
             )}
+
+            <ReasonDialog
+                kind={reasonFor}
+                busy={busy}
+                onClose={() => setReasonFor(null)}
+                onConfirm={confirmReason}
+            />
 
             {count.status === 'POSTED' && (
                 <Alert severity="success" icon={<CheckCircleOutlineIcon fontSize="small" />}>
@@ -310,6 +462,53 @@ const StockCountSheet = () => {
                 </Alert>
             )}
         </Box>
+    );
+};
+
+/**
+ * The reason behind Send back or Cancel. Both require one on the server, so the Confirm button waits
+ * for it. Replaces a browser `window.prompt`, which could not say what the reason was for.
+ */
+const ReasonDialog = ({ kind, busy, onClose, onConfirm }: {
+    kind: 'sendBack' | 'cancel' | null;
+    busy: boolean;
+    onClose: () => void;
+    onConfirm: (remarks: string) => void;
+}) => {
+    const [remarks, setRemarks] = useState('');
+    useEffect(() => { if (kind) setRemarks(''); }, [kind]);
+
+    const cancelling = kind === 'cancel';
+    return (
+        <Dialog open={kind !== null} onClose={busy ? undefined : onClose} maxWidth="sm" fullWidth
+            PaperProps={{ sx: { borderRadius: `${radii.xl}px` } }}>
+            <DialogTitle sx={{ fontWeight: 700 }}>
+                {cancelling ? 'Cancel this count' : 'Send back for recount'}
+            </DialogTitle>
+            <DialogContent dividers>
+                <Stack spacing={2}>
+                    <Typography variant="body2" sx={{ color: neutral[600] }}>
+                        {cancelling
+                            ? 'Nothing has been applied to stock, so nothing is undone. The store becomes free for a new count.'
+                            : 'The counter will see this note on the sheet and can correct the lines before submitting again.'}
+                    </Typography>
+                    <TextField
+                        autoFocus fullWidth multiline rows={3} required
+                        label={cancelling ? 'Why is it being cancelled?' : 'What needs recounting?'}
+                        value={remarks} onChange={(e) => setRemarks(e.target.value)}
+                        sx={fieldSx}
+                    />
+                </Stack>
+            </DialogContent>
+            <DialogActions sx={{ px: 3, py: 2 }}>
+                <Button onClick={onClose} disabled={busy} sx={{ textTransform: 'none' }}>Back</Button>
+                <Button onClick={() => onConfirm(remarks.trim())} disabled={busy || !remarks.trim()}
+                    variant="contained" disableElevation
+                    sx={{ ...primaryBtn, ...(cancelling ? { background: statusTokens.danger.strong, '&:hover': { background: statusTokens.danger.strong } } : {}) }}>
+                    {cancelling ? 'Cancel count' : 'Send back'}
+                </Button>
+            </DialogActions>
+        </Dialog>
     );
 };
 
@@ -329,7 +528,7 @@ const SummaryTile = ({ label, value, tone, signed }: {
     label: string; value: number; tone?: { soft: string; strong: string }; signed?: boolean;
 }) => (
     <Box sx={{ flex: 1, p: 1.75, borderRadius: 2, border: `1px solid ${border.subtle}`, bgcolor: tone ? tone.soft : '#fff' }}>
-        <Typography sx={{ fontSize: '0.62rem', fontWeight: 700, color: neutral[400], textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</Typography>
+        <Typography sx={{ fontSize: '0.8rem', fontWeight: 700, color: neutral[400], textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</Typography>
         <Typography sx={{ fontSize: '1.1rem', fontWeight: 800, color: tone ? tone.strong : neutral[900], fontVariantNumeric: 'tabular-nums' }}>
             {signed && value > 0 ? `+${value}` : value}
         </Typography>
@@ -355,11 +554,11 @@ const LineRow = ({ line, idx, draft, editable, revealed, onChange }: {
             bgcolor: line.recountRequired
                 ? statusTokens.warning.soft
                 : idx % 2 ? alpha(neutral[900], 0.012) : 'transparent',
-            '& td': { borderBottom: `1px solid ${alpha(neutral[900], 0.05)}`, py: 1.1, fontSize: '0.83rem' },
+            '& td': { borderBottom: `1px solid ${alpha(neutral[900], 0.05)}`, py: 1.1, fontSize: '0.875rem' },
         }}>
             <TableCell>
-                <Typography sx={{ fontSize: '0.85rem', fontWeight: 600, color: neutral[900] }}>{line.commodityName}</Typography>
-                <Typography sx={{ fontSize: '0.7rem', color: neutral[500] }}>
+                <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: neutral[900] }}>{line.commodityName}</Typography>
+                <Typography sx={{ fontSize: '0.8rem', color: neutral[500] }}>
                     {line.assetTypeName || '—'}
                     {line.recountRequired && ' · stock moved during the count — count this line again'}
                 </Typography>
@@ -416,8 +615,8 @@ const LineRow = ({ line, idx, draft, editable, revealed, onChange }: {
                         {ADJUSTMENT_REASONS.map((r) => (
                             <MenuItem key={r.value} value={r.value}>
                                 <Box>
-                                    <Typography sx={{ fontSize: '0.84rem', fontWeight: 600 }}>{r.label}</Typography>
-                                    <Typography sx={{ fontSize: '0.7rem', color: neutral[500] }}>{r.hint}</Typography>
+                                    <Typography sx={{ fontSize: '0.875rem', fontWeight: 600 }}>{r.label}</Typography>
+                                    <Typography sx={{ fontSize: '0.8rem', color: neutral[500] }}>{r.hint}</Typography>
                                 </Box>
                             </MenuItem>
                         ))}
@@ -440,7 +639,7 @@ const LineRow = ({ line, idx, draft, editable, revealed, onChange }: {
                         sx={fieldSx}
                     />
                 ) : (
-                    <Typography sx={{ color: neutral[600], fontSize: '0.8rem' }}>{line.note || '—'}</Typography>
+                    <Typography sx={{ color: neutral[600], fontSize: '0.875rem' }}>{line.note || '—'}</Typography>
                 )}
             </TableCell>
         </TableRow>

@@ -132,7 +132,7 @@ const AssetBulkImportResult = ({ result, sourceRows, headers, handleClose }: Pro
                             startIcon={<FileDownloadOutlinedIcon sx={{ fontSize: '15px !important' }} />}
                             onClick={downloadFailedRows}
                             sx={{
-                                textTransform: 'none', fontWeight: 600, fontSize: '0.78rem',
+                                textTransform: 'none', fontWeight: 600, fontSize: '0.875rem',
                                 borderRadius: '8px', borderColor: '#E2E8F0', color: TEAL,
                                 '&:hover': { borderColor: TEAL, bgcolor: alpha(TEAL, 0.04) },
                             }}
@@ -168,7 +168,7 @@ const AssetBulkImportResult = ({ result, sourceRows, headers, handleClose }: Pro
                                     <TableRow key={`${e.row}-${idx}`} hover>
                                         <TableCell>{e.row}</TableCell>
                                         <TableCell>{e.assetName || '—'}</TableCell>
-                                        <TableCell sx={{ fontFamily: 'monospace', fontSize: '0.78rem' }}>
+                                        <TableCell sx={{ fontFamily: 'monospace', fontSize: '0.875rem' }}>
                                             {e.engravedNumber || '—'}
                                         </TableCell>
                                         <TableCell sx={{ color: RED }}>{e.error}</TableCell>

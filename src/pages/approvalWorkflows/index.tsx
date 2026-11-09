@@ -44,7 +44,7 @@ import { brand, gold, neutral, border, surface, elevation, radii, status } from 
 import { PageHero, EmptyState } from '../../components/layout';
 import WorkflowForm from './WorkflowForm';
 import ApprovalWorkflowUtills from './utills';
-import { BRANCH_SCOPE_LABELS, IApprovalWorkflow, IApprovalStep, APPROVER_TYPE_LABELS } from './interface';
+import { BRANCH_SCOPE_LABELS, IApprovalWorkflow, IApprovalStep, APPROVER_TYPE_LABELS, WORKFLOW_PURPOSE_LABELS } from './interface';
 import { RequirePermission } from '../../core/permissions';
 import { PERMISSIONS } from '../../core/permissions/constants';
 
@@ -63,7 +63,7 @@ const TabLabel = ({ text, count }: { text: string; count: number }) => (
             sx={{
                 px: 0.75,
                 borderRadius: '10px',
-                fontSize: '0.68rem',
+                fontSize: '0.8rem',
                 fontWeight: 700,
                 lineHeight: 1.6,
                 bgcolor: neutral[100],
@@ -86,7 +86,7 @@ const ActiveBadge = ({ active }: { active: boolean }) => (
         px: 1,
         py: 0.25,
         borderRadius: `${radii.pill}px`,
-        fontSize: '0.7rem',
+        fontSize: '0.8rem',
         fontWeight: 700,
         letterSpacing: '0.04em',
         bgcolor: active ? status.success.soft : neutral[100],
@@ -104,13 +104,13 @@ const ActiveBadge = ({ active }: { active: boolean }) => (
 const MetaItem = ({ icon, label }: { icon: React.ReactNode; label: string }) => (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.6 }}>
         <Box sx={{ color: neutral[400], display: 'flex', alignItems: 'center' }}>{icon}</Box>
-        <Typography sx={{ fontSize: '0.75rem', color: neutral[500], fontWeight: 500 }}>{label}</Typography>
+        <Typography sx={{ fontSize: '0.8rem', color: neutral[500], fontWeight: 500 }}>{label}</Typography>
     </Box>
 );
 
 const StepFlow = ({ steps }: { steps: IApprovalStep[] }) => {
     if (!steps?.length) return (
-        <Typography sx={{ fontSize: '0.72rem', color: neutral[400], fontStyle: 'italic' }}>No steps configured</Typography>
+        <Typography sx={{ fontSize: '0.8rem', color: neutral[400], fontStyle: 'italic' }}>No steps configured</Typography>
     );
     return (
         <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 0.5 }}>
@@ -139,21 +139,21 @@ const StepFlow = ({ steps }: { steps: IApprovalStep[] }) => {
                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                                 flexShrink: 0,
                             }}>
-                                <Typography sx={{ fontSize: '0.55rem', color: '#fff', fontWeight: 700, lineHeight: 1 }}>
+                                <Typography sx={{ fontSize: '0.8rem', color: '#fff', fontWeight: 700, lineHeight: 1 }}>
                                     {i + 1}
                                 </Typography>
                             </Box>
-                            <Typography sx={{ fontSize: '0.72rem', fontWeight: 600, color: neutral[800], whiteSpace: 'nowrap' }}>
+                            <Typography sx={{ fontSize: '0.8rem', fontWeight: 600, color: neutral[800], whiteSpace: 'nowrap' }}>
                                 {s.stepName || `Step ${i + 1}`}
                             </Typography>
                             {s.optional && (
                                 <Chip label="opt" size="small" sx={{
-                                    height: 14, fontSize: '0.55rem', fontWeight: 700,
+                                    height: 14, fontSize: '0.8rem', fontWeight: 700,
                                     bgcolor: alpha(GOLD, 0.12), color: GOLD,
                                 }} />
                             )}
                         </Box>
-                        <Typography sx={{ fontSize: '0.62rem', color: neutral[400], fontWeight: 500 }}>
+                        <Typography sx={{ fontSize: '0.8rem', color: neutral[400], fontWeight: 500 }}>
                             {APPROVER_TYPE_LABELS[s.approverType] ?? s.approverType}
                         </Typography>
                     </Box>
@@ -228,7 +228,7 @@ const WorkflowCard = ({ wf, onEdit, onToggle, onDelete }: WorkflowCardProps) => 
                                     size="small"
                                     icon={<LowPriorityOutlinedIcon sx={{ fontSize: '12px !important', ml: '6px !important' }} />}
                                     sx={{
-                                        height: 20, fontSize: '0.68rem', fontWeight: 600,
+                                        height: 20, fontSize: '0.8rem', fontWeight: 600,
                                         bgcolor: alpha(GOLD, 0.08),
                                         color: GOLD,
                                         border: `1px solid ${alpha(GOLD, 0.2)}`,
@@ -237,7 +237,7 @@ const WorkflowCard = ({ wf, onEdit, onToggle, onDelete }: WorkflowCardProps) => 
                                 />
                             </Box>
                             {wf.description && (
-                                <Typography sx={{ fontSize: '0.78rem', color: neutral[500], lineHeight: 1.4 }}>
+                                <Typography sx={{ fontSize: '0.875rem', color: neutral[500], lineHeight: 1.4 }}>
                                     {wf.description}
                                 </Typography>
                             )}
@@ -290,6 +290,10 @@ const WorkflowCard = ({ wf, onEdit, onToggle, onDelete }: WorkflowCardProps) => 
                         icon={<AccountBalanceOutlinedIcon sx={{ fontSize: 13 }} />}
                         label={BRANCH_SCOPE_LABELS[wf.branchScope] ?? wf.branchScope}
                     />
+                    <MetaItem
+                        icon={<PeopleOutlineIcon sx={{ fontSize: 13 }} />}
+                        label={WORKFLOW_PURPOSE_LABELS[wf.appliesTo ?? 'BOTH']}
+                    />
                     {wf.branchName && (
                         <MetaItem
                             icon={<AccountBalanceOutlinedIcon sx={{ fontSize: 13 }} />}
@@ -315,14 +319,14 @@ const WorkflowCard = ({ wf, onEdit, onToggle, onDelete }: WorkflowCardProps) => 
                         <Box sx={{ px: { xs: 2, md: 3 }, py: 1.25, display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mr: 0.5 }}>
                                 <CategoryOutlinedIcon sx={{ fontSize: 13, color: neutral[400] }} />
-                                <Typography sx={{ fontSize: '0.68rem', fontWeight: 700, color: neutral[400], textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                                <Typography sx={{ fontSize: '0.8rem', fontWeight: 700, color: neutral[400], textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                                     Categories
                                 </Typography>
                             </Box>
                             {(wf.assetTypeNames ?? []).map((name) => (
                                 <Chip key={name} label={name} size="small" sx={{
                                     height: 20,
-                                    fontSize: '0.7rem',
+                                    fontSize: '0.8rem',
                                     fontWeight: 500,
                                     bgcolor: alpha(P, 0.07),
                                     color: P,
@@ -339,7 +343,7 @@ const WorkflowCard = ({ wf, onEdit, onToggle, onDelete }: WorkflowCardProps) => 
                         <Divider sx={{ borderColor: border.subtle }} />
                         <Box sx={{ px: { xs: 2, md: 3 }, py: 1.5 }}>
                             <Typography sx={{
-                                fontSize: '0.68rem', fontWeight: 700, color: neutral[400],
+                                fontSize: '0.8rem', fontWeight: 700, color: neutral[400],
                                 textTransform: 'uppercase', letterSpacing: '0.06em', mb: 1,
                             }}>
                                 Approval Flow
@@ -450,7 +454,7 @@ const ApprovalWorkflows: React.FC = () => {
                         sx={{
                             minHeight: 44,
                             '& .MuiTab-root': {
-                                fontSize: '0.82rem',
+                                fontSize: '0.875rem',
                                 minHeight: 44,
                                 textTransform: 'none',
                                 px: 1.75,
@@ -549,7 +553,7 @@ const ApprovalWorkflows: React.FC = () => {
                     </Box>
                 </DialogTitle>
                 <DialogContent>
-                    <Typography sx={{ fontSize: '0.875rem', color: neutral[600] }}>
+                    <Typography sx={{ fontSize: '0.9375rem', color: neutral[600] }}>
                         Are you sure you want to delete{' '}
                         <Box component="span" sx={{ fontWeight: 700, color: neutral[900] }}>
                             "{deleteTarget?.name}"

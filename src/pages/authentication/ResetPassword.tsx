@@ -103,7 +103,7 @@ const fieldLabelSx = (active: boolean) => ({
     display: 'block',
     mb: 0.75,
     fontWeight: 600,
-    fontSize: '0.72rem',
+    fontSize: '0.8rem',
     letterSpacing: 0.4,
     textTransform: 'uppercase',
     color: active ? PRIMARY_COLOR : '#64748B',
@@ -130,7 +130,7 @@ const passwordFieldSx = (active: boolean, hasError: boolean) => ({
         },
     },
     '& .MuiOutlinedInput-input': {
-        fontSize: '0.875rem',
+        fontSize: '0.9375rem',
         fontWeight: 500,
         color: '#0F172A',
         '&::placeholder': { color: '#94A3B8', opacity: 1 },
@@ -316,7 +316,7 @@ const ResetPassword = () => {
 
                         {/* Token status */}
                         {!token ? (
-                            <Alert severity="warning" sx={{ borderRadius: 2, '& .MuiAlert-message': { fontSize: '0.8rem' } }}>
+                            <Alert severity="warning" sx={{ borderRadius: 2, '& .MuiAlert-message': { fontSize: '0.875rem' } }}>
                                 Reset token is missing. Please use a valid reset link.
                             </Alert>
                         ) : (
@@ -324,7 +324,7 @@ const ResetPassword = () => {
                                 <Alert
                                     severity="info"
                                     icon={<VpnKeyIcon fontSize="small" />}
-                                    sx={{ borderRadius: 2, '& .MuiAlert-message': { fontSize: '0.8rem' } }}
+                                    sx={{ borderRadius: 2, '& .MuiAlert-message': { fontSize: '0.875rem' } }}
                                 >
                                     Resetting password for: <strong>{userEmail}</strong>
                                 </Alert>
@@ -370,7 +370,7 @@ const ResetPassword = () => {
                                     sx={passwordFieldSx(Boolean(isPasswordFieldActive), !!formState.errors.newPassword)}
                                 />
                                 {formState.errors.newPassword && (
-                                    <FormHelperText error sx={{ mx: 0, mt: 0.5, fontSize: '0.72rem', fontWeight: 500 }}>
+                                    <FormHelperText error sx={{ mx: 0, mt: 0.5, fontSize: '0.8rem', fontWeight: 500 }}>
                                         {formState.errors.newPassword.message}
                                     </FormHelperText>
                                 )}
@@ -379,12 +379,12 @@ const ResetPassword = () => {
                                 {newPassword.length > 0 && (
                                     <Box sx={{ mt: 1 }}>
                                         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-                                            <Typography variant="caption" sx={{ fontWeight: 500, fontSize: '0.7rem', color: '#64748B' }}>
+                                            <Typography variant="caption" sx={{ fontWeight: 500, fontSize: '0.8rem', color: '#64748B' }}>
                                                 Password strength:
                                             </Typography>
                                             <Typography
                                                 variant="caption"
-                                                sx={{ fontWeight: 600, color: strengthInfo.color, fontSize: '0.7rem' }}
+                                                sx={{ fontWeight: 600, color: strengthInfo.color, fontSize: '0.8rem' }}
                                             >
                                                 {strengthInfo.label}
                                             </Typography>
@@ -439,7 +439,7 @@ const ResetPassword = () => {
                                     sx={passwordFieldSx(Boolean(formState.touchedFields.confirmPassword), !!formState.errors.confirmPassword)}
                                 />
                                 {formState.errors.confirmPassword && (
-                                    <FormHelperText error sx={{ mx: 0, mt: 0.5, fontSize: '0.72rem', fontWeight: 500 }}>
+                                    <FormHelperText error sx={{ mx: 0, mt: 0.5, fontSize: '0.8rem', fontWeight: 500 }}>
                                         {formState.errors.confirmPassword.message}
                                     </FormHelperText>
                                 )}
@@ -456,7 +456,7 @@ const ResetPassword = () => {
                             >
                                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                                     <ShieldIcon sx={{ color: PRIMARY_COLOR, mr: 1, fontSize: '0.95rem' }} />
-                                    <Typography variant="subtitle2" sx={{ color: PRIMARY_COLOR, fontWeight: 600, fontSize: '0.8rem' }}>
+                                    <Typography variant="subtitle2" sx={{ color: PRIMARY_COLOR, fontWeight: 600, fontSize: '0.875rem' }}>
                                         Password Requirements
                                     </Typography>
                                 </Box>
@@ -499,7 +499,7 @@ const ResetPassword = () => {
                                     height: 48,
                                     borderRadius: '10px',
                                     fontWeight: 700,
-                                    fontSize: '0.875rem',
+                                    fontSize: '0.9375rem',
                                     textTransform: 'none',
                                     bgcolor: PRIMARY_COLOR,
                                     boxShadow: `0 4px 14px ${alpha(PRIMARY_COLOR, 0.35)}`,
@@ -568,14 +568,14 @@ const RequirementItem = ({ text, fulfilled, active = false }: RequirementItemPro
                     transition: 'color 0.2s ease-in-out',
                 }}
             >
-                <CheckCircleIcon sx={{ fontSize: '0.9rem' }} />
+                <CheckCircleIcon sx={{ fontSize: '0.9375rem' }} />
             </Box>
             <Typography
                 variant="body2"
                 sx={{
                     color: active ? (fulfilled ? 'text.primary' : 'text.secondary') : 'text.secondary',
                     fontWeight: active && fulfilled ? 500 : 400,
-                    fontSize: '0.75rem',
+                    fontSize: '0.8rem',
                     transition: 'color 0.2s ease-in-out, font-weight 0.2s ease-in-out',
                 }}
             >

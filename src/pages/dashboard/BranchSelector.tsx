@@ -67,7 +67,7 @@ const BranchSelector = ({ value, onChange }: IBranchSelectorProps) => {
                 height: 32,
                 minWidth: 190,
                 bgcolor: '#fff',
-                fontSize: '0.78rem',
+                fontSize: '0.875rem',
                 fontWeight: 600,
                 color: neutral[800],
                 borderRadius: '8px',
@@ -84,11 +84,11 @@ const BranchSelector = ({ value, onChange }: IBranchSelectorProps) => {
         >
             {/* The roll-up stays first and is the default, so the page opens on the widest view a
                 viewer at this scope is entitled to. */}
-            <MenuItem value="all" sx={{ fontSize: '0.8rem', fontWeight: 700 }}>
+            <MenuItem value="all" sx={{ fontSize: '0.875rem', fontWeight: 700 }}>
                 All branches &amp; Head Office
             </MenuItem>
             {branches.map((branch) => (
-                <MenuItem key={branch.value} value={String(branch.value)} sx={{ fontSize: '0.8rem' }}>
+                <MenuItem key={branch.value} value={String(branch.value)} sx={{ fontSize: '0.875rem' }}>
                     {branch.label}
                 </MenuItem>
             ))}

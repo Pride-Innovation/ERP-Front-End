@@ -49,7 +49,7 @@ const PageShell = ({
             <Breadcrumbs
                 separator={<NavigateNextIcon fontSize="small" sx={{ color: neutral[400] }} />}
                 aria-label="breadcrumb"
-                sx={{ mb: 1.5, fontSize: '0.75rem' }}
+                sx={{ mb: 1.5, fontSize: '0.8rem' }}
             >
                 {breadcrumbs.map((crumb, idx) => {
                     const isLast = idx === breadcrumbs.length - 1;
@@ -77,7 +77,7 @@ const PageShell = ({
                             underline="hover"
                             sx={{
                                 color: neutral[500],
-                                fontSize: '0.75rem',
+                                fontSize: '0.8rem',
                                 fontWeight: 500,
                                 cursor: 'pointer',
                                 '&:hover': { color: brand[600] },

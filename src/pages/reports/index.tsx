@@ -26,7 +26,8 @@ import DisposalReport from './panels/DisposalReport';
 import MaintenanceReport from './panels/MaintenanceReport';
 import { PageHero } from '../../components/layout';
 import usePermissions from '../../core/permissions/usePermissions';
-import { PERMISSIONS, PermissionName } from '../../core/permissions/constants';
+import { PermissionName } from '../../core/permissions/constants';
+import { REPORT_TAB_PERMISSIONS } from './reportPermissions';
 
 interface ReportTab {
     id: number;
@@ -49,35 +50,33 @@ const REPORT_TABS: ReportTab[] = [
     {
         id: 0, label: 'Stock Management', shortLabel: 'Stock',
         icon: <Inventory2OutlinedIcon fontSize="small" />,
-        // GET /stocks/** answers to READ_INVENTORY.
-        permission: PERMISSIONS.READ_INVENTORY, render: () => <StockReport />,
+        permission: REPORT_TAB_PERMISSIONS.stock, render: () => <StockReport />,
     },
     {
         id: 1, label: 'Asset Register', shortLabel: 'Assets',
         icon: <TuneOutlinedIcon fontSize="small" />,
-        permission: PERMISSIONS.READ_ASSET, render: () => <AssetRegisterReport />,
+        permission: REPORT_TAB_PERMISSIONS.assets, render: () => <AssetRegisterReport />,
     },
     {
         id: 2, label: 'Requests / Requisitions', shortLabel: 'Requests',
         icon: <RecentActorsOutlinedIcon fontSize="small" />,
-        permission: PERMISSIONS.READ_REQUEST, render: () => <RequestsReport />,
+        permission: REPORT_TAB_PERMISSIONS.requests, render: () => <RequestsReport />,
     },
     {
         id: 3, label: 'Asset Movement', shortLabel: 'Movement',
         icon: <LocalShippingOutlinedIcon fontSize="small" />,
-        permission: PERMISSIONS.READ_MOVEMENT, render: () => <MovementReport />,
+        permission: REPORT_TAB_PERMISSIONS.movements, render: () => <MovementReport />,
     },
     {
         id: 4, label: 'Asset Disposal', shortLabel: 'Disposal',
         icon: <DeleteForeverOutlinedIcon fontSize="small" />,
-        // Disposals are assets with the written-off flag, read through GET /assets.
-        permission: PERMISSIONS.READ_ASSET, render: () => <DisposalReport />,
+        permission: REPORT_TAB_PERMISSIONS.disposal, render: () => <DisposalReport />,
     },
     {
         id: 5, label: 'Maintenance', shortLabel: 'Maintenance',
         icon: <BuildOutlinedIcon fontSize="small" />,
-        // GET /assets/repairs sits under /assets/**, so it answers to READ_ASSET too.
-        permission: PERMISSIONS.READ_ASSET, render: () => <MaintenanceReport />,
+        // GET /assets/repairs has its own rule, READ_REPAIR_HISTORY, matched before /assets/**.
+        permission: REPORT_TAB_PERMISSIONS.maintenance, render: () => <MaintenanceReport />,
     },
 ];
 
@@ -120,7 +119,7 @@ const ReportsPage = () => {
                         sx={{
                             minHeight: 44,
                             '& .MuiTab-root': {
-                                fontSize: '0.82rem',
+                                fontSize: '0.875rem',
                                 minHeight: 44,
                                 textTransform: 'none',
                                 px: 1.75,

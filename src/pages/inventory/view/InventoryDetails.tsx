@@ -81,7 +81,7 @@ const StatusChip = ({ code }: { code?: string }) => {
             sx={{
                 height: 24,
                 fontWeight: 700,
-                fontSize: '0.72rem',
+                fontSize: '0.8rem',
                 bgcolor: tone.soft,
                 color: tone.strong,
                 border: `1px solid ${alpha(tone.main, 0.3)}`,
@@ -105,12 +105,12 @@ const HeroFact = ({
                 borderLeft: { xs: 'none', sm: first ? 'none' : `1px solid ${border.subtle}` },
             }}
         >
-            <Typography sx={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.09em', textTransform: 'uppercase', color: neutral[500] }}>
+            <Typography sx={{ fontSize: '0.8rem', fontWeight: 700, letterSpacing: '0.09em', textTransform: 'uppercase', color: neutral[500] }}>
                 {label}
             </Typography>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.35 }}>
                 <Typography noWrap sx={{
-                    fontSize: '0.9rem',
+                    fontSize: '0.9375rem',
                     fontWeight: empty ? 400 : 700,
                     fontStyle: empty ? 'italic' : 'normal',
                     color: empty ? neutral[400] : neutral[800],
@@ -238,7 +238,7 @@ const InventoryDetails = () => {
                                             size="small"
                                             icon={<BusinessOutlinedIcon sx={{ fontSize: 14 }} />}
                                             label={currentInventory?.supplier?.name || 'Unknown Supplier'}
-                                            sx={{ height: 24, fontWeight: 600, fontSize: '0.72rem', bgcolor: alpha(brand[500], 0.08), color: brand[700], border: `1px solid ${alpha(brand[500], 0.14)}`, '& .MuiChip-icon': { color: brand[600] } }}
+                                            sx={{ height: 24, fontWeight: 600, fontSize: '0.8rem', bgcolor: alpha(brand[500], 0.08), color: brand[700], border: `1px solid ${alpha(brand[500], 0.14)}`, '& .MuiChip-icon': { color: brand[600] } }}
                                         />
                                         <StatusChip code={currentInventory?.status?.status ?? undefined} />
                                     </Stack>
@@ -332,7 +332,7 @@ const InventoryDetails = () => {
                                     minHeight: 50,
                                     borderBottom: `1px solid ${alpha('#000', 0.07)}`,
                                     bgcolor: alpha(brand[500], 0.025),
-                                    '& .MuiTab-root': { minHeight: 50, textTransform: 'none', fontSize: '0.83rem', fontWeight: 500, color: neutral[500], gap: 0.75, px: 2 },
+                                    '& .MuiTab-root': { minHeight: 50, textTransform: 'none', fontSize: '0.875rem', fontWeight: 500, color: neutral[500], gap: 0.75, px: 2 },
                                     '& .Mui-selected': { color: brand[700], fontWeight: 700 },
                                     '& .MuiTabs-indicator': { bgcolor: brand[500], height: 3, borderRadius: '3px 3px 0 0' },
                                 }}

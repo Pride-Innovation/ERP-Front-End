@@ -71,11 +71,11 @@ const ImportProgressDialog = ({ title, subtitle, noun, progress, footnote }: IIm
         >
             <Box sx={{ pt: 0.5 }}>
                 <Stack direction="row" justifyContent="space-between" alignItems="baseline" sx={{ mb: 1.25 }}>
-                    <Typography sx={{ fontSize: '0.9rem', fontWeight: 600, color: '#1E293B' }}>
+                    <Typography sx={{ fontSize: '0.9375rem', fontWeight: 600, color: '#1E293B' }}>
                         {headline}
                     </Typography>
                     {determinate && (
-                        <Typography sx={{ fontSize: '0.78rem', fontWeight: 700, color: PRIMARY, fontVariantNumeric: 'tabular-nums' }}>
+                        <Typography sx={{ fontSize: '0.875rem', fontWeight: 700, color: PRIMARY, fontVariantNumeric: 'tabular-nums' }}>
                             {count(done!)} / {count(total)} done
                         </Typography>
                     )}
@@ -93,7 +93,7 @@ const ImportProgressDialog = ({ title, subtitle, noun, progress, footnote }: IIm
                         },
                     }}
                 />
-                <Typography sx={{ fontSize: '0.75rem', color: '#94A3B8', mt: 1.5, lineHeight: 1.5 }}>
+                <Typography sx={{ fontSize: '0.8rem', color: '#94A3B8', mt: 1.5, lineHeight: 1.5 }}>
                     Please keep this page open until it finishes. {footnote}
                 </Typography>
             </Box>

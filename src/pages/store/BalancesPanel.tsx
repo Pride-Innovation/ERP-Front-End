@@ -44,6 +44,8 @@ export interface IBalanceView {
     commodityName?: string;
     assetTypeName?: string;
     quantity: number;
+    /** On hand less what is already promised (issued but not approved, or on an uncollected movement). */
+    available?: number | null;
     minLevel: number;
     lowStock: boolean;
 }
@@ -152,7 +154,7 @@ const BalancesPanel = ({ rows, setRows, loading, lowOnly, onLowOnlyChange }: Bal
     const filterChipSx = (active: boolean, color: string = PRIMARY) => ({
         height: 26,
         fontWeight: 700,
-        fontSize: '0.7rem',
+        fontSize: '0.8rem',
         cursor: 'pointer',
         bgcolor: active ? alpha(color, 0.12) : '#fff',
         color: active ? color : neutral[500],
@@ -184,7 +186,7 @@ const BalancesPanel = ({ rows, setRows, loading, lowOnly, onLowOnlyChange }: Bal
                     </Typography>
                     {/* The listing is branch-scoped server-side. Saying so stops a branch officer
                         reading an empty or short table as "the bank holds almost nothing". */}
-                    <Typography variant="caption" sx={{ color: neutral[500], fontSize: '0.7rem' }}>
+                    <Typography variant="caption" sx={{ color: neutral[500], fontSize: '0.8rem' }}>
                         {seesAllBranches
                             ? 'What each store holds on hand, across every branch'
                             : 'What your branch’s stores hold on hand, and when to reorder'}
@@ -204,7 +206,7 @@ const BalancesPanel = ({ rows, setRows, loading, lowOnly, onLowOnlyChange }: Bal
                     value={search} onChange={(e) => setSearch(e.target.value)}
                     sx={{
                         minWidth: 250,
-                        '& .MuiOutlinedInput-root': { borderRadius: '8px', bgcolor: '#fff', fontSize: '0.8rem' },
+                        '& .MuiOutlinedInput-root': { borderRadius: '8px', bgcolor: '#fff', fontSize: '0.875rem' },
                         '& fieldset': { borderColor: border.subtle },
                         '&:hover fieldset': { borderColor: alpha(PRIMARY, 0.5) },
                     }}
@@ -292,12 +294,20 @@ const BalancesPanel = ({ rows, setRows, loading, lowOnly, onLowOnlyChange }: Bal
                                         <Typography
                                             component="span"
                                             sx={{
-                                                fontWeight: 700, fontSize: '0.84rem',
+                                                fontWeight: 700, fontSize: '0.875rem',
                                                 color: r.lowStock ? AMBER : neutral[900],
                                             }}
                                         >
                                             {r.quantity.toLocaleString()}
                                         </Typography>
+                                        {/* Said only when some of it is spoken for: issued stock stays on
+                                            the shelf until it is approved, and the shelf alone reads as
+                                            though all of it could still be issued. */}
+                                        {r.available != null && r.available < r.quantity && (
+                                            <Typography component="span" sx={{ display: 'block', fontSize: '0.8rem', color: neutral[500] }}>
+                                                {r.available.toLocaleString()} available · {(r.quantity - r.available).toLocaleString()} promised
+                                            </Typography>
+                                        )}
                                         <StockHealthBar quantity={r.quantity} minLevel={r.minLevel} />
                                     </TableCell>
                                     <TableCell align="right" sx={dataBodyCellSx}>
@@ -313,7 +323,7 @@ const BalancesPanel = ({ rows, setRows, loading, lowOnly, onLowOnlyChange }: Bal
                                             inputProps={{ min: 0, style: { textAlign: 'right', width: 52, padding: '3px 6px' } }}
                                             sx={{
                                                 '& .MuiOutlinedInput-root': {
-                                                    fontSize: '0.78rem', borderRadius: '6px', bgcolor: '#fff',
+                                                    fontSize: '0.875rem', borderRadius: '6px', bgcolor: '#fff',
                                                     fontVariantNumeric: 'tabular-nums',
                                                 },
                                                 '& fieldset': { borderColor: border.subtle },
@@ -387,7 +397,7 @@ const BalancesPanel = ({ rows, setRows, loading, lowOnly, onLowOnlyChange }: Bal
                             }}
                             sx={{
                                 width: 80,
-                                fontSize: '0.8rem',
+                                fontSize: '0.875rem',
                                 height: 28,
                                 '& .MuiOutlinedInput-root': { borderRadius: '6px' },
                             }}

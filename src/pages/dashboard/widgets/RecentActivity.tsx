@@ -77,7 +77,7 @@ const RecentActivity = ({ events, limit = 8 }: IRecentActivityProps) => {
                     size="small"
                     onClick={() => navigate(ROUTES.AUDIT_TRAILS)}
                     sx={{
-                        textTransform: 'none', fontWeight: 600, fontSize: '0.75rem',
+                        textTransform: 'none', fontWeight: 600, fontSize: '0.8rem',
                         color: brand[600], minWidth: 0, px: 1,
                         '&:hover': { bgcolor: alpha(brand[500], 0.06) },
                     }}
@@ -109,7 +109,7 @@ const RecentActivity = ({ events, limit = 8 }: IRecentActivityProps) => {
                         <Box sx={{ minWidth: 0, flexGrow: 1 }}>
                             <Typography
                                 sx={{
-                                    fontSize: '0.82rem',
+                                    fontSize: '0.875rem',
                                     color: neutral[800],
                                     overflow: 'hidden',
                                     textOverflow: 'ellipsis',
@@ -120,18 +120,18 @@ const RecentActivity = ({ events, limit = 8 }: IRecentActivityProps) => {
                                 {event.description}
                             </Typography>
                             <Stack direction="row" spacing={0.75} alignItems="center" sx={{ mt: 0.25 }}>
-                                <Typography sx={{ fontSize: '0.7rem', color: neutral[500] }}>
+                                <Typography sx={{ fontSize: '0.8rem', color: neutral[500] }}>
                                     {event.actor || 'System'}
                                 </Typography>
                                 <Box sx={{ width: 3, height: 3, borderRadius: '50%', bgcolor: neutral[300] }} />
-                                <Typography sx={{ fontSize: '0.7rem', color: neutral[400] }}>
+                                <Typography sx={{ fontSize: '0.8rem', color: neutral[400] }}>
                                     {event.module}
                                 </Typography>
                             </Stack>
                         </Box>
                         <Typography
                             sx={{
-                                fontSize: '0.7rem',
+                                fontSize: '0.8rem',
                                 color: neutral[400],
                                 whiteSpace: 'nowrap',
                                 bgcolor: alpha(neutral[300], 0.18),

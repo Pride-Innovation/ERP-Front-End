@@ -119,7 +119,7 @@ const MovementHistory = ({ request }: { request: IRequest }) => {
                         size="small"
                         sx={{
                             fontWeight: 700,
-                            fontSize: '0.72rem',
+                            fontSize: '0.8rem',
                             bgcolor: requestIsRejected ? REJECT_COLOR : brand[500],
                             color: '#fff',
                             height: 22,

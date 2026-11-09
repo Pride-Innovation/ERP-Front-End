@@ -153,7 +153,7 @@ const PILL_INPUT_SX = {
     '& .MuiOutlinedInput-root': {
         borderRadius: '8px',
         bgcolor: '#fff',
-        fontSize: '0.8rem',
+        fontSize: '0.875rem',
         height: 36,
         '& fieldset': { borderColor: '#E2E8F0' },
         '&:hover fieldset': { borderColor: PRIMARY },
@@ -162,7 +162,7 @@ const PILL_INPUT_SX = {
 };
 
 const FieldLabel = ({ children }: { children: React.ReactNode }) => (
-    <Typography sx={{ fontSize: '0.72rem', fontWeight: 600, color: '#64748B', mb: 0.5, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+    <Typography sx={{ fontSize: '0.8rem', fontWeight: 600, color: '#64748B', mb: 0.5, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
         {children}
     </Typography>
 );
@@ -170,7 +170,7 @@ const FieldLabel = ({ children }: { children: React.ReactNode }) => (
 /** "All …" placeholder item styled the same as the reports page's empty options. */
 const allItem = (label: string) => (
     <MenuItem value="">
-        <em style={{ fontSize: '0.8rem', fontStyle: 'normal', color: '#94A3B8' }}>{label}</em>
+        <em style={{ fontSize: '0.875rem', fontStyle: 'normal', color: '#94A3B8' }}>{label}</em>
     </MenuItem>
 );
 
@@ -261,7 +261,7 @@ const MovementFilters = ({
                 }}>
                     <Stack direction="row" alignItems="center" gap={1}>
                         <TuneOutlinedIcon sx={{ fontSize: 16, color: PRIMARY }} />
-                        <Typography sx={{ fontWeight: 700, fontSize: '0.82rem', color: '#0F172A' }}>
+                        <Typography sx={{ fontWeight: 700, fontSize: '0.875rem', color: '#0F172A' }}>
                             Filters &amp; Options
                         </Typography>
                     </Stack>
@@ -282,7 +282,7 @@ const MovementFilters = ({
                                 <FormControl fullWidth size="small" sx={PILL_INPUT_SX}>
                                     <Select value={datePreset} onChange={e => setDatePreset(e.target.value)}
                                         startAdornment={<InputAdornment position="start"><CalendarTodayOutlinedIcon sx={{ fontSize: 13, color: PRIMARY }} /></InputAdornment>}>
-                                        {DATE_PRESETS.map(d => <MenuItem key={d.value} value={d.value} sx={{ fontSize: '0.8rem' }}>{d.label}</MenuItem>)}
+                                        {DATE_PRESETS.map(d => <MenuItem key={d.value} value={d.value} sx={{ fontSize: '0.875rem' }}>{d.label}</MenuItem>)}
                                     </Select>
                                 </FormControl>
                             </Grid>
@@ -308,7 +308,7 @@ const MovementFilters = ({
                                     <Select value={movementType} onChange={e => setMovementType(e.target.value)} displayEmpty>
                                         {allItem('All Types')}
                                         {(Object.keys(movementTypeLabels) as MovementType[]).map(t => (
-                                            <MenuItem key={t} value={t} sx={{ fontSize: '0.8rem' }}>{movementTypeLabels[t]}</MenuItem>
+                                            <MenuItem key={t} value={t} sx={{ fontSize: '0.875rem' }}>{movementTypeLabels[t]}</MenuItem>
                                         ))}
                                     </Select>
                                 </FormControl>
@@ -321,7 +321,7 @@ const MovementFilters = ({
                                     <Select value={movementCategory} onChange={e => setMovementCategory(e.target.value)} displayEmpty>
                                         {allItem('All Categories')}
                                         {(Object.keys(categoryLabels) as MovementCategory[]).map(c => (
-                                            <MenuItem key={c} value={c} sx={{ fontSize: '0.8rem' }}>{categoryLabels[c]}</MenuItem>
+                                            <MenuItem key={c} value={c} sx={{ fontSize: '0.875rem' }}>{categoryLabels[c]}</MenuItem>
                                         ))}
                                     </Select>
                                 </FormControl>
@@ -334,7 +334,7 @@ const MovementFilters = ({
                                     <Select value={status} onChange={e => setStatus(e.target.value)} displayEmpty>
                                         {allItem('All Statuses')}
                                         {(Object.keys(statusConfig) as MovementStatus[]).map(s => (
-                                            <MenuItem key={s} value={s} sx={{ fontSize: '0.8rem' }}>{statusConfig[s].label}</MenuItem>
+                                            <MenuItem key={s} value={s} sx={{ fontSize: '0.875rem' }}>{statusConfig[s].label}</MenuItem>
                                         ))}
                                     </Select>
                                 </FormControl>
@@ -346,7 +346,7 @@ const MovementFilters = ({
                                 <FormControl fullWidth size="small" sx={PILL_INPUT_SX}>
                                     <Select value={source} onChange={e => setSource(e.target.value)} displayEmpty>
                                         {allItem('All Sources')}
-                                        {sources.map(s => <MenuItem key={s} value={s} sx={{ fontSize: '0.8rem' }}>{s}</MenuItem>)}
+                                        {sources.map(s => <MenuItem key={s} value={s} sx={{ fontSize: '0.875rem' }}>{s}</MenuItem>)}
                                     </Select>
                                 </FormControl>
                             </Grid>
@@ -357,7 +357,7 @@ const MovementFilters = ({
                                 <FormControl fullWidth size="small" sx={PILL_INPUT_SX}>
                                     <Select value={destination} onChange={e => setDestination(e.target.value)} displayEmpty>
                                         {allItem('All Destinations')}
-                                        {destinations.map(d => <MenuItem key={d} value={d} sx={{ fontSize: '0.8rem' }}>{d}</MenuItem>)}
+                                        {destinations.map(d => <MenuItem key={d} value={d} sx={{ fontSize: '0.875rem' }}>{d}</MenuItem>)}
                                     </Select>
                                 </FormControl>
                             </Grid>
@@ -368,7 +368,7 @@ const MovementFilters = ({
                                 <FormControl fullWidth size="small" sx={PILL_INPUT_SX}>
                                     <Select value={courier} onChange={e => setCourier(e.target.value)} displayEmpty>
                                         {allItem('All Couriers')}
-                                        {couriers.map(c => <MenuItem key={c} value={c} sx={{ fontSize: '0.8rem' }}>{c}</MenuItem>)}
+                                        {couriers.map(c => <MenuItem key={c} value={c} sx={{ fontSize: '0.875rem' }}>{c}</MenuItem>)}
                                     </Select>
                                 </FormControl>
                             </Grid>
@@ -392,7 +392,7 @@ const MovementFilters = ({
                                     <Select value={receiptStatus} onChange={e => setReceiptStatus(e.target.value)} displayEmpty>
                                         {allItem('All Receipts')}
                                         {(Object.keys(receiptStatusLabels) as ReceiptStatus[]).map(r => (
-                                            <MenuItem key={r} value={r} sx={{ fontSize: '0.8rem' }}>{receiptStatusLabels[r]}</MenuItem>
+                                            <MenuItem key={r} value={r} sx={{ fontSize: '0.875rem' }}>{receiptStatusLabels[r]}</MenuItem>
                                         ))}
                                     </Select>
                                 </FormControl>
@@ -404,7 +404,7 @@ const MovementFilters = ({
                                 <FormControl fullWidth size="small" sx={PILL_INPUT_SX}>
                                     <Select value={initiator} onChange={e => setInitiator(e.target.value)} displayEmpty>
                                         {allItem('All Initiators')}
-                                        {initiators.map(i => <MenuItem key={i} value={i} sx={{ fontSize: '0.8rem' }}>{i}</MenuItem>)}
+                                        {initiators.map(i => <MenuItem key={i} value={i} sx={{ fontSize: '0.875rem' }}>{i}</MenuItem>)}
                                     </Select>
                                 </FormControl>
                             </Grid>
@@ -417,7 +417,7 @@ const MovementFilters = ({
                                         onClick={handleApply}
                                         sx={{
                                             height: 36, px: 2, textTransform: 'none', fontWeight: 600,
-                                            fontSize: '0.8rem', bgcolor: PRIMARY, borderRadius: '8px',
+                                            fontSize: '0.875rem', bgcolor: PRIMARY, borderRadius: '8px',
                                             boxShadow: `0 2px 8px ${alpha(PRIMARY, 0.35)}`,
                                             '&:hover': { bgcolor: alpha(PRIMARY, 0.85), boxShadow: `0 4px 14px ${alpha(PRIMARY, 0.4)}` },
                                         }}
@@ -429,7 +429,7 @@ const MovementFilters = ({
                                         onClick={handleClear}
                                         sx={{
                                             height: 36, px: 1.5, textTransform: 'none', fontWeight: 600,
-                                            fontSize: '0.8rem', borderRadius: '8px',
+                                            fontSize: '0.875rem', borderRadius: '8px',
                                             borderColor: '#CBD5E1', color: '#64748B',
                                             '&:hover': { borderColor: PRIMARY, color: PRIMARY, bgcolor: alpha(PRIMARY, 0.04) },
                                         }}
@@ -448,14 +448,14 @@ const MovementFilters = ({
                 display: 'flex', alignItems: 'center', justifyContent: 'flex-end',
                 gap: 1, mb: 2,
             }}>
-                <Typography sx={{ fontSize: '0.75rem', color: '#94A3B8', mr: 0.5 }}>Export as:</Typography>
+                <Typography sx={{ fontSize: '0.8rem', color: '#94A3B8', mr: 0.5 }}>Export as:</Typography>
 
                 <Tooltip title="Export PDF">
                     <Button
                         size="small" variant="outlined" startIcon={<PictureAsPdfOutlinedIcon sx={{ fontSize: '14px !important' }} />}
                         onClick={onExportPdf}
                         sx={{
-                            height: 32, px: 1.5, borderRadius: '8px', fontSize: '0.75rem', fontWeight: 600,
+                            height: 32, px: 1.5, borderRadius: '8px', fontSize: '0.8rem', fontWeight: 600,
                             textTransform: 'none', borderColor: '#E2E8F0', color: '#DC2626',
                             '&:hover': { borderColor: '#DC2626', bgcolor: alpha('#DC2626', 0.04) },
                         }}
@@ -469,7 +469,7 @@ const MovementFilters = ({
                         size="small" variant="outlined" startIcon={<TableChartOutlinedIcon sx={{ fontSize: '14px !important' }} />}
                         onClick={onExportExcel}
                         sx={{
-                            height: 32, px: 1.5, borderRadius: '8px', fontSize: '0.75rem', fontWeight: 600,
+                            height: 32, px: 1.5, borderRadius: '8px', fontSize: '0.8rem', fontWeight: 600,
                             textTransform: 'none', borderColor: '#E2E8F0', color: '#15803D',
                             '&:hover': { borderColor: '#15803D', bgcolor: alpha('#15803D', 0.04) },
                         }}
@@ -483,7 +483,7 @@ const MovementFilters = ({
                         size="small" variant="outlined" startIcon={<DataObjectOutlinedIcon sx={{ fontSize: '14px !important' }} />}
                         onClick={onExportCsv}
                         sx={{
-                            height: 32, px: 1.5, borderRadius: '8px', fontSize: '0.75rem', fontWeight: 600,
+                            height: 32, px: 1.5, borderRadius: '8px', fontSize: '0.8rem', fontWeight: 600,
                             textTransform: 'none', borderColor: '#E2E8F0', color: '#0369A1',
                             '&:hover': { borderColor: '#0369A1', bgcolor: alpha('#0369A1', 0.04) },
                         }}

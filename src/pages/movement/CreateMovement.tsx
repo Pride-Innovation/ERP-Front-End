@@ -121,27 +121,27 @@ const CreateMovement = () => {
                         }}
                     >
                         <ArrowBackIosNewOutlinedIcon sx={{ fontSize: 12 }} />
-                        <Typography variant="caption" sx={{ fontWeight: 700, fontSize: '0.78rem', color: 'inherit' }}>
+                        <Typography variant="caption" sx={{ fontWeight: 700, fontSize: '0.875rem', color: 'inherit' }}>
                             Back to Movements
                         </Typography>
                     </Box>
                     <Breadcrumbs separator="›" sx={{ '& .MuiBreadcrumbs-separator': { color: alpha('#000', 0.3), mx: 0.5 }, display: { xs: 'none', sm: 'flex' } }}>
                         <Link underline="hover" onClick={() => navigate(ROUTES.ASSETS_MANAGEMENT)}
-                            sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: 'text.disabled', fontSize: '0.75rem', cursor: 'pointer' }}>
+                            sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: 'text.disabled', fontSize: '0.8rem', cursor: 'pointer' }}>
                             <HomeOutlinedIcon sx={{ fontSize: 14 }} />Home
                         </Link>
                         <Link underline="hover" onClick={() => navigate(ROUTES.MOVEMENT)}
-                            sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: 'text.secondary', fontSize: '0.75rem', cursor: 'pointer' }}>
+                            sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: 'text.secondary', fontSize: '0.8rem', cursor: 'pointer' }}>
                             <SwapHorizOutlinedIcon sx={{ fontSize: 14 }} />Movements
                         </Link>
-                        <Typography sx={{ fontSize: '0.75rem', color: P, fontWeight: 600 }}>Create</Typography>
+                        <Typography sx={{ fontSize: '0.8rem', color: P, fontWeight: 600 }}>Create</Typography>
                     </Breadcrumbs>
                 </Stack>
                 <Chip
                     icon={<AddCircleOutlineIcon sx={{ fontSize: 14 }} />}
                     label="New Movement"
                     size="small"
-                    sx={{ height: 26, fontSize: '0.72rem', fontWeight: 600, bgcolor: alpha(P, 0.08), color: P, border: `1px solid ${alpha(P, 0.2)}`, '& .MuiChip-icon': { color: P } }}
+                    sx={{ height: 26, fontSize: '0.8rem', fontWeight: 600, bgcolor: alpha(P, 0.08), color: P, border: `1px solid ${alpha(P, 0.2)}`, '& .MuiChip-icon': { color: P } }}
                 />
             </Box>
 

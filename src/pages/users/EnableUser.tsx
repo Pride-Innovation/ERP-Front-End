@@ -262,16 +262,16 @@ const EnableUser = ({
                                 mb: 2
                             }}
                         >
-                            <Typography variant="body2" sx={{ mb: 0.75, color: 'text.primary', fontSize: '0.875rem' }}>
+                            <Typography variant="body2" sx={{ mb: 0.75, color: 'text.primary', fontSize: '0.9375rem' }}>
                                 • Will fully restore the user's account and system access
                             </Typography>
-                            <Typography variant="body2" sx={{ mb: 0.75, color: 'text.primary', fontSize: '0.875rem' }}>
+                            <Typography variant="body2" sx={{ mb: 0.75, color: 'text.primary', fontSize: '0.9375rem' }}>
                                 • Reactivates previously assigned permissions and roles
                             </Typography>
-                            <Typography variant="body2" sx={{ mb: 0.75, color: 'text.primary', fontSize: '0.875rem' }}>
+                            <Typography variant="body2" sx={{ mb: 0.75, color: 'text.primary', fontSize: '0.9375rem' }}>
                                 • Reconnects the user with their previous history and records
                             </Typography>
-                            <Typography variant="body2" sx={{ color: 'text.primary', fontSize: '0.875rem' }}>
+                            <Typography variant="body2" sx={{ color: 'text.primary', fontSize: '0.9375rem' }}>
                                 • Allows immediate login after password reset
                             </Typography>
                         </Box>

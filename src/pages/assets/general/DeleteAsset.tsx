@@ -76,7 +76,7 @@ const DeleteAsset = ({ asset, handleClose, onDeleted }: IDeleteAssetProps) => {
 
             {/* Same radius and message size as the Dispose dialog's alert — the two sit in the
                 same row menu and reading as siblings is the point. */}
-            <Alert severity="info" sx={{ borderRadius: 2, mb: 2, '& .MuiAlert-message': { fontSize: '0.82rem' } }}>
+            <Alert severity="info" sx={{ borderRadius: 2, mb: 2, '& .MuiAlert-message': { fontSize: '0.875rem' } }}>
                 <Typography variant="body2" sx={{ fontWeight: 700, mb: 0.25 }}>
                     This is not the same as disposing of it
                 </Typography>

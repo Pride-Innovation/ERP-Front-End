@@ -10,11 +10,16 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import {
     Box,
+    Checkbox,
     Container,
+    FormControlLabel,
     Stack,
     Typography,
     alpha,
 } from "@mui/material";
+import usePermissions from "../../../core/permissions/usePermissions";
+import { PERMISSIONS } from "../../../core/permissions/constants";
+import RoutesUtills from "../../../core/routes/utills";
 import NoteAddOutlinedIcon from '@mui/icons-material/NoteAddOutlined';
 import ChecklistOutlinedIcon from '@mui/icons-material/ChecklistOutlined';
 import RateReviewOutlinedIcon from '@mui/icons-material/RateReviewOutlined';
@@ -63,6 +68,11 @@ const CreateRequest = () => {
     const [file, setFile] = useState<File | null>(null);
     const { rows, setRows } = useContext(RequestContext);
     const navigate = useNavigate();
+    const { has } = usePermissions();
+    const [forStoreRestock, setForStoreRestock] = useState(false);
+    // Offered only to a RESTOCK_STORE holder at a branch: Head Office is where restocks come from.
+    const viewer = RoutesUtills().getCurrentUser() as { branch?: { isHeadOffice?: boolean } } | null;
+    const mayRestock = has(PERMISSIONS.RESTOCK_STORE) && !!viewer?.branch && !viewer.branch.isHeadOffice;
 
     useEffect(() => { setRows(initialData); }, [setRows]);
 
@@ -95,6 +105,8 @@ const CreateRequest = () => {
                 payload.append("attributes", JSON.stringify(formData.attributes));
             }
             if (file) payload.append("file", file);
+            // The whole request is for the branch store; personal items go in a separate request.
+            if (mayRestock && forStoreRestock) payload.append("forStoreRestock", "true");
 
             payload.append(
                 "requestCommodities",
@@ -104,12 +116,21 @@ const CreateRequest = () => {
             try {
                 const response = await createAssetRequestService(payload) as IRequestAxiosResponse;
                 if (response.status === 201) {
-                    toast.success("Request created successfully");
+                    toast.success(forStoreRestock ? "Store restock request created" : "Request created successfully");
                     reset({} as IRequest);
                     setFile(null);
                     setSignature("");
                     setRows(initialData);
+                    setForStoreRestock(false);
                     navigate(ROUTES.REQUEST);
+                } else {
+                    // The service returns a failure rather than throwing (trap #6). The server's own
+                    // reason is the useful part - e.g. that no workflow handles store restocks yet.
+                    const failed = response as any;
+                    const reason = failed?.response?.data;
+                    toast.error(typeof reason === 'string' && reason
+                        ? reason
+                        : (reason?.message ?? reason?.detail ?? "Failed to create request. Please try again."));
                 }
             } catch {
                 toast.error("Failed to create request. Please try again.");
@@ -180,7 +201,7 @@ const CreateRequest = () => {
                             sx={{ mb: 1, justifyContent: { xs: 'flex-start', md: 'flex-end' } }}
                         >
                             <Typography sx={{
-                                fontSize: '0.68rem',
+                                fontSize: '0.8rem',
                                 fontWeight: 700,
                                 color: neutral[400],
                                 textTransform: 'uppercase',
@@ -189,7 +210,7 @@ const CreateRequest = () => {
                                 Completion
                             </Typography>
                             <Typography sx={{
-                                fontSize: '0.78rem',
+                                fontSize: '0.875rem',
                                 fontWeight: 800,
                                 fontVariantNumeric: 'tabular-nums',
                                 color: isDone ? status.success.strong : brand[700],
@@ -197,7 +218,7 @@ const CreateRequest = () => {
                                 {formProgress}%
                             </Typography>
                             {isDone && (
-                                <Typography sx={{ fontSize: '0.72rem', fontWeight: 600, color: status.success.strong }}>
+                                <Typography sx={{ fontSize: '0.8rem', fontWeight: 600, color: status.success.strong }}>
                                     · Ready to submit
                                 </Typography>
                             )}
@@ -226,7 +247,7 @@ const CreateRequest = () => {
                                         <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: neutral[300], mx: '3px' }} />
                                     )}
                                     <Typography sx={{
-                                        fontSize: '0.68rem',
+                                        fontSize: '0.8rem',
                                         fontWeight: 600,
                                         color: item.done ? brand[700] : neutral[500],
                                     }}>
@@ -273,7 +294,7 @@ const CreateRequest = () => {
                                             {state === 'done' ? <CheckRoundedIcon sx={{ fontSize: 14 }} /> : step.icon}
                                         </Box>
                                         <Typography sx={{
-                                            fontSize: '0.72rem',
+                                            fontSize: '0.8rem',
                                             fontWeight: state === 'active' ? 700 : 600,
                                             color: 'inherit',
                                             whiteSpace: 'nowrap',
@@ -287,6 +308,31 @@ const CreateRequest = () => {
                     </Stack>
                 </Box>
             </Box>
+
+            {mayRestock && (
+                <Box sx={{
+                    mb: 3, px: { xs: 2.5, sm: 3.5 }, py: 2,
+                    borderRadius: `${radii.lg}px`,
+                    border: `1px solid ${forStoreRestock ? alpha(P, 0.45) : border.subtle}`,
+                    bgcolor: forStoreRestock ? alpha(P, 0.05) : surface.card,
+                    transition: 'all 0.2s ease',
+                }}>
+                    <FormControlLabel
+                        control={<Checkbox checked={forStoreRestock} onChange={(e) => setForStoreRestock(e.target.checked)} />}
+                        label={
+                            <Box>
+                                <Typography sx={{ fontWeight: 700, color: neutral[900] }}>
+                                    This request is to restock the branch store
+                                </Typography>
+                                <Typography variant="body2" sx={{ color: neutral[600] }}>
+                                    Everything on it is delivered into your branch Admin store, not to you. For
+                                    items you need yourself, raise a separate request.
+                                </Typography>
+                            </Box>
+                        }
+                    />
+                </Box>
+            )}
 
             {/* ── Main form ──────────────────────────────────────────── */}
             <Box component="form" autoComplete="off" onSubmit={handleSubmit(onSubmit)}>

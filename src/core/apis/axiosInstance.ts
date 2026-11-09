@@ -43,6 +43,10 @@ const CSRF_TOKEN_HEADER = 'X-CSRF-TOKEN';
  */
 const UNCLAIMED_ERROR_CODES = new Set(['SERVER_ERROR']);
 
+/** The calls whose 401 means "not signed in yet", never "session expired". */
+export const isSignInCall = (url?: string): boolean =>
+    !!url && /(^|\/)auth\/login(\?|$)/.test(url);
+
 const XSRF_COOKIE_NAME  = 'XSRF-TOKEN';
 const XSRF_TOKEN_HEADER = 'X-XSRF-TOKEN';
 
@@ -273,8 +277,13 @@ axiosInstance.interceptors.response.use(
             | (InternalAxiosRequestConfig & { _retry?: boolean })
             | undefined;
 
-        // Only attempt refresh once per request, and only for 401 errors.
-        if (error.response?.status === 401 && original && !original._retry) {
+        /*
+         * Only attempt refresh once per request, and only for 401 errors - and never for the sign-in
+         * calls themselves. A refused login IS a 401 (wrong password, AD throttling, blocked account),
+         * and sending it here found no refresh token on the login page, cleared the session, toasted
+         * "Your session has expired" and reloaded: the login page's own messages could never show.
+         */
+        if (error.response?.status === 401 && original && !original._retry && !isSignInCall(original.url)) {
             if (isRefreshing) {
                 // Park this request; it will be retried after the in-flight refresh.
                 return new Promise<AxiosResponse>((resolve, reject) => {

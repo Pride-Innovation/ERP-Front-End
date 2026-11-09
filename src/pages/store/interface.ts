@@ -25,6 +25,14 @@ export interface IStoreContainer {
 export interface IStore {
     id?: number | string;
     quantity: number;
+    /**
+     * Of `quantity`, how much is already spoken for: issued but not yet approved, or on a movement not
+     * yet collected. It stays on the shelf until approval or collection, which is why the shelf alone
+     * overstates what can be issued. Set by `GET /store`; absent elsewhere, which is not zero.
+     */
+    promised?: number | null;
+    /** `quantity` less `promised`: what the next issuance can still be given. */
+    available?: number | null;
     /** Reorder threshold. 0 (the default) means the line is never flagged low. */
     minLevel?: number;
     commodity: ICommodity;
@@ -51,6 +59,9 @@ export interface IStoreReportTableData {
     name: string;
     unitOfMeasure: string;
     quantity: number;
+    /** A number, or "—" when the server did not say. */
+    promised: number | string;
+    available: number | string;
     branch: string;
     status: string;
 }

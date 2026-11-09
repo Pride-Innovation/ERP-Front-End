@@ -76,6 +76,8 @@ const WorkflowRoutesPanel = () => {
         const scope = isHeadOffice ? 'HEAD_OFFICE' : 'BRANCH';
         return workflows
             .filter((wf) => wf.active && (wf.branchScope === scope || wf.branchScope === 'ALL'))
+            // A restock-only route fills the branch store; it is not a route for items you need yourself.
+            .filter((wf) => (wf.appliesTo ?? 'BOTH') !== 'RESTOCK')
             .sort((a, b) => (a.priority ?? 0) - (b.priority ?? 0));
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [workflows]);
@@ -149,7 +151,7 @@ const WorkflowRoutesPanel = () => {
                                                 label={name}
                                                 size="small"
                                                 sx={{
-                                                    height: 22, fontSize: '0.7rem', fontWeight: 600,
+                                                    height: 22, fontSize: '0.8rem', fontWeight: 600,
                                                     bgcolor: alpha(PRIMARY, 0.07), color: PRIMARY,
                                                     '& .MuiChip-label': { px: 1 },
                                                 }}
@@ -165,7 +167,7 @@ const WorkflowRoutesPanel = () => {
                                             variant="caption"
                                             sx={{
                                                 display: 'block', mb: 0.75,
-                                                fontWeight: 800, fontSize: '0.62rem',
+                                                fontWeight: 800, fontSize: '0.8rem',
                                                 textTransform: 'uppercase', letterSpacing: '0.07em', color: '#94A3B8',
                                             }}
                                         >
@@ -180,7 +182,7 @@ const WorkflowRoutesPanel = () => {
                                                                 width: 17, height: 17, borderRadius: '50%', flexShrink: 0,
                                                                 bgcolor: '#F1F5F9', border: '1px solid #E2E8F0',
                                                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                                fontSize: '0.6rem', fontWeight: 700, color: '#64748B',
+                                                                fontSize: '0.8rem', fontWeight: 700, color: '#64748B',
                                                                 fontVariantNumeric: 'tabular-nums',
                                                             }}
                                                         >

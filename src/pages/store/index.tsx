@@ -295,7 +295,7 @@ const Store = () => {
                                         borderRadius: '8px',
                                         textTransform: 'none',
                                         fontWeight: 700,
-                                        fontSize: '0.78rem',
+                                        fontSize: '0.875rem',
                                         color: store.accentColor,
                                         bgcolor: alpha(store.accentColor, 0.07),
                                         border: `1px solid ${alpha(store.accentColor, 0.2)}`,
@@ -417,7 +417,7 @@ const Store = () => {
                                     <Box sx={{ width: 28, height: 28, borderRadius: 1, bgcolor: alpha(brand[500], 0.08), color: brand[500], display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                                         <PublicOutlinedIcon sx={{ fontSize: 15 }} />
                                     </Box>
-                                    <Typography sx={{ fontWeight: 700, fontSize: '0.9rem', color: neutral[800] }}>{region}</Typography>
+                                    <Typography sx={{ fontWeight: 700, fontSize: '0.9375rem', color: neutral[800] }}>{region}</Typography>
                                     <Typography variant="caption" sx={{ color: neutral[400] }}>
                                         {rows.length} branch{rows.length !== 1 ? 'es' : ''}
                                     </Typography>
@@ -428,7 +428,7 @@ const Store = () => {
                                             icon={<WarningAmberOutlinedIcon sx={{ fontSize: 13 }} />}
                                             label={`${low} low stock`}
                                             size="small"
-                                            sx={{ height: 22, fontWeight: 700, fontSize: '0.68rem', bgcolor: alpha(status.warning.strong, 0.12), color: status.warning.strong, '& .MuiChip-icon': { color: status.warning.strong } }}
+                                            sx={{ height: 22, fontWeight: 700, fontSize: '0.8rem', bgcolor: alpha(status.warning.strong, 0.12), color: status.warning.strong, '& .MuiChip-icon': { color: status.warning.strong } }}
                                         />
                                     )}
                                     {/* Units lead, matching the hero headline and the branch rows
@@ -437,7 +437,7 @@ const Store = () => {
                                     <Chip
                                         label={`${totalQuantity.toLocaleString()} unit${totalQuantity !== 1 ? 's' : ''} · ${itemLines.toLocaleString()} line${itemLines !== 1 ? 's' : ''}`}
                                         size="small"
-                                        sx={{ height: 22, fontWeight: 700, fontSize: '0.68rem', fontVariantNumeric: 'tabular-nums', bgcolor: alpha(brand[500], 0.08), color: brand[500] }}
+                                        sx={{ height: 22, fontWeight: 700, fontSize: '0.8rem', fontVariantNumeric: 'tabular-nums', bgcolor: alpha(brand[500], 0.08), color: brand[500] }}
                                     />
                                     {/* Purely decorative: the header itself is the control, so this
                                         must not be a nested <button> or a second tab stop. */}
@@ -473,7 +473,7 @@ const Store = () => {
                                             }}
                                         >
                                             <StorefrontOutlinedIcon sx={{ fontSize: 15, color: neutral[400], flexShrink: 0 }} />
-                                            <Typography sx={{ fontWeight: 600, fontSize: '0.84rem', color: neutral[800] }}>{b.name}</Typography>
+                                            <Typography sx={{ fontWeight: 600, fontSize: '0.875rem', color: neutral[800] }}>{b.name}</Typography>
                                             {/*
                                              * Health first. `itemLines` and `totalQuantity` are weak
                                              * signals — 400 units could be 399 paperclips — while the
@@ -487,14 +487,14 @@ const Store = () => {
                                                     icon={<WarningAmberOutlinedIcon sx={{ fontSize: 12 }} />}
                                                     label={`${b.low} low`}
                                                     size="small"
-                                                    sx={{ height: 22, fontWeight: 700, fontSize: '0.68rem', bgcolor: alpha(status.warning.strong, 0.12), color: status.warning.strong, '& .MuiChip-icon': { color: status.warning.strong } }}
+                                                    sx={{ height: 22, fontWeight: 700, fontSize: '0.8rem', bgcolor: alpha(status.warning.strong, 0.12), color: status.warning.strong, '& .MuiChip-icon': { color: status.warning.strong } }}
                                                 />
                                             )}
                                             <Chip
                                                 label={`${b.totalQuantity.toLocaleString()} unit${b.totalQuantity !== 1 ? 's' : ''} · ${b.itemLines} line${b.itemLines !== 1 ? 's' : ''}`}
                                                 size="small"
                                                 sx={{
-                                                    height: 22, fontWeight: 700, fontSize: '0.68rem', fontVariantNumeric: 'tabular-nums',
+                                                    height: 22, fontWeight: 700, fontSize: '0.8rem', fontVariantNumeric: 'tabular-nums',
                                                     bgcolor: alpha(b.itemLines === 0 ? status.danger.main : brand[500], 0.1),
                                                     color: b.itemLines === 0 ? status.danger.main : brand[500],
                                                 }}
@@ -504,7 +504,7 @@ const Store = () => {
                                                     label={`${b.assetsHeld} asset${b.assetsHeld !== 1 ? 's' : ''}`}
                                                     size="small"
                                                     sx={{
-                                                        height: 22, fontWeight: 700, fontSize: '0.68rem', fontVariantNumeric: 'tabular-nums',
+                                                        height: 22, fontWeight: 700, fontSize: '0.8rem', fontVariantNumeric: 'tabular-nums',
                                                         bgcolor: alpha(STORE_ACCENT.it, 0.1), color: STORE_ACCENT.it,
                                                     }}
                                                 />

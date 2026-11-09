@@ -169,10 +169,10 @@ const AssetsByCategory = ({ stats, scope }: IAssetsByCategoryProps) => {
                     {legend.map((item) => (
                         <Stack key={item.label} direction="row" alignItems="center" spacing={0.6}>
                             <Box sx={{ width: 9, height: 9, borderRadius: '2px', bgcolor: item.colour, flexShrink: 0 }} />
-                            <Typography sx={{ fontSize: '0.72rem', color: neutral[600] }}>
+                            <Typography sx={{ fontSize: '0.8rem', color: neutral[600] }}>
                                 {item.label}
                             </Typography>
-                            <Typography sx={{ fontSize: '0.72rem', fontWeight: 700, color: neutral[800] }}>
+                            <Typography sx={{ fontSize: '0.8rem', fontWeight: 700, color: neutral[800] }}>
                                 {item.value.toLocaleString()}
                             </Typography>
                         </Stack>

@@ -233,7 +233,7 @@ const AssetImageUpload = ({
                             color: '#fff',
                             fontWeight: 600,
                             textTransform: 'none',
-                            fontSize: '0.875rem',
+                            fontSize: '0.9375rem',
                             letterSpacing: '0.01em',
                             boxShadow: `0 1px 2px ${alpha(PRIMARY_COLOR, 0.24)}`,
                             '&:hover': !readOnly ? {
@@ -285,7 +285,7 @@ const AssetImageUpload = ({
                                     borderRadius: 999,
                                     bgcolor: alpha('#000', 0.04),
                                     border: `1px solid ${alpha('#000', 0.07)}`,
-                                    fontSize: '0.7rem',
+                                    fontSize: '0.8rem',
                                     letterSpacing: '0.01em',
                                 }}
                             >

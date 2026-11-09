@@ -139,7 +139,7 @@ const LoanerList = ({ mode, onChanged, emptyText = 'Nothing is on loan.', headin
     if (failed) {
         // Unknown is not none: a refusal must not read as "nothing on loan".
         return (
-            <Alert severity="warning" sx={{ borderRadius: 2, '& .MuiAlert-message': { fontSize: '0.82rem' } }}
+            <Alert severity="warning" sx={{ borderRadius: 2, '& .MuiAlert-message': { fontSize: '0.875rem' } }}
                 action={<Button size="small" onClick={load}>Retry</Button>}>
                 Temporary assets could not be loaded.
             </Alert>
@@ -169,14 +169,14 @@ const LoanerList = ({ mode, onChanged, emptyText = 'Nothing is on loan.', headin
                                     <Typography variant="body2" sx={{ fontWeight: 600, color: neutral[800] }}>
                                         {tag(l)}
                                     </Typography>
-                                    <Chip size="small" label="Temporary" sx={{ height: 20, fontSize: '0.66rem', fontWeight: 700 }} />
+                                    <Chip size="small" label="Temporary" sx={{ height: 20, fontSize: '0.8rem', fontWeight: 700 }} />
                                     {l.coveredAssetBack && !pending && (
                                         <Chip size="small" color="warning" label="Due back"
-                                            sx={{ height: 20, fontSize: '0.66rem', fontWeight: 700 }} />
+                                            sx={{ height: 20, fontSize: '0.8rem', fontWeight: 700 }} />
                                     )}
                                     {pending && (
                                         <Chip size="small" color="info" label={`Return under way · #${l.pendingReturnMovementId}`}
-                                            sx={{ height: 20, fontSize: '0.66rem', fontWeight: 700 }} />
+                                            sx={{ height: 20, fontSize: '0.8rem', fontWeight: 700 }} />
                                     )}
                                 </Stack>
                                 <Typography variant="caption" sx={{ color: neutral[500], display: 'block' }}>

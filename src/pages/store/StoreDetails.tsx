@@ -112,7 +112,7 @@ const DetailRow = ({ icon, label, value, accent = PRIMARY }: DetailRowProps) => 
             <Box sx={{ fontSize: 15, color: accent, display: 'flex' }}>{icon}</Box>
         </Box>
         <Box sx={{ minWidth: 0 }}>
-            <Typography variant="caption" sx={{ color: 'text.disabled', textTransform: 'uppercase', letterSpacing: '0.05em', fontSize: '0.65rem', display: 'block' }}>
+            <Typography variant="caption" sx={{ color: 'text.disabled', textTransform: 'uppercase', letterSpacing: '0.05em', fontSize: '0.8rem', display: 'block' }}>
                 {label}
             </Typography>
             {typeof value === 'string' || typeof value === 'number' || value == null ? (
@@ -127,7 +127,7 @@ const DetailRow = ({ icon, label, value, accent = PRIMARY }: DetailRowProps) => 
 const SectionHeader = ({ title, accent = PRIMARY, action }: { title: string; accent?: string; action?: React.ReactNode }) => (
     <Stack direction="row" alignItems="center" spacing={1} mb={1.5}>
         <Box sx={{ height: 14, width: 3, borderRadius: 2, bgcolor: accent }} />
-        <Typography variant="caption" sx={{ fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: accent, fontSize: '0.72rem' }}>
+        <Typography variant="caption" sx={{ fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: accent, fontSize: '0.8rem' }}>
             {title}
         </Typography>
         {action && <Box sx={{ ml: 'auto' }}>{action}</Box>}
@@ -162,14 +162,14 @@ const MetricTile = ({
             bgcolor: alpha(accent, 0.02),
         }}
     >
-        <Typography variant="caption" sx={{ color: neutral[500], fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', fontSize: '0.62rem', display: 'block' }}>
+        <Typography variant="caption" sx={{ color: neutral[500], fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', fontSize: '0.8rem', display: 'block' }}>
             {label}
         </Typography>
         <Typography sx={{ fontWeight: 800, fontSize: '1.05rem', color, lineHeight: 1.4, fontVariantNumeric: 'tabular-nums' }}>
             {value}
         </Typography>
         {hint && (
-            <Typography variant="caption" sx={{ color: neutral[400], fontSize: '0.66rem' }}>
+            <Typography variant="caption" sx={{ color: neutral[400], fontSize: '0.8rem' }}>
                 {hint}
             </Typography>
         )}
@@ -281,7 +281,7 @@ const StoreDetails = ({ handleClose }: { handleClose: () => void }) => {
                 </Box>
 
                 <Stack alignItems={{ xs: 'flex-start', sm: 'flex-end' }} spacing={0.4} sx={{ flexShrink: 0 }}>
-                    <Typography variant="caption" sx={{ color: neutral[500], fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.07em' }}>
+                    <Typography variant="caption" sx={{ color: neutral[500], fontSize: '0.8rem', fontWeight: 700, letterSpacing: '0.07em' }}>
                         ON HAND
                     </Typography>
                     <Typography sx={{ fontWeight: 800, fontSize: '1.6rem', lineHeight: 1, color: health.color, fontVariantNumeric: 'tabular-nums' }}>
@@ -374,7 +374,7 @@ const StoreDetails = ({ handleClose }: { handleClose: () => void }) => {
                                                 size="small"
                                                 label={s.name}
                                                 sx={{
-                                                    height: 20, fontSize: '0.68rem', fontWeight: 600,
+                                                    height: 20, fontSize: '0.8rem', fontWeight: 600,
                                                     bgcolor: alpha(PRIMARY, 0.07), color: brand[700],
                                                 }}
                                             />
@@ -471,7 +471,7 @@ const StoreDetails = ({ handleClose }: { handleClose: () => void }) => {
                         {issuance.status?.name && (
                             <Grid item xs={12}>
                                 <Stack direction="row" spacing={1} alignItems="center">
-                                    <Typography variant="caption" sx={{ color: 'text.disabled', textTransform: 'uppercase', letterSpacing: '0.05em', fontSize: '0.65rem' }}>
+                                    <Typography variant="caption" sx={{ color: 'text.disabled', textTransform: 'uppercase', letterSpacing: '0.05em', fontSize: '0.8rem' }}>
                                         Status
                                     </Typography>
                                     <StatusChip label={issuance.status.name} tone="info" />
@@ -495,7 +495,7 @@ const StoreDetails = ({ handleClose }: { handleClose: () => void }) => {
                     title="Recent stock movement"
                     accent={PRIMARY}
                     action={entries.length > RECENT_ENTRY_LIMIT ? (
-                        <Typography variant="caption" sx={{ color: neutral[400], fontSize: '0.68rem' }}>
+                        <Typography variant="caption" sx={{ color: neutral[400], fontSize: '0.8rem' }}>
                             newest {RECENT_ENTRY_LIMIT} of {entries.length}
                         </Typography>
                     ) : undefined}
@@ -541,17 +541,17 @@ const StoreDetails = ({ handleClose }: { handleClose: () => void }) => {
                                             : <NorthEastIcon sx={{ fontSize: 14 }} />}
                                     </Box>
                                     <Box sx={{ flex: 1, minWidth: 0 }}>
-                                        <Typography variant="body2" sx={{ fontWeight: 600, color: meta.tone, fontSize: '0.82rem' }}>
+                                        <Typography variant="body2" sx={{ fontWeight: 600, color: meta.tone, fontSize: '0.875rem' }}>
                                             {meta.label}
                                         </Typography>
-                                        <Typography variant="caption" sx={{ color: neutral[500], fontSize: '0.68rem' }}>
+                                        <Typography variant="caption" sx={{ color: neutral[500], fontSize: '0.8rem' }}>
                                             {fmtDateTime(e.occurredAt) ?? 'date not recorded'}
                                             {e.note ? ` · ${e.note}` : ''}
                                         </Typography>
                                     </Box>
                                     <Stack alignItems="flex-end" sx={{ flexShrink: 0 }}>
                                         <Typography sx={{
-                                            fontWeight: 700, fontSize: '0.82rem',
+                                            fontWeight: 700, fontSize: '0.875rem',
                                             fontVariantNumeric: 'tabular-nums',
                                             color: inward ? statusTokens.success.strong : statusTokens.danger.main,
                                         }}
@@ -559,7 +559,7 @@ const StoreDetails = ({ handleClose }: { handleClose: () => void }) => {
                                             {inward ? '+' : ''}{e.quantityDelta.toLocaleString()}
                                         </Typography>
                                         <Tooltip title="Running balance after this change" arrow>
-                                            <Typography variant="caption" sx={{ color: neutral[400], fontSize: '0.66rem', fontVariantNumeric: 'tabular-nums' }}>
+                                            <Typography variant="caption" sx={{ color: neutral[400], fontSize: '0.8rem', fontVariantNumeric: 'tabular-nums' }}>
                                                 → {e.balanceAfter.toLocaleString()}
                                             </Typography>
                                         </Tooltip>

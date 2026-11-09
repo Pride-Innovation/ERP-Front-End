@@ -148,7 +148,7 @@ const BranchCategoryHeatmap = ({ cells }: IBranchCategoryHeatmapProps) => {
                                 <Tooltip arrow placement="top" title={category}>
                                     <Typography
                                         sx={{
-                                            fontSize: '0.65rem',
+                                            fontSize: '0.8rem',
                                             fontWeight: 700,
                                             color: neutral[600],
                                             lineHeight: 1.25,
@@ -174,7 +174,7 @@ const BranchCategoryHeatmap = ({ cells }: IBranchCategoryHeatmapProps) => {
                                     noWrap
                                     title={branch}
                                     sx={{
-                                        fontSize: '0.75rem',
+                                        fontSize: '0.8rem',
                                         fontWeight: 600,
                                         color: branch === UNASSIGNED ? neutral[500] : neutral[800],
                                         fontStyle: branch === UNASSIGNED ? 'italic' : 'normal',
@@ -209,7 +209,7 @@ const BranchCategoryHeatmap = ({ cells }: IBranchCategoryHeatmapProps) => {
                                             >
                                                 <Typography
                                                     sx={{
-                                                        fontSize: '0.7rem',
+                                                        fontSize: '0.8rem',
                                                         fontWeight: 600,
                                                         fontVariantNumeric: 'tabular-nums',
                                                         color: inkFor(count),
@@ -238,7 +238,7 @@ const BranchCategoryHeatmap = ({ cells }: IBranchCategoryHeatmapProps) => {
                     <Button
                         size="small"
                         onClick={() => setShowAll((open) => !open)}
-                        sx={{ textTransform: 'none', fontSize: '0.75rem', fontWeight: 700 }}
+                        sx={{ textTransform: 'none', fontSize: '0.8rem', fontWeight: 700 }}
                     >
                         {showAll
                             ? `Show top ${DEFAULT_ROW_LIMIT} branches`
@@ -250,14 +250,14 @@ const BranchCategoryHeatmap = ({ cells }: IBranchCategoryHeatmapProps) => {
 
                 {/* Scale legend — a sequential ramp is unreadable without one. */}
                 <Stack direction="row" alignItems="center" spacing={0.75}>
-                    <Typography sx={{ fontSize: '0.68rem', color: neutral[500] }}>Fewer</Typography>
+                    <Typography sx={{ fontSize: '0.8rem', color: neutral[500] }}>Fewer</Typography>
                     <Stack direction="row" spacing={`${SEGMENT_GAP_PX}px`}>
                         <Box sx={{ width: 16, height: 10, borderRadius: '2px', bgcolor: EMPTY_CELL_FILL, border: `1px solid ${border.subtle}` }} />
                         {SEQUENTIAL_TEAL.map((step) => (
                             <Box key={step} sx={{ width: 16, height: 10, borderRadius: '2px', bgcolor: step }} />
                         ))}
                     </Stack>
-                    <Typography sx={{ fontSize: '0.68rem', color: neutral[500] }}>More</Typography>
+                    <Typography sx={{ fontSize: '0.8rem', color: neutral[500] }}>More</Typography>
                 </Stack>
             </Stack>
         </WidgetCard>

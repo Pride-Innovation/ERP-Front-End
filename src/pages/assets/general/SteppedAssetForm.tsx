@@ -210,7 +210,7 @@ const SteppedOfficeEquipmentForm = ({
                         '& .MuiStepIcon-root': { color: neutral[200], '& text': { fill: neutral[500], fontWeight: 700 } },
                         '& .MuiStepIcon-root.Mui-active': { color: P, '& text': { fill: '#fff' } },
                         '& .MuiStepIcon-root.Mui-completed': { color: brand[600] },
-                        '& .MuiStepLabel-label': { fontSize: '0.8rem', color: neutral[500], mt: isMobile ? 0.5 : 0 },
+                        '& .MuiStepLabel-label': { fontSize: '0.875rem', color: neutral[500], mt: isMobile ? 0.5 : 0 },
                         '& .MuiStepLabel-label.Mui-active': { color: brand[700], fontWeight: 700 },
                         '& .MuiStepLabel-label.Mui-completed': { color: neutral[700], fontWeight: 600 },
                         '& .MuiStepConnector-line': { borderColor: border.subtle, borderTopWidth: 2 },
@@ -290,7 +290,7 @@ const SteppedOfficeEquipmentForm = ({
                             variant="text"
                             startIcon={<CloseIcon fontSize="small" />}
                             sx={{
-                                color: neutral[500], textTransform: 'none', fontSize: '0.82rem', borderRadius: '8px',
+                                color: neutral[500], textTransform: 'none', fontSize: '0.875rem', borderRadius: '8px',
                                 '&:hover': { color: '#D32F2F', bgcolor: alpha('#D32F2F', 0.06) },
                             }}
                         >

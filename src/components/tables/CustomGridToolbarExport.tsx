@@ -80,7 +80,7 @@ const CustomGridToolbarExport = ({
                     height: 34, px: 1.75, borderRadius: '8px',
                     border: `1px solid ${alpha(GREEN, 0.3)}`,
                     color: GREEN,
-                    textTransform: 'none', fontWeight: 600, fontSize: '0.82rem',
+                    textTransform: 'none', fontWeight: 600, fontSize: '0.875rem',
                     bgcolor: 'transparent',
                     transition: 'all 0.15s',
                     '&:hover': {
@@ -114,7 +114,7 @@ const CustomGridToolbarExport = ({
             >
                 {/* Header label */}
                 <Box sx={{ px: 2, pt: 1.25, pb: 0.75 }}>
-                    <Typography sx={{ fontSize: '0.67rem', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                    <Typography sx={{ fontSize: '0.8rem', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
                         Download as
                     </Typography>
                 </Box>
@@ -133,8 +133,8 @@ const CustomGridToolbarExport = ({
                         <ListItemText
                             primary="Excel Spreadsheet"
                             secondary=".xlsx format"
-                            primaryTypographyProps={{ fontSize: '0.83rem', fontWeight: 600, color: '#1E293B' }}
-                            secondaryTypographyProps={{ fontSize: '0.72rem', color: '#94A3B8' }}
+                            primaryTypographyProps={{ fontSize: '0.875rem', fontWeight: 600, color: '#1E293B' }}
+                            secondaryTypographyProps={{ fontSize: '0.8rem', color: '#94A3B8' }}
                         />
                     </MenuItem>
                     <MenuItem
@@ -150,8 +150,8 @@ const CustomGridToolbarExport = ({
                         <ListItemText
                             primary="PDF Document"
                             secondary=".pdf format"
-                            primaryTypographyProps={{ fontSize: '0.83rem', fontWeight: 600, color: '#1E293B' }}
-                            secondaryTypographyProps={{ fontSize: '0.72rem', color: '#94A3B8' }}
+                            primaryTypographyProps={{ fontSize: '0.875rem', fontWeight: 600, color: '#1E293B' }}
+                            secondaryTypographyProps={{ fontSize: '0.8rem', color: '#94A3B8' }}
                         />
                     </MenuItem>
                 </Box>
@@ -179,8 +179,8 @@ const CustomGridToolbarExport = ({
                                 <ListItemText
                                     primary="Choose columns…"
                                     secondary="Applies to your downloads"
-                                    primaryTypographyProps={{ fontSize: '0.83rem', fontWeight: 600, color: '#1E293B' }}
-                                    secondaryTypographyProps={{ fontSize: '0.72rem', color: '#94A3B8' }}
+                                    primaryTypographyProps={{ fontSize: '0.875rem', fontWeight: 600, color: '#1E293B' }}
+                                    secondaryTypographyProps={{ fontSize: '0.8rem', color: '#94A3B8' }}
                                 />
                             </MenuItem>
                         </Box>

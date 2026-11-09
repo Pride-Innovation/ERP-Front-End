@@ -111,7 +111,7 @@ const SideBar = ({ drawerOpen }: SideBarProps) => {
                 <ListItemText
                     primary={item.name}
                     primaryTypographyProps={{
-                        fontSize: '0.84rem',
+                        fontSize: '0.875rem',
                         fontWeight: isActive ? 600 : 500,
                         letterSpacing: 0.1,
                     }}
@@ -175,7 +175,7 @@ const SideBar = ({ drawerOpen }: SideBarProps) => {
                                         px: 2.75,
                                         pt: gi === 0 ? 0.75 : 2,
                                         pb: 0.5,
-                                        fontSize: '0.62rem',
+                                        fontSize: '0.8rem',
                                         fontWeight: 700,
                                         letterSpacing: '0.09em',
                                         textTransform: 'uppercase',
@@ -237,7 +237,7 @@ const SideBar = ({ drawerOpen }: SideBarProps) => {
                             >
                                 <Typography
                                     sx={{
-                                        fontSize: '0.78rem', fontWeight: 600, color: neutral[800],
+                                        fontSize: '0.875rem', fontWeight: 600, color: neutral[800],
                                         whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', lineHeight: 1.3,
                                     }}
                                 >
@@ -245,7 +245,7 @@ const SideBar = ({ drawerOpen }: SideBarProps) => {
                                 </Typography>
                                 <Typography
                                     sx={{
-                                        fontSize: '0.66rem', fontWeight: 500, color: neutral[500],
+                                        fontSize: '0.8rem', fontWeight: 500, color: neutral[500],
                                         whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', lineHeight: 1.3,
                                     }}
                                 >

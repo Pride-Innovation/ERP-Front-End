@@ -122,12 +122,12 @@ const LedgerHistoryModal = ({
                     <Typography variant="subtitle2" sx={{ fontWeight: 700, color: neutral[900], lineHeight: 1.3 }}>
                         {commodityName ?? 'Commodity'}
                     </Typography>
-                    <Typography variant="caption" sx={{ color: neutral[600], fontSize: '0.78rem' }}>
+                    <Typography variant="caption" sx={{ color: neutral[600], fontSize: '0.875rem' }}>
                         {storeName ?? 'Store'} · every movement of this line, newest first
                     </Typography>
                 </Box>
                 <Stack alignItems="flex-end" spacing={0.25}>
-                    <Typography variant="caption" sx={{ color: neutral[500], fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.06em' }}>
+                    <Typography variant="caption" sx={{ color: neutral[500], fontSize: '0.8rem', fontWeight: 700, letterSpacing: '0.06em' }}>
                         ON HAND
                     </Typography>
                     <Typography sx={{ fontWeight: 800, fontSize: '1.1rem', color: neutral[900], fontVariantNumeric: 'tabular-nums' }}>
@@ -189,7 +189,7 @@ const LedgerHistoryModal = ({
                                                     size="small"
                                                     label={meta.label}
                                                     sx={{
-                                                        height: 20, fontSize: '0.66rem', fontWeight: 700,
+                                                        height: 20, fontSize: '0.8rem', fontWeight: 700,
                                                         bgcolor: alpha(meta.tone, 0.1), color: meta.tone,
                                                     }}
                                                 />
@@ -199,7 +199,7 @@ const LedgerHistoryModal = ({
                                                     </Typography>
                                                 )}
                                             </TableCell>
-                                            <TableCell sx={{ ...dataBodyCellSx, color: neutral[500], fontFamily: 'monospace', fontSize: '0.72rem' }}>
+                                            <TableCell sx={{ ...dataBodyCellSx, color: neutral[500], fontFamily: 'monospace', fontSize: '0.8rem' }}>
                                                 {e.sourceType ? `${e.sourceType}${e.sourceId ? ` #${e.sourceId}` : ''}` : '—'}
                                             </TableCell>
                                             <TableCell align="right" sx={{ ...dataBodyCellSx, fontVariantNumeric: 'tabular-nums' }}>
@@ -210,7 +210,7 @@ const LedgerHistoryModal = ({
                                                     <Typography
                                                         component="span"
                                                         sx={{
-                                                            fontWeight: 700, fontSize: '0.8rem',
+                                                            fontWeight: 700, fontSize: '0.875rem',
                                                             color: inward ? statusTokens.success.strong : statusTokens.danger.main,
                                                         }}
                                                     >

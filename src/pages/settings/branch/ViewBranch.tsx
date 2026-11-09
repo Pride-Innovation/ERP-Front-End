@@ -104,7 +104,7 @@ const ViewBranch = ({ branch, deleteBranch, updateBranch, index = 0 }: IBranchDe
                                     size="small"
                                     sx={{
                                         height: 20,
-                                        fontSize: '0.65rem',
+                                        fontSize: '0.8rem',
                                         fontWeight: 700,
                                         bgcolor: alpha(color, 0.1),
                                         color,
@@ -162,7 +162,7 @@ const ViewBranch = ({ branch, deleteBranch, updateBranch, index = 0 }: IBranchDe
                                         sx={{
                                             height: 22,
                                             maxWidth: '100%',
-                                            fontSize: '0.68rem',
+                                            fontSize: '0.8rem',
                                             fontWeight: 500,
                                             bgcolor: alpha(color, 0.08),
                                             color,
@@ -239,7 +239,7 @@ const ContactRow = ({
                 minWidth: 0,
                 color: value ? '#334155' : '#94A3B8',
                 fontStyle: value ? 'normal' : 'italic',
-                fontSize: '0.8rem',
+                fontSize: '0.875rem',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
                 whiteSpace: 'nowrap',

@@ -4,6 +4,8 @@ export const StoreMocks: Array<IStore> = [
     {
         "id": 53,
         "quantity": 4,
+        "promised": 0,
+        "available": 4,
         "commodity": {
             "id": 1,
             "name": "Books",

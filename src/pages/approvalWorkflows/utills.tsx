@@ -51,6 +51,7 @@ export const blankApprovalWorkflow = (): IApprovalWorkflow => ({
     assetTypeIds: [],
     branchId: null,
     branchScope: 'ALL',
+    appliesTo: 'BOTH',
     active: true,
     priority: 0,
     requesterRoleIds: [],

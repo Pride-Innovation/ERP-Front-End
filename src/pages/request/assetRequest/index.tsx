@@ -113,7 +113,7 @@ const RequestsManagement = () => {
                         sx={{
                             minHeight: 44,
                             '& .MuiTab-root': {
-                                fontSize: '0.82rem',
+                                fontSize: '0.875rem',
                                 minHeight: 44,
                                 textTransform: 'none',
                                 px: 1.75,

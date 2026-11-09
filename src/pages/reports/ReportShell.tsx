@@ -51,7 +51,21 @@ export interface ReportShellFilters {
     /** The status's stable camelCase code — what client-side matching compares against. */
     statusCode?: string;
     status?: string;
+    /** Maintenance only: `INTERNAL` / `EXTERNAL` / `NONE` (no technician recorded yet). */
+    repairedBy?: string;
+    repairedByLabel?: string;
 }
+
+/**
+ * Who repaired it - the kind of technician on the repair record. "Not yet recorded" is a real
+ * answer rather than a gap: a repair names its technician only when it is closed, so most open
+ * ones have none, and leaving them out of both choices would make the two look like the whole set.
+ */
+export const REPAIRED_BY_OPTIONS = [
+    { value: 'INTERNAL', label: 'Internal officer' },
+    { value: 'EXTERNAL', label: 'External consultant' },
+    { value: 'NONE', label: 'Not yet recorded' },
+];
 
 /*
  * There was a `schedule` field here, and a Daily / Weekly / Monthly picker behind a clock icon in
@@ -68,7 +82,7 @@ interface ReportShellProps {
     title: string;
     subtitle?: string;
     accentColor: string;
-    filterFields?: Array<'dateRange' | 'branch' | 'department' | 'category' | 'status'>;
+    filterFields?: Array<'dateRange' | 'branch' | 'department' | 'category' | 'status' | 'repairedBy'>;
     /**
      * Statuses this report actually uses, when they are not the ones in the status catalogue.
      *
@@ -83,6 +97,18 @@ interface ReportShellProps {
      * catalogue.
      */
     statusOptions?: LookupOption[];
+    /**
+     * The catalogue codes this report's subject can hold. The catalogue mixes request, asset and
+     * stock-order states; offering all of them on every tab let a reader pick one that can only
+     * ever match nothing.
+     */
+    statusCodes?: string[];
+    /**
+     * The period the bar opens on, and returns to on Clear. A register is a point-in-time listing
+     * whose date filter means "added between", so opening it on "This Month" showed only what was
+     * added this month — most of the estate looked missing.
+     */
+    defaultPreset?: string;
     /**
      * Something the reader has to know before trusting the figures — currently, that the report read
      * less than the server holds.
@@ -109,6 +135,7 @@ interface ReportShellProps {
 }
 
 const DATE_PRESETS = [
+    { label: 'All time', value: 'all' },
     { label: 'Today', value: 'today' },
     { label: 'This Week', value: 'week' },
     { label: 'This Month', value: 'month' },
@@ -172,7 +199,7 @@ const PILL_INPUT_SX = {
     '& .MuiOutlinedInput-root': {
         borderRadius: '8px',
         bgcolor: '#fff',
-        fontSize: '0.8rem',
+        fontSize: '0.875rem',
         height: 36,
         '& fieldset': { borderColor: '#E2E8F0' },
         '&:hover fieldset': { borderColor: PRIMARY },
@@ -187,6 +214,8 @@ const ReportShell = ({
     filterFields = ['dateRange', 'branch', 'department', 'category', 'status'],
     onApplyFilters,
     statusOptions,
+    statusCodes,
+    defaultPreset = 'month',
     notice,
     onExportPdf,
     onExportExcel,
@@ -198,19 +227,23 @@ const ReportShell = ({
     children,
 }: ReportShellProps) => {
     const [showFilters, setShowFilters] = useState(true);
-    const [datePreset, setDatePreset] = useState('month');
+    const [datePreset, setDatePreset] = useState(defaultPreset);
     const [customFrom, setCustomFrom] = useState('');
     const [customTo, setCustomTo] = useState('');
     const [branch, setBranch] = useState('');
     const [department, setDepartment] = useState('');
     const [category, setCategory] = useState('');
     const [status, setStatus] = useState('');
+    const [repairedBy, setRepairedBy] = useState('');
 
     /** Live branch / department / category / status directories for the four dropdowns. */
     const lookups = useReportLookups();
 
     /** The catalogue, unless this report's subject has a vocabulary of its own. */
-    const statusChoices = statusOptions ?? lookups.statuses;
+    const statusChoices = statusOptions
+        ?? (statusCodes
+            ? lookups.statuses.filter((s) => s.code && statusCodes.includes(s.code))
+            : lookups.statuses);
 
     /** Resolves a selected id back to its directory entry, so the emitted filter carries both. */
     const pick = (options: LookupOption[], id: string) => options.find((o) => String(o.id) === String(id));
@@ -222,6 +255,7 @@ const ReportShell = ({
         const d = pick(lookups.departments, department);
         const c = pick(lookups.categories, category);
         const s = pick(statusChoices, status);
+        const r = REPAIRED_BY_OPTIONS.find((o) => o.value === repairedBy);
 
         return {
             dateFrom: range.from,
@@ -235,9 +269,11 @@ const ReportShell = ({
             statusId: s?.id,
             statusCode: s?.code,
             status: s?.label,
+            repairedBy: r?.value,
+            repairedByLabel: r?.label,
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [datePreset, customFrom, customTo, branch, department, category, status, lookups]);
+    }, [datePreset, customFrom, customTo, branch, department, category, status, repairedBy, lookups]);
 
     const handleApply = () => onApplyFilters?.(currentFilters());
 
@@ -278,6 +314,7 @@ const ReportShell = ({
                 department: pick(lookups.departments, department)?.label,
                 category: pick(lookups.categories, category)?.label,
                 status: pick(statusChoices, status)?.label,
+                repairedByLabel: REPAIRED_BY_OPTIONS.find((o) => o.value === repairedBy)?.label,
             },
         };
         if (kind === 'pdf') exportReportPdf(input);
@@ -286,23 +323,25 @@ const ReportShell = ({
     };
 
     /**
-     * Back to the opening state — which is "this month", not "everything".
+     * Back to the opening state — the report's default period, not "everything".
      *
      * <p>It used to reset the controls to *This Month* and then apply an **empty** filter set, so
      * Clear left the bar and the table disagreeing permanently. Clearing should mean "put it back
      * how it opened", and what it opened as is now one definition rather than two.
      */
     const handleClear = () => {
-        setDatePreset('month');
+        setDatePreset(defaultPreset);
         setCustomFrom('');
         setCustomTo('');
         setBranch('');
         setDepartment('');
         setCategory('');
         setStatus('');
+        setRepairedBy('');
+        const range = getDateRange(defaultPreset);
         onApplyFilters?.({
-            dateFrom: getDateRange('month').from,
-            dateTo: getDateRange('month').to,
+            dateFrom: range.from || undefined,
+            dateTo: range.to || undefined,
         });
     };
 
@@ -330,7 +369,7 @@ const ReportShell = ({
                 }}>
                     <Stack direction="row" alignItems="center" gap={1}>
                         <TuneOutlinedIcon sx={{ fontSize: 16, color: accentColor }} />
-                        <Typography sx={{ fontWeight: 700, fontSize: '0.82rem', color: '#0F172A' }}>
+                        <Typography sx={{ fontWeight: 700, fontSize: '0.875rem', color: '#0F172A' }}>
                             Filters &amp; Options
                         </Typography>
                     </Stack>
@@ -351,13 +390,13 @@ const ReportShell = ({
                             {/* Date preset */}
                             {filterFields.includes('dateRange') && (
                                 <Grid item xs={12} sm={6} md={2}>
-                                    <Typography sx={{ fontSize: '0.72rem', fontWeight: 600, color: '#64748B', mb: 0.5, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                    <Typography sx={{ fontSize: '0.8rem', fontWeight: 600, color: '#64748B', mb: 0.5, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                                         Period
                                     </Typography>
                                     <FormControl fullWidth size="small" sx={PILL_INPUT_SX}>
                                         <Select value={datePreset} onChange={e => setDatePreset(e.target.value)}
                                             startAdornment={<InputAdornment position="start"><CalendarTodayOutlinedIcon sx={{ fontSize: 13, color: accentColor }} /></InputAdornment>}>
-                                            {DATE_PRESETS.map(d => <MenuItem key={d.value} value={d.value} sx={{ fontSize: '0.8rem' }}>{d.label}</MenuItem>)}
+                                            {DATE_PRESETS.map(d => <MenuItem key={d.value} value={d.value} sx={{ fontSize: '0.875rem' }}>{d.label}</MenuItem>)}
                                         </Select>
                                     </FormControl>
                                 </Grid>
@@ -367,11 +406,11 @@ const ReportShell = ({
                             {filterFields.includes('dateRange') && datePreset === 'custom' && (
                                 <>
                                     <Grid item xs={6} sm={3} md={1.5}>
-                                        <Typography sx={{ fontSize: '0.72rem', fontWeight: 600, color: '#64748B', mb: 0.5, textTransform: 'uppercase', letterSpacing: '0.05em' }}>From</Typography>
+                                        <Typography sx={{ fontSize: '0.8rem', fontWeight: 600, color: '#64748B', mb: 0.5, textTransform: 'uppercase', letterSpacing: '0.05em' }}>From</Typography>
                                         <TextField fullWidth size="small" type="date" value={customFrom} onChange={e => setCustomFrom(e.target.value)} sx={PILL_INPUT_SX} />
                                     </Grid>
                                     <Grid item xs={6} sm={3} md={1.5}>
-                                        <Typography sx={{ fontSize: '0.72rem', fontWeight: 600, color: '#64748B', mb: 0.5, textTransform: 'uppercase', letterSpacing: '0.05em' }}>To</Typography>
+                                        <Typography sx={{ fontSize: '0.8rem', fontWeight: 600, color: '#64748B', mb: 0.5, textTransform: 'uppercase', letterSpacing: '0.05em' }}>To</Typography>
                                         <TextField fullWidth size="small" type="date" value={customTo} onChange={e => setCustomTo(e.target.value)} sx={PILL_INPUT_SX} />
                                     </Grid>
                                 </>
@@ -380,11 +419,11 @@ const ReportShell = ({
                             {/* Branch */}
                             {filterFields.includes('branch') && (
                                 <Grid item xs={12} sm={6} md={2}>
-                                    <Typography sx={{ fontSize: '0.72rem', fontWeight: 600, color: '#64748B', mb: 0.5, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Branch</Typography>
+                                    <Typography sx={{ fontSize: '0.8rem', fontWeight: 600, color: '#64748B', mb: 0.5, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Branch</Typography>
                                     <FormControl fullWidth size="small" sx={PILL_INPUT_SX}>
                                         <Select value={branch} onChange={e => setBranch(e.target.value)} displayEmpty>
-                                            <MenuItem value=""><em style={{ fontSize: '0.8rem', fontStyle: 'normal', color: '#94A3B8' }}>All Branches</em></MenuItem>
-                                            {lookups.branches.map(b => <MenuItem key={b.id} value={String(b.id)} sx={{ fontSize: '0.8rem' }}>{b.label}</MenuItem>)}
+                                            <MenuItem value=""><em style={{ fontSize: '0.875rem', fontStyle: 'normal', color: '#94A3B8' }}>All Branches</em></MenuItem>
+                                            {lookups.branches.map(b => <MenuItem key={b.id} value={String(b.id)} sx={{ fontSize: '0.875rem' }}>{b.label}</MenuItem>)}
                                         </Select>
                                     </FormControl>
                                 </Grid>
@@ -393,11 +432,11 @@ const ReportShell = ({
                             {/* Department */}
                             {filterFields.includes('department') && (
                                 <Grid item xs={12} sm={6} md={2}>
-                                    <Typography sx={{ fontSize: '0.72rem', fontWeight: 600, color: '#64748B', mb: 0.5, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Department</Typography>
+                                    <Typography sx={{ fontSize: '0.8rem', fontWeight: 600, color: '#64748B', mb: 0.5, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Department</Typography>
                                     <FormControl fullWidth size="small" sx={PILL_INPUT_SX}>
                                         <Select value={department} onChange={e => setDepartment(e.target.value)} displayEmpty>
-                                            <MenuItem value=""><em style={{ fontSize: '0.8rem', fontStyle: 'normal', color: '#94A3B8' }}>All Departments</em></MenuItem>
-                                            {lookups.departments.map(d => <MenuItem key={d.id} value={String(d.id)} sx={{ fontSize: '0.8rem' }}>{d.label}</MenuItem>)}
+                                            <MenuItem value=""><em style={{ fontSize: '0.875rem', fontStyle: 'normal', color: '#94A3B8' }}>All Departments</em></MenuItem>
+                                            {lookups.departments.map(d => <MenuItem key={d.id} value={String(d.id)} sx={{ fontSize: '0.875rem' }}>{d.label}</MenuItem>)}
                                         </Select>
                                     </FormControl>
                                 </Grid>
@@ -406,11 +445,11 @@ const ReportShell = ({
                             {/* Category */}
                             {filterFields.includes('category') && (
                                 <Grid item xs={12} sm={6} md={2}>
-                                    <Typography sx={{ fontSize: '0.72rem', fontWeight: 600, color: '#64748B', mb: 0.5, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Category</Typography>
+                                    <Typography sx={{ fontSize: '0.8rem', fontWeight: 600, color: '#64748B', mb: 0.5, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Category</Typography>
                                     <FormControl fullWidth size="small" sx={PILL_INPUT_SX}>
                                         <Select value={category} onChange={e => setCategory(e.target.value)} displayEmpty>
-                                            <MenuItem value=""><em style={{ fontSize: '0.8rem', fontStyle: 'normal', color: '#94A3B8' }}>All Categories</em></MenuItem>
-                                            {lookups.categories.map(c => <MenuItem key={c.id} value={String(c.id)} sx={{ fontSize: '0.8rem' }}>{c.label}</MenuItem>)}
+                                            <MenuItem value=""><em style={{ fontSize: '0.875rem', fontStyle: 'normal', color: '#94A3B8' }}>All Categories</em></MenuItem>
+                                            {lookups.categories.map(c => <MenuItem key={c.id} value={String(c.id)} sx={{ fontSize: '0.875rem' }}>{c.label}</MenuItem>)}
                                         </Select>
                                     </FormControl>
                                 </Grid>
@@ -419,11 +458,24 @@ const ReportShell = ({
                             {/* Status */}
                             {filterFields.includes('status') && (
                                 <Grid item xs={12} sm={6} md={2}>
-                                    <Typography sx={{ fontSize: '0.72rem', fontWeight: 600, color: '#64748B', mb: 0.5, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Status</Typography>
+                                    <Typography sx={{ fontSize: '0.8rem', fontWeight: 600, color: '#64748B', mb: 0.5, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Status</Typography>
                                     <FormControl fullWidth size="small" sx={PILL_INPUT_SX}>
                                         <Select value={status} onChange={e => setStatus(e.target.value)} displayEmpty>
-                                            <MenuItem value=""><em style={{ fontSize: '0.8rem', fontStyle: 'normal', color: '#94A3B8' }}>All Statuses</em></MenuItem>
-                                            {statusChoices.map(s => <MenuItem key={s.id} value={String(s.id)} sx={{ fontSize: '0.8rem' }}>{s.label}</MenuItem>)}
+                                            <MenuItem value=""><em style={{ fontSize: '0.875rem', fontStyle: 'normal', color: '#94A3B8' }}>All Statuses</em></MenuItem>
+                                            {statusChoices.map(s => <MenuItem key={s.id} value={String(s.id)} sx={{ fontSize: '0.875rem' }}>{s.label}</MenuItem>)}
+                                        </Select>
+                                    </FormControl>
+                                </Grid>
+                            )}
+
+                            {/* Repaired by — maintenance only */}
+                            {filterFields.includes('repairedBy') && (
+                                <Grid item xs={12} sm={6} md={2}>
+                                    <Typography sx={{ fontSize: '0.8rem', fontWeight: 600, color: '#64748B', mb: 0.5, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Repaired By</Typography>
+                                    <FormControl fullWidth size="small" sx={PILL_INPUT_SX}>
+                                        <Select value={repairedBy} onChange={e => setRepairedBy(e.target.value)} displayEmpty>
+                                            <MenuItem value=""><em style={{ fontSize: '0.875rem', fontStyle: 'normal', color: '#94A3B8' }}>Internal &amp; External</em></MenuItem>
+                                            {REPAIRED_BY_OPTIONS.map(o => <MenuItem key={o.value} value={o.value} sx={{ fontSize: '0.875rem' }}>{o.label}</MenuItem>)}
                                         </Select>
                                     </FormControl>
                                 </Grid>
@@ -437,7 +489,7 @@ const ReportShell = ({
                                         onClick={handleApply}
                                         sx={{
                                             height: 36, px: 2, textTransform: 'none', fontWeight: 600,
-                                            fontSize: '0.8rem', bgcolor: accentColor, borderRadius: '8px',
+                                            fontSize: '0.875rem', bgcolor: accentColor, borderRadius: '8px',
                                             boxShadow: `0 2px 8px ${alpha(accentColor, 0.35)}`,
                                             '&:hover': { bgcolor: alpha(accentColor, 0.85), boxShadow: `0 4px 14px ${alpha(accentColor, 0.4)}` },
                                         }}
@@ -449,7 +501,7 @@ const ReportShell = ({
                                         onClick={handleClear}
                                         sx={{
                                             height: 36, px: 1.5, textTransform: 'none', fontWeight: 600,
-                                            fontSize: '0.8rem', borderRadius: '8px',
+                                            fontSize: '0.875rem', borderRadius: '8px',
                                             borderColor: '#CBD5E1', color: '#64748B',
                                             '&:hover': { borderColor: accentColor, color: accentColor, bgcolor: alpha(accentColor, 0.04) },
                                         }}
@@ -468,14 +520,14 @@ const ReportShell = ({
                 display: 'flex', alignItems: 'center', justifyContent: 'flex-end',
                 gap: 1, mb: 2,
             }}>
-                <Typography sx={{ fontSize: '0.75rem', color: '#94A3B8', mr: 0.5 }}>Export as:</Typography>
+                <Typography sx={{ fontSize: '0.8rem', color: '#94A3B8', mr: 0.5 }}>Export as:</Typography>
 
                 <Tooltip title="Export PDF">
                     <Button
                         size="small" variant="outlined" startIcon={<PictureAsPdfOutlinedIcon sx={{ fontSize: '14px !important' }} />}
                         onClick={onExportPdf ?? (() => runExport('pdf'))}
                         sx={{
-                            height: 32, px: 1.5, borderRadius: '8px', fontSize: '0.75rem', fontWeight: 600,
+                            height: 32, px: 1.5, borderRadius: '8px', fontSize: '0.8rem', fontWeight: 600,
                             textTransform: 'none', borderColor: '#E2E8F0', color: '#DC2626',
                             '&:hover': { borderColor: '#DC2626', bgcolor: alpha('#DC2626', 0.04) },
                         }}
@@ -489,7 +541,7 @@ const ReportShell = ({
                         size="small" variant="outlined" startIcon={<TableChartOutlinedIcon sx={{ fontSize: '14px !important' }} />}
                         onClick={onExportExcel ?? (() => runExport('excel'))}
                         sx={{
-                            height: 32, px: 1.5, borderRadius: '8px', fontSize: '0.75rem', fontWeight: 600,
+                            height: 32, px: 1.5, borderRadius: '8px', fontSize: '0.8rem', fontWeight: 600,
                             textTransform: 'none', borderColor: '#E2E8F0', color: '#15803D',
                             '&:hover': { borderColor: '#15803D', bgcolor: alpha('#15803D', 0.04) },
                         }}
@@ -503,7 +555,7 @@ const ReportShell = ({
                         size="small" variant="outlined" startIcon={<DataObjectOutlinedIcon sx={{ fontSize: '14px !important' }} />}
                         onClick={onExportCsv ?? (() => runExport('csv'))}
                         sx={{
-                            height: 32, px: 1.5, borderRadius: '8px', fontSize: '0.75rem', fontWeight: 600,
+                            height: 32, px: 1.5, borderRadius: '8px', fontSize: '0.8rem', fontWeight: 600,
                             textTransform: 'none', borderColor: '#E2E8F0', color: '#0369A1',
                             '&:hover': { borderColor: '#0369A1', bgcolor: alpha('#0369A1', 0.04) },
                         }}

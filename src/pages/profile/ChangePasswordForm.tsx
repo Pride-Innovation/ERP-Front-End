@@ -60,7 +60,7 @@ const passwordFieldSx = {
     },
     '& .MuiOutlinedInput-input': {
         padding: '13px 14px',
-        fontSize: '0.875rem',
+        fontSize: '0.9375rem',
         lineHeight: 1.5,
     },
 };

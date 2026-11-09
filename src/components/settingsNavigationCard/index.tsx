@@ -127,7 +127,7 @@ const SettingsHeader = ({
                             fontWeight: 600,
                             minWidth: 70,
                             textAlign: 'center',
-                            fontSize: '0.8rem',
+                            fontSize: '0.875rem',
                             color: 'text.secondary',
                         }}
                     >

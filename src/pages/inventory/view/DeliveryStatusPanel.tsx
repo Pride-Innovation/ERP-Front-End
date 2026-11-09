@@ -678,14 +678,14 @@ const ReceiveDeliveryDialog = ({
                         <Typography sx={{ fontSize: '1.05rem', fontWeight: 700, color: neutral[900], lineHeight: 1.3, letterSpacing: '-0.01em' }}>
                             Record a Delivery
                         </Typography>
-                        <Typography sx={{ fontSize: '0.8rem', color: neutral[500], mt: 0.2 }}>
+                        <Typography sx={{ fontSize: '0.875rem', color: neutral[500], mt: 0.2 }}>
                             Enter what arrived in this batch — one delivery note becomes one GRN
                         </Typography>
                     </Box>
 
                     {totalOutstanding > 0 && (
                         <Box sx={{ textAlign: 'right', display: { xs: 'none', sm: 'block' }, pr: 0.5 }}>
-                            <Typography sx={{ fontSize: '0.6rem', fontWeight: 700, color: neutral[400], textTransform: 'uppercase', letterSpacing: '0.07em' }}>
+                            <Typography sx={{ fontSize: '0.8rem', fontWeight: 700, color: neutral[400], textTransform: 'uppercase', letterSpacing: '0.07em' }}>
                                 Outstanding
                             </Typography>
                             <Typography sx={{ fontSize: '1.05rem', fontWeight: 800, color: neutral[900], lineHeight: 1.2, fontVariantNumeric: 'tabular-nums' }}>
@@ -763,7 +763,7 @@ const ReceiveDeliveryDialog = ({
                                         onClick={everythingSelected ? () => setQuantities({}) : receiveEverything}
                                         startIcon={<DoneAllRoundedIcon sx={{ fontSize: 16 }} />}
                                         sx={{
-                                            textTransform: 'none', fontWeight: 700, fontSize: '0.76rem',
+                                            textTransform: 'none', fontWeight: 700, fontSize: '0.8rem',
                                             borderRadius: `${radii.pill}px`, px: 1.5,
                                             color: brand[700], bgcolor: alpha(brand[500], 0.08),
                                             '&:hover': { bgcolor: alpha(brand[500], 0.14) },
@@ -782,7 +782,7 @@ const ReceiveDeliveryDialog = ({
                                                 '& th': {
                                                     bgcolor: alpha(brand[500], 0.04),
                                                     borderBottom: `1px solid ${border.subtle}`,
-                                                    fontWeight: 700, fontSize: '0.66rem', color: brand[700],
+                                                    fontWeight: 700, fontSize: '0.8rem', color: brand[700],
                                                     textTransform: 'uppercase', letterSpacing: '0.06em',
                                                     py: 1.25, whiteSpace: 'nowrap',
                                                 },
@@ -823,10 +823,10 @@ const ReceiveDeliveryDialog = ({
                                                                 }}
                                                             />
                                                             <Box sx={{ minWidth: 0 }}>
-                                                                <Typography sx={{ fontSize: '0.85rem', fontWeight: 600, color: neutral[900], lineHeight: 1.35 }}>
+                                                                <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: neutral[900], lineHeight: 1.35 }}>
                                                                     {line.commodity?.name ?? '—'}
                                                                 </Typography>
-                                                                <Typography sx={{ fontSize: '0.71rem', color: neutral[500] }}>
+                                                                <Typography sx={{ fontSize: '0.8rem', color: neutral[500] }}>
                                                                     {line.deliveredQuantity || 0} of {line.orderedQuantity || 0} received so far
                                                                     {line.commodity?.groupName ? ` · ${line.commodity.groupName}` : ''}
                                                                 </Typography>
@@ -840,7 +840,7 @@ const ReceiveDeliveryDialog = ({
                                                             sx={{
                                                                 display: 'inline-flex', minWidth: 32, justifyContent: 'center',
                                                                 px: 1, py: 0.35, borderRadius: `${radii.sm}px`,
-                                                                fontSize: '0.8rem', fontWeight: 700, fontVariantNumeric: 'tabular-nums',
+                                                                fontSize: '0.875rem', fontWeight: 700, fontVariantNumeric: 'tabular-nums',
                                                                 color: statusTokens.warning.strong, bgcolor: statusTokens.warning.soft,
                                                             }}
                                                         >
@@ -897,7 +897,7 @@ const ReceiveDeliveryDialog = ({
                                 onClick={() => setShowPrices(!showPrices)}
                                 startIcon={<TuneRoundedIcon sx={{ fontSize: 15 }} />}
                                 sx={{
-                                    mt: 1.25, textTransform: 'none', fontWeight: 600, fontSize: '0.75rem',
+                                    mt: 1.25, textTransform: 'none', fontWeight: 600, fontSize: '0.8rem',
                                     color: showPrices ? brand[700] : neutral[500], px: 0.5,
                                     '&:hover': { bgcolor: 'transparent', color: brand[600] },
                                 }}
@@ -949,10 +949,10 @@ const ReceiveDeliveryDialog = ({
                         <ReceiptLongOutlinedIcon sx={{ fontSize: 19 }} />
                     </Box>
                     <Box sx={{ minWidth: 0 }}>
-                        <Typography sx={{ fontSize: '0.9rem', fontWeight: 800, lineHeight: 1.2, fontVariantNumeric: 'tabular-nums', color: totalReceiving > 0 ? neutral[900] : neutral[400] }}>
+                        <Typography sx={{ fontSize: '0.9375rem', fontWeight: 800, lineHeight: 1.2, fontVariantNumeric: 'tabular-nums', color: totalReceiving > 0 ? neutral[900] : neutral[400] }}>
                             {totalReceiving.toLocaleString()} unit{totalReceiving === 1 ? '' : 's'}
                         </Typography>
-                        <Typography sx={{ fontSize: '0.7rem', color: neutral[500] }}>
+                        <Typography sx={{ fontSize: '0.8rem', color: neutral[500] }}>
                             {totalReceiving > 0
                                 ? `across ${linesTouched} line${linesTouched === 1 ? '' : 's'} · issues 1 GRN`
                                 : 'nothing selected yet'}
@@ -981,7 +981,7 @@ const ReceiveDeliveryDialog = ({
                             ? <CircularProgress size={15} sx={{ color: '#fff' }} />
                             : <CheckCircleOutlineIcon sx={{ fontSize: 18 }} />}
                         sx={{
-                            textTransform: 'none', fontWeight: 700, fontSize: '0.87rem',
+                            textTransform: 'none', fontWeight: 700, fontSize: '0.9375rem',
                             height: 42, px: 3, borderRadius: `${radii.pill}px`, whiteSpace: 'nowrap',
                             background: `linear-gradient(135deg, ${brand[500]} 0%, ${brand[700]} 100%)`,
                             boxShadow: `0 6px 16px ${alpha(brand[500], 0.3)}`,
@@ -1025,18 +1025,18 @@ const SectionHeader = ({ index, title, hint, action }: {
                     width: 22, height: 22, borderRadius: '50%', flexShrink: 0,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     bgcolor: alpha(brand[500], 0.1), color: brand[700],
-                    fontSize: '0.68rem', fontWeight: 800,
+                    fontSize: '0.8rem', fontWeight: 800,
                 }}
             >
                 {index}
             </Box>
             )}
             <Box sx={{ minWidth: 0 }}>
-                <Typography sx={{ fontSize: '0.82rem', fontWeight: 700, color: neutral[800], lineHeight: 1.3 }}>
+                <Typography sx={{ fontSize: '0.875rem', fontWeight: 700, color: neutral[800], lineHeight: 1.3 }}>
                     {title}
                 </Typography>
                 {hint && (
-                    <Typography sx={{ fontSize: '0.7rem', color: neutral[500] }}>{hint}</Typography>
+                    <Typography sx={{ fontSize: '0.8rem', color: neutral[500] }}>{hint}</Typography>
                 )}
             </Box>
         </Stack>
@@ -1082,7 +1082,7 @@ const QuantityStepper = ({ value, max, onChange }: {
                     disableUnderline: true,
                     sx: {
                         width: 46,
-                        fontSize: '0.88rem',
+                        fontSize: '0.9375rem',
                         fontWeight: 700,
                         fontVariantNumeric: 'tabular-nums',
                         color: active ? brand[700] : neutral[700],
@@ -1144,7 +1144,7 @@ const DeliveryDatePicker = ({ value, onChange }: { value: string; onChange: (v: 
                             },
                             '& .MuiPickersDay-root': {
                                 borderRadius: `${radii.sm}px`,
-                                fontSize: '0.8125rem',
+                                fontSize: '0.875rem',
                                 '&:hover': { backgroundColor: alpha(brand[500], 0.08) },
                                 '&.Mui-selected': {
                                     backgroundColor: brand[500],
@@ -1156,7 +1156,7 @@ const DeliveryDatePicker = ({ value, onChange }: { value: string; onChange: (v: 
                             '& .MuiDayCalendar-weekDayLabel': {
                                 color: alpha(brand[500], 0.7),
                                 fontWeight: 600,
-                                fontSize: '0.75rem',
+                                fontSize: '0.8rem',
                             },
                         },
                     },
@@ -1198,7 +1198,7 @@ const MoneyField = ({ value, fallback, onChange }: {
         InputProps={{
             startAdornment: (
                 <InputAdornment position="start">
-                    <Typography sx={{ fontSize: '0.7rem', fontWeight: 700, color: neutral[400], letterSpacing: '0.04em' }}>
+                    <Typography sx={{ fontSize: '0.8rem', fontWeight: 700, color: neutral[400], letterSpacing: '0.04em' }}>
                         UGX
                     </Typography>
                 </InputAdornment>

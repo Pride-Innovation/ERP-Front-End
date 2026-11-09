@@ -46,6 +46,16 @@ export const truncationNotice = (res: any, noun: string): string | undefined => 
         + 'Narrow the filters to bring the rest into range — totals and exports cover only what is shown.';
 };
 
+/**
+ * Said whenever the department filter is on. An asset has no department — this is the **holder's** —
+ * so unassigned assets cannot match, and measured on live data that is most of the estate. The
+ * filter now runs in the database (`departmentId`), so the count of what it set aside is no longer
+ * to hand; the reason is.
+ */
+export const HOLDER_DEPARTMENT_NOTE =
+    "Department means the holder's department: unassigned assets, and holders with no department "
+    + 'recorded, cannot match.';
+
 /** Joins what a panel has to say, dropping the parts that do not apply. */
 export const combineNotices = (...parts: Array<string | undefined>): string | undefined =>
     parts.filter(Boolean).join(' ') || undefined;

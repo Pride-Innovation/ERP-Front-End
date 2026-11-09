@@ -626,7 +626,7 @@ const ActionPermissions: React.FC<ActionPermissionsProps> = ({ role, allPermissi
                             : alpha(theme.palette.divider, 0.4),
                         color: grantedCount > 0 ? theme.palette.primary.main : 'text.secondary',
                         fontWeight: 600,
-                        fontSize: '0.72rem',
+                        fontSize: '0.8rem',
                         height: 22,
                     }}
                 />
@@ -682,7 +682,7 @@ const ActionPermissions: React.FC<ActionPermissionsProps> = ({ role, allPermissi
                                     color: theme.palette.primary.main,
                                     textTransform: 'uppercase',
                                     letterSpacing: '0.06em',
-                                    fontSize: '0.68rem',
+                                    fontSize: '0.8rem',
                                 }}
                             >
                                 {groupName}
@@ -747,7 +747,7 @@ const ActionPermissions: React.FC<ActionPermissionsProps> = ({ role, allPermissi
                                                 label="Active"
                                                 sx={{
                                                     height: 18,
-                                                    fontSize: '0.65rem',
+                                                    fontSize: '0.8rem',
                                                     fontWeight: 700,
                                                     bgcolor: alpha(ap.color, 0.1),
                                                     color: ap.color,

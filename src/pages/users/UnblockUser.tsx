@@ -151,7 +151,7 @@ const UnblockUser = ({
                                         {user.firstName} {user.lastName} {user.otherName}
                                     </Typography>
                                     <Stack direction="row" spacing={1} alignItems="center">
-                                        <CheckCircleOutlineIcon sx={{ fontSize: '0.85rem', color: 'success.main' }} />
+                                        <CheckCircleOutlineIcon sx={{ fontSize: '0.875rem', color: 'success.main' }} />
                                         <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
                                             {user.title?.name || "No title assigned"}
                                         </Typography>

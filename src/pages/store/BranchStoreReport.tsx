@@ -18,7 +18,7 @@ interface BranchStoreReportProps {
 }
 
 const BranchStoreReport = ({ accentColor }: BranchStoreReportProps) => {
-    const { branchId, currentAssetType, storeType } = useContext(StoreContext);
+    const { branchId, currentAssetType, storeType, storeFilters } = useContext(StoreContext);
     const { assetTypes } = useSelector((state: RootState) => state.AssetTypeStore);
 
     const {
@@ -63,11 +63,14 @@ const BranchStoreReport = ({ accentColor }: BranchStoreReportProps) => {
      *
      * `storeType` is here because the Admin / IT / Disposal pages all render the same `StoreViewPage`
      * and switching between them does not remount this component.
+     *
+     * `storeFilters` is here because Apply is what changes it: the table hands its filters to the
+     * page, and this is the fetch that turns them into rows and a count.
      */
     useEffect(() => {
         fetchStoresCommoditiesPerBranchPerAsset();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [currentAssetType, storeType, branchId]);
+    }, [currentAssetType, storeType, branchId, storeFilters]);
 
     // The tab bar renders from the same value the fetch uses, so they cannot disagree.
     const activeTab = Math.max(0, tableHeaders.findIndex(h => h.id === currentAssetType?.id));

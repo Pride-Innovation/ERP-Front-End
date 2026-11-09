@@ -45,7 +45,7 @@ const ApprovalTipsPanel = () => (
                             flexShrink: 0, mt: '7px',
                         }}
                     />
-                    <Typography variant="body2" sx={{ color: '#08796C', fontSize: '0.82rem', lineHeight: 1.55 }}>
+                    <Typography variant="body2" sx={{ color: '#08796C', fontSize: '0.875rem', lineHeight: 1.55 }}>
                         {tip}
                     </Typography>
                 </Stack>

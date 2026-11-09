@@ -204,7 +204,7 @@ const UnitRolesDialog = ({ unit, handleClose, onSaved }: IUnitRolesDialogProps) 
                             </Stack>
                             <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap sx={{ mb: gainedPermissions.length ? 1.5 : 0 }}>
                                 {granted.map((r) => (
-                                    <Chip key={r.id} size="small" label={r.name} sx={{ height: 22, fontSize: '0.7rem', fontWeight: 600 }} />
+                                    <Chip key={r.id} size="small" label={r.name} sx={{ height: 22, fontSize: '0.8rem', fontWeight: 600 }} />
                                 ))}
                             </Stack>
                             {gainedPermissions.length > 0 ? (
@@ -238,7 +238,7 @@ const UnitRolesDialog = ({ unit, handleClose, onSaved }: IUnitRolesDialogProps) 
                             </Stack>
                             <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap sx={{ mb: lostPermissions.length ? 1.5 : 0 }}>
                                 {revoked.map((r) => (
-                                    <Chip key={r.id} size="small" label={r.name} sx={{ height: 22, fontSize: '0.7rem', fontWeight: 600 }} />
+                                    <Chip key={r.id} size="small" label={r.name} sx={{ height: 22, fontSize: '0.8rem', fontWeight: 600 }} />
                                 ))}
                             </Stack>
                             {lostPermissions.length > 0 ? (
@@ -333,7 +333,7 @@ const UnitRolesDialog = ({ unit, handleClose, onSaved }: IUnitRolesDialogProps) 
                                             size="small"
                                             icon={<PublicOutlinedIcon sx={{ fontSize: 12 }} />}
                                             label="Cross-branch"
-                                            sx={{ height: 18, fontSize: '0.62rem', fontWeight: 700, bgcolor: alpha(DANGER, 0.08), color: DANGER, '& .MuiChip-icon': { color: DANGER, ml: 0.5 } }}
+                                            sx={{ height: 18, fontSize: '0.8rem', fontWeight: 700, bgcolor: alpha(DANGER, 0.08), color: DANGER, '& .MuiChip-icon': { color: DANGER, ml: 0.5 } }}
                                         />
                                     )}
                                 </Stack>

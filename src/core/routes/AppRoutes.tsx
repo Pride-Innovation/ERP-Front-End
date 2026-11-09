@@ -29,10 +29,12 @@ import ResetPassword from '../../pages/authentication/ResetPassword'
 import MovementRoutes from './subroutes/movement'
 import StoreRoutes from './subroutes/StoreRoutes'
 import ReportsPage from '../../pages/reports'
+import { REPORT_PAGE_PERMISSIONS } from '../../pages/reports/reportPermissions'
 import ApprovalWorkflows from '../../pages/approvalWorkflows'
 import Notifications from '../../pages/notifications'
 import { NotificationContextProvider } from '../../context/notification/NotificationContext'
 import { PERMISSIONS } from '../permissions/constants'
+import ScannerPage from '../../pages/scan/ScannerPage'
 
 /**
  * Route tree as JSX. Rendered through a data router (createBrowserRouter) so
@@ -124,12 +126,8 @@ const routeElements = (
             * `anyOf`, because the page hides the tabs a viewer cannot load: holding one of these
             * means there is something here worth opening.
             */}
-          <Route element={<PrivateRoute anyOf={[
-            PERMISSIONS.READ_ASSET,
-            PERMISSIONS.READ_REQUEST,
-            PERMISSIONS.READ_MOVEMENT,
-            PERMISSIONS.READ_INVENTORY,
-          ]} />}>
+          {/* Any tab's permission opens the page; the list is the tabs' own (reportPermissions). */}
+          <Route element={<PrivateRoute anyOf={REPORT_PAGE_PERMISSIONS} />}>
             <Route path={ROUTES.REPORTS} element={<ReportsPage />} />
           </Route>
 
@@ -148,6 +146,12 @@ const routeElements = (
         * page does not exist, not bounced to a login screen that then sends them somewhere they did
         * not ask for.
         */}
+      {/*
+        * The handheld scanner's page. Outside PrivateRoute on purpose: the PDA is paired with a
+        * computer by scanning a code, not signed in - often a shared device - and its token can only
+        * put text into that one computer's search box. See ScanRelayService on the backend.
+        */}
+      <Route path={ROUTES.SCANNER} element={<ScannerPage />} />
       <Route path="*" element={<RouteError />} />
     </Route>
 )

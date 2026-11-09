@@ -66,7 +66,7 @@ const TotalCard = ({ label, value, accent, icon }: TotalCardProps) => (
                 sx={{
                     color: neutral[500],
                     fontWeight: 700,
-                    fontSize: '0.65rem',
+                    fontSize: '0.8rem',
                     letterSpacing: '0.05em',
                     textTransform: 'uppercase',
                     lineHeight: 1.2,
@@ -78,7 +78,7 @@ const TotalCard = ({ label, value, accent, icon }: TotalCardProps) => (
             <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 0.5 }}>
                 <Typography
                     sx={{
-                        fontSize: '0.75rem',
+                        fontSize: '0.8rem',
                         fontWeight: 700,
                         color: accent,
                     }}
@@ -171,7 +171,7 @@ const PriceTotals = ({ showPrices = false }: PriceTotalsProps) => {
                         variant="caption"
                         sx={{
                             color: neutral[500],
-                            fontSize: '0.8rem',
+                            fontSize: '0.875rem',
                             fontWeight: 500,
                         }}
                     >
@@ -204,7 +204,7 @@ const PriceTotals = ({ showPrices = false }: PriceTotalsProps) => {
                                 sx={{
                                     fontWeight: 700,
                                     color: status.warning.strong,
-                                    fontSize: '0.8rem',
+                                    fontSize: '0.875rem',
                                 }}
                             >
                                 Some items are incomplete

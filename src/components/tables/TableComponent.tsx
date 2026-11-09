@@ -365,7 +365,7 @@ const TableComponent = ({
                     sx={{
                         width: 36, height: 36,
                         bgcolor: alpha(bg, 0.15), color: bg,
-                        fontSize: '0.78rem', fontWeight: 700,
+                        fontSize: '0.875rem', fontWeight: 700,
                         border: `2px solid ${alpha(bg, 0.2)}`,
                         boxShadow: `0 1px 4px ${alpha('#000', 0.08)}`,
                     }}
@@ -384,7 +384,7 @@ const TableComponent = ({
                     <Avatar sx={{
                         width: 30, height: 30, flexShrink: 0,
                         bgcolor: alpha(bg, 0.12), color: bg,
-                        fontSize: '0.7rem', fontWeight: 800,
+                        fontSize: '0.8rem', fontWeight: 800,
                         border: `1.5px solid ${alpha(bg, 0.18)}`,
                     }}>
                         {display !== EMPTY_COL ? initials(display) : '?'}
@@ -417,7 +417,7 @@ const TableComponent = ({
                     <StyledBox sx={{ maxWidth: 200 }}>
                         <MailOutlineIcon sx={{ fontSize: 14, color: '#94A3B8', flexShrink: 0 }} />
                         <Typography sx={{
-                            fontSize: '0.82rem', color: '#334155',
+                            fontSize: '0.875rem', color: '#334155',
                             overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                         }}>
                             {value ?? EMPTY_COL}
@@ -433,7 +433,7 @@ const TableComponent = ({
                 return (
                     <StyledBox>
                         <PersonOutlineIcon sx={{ fontSize: 14, color: '#CBD5E1', flexShrink: 0 }} />
-                        <Typography sx={{ fontSize: '0.8rem', color: '#CBD5E1', fontStyle: 'italic' }}>
+                        <Typography sx={{ fontSize: '0.875rem', color: '#CBD5E1', fontStyle: 'italic' }}>
                             {column.label === 'approver' ? 'Unassigned' : EMPTY_COL}
                         </Typography>
                     </StyledBox>
@@ -445,12 +445,12 @@ const TableComponent = ({
                     <Avatar sx={{
                         width: 26, height: 26, flexShrink: 0,
                         bgcolor: alpha(bg, 0.12), color: bg,
-                        fontSize: '0.65rem', fontWeight: 800,
+                        fontSize: '0.8rem', fontWeight: 800,
                         border: `1.5px solid ${alpha(bg, 0.18)}`,
                     }}>
                         {initials(value)}
                     </Avatar>
-                    <Typography sx={{ fontSize: '0.825rem', fontWeight: 500, color: '#1E293B', lineHeight: 1.3 }}>
+                    <Typography sx={{ fontSize: '0.875rem', fontWeight: 500, color: '#1E293B', lineHeight: 1.3 }}>
                         {value}
                     </Typography>
                 </StyledBox>
@@ -461,7 +461,7 @@ const TableComponent = ({
         if (column.isText || column.isNumber) {
             const display = value !== null ? ((isCamelCase(value) && value) ? camelCaseToWords(value) : value) : EMPTY_COL;
             return (
-                <Typography sx={{ fontSize: '0.825rem', color: display === EMPTY_COL ? '#CBD5E1' : '#334155', lineHeight: 1.4 }}>
+                <Typography sx={{ fontSize: '0.875rem', color: display === EMPTY_COL ? '#CBD5E1' : '#334155', lineHeight: 1.4 }}>
                     {display}
                 </Typography>
             );
@@ -472,7 +472,7 @@ const TableComponent = ({
             return (
                 <StyledBox>
                     <AccountBalanceWalletOutlinedIcon sx={{ fontSize: 14, color: alpha('#16a34a', 0.6), flexShrink: 0 }} />
-                    <Typography sx={{ fontWeight: 600, fontSize: '0.85rem', color: '#15803d', fontFamily: 'monospace', letterSpacing: '-0.01em' }}>
+                    <Typography sx={{ fontWeight: 600, fontSize: '0.875rem', color: '#15803d', fontFamily: 'monospace', letterSpacing: '-0.01em' }}>
                         {value !== null ? formatToUGXMoney(raw) : EMPTY_COL}
                     </Typography>
                 </StyledBox>
@@ -481,7 +481,7 @@ const TableComponent = ({
 
         // ── Status badge ───────────────────────────────────────────────────────
         if (column.isStatus) {
-            if (!value) return <Typography sx={{ color: '#CBD5E1', fontSize: '0.8rem' }}>{EMPTY_COL}</Typography>;
+            if (!value) return <Typography sx={{ color: '#CBD5E1', fontSize: '0.875rem' }}>{EMPTY_COL}</Typography>;
             const meta = getStatusMeta(value);
             return (
                 <Box sx={{
@@ -496,7 +496,7 @@ const TableComponent = ({
                         boxShadow: `0 0 0 2px ${alpha(meta.dot, 0.2)}`,
                     }} />
                     <Typography sx={{
-                        fontSize: '0.725rem', fontWeight: 600, color: meta.text,
+                        fontSize: '0.8rem', fontWeight: 600, color: meta.text,
                         textTransform: 'capitalize', lineHeight: 1, whiteSpace: 'nowrap',
                     }}>
                         {STATUS_DISPLAY_LABELS[value] ?? camelCaseToWords(value)}
@@ -508,8 +508,8 @@ const TableComponent = ({
         // ── Boolean (availability) ────────────────────────────────────────────
         if (column.isBoolen) {
             return value === 'present'
-                ? <ChipComponent variant="filled" label="Present" icon={<HowToRegOutlinedIcon fontSize="small" />} size="medium" color="success" sx={{ fontWeight: 600, fontSize: '0.75rem', height: 26 }} />
-                : <ChipComponent variant="filled" label="Absent"  icon={<NoAccountsIcon fontSize="small" />}     size="medium" color="warning" sx={{ fontWeight: 600, fontSize: '0.75rem', height: 26 }} />;
+                ? <ChipComponent variant="filled" label="Present" icon={<HowToRegOutlinedIcon fontSize="small" />} size="medium" color="success" sx={{ fontWeight: 600, fontSize: '0.8rem', height: 26 }} />
+                : <ChipComponent variant="filled" label="Absent"  icon={<NoAccountsIcon fontSize="small" />}     size="medium" color="warning" sx={{ fontWeight: 600, fontSize: '0.8rem', height: 26 }} />;
         }
 
         // ── Priority ──────────────────────────────────────────────────────────
@@ -528,7 +528,7 @@ const TableComponent = ({
                     bgcolor: p.bg, color: p.color,
                 }}>
                     {p.icon}
-                    <Typography sx={{ fontSize: '0.73rem', fontWeight: 700, color: p.color, lineHeight: 1 }}>
+                    <Typography sx={{ fontSize: '0.8rem', fontWeight: 700, color: p.color, lineHeight: 1 }}>
                         {p.label}
                     </Typography>
                 </Box>
@@ -549,7 +549,7 @@ const TableComponent = ({
                         }}
                         sx={{
                             height: 30, px: 1.25, borderRadius: '8px',
-                            textTransform: 'none', fontWeight: 600, fontSize: '0.76rem',
+                            textTransform: 'none', fontWeight: 600, fontSize: '0.8rem',
                             borderColor: alpha(PRIMARY, 0.22),
                             color: PRIMARY,
                             bgcolor: 'transparent',
@@ -631,7 +631,7 @@ const TableComponent = ({
                                         bgcolor: HEADER_BG,
                                         color: '#64748B',
                                         fontWeight: 700,
-                                        fontSize: '0.67rem',
+                                        fontSize: '0.8rem',
                                         textTransform: 'uppercase',
                                         letterSpacing: '0.08em',
                                         whiteSpace: 'nowrap',
@@ -663,7 +663,7 @@ const TableComponent = ({
                                             {camelCaseToWords(col.label)}
                                         </TableSortLabel>
                                     ) : (
-                                        <Typography sx={{ fontSize: '0.67rem', fontWeight: 700, color: '#64748B', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                                        <Typography sx={{ fontSize: '0.8rem', fontWeight: 700, color: '#64748B', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
                                             {camelCaseToWords(col.label)}
                                         </Typography>
                                     )}
@@ -679,7 +679,7 @@ const TableComponent = ({
                                 <TableCell colSpan={columnHeaders.length} sx={{ textAlign: 'center', py: 6, border: 'none' }}>
                                     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1.5 }}>
                                         <CircularProgress size={28} thickness={3} sx={{ color: PRIMARY }} />
-                                        <Typography sx={{ fontSize: '0.82rem', color: '#94A3B8', fontWeight: 500 }}>
+                                        <Typography sx={{ fontSize: '0.875rem', color: '#94A3B8', fontWeight: 500 }}>
                                             Loading records…
                                         </Typography>
                                     </Box>
@@ -723,7 +723,7 @@ const TableComponent = ({
                                             px: 2,
                                             '&:first-of-type': { pl: 2.5 },
                                             '&:last-of-type': { pr: 2.5 },
-                                            fontSize: '0.825rem',
+                                            fontSize: '0.875rem',
                                             maxWidth: col.label === 'email' ? 200 : col.label === 'name' ? 220 : 'none',
                                             minWidth: col.isAction ? 110 : 'auto',
                                             borderRight: ci < columnHeaders.length - 1 ? `1px solid ${BORDER}` : 'none',
@@ -756,9 +756,9 @@ const TableComponent = ({
                     rowsPerPageOptions={[5, 10, 25, 50, 100]}
                     sx={{
                         '& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows': {
-                            fontSize: '0.8rem', color: '#64748B', margin: 0,
+                            fontSize: '0.875rem', color: '#64748B', margin: 0,
                         },
-                        '& .MuiTablePagination-select': { fontSize: '0.8rem' },
+                        '& .MuiTablePagination-select': { fontSize: '0.875rem' },
                         '& .MuiIconButton-root': {
                             borderRadius: '8px',
                             width: 32, height: 32,

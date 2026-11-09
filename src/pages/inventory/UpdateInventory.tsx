@@ -75,7 +75,7 @@ const TotalCard = ({ icon, label, value, tone }: {
             {icon}
         </Box>
         <Box sx={{ minWidth: 0 }}>
-            <Typography sx={{ fontSize: '0.6rem', fontWeight: 700, color: neutral[400], textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</Typography>
+            <Typography sx={{ fontSize: '0.8rem', fontWeight: 700, color: neutral[400], textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</Typography>
             <Typography sx={{ fontSize: '1.05rem', fontWeight: 800, color: neutral[900], lineHeight: 1.2 }}>{value}</Typography>
         </Box>
     </Box>
@@ -275,7 +275,7 @@ const UpdateInventory = () => {
         borderRadius: `${radii.pill}px`,
         textTransform: 'none' as const,
         fontWeight: 700,
-        fontSize: '0.9rem',
+        fontSize: '0.9375rem',
         color: '#fff',
         background: `linear-gradient(135deg, ${brand[500]} 0%, ${brand[700]} 100%)`,
         boxShadow: `0 6px 16px ${alpha(brand[500], 0.32)}`,
@@ -324,10 +324,10 @@ const UpdateInventory = () => {
                         {detailItems.map((d) => (
                             <Grid item xs={12} sm={6} md={4} key={d.label}>
                                 <Box sx={{ px: { xs: 1, md: 1.5 }, py: 1.25 }}>
-                                    <Typography sx={{ fontSize: '0.66rem', fontWeight: 700, color: neutral[400], textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                                    <Typography sx={{ fontSize: '0.8rem', fontWeight: 700, color: neutral[400], textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                                         {d.label}
                                     </Typography>
-                                    <Typography sx={{ fontSize: '0.9rem', fontWeight: 600, color: d.value === '—' ? neutral[400] : neutral[900], mt: 0.25 }}>
+                                    <Typography sx={{ fontSize: '0.9375rem', fontWeight: 600, color: d.value === '—' ? neutral[400] : neutral[900], mt: 0.25 }}>
                                         {d.value}
                                     </Typography>
                                 </Box>
@@ -358,7 +358,7 @@ const UpdateInventory = () => {
                                     '& th': {
                                         bgcolor: alpha(brand[500], 0.04),
                                         borderBottom: `1px solid ${border.subtle}`,
-                                        fontWeight: 700, fontSize: '0.68rem', color: brand[700],
+                                        fontWeight: 700, fontSize: '0.8rem', color: brand[700],
                                         textTransform: 'uppercase', letterSpacing: '0.05em',
                                         py: 1.5, whiteSpace: 'nowrap',
                                     },
@@ -393,38 +393,38 @@ const UpdateInventory = () => {
                                             {/* Item */}
                                             <TableCell>
                                                 <Stack direction="row" spacing={1.5} alignItems="center">
-                                                    <Box sx={{ width: 30, height: 30, borderRadius: '9px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.78rem', fontWeight: 800, color: brand[700], bgcolor: alpha(brand[500], 0.1) }}>
+                                                    <Box sx={{ width: 30, height: 30, borderRadius: '9px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.875rem', fontWeight: 800, color: brand[700], bgcolor: alpha(brand[500], 0.1) }}>
                                                         {idx + 1}
                                                     </Box>
                                                     <Box sx={{ minWidth: 0 }}>
-                                                        <Typography sx={{ fontSize: '0.88rem', fontWeight: 700, color: neutral[900], lineHeight: 1.3 }}>
+                                                        <Typography sx={{ fontSize: '0.9375rem', fontWeight: 700, color: neutral[900], lineHeight: 1.3 }}>
                                                             {row.name || '—'}
                                                         </Typography>
                                                         {row.groupName && (
-                                                            <Typography sx={{ fontSize: '0.72rem', color: neutral[500] }}>{row.groupName}</Typography>
+                                                            <Typography sx={{ fontSize: '0.8rem', color: neutral[500] }}>{row.groupName}</Typography>
                                                         )}
                                                     </Box>
                                                 </Stack>
                                             </TableCell>
                                             {/* Ordered */}
                                             <TableCell align="center">
-                                                <Box component="span" sx={{ display: 'inline-flex', minWidth: 34, justifyContent: 'center', px: 1, py: 0.4, borderRadius: '8px', fontSize: '0.82rem', fontWeight: 700, color: neutral[700], bgcolor: alpha(neutral[900], 0.05) }}>
+                                                <Box component="span" sx={{ display: 'inline-flex', minWidth: 34, justifyContent: 'center', px: 1, py: 0.4, borderRadius: '8px', fontSize: '0.875rem', fontWeight: 700, color: neutral[700], bgcolor: alpha(neutral[900], 0.05) }}>
                                                     {ordered}
                                                 </Box>
                                             </TableCell>
                                             {/* Delivered */}
                                             <TableCell align="center">
-                                                <Box component="span" sx={{ display: 'inline-flex', minWidth: 34, justifyContent: 'center', px: 1, py: 0.4, borderRadius: '8px', fontSize: '0.82rem', fontWeight: 700, color: deliveredTone.strong, bgcolor: deliveredTone.soft }}>
+                                                <Box component="span" sx={{ display: 'inline-flex', minWidth: 34, justifyContent: 'center', px: 1, py: 0.4, borderRadius: '8px', fontSize: '0.875rem', fontWeight: 700, color: deliveredTone.strong, bgcolor: deliveredTone.soft }}>
                                                     {delivered}
                                                 </Box>
                                             </TableCell>
                                             {/* Unit cost */}
-                                            <TableCell align="right" sx={{ fontSize: '0.85rem', color: neutral[700], fontVariantNumeric: 'tabular-nums' }}>{fmtMoney(Number(row.costPrice) || 0)}</TableCell>
+                                            <TableCell align="right" sx={{ fontSize: '0.875rem', color: neutral[700], fontVariantNumeric: 'tabular-nums' }}>{fmtMoney(Number(row.costPrice) || 0)}</TableCell>
                                             {/* Unit price */}
-                                            <TableCell align="right" sx={{ fontSize: '0.85rem', color: neutral[700], fontVariantNumeric: 'tabular-nums' }}>{fmtMoney(purchase)}</TableCell>
+                                            <TableCell align="right" sx={{ fontSize: '0.875rem', color: neutral[700], fontVariantNumeric: 'tabular-nums' }}>{fmtMoney(purchase)}</TableCell>
                                             {/* Line total */}
                                             <TableCell align="right">
-                                                <Box component="span" sx={{ display: 'inline-block', px: 1.25, py: 0.45, borderRadius: '8px', bgcolor: alpha(brand[500], 0.08), color: brand[700], fontWeight: 800, fontSize: '0.85rem', fontVariantNumeric: 'tabular-nums' }}>
+                                                <Box component="span" sx={{ display: 'inline-block', px: 1.25, py: 0.45, borderRadius: '8px', bgcolor: alpha(brand[500], 0.08), color: brand[700], fontWeight: 800, fontSize: '0.875rem', fontVariantNumeric: 'tabular-nums' }}>
                                                     {fmtMoney(lineTotal)}
                                                 </Box>
                                             </TableCell>
@@ -434,9 +434,9 @@ const UpdateInventory = () => {
                             </TableBody>
                             <TableFooter>
                                 <TableRow sx={{ '& td': { borderTop: `2px solid ${border.subtle}`, borderBottom: 'none', py: 1.75, bgcolor: alpha(brand[500], 0.02) } }}>
-                                    <TableCell sx={{ fontWeight: 800, color: neutral[700], fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Total</TableCell>
-                                    <TableCell align="center" sx={{ fontWeight: 800, color: neutral[800], fontSize: '0.85rem' }}>{totalOrdered}</TableCell>
-                                    <TableCell align="center" sx={{ fontWeight: 800, color: neutral[800], fontSize: '0.85rem' }}>{totalDelivered}</TableCell>
+                                    <TableCell sx={{ fontWeight: 800, color: neutral[700], fontSize: '0.875rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Total</TableCell>
+                                    <TableCell align="center" sx={{ fontWeight: 800, color: neutral[800], fontSize: '0.875rem' }}>{totalOrdered}</TableCell>
+                                    <TableCell align="center" sx={{ fontWeight: 800, color: neutral[800], fontSize: '0.875rem' }}>{totalDelivered}</TableCell>
                                     <TableCell />
                                     <TableCell />
                                     <TableCell align="right">
@@ -460,7 +460,7 @@ const UpdateInventory = () => {
                 <Stack direction="row" spacing={1.25} alignItems="flex-start" sx={{ p: 1.75, borderRadius: 2, bgcolor: alpha(gold[500], 0.07), border: `1px solid ${alpha(gold[500], 0.25)}` }}>
                     <WarningAmberIcon sx={{ fontSize: 18, color: gold[700], mt: 0.1, flexShrink: 0 }} />
                     <Box>
-                        <Typography sx={{ fontSize: '0.82rem', color: neutral[700], lineHeight: 1.5 }}>
+                        <Typography sx={{ fontSize: '0.875rem', color: neutral[700], lineHeight: 1.5 }}>
                             This corrects the order — supplier, references, dates, quantities <strong>ordered</strong> and unit prices.
                             Quantities <strong>received</strong> are not editable here: recording a delivery also credits the store,
                             registers the assets and issues a GRN, which all have to happen together.
@@ -518,10 +518,10 @@ const UpdateInventory = () => {
                     {/* Right — live field checklist */}
                     <Box sx={{ flexShrink: 0, width: { xs: '100%', md: 'auto' } }}>
                         <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1, justifyContent: { xs: 'flex-start', md: 'flex-end' } }}>
-                            <Typography sx={{ fontSize: '0.68rem', fontWeight: 700, color: neutral[400], textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                            <Typography sx={{ fontSize: '0.8rem', fontWeight: 700, color: neutral[400], textTransform: 'uppercase', letterSpacing: '0.08em' }}>
                                 Completion
                             </Typography>
-                            <Typography sx={{ fontSize: '0.78rem', fontWeight: 800, fontVariantNumeric: 'tabular-nums', color: isDone ? statusTokens.success.strong : brand[700] }}>
+                            <Typography sx={{ fontSize: '0.875rem', fontWeight: 800, fontVariantNumeric: 'tabular-nums', color: isDone ? statusTokens.success.strong : brand[700] }}>
                                 {formProgress}%
                             </Typography>
                         </Stack>
@@ -539,7 +539,7 @@ const UpdateInventory = () => {
                                     ) : (
                                         <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: neutral[300], mx: '3px' }} />
                                     )}
-                                    <Typography sx={{ fontSize: '0.68rem', fontWeight: 600, color: item.done ? brand[700] : neutral[500] }}>
+                                    <Typography sx={{ fontSize: '0.8rem', fontWeight: 600, color: item.done ? brand[700] : neutral[500] }}>
                                         {item.label}
                                     </Typography>
                                 </Stack>
@@ -566,7 +566,7 @@ const UpdateInventory = () => {
                                         <Box sx={{ display: 'flex', color: 'inherit' }}>
                                             {state === 'done' ? <CheckRoundedIcon sx={{ fontSize: 14 }} /> : step.icon}
                                         </Box>
-                                        <Typography sx={{ fontSize: '0.72rem', fontWeight: state === 'active' ? 700 : 600, color: 'inherit', whiteSpace: 'nowrap' }}>
+                                        <Typography sx={{ fontSize: '0.8rem', fontWeight: state === 'active' ? 700 : 600, color: 'inherit', whiteSpace: 'nowrap' }}>
                                             {step.label}
                                         </Typography>
                                     </Stack>
@@ -616,14 +616,14 @@ const UpdateInventory = () => {
                     <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent="space-between" alignItems={{ xs: 'stretch', sm: 'center' }}>
                         {/* Left — step context */}
                         <Stack direction="row" spacing={1.5} alignItems="center">
-                            <Box sx={{ width: 34, height: 34, borderRadius: '50%', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.85rem', fontWeight: 800, color: brand[700], bgcolor: alpha(PRIMARY_COLOR, 0.1) }}>
+                            <Box sx={{ width: 34, height: 34, borderRadius: '50%', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.875rem', fontWeight: 800, color: brand[700], bgcolor: alpha(PRIMARY_COLOR, 0.1) }}>
                                 {activeStep + 1}
                             </Box>
                             <Box sx={{ minWidth: 0 }}>
-                                <Typography sx={{ fontSize: '0.88rem', fontWeight: 700, color: neutral[800], lineHeight: 1.2 }}>
+                                <Typography sx={{ fontSize: '0.9375rem', fontWeight: 700, color: neutral[800], lineHeight: 1.2 }}>
                                     {steps[activeStep]}
                                 </Typography>
-                                <Typography sx={{ fontSize: '0.72rem', color: neutral[500] }}>
+                                <Typography sx={{ fontSize: '0.8rem', color: neutral[500] }}>
                                     Step {activeStep + 1} of 3 · {activeStep === 0
                                         ? 'Order & delivery details'
                                         : activeStep === 1

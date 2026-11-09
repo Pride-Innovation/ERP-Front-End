@@ -154,7 +154,7 @@ const Section = ({
 
 const headCellSx = {
     fontWeight: 700,
-    fontSize: '0.68rem',
+    fontSize: '0.8rem',
     textTransform: 'uppercase',
     letterSpacing: '0.05em',
     color: '#64748B',
@@ -165,7 +165,7 @@ const headCellSx = {
 
 const bodyCellSx = {
     borderBottom: '1px solid #F1F5F9',
-    fontSize: '0.84rem',
+    fontSize: '0.875rem',
     py: 1.1,
 } as const;
 
@@ -232,7 +232,7 @@ const RequestActionLayout = ({
                         variant="caption"
                         sx={{
                             fontWeight: 800, letterSpacing: '0.07em', textTransform: 'uppercase',
-                            color: accent, fontSize: '0.62rem', display: 'block', lineHeight: 1.4,
+                            color: accent, fontSize: '0.8rem', display: 'block', lineHeight: 1.4,
                         }}
                     >
                         {kicker}
@@ -248,7 +248,7 @@ const RequestActionLayout = ({
                 <Stack spacing={0.5} sx={{ flexShrink: 0, alignItems: 'flex-start' }}>
                     {requesterName && (
                         <Stack direction="row" spacing={0.75} alignItems="center">
-                            <Avatar sx={{ width: 20, height: 20, fontSize: '0.62rem', fontWeight: 700, bgcolor: '#BC892C' }}>
+                            <Avatar sx={{ width: 20, height: 20, fontSize: '0.8rem', fontWeight: 700, bgcolor: '#BC892C' }}>
                                 {requesterName.charAt(0).toUpperCase()}
                             </Avatar>
                             <Typography variant="caption" sx={{ color: '#64748B' }}>
@@ -278,10 +278,10 @@ const RequestActionLayout = ({
                     severity={banner.severity}
                     sx={{
                         borderRadius: 2,
-                        '& .MuiAlert-message': { fontSize: '0.82rem' },
+                        '& .MuiAlert-message': { fontSize: '0.875rem' },
                     }}
                 >
-                    <Typography variant="body2" sx={{ fontWeight: 700, fontSize: '0.85rem' }}>{banner.title}</Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 700, fontSize: '0.875rem' }}>{banner.title}</Typography>
                     <Typography variant="caption" sx={{ display: 'block', mt: 0.25 }}>{banner.body}</Typography>
                 </Alert>
             )}
@@ -295,7 +295,7 @@ const RequestActionLayout = ({
                         size="small"
                         label={`${commodities.length} item${commodities.length === 1 ? '' : 's'}`}
                         sx={{
-                            height: 20, fontSize: '0.66rem', fontWeight: 700,
+                            height: 20, fontSize: '0.8rem', fontWeight: 700,
                             bgcolor: alpha(accent, 0.08), color: accent,
                             '& .MuiChip-label': { px: 1 },
                         }}
@@ -325,7 +325,7 @@ const RequestActionLayout = ({
                                         hover
                                         sx={{ '&:last-child td': { borderBottom: 'none' } }}
                                     >
-                                        <TableCell sx={{ ...bodyCellSx, pl: 2, color: '#94A3B8', fontSize: '0.75rem', fontVariantNumeric: 'tabular-nums' }}>
+                                        <TableCell sx={{ ...bodyCellSx, pl: 2, color: '#94A3B8', fontSize: '0.8rem', fontVariantNumeric: 'tabular-nums' }}>
                                             {idx + 1}
                                         </TableCell>
                                         <TableCell sx={{ ...bodyCellSx, fontWeight: 600, color: '#1E293B' }}>
@@ -343,7 +343,7 @@ const RequestActionLayout = ({
                                                 sx={{
                                                     display: 'inline-block', minWidth: 30, textAlign: 'center',
                                                     px: 1, py: 0.2, borderRadius: '6px',
-                                                    fontWeight: 700, fontSize: '0.78rem',
+                                                    fontWeight: 700, fontSize: '0.875rem',
                                                     fontVariantNumeric: 'tabular-nums',
                                                     bgcolor: alpha(accent, 0.07), color: accent,
                                                 }}
@@ -402,7 +402,7 @@ const RequestActionLayout = ({
                             // type so the first line sits level with the icon chip.
                             '& .MuiTypography-root': {
                                 m: 0,
-                                fontSize: '0.85rem',
+                                fontSize: '0.875rem',
                                 lineHeight: 1.7,
                                 color: '#475569',
                             },
@@ -416,11 +416,11 @@ const RequestActionLayout = ({
                             <Box sx={{ mt: 1.25, pt: 1.25, borderTop: '1px dashed #E2E8F0' }}>
                                 <Typography
                                     variant="caption"
-                                    sx={{ fontWeight: 800, letterSpacing: '0.04em', textTransform: 'uppercase', color: '#94A3B8', fontSize: '0.62rem' }}
+                                    sx={{ fontWeight: 800, letterSpacing: '0.04em', textTransform: 'uppercase', color: '#94A3B8', fontSize: '0.8rem' }}
                                 >
                                     {additionalNote.label}
                                 </Typography>
-                                <Typography variant="body2" sx={{ mt: 0.25, color: '#475569', fontSize: '0.82rem', lineHeight: 1.6 }}>
+                                <Typography variant="body2" sx={{ mt: 0.25, color: '#475569', fontSize: '0.875rem', lineHeight: 1.6 }}>
                                     {additionalNote.body}
                                 </Typography>
                             </Box>
@@ -434,7 +434,7 @@ const RequestActionLayout = ({
                 accent={accent}
                 title={commentLabel}
                 meta={
-                    <Typography variant="caption" sx={{ color: accent, fontWeight: 700, fontSize: '0.66rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    <Typography variant="caption" sx={{ color: accent, fontWeight: 700, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                         Required
                     </Typography>
                 }
@@ -448,7 +448,7 @@ const RequestActionLayout = ({
                     onChange={(e) => onCommentChange(e.target.value)}
                     // fieldSx pads the inner input for single-line height; a multiline root already
                     // carries its own padding, so zero the textarea's to avoid doubling up.
-                    sx={{ ...fieldSx, '& .MuiInputBase-input': { padding: 0, fontSize: '0.875rem', lineHeight: 1.5 } }}
+                    sx={{ ...fieldSx, '& .MuiInputBase-input': { padding: 0, fontSize: '0.9375rem', lineHeight: 1.5 } }}
                 />
                 <Typography variant="caption" sx={{ display: 'block', mt: 0.75, color: '#94A3B8' }}>
                     {commentHelper}

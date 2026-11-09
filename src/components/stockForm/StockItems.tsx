@@ -456,7 +456,7 @@ const StockItems = ({ lockDeliveredQuantity = false, stockBranchId }: StockItems
                         <Typography sx={{ fontWeight: 700, fontSize: '1.05rem', color: neutral[900], lineHeight: 1.2 }}>
                             Stock Items
                         </Typography>
-                        <Typography variant="caption" sx={{ color: neutral[500], fontSize: '0.75rem' }}>
+                        <Typography variant="caption" sx={{ color: neutral[500], fontSize: '0.8rem' }}>
                             Add and manage the items received in this delivery
                         </Typography>
                         {stockable && (
@@ -466,7 +466,7 @@ const StockItems = ({ lockDeliveredQuantity = false, stockBranchId }: StockItems
                             >
                                 <Stack direction="row" spacing={0.5} alignItems="center" sx={{ mt: 0.25, color: PRIMARY_COLOR, cursor: 'help' }}>
                                     <StorefrontOutlinedIcon sx={{ fontSize: 13 }} />
-                                    <Typography variant="caption" sx={{ fontWeight: 600, fontSize: '0.72rem' }}>
+                                    <Typography variant="caption" sx={{ fontWeight: 600, fontSize: '0.8rem' }}>
                                         {stockable.assetTypeIds.length === 0
                                             ? `${stockable.branchName} is not set up to stock any category`
                                             : `Showing what ${stockable.branchName} may stock`}
@@ -485,7 +485,7 @@ const StockItems = ({ lockDeliveredQuantity = false, stockBranchId }: StockItems
                             sx={{
                                 textTransform: 'none',
                                 fontWeight: 700,
-                                fontSize: '0.85rem',
+                                fontSize: '0.875rem',
                                 letterSpacing: '0.01em',
                                 color: showPrices ? '#fff' : PRIMARY_COLOR,
                                 backgroundColor: showPrices ? PRIMARY_COLOR : alpha(PRIMARY_COLOR, 0.08),
@@ -518,7 +518,7 @@ const StockItems = ({ lockDeliveredQuantity = false, stockBranchId }: StockItems
                         sx={{
                             textTransform: 'none',
                             fontWeight: 700,
-                            fontSize: '0.85rem',
+                            fontSize: '0.875rem',
                             letterSpacing: '0.01em',
                             backgroundColor: PRIMARY_COLOR,
                             color: '#fff',
@@ -570,7 +570,7 @@ const StockItems = ({ lockDeliveredQuantity = false, stockBranchId }: StockItems
                                         bgcolor: TABLE_HEADER_BG,
                                         color: TABLE_HEADER_COLOR,
                                         fontWeight: 700,
-                                        fontSize: '0.7rem',
+                                        fontSize: '0.8rem',
                                         textTransform: 'uppercase',
                                         letterSpacing: '0.05em',
                                         borderBottom: `1.5px solid ${TABLE_BORDER_COLOR}`,
@@ -646,7 +646,7 @@ const StockItems = ({ lockDeliveredQuantity = false, stockBranchId }: StockItems
                                                     display: 'flex',
                                                     alignItems: 'center',
                                                     justifyContent: 'center',
-                                                    fontSize: '0.78rem',
+                                                    fontSize: '0.875rem',
                                                     fontWeight: 800,
                                                     color: accent.fg,
                                                     bgcolor: accent.bg,
@@ -747,7 +747,7 @@ const StockItems = ({ lockDeliveredQuantity = false, stockBranchId }: StockItems
                                                     sx={{
                                                         color: neutral[600],
                                                         fontWeight: 700,
-                                                        fontSize: '0.7rem',
+                                                        fontSize: '0.8rem',
                                                         textTransform: 'uppercase',
                                                         letterSpacing: '0.05em',
                                                         bgcolor: alpha(PRIMARY_COLOR, 0.08),
@@ -868,7 +868,7 @@ const StockItems = ({ lockDeliveredQuantity = false, stockBranchId }: StockItems
                                     <Typography
                                         sx={{
                                             mt: 0.75,
-                                            fontSize: '0.7rem',
+                                            fontSize: '0.8rem',
                                             fontWeight: 600,
                                             color: neutral[500],
                                             textAlign: 'center',
@@ -933,7 +933,7 @@ const StockItems = ({ lockDeliveredQuantity = false, stockBranchId }: StockItems
                                     <Typography
                                         sx={{
                                             mt: 0.75,
-                                            fontSize: '0.7rem',
+                                            fontSize: '0.8rem',
                                             fontWeight: 600,
                                             color: neutral[500],
                                             textAlign: 'center',

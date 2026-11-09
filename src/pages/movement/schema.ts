@@ -30,5 +30,14 @@ export const movementSchema = yup.object().shape({
     // No courier / tracking / delivery-date rules: the create form does not collect them. They are
     // captured at dispatch, where the carrier is actually known — see the Journey note in
     // MovementForm.
-    remarks: yup.string().nullable().optional(),
+    // Giving to a person without a request is the exception path, and the server refuses it without
+    // a reason; asked for here so the rule is visible while typing.
+    remarks: yup
+        .string()
+        .nullable()
+        .when('destinationKind', {
+            is: 'USER',
+            then: (s) => s.trim().required('Say why these items are given without a request'),
+            otherwise: (s) => s.nullable().optional(),
+        }),
 });

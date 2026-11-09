@@ -65,6 +65,10 @@ const openStockCountService = async (body: Object) =>
 const fetchStockCountsService = async (storeId?: number) =>
     axiosInstance.get('stock-counts', { params: storeId ? { storeId } : {} });
 
+/** The stores this viewer may open a count for: at their own branch, with stock lines to count. */
+const fetchCountableStoresService = async () =>
+    axiosInstance.get('stock-counts/countable-stores');
+
 const fetchStockCountService = async (countId: number | string) =>
     axiosInstance.get(`stock-counts/${countId}`);
 
@@ -153,6 +157,7 @@ export {
     setBalanceMinLevelService,
     openStockCountService,
     fetchStockCountsService,
+    fetchCountableStoresService,
     fetchStockCountService,
     saveStockCountLinesService,
     submitStockCountService,

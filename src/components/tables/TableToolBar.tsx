@@ -204,7 +204,7 @@ const TableToolBar = ({
         '& .MuiOutlinedInput-root': {
             height: 34,
             borderRadius: '8px',
-            fontSize: '0.78rem',
+            fontSize: '0.875rem',
             bgcolor: hasVal ? alpha(PRIMARY, 0.04) : '#fff',
             fontWeight: hasVal ? 600 : 400,
             color: hasVal ? PRIMARY : MUTED,
@@ -221,14 +221,14 @@ const TableToolBar = ({
         '& .MuiOutlinedInput-root': {
             height: 34,
             borderRadius: '8px',
-            fontSize: '0.8rem',
+            fontSize: '0.875rem',
             bgcolor: hasVal ? alpha(PRIMARY, 0.04) : '#fff',
             transition: 'background-color 0.15s',
             '& fieldset': { borderColor: hasVal ? P16 : BORDER, transition: 'border-color 0.15s' },
             '&:hover fieldset': { borderColor: alpha(PRIMARY, 0.4) },
             '&.Mui-focused fieldset': { borderColor: PRIMARY, borderWidth: 1.5 },
         },
-        '& input': { color: hasVal ? PRIMARY : '#0F172A', fontWeight: hasVal ? 600 : 400, fontSize: '0.8rem' },
+        '& input': { color: hasVal ? PRIMARY : '#0F172A', fontWeight: hasVal ? 600 : 400, fontSize: '0.875rem' },
         '& input::placeholder': { color: MUTED, opacity: 1 },
     });
 
@@ -273,7 +273,7 @@ const TableToolBar = ({
                     <Box sx={{ minWidth: 0 }}>
                         <Typography sx={{
                             fontWeight: 700,
-                            fontSize: '0.92rem',
+                            fontSize: '0.9375rem',
                             color: '#0F172A',
                             lineHeight: 1.25,
                             whiteSpace: 'nowrap',
@@ -282,7 +282,7 @@ const TableToolBar = ({
                         }}>
                             {header?.plural}
                         </Typography>
-                        <Typography sx={{ fontSize: '0.72rem', color: MUTED, lineHeight: 1.3 }}>
+                        <Typography sx={{ fontSize: '0.8rem', color: MUTED, lineHeight: 1.3 }}>
                             Browse and manage records
                         </Typography>
                     </Box>
@@ -304,7 +304,7 @@ const TableToolBar = ({
                                         sx={{
                                             '& .MuiBadge-badge': {
                                                 bgcolor: PRIMARY, color: '#fff',
-                                                fontSize: '0.6rem', height: 14, minWidth: 14,
+                                                fontSize: '0.8rem', height: 14, minWidth: 14,
                                                 p: 0, top: 1, right: 1,
                                             },
                                         }}
@@ -344,7 +344,7 @@ const TableToolBar = ({
                                 sx={{
                                     height: BTN_H, px: 2, borderRadius: '8px',
                                     bgcolor: PRIMARY, color: '#fff',
-                                    textTransform: 'none', fontWeight: 600, fontSize: '0.82rem',
+                                    textTransform: 'none', fontWeight: 600, fontSize: '0.875rem',
                                     boxShadow: `0 1px 4px ${alpha(PRIMARY, 0.25)}, 0 4px 12px ${alpha(PRIMARY, 0.18)}`,
                                     '&:hover': {
                                         bgcolor: '#065E53',
@@ -380,7 +380,7 @@ const TableToolBar = ({
                         }}>
                             <Stack direction="row" alignItems="center" gap={1}>
                                 <TuneOutlinedIcon sx={{ fontSize: 14, color: PRIMARY }} />
-                                <Typography sx={{ fontSize: '0.72rem', fontWeight: 700, color: PRIMARY, textTransform: 'uppercase', letterSpacing: '0.07em' }}>
+                                <Typography sx={{ fontSize: '0.8rem', fontWeight: 700, color: PRIMARY, textTransform: 'uppercase', letterSpacing: '0.07em' }}>
                                     Filter Records
                                 </Typography>
                                 {activeFilterCount > 0 && (
@@ -389,7 +389,7 @@ const TableToolBar = ({
                                         bgcolor: P8, border: `1px solid ${P16}`,
                                         display: 'flex', alignItems: 'center',
                                     }}>
-                                        <Typography sx={{ fontSize: '0.65rem', fontWeight: 700, color: PRIMARY }}>
+                                        <Typography sx={{ fontSize: '0.8rem', fontWeight: 700, color: PRIMARY }}>
                                             {activeFilterCount} active
                                         </Typography>
                                     </Box>
@@ -420,7 +420,7 @@ const TableToolBar = ({
                                                 deleteIcon={<CloseOutlinedIcon sx={{ fontSize: '11px !important', color: 'rgba(255,255,255,0.75) !important', '&:hover': { color: '#fff !important' } }} />}
                                                 sx={{
                                                     height: 22,
-                                                    fontSize: '0.7rem',
+                                                    fontSize: '0.8rem',
                                                     fontWeight: 600,
                                                     bgcolor: PRIMARY,
                                                     color: '#fff',
@@ -436,7 +436,7 @@ const TableToolBar = ({
                                         variant="text"
                                         onClick={handleClearAll}
                                         sx={{
-                                            fontSize: '0.7rem', color: '#DC2626',
+                                            fontSize: '0.8rem', color: '#DC2626',
                                             textTransform: 'none', fontWeight: 600,
                                             px: 0.75, minWidth: 0, py: 0.25,
                                             borderRadius: '6px',
@@ -461,7 +461,7 @@ const TableToolBar = ({
                                         const isActive = !!dr.preset;
                                         return (
                                             <Box key={col.key}>
-                                                <Typography sx={{ fontSize: '0.67rem', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.06em', mb: 0.5 }}>
+                                                <Typography sx={{ fontSize: '0.8rem', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.06em', mb: 0.5 }}>
                                                     {col.label}
                                                 </Typography>
                                                 <Stack direction="row" alignItems="center" gap={0.75} flexWrap="wrap">
@@ -493,12 +493,12 @@ const TableToolBar = ({
                                                                 '& .MuiSelect-icon': { color: isActive ? PRIMARY : MUTED, right: 4, fontSize: 18 },
                                                             }}
                                                             renderValue={v => v
-                                                                ? <Typography sx={{ fontSize: '0.79rem', fontWeight: 600, color: PRIMARY }}>{DATE_PRESETS.find(p => p.value === v)?.label}</Typography>
-                                                                : <Typography sx={{ fontSize: '0.79rem', color: MUTED }}>Select period…</Typography>
+                                                                ? <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: PRIMARY }}>{DATE_PRESETS.find(p => p.value === v)?.label}</Typography>
+                                                                : <Typography sx={{ fontSize: '0.875rem', color: MUTED }}>Select period…</Typography>
                                                             }
                                                         >
                                                             {DATE_PRESETS.map(p => (
-                                                                <MenuItem key={p.value} value={p.value} sx={{ fontSize: '0.82rem', py: 0.75 }}>
+                                                                <MenuItem key={p.value} value={p.value} sx={{ fontSize: '0.875rem', py: 0.75 }}>
                                                                     {p.label}
                                                                 </MenuItem>
                                                             ))}
@@ -521,7 +521,7 @@ const TableToolBar = ({
                                                             bgcolor: P8, px: 1.1, height: 26,
                                                             borderRadius: '6px', border: `1px solid ${P16}`,
                                                         }}>
-                                                            <Typography sx={{ fontSize: '0.7rem', color: PRIMARY, fontWeight: 700, whiteSpace: 'nowrap' }}>
+                                                            <Typography sx={{ fontSize: '0.8rem', color: PRIMARY, fontWeight: 700, whiteSpace: 'nowrap' }}>
                                                                 {/*
                                                                   * Shown from the first date, not only
                                                                   * once both are set. Picking a start
@@ -571,7 +571,7 @@ const TableToolBar = ({
                                                                         openPickerButton: { size: 'small', sx: { color: dr.from ? PRIMARY : MUTED, mr: -0.5 } },
                                                                     }}
                                                                 />
-                                                                <Typography sx={{ fontSize: '0.8rem', color: MUTED, fontWeight: 600, flexShrink: 0 }}>
+                                                                <Typography sx={{ fontSize: '0.875rem', color: MUTED, fontWeight: 600, flexShrink: 0 }}>
                                                                     →
                                                                 </Typography>
                                                                 <DatePicker
@@ -625,7 +625,7 @@ const TableToolBar = ({
                                         const selectedLabel = (col.options ?? []).find(o => String(o.value) === String(val))?.label ?? '';
                                         return (
                                             <Box key={col.key}>
-                                                <Typography sx={{ fontSize: '0.67rem', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.06em', mb: 0.5 }}>
+                                                <Typography sx={{ fontSize: '0.8rem', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.06em', mb: 0.5 }}>
                                                     {col.label}
                                                 </Typography>
                                                 <FormControl size="small" sx={{ minWidth: 160 }}>
@@ -634,7 +634,7 @@ const TableToolBar = ({
                                                         displayEmpty
                                                         onChange={e => setFilterValues(prev => ({ ...prev, [col.key]: e.target.value }))}
                                                         sx={{
-                                                            height: 34, borderRadius: '8px', fontSize: '0.8rem',
+                                                            height: 34, borderRadius: '8px', fontSize: '0.875rem',
                                                             bgcolor: hasVal ? alpha(PRIMARY, 0.04) : '#fff',
                                                             color: hasVal ? PRIMARY : MUTED,
                                                             fontWeight: hasVal ? 600 : 400,
@@ -645,15 +645,15 @@ const TableToolBar = ({
                                                             '& .MuiSelect-icon': { color: hasVal ? PRIMARY : MUTED },
                                                         }}
                                                         renderValue={v => v
-                                                            ? <Typography component="span" sx={{ fontSize: '0.8rem', color: PRIMARY, fontWeight: 600 }}>{selectedLabel || String(v)}</Typography>
-                                                            : <Typography component="span" sx={{ fontSize: '0.8rem', color: MUTED }}>Any…</Typography>
+                                                            ? <Typography component="span" sx={{ fontSize: '0.875rem', color: PRIMARY, fontWeight: 600 }}>{selectedLabel || String(v)}</Typography>
+                                                            : <Typography component="span" sx={{ fontSize: '0.875rem', color: MUTED }}>Any…</Typography>
                                                         }
                                                     >
-                                                        <MenuItem value="" sx={{ fontSize: '0.8rem', color: MUTED, fontStyle: 'italic', py: 0.75 }}>
+                                                        <MenuItem value="" sx={{ fontSize: '0.875rem', color: MUTED, fontStyle: 'italic', py: 0.75 }}>
                                                             Any {col.label}
                                                         </MenuItem>
                                                         {(col.options ?? []).map(opt => (
-                                                            <MenuItem key={opt.value} value={opt.value} sx={{ fontSize: '0.8rem', py: 0.75 }}>
+                                                            <MenuItem key={opt.value} value={opt.value} sx={{ fontSize: '0.875rem', py: 0.75 }}>
                                                                 {opt.label}
                                                             </MenuItem>
                                                         ))}
@@ -667,7 +667,7 @@ const TableToolBar = ({
                                     const hasVal = !!(filterValues[col.key]);
                                     return (
                                         <Box key={col.key}>
-                                            <Typography sx={{ fontSize: '0.67rem', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.06em', mb: 0.5 }}>
+                                            <Typography sx={{ fontSize: '0.8rem', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.06em', mb: 0.5 }}>
                                                 {col.label}
                                             </Typography>
                                             <TextField
@@ -700,7 +700,7 @@ const TableToolBar = ({
                                             onClick={handleClearAll}
                                             sx={{
                                                 height: 34, px: 1.75, borderRadius: '8px',
-                                                textTransform: 'none', fontWeight: 600, fontSize: '0.79rem',
+                                                textTransform: 'none', fontWeight: 600, fontSize: '0.875rem',
                                                 color: '#64748B', borderColor: BORDER,
                                                 '&:hover': { borderColor: '#94A3B8', bgcolor: '#F8FAFC', color: '#475569' },
                                             }}
@@ -715,7 +715,7 @@ const TableToolBar = ({
                                         startIcon={<CheckOutlinedIcon sx={{ fontSize: '15px !important' }} />}
                                         sx={{
                                             height: 34, px: 2, borderRadius: '8px',
-                                            textTransform: 'none', fontWeight: 600, fontSize: '0.82rem',
+                                            textTransform: 'none', fontWeight: 600, fontSize: '0.875rem',
                                             bgcolor: PRIMARY, color: '#fff',
                                             boxShadow: `0 1px 4px ${alpha(PRIMARY, 0.25)}`,
                                             '&:hover': {

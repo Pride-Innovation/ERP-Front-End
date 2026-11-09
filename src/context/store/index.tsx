@@ -73,6 +73,17 @@ interface IStoreContext {
     detailsState: string;
     setDetailsState: Dispatch<SetStateAction<string>>;
 
+    /**
+     * The balances table's applied filters (`stockName`, `stockLevel`), sent on **every** fetch of it.
+     *
+     * <p>They lived only inside the table component, which merged them into page changes and nothing
+     * else - Apply did not refetch at all, and a tab change refetched without them while their chips
+     * stayed on screen. So on a one-page store the filters never reached the server: "No reorder level
+     * set" showed every line, "In Stock" ones included. Held here, the page's own fetch uses them too.
+     */
+    storeFilters: Record<string, string>;
+    setStoreFilters: Dispatch<SetStateAction<Record<string, string>>>;
+
     /** Drops everything tied to one branch/container, so nothing stale can render under a new heading. */
     resetStoreView: () => void;
 }
@@ -93,6 +104,7 @@ const StoreContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
     const [storeError, setStoreError] = useState<string | null>(null);
     const [detailsOpen, setDetailsOpen] = useState<boolean>(false);
     const [detailsState, setDetailsState] = useState<string>('');
+    const [storeFilters, setStoreFilters] = useState<Record<string, string>>({});
 
     /**
      * This provider is mounted at the application root, so everything in it **survives navigation**.
@@ -141,6 +153,8 @@ const StoreContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
         setDetailsOpen,
         detailsState,
         setDetailsState,
+        storeFilters,
+        setStoreFilters,
         resetStoreView,
     }}>
         {children}

@@ -183,10 +183,10 @@ const DispatchConsignment = ({
                         <Chip
                             size="small"
                             label={`${consignment.movementCount} movement${consignment.movementCount === 1 ? '' : 's'}`}
-                            sx={{ height: 20, fontSize: '0.65rem', fontWeight: 700, bgcolor: alpha(brand[500], 0.1), color: brand[700] }}
+                            sx={{ height: 20, fontSize: '0.8rem', fontWeight: 700, bgcolor: alpha(brand[500], 0.1), color: brand[700] }}
                         />
                     </Stack>
-                    <Typography variant="caption" sx={{ color: neutral[600], fontSize: '0.78rem' }}>
+                    <Typography variant="caption" sx={{ color: neutral[600], fontSize: '0.875rem' }}>
                         {consignment.sourceLocation?.name ?? '—'} → {consignment.destLocation?.name ?? '—'}.
                         Contents are frozen afterwards — nothing can be added or removed. Stock stays in the
                         source stores until you mark it in transit.
@@ -216,7 +216,7 @@ const DispatchConsignment = ({
                             <Typography variant="body2">{typeof c === 'string' ? c : c.name}</Typography>
                             {typeof c !== 'string' && c.vetted && (
                                 <Chip size="small" label="Vetted"
-                                    sx={{ fontSize: '0.65rem', fontWeight: 700, bgcolor: alpha(brand[500], 0.1), color: brand[700] }} />
+                                    sx={{ fontSize: '0.8rem', fontWeight: 700, bgcolor: alpha(brand[500], 0.1), color: brand[700] }} />
                             )}
                         </Box>
                     </li>
@@ -269,7 +269,7 @@ const DispatchConsignment = ({
                     transition: 'background-color .15s ease, border-color .15s ease',
                 }}
             >
-                <Typography variant="caption" sx={{ color: neutral[600], display: 'block', mb: 1.5, fontSize: '0.78rem' }}>
+                <Typography variant="caption" sx={{ color: neutral[600], display: 'block', mb: 1.5, fontSize: '0.875rem' }}>
                     Download the note, have it signed by the releasing officer and the courier, then attach
                     the scan. One note lists every item on the van, grouped by movement.
                 </Typography>

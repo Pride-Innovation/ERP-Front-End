@@ -50,7 +50,7 @@ export const DropdownPaper = ({ children, ...props }: any) => (
             '& .MuiAutocomplete-listbox': {
                 padding: '4px 0',
                 '& .MuiAutocomplete-option': {
-                    fontSize: '0.875rem',
+                    fontSize: '0.9375rem',
                     minHeight: 40,
                     px: 2,
                     '&:hover': { backgroundColor: alpha(PRIMARY, 0.06) },
@@ -74,7 +74,7 @@ export const SectionLabel = ({ children }: { children: ReactNode }) => (
             variant="caption"
             sx={{
                 fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase',
-                color: '#94A3B8', fontSize: '0.66rem', whiteSpace: 'nowrap',
+                color: '#94A3B8', fontSize: '0.8rem', whiteSpace: 'nowrap',
             }}
         >
             {children}

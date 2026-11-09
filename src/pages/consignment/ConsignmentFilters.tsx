@@ -124,7 +124,7 @@ const PILL_INPUT_SX = {
     '& .MuiOutlinedInput-root': {
         borderRadius: '8px',
         bgcolor: '#fff',
-        fontSize: '0.8rem',
+        fontSize: '0.875rem',
         height: 36,
         '& fieldset': { borderColor: '#E2E8F0' },
         '&:hover fieldset': { borderColor: PRIMARY },
@@ -133,14 +133,14 @@ const PILL_INPUT_SX = {
 };
 
 const FieldLabel = ({ children }: { children: React.ReactNode }) => (
-    <Typography sx={{ fontSize: '0.72rem', fontWeight: 600, color: '#64748B', mb: 0.5, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+    <Typography sx={{ fontSize: '0.8rem', fontWeight: 600, color: '#64748B', mb: 0.5, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
         {children}
     </Typography>
 );
 
 const allItem = (label: string) => (
     <MenuItem value="">
-        <em style={{ fontSize: '0.8rem', fontStyle: 'normal', color: '#94A3B8' }}>{label}</em>
+        <em style={{ fontSize: '0.875rem', fontStyle: 'normal', color: '#94A3B8' }}>{label}</em>
     </MenuItem>
 );
 
@@ -225,7 +225,7 @@ const ConsignmentFilters = ({
                 }}>
                     <Stack direction="row" alignItems="center" gap={1}>
                         <TuneOutlinedIcon sx={{ fontSize: 16, color: PRIMARY }} />
-                        <Typography sx={{ fontWeight: 700, fontSize: '0.82rem', color: '#0F172A' }}>
+                        <Typography sx={{ fontWeight: 700, fontSize: '0.875rem', color: '#0F172A' }}>
                             Filters &amp; Options
                         </Typography>
                     </Stack>
@@ -254,7 +254,7 @@ const ConsignmentFilters = ({
                                         )}
                                     >
                                         {DATE_PRESETS.map((d) => (
-                                            <MenuItem key={d.value} value={d.value} sx={{ fontSize: '0.8rem' }}>{d.label}</MenuItem>
+                                            <MenuItem key={d.value} value={d.value} sx={{ fontSize: '0.875rem' }}>{d.label}</MenuItem>
                                         ))}
                                     </Select>
                                 </FormControl>
@@ -283,7 +283,7 @@ const ConsignmentFilters = ({
                                     <Select value={status} onChange={(e) => setStatus(e.target.value)} displayEmpty>
                                         {allItem('All Statuses')}
                                         {(Object.keys(consignmentStatusLabels) as ConsignmentStatus[]).map((s) => (
-                                            <MenuItem key={s} value={s} sx={{ fontSize: '0.8rem' }}>
+                                            <MenuItem key={s} value={s} sx={{ fontSize: '0.875rem' }}>
                                                 {consignmentStatusLabels[s]}
                                             </MenuItem>
                                         ))}
@@ -297,7 +297,7 @@ const ConsignmentFilters = ({
                                 <FormControl fullWidth size="small" sx={PILL_INPUT_SX}>
                                     <Select value={source} onChange={(e) => setSource(e.target.value)} displayEmpty>
                                         {allItem('All Sources')}
-                                        {sources.map((s) => <MenuItem key={s} value={s} sx={{ fontSize: '0.8rem' }}>{s}</MenuItem>)}
+                                        {sources.map((s) => <MenuItem key={s} value={s} sx={{ fontSize: '0.875rem' }}>{s}</MenuItem>)}
                                     </Select>
                                 </FormControl>
                             </Grid>
@@ -308,7 +308,7 @@ const ConsignmentFilters = ({
                                 <FormControl fullWidth size="small" sx={PILL_INPUT_SX}>
                                     <Select value={destination} onChange={(e) => setDestination(e.target.value)} displayEmpty>
                                         {allItem('All Destinations')}
-                                        {destinations.map((d) => <MenuItem key={d} value={d} sx={{ fontSize: '0.8rem' }}>{d}</MenuItem>)}
+                                        {destinations.map((d) => <MenuItem key={d} value={d} sx={{ fontSize: '0.875rem' }}>{d}</MenuItem>)}
                                     </Select>
                                 </FormControl>
                             </Grid>
@@ -319,7 +319,7 @@ const ConsignmentFilters = ({
                                 <FormControl fullWidth size="small" sx={PILL_INPUT_SX}>
                                     <Select value={courier} onChange={(e) => setCourier(e.target.value)} displayEmpty>
                                         {allItem('All Couriers')}
-                                        {couriers.map((c) => <MenuItem key={c} value={c} sx={{ fontSize: '0.8rem' }}>{c}</MenuItem>)}
+                                        {couriers.map((c) => <MenuItem key={c} value={c} sx={{ fontSize: '0.875rem' }}>{c}</MenuItem>)}
                                     </Select>
                                 </FormControl>
                             </Grid>
@@ -352,8 +352,8 @@ const ConsignmentFilters = ({
                                 <FormControl fullWidth size="small" sx={PILL_INPUT_SX}>
                                     <Select value={timeliness} onChange={(e) => setTimeliness(e.target.value)} displayEmpty>
                                         {allItem('Any')}
-                                        <MenuItem value="overdue" sx={{ fontSize: '0.8rem' }}>Overdue</MenuItem>
-                                        <MenuItem value="on-time" sx={{ fontSize: '0.8rem' }}>On schedule</MenuItem>
+                                        <MenuItem value="overdue" sx={{ fontSize: '0.875rem' }}>Overdue</MenuItem>
+                                        <MenuItem value="on-time" sx={{ fontSize: '0.875rem' }}>On schedule</MenuItem>
                                     </Select>
                                 </FormControl>
                             </Grid>
@@ -364,8 +364,8 @@ const ConsignmentFilters = ({
                                 <FormControl fullWidth size="small" sx={PILL_INPUT_SX}>
                                     <Select value={load} onChange={(e) => setLoad(e.target.value)} displayEmpty>
                                         {allItem('Any')}
-                                        <MenuItem value="loaded" sx={{ fontSize: '0.8rem' }}>Carrying movements</MenuItem>
-                                        <MenuItem value="empty" sx={{ fontSize: '0.8rem' }}>Nothing loaded</MenuItem>
+                                        <MenuItem value="loaded" sx={{ fontSize: '0.875rem' }}>Carrying movements</MenuItem>
+                                        <MenuItem value="empty" sx={{ fontSize: '0.875rem' }}>Nothing loaded</MenuItem>
                                     </Select>
                                 </FormControl>
                             </Grid>
@@ -377,7 +377,7 @@ const ConsignmentFilters = ({
                                         size="small" variant="contained" onClick={handleApply}
                                         sx={{
                                             height: 36, px: 2, textTransform: 'none', fontWeight: 600,
-                                            fontSize: '0.8rem', bgcolor: PRIMARY, borderRadius: '8px',
+                                            fontSize: '0.875rem', bgcolor: PRIMARY, borderRadius: '8px',
                                             boxShadow: `0 2px 8px ${alpha(PRIMARY, 0.35)}`,
                                             '&:hover': { bgcolor: alpha(PRIMARY, 0.85), boxShadow: `0 4px 14px ${alpha(PRIMARY, 0.4)}` },
                                         }}
@@ -388,7 +388,7 @@ const ConsignmentFilters = ({
                                         size="small" variant="outlined" onClick={handleClear}
                                         sx={{
                                             height: 36, px: 1.5, textTransform: 'none', fontWeight: 600,
-                                            fontSize: '0.8rem', borderRadius: '8px',
+                                            fontSize: '0.875rem', borderRadius: '8px',
                                             borderColor: '#CBD5E1', color: '#64748B',
                                             '&:hover': { borderColor: PRIMARY, color: PRIMARY, bgcolor: alpha(PRIMARY, 0.04) },
                                         }}
@@ -404,7 +404,7 @@ const ConsignmentFilters = ({
 
             {/* ── Export bar ──────────────────────────────────────────── */}
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 1, mb: 2 }}>
-                <Typography sx={{ fontSize: '0.75rem', color: '#94A3B8', mr: 0.5 }}>Export as:</Typography>
+                <Typography sx={{ fontSize: '0.8rem', color: '#94A3B8', mr: 0.5 }}>Export as:</Typography>
 
                 <Tooltip title="Export PDF">
                     <Button
@@ -412,7 +412,7 @@ const ConsignmentFilters = ({
                         startIcon={<PictureAsPdfOutlinedIcon sx={{ fontSize: '14px !important' }} />}
                         onClick={onExportPdf}
                         sx={{
-                            height: 32, px: 1.5, borderRadius: '8px', fontSize: '0.75rem', fontWeight: 600,
+                            height: 32, px: 1.5, borderRadius: '8px', fontSize: '0.8rem', fontWeight: 600,
                             textTransform: 'none', borderColor: '#E2E8F0', color: '#DC2626',
                             '&:hover': { borderColor: '#DC2626', bgcolor: alpha('#DC2626', 0.04) },
                         }}
@@ -427,7 +427,7 @@ const ConsignmentFilters = ({
                         startIcon={<TableChartOutlinedIcon sx={{ fontSize: '14px !important' }} />}
                         onClick={onExportExcel}
                         sx={{
-                            height: 32, px: 1.5, borderRadius: '8px', fontSize: '0.75rem', fontWeight: 600,
+                            height: 32, px: 1.5, borderRadius: '8px', fontSize: '0.8rem', fontWeight: 600,
                             textTransform: 'none', borderColor: '#E2E8F0', color: '#15803D',
                             '&:hover': { borderColor: '#15803D', bgcolor: alpha('#15803D', 0.04) },
                         }}
@@ -442,7 +442,7 @@ const ConsignmentFilters = ({
                         startIcon={<DataObjectOutlinedIcon sx={{ fontSize: '14px !important' }} />}
                         onClick={onExportCsv}
                         sx={{
-                            height: 32, px: 1.5, borderRadius: '8px', fontSize: '0.75rem', fontWeight: 600,
+                            height: 32, px: 1.5, borderRadius: '8px', fontSize: '0.8rem', fontWeight: 600,
                             textTransform: 'none', borderColor: '#E2E8F0', color: '#0369A1',
                             '&:hover': { borderColor: '#0369A1', bgcolor: alpha('#0369A1', 0.04) },
                         }}

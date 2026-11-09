@@ -43,13 +43,13 @@ const RoutePanel = ({ kind, name, accent, icon }: {
     >
         <Stack direction="row" spacing={0.75} alignItems="center" mb={0.4}>
             <Box sx={{ color: accent, display: 'flex', '& .MuiSvgIcon-root': { fontSize: 14 } }}>{icon}</Box>
-            <Typography variant="caption" sx={{ fontWeight: 700, color: accent, letterSpacing: '0.06em', fontSize: '0.62rem' }}>
+            <Typography variant="caption" sx={{ fontWeight: 700, color: accent, letterSpacing: '0.06em', fontSize: '0.8rem' }}>
                 {kind}
             </Typography>
         </Stack>
         <Typography
             variant="body2"
-            sx={{ fontWeight: 700, color: name ? neutral[900] : neutral[400], fontSize: '0.84rem' }}
+            sx={{ fontWeight: 700, color: name ? neutral[900] : neutral[400], fontSize: '0.875rem' }}
             noWrap
         >
             {name ?? 'Unknown'}
@@ -179,7 +179,7 @@ const LoadOntoConsignmentModal = ({
                     <Typography variant="subtitle2" sx={{ fontWeight: 700, color: neutral[900], lineHeight: 1.3 }}>
                         Load onto a consignment
                     </Typography>
-                    <Typography variant="caption" sx={{ color: neutral[600], fontSize: '0.78rem' }}>
+                    <Typography variant="caption" sx={{ color: neutral[600], fontSize: '0.875rem' }}>
                         Movement #{movement.id} then travels with the rest of the load — one courier, one dispatch
                         note, landed together. Its courier is captured when the consignment goes out.
                     </Typography>
@@ -200,7 +200,7 @@ const LoadOntoConsignmentModal = ({
             </Stack>
 
             {!routeKnown ? (
-                <Alert severity="warning" sx={{ borderRadius: 2, '& .MuiAlert-message': { fontSize: '0.82rem' } }}>
+                <Alert severity="warning" sx={{ borderRadius: 2, '& .MuiAlert-message': { fontSize: '0.875rem' } }}>
                     This movement&apos;s start or destination location could not be resolved, so it cannot be matched
                     to a consignment. Dispatch it on its own instead.
                 </Alert>
@@ -230,7 +230,7 @@ const LoadOntoConsignmentModal = ({
                                         icon={<Inventory2OutlinedIcon sx={{ fontSize: 13 }} />}
                                         label={`${c.movementCount} on board`}
                                         size="small"
-                                        sx={{ height: 20, fontSize: '0.66rem', fontWeight: 700, bgcolor: alpha(PRIMARY, 0.08), color: PRIMARY }}
+                                        sx={{ height: 20, fontSize: '0.8rem', fontWeight: 700, bgcolor: alpha(PRIMARY, 0.08), color: PRIMARY }}
                                     />
                                 </Stack>
                             </Box>
@@ -241,7 +241,7 @@ const LoadOntoConsignmentModal = ({
                     />
 
                     {!loading && openConsignments.length === 0 && (
-                        <Alert severity="info" sx={{ borderRadius: 2, '& .MuiAlert-message': { fontSize: '0.82rem' } }}>
+                        <Alert severity="info" sx={{ borderRadius: 2, '& .MuiAlert-message': { fontSize: '0.875rem' } }}>
                             Nothing is being loaded for this route yet. Open a consignment and this movement goes on
                             it — others heading the same way can join before it is dispatched.
                         </Alert>
