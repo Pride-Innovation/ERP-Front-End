@@ -3200,7 +3200,16 @@ leaves `errorCode` bodies to the caller, so the dialog may show nothing.
 **A refused login used to look like an expired session.** It is a 401, and the response interceptor
 sent every 401 through the refresh branch: no refresh token on the login page, so it cleared the
 session, toasted "Your session has expired" and reloaded — the login page's own blocked / locked /
-wrong-password messages could never show. `isSignInCall` exempts `auth/login`.
+wrong-password messages could never show. `isSessionlessCall` exempts the public calls
+(`auth/login`, `auth/mode`, `auth/verify-email`, `request-password-reset`, `reset-password`).
+
+**And the branch runs only when a session exists** (`hasSession()`: a refresh token in storage). It
+ends by navigating to `/`, which on the login page is a *reload*. Deployed against a backend without
+`auth/mode`, the login page's `auth/mode` call answered 401 on every load, and each 401 reloaded the
+page that made it: a page that flickered and never settled. With no session there is nothing to
+expire, so the 401 goes back to the caller (`useAuthMode` reads a failure as LDAP).
+`axiosSignIn.test.ts` pins it; restoring the old condition makes the call hang in the expiry branch
+and the test time out.
 
 Tests use a mock server, never the real API (five failures throttle a real employee everywhere):
 `DirectoryAuthClientTest`, `DirectorySignInTest`, `DirectoryUsernameTest`, `axiosSignIn.test.ts`.
