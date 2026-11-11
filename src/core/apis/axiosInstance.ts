@@ -43,9 +43,19 @@ const CSRF_TOKEN_HEADER = 'X-CSRF-TOKEN';
  */
 const UNCLAIMED_ERROR_CODES = new Set(['SERVER_ERROR']);
 
-/** The calls whose 401 means "not signed in yet", never "session expired". */
-export const isSignInCall = (url?: string): boolean =>
-    !!url && /(^|\/)auth\/login(\?|$)/.test(url);
+/**
+ * The public calls a signed-out page makes, whose 401 means "not signed in", never "session expired".
+ *
+ * <p>Sending one of these through the refresh branch is a loop, not just a wrong message: with no
+ * session there is nothing to refresh, so the branch clears storage and navigates to `/` - which
+ * reloads the login page, which makes the call again. `auth/mode` is the one the login page makes
+ * on every load, and an older backend without that endpoint answers it 401.
+ */
+export const isSessionlessCall = (url?: string): boolean =>
+    !!url && /(^|\/)(auth\/(login|mode|verify-email\/[^?]*)|request-password-reset|reset-password)(\?|$)/.test(url);
+
+/** A 401 can only mean "your session expired" if there was a session to expire. */
+const hasSession = (): boolean => !!sessionStorage.getItem(REFRESH_TOKEN_KEY);
 
 const XSRF_COOKIE_NAME  = 'XSRF-TOKEN';
 const XSRF_TOKEN_HEADER = 'X-XSRF-TOKEN';
@@ -282,8 +292,14 @@ axiosInstance.interceptors.response.use(
          * calls themselves. A refused login IS a 401 (wrong password, AD throttling, blocked account),
          * and sending it here found no refresh token on the login page, cleared the session, toasted
          * "Your session has expired" and reloaded: the login page's own messages could never show.
+         *
+         * And never without a session. The end of this branch navigates to `/`, which on the login
+         * page is a reload; a 401 from any call that page makes then started the page again, which
+         * made the call again - a page that flickered and never settled. With no session there is
+         * nothing to expire, so the 401 falls through to the caller like any other refusal.
          */
-        if (error.response?.status === 401 && original && !original._retry && !isSignInCall(original.url)) {
+        if (error.response?.status === 401 && original && !original._retry
+            && !isSessionlessCall(original.url) && hasSession()) {
             if (isRefreshing) {
                 // Park this request; it will be retried after the in-flight refresh.
                 return new Promise<AxiosResponse>((resolve, reject) => {

@@ -3,7 +3,12 @@
     "allow": [
       "Bash(npx tsc *)",
       "Read(//c/Users/sodong/Projects/ERP-Back-End/src/main/java/pride/bank/erp/assetType/**)",
-      "Bash(git fetch *)"
+      "Bash(git fetch *)",
+      "PowerShell(foreach \\($p in 'C:\\\\Users\\\\sodong\\\\Projects\\\\ldap','C:\\\\Users\\\\sodong\\\\Projects\\\\ldap-frontend'\\) { \"=== $p\"; if \\(Test-Path $p\\) { Get-ChildItem $p -Force | Select-Object Mode, Name | Format-Table -HideTableHeaders | Out-String -Width 200 } else { 'not found' } })",
+      "PowerShell(foreach \\($p in 'C:\\\\Users\\\\sodong\\\\Projects\\\\ldap','C:\\\\Users\\\\sodong\\\\Projects\\\\ldap-frontend'\\) { \"=== $p\"; git -C $p remote -v 2>&1 | Select-Object -First 1; git -C $p status --short 2>&1 | Measure-Object | Select-Object -ExpandProperty Count })",
+      "PowerShell(cd C:\\\\Users\\\\sodong\\\\Projects\\\\ldap; $f=\"C:\\\\Users\\\\sodong\\\\Projects\\\\ldap\\\\src\\\\main\\\\java\\\\pride\\\\com\\\\ldap\\\\report\\\\AuditTrailController.java\"; $orig=[IO.File]::ReadAllText\\($f\\); $broken=$orig.Replace\\('entry.getEntityType\\(\\) == null || entry.getEntityId\\(\\) == null ? null','entry.getEntityType\\(\\) == null ? null'\\); if \\($broken -eq $orig\\) { throw 'break not applied' }; [IO.File]::WriteAllText\\($f,$broken,\\(New-Object Text.UTF8Encoding\\($false\\)\\)\\); ./mvnw.cmd -o -q test \"-Dtest=ReportsTests#auditTrailListsARequestToCreateSomethingThatHasNoIdYet\" 2>&1 | Select-String \"Tests run:|expected|Status|NullPointer\" | Select-Object -First 5; [IO.File]::WriteAllText\\($f,$orig,\\(New-Object Text.UTF8Encoding\\($false\\)\\)\\); if \\([IO.File]::ReadAllText\\($f\\) -eq $orig\\) { 'restored' })",
+      "PowerShell(cd c:\\\\Users\\\\sodong\\\\Projects\\\\ERP-Front-End; $env:CI='true'; npx react-scripts test --watchAll=false --testPathPattern 'axios' 2>&1 | Select-String \"Tests:|Test Suites:|✕|●\" | Select-Object -First 20)",
+      "PowerShell(cd C:\\\\Users\\\\sodong\\\\Projects\\\\ERP-Front-End; $f=\"C:\\\\Users\\\\sodong\\\\Projects\\\\ERP-Front-End\\\\src\\\\core\\\\apis\\\\axiosInstance.ts\"; $orig=[IO.File]::ReadAllText\\($f\\); $broken=$orig.Replace\\(\"&& !isSessionlessCall\\(original.url\\) && hasSession\\(\\)\\) {\", \"&& !/auth\\\\/login/.test\\(original.url ?? ''\\)\\) {\"\\); if \\($broken -eq $orig\\) { throw 'break not applied' }; [IO.File]::WriteAllText\\($f,$broken,\\(New-Object Text.UTF8Encoding\\($false\\)\\)\\); $env:CI='true'; npx react-scripts test --watchAll=false --testPathPattern 'axiosSignIn' 2>&1 | Select-String \"Tests:|✕|Exceeded timeout\" | Select-Object -First 6; [IO.File]::WriteAllText\\($f,$orig,\\(New-Object Text.UTF8Encoding\\($false\\)\\)\\); if \\([IO.File]::ReadAllText\\($f\\) -eq $orig\\) { 'restored' })"
     ]
   }
 }
