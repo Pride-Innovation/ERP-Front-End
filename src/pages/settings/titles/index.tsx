@@ -43,14 +43,55 @@ import { useDebounce } from "../../../hooks/useDebounce";
 import { RequirePermission } from "../../../core/permissions";
 import { PERMISSIONS } from "../../../core/permissions/constants";
 import { PageHero } from "../../../components/layout";
+import { NO_DEPARTMENT, WORKPLACE_OPTIONS, WorkplaceFilter } from "./classification";
+import { fetchAllDepartments, ReferenceOption } from "../../users/service/referenceData";
 
 const PRIMARY = '#08796C';
+
+const FILTER_SX = { minWidth: 180, flex: { xs: 1, md: "unset" }, '& .MuiOutlinedInput-root': { borderRadius: '8px', height: 36, bgcolor: '#fff', '& fieldset': { borderColor: '#E2E8F0' }, '&:hover fieldset': { borderColor: PRIMARY }, '&.Mui-focused fieldset': { borderColor: PRIMARY, borderWidth: 1.5 } } };
+
+/** One filter dropdown: an "All" entry, then the options, with the chosen label shown in colour. */
+const FilterSelect = ({ value, onChange, allLabel, options, ariaLabel }: {
+  value: string;
+  onChange: (value: string) => void;
+  allLabel: string;
+  options: Array<{ value: string; label: string; divider?: boolean }>;
+  ariaLabel: string;
+}) => (
+  <FormControl size="small" variant="outlined" sx={FILTER_SX}>
+    <Select
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      startAdornment={<FilterListIcon fontSize="small" sx={{ ml: 0.5, mr: 1, color: PRIMARY, opacity: 0.8 }} />}
+      displayEmpty
+      inputProps={{ 'aria-label': ariaLabel }}
+      renderValue={(v) => (
+        <Typography variant="body2" sx={{ fontWeight: 500, color: !v ? '#94A3B8' : PRIMARY }}>
+          {options.find(o => o.value === v)?.label ?? allLabel}
+        </Typography>
+      )}
+      MenuProps={{ PaperProps: { elevation: 4, sx: { mt: 0.5, borderRadius: 1.5, maxHeight: 300 } } }}
+    >
+      <MenuItem value=""><Typography variant="body2">{allLabel}</Typography></MenuItem>
+      {options.length > 0 && <Divider sx={{ my: 0.5 }} />}
+      {options.flatMap(o => [
+        ...(o.divider ? [<Divider key={`${o.value}-divider`} sx={{ my: 0.5 }} />] : []),
+        <MenuItem key={o.value} value={o.value} sx={{ py: 1 }}>
+          <Typography variant="body2">{o.label}</Typography>
+        </MenuItem>,
+      ])}
+    </Select>
+  </FormControl>
+);
 
 const Titles = () => {
   const [currentTitle, setCurrentTitle] = useState<ITitle>({} as ITitle);
   const [sendingRequest, setSendingRequest] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [roleFilter, setRoleFilter] = useState<string>("");
+  const [workplaceFilter, setWorkplaceFilter] = useState<WorkplaceFilter>("");
+  const [departmentFilter, setDepartmentFilter] = useState<string>("");
+  const [departments, setDepartments] = useState<ReferenceOption[]>([]);
   const [pageNumber, setPageNumber] = useState<number>(0);
   const pageSize = 9;
 
@@ -75,6 +116,12 @@ const Titles = () => {
     if (!roles || roles.length === 0) {
       fetchRolesForFilter();
     }
+    let active = true;
+    // A failure leaves the list empty; the filter then offers only All / No department.
+    fetchAllDepartments()
+      .then(options => { if (active) setDepartments(options); })
+      .catch(() => { /* the department filter simply has no names to offer */ });
+    return () => { active = false; };
   }, []);
 
   useEffect(() => {
@@ -83,8 +130,10 @@ const Titles = () => {
       pageSize,
       name: debouncedSearch || undefined,
       roleId: roleFilter || undefined,
+      workplace: workplaceFilter,
+      department: departmentFilter,
     });
-  }, [pageNumber, debouncedSearch, roleFilter]);
+  }, [pageNumber, debouncedSearch, roleFilter, workplaceFilter, departmentFilter]);
 
   const handleSearchChange = (value: string) => {
     setSearchTerm(value);
@@ -93,6 +142,16 @@ const Titles = () => {
 
   const handleRoleFilterChange = (value: string) => {
     setRoleFilter(value);
+    setPageNumber(0);
+  };
+
+  const handleWorkplaceFilterChange = (value: string) => {
+    setWorkplaceFilter(value as WorkplaceFilter);
+    setPageNumber(0);
+  };
+
+  const handleDepartmentFilterChange = (value: string) => {
+    setDepartmentFilter(value);
     setPageNumber(0);
   };
 
@@ -116,10 +175,12 @@ const Titles = () => {
   const clearFilters = () => {
     setSearchTerm("");
     setRoleFilter("");
+    setWorkplaceFilter("");
+    setDepartmentFilter("");
     setPageNumber(0);
   };
 
-  const hasActiveFilters = searchTerm !== "" || roleFilter !== "";
+  const hasActiveFilters = searchTerm !== "" || roleFilter !== "" || workplaceFilter !== "" || departmentFilter !== "";
 
   return (
     <>
@@ -172,7 +233,7 @@ const Titles = () => {
 
       {/* Filter Bar */}
       <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} alignItems={{ xs: "stretch", sm: "center" }} justifyContent="space-between" sx={{ mb: 3 }}>
-        <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} alignItems={{ xs: "stretch", sm: "center" }} sx={{ flex: 1 }}>
+        <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} useFlexGap flexWrap="wrap" alignItems={{ xs: "stretch", sm: "center" }} sx={{ flex: 1 }}>
           <TextField
             size="small"
             placeholder="Search titles..."
@@ -181,31 +242,33 @@ const Titles = () => {
             InputProps={{ startAdornment: (<InputAdornment position="start"><SearchIcon fontSize="small" sx={{ color: '#94A3B8' }} /></InputAdornment>) }}
             sx={{ minWidth: 220, flex: { xs: 1, md: "unset" }, '& .MuiOutlinedInput-root': { borderRadius: '8px', height: 36, bgcolor: '#fff', '& fieldset': { borderColor: '#E2E8F0' }, '&:hover fieldset': { borderColor: PRIMARY }, '&.Mui-focused fieldset': { borderColor: PRIMARY, borderWidth: 1.5 } } }}
           />
-          <FormControl size="small" variant="outlined" sx={{ minWidth: 180, flex: { xs: 1, md: "unset" }, '& .MuiOutlinedInput-root': { borderRadius: '8px', height: 36, bgcolor: '#fff', '& fieldset': { borderColor: '#E2E8F0' }, '&:hover fieldset': { borderColor: PRIMARY }, '&.Mui-focused fieldset': { borderColor: PRIMARY, borderWidth: 1.5 } } }}>
-            <Select
-              value={roleFilter}
-              onChange={(e) => handleRoleFilterChange(e.target.value)}
-              startAdornment={<FilterListIcon fontSize="small" sx={{ ml: 0.5, mr: 1, color: PRIMARY, opacity: 0.8 }} />}
-              displayEmpty
-              renderValue={(value) => {
-                const selectedRole = roles?.find(r => String(r.id) === String(value));
-                return (
-                  <Typography variant="body2" sx={{ fontWeight: 500, color: !value ? '#94A3B8' : PRIMARY }}>
-                    {selectedRole ? selectedRole.name : "All Roles"}
-                  </Typography>
-                );
-              }}
-              MenuProps={{ PaperProps: { elevation: 4, sx: { mt: 0.5, borderRadius: 1.5, maxHeight: 300 } } }}
-            >
-              <MenuItem value=""><Typography variant="body2">All Roles</Typography></MenuItem>
-              {roles?.length > 0 && <Divider sx={{ my: 0.5 }} />}
-              {roles?.map(role => (
-                <MenuItem key={role.id} value={String(role.id)} sx={{ py: 1 }}>
-                  <Typography variant="body2">{role.name}</Typography>
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+          <FilterSelect
+            ariaLabel="Filter by role"
+            value={roleFilter}
+            onChange={handleRoleFilterChange}
+            allLabel="All Roles"
+            options={(roles ?? []).map(role => ({ value: String(role.id), label: role.name }))}
+          />
+          <FilterSelect
+            ariaLabel="Filter by where the title is used"
+            value={workplaceFilter}
+            onChange={handleWorkplaceFilterChange}
+            allLabel="Used at: All"
+            options={[
+              ...WORKPLACE_OPTIONS,
+              { value: 'NOT_SET', label: 'Not set', divider: true },
+            ]}
+          />
+          <FilterSelect
+            ariaLabel="Filter by department"
+            value={departmentFilter}
+            onChange={handleDepartmentFilterChange}
+            allLabel="All Departments"
+            options={[
+              ...departments.map(d => ({ value: String(d.value), label: d.label })),
+              { value: NO_DEPARTMENT, label: 'No department', divider: departments.length > 0 },
+            ]}
+          />
         </Stack>
       </Stack>
 

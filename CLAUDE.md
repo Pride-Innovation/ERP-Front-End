@@ -3107,8 +3107,8 @@ it — both were measured, and both then build all 105 tables.
 `titles.json` is the HR policy's Appendix B (figures 1–18) as one tree: 200 titles, **one place per
 name** (the user import resolves a title by name). Heads hang under the MD or the ED as figures 1 and
 2 draw them; Internal Audit and Compliance under the Board. Branch titles are one shared set under
-Branch Manager, Head Office titles everything else — `Title` carries no department, by decision, and
-department stays on the user. Where the grade table and an organogram name the same job differently,
+Branch Manager, Head Office titles everything else. A user's department stays on the user; a title's
+optional department (below) is for filtering only and is never derived from or copied to a user. Where the grade table and an organogram name the same job differently,
 the organogram name is kept (e.g. Manager CBS & Business Applications is "Manager Custom
 Applications").
 
@@ -3122,6 +3122,36 @@ databases never see it; re-running moves on every startup would undo a move made
 
 *Not migrated:* holders of titles dropped from the file (Head Cashier, Relationship Officer
 Group/Comm Banking) keep them — the rows stay, outside the tree's new shape.
+
+### "Used at" and Department — classification for filtering only (V31)
+
+Settings → Titles filters by **Used at** (Head Office / Branches / *Not set*) and **Department** (any /
+*No department*). Both fields are optional, both start empty, and **both are set by hand in the title
+form — no seeder fills them**. `TitleSeeder` touches only role, short code and reports-to on an
+existing title, so a classification survives restarts. **Nothing reads either field for permissions,
+scope, approval routing or the user import**, and the form says so.
+
+- **`title.workplace`** (`TitleWorkplace`: `HEAD_OFFICE` | `BRANCH`, stored as text). Branches share one
+  set of titles, so "Branches" is a group, never a particular branch. Null is *not set*, not both;
+  `BOTH` can be added later without a migration. The filter's `NOT_SET` is a filter value, not a
+  workplace, so `workplace` is bound as a string and **an unknown value is a 400**, never "no filter".
+- **`title.department_id`**, `ON DELETE SET NULL`, so deleting a department is never blocked by a
+  classification. Allowed on branch titles too (Credit Evaluation – SME may be Credit). Serialised as
+  `{id, name, shortCode}` without its branch, because a title rides inside every user response.
+  Filtered through an explicit LEFT JOIN; `noDepartment=true` finds the unclassified ones.
+- **Why not `title.branch_id`, which already existed:** it names one branch, and three front-end sites
+  (`store/utillls.tsx`, `StoreDetails.tsx`, `WorkflowRoutesPanel.tsx`) read it as a fallback for a
+  *user's* branch. Setting it to Head Office on Head Office titles would have placed every branchless
+  Head Office user at Head Office on the store page and the routes panel. Left untouched and unwritten.
+- **An update replaces the whole title**, so `toTitlePayload` (`settings/titles/classification.ts`)
+  always sends both fields — `null` for *Not set* / *None* — and never omits them.
+- *Fixed on the way:* `TitleSearchDao` had no `id` tie-break (trap #3) and passed `sortBy` straight to
+  `root.get(...)`; both fixed. The paging test passed even with the tie-break removed (MySQL ordered
+  the seven ties consistently), so it pins behaviour rather than proving the fault. Create and update
+  closed their dialog on any outcome (trap #6); they stay open on failure now.
+
+`TitleClassificationTest` (backend) and `classification.test.ts` (front end) pin it, including that the
+three workplace values partition the whole table.
 
 ## Sign-in goes through the bank's LDAP Authentication API
 

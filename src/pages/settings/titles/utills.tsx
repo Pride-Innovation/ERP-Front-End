@@ -16,6 +16,7 @@ import { useSelector } from "react-redux";
 import { IOptions } from "../../../components/tables/interface";
 import { IRolesAxiosResponse } from "../../settings/interface";
 import { loadAllRoles } from "../roles/slice";
+import { TitleFilters, titleFilterParams } from "./classification";
 
 const TitleUtills = () => {
     const endPoint: string = "titles";
@@ -38,19 +39,14 @@ const TitleUtills = () => {
     const fetchAllTitles = async ({
         pageNumber = 0,
         pageSize = 10,
-        name,
-        roleId,
+        ...filters
     }: {
         pageNumber?: number;
         pageSize?: number;
-        name?: string;
-        roleId?: number | string;
-    } = {}) => {
+    } & TitleFilters = {}) => {
         setLoading(true)
         try {
-            const params: Record<string, any> = {};
-            if (name) params.name = name;
-            if (roleId) params.roleId = roleId;
+            const params = titleFilterParams(filters);
 
             const response = await fetchRowsService({ pageNumber, pageSize, endPoint, params }) as ITitlesAxiosResponse;
             if (response.status === 200) {
