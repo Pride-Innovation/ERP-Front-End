@@ -15,6 +15,7 @@ import { titleSchema } from './schema';
 import { toast } from 'react-toastify';
 import { createTitleService } from './service';
 import TitleForm from './TitleForm';
+import { toTitlePayload } from './classification';
 
 const CreateTitle = ({ sendingRequest, setSendingRequest, handleClose }: ICreateTitle) => {
     const defaultTitle: ITitle = {} as ITitle;
@@ -37,18 +38,24 @@ const CreateTitle = ({ sendingRequest, setSendingRequest, handleClose }: ICreate
 
     const onSubmit = async (formData: ITitle) => {
         setSendingRequest(true);
+        // The service returns a failure as a value rather than throwing (trap #6), so anything that
+        // is not 201 failed - and the dialog stays open so nothing typed is lost.
+        let created = false;
         try {
-            const response = await createTitleService(formData) as ITitleAxiosResponse;
-            if (response.status === 201) {
+            const response = await createTitleService(toTitlePayload(formData as any)) as ITitleAxiosResponse;
+            if (response?.status === 201) {
                 addTitleToStore(response.data);
                 toast.success("Title created successfully", { position: 'bottom-right' });
+                created = true;
+            } else {
+                toast.error("Failed to create title. Please try again.", { position: 'bottom-right' });
             }
         } catch (error) {
             console.error("Error creating title:", error);
             toast.error("Failed to create title. Please try again.", { position: 'bottom-right' });
         }
         setSendingRequest(false);
-        handleClose();
+        if (created) handleClose();
     };
 
     return (

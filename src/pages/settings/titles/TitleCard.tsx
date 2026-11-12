@@ -23,7 +23,11 @@ import WorkOutlineOutlinedIcon from '@mui/icons-material/WorkOutlineOutlined';
 import SupervisorAccountOutlinedIcon from '@mui/icons-material/SupervisorAccountOutlined';
 import SecurityOutlinedIcon from '@mui/icons-material/SecurityOutlined';
 
+import PlaceOutlinedIcon from '@mui/icons-material/PlaceOutlined';
+import ApartmentOutlinedIcon from '@mui/icons-material/ApartmentOutlined';
+
 import { ITitleDetails } from './interface';
+import { WORKPLACE_LABEL } from './classification';
 import { getCardColor } from '../cardColors';
 
 const TitleCard = ({ title, updateTitle, deleteTitle, index = 0 }: ITitleDetails) => {
@@ -111,6 +115,18 @@ const TitleCard = ({ title, updateTitle, deleteTitle, index = 0 }: ITitleDetails
                         label="Role"
                         value={title.role?.name}
                         emptyLabel="Not assigned"
+                    />
+                    <DetailRow
+                        icon={<PlaceOutlinedIcon sx={{ fontSize: 16, color: '#94A3B8' }} />}
+                        label="Used at"
+                        value={title.workplace ? WORKPLACE_LABEL[title.workplace] : null}
+                        emptyLabel="Not set"
+                    />
+                    <DetailRow
+                        icon={<ApartmentOutlinedIcon sx={{ fontSize: 16, color: '#94A3B8' }} />}
+                        label="Department"
+                        value={title.department?.name}
+                        emptyLabel="None"
                     />
                 </Stack>
 

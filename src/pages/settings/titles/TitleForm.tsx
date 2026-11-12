@@ -12,6 +12,7 @@ import {
     Button as MuiButton,
     CircularProgress,
     Grid,
+    MenuItem,
     Paper,
     Popper,
     Stack,
@@ -36,6 +37,9 @@ import { ITitle, ITitleForm, ITitleOption } from './interface';
 import { fetchRowsService } from '../../../core/apis/globalService';
 import { useDebounce } from '../../../hooks/useDebounce';
 import { autocompleteSx } from '../../../components/forms/Autocomplete';
+import LabelOutlinedIcon from '@mui/icons-material/LabelOutlined';
+import { WORKPLACE_OPTIONS } from './classification';
+import { fetchAllDepartments, ReferenceOption } from '../../users/service/referenceData';
 
 const P = '#08796C';
 
@@ -260,8 +264,16 @@ const TitleForm = ({
     const { fetchAllRoles } = RoleUtills();
     const theme = useTheme();
 
+    const [departments, setDepartments] = useState<ReferenceOption[]>([]);
+    const [departmentsFailed, setDepartmentsFailed] = useState(false);
+
     useEffect(() => {
         fetchAllRoles();
+        let active = true;
+        fetchAllDepartments()
+            .then((options) => { if (active) setDepartments(options); })
+            .catch(() => { if (active) setDepartmentsFailed(true); });
+        return () => { active = false; };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
@@ -307,6 +319,60 @@ const TitleForm = ({
                     <Typography sx={{ mt: 0.75, fontSize: '0.8rem', color: '#94A3B8' }}>
                         Type to search titles by name. The first 10 matching results will appear.
                     </Typography>
+                </Grid>
+            </FormSection>
+
+            {/* Classification — filtering only */}
+            <FormSection title="Classification" icon={<LabelOutlinedIcon fontSize="small" />}>
+                <Grid item xs={12}>
+                    <Typography sx={{ fontSize: '0.8rem', color: '#64748B', mt: -1 }}>
+                        Used only to filter this page. It does not change permissions, approvals or anyone's branch.
+                    </Typography>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                    <Controller
+                        control={control}
+                        name="workplace"
+                        render={({ field }) => (
+                            <TextField
+                                select
+                                fullWidth
+                                label="Used at"
+                                value={field.value ?? ''}
+                                onChange={(e) => field.onChange(e.target.value)}
+                                sx={autocompleteSx}
+                            >
+                                <MenuItem value=""><em>Not set</em></MenuItem>
+                                {WORKPLACE_OPTIONS.map((o) => (
+                                    <MenuItem key={o.value} value={o.value}>{o.label}</MenuItem>
+                                ))}
+                            </TextField>
+                        )}
+                    />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                    <Controller
+                        control={control}
+                        name="departmentId"
+                        render={({ field }) => (
+                            <TextField
+                                select
+                                fullWidth
+                                label="Department"
+                                value={field.value ?? ''}
+                                onChange={(e) => field.onChange(e.target.value === '' ? null : Number(e.target.value))}
+                                helperText={departmentsFailed ? 'Departments could not be loaded.' : 'Optional'}
+                                error={departmentsFailed}
+                                sx={autocompleteSx}
+                                SelectProps={{ MenuProps: { PaperProps: { sx: { maxHeight: 320 } } } }}
+                            >
+                                <MenuItem value=""><em>None</em></MenuItem>
+                                {departments.map((d) => (
+                                    <MenuItem key={d.value} value={d.value}>{d.label}</MenuItem>
+                                ))}
+                            </TextField>
+                        )}
+                    />
                 </Grid>
             </FormSection>
 

@@ -15,6 +15,7 @@ import TitleForm from "./TitleForm";
 import { updateTitleService } from "./service";
 import { toast } from "react-toastify";
 import TitleUtills from "./utills";
+import { toTitlePayload } from "./classification";
 
 const UpdateTitle = ({ handleClose, sendingRequest, setSendingRequest, title }: IUpdateTitle) => {
     const { updateTitleInStore } = TitleUtills();
@@ -42,32 +43,32 @@ const UpdateTitle = ({ handleClose, sendingRequest, setSendingRequest, title }: 
             // TitleRequestDTO expects (reportsTo: Long, role: Long) rather than nested objects.
             reportsTo: title.reportsTo?.id as any,
             role: (typeof title.role === 'object' && title.role ? (title.role as any).id : title.role) as any,
+            workplace: (title.workplace ?? '') as any,
+            departmentId: title.department?.id ?? null,
         });
     }, [title, reset]);
 
     const onSubmit = async (formData: ITitle) => {
         setSendingRequest(true);
+        let updated = false;
         try {
-            // TitleRequestDTO expects scalar ids; normalise in case a field is still an object
-            // (e.g. role left untouched after reset) so Jackson can bind it to a Long.
-            const role = formData.role as any;
-            const payload = {
-                name: formData.name,
-                shortCode: (formData as any).shortCode,
-                reportsTo: formData.reportsTo != null ? Number(formData.reportsTo) : null,
-                role: role && typeof role === 'object' ? role.id : role,
-            };
-            const response = await updateTitleService(payload, title.id as number) as ITitleAxiosResponse;
-            if (response.status === 200 || response.status === 201) {
+            // TitleRequestDTO expects scalar ids, and the classification fields always present:
+            // an update replaces the whole title, so an omitted field would be cleared.
+            const response = await updateTitleService(toTitlePayload(formData as any), title.id as number) as ITitleAxiosResponse;
+            if (response?.status === 200 || response?.status === 201) {
                 toast.success("Title updated successfully", { position: "bottom-right" });
                 updateTitleInStore(response.data);
+                updated = true;
+            } else {
+                // Trap #6: a failure arrives as a value. Keep the dialog open rather than look saved.
+                toast.error("Failed to update title. Please try again.", { position: "bottom-right" });
             }
         } catch (error) {
             console.error("Error updating title:", error);
             toast.error("Failed to update title. Please try again.", { position: "bottom-right" });
         }
         setSendingRequest(false);
-        handleClose();
+        if (updated) handleClose();
     };
 
     return (

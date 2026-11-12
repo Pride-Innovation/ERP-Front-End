@@ -10,6 +10,7 @@ import { IAxiosResponse, IFetchDataRequest } from "../../../core/apis/interface"
 import { Dispatch, SetStateAction } from "react";
 import { IRole } from "../interface";
 import { IBranch } from "../branch/interface";
+import { TitleWorkplace } from "./classification";
 
 export interface ITitle {
     id?: string | number;
@@ -18,6 +19,12 @@ export interface ITitle {
     reportsTo?: ITitle | null;
     role?: IRole | null;
     branch?: IBranch | null
+    /** For filtering only. Null or absent = not set. */
+    workplace?: TitleWorkplace | null;
+    /** For filtering only; the server sends the department without its branch. */
+    department?: { id: number; name: string; shortCode?: string } | null;
+    /** Form-only: the department picker's value, sent as `departmentId`. */
+    departmentId?: number | null;
 }
 
 export interface ITitleDetails {
